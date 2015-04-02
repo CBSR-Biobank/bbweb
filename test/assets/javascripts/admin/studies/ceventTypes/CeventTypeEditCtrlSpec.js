@@ -4,7 +4,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  fdescribe('Controller: CeventTypeEditCtrl', function() {
+  describe('Controller: CeventTypeEditCtrl', function() {
     var q,
         rootScope,
         controller,
@@ -38,12 +38,14 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     }));
 
     function createEntities(options) {
-      var study, specimenGroups, annotationTypes, ceventType;
+      var study, specimenGroups, annotationTypes, ceventType, serverCet;
 
       options = options || {};
 
       study = fakeEntities.study();
-      specimenGroups = [ fakeEntities.specimenGroup(study) ];
+      specimenGroups = _.map(_.range(2), function () {
+        return fakeEntities.specimenGroup(study);
+      });
       annotationTypes = _.map(
           ['Text', 'Number', 'DateTime', 'Select'],
           function(valueType) {
@@ -52,10 +54,15 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
                 study, { valueType: valueType }));
           });
 
+      serverCet = fakeEntities.collectionEventType(study, {
+        specimenGroups: specimenGroups,
+        annotationTypes: annotationTypes
+      });
+
       if (options.noCetId) {
-        ceventType = new CollectionEventType(_.omit(fakeEntities.collectionEventType(study), 'id'));
+        ceventType = new CollectionEventType(_.omit(serverCet, 'id'));
       } else {
-        ceventType = new CollectionEventType(fakeEntities.collectionEventType(study));
+        ceventType = new CollectionEventType(serverCet);
       }
       ceventType.studySpecimenGroups(specimenGroups);
       ceventType.studyAnnotationTypes(annotationTypes);
@@ -160,67 +167,87 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('can add specimen group data', function() {
-      var entities = createEntities({ noCetId: true }),
-          scope = createController(entities);
+      var entities = createEntities(), scope;
+
+      entities.ceventType = new CollectionEventType(
+        fakeEntities.collectionEventType(entities.study));
+
+      scope = createController(entities);
 
       expect(scope.vm.ceventType.specimenGroupData).toBeArrayOfSize(0);
-      scope.vm.addSpecimenGroupData();
+      scope.vm.addSpecimenGroup();
       expect(scope.vm.ceventType.specimenGroupData).toBeArrayOfSize(1);
     });
 
     it('can remove specimen group data', function() {
-      var entities = createEntities({ noCetId: true }),
-          scope = createController(entities);
+      var entities = createEntities(), scope;
 
-      scope.vm.addSpecimenGroupData();
-      scope.vm.addSpecimenGroupData();
+      entities.ceventType = new CollectionEventType(
+        fakeEntities.collectionEventType(entities.study));
+
+      scope = createController(entities);
+
+      scope.vm.addSpecimenGroup();
+      scope.vm.addSpecimenGroup();
       expect(scope.vm.ceventType.specimenGroupData).toBeArrayOfSize(2);
 
-      scope.vm.removeSpecimenGroupData(0);
+      scope.vm.removeSpecimenGroup(0);
       expect(scope.vm.ceventType.specimenGroupData).toBeArrayOfSize(1);
     });
 
     it('removing a specimen group data with invalid index throws an error', function() {
-      var entities = createEntities({ noCetId: true }),
-          scope = createController(entities);
+      var entities = createEntities(), scope;
 
-      expect(function () { scope.vm.removeSpecimenGroupData(-1); })
+      entities.ceventType = new CollectionEventType(
+        fakeEntities.collectionEventType(entities.study));
+
+      scope = createController(entities);
+
+      expect(function () { scope.vm.removeSpecimenGroup(-1); })
         .toThrow(new Error('index is invalid: -1'));
 
-      expect(function () { scope.vm.removeSpecimenGroupData(1); })
+      expect(function () { scope.vm.removeSpecimenGroup(1); })
         .toThrow(new Error('index is invalid: 1'));
     });
 
-    it('can add annotation type data', function() {
-      var entities = createEntities({ noCetId: true }),
-          scope = createController(entities);
+    it('can add an annotation type', function() {
+      var entities = createEntities({ noCetId: true }), scope;
+
+      entities.ceventType = new CollectionEventType(
+        fakeEntities.collectionEventType(entities.study));
+      scope = createController(entities);
 
       expect(scope.vm.ceventType.annotationTypeData).toBeArrayOfSize(0);
-      scope.vm.addAnnotationTypeData();
+      scope.vm.addAnnotationType();
       expect(scope.vm.ceventType.annotationTypeData).toBeArrayOfSize(1);
     });
 
-    it('can remove annotation type data', function() {
-      var entities = createEntities({ noCetId: true }),
-          scope = createController(entities);
+    it('can remove an annotation type', function() {
+      var entities = createEntities({ noCetId: true }), scope;
 
-      scope.vm.addAnnotationTypeData();
-      scope.vm.addAnnotationTypeData();
+      entities.ceventType = new CollectionEventType(
+        fakeEntities.collectionEventType(entities.study));
+      scope = createController(entities);
+
+      scope.vm.addAnnotationType();
+      scope.vm.addAnnotationType();
       expect(scope.vm.ceventType.annotationTypeData).toBeArrayOfSize(2);
 
-      scope.vm.removeAnnotationTypeData(0);
+      scope.vm.removeAnnotationType(0);
       expect(scope.vm.ceventType.annotationTypeData).toBeArrayOfSize(1);
     });
 
     it('removing an annotation type data with invalid index throws an error', function() {
-      var entities = createEntities({ noCetId: true }),
-          scope = createController(entities);
+      var entities = createEntities({ noCetId: true }), scope;
 
+      entities.ceventType = new CollectionEventType(
+        fakeEntities.collectionEventType(entities.study));
+      scope = createController(entities);
 
-      expect(function () { scope.vm.removeAnnotationTypeData(-1); })
+      expect(function () { scope.vm.removeAnnotationType(-1); })
         .toThrow(new Error('index is invalid: -1'));
 
-      expect(function () { scope.vm.removeAnnotationTypeData(1); })
+      expect(function () { scope.vm.removeAnnotationType(1); })
         .toThrow(new Error('index is invalid: 1'));
     });
 

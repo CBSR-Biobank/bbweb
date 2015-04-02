@@ -6,7 +6,6 @@ define(function (require) {
       ceventAnnotTypesService      = require('./ceventAnnotTypesService'),
       participantsService          = require('./participantsService'),
       participantAnnotTypesService = require('./participantAnnotTypesService'),
-      processingTypesService       = require('./processingTypesService'),
       spcLinkAnnotTypesService     = require('./spcLinkAnnotTypesService'),
       specimenGroupsService        = require('./specimenGroupsService'),
       StudyAnnotTypesService       = require('./StudyAnnotTypesService'),
@@ -19,7 +18,6 @@ define(function (require) {
   module.service('ceventAnnotTypesService',      ceventAnnotTypesService);
   module.service('participantAnnotTypesService', participantAnnotTypesService);
   module.service('participantsService',          participantsService);
-  module.service('processingTypesService',       processingTypesService);
   module.service('spcLinkAnnotTypesService',     spcLinkAnnotTypesService);
   module.service('specimenGroupsService',        specimenGroupsService);
   module.service('studiesService',               studiesService);

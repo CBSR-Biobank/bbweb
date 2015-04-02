@@ -25,18 +25,18 @@ define(['underscore'], function(_) {
     var vm = this,
         action = ceventType.isNew ? 'Add' : 'Update';
 
-    vm.ceventType               = ceventType;
-    vm.studySpecimenGroups      = studySpecimenGroups;
+    vm.ceventType            = ceventType;
+    vm.studySpecimenGroups   = studySpecimenGroups;
 
-    vm.title                    = action + ' Collection Event Type';
-    vm.submit                   = submit;
-    vm.cancel                   = cancel;
+    vm.title                 = action + ' Collection Event Type';
+    vm.submit                = submit;
+    vm.cancel                = cancel;
 
-    vm.addSpecimenGroupData     = addSpecimenGroupData;
-    vm.removeSpecimenGroupData  = removeSpecimenGroupData;
-    vm.addAnnotationTypeData    = addAnnotationTypeData;
-    vm.removeAnnotationTypeData = removeAnnotationTypeData;
-    vm.getSpecimenGroupUnits    = getSpecimenGroupUnits;
+    vm.addSpecimenGroup      = addSpecimenGroup;
+    vm.removeSpecimenGroup   = removeSpecimenGroup;
+    vm.addAnnotationType     = addAnnotationType;
+    vm.removeAnnotationType  = removeAnnotationType;
+    vm.getSpecimenGroupUnits = getSpecimenGroupUnits;
 
     //---
 
@@ -62,22 +62,22 @@ define(['underscore'], function(_) {
       gotoReturnState();
     }
 
-    function addSpecimenGroupData() {
+    function addSpecimenGroup() {
       vm.ceventType.specimenGroupData.push({specimenGroupId: '', maxCount: null, amount: null});
     }
 
-    function removeSpecimenGroupData(index) {
+    function removeSpecimenGroup(index) {
       if ((index < 0) || (index >= vm.ceventType.specimenGroupData.length)) {
         throw new Error('index is invalid: ' + index);
       }
       vm.ceventType.specimenGroupData.splice(index, 1);
     }
 
-    function addAnnotationTypeData() {
+    function addAnnotationType() {
       vm.ceventType.annotationTypeData.push({annotationTypeId:'', required: false});
     }
 
-    function removeAnnotationTypeData(index) {
+    function removeAnnotationType(index) {
       if ((index < 0) || (index >= vm.ceventType.annotationTypeData.length)) {
         throw new Error('index is invalid: ' + index);
       }
@@ -85,7 +85,7 @@ define(['underscore'], function(_) {
     }
 
     function getSpecimenGroupUnits(sgId) {
-      return SpecimenGroup.getUnits(vm.specimenGroups, sgId);
+      return SpecimenGroup.getUnits(vm.studySpecimenGroups, sgId);
     }
   }
 

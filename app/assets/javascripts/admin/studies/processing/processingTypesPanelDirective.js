@@ -23,7 +23,7 @@ define(['angular', 'underscore'], function(angular, _) {
     'Panel',
     'tableService',
     'ProcessingTypeViewer',
-    'processingTypeUtils'
+    'domainEntityService'
   ];
 
   /**
@@ -34,7 +34,7 @@ define(['angular', 'underscore'], function(angular, _) {
                                     Panel,
                                     tableService,
                                     ProcessingTypeViewer,
-                                    processingTypeUtils) {
+                                    domainEntityService) {
     var vm = this,
         panel = new Panel('study.panel.processingTypes',
                           'home.admin.studies.study.processing.processingTypeAdd');
@@ -83,7 +83,13 @@ define(['angular', 'underscore'], function(angular, _) {
       if (!vm.study.isDisabled()) {
         throw new Error('study is not disabled');
       }
-      processingTypeUtils.remove(processingType).then(function () {
+      domainEntityService.removeEntity(
+        processingType.remove,
+        'Remove Processing Type',
+        'Are you sure you want to remove processing type ' + processingType.name + '?',
+        'Remove Failed',
+        'Processing type ' + processingType.name + ' cannot be removed: '
+      ).then(function () {
         vm.processingTypes = _.without(vm.processingTypes, processingType);
         vm.tableParams.reload();
       });

@@ -159,7 +159,7 @@ define([
         id:          utils.uuid(),
         studyId:     study.id,
         name:        domainEntityNameNext(ENTITY_NAME_PROCESSING_TYPE()),
-        description: faker.lorem.words(1),
+        description: faker.lorem.words(1)[0],
         enabled:     false
       };
       return extendWithCommonFields(pt);
@@ -174,7 +174,7 @@ define([
         id:                 utils.uuid(),
         studyId:            study.id,
         name:               domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE()),
-        description:        faker.lorem.words(1),
+        description:        faker.lorem.words(1)[0],
         specimenGroupData:  [],
         annotationTypeData: []
       };
@@ -218,7 +218,7 @@ define([
         id:                          utils.uuid(),
         studyId:                     study.id,
         name:                        domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP()),
-        description:                 faker.lorem.words(1),
+        description:                 faker.lorem.words(1)[0],
         units:                       'mL',
         anatomicalSourceType:        randomAnatomicalSourceType(),
         preservationType:            randomPreservationType(),
@@ -289,7 +289,7 @@ define([
       var study =  {
         id:          utils.uuid(),
         name:        domainEntityNameNext(ENTITY_NAME_STUDY()),
-        description: faker.lorem.words(1),
+        description: faker.lorem.words(1)[0],
         status:      'Disabled'
       };
       return extendWithCommonFields(study);
@@ -299,7 +299,7 @@ define([
       var centre =  {
         id:          utils.uuid(),
         name:        domainEntityNameNext(ENTITY_NAME_CENTRE()),
-        description: faker.lorem.words(1),
+        description: faker.lorem.words(1)[0],
         status:      'Disabled'
       };
       return extendWithCommonFields(centre);

@@ -28,17 +28,16 @@ define(['underscore'], function(_) {
                                processingDto) {
     var vm = this, action;
 
-    vm.study               = study;
-    vm.processingTypes     = processingDto.processingTypes;
-    vm.processingTypesById = _.indexBy(processingDto.processingTypes, 'id');
-    vm.annotationTypes     = processingDto.specimenLinkAnnotationTypes;
-    vm.specimenGroups      = processingDto.specimenGroups;
-    vm.annotationTypeData  = spcLinkType.annotationTypeData;
+    vm.study                 = study;
+    vm.processingTypes       = processingDto.processingTypes;
+    vm.processingTypesById   = _.indexBy(processingDto.processingTypes, 'id');
+    vm.studyAnnotationTypes  = processingDto.specimenLinkAnnotationTypes;
+    vm.studySpecimenGroups   = processingDto.specimenGroups;
 
     vm.submit                = submit;
     vm.cancel                = cancel;
-    vm.addAnnotType          = addAnnotType;
-    vm.removeAnnotType       = removeAnnotType;
+    vm.addAnnotationType     = addAnnotationType;
+    vm.removeAnnotationType  = removeAnnotationType;
     vm.getSpecimenGroupUnits = getSpecimenGroupUnits;
 
     vm.specimenLinkType = new SpecimenLinkType(
@@ -48,7 +47,7 @@ define(['underscore'], function(_) {
       });
 
     action = vm.specimenLinkType.isNew ? 'Add' : 'Update';
-    vm.title =  action + ' Spcecimen Link Type';
+    vm.title =  action + ' Specimen Link Type';
 
     //---
 
@@ -62,11 +61,7 @@ define(['underscore'], function(_) {
     }
 
     function submit(specimenLinkType) {
-      var serverSpcLinkType = specimenLinkType.getServerSpecimenLinkType();
-
-      serverSpcLinkType.annotationTypeData = vm.annotationTypeData;
-
-      serverSpcLinkType.addOrUpdate()
+      specimenLinkType.addOrUpdate()
         .then(submitSuccess)
         .catch(function(error) {
           domainEntityService.updateErrorModal(
@@ -78,16 +73,19 @@ define(['underscore'], function(_) {
       gotoReturnState();
     }
 
-    function addAnnotType () {
-      vm.annotationTypeData.push({annotationTypeId:'', required: false});
+    function addAnnotationType () {
+      vm.specimenLinkType.annotationTypeData.push({annotationTypeId:'', required: false});
     }
 
-    function removeAnnotType (index) {
-      vm.annotationTypeData.splice(index, 1);
+    function removeAnnotationType (index) {
+      if ((index < 0) || (index >= vm.specimenLinkType.annotationTypeData.length)) {
+        throw new Error('index is invalid: ' + index);
+      }
+      vm.specimenLinkType.annotationTypeData.splice(index, 1);
     }
 
     function getSpecimenGroupUnits(sgId) {
-      return SpecimenGroup.getUnits(vm.specimenGroups, sgId);
+      return SpecimenGroup.getUnits(vm.studySpecimenGroups, sgId);
     }
   }
 

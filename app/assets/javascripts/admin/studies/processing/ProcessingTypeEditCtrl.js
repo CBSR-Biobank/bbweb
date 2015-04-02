@@ -4,7 +4,6 @@ define([], function() {
   ProcessingTypeEditCtrl.$inject = [
     '$state',
     'domainEntityService',
-    'processingTypesService',
     'notificationsService',
     'processingType'
   ];
@@ -14,13 +13,12 @@ define([], function() {
    */
   function ProcessingTypeEditCtrl($state,
                                   domainEntityService,
-                                  processingTypesService,
                                   notificationsService,
                                   processingType) {
 
-    var action = (processingType.id) ? 'Update' : 'Add';
     var vm = this;
-    vm.title =  action  + ' Processing Type';
+
+    vm.title =  (processingType.isNew ? 'Add' : 'Update')  + ' Processing Type';
     vm.processingType = processingType;
     vm.submit = submit;
     vm.cancel = cancel;
@@ -37,7 +35,7 @@ define([], function() {
     }
 
     function submit(processingType) {
-      processingTypesService.addOrUpdate(processingType)
+      processingType.addOrUpdate()
         .then(submitSuccess)
         .catch(function(error) {
           domainEntityService.updateErrorModal(

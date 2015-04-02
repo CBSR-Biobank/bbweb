@@ -62,8 +62,6 @@ define([
     });
 
     it('fails when creating from bad specimen group data', function() {
-      var ceventType;
-
       cetFromServer = fakeEntities.collectionEventType(study);
       cetFromServer.specimenGroupData.push({ 1: 'abc' });
 
@@ -72,8 +70,6 @@ define([
     });
 
     it('fails when creating from bad annotation type data', function() {
-      var ceventType;
-
       cetFromServer = fakeEntities.collectionEventType(study);
       cetFromServer.annotationTypeData.push({ 1: 'abc' });
 
@@ -398,6 +394,7 @@ define([
       expect(cet.isNew).toBe(false);
       expect(cet.studyId).toBe(serverObj.studyId);
       expect(cet.name).toBe(serverObj.name);
+      expect(cet.description).toBe(serverObj.description);
       expect(cet.recurring).toBe(serverObj.recurring);
       expect(cet.specimenGroupData).toBeArrayOfSize(serverObj.specimenGroupData.length);
       expect(cet.annotationTypeData).toBeArrayOfSize(serverObj.annotationTypeData.length);

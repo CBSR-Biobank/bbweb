@@ -17,8 +17,7 @@ define([
     var httpBackend,
         funutils,
         SpecimenLinkType,
-        fakeEntities,
-        entities;
+        fakeEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 

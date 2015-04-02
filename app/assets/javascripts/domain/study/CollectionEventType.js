@@ -82,6 +82,7 @@ define(['underscore'], function(_) {
       _.extend(self, _.defaults(collectionEventType, {
         studyId:            null,
         name:               '',
+        description:        null,
         recurring:          false,
         specimenGroupData:  [],
         annotationTypeData: []
@@ -165,7 +166,6 @@ define(['underscore'], function(_) {
           cmd = _.extend(_.pick(self,
                                 'studyId',
                                 'name',
-                                'description',
                                 'recurring'),
                          funutils.pickOptional(self, 'description'));
 
@@ -191,8 +191,7 @@ define(['underscore'], function(_) {
         if (self.isNew) {
           return biobankApi.post(uri(self.studyId), cmd);
         }
-        cmd.id = self.id;
-        cmd.expectedVersion = self.version;
+        _.extend(cmd, { id: self.id, expectedVersion: self.version });
         return biobankApi.put(uri(self.studyId, self.id), cmd);
       }
     };

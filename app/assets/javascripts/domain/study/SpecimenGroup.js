@@ -1,7 +1,5 @@
-define([], function() {
+define(['underscore'], function(_) {
   'use strict';
-
-  module.factory('SpecimenGroup', SpecimenGroupFactory);
 
   //SpecimenGroupFactory.$inject = [];
 
@@ -24,10 +22,12 @@ define([], function() {
       if (sg) {
         return sg.units;
       }
-      throw new Error('specimen group not found: ' + id);
+      throw new Error('specimen group ID not found: ' + id);
     };
 
     return SpecimenGroup;
   }
+
+  return SpecimenGroupFactory;
 
 });

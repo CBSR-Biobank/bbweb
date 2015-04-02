@@ -40,9 +40,7 @@ define(function (require) {
 
       ProcessingTypeEditCtrl                  = require('./studies/processing/ProcessingTypeEditCtrl'),
       SpcLinkTypeEditCtrl                     = require('./studies/processing/SpcLinkTypeEditCtrl'),
-      processingTypeUtilsService              = require('./studies/processing/processingTypeUtilsService'),
       processingTypesPanelDirective           = require('./studies/processing/processingTypesPanelDirective'),
-      specimenLinkTypeUtilsService            = require('./studies/processing/specimenLinkTypeUtilsService'),
       spcLinkTypesPanelDirective              = require('./studies/processing/spcLinkTypesPanelDirective'),
       processingStates                        = require('./studies/processing/states'),
 
@@ -114,12 +112,8 @@ define(function (require) {
 
   module.controller('SpcLinkTypeEditCtrl', SpcLinkTypeEditCtrl);
 
-  module.service('processingTypeUtils', processingTypeUtilsService);
-
   module.directive('processingTypesPanel', processingTypesPanelDirective.directive);
   module.controller('ProcessingTypesPanelCtrl', processingTypesPanelDirective.controller);
-
-  module.service('specimenLinkTypeUtils', specimenLinkTypeUtilsService);
 
   module.directive('spcLinkTypesPanel', spcLinkTypesPanelDirective.directive);
   module.controller('SpcLinkTypesPanelCtrl', spcLinkTypesPanelDirective.controller);

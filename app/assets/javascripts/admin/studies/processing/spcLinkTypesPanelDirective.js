@@ -26,7 +26,7 @@ define(['angular', 'underscore'], function(angular, _) {
     'Panel',
     'SpecimenLinkAnnotationType',
     'SpcLinkTypeViewer',
-    'specimenLinkTypeUtils',
+    'domainEntityService',
     'ProcessingTypeViewer',
     'SpecimenGroupViewer',
     'AnnotationTypeViewer'
@@ -43,7 +43,7 @@ define(['angular', 'underscore'], function(angular, _) {
                                  Panel,
                                  SpecimenLinkAnnotationType,
                                  SpcLinkTypeViewer,
-                                 specimenLinkTypeUtils,
+                                 domainEntityService,
                                  ProcessingTypeViewer,
                                  SpecimenGroupViewer,
                                  AnnotationTypeViewer) {
@@ -139,11 +139,16 @@ define(['angular', 'underscore'], function(angular, _) {
       if (!vm.study.isDisabled()) {
         throw new Error('study is not disabled');
       }
-      specimenLinkTypeUtils.remove(slt)
-        .then(function () {
-          vm.specimenLinkTypes = _.without(vm.specimenLinkTypes, slt);
-          vm.tableParams.reload();
-        });
+      domainEntityService.removeEntity(
+        slt.remove,
+        'Remove Specimen Link Type',
+        'Are you sure you want to remove this specimen link type?',
+        'Remove Failed',
+        'specimen link type ' + slt.name + ' cannot be removed: '
+      ).then(function () {
+        vm.specimenLinkTypes = _.without(vm.specimenLinkTypes, slt);
+        vm.tableParams.reload();
+      });
     }
 
     function getTableData() {

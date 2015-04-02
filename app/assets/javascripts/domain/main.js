@@ -34,6 +34,7 @@ define(function (require) {
       CollectionEventType                 = require('./study/CollectionEventType'),
       Participant                         = require('./study/Participant'),
       ParticipantAnnotationType           = require('./study/ParticipantAnnotationType'),
+      ProcessingType                      = require('./study/ProcessingType'),
       ProcessingTypeViewer                = require('./study/ProcessingTypeViewer'),
       SpcLinkTypeViewer                   = require('./study/SpcLinkTypeViewer'),
       SpecimenGroup                       = require('./study/SpecimenGroup'),
@@ -94,6 +95,7 @@ define(function (require) {
   module.service('CentreStatus',                        CentreStatus);
   module.service('PreservationTemperatureType',         PreservationTemperatureType);
   module.service('PreservationType',                    PreservationType);
+  module.service('ProcessingType',                      ProcessingType);
   module.service('SpecimenType',                        SpecimenType);
   module.service('StudyStatus',                         StudyStatus);
   module.service('annotationTypeValidation',            annotationTypeValidation);

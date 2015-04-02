@@ -168,7 +168,6 @@ define(['underscore'], function(_) {
       it('can be removed', function() {
         var baseAnnotType = createServerAnnotTypeFn();
         var annotationType = createAnnotTypeFn(baseAnnotType);
-        var command = removeCommand(baseAnnotType);
 
         httpBackend.expectDELETE(uri(annotationType.studyId, annotationType.id, annotationType.version))
           .respond(201);
@@ -255,11 +254,6 @@ define(['underscore'], function(_) {
       function updateCommand(annotationType) {
         return _.extend(addCommand(annotationType),
                         { id: annotationType.id, expectedVersion: annotationType.version });
-      }
-
-      function removeCommand(annotationType) {
-        return _.extend(_.pick(annotationType, 'id', 'studyId'),
-                        { expectedVersion: annotationType.version });
       }
 
       function replyAnnotType(annotationType, newValues) {

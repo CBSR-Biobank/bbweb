@@ -257,9 +257,29 @@ define(['angular', 'underscore'], function(angular, _) {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         processingDto: [
-          'studiesService', 'study',
-          function (studiesService, study) {
-            return studiesService.processingDto(study.id);
+          'studiesService',
+          'study',
+          'ProcessingType',
+          'SpecimenLinkType',
+          'SpecimenLinkAnnotationType',
+          function (studiesService,
+                    study,
+                    ProcessingType,
+                    SpecimenLinkType,
+                    SpecimenLinkAnnotationType) {
+            return studiesService.processingDto(study.id).then(function (dto) {
+              dto.processingTypes = _.map(dto.processingTypes, function(obj) {
+                return new ProcessingType(obj);
+              });
+              dto.specimenLinkTypes = _.map(dto.specimenLinkTypes, function(obj) {
+                return new SpecimenLinkType(obj);
+              });
+              dto.specimenLinkAnnotationTypes = _.map(
+                dto.specimenLinkAnnotationTypes,
+                function (at) {
+                  return new SpecimenLinkAnnotationType(at);
+                });
+            });
           }
         ]
       },
@@ -267,15 +287,10 @@ define(['angular', 'underscore'], function(angular, _) {
         'studyDetails': {
           templateUrl: '/assets/javascripts/admin/studies/studyProcessingTab.html',
           controller: [
-            '$scope', 'study', 'processingDto', 'SpecimenLinkAnnotationType',
-            function($scope, study, processingDto, SpecimenLinkAnnotationType) {
+            '$scope', 'study', 'processingDto',
+            function($scope, study, processingDto) {
               $scope.study = study;
               $scope.processingDto = processingDto;
-              $scope.processingDto.specimenLinkAnnotationTypes = _.map(
-                $scope.processingDto.specimenLinkAnnotationTypes,
-                function (at) {
-                  return new SpecimenLinkAnnotationType(at);
-                });
             }
           ]
         }
