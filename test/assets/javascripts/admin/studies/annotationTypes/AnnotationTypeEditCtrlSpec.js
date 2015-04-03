@@ -44,14 +44,14 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       var context = {};
 
       beforeEach(inject(function (ParticipantAnnotationType) {
-        var baseAnnotType = fakeEntities.annotationType({ required: true }),
+        var baseAnnotationType = fakeEntities.annotationType({ required: true }),
             stateName = 'home.admin.studies.study.participants';
 
 
         context.state           = { current: { name: stateName } };
         context.returnState     = stateName;
-        context.annotationTypeNew    = new ParticipantAnnotationType(_.omit(baseAnnotType, 'id'));
-        context.annotationTypeWithId = new ParticipantAnnotationType(baseAnnotType);
+        context.annotationTypeNew    = new ParticipantAnnotationType(_.omit(baseAnnotationType, 'id'));
+        context.annotationTypeWithId = new ParticipantAnnotationType(baseAnnotationType);
       }));
 
       sharedBehaviour(context);
@@ -61,12 +61,12 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       var context = {};
 
       beforeEach(inject(function (CollectionEventAnnotationType) {
-        var baseAnnotType = fakeEntities.annotationType();
+        var baseAnnotationType = fakeEntities.annotationType();
 
         context.state           = { current: { name: 'home.admin.studies.study.collection' } };
         context.returnState     = 'home.admin.studies.study.collection';
-        context.annotationTypeNew    = new CollectionEventAnnotationType(_.omit(baseAnnotType, 'id'));
-        context.annotationTypeWithId = new CollectionEventAnnotationType(baseAnnotType);
+        context.annotationTypeNew    = new CollectionEventAnnotationType(_.omit(baseAnnotationType, 'id'));
+        context.annotationTypeWithId = new CollectionEventAnnotationType(baseAnnotationType);
       }));
 
       sharedBehaviour(context);
@@ -76,14 +76,14 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       var context = {};
 
       beforeEach(inject(function (SpecimenLinkAnnotationType) {
-        var baseAnnotType = fakeEntities.annotationType({ required: true }),
+        var baseAnnotationType = fakeEntities.annotationType({ required: true }),
             stateName = 'home.admin.studies.study.processing';
 
 
         context.state           = { current: { name: stateName } };
         context.returnState     = stateName;
-        context.annotationTypeNew    = new SpecimenLinkAnnotationType(_.omit(baseAnnotType, 'id'));
-        context.annotationTypeWithId = new SpecimenLinkAnnotationType(baseAnnotType);
+        context.annotationTypeNew    = new SpecimenLinkAnnotationType(_.omit(baseAnnotationType, 'id'));
+        context.annotationTypeWithId = new SpecimenLinkAnnotationType(baseAnnotationType);
       }));
 
       sharedBehaviour(context);
@@ -243,7 +243,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           spyOn(domainEntityService, 'updateErrorModal')
             .and.callFake(function () {});
 
-          spyOnAnnotTypeAddOrUpdateAndReject(annotationTypeNew);
+          spyOnAnnotationTypeAddOrUpdateAndReject(annotationTypeNew);
 
           createController(state, annotationTypeNew);
           scope.vm.submit(annotationTypeNew);
@@ -276,7 +276,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           scope.$digest();
         }
 
-        function spyOnAnnotTypeAddOrUpdateAndResolve(annotationType) {
+        function spyOnAnnotationTypeAddOrUpdateAndResolve(annotationType) {
           spyOn(annotationType, 'addOrUpdate').and.callFake(function () {
             var deferred = q.defer();
             deferred.resolve('xxx');
@@ -284,7 +284,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           });
         }
 
-        function spyOnAnnotTypeAddOrUpdateAndReject(annotationType) {
+        function spyOnAnnotationTypeAddOrUpdateAndReject(annotationType) {
           spyOn(annotationType, 'addOrUpdate').and.callFake(function () {
             var deferred = q.defer();
             deferred.reject({ data: { message: 'error'} });
@@ -293,7 +293,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         }
 
         function onSubmit(state, annotationType, returnState) {
-          spyOnAnnotTypeAddOrUpdateAndResolve(annotationType);
+          spyOnAnnotationTypeAddOrUpdateAndResolve(annotationType);
 
           createController(state, annotationType);
           scope.vm.submit(annotationType);
@@ -303,7 +303,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         }
 
         function onCancel(state, annotationType, returnState) {
-          spyOnAnnotTypeAddOrUpdateAndResolve(annotationType);
+          spyOnAnnotationTypeAddOrUpdateAndResolve(annotationType);
 
           createController(state, annotationType);
           scope.vm.cancel();

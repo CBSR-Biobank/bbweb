@@ -24,21 +24,21 @@ define([
       fakeEntities = fakeDomainEntities;
 
       context.annotationTypeType            = ParticipantAnnotationType;
-      context.createAnnotTypeFn        = createAnnotType;
+      context.createAnnotationTypeFn        = createAnnotationType;
       context.annotationTypeUriPart         = '/pannottypes';
       context.objRequiredKeys          = requiredKeys;
-      context.createServerAnnotTypeFn  = createServerAnnotType;
+      context.createServerAnnotationTypeFn  = createServerAnnotationType;
       context.annotationTypeListFn          = ParticipantAnnotationType.list;
       context.annotationTypeGetFn           = ParticipantAnnotationType.get;
     }));
 
-    function createServerAnnotType(options) {
+    function createServerAnnotationType(options) {
       var study = fakeEntities.study();
       options = _.extend({ required: true }, options);
       return fakeEntities.studyAnnotationType(study, options);
     }
 
-    function createAnnotType(obj) {
+    function createAnnotationType(obj) {
       obj = obj || {};
       return new ParticipantAnnotationType(obj);
     }

@@ -24,6 +24,7 @@ define(['angular', 'underscore'], function(angular, _) {
     'Panel',
     'modalService',
     'tableService',
+    'domainEntityService',
     'SpecimenGroupViewer',
     'specimenGroupUtils'
   ];
@@ -36,6 +37,7 @@ define(['angular', 'underscore'], function(angular, _) {
                                    Panel,
                                    modalService,
                                    tableService,
+                                   domainEntityService,
                                    SpecimenGroupViewer,
                                    specimenGroupUtils) {
     var vm = this,
@@ -79,27 +81,37 @@ define(['angular', 'underscore'], function(angular, _) {
       if (!vm.study.isDisabled()) {
         throw new Error('study is not disabled');
       }
+
       if (_.contains(vm.specimenGroupIdsInUse, specimenGroup.id)) {
-        specimenGroupUtils.inUseModal(specimenGroup);
-      } else {
-        $state.go(
-          'home.admin.studies.study.specimens.groupUpdate',
-          { specimenGroupId: specimenGroup.id });
+        specimenGroupUtils.inUseModal(specimenGroup, 'updated');
+        return;
       }
+
+      $state.go(
+        'home.admin.studies.study.specimens.groupUpdate',
+        { specimenGroupId: specimenGroup.id });
     }
 
     function remove(specimenGroup) {
+      if (!vm.study.isDisabled()) {
+        throw new Error('study is not disabled');
+      }
+
       if (_.contains(vm.specimenGroupIdsInUse, specimenGroup.id)) {
         specimenGroupUtils.inUseModal(specimenGroup);
-      } else {
-        if (!vm.study.isDisabled()) {
-          throw new Error('study is not disabled');
-        }
-        specimenGroupUtils.remove(specimenGroup).then(function () {
-          vm.specimenGroups = _.without(vm.specimenGroups, specimenGroup);
-          vm.tableParams.reload();
-        });
+        return;
       }
+
+      domainEntityService.removeEntity(
+        specimenGroup,
+        'Remove Specimen Group',
+        'Are you sure you want to remove specimen group ' + specimenGroup.name + '?',
+        'Remove Failed',
+        'Specimen group ' + specimenGroup.name + ' cannot be removed: '
+      ).then(function () {
+        vm.specimenGroups = _.without(vm.specimenGroups, specimenGroup);
+        vm.tableParams.reload();
+      });
     }
 
     function getTableData() {

@@ -41,14 +41,14 @@
   </div>
 
   <!-- SPECIMEN GROUP DATA -->
-  <div class="form-group" ng-repeat="sgDataItem in vm.specimenGroupData track by $index">
+  <div class="form-group" ng-repeat="sgDataItem in vm.ceventType.specimenGroupData track by $index">
     <ng-form name="sgSubForm">
       <label class="col-md-2 control-label">Specimen Group {{$index + 1}}</label>
       <div class="col-md-3">
         <select class="form-control"
                 name="sgId"
-                ng-model="vm.specimenGroupData[$index].specimenGroupId"
-                ng-options="sg.id as sg.name for sg in vm.specimenGroups | orderBy: 'name'"
+                ng-model="vm.ceventType.specimenGroupData[$index].specimenGroupId"
+                ng-options="sg.id as sg.name for sg in vm.studySpecimenGroups | orderBy: 'name'"
                 required>
           <option value="">-- make a selection --</option>
         </select>
@@ -59,20 +59,20 @@
                min="1"
                name="maxCount"
                class="form-control input-sm"
-               ng-model="vm.specimenGroupData[$index].maxCount"
+               ng-model="vm.ceventType.specimenGroupData[$index].maxCount"
                placeholder="max count"
                valid-count
                required/>
       </div>
       <label class="col-md-1 control-label small">
-        {{vm.getSpecimenGroupUnits(vm.specimenGroupData[$index].specimenGroupId)}}:
+        {{vm.getSpecimenGroupUnits(vm.ceventType.specimenGroupData[$index].specimenGroupId)}}:
       </label>
       <div class="col-md-2">
         <input type="number"
                min="0"
                name="amount"
                class="form-control input-sm"
-               ng-model="vm.specimenGroupData[$index].amount"
+               ng-model="vm.ceventType.specimenGroupData[$index].amount"
                placeholder="amount"
                valid-amount
                required />
@@ -111,14 +111,14 @@
   </div>
 
   <!-- ANNOTATION TYPE DATA -->
-  <div class="form-group" ng-repeat="atData in vm.annotationTypeData track by $index">
+  <div class="form-group" ng-repeat="atData in vm.ceventType.annotationTypeData track by $index">
     <ng-form name="atSubForm">
       <label class="col-md-2 control-label">Annotation Type {{$index + 1}}</label>
       <div class="col-md-3">
         <select class="form-control"
                 name="name"
-                ng-model="vm.annotationTypeData[$index].annotationTypeId"
-                ng-options="annotationType.id as annotationType.name for annotationType in vm.annotationTypes | orderBy: 'name'"
+                ng-model="vm.ceventType.annotationTypeData[$index].annotationTypeId"
+                ng-options="annotationType.id as annotationType.name for annotationType in vm.studyAnnotationTypes | orderBy: 'name'"
                 required>
           <option value="">-- make a selection --</option>
         </select>
@@ -126,7 +126,7 @@
       <div class="col-md-2">
         <input name="required"
                type="checkbox"
-               ng-model="vm.annotationTypeData[$index].required"/> Required
+               ng-model="vm.ceventType.annotationTypeData[$index].required"/> Required
       </div>
       <div class="col-md-1">
         <button class="btn btn-xs btn-warning"

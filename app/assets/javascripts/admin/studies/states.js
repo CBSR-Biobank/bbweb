@@ -137,7 +137,8 @@ define(['angular', 'underscore'], function(angular, _) {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         annotationTypes: [
-          '$stateParams', 'ParticipantAnnotationType',
+          '$stateParams',
+          'ParticipantAnnotationType',
           function($stateParams, ParticipantAnnotationType) {
             return ParticipantAnnotationType.list($stateParams.studyId);
           }
@@ -146,12 +147,15 @@ define(['angular', 'underscore'], function(angular, _) {
       views: {
         'studyDetails': {
           templateUrl: '/assets/javascripts/admin/studies/studyParticipantsTab.html',
-          controller: ['$scope', 'study', 'annotationTypes', function($scope, study, annotationTypes) {
-            $scope.study = study;
-            $scope.annotationTypes = annotationTypes;
-            // FIXME this is set to empty array for now, but will have to call the correct method in the future
-            $scope.annotationTypeIdsInUse = [];
-          }]
+          controller: [
+            '$scope', 'study', 'annotationTypes',
+            function($scope, study, annotationTypes) {
+              $scope.study = study;
+              $scope.annotationTypes = annotationTypes;
+              // FIXME this is set to empty array for now, but will have to call the correct method in the future
+              $scope.annotationTypeIdsInUse = [];
+            }
+          ]
         }
       },
       data: {

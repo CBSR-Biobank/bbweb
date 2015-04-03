@@ -8,25 +8,28 @@ define([
 ], function(angular, mocks, _, commonTests) {
   'use strict';
 
-  describe('Controller: StudyAnnotTypesTableCtrl', function() {
+  describe('Controller: StudyAnnotationTypesTableCtrl', function() {
 
     var Study,
         ParticipantAnnotationType,
         CollectionEventAnnotationType,
         SpecimenLinkAnnotationType,
+        AnnotationValueType,
         fakeEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function (_Study_,
-                               _ParticipantAnnotationType_,
-                               _CollectionEventAnnotationType_,
-                               _SpecimenLinkAnnotationType_,
+                                _ParticipantAnnotationType_,
+                                _CollectionEventAnnotationType_,
+                                _SpecimenLinkAnnotationType_,
+                                _AnnotationValueType_,
                                fakeDomainEntities) {
       Study                         = _Study_;
       ParticipantAnnotationType     = _ParticipantAnnotationType_;
       CollectionEventAnnotationType = _CollectionEventAnnotationType_;
       SpecimenLinkAnnotationType    = _SpecimenLinkAnnotationType_;
+      AnnotationValueType           = _AnnotationValueType_;
       fakeEntities                  = fakeDomainEntities;
     }));
 
@@ -36,7 +39,7 @@ define([
       beforeEach(function () {
         context.study = new Study(fakeEntities.study());
         context.annotationTypes = _.map(
-          ['Text', 'Number', 'DateTime', 'Select'],
+          AnnotationValueType.values(),
           function(valueType) {
             return new ParticipantAnnotationType(
               fakeEntities.studyAnnotationType(
@@ -57,7 +60,7 @@ define([
       beforeEach(function () {
         context.study = new Study(fakeEntities.study());
         context.annotationTypes = _.map(
-          ['Text', 'Number', 'DateTime', 'Select'],
+          AnnotationValueType.values(),
           function(valueType) {
             return new CollectionEventAnnotationType(
               fakeEntities.studyAnnotationType(
@@ -66,7 +69,7 @@ define([
           });
         context.annotationTypeIdsInUse = [context.annotationTypes[0].id];
         context.annotationTypeName   = 'CollectionEventAnnotationType';
-        context.updateStateName = 'home.admin.studies.study.collection.ceventAnnotTypeUpdate';
+        context.updateStateName = 'home.admin.studies.study.collection.ceventAnnotationTypeUpdate';
         });
 
       sharedBehaviour(context);
@@ -78,7 +81,7 @@ define([
       beforeEach(function () {
         context.study = new Study(fakeEntities.study());
         context.annotationTypes = _.map(
-          ['Text', 'Number', 'DateTime', 'Select'],
+          AnnotationValueType.values(),
           function(valueType) {
             return new SpecimenLinkAnnotationType(
               fakeEntities.studyAnnotationType(
@@ -87,7 +90,7 @@ define([
           });
         context.annotationTypeIdsInUse = [context.annotationTypes[0].id];
         context.annotationTypeName   = 'SpecimenLinkAnnotationType';
-        context.updateStateName = 'home.admin.studies.study.processing.spcLinkAnnotTypeUpdate';
+        context.updateStateName = 'home.admin.studies.study.processing.spcLinkAnnotationTypeUpdate';
         });
 
       sharedBehaviour(context);
@@ -128,7 +131,7 @@ define([
           spyOn(state, 'go');
           spyOn(tableService, 'getTableParams').and.callThrough();
 
-          $controller('StudyAnnotTypesTableCtrl as vm', {
+          $controller('StudyAnnotationTypesTableCtrl as vm', {
             $scope:                   scope,
             $state:                   state,
             modalService:             modalService,

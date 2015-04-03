@@ -8,8 +8,10 @@ define(['underscore'], function(_) {
     'SpecimenGroup',
     'domainEntityService',
     'notificationsService',
+    'study',
     'ceventType',
-    'studySpecimenGroups'
+    'studySpecimenGroups',
+    'studyAnnotationTypes'
   ];
 
   /**
@@ -20,15 +22,17 @@ define(['underscore'], function(_) {
                               SpecimenGroup,
                               domainEntityService,
                               notificationsService,
+                              study,
                               ceventType,
-                              studySpecimenGroups) {
-    var vm = this,
-        action = ceventType.isNew() ? 'Add' : 'Update';
+                              studySpecimenGroups,
+                              studyAnnotationTypes) {
+    var vm = this;
 
     vm.ceventType            = ceventType;
     vm.studySpecimenGroups   = studySpecimenGroups;
+    vm.studyAnnotationTypes  = studyAnnotationTypes;
 
-    vm.title                 = action + ' Collection Event Type';
+    vm.title                 = (ceventType.isNew() ? 'Add' : 'Update') + ' Collection Event Type';
     vm.submit                = submit;
     vm.cancel                = cancel;
 
@@ -37,6 +41,8 @@ define(['underscore'], function(_) {
     vm.addAnnotationType     = addAnnotationType;
     vm.removeAnnotationType  = removeAnnotationType;
     vm.getSpecimenGroupUnits = getSpecimenGroupUnits;
+
+    vm.ceventType.studyId = study.id;
 
     //---
 

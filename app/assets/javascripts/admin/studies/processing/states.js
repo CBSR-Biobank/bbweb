@@ -69,7 +69,7 @@ define([], function() {
     /**
      * Specimen Link Annotation Type Add
      */
-    $stateProvider.state('home.admin.studies.study.processing.spcLinkAnnotTypeAdd', {
+    $stateProvider.state('home.admin.studies.study.processing.spcLinkAnnotationTypeAdd', {
       url: '/annottype/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
@@ -91,7 +91,7 @@ define([], function() {
     /**
      * Prticipant Annotation Type Update
      */
-    $stateProvider.state('home.admin.studies.study.processing.spcLinkAnnotTypeUpdate', {
+    $stateProvider.state('home.admin.studies.study.processing.spcLinkAnnotationTypeUpdate', {
       url: '/annottype/update/{annotationTypeId}',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,

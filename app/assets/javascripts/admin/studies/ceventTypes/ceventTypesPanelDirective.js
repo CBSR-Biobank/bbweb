@@ -127,7 +127,7 @@ define(['angular', 'underscore'], function(angular, _) {
         throw new Error('study is not disabled');
       }
       domainEntityService.removeEntity(
-        ceventType.remove,
+        ceventType,
         'Remove Collection Event Type',
         'Are you sure you want to remove collection event type ' + ceventType.name + '?',
         'Remove Failed',

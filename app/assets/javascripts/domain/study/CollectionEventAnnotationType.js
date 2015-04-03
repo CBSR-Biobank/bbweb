@@ -4,7 +4,7 @@ define([], function() {
   CollectionEventAnnotationTypeFactory.$inject = [
     'StudyAnnotationType',
     'studyAnnotationTypeValidation',
-    'ceventAnnotTypesService'
+    'ceventAnnotationTypesService'
   ];
 
   /**
@@ -12,13 +12,13 @@ define([], function() {
    */
   function CollectionEventAnnotationTypeFactory(StudyAnnotationType,
                                                 studyAnnotationTypeValidation,
-                                                ceventAnnotTypesService) {
+                                                ceventAnnotationTypesService) {
 
     function CollectionEventAnnotationType(obj) {
       obj = obj || {};
       StudyAnnotationType.call(this, obj);
 
-      this._service = ceventAnnotTypesService;
+      this._service = ceventAnnotationTypesService;
     }
 
     CollectionEventAnnotationType.prototype = Object.create(StudyAnnotationType.prototype);

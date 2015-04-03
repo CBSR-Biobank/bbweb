@@ -5,7 +5,10 @@ define([], function() {
     '$state',
     'domainEntityService',
     'notificationsService',
-    'valueTypes',
+    'AnatomicalSourceType',
+    'PreservationType',
+    'PreservationTemperatureType',
+    'SpecimenType',
     'study',
     'specimenGroup'
   ];
@@ -16,20 +19,21 @@ define([], function() {
   function SpecimenGroupEditCtrl($state,
                                  domainEntityService,
                                  notificationsService,
-                                 valueTypes,
+                                 AnatomicalSourceType,
+                                 PreservationType,
+                                 PreservationTemperatureType,
+                                 SpecimenType,
                                  study,
                                  specimenGroup) {
-    var action = specimenGroup.id ? 'Update' : 'Add';
-
     var vm = this;
-    vm.title =  action + ' Specimen Group';
-    vm.study = study;
-    vm.specimenGroup = specimenGroup;
 
-    vm.anatomicalSourceTypes = valueTypes.anatomicalSourceType.sort();
-    vm.preservTypes          = valueTypes.preservationType.sort();
-    vm.preservTempTypes      = valueTypes.preservationTemperatureType.sort();
-    vm.specimenTypes         = valueTypes.specimenType.sort();
+    vm.title                 = (specimenGroup.isNew() ? 'Add' : 'Update') + ' Specimen Group';
+    vm.study                 = study;
+    vm.specimenGroup         = specimenGroup;
+    vm.anatomicalSourceTypes = AnatomicalSourceType.values();
+    vm.preservTypes          = PreservationType.values();
+    vm.preservTempTypes      = PreservationTemperatureType.values();
+    vm.specimenTypes         = SpecimenType.values();
 
     vm.submit = submit;
     vm.cancel = cancel;
@@ -50,7 +54,7 @@ define([], function() {
         .then(submitSuccess)
         .catch(function(error) {
           domainEntityService.updateErrorModal(
-            error,'specimen link type');
+            error,'specimen group');
         });
     }
 

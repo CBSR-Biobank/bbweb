@@ -68,29 +68,33 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         q = $q;
       }));
 
+      function removeEntity() {
+        return {
+          remove: function () {
+            return q.when('yyy');
+          }
+        };
+      }
+
       it('remove works when user confirms the removal', function(done) {
         var header = 'header',
             body = 'body',
             removeFailedHeader = 'removeFailedHeaderHtml',
             removeFailedBody = 'removeFailedBody',
-            remove = {
-              promiseFn: function () {
-                return q.when('yyy');
-              }
-            };
+            entity = removeEntity();
 
-        spyOn(remove, 'promiseFn').and.callThrough();
+        spyOn(entity, 'remove').and.callThrough();
         spyOn(modalService, 'showModal').and.callFake(function () {
           return q.when('xxx');
         });
 
-        domainEntityService.removeEntity(remove.promiseFn,
+        domainEntityService.removeEntity(entity,
                                          header,
                                          body,
                                          removeFailedHeader,
                                          removeFailedBody)
           .then(function () {
-            expect(remove.promiseFn).toHaveBeenCalled();
+            expect(entity.remove).toHaveBeenCalled();
             done();
           });
         rootScope.$digest();
@@ -101,27 +105,23 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
             body = 'body',
             removeFailedHeader = 'removeFailedHeaderHtml',
             removeFailedBody = 'removeFailedBody',
-            remove = {
-              promiseFn: function () {
-                return q.when('yyy');
-              }
-            };
+            entity = removeEntity();
 
-        spyOn(remove, 'promiseFn').and.callThrough();
+        spyOn(entity, 'remove').and.callThrough();
         spyOn(modalService, 'showModal').and.callFake(function () {
           var deferred = q.defer();
           deferred.reject('xxx');
           return deferred.promise;
         });
 
-        domainEntityService.removeEntity(remove.promiseFn,
+        domainEntityService.removeEntity(entity,
                                          header,
                                          body,
                                          removeFailedHeader,
                                          removeFailedBody);
 
         rootScope.$digest();
-        expect(remove.promiseFn).not.toHaveBeenCalled();
+        expect(entity.remove).not.toHaveBeenCalled();
       });
 
       it('displays the removal failed modal', function() {
@@ -129,26 +129,26 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
             body = 'body',
             removeFailedHeader = 'removeFailedHeaderHtml',
             removeFailedBody = 'removeFailedBody',
-            remove = {
-              promiseFn: function () {
+            entity =  {
+              remove: function () {
                 var deferred = q.defer();
                 deferred.reject('yyy');
                 return deferred.promise;
               }
             };
 
-        spyOn(remove, 'promiseFn').and.callThrough();
+        spyOn(entity, 'remove').and.callThrough();
         spyOn(modalService, 'showModal').and.callFake(function () {
           return q.when('xxx');
         });
 
-        domainEntityService.removeEntity(remove.promiseFn,
+        domainEntityService.removeEntity(entity,
                                          header,
                                          body,
                                          removeFailedHeader,
                                          removeFailedBody);
         rootScope.$digest();
-        expect(remove.promiseFn).toHaveBeenCalled();
+        expect(entity.remove).toHaveBeenCalled();
         expect(modalService.showModal.calls.count()).toEqual(2);
       });
 

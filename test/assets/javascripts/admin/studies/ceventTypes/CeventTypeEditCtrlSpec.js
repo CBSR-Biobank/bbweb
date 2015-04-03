@@ -11,6 +11,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         state,
         CollectionEventType,
         CollectionEventAnnotationType,
+        AnnotationValueType,
         domainEntityService,
         notificationsService,
         fakeEntities;
@@ -23,6 +24,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
                                $state,
                                _CollectionEventType_,
                                _CollectionEventAnnotationType_,
+                               _AnnotationValueType_,
                                _domainEntityService_,
                                _notificationsService_,
                                fakeDomainEntities) {
@@ -32,6 +34,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       state                         = $state;
       CollectionEventType           = _CollectionEventType_;
       CollectionEventAnnotationType = _CollectionEventAnnotationType_;
+      AnnotationValueType           = _AnnotationValueType_;
       domainEntityService           = _domainEntityService_;
       notificationsService          = _notificationsService_;
       fakeEntities                  = fakeDomainEntities;
@@ -47,12 +50,12 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         return fakeEntities.specimenGroup(study);
       });
       annotationTypes = _.map(
-          ['Text', 'Number', 'DateTime', 'Select'],
-          function(valueType) {
-            return new CollectionEventAnnotationType(
-              fakeEntities.studyAnnotationType(
-                study, { valueType: valueType }));
-          });
+        AnnotationValueType.values(),
+        function(valueType) {
+          return new CollectionEventAnnotationType(
+            fakeEntities.studyAnnotationType(
+              study, { valueType: valueType }));
+        });
 
       serverCet = fakeEntities.collectionEventType(study, {
         specimenGroups: specimenGroups,

@@ -11,106 +11,115 @@ define([
   'use strict';
 
   describe('Controller: SpcLinkTypeEditCtrl', function() {
-    var q,
-        rootScope,
-        controller,
-        state,
+    var createEntities,
+        createController,
         SpecimenLinkType,
-        SpecimenLinkAnnotationType,
-        domainEntityService,
-        notificationsService,
         fakeEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($q,
-                               $rootScope,
-                               $controller,
-                               $state,
-                               _SpecimenLinkType_,
-                               _SpecimenLinkAnnotationType_,
-                               _domainEntityService_,
-                               _notificationsService_,
-                               fakeDomainEntities) {
-      q                          = $q;
-      rootScope                  = $rootScope;
-      controller                 = $controller;
-      state                      = $state;
-      SpecimenLinkType           = _SpecimenLinkType_;
-      SpecimenLinkAnnotationType = _SpecimenLinkAnnotationType_;
-      domainEntityService        = _domainEntityService_;
-      notificationsService       = _notificationsService_;
-      fakeEntities               = fakeDomainEntities;
-
+    beforeEach(inject(function($injector) {
+      createEntities   = setupEntities($injector);
+      createController = setupController($injector);
+      SpecimenLinkType = $injector.get('SpecimenLinkType');
+      fakeEntities     = $injector.get('fakeDomainEntities');
       testUtils.addCustomMatchers();
     }));
 
-    function createEntities() {
-      var study, processingType, specimenGroups, annotationTypes, specimenLinkType;
+    function setupEntities(injector) {
+      var Study                      = injector.get('Study'),
+          ProcessingType             = injector.get('ProcessingType'),
+          SpecimenLinkAnnotationType = injector.get('SpecimenLinkAnnotationType'),
+          AnnotationValueType        = injector.get('AnnotationValueType');
 
-      study = fakeEntities.study();
-      processingType = fakeEntities.processingType(study);
-      specimenGroups = _.map(_.range(2), function () {
-        return fakeEntities.specimenGroup(study);
-      });
-      annotationTypes = _.map(
-          ['Text', 'Number', 'DateTime', 'Select'],
+      return create;
+
+      //--
+
+      function create(options) {
+        var study, processingType, specimenGroups, annotationTypes, serverSlt, specimenLinkType;
+
+        options = options || {};
+
+        study = fakeEntities.study();
+        processingType = fakeEntities.processingType(study);
+        specimenGroups = _.map(_.range(2), function () {
+          return fakeEntities.specimenGroup(study);
+        });
+        annotationTypes = _.map(
+          AnnotationValueType.values(),
           function(valueType) {
             return new SpecimenLinkAnnotationType(
               fakeEntities.studyAnnotationType(
                 study, { valueType: valueType }));
           });
 
-      specimenLinkType = new SpecimenLinkType(
-        fakeEntities.specimenLinkType(processingType, {
+        serverSlt = fakeEntities.specimenLinkType(processingType, {
           inputGroup: specimenGroups[0],
           outputGroup: specimenGroups[1],
           annotationTypes: annotationTypes
-        }));
-      specimenLinkType.studySpecimenGroups(specimenGroups);
-      specimenLinkType.studyAnnotationTypes(annotationTypes);
+        });
 
-      return {
-        study:            study,
-        processingType:   processingType,
-        specimenGroups:   specimenGroups,
-        annotationTypes:  annotationTypes,
-        specimenLinkType: specimenLinkType
-      };
+        if (options.noSltId) {
+          specimenLinkType = new SpecimenLinkType(_.omit(serverSlt, 'id'));
+        } else {
+          specimenLinkType = new SpecimenLinkType(serverSlt);
+        }
+
+        specimenLinkType.studySpecimenGroups(specimenGroups);
+        specimenLinkType.studyAnnotationTypes(annotationTypes);
+
+        return {
+          study:            new Study(study),
+          processingType:   new ProcessingType(processingType),
+          specimenGroups:   specimenGroups,
+          annotationTypes:  annotationTypes,
+          specimenLinkType: specimenLinkType
+        };
+      }
     }
 
-    function createController(entities) {
-      var scope = rootScope.$new();
+    function setupController(injector) {
+      var rootScope                  = injector.get('$rootScope'),
+          controller                 = injector.get('$controller'),
+          state                      = injector.get('$state'),
+          SpecimenLinkType           = injector.get('SpecimenLinkType'),
+          domainEntityService        = injector.get('domainEntityService'),
+          notificationsService       = injector.get('notificationsService');
 
-      controller('SpcLinkTypeEditCtrl as vm', {
-        $scope:               scope,
-        $state:               state,
-        SpecimenLinkType:     SpecimenLinkType,
-        domainEntityService:  domainEntityService,
-        notificationsService: notificationsService,
-        study:                entities.study,
-        spcLinkType:          entities.specimenLinkType,
-        processingDto:        {
-          processingTypes:             [ entities.processingType ],
-          specimenLinkTypes:           [ entities.specimenLinkType ],
-          specimenLinkAnnotationTypes: entities.annotationTypes,
-          specimenGroups:              entities.specimenGroups
-        }
-      });
+      return create;
 
-      scope.$digest();
-      return scope;
+      //--
+
+      function create(entities) {
+        var scope = rootScope.$new();
+
+        controller('SpcLinkTypeEditCtrl as vm', {
+          $scope:               scope,
+          $state:               state,
+          SpecimenLinkType:     SpecimenLinkType,
+          domainEntityService:  domainEntityService,
+          notificationsService: notificationsService,
+          study:                entities.study,
+          spcLinkType:          entities.specimenLinkType,
+          processingDto:        {
+            processingTypes:             [ entities.processingType ],
+            specimenLinkTypes:           [ entities.specimenLinkType ],
+            specimenLinkAnnotationTypes: entities.annotationTypes,
+            specimenGroups:              entities.specimenGroups
+          }
+        });
+
+        scope.$digest();
+        return scope;
+      }
     }
 
     describe('has valid scope when created', function () {
 
       it('for new specimen link type', function() {
-        var entities = createEntities({ noCetId: true }), scope;
-
-        entities.specimenLinkType = new SpecimenLinkType(
-          _.omit(fakeEntities.specimenLinkType(entities.processingType), 'id'));
-
-        scope = createController(entities);
+        var entities = createEntities({noSltId: true}),
+            scope = createController(entities);
 
         expect(scope.vm.title).toBe('Add Specimen Link Type');
         initScopeCommon(entities, scope);
@@ -140,7 +149,9 @@ define([
     });
 
     it('can submit a specimen link type', function() {
-      var entities = createEntities(),
+      var q = this.$injector.get('$q'),
+          state = this.$injector.get('$state'),
+          entities = createEntities(),
           scope = createController(entities);
 
       spyOn(entities.specimenLinkType, 'addOrUpdate').and.callFake(function () {
@@ -159,7 +170,9 @@ define([
     });
 
     it('on submit error, displays an error modal', function() {
-      var entities = createEntities(),
+      var q = this.$injector.get('$q'),
+          domainEntityService = this.$injector.get('domainEntityService'),
+          entities = createEntities(),
           scope = createController(entities);
 
       spyOn(entities.specimenLinkType, 'addOrUpdate').and.callFake(function () {
@@ -177,7 +190,8 @@ define([
     });
 
     it('when user presses the cancel button, goes to correct state', function() {
-      var entities = createEntities(),
+      var state = this.$injector.get('$state'),
+          entities = createEntities(),
           scope = createController(entities);
 
       spyOn(state, 'go').and.callFake(function () {});

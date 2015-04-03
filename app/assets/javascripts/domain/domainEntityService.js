@@ -58,7 +58,7 @@ define(['underscore'], function(_) {
      * server responds with an error, another dialog box is displayed showing the error and the promise is
      * rejected.
      *
-     * @param  {function} removePromiseFn - A function that returns a promise that removes the entity.
+     * @param  {function} entity - The domain entity to be removed.
      *
      * @param {String} headerHtml - The header text to display in the confirmation dialog box.
      *
@@ -71,7 +71,7 @@ define(['underscore'], function(_) {
      * @return A promise. The promise is resolved if the entity was removed. The promise is rejected if the
      * user does not want to remove the entity or if the server does not allow the entity to be removed.
      */
-    function removeEntity(removePromiseFn,
+    function removeEntity(entity,
                           headerHtml,
                           bodyHtml,
                           removeFailedHeaderHtml,
@@ -90,13 +90,13 @@ define(['underscore'], function(_) {
       //--
 
       function removeConfirmed() {
-        return removePromiseFn()
+        return entity.remove()
           .then(deferred.resolve)
           .catch(function (error) {
             var modalOptions = {
               closeButtonText: 'Cancel',
-              headerHtml: removeFailedHeaderHtml,
-              bodyHtml: removeFaileBodyHtml + ': ' + error
+              headerHtml:      removeFailedHeaderHtml,
+              bodyHtml:        removeFaileBodyHtml + ': ' + error
             };
             modalService.showModal({}, modalOptions).then(deferred.reject);
           });

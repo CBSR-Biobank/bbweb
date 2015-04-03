@@ -22,21 +22,21 @@ define([
       fakeEntities = fakeDomainEntities;
 
       context.annotationTypeType            = SpecimenLinkAnnotationType;
-      context.createAnnotTypeFn        = createAnnotType;
+      context.createAnnotationTypeFn        = createAnnotationType;
       context.annotationTypeUriPart         = '/slannottypes';
       context.objRequiredKeys          = requiredKeys;
-      context.createServerAnnotTypeFn  = createServerAnnotType;
+      context.createServerAnnotationTypeFn  = createServerAnnotationType;
       context.annotationTypeListFn          = SpecimenLinkAnnotationType.list;
       context.annotationTypeGetFn           = SpecimenLinkAnnotationType.get;
     }));
 
-    function createServerAnnotType(options) {
+    function createServerAnnotationType(options) {
       var study = fakeEntities.study();
       options = options || {};
       return fakeEntities.studyAnnotationType(study, options);
     }
 
-    function createAnnotType(obj) {
+    function createAnnotationType(obj) {
       obj = obj || {};
       return new SpecimenLinkAnnotationType(obj);
     }

@@ -30,10 +30,12 @@ define(function (require) {
       PreservationType                    = require('./PreservationType'),
 
       CeventTypeViewer                    = require('./study/CeventTypeViewer'),
+      CollectionDto                       = require('./study/CollectionDto'),
       CollectionEventAnnotationType       = require('./study/CollectionEventAnnotationType'),
       CollectionEventType                 = require('./study/CollectionEventType'),
       Participant                         = require('./study/Participant'),
       ParticipantAnnotationType           = require('./study/ParticipantAnnotationType'),
+      ProcessingDto                       = require('./study/ProcessingDto'),
       ProcessingType                      = require('./study/ProcessingType'),
       ProcessingTypeViewer                = require('./study/ProcessingTypeViewer'),
       SpcLinkTypeViewer                   = require('./study/SpcLinkTypeViewer'),
@@ -68,6 +70,7 @@ define(function (require) {
   module.factory('Centre',                              Centre);
   module.factory('CentreCounts',                        CentreCounts);
   module.factory('CeventTypeViewer',                    CeventTypeViewer);
+  module.factory('CollectionDto',                       CollectionDto);
   module.factory('CollectionEventAnnotationType',       CollectionEventAnnotationType);
   module.factory('CollectionEventType',                 CollectionEventType);
   module.factory('ConcurrencySafeEntity',               ConcurrencySafeEntity);
@@ -95,6 +98,7 @@ define(function (require) {
   module.service('CentreStatus',                        CentreStatus);
   module.service('PreservationTemperatureType',         PreservationTemperatureType);
   module.service('PreservationType',                    PreservationType);
+  module.service('ProcessingDto',                       ProcessingDto);
   module.service('ProcessingType',                      ProcessingType);
   module.service('SpecimenType',                        SpecimenType);
   module.service('StudyStatus',                         StudyStatus);

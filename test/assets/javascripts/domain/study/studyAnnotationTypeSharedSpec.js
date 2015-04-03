@@ -13,14 +13,14 @@ define(['underscore'], function(_) {
 
       var httpBackend,
           funutils,
-          AnnotTypeType,
+          AnnotationTypeType,
           AnnotationValueType,
           AnnotationMaxValueCount,
-          createAnnotTypeFn,
+          createAnnotationTypeFn,
           annotationTypesService,
           annotationTypeUriPart,
           objRequiredKeys,
-          createServerAnnotTypeFn,
+          createServerAnnotationTypeFn,
           annotationTypeListFn,
           annotationTypeGetFn;
 
@@ -32,18 +32,18 @@ define(['underscore'], function(_) {
         funutils                 = _funutils_;
         AnnotationValueType      = _AnnotationValueType_;
         AnnotationMaxValueCount  = _AnnotationMaxValueCount_;
-        AnnotTypeType            = context.annotationTypeType;
-        createAnnotTypeFn        = context.createAnnotTypeFn;
+        AnnotationTypeType            = context.annotationTypeType;
+        createAnnotationTypeFn        = context.createAnnotationTypeFn;
         annotationTypesService        = context.annotationTypesService;
         annotationTypeUriPart         = context.annotationTypeUriPart;
         objRequiredKeys          = context.objRequiredKeys;
-        createServerAnnotTypeFn  = context.createServerAnnotTypeFn;
+        createServerAnnotationTypeFn  = context.createServerAnnotationTypeFn;
         annotationTypeListFn          = context.annotationTypeListFn;
         annotationTypeGetFn           = context.annotationTypeGetFn;
       }));
 
       it('has default values', function() {
-        var annotationType = new AnnotTypeType();
+        var annotationType = new AnnotationTypeType();
 
         expect(annotationType.id).toBeNull();
         expect(annotationType.name).toBeEmptyString();
@@ -58,16 +58,16 @@ define(['underscore'], function(_) {
       });
 
       it('a list can be retrieved from the server', function(done) {
-        var serverAnnotType = createServerAnnotTypeFn();
-        var objs = [serverAnnotType];
+        var serverAnnotationType = createServerAnnotationTypeFn();
+        var objs = [serverAnnotationType];
 
-        httpBackend.whenGET(uri(serverAnnotType.studyId)).respond(serverReply(objs));
+        httpBackend.whenGET(uri(serverAnnotationType.studyId)).respond(serverReply(objs));
 
-        annotationTypeListFn(serverAnnotType.studyId).then(function (annotationTypes) {
+        annotationTypeListFn(serverAnnotationType.studyId).then(function (annotationTypes) {
           expect(annotationTypes).toBeArrayOfSize(objs.length);
 
           _.each(annotationTypes, function(at) {
-            expect(at).toEqual(jasmine.any(AnnotTypeType));
+            expect(at).toEqual(jasmine.any(AnnotationTypeType));
           });
           done();
         });
@@ -75,15 +75,15 @@ define(['underscore'], function(_) {
       });
 
       it('when listing, fails for invalid response from server', function(done) {
-        var serverAnnotType = createServerAnnotTypeFn();
+        var serverAnnotationType = createServerAnnotationTypeFn();
         var lastReplyKey = _.last(objRequiredKeys);
 
         _.each(objRequiredKeys, function(key) {
-          var badObjs = [ _.omit(serverAnnotType, key) ];
+          var badObjs = [ _.omit(serverAnnotationType, key) ];
 
-          httpBackend.whenGET(uri(serverAnnotType.studyId)).respond(serverReply(badObjs));
+          httpBackend.whenGET(uri(serverAnnotationType.studyId)).respond(serverReply(badObjs));
 
-          annotationTypeListFn(serverAnnotType.studyId).then(function (reply) {
+          annotationTypeListFn(serverAnnotationType.studyId).then(function (reply) {
             _.each(reply, function(err) {
               expect(err).toEqual(jasmine.any(Error));
             });
@@ -98,30 +98,30 @@ define(['underscore'], function(_) {
       });
 
       it('an annotation type can be retrieved from the server', function(done) {
-        var serverAnnotType = createServerAnnotTypeFn();
+        var serverAnnotationType = createServerAnnotationTypeFn();
 
-        httpBackend.whenGET(uri(serverAnnotType.studyId) + '?annotationTypeId=' + serverAnnotType.id)
-          .respond(serverReply(serverAnnotType));
+        httpBackend.whenGET(uri(serverAnnotationType.studyId) + '?annotTypeId=' + serverAnnotationType.id)
+          .respond(serverReply(serverAnnotationType));
 
-        annotationTypeGetFn(serverAnnotType.studyId, serverAnnotType.id)
+        annotationTypeGetFn(serverAnnotationType.studyId, serverAnnotationType.id)
           .then(function (annotationType) {
-            expect(annotationType).toEqual(jasmine.any(AnnotTypeType));
+            expect(annotationType).toEqual(jasmine.any(AnnotationTypeType));
             done();
           });
         httpBackend.flush();
       });
 
       it('when getting, fails for invalid response from server', function(done) {
-        var serverAnnotType = createServerAnnotTypeFn();
+        var serverAnnotationType = createServerAnnotationTypeFn();
         var lastReplyKey = _.last(objRequiredKeys);
 
         _.each(objRequiredKeys, function(key) {
-          var badObj = _.omit(serverAnnotType, key);
+          var badObj = _.omit(serverAnnotationType, key);
 
-        httpBackend.whenGET(uri(serverAnnotType.studyId) + '?annotationTypeId=' + serverAnnotType.id)
+        httpBackend.whenGET(uri(serverAnnotationType.studyId) + '?annotTypeId=' + serverAnnotationType.id)
             .respond(201, serverReply(badObj));
 
-          annotationTypeGetFn(serverAnnotType.studyId, serverAnnotType.id)
+          annotationTypeGetFn(serverAnnotationType.studyId, serverAnnotationType.id)
             .then(function (err) {
               expect(err).toEqual(jasmine.any(Error));
 
@@ -135,39 +135,39 @@ define(['underscore'], function(_) {
       });
 
       it('can be added', function() {
-        var baseAnnotType = createServerAnnotTypeFn();
-        var annotationType = createAnnotTypeFn(_.omit(baseAnnotType, 'id'));
-        var command = addCommand(baseAnnotType);
-        var reply = replyAnnotType(baseAnnotType);
+        var baseAnnotationType = createServerAnnotationTypeFn();
+        var annotationType = createAnnotationTypeFn(_.omit(baseAnnotationType, 'id'));
+        var command = addCommand(baseAnnotationType);
+        var reply = replyAnnotationType(baseAnnotationType);
 
         httpBackend.expectPOST(uri(annotationType.studyId), command).respond(201, serverReply(reply));
 
         annotationType.addOrUpdate().then(function(replyObj) {
-          expect(replyObj).toEqual(jasmine.any(AnnotTypeType));
-          checkAnnotType(replyObj, reply);
+          expect(replyObj).toEqual(jasmine.any(AnnotationTypeType));
+          checkAnnotationType(replyObj, reply);
         });
         httpBackend.flush();
       });
 
       it('can be updated', function() {
-        var baseAnnotType = createServerAnnotTypeFn();
-        var annotationType = createAnnotTypeFn(baseAnnotType);
-        var command = updateCommand(baseAnnotType);
-        var reply = replyAnnotType(baseAnnotType);
+        var baseAnnotationType = createServerAnnotationTypeFn();
+        var annotationType = createAnnotationTypeFn(baseAnnotationType);
+        var command = updateCommand(baseAnnotationType);
+        var reply = replyAnnotationType(baseAnnotationType);
 
         httpBackend.expectPUT(uri(annotationType.studyId, annotationType.id), command)
           .respond(201, serverReply(reply));
 
         annotationType.addOrUpdate().then(function(replyObj) {
-          expect(replyObj).toEqual(jasmine.any(AnnotTypeType));
-          checkAnnotType(replyObj, reply);
+          expect(replyObj).toEqual(jasmine.any(AnnotationTypeType));
+          checkAnnotationType(replyObj, reply);
         });
         httpBackend.flush();
       });
 
       it('can be removed', function() {
-        var baseAnnotType = createServerAnnotTypeFn();
-        var annotationType = createAnnotTypeFn(baseAnnotType);
+        var baseAnnotationType = createServerAnnotationTypeFn();
+        var annotationType = createAnnotationTypeFn(baseAnnotationType);
 
         httpBackend.expectDELETE(uri(annotationType.studyId, annotationType.id, annotationType.version))
           .respond(201);
@@ -177,12 +177,12 @@ define(['underscore'], function(_) {
 
 
       it('when adding, fails for invalid response from server', function(done) {
-        var baseAnnotType = createServerAnnotTypeFn();
-        var command = addCommand(baseAnnotType);
-        var reply = replyAnnotType(baseAnnotType);
+        var baseAnnotationType = createServerAnnotationTypeFn();
+        var command = addCommand(baseAnnotationType);
+        var reply = replyAnnotationType(baseAnnotationType);
 
-        checkAddOrUpdateInvalidResponse(uri(baseAnnotType.studyId),
-                                        _.omit(baseAnnotType, 'id'),
+        checkAddOrUpdateInvalidResponse(uri(baseAnnotationType.studyId),
+                                        _.omit(baseAnnotationType, 'id'),
                                         command,
                                         reply,
                                         'expectPOST',
@@ -190,12 +190,12 @@ define(['underscore'], function(_) {
       });
 
       it('when updating, fails for invalid response from server', function(done) {
-        var baseAnnotType = createServerAnnotTypeFn();
-        var command = updateCommand(baseAnnotType);
-        var reply = replyAnnotType(baseAnnotType);
+        var baseAnnotationType = createServerAnnotationTypeFn();
+        var command = updateCommand(baseAnnotationType);
+        var reply = replyAnnotationType(baseAnnotationType);
 
-        checkAddOrUpdateInvalidResponse(uri(baseAnnotType.studyId, baseAnnotType.id),
-                                        baseAnnotType,
+        checkAddOrUpdateInvalidResponse(uri(baseAnnotationType.studyId, baseAnnotationType.id),
+                                        baseAnnotationType,
                                         command,
                                         reply,
                                         'expectPUT',
@@ -203,7 +203,7 @@ define(['underscore'], function(_) {
       });
 
       it('values assigned correctly when value type is changed', function() {
-        var annotationType = createAnnotTypeFn(createServerAnnotTypeFn());
+        var annotationType = createAnnotationTypeFn(createServerAnnotationTypeFn());
         annotationType.valueType = AnnotationValueType.TEXT();
         annotationType.valueTypeChanged();
         expect(annotationType.maxValueCount).toBe(null);
@@ -256,9 +256,9 @@ define(['underscore'], function(_) {
                         { id: annotationType.id, expectedVersion: annotationType.version });
       }
 
-      function replyAnnotType(annotationType, newValues) {
+      function replyAnnotationType(annotationType, newValues) {
         newValues = newValues || {};
-        return createAnnotTypeFn(_.extend({},
+        return createAnnotationTypeFn(_.extend({},
                                           annotationType,
                                           newValues,
                                           {version: annotationType.version + 1}));
@@ -269,18 +269,18 @@ define(['underscore'], function(_) {
       }
 
       function checkAddOrUpdateInvalidResponse(uri,
-                                               serverAnnotType,
+                                               serverAnnotationType,
                                                command,
-                                               replyAnnotType,
+                                               replyAnnotationType,
                                                httpBackendMethod,
                                                done) {
         var lastReplyKey = _.last(objRequiredKeys);
 
         _.each(objRequiredKeys, function(key) {
-          var annotationType = createAnnotTypeFn(serverAnnotType);
-          var replyBadAnnotType = _.omit(replyAnnotType, key);
+          var annotationType = createAnnotationTypeFn(serverAnnotationType);
+          var replyBadAnnotationType = _.omit(replyAnnotationType, key);
 
-          httpBackend[httpBackendMethod](uri, command).respond(201, serverReply(replyBadAnnotType));
+          httpBackend[httpBackendMethod](uri, command).respond(201, serverReply(replyBadAnnotationType));
 
           annotationType.addOrUpdate().then(function (reply) {
             expect(reply).toEqual(jasmine.any(Error));
@@ -294,7 +294,7 @@ define(['underscore'], function(_) {
         httpBackend.flush();
       }
 
-      function checkAnnotType(newObj, orig) {
+      function checkAnnotationType(newObj, orig) {
         expect(newObj).toHaveNonEmptyString('id');
         expect(newObj.name).toEqual(orig.name);
         expect(newObj.description).toEqual(orig.description);

@@ -1,9 +1,9 @@
 /**
  * Jasmine test suite for:
  *
- *   - ceventAnnotTypesService
- *   - participantAnnotTypesService
- *   - spcLinkAnnotTypesService
+ *   - ceventAnnotationTypesService
+ *   - participantAnnotationTypesService
+ *   - spcLinkAnnotationTypesService
  *
  */
 define([
@@ -16,9 +16,9 @@ define([
   'use strict';
 
   /**
-   * Suite for ceventAnnotTypesService
+   * Suite for ceventAnnotationTypesService
    */
-  describe('service: ceventAnnotTypesService', function () {
+  describe('service: ceventAnnotationTypesService', function () {
 
     var context = {};
 
@@ -28,26 +28,26 @@ define([
                                 fakeDomainEntities,
                                 extendedDomainEntities,
                                 CollectionEventAnnotationType,
-                                ceventAnnotTypesService) {
+                                ceventAnnotationTypesService) {
       var fakeEntities = fakeDomainEntities;
 
       context.httpBackend            = $httpBackend;
       context.annotationTypeType     = CollectionEventAnnotationType;
-      context.studyAnnotTypesService = ceventAnnotTypesService;
+      context.studyAnnotationTypesService = ceventAnnotationTypesService;
       context.study                  = fakeEntities.study();
       context.annotationTypeUriPart       = 'ceannottypes';
 
-      //context.serverAnnotType = fakeEntities.studyAnnotationType(context.study, { required: false });
-      context.serverAnnotType = fakeEntities.studyAnnotationType(context.study);
+      //context.serverAnnotationType = fakeEntities.studyAnnotationType(context.study, { required: false });
+      context.serverAnnotationType = fakeEntities.studyAnnotationType(context.study);
     }));
 
     sharedBehaviourForStudyAnnotationTypes(context);
   });
 
   /**
-   * Suite for spcLinkAnnotTypesService
+   * Suite for spcLinkAnnotationTypesService
    */
-  describe('service: spcLinkAnnotTypesService', function () {
+  describe('service: spcLinkAnnotationTypesService', function () {
 
     var context = {};
 
@@ -57,26 +57,26 @@ define([
                                 fakeDomainEntities,
                                 extendedDomainEntities,
                                 SpecimenLinkAnnotationType,
-                                spcLinkAnnotTypesService) {
+                                spcLinkAnnotationTypesService) {
       var fakeEntities = fakeDomainEntities;
 
       context.httpBackend            = $httpBackend;
       context.annotationTypeType     = SpecimenLinkAnnotationType;
-      context.studyAnnotTypesService = spcLinkAnnotTypesService;
+      context.studyAnnotationTypesService = spcLinkAnnotationTypesService;
       context.study                  = fakeEntities.study();
       context.annotationTypeUriPart       = 'slannottypes';
 
-      //context.serverAnnotType = fakeEntities.studyAnnotationType(context.study, { required: false });
-      context.serverAnnotType = fakeEntities.studyAnnotationType(context.study);
+      //context.serverAnnotationType = fakeEntities.studyAnnotationType(context.study, { required: false });
+      context.serverAnnotationType = fakeEntities.studyAnnotationType(context.study);
     }));
 
     sharedBehaviourForStudyAnnotationTypes(context);
   });
 
   /**
-   * Suite for participantAnnotTypesService
+   * Suite for participantAnnotationTypesService
    */
-  describe('service: participantAnnotTypesService', function () {
+  describe('service: participantAnnotationTypesService', function () {
 
     var context = {};
 
@@ -86,16 +86,16 @@ define([
                                 fakeDomainEntities,
                                 extendedDomainEntities,
                                 ParticipantAnnotationType,
-                                participantAnnotTypesService) {
+                                participantAnnotationTypesService) {
       var fakeEntities = fakeDomainEntities;
 
       context.httpBackend            = $httpBackend;
       context.annotationTypeType     = ParticipantAnnotationType;
-      context.studyAnnotTypesService = participantAnnotTypesService;
+      context.studyAnnotationTypesService = participantAnnotationTypesService;
       context.study                  = fakeEntities.study();
       context.annotationTypeUriPart       = 'pannottypes';
 
-      context.serverAnnotType = fakeEntities.studyAnnotationType(context.study, { required: true });
+      context.serverAnnotationType = fakeEntities.studyAnnotationType(context.study, { required: true });
     }));
 
     sharedBehaviourForStudyAnnotationTypes(context);
@@ -108,8 +108,8 @@ define([
 
     describe('(shared)', function() {
 
-      var httpBackend, studyAnnotTypesService, AnnotationTypeType;
-      var study, serverAnnotType, serverAnnotTypeNoId;
+      var httpBackend, studyAnnotationTypesService, AnnotationTypeType;
+      var study, serverAnnotationType, serverAnnotationTypeNoId;
 
       function uri(annotationTypeId, version) {
         var result = '/studies/' + context.study.id + '/' + context.annotationTypeUriPart;
@@ -124,11 +124,11 @@ define([
 
       beforeEach(function () {
         httpBackend            = context.httpBackend;
-        studyAnnotTypesService = context.studyAnnotTypesService;
+        studyAnnotationTypesService = context.studyAnnotationTypesService;
         AnnotationTypeType     = context.annotationTypeType;
         study                  = context.study;
-        serverAnnotType        = context.serverAnnotType;
-        serverAnnotTypeNoId    = _.omit(context.serverAnnotType, 'id', 'version');
+        serverAnnotationType        = context.serverAnnotationType;
+        serverAnnotationTypeNoId    = _.omit(context.serverAnnotationType, 'id', 'version');
       });
 
       afterEach(function() {
@@ -137,41 +137,41 @@ define([
       });
 
       it('should have the following functions', function () {
-        expect(studyAnnotTypesService.addOrUpdate).toBeFunction();
-        expect(studyAnnotTypesService.remove).toBeFunction();
+        expect(studyAnnotationTypesService.addOrUpdate).toBeFunction();
+        expect(studyAnnotationTypesService.remove).toBeFunction();
       });
 
       it('should allow adding an annotation type', function() {
-        var annotationType = new AnnotationTypeType(serverAnnotTypeNoId);
+        var annotationType = new AnnotationTypeType(serverAnnotationTypeNoId);
         var cmd = getAddCommand(annotationType);
 
         var expectedResult = {status: 'success', data: 'success'};
         httpBackend.expectPOST(uri(), cmd).respond(201, expectedResult);
 
-        studyAnnotTypesService.addOrUpdate(annotationType).then(function(reply) {
+        studyAnnotationTypesService.addOrUpdate(annotationType).then(function(reply) {
           expect(reply).toEqual('success');
         });
         httpBackend.flush();
       });
 
       it('should allow updating an annotation type', function() {
-        var annotationType = new AnnotationTypeType(serverAnnotType);
+        var annotationType = new AnnotationTypeType(serverAnnotationType);
         var cmd = getUpdateCommand(annotationType);
 
         var expectedResult = {status: 'success', data: 'success'};
 
         httpBackend.expectPUT(uri(annotationType.id), cmd).respond(201, expectedResult);
 
-        studyAnnotTypesService.addOrUpdate(annotationType).then(function(reply) {
+        studyAnnotationTypesService.addOrUpdate(annotationType).then(function(reply) {
           expect(reply).toEqual('success');
         });
         httpBackend.flush();
       });
 
       it('should remove an annotation type', function() {
-        var annotationType = new AnnotationTypeType(serverAnnotType);
+        var annotationType = new AnnotationTypeType(serverAnnotationType);
         httpBackend.expectDELETE(uri(annotationType.id, annotationType.version)).respond(201);
-        studyAnnotTypesService.remove(annotationType);
+        studyAnnotationTypesService.remove(annotationType);
         httpBackend.flush();
       });
 

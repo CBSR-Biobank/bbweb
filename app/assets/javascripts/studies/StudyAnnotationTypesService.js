@@ -1,19 +1,19 @@
 define(['angular', 'underscore'], function(angular, _) {
   'use strict';
 
-  studyAnnotTypesServiceFactory.$inject = [
+  studyAnnotationTypesServiceFactory.$inject = [
     'biobankApi',
     'domainEntityService'
   ];
 
-  function studyAnnotTypesServiceFactory(biobankApi,
+  function studyAnnotationTypesServiceFactory(biobankApi,
                                          domainEntityService,
                                          ParticipantAnnotationType) {
 
     /**
      * Service to access study annotation types.
      */
-    function StudyAnnotTypesService(annotationTypeUri) {
+    function StudyAnnotationTypesService(annotationTypeUri) {
       this.annotationTypeUri = annotationTypeUri || '';
     }
 
@@ -43,7 +43,7 @@ define(['angular', 'underscore'], function(angular, _) {
       return result;
     }
 
-    StudyAnnotTypesService.prototype.addOrUpdate = function (annotationType) {
+    StudyAnnotationTypesService.prototype.addOrUpdate = function (annotationType) {
       if (annotationType.isNew()) {
         return biobankApi.post(
           uri(this.annotationTypeUri, annotationType.studyId),
@@ -56,7 +56,7 @@ define(['angular', 'underscore'], function(angular, _) {
 
     };
 
-    StudyAnnotTypesService.prototype.remove = function (annotationType) {
+    StudyAnnotationTypesService.prototype.remove = function (annotationType) {
       return biobankApi.del(
         uri(this.annotationTypeUri, annotationType.studyId, annotationType.id, annotationType.version));
     };
@@ -82,8 +82,8 @@ define(['angular', 'underscore'], function(angular, _) {
       });
     }
 
-    return StudyAnnotTypesService;
+    return StudyAnnotationTypesService;
   }
 
-  return studyAnnotTypesServiceFactory;
+  return studyAnnotationTypesServiceFactory;
 });

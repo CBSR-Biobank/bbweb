@@ -5,8 +5,8 @@ define(['underscore'], function(_) {
     'validationService',
     'participantAnnotationTypeValidation',
     'StudyAnnotationType',
-    'StudyAnnotTypesService',
-    'participantAnnotTypesService'
+    'StudyAnnotationTypesService',
+    'participantAnnotationTypesService'
   ];
 
   /**
@@ -15,15 +15,15 @@ define(['underscore'], function(_) {
   function ParticipantAnnotationTypeFactory(validationService,
                                             participantAnnotationTypeValidation,
                                             StudyAnnotationType,
-                                            StudyAnnotTypesService,
-                                            participantAnnotTypesService) {
+                                            StudyAnnotationTypesService,
+                                            participantAnnotationTypesService) {
 
     function ParticipantAnnotationType(obj) {
       obj = obj || {};
       StudyAnnotationType.call(this, obj);
 
       this.required = obj.required || false;
-      this._service = participantAnnotTypesService;
+      this._service = participantAnnotationTypesService;
     }
 
     ParticipantAnnotationType.prototype = Object.create(StudyAnnotationType.prototype);

@@ -4,25 +4,25 @@ define(['angular', 'underscore'], function(angular, _) {
   /**
    *
    */
-  function studyAnnotTypesPanelDirective() {
+  function studyAnnotationTypesPanelDirective() {
     return {
       require: '^tab',
       restrict: 'E',
       scope: {
-        study:           '=',
-        annotationTypes:      '=',
+        study:                  '=',
+        annotationTypes:        '=',
         annotationTypeIdsInUse: '=',
-        annotationTypeName:   '@',
-        panelId:         '@',
-        addStateName:    '@',
-        updateStateName: '@'
+        annotationTypeName:     '@',
+        panelId:                '@',
+        addStateName:           '@',
+        updateStateName:        '@'
       },
-      templateUrl: '/assets/javascripts/admin/studies/annotationTypes/studyAnnotTypesPanel.html',
-      controller: 'StudyAnnotTypesPanelCtrl as vm'
+      templateUrl: '/assets/javascripts/admin/studies/annotationTypes/studyAnnotationTypesPanel.html',
+      controller: 'StudyAnnotationTypesPanelCtrl as vm'
     };
   }
 
-  StudyAnnotTypesPanelCtrl.$inject = [
+  StudyAnnotationTypesPanelCtrl.$inject = [
     '$scope',
     'Panel'
   ];
@@ -30,21 +30,21 @@ define(['angular', 'underscore'], function(angular, _) {
   /**
    * A panel to display a study's participant annotation types.
    */
-  function StudyAnnotTypesPanelCtrl($scope,
+  function StudyAnnotationTypesPanelCtrl($scope,
                                     Panel) {
     var vm = this,
         panel = new Panel($scope.panelId, $scope.addStateName);
 
-    vm.study                = $scope.study;
+    vm.study                     = $scope.study;
     vm.annotationTypes           = $scope.annotationTypes;
-    vm.annotationTypeIdsInUse      = $scope.annotationTypeIdsInUse;
+    vm.annotationTypeIdsInUse    = $scope.annotationTypeIdsInUse;
     vm.annotationTypeName        = $scope.annotationTypeName;
-    vm.panelHeading         = panelHeading($scope.annotationTypeName);
+    vm.panelHeading              = panelHeading($scope.annotationTypeName);
     vm.annotationTypeDescription = annotationTypeDescription($scope.annotationTypeName);
-    vm.updateStateName      = $scope.updateStateName;
-    vm.add                  = add;
-    vm.panelOpen            = panel.getPanelOpenState();
-    vm.modificationsAllowed = vm.study.isDisabled();
+    vm.updateStateName           = $scope.updateStateName;
+    vm.add                       = add;
+    vm.panelOpen                 = panel.getPanelOpenState();
+    vm.modificationsAllowed      = vm.study.isDisabled();
 
     $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                   angular.bind(panel, panel.watchPanelOpenChangeFunc));
@@ -96,7 +96,7 @@ define(['angular', 'underscore'], function(angular, _) {
   }
 
   return {
-    directive: studyAnnotTypesPanelDirective,
-    controller: StudyAnnotTypesPanelCtrl
+    directive: studyAnnotationTypesPanelDirective,
+    controller: StudyAnnotationTypesPanelCtrl
   };
 });

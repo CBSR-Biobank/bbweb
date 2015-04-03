@@ -4,7 +4,7 @@ define(['angular', 'underscore'], function(angular, _) {
   /**
    *
    */
-  function studyAnnotTypesTableDirective() {
+  function studyAnnotationTypesTableDirective() {
     return {
       require: '^tab',
       restrict: 'E',
@@ -17,11 +17,11 @@ define(['angular', 'underscore'], function(angular, _) {
         hasRequired:     '@'
       },
       templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotationTypesPanel.html',
-      controller: 'StudyAnnotTypesTableCtrl as vm'
+      controller: 'StudyAnnotationTypesTableCtrl as vm'
     };
   }
 
-  StudyAnnotTypesTableCtrl.$inject = [
+  StudyAnnotationTypesTableCtrl.$inject = [
     '$scope',
     '$state',
     'modalService',
@@ -33,7 +33,7 @@ define(['angular', 'underscore'], function(angular, _) {
   /**
    * A table to display a study's participant annotation types.
    */
-  function StudyAnnotTypesTableCtrl($scope,
+  function StudyAnnotationTypesTableCtrl($scope,
                                     $state,
                                     modalService,
                                     studyAnnotationTypeUtils,
@@ -116,7 +116,7 @@ define(['angular', 'underscore'], function(angular, _) {
   }
 
   return {
-    directive: studyAnnotTypesTableDirective,
-    controller: StudyAnnotTypesTableCtrl
+    directive: studyAnnotationTypesTableDirective,
+    controller: StudyAnnotationTypesTableCtrl
   };
 });

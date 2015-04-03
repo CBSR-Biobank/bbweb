@@ -51,12 +51,8 @@ define(['underscore'], function(_) {
 
     function remove(annotationType) {
 
-      function removeInternal() {
-        return annotationType.remove();
-      }
-
       return domainEntityService.removeEntity(
-        removeInternal,
+        annotationType,
         'Remove Annotation Type',
         'Are you sure you want to remove annotation type ' + annotationType.name + '?',
         'Remove failed',

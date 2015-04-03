@@ -10,7 +10,7 @@ define(['angular', 'underscore'], function(angular, _) {
       restrict: 'E',
       scope: {
         study: '=',
-        processingDto: '='
+        processingTypes: '='
       },
       templateUrl: '/assets/javascripts/admin/studies/processing/processingTypesPanel.html',
       controller: 'ProcessingTypesPanelCtrl as vm'
@@ -40,7 +40,7 @@ define(['angular', 'underscore'], function(angular, _) {
                           'home.admin.studies.study.processing.processingTypeAdd');
 
     vm.study                = $scope.study;
-    vm.processingTypes      = $scope.processingDto.processingTypes;
+    vm.processingTypes      = $scope.processingTypes;
     vm.update               = update;
     vm.remove               = remove;
     vm.add                  = add;
@@ -84,7 +84,7 @@ define(['angular', 'underscore'], function(angular, _) {
         throw new Error('study is not disabled');
       }
       domainEntityService.removeEntity(
-        processingType.remove,
+        processingType,
         'Remove Processing Type',
         'Are you sure you want to remove processing type ' + processingType.name + '?',
         'Remove Failed',

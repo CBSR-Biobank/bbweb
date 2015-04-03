@@ -20,8 +20,8 @@ define([], function() {
       return SpecimenGroup.list($stateParams.studyId);
     }
 
-    resolveAnnotTypes.$inject = ['CollectionEventAnnotationType', 'study'];
-    function resolveAnnotTypes(CollectionEventAnnotationType, study) {
+    resolveAnnotationTypes.$inject = ['CollectionEventAnnotationType', 'study'];
+    function resolveAnnotationTypes(CollectionEventAnnotationType, study) {
       return CollectionEventAnnotationType.list(study.id);
     }
 
@@ -35,7 +35,7 @@ define([], function() {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         studySpecimenGroups: resolveSpecimenGroups,
-        studyAnnotationTypes: resolveAnnotTypes,
+        studyAnnotationTypes: resolveAnnotationTypes,
         ceventType: [
           'CollectionEventType',
           'studySpecimenGroups',
@@ -45,7 +45,7 @@ define([], function() {
                    studyAnnotationTypes) {
             var cet = new CollectionEventType();
             cet.studySpecimenGroups(studySpecimenGroups);
-            cet.studyAnnotationType(studyAnnotationTypes);
+            cet.studyAnnotationTypes(studyAnnotationTypes);
             return cet;
           }]
       },
@@ -68,7 +68,7 @@ define([], function() {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         studySpecimenGroups: resolveSpecimenGroups,
-        studyAnnotationTypes: resolveAnnotTypes,
+        studyAnnotationTypes: resolveAnnotationTypes,
         ceventType: [
           '$stateParams',
           'CollectionEventType',
@@ -78,11 +78,13 @@ define([], function() {
                    CollectionEventType,
                    studySpecimenGroups,
                    studyAnnotationTypes) {
-            var cet = CollectionEventType.get($stateParams.studyId,
-                                              $stateParams.ceventTypeId);
-            cet.studySpecimenGroups(studySpecimenGroups);
-            cet.studyAnnotationType(studyAnnotationTypes);
-            return cet;
+            return CollectionEventType.get(
+              $stateParams.studyId,
+              $stateParams.ceventTypeId).then(function (cet) {
+                cet.studySpecimenGroups(studySpecimenGroups);
+                cet.studyAnnotationTypes(studyAnnotationTypes);
+                return cet;
+              });
           }
         ]
       },
@@ -100,7 +102,7 @@ define([], function() {
     /**
      * Collection Event Annotation Type Add
      */
-    $stateProvider.state('home.admin.studies.study.collection.ceventAnnotTypeAdd', {
+    $stateProvider.state('home.admin.studies.study.collection.ceventAnnotationTypeAdd', {
       url: '/cevent/annottype/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
@@ -122,7 +124,7 @@ define([], function() {
     /**
      * Collection Event Annotation Type Update
      */
-    $stateProvider.state('home.admin.studies.study.collection.ceventAnnotTypeUpdate', {
+    $stateProvider.state('home.admin.studies.study.collection.ceventAnnotationTypeUpdate', {
       url: '/cevent/annottype/update/{annotationTypeId}',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,

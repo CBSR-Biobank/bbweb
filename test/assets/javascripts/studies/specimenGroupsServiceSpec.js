@@ -1,25 +1,18 @@
 // Jasmine test suite
 //
-define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
+define([
+  'angular',
+  'angularMocks',
+  'underscore',
+  'biobankApp'
+], function(angular, mocks, _) {
   'use strict';
 
   describe('Service: specimenGroupsService', function() {
 
     var specimenGroupsService, httpBackend, fakeEntities;
-    var studyId = 'dummy-study-id';
 
-    function uri(specimenGroupId, version) {
-      var result = '/studies/' + studyId + '/sgroups';
-      if (arguments.length > 0) {
-        result += '/' + specimenGroupId;
-      }
-      if (arguments.length > 1) {
-        result += '/' + version;
-      }
-      return result;
-    }
-
-    beforeEach(mocks.module('biobankApp'));
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function ($httpBackend,
                                 _specimenGroupsService_,
@@ -34,23 +27,13 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       httpBackend.verifyNoOutstandingRequest();
     });
 
-
-    it('should retrieve specimen groups in use', function() {
-      var specimenGroup = fakeEntities.
-      httpBackend.whenGET(uri() + '/inuse').respond({
-        status: 'success',
-        data: [specimenGroup]
-      });
-
-      specimenGroupsService.specimenGroupIdsInUse(studyId).then(function(data) {
-        expect(data.length).toEqual(1);
-        expect(_.isEqual(specimenGroup, data[0]));
-      });
-
-      httpBackend.flush();
-    });
+    function uri(studyId) {
+      return '/studies/' + studyId + '/sgroups';
+    }
 
     function getValueType(uri, serviceFn) {
+      var studyId = fakeEntities.stringNext();
+
       httpBackend.whenGET('/studies/' + uri).respond({
         status: 'success',
         data: 'success'
@@ -60,6 +43,23 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       });
       httpBackend.flush();
     }
+
+    it('should retrieve specimen groups in use', function() {
+      var studyId = fakeEntities.stringNext(),
+          specimenGroupId = fakeEntities.stringNext();
+
+      httpBackend.whenGET(uri(studyId) + '/inuse').respond({
+        status: 'success',
+        data: [specimenGroupId]
+      });
+
+      specimenGroupsService.specimenGroupIdsInUse(studyId)
+        .then(function(data) {
+          expect(data.length).toEqual(1);
+          expect(data[0]).toBe(specimenGroupId);
+        });
+      httpBackend.flush();
+    });
 
     it('should retrieve specimen group value types', function() {
       getValueType('anatomicalsrctypes', specimenGroupsService.anatomicalSourceTypes);

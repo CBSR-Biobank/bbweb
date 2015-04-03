@@ -4,7 +4,7 @@
   // -- RequireJS config --
   requirejs.config({
     // Packages = top-level folders; loads a contained file named 'main.js'
-    packages: ['admin', 'centres', 'collection', 'common', 'dashboard', 'domain', 'home', 'studies', 'users'],
+    packages: ['common', 'admin', 'centres', 'collection', 'dashboard', 'domain', 'home', 'studies', 'users'],
 
     paths: {
       'requirejs':              '../lib/requirejs/require',
@@ -30,9 +30,12 @@
       'underscore': {
         exports: '_'
       },
-      'bootstrap':         ['jquery'],
+      'angular-cookies':   ['angular'],
+      'angular-sanitize':  ['angular'],
       'angular-ui-router': ['angular'],
-      'angular-sanitize':  ['angular']
+      'bootstrap':         ['jquery'],
+      'ngTable':           ['angular'],
+      'ui-bootstrap':      ['angular']
     }
   });
 

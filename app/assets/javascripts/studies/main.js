@@ -3,23 +3,23 @@ define(function (require) {
   'use strict';
 
   var angular                      = require('angular'),
-      ceventAnnotTypesService      = require('./ceventAnnotTypesService'),
+      ceventAnnotationTypesService      = require('./ceventAnnotationTypesService'),
       participantsService          = require('./participantsService'),
-      participantAnnotTypesService = require('./participantAnnotTypesService'),
+      participantAnnotationTypesService = require('./participantAnnotationTypesService'),
       specimenGroupsService        = require('./specimenGroupsService'),
-      spcLinkAnnotTypesService     = require('./spcLinkAnnotTypesService'),
-      StudyAnnotTypesService       = require('./StudyAnnotTypesService'),
+      spcLinkAnnotationTypesService     = require('./spcLinkAnnotationTypesService'),
+      StudyAnnotationTypesService       = require('./StudyAnnotationTypesService'),
       studiesService               = require('./studiesService');
 
   var module = angular.module('biobank.studies', []);
 
-  module.factory('StudyAnnotTypesService',       StudyAnnotTypesService);
+  module.factory('StudyAnnotationTypesService',       StudyAnnotationTypesService);
 
-  module.service('ceventAnnotTypesService',      ceventAnnotTypesService);
-  module.service('participantAnnotTypesService', participantAnnotTypesService);
+  module.service('ceventAnnotationTypesService',      ceventAnnotationTypesService);
+  module.service('participantAnnotationTypesService', participantAnnotationTypesService);
   module.service('specimenGroupsService',        specimenGroupsService);
   module.service('participantsService',          participantsService);
-  module.service('spcLinkAnnotTypesService',     spcLinkAnnotTypesService);
+  module.service('spcLinkAnnotationTypesService',     spcLinkAnnotationTypesService);
   module.service('studiesService',               studiesService);
 
   return module;

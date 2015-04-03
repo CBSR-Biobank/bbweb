@@ -22,21 +22,21 @@ define([
       fakeEntities = fakeDomainEntities;
 
       context.annotationTypeType            = CollectionEventAnnotationType;
-      context.createAnnotTypeFn        = createAnnotType;
+      context.createAnnotationTypeFn        = createAnnotationType;
       context.annotationTypeUriPart         = '/ceannottypes';
-      context.objRequiredKeys          = requiredKeys;
-      context.createServerAnnotTypeFn  = createServerAnnotType;
+      context.objRequiredKeys               = requiredKeys;
+      context.createServerAnnotationTypeFn  = createServerAnnotationType;
       context.annotationTypeListFn          = CollectionEventAnnotationType.list;
       context.annotationTypeGetFn           = CollectionEventAnnotationType.get;
     }));
 
-    function createServerAnnotType(options) {
+    function createServerAnnotationType(options) {
       var study = fakeEntities.study();
       options = options || {};
       return fakeEntities.studyAnnotationType(study, options);
     }
 
-    function createAnnotType(obj) {
+    function createAnnotationType(obj) {
       obj = obj || {};
       return new CollectionEventAnnotationType(obj);
     }

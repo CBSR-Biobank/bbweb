@@ -4,7 +4,7 @@ define([], function() {
   SpecimenLinkAnnotationTypeFactory.$inject = [
     'StudyAnnotationType',
     'studyAnnotationTypeValidation',
-    'spcLinkAnnotTypesService'
+    'spcLinkAnnotationTypesService'
   ];
 
   /**
@@ -12,13 +12,13 @@ define([], function() {
    */
   function SpecimenLinkAnnotationTypeFactory(StudyAnnotationType,
                                              studyAnnotationTypeValidation,
-                                             spcLinkAnnotTypesService) {
+                                             spcLinkAnnotationTypesService) {
 
     function SpecimenLinkAnnotationType(obj) {
       obj = obj || {};
       StudyAnnotationType.call(this, obj);
 
-      this._service = spcLinkAnnotTypesService;
+      this._service = spcLinkAnnotationTypesService;
     }
 
     SpecimenLinkAnnotationType.prototype = Object.create(StudyAnnotationType.prototype);

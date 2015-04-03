@@ -57,7 +57,7 @@ define(['angular', 'underscore'], function(angular, _) {
                                         studyId,
                                         annotationTypeId) {
       return biobankApi.get(
-        '/studies/' + studyId + '/' + annotationTypeUriPart + '?annotationTypeId=' + annotationTypeId
+        '/studies/' + studyId + '/' + annotationTypeUriPart + '?annotTypeId=' + annotationTypeId
       ).then(function (obj) {
         return create(validator, createFn, obj);
       });

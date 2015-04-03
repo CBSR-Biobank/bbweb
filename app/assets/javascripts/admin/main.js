@@ -29,8 +29,8 @@ define(function (require) {
 
       AnnotationTypeEditCtrl                  = require('./studies/annotationTypes/AnnotationTypeEditCtrl'),
       studyAnnotationTypeUtilsService         = require('./studies/annotationTypes/studyAnnotationTypeUtilsService'),
-      studyAnnotTypesPanelDirective           = require('./studies/annotationTypes/studyAnnotTypesPanelDirective'),
-      studyAnnotTypesTableDirective           = require('./studies/annotationTypes/studyAnnotTypesTableDirective'),
+      studyAnnotationTypesPanelDirective      = require('./studies/annotationTypes/studyAnnotationTypesPanelDirective'),
+      studyAnnotationTypesTableDirective      = require('./studies/annotationTypes/studyAnnotationTypesTableDirective'),
 
       CeventTypeEditCtrl                      = require('./studies/ceventTypes/CeventTypeEditCtrl'),
       ceventTypesPanelDirective               = require('./studies/ceventTypes/ceventTypesPanelDirective'),
@@ -94,11 +94,11 @@ define(function (require) {
   module.controller('AnnotationTypeEditCtrl', AnnotationTypeEditCtrl);
   module.service('studyAnnotationTypeUtils', studyAnnotationTypeUtilsService);
 
-  module.directive('studyAnnotTypesPanel', studyAnnotTypesPanelDirective.directive);
-  module.controller('StudyAnnotTypesPanelCtrl', studyAnnotTypesPanelDirective.controller);
+  module.directive('studyAnnotationTypesPanel', studyAnnotationTypesPanelDirective.directive);
+  module.controller('StudyAnnotationTypesPanelCtrl', studyAnnotationTypesPanelDirective.controller);
 
-  module.directive('studyAnnotTypesTable', studyAnnotTypesTableDirective.directive);
-  module.controller('StudyAnnotTypesTableCtrl', studyAnnotTypesTableDirective.controller);
+  module.directive('studyAnnotationTypesTable', studyAnnotationTypesTableDirective.directive);
+  module.controller('StudyAnnotationTypesTableCtrl', studyAnnotationTypesTableDirective.controller);
 
   module.controller('CeventTypeEditCtrl', CeventTypeEditCtrl);
 

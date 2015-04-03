@@ -5,7 +5,6 @@ define(['underscore'], function(_) {
     'funutils',
     'validationService',
     'biobankApi',
-    'CollectionType',
     'CollectionEventType',
     'CollectionEventAnnotationType',
     'SpecimenGroup'
@@ -14,7 +13,6 @@ define(['underscore'], function(_) {
   function CollectionDtoFactory(funutils,
                                 validationService,
                                 biobankApi,
-                                CollectionType,
                                 CollectionEventType,
                                 CollectionEventAnnotationType,
                                 SpecimenGroup) {
@@ -43,23 +41,26 @@ define(['underscore'], function(_) {
 
       obj = obj || {};
 
-      obj.collectionEventTypes = _.map(obj.collectionEventTypes, function(obj) {
-        return new CollectionEventType(obj);
-      });
       obj.collectionEventAnnotationTypes = _.map(
         obj.collectionEventAnnotationTypes,
-        function (at) {
-          return new CollectionEventAnnotationType(at);
+        function (serverAt) {
+          return new CollectionEventAnnotationType(serverAt);
         });
-      obj.specimenGroups = _.map(obj.specimenGrops, function(obj) {
-        return new SpecimenGroup(obj);
+      obj.specimenGroups = _.map(obj.specimenGroups, function(serverSg) {
+        return new SpecimenGroup(serverSg);
+      });
+      obj.collectionEventTypes = _.map(obj.collectionEventTypes, function(serverCet) {
+        var cet = new CollectionEventType(serverCet);
+        cet.studySpecimenGroups(obj.specimenGroups);
+        cet.studyAnnotationTypes(obj.collectionEventAnnotationTypes);
+        return cet;
       });
 
       _.extend(self, _.defaults(obj, {
-        collectionTypes:                [],
-        collectionEventTypes:           [],
-        collectionEventAnnotationTypes: [],
-        specimenGroups:                 []
+        collectionEventTypes:                [],
+        collectionEventAnnotationTypes:      [],
+        collectionEventAnnotationTypesInUse: [],
+        specimenGroups:                      []
       }));
     }
 
@@ -75,7 +76,7 @@ define(['underscore'], function(_) {
     };
 
     CollectionDto.get = function(studyId) {
-      return biobankApi.get('/studies' + studyId + '/dto/collection')
+      return biobankApi.get('/studies/' + studyId + '/dto/collection')
         .then(function(reply) {
           return CollectionDto.create(reply);
         });

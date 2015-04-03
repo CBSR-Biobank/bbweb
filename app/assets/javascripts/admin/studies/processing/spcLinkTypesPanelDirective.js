@@ -22,11 +22,11 @@ define(['angular', 'underscore'], function(angular, _) {
     '$state',
     'modalService',
     'tableService',
-    'SpecimenLinkType',
+    'domainEntityService',
     'Panel',
+    'SpecimenLinkType',
     'SpecimenLinkAnnotationType',
     'SpcLinkTypeViewer',
-    'domainEntityService',
     'ProcessingTypeViewer',
     'SpecimenGroupViewer',
     'AnnotationTypeViewer'
@@ -39,42 +39,34 @@ define(['angular', 'underscore'], function(angular, _) {
                                  $state,
                                  modalService,
                                  tableService,
-                                 SpecimenLinkType,
+                                 domainEntityService,
                                  Panel,
+                                 SpecimenLinkType,
                                  SpecimenLinkAnnotationType,
                                  SpcLinkTypeViewer,
-                                 domainEntityService,
                                  ProcessingTypeViewer,
                                  SpecimenGroupViewer,
                                  AnnotationTypeViewer) {
     var vm = this,
         panel = new Panel('study.panel.specimenLinkTypes');
 
-    vm.study               = $scope.study;
-    vm.tableData           = [];
-    vm.update              = update;
-    vm.remove              = remove;
-    vm.add                 = add;
-    vm.information         = information;
-    vm.panelOpen           = panel.getPanelOpenState();
+    vm.study                = $scope.study;
+    vm.specimenLinkTypes    = $scope.processingDto.specimenLinkTypes;
+    vm.processingTypesById  = _.indexBy($scope.processingDto.processingTypes, 'id');
+    vm.specimenGroupsById   = _.indexBy($scope.processingDto.specimenGroups, 'id');
+    vm.annotationTypesById  = _.indexBy($scope.processingDto.specimenLinkAnnotationTypes, 'id');
 
-    vm.processingTypes     = _.indexBy($scope.processingDto.processingTypes, 'id');
-    vm.specimenGroups      = _.indexBy($scope.processingDto.specimenGroups, 'id');
-    vm.annotationTypes     = _.indexBy($scope.processingDto.specimenLinkAnnotationTypes, 'id');
+    vm.viewProcessingType   = viewProcessingType;
+    vm.viewSpecimenGroup    = viewSpecimenGroup;
+    vm.viewAnnotationType   = viewAnnotationType;
+    vm.update               = update;
+    vm.remove               = remove;
+    vm.add                  = add;
+    vm.information          = information;
 
-    vm.showProcessingType  = showProcessingType;
-    vm.viewSpecimenGroup   = viewSpecimenGroup;
-    vm.viewAnnotationType  = viewAnnotationType;
-
+    vm.tableData            = [];
+    vm.panelOpen            = panel.getPanelOpenState();
     vm.modificationsAllowed = vm.study.isDisabled();
-
-    vm.specimenLinkTypes = _.map($scope.processingDto.specimenLinkTypes, function (slt) {
-      return new SpecimenLinkType(
-        slt, {
-          studySpecimenGroups:  $scope.processingDto.specimenGroups,
-          studyAnnotationTypes: $scope.processingDto.specimenLinkAnnotationTypes
-        });
-    });
 
     vm.tableParams = tableService.getTableParamsWithCallback(getTableData,
                                                              {},
@@ -88,7 +80,7 @@ define(['angular', 'underscore'], function(angular, _) {
      */
     function information(spcLinkType) {
       return new SpcLinkTypeViewer(spcLinkType,
-                                   vm.processingTypes[spcLinkType.processingTypeId]);
+                                   vm.processingTypesById[spcLinkType.processingTypeId]);
     }
 
     function add() {
@@ -105,22 +97,23 @@ define(['angular', 'underscore'], function(angular, _) {
     /**
      * Displays a processing type in a modal.
      */
-    function showProcessingType(processingTypeId) {
-      return new ProcessingTypeViewer(vm.processingTypeSet.get(processingTypeId));
+    function viewProcessingType(processingTypeId) {
+      return new ProcessingTypeViewer(vm.processingTypesById[processingTypeId]);
     }
 
     /**
      * Displays a specimen group in a modal.
      */
     function viewSpecimenGroup(specimenGroupId) {
-      return new SpecimenGroupViewer(vm.specimenGroups[specimenGroupId]);
+      return new SpecimenGroupViewer(vm.specimenGroupsById[specimenGroupId]);
     }
 
     /**
      * Display a specimen link annotation type in a modal.
      */
     function viewAnnotationType(annotationTypeId) {
-      return new AnnotationTypeViewer(vm.annotationTypes[annotationTypeId], 'Specimen Link Annotation Type');
+      return new AnnotationTypeViewer(vm.annotationTypesById[annotationTypeId],
+                                      'Specimen Link Annotation Type');
     }
 
     /**
@@ -140,7 +133,7 @@ define(['angular', 'underscore'], function(angular, _) {
         throw new Error('study is not disabled');
       }
       domainEntityService.removeEntity(
-        slt.remove,
+        slt,
         'Remove Specimen Link Type',
         'Are you sure you want to remove this specimen link type?',
         'Remove Failed',

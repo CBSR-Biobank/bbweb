@@ -148,17 +148,17 @@ define(['underscore'], function(_) {
     };
 
     CollectionEventType.prototype.studySpecimenGroups = function (specimenGroups) {
-      this.specimenGroupDataSet = new SpecimenGroupDataSet(this.specimenGroupData,
-                                                           {
-                                                             studySpecimenGroups: specimenGroups
-                                                           });
+      this.specimenGroupDataSet =
+        new SpecimenGroupDataSet(this.specimenGroupData, {
+          studySpecimenGroups: specimenGroups
+        });
     };
 
     CollectionEventType.prototype.studyAnnotationTypes = function (annotationTypes) {
-      this.annotationTypeDataSet = new AnnotationTypeDataSet(this.annotationTypeData,
-                                                             {
-                                                               studyAnnotationTypes: annotationTypes
-                                                             });
+      this.annotationTypeDataSet =
+        new AnnotationTypeDataSet(this.annotationTypeData, {
+          studyAnnotationTypes: annotationTypes
+        });
     };
 
     CollectionEventType.prototype.addOrUpdate = function (annotationTypes) {
@@ -169,13 +169,13 @@ define(['underscore'], function(_) {
                                 'recurring'),
                          funutils.pickOptional(self, 'description'));
 
-      if (self.specimenGroupDataSet) {
+      if (self.specimenGroupDataSet && (self.specimenGroupDataSet.dataItems.length > 0)) {
         cmd.specimenGroupData = self.specimenGroupDataSet.getSpecimenGroupData();
       } else {
         cmd.specimenGroupData = self.specimenGroupData;
       }
 
-      if (self.annotationTypeDataSet) {
+      if (self.annotationTypeDataSet && (self.annotationTypeDataSet.dataItems.length > 0)) {
         cmd.annotationTypeData = self.annotationTypeDataSet.getAnnotationTypeData();
       } else {
         cmd.annotationTypeData = self.annotationTypeData;

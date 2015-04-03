@@ -92,7 +92,7 @@ define([
     it('has valid values when creating from server response', function() {
       var entities = createEntities();
       entities.specimenGroup = SpecimenGroup.create(entities.serverSg);
-      compareCetToServerObj(entities.specimenGroup, entities.serverSg);
+      compareSpecimenGroupToServerObj(entities.specimenGroup, entities.serverSg);
     });
 
     it('can retrieve a specimen group', function(done) {
@@ -101,7 +101,7 @@ define([
         .respond(serverReply(entities.serverSg));
 
       SpecimenGroup.get(entities.study.id, entities.serverSg.id).then(function(cet) {
-        compareCetToServerObj(cet, entities.serverSg);
+        compareSpecimenGroupToServerObj(cet, entities.serverSg);
         done();
       });
       httpBackend.flush();
@@ -112,7 +112,7 @@ define([
       httpBackend.whenGET(uri(entities.study.id)).respond(serverReply([ entities.serverSg ]));
       SpecimenGroup.list(entities.study.id).then(function(list) {
         _.each(list, function (cet) {
-          compareCetToServerObj(cet, entities.serverSg);
+          compareSpecimenGroupToServerObj(cet, entities.serverSg);
         });
         done();
       });
@@ -127,7 +127,7 @@ define([
         .respond(201, serverReply(entities.serverSg));
 
       entities.specimenGroup.addOrUpdate().then(function(cet) {
-        compareCetToServerObj(cet, entities.serverSg);
+        compareSpecimenGroupToServerObj(cet, entities.serverSg);
       });
       httpBackend.flush();
     });
@@ -140,7 +140,7 @@ define([
         .respond(201, serverReply(entities.serverSg));
 
       entities.specimenGroup.addOrUpdate().then(function(cet) {
-        compareCetToServerObj(cet, entities.serverSg);
+        compareSpecimenGroupToServerObj(cet, entities.serverSg);
       });
       httpBackend.flush();
     });
@@ -174,16 +174,16 @@ define([
       return { status: 'success', data: obj };
     }
 
-    function compareCetToServerObj(cet, serverObj) {
-      expect(cet.isNew()).toBe(false);
-      expect(cet.studyId).toBe(serverObj.studyId);
-      expect(cet.name).toBe(serverObj.name);
-      expect(cet.description).toEqual(serverObj.description);
-      expect(cet.units).toBe(serverObj.units);
-      expect(cet.anatomicalSourceType).toBe(serverObj.anatomicalSourceType);
-      expect(cet.preservationType).toBe(serverObj.preservationType);
-      expect(cet.preservationTemperatureType).toBe(serverObj.preservationTemperatureType);
-      expect(cet.specimenType).toBe(serverObj.specimenType);
+    function compareSpecimenGroupToServerObj(sg, serverObj) {
+      expect(sg.isNew()).toBe(false);
+      expect(sg.studyId).toBe(serverObj.studyId);
+      expect(sg.name).toBe(serverObj.name);
+      expect(sg.description).toEqual(serverObj.description);
+      expect(sg.units).toBe(serverObj.units);
+      expect(sg.anatomicalSourceType).toBe(serverObj.anatomicalSourceType);
+      expect(sg.preservationType).toBe(serverObj.preservationType);
+      expect(sg.preservationTemperatureType).toBe(serverObj.preservationTemperatureType);
+      expect(sg.specimenType).toBe(serverObj.specimenType);
     }
 
     function specimenGroupToAddCommand(specimenGroup) {

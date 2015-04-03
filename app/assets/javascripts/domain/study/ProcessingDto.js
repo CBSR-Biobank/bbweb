@@ -42,19 +42,22 @@ define(['underscore'], function(_) {
 
       obj = obj || {};
 
-      obj.processingTypes = _.map(obj.processingTypes, function(obj) {
-        return new ProcessingType(obj);
-      });
-      obj.specimenLinkTypes = _.map(obj.specimenLinkTypes, function(obj) {
-        return new SpecimenLinkType(obj);
+      obj.processingTypes = _.map(obj.processingTypes, function(serverPt) {
+        return new ProcessingType(serverPt);
       });
       obj.specimenLinkAnnotationTypes = _.map(
         obj.specimenLinkAnnotationTypes,
-        function (at) {
-          return new SpecimenLinkAnnotationType(at);
+        function (serverAt) {
+          return new SpecimenLinkAnnotationType(serverAt);
         });
-      obj.specimenGroups = _.map(obj.specimenGrops, function(obj) {
-        return new SpecimenGroup(obj);
+      obj.specimenGroups = _.map(obj.specimenGroups, function(serverSg) {
+        return new SpecimenGroup(serverSg);
+      });
+      obj.specimenLinkTypes = _.map(obj.specimenLinkTypes, function(serverSlt) {
+        return new SpecimenLinkType(serverSlt, {
+          studySpecimenGroups:  obj.specimenGroups,
+          studyAnnotationTypes: obj.specimenLinkAnnotationTypes
+        });
       });
 
       _.extend(self, _.defaults(obj, {
@@ -77,7 +80,7 @@ define(['underscore'], function(_) {
     };
 
     ProcessingDto.get = function(studyId) {
-      return biobankApi.get('/studies' + studyId + '/dto/processing')
+      return biobankApi.get('/studies/' + studyId + '/dto/processing')
         .then(function(reply) {
           return ProcessingDto.create(reply);
         });
