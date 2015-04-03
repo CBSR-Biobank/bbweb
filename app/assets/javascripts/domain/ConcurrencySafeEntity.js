@@ -12,9 +12,9 @@ define(['angular', 'underscore'], function(angular, _) {
       obj = obj || {};
 
       _.extend(this, _.defaults(obj, {
-        id: null,
-        version: 0,
-        timeAdded: null,
+        id:           null,
+        version:      0,
+        timeAdded:    null,
         timeModified: null
       }));
     }

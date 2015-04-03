@@ -7,9 +7,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  '../annotationTypeDataSetSharedSpec',
   'biobankApp'
-], function(angular, mocks, _, annotationTypeDataSetSharedSpec) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('ProcessingType', function() {
@@ -71,7 +70,7 @@ define([
     it('constructor with no parameters has default values', function() {
       var processingType = new ProcessingType();
 
-      expect(processingType.isNew).toBe(true);
+      expect(processingType.isNew()).toBe(true);
       expect(processingType.studyId).toBe(null);
       expect(processingType.name).toBe('');
       expect(processingType.description).toBe(null);
@@ -151,12 +150,12 @@ define([
 
     it('isNew should be true for a processing type with no ID', function() {
       var entities = createEntities({ noPtId: true });
-      expect(entities.processingType.isNew).toBe(true);
+      expect(entities.processingType.isNew()).toBe(true);
     });
 
     it('isNew should be false for a processing type that has an ID', function() {
       var entities = createEntities();
-      expect(entities.processingType.isNew).toBe(false);
+      expect(entities.processingType.isNew()).toBe(false);
     });
 
     it('study ID matches the study', function() {
@@ -169,7 +168,7 @@ define([
     }
 
     function compareCetToServerObj(cet, serverObj) {
-      expect(cet.isNew).toBe(false);
+      expect(cet.isNew()).toBe(false);
       expect(cet.studyId).toBe(serverObj.studyId);
       expect(cet.name).toBe(serverObj.name);
       expect(cet.description).toEqual(serverObj.description);

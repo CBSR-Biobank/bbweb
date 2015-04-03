@@ -37,7 +37,7 @@ define(['underscore'], function(_) {
       options: { reload: true }
     };
 
-    if (vm.participant.isNew) {
+    if (vm.participant.isNew()) {
       vm.title = 'Add participant';
       vm.participant.uniqueId = $stateParams.uniqueId;
       vm.onCancelState = {name: 'home.collection.study', params: {studyId: study.id}};
@@ -65,7 +65,7 @@ define(['underscore'], function(_) {
     }
 
     function submitSuccess(reply) {
-      if (vm.participant.isNew) {
+      if (vm.participant.isNew()) {
         // the reply contains the id assigned to this new participant, therefore, the state data can be
         // updated
         vm.returnState.params.participantId = reply.id;

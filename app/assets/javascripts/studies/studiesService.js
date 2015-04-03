@@ -17,8 +17,6 @@ define(['angular', 'jquery', 'underscore'], function(angular, $, _) {
       disable:        disable,
       retire:         retire,
       unretire:       unretire,
-      collectionDto:  collectionDto,
-      processingDto:  processingDto,
       valueTypes:     valueTypes
     };
     return service;
@@ -133,14 +131,6 @@ define(['angular', 'jquery', 'underscore'], function(angular, $, _) {
 
     function unretire(study) {
       return changeStatus(study, 'unretire');
-    }
-
-    function collectionDto(studyId) {
-      return biobankApi.get(uri(studyId) + '/dto/collection');
-    }
-
-    function processingDto(studyId) {
-      return biobankApi.get(uri(studyId) + '/dto/processing');
     }
 
     function valueTypes() {

@@ -5,21 +5,8 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
   describe('Service: specimenGroupsService', function() {
 
-    var specimenGroupsService, httpBackend;
+    var specimenGroupsService, httpBackend, fakeEntities;
     var studyId = 'dummy-study-id';
-    var specimenGroupNoId = {
-      studyId:                     studyId,
-      version:                     1,
-      timeAdded:                   '2014-10-20T09:58:43-0600',
-      name:                        'CET1',
-      description:                 'test',
-      units:                       'mL',
-      anatomicalSourceType:        'Blood',
-      preservationType:            'Frozen Specimen',
-      preservationTemperatureType: '-80 C',
-      specimenType:                'Buffy coat'
-    };
-    var specimenGroup = angular.extend({id: 'dummy-id'}, specimenGroupNoId);
 
     function uri(specimenGroupId, version) {
       var result = '/studies/' + studyId + '/sgroups';
@@ -34,9 +21,12 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     beforeEach(mocks.module('biobankApp'));
 
-    beforeEach(inject(function (_specimenGroupsService_, $httpBackend) {
+    beforeEach(inject(function ($httpBackend,
+                                _specimenGroupsService_,
+                               fakeDomainEntities) {
       specimenGroupsService = _specimenGroupsService_;
       httpBackend = $httpBackend;
+      fakeEntities = fakeDomainEntities;
     }));
 
     afterEach(function() {
@@ -44,94 +34,9 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should have the following functions', function () {
-      expect(specimenGroupsService.getAll).toBeFunction();
-      expect(specimenGroupsService.get).toBeFunction();
-      expect(specimenGroupsService.addOrUpdate).toBeFunction();
-      expect(specimenGroupsService.remove).toBeFunction();
-      expect(specimenGroupsService.anatomicalSourceTypes).toBeFunction();
-      expect(specimenGroupsService.specimenTypes).toBeFunction();
-      expect(specimenGroupsService.preservTypes).toBeFunction();
-      expect(specimenGroupsService.preservTempTypes).toBeFunction();
-      expect(specimenGroupsService.specimenGroupValueTypes).toBeFunction();
-      expect(specimenGroupsService.specimenGroupIdsInUse).toBeFunction();
-
-    });
-
-    it('list should return a list containing one specimen group', function() {
-      httpBackend.whenGET(uri()).respond({
-        status: 'success',
-        data: [specimenGroup]
-      });
-
-      specimenGroupsService.getAll(studyId).then(function(data) {
-        expect(data.length).toEqual(1);
-        expect(_.isEqual(specimenGroup, data[0]));
-      });
-
-      httpBackend.flush();
-    });
-
-    it('get should return valid object', function() {
-      httpBackend.whenGET(uri() + '?sgId=' + specimenGroup.id).respond({
-        status: 'success',
-        data: specimenGroup
-      });
-
-      specimenGroupsService.get(specimenGroup.studyId, specimenGroup.id).then(function(data) {
-        expect(_.isEqual(specimenGroup, data));
-      });
-
-      httpBackend.flush();
-    });
-
-    it('should allow adding a specimen group', function() {
-      var expectedResult = {status: 'success', data: 'success'};
-      var cmd = {
-        studyId:                     specimenGroup.studyId,
-        name:                        specimenGroup.name,
-        description:                 specimenGroup.description,
-        units:                       specimenGroup.units,
-        anatomicalSourceType:        specimenGroup.anatomicalSourceType,
-        preservationType:            specimenGroup.preservationType,
-        preservationTemperatureType: specimenGroup.preservationTemperatureType,
-        specimenType:                specimenGroup.specimenType
-      };
-      httpBackend.expectPOST(uri(), cmd).respond(201, expectedResult);
-      specimenGroupsService.addOrUpdate(specimenGroupNoId).then(function(reply) {
-        expect(reply).toEqual('success');
-      });
-      httpBackend.flush();
-    });
-
-    it('should allow updating a specimen group', function() {
-      var expectedResult = {status: 'success', data: 'success'};
-      var cmd = {
-        id:                          specimenGroup.id,
-        expectedVersion:             specimenGroup.version,
-        studyId:                     specimenGroup.studyId,
-        name:                        specimenGroup.name,
-        description:                 specimenGroup.description,
-        units:                       specimenGroup.units,
-        anatomicalSourceType:        specimenGroup.anatomicalSourceType,
-        preservationType:            specimenGroup.preservationType,
-        preservationTemperatureType: specimenGroup.preservationTemperatureType,
-        specimenType:                specimenGroup.specimenType
-      };
-      httpBackend.expectPUT(uri(specimenGroup.id), cmd).respond(201, expectedResult);
-      specimenGroupsService.addOrUpdate(specimenGroup).then(function(reply) {
-        expect(reply).toEqual('success');
-      });
-      httpBackend.flush();
-    });
-
-    it('should remove a specimen group', function() {
-      httpBackend.expectDELETE(uri(specimenGroup.id, specimenGroup.version)).respond(201);
-      specimenGroupsService.remove(specimenGroup);
-      httpBackend.flush();
-    });
 
     it('should retrieve specimen groups in use', function() {
+      var specimenGroup = fakeEntities.
       httpBackend.whenGET(uri() + '/inuse').respond({
         status: 'success',
         data: [specimenGroup]

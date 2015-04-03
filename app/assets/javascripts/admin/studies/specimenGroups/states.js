@@ -21,21 +21,14 @@ define([], function() {
       url: '/spcgroup/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        specimenGroup: ['study', function(study) {
-          return {
-            studyId: study.id,
-            name: '',
-            description: null,
-            units: '',
-            anatomicalSourceType: '',
-            preservationType: '',
-            preservationTemperatureType: '',
-            specimenType: ''
-          };
-        }],
-        valueTypes: ['specimenGroupsService', function(specimenGroupsService) {
-          return specimenGroupsService.specimenGroupValueTypes();
-        }]
+        specimenGroup: [
+          '$stateParams',
+          'SpecimenGroup',
+          function($stateParams, SpecimenGroup) {
+            var sg = new SpecimenGroup();
+            sg.studyId = $stateParams.studyId;
+            return sg;
+          }]
       },
       views: {
         'main@': {
@@ -56,17 +49,12 @@ define([], function() {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         specimenGroup: [
-          '$stateParams', 'specimenGroupsService', 'study',
-          function($stateParams, specimenGroupsService, study) {
-            if ($stateParams.specimenGroupId) {
-              return specimenGroupsService.get(study.id, $stateParams.specimenGroupId);
-            }
-            throw new Error('state parameter specimenGroupId is invalid');
+          '$stateParams',
+          'SpecimenGroup',
+          function($stateParams, SpecimenGroup) {
+            return SpecimenGroup.get($stateParams.studyId, $stateParams.specimenGroupId);
           }
-        ],
-        valueTypes: ['specimenGroupsService', function(specimenGroupsService) {
-          return specimenGroupsService.specimenGroupValueTypes();
-        }]
+        ]
       },
       views: {
         'main@': {

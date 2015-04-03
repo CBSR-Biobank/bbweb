@@ -64,7 +64,7 @@ define(['underscore'], function(_) {
       var self = this;
 
       specimenLinkType = specimenLinkType || {};
-      options = options || {};
+      ConcurrencySafeEntity.call(self, specimenLinkType);
 
       _.extend(self, _.defaults(specimenLinkType, {
         processingTypeId:     null,
@@ -77,7 +77,7 @@ define(['underscore'], function(_) {
         annotationTypeData:   []
       }));
 
-      self.isNew = !self.id;
+      options = options || {};
 
       if (options.studySpecimenGroups) {
         self.studySpecimenGroups(options.studySpecimenGroups);
@@ -152,7 +152,7 @@ define(['underscore'], function(_) {
       });
 
       function addOrUpdateInternal() {
-        if (self.isNew) {
+        if (self.isNew()) {
           return biobankApi.post(uri(self.processingTypeId), cmd);
         } else {
           cmd.id = self.id;

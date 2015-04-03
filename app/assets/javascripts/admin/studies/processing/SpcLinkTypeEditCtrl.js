@@ -46,7 +46,7 @@ define(['underscore'], function(_) {
         studyAnnotationTypes: processingDto.specimenLinkAnnotationTypes
       });
 
-    action = vm.specimenLinkType.isNew ? 'Add' : 'Update';
+    action = vm.specimenLinkType.isNew() ? 'Add' : 'Update';
     vm.title =  action + ' Specimen Link Type';
 
     //---

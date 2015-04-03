@@ -198,19 +198,19 @@ define([
     }
 
     function randomAnatomicalSourceType() {
-      faker.random.array_element(AnatomicalSourceType.values());
+      return faker.random.array_element(AnatomicalSourceType.values());
     }
 
     function randomPreservationType() {
-      faker.random.array_element(PreservationType.values());
+      return faker.random.array_element(PreservationType.values());
     }
 
     function randomPreservationTemperatureTypeType() {
-      faker.random.array_element(PreservationTemperatureType.values());
+      return faker.random.array_element(PreservationTemperatureType.values());
     }
 
     function randomSpecimenType() {
-      faker.random.array_element(SpecimenType.values());
+      return faker.random.array_element(SpecimenType.values());
     }
 
     function specimenGroup(study) {

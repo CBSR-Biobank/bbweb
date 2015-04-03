@@ -44,7 +44,6 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
       expect(studiesService.disable).toBeFunction();
       expect(studiesService.retire).toBeFunction();
       expect(studiesService.unretire).toBeFunction();
-      expect(studiesService.processingDto).toBeFunction();
     });
 
     it('calling getStudyCount has valid URL', function() {
@@ -234,32 +233,6 @@ define(['angular', 'angularMocks', 'underscore', 'jquery', 'biobankApp'], functi
 
     it('should allow unretiring a study', function() {
       studyStatusChange('unretire', studiesService.unretire);
-    });
-
-    it('collectionDto should return valid object', function() {
-      httpBackend.whenGET(uri(study.id) + '/dto/collection').respond({
-        status: 'success',
-        data: 'success'
-      });
-
-      studiesService.collectionDto(study.id).then(function(data) {
-        expect(data).toBe('success');
-      });
-
-      httpBackend.flush();
-    });
-
-    it('processingDto should return valid object', function() {
-      httpBackend.whenGET(uri(study.id) + '/dto/processing').respond({
-        status: 'success',
-        data: 'success'
-      });
-
-      studiesService.processingDto(study.id).then(function(data) {
-        expect(data).toBe('success');
-      });
-
-      httpBackend.flush();
     });
 
     it('shoud get all value types', function() {

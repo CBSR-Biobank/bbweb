@@ -48,7 +48,7 @@ define([
     it('constructor with no parameters has default values', function() {
       var ceventType = new CollectionEventType();
 
-      expect(ceventType.isNew).toBe(true);
+      expect(ceventType.isNew()).toBe(true);
       expect(ceventType.studyId).toBe(null);
       expect(ceventType.name).toBe('');
       expect(ceventType.recurring).toBe(false);
@@ -179,7 +179,7 @@ define([
     it('isNew should be true for a collection event type with no ID', function() {
       var cetNoId = _.omit(cetFromServer, 'id');
       var cet = new CollectionEventType(cetNoId);
-      expect(cet.isNew).toBe(true);
+      expect(cet.isNew()).toBe(true);
     });
 
     it('study ID matches the study', function() {
@@ -189,7 +189,7 @@ define([
 
     it('isNew should be false for a collection event type that has an ID', function() {
       var cet = new CollectionEventType(cetFromServer);
-      expect(cet.isNew).toBe(false);
+      expect(cet.isNew()).toBe(false);
     });
 
     it('should be initialized with specimen group and annotation type server objects', function() {
@@ -391,7 +391,7 @@ define([
     }
 
     function compareCetToServerObj(cet, serverObj) {
-      expect(cet.isNew).toBe(false);
+      expect(cet.isNew()).toBe(false);
       expect(cet.studyId).toBe(serverObj.studyId);
       expect(cet.name).toBe(serverObj.name);
       expect(cet.description).toBe(serverObj.description);

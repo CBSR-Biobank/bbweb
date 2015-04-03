@@ -18,7 +18,7 @@ define([], function() {
 
     var vm = this;
 
-    vm.title =  (processingType.isNew ? 'Add' : 'Update')  + ' Processing Type';
+    vm.title =  (processingType.isNew() ? 'Add' : 'Update')  + ' Processing Type';
     vm.processingType = processingType;
     vm.submit = submit;
     vm.cancel = cancel;

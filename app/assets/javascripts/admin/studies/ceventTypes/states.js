@@ -15,9 +15,9 @@ define([], function() {
                   authorizationProvider
                  ) {
 
-    resolveSpecimenGroups.$inject = ['specimenGroupsService', 'study'];
-    function resolveSpecimenGroups(specimenGroupsService, study) {
-      return specimenGroupsService.getAll(study.id);
+    resolveSpecimenGroups.$inject = ['$stateParams', 'SpecimenGroup'];
+    function resolveSpecimenGroups($stateParams, SpecimenGroup) {
+      return SpecimenGroup.list($stateParams.studyId);
     }
 
     resolveAnnotTypes.$inject = ['CollectionEventAnnotationType', 'study'];

@@ -81,7 +81,7 @@ define([
     it('constructor with no parameters has default values', function() {
       var slt = new SpecimenLinkType();
 
-      expect(slt.isNew).toBe(true);
+      expect(slt.isNew()).toBe(true);
       expect(slt.processingTypeId).toBe(null);
       expect(slt.expectedInputChange).toBe(null);
       expect(slt.expectedOutputChange).toBe(null);
@@ -204,13 +204,13 @@ define([
     it('isNew should be true for a specimen link type with no ID', function() {
       var entities = createEntities(),
           slt = new SpecimenLinkType(_.omit(entities.sltFromServer, 'id'));
-      expect(slt.isNew).toBe(true);
+      expect(slt.isNew()).toBe(true);
     });
 
     it('isNew should be false for a specimen link type that has an ID', function() {
       var entities = createEntities(),
           slt = new SpecimenLinkType(entities.sltFromServer);
-      expect(slt.isNew).toBe(false);
+      expect(slt.isNew()).toBe(false);
     });
 
     it('processing type ID matches', function() {
@@ -303,7 +303,7 @@ define([
     });
 
     function compareSltToServerObj(slt, serverObj) {
-      expect(slt.isNew).toBe(false);
+      expect(slt.isNew()).toBe(false);
       expect(slt.processingTypeId).toBe(serverObj.processingTypeId);
       expect(slt.expectedInputChange).toBe(serverObj.expectedInputChange);
       expect(slt.expectedOutputChange).toBe(serverObj.expectedOutputChange);

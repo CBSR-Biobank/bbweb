@@ -3,16 +3,14 @@ define(['underscore'], function(_) {
 
   specimenGroupUtils.$inject = [
     'domainEntityService',
-    'modalService',
-    'specimenGroupsService'
+    'modalService'
   ];
 
   /**
    * Removes a specimen group.
    */
   function specimenGroupUtils(domainEntityService,
-                              modalService,
-                              specimenGroupsService) {
+                              modalService) {
     var service = {
       inUseModal: inUseModal,
       remove: remove
@@ -30,14 +28,8 @@ define(['underscore'], function(_) {
     }
 
     function remove(specimenGroup) {
-
-      function removeInternal() {
-        // FIXME replace with this once specimen group entity is ready specimenGroup.remove();
-        return specimenGroupsService.remove(specimenGroup);
-      }
-
       return domainEntityService.removeEntity(
-        removeInternal,
+        specimenGroup.remove,
         'Remove Specimen Group',
         'Are you sure you want to remove specimen group ' + specimenGroup.name + '?',
         'Remove Failed',

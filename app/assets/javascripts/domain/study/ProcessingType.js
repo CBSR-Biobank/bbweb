@@ -29,6 +29,7 @@ define(['underscore'], function(_) {
       var self = this;
 
       obj = obj || {};
+      ConcurrencySafeEntity.call(self, obj);
 
       _.extend(self, _.defaults(obj, {
         studyId:     null,
@@ -36,8 +37,6 @@ define(['underscore'], function(_) {
         description: null,
         enabled:     false
       }));
-
-      self.isNew = !self.id;
     }
 
     ProcessingType.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -83,7 +82,7 @@ define(['underscore'], function(_) {
       // --
 
       function addOrUpdateInternal() {
-        if (self.isNew) {
+        if (self.isNew()) {
           return biobankApi.post(uri(self.studyId), cmd);
         }
         _.extend(cmd, { id: self.id, expectedVersion: self.version });

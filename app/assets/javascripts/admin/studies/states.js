@@ -167,9 +167,10 @@ define(['angular', 'underscore'], function(angular, _) {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         specimenGroups: [
-          'specimenGroupsService', 'study',
-          function(specimenGroupsService, study) {
-            return specimenGroupsService.getAll(study.id);
+          '$stateParams',
+          'SpecimenGroup',
+          function($stateParams, SpecimenGroup) {
+            return SpecimenGroup.list($stateParams.studyId);
           }
         ],
         specimenGroupIdsInUse: [
@@ -205,9 +206,10 @@ define(['angular', 'underscore'], function(angular, _) {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         collectionDto: [
-          'studiesService', 'study',
-          function (studiesService, study) {
-            return studiesService.collectionDto(study.id);
+          '$stateParams',
+          'CollectionDto',
+          function ($stateParams,  CollectionDto) {
+            return CollectionDto.get($stateParams.studyId);
           }
         ]
       },
@@ -218,28 +220,9 @@ define(['angular', 'underscore'], function(angular, _) {
             '$scope',
             'study',
             'collectionDto',
-            'CollectionEventType',
-            'CollectionEventAnnotationType',
-            function($scope,
-                     study,
-                     collectionDto,
-                     CollectionEventType,
-                     CollectionEventAnnotationType) {
+            function($scope, study, collectionDto) {
               $scope.study = study;
-              $scope.annotationTypes  = _.map(collectionDto.collectionEventAnnotationTypes,
-                                         function (annotationType) {
-                                           return new CollectionEventAnnotationType(annotationType);
-                                         });
-              // FIXME: convert collectionDto.specimenGroups to SpecimenGroup objects
-              $scope.ceventTypes = _.map(collectionDto.collectionEventTypes,
-                                         function (obj) {
-                                           return new CollectionEventType(obj, {
-                                             studySpecimenGroups: collectionDto.specimenGroups,
-                                             studyAnnotationTypes: $scope.annotationTypes
-                                           });
-                                         });
-              $scope.annotationTypeIdsInUse = collectionDto.collectionEventAnnotationTypesInUse;
-              $scope.specimenGroups = collectionDto.specimenGroups;
+              $scope.collectionDto = collectionDto;
             }
           ]
         }
@@ -257,29 +240,10 @@ define(['angular', 'underscore'], function(angular, _) {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         processingDto: [
-          'studiesService',
-          'study',
-          'ProcessingType',
-          'SpecimenLinkType',
-          'SpecimenLinkAnnotationType',
-          function (studiesService,
-                    study,
-                    ProcessingType,
-                    SpecimenLinkType,
-                    SpecimenLinkAnnotationType) {
-            return studiesService.processingDto(study.id).then(function (dto) {
-              dto.processingTypes = _.map(dto.processingTypes, function(obj) {
-                return new ProcessingType(obj);
-              });
-              dto.specimenLinkTypes = _.map(dto.specimenLinkTypes, function(obj) {
-                return new SpecimenLinkType(obj);
-              });
-              dto.specimenLinkAnnotationTypes = _.map(
-                dto.specimenLinkAnnotationTypes,
-                function (at) {
-                  return new SpecimenLinkAnnotationType(at);
-                });
-            });
+          '$stateParams',
+          'ProcessingDto',
+          function ($stateParams, ProcessingDto) {
+            return ProcessingDto.get($stateParams.studyId);
           }
         ]
       },

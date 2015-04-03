@@ -23,7 +23,7 @@ define(['underscore'], function(_) {
                               ceventType,
                               studySpecimenGroups) {
     var vm = this,
-        action = ceventType.isNew ? 'Add' : 'Update';
+        action = ceventType.isNew() ? 'Add' : 'Update';
 
     vm.ceventType            = ceventType;
     vm.studySpecimenGroups   = studySpecimenGroups;

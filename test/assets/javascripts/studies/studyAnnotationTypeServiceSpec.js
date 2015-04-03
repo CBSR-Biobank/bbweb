@@ -2,7 +2,7 @@
  * Jasmine test suite for:
  *
  *   - ceventAnnotTypesService
- *   - processingTypesService
+ *   - participantAnnotTypesService
  *   - spcLinkAnnotTypesService
  *
  */

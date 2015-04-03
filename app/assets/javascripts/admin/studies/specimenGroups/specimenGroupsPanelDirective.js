@@ -24,7 +24,6 @@ define(['angular', 'underscore'], function(angular, _) {
     'Panel',
     'modalService',
     'tableService',
-    'specimenGroupsService',
     'SpecimenGroupViewer',
     'specimenGroupUtils'
   ];
@@ -37,7 +36,6 @@ define(['angular', 'underscore'], function(angular, _) {
                                    Panel,
                                    modalService,
                                    tableService,
-                                   specimenGroupsService,
                                    SpecimenGroupViewer,
                                    specimenGroupUtils) {
     var vm = this,

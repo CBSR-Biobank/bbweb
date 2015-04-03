@@ -49,12 +49,9 @@ define([], function() {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         processingType: [
-          '$stateParams', 'processingTypesService', 'study',
-          function($stateParams, processingTypesService, study) {
-            if ($stateParams.processingTypeId) {
-              return processingTypesService.get(study.id, $stateParams.processingTypeId);
-            }
-            throw new Error('state parameter processingTypeId is invalid');
+          '$stateParams', 'ProcessingType',
+          function($stateParams, ProcessingType) {
+            return ProcessingType.get($stateParams.studyId, $stateParams.processingTypeId);
           }
         ]
       },

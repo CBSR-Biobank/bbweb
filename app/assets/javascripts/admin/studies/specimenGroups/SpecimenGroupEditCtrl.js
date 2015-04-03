@@ -4,7 +4,6 @@ define([], function() {
   SpecimenGroupEditCtrl.$inject = [
     '$state',
     'domainEntityService',
-    'specimenGroupsService',
     'notificationsService',
     'valueTypes',
     'study',
@@ -16,7 +15,6 @@ define([], function() {
    */
   function SpecimenGroupEditCtrl($state,
                                  domainEntityService,
-                                 specimenGroupsService,
                                  notificationsService,
                                  valueTypes,
                                  study,
@@ -48,7 +46,7 @@ define([], function() {
     }
 
     function submit(specimenGroup) {
-      specimenGroupsService.addOrUpdate(specimenGroup)
+      specimenGroup.addOrUpdate()
         .then(submitSuccess)
         .catch(function(error) {
           domainEntityService.updateErrorModal(

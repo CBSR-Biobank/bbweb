@@ -8,10 +8,6 @@ define(['angular'], function(angular) {
    */
   function specimenGroupsServiceFactory(biobankApi, funutils) {
     var service = {
-      getAll                  : getAll,
-      get                     : get,
-      addOrUpdate             : addOrUpdate,
-      remove                  : remove,
       anatomicalSourceTypes   : anatomicalSourceTypes,
       specimenTypes           : specimenTypes,
       preservTypes            : preservTypes,
@@ -23,61 +19,8 @@ define(['angular'], function(angular) {
 
     //-------
 
-    function uri(studyId, ceventTypeId, version) {
-      var result = '/studies';
-      if (arguments.length <= 0) {
-        throw new Error('study id not specified');
-      } else {
-        result += '/' + studyId + '/sgroups';
-
-        if (arguments.length > 1) {
-          result += '/' + ceventTypeId;
-        }
-
-        if (arguments.length > 2) {
-          result += '/' + version;
-        }
-      }
-      return result;
-    }
-
-    function getAll(studyId) {
-      return biobankApi.get(uri(studyId));
-    }
-
-    function get(studyId, specimenGroupId) {
-      return biobankApi.get(uri(studyId) + '?sgId=' + specimenGroupId);
-    }
-
-    function addOrUpdate(specimenGroup) {
-      var cmd = {
-        studyId:                     specimenGroup.studyId,
-        name:                        specimenGroup.name,
-        units:                       specimenGroup.units,
-        anatomicalSourceType:        specimenGroup.anatomicalSourceType,
-        preservationType:            specimenGroup.preservationType,
-        preservationTemperatureType: specimenGroup.preservationTemperatureType,
-        specimenType:                specimenGroup.specimenType
-      };
-
-      angular.extend(cmd, funutils.pickOptional(specimenGroup, 'description'));
-
-      if (specimenGroup.id) {
-        cmd.id = specimenGroup.id;
-        cmd.expectedVersion = specimenGroup.version;
-        return biobankApi.put(uri(specimenGroup.studyId, specimenGroup.id), cmd);
-      } else {
-        return biobankApi.post(uri(specimenGroup.studyId), cmd);
-      }
-    }
-
-    function remove(specimenGroup) {
-      return biobankApi.del(
-        uri(specimenGroup.studyId, specimenGroup.id, specimenGroup.version));
-    }
-
     function  specimenGroupIdsInUse(studyId) {
-      return biobankApi.get(uri(studyId) + '/inuse');
+      return biobankApi.get('/studies/' + studyId + '/sgroups/inuse');
     }
 
     function  anatomicalSourceTypes() {
