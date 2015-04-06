@@ -10,7 +10,7 @@ define([
 ], function(angular, mocks, _, testUtils) {
   'use strict';
 
-  fdescribe('ProcessingDto', function() {
+  describe('ProcessingDto', function() {
     var httpBackend,
         ProcessingDto,
         createEntities,

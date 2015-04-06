@@ -5,96 +5,97 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
   'use strict';
 
   describe('Controller: CeventTypeEditCtrl', function() {
-    var q,
-        rootScope,
-        controller,
-        state,
-        CollectionEventType,
-        CollectionEventAnnotationType,
-        AnnotationValueType,
-        domainEntityService,
-        notificationsService,
+    var createEntities,
+        createController,
         fakeEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($q,
-                               $rootScope,
-                               $controller,
-                               $state,
-                               _CollectionEventType_,
-                               _CollectionEventAnnotationType_,
-                               _AnnotationValueType_,
-                               _domainEntityService_,
-                               _notificationsService_,
+    beforeEach(inject(function($injector,
                                fakeDomainEntities) {
-      q                             = $q;
-      rootScope                     = $rootScope;
-      controller                    = $controller;
-      state                         = $state;
-      CollectionEventType           = _CollectionEventType_;
-      CollectionEventAnnotationType = _CollectionEventAnnotationType_;
-      AnnotationValueType           = _AnnotationValueType_;
-      domainEntityService           = _domainEntityService_;
-      notificationsService          = _notificationsService_;
-      fakeEntities                  = fakeDomainEntities;
+      fakeEntities = fakeDomainEntities;
+      createEntities = setupEntities($injector);
+      createController = setupController($injector);
     }));
 
-    function createEntities(options) {
-      var study, specimenGroups, annotationTypes, ceventType, serverCet;
+    function setupEntities(injector) {
+      var Study                         = injector.get('Study'),
+          CollectionEventType           = injector.get('CollectionEventType'),
+          CollectionEventAnnotationType = injector.get('CollectionEventAnnotationType'),
+          AnnotationValueType           = injector.get('AnnotationValueType');
 
-      options = options || {};
+      return create;
 
-      study = fakeEntities.study();
-      specimenGroups = _.map(_.range(2), function () {
-        return fakeEntities.specimenGroup(study);
-      });
-      annotationTypes = _.map(
-        AnnotationValueType.values(),
-        function(valueType) {
-          return new CollectionEventAnnotationType(
-            fakeEntities.studyAnnotationType(
-              study, { valueType: valueType }));
+      //--
+
+      function create(options) {
+        var study, specimenGroups, annotationTypes, ceventType, serverCet;
+
+        options = options || {};
+
+        study = fakeEntities.study();
+        specimenGroups = _.map(_.range(2), function () {
+          return fakeEntities.specimenGroup(study);
+        });
+        annotationTypes = _.map(
+          AnnotationValueType.values(),
+          function(valueType) {
+            return new CollectionEventAnnotationType(
+              fakeEntities.studyAnnotationType(
+                study, { valueType: valueType }));
+          });
+
+        serverCet = fakeEntities.collectionEventType(study, {
+          specimenGroups: specimenGroups,
+          annotationTypes: annotationTypes
         });
 
-      serverCet = fakeEntities.collectionEventType(study, {
-        specimenGroups: specimenGroups,
-        annotationTypes: annotationTypes
-      });
+        if (options.noCetId) {
+          ceventType = new CollectionEventType(_.omit(serverCet, 'id'));
+        } else {
+          ceventType = new CollectionEventType(serverCet);
+        }
+        ceventType.studySpecimenGroups(specimenGroups);
+        ceventType.studyAnnotationTypes(annotationTypes);
 
-      if (options.noCetId) {
-        ceventType = new CollectionEventType(_.omit(serverCet, 'id'));
-      } else {
-        ceventType = new CollectionEventType(serverCet);
+        return {
+          study:           new Study(study),
+          specimenGroups:  specimenGroups,
+          annotationTypes: annotationTypes,
+          ceventType:      ceventType
+        };
       }
-      ceventType.studySpecimenGroups(specimenGroups);
-      ceventType.studyAnnotationTypes(annotationTypes);
-
-      return {
-        study:           study,
-        specimenGroups:  specimenGroups,
-        annotationTypes: annotationTypes,
-        ceventType:      ceventType
-      };
     }
 
-    /**
-     *
-     */
-    function createController(entities) {
-      var scope = rootScope.$new();
+    function setupController(injector) {
+      var rootScope            = injector.get('$rootScope'),
+          controller           = injector.get('$controller'),
+          state                = injector.get('$state'),
+          CollectionEventType  = injector.get('CollectionEventType'),
+          domainEntityService  = injector.get('domainEntityService'),
+          notificationsService = injector.get('notificationsService');
 
-      controller('CeventTypeEditCtrl as vm', {
-        $scope:               scope,
-        CollectionEventType:  CollectionEventType,
-        domainEntityService:  domainEntityService,
-        notificationsService: notificationsService,
-        ceventType:           entities.ceventType,
-        studySpecimenGroups:  entities.specimenGroups
-      });
+      return create;
 
-      scope.$digest();
-      return scope;
+      //--
+
+      function create(entities) {
+        var scope = rootScope.$new();
+
+        controller('CeventTypeEditCtrl as vm', {
+          $scope:               scope,
+          CollectionEventType:  CollectionEventType,
+          domainEntityService:  domainEntityService,
+          notificationsService: notificationsService,
+          study:                entities.study,
+          ceventType:           entities.ceventType,
+          studySpecimenGroups:  entities.specimenGroups,
+          studyAnnotationTypes: entities.annotationTypes
+        });
+
+        scope.$digest();
+        return scope;
+      }
     }
 
     describe('has valid scope when created', function () {
@@ -120,8 +121,11 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('can submit a collection event type', function() {
-        var entities = createEntities(),
-            scope = createController(entities);
+      var q                    = this.$injector.get('$q'),
+          notificationsService = this.$injector.get('notificationsService'),
+          state                = this.$injector.get('$state'),
+          entities             = createEntities(),
+          scope                = createController(entities);
 
       spyOn(entities.ceventType, 'addOrUpdate').and.callFake(function () {
         return q.when(fakeEntities.collectionEventType(
@@ -142,8 +146,11 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('on submit error, displays an error modal', function() {
-      var entities = createEntities(),
-          scope = createController(entities);
+      var q                   = this.$injector.get('$q'),
+          domainEntityService = this.$injector.get('domainEntityService'),
+          state               = this.$injector.get('$state'),
+          entities            = createEntities(),
+          scope               = createController(entities);
 
       spyOn(entities.ceventType, 'addOrUpdate').and.callFake(function () {
         var deferred = q.defer();
@@ -159,8 +166,9 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('when user presses the cancel button, goes to correct state', function() {
-      var entities = createEntities(),
-          scope = createController(entities);
+      var state    = this.$injector.get('$state'),
+          entities = createEntities(),
+          scope    = createController(entities);
 
       spyOn(state, 'go').and.callFake(function () {});
       scope.vm.cancel();
@@ -170,7 +178,9 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('can add specimen group data', function() {
-      var entities = createEntities(), scope;
+      var CollectionEventType = this.$injector.get('CollectionEventType'),
+          entities = createEntities(),
+          scope;
 
       entities.ceventType = new CollectionEventType(
         fakeEntities.collectionEventType(entities.study));
@@ -183,7 +193,8 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('can remove specimen group data', function() {
-      var entities = createEntities(), scope;
+      var CollectionEventType = this.$injector.get('CollectionEventType'),
+          entities = createEntities(), scope;
 
       entities.ceventType = new CollectionEventType(
         fakeEntities.collectionEventType(entities.study));
@@ -199,7 +210,8 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('removing a specimen group data with invalid index throws an error', function() {
-      var entities = createEntities(), scope;
+      var CollectionEventType = this.$injector.get('CollectionEventType'),
+          entities = createEntities(), scope;
 
       entities.ceventType = new CollectionEventType(
         fakeEntities.collectionEventType(entities.study));
@@ -214,7 +226,8 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('can add an annotation type', function() {
-      var entities = createEntities({ noCetId: true }), scope;
+      var CollectionEventType = this.$injector.get('CollectionEventType'),
+          entities = createEntities({ noCetId: true }), scope;
 
       entities.ceventType = new CollectionEventType(
         fakeEntities.collectionEventType(entities.study));
@@ -226,7 +239,8 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('can remove an annotation type', function() {
-      var entities = createEntities({ noCetId: true }), scope;
+      var CollectionEventType = this.$injector.get('CollectionEventType'),
+          entities = createEntities({ noCetId: true }), scope;
 
       entities.ceventType = new CollectionEventType(
         fakeEntities.collectionEventType(entities.study));
@@ -241,7 +255,8 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     it('removing an annotation type data with invalid index throws an error', function() {
-      var entities = createEntities({ noCetId: true }), scope;
+      var CollectionEventType = this.$injector.get('CollectionEventType'),
+          entities = createEntities({ noCetId: true }), scope;
 
       entities.ceventType = new CollectionEventType(
         fakeEntities.collectionEventType(entities.study));
