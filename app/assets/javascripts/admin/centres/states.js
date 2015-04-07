@@ -10,10 +10,7 @@ define([], function() {
 
     resolveCentre.$inject = ['$stateParams', 'Centre'];
     function resolveCentre($stateParams, Centre) {
-      if ($stateParams.centreId) {
-        return Centre.get($stateParams.centreId);
-      }
-      throw new Error('state parameter centreId is invalid');
+      return Centre.get($stateParams.centreId);
     }
 
     resolveCentreCounts.$inject = ['CentreCounts'];
@@ -50,9 +47,9 @@ define([], function() {
       url: '/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        centre: function() {
-          return { name: '', description: null };
-        }
+        centre: ['Centre', function(Centre) {
+          return new Centre();
+        }]
       },
       views: {
         'main@': {

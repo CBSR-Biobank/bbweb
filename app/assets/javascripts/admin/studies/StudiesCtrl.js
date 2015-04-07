@@ -1,33 +1,27 @@
 define([], function() {
   'use strict';
 
-  StudiesCtrl.$inject = ['$scope', 'Study', 'studyCounts'];
+  StudiesCtrl.$inject = [
+    '$scope',
+    'Study',
+    'StudyStatus',
+    'studyCounts'];
 
   /**
    * Displays a list of studies with each in its own mini-panel.
    *
    */
-  function StudiesCtrl($scope, Study, studyCounts) {
+  function StudiesCtrl($scope, Study, StudyStatus, studyCounts) {
     var vm = this;
 
     vm.studyCounts      = studyCounts;
     vm.pageSize         = 5;
-    vm.updateStudies    = updateStudies;
-    vm.possibleStatuses = [
-      { id: 'all',      label: 'All' },
-      { id: 'disabled', label: 'Disabled' },
-      { id: 'enabled',  label: 'Enabled' },
-      { id: 'retired',  label: 'Retired' }
-    ];
+    vm.updateStudies    = Study.list;
+    vm.possibleStatuses = [ { id: 'all', label: 'All' } ];
 
-    /**
-     * Callback provided to pagedItemsList directive.
-     *
-     * See {@link Study#list} for the format of the options object.
-     */
-    function updateStudies(options) {
-      return Study.list(options);
-    }
+    _.each(StudyStatus.values(), function (status) {
+      vm.possibleStatuses.push({id: status.toLowerCase(), label: status});
+    });
   }
 
   return StudiesCtrl;

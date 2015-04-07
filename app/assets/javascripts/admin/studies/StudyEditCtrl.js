@@ -4,7 +4,6 @@ define(['underscore'], function(_) {
 
   StudyEditCtrl.$inject = [
     '$state',
-    'studiesService',
     'notificationsService',
     'domainEntityService',
     'study'
@@ -14,7 +13,6 @@ define(['underscore'], function(_) {
    * Adds or updates a study.
    */
   function StudyEditCtrl($state,
-                         studiesService,
                          notificationsService,
                          domainEntityService,
                          study) {
@@ -24,8 +22,6 @@ define(['underscore'], function(_) {
     vm.study = study;
     vm.submit = submit;
     vm.cancel = cancel;
-    vm.returnState = {};
-
     vm.returnState = {options: { reload: true } };
 
     if (study.isNew()) {
@@ -56,7 +52,7 @@ define(['underscore'], function(_) {
     }
 
     function submit(study) {
-      studiesService.addOrUpdate(study)
+      study.addOrUpdate()
         .then(submitSuccess)
         .catch(submitError);
     }

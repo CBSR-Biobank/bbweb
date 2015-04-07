@@ -2,55 +2,61 @@ define([], function() {
   'use strict';
 
   CentreEditCtrl.$inject = [
-    '$scope',
-    '$stateParams',
-    'stateHelper',
+    '$state',
     'domainEntityService',
     'notificationsService',
-    'user',
     'centre',
   ];
 
   /**
    *
    */
-  function CentreEditCtrl($scope,
-                          $stateParams,
-                          stateHelper,
+  function CentreEditCtrl($state,
                           domainEntityService,
                           notificationsService,
-                          user,
                           centre) {
-    var vm = this;
-    var action = centre.id ? 'Update' : 'Add';
-    var returnState = centre.id ? 'home.admin.centres.centre.summary' : 'home.admin';
+    var vm = this, action;
 
-    vm.title = action + ' centre';
     vm.centre = centre;
     vm.submit = submit;
     vm.cancel = cancel;
+    vm.returnState = {options: { reload: true } };
+
+    if (centre.isNew()) {
+      action = 'Add';
+      vm.returnState.name = 'home.admin.centres';
+      vm.returnState.params = { };
+    } else {
+      action = 'Update';
+      vm.returnState.name = 'home.admin.centres.centre.summary';
+      vm.returnState.params = { centreId: centre.id };
+    }
+
+    vm.title =  action + ' study';
 
     //---
 
-    function gotoReturnState() {
-      stateHelper.reloadStateAndReinit(returnState, $stateParams, {reload: true});
+    function gotoReturnState(state) {
+      $state.go(state.name, state.params, state.options);
     }
 
     function submitSuccess() {
       notificationsService.submitSuccess();
-      gotoReturnState();
+      gotoReturnState(vm.returnState);
+    }
+
+    function submitError(error) {
+      domainEntityService.updateErrorModal(error, 'centre');
     }
 
     function submit(centre) {
       centre.addOrUpdate()
         .then(submitSuccess)
-        .catch(function(error) {
-          domainEntityService(error, 'centre', returnState);
-        });
+        .catch(submitError);
     }
 
     function cancel() {
-      gotoReturnState();
+      gotoReturnState(_.extend({}, vm.returnState, { options:{ reload: false } }));
     }
   }
 

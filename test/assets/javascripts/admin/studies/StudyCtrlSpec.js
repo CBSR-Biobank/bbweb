@@ -4,10 +4,9 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
   describe('Controller: StudyCtrl', function() {
-    var windowService, stateService, scope, state, studiesService, timeout;
-    var study = {id: 'dummy-study-id', name: 'ST1'};
+    var windowService, stateService, Study, createController, fakeEntities;
 
-    beforeEach(mocks.module('biobankApp', function($provide) {
+    beforeEach(mocks.module('biobankApp', 'biobank.test', function($provide) {
       windowService = {
         localStorage: {
           setItem: function() {},
@@ -17,46 +16,54 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
       spyOn(windowService.localStorage, 'setItem');
       $provide.value('$window', windowService);
-
-      stateService = {
-        current: {
-          name: 'home.admin.studies.study.processing'
-        }
-      };
-
-      $provide.value('$state', stateService);
     }));
 
-    beforeEach(inject(function($controller, $rootScope, $q, $window, $timeout, _studiesService_) {
-      state = {
-        params: {studyId: study.id},
-        current: {name: 'home.admin.studies.study.processing'}
-      };
-      timeout = $timeout;
-      scope = $rootScope.$new();
-      studiesService = _studiesService_;
-
-      spyOn(studiesService, 'get').and.callFake(function () {
-        var deferred = $q.defer();
-        deferred.resolve(study);
-        return deferred.promise;
-      });
-
-      $controller('StudyCtrl as vm', {
-        $window:  $window,
-        $scope:   scope,
-        $state:   state,
-        $timeout: $timeout,
-        study:    study
-      });
-      scope.$digest();
+    beforeEach(inject(function($q, _Study_, fakeDomainEntities) {
+      Study = _Study_;
+      fakeEntities = fakeDomainEntities;
+      createController = setupController(this.$injector);
     }));
+
+    function setupController(injector) {
+      var $rootScope  = injector.get('$rootScope'),
+          $controller = injector.get('$controller'),
+          $window     = injector.get('$window'),
+          $timeout    = injector.get('$timeout');
+
+      return create;
+
+      //--
+
+      function create(study) {
+        var scope = $rootScope.$new(),
+            state = {
+              params: {studyId: study.id},
+              current: {name: 'home.admin.studies.study.processing'}
+            };
+
+        $controller('StudyCtrl as vm', {
+          $window:  $window,
+          $scope:   scope,
+          $state:   state,
+          $timeout: $timeout,
+          study:    study
+        });
+        scope.$digest();
+        return scope;
+      }
+    }
 
     it('should contain a valid study', function() {
+      var study = new Study(fakeEntities.study()),
+          scope = createController(study);
+
       expect(scope.vm.study).toBe(study);
     });
 
     it('should contain initialized panels', function() {
+      var study = new Study(fakeEntities.study()),
+          scope = createController(study);
+
       expect(scope.vm.tabSummaryActive).toBe(false);
       expect(scope.vm.tabParticipantsActive).toBe(false);
       expect(scope.vm.tabSpecimensActive).toBe(false);
@@ -65,6 +72,9 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
     });
 
     it('should contain initialized local storage', function() {
+      var study = new Study(fakeEntities.study()),
+          scope = createController(study);
+
       expect(windowService.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.collectionEventTypes', true);
       expect(windowService.localStorage.setItem)
@@ -82,7 +92,11 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
     });
 
     it('should initialize the tab of the current state', function() {
-      timeout.flush();
+      var $timeout = this.$injector.get('$timeout'),
+          study = new Study(fakeEntities.study()),
+          scope = createController(study);
+
+      $timeout.flush();
       expect(scope.vm.tabProcessingActive).toBe(true);
     });
 

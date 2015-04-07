@@ -18,7 +18,6 @@ define(['angular', 'underscore'], function(angular, _) {
     vm.centreCounts     = centreCounts;
     vm.pageSize         = 5;
     vm.updateCentres    = Centre.list;
-
     vm.possibleStatuses = [{ id: 'all', label: 'All' }];
 
     _.each(CentreStatus.values(), function(status) {

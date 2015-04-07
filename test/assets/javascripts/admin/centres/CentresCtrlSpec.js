@@ -9,21 +9,21 @@ define([
 ], function(angular, _, mocks, testUtils) {
   'use strict';
 
-  describe('Controller: StudiesCtrl', function() {
-    var StudyCounts, fakeEntities, createController;
+  describe('Controller: CentresCtrl', function() {
+    var CentreCounts, fakeEntities, createController;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(_StudyCounts_,
+    beforeEach(inject(function(_CentreCounts_,
                                fakeDomainEntities) {
-      StudyCounts = _StudyCounts_;
+      CentreCounts = _CentreCounts_;
       fakeEntities = fakeDomainEntities;
       createController = setupController(this.$injector);
       testUtils.addCustomMatchers();
     }));
 
-    function createStudyCounts(disabled, enabled, retired) {
-      return new StudyCounts({
+    function createCentreCounts(disabled, enabled, retired) {
+      return new CentreCounts({
         total:    disabled + enabled + retired,
         disabled: disabled,
         enabled:  enabled,
@@ -34,21 +34,21 @@ define([
     function setupController(injector) {
       var $rootScope = injector.get('$rootScope'),
           $controller = injector.get('$controller'),
-          Study = injector.get('Study'),
-          StudyStatus = injector.get('StudyStatus');
+          Centre = injector.get('Centre'),
+          CentreStatus = injector.get('CentreStatus');
 
       return create;
 
       //---
 
-      function create(studyCounts) {
+      function create(centreCounts) {
         var scope = $rootScope.$new();
 
-        $controller('StudiesCtrl as vm', {
+        $controller('CentresCtrl as vm', {
           $scope:      scope,
-          Study:       Study,
-          StudyStatus: StudyStatus,
-          studyCounts: studyCounts
+          Centre:       Centre,
+          CentreStatus: CentreStatus,
+          centreCounts: centreCounts
         });
 
         scope.$digest();
@@ -57,12 +57,12 @@ define([
     }
 
     it('scope is valid on startup', function() {
-      var StudyStatus = this.$injector.get('StudyStatus'),
-          allStatuses = StudyStatus.values().concat('All'),
-          counts = createStudyCounts(1, 2, 3),
+      var CentreStatus = this.$injector.get('CentreStatus'),
+          allStatuses = CentreStatus.values().concat('All'),
+          counts = createCentreCounts(1, 2, 3),
           scope = createController(counts);
 
-      expect(scope.vm.studyCounts).toEqual(counts);
+      expect(scope.vm.centreCounts).toEqual(counts);
       expect(scope.vm.pageSize).toBeDefined();
 
       _.each(allStatuses, function(status) {
@@ -70,19 +70,19 @@ define([
       });
     });
 
-    it('updateStudies retrieves new list of studies', function() {
-      var Study = this.$injector.get('Study'),
-          counts = createStudyCounts(1, 2, 3),
+    it('updateCentres retrieves new list of centres', function() {
+      var Centre = this.$injector.get('Centre'),
+          counts = createCentreCounts(1, 2, 3),
           listOptions = {},
           scope;
 
-      spyOn(Study, 'list').and.callFake(function () {});
+      spyOn(Centre, 'list').and.callFake(function () {});
 
       scope = createController(counts);
-      scope.vm.updateStudies(listOptions);
+      scope.vm.updateCentres(listOptions);
       scope.$digest();
 
-      expect(Study.list).toHaveBeenCalledWith(listOptions);
+      expect(Centre.list).toHaveBeenCalledWith(listOptions);
     });
 
 

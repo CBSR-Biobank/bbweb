@@ -8,7 +8,6 @@ define([], function() {
    */
   function StudyCtrl($window, $state, $timeout, study) {
     var vm = this;
-    vm.study = {};
 
     vm.study                 = study;
     vm.tabSummaryActive      = false;

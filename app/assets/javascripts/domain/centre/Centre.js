@@ -85,6 +85,14 @@ define(['angular', 'underscore'], function(angular, _) {
       });
     };
 
+    Centre.prototype.isDisabled = function () {
+      return this.status == CentreStatus.DISABLED();
+    };
+
+    Centre.prototype.isEnabled = function () {
+      return this.status == CentreStatus.ENABLED();
+    };
+
     Centre.prototype.disable = function () {
       return changeState(this, 'disable');
     };

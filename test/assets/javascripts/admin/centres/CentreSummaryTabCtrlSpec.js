@@ -4,55 +4,65 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
   describe('Controller: CentreSummaryTabCtrl', function() {
-    var q, Centre, CentreStatus, modalService, scope, fakeEntities, centre;
+    var q, Centre, CentreStatus, fakeEntities, createController;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function($q,
-                               $controller,
-                               $rootScope,
-                               $filter,
                                _Centre_,
                                _CentreStatus_,
-                               _modalService_,
+                               modalService,
                                fakeDomainEntities) {
-      q = $q;
-      scope = $rootScope.$new();
-      Centre = _Centre_;
+      q            = $q;
+      Centre       = _Centre_;
       CentreStatus = _CentreStatus_;
-      modalService = _modalService_;
       fakeEntities = fakeDomainEntities;
 
-      centre = new Centre(fakeEntities.centre());
-
       spyOn(modalService, 'showModal').and.callFake(function () {
-        var deferred = $q.defer();
-        deferred.resolve('modalResult');
-        return deferred.promise;
+        return $q.when('modalResult');
       });
 
-      $controller('CentreSummaryTabCtrl as vm', {
-        $scope:  scope,
-        $filter: $filter,
-        centre:   centre
-      });
-      scope.$digest();
+      createController = setupController(this.$injector);
     }));
 
+    function setupController(injector) {
+      var $rootScope  = injector.get('$rootScope'),
+          $controller = injector.get('$controller'),
+          $filter     = injector.get('$filter');
+
+      return create;
+
+      //--
+
+      function create(centre) {
+        var scope = $rootScope.$new();
+        $controller('CentreSummaryTabCtrl as vm', {
+          $scope:  scope,
+          $filter: $filter,
+          centre:   centre
+        });
+        scope.$digest();
+        return scope;
+      }
+    }
+
     it('should contain valid settings to display the centre summary', function() {
+      var centre = new Centre(fakeEntities.centre()),
+          scope = createController(centre);
+
       expect(scope.vm.centre).toBe(centre);
       expect(scope.vm.descriptionToggleLength).toBeDefined();
     });
 
     describe('change centre status', function() {
 
-      function checkStatusChange(status, newStatus) {
+      function checkStatusChange(centre, status, newStatus) {
+        var scope = createController(centre);
+
         spyOn(Centre.prototype, status).and.callFake(function () {
-          var deferred = q.defer();
           centre.status = (centre.status === CentreStatus.ENABLED()) ?
             CentreStatus.DISABLED() : CentreStatus.ENABLED();
-          deferred.resolve(centre);
-          return deferred.promise;
+          return q.when(centre);
         });
 
         scope.vm.changeStatus(status);
@@ -62,12 +72,14 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       }
 
       it('should enable a centre', function() {
-        checkStatusChange('enable', CentreStatus.ENABLED());
+        var centre = new Centre(fakeEntities.centre());
+        checkStatusChange(centre, 'enable', CentreStatus.ENABLED());
       });
 
       it('should disable a centre', function() {
+        var centre = new Centre(fakeEntities.centre());
         centre.status = CentreStatus.ENABLED();
-        checkStatusChange('disable', CentreStatus.DISABLED());
+        checkStatusChange(centre, 'disable', CentreStatus.DISABLED());
       });
 
     });

@@ -3,25 +3,25 @@
 define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
-  describe('Controller: StudyEditCtrl', function() {
+  describe('Controller: CentreEditCtrl', function() {
 
-    var Study, fakeEntities;
+    var Centre, fakeEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (_Study_, fakeDomainEntities) {
-      Study = _Study_;
+    beforeEach(inject(function (_Centre_, fakeDomainEntities) {
+      Centre = _Centre_;
       fakeEntities = fakeDomainEntities;
     }));
 
-    describe('when adding a study', function() {
+    describe('when adding a centre', function() {
       var context = {};
 
       beforeEach(function() {
-        context.study = new Study();
+        context.centre = new Centre();
         context.titleContains = 'Add';
         context.returnState = {
-          name: 'home.admin.studies',
+          name: 'home.admin.centres',
           params: {}
         };
       });
@@ -29,16 +29,16 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       sharedBehaviour(context);
     });
 
-    describe('when updating a study', function() {
+    describe('when updating a centre', function() {
 
       var context = {};
 
       beforeEach(function() {
-        context.study = new Study(fakeEntities.study());
+        context.centre = new Centre(fakeEntities.centre());
         context.titleContains = 'Update';
         context.returnState = {
-          name: 'home.admin.studies.study.summary',
-          params: {studyId: context.study.id}
+          name: 'home.admin.centres.centre.summary',
+          params: {centreId: context.centre.id}
         };
       });
 
@@ -50,7 +50,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
       describe('(shared)', function () {
 
-        var study, titleContains, returnState, createController;
+        var centre, titleContains, returnState, createController;
 
         function setupController(injector) {
           var $rootScope           = injector.get('$rootScope'),
@@ -63,14 +63,14 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
           //--
 
-          function create(study) {
+          function create(centre) {
             var scope = $rootScope.$new();
-            $controller('StudyEditCtrl as vm', {
+            $controller('CentreEditCtrl as vm', {
               $scope:               scope,
               $state:               $state,
               notificationsService: notificationsService,
               domainEntityService:  domainEntityService,
-              study:                study
+              centre:                centre
             });
             scope.$digest();
             return scope;
@@ -78,16 +78,16 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
         }
 
         beforeEach(inject(function ($injector) {
-          study = context.study;
+          centre = context.centre;
           titleContains = context.titleContains;
           returnState = context.returnState;
           createController = setupController($injector);
         }));
 
-        it('should contain valid settings to update a study', function() {
-          var scope = createController(study);
+        it('scope should be valid', function() {
+          var scope = createController(centre);
 
-          expect(scope.vm.study).toEqual(study);
+          expect(scope.vm.centre).toEqual(centre);
           expect(scope.vm.title).toContain(titleContains);
           expect(scope.vm.returnState.name).toBe(returnState.name);
           expect(scope.vm.returnState.params).toEqual(returnState.params);
@@ -95,7 +95,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
         it('should return to valid state on cancel', function() {
           var $state = this.$injector.get('$state'),
-              scope = createController(study);
+              scope = createController(centre);
           spyOn($state, 'go').and.callFake(function () {} );
           scope.vm.cancel();
           expect($state.go).toHaveBeenCalledWith(returnState.name,
@@ -106,33 +106,33 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
         it('should return to valid state on invalid submit', function() {
           var $q                  = this.$injector.get('$q'),
               domainEntityService = this.$injector.get('domainEntityService'),
-              scope               = createController(study);
+              scope               = createController(centre);
 
           spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
-          spyOn(Study.prototype, 'addOrUpdate').and.callFake(function () {
+          spyOn(Centre.prototype, 'addOrUpdate').and.callFake(function () {
             var deferred = $q.defer();
             deferred.reject('err');
             return deferred.promise;
           });
 
-          scope.vm.submit(study);
+          scope.vm.submit(centre);
           scope.$digest();
           expect(domainEntityService.updateErrorModal)
-            .toHaveBeenCalledWith('err', 'study');
+            .toHaveBeenCalledWith('err', 'centre');
         });
 
 
         it('should return to valid state on submit', function() {
           var $q     = this.$injector.get('$q'),
               $state = this.$injector.get('$state'),
-              scope  = createController(study);
+              scope  = createController(centre);
 
           spyOn($state, 'go').and.callFake(function () {} );
-          spyOn(Study.prototype, 'addOrUpdate').and.callFake(function () {
+          spyOn(Centre.prototype, 'addOrUpdate').and.callFake(function () {
             return $q.when('test');
           });
 
-          scope.vm.submit(study);
+          scope.vm.submit(centre);
           scope.$digest();
           expect($state.go).toHaveBeenCalledWith(returnState.name,
                                                  returnState.params,

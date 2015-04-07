@@ -21,9 +21,9 @@ define(['angular', 'underscore'], function(angular, _) {
   CentreStudiesPanelCtrl.$inject = [
     '$scope',
     'Panel',
+    'Study',
     'StudyViewer',
     'tableService',
-    'studiesService',
     'modalService'
   ];
 
@@ -32,9 +32,9 @@ define(['angular', 'underscore'], function(angular, _) {
    */
   function CentreStudiesPanelCtrl($scope,
                                   Panel,
+                                  Study,
                                   StudyViewer,
                                   tableService,
-                                  studiesService,
                                   modalService) {
 
     var vm = this;
@@ -43,7 +43,7 @@ define(['angular', 'underscore'], function(angular, _) {
 
     vm.centre         = $scope.centre;
     vm.studyNames     = $scope.studyNames;
-    vm.studiesById    = [];
+    vm.studyNamesById = [];
     vm.tableStudies   = [];
 
     vm.remove         = remove;
@@ -63,10 +63,10 @@ define(['angular', 'underscore'], function(angular, _) {
       $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                     angular.bind(panel, panel.watchPanelOpenChangeFunc));
 
-      vm.studiesById = _.indexBy(vm.studyNames, 'id');
+      vm.studyNamesById = _.indexBy(vm.studyNames, 'id');
 
       _.each(vm.centre.studyIds, function (studyId) {
-        vm.tableStudies.push(vm.studiesById[studyId]);
+        vm.tableStudies.push(vm.studyNamesById[studyId]);
       });
 
       vm.tableParams = tableService.getTableParamsWithCallback(getTableData, {}, {counts: []});
@@ -80,7 +80,7 @@ define(['angular', 'underscore'], function(angular, _) {
       // add the study only if it's not there
       if(_.indexOf(vm.centre.studyIds, item.id) < 0) {
         vm.centre.addStudy(item).then(function () {
-          vm.tableStudies.push(vm.studiesById[item.id]);
+          vm.tableStudies.push(vm.studyNamesById[item.id]);
           vm.tableParams.reload();
         });
       }
@@ -88,15 +88,10 @@ define(['angular', 'underscore'], function(angular, _) {
     }
 
     function information(studyId) {
-      if (!!vm.studiesById[studyId].timeAdded) {
-        // study already loaded, no need to reload it
-        return new StudyViewer(vm.studiesById[studyId]);
-      } else {
-        return studiesService.get(studyId).then(function (study) {
-          vm.studiesById[study.id] = study;
-          return new StudyViewer(study);
-        });
-      }
+      return Study.get(studyId).then(function (study) {
+        vm.studyNamesById[study.id] = study;
+        return new StudyViewer(study);
+      });
     }
 
     function remove(studyId) {
@@ -104,16 +99,16 @@ define(['angular', 'underscore'], function(angular, _) {
       var modalOptions = {
         closeButtonText: 'Cancel',
         headerHtml: 'Remove study',
-        bodyHtml: 'Are you sure you want to remove study ' + vm.studiesById[studyId].name + '?'
+        bodyHtml: 'Are you sure you want to remove study ' + vm.studyNamesById[studyId].name + '?'
       };
 
       modalService.showModal({}, modalOptions).then(function () {
         return vm.centre.removeStudy({id: studyId})
           .then(function () {
-            vm.tableStudies = _.without(vm.tableStudies, vm.studiesById[studyId]);
+            vm.tableStudies = _.without(vm.tableStudies, vm.studyNamesById[studyId]);
             vm.tableParams.reload();
-          }).
-          catch(removeFailed);
+          })
+          .catch(removeFailed);
       });
 
       function removeFailed(error) {

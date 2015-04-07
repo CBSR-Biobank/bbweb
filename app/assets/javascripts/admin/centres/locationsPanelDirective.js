@@ -22,7 +22,8 @@ define(['angular'], function(angular) {
     '$state',
     'LocationViewer',
     'Panel',
-    'domainEntityService'
+    'domainEntityService',
+    'tableService'
   ];
 
   /**
@@ -32,7 +33,8 @@ define(['angular'], function(angular) {
                               $state,
                               LocationViewer,
                               Panel,
-                              domainEntityService) {
+                              domainEntityService,
+                              tableService) {
     var vm = this;
 
     var panel = new Panel('centre.panel.locations', 'home.admin.centres.centre.locationAdd');
@@ -43,9 +45,11 @@ define(['angular'], function(angular) {
     vm.add              = add;
     vm.information      = information;
     vm.panelOpen        = panel.getPanelOpenState();
-    vm.tableParams      = panel.getTableParams(vm.centre.locations);
+    vm.tableParams      = tableService.getTableParamsWithCallback(getTableData,
+                                                                  {},
+                                                                  { counts: [] });
 
-    vm.modificationsAllowed = vm.centre.status === 'Disabled';
+    vm.modificationsAllowed = vm.centre.isDisabled();
 
     $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                   angular.bind(panel, panel.watchPanelOpenChangeFunc));
@@ -63,16 +67,23 @@ define(['angular'], function(angular) {
     }
 
     function remove(location) {
+      var fakeEntity = {
+        remove: function () {
+          return vm.centre.removeLocation(location);
+        }
+      };
+
       domainEntityService.removeEntity(
-        removeCallback,
+        fakeEntity,
         'Remove Location',
         'Are you sure you want to remove location ' + location.name + '?',
         'Remove Failed',
         'Location ' + location.name + ' cannot be removed: ');
 
-      function removeCallback(location) {
-        return vm.centre.removeLocation(location);
-      }
+    }
+
+    function getTableData() {
+      return vm.centre.locations;
     }
   }
 

@@ -1,14 +1,20 @@
 define([], function() {
   'use strict';
 
-  CentreCtrl.$inject = ['$window', '$scope', '$state', '$timeout', 'Centre'];
+  CentreCtrl.$inject = [
+    '$window',
+    '$scope',
+    '$state',
+    '$timeout',
+    'centre'
+  ];
 
   /**
    *
    */
-  function CentreCtrl($window, $scope, $state, $timeout, Centre) {
+  function CentreCtrl($window, $scope, $state, $timeout, centre) {
     var vm = this;
-    vm.centre = {};
+    vm.centre = centre;
 
     vm.tabSummaryActive   = false;
     vm.tabLocationsActive = false;
@@ -21,17 +27,13 @@ define([], function() {
 
     // initialize the panels to open state when viewing a new centre
     function init() {
-      Centre.get($state.params.centreId).then(function (centre) {
-        vm.centre = centre;
+      if (vm.centre.id !== $window.localStorage.getItem('centre.panel.centreId')) {
+        // this way when the user selects a new centre, the panels always default to open
+        $window.localStorage.setItem('centre.panel.locations', true);
 
-        if (centre.id !== $window.localStorage.getItem('centre.panel.centreId')) {
-          // this way when the user selects a new centre, the panels always default to open
-          $window.localStorage.setItem('centre.panel.locations', true);
-
-          // remember the last viewed centre
-          $window.localStorage.setItem('centre.panel.centreId', centre.id);
-        }
-      });
+        // remember the last viewed centre
+        $window.localStorage.setItem('centre.panel.centreId', centre.id);
+      }
     }
 
     function activeTabUpdateFix() {
