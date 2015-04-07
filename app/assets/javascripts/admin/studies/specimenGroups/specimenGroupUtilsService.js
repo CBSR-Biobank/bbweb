@@ -9,7 +9,8 @@ define(['underscore'], function(_) {
   function specimenGroupUtils(domainEntityService,
                               modalService) {
     var service = {
-      inUseModal: inUseModal
+      updateInUseModal: updateInUseModal,
+      removeInUseModal: removeInUseModal
     };
     return service;
 
@@ -26,6 +27,13 @@ define(['underscore'], function(_) {
           'a collection event type or a specimen link type');
     }
 
+    function updateInUseModal(specimenGroup) {
+      return inUseModal(specimenGroup, 'update');
+    }
+
+    function removeInUseModal(specimenGroup) {
+      return inUseModal(specimenGroup, 'remove');
+    }
   }
 
   return specimenGroupUtils;

@@ -20,15 +20,16 @@ define(['underscore'], function(_) {
                                     SpecimenLinkAnnotationType,
                                     domainEntityService) {
     var service = {
-      inUseModal: inUseModal,
+      updateInUseModal: updateInUseModal,
+      removeInUseModal: removeInUseModal,
       remove:     remove
     };
     return service;
 
     //-------
 
-    function inUseModal(annotationType) {
-      var headerHtml = 'Cannot update this annotation type',
+    function inUseModal(annotationType, action) {
+      var headerHtml = 'Cannot ' + action + ' this annotation type',
           bodyHtml;
 
       if (annotationType instanceof ParticipantAnnotationType) {
@@ -47,6 +48,14 @@ define(['underscore'], function(_) {
         throw new Error('invalid annotation type: ' + annotationType);
       }
       return modalService.modalOk(headerHtml, bodyHtml);
+    }
+
+    function updateInUseModal(annotationType) {
+      return inUseModal(annotationType, 'update');
+    }
+
+    function removeInUseModal(annotationType) {
+      return inUseModal(annotationType, 'remove');
     }
 
     function remove(annotationType) {

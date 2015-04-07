@@ -12,21 +12,21 @@ define([
 ], function(angular, mocks, _, testUtils) {
   'use strict';
 
-  describe('SpecimenGroupDataSet', function() {
+  describe('SpecimenGroupData', function() {
 
-    var SpecimenGroupDataSet,
+    var SpecimenGroupData,
         fakeEntities,
         study,
         specimenGroups,
         specimenGroupData,
-        theSet;
+        testObj;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (fakeDomainEntities, _SpecimenGroupDataSet_) {
+    beforeEach(inject(function (fakeDomainEntities, _SpecimenGroupData_) {
       testUtils.addCustomMatchers();
 
-      SpecimenGroupDataSet = _SpecimenGroupDataSet_;
+      SpecimenGroupData = _SpecimenGroupData_;
       fakeEntities = fakeDomainEntities;
       study = fakeEntities.study();
 
@@ -38,9 +38,8 @@ define([
         return fakeEntities.specimenGroupData(sg);
       });
 
-      theSet = new SpecimenGroupDataSet(specimenGroupData, {
-        studySpecimenGroups: specimenGroups
-      });
+      testObj = _.extend({specimenGroupData: specimenGroupData}, SpecimenGroupData);
+      testObj.studySpecimenGroups(specimenGroups);
     }));
 
     function compareSpecimenGroupData(expected, actual) {
@@ -49,29 +48,24 @@ define([
       expect(expected.amount).toEqual(actual.amount);
     }
 
-    it('should return the correct size', function() {
-      expect(theSet.size()).toBe(specimenGroupData.length);
-    });
-
     it('should return the the correct IDs', function() {
-      var allIds = theSet.allIds();
+      var allIds = testObj.specimenGroupDataIds();
       expect(allIds).toBeArrayOfSize(specimenGroupData.length);
       expect(allIds).toContainAll(_.pluck(specimenGroupData, 'specimenGroupId'));
     });
 
-    it('get should return the correct result', function() {
-      compareSpecimenGroupData(theSet.get(specimenGroups[0].id), specimenGroupData[0]);
+    it('getSpecimenGroupDataById should return the correct result', function() {
+      compareSpecimenGroupData(testObj.getSpecimenGroupDataById(specimenGroups[0].id), specimenGroupData[0]);
     });
 
-    it('get should throw an error for an invalid id', function() {
+    it('getSpecimenGroupDataById should throw an error for an invalid id', function() {
       var badId = fakeEntities.stringNext();
-      expect(function () {
-        theSet.get(badId);
-      }).toThrow(new Error('specimen group data with id not found: ' + badId));
+      expect(function () { testObj.getSpecimenGroupDataById(badId); })
+        .toThrow(new Error('specimen group data with id not found: ' + badId));
     });
 
     it('getSpecimenGroupData should return valid results', function() {
-      var result = theSet.getSpecimenGroupData();
+      var result = testObj.getSpecimenGroupData();
       _.each(result, function(item) {
         var sgDataItem = _.findWhere(specimenGroupData, { specimenGroupId: item.specimenGroupId });
         expect(sgDataItem).toBeDefined();
@@ -86,7 +80,7 @@ define([
           sg.units + ')';
       });
 
-      expect(theSet.getAsString()).toBe(expectedStrs.join(', '));
+      expect(testObj.getSpecimenGroupsAsString()).toBe(expectedStrs.join(', '));
     });
 
 

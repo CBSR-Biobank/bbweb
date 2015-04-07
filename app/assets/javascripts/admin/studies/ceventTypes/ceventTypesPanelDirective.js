@@ -65,9 +65,9 @@ define(['angular', 'underscore'], function(angular, _) {
     vm.viewSpecimenGroup    = viewSpecimenGroup;
     vm.panelOpen            = panel.getPanelOpenState();
     vm.modificationsAllowed = vm.study.isDisabled();
-    vm.tableParams           = tableService.getTableParamsWithCallback(getTableData,
-                                                                       {},
-                                                                       { counts: [] });
+    vm.tableParams          = tableService.getTableParamsWithCallback(getTableData,
+                                                                      {},
+                                                                      { counts: [] });
 
     $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                   angular.bind(panel, panel.watchPanelOpenChangeFunc));

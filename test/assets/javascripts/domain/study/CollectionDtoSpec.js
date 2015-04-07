@@ -49,7 +49,7 @@ define([
         entities.specimenGroups = _.map(_.range(2), function () {
           return fakeEntities.specimenGroup(entities.study);
         });
-        entities.collectionEventAnnotationTypesInUse = [ entities.collectionEventAnnotationTypes[0].id ];
+        entities.collectionEventAnnotationTypeIdsInUse = [ entities.collectionEventAnnotationTypes[0].id ];
         entities.collectionEventTypes = _.map(_.range(2), function () {
           return fakeEntities.collectionEventType(entities.study, {
             specimenGroups: entities.specimenGroups,
@@ -65,7 +65,7 @@ define([
 
       expect(dto.collectionEventTypes).toBeArrayOfSize(0);
       expect(dto.collectionEventAnnotationTypes).toBeArrayOfSize(0);
-      expect(dto.collectionEventAnnotationTypesInUse).toBeArrayOfSize(0);
+      expect(dto.collectionEventAnnotationTypeIdsInUse).toBeArrayOfSize(0);
       expect(dto.specimenGroups).toBeArrayOfSize(0);
     });
 
@@ -110,21 +110,23 @@ define([
     function compareToServerObj(dto, serverObj) {
       expect(dto.collectionEventTypes).toBeArrayOfSize(serverObj.collectionEventTypes.length);
       expect(dto.collectionEventAnnotationTypes).toBeArrayOfSize(serverObj.collectionEventAnnotationTypes.length);
-      expect(dto.collectionEventAnnotationTypesInUse).toBeArrayOfSize(serverObj.collectionEventAnnotationTypesInUse.length);
+      expect(dto.collectionEventAnnotationTypeIdsInUse)
+        .toBeArrayOfSize(serverObj.collectionEventAnnotationTypeIdsInUse.length);
       expect(dto.specimenGroups).toBeArrayOfSize(serverObj.specimenGroups.length);
 
       expect(dto.collectionEventTypes).toContainAll(serverObj.collectionEventTypes);
       expect(dto.collectionEventAnnotationTypes).toContainAll(serverObj.collectionEventAnnotationTypes);
-      expect(dto.collectionEventAnnotationTypesInUse).toContainAll(serverObj.collectionEventAnnotationTypesInUse);
+      expect(dto.collectionEventAnnotationTypeIdsInUse)
+        .toContainAll(serverObj.collectionEventAnnotationTypeIdsInUse);
       expect(dto.specimenGroups).toContainAll(serverObj.specimenGroups);
 
       _.each(dto.collectionEventTypes, function (cet) {
-        expect(cet.allSpecimenGroupDataIds()).toBeArrayOfSize(serverObj.specimenGroups.length);
-        expect(cet.allAnnotationTypeDataIds()).toBeArrayOfSize(serverObj.collectionEventAnnotationTypes.length);
+        expect(cet.specimenGroupDataIds()).toBeArrayOfSize(serverObj.specimenGroups.length);
+        expect(cet.annotationTypeDataIds()).toBeArrayOfSize(serverObj.collectionEventAnnotationTypes.length);
 
-        expect(cet.allSpecimenGroupDataIds()).toContainAll(
+        expect(cet.specimenGroupDataIds()).toContainAll(
           _.pluck(serverObj.specimenGroups, 'id'));
-        expect(cet.allAnnotationTypeDataIds()).toContainAll(
+        expect(cet.annotationTypeDataIds()).toContainAll(
           _.pluck(serverObj.collectionEventAnnotationTypes, 'id'));
       });
     }

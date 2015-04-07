@@ -51,7 +51,8 @@ define([
             return fakeEntities.studyAnnotationType(entities.study, {
               valueType: valueType
             });
-        });
+          });
+        entities.specimenLinkAnnotationTypeIdsInUse = [ entities.specimenLinkAnnotationTypes[0] ];
         entities.specimenLinkTypes = _.map(_.range(2), function (id) {
           return fakeEntities.specimenLinkType(entities.processingTypes[id], {
             inputGroup: entities.specimenGroups[0],
@@ -127,9 +128,9 @@ define([
       expect(dto.specimenGroups).toContainAll(serverObj.specimenGroups);
 
       _.each(dto.specimenLinkTypes, function (slt) {
-        expect(slt.allAnnotationTypeDataIds()).toBeArrayOfSize(serverObj.specimenLinkAnnotationTypes.length);
+        expect(slt.annotationTypeDataIds()).toBeArrayOfSize(serverObj.specimenLinkAnnotationTypes.length);
 
-        expect(slt.allAnnotationTypeDataIds()).toContainAll(
+        expect(slt.annotationTypeDataIds()).toContainAll(
           _.pluck(serverObj.specimenLinkAnnotationTypes, 'id'));
       });
     }

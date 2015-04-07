@@ -20,7 +20,7 @@ define(['underscore'], function(_) {
     var requiredKeys = [
       'collectionEventTypes',
       'collectionEventAnnotationTypes',
-      'collectionEventAnnotationTypesInUse',
+      'collectionEventAnnotationTypeIdsInUse',
       'specimenGroups'
     ];
 
@@ -35,7 +35,6 @@ define(['underscore'], function(_) {
      * An object that contains a list of all the collectionEventTypes, collectionEventAnnotationTypes, and
      * specimenGroups for a study.
      */
-    // FIXME: convert collectionDto.specimenGroups to SpecimenGroup objects
     function CollectionDto(obj) {
       var self = this;
 
@@ -57,10 +56,10 @@ define(['underscore'], function(_) {
       });
 
       _.extend(self, _.defaults(obj, {
-        collectionEventTypes:                [],
-        collectionEventAnnotationTypes:      [],
-        collectionEventAnnotationTypesInUse: [],
-        specimenGroups:                      []
+        collectionEventTypes:                  [],
+        collectionEventAnnotationTypes:        [],
+        collectionEventAnnotationTypeIdsInUse: [],
+        specimenGroups:                        []
       }));
     }
 

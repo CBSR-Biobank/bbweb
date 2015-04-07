@@ -19,7 +19,7 @@ define([], function() {
       ev.addAttribute('Name', ceventType.name);
       ev.addAttribute('Recurring', ceventType.recurring ? 'Yes' : 'No');
       ev.addAttribute('Specimen Groups (Count, Amount)', ceventType.getSpecimenGroupsAsString());
-      ev.addAttribute('Annotation Types', ceventType.getAnnotationTypesAsString());
+      ev.addAttribute('Annotation Types', ceventType.getAnnotationTypeDataAsString());
       ev.addAttribute('Description', ceventType.description);
 
       ev.showModal();

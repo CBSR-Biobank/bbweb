@@ -83,7 +83,7 @@ define(['angular', 'underscore'], function(angular, _) {
       }
 
       if (_.contains(vm.specimenGroupIdsInUse, specimenGroup.id)) {
-        specimenGroupUtils.inUseModal(specimenGroup, 'updated');
+        specimenGroupUtils.updateInUseModal(specimenGroup);
         return;
       }
 
@@ -98,7 +98,7 @@ define(['angular', 'underscore'], function(angular, _) {
       }
 
       if (_.contains(vm.specimenGroupIdsInUse, specimenGroup.id)) {
-        specimenGroupUtils.inUseModal(specimenGroup);
+        specimenGroupUtils.removeInUseModal(specimenGroup);
         return;
       }
 

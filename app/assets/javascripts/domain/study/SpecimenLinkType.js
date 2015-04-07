@@ -7,7 +7,7 @@ define(['underscore'], function(_) {
     'validationService',
     'biobankApi',
     'ConcurrencySafeEntity',
-    'AnnotationTypeDataSet'
+    'AnnotationTypeData'
   ];
 
   /**
@@ -17,7 +17,7 @@ define(['underscore'], function(_) {
                                    validationService,
                                    biobankApi,
                                    ConcurrencySafeEntity,
-                                   AnnotationTypeDataSet) {
+                                   AnnotationTypeData) {
 
     var requiredKeys = [
       'id',
@@ -89,6 +89,7 @@ define(['underscore'], function(_) {
     }
 
     SpecimenLinkType.prototype = Object.create(ConcurrencySafeEntity.prototype);
+    _.extend(SpecimenLinkType.prototype, AnnotationTypeData);
 
     /**
      * Used by promise code, so it must return an error rather than throw one.
@@ -141,11 +142,7 @@ define(['underscore'], function(_) {
                                                'inputContainerTypeId',
                                                'outputContainerTypeId'));
 
-      if (this.annotationTypeDataSet) {
-        cmd.annotationTypeData = this.annotationTypeDataSet.getAnnotationTypeData();
-      } else {
-        cmd.annotationTypeData = this.annotationTypeData;
-      }
+      cmd.annotationTypeData = this.getAnnotationTypeData();
 
       return addOrUpdateInternal().then(function(reply) {
         return SpecimenLinkType.create(reply);
@@ -169,34 +166,6 @@ define(['underscore'], function(_) {
     SpecimenLinkType.prototype.studySpecimenGroups = function (studySpecimenGroups) {
       this.inputGroup = _.findWhere(studySpecimenGroups, { id: this.inputGroupId});
       this.outputGroup = _.findWhere(studySpecimenGroups, { id: this.outputGroupId});
-    };
-
-    SpecimenLinkType.prototype.studyAnnotationTypes = function (annotationTypes) {
-      this.annotationTypeDataSet =
-        new AnnotationTypeDataSet(this.annotationTypeData, {
-          studyAnnotationTypes: annotationTypes
-        });
-    };
-
-    SpecimenLinkType.prototype.allAnnotationTypeDataIds  = function () {
-      if (this.annotationTypeDataSet) {
-        return this.annotationTypeDataSet.allIds();
-      }
-      throw new Error('no data items');
-    };
-
-    SpecimenLinkType.prototype.getAnnotationTypeData = function (annotationTypeId) {
-      if (this.annotationTypeDataSet) {
-        return this.annotationTypeDataSet.get(annotationTypeId);
-      }
-      throw new Error('no data items');
-    };
-
-    SpecimenLinkType.prototype.getAnnotationTypesAsString = function () {
-      if (this.annotationTypeDataSet) {
-        return this.annotationTypeDataSet.getAsString();
-      }
-      throw new Error('no data items');
     };
 
     function uri(processingTypeId, ceventTypeId, version) {

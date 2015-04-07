@@ -98,7 +98,7 @@ define([
             expect(attr.value).toBe(ceventObjs.ceventType.getSpecimenGroupsAsString());
             break;
           case 'Annotation Types':
-            expect(attr.value).toBe(ceventObjs.ceventType.getAnnotationTypesAsString());
+            expect(attr.value).toBe(ceventObjs.ceventType.getAnnotationTypeDataAsString());
             break;
           case 'Description':
             expect(attr.value).toBe(ceventObjs.serverCeventType.description);

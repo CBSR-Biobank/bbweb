@@ -436,15 +436,18 @@ class StudiesServiceImpl(implicit inj: Injector)
         val specimenGroups  = specimenGroupRepository.allForStudy(study.id)
         val processingTypes = processingTypeRepository.allForStudy(study.id)
         val annotationTypes = specimenLinkAnnotationTypeRepository.allForStudy(study.id)
-
         val specimenLinkTypes = processingTypes.flatMap { pt =>
           specimenLinkTypeRepository.allForProcessingType(pt.id)
+        }
+        val annotationTypesInUse = specimenLinkTypes.flatMap { slt =>
+          slt.annotationTypeData.map(atd => atd.annotationTypeId)
         }
 
         ProcessingDto(
           processingTypes.toList,
           specimenLinkTypes.toList,
           annotationTypes.toList,
+          annotationTypesInUse.toList,
           specimenGroups.toList).success
       }
     )

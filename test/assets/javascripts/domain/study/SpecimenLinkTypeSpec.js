@@ -7,9 +7,9 @@ define([
   'angularMocks',
   'underscore',
   'biobank.testUtils',
-  '../annotationTypeDataSetSharedSpec',
+  '../annotationTypeDataSharedSpec',
   'biobankApp'
-], function(angular, mocks, _, testUtils, annotationTypeDataSetSharedSpec) {
+], function(angular, mocks, _, testUtils, annotationTypeDataSharedSpec) {
   'use strict';
 
   describe('SpecimenLinkType', function() {
@@ -226,7 +226,7 @@ define([
       expect(entities.slt.outputGroup).toEqual(entities.specimenGroups[1]);
 
       _.each(entities.annotationTypes, function(at) {
-        expect(entities.slt.getAnnotationTypeData(at.id).annotationType).toEqual(at);
+        expect(entities.slt.getAnnotationTypeDataById(at.id).annotationType).toEqual(at);
       });
     });
 
@@ -245,32 +245,23 @@ define([
         studyAnnotationTypes: entities.annotationTypes
       });
 
-      ids = slt.allAnnotationTypeDataIds();
+      ids = slt.annotationTypeDataIds();
       expect(ids).toBeArrayOfSize(entities.annotationTypes.length);
       expect(ids).toContainAll(_.pluck(entities.annotationTypes, 'id'));
     });
 
-    it('getAnnotationTypeData throws an error if there are no annotation type data items', function() {
+    it('getAnnotationTypeDataById throws an error if there are no annotation type data items', function() {
       var entities = createEntities(),
           slt = new SpecimenLinkType(entities.sltFromServer);
-      expect(function () { slt.getAnnotationTypeData(entities.annotationTypes[0].id); })
+      expect(function () { slt.getAnnotationTypeDataById(entities.annotationTypes[0].id); })
         .toThrow(new Error('no data items'));
     });
 
-    it('allAnnotationTypeDataIds should throw an error if there are no annotation type data items',
+    it('getAnnotationTypeDataAsString should return an empty string if there are no annotation type data items',
        function() {
          var entities = createEntities(),
              slt = new SpecimenLinkType(entities.sltFromServer);
-         expect(function () { slt.allAnnotationTypeDataIds(); })
-           .toThrow(new Error('no data items'));
-       });
-
-    it('getAnnotationTypesAsString should throw an error if there are no annotation type data items',
-       function() {
-         var entities = createEntities(),
-             slt = new SpecimenLinkType(entities.sltFromServer);
-         expect(function () { slt.getAnnotationTypesAsString(); })
-           .toThrow(new Error('no data items'));
+         expect(slt.getAnnotationTypeDataAsString()).toBeEmptyString();
        });
 
     describe('uses annotation type set correctly', function () {
@@ -297,9 +288,11 @@ define([
         slt = new SpecimenLinkType(sltFromServer,
                                    { studyAnnotationTypes: annotationTypes });
         context.parentObj = slt;
+        context.annotationTypes = annotationTypes;
+        context.fakeEntities = fakeEntities;
       }));
 
-      annotationTypeDataSetSharedSpec(context);
+      annotationTypeDataSharedSpec(context);
     });
 
     function compareSltToServerObj(slt, serverObj) {
@@ -319,19 +312,19 @@ define([
     }
 
     function sltToAddCommand(slt) {
-      return _.extend(_.pick(slt,
-                             'processingTypeId',
-                             'expectedInputChange',
-                             'expectedOutputChange',
-                             'inputCount',
-                             'outputCount',
-                             'inputGroupId',
-                             'outputGroupId',
-                             'annotationTypeData'),
-                      funutils.pickOptional(slt,
+      var cmd =  _.extend(_.pick(slt,
+                                 'processingTypeId',
+                                 'expectedInputChange',
+                                 'expectedOutputChange',
+                                 'inputCount',
+                                 'outputCount',
+                                 'inputGroupId',
+                                 'outputGroupId'),
+                          funutils.pickOptional(slt,
                                             'inputContainerTypeId',
-                                            'outputContainerTypeId'));
-
+                                                'outputContainerTypeId'));
+      cmd.annotationTypeData = slt.getAnnotationTypeData();
+      return cmd;
     }
 
     function sltToUpdateCommand(ceventType) {

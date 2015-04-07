@@ -11,7 +11,7 @@ define(function (require) {
       AnatomicalSourceType                = require('./AnatomicalSourceType'),
       AnnotationHelper                    = require('./AnnotationHelper'),
       AnnotationType                      = require('./AnnotationType'),
-      AnnotationTypeDataSet               = require('./AnnotationTypeDataSet'),
+      AnnotationTypeData                  = require('./AnnotationTypeData'),
       AnnotationTypeViewer                = require('./AnnotationTypeViewer'),
       AnnotationValueType                 = require('./AnnotationValueType'),
       AnnotationMaxValueCount             = require('./AnnotationMaxValueCount'),
@@ -40,7 +40,7 @@ define(function (require) {
       ProcessingTypeViewer                = require('./study/ProcessingTypeViewer'),
       SpcLinkTypeViewer                   = require('./study/SpcLinkTypeViewer'),
       SpecimenGroup                       = require('./study/SpecimenGroup'),
-      SpecimenGroupDataSet                = require('./study/SpecimenGroupDataSet'),
+      SpecimenGroupData                   = require('./study/SpecimenGroupData'),
       SpecimenGroupViewer                 = require('./study/SpecimenGroupViewer'),
       SpecimenLinkAnnotationType          = require('./study/SpecimenLinkAnnotationType'),
       SpecimenLinkType                    = require('./study/SpecimenLinkType'),
@@ -63,7 +63,7 @@ define(function (require) {
 
   module.factory('AnnotationHelper',                    AnnotationHelper);
   module.factory('AnnotationType',                      AnnotationType);
-  module.factory('AnnotationTypeDataSet',               AnnotationTypeDataSet);
+  module.factory('AnnotationTypeData',                  AnnotationTypeData);
   module.factory('AnnotationTypeViewer',                AnnotationTypeViewer);
   module.service('domainEntityService',                 domainEntityService);
 
@@ -82,7 +82,7 @@ define(function (require) {
   module.factory('ProcessingTypeViewer',                ProcessingTypeViewer);
   module.factory('SpcLinkTypeViewer',                   SpcLinkTypeViewer);
   module.factory('SpecimenGroup',                       SpecimenGroup);
-  module.factory('SpecimenGroupDataSet',                SpecimenGroupDataSet);
+  module.factory('SpecimenGroupData',                   SpecimenGroupData);
   module.factory('SpecimenGroupViewer',                 SpecimenGroupViewer);
   module.factory('SpecimenLinkAnnotationType',          SpecimenLinkAnnotationType);
   module.factory('SpecimenLinkType',                    SpecimenLinkType);

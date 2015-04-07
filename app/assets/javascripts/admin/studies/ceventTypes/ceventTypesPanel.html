@@ -29,20 +29,24 @@
           <a href>{{ceventType.name}}</a>
         </span>
       </td>
+
+      <!-- SPECIMEN GROUP DATA -->
       <td data-title="'Specimen Groups'">
-        <span ng-repeat="sgItemId in ceventType.allSpecimenGroupDataIds()"
+        <span ng-repeat="sgItemId in ceventType.specimenGroupDataIds()"
               ng-click="vm.viewSpecimenGroup(sgItemId)">
           <a href>
-            {{ceventType.getSpecimenGroupData(sgItemId).specimenGroup.name}}
+            {{ceventType.getSpecimenGroupDataById(sgItemId).specimenGroup.name}}
           </a>
           <span ng-if="!$last">, </span>
         </span>
       </td>
+
+      <!-- ANNOTATION TYPE DATA -->
       <td data-title="'Annotation Types'">
-        <span ng-repeat="atItemId in ceventType.allAnnotationTypeDataIds()"
+        <span ng-repeat="atItemId in ceventType.annotationTypeDataIds()"
               ng-click="vm.viewAnnotationType(atItemId)">
           <a href>
-            {{ceventType.getAnnotationTypeData(atItemId).annotationType.name}}
+            {{ceventType.getAnnotationTypeDataById(atItemId).annotationType.name}}
           </a>
           <span ng-if="!$last">, </span>
         </span>

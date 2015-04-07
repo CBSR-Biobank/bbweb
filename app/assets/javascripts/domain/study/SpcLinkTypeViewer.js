@@ -31,7 +31,7 @@ define([], function() {
                       spcLinkType.outputCount);
       ev.addAttribute('Output Container Type', 'None');
       ev.addAttribute('Annotation Types',
-                      spcLinkType.getAnnotationTypesAsString());
+                      spcLinkType.getAnnotationTypeDataAsString());
 
       ev.showModal();
     }

@@ -23,6 +23,7 @@ define(['underscore'], function(_) {
       'processingTypes',
       'specimenLinkTypes',
       'specimenLinkAnnotationTypes',
+      'specimenLinkAnnotationTypeIdsInUse',
       'specimenGroups'
     ];
 
@@ -61,10 +62,11 @@ define(['underscore'], function(_) {
       });
 
       _.extend(self, _.defaults(obj, {
-        processingTypes:             [],
-        specimenLinkTypes:           [],
-        specimenLinkAnnotationTypes: [],
-        specimenGroups:              []
+        processingTypes:                    [],
+        specimenLinkTypes:                  [],
+        specimenLinkAnnotationTypes:        [],
+        specimenLinkAnnotationTypeIdsInUse: [],
+        specimenGroups:                     []
       }));
     }
 

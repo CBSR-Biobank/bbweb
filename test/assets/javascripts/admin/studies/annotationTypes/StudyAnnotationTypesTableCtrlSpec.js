@@ -184,9 +184,9 @@ define([
         });
 
         it('on update should open a modal to display annotation type in use modal', function() {
-          spyOn(studyAnnotationTypeUtils, 'inUseModal');
+          spyOn(modalService, 'modalOk');
           scope.vm.update(scope.vm.annotationTypes[0]);
-          expect(studyAnnotationTypeUtils.inUseModal).toHaveBeenCalled();
+          expect(modalService.modalOk).toHaveBeenCalled();
         });
 
         it('on update should change state to update an annotation type', function() {

@@ -9,12 +9,12 @@ define(['angular', 'underscore'], function(angular, _) {
       require: '^tab',
       restrict: 'E',
       scope: {
-        study:           '=',
-        annotationTypes:      '=',
+        study:                  '=',
+        annotationTypes:        '=',
         annotationTypeIdsInUse: '=',
-        annotationTypeName:   '=',
-        updateStateName: '=',
-        hasRequired:     '@'
+        annotationTypeName:     '=',
+        updateStateName:        '=',
+        hasRequired:            '@'
       },
       templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotationTypesPanel.html',
       controller: 'StudyAnnotationTypesTableCtrl as vm'
@@ -34,24 +34,23 @@ define(['angular', 'underscore'], function(angular, _) {
    * A table to display a study's participant annotation types.
    */
   function StudyAnnotationTypesTableCtrl($scope,
-                                    $state,
-                                    modalService,
-                                    studyAnnotationTypeUtils,
-                                    AnnotationTypeViewer,
-                                    tableService) {
+                                         $state,
+                                         modalService,
+                                         studyAnnotationTypeUtils,
+                                         AnnotationTypeViewer,
+                                         tableService) {
     var vm = this;
 
-    vm.study             = $scope.study;
+    vm.study                  = $scope.study;
     vm.annotationTypes        = angular.copy($scope.annotationTypes);
     vm.annotationTypeIdsInUse = $scope.annotationTypeIdsInUse;
     vm.annotationTypeName     = $scope.annotationTypeName;
-    vm.updateStateName   = $scope.updateStateName;
-    vm.hasRequired       = $scope.hasRequired;
-    vm.update            = update;
-    vm.remove            = remove;
-    vm.information       = information;
-
-    vm.modificationsAllowed = vm.study.isDisabled();
+    vm.updateStateName        = $scope.updateStateName;
+    vm.hasRequired            = $scope.hasRequired;
+    vm.update                 = update;
+    vm.remove                 = remove;
+    vm.information            = information;
+    vm.modificationsAllowed   = vm.study.isDisabled();
 
     vm.columns = annotationTypeColumns($scope.annotationTypeName);
     vm.tableParams = tableService.getTableParamsWithCallback(getTableData, {}, { counts: [] });
@@ -89,7 +88,7 @@ define(['angular', 'underscore'], function(angular, _) {
       }
 
       if (_.contains(vm.annotationTypeIdsInUse, annotationType.id)) {
-        studyAnnotationTypeUtils.inUseModal(annotationType);
+        studyAnnotationTypeUtils.updateInUseModal(annotationType);
       } else {
         $state.go(vm.updateStateName, { annotationTypeId: annotationType.id });
       }
@@ -97,7 +96,7 @@ define(['angular', 'underscore'], function(angular, _) {
 
     function remove(annotationType) {
       if (_.contains(vm.annotationTypeIdsInUse, annotationType.id)) {
-        studyAnnotationTypeUtils.inUseModal(annotationType);
+        studyAnnotationTypeUtils.removeInUseModal(annotationType);
       } else {
         if (!vm.study.isDisabled()) {
           throw new Error('study is not disabled');

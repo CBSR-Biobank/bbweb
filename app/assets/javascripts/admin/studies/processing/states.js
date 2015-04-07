@@ -21,13 +21,12 @@ define([], function() {
       url: '/proctypes/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        processingType: ['study', function(study) {
-          return {
-            studyId: study.id,
-            name: '',
-            description: null,
-            enabled: false
-          };
+        processingType: [
+          '$stateParams', 'ProcessingType',
+          function($stateParams, ProcessingType) {
+            var pt = new ProcessingType();
+            pt.studyId = $stateParams.studyId;
+            return pt;
         }]
       },
       views: {

@@ -7,8 +7,8 @@ define(['underscore'], function(_) {
     'validationService',
     'biobankApi',
     'ConcurrencySafeEntity',
-    'SpecimenGroupDataSet',
-    'AnnotationTypeDataSet'
+    'SpecimenGroupData',
+    'AnnotationTypeData'
   ];
 
   /**
@@ -18,8 +18,8 @@ define(['underscore'], function(_) {
                                       validationService,
                                       biobankApi,
                                       ConcurrencySafeEntity,
-                                      SpecimenGroupDataSet,
-                                      AnnotationTypeDataSet) {
+                                      SpecimenGroupData,
+                                      AnnotationTypeData) {
     var requiredKeys = [
       'id',
       'studyId',
@@ -79,14 +79,15 @@ define(['underscore'], function(_) {
       collectionEventType = collectionEventType || {};
       ConcurrencySafeEntity.call(self, collectionEventType);
 
-      _.extend(self, _.defaults(collectionEventType, {
-        studyId:            null,
-        name:               '',
-        description:        null,
-        recurring:          false,
-        specimenGroupData:  [],
-        annotationTypeData: []
-      }));
+      _.extend(self,
+               _.defaults(collectionEventType, {
+                 studyId:            null,
+                 name:               '',
+                 description:        null,
+                 recurring:          false,
+                 specimenGroupData:  [],
+                 annotationTypeData: []
+               }));
 
       options = options || {};
 
@@ -100,6 +101,8 @@ define(['underscore'], function(_) {
     }
 
     CollectionEventType.prototype = Object.create(ConcurrencySafeEntity.prototype);
+    _.extend(CollectionEventType.prototype, SpecimenGroupData);
+    _.extend(CollectionEventType.prototype, AnnotationTypeData);
 
     /**
      * Used by promise code, so it must return an error rather than throw one.
@@ -147,20 +150,6 @@ define(['underscore'], function(_) {
       });
     };
 
-    CollectionEventType.prototype.studySpecimenGroups = function (specimenGroups) {
-      this.specimenGroupDataSet =
-        new SpecimenGroupDataSet(this.specimenGroupData, {
-          studySpecimenGroups: specimenGroups
-        });
-    };
-
-    CollectionEventType.prototype.studyAnnotationTypes = function (annotationTypes) {
-      this.annotationTypeDataSet =
-        new AnnotationTypeDataSet(this.annotationTypeData, {
-          studyAnnotationTypes: annotationTypes
-        });
-    };
-
     CollectionEventType.prototype.addOrUpdate = function (annotationTypes) {
       var self = this,
           cmd = _.extend(_.pick(self,
@@ -169,17 +158,8 @@ define(['underscore'], function(_) {
                                 'recurring'),
                          funutils.pickOptional(self, 'description'));
 
-      if (self.specimenGroupDataSet && (self.specimenGroupDataSet.dataItems.length > 0)) {
-        cmd.specimenGroupData = self.specimenGroupDataSet.getSpecimenGroupData();
-      } else {
-        cmd.specimenGroupData = self.specimenGroupData;
-      }
-
-      if (self.annotationTypeDataSet && (self.annotationTypeDataSet.dataItems.length > 0)) {
-        cmd.annotationTypeData = self.annotationTypeDataSet.getAnnotationTypeData();
-      } else {
-        cmd.annotationTypeData = self.annotationTypeData;
-      }
+      cmd.specimenGroupData = self.getSpecimenGroupData();
+      cmd.annotationTypeData = self.getAnnotationTypeData();
 
       return addOrUpdateInternal().then(function(reply) {
         return CollectionEventType.create(reply);
@@ -198,50 +178,6 @@ define(['underscore'], function(_) {
 
     CollectionEventType.prototype.remove = function () {
       return biobankApi.del(uri(this.studyId, this.id, this.version));
-    };
-
-    CollectionEventType.prototype.specimenGroupDataSize = function () {
-      return this.specimenGroupDataSet.size();
-    };
-
-    CollectionEventType.prototype.allSpecimenGroupDataIds = function () {
-      return this.specimenGroupDataSet.allIds();
-    };
-
-    CollectionEventType.prototype.getSpecimenGroupData = function (specimenGroupId) {
-      if (this.specimenGroupDataSet) {
-        return this.specimenGroupDataSet.get(specimenGroupId);
-      }
-      throw new Error('no data items');
-    };
-
-    CollectionEventType.prototype.getSpecimenGroupsAsString = function () {
-      if (this.specimenGroupDataSet) {
-        return this.specimenGroupDataSet.getAsString();
-      }
-      throw new Error('no data items');
-    };
-
-    CollectionEventType.prototype.annotationTypeDataSize = function () {
-      return this.annotationTypeDataSet.size();
-    };
-
-    CollectionEventType.prototype.allAnnotationTypeDataIds = function () {
-      return this.annotationTypeDataSet.allIds();
-    };
-
-    CollectionEventType.prototype.getAnnotationTypeData = function (annotationTypeId) {
-      if (this.annotationTypeDataSet) {
-        return this.annotationTypeDataSet.get(annotationTypeId);
-      }
-      throw new Error('no data items');
-    };
-
-    CollectionEventType.prototype.getAnnotationTypesAsString = function () {
-      if (this.annotationTypeDataSet) {
-        return this.annotationTypeDataSet.getAsString();
-      }
-      throw new Error('no data items');
     };
 
     function uri(studyId, ceventTypeId, version) {

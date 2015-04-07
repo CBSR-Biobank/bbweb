@@ -1,127 +1,68 @@
 /**
  * Jasmine test suite
  */
-define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
+define([
+  'angular',
+  'angularMocks',
+  'underscore',
+  './annotationTypeDataSharedSpec',
+  'biobankApp'
+], function(angular, mocks, _, annotationTypeDataSharedSpec) {
   'use strict';
 
-  describe('AnnotationTypeDataSet', function() {
-    var AnnotationTypeDataSet, fakeEntities;
+  describe('AnnotationTypeData', function() {
+    var AnnotationTypeData, fakeEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(_AnnotationTypeDataSet_,
-                              fakeDomainEntities) {
-      AnnotationTypeDataSet = _AnnotationTypeDataSet_;
+    beforeEach(inject(function(_AnnotationTypeData_,
+                               fakeDomainEntities) {
+      AnnotationTypeData = _AnnotationTypeData_;
       fakeEntities = fakeDomainEntities;
     }));
 
-    it('get throws an error if no data items', function() {
-      var dataSet = new AnnotationTypeDataSet();
+    function createEntities() {
+      var entities = {};
 
-      expect(function () { dataSet.get(fakeEntities.stringNext()); })
-        .toThrow(new Error('no data items'));
-    });
+      entities.study = fakeEntities.study();
+
+      entities.annotationTypes = _.map(_.range(2), function() {
+        return fakeEntities.annotationType(entities.study);
+      });
+
+      entities.annotationTypeData = _.map(entities.annotationTypes, function(at) {
+        return fakeEntities.annotationTypeData(at);
+      });
+
+      return entities;
+    }
 
     it('getAnnotationTypeData returns an empty array if no data items', function() {
-      var dataSet = new AnnotationTypeDataSet();
-
-      expect(dataSet.getAnnotationTypeData()).toBeArrayOfSize(0);
+      var testObj = _.extend({ annotationTypeData: []}, AnnotationTypeData);
+      expect(testObj.getAnnotationTypeData()).toBeArrayOfSize(0);
     });
 
-    it('getAsString throws an error if no data items', function() {
-      var dataSet = new AnnotationTypeDataSet();
-
-      expect(function () { dataSet.getAsString(); })
-        .toThrow(new Error('no data items'));
+    it('getAnnotationTypeDataAsString returns empty string if no data items', function() {
+      var testObj = _.extend({ annotationTypeData: []}, AnnotationTypeData);
+      expect(testObj.getAnnotationTypeDataAsString()).toBeEmptyString();
     });
 
-    it('get throws an error if not found', function() {
-      var annotationTypes = [],
-          annotationTypeData = [],
-          dataSet;
+    describe('uses annotation type set correctly', function () {
+      var context = {};
 
-      _.each(_.range(2), function () {
-        var annotationType = fakeEntities.annotationType();
-        annotationTypes = annotationTypes.concat(annotationType);
-        annotationTypeData = annotationTypeData.concat(fakeEntities.annotationTypeData(annotationType));
+      beforeEach(function() {
+        var entities = createEntities(),
+            testObj = _.extend({ annotationTypeData: entities.annotationTypeData},
+                               AnnotationTypeData);
+        testObj.studyAnnotationTypes(entities.annotationTypes);
+
+        context.parentObj = testObj;
+        context.annotationTypes = entities.annotationTypes;
+        context.fakeEntities = fakeEntities;
       });
 
-      dataSet = new AnnotationTypeDataSet(annotationTypeData, {
-        studyAnnotationTypes: annotationTypes
-      });
-
-      expect(function () {dataSet.get(fakeEntities.stringNext()); })
-        .toThrow(new Error('annotation type data with id not found: string_0'));
+      annotationTypeDataSharedSpec(context);
     });
-
-    it('get returns an item when it is found', function() {
-      var annotationTypes = [],
-          annotationTypeData = [],
-          dataSet;
-
-      _.each(_.range(2), function () {
-        var annotationType = fakeEntities.annotationType();
-        annotationTypes = annotationTypes.concat(annotationType);
-        annotationTypeData = annotationTypeData.concat(fakeEntities.annotationTypeData(annotationType));
-      });
-
-      dataSet = new AnnotationTypeDataSet(annotationTypeData, {
-        studyAnnotationTypes: annotationTypes
-      });
-
-      _.each(_.zip(annotationTypes, annotationTypeData), function (tuple) {
-        var annotationType = tuple[0];
-        var annotationTypeDataItem = tuple[1];
-        var item = dataSet.get(annotationType.id);
-        expect(item.annotationTypeId).toEqual(annotationTypeDataItem.annotationTypeId);
-        expect(item.required).toEqual(annotationTypeDataItem.required);
-      });
-
-    });
-
-    it('getAnnotationTypeData returns valid results', function() {
-      var annotationTypes = [],
-          annotationTypeData = [],
-          dataSet;
-
-      _.each(_.range(2), function () {
-        var annotationType = fakeEntities.annotationType();
-        annotationTypes = annotationTypes.concat(annotationType);
-        annotationTypeData = annotationTypeData.concat(fakeEntities.annotationTypeData(annotationType));
-      });
-
-      dataSet = new AnnotationTypeDataSet(annotationTypeData, {
-        studyAnnotationTypes: annotationTypes
-      });
-
-      expect(dataSet.getAnnotationTypeData()).toEqual(annotationTypeData);
-    });
-
-    it('getAsString returns valid results', function() {
-      var annotationTypes = [],
-          annotationTypeData = [],
-          dataSet,
-          strs = [];
-
-      _.each(_.range(2), function () {
-        var annotationType = fakeEntities.annotationType();
-        annotationTypes = annotationTypes.concat(annotationType);
-        annotationTypeData = annotationTypeData.concat(fakeEntities.annotationTypeData(annotationType));
-      });
-
-      dataSet = new AnnotationTypeDataSet(annotationTypeData, {
-        studyAnnotationTypes: annotationTypes
-      });
-
-      strs = _.map(_.zip(annotationTypes, annotationTypeData), function (tuple) {
-        var annotationType = tuple[0];
-        var annotationTypeDataItem = tuple[1];
-        return annotationType.name + (annotationTypeDataItem.required ? ' (Req)' : ' (N/R)');
-      });
-
-      expect(dataSet.getAsString()).toEqual(strs.join(', '));
-    });
-
   });
 
 });

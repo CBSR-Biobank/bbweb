@@ -84,6 +84,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
         controller('CeventTypeEditCtrl as vm', {
           $scope:               scope,
+          $state:               state,
           CollectionEventType:  CollectionEventType,
           domainEntityService:  domainEntityService,
           notificationsService: notificationsService,
@@ -148,7 +149,6 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     it('on submit error, displays an error modal', function() {
       var q                   = this.$injector.get('$q'),
           domainEntityService = this.$injector.get('domainEntityService'),
-          state               = this.$injector.get('$state'),
           entities            = createEntities(),
           scope               = createController(entities);
 

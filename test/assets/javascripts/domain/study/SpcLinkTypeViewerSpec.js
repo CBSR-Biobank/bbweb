@@ -122,7 +122,7 @@ define([
           expect(attr.value).toBe('None');
           break;
         case 'Annotation Types':
-          expect(attr.value).toBe(entities.slt.getAnnotationTypesAsString());
+          expect(attr.value).toBe(entities.slt.getAnnotationTypeDataAsString());
           break;
         default:
           jasmine.getEnv().fail('label is invalid: ' + attr.label);

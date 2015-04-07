@@ -26,8 +26,8 @@
     <tr ng-repeat="specimenLinkType in $data">
       <td data-title="'Processing Type'"
           sortable="'processingTypeName'"
-          ng-click="vm.showProcessingType(specimenLinkType.processingTypeId)">
-        <a href>{{specimenLinkType.processingType.name}}</a>
+          ng-click="vm.viewProcessingType(specimenLinkType.processingTypeId)">
+        <a href>{{vm.processingTypesById[specimenLinkType.processingTypeId].name}}</a>
       </td>
       <td data-title="'Input Specimen Group'"
           sortable="'inputGroupName'"
@@ -40,10 +40,10 @@
         <a href>{{specimenLinkType.outputGroup.name}}</a>
       </td>
       <td data-title="'Annotation Types'">
-        <span ng-repeat="atItemId in specimenLinkType.allAnnotationTypeDataIds()"
+        <span ng-repeat="atItemId in specimenLinkType.annotationTypeDataIds()"
              ng-click="vm.viewAnnotationType(atItemId)">
           <a href>
-            {{specimenLinkType.getAnnotationTypeData(atItemId).annotationType.name}}
+            {{specimenLinkType.getAnnotationTypeDataById(atItemId).annotationType.name}}
           </a><span ng-if="!$last">, </span>
         </span>
 
