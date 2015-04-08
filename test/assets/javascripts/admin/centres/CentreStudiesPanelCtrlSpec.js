@@ -39,7 +39,7 @@ define([
         return entities;
       }
 
-    };
+    }
 
     function setupController(injector) {
       var $rootScope   = injector.get('$rootScope'),
@@ -163,7 +163,7 @@ define([
           scope;
 
       entities.centre.studyIds.push(studyToRemove.id);
-      scope = createController(entities),
+      scope = createController(entities);
 
       spyOn(modalService, 'showModal').and.callFake(function () {
         return $q.when('OK');

@@ -145,10 +145,13 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     process (event) { applyCentreDisabledEvent(_) }
   }
 
+  /**
+   * Locations can be added regardless of the centre's status.
+   */
   private def processAddCentreLocationCmd(cmd: AddCentreLocationCmd): Unit = {
     val locationId = locationRepository.nextIdentity
     val event = for {
-      centre <- getDisabled(cmd.centreId)
+      centre <- centreRepository.getByKey(CentreId(cmd.centreId))
       location <- Location(locationId, cmd.name, cmd.street, cmd.city, cmd.province,
         cmd.postalCode, cmd.poBoxNumber, cmd.countryIsoCode).success
       event <- createCentreEvent(centre.id, cmd).withLocationAdded(
@@ -165,11 +168,14 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     process (event) { applyCentreLocationAddedEvent(_) }
   }
 
+  /**
+   * Locations can be removed regardless of the centre's status.
+   */
   private def processRemoveCentreLocationCmd(cmd: RemoveCentreLocationCmd): Unit = {
     val event = locationRepository.getByKey(LocationId(cmd.locationId)).fold(
       err => DomainError(s"location with id does not exist: $id").failureNel,
       location => for {
-        centre <- getDisabled(cmd.centreId)
+        centre <- centreRepository.getByKey(CentreId(cmd.centreId))
         event <- createCentreEvent(centre.id, cmd).withLocationRemoved(
           CentreLocationRemovedEvent(Some(cmd.locationId))).success
       } yield event
@@ -178,9 +184,12 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     process (event) { applyCentreLocationRemovedEvent(_) }
   }
 
+  /**
+   * Studies can be added regardless of the centre's status.
+   */
   private def processAddStudyToCentreCmd(cmd: AddStudyToCentreCmd): Unit = {
     val event = for {
-      centre <- getDisabled(cmd.centreId)
+      centre <- centreRepository.getByKey(CentreId(cmd.centreId))
       notLinked <- centreStudyNotLinked(centre.id, StudyId(cmd.studyId))
       event <- createCentreEvent(centre.id, cmd).withStudyAdded(
         StudyAddedToCentreEvent(Some(cmd.studyId))).success
@@ -189,9 +198,12 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
     process (event) { applyCentreAddedToStudyEvent(_) }
   }
 
+  /**
+   * Studies can be removed regardless of the centre's status.
+   */
   private def processRemoveStudyFromCentreCmd(cmd: RemoveStudyFromCentreCmd): Unit = {
     val event = for {
-      centre <- getDisabled(cmd.centreId)
+      centre <- centreRepository.getByKey(CentreId(cmd.centreId))
       item <- centreStudiesRepository.withIds(StudyId(cmd.studyId), centre.id)
       event <- createCentreEvent(centre.id, cmd).withStudyRemoved(
         StudyRemovedFromCentreEvent(Some(cmd.studyId))).success

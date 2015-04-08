@@ -21,6 +21,7 @@ define(['underscore'], function(_) {
     var vm = this;
 
     vm.centre = centre;
+    vm.returnStateName = 'home.admin.centres.centre.locations';
 
     if ($state.current.name === 'home.admin.centres.centre.locationAdd') {
       vm.location = new Location();
@@ -35,29 +36,25 @@ define(['underscore'], function(_) {
 
     //--
 
-    function gotoReturnState() {
-      return $state.go('home.admin.centres.centre.locations', {}, {reload: true});
-    }
-
-    function submitSuccess() {
-      notificationsService.submitSuccess();
-      gotoReturnState();
-    }
-
     function submit(location) {
       vm.centre.addLocation(location)
         .then(submitSuccess)
-        .catch(function(error) {
-          domainEntityService.updateErrorModal(
-            error, 'location').catch(function () {
-              $state.go('home.admin.centres.centre.locations', {}, {reload: true});
+        .catch(submitError);
 
-            });
-        });
+      //--
+
+      function submitSuccess() {
+        notificationsService.submitSuccess();
+        $state.go(vm.returnStateName, {}, {reload: true});
+      }
+
+      function submitError(error) {
+        return domainEntityService.updateErrorModal(error, 'location');
+      }
     }
 
     function cancel() {
-      gotoReturnState();
+      $state.go(vm.returnStateName, {}, {reload: false});
     }
   }
 

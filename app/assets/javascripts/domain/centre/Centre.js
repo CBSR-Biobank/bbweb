@@ -86,11 +86,11 @@ define(['angular', 'underscore'], function(angular, _) {
     };
 
     Centre.prototype.isDisabled = function () {
-      return this.status == CentreStatus.DISABLED();
+      return this.status === CentreStatus.DISABLED();
     };
 
     Centre.prototype.isEnabled = function () {
-      return this.status == CentreStatus.ENABLED();
+      return this.status === CentreStatus.ENABLED();
     };
 
     Centre.prototype.disable = function () {
@@ -107,10 +107,9 @@ define(['angular', 'underscore'], function(angular, _) {
         throw new Error('id is null');
       }
       return centreLocationsService.list(self.id).then(function(reply){
-        var locs = _.map(reply, function(loc) {
+        self.locations = _.map(reply, function(loc) {
           return Location.create(loc);
         });
-        self.locations = _.union(self.locations, locs);
         return self;
       });
     };

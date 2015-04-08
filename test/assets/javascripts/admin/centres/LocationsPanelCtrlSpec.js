@@ -39,7 +39,7 @@ define([
         return entities;
       }
 
-    };
+    }
 
     function setupController(injector) {
       var $rootScope          = injector.get('$rootScope'),
@@ -71,6 +71,15 @@ define([
         return scope;
       }
     }
+
+    it('has valid scope', function() {
+      var entities = createEntities(),
+          scope = createController(entities.centre);
+
+      expect(scope.vm.centre).toBe(entities.centre);
+      expect(scope.vm.tableParams).toBeDefined();
+    });
+
 
     it('can add a location', function() {
       var $state = this.$injector.get('$state'),

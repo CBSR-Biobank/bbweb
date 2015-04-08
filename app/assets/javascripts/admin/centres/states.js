@@ -164,7 +164,7 @@ define([], function() {
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/locationForm.html',
+          templateUrl: '/assets/javascripts/admin/centres/locationForm.html',
           controller: 'LocationEditCtrl as vm'
         }
       },
@@ -189,7 +189,7 @@ define([], function() {
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/locationForm.html',
+          templateUrl: '/assets/javascripts/admin/centres/locationForm.html',
           controller: 'LocationEditCtrl as vm'
         }
       },

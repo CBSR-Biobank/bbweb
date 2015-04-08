@@ -1,4 +1,4 @@
-define([], function() {
+define(['underscore'], function(_) {
   'use strict';
 
   CentreEditCtrl.$inject = [

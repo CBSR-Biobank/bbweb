@@ -5,7 +5,6 @@ define(function (require) {
   var angular                                 = require('angular'),
 
       AdminCtrl                               = require('./AdminCtrl'),
-      LocationEditCtrl                        = require('./LocationEditCtrl'),
       adminService                            = require('./adminService'),
       adminStates                             = require('./states'),
       pagedItemsListDirective                 = require('./pagedItemsListDirective'),
@@ -18,6 +17,7 @@ define(function (require) {
       centreStudiesPanelDirective             = require('./centres/centreStudiesPanelDirective'),
       locationsPanelDirective                 = require('./centres/locationsPanelDirective'),
       centreStates                            = require('./centres/states'),
+      LocationEditCtrl                        = require('./centres/LocationEditCtrl'),
 
       StudiesCtrl                             = require('./studies/StudiesCtrl'),
       StudyCtrl                               = require('./studies/StudyCtrl'),

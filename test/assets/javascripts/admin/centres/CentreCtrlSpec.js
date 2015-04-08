@@ -4,7 +4,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
   describe('Controller: CentreCtrl', function() {
-    var windowService, stateService, Centre, createController, fakeEntities;
+    var windowService, Centre, createController, fakeEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test', function($provide) {
       windowService = {
@@ -70,9 +70,9 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
     });
 
     it('should contain initialized local storage', function() {
-      var centre = new Centre(fakeEntities.centre()),
-          scope = createController(centre);
+      var centre = new Centre(fakeEntities.centre());
 
+      createController(centre);
       expect(windowService.localStorage.setItem)
         .toHaveBeenCalledWith('centre.panel.locations', true);
     });

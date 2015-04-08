@@ -4,7 +4,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
   describe('Controller: StudyCtrl', function() {
-    var windowService, stateService, Study, createController, fakeEntities;
+    var windowService, Study, createController, fakeEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test', function($provide) {
       windowService = {
@@ -72,8 +72,9 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
     });
 
     it('should contain initialized local storage', function() {
-      var study = new Study(fakeEntities.study()),
-          scope = createController(study);
+      var study = new Study(fakeEntities.study());
+
+      createController(study);
 
       expect(windowService.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.collectionEventTypes', true);
