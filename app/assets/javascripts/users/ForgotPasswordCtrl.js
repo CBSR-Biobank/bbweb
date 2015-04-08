@@ -10,9 +10,9 @@ define([], function() {
    */
   function ForgotPasswordCtrl($state, usersService, modalService) {
     var vm = this;
+
     vm.email = '';
     vm.submit = submit;
-    vm.emailNotFound = $state.current.data.emailNotFound;
 
     //---
 

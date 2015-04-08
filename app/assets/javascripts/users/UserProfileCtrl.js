@@ -40,40 +40,7 @@ define([], function() {
         'Cannot apply your change');
     }
 
-    function modalStringInput(type, title, label, defaultValue) {
-      controller.$inject = ['$scope', '$modalInstance', 'defaultValue'];
-
-      function controller ($scope, $modalInstance, defaultValue) {
-        $scope.modal = {
-          value: defaultValue,
-          type: type,
-          title: title,
-          label: label
-        };
-
-        $scope.modal.ok = function () {
-          $modalInstance.close($scope.modal.value);
-        };
-        $scope.modal.close = function () {
-          $modalInstance.dismiss('cancel');
-        };
-      }
-
-      return $modal.open({
-        templateUrl: '/assets/javascripts/users/userUpdateModal.html',
-        controller: controller,
-        resolve: {
-          defaultValue: function () {
-            return defaultValue;
-          }
-        },
-        backdrop: true,
-        keyboard: true,
-        modalFade: true
-      });
-    }
-
-    function postUpdate(userId, message, title, timeout) {
+    function postUpdate(message, title, timeout) {
       return function (user) {
         vm.user = user;
         notificationsService.success(message, title, timeout);
@@ -81,39 +48,48 @@ define([], function() {
     }
 
     function updateName() {
-      modalStringInput(modalInputTypes.text, 'Update user name', 'Name', vm.user.name).result
-        .then(function (name) {
-          vm.user.updateName(name)
-            .then(postUpdate(vm.user.id,
-                             'User name updated successfully.',
-                             'Update successful',
-                             1500))
-            .catch(updateError);
-        });
+      modalService.modalStringInput(
+        modalInputTypes.text,
+        'Update user name',
+        'Name',
+        vm.user.name
+      ).then(function (name) {
+        vm.user.updateName(name)
+          .then(postUpdate('User name updated successfully.',
+                           'Update successful',
+                           1500))
+          .catch(updateError);
+      });
     }
 
     function updateEmail() {
-      modalStringInput(modalInputTypes.email, 'Update user email', 'Email', vm.user.email).result
-        .then(function (email) {
-          vm.user.updateEmail(email)
-            .then(postUpdate(vm.user.id,
-                             'Email updated successfully.',
-                             'Update successful',
-                             1500))
-            .catch(updateError);
-        });
+      modalService.modalStringInput(
+        modalInputTypes.email,
+        'Update user email',
+        'Email',
+        vm.user.email
+      ).then(function (email) {
+        vm.user.updateEmail(email)
+          .then(postUpdate('Email updated successfully.',
+                           'Update successful',
+                           1500))
+          .catch(updateError);
+      });
     }
 
     function updateAvatarUrl() {
-      modalStringInput(modalInputTypes.url, 'Update avatar URL', 'Avatar URL', vm.user.avatarUrl).result
-        .then(function (avatarUrl) {
-          vm.user.updateAvatarUrl(avatarUrl)
-            .then(postUpdate(vm.user.id,
-                  'Avatar URL updated successfully.',
-                  'Update successful',
-                  1500))
-            .catch(updateError);
-        });
+      modalService.modalStringInput(
+        modalInputTypes.url,
+        'Update avatar URL',
+        'Avatar URL',
+        vm.user.avatarUrl
+      ).then(function (avatarUrl) {
+        vm.user.updateAvatarUrl(avatarUrl)
+          .then(postUpdate('Avatar URL updated successfully.',
+                           'Update successful',
+                           1500))
+          .catch(updateError);
+      });
     }
 
     function removeAvatarUrl() {
@@ -128,10 +104,9 @@ define([], function() {
       modalService.showModal(modalDefaults, modalOptions)
         .then(function() {
           vm.user.updateAvatarUrl(null)
-            .then(postUpdate(vm.user.id,
-                'Avatar URL remove successfully.',
-                'Remove successful',
-                1500))
+            .then(postUpdate('Avatar URL remove successfully.',
+                             'Remove successful',
+                             1500))
             .catch(updateError);
         });
     }
@@ -155,12 +130,11 @@ define([], function() {
             $modalInstance.dismiss('cancel');
           };
         }]
-      });
+      }).result;
 
-      modalInstance.result.then(function (result) {
+      modalInstance.then(function (result) {
         vm.user.updatePassword(result.currentPassword, result.newPassword)
-          .then(postUpdate(vm.user.id,
-                           'Your password was updated successfully.',
+          .then(postUpdate('Your password was updated successfully.',
                            'Update successful',
                            1500))
           .catch(function (err) {

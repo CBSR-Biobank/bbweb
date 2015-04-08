@@ -125,7 +125,7 @@ define([
       httpBackend.flush();
     });
 
-    it('can update a processing type', function() {
+    it('can update a processing type', function(done) {
       var entities = createEntities();
 
       var cmd = processingTypeToUpdateCommand(entities.processingType);
@@ -134,6 +134,7 @@ define([
 
       entities.processingType.addOrUpdate().then(function(cet) {
         compareCetToServerObj(cet, entities.serverPt);
+        done();
       });
       httpBackend.flush();
     });

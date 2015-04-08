@@ -15,6 +15,7 @@ define(['toastr'], function(toastr) {
     vm.user = new User();
     vm.password = '';
     vm.confirmPassword = '';
+
     vm.submit = submit;
     vm.cancel = cancel;
 
@@ -22,28 +23,29 @@ define(['toastr'], function(toastr) {
 
     function submit(user) {
       vm.user.register(vm.password)
-        .then(function() {
-          // user has been registerd
-          notificationsService.success(
-            'Your account was created and is now pending administrator approval.',
-            'Registration success',
-            2500);
-          $state.go('home.users.login');
-        })
-        .catch(function (err) {
-          var message;
-          if ((err.status === 403) && (err.data.message === 'already registered')) {
-            message = 'That email address is already registered.';
-          } else {
-            message = err.data.message;
-          }
+        .then(registerSuccess)
+        .catch(registerFailure);
+    }
 
-          // registration failed
-          notificationsService.error(
-            message,
-            'Registration error',
-            2500);
-        });
+    function registerSuccess() {
+      // user has been registerd
+      notificationsService.success(
+        'Your account was created and is now pending administrator approval.',
+        'Registration success',
+        2500);
+      $state.go('home.users.login');
+    }
+
+    function registerFailure(err) {
+      var message;
+      if ((err.status === 403) && (err.data.message === 'already registered')) {
+        message = 'That email address is already registered.';
+      } else {
+        message = err.data.message;
+      }
+
+      // registration failed
+      notificationsService.error(message, 'Registration error', 2500);
     }
 
     function cancel() {

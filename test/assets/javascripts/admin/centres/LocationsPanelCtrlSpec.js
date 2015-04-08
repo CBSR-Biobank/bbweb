@@ -11,7 +11,7 @@ define([
   'use strict';
 
   describe('Controller: LocationsPanelCtrl', function() {
-        var createEntities, createController, fakeEntities;
+    var createEntities, createController, fakeEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -79,7 +79,6 @@ define([
       expect(scope.vm.centre).toBe(entities.centre);
       expect(scope.vm.tableParams).toBeDefined();
     });
-
 
     it('can add a location', function() {
       var $state = this.$injector.get('$state'),

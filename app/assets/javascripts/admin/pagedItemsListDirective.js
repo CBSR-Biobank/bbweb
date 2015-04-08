@@ -24,6 +24,12 @@ define(['angular', 'underscore'], function(angular, _) {
 
   PagedItemsListCtrl.$inject = ['$scope'];
 
+  /**
+   * @param {Array} $scope.possibleStatuses - an array with 2 keys: 'id' and 'name'. The value for the 'id'
+   * key is a status for the entities being displayed, and used with the $scope.getItems function. The value
+   * for the 'Name' key is what is displayed in the 'Status' drop down box. The first item of the array should be
+   * { id: 'all', name: 'All' } so that all items are displayed.
+   */
   function PagedItemsListCtrl($scope) {
     var vm = this;
 
@@ -52,7 +58,7 @@ define(['angular', 'underscore'], function(angular, _) {
     };
 
     vm.displayStates = {
-      NO_STUDIES: 0,
+      NO_ENTITIES: 0,
       NO_RESULTS: 1,
       HAVE_RESULTS: 2
     };
@@ -90,7 +96,7 @@ define(['angular', 'underscore'], function(angular, _) {
           return vm.displayStates.NO_RESULTS;
         }
       } else {
-        return vm.displayStates.NO_STUDIES;
+        return vm.displayStates.NO_ENTITIES;
       }
     }
 
@@ -123,7 +129,7 @@ define(['angular', 'underscore'], function(angular, _) {
 
     function clearFiters() {
       vm.pagerOptions.filter = null;
-      vm.pagerOptions.status.id = 'all';
+      vm.pagerOptions.status = vm.possibleStatuses[0];
       updateItems();
     }
 

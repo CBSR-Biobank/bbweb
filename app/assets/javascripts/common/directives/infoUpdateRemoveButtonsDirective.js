@@ -13,9 +13,9 @@ define([], function(){
       restrict: 'E',
       replace: true,
       scope: {
-        info: '&onInfo',
-        update: '&onUpdate',
-        remove: '&onRemove',
+        info:                '&onInfo',
+        update:              '&onUpdate',
+        remove:              '&onRemove',
         updateButtonEnabled: '&',
         removeButtonEnabled: '&'
       },

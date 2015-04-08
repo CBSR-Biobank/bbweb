@@ -10,22 +10,21 @@ define(['angular'], function(angular) {
    *
    */
   function modalService($modal) {
-    var modalDefaults = {
-      backdrop: true,
-      keyboard: true,
-      modalFade: true,
-      templateUrl: '/assets/javascripts/common/modal.html'
-    };
-    var modalOptions = {
-      //closeButtonText: 'Close',
-      actionButtonText: 'OK',
-      headerHtml: 'Proceed?',
-      bodyHtml: 'Perform this action?'
-    };
+    var modalDefaults = { backdrop: true,
+                          keyboard: true,
+                          modalFade: true,
+                          templateUrl: '/assets/javascripts/common/modal.html'
+                        },
+        modalOptions = { actionButtonText: 'OK', //closeButtonText: 'Close',
+                         headerHtml: 'Proceed?',
+                         bodyHtml: 'Perform this action?'
+                       };
+
     var service = {
-      showModal: showModal,
-      show: show,
-      modalOk: modalOk
+      showModal:        showModal,
+      show:             show,
+      modalOk:          modalOk,
+      modalStringInput: modalStringInput
     };
 
     return service;
@@ -74,6 +73,46 @@ define(['angular'], function(angular) {
       };
       return showModal(modalDefaults, modalOptions);
     }
+
+    /**
+     * Displays a modal asking user to enter a string.
+     */
+    function modalStringInput(type,
+                              title,
+                              label,
+                              defaultValue) {
+      controller.$inject = ['$scope', '$modalInstance', 'defaultValue'];
+
+      function controller ($scope, $modalInstance, defaultValue) {
+        $scope.modal = {
+          value: defaultValue,
+          type: type,
+          title: title,
+          label: label
+        };
+
+        $scope.modal.ok = function () {
+          $modalInstance.close($scope.modal.value);
+        };
+        $scope.modal.close = function () {
+          $modalInstance.dismiss('cancel');
+        };
+      }
+
+      return $modal.open({
+        templateUrl: '/assets/javascripts/common/services/modalStringInput.html',
+        controller: controller,
+        resolve: {
+          defaultValue: function () {
+            return defaultValue;
+          }
+        },
+        backdrop: true,
+        keyboard: true,
+        modalFade: true
+      }).result;
+    }
+
   }
 
   return modalService;

@@ -85,6 +85,15 @@ define([
     }
 
     /**
+     * Alternate way to generate a random word.
+     *
+     * Due to a bug in faker's Helpers.shuffle, faker.lorem.words() sometimes returns undefined.
+     */
+    function randomFakerLoremWord() {
+      return faker.address.streetAddress();
+    }
+
+    /**
      * Generates a unique name for a domain entity type. If domain entity type is undefined, then a unique
      * string is generated.
      *
@@ -159,7 +168,7 @@ define([
         id:          utils.uuid(),
         studyId:     study.id,
         name:        domainEntityNameNext(ENTITY_NAME_PROCESSING_TYPE()),
-        description: faker.lorem.words(1)[0],
+        description: randomFakerLoremWord(),
         enabled:     false
       };
       return extendWithCommonFields(pt);
@@ -174,7 +183,7 @@ define([
         id:                 utils.uuid(),
         studyId:            study.id,
         name:               domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE()),
-        description:        faker.lorem.words(1)[0],
+        description:        randomFakerLoremWord(),
         specimenGroupData:  [],
         annotationTypeData: []
       };
@@ -218,7 +227,7 @@ define([
         id:                          utils.uuid(),
         studyId:                     study.id,
         name:                        domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP()),
-        description:                 faker.lorem.words(1)[0],
+        description:                 randomFakerLoremWord(),
         units:                       'mL',
         anatomicalSourceType:        randomAnatomicalSourceType(),
         preservationType:            randomPreservationType(),
@@ -289,7 +298,7 @@ define([
       var study =  {
         id:          utils.uuid(),
         name:        domainEntityNameNext(ENTITY_NAME_STUDY()),
-        description: faker.lorem.words(1)[0],
+        description: randomFakerLoremWord(),
         status:      'Disabled'
       };
       return extendWithCommonFields(study);
@@ -299,7 +308,7 @@ define([
       var centre =  {
         id:          utils.uuid(),
         name:        domainEntityNameNext(ENTITY_NAME_CENTRE()),
-        description: faker.lorem.words(1)[0],
+        description: randomFakerLoremWord(),
         status:      'Disabled'
       };
       return extendWithCommonFields(centre);
@@ -316,8 +325,8 @@ define([
         city:           faker.address.city(),
         province:       faker.address.state(),
         postalCode:     faker.address.zipCode(),
-        poBoxNumber:    faker.lorem.words(1)[0],
-        countryIsoCode: faker.lorem.words(1)[0]
+        poBoxNumber:    randomFakerLoremWord(),
+        countryIsoCode: randomFakerLoremWord()
       };
     }
 

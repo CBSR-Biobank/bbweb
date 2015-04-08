@@ -7,11 +7,11 @@ define(['angular'], function(angular) {
   function statusLineDirective() {
     var directive = {
       restrict: 'E',
+      replace: true,
       scope: {
         item: '='
       },
-      templateUrl : '/assets/javascripts/admin/statusLine.html',
-      replace: true
+      templateUrl : '/assets/javascripts/admin/statusLine.html'
     };
     return directive;
   }
