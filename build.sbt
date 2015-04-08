@@ -71,8 +71,8 @@ libraryDependencies ++= Seq(
   // WebJars infrastructure
   "org.webjars"               %% "webjars-play"                      % "2.3.0-3",
   // WebJars dependencies
-  "org.webjars"               %  "requirejs"                         % "2.1.16",
-  "org.webjars"               %  "underscorejs"                      % "1.8.2",
+  "org.webjars"               %  "requirejs"                         % "2.1.17",
+  "org.webjars"               %  "underscorejs"                      % "1.8.3",
   "org.webjars"               %  "jquery"                            % "2.1.3",
   "org.webjars"               %  "bootstrap"                         % "3.3.4" exclude(
     "org.webjars", "jquery"),
