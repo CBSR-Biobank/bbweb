@@ -34,24 +34,24 @@ define([], function() {
       var factoryService = {
         requireAuthenticatedUser: function () {
           return usersService.requestCurrentUser().then(function (currentUser) {
-            var defer = $q.defer();
+            var deferred = $q.defer();
             if (usersService.isAuthenticated()) {
-              defer.resolve(currentUser);
+              deferred.resolve(currentUser);
             } else {
-              defer.reject('user is not logged in');
+              deferred.reject('user is not logged in');
             }
-            return defer.promise;
+            return deferred.promise;
           });
         },
         requireAdminUser: function () {
           return usersService.requestCurrentUser().then(function (currentUser) {
-            var defer = $q.defer();
+            var deferred = $q.defer();
             if (usersService.isAdmin()) {
-              defer.resolve(currentUser);
+              deferred.resolve(currentUser);
             } else {
-              defer.reject('user is not an administrator');
+              deferred.reject('user is not an administrator');
             }
-            return defer.promise;
+            return deferred.promise;
           });
         }
       };

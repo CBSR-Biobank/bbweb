@@ -21,10 +21,11 @@ define(['angular'], function(angular) {
                        };
 
     var service = {
-      showModal:        showModal,
-      show:             show,
-      modalOk:          modalOk,
-      modalStringInput: modalStringInput
+      showModal:           showModal,
+      show:                show,
+      modalOk:             modalOk,
+      modalStringInput:    modalStringInput,
+      passwordUpdateModal: passwordUpdateModal
     };
 
     return service;
@@ -38,29 +39,31 @@ define(['angular'], function(angular) {
     }
 
     function show(customModalDefaults, customModalOptions) {
-      //Create temp objects to work with since we're in a singleton service
-      var tempModalDefaults = {};
-      var tempModalOptions = {};
+      var tempModalDefaults = {},
+          tempModalOptions = {};
 
-      //Map angular-ui modal custom defaults to modal defaults defined in service
+      controller.$inject = ['$scope', '$modalInstance'];
+
       angular.extend(tempModalDefaults, modalDefaults, customModalDefaults);
-
-      //Map modal.html $scope custom properties to defaults defined in service
       angular.extend(tempModalOptions, modalOptions, customModalOptions);
 
       if (!tempModalDefaults.controller) {
-        tempModalDefaults.controller = ['$scope', '$modalInstance', function ($scope, $modalInstance) {
-          $scope.modalOptions = tempModalOptions;
-          $scope.modalOptions.ok = function (result) {
-            $modalInstance.close(result);
-          };
-          $scope.modalOptions.close = function () {
-            $modalInstance.dismiss('cancel');
-          };
-        }];
+        tempModalDefaults.controller = controller;
       }
 
       return $modal.open(tempModalDefaults).result;
+
+      //--
+
+      function controller($scope, $modalInstance) {
+        $scope.modalOptions = tempModalOptions;
+        $scope.modalOptions.ok = function (result) {
+          $modalInstance.close(result);
+        };
+          $scope.modalOptions.close = function () {
+            $modalInstance.dismiss('cancel');
+          };
+      }
     }
 
     function modalOk(headerHtml, bodyHtml) {
@@ -81,7 +84,23 @@ define(['angular'], function(angular) {
                               title,
                               label,
                               defaultValue) {
+
       controller.$inject = ['$scope', '$modalInstance', 'defaultValue'];
+
+      return $modal.open({
+        templateUrl: '/assets/javascripts/common/services/modalStringInput.html',
+        controller: controller,
+        resolve: {
+          defaultValue: function () {
+            return defaultValue;
+          }
+        },
+        backdrop: true,
+        keyboard: true,
+        modalFade: true
+      }).result;
+
+      //--
 
       function controller ($scope, $modalInstance, defaultValue) {
         $scope.modal = {
@@ -98,19 +117,44 @@ define(['angular'], function(angular) {
           $modalInstance.dismiss('cancel');
         };
       }
+    }
+
+    /**
+     * Displays a modal asking for current password, new password, and confirm new password.
+     */
+    function passwordUpdateModal() {
+      controller.$inject = [ '$scope', '$modalInstance'];
 
       return $modal.open({
-        templateUrl: '/assets/javascripts/common/services/modalStringInput.html',
-        controller: controller,
-        resolve: {
-          defaultValue: function () {
-            return defaultValue;
-          }
-        },
-        backdrop: true,
-        keyboard: true,
-        modalFade: true
+        templateUrl: '/assets/javascripts/common/services/passwordUpdateModal.html',
+        controller:  controller,
+        backdrop:    true,
+        keyboard:    true,
+        modalFade:   true
       }).result;
+
+      //---
+
+      function controller($scope, $modalInstance) {
+        $scope.model = {
+          currentPassword: '',
+          newPassword:     '',
+          confirmPassword: '',
+          ok:              onOk,
+          close:           onClose
+        };
+
+        function onOk() {
+          $modalInstance.close({
+            currentPassword: $scope.model.currentPassword,
+            newPassword: $scope.model.newPassword
+          });
+        }
+
+        function onClose() {
+          $modalInstance.dismiss('cancel');
+        }
+      }
     }
 
   }

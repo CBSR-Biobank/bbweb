@@ -3,8 +3,8 @@ define([], function() {
 
   UserProfileCtrl.$inject = [
     '$modal',
-    'notificationsService',
     'modalService',
+    'notificationsService',
     'User',
     'user'
   ];
@@ -13,8 +13,8 @@ define([], function() {
    * Displays a list of users in a table.
    */
   function UserProfileCtrl($modal,
-                           notificationsService,
                            modalService,
+                           notificationsService,
                            User,
                            user) {
     var vm = this;
@@ -112,27 +112,7 @@ define([], function() {
     }
 
     function updatePassword() {
-      var modalInstance = $modal.open({
-        templateUrl: '/assets/javascripts/users/userUpdatePasswordModal.html',
-        controller: ['$scope', '$modalInstance', function ($scope, $modalInstance) {
-          $scope.modal = {
-            currentPassword: '',
-            newPassword: '',
-            confirmPassword: ''
-          };
-          $scope.modal.ok = function () {
-            $modalInstance.close({
-              currentPassword: $scope.modal.currentPassword,
-              newPassword: $scope.modal.newPassword
-            });
-          };
-          $scope.modal.close = function () {
-            $modalInstance.dismiss('cancel');
-          };
-        }]
-      }).result;
-
-      modalInstance.then(function (result) {
+      modalService.passwordUpdateModal().then(function (result) {
         vm.user.updatePassword(result.currentPassword, result.newPassword)
           .then(postUpdate('Your password was updated successfully.',
                            'Update successful',

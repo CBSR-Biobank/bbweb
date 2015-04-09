@@ -10,7 +10,9 @@ define([
   'use strict';
 
   describe('Controller: UserProfileCtrl', function() {
-    var createController;
+    var ctrlMethods = ['updateName', 'updateEmail', 'updateAvatarUrl'],
+        createController,
+        fakeEntities;
 
     //   var scope, stateHelper, usersService, domainEntityService;
     //   var state = {current: {data: {returnState: 'admin.users'}}};
@@ -18,46 +20,219 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function() {
+    beforeEach(inject(function(fakeDomainEntities) {
       createController = setupController(this.$injector);
+      fakeEntities = fakeDomainEntities;
     }));
 
     function setupController(injector) {
-      var $rootScope = injector.get('$rootScope'),
-          $controller = injector.get('$controller'),
-          $state = injector.get('$state'),
-          $modal = injector.get('$modal'),
+      var $rootScope           = injector.get('$rootScope'),
+          $controller          = injector.get('$controller'),
+          $modal               = injector.get('$modal'),
+          modalService         = injector.get('modalService'),
+          User                 = injector.get('User'),
           notificationsService = injector.get('notificationsService');
 
       return create;
 
       //--
 
-      function create() {
+      function create(user) {
         var scope = $rootScope.$new();
 
         $controller('UserProfileCtrl as vm', {
-          $scope:                  scope,
-          $state:                  $state,
-          $modal:                  $modal,
-          notificationsService: notificationsService
-          // stateHelper:             stateHelper,
-          // user:                    user
+          $scope:               scope,
+          $modal:               $modal,
+          modalService:         modalService,
+          notificationsService: notificationsService,
+          User:                 User,
+          user:                 user
         });
         scope.$digest();
+        return scope;
       }
     }
 
-    //   it('should contain valid settings to update a user', function() {
-    //     expect(scope.vm.user).toBe(user);
-    //     expect(scope.vm.password).toContain('');
-    //     expect(scope.vm.confirmPassword).toContain('');
-    //   });
+    it('should have valid scope', function() {
+      var User = this.$injector.get('User'),
+          user = fakeEntities.user(),
+          scope = createController(user);
 
-    //   it('should return to valid state on cancel', function() {
-    //     scope.vm.cancel();
-    //     expect(stateHelper.reloadStateAndReinit).toHaveBeenCalledWith(
-    //       state.current.data.returnState);
+      expect(scope.vm.user).toEqual(new User(user));
+    });
+
+    it('should update a users name, email and avatar URL', function() {
+      var notificationsService = this.$injector.get('notificationsService'),
+          User                 = this.$injector.get('User');
+
+      spyOn(notificationsService, 'success').and.callFake(function () {});
+      updateUserCommon(this.$injector, fakeUserUpdate, expectClause);
+
+      function fakeUserUpdate($q) {
+        return $q.when(new User());
+      }
+
+      function expectClause() {
+        expect(notificationsService.success).toHaveBeenCalled();
+      }
+    });
+
+    it('should display a notification error when update fails', function() {
+      var notificationsService = this.$injector.get('notificationsService');
+
+      spyOn(notificationsService, 'error').and.callFake(function () {});
+      updateUserCommon(this.$injector, fakeUserUpdate, expectClause);
+
+      function fakeUserUpdate($q) {
+        var deferred = $q.defer();
+        deferred.reject({ data: { message: 'update failed' } });
+        return deferred.promise;
+      }
+
+      function expectClause() {
+        expect(notificationsService.error).toHaveBeenCalled();
+      }
+    });
+
+    function updateUserCommon(injector, fakeUserUpdate, expectClause) {
+      var $q           = injector.get('$q'),
+          modalService = injector.get('modalService'),
+          User         = injector.get('User'),
+          user         = fakeEntities.user(),
+          scope;
+
+      spyOn(modalService, 'modalStringInput').and.callFake(function () {
+        return $q.when('OK');
+      });
+      scope = createController(user);
+
+      _.each(ctrlMethods, function (ctrlMethod) {
+        spyOn(User.prototype, ctrlMethod).and.callFake(function () {
+          return fakeUserUpdate($q);
+        });
+
+        scope.vm[ctrlMethod]();
+        scope.$digest();
+        expectClause();
+      });
+    }
+
+    it('can remove a users avatar', function() {
+      var $q                   = this.$injector.get('$q'),
+          modalService         = this.$injector.get('modalService'),
+          notificationsService = this.$injector.get('notificationsService'),
+          User                 = this.$injector.get('User'),
+          user                 = fakeEntities.user(),
+          scope;
+
+      spyOn(modalService, 'showModal').and.callFake(function () {
+        return $q.when('OK');
+      });
+      spyOn(User.prototype, 'updateAvatarUrl').and.callFake(function () {
+        return $q.when(new User());
+      });
+      spyOn(notificationsService, 'success').and.callFake(function () {});
+
+      scope = createController(user);
+      scope.vm.removeAvatarUrl();
+      scope.$digest();
+      expect(notificationsService.success).toHaveBeenCalled();
+    });
+
+    it('should display a notification error when removing avatar URL fails', function() {
+      var $q                   = this.$injector.get('$q'),
+          modalService         = this.$injector.get('modalService'),
+          notificationsService = this.$injector.get('notificationsService'),
+          User                 = this.$injector.get('User'),
+          user                 = fakeEntities.user(),
+          scope;
+
+      spyOn(modalService, 'showModal').and.callFake(function () {
+        return $q.when('OK');
+      });
+      spyOn(User.prototype, 'updateAvatarUrl').and.callFake(function () {
+        var deferred = $q.defer();
+        deferred.reject({ data: { message: 'xxx' } });
+        return deferred.promise;
+      });
+      spyOn(notificationsService, 'error').and.callFake(function () {});
+
+      scope = createController(user);
+      scope.vm.removeAvatarUrl();
+      scope.$digest();
+      expect(notificationsService.error).toHaveBeenCalled();
+    });
+
+    it('can update users password', function() {
+      var $q                   = this.$injector.get('$q'),
+          modalService         = this.$injector.get('modalService'),
+          notificationsService = this.$injector.get('notificationsService'),
+          User                 = this.$injector.get('User'),
+          user                 = fakeEntities.user(),
+          scope;
+
+      spyOn(modalService, 'passwordUpdateModal').and.callFake(function () {
+        return $q.when({ currentPassword: 'xx', newPassword: 'xx' });
+      });
+      spyOn(User.prototype, 'updatePassword').and.callFake(function () {
+        return $q.when(new User());
+      });
+      spyOn(notificationsService, 'success').and.callFake(function () {});
+
+      scope = createController(user);
+      scope.vm.updatePassword();
+      scope.$digest();
+      expect(notificationsService.success).toHaveBeenCalled();
+    });
+
+    it('should display a notification error when current password is invalid', function() {
+      var $q                   = this.$injector.get('$q'),
+          modalService         = this.$injector.get('modalService'),
+          notificationsService = this.$injector.get('notificationsService'),
+          User                 = this.$injector.get('User'),
+          user                 = fakeEntities.user(),
+          scope;
+
+      spyOn(modalService, 'passwordUpdateModal').and.callFake(function () {
+        return $q.when({ currentPassword: 'xx', newPassword: 'xx' });
+      });
+      spyOn(User.prototype, 'updatePassword').and.callFake(function () {
+        var deferred = $q.defer();
+        deferred.reject({ data: { message: 'invalid password' } });
+        return deferred.promise;
+      });
+      spyOn(notificationsService, 'error').and.callFake(function () {});
+
+      scope = createController(user);
+      scope.vm.updatePassword();
+      scope.$digest();
+      expect(notificationsService.error).toHaveBeenCalled();
+    });
+
+    it('should display a notification error when updating password fails', function() {
+      var $q                   = this.$injector.get('$q'),
+          modalService         = this.$injector.get('modalService'),
+          notificationsService = this.$injector.get('notificationsService'),
+          User                 = this.$injector.get('User'),
+          user                 = fakeEntities.user(),
+          scope;
+
+      spyOn(modalService, 'passwordUpdateModal').and.callFake(function () {
+        return $q.when({ currentPassword: 'xx', newPassword: 'xx' });
+      });
+      spyOn(User.prototype, 'updatePassword').and.callFake(function () {
+        var deferred = $q.defer();
+        deferred.reject({ data: { message: 'xxx' } });
+        return deferred.promise;
+      });
+      spyOn(notificationsService, 'error').and.callFake(function () {});
+
+      scope = createController(user);
+      scope.vm.updatePassword();
+      scope.$digest();
+      expect(notificationsService.error).toHaveBeenCalled();
+    });
+
   });
 
 });
