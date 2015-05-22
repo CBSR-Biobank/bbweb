@@ -6,18 +6,20 @@ module.exports = function(grunt) {
 
     karma: {
       options: {
-        configFile: 'karma.conf.js'
+        configFile: 'karma.conf.js',
+        reporters: ['spec']
       },
       unit: {
         singleRun: true,
-        colors: true,
-        reporters: ['spec']
+        colors: true
       },
       coverage: {
+        options: {
+          reporters: ['dots', 'coverage']
+        },
         preprocessors: {
           'app/assets/javascripts/**/*.js': 'coverage'
         },
-        reporters: ['dots', 'coverage'],
         coverageReporter: {
           type: 'html',
           dir: 'coverage',
@@ -70,19 +72,19 @@ module.exports = function(grunt) {
     //   },
     // }
 
+    // grunt.loadNpmTasks('grunt-karma');
+    // grunt.registerTask('test', 'Run tests on singleRun karma server', function () {
+    //   if (grunt.option('coverage')) {
+    //     var karmaOptions = grunt.config.get('karma.options'),
+    //         coverageOpts = grunt.config.get('karma.coverage');
+    //     grunt.util._.extend(karmaOptions, coverageOpts);
+    //     grunt.config.set('karma.options', karmaOptions);
+    //   }
+    //   grunt.task.run('karma:unit');
+    // });
+
   });
 
-  grunt.loadNpmTasks('grunt-karma');
-  grunt.registerTask('test', 'Run tests on singleRun karma server', function () {
-    if (grunt.option('coverage')) {
-      var karmaOptions = grunt.config.get('karma.options'),
-          coverageOpts = grunt.config.get('karma.coverage');
-      grunt.util._.extend(karmaOptions, coverageOpts);
-      grunt.config.set('karma.options', karmaOptions);
-    }
-    grunt.task.run('karma:unit');
-  });
+  grunt.registerTask('default', ['karma:unit']);
 
-  // grunt.registerTask('jshint', ['jshint']);
-  // grunt.loadNpmTasks('grunt-ng-annotate');
 };
