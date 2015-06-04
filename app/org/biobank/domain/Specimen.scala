@@ -1,7 +1,5 @@
 package org.biobank.domain
 
-import org.biobank.domain.study.Participant
-
 /**
   * Represents something that was obtained from ae study participant.
   *

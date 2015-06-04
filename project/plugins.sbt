@@ -8,7 +8,7 @@ resolvers ++= Seq(
 )
 
 // Use the Play sbt plugin for Play projects
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3.9")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.0")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-rjs" % "1.0.7")
 
@@ -20,11 +20,10 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-digest" % "1.1.0")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-gzip" % "1.0.0")
 
-// dependency graph generator
-//addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.7.4")
-
 // plugin for Play Framework apps which works with a Chrome Extension to auto-refresh your browser
 // when changes are made to the web app
-addSbtPlugin("com.jamesward" %% "play-auto-refresh" % "0.0.11")
+addSbtPlugin("com.jamesward" %% "play-auto-refresh" % "0.0.13")
 
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.0.4")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.1.0")
+
+//addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "4.0.0-RC2")

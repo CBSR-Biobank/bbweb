@@ -14,8 +14,6 @@ import org.biobank.domain.{
 import org.biobank.infrastructure.JsonUtils._
 
 import play.api.libs.json._
-import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._
 import org.joda.time.DateTime
 import scalaz._
 import scalaz.Scalaz._

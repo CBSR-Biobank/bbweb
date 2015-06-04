@@ -4,17 +4,11 @@ import org.biobank.infrastructure.{
   CollectionEventTypeSpecimenGroupData,
   CollectionEventTypeAnnotationTypeData}
 import org.biobank.domain._
-import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.AnnotationValueType._
-import org.biobank.domain.PreservationType._
-import org.biobank.domain.PreservationTemperatureType._
-import org.biobank.domain.SpecimenType._
 import org.biobank.infrastructure.JsonUtils._
 
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
 import org.joda.time.DateTime
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 

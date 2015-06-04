@@ -1,27 +1,31 @@
 package org.biobank.service.study
 
-import org.biobank.fixture._
 import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 
-import akka.pattern._
+import akka.actor._
 import org.slf4j.LoggerFactory
 import org.scalatest.Tag
 import org.joda.time.DateTime
-import scalaz._
 import scalaz.Scalaz._
+import akka.testkit.{ TestActors, TestKit, ImplicitSender }
 
 /**
   * Tests for actor CeventAnnotationTypeProcessorSpec. These are written using ScalaTest.
   *
   */
-class CeventAnnotationTypeProcessorSpec
-    extends StudyAnnotationTypeProcessorSpec[CollectionEventAnnotationType] {
+class CeventAnnotationTypeProcessorSpec(_system: ActorSystem)
+    extends TestKit(_system)
+    with ImplicitSender
+    with StudyAnnotationTypeProcessorSpec[CollectionEventAnnotationType] {
+
   import org.biobank.TestUtils._
 
-  override def annotationTypeRepository = inject [CollectionEventAnnotationTypeRepository]
+  override val system = _system
+
+  override def annotationTypeRepository = collectionEventAnnotationTypeRepository
 
   override def createAnnotationType(maybeId:      Option[AnnotationTypeId] = None,
                                     maybeStudyId: Option[StudyId] = None,

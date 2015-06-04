@@ -1,10 +1,7 @@
 package org.biobank
 
-import org.biobank.domain.study._
-
 import org.joda.time.DateTime
 import scalaz._
-import scalaz.Scalaz._
 
 package object domain {
 

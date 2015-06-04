@@ -10,9 +10,7 @@ import org.biobank.domain.{
 import org.biobank.infrastructure.JsonUtils._
 
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
 import com.github.nscala_time.time.Imports._
-import scalaz._
 import scalaz.Scalaz._
 
 /** Records a regularly preformed specimen processing procedure. There are one or more associated

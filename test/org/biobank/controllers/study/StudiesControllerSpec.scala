@@ -3,23 +3,19 @@ package org.biobank.controllers.study
 import org.biobank.fixture.NameGenerator
 import org.biobank.controllers._
 import org.biobank.dto._
-import org.biobank.domain.study.{ Study, StudyId }
-import org.biobank.infrastructure._
-import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.domain.study._
 import org.biobank.domain.JsonHelper._
 import org.biobank.fixture.ControllerFixture
+
 import play.api.test.Helpers._
-import play.api.test.WithApplication
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 
 /**
-  * Tests the REST API for [[Study]].
-  */
+ * Tests the REST API for [[Study]].
+ */
 class StudiesControllerSpec extends ControllerFixture {
-  import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -57,7 +53,7 @@ class StudiesControllerSpec extends ControllerFixture {
 
       "list multiple studies" in {
         val studies = List(factory.createDisabledStudy, factory.createDisabledStudy)
-          .map{ study => studyRepository.put(study) }
+        .map{ study => studyRepository.put(study) }
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
@@ -71,10 +67,10 @@ class StudiesControllerSpec extends ControllerFixture {
 
       "list a single study when filtered by name" in {
         val studies = List(factory.createDisabledStudy, factory.createEnabledStudy)
-          .map { study => studyRepository.put(study) }
+        .map { study => studyRepository.put(study) }
 
         val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri, Map("filter" -> studies(0).name))
+        .singleItemResult(uri, Map("filter" -> studies(0).name))
         compareObj(jsonItem, studies(0))
       }
 
@@ -83,10 +79,10 @@ class StudiesControllerSpec extends ControllerFixture {
           factory.createDisabledStudy,
           factory.createEnabledStudy,
           factory.createEnabledStudy)
-          .map { study => studyRepository.put(study) }
+        .map { study => studyRepository.put(study) }
 
         val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri, Map("status" -> "disabled"))
+        .singleItemResult(uri, Map("status" -> "disabled"))
         compareObj(jsonItem, studies(0))
       }
 
@@ -96,7 +92,7 @@ class StudiesControllerSpec extends ControllerFixture {
           factory.createDisabledStudy,
           factory.createEnabledStudy,
           factory.createEnabledStudy)
-          .map { study => studyRepository.put(study) }
+        .map { study => studyRepository.put(study) }
 
         val expectedStudies = List(studies(0), studies(1))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
@@ -117,7 +113,7 @@ class StudiesControllerSpec extends ControllerFixture {
           factory.createDisabledStudy,
           factory.createEnabledStudy,
           factory.createEnabledStudy)
-          .map { study => studyRepository.put(study) }
+        .map { study => studyRepository.put(study) }
 
         val expectedStudies = List(studies(2), studies(3))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
@@ -138,7 +134,7 @@ class StudiesControllerSpec extends ControllerFixture {
           factory.createDisabledStudy.copy(name = "CTR2"),
           factory.createEnabledStudy.copy(name = "CTR1"),
           factory.createEnabledStudy.copy(name = "CTR0"))
-          .map { study => studyRepository.put(study) }
+        .map { study => studyRepository.put(study) }
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
@@ -159,7 +155,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val studies = List(
           factory.createEnabledStudy,
           factory.createDisabledStudy)
-          .map { study => studyRepository.put(study) }
+        .map { study => studyRepository.put(study) }
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
@@ -178,7 +174,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val studies = List(
           factory.createEnabledStudy,
           factory.createDisabledStudy)
-          .map { study => studyRepository.put(study) }
+        .map { study => studyRepository.put(study) }
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
@@ -199,7 +195,7 @@ class StudiesControllerSpec extends ControllerFixture {
           factory.createDisabledStudy.copy(name = "CTR2"),
           factory.createEnabledStudy.copy(name = "CTR1"),
           factory.createEnabledStudy.copy(name = "CTR0"))
-          .map { study => studyRepository.put(study) }
+        .map { study => studyRepository.put(study) }
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
           uri = uri,
@@ -216,7 +212,7 @@ class StudiesControllerSpec extends ControllerFixture {
           factory.createDisabledStudy.copy(name = "CTR2"),
           factory.createEnabledStudy.copy(name = "CTR1"),
           factory.createEnabledStudy.copy(name = "CTR0"))
-          .map { study => studyRepository.put(study) }
+        .map { study => studyRepository.put(study) }
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
           uri = uri,
@@ -331,7 +327,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
         val json = makeRequest(GET, uri(study))
-        compareObj((json \ "data"), study)
+        compareObj((json \ "data").get, study)
       }
     }
 
@@ -369,7 +365,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val json = makeRequest(POST, uri(study) + "/enable", BAD_REQUEST, cmdJson)
 
         (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("no specimen groups")
+        (json \ "message").as[String] must include ("no specimen groups")
       }
 
       "not enable a study  when it has no collection event types" in {
@@ -385,7 +381,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val json = makeRequest(POST, uri(study) + "/enable", BAD_REQUEST, cmdJson)
 
         (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("no collection event types")
+        (json \ "message").as[String] must include ("no collection event types")
       }
 
       "fail when enabling a study and the study IDs do not match" in {
@@ -547,10 +543,10 @@ class StudiesControllerSpec extends ControllerFixture {
       "list all" in {
         val json = makeRequest(GET, uri + "/sgvaluetypes")
         val jsonObj = (json \ "data").as[JsObject]
-          (jsonObj \ "anatomicalSourceType").as[List[String]].size        must be > 0
-          (jsonObj \ "preservationType").as[List[String]].size            must be > 0
-          (jsonObj \ "preservationTemperatureType").as[List[String]].size must be > 0
-          (jsonObj \ "specimenType").as[List[String]].size                must be > 0
+        (jsonObj \ "anatomicalSourceType").as[List[String]].size        must be > 0
+        (jsonObj \ "preservationType").as[List[String]].size            must be > 0
+        (jsonObj \ "preservationTemperatureType").as[List[String]].size must be > 0
+        (jsonObj \ "specimenType").as[List[String]].size                must be > 0
       }
     }
 
@@ -563,9 +559,9 @@ class StudiesControllerSpec extends ControllerFixture {
         val jsonObj = (json \ "data").as[JsObject]
 
         (jsonObj \ "collectionEventTypes").as[List[JsObject]].size mustBe (0)
-          (jsonObj \ "collectionEventAnnotationTypes").as[List[JsObject]].size mustBe (0)
-          (jsonObj \ "collectionEventAnnotationTypesInUse").as[List[String]].size mustBe (0)
-          (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (0)
+        (jsonObj \ "collectionEventAnnotationTypes").as[List[JsObject]].size mustBe (0)
+        (jsonObj \ "collectionEventAnnotationTypeIdsInUse").as[List[String]].size mustBe (0)
+        (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (0)
       }
 
       "return valid results for study" in {
@@ -585,9 +581,9 @@ class StudiesControllerSpec extends ControllerFixture {
         val jsonObj = (json \ "data").as[JsObject]
 
         (jsonObj \ "collectionEventTypes").as[List[JsObject]].size mustBe (1)
-          (jsonObj \ "collectionEventAnnotationTypes").as[List[JsObject]].size mustBe (1)
-          (jsonObj \ "collectionEventAnnotationTypesInUse").as[List[String]].size mustBe (1)
-          (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (1)
+        (jsonObj \ "collectionEventAnnotationTypes").as[List[JsObject]].size mustBe (1)
+        (jsonObj \ "collectionEventAnnotationTypeIdsInUse").as[List[String]].size mustBe (1)
+        (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (1)
       }
     }
 
@@ -600,9 +596,9 @@ class StudiesControllerSpec extends ControllerFixture {
         val jsonObj = (json \ "data").as[JsObject]
 
         (jsonObj \ "processingTypes").as[List[JsObject]].size mustBe (0)
-          (jsonObj \ "specimenLinkTypes").as[List[JsObject]].size mustBe (0)
-          (jsonObj \ "specimenLinkAnnotationTypes").as[List[JsObject]].size mustBe (0)
-          (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (0)
+        (jsonObj \ "specimenLinkTypes").as[List[JsObject]].size mustBe (0)
+        (jsonObj \ "specimenLinkAnnotationTypes").as[List[JsObject]].size mustBe (0)
+        (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (0)
       }
 
       "return valid results for study" in {
@@ -618,9 +614,9 @@ class StudiesControllerSpec extends ControllerFixture {
         val jsonObj = (json \ "data").as[JsObject]
 
         (jsonObj \ "processingTypes").as[List[JsObject]].size mustBe (1)
-          (jsonObj \ "specimenLinkTypes").as[List[JsObject]].size mustBe (1)
-          (jsonObj \ "specimenLinkAnnotationTypes").as[List[JsObject]].size mustBe (1)
-          (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (1)
+        (jsonObj \ "specimenLinkTypes").as[List[JsObject]].size mustBe (1)
+        (jsonObj \ "specimenLinkAnnotationTypes").as[List[JsObject]].size mustBe (1)
+        (jsonObj \ "specimenGroups").as[List[JsObject]].size mustBe (1)
       }
     }
 
@@ -636,7 +632,7 @@ class StudiesControllerSpec extends ControllerFixture {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, "/studies/names?order=asc")
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size studies.size
 
@@ -654,7 +650,7 @@ class StudiesControllerSpec extends ControllerFixture {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, "/studies/names?filter=ABC")
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
 
@@ -671,7 +667,7 @@ class StudiesControllerSpec extends ControllerFixture {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, "/studies/names?filter=xxx")
-          (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
       }
@@ -688,7 +684,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val json = makeRequest(GET, "/studies/names?order=xxxx", BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("invalid order requested")
+        (json \ "message").as[String] must include ("invalid order requested")
       }
     }
 

@@ -16,12 +16,12 @@ import org.biobank.domain.{
 import org.biobank.domain.study._
 
 import akka.pattern._
+import akka.testkit.{ TestActors, TestKit, ImplicitSender }
 import org.joda.time.DateTime
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import akka.actor.Props
 
-import scalaz._
 import scalaz.Scalaz._
 
 /**
@@ -32,14 +32,6 @@ class StudiesProcessorSpec extends TestFixture {
   import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
-
-  val studyRepository = inject [StudyRepository]
-
-  val specimenGroupRepository = inject [SpecimenGroupRepository]
-
-  val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
-
-  val studiesProcessor = injectActorRef [StudiesProcessor] ("studies")
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -313,23 +305,23 @@ class StudiesProcessorSpec extends TestFixture {
     }
 
     "be recovered from journal" ignore {
-      val study = factory.createDisabledStudy
+      // val study = factory.createDisabledStudy
 
-      askAddCommand(study) mustSucceed { event =>
-        event mustBe a [StudyEvent]
+      // askAddCommand(study) mustSucceed { event =>
+      //   event mustBe a [StudyEvent]
 
-        val study2 = study.copy(
-          id          = StudyId(event.id),
-          name        = nameGenerator.next[Study],
-          description = some(nameGenerator.next[Study]))
+      //   val study2 = study.copy(
+      //     id          = StudyId(event.id),
+      //     name        = nameGenerator.next[Study],
+      //     description = some(nameGenerator.next[Study]))
 
-        askUpdateCommand(study2) mustSucceed { event =>
-          event mustBe a[StudyEvent]
-        }
-      }
+      //   askUpdateCommand(study2) mustSucceed { event =>
+      //     event mustBe a[StudyEvent]
+      //   }
+      // }
 
-      // restart the processor
-      val newStudiesProcessor = system.actorOf(Props(new StudiesProcessor), "study-processor-id")
+      // // restart the processor
+      // val newStudiesProcessor = system.actorOf(Props(new StudiesProcessor), "study-processor-id")
     }
   }
 }

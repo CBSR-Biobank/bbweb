@@ -1,6 +1,5 @@
 package org.biobank.service.study
 
-import org.biobank.fixture._
 import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
@@ -10,8 +9,8 @@ import org.biobank.infrastructure.event.StudyEvents._
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 import akka.pattern.ask
+import akka.testkit.{ TestActors, TestKit, ImplicitSender }
 import org.scalatest.Tag
-import scalaz._
 import scalaz.Scalaz._
 
 /**
@@ -22,7 +21,7 @@ class SpecimenLinkAnnotationTypeProcessorSpec
     extends StudyAnnotationTypeProcessorSpec[SpecimenLinkAnnotationType] {
   import org.biobank.TestUtils._
 
-  override def annotationTypeRepository = inject [SpecimenLinkAnnotationTypeRepository]
+  override def annotationTypeRepository = specimenLinkAnnotationTypeRepository
 
   override def createAnnotationType(maybeId:      Option[AnnotationTypeId] = None,
                                     maybeStudyId: Option[StudyId] = None,

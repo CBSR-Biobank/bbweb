@@ -6,7 +6,6 @@ import org.biobank.fixture.NameGenerator
 import org.biobank.domain.AnnotationValueType
 import com.github.nscala_time.time.Imports._
 
-import scalaz._
 import scalaz.Scalaz._
 
 

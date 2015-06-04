@@ -1,8 +1,6 @@
 package org.biobank.domain
 
 import scala.concurrent.stm.Ref
-
-import scalaz._
 import scalaz.Scalaz._
 
 /**

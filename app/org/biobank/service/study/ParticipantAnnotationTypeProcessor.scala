@@ -2,21 +2,24 @@ package org.biobank.service.study
 
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.service._
 import org.biobank.domain._
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 import org.biobank.domain.study.Study
 import org.biobank.domain.AnnotationValueType._
 
+import akka.actor._
 import akka.persistence.SnapshotOffer
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import scaldi.akka.AkkaInjectable
-import scaldi.{Injectable, Injector}
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
+
+object ParticipantAnnotationTypeProcessor {
+
+  def props = Props[ParticipantAnnotationTypeProcessor]
+
+}
 
 /**
   * The ParticipantAnnotationTypeProcessor is responsible for maintaining state changes for all
@@ -27,17 +30,14 @@ import scalaz.Validation.FlatMap._
   *
   * It is a child actor of [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
   */
-class ParticipantAnnotationTypeProcessor(implicit inj: Injector)
-    extends StudyAnnotationTypeProcessor[ParticipantAnnotationType]
-    with AkkaInjectable {
+class ParticipantAnnotationTypeProcessor @javax.inject.Inject() (
+  val annotationTypeRepository: ParticipantAnnotationTypeRepository,
+  val participantRepository:    ParticipantRepository)
+    extends StudyAnnotationTypeProcessor[ParticipantAnnotationType] {
   import org.biobank.infrastructure.event.StudyEventsUtil._
   import StudyEvent.EventType
 
   override def persistenceId = "participant-annotation-type-processor-id"
-
-  override val annotationTypeRepository = inject [ParticipantAnnotationTypeRepository]
-
-  val participantRepository = inject [ParticipantRepository]
 
   case class SnapshotState(annotationTypes: Set[ParticipantAnnotationType])
 

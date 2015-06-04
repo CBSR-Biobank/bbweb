@@ -6,7 +6,6 @@ import org.biobank.fixture.NameGenerator
 import org.slf4j.LoggerFactory
 import com.github.nscala_time.time.Imports._
 import org.scalatest.Tag
-import scalaz._
 import scalaz.Scalaz._
 
 class StudySpec extends DomainSpec {

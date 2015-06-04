@@ -1,4 +1,4 @@
-package org.biobank.service.centre
+package org.biobank.service.centres
 
 import org.biobank.service.{ Processor, WrappedEvent }
 import org.biobank.domain.centre._
@@ -15,32 +15,34 @@ import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
 import org.biobank.TestData
 
-import akka.actor. { ActorRef, Props }
+import akka.actor._
 import akka.pattern.ask
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.slf4j.LoggerFactory
+import javax.inject.{Inject => javaxInject}
+
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
-import scalaz._
-import scaldi.akka.AkkaInjectable
-import scaldi.{Injectable, Injector}
 
-class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInjectable {
+object CentresProcessor {
+
+  def props = Props[CentresProcessor]
+
+}
+
+class CentresProcessor @javaxInject() (val centreRepository:          CentreRepository,
+                                       val locationRepository:        LocationRepository,
+                                       val centreStudiesRepository:   CentreStudiesRepository,
+                                       val centreLocationsRepository: CentreLocationsRepository,
+                                       val testData:                  TestData)
+    extends Processor {
   import CentreEvent.EventType
 
   override def persistenceId = "centre-processor-id"
 
   case class SnapshotState(centres: Set[Centre])
-
-  val centreRepository = inject [CentreRepository]
-
-  val locationRepository = inject [LocationRepository]
-
-  val centreStudiesRepository = inject [CentreStudiesRepository]
-
-  val centreLocationsRepository = inject [CentreLocationsRepository]
 
   val errMsgNameExists = "centre with name already exists"
 
@@ -150,20 +152,25 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
    */
   private def processAddCentreLocationCmd(cmd: AddCentreLocationCmd): Unit = {
     val locationId = locationRepository.nextIdentity
-    val event = for {
-      centre <- centreRepository.getByKey(CentreId(cmd.centreId))
-      location <- Location(locationId, cmd.name, cmd.street, cmd.city, cmd.province,
-        cmd.postalCode, cmd.poBoxNumber, cmd.countryIsoCode).success
-      event <- createCentreEvent(centre.id, cmd).withLocationAdded(
-        CentreLocationAddedEvent(locationId     = Some(locationId.id),
-                                 name           = Some(cmd.name),
-                                 street         = Some(cmd.street),
-                                 city           = Some(cmd.city),
-                                 province       = Some(cmd.province),
-                                 postalCode     = Some(cmd.postalCode),
-                                 poBoxNumber    = cmd.poBoxNumber,
-                                 countryIsoCode = Some(cmd.countryIsoCode))).success
-    } yield event
+
+    val event = centreRepository.getByKey(CentreId(cmd.centreId)).fold(
+      err => DomainError(s"centre with id does not exist: $id").failureNel,
+      centre => {
+        for {
+          location <- Location(locationId, cmd.name, cmd.street, cmd.city, cmd.province,
+                               cmd.postalCode, cmd.poBoxNumber, cmd.countryIsoCode).success
+          event <- createCentreEvent(centre.id, cmd).withLocationAdded(
+            CentreLocationAddedEvent(locationId     = Some(locationId.id),
+                                     name           = Some(cmd.name),
+                                     street         = Some(cmd.street),
+                                     city           = Some(cmd.city),
+                                     province       = Some(cmd.province),
+                                     postalCode     = Some(cmd.postalCode),
+                                     poBoxNumber    = cmd.poBoxNumber,
+                                     countryIsoCode = Some(cmd.countryIsoCode))).success
+        } yield event
+      }
+    )
 
     process (event) { applyCentreLocationAddedEvent(_) }
   }
@@ -172,13 +179,15 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
    * Locations can be removed regardless of the centre's status.
    */
   private def processRemoveCentreLocationCmd(cmd: RemoveCentreLocationCmd): Unit = {
-    val event = locationRepository.getByKey(LocationId(cmd.locationId)).fold(
-      err => DomainError(s"location with id does not exist: $id").failureNel,
-      location => for {
-        centre <- centreRepository.getByKey(CentreId(cmd.centreId))
-        event <- createCentreEvent(centre.id, cmd).withLocationRemoved(
-          CentreLocationRemovedEvent(Some(cmd.locationId))).success
-      } yield event
+    val event = centreRepository.getByKey(CentreId(cmd.centreId)).fold(
+      err => DomainError(s"centre with id does not exist: $id").failureNel,
+      centre => {
+        locationRepository.getByKey(LocationId(cmd.locationId)).fold(
+          err => DomainError(s"location with id does not exist: $id").failureNel,
+          location => createCentreEvent(centre.id, cmd).withLocationRemoved(
+            CentreLocationRemovedEvent(Some(cmd.locationId))).success
+        )
+      }
     )
 
     process (event) { applyCentreLocationRemovedEvent(_) }
@@ -188,12 +197,16 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
    * Studies can be added regardless of the centre's status.
    */
   private def processAddStudyToCentreCmd(cmd: AddStudyToCentreCmd): Unit = {
-    val event = for {
-      centre <- centreRepository.getByKey(CentreId(cmd.centreId))
-      notLinked <- centreStudyNotLinked(centre.id, StudyId(cmd.studyId))
-      event <- createCentreEvent(centre.id, cmd).withStudyAdded(
-        StudyAddedToCentreEvent(Some(cmd.studyId))).success
-    } yield event
+    val event = centreRepository.getByKey(CentreId(cmd.centreId)).fold(
+      err => DomainError(s"centre with id does not exist: $id").failureNel,
+      centre => {
+        for {
+          notLinked <- centreStudyNotLinked(centre.id, StudyId(cmd.studyId))
+          event <- createCentreEvent(centre.id, cmd).withStudyAdded(
+            StudyAddedToCentreEvent(Some(cmd.studyId))).success
+        } yield event
+      }
+    )
 
     process (event) { applyCentreAddedToStudyEvent(_) }
   }
@@ -468,5 +481,5 @@ class CentresProcessor(implicit inj: Injector) extends Processor with AkkaInject
                 userId = command.userId,
                 time   = Some(ISODateTimeFormat.dateTime.print(DateTime.now)))
 
-  TestData.addMultipleCentres
+  testData.addMultipleCentres
 }

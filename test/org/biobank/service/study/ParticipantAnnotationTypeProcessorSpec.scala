@@ -1,6 +1,5 @@
 package org.biobank.service.study
 
-import org.biobank.fixture._
 import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
@@ -8,10 +7,12 @@ import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.infrastructure.event.StudyEvents._
 
 import org.slf4j.LoggerFactory
+import akka.actor._
 import akka.pattern.ask
 import org.scalatest.Tag
 import org.scalatest.BeforeAndAfterEach
 import org.joda.time.DateTime
+import akka.testkit.{ TestActors, TestKit, ImplicitSender }
 import scalaz._
 import Scalaz._
 
@@ -21,11 +22,12 @@ import Scalaz._
   * To run tagged tests, use this command:
   *   ParticipantAnnotationTypeProcessorSpec -- -n 1
   */
-class ParticipantAnnotationTypeProcessorSpec
+class ParticipantAnnotationTypeProcessorSpec(_system: ActorSystem)
     extends StudyAnnotationTypeProcessorSpec[ParticipantAnnotationType] {
+
   import org.biobank.TestUtils._
 
-  override def annotationTypeRepository = inject [ParticipantAnnotationTypeRepository]
+  override def annotationTypeRepository = participantAnnotationTypeRepository
 
   override def createAnnotationType(maybeId:      Option[AnnotationTypeId] = None,
                                     maybeStudyId: Option[StudyId] = None,

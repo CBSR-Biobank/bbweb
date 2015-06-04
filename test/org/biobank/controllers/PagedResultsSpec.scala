@@ -1,6 +1,6 @@
 package org.biobank.controllers
 
-import org.biobank.fixture.{ BbwebFakeApplication, ControllerFixture }
+import org.biobank.fixture.BbwebFakeApplication
 
 import play.api.libs.json._
 import play.api.test.Helpers._

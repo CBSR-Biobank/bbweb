@@ -1,19 +1,10 @@
 package org.biobank.domain
 
-import org.biobank.fixture.ProcessorTestModule
-import org.biobank.infrastructure._
-
-import akka.actor.ActorSystem
-import akka.util.Timeout
 import org.scalatest._
-import scaldi.akka.AkkaInjectable
-import scalaz._
-import scalaz.Scalaz._
 
-trait DomainSpec extends WordSpec with MustMatchers with AkkaInjectable {
+trait DomainSpec extends WordSpecLike with MustMatchers {
 
-  implicit val appModule = new ProcessorTestModule
-
+  // TODO: can this be replaced with an Injectable singleton?
   val factory = new Factory
 
 }

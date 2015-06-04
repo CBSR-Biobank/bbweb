@@ -6,7 +6,6 @@ import org.biobank.domain.study._
 import org.biobank.domain.JsonHelper._
 
 import play.api.test.Helpers._
-import play.api.test.WithApplication
 import play.api.libs.json._
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
@@ -15,8 +14,6 @@ import org.scalatest.FlatSpec
 
 trait StudyAnnotTypeControllerSpec[T <: StudyAnnotationType]
     extends ControllerFixture {
-
-  import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 

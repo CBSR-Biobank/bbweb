@@ -2,27 +2,22 @@ package org.biobank.controllers
 
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain.centre._
-import org.biobank.domain.{ Location, LocationId }
-import org.biobank.domain.study.Study
-import org.biobank.infrastructure.command.CentreCommands._
-import org.biobank.infrastructure.event.CentreEvents._
+import org.biobank.domain.{ Location, LocationId, LocationRepository }
+import org.biobank.domain.study.{ Study, StudyRepository }
 import org.biobank.domain.JsonHelper._
 import org.biobank.fixture.ControllerFixture
 
 import play.api.test.Helpers._
-import play.api.test.WithApplication
 import play.api.libs.json._
 import org.slf4j.LoggerFactory
 import play.api.Play.current
 import play.api.test.FakeApplication
 import org.scalatest.Tag
-import org.scalatestplus.play._
 
 /**
   * Tests the REST API for [[Centre]]s.
   */
 class CentresControllerSpec extends ControllerFixture {
-  import TestGlobal._
   import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
@@ -615,18 +610,7 @@ class CentresControllerSpec extends ControllerFixture {
 
     "POST /centres/location" must {
 
-      "add a location" in {
-        val centre = factory.createDisabledCentre
-        centreRepository.put(centre)
-
-        val location = factory.createLocation
-        val json = makeRequest(POST,
-                               uri(centre) + "/locations",
-                               json = jsonAddCentreLocationCmd(location, centre.id))
-
-        val jsonEvent = (json \ "data").as[JsObject]
-        val jsonObj = (json \ "data").as[JsObject]
-
+      def validateJsonLocation(jsonObj: JsObject, location: Location, centre: Centre): Unit = {
         (jsonObj \ "name").as[String]           mustBe (location.name)
         (jsonObj \ "street").as[String]         mustBe (location.street)
         (jsonObj \ "city").as[String]           mustBe (location.city)
@@ -656,7 +640,31 @@ class CentresControllerSpec extends ControllerFixture {
             'centreId   (centre.id)
           )
         }
-        ()
+      }
+
+      "add a location to a disabled centre" in {
+        val centre = factory.createDisabledCentre
+        centreRepository.put(centre)
+
+        val location = factory.createLocation
+        val json = makeRequest(POST,
+                               uri(centre) + "/locations",
+                               json = jsonAddCentreLocationCmd(location, centre.id))
+
+        val jsonObj = (json \ "data").as[JsObject]
+        validateJsonLocation(jsonObj, location, centre)
+      }
+
+      "add a location to an enabled centre" in {
+        val centre = factory.createEnabledCentre
+        centreRepository.put(centre)
+        val location = factory.createLocation
+        val json = makeRequest(POST,
+                               uri(centre) + "/locations",
+                               json = jsonAddCentreLocationCmd(location, centre.id))
+
+        val jsonObj = (json \ "data").as[JsObject]
+        validateJsonLocation(jsonObj, location, centre)
       }
 
       "fail on attempt to add a location to an invalid centre" in {
@@ -667,19 +675,6 @@ class CentresControllerSpec extends ControllerFixture {
 
         (jsonResponse \ "status").as[String] must include ("error")
           (jsonResponse \ "message").as[String] must include regex ("centre.*does not exist")
-      }
-
-      "fail when adding a location to a centre and the centre is enabled" in {
-        val centre = factory.createEnabledCentre
-        centreRepository.put(centre)
-        val location = factory.createLocation
-        val json = makeRequest(POST,
-                               uri(centre) + "/locations",
-                               BAD_REQUEST,
-                               json = jsonAddCentreLocationCmd(location, centre.id))
-
-        (json \ "status").as[String] mustBe ("error")
-        (json \ "message").as[String] must include("centre is not disabled")
       }
     }
 
@@ -775,6 +770,19 @@ class CentresControllerSpec extends ControllerFixture {
 
     "POST /centres/:centerId/studies" must {
 
+      def validateAddedStudy(jsonObj: JsObject, study: Study, centre: Centre): Unit = {
+        (jsonObj \ "id").as[String] mustBe (study.id.id)
+
+        compareObj(jsonObj, study)
+
+        val repoValues = centreStudiesRepository.getValues.toList
+        repoValues must have size 1
+        repoValues(0) must have (
+          'centreId (centre.id),
+          'studyId  (study.id)
+        )
+      }
+
       "add a study to a centre" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
@@ -786,16 +794,21 @@ class CentresControllerSpec extends ControllerFixture {
           "centreId" -> centre.id.id,
           "studyId"  -> study.id.id)
         val json = makeRequest(POST, uri(centre) + s"/studies/${study.id.id}", json = cmdJson)
-        (json \ "data" \ "id").as[String] mustBe (study.id.id)
+        validateAddedStudy((json \ "data").as[JsObject], study, centre)
+      }
 
-        compareObj((json \ "data").as[JsObject], study)
+      "add a study to an enabled centre" in {
+        val centre = factory.createEnabledCentre
+        centreRepository.put(centre)
 
-        val repoValues = centreStudiesRepository.getValues.toList
-        repoValues must have size 1
-        repoValues(0) must have (
-          'centreId (centre.id),
-          'studyId  (study.id)
-        )
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val cmdJson = Json.obj("centreId" -> centre.id.id, "studyId"  -> study.id.id)
+        val json = makeRequest(POST,
+                               uri(centre) + s"/studies/${study.id.id}",
+                               json = cmdJson)
+        validateAddedStudy((json \ "data").as[JsObject], study, centre)
       }
 
       "fail when adding a study to a centre and they are already linked" in {
@@ -848,23 +861,6 @@ class CentresControllerSpec extends ControllerFixture {
         (json \ "status").as[String] mustBe ("error")
         (json \ "message").as[String] must include("study id mismatch")
       }
-
-      "fail when adding a study to a centre and the centre is enabled" in {
-        val centre = factory.createEnabledCentre
-        centreRepository.put(centre)
-
-        val study = factory.createDisabledStudy
-        studyRepository.put(study)
-
-        val cmdJson = Json.obj("centreId" -> centre.id.id, "studyId"  -> study.id.id)
-        val json = makeRequest(POST,
-                               uri(centre) + s"/studies/${study.id.id}",
-                               BAD_REQUEST,
-                               cmdJson)
-        (json \ "status").as[String] mustBe ("error")
-        (json \ "message").as[String] must include("centre is not disabled")
-      }
-
     }
 
     "DELETE /centres/studies" must {

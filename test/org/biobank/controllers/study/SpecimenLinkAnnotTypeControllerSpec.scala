@@ -1,24 +1,18 @@
 package org.biobank.controllers.study
 
-import org.biobank.fixture._
 import org.biobank.domain._
 import org.biobank.domain.study.{ Study, StudyId, SpecimenLinkAnnotationType }
-import org.biobank.fixture.ControllerFixture
-import org.biobank.domain.JsonHelper._
+import org.biobank.domain.study._
 
 import org.joda.time.DateTime
 import org.scalatest.Tag
-import org.scalatestplus.play._
 import org.slf4j.LoggerFactory
 import play.api.Play.current
-import play.api.libs.json._
-import play.api.test.Helpers._
-import play.api.test.WithApplication
 
-class SpecimenLinkAnnotTypeControllerSpec extends StudyAnnotTypeControllerSpec[SpecimenLinkAnnotationType] {
-  import TestGlobal._
+class SpecimenLinkAnnotTypeControllerSpec
+    extends StudyAnnotTypeControllerSpec[SpecimenLinkAnnotationType] {
 
-  override def annotationTypeRepository = TestGlobal.specimenLinkAnnotationTypeRepository
+  override def annotationTypeRepository = app.injector.instanceOf[SpecimenLinkAnnotationTypeRepository]
 
   override def createAnnotationType = factory.createSpecimenLinkAnnotationType
 

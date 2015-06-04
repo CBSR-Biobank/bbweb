@@ -2,11 +2,9 @@ package org.biobank.infrastructure.command
 
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.Commands._
-import org.biobank.infrastructure.JsonUtils._
 
 import play.api.libs.json._
 import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._
 
 object UserCommands {
 

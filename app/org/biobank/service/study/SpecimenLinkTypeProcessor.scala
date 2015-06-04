@@ -18,17 +18,20 @@ import org.slf4j.LoggerFactory
 import org.biobank.service.{ Processor, WrappedEvent }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.StudyEventsUtil._
 import org.biobank.infrastructure.event.StudyEvents._
 
+import akka.actor._
 import akka.persistence.SnapshotOffer
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import scaldi.akka.AkkaInjectable
-import scaldi.{Injectable, Injector}
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
+
+object SpecimenLinkTypeProcessor {
+
+  def props = Props[SpecimenLinkTypeProcessor]
+
+}
 
 /**
   * The SpecimenLinkTypeProcessor is responsible for maintaining state changes for all
@@ -39,21 +42,18 @@ import scalaz.Validation.FlatMap._
   *
   * It is a child actor of [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
   */
-class SpecimenLinkTypeProcessor(implicit inj: Injector) extends Processor with AkkaInjectable {
+class SpecimenLinkTypeProcessor @javax.inject.Inject() (
+  val specimenGroupRepository:              SpecimenGroupRepository,
+  val processingTypeRepository:             ProcessingTypeRepository,
+  val specimenLinkTypeRepository:           SpecimenLinkTypeRepository,
+  val specimenLinkAnnotationTypeRepository: SpecimenLinkAnnotationTypeRepository)
+    extends Processor {
   import org.biobank.infrastructure.event.StudyEventsUtil._
   import StudyEvent.EventType
 
   override def persistenceId = "specimen-link-type-processor-id"
 
   case class SnapshotState(specimenLinkTypes: Set[SpecimenLinkType])
-
-  val specimenGroupRepository = inject [SpecimenGroupRepository]
-
-  val processingTypeRepository = inject [ProcessingTypeRepository]
-
-  val specimenLinkTypeRepository = inject [SpecimenLinkTypeRepository]
-
-  val specimenLinkAnnotationTypeRepository = inject [SpecimenLinkAnnotationTypeRepository]
 
   /**
     * These are the events that are recovered during journal recovery. They cannot fail and must be

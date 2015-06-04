@@ -5,9 +5,7 @@ import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.infrastructure._
 import org.biobank.domain.study._
 
-import play.api.libs.json._
 import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 

@@ -6,33 +6,28 @@ import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 
+import javax.inject.{Inject => javaxInject, Singleton}
 import play.api.Logger
 import play.api.Play.current
 import play.api.cache.Cache
 import play.api.libs.concurrent.Execution.Implicits._
-import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
-import play.api.mvc.Results._
 import play.api.mvc._
 import scala.concurrent.Future
 import scala.language.reflectiveCalls
-import scaldi.{Injectable, Injector}
 
 import scalaz._
 import Scalaz._
 import scalaz.Validation.FlatMap._
 
-class UsersController(implicit inj: Injector)
+@Singleton
+class UsersController @javaxInject() (val authToken:      AuthToken,
+                                      val usersService:   UsersService,
+                                      val studiesService: StudiesService)
     extends CommandController
-    with JsonController
-    with Injectable {
+    with JsonController {
 
-  implicit override val authToken = inject [AuthToken]
-
-  implicit override val usersService = inject [UsersService]
-
-  implicit val studiesService = inject [StudiesService]
 
   private val PageSizeDefault = 5
 
@@ -55,7 +50,7 @@ class UsersController(implicit inj: Injector)
   def login() = Action(parse.json) { implicit request =>
     request.body.validate[LoginCredentials].fold(
       errors => {
-        BadRequest(JsError.toFlatJson(errors))
+        BadRequest(JsError.toJson(errors))
       },
       loginCredentials => {
         usersService.validatePassword(loginCredentials.email, loginCredentials.password).fold(
@@ -109,7 +104,7 @@ class UsersController(implicit inj: Injector)
   def passwordReset() = Action.async(parse.json) { implicit request =>
     request.body.validate[ResetUserPasswordCmd].fold(
       errors => {
-        Future.successful(BadRequest(JsError.toFlatJson(errors)))
+        Future.successful(BadRequest(JsError.toJson(errors)))
       },
       command => {
         val future = usersService.resetPassword(command)
@@ -180,7 +175,7 @@ class UsersController(implicit inj: Injector)
   def registerUser() = Action.async(parse.json) { implicit request =>
     request.body.validate[RegisterUserCmd].fold(
       errors => {
-        Future.successful(BadRequest(JsError.toFlatJson(errors)))
+        Future.successful(BadRequest(JsError.toJson(errors)))
       },
       cmd => {
         Logger.debug(s"addUser: cmd: $cmd")

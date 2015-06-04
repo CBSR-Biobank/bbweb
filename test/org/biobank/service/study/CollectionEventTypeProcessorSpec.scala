@@ -19,11 +19,11 @@ import org.biobank.domain.{
 import org.biobank.domain.study._
 
 import org.slf4j.LoggerFactory
-import org.scalatest.OptionValues._
 import org.joda.time.DateTime
 import akka.pattern.ask
+import akka.testkit.{ TestActors, TestKit, ImplicitSender }
+import org.scalatest.Tag
 
-import scalaz._
 import scalaz.Scalaz._
 
 /**
@@ -34,16 +34,6 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
   import org.biobank.TestUtils._
 
   private val log = LoggerFactory.getLogger(this.getClass)
-
-  val studyRepository = inject [StudyRepository]
-
-  val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
-
-  val collectionEventAnnotationTypeRepository = inject [CollectionEventAnnotationTypeRepository]
-
-  val specimenGroupRepository = inject [SpecimenGroupRepository]
-
-  val studiesProcessor = injectActorRef [StudiesProcessor] ("studies")
 
   val nameGenerator = new NameGenerator(this.getClass)
 

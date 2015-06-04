@@ -5,15 +5,12 @@ import org.biobank.domain.{
   ContainerTypeId,
   DomainError,
   DomainValidation,
-  HasUniqueName,
-  HasDescriptionOption,
   ValidationKey
 }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.JsonUtils._
 
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
 import com.github.nscala_time.time.Imports._
 import scalaz._
 import Scalaz._

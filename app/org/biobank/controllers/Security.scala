@@ -11,11 +11,7 @@ import play.api.Mode
 import play.api.Logger
 import play.api.mvc._
 import play.api.libs.json._
-import play.api.cache._
 import play.api.Play.current
-import scaldi.{Injectable, Injector}
-
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 

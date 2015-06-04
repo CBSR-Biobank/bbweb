@@ -16,10 +16,10 @@ import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
 
 import akka.pattern._
+import akka.testkit.{ TestActors, TestKit, ImplicitSender }
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 import org.scalatest.Tag
-import scalaz._
 import scalaz.Scalaz._
 
 /**
@@ -27,15 +27,10 @@ import scalaz.Scalaz._
   *
   */
 class ProcessingTypeProcessorSpec extends TestFixture {
+
   import org.biobank.TestUtils._
 
   private val log = LoggerFactory.getLogger(this.getClass)
-
-  val studyRepository = inject [StudyRepository]
-
-  val processingTypeRepository = inject [ProcessingTypeRepository]
-
-  val studiesProcessor = injectActorRef [StudiesProcessor] ("studies")
 
   val nameGenerator = new NameGenerator(this.getClass)
 

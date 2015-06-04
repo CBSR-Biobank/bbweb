@@ -1,13 +1,8 @@
 package org.biobank.controllers
 
-import org.biobank.infrastructure._
 import org.biobank.domain.{ DomainError, DomainValidation }
 
 import play.api.libs.json._
-import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._
-
-import scalaz._
 import scalaz.Scalaz._
 
 /**

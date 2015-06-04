@@ -1,42 +1,31 @@
 package org.biobank.controllers.centres
 
 import org.biobank.controllers._
-import org.biobank.domain._
 import org.biobank.service._
 import org.biobank.service.users.UsersService
-import org.biobank.service.centre.CentresService
+import org.biobank.service.centres.CentresService
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.domain.centre.Centre
 
+import javax.inject.{Inject => javaxInject, Singleton}
 import play.api.Play.current
-import play.api.libs.json._
-import play.api.mvc.Results._
-import play.api.mvc._
-import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
 import play.api.Logger
 import play.api.Play.current
 import scala.concurrent.Future
 import scala.language.reflectiveCalls
-import scaldi.{Injectable, Injector}
-
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 /**
   *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
   */
-class CentresController(implicit inj: Injector)
+@Singleton
+class CentresController @javaxInject() (val authToken:      AuthToken,
+                                        val usersService:   UsersService,
+                                        val centresService: CentresService)
     extends CommandController
-    with JsonController
-    with Injectable {
-
-  implicit override val authToken = inject [AuthToken]
-
-  implicit override val usersService = inject [UsersService]
-
-  private def centresService = inject [CentresService]
+    with JsonController {
 
   private val PageSizeMax = 10
 

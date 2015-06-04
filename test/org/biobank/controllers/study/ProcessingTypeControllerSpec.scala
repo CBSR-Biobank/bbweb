@@ -4,18 +4,16 @@ import org.biobank.fixture._
 import org.biobank.domain.study.{ Study, ProcessingType }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper._
+import org.biobank.domain.study._
 
 import play.api.test.Helpers._
-import play.api.test.WithApplication
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 import play.api.Play.current
-import org.scalatestplus.play._
 
 class ProcessingTypeControllerSpec extends ControllerFixture {
-  import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 

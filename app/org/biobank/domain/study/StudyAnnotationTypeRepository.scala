@@ -1,6 +1,7 @@
 package org.biobank.domain.study
 
 import org.biobank.domain._
+
 import scalaz._
 import Scalaz._
 

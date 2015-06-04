@@ -1,9 +1,5 @@
 package org.biobank.domain
 
-import org.biobank.infrastructure.EnumUtils._
-
-import play.api.libs.json._
-
 /**
   * A standardized set of regions from a [[org.biobank.domain.participant.Participant]] where a [[Specimen]]
   * is collected from.

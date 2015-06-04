@@ -6,13 +6,10 @@ import org.biobank.domain.{
   DomainValidation,
   DomainError,
   ValidationKey }
-import org.biobank.infrastructure.event.UserEvents._
 import org.joda.time.DateTime
 import org.biobank.infrastructure.JsonUtils._
 
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
-import scalaz._
 import scalaz.Scalaz._
 
 /** A user of the system.
@@ -110,8 +107,6 @@ object User {
 }
 
 trait UserValidations {
-  import CommonValidations._
-
   val NameMinLength = 2
 
   case object PasswordRequired extends ValidationKey
@@ -158,7 +153,6 @@ case class RegisteredUser (
   password:     String,
   salt:         String,
   avatarUrl:    Option[String]) extends User with UserValidations {
-  import CommonValidations._
 
   override val status: String = RegisteredUser.status
 

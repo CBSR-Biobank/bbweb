@@ -4,11 +4,13 @@ import org.biobank.domain.{ DomainValidation, DomainError, ReadWriteRepository, 
 
 import org.slf4j.LoggerFactory
 
-import scalaz._
+import javax.inject.Singleton
+import com.google.inject.ImplementedBy
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 /** A repository that stores [[User]]s. */
+@ImplementedBy(classOf[UserRepositoryImpl])
 trait UserRepository extends ReadWriteRepository[UserId, User] {
 
   def allUsers(): Set[User]
@@ -26,7 +28,8 @@ trait UserRepository extends ReadWriteRepository[UserId, User] {
 /** An implementation of repository that stores [[User]]s.
   *
   * This repository uses the [[ReadWriteRepository]] implementation.
-  */
+ */
+@Singleton
 class UserRepositoryImpl
     extends ReadWriteRepositoryRefImpl[UserId, User](v => v.id)
     with UserRepository {

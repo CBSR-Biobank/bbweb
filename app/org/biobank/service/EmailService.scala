@@ -1,5 +1,6 @@
 package org.biobank.service
 
+import javax.inject.{ Inject, Singleton }
 import play.api.libs.mailer._
 import play.api.Play.current
 import play.Play
@@ -7,7 +8,8 @@ import play.api.Logger
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 
-object EmailService {
+@Singleton
+class EmailService @Inject() (mailerClient: MailerClient) {
 
   def passwordResetEmail(recipient: String, password: String) = {
     val async: Future[Unit] = Future {
@@ -33,7 +35,7 @@ object EmailService {
                         to       = Seq(to),
                         bodyHtml = Some(bodyHtml))
 
-      MailerPlugin.send(email)
+      mailerClient.send(email)
       ()
     }
 

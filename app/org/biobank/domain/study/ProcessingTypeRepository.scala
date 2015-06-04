@@ -2,11 +2,13 @@ package org.biobank.domain.study
 
 import org.biobank.domain._
 
+import javax.inject.Singleton
+import com.google.inject.ImplementedBy
 import org.slf4j.LoggerFactory
-
 import scalaz._
 import Scalaz._
 
+@ImplementedBy(classOf[ProcessingTypeRepositoryImpl])
 trait ProcessingTypeRepository extends ReadWriteRepository [ProcessingTypeId, ProcessingType] {
 
   def withId(
@@ -17,6 +19,7 @@ trait ProcessingTypeRepository extends ReadWriteRepository [ProcessingTypeId, Pr
 
 }
 
+@Singleton
 class ProcessingTypeRepositoryImpl
     extends ReadWriteRepositoryRefImpl[ProcessingTypeId, ProcessingType](v => v.id)
     with ProcessingTypeRepository {

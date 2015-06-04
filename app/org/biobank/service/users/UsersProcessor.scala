@@ -7,34 +7,37 @@ import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.TestData
 
-import akka.actor.{ ActorSystem, ActorRef }
+import akka.actor._
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import com.trueaccord.scalapb.GeneratedMessage
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.slf4j.LoggerFactory
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scaldi.akka.AkkaInjectable
-import scaldi.{Injectable, Injector}
 
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
+
+object UsersProcessor {
+
+  def props = Props[UsersProcessor]
+
+}
 
 /**
  * Handles the commands to configure users.
  */
-class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
+class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
+                                             val passwordHasher: PasswordHasher,
+                                             val emailService:   EmailService,
+                                             val testData:       TestData)
+    extends Processor {
+
   import UserEvent.EventType
 
   case class PasswordInfo(password: String, salt: String)
 
   case class SnapshotState(users: Set[User])
-
-  val userRepository = inject [UserRepository]
-
-  val passwordHasher = inject [PasswordHasher]
 
   override def persistenceId = "user-processor-id"
 
@@ -210,7 +213,7 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
             activeUser.updatePassword(passwordInfo.password, passwordInfo.salt).fold(
               err => err.failure[UserEvent],
               updatedUser => {
-                EmailService.passwordResetEmail(user.email, plainPassword)
+                emailService.passwordResetEmail(user.email, plainPassword)
                 createUserEvent(updatedUser.id, cmd).withPasswordReset(
                   UserPasswordResetEvent(version  = Some(updatedUser.version),
                                          password = Some(updatedUser.password),
@@ -551,7 +554,6 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
   private def createDefaultUser(): Unit = {
     if (context.system.settings.config.hasPath(TestData.configPath)
       && context.system.settings.config.getBoolean(TestData.configPath)) {
-      val userRepository = inject [UserRepository]
 
       log.debug("createDefaultUser")
 
@@ -570,5 +572,5 @@ class UsersProcessor(implicit inj: Injector) extends Processor with Injectable {
   }
 
   createDefaultUser
-  TestData.addMultipleUsers
+  testData.addMultipleUsers
 }

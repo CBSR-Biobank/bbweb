@@ -8,23 +8,25 @@ import org.biobank.domain.study.{
   ProcessingType,
   ProcessingTypeId,
   ProcessingTypeRepository,
-  SpecimenGroupId,
-  SpecimenGroupRepository
+  SpecimenGroupId
 }
 import org.slf4j.LoggerFactory
 import org.biobank.service.{ Processor, WrappedEvent }
-import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 
+import akka.actor._
 import akka.persistence.SnapshotOffer
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import scaldi.akka.AkkaInjectable
-import scaldi.{Injectable, Injector}
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
+
+object ProcessingTypeProcessor {
+
+  def props = Props[ProcessingTypeProcessor]
+
+}
 
 /**
   * The ProcessingTypeProcessor is responsible for maintaining state changes for all
@@ -36,15 +38,14 @@ import scalaz.Validation.FlatMap._
   * It is a child actor of
   * [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
   */
-class ProcessingTypeProcessor(implicit inj: Injector) extends Processor with AkkaInjectable {
+class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeRepository: ProcessingTypeRepository)
+    extends Processor {
   import org.biobank.infrastructure.event.StudyEventsUtil._
   import StudyEvent.EventType
 
   override def persistenceId = "processing-type-processor-id"
 
   case class SnapshotState(processingTypes: Set[ProcessingType])
-
-  val processingTypeRepository = inject [ProcessingTypeRepository]
 
   /**
     * These are the events that are recovered during journal recovery. They cannot fail and must be

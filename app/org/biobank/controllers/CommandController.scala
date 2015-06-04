@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory
 import play.Logger
 import play.api.mvc._
 import play.api.libs.json._
-import play.api.mvc.Results._
 import play.mvc.Http
 import play.api.libs.concurrent.Execution.Implicits._
 
@@ -29,7 +28,7 @@ trait CommandController extends Controller with Security {
         cmdResult.fold(
           errors => {
             Future.successful(
-              BadRequest(Json.obj("status" ->"error", "message" -> JsError.toFlatJson(errors))))
+              BadRequest(Json.obj("status" ->"error", "message" -> JsError.toJson(errors))))
           },
           cmd => {
             Logger.debug(s"commandAction: $cmd")
@@ -50,7 +49,7 @@ trait CommandController extends Controller with Security {
         cmdResult.fold(
           errors => {
             Future.successful(
-              BadRequest(Json.obj("status" ->"error", "message" -> JsError.toFlatJson(errors))))
+              BadRequest(Json.obj("status" ->"error", "message" -> JsError.toJson(errors))))
           },
           cmd => {
             Logger.debug(s"commandAction: $cmd")
@@ -103,6 +102,7 @@ trait JsonController extends Controller {
       : Result = {
     validation.fold(
       err => {
+        Log.info("*** ERROR ***: " + err.list.mkString(", "))
         val errMsgs = err.list.mkString(", ")
         if ("does not exist".r.findAllIn(errMsgs).length > 0) {
           NotFound(errMsgs)

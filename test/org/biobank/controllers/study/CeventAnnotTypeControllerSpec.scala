@@ -1,26 +1,18 @@
 package org.biobank.controllers.study
 
-import org.biobank.fixture._
 import org.biobank.domain._
 import org.biobank.domain.study._
-import org.biobank.fixture.ControllerFixture
-import org.biobank.domain.JsonHelper._
 
-import play.api.test.Helpers._
-import play.api.test.WithApplication
-import play.api.libs.json._
 import org.scalatest.Tag
 import play.api.Play.current
-import org.scalatestplus.play._
 import org.joda.time.DateTime
 
-class CeventAnnotTypeControllerSpec extends StudyAnnotTypeControllerSpec[CollectionEventAnnotationType] {
-  import AnnotationValueType._
-  import TestGlobal._
+class CeventAnnotTypeControllerSpec
+    extends StudyAnnotTypeControllerSpec[CollectionEventAnnotationType] {
 
   override val uriPart = "ceannottypes"
 
-  override def annotationTypeRepository = collectionEventAnnotationTypeRepository
+  override def annotationTypeRepository = app.injector.instanceOf[CollectionEventAnnotationTypeRepository]
 
   override def createAnnotationType = factory.createCollectionEventAnnotationType
 

@@ -4,24 +4,23 @@ import org.biobank.domain.study.ParticipantAnnotationType
 
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.service._
 import org.biobank.domain._
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 
+import javax.inject.{Inject => javaxInject, Named}
+import com.google.inject.ImplementedBy
 import akka.actor._
 import akka.util.Timeout
 import akka.pattern.ask
 import scala.concurrent._
+import scala.concurrent.duration._
 import org.slf4j.LoggerFactory
-import ExecutionContext.Implicits.global
-import scaldi.akka.AkkaInjectable
-import scaldi.{Injectable, Injector}
-
-import scalaz._
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
+@ImplementedBy(classOf[ParticipantsServiceImpl])
 trait ParticipantsService {
 
   def get(studyId: String, participantId: String): DomainValidation[Participant]
@@ -40,19 +39,13 @@ trait ParticipantsService {
 
 }
 
-class ParticipantsServiceImpl(implicit inj: Injector)
-    extends ParticipantsService
-    with AkkaInjectable {
+class ParticipantsServiceImpl @javaxInject() (@Named("participantsProcessor") val processor: ActorRef,
+                                              val participantRepository: ParticipantRepository)
+    extends ParticipantsService {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  implicit val system = inject [ActorSystem]
-
-  implicit val timeout = inject [Timeout] ('akkaTimeout)
-
-  val processor = injectActorRef [ParticipantsProcessor] ("participants")
-
-  val participantRepository = inject [ParticipantRepository]
+  implicit val timeout: Timeout = 5.seconds
 
   // TODO: add read side API
 

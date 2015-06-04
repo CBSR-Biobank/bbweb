@@ -1,4 +1,4 @@
-package org.biobank.service.centre
+package org.biobank.service.centres
 
 import org.biobank.dto._
 import org.biobank.infrastructure._
@@ -14,15 +14,15 @@ import akka.pattern.ask
 import scala.concurrent._
 import scala.concurrent.duration._
 import org.slf4j.LoggerFactory
-import ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext.Implicits.global
 import akka.util.Timeout
-import scaldi.akka.AkkaInjectable
-import scaldi.{Injectable, Injector}
+import javax.inject.{Inject => javaxInject, Named}
+import com.google.inject.ImplementedBy
 
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
+@ImplementedBy(classOf[CentresServiceImpl])
 trait CentresService {
 
   def getAll: Set[Centre]
@@ -65,27 +65,17 @@ trait CentresService {
  * @param centreProcessor
  *
  */
-class CentresServiceImpl(implicit inj: Injector)
-    extends CentresService
-    with AkkaInjectable {
-
-  implicit val system = inject [ActorSystem]
-
-  implicit val timeout = inject [Timeout] ('akkaTimeout)
-
-  val centreRepository = inject [CentreRepository]
-
-  val locationRepository = inject [LocationRepository]
-
-  val centreStudiesRepository = inject [CentreStudiesRepository]
-
-  val centreLocationsRepository = inject [CentreLocationsRepository]
-
-  val studyRepository = inject [StudyRepository]
-
-  val processor = injectActorRef [CentresProcessor] ("centre")
+class CentresServiceImpl @javaxInject() (@Named("centresProcessor") val processor: ActorRef,
+                                         val centreRepository:          CentreRepository,
+                                         val locationRepository:        LocationRepository,
+                                         val centreStudiesRepository:   CentreStudiesRepository,
+                                         val centreLocationsRepository: CentreLocationsRepository,
+                                         val studyRepository:           StudyRepository)
+    extends CentresService {
 
   val log = LoggerFactory.getLogger(this.getClass)
+
+  implicit val timeout: Timeout = 5.seconds
 
   /**
    * FIXME: use paging and sorting

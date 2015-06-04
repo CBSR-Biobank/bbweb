@@ -4,18 +4,16 @@ import org.biobank.fixture._
 import org.biobank.domain.study.{ DisabledStudy, Study, SpecimenGroup }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper._
+import org.biobank.domain.study._
 
 import play.api.test.Helpers._
-import play.api.test.WithApplication
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 import play.api.Play.current
-import org.scalatestplus.play._
 
 class SpecimenGroupControllerSpec extends ControllerFixture {
-  import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -120,7 +118,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
 
         val json = makeRequest(GET, uriWithQuery(study, sg)).as[JsObject]
         (json \ "status").as[String] must include ("success")
-        val jsonObj = (json \ "data")
+        val jsonObj = (json \ "data").get
         compareObj(jsonObj, sg)
       }
 

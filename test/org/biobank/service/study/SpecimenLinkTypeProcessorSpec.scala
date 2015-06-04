@@ -15,6 +15,7 @@ import org.joda.time.DateTime
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import akka.pattern.ask
+import akka.testkit.{ TestActors, TestKit, ImplicitSender }
 import scalaz._
 import scalaz.Scalaz._
 
@@ -26,18 +27,6 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
   import org.biobank.TestUtils._
 
   private val log = LoggerFactory.getLogger(this.getClass)
-
-  val studyRepository = inject [StudyRepository]
-
-  val specimenGroupRepository = inject [SpecimenGroupRepository]
-
-  val processingTypeRepository = inject [ProcessingTypeRepository]
-
-  val specimenLinkTypeRepository = inject [SpecimenLinkTypeRepository]
-
-  val specimenLinkAnnotationTypeRepository = inject [SpecimenLinkAnnotationTypeRepository]
-
-  val studiesProcessor = injectActorRef [StudiesProcessor] ("studies")
 
   val nameGenerator = new NameGenerator(this.getClass)
 

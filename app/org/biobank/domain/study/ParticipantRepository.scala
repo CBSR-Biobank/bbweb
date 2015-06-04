@@ -4,9 +4,12 @@ import org.biobank.domain._
 
 import org.slf4j.LoggerFactory
 
+import javax.inject.Singleton
+import com.google.inject.ImplementedBy
 import scalaz._
 import Scalaz._
 
+@ImplementedBy(classOf[ParticipantRepositoryImpl])
 trait ParticipantRepository
     extends ReadWriteRepository [ParticipantId, Participant] {
 
@@ -18,6 +21,7 @@ trait ParticipantRepository
 
 }
 
+@Singleton
 class ParticipantRepositoryImpl
     extends ReadWriteRepositoryRefImpl[ParticipantId, Participant](v => v.id)
     with ParticipantRepository {

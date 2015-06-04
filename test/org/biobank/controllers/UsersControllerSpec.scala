@@ -1,30 +1,24 @@
 package org.biobank.controllers
 
 import org.biobank.Global
-import org.biobank.domain._
 import org.biobank.domain.user._
 import org.biobank.fixture.{ ControllerFixture, NameGenerator }
-import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.domain.JsonHelper._
 import org.biobank.service.PasswordHasher
 
 import org.joda.time.DateTime
 import org.scalatest.Tag
-import org.scalatestplus.play._
 import org.slf4j.LoggerFactory
 import play.api.Play.current
 import play.api.libs.json._
 import play.api.mvc.Cookie
 import play.api.test.Helpers._
 import play.api.test._
-import scaldi.Injectable
 
 /**
  * Tests the REST API for [[User]].
  */
 class UsersControllerSpec extends ControllerFixture {
-  import org.biobank.TestUtils._
-  import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -87,14 +81,15 @@ class UsersControllerSpec extends ControllerFixture {
         compareObj(jsonItem, user)
       }
 
-      "list multiple users" in {
-        val users = List(factory.createRegisteredUser, factory.createRegisteredUser)
-        .map(user => userRepository.put(user))
+      "list multiple users" taggedAs(Tag("1")) in {
+        val users = (0 until 2).map { x =>
+          factory.createRegisteredUser
+        }.map(user => userRepository.put(user)).toList
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri,
-          offset = 0,
-          total = users.size,
+          uri       = uri,
+          offset    = 0,
+          total     = users.size,
           maybeNext = None,
           maybePrev = None)
         jsonItems must have size users.size
@@ -285,7 +280,7 @@ class UsersControllerSpec extends ControllerFixture {
       "return empty counts" in {
         val json = makeRequest(GET, uri + "/counts")
         (json \ "status").as[String] must include ("success")
-        checkCounts(json            = (json \ "data"),
+        checkCounts(json            = (json \ "data").get,
                     registeredCount = 0,
                     activeCount     = 0,
                     lockedCount     = 0)
@@ -302,7 +297,7 @@ class UsersControllerSpec extends ControllerFixture {
 
         val json = makeRequest(GET, uri + "/counts")
         (json \ "status").as[String] must include ("success")
-        checkCounts(json            = (json \ "data"),
+        checkCounts(json            = (json \ "data").get,
                     registeredCount = 3,
                     activeCount     = 2,
                     lockedCount     = 1)
@@ -503,6 +498,7 @@ class UsersControllerSpec extends ControllerFixture {
     }
 
     "GET /users/:id" must {
+
       "return a user" in {
         val user = factory.createActiveUser
         userRepository.put(user)
@@ -521,6 +517,7 @@ class UsersControllerSpec extends ControllerFixture {
     }
 
     "PUT /users/activate" must {
+
       "activate a user" in {
         val user = factory.createRegisteredUser
         userRepository.put(user)
@@ -546,6 +543,7 @@ class UsersControllerSpec extends ControllerFixture {
     }
 
     "PUT /users/lock" must {
+
       "lock a user" in {
         val user = factory.createActiveUser
         userRepository.put(user)
@@ -571,6 +569,7 @@ class UsersControllerSpec extends ControllerFixture {
     }
 
     "PUT /users/unlock" must {
+
       "must unlock a user" in {
         val user = factory.createLockedUser
         userRepository.put(user)
@@ -596,6 +595,7 @@ class UsersControllerSpec extends ControllerFixture {
     }
 
     "POST /login" must {
+
       "allow a user to log in" in {
         val plainPassword = nameGenerator.next[String]
         val user = createRegisteredUserInRepository(plainPassword)

@@ -15,27 +15,20 @@ import org.biobank.domain.{
 }
 import AnnotationValueType._
 import org.biobank.domain.study._
-import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 
 import akka.pattern.ask
+import akka.testkit.{ TestActors, TestKit, ImplicitSender }
 import org.joda.time.DateTime
 import org.scalatest.BeforeAndAfterEach
-import scalaz._
-import scalaz.Scalaz._
 
 /**
   * Tests for actor SpecimenGroupProcessor. These are written using ScalaTest.
   *
   */
 class SpecimenGroupProcessorSpec extends TestFixture {
+
   import org.biobank.TestUtils._
-
-  val studyRepository = inject [StudyRepository]
-
-  val specimenGroupRepository = inject [SpecimenGroupRepository]
-
-  val studiesProcessor = injectActorRef [StudiesProcessor] ("studies")
 
   val nameGenerator = new NameGenerator(this.getClass)
 

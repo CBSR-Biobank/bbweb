@@ -3,17 +3,17 @@ package org.biobank.service
 import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.domain.user.UserId
 
+import com.google.inject.ImplementedBy
 import play.api.Play.current
 import play.api.cache.Cache
-import scaldi.{Injectable, Injector}
 
 import scalaz._
 import Scalaz._
-import scalaz.Validation.FlatMap._
 
 /**
  *  Manages tokens used to authenticate logged in users.
  */
+@ImplementedBy(classOf[AuthTokenImpl])
 trait AuthToken {
 
   def newToken(userId: UserId): String

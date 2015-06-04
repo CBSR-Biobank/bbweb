@@ -1,24 +1,22 @@
 package org.biobank
 
 import org.biobank.domain._
-import org.biobank.domain.centre._
 import org.biobank.domain.study._
+import org.biobank.domain.centre._
 import org.biobank.domain.user._
-import org.biobank.infrastructure._
 import org.biobank.service.PasswordHasher
+import org.biobank.infrastructure._
 
-import org.joda.time.DateTime
-import play.api.Logger
-import scaldi.{Injectable, Injector}
-import akka.actor.ActorSystem
 import org.slf4j.LoggerFactory
+import javax.inject.{ Inject, Singleton }
+import akka.actor.ActorSystem
+import play.api.Logger
+import org.joda.time.DateTime
 
 /**
- * Provides initial data to test with. Ideally these methods should only be called for developemnt builds.
+ * Provides initial data to test with.
  */
-object TestData extends Injectable {
-
-  val log = LoggerFactory.getLogger(this.getClass)
+object TestData {
 
   val configPath = "application.loadTestData"
 
@@ -164,13 +162,37 @@ object TestData extends Injectable {
     ("88346afcb2884e53853a25da6930fb64", "Paivi Koski", "paivi.koski@ppshp.fi")
   )
 
-  def addMultipleCentres(implicit injector: Injector): Unit = {
-    val actorSystem = inject [ActorSystem]
+}
 
-    if (actorSystem.settings.config.hasPath(TestData.configPath)
-      && actorSystem.settings.config.getBoolean(TestData.configPath)) {
-      val centreRepository = inject [CentreRepository]
+/**
+ * Provides initial data to test with. Ideally these methods should only be called for developemnt builds.
+ */
+@Singleton
+class TestData @Inject() (
+  val actorSystem:                             ActorSystem,
+  val passwordHasher:                          PasswordHasher,
+  val collectionEventAnnotationTypeRepository: CollectionEventAnnotationTypeRepository,
+  val collectionEventTypeRepository:           CollectionEventTypeRepository,
+  val participantAnnotationTypeRepository:     ParticipantAnnotationTypeRepository,
+  val processingTypeRepository:                ProcessingTypeRepository,
+  val specimenGroupRepository:                 SpecimenGroupRepository,
+  val specimenLinkAnnotationTypeRepository:    SpecimenLinkAnnotationTypeRepository,
+  val specimenLinkTypeRepository:              SpecimenLinkTypeRepository,
+  val studyRepository:                         StudyRepository,
+  val participantRepository:                   ParticipantRepository,
+  val userRepository:                          UserRepository,
+  val centreRepository:                        CentreRepository,
+  val centreLocationsRepository:               CentreLocationsRepository,
+  val centreStudiesRepository:                 CentreStudiesRepository,
+  val locationRepository:                      LocationRepository
+) {
+  import TestData._
 
+  val log = LoggerFactory.getLogger(this.getClass)
+
+  def addMultipleCentres(): Unit = {
+    if (actorSystem.settings.config.hasPath(configPath)
+      && actorSystem.settings.config.getBoolean(configPath)) {
       Logger.debug("addMultipleCentres")
 
       val centres = centreData.map { case (id, name, description) =>
@@ -187,13 +209,9 @@ object TestData extends Injectable {
     }
   }
 
-  def addMultipleStudies(implicit injector: Injector): Unit = {
-    val actorSystem = inject [ActorSystem]
-
-    if (actorSystem.settings.config.hasPath(TestData.configPath)
-      && actorSystem.settings.config.getBoolean(TestData.configPath)) {
-      val studyRepository = inject [StudyRepository]
-
+  def addMultipleStudies(): Unit = {
+    if (actorSystem.settings.config.hasPath(configPath)
+      && actorSystem.settings.config.getBoolean(configPath)) {
       Logger.debug("addMultipleStudies")
 
       val studies = studyData.map { case (id, name, description) =>
@@ -210,9 +228,6 @@ object TestData extends Injectable {
       addSpecimenGroups
       addCollectionEvents
       addParticipantAnnotationTypes
-
-      val specimenGroupRepository = inject [SpecimenGroupRepository]
-      val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
 
       specimenGroupRepository.getValues.foreach { sg =>
         studyRepository.getDisabled(sg.studyId).fold(
@@ -234,10 +249,7 @@ object TestData extends Injectable {
     }
   }
 
-  def addSpecimenGroups(implicit injector: Injector) = {
-    val studyRepository = inject [StudyRepository]
-    val specimenGroupRepository = inject [SpecimenGroupRepository]
-
+  def addSpecimenGroups() = {
     Logger.debug("addSpecimenGroups")
 
     studyRepository.getValues.take(sgIds.size).zip(sgIds).foreach { case (study, sgId) =>
@@ -258,12 +270,8 @@ object TestData extends Injectable {
     }
   }
 
-  def addCollectionEvents(implicit injector: Injector) = {
+  def addCollectionEvents() = {
     Logger.debug("addCollectionEvents")
-
-    val studyRepository = inject [StudyRepository]
-    val specimenGroupRepository = inject [SpecimenGroupRepository]
-    val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
 
     specimenGroupRepository.getValues.zip(cetIds).foreach { case (sg, cetId) =>
       studyRepository.getDisabled(sg.studyId).fold(
@@ -289,11 +297,9 @@ object TestData extends Injectable {
     }
   }
 
-  def addParticipantAnnotationTypes(implicit injector: Injector) = {
+  def addParticipantAnnotationTypes() = {
     Logger.debug("addParticipantAnnotationTypes")
 
-    val studyRepository = inject [StudyRepository]
-    val patRepository = inject [ParticipantAnnotationTypeRepository]
     val studyNames = List("BBPSP")
 
     studyNames.foreach { studyName =>
@@ -363,21 +369,17 @@ object TestData extends Injectable {
               options       = Seq("option1", "option2", "option3"),
               required      = true)
           )
-          patList.foreach { pat => patRepository.put(pat) }
+          patList.foreach { pat => participantAnnotationTypeRepository.put(pat) }
       }
     }
 
   }
 
-  def addMultipleUsers(implicit injector: Injector) = {
-    val actorSystem = inject [ActorSystem]
-
-    if (actorSystem.settings.config.hasPath(TestData.configPath)
-      && actorSystem.settings.config.getBoolean(TestData.configPath)) {
+  def addMultipleUsers() = {
+    if (actorSystem.settings.config.hasPath(configPath)
+      && actorSystem.settings.config.getBoolean(configPath)) {
       Logger.debug("addMultipleUsers")
 
-      val userRepository = inject [UserRepository]
-      def passwordHasher = inject [PasswordHasher]
       val plainPassword = "testuser"
       val salt = passwordHasher.generateSalt
 

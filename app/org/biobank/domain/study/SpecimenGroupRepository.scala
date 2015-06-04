@@ -2,10 +2,13 @@ package org.biobank.domain.study
 
 import org.biobank.domain._
 
+import javax.inject.Singleton
+import com.google.inject.ImplementedBy
 import org.slf4j.LoggerFactory
 import scalaz._
 import Scalaz._
 
+@ImplementedBy(classOf[SpecimenGroupRepositoryImpl])
 trait SpecimenGroupRepository extends ReadWriteRepository[SpecimenGroupId, SpecimenGroup] {
 
   def allForStudy(studyId: StudyId): Set[SpecimenGroup]
@@ -16,6 +19,7 @@ trait SpecimenGroupRepository extends ReadWriteRepository[SpecimenGroupId, Speci
 
 }
 
+@Singleton
 class SpecimenGroupRepositoryImpl
     extends ReadWriteRepositoryRefImpl[SpecimenGroupId, SpecimenGroup](v => v.id)
     with SpecimenGroupRepository {

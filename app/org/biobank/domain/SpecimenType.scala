@@ -1,9 +1,5 @@
 package org.biobank.domain
 
-import org.biobank.infrastructure.EnumUtils._
-
-import play.api.libs.json._
-
 /** A standardized set of classifications that describe what a [[Specimen]] is.
   */
 object SpecimenType extends Enumeration {

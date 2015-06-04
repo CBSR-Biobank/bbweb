@@ -11,30 +11,74 @@ import org.biobank.infrastructure.event.UserEvents._
 import akka.actor.{ ActorSystem, ActorRef }
 import akka.pattern.ask
 import akka.util.Timeout
+import javax.inject._
+import com.google.inject.ImplementedBy
 import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
-import scala.concurrent.ExecutionContext.Implicits.global
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
-import scaldi.akka.AkkaInjectable
-import scaldi.{Injectable, Injector}
+import scala.concurrent.duration._
 
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
-class UsersService(implicit inj: Injector) extends AkkaInjectable {
+@ImplementedBy(classOf[UsersServiceImpl])
+trait UsersService {
+
+  def getAll: Set[User]
+
+  def getCountsByStatus(): UserCountsByStatus
+
+  def getUsers[T <: User](nameFilter:  String,
+                          emailFilter: String,
+                          status:      String,
+                          sortFunc:    (User, User) => Boolean,
+                          order:       SortOrder)
+      : DomainValidation[Seq[User]]
+
+  def getUser(id: String): DomainValidation[User]
+
+  def getByEmail(email: String): DomainValidation[User]
+
+  def validatePassword(email: String, enteredPwd: String): DomainValidation[User]
+
+  def resetPassword(cmd: ResetUserPasswordCmd)
+      : Future[DomainValidation[User]]
+
+  def register(cmd: RegisterUserCmd): Future[DomainValidation[User]]
+
+  def updateName(cmd: UpdateUserNameCmd)(implicit userId: UserId)
+      : Future[DomainValidation[User]]
+
+  def updateEmail(cmd: UpdateUserEmailCmd)(implicit userId: UserId)
+      : Future[DomainValidation[User]]
+
+  def updatePassword(cmd: UpdateUserPasswordCmd)(implicit userId: UserId)
+      : Future[DomainValidation[User]]
+
+  def updateAvatarUrl(cmd: UpdateUserAvatarUrlCmd)(implicit userId: UserId)
+      : Future[DomainValidation[User]]
+
+  def activate(cmd: ActivateUserCmd)(implicit userId: UserId)
+      : Future[DomainValidation[User]]
+
+  def lock(cmd: LockUserCmd)(implicit userId: UserId)
+      : Future[DomainValidation[User]]
+
+  def unlock(cmd: UnlockUserCmd)(implicit userId: UserId)
+      : Future[DomainValidation[User]]
+
+}
+
+class UsersServiceImpl @javax.inject.Inject() (
+  @Named("usersProcessor") val processor: ActorRef,
+  val userRepository: UserRepository,
+  val passwordHasher: PasswordHasher)
+    extends UsersService {
 
   val Log = LoggerFactory.getLogger(this.getClass)
 
-  implicit val system = inject [ActorSystem]
-
-  implicit val timeout = inject [Timeout] ('akkaTimeout)
-
-  val usersProcessor = injectActorRef [UsersProcessor] ("user")
-
-  val userRepository = inject [UserRepository]
-
-  val passwordHasher = inject [PasswordHasher]
+  implicit val timeout: Timeout = 5.seconds
 
   def getAll: Set[User] = {
     userRepository.allUsers
@@ -61,12 +105,11 @@ class UsersService(implicit inj: Injector) extends AkkaInjectable {
     }
   }
 
-  def getUsers[T <: User]
-    (nameFilter: String,
-      emailFilter: String,
-      status: String,
-      sortFunc: (User, User) => Boolean,
-      order: SortOrder)
+  def getUsers[T <: User](nameFilter:  String,
+                          emailFilter: String,
+                          status:      String,
+                          sortFunc:    (User, User) => Boolean,
+                          order:       SortOrder)
       : DomainValidation[Seq[User]] = {
     val allUsers = userRepository.getValues
 
@@ -130,46 +173,46 @@ class UsersService(implicit inj: Injector) extends AkkaInjectable {
 
   def resetPassword(cmd: ResetUserPasswordCmd)
       : Future[DomainValidation[User]] = {
-    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
+    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
   def register(cmd: RegisterUserCmd): Future[DomainValidation[User]] = {
-    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
+    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
   def updateName(cmd: UpdateUserNameCmd)(implicit userId: UserId)
       : Future[DomainValidation[User]] = {
-    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
+    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
   def updateEmail(cmd: UpdateUserEmailCmd)(implicit userId: UserId)
       : Future[DomainValidation[User]] = {
-    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
+    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
   def updatePassword(cmd: UpdateUserPasswordCmd)(implicit userId: UserId)
       : Future[DomainValidation[User]] = {
-    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
+    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
   def updateAvatarUrl(cmd: UpdateUserAvatarUrlCmd)(implicit userId: UserId)
       : Future[DomainValidation[User]] = {
-    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
+    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
   def activate(cmd: ActivateUserCmd)(implicit userId: UserId)
       : Future[DomainValidation[User]] = {
-    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
+    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
   def lock(cmd: LockUserCmd)(implicit userId: UserId)
       : Future[DomainValidation[User]] = {
-    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
+    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
   def unlock(cmd: UnlockUserCmd)(implicit userId: UserId)
       : Future[DomainValidation[User]] = {
-    replyWithUser(ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]])
+    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
   private def replyWithUser(future: Future[DomainValidation[UserEvent]])
@@ -183,4 +226,5 @@ class UsersService(implicit inj: Injector) extends AkkaInjectable {
   }
 
 }
+
 

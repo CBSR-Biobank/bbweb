@@ -1,12 +1,6 @@
 package org.biobank.query
 
-import org.biobank.domain.user.UserId
-import org.biobank.fixture._
-import org.biobank.infrastructure.event.StudyEvents._
-
-import java.util.UUID
-import org.junit.runner.RunWith
-import org.slf4j.LoggerFactory
+// import org.slf4j.LoggerFactory
 import org.scalatest._
 //import scala.slick.jdbc.{ GetResult, StaticQuery => Q }
 //import scala.slick.session.Session

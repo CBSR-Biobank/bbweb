@@ -1,6 +1,5 @@
 package org.biobank.domain.study
 
-import org.biobank.infrastructure._
 import org.biobank.domain.{
   ConcurrencySafeEntity,
   DomainValidation,
@@ -8,7 +7,6 @@ import org.biobank.domain.{
   HasDescriptionOption,
   ValidationKey
 }
-import org.biobank.domain.study._
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
@@ -17,7 +15,6 @@ import org.biobank.infrastructure.JsonUtils._
 import org.biobank.infrastructure.command.StudyCommands._
 
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
 
 import com.github.nscala_time.time.Imports._
 import scalaz._

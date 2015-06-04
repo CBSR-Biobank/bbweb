@@ -1,19 +1,20 @@
 package org.biobank.domain.centre
 
 import org.biobank.domain._
-import org.biobank.domain.centre._
 
-import scalaz._
-import Scalaz._
+import javax.inject.Singleton
+import com.google.inject.ImplementedBy
 
 /** This repository maintains the relationship between a single centre and its multiple locations.
-  */
+ */
+@ImplementedBy(classOf[CentreLocationsRepositoryImpl])
 trait CentreLocationsRepository extends ReadWriteRepository[LocationId, CentreLocation] {
 
   def withCentreId(centreId: CentreId): Set[CentreLocation]
 
 }
 
+@Singleton
 class CentreLocationsRepositoryImpl
     extends ReadWriteRepositoryRefImpl[LocationId, CentreLocation](v => v.locationId)
     with CentreLocationsRepository {

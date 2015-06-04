@@ -7,7 +7,6 @@ import org.biobank.domain.AnnotationValueType
 
 import com.github.nscala_time.time.Imports._
 import org.slf4j.LoggerFactory
-import scalaz._
 import scalaz.Scalaz._
 
 class SpecimenLinkAnnotationTypeSpec extends DomainSpec {

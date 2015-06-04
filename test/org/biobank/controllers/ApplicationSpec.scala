@@ -1,34 +1,37 @@
 package org.biobank.controllers
 
-import org.biobank.fixture.{ ControllerFixture, NameGenerator }
+import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.user.UserRepository
+import org.biobank.domain.study.StudyRepository
+import org.biobank.domain.centre.CentreRepository
 import org.biobank.Global
 
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import play.api.Play.current
 import play.api.libs.json._
-import play.api.test._
 import play.api.test.Helpers._
-import org.scalatest._
-import org.scalatestplus.play._
+import play.mvc.Http.RequestBuilder
+import scala.concurrent.Future
 
 class ApplicationSpec extends ControllerFixture {
-  import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
   "Application" must {
 
-    "send 404 on a bad request" in {
-      route(FakeRequest(GET, "/xyz")) mustBe (None)
+    "send 404 on a bad request" taggedAs(Tag("1")) in {
+      val request = new RequestBuilder().method("GET").uri("/xyz")
+      val result = Future.successful(play.test.Helpers.route(request).toScala)
+      status(result) mustEqual NOT_FOUND
     }
 
-    "return results for index" in {
-      val home = route(FakeRequest(GET, "/")).get
+    "return results for index" taggedAs(Tag("1")) in {
+      val request = new RequestBuilder().method("GET").uri("/")
+      val result = Future.successful(play.test.Helpers.route(request).toScala)
 
-      status(home) mustBe (OK)
-      contentType(home) mustBe (Some("text/html"))
+      status(result) mustBe (OK)
+      contentType(result) mustBe (Some("text/html"))
     }
 
     "return initial aggregate counts" in {

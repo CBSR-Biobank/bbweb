@@ -10,34 +10,23 @@ import org.biobank.service._
 import org.biobank.service.study.StudiesService
 import org.biobank.controllers.PagedResults._
 
+import javax.inject.{Inject => javaxInject, Singleton}
 import play.api.Logger
 import play.api.Play.current
-import play.api.libs.concurrent.Execution.Implicits._
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
-import play.api.mvc.Results._
 import play.api.mvc._
 import scala.concurrent.Future
 import scala.language.reflectiveCalls
-import scaldi.{Injectable, Injector}
-
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 /**
   *
   */
-class StudiesController(implicit inj: Injector)
+class StudiesController @javaxInject() (val authToken:      AuthToken,
+                                        val usersService:   UsersService,
+                                        val studiesService: StudiesService)
     extends CommandController
-    with JsonController
-    with Injectable {
-
-  implicit override val authToken = inject [AuthToken]
-
-  implicit override val usersService = inject [UsersService]
-
-  private val studiesService = inject[StudiesService]
+    with JsonController {
 
   private val PageSizeDefault = 5
 

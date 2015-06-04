@@ -8,14 +8,12 @@ import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
 import org.biobank.domain.AnnotationValueType._
-import org.biobank.infrastructure.JsonUtils._
 import org.biobank.infrastructure.EnumUtils._
 
 import Commands._
 
 import play.api.libs.json._
 import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._
 
 object StudyCommands {
 

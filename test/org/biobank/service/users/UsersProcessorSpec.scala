@@ -7,26 +7,26 @@ import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.domain._
 import org.biobank.domain.user._
 
+import javax.inject.{Inject => javaxInject, Named}
+import akka.actor.{ ActorSystem, Actor, Props }
 import akka.pattern._
 import org.joda.time.DateTime
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
-import scaldi.MutableInjectorAggregation
-import scalaz._
 import scalaz.Scalaz._
+import akka.testkit.{ TestActors, TestKit, ImplicitSender }
 
 class UsersProcessorSpec extends TestFixture {
+
   import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  val userRepository = inject [UserRepository]
-
-  val passwordHasher = inject [PasswordHasher]
-
-  val usersProcessor = injectActorRef [UsersProcessor] ("user")
-
   val nameGenerator = new NameGenerator(this.getClass)
+
+  override def afterAll {
+    TestKit.shutdownActorSystem(system)
+  }
 
   "A user processor" must {
 

@@ -1,7 +1,5 @@
 package org.biobank.infrastructure.command
 
-import org.biobank.infrastructure._
-
 object Commands {
 
   trait Command {

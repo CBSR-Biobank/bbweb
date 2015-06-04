@@ -6,8 +6,6 @@ import org.biobank.fixture.NameGenerator
 import org.scalatest.Tag
 import com.github.nscala_time.time.Imports._
 import org.slf4j.LoggerFactory
-import scalaz._
-import scalaz.Scalaz._
 
 /**
   * Note: to run from Eclipse uncomment the @RunWith line. To run from SBT the line mustBe

@@ -2,31 +2,20 @@ package org.biobank.controllers.study
 
 import org.biobank.fixture._
 import org.biobank.domain.{ AnnotationTypeId, AnnotationOption, AnnotationValueType }
-import org.biobank.domain.study.{
-  Study,
-  StudyId,
-  Participant,
-  ParticipantId,
-  ParticipantAnnotation,
-  ParticipantAnnotationType
-}
-import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.domain.study._
 import org.biobank.domain.JsonHelper._
 import org.biobank.fixture.ControllerFixture
+
 import play.api.test.Helpers._
-import play.api.test.WithApplication
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
-import org.scalatestplus.play._
 import org.joda.time.DateTime
 
 /**
  * Tests the REST API for [[Participants]].
  */
 class ParticipantsControllerSpec extends ControllerFixture {
-  import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 

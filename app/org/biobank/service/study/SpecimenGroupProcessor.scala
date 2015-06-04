@@ -23,15 +23,20 @@ import org.biobank.domain.study.{
   Study,
   StudyId
 }
+import javax.inject.{Inject => javaxInject}
 
+import akka.actor._
 import akka.persistence.SnapshotOffer
-import scaldi.akka.AkkaInjectable
-import scaldi.{Injectable, Injector}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
+
+object SpecimenGroupProcessor {
+
+  def props = Props[SpecimenGroupProcessor]
+
+}
 
 /** The SpecimenGroupProcessor is responsible for maintaining state changes for all
   * [[org.biobank.domain.study.SpecimenGroup]] aggregates. This particular processor uses Akka-Persistence's
@@ -44,19 +49,17 @@ import scalaz.Validation.FlatMap._
   * It handles commands that deal with a Specimen Group.
   *
   */
-class SpecimenGroupProcessor(implicit inj: Injector) extends Processor with AkkaInjectable {
+class SpecimenGroupProcessor @javaxInject() (
+  val collectionEventTypeRepository: CollectionEventTypeRepository,
+  val specimenGroupRepository:       SpecimenGroupRepository,
+  val specimenLinkTypeRepository:    SpecimenLinkTypeRepository)
+    extends Processor {
   import org.biobank.infrastructure.event.StudyEventsUtil._
   import StudyEvent.EventType
 
   override def persistenceId = "specimen-group-processor-id"
 
   case class SnapshotState(specimenGroups: Set[SpecimenGroup])
-
-  val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
-
-  val specimenGroupRepository = inject [SpecimenGroupRepository]
-
-  val specimenLinkTypeRepository = inject [SpecimenLinkTypeRepository]
 
   /**
     * These are the events that are recovered during journal recovery. They cannot fail and must be

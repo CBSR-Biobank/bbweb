@@ -3,10 +3,6 @@ package org.biobank.service.study
 import org.biobank.service._
 import org.biobank.domain._
 import org.biobank.domain.study._
-import org.biobank.domain.AnnotationValueType._
-
-import scalaz._
-import scalaz.Scalaz._
 
 /**
  *

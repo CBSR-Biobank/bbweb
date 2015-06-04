@@ -115,7 +115,7 @@ POST    /users/:id/unlock                       @org.biobank.controllers.UsersCo
 GET     /users/:id/studies                      @org.biobank.controllers.UsersController.userStudies(id, query: Option[String], sort: Option[String], order: Option[String])
 
 # Authentication
-GET     /authenticate                           @org.biobank.controllers.UsersController.authenticateUser
+GET     /authenticate                           @org.biobank.controllers.UsersController.authenticateUser()
 POST    /login                                  @org.biobank.controllers.UsersController.login()
 POST    /logout                                 @org.biobank.controllers.UsersController.logout()
 POST    /passreset                              @org.biobank.controllers.UsersController.passwordReset()

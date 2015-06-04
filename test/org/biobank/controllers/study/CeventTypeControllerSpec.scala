@@ -4,18 +4,16 @@ import org.biobank.fixture._
 import org.biobank.domain.study.{ CollectionEventType, CollectionEventAnnotationType, Study, SpecimenGroup }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper._
+import org.biobank.domain.study._
 
 import play.api.test.Helpers._
-import play.api.test.WithApplication
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 import play.api.Play.current
-import org.scalatestplus.play._
 
 class CeventTypeControllerSpec extends ControllerFixture {
-  import TestGlobal._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -336,7 +334,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "allow a updating collection event types on two different studies to same name" in {
         val commonName = nameGenerator.next[CollectionEventType]
 
-        (0 until 2).map { study =>
+        (0 until 2).map { x =>
           val study = factory.createDisabledStudy
           studyRepository.put(study)
           val cet = factory.createCollectionEventType

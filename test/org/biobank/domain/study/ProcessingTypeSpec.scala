@@ -1,20 +1,19 @@
 package org.biobank.domain.study
 
 import org.biobank.domain.DomainSpec
-import org.biobank.infrastructure._
 import org.biobank.fixture.NameGenerator
 
+import javax.inject.{Inject => javaxInject}
 import org.slf4j.LoggerFactory
 import com.github.nscala_time.time.Imports._
-import scalaz._
 import scalaz.Scalaz._
 
-class ProcessingTypeSpec extends DomainSpec {
+class ProcessingTypeSpec @javaxInject() (
+  val processingTypeRepository: ProcessingTypeRepository)
+    extends DomainSpec {
   import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
-
-  val processingTypeRepository = inject [ProcessingTypeRepository]
 
   val nameGenerator = new NameGenerator(this.getClass)
 

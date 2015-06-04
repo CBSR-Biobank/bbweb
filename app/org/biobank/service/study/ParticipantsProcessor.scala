@@ -7,17 +7,21 @@ import org.biobank.domain.{ AnnotationTypeId, AnnotationOption, DomainValidation
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 
-import akka.actor. { ActorRef, Props }
+import javax.inject.{Inject => javaxInject}
+import akka.actor._
 import akka.pattern.ask
 import org.slf4j.LoggerFactory
 import akka.persistence.SnapshotOffer
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import scaldi.akka.AkkaInjectable
-import scaldi.{Injectable, Injector}
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
+
+object ParticipantsProcessor {
+
+  def props = Props[ParticipantsProcessor]
+
+}
 
 /**
   * The ParticipantsProcessor is responsible for maintaining state changes for all
@@ -25,21 +29,17 @@ import scalaz.Validation.FlatMap._
   * [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist the generated
   * events, afterwhich it will updated the current state of the [[org.biobank.domain.study.Study]] being
   * processed.
-  */
-class ParticipantsProcessor(implicit inj: Injector) extends Processor with AkkaInjectable {
+ */
+class ParticipantsProcessor @javaxInject() (val participantRepository:    ParticipantRepository,
+                                            val annotationTypeRepository: ParticipantAnnotationTypeRepository,
+                                            val studyRepository:          StudyRepository)
+    extends Processor {
   import org.biobank.infrastructure.event.StudyEventsUtil._
   import StudyEvent.EventType
 
   override def persistenceId = "participant-processor-id"
 
   case class SnapshotState(participants: Set[Participant])
-
-  val participantRepository = inject [ParticipantRepository]
-
-  val annotationTypeRepository = inject [ParticipantAnnotationTypeRepository]
-
-  // used to check the status of a study
-  val studyRepository = inject [StudyRepository]
 
   /**
     * These are the events that are recovered during journal recovery. They cannot fail and must be

@@ -3,9 +3,12 @@ package org.biobank.domain.study
 import org.biobank.domain._
 import org.slf4j.LoggerFactory
 
+import javax.inject.Singleton
+import com.google.inject.ImplementedBy
 import scalaz._
 import Scalaz._
 
+@ImplementedBy(classOf[SpecimenLinkTypeRepositoryImpl])
 trait SpecimenLinkTypeRepository extends ReadWriteRepository [SpecimenLinkTypeId, SpecimenLinkType] {
 
   def withId(processingTypeId: ProcessingTypeId, specimenLinkTypeId: SpecimenLinkTypeId): DomainValidation[SpecimenLinkType]
@@ -18,6 +21,7 @@ trait SpecimenLinkTypeRepository extends ReadWriteRepository [SpecimenLinkTypeId
 
 }
 
+@Singleton
 class SpecimenLinkTypeRepositoryImpl
     extends ReadWriteRepositoryRefImpl[SpecimenLinkTypeId, SpecimenLinkType](v => v.id)
     with SpecimenLinkTypeRepository {

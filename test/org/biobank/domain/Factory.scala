@@ -1,7 +1,6 @@
 package org.biobank.domain
 
 import org.biobank.fixture.NameGenerator
-import org.biobank.domain._
 import org.biobank.domain.user._
 import org.biobank.domain.study._
 import org.biobank.domain.centre._
@@ -12,9 +11,7 @@ import org.biobank.infrastructure.{
 }
 import org.slf4j.LoggerFactory
 import scala.reflect.ClassTag
-import scala.reflect._
 import org.joda.time.DateTime
-import scalaz._
 import scalaz.Scalaz._
 
 class Factory {

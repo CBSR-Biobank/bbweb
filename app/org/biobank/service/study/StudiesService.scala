@@ -19,14 +19,14 @@ import akka.pattern.ask
 import scala.concurrent._
 import scala.concurrent.duration._
 import org.slf4j.LoggerFactory
-import ExecutionContext.Implicits.global
-import scaldi.akka.AkkaInjectable
-import scaldi.{Injectable, Injector}
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import javax.inject._
+import com.google.inject.ImplementedBy
 
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
+@ImplementedBy(classOf[StudiesServiceImpl])
 trait StudiesService {
 
   def getAll: Seq[StudyNameDto]
@@ -175,28 +175,23 @@ trait StudiesService {
   *
   * @param studiesProcessor
   *
-  */
-class StudiesServiceImpl(implicit inj: Injector)
-    extends StudiesService
-    with AkkaInjectable {
+ */
+class StudiesServiceImpl @javax.inject.Inject() (
+  @Named("studiesProcessor") val processor:    ActorRef,
+  val studyRepository:                         StudyRepository,
+  val processingTypeRepository:                ProcessingTypeRepository,
+  val specimenGroupRepository:                 SpecimenGroupRepository,
+  val collectionEventTypeRepository:           CollectionEventTypeRepository,
+  val specimenLinkTypeRepository:              SpecimenLinkTypeRepository,
+  val collectionEventAnnotationTypeRepository: CollectionEventAnnotationTypeRepository,
+  val participantAnnotationTypeRepository:     ParticipantAnnotationTypeRepository,
+  val specimenLinkAnnotationTypeRepository:    SpecimenLinkAnnotationTypeRepository,
+  val participantRepository:                   ParticipantRepository)
+    extends StudiesService {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  implicit val system = inject [ActorSystem]
-
-  implicit val timeout = inject [Timeout] ('akkaTimeout)
-
-  val processor = injectActorRef [StudiesProcessor] ("study")
-
-  val studyRepository                         = inject [StudyRepository]
-  val processingTypeRepository                = inject [ProcessingTypeRepository]
-  val specimenGroupRepository                 = inject [SpecimenGroupRepository]
-  val collectionEventTypeRepository           = inject [CollectionEventTypeRepository]
-  val specimenLinkTypeRepository              = inject [SpecimenLinkTypeRepository]
-  val collectionEventAnnotationTypeRepository = inject [CollectionEventAnnotationTypeRepository]
-  val participantAnnotationTypeRepository     = inject [ParticipantAnnotationTypeRepository]
-  val specimenLinkAnnotationTypeRepository    = inject [SpecimenLinkAnnotationTypeRepository]
-  val participantRepository                   = inject [ParticipantRepository]
+  implicit val timeout: Timeout = 5.seconds
 
   /**
     * FIXME: use paging and sorting

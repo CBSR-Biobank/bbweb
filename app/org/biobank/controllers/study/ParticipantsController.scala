@@ -1,38 +1,23 @@
 package org.biobank.controllers.study
 
 import org.biobank.controllers._
-import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.domain._
-import org.biobank.domain.study._
 import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.ParticipantsService
 
-import play.api.libs.concurrent.Execution.Implicits._
+import javax.inject.{Inject => javaxInject, Singleton}
 import scala.concurrent.Future
 import scala.language.postfixOps
-import play.api.mvc._
-import play.api.libs.json._
-import play.api.mvc.Results._
 import play.api.Logger
 import play.api.Play.current
 import scala.language.reflectiveCalls
-import scaldi.{Injectable, Injector}
 
-import scalaz._
-import scalaz.Scalaz._
-
-class ParticipantsController(implicit inj: Injector)
+class ParticipantsController @javaxInject() (val authToken:      AuthToken,
+                                             val usersService:   UsersService,
+                                             val participantsService: ParticipantsService)
     extends CommandController
-    with JsonController
-    with Injectable {
-
-  implicit override val authToken = inject [AuthToken]
-
-  implicit override val usersService = inject [UsersService]
-
-  private def participantsService = inject[ParticipantsService]
+    with JsonController {
 
   def get(studyId: String, participantId: String) =
     AuthAction(parse.empty) { (token, userId, request) =>

@@ -6,7 +6,6 @@ import org.biobank.fixture.NameGenerator
 
 import com.github.nscala_time.time.Imports._
 import org.slf4j.LoggerFactory
-import scalaz._
 import scalaz.Scalaz._
 
 class CollectionEventTypeSpec extends DomainSpec {

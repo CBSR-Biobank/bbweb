@@ -1,7 +1,6 @@
 package org.biobank.domain
 
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
 
 /** A Location is a street address.
   *

@@ -1,7 +1,6 @@
 package org.biobank
 
 import org.biobank.domain.user.UserId
-import org.biobank.infrastructure.command.Commands._
 import org.joda.time.DateTime
 import com.trueaccord.scalapb.GeneratedMessage
 

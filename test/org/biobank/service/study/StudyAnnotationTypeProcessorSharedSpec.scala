@@ -10,8 +10,6 @@ import akka.pattern._
 import org.slf4j.LoggerFactory
 import org.scalatest.Tag
 import org.joda.time.DateTime
-import scalaz._
-import scalaz.Scalaz._
 
 /**
   * Tests for actor CeventAnnotationTypeProcessorSpec. These are written using ScalaTest.
@@ -23,10 +21,6 @@ trait StudyAnnotationTypeProcessorSpec[T <: StudyAnnotationType] extends TestFix
   val log = LoggerFactory.getLogger(this.getClass)
 
   val nameGenerator = new NameGenerator(this.getClass)
-
-  val studyRepository = inject [StudyRepository]
-
-  val studiesProcessor = injectActorRef [StudiesProcessor] ("studies")
 
   var disabledStudy: DisabledStudy = null
 

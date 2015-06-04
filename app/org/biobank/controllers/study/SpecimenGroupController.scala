@@ -5,38 +5,21 @@ import org.biobank.service._
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.domain.study._
-import org.biobank.domain.AnatomicalSourceType._
-import org.biobank.domain.PreservationType._
-import org.biobank.domain.PreservationTemperatureType._
-import org.biobank.domain.SpecimenType._
 
+import javax.inject.{Inject => javaxInject, Singleton}
 import scala.concurrent.Future
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.Logger
-import play.api.mvc._
-import play.api.libs.json._
-import play.api.mvc.Results._
 import play.api.Play.current
 import scala.language.reflectiveCalls
-import scaldi.{Injectable, Injector}
-
-import scalaz._
-import scalaz.Scalaz._
 
 /**
  * Handles all operations user can perform on a Specimen Group.
  */
-class SpecimenGroupController(implicit inj: Injector)
+class SpecimenGroupController @javaxInject() (val authToken:      AuthToken,
+                                              val usersService:   UsersService,
+                                              val studiesService: StudiesService)
     extends CommandController
-    with JsonController
-    with Injectable {
-
-  implicit override val authToken = inject [AuthToken]
-
-  implicit override val usersService = inject [UsersService]
-
-  private val studiesService = inject[StudiesService]
+    with JsonController {
 
   def get(studyId: String, sgId: Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>

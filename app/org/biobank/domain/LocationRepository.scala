@@ -1,12 +1,12 @@
 package org.biobank.domain
 
-import org.biobank.domain._
+import javax.inject.Singleton
+import com.google.inject.ImplementedBy
 
-import scalaz._
-import Scalaz._
-
+@ImplementedBy(classOf[LocationRepositoryImpl])
 trait LocationRepository extends ReadWriteRepository[LocationId, Location]
 
+@Singleton
 class LocationRepositoryImpl
     extends ReadWriteRepositoryRefImpl[LocationId, Location](v => v.id)
     with LocationRepository {

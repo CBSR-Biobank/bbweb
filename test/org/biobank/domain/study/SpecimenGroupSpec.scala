@@ -9,7 +9,6 @@ import org.biobank.domain.PreservationTemperatureType
 import org.biobank.domain.SpecimenType
 
 import com.github.nscala_time.time.Imports._
-import scalaz._
 import scalaz.Scalaz._
 
 class SpecimenGroupSpec extends DomainSpec {

@@ -1,26 +1,24 @@
 package org.biobank.controllers.study
 
-import org.biobank.fixture._
 import org.biobank.domain._
-import org.biobank.domain.study.{ Study, StudyId, ParticipantAnnotationType }
-import org.biobank.fixture.ControllerFixture
-import org.biobank.domain.JsonHelper._
+import org.biobank.domain.study.{
+  Study,
+  StudyId,
+  ParticipantAnnotationType,
+  ParticipantAnnotationTypeRepository }
+import org.biobank.domain.study._
 
-import play.api.test.Helpers._
-import play.api.test.WithApplication
 import play.api.libs.json._
 import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 import play.api.Play.current
-import org.scalatestplus.play._
 
-class ParticipantAnnotTypeControllerSpec extends StudyAnnotTypeControllerSpec[ParticipantAnnotationType]  {
-  import TestGlobal._
+class ParticipantAnnotTypeControllerSpec
+    extends StudyAnnotTypeControllerSpec[ParticipantAnnotationType]  {
 
-  //override val annotationTypeName = this.getClass.getName
-
-  override def annotationTypeRepository = TestGlobal.participantAnnotationTypeRepository
+  override def annotationTypeRepository =
+    app.injector.instanceOf[ParticipantAnnotationTypeRepository]
 
   override def createAnnotationType = factory.createParticipantAnnotationType
 

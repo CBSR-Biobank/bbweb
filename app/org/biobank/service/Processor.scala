@@ -7,10 +7,7 @@ import akka.actor.ActorLogging
 import org.slf4j.Logger
 import akka.persistence.PersistentActor
 import org.joda.time.DateTime
-
 import com.trueaccord.scalapb.GeneratedMessage
-
-import scalaz._
 import scalaz.Scalaz._
 
 trait Processor extends PersistentActor with ActorLogging {

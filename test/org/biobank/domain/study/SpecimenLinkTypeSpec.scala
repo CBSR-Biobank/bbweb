@@ -4,19 +4,18 @@ import org.biobank.domain.{ DomainSpec, ContainerTypeId }
 import org.biobank.infrastructure._
 import org.biobank.fixture.NameGenerator
 
+import javax.inject.{Inject => javaxInject}
 import com.github.nscala_time.time.Imports._
 import org.slf4j.LoggerFactory
-import scalaz._
 import scalaz.Scalaz._
 
-class SpecimenLinkTypeSpec extends DomainSpec {
+class SpecimenLinkTypeSpec @javaxInject() (
+  val specimenLinkTypeRepository: SpecimenLinkTypeRepository,
+  val specimenGroupRepository: SpecimenGroupRepository)
+    extends DomainSpec {
   import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
-
-  val specimenLinkTypeRepository = inject [SpecimenLinkTypeRepository]
-
-  val specimenGroupRepository = inject [SpecimenGroupRepository]
 
   val nameGenerator = new NameGenerator(this.getClass)
 

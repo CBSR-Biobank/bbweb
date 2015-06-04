@@ -1,16 +1,10 @@
 package org.biobank.fixture
 
-import org.biobank.service._
-
 import akka.actor.ActorSystem
 import akka.util.Timeout
 import com.mongodb.casbah.Imports._
 import com.typesafe.config.ConfigFactory
-import scala.concurrent.duration._
 import scala.language.postfixOps
-import scaldi.Module
-import scaldi.akka.AkkaInjectable
-import scaldi.MutableInjectorAggregation
 
 trait TestDbConfiguration {
 

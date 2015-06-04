@@ -2,21 +2,25 @@ package org.biobank.service.study
 
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.service.{ Processor, WrappedEvent }
+import org.biobank.service.{ WrappedEvent }
 import org.biobank.domain._
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 import org.biobank.domain.study.Study
 import org.biobank.domain.AnnotationValueType._
 
+import akka.actor._
 import akka.persistence.SnapshotOffer
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import scaldi.akka.AkkaInjectable
-import scaldi.{Injectable, Injector}
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
+
+object SpecimenLinkAnnotationTypeProcessor {
+
+  def props = Props[SpecimenLinkAnnotationTypeProcessor]
+
+}
 
 /**
   * The SpecimenLinkAnnotationTypeProcessor is responsible for maintaining state changes for all
@@ -27,17 +31,14 @@ import scalaz.Validation.FlatMap._
   *
   * It is a child actor of [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
   */
-class SpecimenLinkAnnotationTypeProcessor(implicit inj: Injector)
-    extends StudyAnnotationTypeProcessor[SpecimenLinkAnnotationType]
-    with AkkaInjectable {
+class SpecimenLinkAnnotationTypeProcessor @javax.inject.Inject() (
+  val annotationTypeRepository: SpecimenLinkAnnotationTypeRepository,
+  val specimenLinkTypeRepository: SpecimenLinkTypeRepository)
+    extends StudyAnnotationTypeProcessor[SpecimenLinkAnnotationType] {
   import org.biobank.infrastructure.event.StudyEventsUtil._
   import StudyEvent.EventType
 
   override def persistenceId = "specimen-link-annotation-type-processor-id"
-
-  override val annotationTypeRepository = inject [SpecimenLinkAnnotationTypeRepository]
-
-  val specimenLinkTypeRepository = inject [SpecimenLinkTypeRepository]
 
   case class SnapshotState(annotationTypes: Set[SpecimenLinkAnnotationType])
 

@@ -16,17 +16,20 @@ import org.slf4j.LoggerFactory
 import org.biobank.service.{ Processor, WrappedEvent }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.StudyEventsUtil._
 import org.biobank.infrastructure.event.StudyEvents._
 
+import akka.actor._
 import akka.persistence.SnapshotOffer
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import scaldi.akka.AkkaInjectable
-import scaldi.{Injectable, Injector}
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
+
+object CollectionEventTypeProcessor {
+
+  def props = Props[CollectionEventTypeProcessor]
+
+}
 
 /**
   * The CollectionEventTypeProcessor is responsible for maintaining state changes for all
@@ -37,19 +40,18 @@ import scalaz.Validation.FlatMap._
   *
   * It is a child actor of [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
   */
-class CollectionEventTypeProcessor(implicit inj: Injector) extends Processor with AkkaInjectable {
+class CollectionEventTypeProcessor @javax.inject.Inject() (
+  val collectionEventTypeRepository:           CollectionEventTypeRepository,
+  val collectionEventAnnotationTypeRepository: CollectionEventAnnotationTypeRepository,
+  val specimenGroupRepository:                 SpecimenGroupRepository)
+    extends Processor {
+
   import org.biobank.infrastructure.event.StudyEventsUtil._
-  import StudyEvent.EventType
+  import org.biobank.infrastructure.event.StudyEvents.StudyEvent.EventType
 
   override def persistenceId = "collection-event-processor-id"
 
   case class SnapshotState(collectionEventTypes: Set[CollectionEventType])
-
-  val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
-
-  val collectionEventAnnotationTypeRepository = inject [CollectionEventAnnotationTypeRepository]
-
-  val specimenGroupRepository = inject [SpecimenGroupRepository]
 
   /**
     * These are the events that are recovered during journal recovery. They cannot fail and must be

@@ -8,17 +8,21 @@ import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 import org.biobank.TestData
 
-import akka.actor. { ActorRef, Props }
+import javax.inject._
+import akka.actor._
 import akka.pattern.ask
 import org.slf4j.LoggerFactory
 import akka.persistence.SnapshotOffer
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import scaldi.akka.AkkaInjectable
-import scaldi.{Injectable, Injector}
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
+
+object StudiesProcessor {
+
+  def props = Props[StudiesProcessor]
+
+}
 
 /**
  * The StudiesProcessor is responsible for maintaining state changes for all
@@ -27,42 +31,27 @@ import scalaz.Validation.FlatMap._
  * events, afterwhich it will updated the current state of the [[org.biobank.domain.study.Study]] being
  * processed.
  */
-class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInjectable {
+class StudiesProcessor @javax.inject.Inject() (
+  @Named("collectionEventType")        val collectionEventTypeProcessor:        ActorRef,
+  @Named("ceventAnnotationType")       val ceventAnnotationTypeProcessor:       ActorRef,
+  @Named("participantAnnotationType")  val participantAnnotationTypeProcessor:  ActorRef,
+  @Named("processingType")             val processingTypeProcessor:             ActorRef,
+  @Named("specimenGroup")              val specimenGroupProcessor:              ActorRef,
+  @Named("specimenLinkAnnotationType") val specimenLinkAnnotationTypeProcessor: ActorRef,
+  @Named("specimenLinkType")           val specimenLinkTypeProcessor:           ActorRef,
+
+  val studyRepository:               StudyRepository,
+  val processingTypeRepository:      ProcessingTypeRepository,
+  val specimenGroupRepository:       SpecimenGroupRepository,
+  val collectionEventTypeRepository: CollectionEventTypeRepository,
+  val testData:                      TestData)
+    extends Processor {
   import org.biobank.infrastructure.event.StudyEventsUtil._
   import StudyEvent.EventType
 
   override def persistenceId = "study-processor-id"
 
   case class SnapshotState(studies: Set[Study])
-
-  val studyRepository = inject [StudyRepository]
-
-  val processingTypeRepository = inject [ProcessingTypeRepository]
-
-  val specimenGroupRepository = inject [SpecimenGroupRepository]
-
-  val collectionEventTypeRepository = inject [CollectionEventTypeRepository]
-
-  val specimenGroupProcessor =
-    injectActorRef [SpecimenGroupProcessor] ("specimenGroup")
-
-  val collectionEventTypeProcessor =
-    injectActorRef [CollectionEventTypeProcessor] ("collectionEventType")
-
-  val ceventAnnotationTypeProcessor =
-    injectActorRef [CeventAnnotationTypeProcessor] ("ceventAnnotationType")
-
-  val participantAnnotationTypeProcessor =
-    injectActorRef [ParticipantAnnotationTypeProcessor] ("participantAnnotationType")
-
-  val processingTypeProcessor =
-    injectActorRef [ProcessingTypeProcessor] ("processingType")
-
-  val specimenLinkTypeProcessor =
-    injectActorRef [SpecimenLinkTypeProcessor] ("specimenLinkType")
-
-  val specimenLinkAnnotationTypeProcessor =
-    injectActorRef [SpecimenLinkAnnotationTypeProcessor] ("specimenLinkAnnotationType")
 
   /**
    * These are the events that are recovered during journal recovery. They cannot fail and must be
@@ -435,5 +424,5 @@ class StudiesProcessor(implicit inj: Injector) extends Processor with AkkaInject
     }
   }
 
-  TestData.addMultipleStudies
+  testData.addMultipleStudies
 }
