@@ -43,8 +43,6 @@ define(['underscore'], function(_) {
 
       obj = obj || {};
 
-      ConcurrencySafeEntity.call(this, obj);
-
       _.extend(this, _.defaults(obj, {
         study:             null,
         studyId:           null,
@@ -62,6 +60,8 @@ define(['underscore'], function(_) {
         self.annotationHelpers = createAnnotationHelpers.call(self, annotationTypes);
       }
     }
+
+    Participant.prototype = Object.create(ConcurrencySafeEntity.prototype);
 
     /**
      * Used by promise code, so it must return an error rather than throw one.

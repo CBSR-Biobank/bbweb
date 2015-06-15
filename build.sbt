@@ -88,9 +88,7 @@ libraryDependencies ++= Seq(
     "org.webjars", "angularjs"),
   "org.webjars"               %  "angular-ui-router"                 % "0.2.15" exclude(
     "org.webjars", "angularjs"),
-  "org.webjars"               %  "ng-table"                          % "0.3.3" excludeAll(
-    ExclusionRule(organization="org.webjars")
-  ),
+  "org.webjars"               %  "ng-table"                          % "0.3.3",
   "org.webjars"               %  "toastr"                            % "2.1.0" exclude(
     "org.webjars", "jquery"),
   "org.webjars"               %  "angular-sanitize"                  % "1.3.11" exclude(
