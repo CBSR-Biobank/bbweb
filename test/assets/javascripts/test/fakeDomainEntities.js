@@ -44,6 +44,7 @@ define([
       specimenGroup:                     specimenGroup,
       annotationType:                    annotationType,
       study:                             study,
+      participant:                       participant,
 
       centre:                            centre,
       location:                          location,
@@ -58,6 +59,7 @@ define([
       ENTITY_NAME_SPECIMEN_GROUP:        ENTITY_NAME_SPECIMEN_GROUP,
       ENTITY_NAME_ANNOTATION_TYPE:       ENTITY_NAME_ANNOTATION_TYPE,
       ENTITY_NAME_STUDY:                 ENTITY_NAME_STUDY,
+      ENTITY_NAME_PARTICIPANT:           ENTITY_NAME_PARTICIPANT,
 
       ENTITY_NAME_CENTRE:                ENTITY_NAME_CENTRE,
       ENTITY_NAME_LOCATION:              ENTITY_NAME_LOCATION
@@ -70,6 +72,7 @@ define([
     function ENTITY_NAME_SPECIMEN_GROUP()        { return 'specimenGroup'; }
     function ENTITY_NAME_ANNOTATION_TYPE()       { return 'annotationType'; }
     function ENTITY_NAME_STUDY()                 { return 'study'; }
+    function ENTITY_NAME_PARTICIPANT()           { return 'participant'; }
 
     function ENTITY_NAME_CENTRE()                { return 'centre'; }
     function ENTITY_NAME_LOCATION()              { return 'location'; }
@@ -302,6 +305,18 @@ define([
         status:      'Disabled'
       };
       return extendWithCommonFields(study);
+    }
+
+    function participant(options) {
+      options = options || {};
+
+      var participant =  {
+        id:          utils.uuid(),
+        studyId:     options.studyId || null,
+        uniqueId:    domainEntityNameNext(ENTITY_NAME_PARTICIPANT()),
+        annotations: []
+      };
+      return extendWithCommonFields(participant);
     }
 
     function centre() {

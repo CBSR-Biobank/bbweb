@@ -43,6 +43,8 @@ define(['underscore'], function(_) {
 
       obj = obj || {};
 
+      ConcurrencySafeEntity.call(this, obj);
+
       _.extend(this, _.defaults(obj, {
         study:             null,
         studyId:           null,

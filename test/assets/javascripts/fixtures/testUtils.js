@@ -69,10 +69,15 @@ define(['faker', 'underscore'], function(faker, _) {
     return result;
   };
 
+  function expectedVersion(version) {
+    return { expectedVersion: version};
+  }
+
   return {
     uuid:                  uuid,
     randomBoolean:         randomBoolean,
     fakeModal:             fakeModal,
+    expectedVersion:       expectedVersion,
     addCustomMatchers:     addCustomMatchers,
     putHtmlTemplate:       putHtmlTemplate,
     camelCaseToUnderscore: camelCaseToUnderscore

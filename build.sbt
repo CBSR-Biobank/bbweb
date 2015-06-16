@@ -62,10 +62,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka"         %% "akka-persistence-experimental"     % "2.3.11"             % "compile" excludeAll(
     ExclusionRule(organization="com.google.protobuf")
   ),
-  "com.typesafe.akka"         %% "akka-remote"                       % "2.3.11"             % "compile" excludeAll(
-    ExclusionRule(organization="io.netty"),
-    ExclusionRule(organization="com.google.protobuf")
-  ),
+  "com.typesafe.akka"         %% "akka-remote"                       % "2.3.11"             % "compile",
   "com.typesafe.akka"         %% "akka-slf4j"                        % "2.3.11"             % "compile",
   "org.scala-stm"             %% "scala-stm"                         % "0.7"                % "compile",
   "org.scalaz"                %% "scalaz-core"                       % "7.1.2"              % "compile",
@@ -118,6 +115,9 @@ pipelineStages := Seq(rjs, digest, gzip)
 //requireNativePath := Some("node r.js -o name=main out=javascript-min/main.min.js")
 
 PB.protobufSettings
+
+PB.runProtoc in PB.protobufConfig := (args =>
+  com.github.os72.protocjar.Protoc.runProtoc("-v261" +: args.toArray))
 
 // setting for play-auto-refresh plugin so that it does not open a new browser window when
 // the application is run

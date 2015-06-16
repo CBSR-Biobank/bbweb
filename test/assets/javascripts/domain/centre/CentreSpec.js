@@ -121,20 +121,18 @@ define([
       changeStatusShared('enable', CentreStatus.ENABLED());
     });
 
-    function expectedVersion(version) {
-      return { expectedVersion: version};
-    }
-
     function addCommand(centre) {
       return  _.pick(centre, 'name', 'description');
     }
 
     function updateCommand(centre) {
-      return _.extend(_.pick(centre, 'id', 'name', 'description'), expectedVersion(centre.version));
+      return _.extend(_.pick(centre, 'id', 'name', 'description'),
+                      testUtils.expectedVersion(centre.version));
     }
 
     function changeStatusCommand(centre) {
-      return _.extend(_.pick(centre, 'id'), expectedVersion(centre.version));
+      return _.extend(_.pick(centre, 'id'),
+                      testUtils.expectedVersion(centre.version));
     }
 
     function replyCentre(centre, newValues) {

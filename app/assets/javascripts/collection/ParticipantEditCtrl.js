@@ -61,7 +61,7 @@ define(['underscore'], function(_) {
     }
 
     function gotoState(state) {
-      $state.go.apply(null, _.values(vm.returnState));
+      $state.go(state.name, state.params, state.options);
     }
 
     function submitSuccess(reply) {

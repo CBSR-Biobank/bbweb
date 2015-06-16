@@ -23,6 +23,7 @@ define([
     var $scope;
     var element;
     var $state;
+    var $httpBackend;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -120,12 +121,13 @@ define([
       inject(function () {});
     });
 
-    beforeEach(inject(function($templateCache, $rootScope, _$compile_, _$state_) {
+    beforeEach(inject(function($templateCache, $rootScope, _$compile_, _$state_, _$httpBackend_) {
       testUtils.putHtmlTemplate($templateCache,
                                 '/assets/javascripts/common/directives/uiBreadcrumbs.html');
 
       $compile = _$compile_;
       $scope = $rootScope.$new();
+      $httpBackend = _$httpBackend_;
       $state = _$state_;
 
       element = $compile('<ui-breadcrumbs displayname-property="data.displayName"></ui-breadcrumbs>')($scope);
@@ -163,6 +165,7 @@ define([
     });
 
     it('should update on route change', function() {
+      $httpBackend.whenGET('/assets/javascripts/home/home.html').respond(200, '');
       $state.go('root');
       $scope.$apply();
       expect(element[0].querySelectorAll('li').length).toBe(1);
@@ -177,6 +180,7 @@ define([
     });
 
     it('should show correct displayName for alternative directive attribute', function() {
+      $httpBackend.whenGET('/assets/javascripts/home/home.html').respond(200, '');
       var element2 = $compile('<ui-breadcrumbs displayname-property="custom.alternateDisplayName"></ui-breadcrumbs>')($scope);
       $scope.$apply();
 

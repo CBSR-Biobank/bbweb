@@ -7,16 +7,20 @@ define(['angular', 'underscore'], function(angular, _) {
   extendedDomainEntities.$inject = [
     'ConcurrencySafeEntity',
     'AnnotationType',
+    'Study',
     'StudyAnnotationType',
     'ParticipantAnnotationType',
+    'Participant',
     'Centre',
     'Location'
   ];
 
   function extendedDomainEntities(ConcurrencySafeEntity,
                                   AnnotationType,
+                                  Study,
                                   StudyAnnotationType,
                                   ParticipantAnnotationType,
+                                  Participant,
                                   Centre,
                                   Location) {
 
@@ -72,6 +76,17 @@ define(['angular', 'underscore'], function(angular, _) {
     ParticipantAnnotationType.prototype.compareToServerEntity = function (annotationType) {
       StudyAnnotationType.prototype.compareToServerEntity.call(this, annotationType);
       validateAttrs(this, annotationType, 'required');
+    };
+
+    Study.prototype.compareToServerEntity = function (study) {
+      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, study);
+      validateAttrs(this, study, 'name', 'Status');
+      validateOptional(this, study, 'description');
+    };
+
+    Participant.prototype.compareToServerEntity = function (participant) {
+      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, participant);
+      validateAttrs(this, participant, 'studyId', 'uniqueId', 'annotations');
     };
 
     Centre.prototype.compareToServerEntity = function (centre) {

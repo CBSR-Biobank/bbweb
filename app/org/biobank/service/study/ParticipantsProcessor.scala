@@ -247,8 +247,7 @@ class ParticipantsProcessor @javaxInject() (val participantRepository:    Partic
     }
   }
 
-  private def convertAnnotationToEvent
-    (annotations: List[ParticipantAnnotation])
+  private def convertAnnotationToEvent(annotations: List[ParticipantAnnotation])
       : Seq[ParticipantAddedEvent.ParticipantAnnotation] = {
     annotations.map { annot =>
       ParticipantAddedEvent.ParticipantAnnotation(

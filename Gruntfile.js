@@ -72,18 +72,19 @@ module.exports = function(grunt) {
     //   },
     // }
 
-    // grunt.loadNpmTasks('grunt-karma');
-    // grunt.registerTask('test', 'Run tests on singleRun karma server', function () {
-    //   if (grunt.option('coverage')) {
-    //     var karmaOptions = grunt.config.get('karma.options'),
-    //         coverageOpts = grunt.config.get('karma.coverage');
-    //     grunt.util._.extend(karmaOptions, coverageOpts);
-    //     grunt.config.set('karma.options', karmaOptions);
-    //   }
-    //   grunt.task.run('karma:unit');
-    // });
-
   });
+
+  grunt.loadNpmTasks('grunt-karma');
+
+  // grunt.registerTask('test', 'Run tests on singleRun karma server', function () {
+  //   if (grunt.option('coverage')) {
+  //     var karmaOptions = grunt.config.get('karma.options'),
+  //         coverageOpts = grunt.config.get('karma.coverage');
+  //     grunt.util._.extend(karmaOptions, coverageOpts);
+  //     grunt.config.set('karma.options', karmaOptions);
+  //   }
+  //   grunt.task.run('karma:unit');
+  // });
 
   grunt.registerTask('default', ['karma:unit']);
 

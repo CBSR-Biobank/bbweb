@@ -1,6 +1,7 @@
 package org.biobank.domain
 
 import org.biobank.fixture.NameGenerator
+import org.biobank.domain.AnnotationValueType._
 import org.biobank.domain.user._
 import org.biobank.domain.study._
 import org.biobank.domain.centre._
@@ -177,8 +178,20 @@ class Factory {
     ceventTypeAnnotationType
   }
 
-  def createParticipantAnnotationType: ParticipantAnnotationType = {
+  def createParticipantAnnotationType(valueType:     AnnotationValueType,
+                                      maxValueCount: Int,
+                                      options:       Seq[String],
+                                      required:      Boolean)
+      : ParticipantAnnotationType = {
     val disabledStudy = defaultDisabledStudy
+
+    val (vtMaxValueCount, vtOptions) = valueType match {
+      case AnnotationValueType.Text     => (0, Seq.empty)
+      case AnnotationValueType.Number   => (0, Seq.empty)
+      case AnnotationValueType.DateTime => (0, Seq.empty)
+      case AnnotationValueType.Select   => (maxValueCount, options)
+    }
+
     val annotationType = ParticipantAnnotationType(
       id             = AnnotationTypeId(nameGenerator.next[ParticipantAnnotationType]),
       studyId        = disabledStudy.id,
@@ -187,14 +200,16 @@ class Factory {
       timeModified = None,
       name           = nameGenerator.next[ParticipantAnnotationType],
       description    = Some(nameGenerator.next[ParticipantAnnotationType]),
-      valueType      = AnnotationValueType.Select,
-      maxValueCount  = Some(1),
-      options        = Seq(
-        nameGenerator.next[ParticipantAnnotationType],
-        nameGenerator.next[ParticipantAnnotationType]),
-      required       = false)
+      valueType      = valueType,
+      maxValueCount  = Some(vtMaxValueCount),
+      options        = vtOptions,
+      required       = required)
     domainObjects = domainObjects + (classOf[ParticipantAnnotationType] -> annotationType)
     annotationType
+  }
+
+  def createParticipantAnnotationType(): ParticipantAnnotationType = {
+    createParticipantAnnotationType(AnnotationValueType.Text, 0, Seq.empty, false)
   }
 
   def createSpecimenLinkAnnotationType: SpecimenLinkAnnotationType = {

@@ -132,20 +132,17 @@ define([
       changeStatusShared('unretire', StudyStatus.DISABLED());
     });
 
-    function expectedVersion(version) {
-      return { expectedVersion: version};
-    }
-
     function addCommand(study) {
       return  _.pick(study, 'name', 'description');
     }
 
     function updateCommand(study) {
-      return _.extend(_.pick(study, 'id', 'name', 'description'), expectedVersion(study.version));
+      return _.extend(_.pick(study, 'id', 'name', 'description'),
+                      testUtils.expectedVersion(study.version));
     }
 
     function changeStatusCommand(study) {
-      return _.extend(_.pick(study, 'id'), expectedVersion(study.version));
+      return _.extend(_.pick(study, 'id'), testUtils.expectedVersion(study.version));
     }
 
     function replyStudy(study, newValues) {

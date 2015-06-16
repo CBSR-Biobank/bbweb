@@ -3,7 +3,7 @@
 </div>
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">{{vm.participant.uniqueId}}
+    <h3 class="panel-title">Participant {{vm.participant.uniqueId}}
       <span class="btn-group pull-right">
         <a ui-sref="home.collection.study.participant.update({participantId: vm.participant.id})"
            class="btn btn-xs btn-primary"
@@ -15,6 +15,16 @@
   </div>
 
   <ul class="list-group">
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong>Study</strong>
+        </div>
+        <div class="col-md-5">
+          {{vm.study.name}}
+        </div>
+      </div>
+    </li>
     <li class="list-group-item" ng-repeat="annotationHelper in vm.participant.annotationHelpers">
       <div class="row">
         <div class="col-md-3">
