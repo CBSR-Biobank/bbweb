@@ -37,22 +37,21 @@ define(['underscore'], function(_) {
       _.identity);
 
     function SpecimenGroup(obj) {
-      var self = this;
+      var self = this,
+          defaults = {
+            studyId:                     null,
+            name:                        '',
+            description:                 null,
+            units:                       '',
+            anatomicalSourceType:        '',
+            preservationType:            '',
+            preservationTemperatureType: '',
+            specimenType:                ''
+          };
 
       obj = obj || {};
-
       ConcurrencySafeEntity.call(self, obj);
-
-      _.extend(self, _.defaults(obj, {
-        studyId:                     null,
-        name:                        '',
-        description:                 null,
-        units:                       '',
-        anatomicalSourceType:        '',
-        preservationType:            '',
-        preservationTemperatureType: '',
-        specimenType:                ''
-      }));
+      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
     }
 
     SpecimenGroup.prototype = Object.create(ConcurrencySafeEntity.prototype);

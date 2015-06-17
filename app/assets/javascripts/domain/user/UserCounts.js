@@ -1,4 +1,4 @@
-define([], function() {
+define(['underscore'], function(_) {
   'use strict';
 
   UserCountsFactory.$inject = ['biobankApi'];
@@ -9,12 +9,15 @@ define([], function() {
   function UserCountsFactory(biobankApi) {
 
     function UserCounts(options) {
-      options = options || {};
+      var defaults = {
+        total:      0,
+        registered: 0,
+        active:     0,
+        locked:     0
+      };
 
-      this.total      = options.total || 0;
-      this.registered = options.registered || 0;
-      this.active     = options.active || 0;
-      this.locked     = options.locked || 0;
+      options = options || {};
+      _.extend(this, defaults, _.pick(options, _.keys(defaults)));
     }
 
     UserCounts.get = function () {

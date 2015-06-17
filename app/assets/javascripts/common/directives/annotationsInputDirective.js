@@ -1,4 +1,4 @@
-define([], function(){
+define(['underscore'], function(_) {
   'use strict';
 
   /**
@@ -8,23 +8,24 @@ define([], function(){
     return {
       restrict: 'E',
       scope: {
-        annotationHelpers: '='
+        annotations: '='
       },
       templateUrl : '/assets/javascripts/common/directives/annotationsInput.html',
       controller: 'AnnotationsInputCtrl as vm'
     };
   }
 
-  AnnotationsInputCtrl.$inject = ['$scope'];
+  AnnotationsInputCtrl.$inject = ['$scope', 'bbwebConfig'];
 
   /**
    *
    */
-  function AnnotationsInputCtrl($scope) {
+  function AnnotationsInputCtrl($scope, bbwebConfig) {
     var vm = this;
 
-    vm.annotationHelpers = $scope.annotationHelpers;
+    vm.annotations = $scope.annotations;
     vm.openend = false;
+    vm.format = bbwebConfig.datepickerFormat;
     vm.datePicker = {
       options: {
         startingDay: 0

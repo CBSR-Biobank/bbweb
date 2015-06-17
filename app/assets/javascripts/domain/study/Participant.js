@@ -7,7 +7,7 @@ define(['underscore'], function(_) {
     'validationService',
     'ConcurrencySafeEntity',
     'participantsService',
-    'AnnotationHelper'
+    'Annotation'
   ];
 
   /**
@@ -17,7 +17,7 @@ define(['underscore'], function(_) {
                               validationService,
                               ConcurrencySafeEntity,
                               participantsService,
-                              AnnotationHelper) {
+                              Annotation) {
 
     var requiredKeys = ['id', 'studyId', 'uniqueId', 'annotations', 'version'];
 
@@ -38,28 +38,27 @@ define(['underscore'], function(_) {
                                     validationService.hasKeys('annotationTypeId', 'selectedValues'))),
       createObj);
 
+    /**
+     * @param {object} obj.annotations - server response for annotation.
+     */
     function Participant(obj, study, annotationTypes) {
-      var self = this;
+      var defaults = {
+        study:       null,
+        studyId:     null,
+        uniqueId:    '',
+        annotations: []
+      };
 
       obj = obj || {};
-
       ConcurrencySafeEntity.call(this, obj);
-
-      _.extend(this, _.defaults(obj, {
-        study:             null,
-        studyId:           null,
-        uniqueId:          '',
-        annotations:       [],
-        annotationHelpers: []
-      }));
+      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
 
       if (study) {
-        self.study   = study;
-        self.studyId = study.id;
+        this.setStudy(study);
       }
 
       if (annotationTypes) {
-        self.annotationHelpers = createAnnotationHelpers.call(self, annotationTypes);
+        this.setAnnotationTypes(obj.annotations, annotationTypes);
       }
     }
 
@@ -81,7 +80,7 @@ define(['underscore'], function(_) {
       }, true);
 
       if (!annotValid) {
-        return new Error('invalid object from server: ' + annotValid);
+        return new Error('invalid annotation object from server');
       }
       return new Participant(obj);
     };
@@ -103,40 +102,39 @@ define(['underscore'], function(_) {
       this.studyId = study.id;
     };
 
-    Participant.prototype.setAnnotationTypes = function (annotationTypes) {
-      this.annotationHelpers = createAnnotationHelpers.call(this, annotationTypes);
+    Participant.prototype.setAnnotationTypes = function (serverAnnotations, annotationTypes) {
+      // make sure the annotations ids match up with the corresponding annotation types
+      var differentIds = _.difference(_.pluck(serverAnnotations, 'annotationTypeId'),
+                                      _.pluck(annotationTypes, 'id'));
+
+      if (differentIds.length > 0) {
+        throw new Error('annotation types not found: ' + differentIds);
+      }
+
+      serverAnnotations = serverAnnotations || [];
+      this.annotations = _.map(annotationTypes, function (annotationType) {
+        var serverAnnotation = _.findWhere(serverAnnotations, { annotationTypeId: annotationType.id }) || {};
+        return new Annotation(serverAnnotation, annotationType);
+      });
     };
 
     Participant.prototype.addOrUpdate = function () {
       var self = this;
+
+      // convert annotations to server side entities
+      self.annotations = _.map(self.annotations, function (annotation) {
+        // make sure required annotations have values
+        if (!annotation.isValid()) {
+          throw new Error('required annotation has no value: annotationId: ' +
+                          annotation.annotationType.id);
+        }
+        return annotation.getServerAnnotation();
+      });
+
       return participantsService.addOrUpdate(self).then(function(reply) {
         return Participant.create(reply);
       });
     };
-
-    /**
-     * Updated the annotations array with the values assigned to the annotation helpers.
-     */
-    Participant.prototype.updateAnnotations = function () {
-      var self = this;
-      self.annotations = [];
-      return _.each(self.annotationHelpers, function (annotationHelper) {
-        self.annotations.push(annotationHelper.getAnnotation());
-      });
-    };
-
-    function createAnnotationHelpers(annotationTypes) {
-      /*jshint validthis:true */
-      var self = this;
-      return _.map(annotationTypes, function(annotationType) {
-        var helper =  new AnnotationHelper(annotationType);
-        var annotation = _.findWhere(self.annotations, {annotationTypeId: annotationType.id});
-        if (annotation) {
-          helper.setValue(annotation);
-        }
-        return helper;
-      });
-    }
 
     /** return constructor function */
     return Participant;

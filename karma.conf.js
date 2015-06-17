@@ -19,9 +19,9 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      {pattern: 'target/web/web-modules/main/webjars/lib/underscorejs/underscore.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/angularjs/angular.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/angularjs/angular-*.js', included: false},
+      {pattern: 'target/web/web-modules/main/webjars/lib/underscorejs/underscore.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/angular-ui-router/angular-ui-router.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/ui-bootstrap-tpls.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/angular-sanitize/angular-sanitize.js', included: false},
@@ -54,8 +54,9 @@ module.exports = function(config) {
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
     reporters: [
+      'dots'
       //'spec'
-      'failed'
+      //'failed'
     ],
 
     specReporter: {

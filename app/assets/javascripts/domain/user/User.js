@@ -28,16 +28,16 @@ define(['underscore'], function(_) {
       _.identity);
 
     function User(obj) {
-      obj = obj || {};
-
-      ConcurrencySafeEntity.call(this, obj);
-
-      _.extend(this, _.defaults(obj, {
+      var defaults = {
         name:      '',
         email:     '',
         avatarUrl: null,
         status:    UserStatus.REGISTERED()
-      }));
+      };
+
+      ConcurrencySafeEntity.call(this, obj);
+      obj = obj || {};
+      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
     }
 
     User.prototype = Object.create(ConcurrencySafeEntity.prototype);

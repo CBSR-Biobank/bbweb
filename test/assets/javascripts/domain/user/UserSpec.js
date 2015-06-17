@@ -39,6 +39,12 @@ define([
       expect(user.status).toBe(UserStatus.REGISTERED());
     });
 
+    it('creating a user with an object does not modify object', function() {
+      var obj = null, user = new User(obj);
+      expect(user).toBeObject();
+      expect(obj).toBeNull();
+    });
+
     it('fails when creating from object with a non object', function() {
       var nonObj = 1;
       expect(User.create(nonObj)).toEqual(

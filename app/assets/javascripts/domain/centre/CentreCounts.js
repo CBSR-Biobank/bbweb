@@ -1,4 +1,4 @@
-define([], function() {
+define(['underscore'], function(_) {
   'use strict';
 
   CentreCountsFactory.$inject = ['biobankApi'];
@@ -9,11 +9,14 @@ define([], function() {
   function CentreCountsFactory(biobankApi) {
 
     function CentreCounts(options) {
-      options = options || {};
+      var defaults = {
+        total:    0,
+        disabled: 0,
+        enabled:  0
+      };
 
-      this.total    = options.total || 0;
-      this.disabled = options.disabled || 0;
-      this.enabled  = options.enabled || 0;
+      options = options || {};
+      _.extend(this, defaults, _.pick(options, _.keys(defaults)));
     }
 
     CentreCounts.get = function () {

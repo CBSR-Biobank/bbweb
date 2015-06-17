@@ -23,9 +23,11 @@ define(['angular', 'underscore'], function(angular, _) {
                                       AnnotationType) {
 
     function StudyAnnotationType(obj) {
+      var defaults = { studyId: null };
+
       obj = obj || {};
       AnnotationType.call(this, obj);
-      _.extend(this, _.defaults(obj, { studyId: null }));
+      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
       this._service = null;
     }
 

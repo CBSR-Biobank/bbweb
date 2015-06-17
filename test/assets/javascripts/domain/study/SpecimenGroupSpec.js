@@ -23,7 +23,8 @@ define([
     beforeEach(inject(function($httpBackend,
                                _funutils_,
                                _SpecimenGroup_,
-                               fakeDomainEntities) {
+                               fakeDomainEntities,
+                               extendedDomainEntities) {
       httpBackend   = $httpBackend;
       funutils      = _funutils_;
       SpecimenGroup = _SpecimenGroup_;
@@ -92,7 +93,7 @@ define([
     it('has valid values when creating from server response', function() {
       var entities = createEntities();
       entities.specimenGroup = SpecimenGroup.create(entities.serverSg);
-      compareSpecimenGroupToServerObj(entities.specimenGroup, entities.serverSg);
+      entities.specimenGroup.compareToServerEntity(entities.serverSg);
     });
 
     it('can retrieve a specimen group', function(done) {
@@ -100,8 +101,8 @@ define([
       httpBackend.whenGET(uri(entities.study.id) + '?sgId=' + entities.serverSg.id)
         .respond(serverReply(entities.serverSg));
 
-      SpecimenGroup.get(entities.study.id, entities.serverSg.id).then(function(cet) {
-        compareSpecimenGroupToServerObj(cet, entities.serverSg);
+      SpecimenGroup.get(entities.study.id, entities.serverSg.id).then(function(sg) {
+        sg.compareToServerEntity(entities.serverSg);
         done();
       });
       httpBackend.flush();
@@ -111,8 +112,8 @@ define([
       var entities = createEntities();
       httpBackend.whenGET(uri(entities.study.id)).respond(serverReply([ entities.serverSg ]));
       SpecimenGroup.list(entities.study.id).then(function(list) {
-        _.each(list, function (cet) {
-          compareSpecimenGroupToServerObj(cet, entities.serverSg);
+        _.each(list, function (sg) {
+          sg.compareToServerEntity(entities.serverSg);
         });
         done();
       });
@@ -126,8 +127,8 @@ define([
       httpBackend.expectPOST(uri(entities.study.id), cmd)
         .respond(201, serverReply(entities.serverSg));
 
-      entities.specimenGroup.addOrUpdate().then(function(cet) {
-        compareSpecimenGroupToServerObj(cet, entities.serverSg);
+      entities.specimenGroup.addOrUpdate().then(function(sg) {
+        sg.compareToServerEntity(entities.serverSg);
       });
       httpBackend.flush();
     });
@@ -139,8 +140,8 @@ define([
       httpBackend.expectPUT(uri(entities.study.id, entities.specimenGroup.id), cmd)
         .respond(201, serverReply(entities.serverSg));
 
-      entities.specimenGroup.addOrUpdate().then(function(cet) {
-        compareSpecimenGroupToServerObj(cet, entities.serverSg);
+      entities.specimenGroup.addOrUpdate().then(function(sg) {
+        sg.compareToServerEntity(entities.serverSg);
       });
       httpBackend.flush();
     });
@@ -172,18 +173,6 @@ define([
 
     function serverReply(obj) {
       return { status: 'success', data: obj };
-    }
-
-    function compareSpecimenGroupToServerObj(sg, serverObj) {
-      expect(sg.isNew()).toBe(false);
-      expect(sg.studyId).toBe(serverObj.studyId);
-      expect(sg.name).toBe(serverObj.name);
-      expect(sg.description).toEqual(serverObj.description);
-      expect(sg.units).toBe(serverObj.units);
-      expect(sg.anatomicalSourceType).toBe(serverObj.anatomicalSourceType);
-      expect(sg.preservationType).toBe(serverObj.preservationType);
-      expect(sg.preservationTemperatureType).toBe(serverObj.preservationTemperatureType);
-      expect(sg.specimenType).toBe(serverObj.specimenType);
     }
 
     function specimenGroupToAddCommand(specimenGroup) {

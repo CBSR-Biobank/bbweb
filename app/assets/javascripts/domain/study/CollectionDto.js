@@ -36,31 +36,33 @@ define(['underscore'], function(_) {
      * specimenGroups for a study.
      */
     function CollectionDto(obj) {
-      var self = this;
+      var self = this,
+          defaults = {
+            collectionEventAnnotationTypes:        [],
+            specimenGroups:                        [],
+            collectionEventTypes:                  [],
+            collectionEventAnnotationTypeIdsInUse: []
+          };
 
       obj = obj || {};
+      _.extend(this, defaults, _.pick(obj, 'collectionEventAnnotationTypeIdsInUse'));
 
-      obj.collectionEventAnnotationTypes = _.map(
+      self.collectionEventAnnotationTypes = _.map(
         obj.collectionEventAnnotationTypes,
-        function (serverAt) {
-          return new CollectionEventAnnotationType(serverAt);
+        function (serverAnnotationType) {
+          return new CollectionEventAnnotationType(serverAnnotationType);
         });
-      obj.specimenGroups = _.map(obj.specimenGroups, function(serverSg) {
-        return new SpecimenGroup(serverSg);
+
+      self.specimenGroups = _.map(obj.specimenGroups, function(serverSpecimenGroup) {
+        return new SpecimenGroup(serverSpecimenGroup);
       });
-      obj.collectionEventTypes = _.map(obj.collectionEventTypes, function(serverCet) {
+
+      self.collectionEventTypes = _.map(obj.collectionEventTypes, function(serverCet) {
         var cet = new CollectionEventType(serverCet);
-        cet.studySpecimenGroups(obj.specimenGroups);
-        cet.studyAnnotationTypes(obj.collectionEventAnnotationTypes);
+        cet.studySpecimenGroups(self.specimenGroups);
+        cet.studyAnnotationTypes(self.collectionEventAnnotationTypes);
         return cet;
       });
-
-      _.extend(self, _.defaults(obj, {
-        collectionEventTypes:                  [],
-        collectionEventAnnotationTypes:        [],
-        collectionEventAnnotationTypeIdsInUse: [],
-        specimenGroups:                        []
-      }));
     }
 
     /**

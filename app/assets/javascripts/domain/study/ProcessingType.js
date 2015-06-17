@@ -26,17 +26,17 @@ define(['underscore'], function(_) {
      *
      */
     function ProcessingType(obj) {
-      var self = this;
+      var self = this,
+          defaults = {
+            studyId:     null,
+            name:        '',
+            description: null,
+            enabled:     false
+          };
 
       obj = obj || {};
       ConcurrencySafeEntity.call(self, obj);
-
-      _.extend(self, _.defaults(obj, {
-        studyId:     null,
-        name:        '',
-        description: null,
-        enabled:     false
-      }));
+      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
     }
 
     ProcessingType.prototype = Object.create(ConcurrencySafeEntity.prototype);

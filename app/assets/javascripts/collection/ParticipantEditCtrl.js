@@ -28,6 +28,8 @@ define(['underscore'], function(_) {
     vm.submit      = submit;
     vm.cancel      = cancel;
 
+    console.log(participant);
+
     vm.returnState = {
       name: 'home.collection.study.participant',
       params: {
@@ -48,8 +50,6 @@ define(['underscore'], function(_) {
 
     function submit(participant) {
       // convert the data from the form to data expected by REST API
-      participant.updateAnnotations();
-
       participant.addOrUpdate()
         .then(submitSuccess)
         .catch(function(error) {

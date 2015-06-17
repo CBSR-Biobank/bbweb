@@ -35,17 +35,17 @@ define(['angular', 'underscore'], function(angular, _) {
      *
      */
     function Centre(obj) {
-      obj =  obj || {};
-
-      ConcurrencySafeEntity.call(this, obj);
-
-      _.extend(this, _.defaults(obj, {
+      var defaults = {
         name:        '',
         description: null,
         status:      CentreStatus.DISABLED(),
-        locations :  [],
+        locations:   [],
         studyIds:    []
-      }));
+      };
+
+      ConcurrencySafeEntity.call(this, obj);
+      obj =  obj || {};
+      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
     }
 
     Centre.prototype = Object.create(ConcurrencySafeEntity.prototype);

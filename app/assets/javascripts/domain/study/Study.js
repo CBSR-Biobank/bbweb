@@ -32,15 +32,15 @@ define(['angular', 'underscore'], function(angular, _) {
      *
      */
     function Study(obj) {
-      obj =  obj || {};
-
-      ConcurrencySafeEntity.call(this, obj);
-
-      _.extend(this, _.defaults(obj, {
+      var defaults = {
         name:        '',
         description: null,
         status:      StudyStatus.DISABLED()
-      }));
+      };
+
+      obj =  obj || {};
+      ConcurrencySafeEntity.call(this, obj);
+      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
     }
 
     Study.prototype = Object.create(ConcurrencySafeEntity.prototype);

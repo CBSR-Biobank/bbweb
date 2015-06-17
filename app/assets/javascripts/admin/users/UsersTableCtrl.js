@@ -7,7 +7,8 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
     'User',
     'UserStatus',
     'UserViewer',
-    'userCounts'
+    'userCounts',
+    'bbwebConfig'
   ];
 
   /**
@@ -18,7 +19,8 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
                           User,
                           UserStatus,
                           UserViewer,
-                          userCounts) {
+                          userCounts,
+                          bbwebConfig) {
     var vm = this;
 
     vm.users               = [];
@@ -156,7 +158,7 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
     }
 
     function getTimeAddedlocal(user) {
-      return moment(user.timeAdded).format('YYYY-MM-DD hh: ss A');
+      return moment(user.timeAdded).format(bbwebConfig.dateTimeFormat);
     }
   }
 

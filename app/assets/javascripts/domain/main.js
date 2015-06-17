@@ -9,7 +9,7 @@ define(function (require) {
   var angular                             = require('angular'),
 
       AnatomicalSourceType                = require('./AnatomicalSourceType'),
-      AnnotationHelper                    = require('./AnnotationHelper'),
+      Annotation                          = require('./Annotation'),
       AnnotationType                      = require('./AnnotationType'),
       AnnotationTypeData                  = require('./AnnotationTypeData'),
       AnnotationTypeViewer                = require('./AnnotationTypeViewer'),
@@ -61,7 +61,7 @@ define(function (require) {
 
   var module = angular.module('biobank.domain', []);
 
-  module.factory('AnnotationHelper',                    AnnotationHelper);
+  module.factory('Annotation',                          Annotation);
   module.factory('AnnotationType',                      AnnotationType);
   module.factory('AnnotationTypeData',                  AnnotationTypeData);
   module.factory('AnnotationTypeViewer',                AnnotationTypeViewer);

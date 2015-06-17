@@ -74,12 +74,12 @@ define(['faker', 'underscore'], function(faker, _) {
   }
 
   return {
-    uuid:                  uuid,
-    randomBoolean:         randomBoolean,
-    fakeModal:             fakeModal,
-    expectedVersion:       expectedVersion,
-    addCustomMatchers:     addCustomMatchers,
-    putHtmlTemplate:       putHtmlTemplate,
-    camelCaseToUnderscore: camelCaseToUnderscore
+    uuid:                          uuid,
+    randomBoolean:                 randomBoolean,
+    fakeModal:                     fakeModal,
+    expectedVersion:               expectedVersion,
+    addCustomMatchers:             addCustomMatchers,
+    putHtmlTemplate:               putHtmlTemplate,
+    camelCaseToUnderscore:         camelCaseToUnderscore
   };
 });

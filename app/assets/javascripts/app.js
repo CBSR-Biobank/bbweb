@@ -37,6 +37,12 @@ define([
   //
   app.run(debugFunc);
 
+  app.constant('bbwebConfig', {
+    dateFormat:       'YYYY-MM-DD',
+    dateTimeFormat:   'YYYY-MM-DD hh:mm A',
+    datepickerFormat: 'yyyy-MM-dd'
+  });
+
   app.config(exceptionConfig);
 
   debugFunc.$inject = ['$rootScope'];

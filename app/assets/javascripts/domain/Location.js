@@ -25,19 +25,17 @@ define(['angular', 'underscore'], function(angular, _) {
      * Location is a value object.
      */
     function Location(obj) {
+      this.id             = null;
+      this.name           = '';
+      this.street         = '';
+      this.city           = '';
+      this.province       = '';
+      this.postalCode     = '';
+      this.poBoxNumber    = null;
+      this.countryIsoCode = '';
+
       obj = obj || {};
-
-      _.extend(this, _.defaults(obj, {
-        id:             null,
-        name:           '',
-        street:         '',
-        city:           '',
-        province:       '',
-        postalCode:     '',
-        poBoxNumber:    null,
-        countryIsoCode: ''
-      }));
-
+      _.extend(this, obj);
     }
 
     /**

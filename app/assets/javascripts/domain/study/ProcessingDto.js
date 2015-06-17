@@ -39,35 +39,38 @@ define(['underscore'], function(_) {
      * specimenLinkAnnotationTypes, and specimenGroups for a study.
      */
     function ProcessingDto(obj) {
-      var self = this;
+      var self = this,
+          defaults = {
+            processingTypes:                    [],
+            specimenLinkTypes:                  [],
+            specimenLinkAnnotationTypes:        [],
+            specimenGroups:                     [],
+            specimenLinkAnnotationTypeIdsInUse: []
+          };
 
       obj = obj || {};
+      _.extend(this, defaults, _.pick(obj, 'specimenLinkAnnotationTypeIdsInUse'));
 
-      obj.processingTypes = _.map(obj.processingTypes, function(serverPt) {
+      self.processingTypes = _.map(obj.processingTypes, function(serverPt) {
         return new ProcessingType(serverPt);
       });
-      obj.specimenLinkAnnotationTypes = _.map(
-        obj.specimenLinkAnnotationTypes,
-        function (serverAt) {
-          return new SpecimenLinkAnnotationType(serverAt);
-        });
-      obj.specimenGroups = _.map(obj.specimenGroups, function(serverSg) {
-        return new SpecimenGroup(serverSg);
-      });
-      obj.specimenLinkTypes = _.map(obj.specimenLinkTypes, function(serverSlt) {
+
+      self.specimenLinkTypes = _.map(obj.specimenLinkTypes, function(serverSlt) {
         return new SpecimenLinkType(serverSlt, {
           studySpecimenGroups:  obj.specimenGroups,
           studyAnnotationTypes: obj.specimenLinkAnnotationTypes
         });
       });
 
-      _.extend(self, _.defaults(obj, {
-        processingTypes:                    [],
-        specimenLinkTypes:                  [],
-        specimenLinkAnnotationTypes:        [],
-        specimenLinkAnnotationTypeIdsInUse: [],
-        specimenGroups:                     []
-      }));
+      self.specimenLinkAnnotationTypes = _.map(
+        obj.specimenLinkAnnotationTypes,
+        function (serverAt) {
+          return new SpecimenLinkAnnotationType(serverAt);
+        });
+
+      self.specimenGroups = _.map(obj.specimenGroups, function(serverSg) {
+        return new SpecimenGroup(serverSg);
+      });
     }
 
     /**

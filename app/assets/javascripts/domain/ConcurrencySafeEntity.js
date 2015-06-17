@@ -9,14 +9,15 @@ define(['angular', 'underscore'], function(angular, _) {
   function ConcurrencySafeEntityFactory() {
 
     function ConcurrencySafeEntity(obj) {
-      obj = obj || {};
-
-      _.extend(this, _.defaults(obj, {
+      var defaults = {
         id:           null,
         version:      0,
         timeAdded:    null,
         timeModified: null
-      }));
+      };
+
+      obj = obj || {};
+      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
     }
 
     ConcurrencySafeEntity.prototype.isNew = function () {

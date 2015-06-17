@@ -17,19 +17,19 @@ define(['angular', 'underscore'], function(angular, _) {
                                  AnnotationMaxValueCount) {
 
     function AnnotationType(obj) {
-      obj = obj || {};
-
-      ConcurrencySafeEntity.call(this, obj);
-
-      _.extend(this, _.defaults(obj, {
+      var defaults = {
         name:          '',
         description:   null,
         valueType:     '',
         maxValueCount: null,
         options:       []
-      }));
+      };
 
       this._requiredKeys = ['id', 'name', 'valueType', 'options'];
+
+      obj = obj || {};
+      ConcurrencySafeEntity.call(this, obj);
+      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
     }
 
     AnnotationType.prototype = Object.create(ConcurrencySafeEntity.prototype);

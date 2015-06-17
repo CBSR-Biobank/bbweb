@@ -61,23 +61,22 @@ define(['underscore'], function(_) {
      * @param options.studyAnnotationTypes all the specimen link annotation types for the study.
      */
     function SpecimenLinkType(specimenLinkType, options) {
-      var self = this;
+      var self = this,
+          defaults = {
+            processingTypeId:     null,
+            expectedInputChange:  null,
+            expectedOutputChange: null,
+            inputCount:           null,
+            outputCount:          null,
+            inputGroupId:         null,
+            outputGroupId:        null,
+            annotationTypeData:   []
+          };
 
       specimenLinkType = specimenLinkType || {};
-      ConcurrencySafeEntity.call(self, specimenLinkType);
-
-      _.extend(self, _.defaults(specimenLinkType, {
-        processingTypeId:     null,
-        expectedInputChange:  null,
-        expectedOutputChange: null,
-        inputCount:           null,
-        outputCount:          null,
-        inputGroupId:         null,
-        outputGroupId:        null,
-        annotationTypeData:   []
-      }));
-
       options = options || {};
+      ConcurrencySafeEntity.call(self, specimenLinkType);
+      _.extend(this, defaults, _.pick(specimenLinkType, _.keys(defaults)));
 
       if (options.studySpecimenGroups) {
         self.studySpecimenGroups(options.studySpecimenGroups);

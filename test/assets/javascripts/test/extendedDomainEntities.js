@@ -8,19 +8,35 @@ define(['angular', 'underscore'], function(angular, _) {
     'ConcurrencySafeEntity',
     'AnnotationType',
     'Study',
+    'SpecimenGroup',
     'StudyAnnotationType',
     'ParticipantAnnotationType',
+    'CollectionEventType',
+    'ProcessingType',
+    'SpecimenLinkType',
     'Participant',
+    'Annotation',
+    'AnnotationValueType',
     'Centre',
     'Location'
   ];
 
+  /**
+   * Extends domain entities by adding a 'compareToServerEntity' that can be called from test code to compare
+   * a javascript domain object and a response from the server (for the same domain entity).
+   */
   function extendedDomainEntities(ConcurrencySafeEntity,
                                   AnnotationType,
                                   Study,
+                                  SpecimenGroup,
                                   StudyAnnotationType,
                                   ParticipantAnnotationType,
+                                  CollectionEventType,
+                                  ProcessingType,
+                                  SpecimenLinkType,
                                   Participant,
+                                  Annotation,
+                                  AnnotationValueType,
                                   Centre,
                                   Location) {
 
@@ -58,53 +74,131 @@ define(['angular', 'underscore'], function(angular, _) {
       });
     };
 
-    ConcurrencySafeEntity.prototype.compareToServerEntity = function (entity) {
-      validateAttrs(this, entity, 'version');
+    ConcurrencySafeEntity.prototype.compareToServerEntity = function (serverEntity) {
+      expect(this.isNew()).toBe(false);
+      validateAttrs(this, serverEntity, 'version');
     };
 
-    AnnotationType.prototype.compareToServerEntity = function (annotationType) {
-      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, annotationType);
-      validateAttrs(this, annotationType, 'name', 'valueType', 'options');
-      validateOptional(this, annotationType, 'description', 'maxValueCount');
+    AnnotationType.prototype.compareToServerEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
+      validateAttrs(this, serverEntity, 'name', 'valueType', 'options');
+      validateOptional(this, serverEntity, 'description', 'maxValueCount');
     };
 
-    StudyAnnotationType.prototype.compareToServerEntity = function (annotationType) {
-      AnnotationType.prototype.compareToServerEntity.call(this, annotationType);
-      validateAttrs(this, annotationType, 'studyId');
+    StudyAnnotationType.prototype.compareToServerEntity = function (serverEntity) {
+      AnnotationType.prototype.compareToServerEntity.call(this, serverEntity);
+      validateAttrs(this, serverEntity, 'studyId');
     };
 
-    ParticipantAnnotationType.prototype.compareToServerEntity = function (annotationType) {
-      StudyAnnotationType.prototype.compareToServerEntity.call(this, annotationType);
-      validateAttrs(this, annotationType, 'required');
+    ParticipantAnnotationType.prototype.compareToServerEntity = function (serverEntity) {
+      StudyAnnotationType.prototype.compareToServerEntity.call(this, serverEntity);
+      validateAttrs(this, serverEntity, 'required');
     };
 
-    Study.prototype.compareToServerEntity = function (study) {
-      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, study);
-      validateAttrs(this, study, 'name', 'Status');
-      validateOptional(this, study, 'description');
+    CollectionEventType.compareToServerEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
+      validateAttrs(this, serverEntity, 'name', 'recurring');
+      validateOptional(this, serverEntity, 'description');
+
+      expect(this.specimenGroupData).toBeArrayOfSize(serverEntity.specimenGroupData.length);
+      expect(this.annotationTypeData).toBeArrayOfSize(serverEntity.annotationTypeData.length);
+
+      expect(this.specimenGroupData).toBeContainAll(serverEntity.specimenGroupData);
+      expect(this.annotationTypeData).toBeContainAll(serverEntity.annotationTypeData);
     };
 
-    Participant.prototype.compareToServerEntity = function (participant) {
-      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, participant);
-      validateAttrs(this, participant, 'studyId', 'uniqueId', 'annotations');
+    ProcessingType.compareToServerEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
+      validateAttrs(this, serverEntity, 'name', 'enabled');
+      validateOptional(this, serverEntity, 'description');
     };
 
-    Centre.prototype.compareToServerEntity = function (centre) {
-      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, centre);
-      validateAttrs(this, centre, 'name', 'Status');
-      validateOptional(this, centre, 'description');
-    };
-
-    Location.prototype.compareToServerEntity = function (location) {
+    SpecimenLinkType.compareToServerEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
       validateAttrs(this,
-                    location,
+                    serverEntity,
+                    'processingTypeId',
+                    'expectedInputChange',
+                    'expectedOutputChange',
+                    'inputCount',
+                    'outputCount',
+                    'inputGroupId',
+                    'outputGroupId');
+      expect(this.annotationTypeData).toBeArrayOfSize(serverEntity.annotationTypeData.length);
+      expect(this.annotationTypeData).toBeContainAll(serverEntity.annotationTypeData);
+    };
+
+    SpecimenGroup.prototype.compareToServerEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
+      validateAttrs(this,
+                    serverEntity,
+                    'name',
+                    'units',
+                    'anatomicalSourceType',
+                    'preservationType',
+                    'preservationTemperatureType',
+                    'specimenType');
+      validateOptional(this, serverEntity, 'description');
+    };
+
+    Study.prototype.compareToServerEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
+      validateAttrs(this, serverEntity, 'name', 'Status');
+      validateOptional(this, serverEntity, 'description');
+    };
+
+    Participant.prototype.compareToServerEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
+      validateAttrs(this, serverEntity, 'studyId', 'uniqueId');
+
+      _.each(this.annotations, function (annotation) {
+        var serverAnnotation = _.findWhere(serverEntity.annotations,
+                                           { annotationTypeId: annotation.getAnnotationTypeId() });
+        Annotation.prototype.compareToServerEntity.call(annotation, serverEntity);
+      });
+    };
+
+    Annotation.prototype.compareToServerEntity = function (serverEntity) {
+      switch (this.getValueType) {
+
+      case AnnotationValueType.DATE_TIME():
+      case AnnotationValueType.TEXT():
+        expect(this.stringValue).toEqual(serverEntity.stringValue);
+        expect(this.numberValue).toBeNull();
+        expect(this.selectedValues).toBeEmptyArray();
+        break;
+
+      case AnnotationValueType.NUMBER():
+        expect(this.numberValue).toEqual(serverEntity.numberValue);
+        expect(this.stringValue).toBeNull();
+        expect(this.selectedValues).toBeEmptyArray();
+        break;
+
+      case AnnotationValueType.SELECT():
+        expect(this.stringValue).toBeNull();
+        expect(this.numberValue).toBeNull();
+        expect(this.selectedValues).toBeArrayOfSize(serverEntity.selectedValues.length);
+        expect(this.selectedValues).toContainAll(serverEntity.selectedValues);
+        break;
+      }
+    };
+
+    Centre.prototype.compareToServerEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
+      validateAttrs(this, serverEntity, 'name', 'Status');
+      validateOptional(this, serverEntity, 'description');
+    };
+
+    Location.prototype.compareToServerEntity = function (serverEntity) {
+      validateAttrs(this,
+                    serverEntity,
                     'name',
                     'street',
                     'city',
                     'province',
                     'postalCode',
                     'countryIsoCode');
-      validateOptional(this, location, 'id', 'poBoxNumber');
+      validateOptional(this, serverEntity, 'id', 'poBoxNumber');
     };
   }
 

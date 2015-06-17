@@ -1,36 +1,36 @@
-<div ng-form="annotationSubForm" class="form-group" ng-repeat="annotationHelper in vm.annotationHelpers">
-  <label class="col-md-2 control-label">{{annotationHelper.annotationType.name}}</label>
-  <div class="col-md-8" ng-switch on="annotationHelper.annotationType.valueType">
+<div ng-form="annotationSubForm" class="form-group" ng-repeat="annotation in vm.annotations">
+  <label class="col-md-2 control-label">{{annotation.annotationType.name}}</label>
+  <div class="col-md-8" ng-switch on="annotation.getValueType()">
 
     <!-- TEXT -->
     <input ng-switch-when="Text"
            name="annotationValue"
            type="text"
            class="form-control"
-           ng-model="annotationHelper.value"
-           ng-required="annotationHelper.required"/>
+           ng-model="annotation.stringValue"
+           ng-required="annotation.required"/>
 
     <!-- NUMBER -->
     <input ng-switch-when="Number"
            name="annotationValue"
            type="number"
            class="form-control"
-           ng-model="annotationHelper.value"
-           ng-required="annotationHelper.required"/>
+           ng-model="annotation.numberValue"
+           ng-required="annotation.required"/>
 
     <!-- DATE TIME -->
     <div class="input-group" ng-switch-when="DateTime">
       <input name="annotationValue"
              type="text"
              class="form-control"
-             datepicker-popup="yyyy-MM-dd"
+             datepicker-popup
              is-open="vm.opened"
              min-date="'2000-01-01'"
-             show-weeks="false"
              datepicker-options="vm.datePicker.options"
+             date-disabled="disabled(date, mode)"
              close-text="Close"
-             ng-model="annotationHelper.value.date"
-             ng-required="annotationHelper.required"/>
+             ng-model="annotation.dateTimeValue.date"
+             ng-required="annotation.required"/>
       <span class="input-group-btn">
         <button type="button" class="btn btn-default" ng-click="vm.datePicker.open($event)">
           <i class="glyphicon glyphicon-calendar"></i>
@@ -38,33 +38,33 @@
       </span>
     </div>
     <div class="input-group" ng-switch-when="DateTime">
-      <timepicker ng-model="annotationHelper.value.time"
+      <timepicker ng-model="annotation.dateTimeValue.time"
                   show-meridian="true"
-                  ng-required="annotationHelper.required"></timepicker>
+                  ng-required="annotation.required"></timepicker>
     </div>
 
     <!-- SELECT SINGLE -->
     <select ng-switch-when="Select"
-            ng-if="annotationHelper.annotationType.maxValueCount == 1"
+            ng-if="annotation.annotationType.maxValueCount == 1"
             name="annotationValue"
             class="form-control"
             name="annotationTypeValue"
-            ng-model="annotationHelper.value"
-            ng-options="option for option in annotationHelper.annotationType.options"
-            ng-required="annotationHelper.required">
+            ng-model="annotation.singleSelectValue"
+            ng-options="option for option in annotation.annotationType.options"
+            ng-required="annotation.required">
       <option value="">-- make a selection --</option>
     </select>
 
     <!-- SELECT MULTIPLE -->
     <div class="input-group"
          ng-switch-when="Select"
-         ng-if="annotationHelper.annotationType.maxValueCount > 1">
-      <div ng-repeat="value in annotationHelper.values">
+         ng-if="annotation.annotationType.maxValueCount > 1">
+      <div ng-repeat="value in annotation.multipleSelectValues">
         <label>
           <input type="checkbox"
                  name="annotationValue"
                  ng-model="value.checked"
-                 ng-required="!annotationHelper.someSelected()">
+                 ng-required="!annotation.someSelected()">
           <span>{{value.name}}</span>
         </label>
       </div>
@@ -73,21 +73,21 @@
   </div>
   <div class="col-md-offset-2 col-md-10">
     <p class="help-block"
-       ng-show="annotationHelper.annotationType.valueType != 'Select' &&
+       ng-show="annotation.annotationType.valueType != 'Select' &&
                 annotationSubForm.annotationValue.$error.required &&
                 !annotationSubForm.annotationValue.$pristine">
       Please enter a value
     </p>
     <p class="help-block"
-       ng-show="annotationHelper.annotationType.valueType == 'Select' &&
-                annotationHelper.annotationType.maxValueCount == 1 &&
+       ng-show="annotation.annotationType.valueType == 'Select' &&
+                annotation.annotationType.maxValueCount == 1 &&
                 annotationSubForm.annotationValue.$error.required &&
                 !annotationSubForm.annotationValue.$pristine">
       Please make a selection
     </p>
     <p class="help-block"
-       ng-show="annotationHelper.annotationType.valueType == 'Select' &&
-                annotationHelper.annotationType.maxValueCount > 1 &&
+       ng-show="annotation.annotationType.valueType == 'Select' &&
+                annotation.annotationType.maxValueCount > 1 &&
                 annotationSubForm.annotationValue.$error.required">
       Please make a selection
     </p>

@@ -3,7 +3,7 @@
 </div>
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">Participant {{vm.participant.uniqueId}}
+    <h3 class="panel-title">Participant
       <span class="btn-group pull-right">
         <a ui-sref="home.collection.study.participant.update({participantId: vm.participant.id})"
            class="btn btn-xs btn-primary"
@@ -18,6 +18,16 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-3">
+          <strong>Unique ID</strong>
+        </div>
+        <div class="col-md-5">
+          {{vm.participant.uniqueId}}
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
           <strong>Study</strong>
         </div>
         <div class="col-md-5">
@@ -25,13 +35,13 @@
         </div>
       </div>
     </li>
-    <li class="list-group-item" ng-repeat="annotationHelper in vm.participant.annotationHelpers">
+    <li class="list-group-item" ng-repeat="annotation in vm.participant.annotations">
       <div class="row">
         <div class="col-md-3">
-          <strong>{{annotationHelper.getLabel()}}</strong>
+          <strong>{{annotation.getLabel()}}</strong>
         </div>
         <div class="col-md-5">
-          {{annotationHelper.getDisplayValue()}}
+          {{annotation.getValue()}}
         </div>
       </div>
     </li>

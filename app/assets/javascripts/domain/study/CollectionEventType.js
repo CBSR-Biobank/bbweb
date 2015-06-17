@@ -73,23 +73,22 @@ define(['underscore'], function(_) {
      * @param {Array} options.studyAnnotationTypes all the collection event annotation types for the
      * study.
      */
-    function CollectionEventType(collectionEventType, options) {
-      var self = this;
+    function CollectionEventType(obj, options) {
+      var self = this,
+          defaults = {
+            studyId:            null,
+            name:               '',
+            description:        null,
+            recurring:          false,
+            specimenGroupData:  [],
+            annotationTypeData: []
+          };
 
-      collectionEventType = collectionEventType || {};
-      ConcurrencySafeEntity.call(self, collectionEventType);
-
-      _.extend(self,
-               _.defaults(collectionEventType, {
-                 studyId:            null,
-                 name:               '',
-                 description:        null,
-                 recurring:          false,
-                 specimenGroupData:  [],
-                 annotationTypeData: []
-               }));
+      obj = obj || {};
+      ConcurrencySafeEntity.call(self, obj);
 
       options = options || {};
+      _.extend(self, defaults, _.pick(obj, _.keys(defaults)));
 
       if (options.studySpecimenGroups) {
         self.studySpecimenGroups(options.studySpecimenGroups);

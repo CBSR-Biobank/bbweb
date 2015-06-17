@@ -22,11 +22,12 @@ define([], function() {
 
     resolveParticipant.$inject = ['$stateParams', 'Participant', 'study', 'annotationTypes'];
     function resolveParticipant($stateParams, Participant, study, annotationTypes) {
-      return Participant.get($stateParams.studyId, $stateParams.participantId).then(function (p) {
-        p.setStudy(study);
-        p.setAnnotationTypes(annotationTypes);
-        return p;
-      });
+      return Participant.get($stateParams.studyId, $stateParams.participantId).then(
+        function (p) {
+          p.setStudy(study);
+          p.setAnnotationTypes(annotationTypes);
+          return p;
+        });
     }
 
     resolveParticipantByUniqueId.$inject = ['$stateParams', 'Participant'];

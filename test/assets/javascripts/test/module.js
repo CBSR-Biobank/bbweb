@@ -3,17 +3,17 @@
  *
  * Provides factories for various client side domain objects.
  */
-define([
-  'angular',
-  '../../../test/assets/javascripts/test/fakeDomainEntities',
-  '../../../test/assets/javascripts/test/extendedDomainEntities'
-], function(angular, fakeDomainEntities, extendedDomainEntities) {
+define(function (require) {
   'use strict';
+
+  var angular                = require('angular'),
+      extendedDomainEntities = require('../../../test/assets/javascripts/test/extendedDomainEntities'),
+      fakeDomainEntities     = require('../../../test/assets/javascripts/test/fakeDomainEntities');
 
   var module = angular.module('biobank.test', []);
 
-  module.service('fakeDomainEntities', fakeDomainEntities);
   module.service('extendedDomainEntities', extendedDomainEntities);
+  module.service('fakeDomainEntities',     fakeDomainEntities);
 
   return module;
 });

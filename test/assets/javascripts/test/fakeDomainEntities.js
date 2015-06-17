@@ -16,7 +16,8 @@ define([
     'AnatomicalSourceType',
     'PreservationTemperatureType',
     'PreservationType',
-    'SpecimenType'
+    'SpecimenType',
+    'bbwebConfig'
   ];
 
   /**
@@ -29,7 +30,8 @@ define([
                               AnatomicalSourceType,
                               PreservationTemperatureType,
                               PreservationType,
-                              SpecimenType) {
+                              SpecimenType,
+                              bbwebConfig) {
     var nameCountByEntity = {};
 
     var service = {
@@ -37,14 +39,17 @@ define([
       stringNext:                        stringNext,
       specimenGroupData:                 specimenGroupData,
       annotationTypeData:                annotationTypeData,
-      studyAnnotationType:               studyAnnotationType,
       specimenLinkType:                  specimenLinkType,
       processingType:                    processingType,
       collectionEventType:               collectionEventType,
       specimenGroup:                     specimenGroup,
       annotationType:                    annotationType,
+      studyAnnotationType:               studyAnnotationType,
+      allStudyAnnotationTypes:           allStudyAnnotationTypes,
       study:                             study,
       participant:                       participant,
+      annotation:                        annotation,
+      valueForAnnotation:                valueForAnnotation,
 
       centre:                            centre,
       location:                          location,
@@ -60,6 +65,7 @@ define([
       ENTITY_NAME_ANNOTATION_TYPE:       ENTITY_NAME_ANNOTATION_TYPE,
       ENTITY_NAME_STUDY:                 ENTITY_NAME_STUDY,
       ENTITY_NAME_PARTICIPANT:           ENTITY_NAME_PARTICIPANT,
+      ENTITY_NAME_ANNOTATION:            ENTITY_NAME_ANNOTATION,
 
       ENTITY_NAME_CENTRE:                ENTITY_NAME_CENTRE,
       ENTITY_NAME_LOCATION:              ENTITY_NAME_LOCATION
@@ -73,6 +79,7 @@ define([
     function ENTITY_NAME_ANNOTATION_TYPE()       { return 'annotationType'; }
     function ENTITY_NAME_STUDY()                 { return 'study'; }
     function ENTITY_NAME_PARTICIPANT()           { return 'participant'; }
+    function ENTITY_NAME_ANNOTATION()            { return 'annotation'; }
 
     function ENTITY_NAME_CENTRE()                { return 'centre'; }
     function ENTITY_NAME_LOCATION()              { return 'location'; }
@@ -297,6 +304,18 @@ define([
       return _.extend(annotationType(options), { studyId: study.id });
     }
 
+    function allStudyAnnotationTypes(study) {
+      var annotationTypes = _.map(AnnotationValueType.values(), function (valueType) {
+        return studyAnnotationType(study, { valueType: valueType });
+      });
+      annotationTypes.push(studyAnnotationType(study, {
+        valueType:     AnnotationValueType.SELECT(),
+        maxValueCount: 2,
+        options:       [ 'opt1', 'opt2', 'opt3' ]
+      }));
+      return annotationTypes;
+    }
+
     function study() {
       var study =  {
         id:          utils.uuid(),
@@ -313,10 +332,76 @@ define([
       var participant =  {
         id:          utils.uuid(),
         studyId:     options.studyId || null,
-        uniqueId:    domainEntityNameNext(ENTITY_NAME_PARTICIPANT()),
-        annotations: []
+        uniqueId:    domainEntityNameNext(ENTITY_NAME_PARTICIPANT())
       };
+
+      options.annotationTypes = options.annotationTypes || {};
+      participant.annotations = _.map(options.annotationTypes, function (annotationType) {
+        return annotation(valueForAnnotation(annotationType), annotationType);
+      });
+
       return extendWithCommonFields(participant);
+    }
+
+    function annotation(value, annotationType) {
+      var annotation = {
+        annotationTypeId: annotationType.id,
+        selectedValues:   []
+      };
+
+      switch (annotationType.valueType) {
+
+      case AnnotationValueType.TEXT():
+      case AnnotationValueType.DATE_TIME():
+        annotation.stringValue = value;
+        break;
+
+      case AnnotationValueType.NUMBER():
+        annotation.numberValue = value;
+        break;
+
+      case AnnotationValueType.SELECT():
+        if (annotationType.maxValueCount === 1) {
+          annotation.selectedValues =  [{ annotationTypeId: annotationType.id, value: value }];
+        } else if (annotationType.maxValueCount > 1) {
+          annotation.selectedValues =_.map(value, function (v) {
+            return { annotationTypeId: annotationType.id, value: v };
+          });
+        } else {
+          throw new Error('invalid max value count for annotation: ' + annotationType.maxValueCount);
+        }
+        break;
+
+      default:
+        throw new Error('invalid value type: ' + annotationType.valueType);
+      }
+
+      return annotation;
+    }
+
+    function valueForAnnotation(annotationType) {
+      switch (annotationType.valueType) {
+
+      case AnnotationValueType.TEXT():
+        return stringNext();
+
+      case AnnotationValueType.NUMBER():
+        return faker.random.number({precision: 0.05}).toString();
+
+      case AnnotationValueType.DATE_TIME():
+        return moment(faker.date.past(1)).local().format(bbwebConfig.dateTimeFormat);
+
+      case AnnotationValueType.SELECT():
+        if (annotationType.maxValueCount === 1) {
+          return annotationType.options[0];
+        } else if (annotationType.maxValueCount === 2) {
+          return annotationType.options;
+        } else {
+          throw new Error('invalid max value count: ' + annotationType.maxValueCount);
+        }
+      }
+
+      throw new Error('invalid value type: ' + annotationType.valueType);
     }
 
     function centre() {

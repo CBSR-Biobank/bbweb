@@ -24,7 +24,8 @@ define([
 
     beforeEach(inject(function($httpBackend,
                                _CollectionEventType_,
-                               fakeDomainEntities) {
+                               fakeDomainEntities,
+                               extendedDomainEntities) {
       httpBackend         = $httpBackend;
       CollectionEventType = _CollectionEventType_;
       fakeEntities        = fakeDomainEntities;
@@ -86,7 +87,7 @@ define([
       });
 
       ceventType = CollectionEventType.create(cetFromServer);
-      compareCetToServerObj(ceventType, cetFromServer);
+      ceventType.compareToServerEntity(cetFromServer);
     });
 
     it('can retrieve a collection event type', function(done) {
@@ -94,7 +95,7 @@ define([
         .respond(serverReply(cetFromServer));
 
       CollectionEventType.get(study.id, cetFromServer.id).then(function(cet) {
-        compareCetToServerObj(cet, cetFromServer);
+        cet.compareToServerEntity(cetFromServer);
         done();
       });
       httpBackend.flush();
@@ -105,7 +106,7 @@ define([
         .respond(serverReply([ cetFromServer ]));
       CollectionEventType.list(study.id).then(function(list) {
         _.each(list, function (cet) {
-          compareCetToServerObj(cet, cetFromServer);
+          cet.compareToServerEntity(cetFromServer);
         });
         done();
       });
@@ -120,7 +121,7 @@ define([
         .respond(201, serverReply(cetFromServer));
 
       ceventType.addOrUpdate().then(function(cet) {
-        compareCetToServerObj(cet, cetFromServer);
+        cet.compareToServerEntity(cetFromServer);
       });
       httpBackend.flush();
     });
@@ -151,7 +152,7 @@ define([
         .respond(201, serverReply(cetFromServer));
 
       ceventType.addOrUpdate().then(function(cet) {
-        compareCetToServerObj(cet, cetFromServer);
+        cet.compareToServerEntity(cetFromServer);
       });
       httpBackend.flush();
     }
@@ -364,16 +365,6 @@ define([
 
     function serverReply(obj) {
       return { status: 'success', data: obj };
-    }
-
-    function compareCetToServerObj(cet, serverObj) {
-      expect(cet.isNew()).toBe(false);
-      expect(cet.studyId).toBe(serverObj.studyId);
-      expect(cet.name).toBe(serverObj.name);
-      expect(cet.description).toBe(serverObj.description);
-      expect(cet.recurring).toBe(serverObj.recurring);
-      expect(cet.specimenGroupData).toBeArrayOfSize(serverObj.specimenGroupData.length);
-      expect(cet.annotationTypeData).toBeArrayOfSize(serverObj.annotationTypeData.length);
     }
 
     function ceventTypeToAddCommand(ceventType) {

@@ -24,7 +24,8 @@ define([
     beforeEach(inject(function($httpBackend,
                                _funutils_,
                                _SpecimenLinkType_,
-                               fakeDomainEntities) {
+                               fakeDomainEntities,
+                               extendedDomainEntities) {
       httpBackend      = $httpBackend;
       funutils         = _funutils_;
       SpecimenLinkType = _SpecimenLinkType_;
@@ -113,7 +114,7 @@ define([
 
     it('has valid values when creating from server response', function() {
       var entities = entitiesWithLinkedSpecimenLinkType();
-      compareSltToServerObj(entities.slt, entities.sltFromServer);
+      entities.slt.compareToServerEntity(entities.sltFromServer);
     });
 
     it('can retrieve a specimen link type', function(done) {
@@ -126,7 +127,7 @@ define([
         .respond(serverReply(entities.sltFromServer));
 
       SpecimenLinkType.get(entities.processingType.id, entities.sltFromServer.id).then(function(slt) {
-        compareSltToServerObj(slt, entities.sltFromServer);
+        slt.compareToServerEntity(entities.sltFromServer);
         done();
       });
       httpBackend.flush();
@@ -140,7 +141,7 @@ define([
 
       SpecimenLinkType.list(entities.processingType.id).then(function(list) {
         _.each(list, function (slt) {
-          compareSltToServerObj(slt, entities.sltFromServer);
+          slt.compareToServerEntity(entities.sltFromServer);
         });
         done();
       });
@@ -164,7 +165,7 @@ define([
         .respond(201, serverReply(entities.sltFromServer));
 
       slt.addOrUpdate().then(function(reply) {
-        compareSltToServerObj(reply, entities.sltFromServer);
+        reply.compareToServerEntity(entities.sltFromServer);
       });
       httpBackend.flush();
     });
@@ -295,18 +296,6 @@ define([
       annotationTypeDataSharedSpec(context);
     });
 
-    function compareSltToServerObj(slt, serverObj) {
-      expect(slt.isNew()).toBe(false);
-      expect(slt.processingTypeId).toBe(serverObj.processingTypeId);
-      expect(slt.expectedInputChange).toBe(serverObj.expectedInputChange);
-      expect(slt.expectedOutputChange).toBe(serverObj.expectedOutputChange);
-      expect(slt.inputCount).toBe(serverObj.inputCount);
-      expect(slt.outputCount).toBe(serverObj.outputCount);
-      expect(slt.inputGroupId).toBe(serverObj.inputGroupId);
-      expect(slt.outputGroupId).toBe(serverObj.outputGroupId);
-      expect(slt.annotationTypeData).toBeArrayOfSize(serverObj.annotationTypeData.length);
-    }
-
     function serverReply(obj) {
       return { status: 'success', data: obj };
     }
@@ -341,7 +330,7 @@ define([
         .respond(201, serverReply(sltFromServer));
 
       slt.addOrUpdate().then(function(reply) {
-        compareSltToServerObj(reply, sltFromServer);
+        reply.compareToServerEntity(sltFromServer);
       });
       httpBackend.flush();
     }
