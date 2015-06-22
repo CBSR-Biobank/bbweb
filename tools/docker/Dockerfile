@@ -7,16 +7,16 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update
 RUN apt-get install -y vim less net-tools inetutils-ping curl git nmap socat dnsutils netcat tree htop unzip sudo software-properties-common
 
-#Install Oracle Java 7 and MongoDB.
+#Install Oracle Java 8 and MongoDB.
 RUN add-apt-repository ppa:webupd8team/java -y
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
 RUN echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' > /etc/apt/sources.list.d/mongodb.list
-RUN echo oracle-java7-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
 RUN apt-get update
-RUN apt-get install -y oracle-java7-installer mongodb-org
+RUN apt-get install -y oracle-java8-installer mongodb-org
 RUN rm -rf /var/lib/apt/lists/*
 
-ENV JAVA_HOME /usr/lib/jvm/java-7-oracle
+ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 
 ###----
 

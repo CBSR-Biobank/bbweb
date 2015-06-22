@@ -67,7 +67,7 @@ image to run the web application in. You also need:
 * a valid email.conf file
 * and the `bbweb_start.sh` script.
 
-This docker image contains instructions to also install Oracle Java 7.
+This docker image contains instructions to also install Oracle Java 8.
 
 Run the command `docker build -t bbweb .` to build the docker image in the directory containing the
 Dockerfile.
