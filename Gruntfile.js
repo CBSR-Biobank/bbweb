@@ -1,3 +1,7 @@
+/**
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2015 Canadian BioSample Repository (CBSR)
+ */
 module.exports = function(grunt) {
 
   //	Initialize the grunt tasks
@@ -27,6 +31,14 @@ module.exports = function(grunt) {
             { type: 'html', subdir: 'report-html' }
           ]
         }
+      }
+    },
+
+    ngdocs: {
+      all: [ 'app/assets/javascripts/**/*.js' ],
+      options: {
+        dest: 'docs',
+        scripts: ['../app.min.js'],
       }
     }
 
@@ -75,6 +87,7 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-karma');
+  grunt.loadNpmTasks('grunt-ngdocs');
 
   // grunt.registerTask('test', 'Run tests on singleRun karma server', function () {
   //   if (grunt.option('coverage')) {

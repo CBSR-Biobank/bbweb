@@ -1,3 +1,7 @@
+/**
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2015 Canadian BioSample Repository (CBSR)
+ */
 // Jasmine test suite
 //
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {

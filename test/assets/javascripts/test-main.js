@@ -1,3 +1,7 @@
+/**
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2015 Canadian BioSample Repository (CBSR)
+ */
 var allTestFiles = [];
 var TEST_REGEXP = /(spec|test)\.js$/i;
 

@@ -1,9 +1,12 @@
-/* global define */
+/**
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2015 Canadian BioSample Repository (CBSR)
+ */
 define([], function() {
   'use strict';
 
   /**
-   *
+   * This directive allows the user to select a {@link Study} from the list provided by function getStudies().
    */
   function selectStudyDirective() {
     return {
@@ -35,11 +38,12 @@ define([], function() {
     vm.getHeader              = $scope.getHeader;
     vm.getStudies             = $scope.getStudies;
     vm.icon                   = $scope.icon;
+    vm.messageNoResults       = $scope.messageNoResults;
     vm.navigateStateName      = $scope.navigateStateName;
     vm.navigateStateParamName = $scope.navigateStateParamName;
-    vm.pageSize               = 10;
+
     vm.updateStudies          = updateStudies;
-    vm.messageNoResults       = $scope.messageNoResults;
+
     vm.pageSize               = 10;
     vm.pagedResult            = {};
     vm.paginationNumPages     = 5;
@@ -63,11 +67,7 @@ define([], function() {
     //---
 
     function getDisplayState() {
-      if (vm.pagedResult.total > 0) {
-        return vm.displayStates.HAVE_RESULTS;
-      } else {
-        return vm.displayStates.NO_RESULTS;
-      }
+      return (vm.pagedResult.total > 0) ? vm.displayStates.HAVE_RESULTS : vm.displayStates.NO_RESULTS;
     }
 
     function updateStudies() {

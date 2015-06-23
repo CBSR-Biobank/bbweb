@@ -1,5 +1,8 @@
 /**
- * Common tests for the Panel object.
+ * Jasmine test suite
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
 define(['underscore'], function(_) {
   'use strict';

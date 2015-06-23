@@ -1,5 +1,6 @@
 /**
- * Study administration controllers.
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
 define(['underscore'], function(_) {
   'use strict';

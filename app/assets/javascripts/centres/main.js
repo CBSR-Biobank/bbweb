@@ -1,4 +1,9 @@
-/** centre module */
+/**
+ * Centre configuration module.
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2015 Canadian BioSample Repository (CBSR)
+*/
 define([
   'angular',
   './centresService',

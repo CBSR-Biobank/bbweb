@@ -1,5 +1,6 @@
 /**
- * User service, exposes user model to the rest of the app.
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
 define([], function() {
   'use strict';

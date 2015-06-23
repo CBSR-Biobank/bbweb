@@ -1,3 +1,7 @@
+/**
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2015 Canadian BioSample Repository (CBSR)
+ */
 define(['moment'], function(moment) {
   'use strict';
 

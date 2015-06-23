@@ -1,7 +1,10 @@
 /**
- * Main, shows the start page and provides controllers for the header and the footer.
- * This the entry module which serves as an entry point so other modules only have to include a
- * single module.
+ * The Home module.
+ *
+ * Shows the start page and provides controllers for the header and the footer.
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
 define([
   'angular',

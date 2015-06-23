@@ -1,6 +1,9 @@
-// Karma configuration
-// Generated on Wed Oct 22 2014 14:27:38 GMT-0600 (MDT)
-
+/**
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2015 Canadian BioSample Repository (CBSR)
+ *
+ * Karma configuration
+ */
 module.exports = function(config) {
   config.set({
 

@@ -1,5 +1,8 @@
 /**
  * Configure routes of studies module.
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
 define(['angular', 'underscore'], function(angular, _) {
   'use strict';
