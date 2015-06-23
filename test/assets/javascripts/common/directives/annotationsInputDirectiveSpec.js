@@ -36,12 +36,13 @@ define([
                                _ParticipantAnnotationType_,
                                _AnnotationValueType_,
                                fakeDomainEntities) {
-      compile = $compile;
-      scope = $rootScope;
-      Annotation           = _Annotation_;
-      ParticipantAnnotationType  = _ParticipantAnnotationType_;
-      AnnotationValueType        = _AnnotationValueType_;
-      fakeEntities               = fakeDomainEntities;
+
+      compile                   = $compile;
+      scope                     = $rootScope;
+      Annotation                = _Annotation_;
+      ParticipantAnnotationType = _ParticipantAnnotationType_;
+      AnnotationValueType       = _AnnotationValueType_;
+      fakeEntities              = fakeDomainEntities;
 
       testUtils.putHtmlTemplate($templateCache,
                                '/assets/javascripts/common/directives/annotationsInput.html');

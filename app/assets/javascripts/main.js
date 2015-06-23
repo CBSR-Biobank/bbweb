@@ -34,12 +34,12 @@
       'underscore': {
         exports: '_'
       },
-      'angular-cookies':   ['angular'],
-      'angular-sanitize':  ['angular'],
-      'angular-ui-router': ['angular'],
-      'bootstrap':         ['jquery'],
-      'ngTable':           ['angular'],
-      'ui-bootstrap':      ['angular']
+      'angular-cookies':    ['angular'],
+      'angular-sanitize':   ['angular'],
+      'angular-ui-router':  ['angular'],
+      'bootstrap':          ['jquery'],
+      'ngTable':            ['angular'],
+      'ui-bootstrap':       ['angular']
     }
   });
 

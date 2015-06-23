@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([], function() {
+define(['underscore'], function(_) {
   'use strict';
 
   /**
@@ -96,15 +96,12 @@ define([], function() {
     }
 
     function navigateToStudyHref(study) {
-      if (!!vm.navigateStateName) {
-        var stateParam = {};
-        stateParam[vm.navigateStateParamName] = study.id;
-        var href = $state.href(vm.navigateStateName, stateParam, {absolute: true});
-        return '<a href="' + href + '"><strong><i class="glyphicon ' + vm.icon + '"></i> ' +
-          study.name + '</strong></a>';
-      }
+      var stateParam = {};
 
-      return study.name;
+      stateParam[vm.navigateStateParamName] = study.id;
+      var href = $state.href(vm.navigateStateName, stateParam, {absolute: true});
+      return '<a href="' + href + '"><strong><i class="glyphicon ' + vm.icon + '"></i> ' +
+        study.name + '</strong></a>';
     }
 
     function getShowPagination() {

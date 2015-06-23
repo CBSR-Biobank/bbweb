@@ -345,31 +345,6 @@ define([
       });
     }
 
-    function annotationClearValue(annotation) {
-      switch (annotation.getValueType()) {
-
-      case AnnotationValueType.TEXT():
-        annotation.stringValue = '';
-        break;
-
-      case AnnotationValueType.NUMBER():
-        annotation.numberValue =  null;
-        break;
-
-      case AnnotationValueType.DATE_TIME():
-        annotation.dateTimeValue =  {date: null, time: null};
-        break;
-
-      case AnnotationValueType.SELECT():
-        if (annotation.annotationType.isSingleSelect()) {
-          annotation.singleSelectValue = null;
-        } else {
-          annotation.multipleSelectValue = [];
-        }
-        break;
-      }
-    }
-
     function annotationsForCommand(participant) {
       return _.map(participant.annotations, function (annotation) {
         return annotation.getServerAnnotation();

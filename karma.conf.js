@@ -22,7 +22,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      {pattern: 'target/web/web-modules/main/webjars/lib/angularjs/angular.js', included: false},
+      {pattern: 'target/web/web-modules/main/webjars/lib/angularjs/angular.js', included: true},
       {pattern: 'target/web/web-modules/main/webjars/lib/angularjs/angular-*.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/underscorejs/underscore.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/angular-ui-router/angular-ui-router.js', included: false},
