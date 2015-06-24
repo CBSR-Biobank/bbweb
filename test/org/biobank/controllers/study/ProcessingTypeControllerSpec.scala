@@ -15,10 +15,6 @@ import play.api.Play.current
 
 class ProcessingTypeControllerSpec extends ControllerFixture {
 
-  val log = LoggerFactory.getLogger(this.getClass)
-
-  val nameGenerator = new NameGenerator(this.getClass)
-
   def uri(study: Study): String = s"/studies/${study.id.id}/proctypes"
 
   def uri(study: Study, procType: ProcessingType): String =
@@ -153,7 +149,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
       "fail for an invalid study ID" in {
         val study = factory.createDisabledStudy
 
-        val json = makeRequest(GET, uri(study), BAD_REQUEST)
+        val json = makeRequest(GET, uri(study), NOT_FOUND)
           (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("invalid study id")
       }
@@ -162,9 +158,9 @@ class ProcessingTypeControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         val procType = factory.createProcessingType
 
-        val json = makeRequest(GET, uriWithQuery(study, procType), BAD_REQUEST)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("invalid study id")
+        val json = makeRequest(GET, uriWithQuery(study, procType), NOT_FOUND)
+        (json \ "status").as[String] must include ("error")
+        (json \ "message").as[String] must include ("invalid study id")
       }
 
       "fail for an invalid processing type id" in {

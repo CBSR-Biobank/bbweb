@@ -16,8 +16,6 @@ import scala.concurrent.Future
 
 class ApplicationSpec extends ControllerFixture {
 
-  val log = LoggerFactory.getLogger(this.getClass)
-
   "Application" must {
 
     "send 404 on a bad request" taggedAs(Tag("1")) in {

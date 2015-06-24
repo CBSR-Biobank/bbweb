@@ -1,13 +1,14 @@
-package org.biobank.service.study
+package org.biobank.service.participants
 
-import org.biobank.service.{ Processor, WrappedEvent }
-import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.service.Processor
+import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.infrastructure.event.CommonEvents._
 import org.biobank.domain.{ AnnotationTypeId, AnnotationOption, DomainValidation, DomainError }
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 
-import javax.inject.{Inject => javaxInject}
+import javax.inject.{Inject => javaxInject, Named}
 import akka.actor._
 import akka.pattern.ask
 import org.slf4j.LoggerFactory
@@ -24,16 +25,16 @@ object ParticipantsProcessor {
 }
 
 /**
-  * The ParticipantsProcessor is responsible for maintaining state changes for all
-  * [[org.biobank.domain.study.Study]] aggregates. This particular processor uses Akka-Persistence's
-  * [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist the generated
-  * events, afterwhich it will updated the current state of the [[org.biobank.domain.study.Study]] being
-  * processed.
+ *
  */
-class ParticipantsProcessor @javaxInject() (val participantRepository:    ParticipantRepository,
-                                            val annotationTypeRepository: ParticipantAnnotationTypeRepository,
-                                            val studyRepository:          StudyRepository)
+class ParticipantsProcessor @javaxInject() (
+  @Named("collectionEvents") val collectionEventsProcessor: ActorRef,
+
+  val participantRepository:    ParticipantRepository,
+  val annotationTypeRepository: ParticipantAnnotationTypeRepository,
+  val studyRepository:          StudyRepository)
     extends Processor {
+
   import org.biobank.infrastructure.event.StudyEventsUtil._
   import StudyEvent.EventType
 
@@ -62,28 +63,33 @@ class ParticipantsProcessor @javaxInject() (val participantRepository:    Partic
     * back to the user. Each valid command generates one or more events and is journaled.
     */
   val receiveCommand: Receive = {
-    case cmd: AddParticipantCmd    => processAddParticipantCmd(cmd)
-    case cmd: UpdateParticipantCmd => processUpdateParticipantCmd(cmd)
+    case cmd: AddParticipantCmd      => processAddParticipantCmd(cmd)
+    case cmd: UpdateParticipantCmd   => processUpdateParticipantCmd(cmd)
+    case cmd: CollectionEventCommand => validateAndForward(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(participantRepository.getValues.toSet))
       stash()
 
     case cmd => log.error(s"ParticipantsProcessor: message not handled: $cmd")
-
   }
 
-  private def enabledStudy(studyId: StudyId): DomainValidation[EnabledStudy] = {
-    studyRepository.getByKey(studyId).fold(
-      err => DomainError(s"invalid study id: $studyId").failureNel,
-      study => study match {
-        case st: EnabledStudy => st.success
-        case _ => DomainError(s"study is not enabled: $studyId").failureNel
+  private def validateAndForward(cmd: CollectionEventCommand) = {
+    participantRepository.getByKey(ParticipantId(cmd.participantId)).fold(
+      err => context.sender ! DomainError(s"invalid participant id: ${cmd.participantId}").failureNel,
+      participant => {
+        studyRepository.getByKey(participant.studyId).fold(
+          err => context.sender ! DomainError(s"invalid study id: ${cmd.participantId}").failureNel,
+          study => study match {
+            case s: EnabledStudy => collectionEventsProcessor forward cmd
+            case _ => context.sender ! DomainError(s"study is not enabled: ${study.id}").failureNel
+          }
+        )
       }
     )
   }
 
-  val errMsgUniqueIdExists = "participant with unique ID already exists"
+  val ErrMsgUniqueIdExists = "participant with unique ID already exists"
 
   /** Searches the repository for a matching item.
     */
@@ -93,7 +99,7 @@ class ParticipantsProcessor @javaxInject() (val participantRepository:    Partic
       matcher(item)
     }
     if (exists) {
-      DomainError(s"$errMsgUniqueIdExists: $uniqueId").failureNel
+      DomainError(s"$ErrMsgUniqueIdExists: $uniqueId").failureNel
     } else {
       true.success
     }
@@ -157,7 +163,7 @@ class ParticipantsProcessor @javaxInject() (val participantRepository:    Partic
     }
 
     val event = for {
-      study             <- enabledStudy(studyId)
+      study             <- studyRepository.getEnabled(studyId)
       uniqueIdAvailable <- uniqueIdAvailable(cmd.uniqueId)
       annotTypes        <- validateAnnotationTypes(studyId, cmd.annotations.toSet)
       newParticip       <- Participant.create(studyId,
@@ -170,7 +176,7 @@ class ParticipantsProcessor @javaxInject() (val participantRepository:    Partic
         ParticipantAddedEvent(
           participantId = Some(newParticip.id.id),
           uniqueId      = Some(cmd.uniqueId),
-          annotations   = convertAnnotationToEvent(cmd.annotations))).success
+          annotations   = convertAnnotationsToEvent(cmd.annotations))).success
     } yield event
 
     process(event) { applyParticipantAddedEvent(_) }
@@ -179,31 +185,32 @@ class ParticipantsProcessor @javaxInject() (val participantRepository:    Partic
   private def processUpdateParticipantCmd(cmd: UpdateParticipantCmd): Unit = {
     val studyId = StudyId(cmd.studyId)
     val participantId = ParticipantId(cmd.id)
+    var annotationsSet = cmd.annotations.toSet
 
     val event = for {
-      study             <- enabledStudy(studyId)
+      study             <- studyRepository.getEnabled(studyId)
       uniqueIdAvailable <- uniqueIdAvailable(cmd.uniqueId, participantId)
-      annotTypes        <- validateAnnotationTypes(studyId, cmd.annotations.toSet)
+      annotTypes        <- validateAnnotationTypes(studyId, annotationsSet)
       particip          <- participantRepository.getByKey(participantId)
       newParticip       <- Participant.create(studyId,
-                                        participantId,
-                                        particip.version,
-                                        DateTime.now,
-                                        cmd.uniqueId,
-                                        cmd.annotations.toSet)
+                                              participantId,
+                                              particip.version,
+                                              DateTime.now,
+                                              cmd.uniqueId,
+                                              annotationsSet)
       event             <- createStudyEvent(newParticip.studyId, cmd).withParticipantUpdated(
         ParticipantUpdatedEvent(
           participantId = Some(newParticip.id.id),
-          version       = Some(particip.version),
+          version       = Some(newParticip.version),
           uniqueId      = Some(cmd.uniqueId),
-          annotations   = convertAnnotationToEvent(cmd.annotations))).success
+          annotations   = convertAnnotationsToEvent(cmd.annotations))).success
     } yield event
 
     process(event){ applyParticipantUpdatedEvent(_) }
   }
 
   private def applyParticipantAddedEvent(event: StudyEvent) = {
-    log.debug(s"applyParticipantAddedEvent: event/$event")
+    log.debug(s"applyParticipantAddedEvent: event: $event")
 
     if (event.eventType.isParticipantAdded) {
       val addedEvent = event.getParticipantAdded
@@ -247,10 +254,10 @@ class ParticipantsProcessor @javaxInject() (val participantRepository:    Partic
     }
   }
 
-  private def convertAnnotationToEvent(annotations: List[ParticipantAnnotation])
-      : Seq[ParticipantAddedEvent.ParticipantAnnotation] = {
+  private def convertAnnotationsToEvent(annotations: List[ParticipantAnnotation])
+      : Seq[Annotation] = {
     annotations.map { annot =>
-      ParticipantAddedEvent.ParticipantAnnotation(
+      Annotation(
         annotationTypeId = Some(annot.annotationTypeId.id),
         stringValue      = annot.stringValue,
         numberValue      = annot.numberValue,
@@ -259,8 +266,7 @@ class ParticipantsProcessor @javaxInject() (val participantRepository:    Partic
     }
   }
 
-  private def convertAnnotationsFromEvent
-    (annotations: Seq[ParticipantAddedEvent.ParticipantAnnotation])
+  private def convertAnnotationsFromEvent(annotations: Seq[Annotation])
       : Set[ParticipantAnnotation] = {
     annotations.map { eventAnnot =>
       ParticipantAnnotation(

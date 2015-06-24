@@ -1,6 +1,6 @@
 package org.biobank.service.study
 
-import org.biobank.service.{ Processor, WrappedEvent }
+import org.biobank.service.Processor
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{
@@ -234,7 +234,7 @@ class SpecimenGroupProcessor @javaxInject() (
       specimenGroupRepository.getByKey(
         SpecimenGroupId(event.getSpecimenGroupRemoved.getSpecimenGroupId))
       .fold(
-        err => log.error(s"updating annotation type from event failed: $err"),
+        err => log.error(s"removing specimen group from event failed: $err"),
         sg => {
           specimenGroupRepository.remove(sg)
           ()

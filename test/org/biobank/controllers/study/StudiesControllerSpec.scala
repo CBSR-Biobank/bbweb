@@ -17,10 +17,6 @@ import org.slf4j.LoggerFactory
  */
 class StudiesControllerSpec extends ControllerFixture {
 
-  val log = LoggerFactory.getLogger(this.getClass)
-
-  val nameGenerator = new NameGenerator(this.getClass)
-
   def uri: String = "/studies"
 
   def uri(study: Study): String = uri + s"/${study.id.id}"

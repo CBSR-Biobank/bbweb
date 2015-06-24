@@ -27,6 +27,8 @@
   <logger name="org.biobank.service" level="INFO" />
   <logger name="org.biobank.query" level="INFO" />
 
+  <logger name="org.biobank.fixture" level="DEBUG" />
+
   <root level="INFO">
     <appender-ref ref="STDOUT" />
     <appender-ref ref="FILE" />

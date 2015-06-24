@@ -102,9 +102,10 @@ trait JsonController extends Controller {
       : Result = {
     validation.fold(
       err => {
-        Log.info("*** ERROR ***: " + err.list.mkString(", "))
+        Log.trace("*** ERROR ***: " + err.list.mkString(", "))
         val errMsgs = err.list.mkString(", ")
-        if ("does not exist".r.findAllIn(errMsgs).length > 0) {
+        if (("does not exist".r.findAllIn(errMsgs).length > 0)
+          || ("invalid.*id".r.findAllIn(errMsgs).length > 0)){
           NotFound(errMsgs)
         } else if (errMsgs.contains("already exists")) {
           Forbidden(errMsgs)
@@ -112,9 +113,9 @@ trait JsonController extends Controller {
           BadRequest(errMsgs)
         }
       },
-      event => {
-        Log.debug(s"domainValidationReply: $event")
-        Ok(event)
+      reply => {
+        Log.trace(s"domainValidationReply: $reply")
+        Ok(reply)
       }
     )
   }

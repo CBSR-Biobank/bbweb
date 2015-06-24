@@ -11,7 +11,7 @@ import org.biobank.domain.study.{
   SpecimenGroupId
 }
 import org.slf4j.LoggerFactory
-import org.biobank.service.{ Processor, WrappedEvent }
+import org.biobank.service.Processor
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 

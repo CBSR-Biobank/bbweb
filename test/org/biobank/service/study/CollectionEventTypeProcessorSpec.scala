@@ -39,7 +39,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
 
   var disabledStudy: DisabledStudy = null
 
-  // create the study to be used for each tests*
+  // create the study to be used for each tests
   override def beforeEach: Unit = {
     disabledStudy = factory.createDisabledStudy
     studyRepository.put(disabledStudy)
@@ -118,7 +118,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
     "not add a collection event type with a name that already exists" in {
       val cet = factory.createCollectionEventType
       collectionEventTypeRepository.put(cet)
-      askAddCommand(cet) mustFail "name already exists"
+      askAddCommand(cet) mustFailContains "name already exists"
     }
 
     "update a collection event type" in {
@@ -159,7 +159,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       collectionEventTypeRepository.put(cet2)
 
       val cet3 = cet.copy(name = cet2.name)
-      askUpdateCommand(cet3) mustFail "name already exists"
+      askUpdateCommand(cet3) mustFailContains "name already exists"
     }
 
     "not update a collection event type to wrong study" in {
@@ -170,7 +170,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       studyRepository.put(study2)
 
       val cet2 = cet.copy(studyId = study2.id)
-      askUpdateCommand(cet2) mustFail "study does not have collection event type"
+      askUpdateCommand(cet2) mustFailContains "study does not have collection event type"
     }
 
     "not update a collection event type with an invalid version" in {
@@ -178,7 +178,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       collectionEventTypeRepository.put(cet)
 
       val cet2 = cet.copy(version = cet.version + 1)
-      askUpdateCommand(cet2) mustFail "doesn't match current version"
+      askUpdateCommand(cet2) mustFailContains "doesn't match current version"
     }
 
     "remove a collection event type" in {
@@ -197,7 +197,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       collectionEventTypeRepository.put(cet)
 
       val cet2 = cet.copy(version = cet.version - 1)
-      askRemoveCommand(cet2) mustFail "expected version doesn't match current version"
+      askRemoveCommand(cet2) mustFailContains "expected version doesn't match current version"
     }
 
     "add a specimen group to a collection event type" in {
@@ -287,7 +287,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       val v = ask(studiesProcessor, cmd)
       .mapTo[DomainValidation[StudyEvent]]
       .futureValue
-      v mustFail "specimen group is in use by collection event type"
+      v mustFailContains "specimen group is in use by collection event type"
     }
 
     "remove a specimen group from collection event type" in {
@@ -327,7 +327,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       val v = ask(studiesProcessor, cmd)
       .mapTo[DomainValidation[StudyEvent]]
       .futureValue
-      v mustFail "specimen group is in use by collection event type"
+      v mustFailContains "specimen group is in use by collection event type"
     }
 
     "not add a specimen group from a different study" in {
@@ -338,7 +338,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
 
       val cet = factory.createCollectionEventType.copy(
         specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData))
-      askAddCommand(cet) mustFail "specimen group.+do not belong to study"
+      askAddCommand(cet) mustFailContains "specimen group.+do not belong to study"
     }
 
     "not update a collection event type with a specimen group from a different study" in {
@@ -352,7 +352,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
 
       val cet2 = cet.copy(
         specimenGroupData = List(factory.createCollectionEventTypeSpecimenGroupData))
-      askUpdateCommand(cet2)  mustFail "specimen group.+do not belong to study"
+      askUpdateCommand(cet2) mustFailContains "specimen group.+do not belong to study"
     }
 
     "add an annotation type to a collection event" in {
@@ -406,7 +406,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       .mapTo[DomainValidation[StudyEvent]]
       .futureValue
 
-      v mustFail "annotation type is in use by collection event type"
+      v mustFailContains "annotation type is in use by collection event type"
     }
 
     "remove an annotation type from collection event type" in {
@@ -448,7 +448,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       .mapTo[DomainValidation[StudyEvent]]
       .futureValue
 
-      v mustFail "annotation type is in use by collection event type"
+      v mustFailContains "annotation type is in use by collection event type"
     }
 
     "not add an annotation type if it is in wrong study" in {
@@ -464,7 +464,7 @@ class CollectionEventTypeProcessorSpec extends TestFixture {
       val cet2 = cet.copy(
         annotationTypeData = List(factory.createCollectionEventTypeAnnotationTypeData))
 
-      askUpdateCommand(cet2) mustFail "annotation type.+do not belong to study"
+      askUpdateCommand(cet2) mustFailContains "annotation type.+do not belong to study"
     }
   }
 }

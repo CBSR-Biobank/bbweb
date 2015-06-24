@@ -15,10 +15,6 @@ import play.api.Play.current
 
 class SpecimenLinkTypeControllerSpec extends ControllerFixture {
 
-  val log = LoggerFactory.getLogger(this.getClass)
-
-  val nameGenerator = new NameGenerator(this.getClass)
-
   def uri(procType: ProcessingType): String = s"/studies/${procType.id.id}/sltypes"
 
   def uri(procType: ProcessingType, slType: SpecimenLinkType): String =
@@ -112,71 +108,78 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
     (json \ "message").as[String] must include ("is not disabled")
   }
 
+  def createEntities()(fn: (Study, ProcessingType) => Unit): Unit = {
+    var disabledStudy = factory.createDisabledStudy
+    studyRepository.put(disabledStudy)
+
+    val procType = factory.createProcessingType
+    processingTypeRepository.put(procType)
+
+    fn(disabledStudy, procType)
+  }
+
   "SpecimenLink Type REST API" when {
 
     "GET /studies/sltypes" must {
       "list none" in {
-        val procType = factory.createProcessingType
-        processingTypeRepository.put(procType)
-
-        val json = makeRequest(GET, uri(procType))
-        (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList must have size 0
+        createEntities() { (study, processingType) =>
+          val json = makeRequest(GET, uri(processingType))
+          (json \ "status").as[String] must include ("success")
+          val jsonList = (json \ "data").as[List[JsObject]]
+          jsonList must have size 0
+        }
       }
 
       "list a single specimen link type" in {
-        val procType = factory.createProcessingType
-        processingTypeRepository.put(procType)
+        createEntities() { (study, procType) =>
+          val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
+          specimenGroupRepository.put(inputSg)
+          specimenGroupRepository.put(outputSg)
+          specimenLinkTypeRepository.put(slType)
 
-        val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
-        specimenGroupRepository.put(inputSg)
-        specimenGroupRepository.put(outputSg)
-        specimenLinkTypeRepository.put(slType)
-
-        val json = makeRequest(GET, uri(procType))
-        (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList must have size 1
-        compareObj(jsonList(0), slType)
+          val json = makeRequest(GET, uri(procType))
+          (json \ "status").as[String] must include ("success")
+          val jsonList = (json \ "data").as[List[JsObject]]
+          jsonList must have size 1
+          compareObj(jsonList(0), slType)
+        }
       }
 
       "get a single specimen link type" in {
-        val procType = factory.createProcessingType
-        processingTypeRepository.put(procType)
+        createEntities() { (study, procType) =>
 
-        val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
-        specimenGroupRepository.put(inputSg)
-        specimenGroupRepository.put(outputSg)
-        specimenLinkTypeRepository.put(slType)
+          val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
+          specimenGroupRepository.put(inputSg)
+          specimenGroupRepository.put(outputSg)
+          specimenLinkTypeRepository.put(slType)
 
-        val json = makeRequest(GET, uriWithQuery(procType, slType))
-        (json \ "status").as[String] must include ("success")
-        val jsonObj = (json \ "data").as[JsObject]
-        compareObj(jsonObj, slType)
+          val json = makeRequest(GET, uriWithQuery(procType, slType))
+          (json \ "status").as[String] must include ("success")
+          val jsonObj = (json \ "data").as[JsObject]
+          compareObj(jsonObj, slType)
+        }
       }
 
       "list multiple specimen link types" in {
-        val procType = factory.createProcessingType
-        processingTypeRepository.put(procType)
+        createEntities() { (study, procType) =>
+          val sltypes = List(factory.createSpecimenLinkType, factory.createSpecimenLinkType)
 
-        val sltypes = List(factory.createSpecimenLinkType, factory.createSpecimenLinkType)
+          sltypes map { slType => specimenLinkTypeRepository.put(slType) }
 
-        sltypes map { slType => specimenLinkTypeRepository.put(slType) }
+          val json = makeRequest(GET, uri(procType))
+          (json \ "status").as[String] must include ("success")
+          val jsonList = (json \ "data").as[List[JsObject]]
 
-        val json = makeRequest(GET, uri(procType))
-        (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
-
-        jsonList must have size sltypes.size
-        (jsonList zip sltypes).map { item => compareObj(item._1, item._2) }
-        ()
+          jsonList must have size sltypes.size
+          (jsonList zip sltypes).map { item => compareObj(item._1, item._2) }
+          ()
+        }
       }
 
       "fail for invalid processing type id" in {
         val procType = factory.createProcessingType
 
-        val json = makeRequest(GET, uri(procType), BAD_REQUEST)
+        val json = makeRequest(GET, uri(procType), NOT_FOUND)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("invalid processing type id")
       }
@@ -185,20 +188,18 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture {
         val procType = factory.createProcessingType
         val slType = factory.createSpecimenLinkType
 
-        val json = makeRequest(GET, uriWithQuery(procType, slType), BAD_REQUEST)
+        val json = makeRequest(GET, uriWithQuery(procType, slType), NOT_FOUND)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("invalid processing type id")
       }
 
       "fail for an invalid specimen link type id" in {
-        val procType = factory.createProcessingType
-        processingTypeRepository.put(procType)
-
-        val slType = factory.createSpecimenLinkType
-
-        val json = makeRequest(GET, uriWithQuery(procType, slType), NOT_FOUND)
-        (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("specimen link type does not exist")
+        createEntities() { (study, procType) =>
+          val slType = factory.createSpecimenLinkType
+          val json = makeRequest(GET, uriWithQuery(procType, slType), NOT_FOUND)
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("specimen link type does not exist")
+        }
       }
 
     }

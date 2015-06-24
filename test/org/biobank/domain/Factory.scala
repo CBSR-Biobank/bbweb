@@ -1,7 +1,7 @@
 package org.biobank.domain
 
 import org.biobank.fixture.NameGenerator
-import org.biobank.domain.AnnotationValueType._
+import org.biobank.domain._
 import org.biobank.domain.user._
 import org.biobank.domain.study._
 import org.biobank.domain.centre._
@@ -10,11 +10,25 @@ import org.biobank.infrastructure.{
   CollectionEventTypeSpecimenGroupData,
   SpecimenLinkTypeAnnotationTypeData
 }
+import org.biobank.domain.AnnotationValueType._
 import org.slf4j.LoggerFactory
 import scala.reflect.ClassTag
 import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import scalaz.Scalaz._
+import com.github.nscala_time.time.Imports._
 
+/**
+ * This factory class creates domain entities that can be used in test cases.
+ *
+ * The factory remembers the previously created domain etities. Entities of each type are cached, but only the
+ * last one created.
+ *
+ * If an entity has a dependency on another, the other is created first, or if the other entity has
+ * already been created it will be used.  For example, if a participant is created, it will belong to the last
+ * study that was created.
+ *
+ */
 class Factory {
 
   val log = LoggerFactory.getLogger(this.getClass)
@@ -23,76 +37,71 @@ class Factory {
 
   var domainObjects: Map[Class[_], _] = Map.empty
 
-  def createRegisteredUser: RegisteredUser = {
-    val user = RegisteredUser(
-      version        = 0L,
-      timeAdded      = DateTime.now,
-      timeModified = None,
-      name           = nameGenerator.next[User],
-      email          = nameGenerator.nextEmail[User],
-      id             = UserId(nameGenerator.next[User]),
-      password       = nameGenerator.next[User],
-      salt           = nameGenerator.next[User],
-      avatarUrl      = Some(nameGenerator.nextUrl[User]))
-    domainObjects = domainObjects + (classOf[RegisteredUser] -> user)
+  def createRegisteredUser(): RegisteredUser = {
+    val user = RegisteredUser(version      = 0L,
+                              timeAdded    = DateTime.now,
+                              timeModified = None,
+                              name         = nameGenerator.next[User],
+                              email        = nameGenerator.nextEmail[User],
+                              id           = UserId(nameGenerator.next[User]),
+                              password     = nameGenerator.next[User],
+                              salt         = nameGenerator.next[User],
+                              avatarUrl    = Some(nameGenerator.nextUrl[User]))
+    domainObjects  = domainObjects + (classOf[RegisteredUser] -> user)
     user
   }
 
   def createActiveUser: ActiveUser = {
-    val user = ActiveUser(
-      version        = 0L,
-      timeAdded      = DateTime.now,
-      timeModified = None,
-      name           = nameGenerator.next[User],
-      email          = nameGenerator.nextEmail[User],
-      id             = UserId(nameGenerator.next[User]),
-      password       = nameGenerator.next[User],
-      salt           = nameGenerator.next[User],
-      avatarUrl      = Some(nameGenerator.nextUrl[User]))
+    val user = ActiveUser(version      = 0L,
+                          timeAdded    = DateTime.now,
+                          timeModified = None,
+                          name         = nameGenerator.next[User],
+                          email        = nameGenerator.nextEmail[User],
+                          id           = UserId(nameGenerator.next[User]),
+                          password     = nameGenerator.next[User],
+                          salt         = nameGenerator.next[User],
+                          avatarUrl    = Some(nameGenerator.nextUrl[User]))
     domainObjects = domainObjects + (classOf[ActiveUser] -> user)
     user
   }
 
-  def createLockedUser: LockedUser = {
-    val user = LockedUser(
-      version        = 0L,
-      timeAdded      = DateTime.now,
-      timeModified = None,
-      name           = nameGenerator.next[User],
-      email          = nameGenerator.nextEmail[User],
-      id             = UserId(nameGenerator.next[User]),
-      password       = nameGenerator.next[User],
-      salt           = nameGenerator.next[User],
-      avatarUrl      = Some(nameGenerator.nextUrl[User]))
-    domainObjects = domainObjects + (classOf[LockedUser] -> user)
+  def createLockedUser(): LockedUser = {
+    val user = LockedUser(version      = 0L,
+                          timeAdded    = DateTime.now,
+                          timeModified = None,
+                          name         = nameGenerator.next[User],
+                          email        = nameGenerator.nextEmail[User],
+                          id           = UserId(nameGenerator.next[User]),
+                          password     = nameGenerator.next[User],
+                          salt         = nameGenerator.next[User],
+                          avatarUrl    = Some(nameGenerator.nextUrl[User]))
+    domainObjects  = domainObjects + (classOf[LockedUser] -> user)
     user
   }
 
-  def createDisabledStudy: DisabledStudy = {
-    val study = DisabledStudy(
-      version        = 0L,
-      timeAdded      = DateTime.now,
-      timeModified = None,
-      id             = StudyId(nameGenerator.next[Study]),
-      name           = nameGenerator.next[Study],
-      description    = Some(nameGenerator.next[Study]))
+  def createDisabledStudy(): DisabledStudy = {
+    val study = DisabledStudy(version      = 0L,
+                              timeAdded    = DateTime.now,
+                              timeModified = None,
+                              id           = StudyId(nameGenerator.next[Study]),
+                              name         = nameGenerator.next[Study],
+                              description  = Some(nameGenerator.next[Study]))
     domainObjects = domainObjects + (classOf[DisabledStudy] -> study)
     study
   }
 
-  def createEnabledStudy: EnabledStudy = {
-    val enabledStudy = EnabledStudy(
-      id             = StudyId(nameGenerator.next[Study]),
-      version        = 0L,
-      timeAdded      = DateTime.now,
-      timeModified = None,
-      name           = nameGenerator.next[Study],
-      description    = Some(nameGenerator.next[Study]))
+  def createEnabledStudy(): EnabledStudy = {
+    val enabledStudy = EnabledStudy(id           = StudyId(nameGenerator.next[Study]),
+                                    version      = 0L,
+                                    timeAdded    = DateTime.now,
+                                    timeModified = None,
+                                    name         = nameGenerator.next[Study],
+                                    description  = Some(nameGenerator.next[Study]))
     domainObjects = domainObjects + (classOf[EnabledStudy] -> enabledStudy)
     enabledStudy
   }
 
-  def createRetiredStudy: RetiredStudy = {
+  def createRetiredStudy(): RetiredStudy = {
     val retiredStudy = RetiredStudy(
       id             = StudyId(nameGenerator.next[Study]),
       version        = 0L,
@@ -104,14 +113,14 @@ class Factory {
     retiredStudy
   }
 
-  def createSpecimenGroup: SpecimenGroup = {
+  def createSpecimenGroup(): SpecimenGroup = {
     val disabledStudy = defaultDisabledStudy
     val specimenGroup = SpecimenGroup(
       id                          = SpecimenGroupId(nameGenerator.next[SpecimenGroup]),
       studyId                     = disabledStudy.id,
       version                     = 0L,
       timeAdded                   = DateTime.now,
-      timeModified              = None,
+      timeModified                = None,
       name                        = nameGenerator.next[SpecimenGroup],
       description                 = Some(nameGenerator.next[SpecimenGroup]),
       units                       = nameGenerator.next[String],
@@ -123,14 +132,14 @@ class Factory {
   specimenGroup
   }
 
-  def createCollectionEventType: CollectionEventType = {
+  def createCollectionEventType(): CollectionEventType = {
     val disabledStudy = defaultDisabledStudy
     val ceventType = CollectionEventType(
       id                 = CollectionEventTypeId(nameGenerator.next[CollectionEventType]),
       studyId            = disabledStudy.id,
       version            = 0L,
       timeAdded          = DateTime.now,
-      timeModified     = None,
+      timeModified       = None,
       name               = nameGenerator.next[CollectionEventType],
       description        = Some(nameGenerator.next[CollectionEventType]),
       recurring          = false,
@@ -141,35 +150,71 @@ class Factory {
     ceventType
   }
 
-  def createCollectionEventAnnotationType: CollectionEventAnnotationType = {
-    val disabledStudy = defaultDisabledStudy
+  def createAnnotationType(valueType:     AnnotationValueType,
+                           maxValueCount: Int,
+                           options:       Seq[String]) = {
+    val (vtMaxValueCount, vtOptions) = valueType match {
+      case AnnotationValueType.Text     => (None, Seq.empty)
+      case AnnotationValueType.Number   => (None, Seq.empty)
+      case AnnotationValueType.DateTime => (None, Seq.empty)
+      case AnnotationValueType.Select   => (Some(maxValueCount), options)
+    }
+
+    (defaultDisabledStudy.id,
+     0L,
+     DateTime.now,
+     None,
+     nameGenerator.next[AnnotationType],
+     Some(nameGenerator.next[AnnotationType]),
+     vtMaxValueCount,
+     vtOptions)
+  }
+
+
+  def createCollectionEventAnnotationType(valueType:     AnnotationValueType,
+                                          maxValueCount: Int,
+                                          options:       Seq[String])
+      : CollectionEventAnnotationType = {
+    val (studyId,
+         version,
+         timeAdded,
+         timeModified,
+         name,
+         description,
+         vtMaxValueCount,
+         vtOptions) = createAnnotationType(valueType, maxValueCount, options)
+
     val annotationType = CollectionEventAnnotationType(
-      id             = AnnotationTypeId(nameGenerator.next[CollectionEventAnnotationType]),
-      studyId        = disabledStudy.id,
-      version        = 0L,
-      timeAdded      = DateTime.now,
-      timeModified = None,
-      name           = nameGenerator.next[CollectionEventAnnotationType],
-      description    = Some(nameGenerator.next[CollectionEventAnnotationType]),
-      valueType      = AnnotationValueType.Select,
-      maxValueCount  = Some(1),
-      options        = Seq(nameGenerator.next[String], nameGenerator.next[String]))
+      id            = AnnotationTypeId(nameGenerator.next[CollectionEventAnnotationType]),
+      studyId       = studyId,
+      version       = version,
+      timeAdded     = timeAdded,
+      timeModified  = timeModified,
+      name          = name,
+      description   = description,
+      valueType     = valueType,
+      maxValueCount = vtMaxValueCount,
+      options       = vtOptions)
 
     domainObjects = domainObjects + (classOf[CollectionEventAnnotationType] -> annotationType)
     annotationType
   }
 
-  def createCollectionEventTypeSpecimenGroupData: CollectionEventTypeSpecimenGroupData = {
+  def createCollectionEventAnnotationType(): CollectionEventAnnotationType = {
+    createCollectionEventAnnotationType(AnnotationValueType.Text, 0, Seq.empty)
+  }
+
+  def createCollectionEventTypeSpecimenGroupData(): CollectionEventTypeSpecimenGroupData = {
     val sg = defaultSpecimenGroup
     val ceventTypeSpecimenGroup = CollectionEventTypeSpecimenGroupData(
       specimenGroupId = sg.id.id,
-      maxCount = 1,
-      amount = Some(BigDecimal(1.0)))
+      maxCount        = 1,
+      amount          = Some(BigDecimal(1.0)))
     domainObjects = domainObjects + (classOf[CollectionEventTypeSpecimenGroupData] -> ceventTypeSpecimenGroup)
     ceventTypeSpecimenGroup
   }
 
-  def createCollectionEventTypeAnnotationTypeData: CollectionEventTypeAnnotationTypeData = {
+  def createCollectionEventTypeAnnotationTypeData(): CollectionEventTypeAnnotationTypeData = {
     val annotationType = defaultCollectionEventAnnotationType
     val ceventTypeAnnotationType = CollectionEventTypeAnnotationTypeData(
       annotationTypeId = annotationType.id.id, required = true)
@@ -183,27 +228,27 @@ class Factory {
                                       options:       Seq[String],
                                       required:      Boolean)
       : ParticipantAnnotationType = {
-    val disabledStudy = defaultDisabledStudy
-
-    val (vtMaxValueCount, vtOptions) = valueType match {
-      case AnnotationValueType.Text     => (None, Seq.empty)
-      case AnnotationValueType.Number   => (None, Seq.empty)
-      case AnnotationValueType.DateTime => (None, Seq.empty)
-      case AnnotationValueType.Select   => (Some(maxValueCount), options)
-    }
+    val (studyId,
+         version,
+         timeAdded,
+         timeModified,
+         name,
+         description,
+         vtMaxValueCount,
+         vtOptions) = createAnnotationType(valueType, maxValueCount, options)
 
     val annotationType = ParticipantAnnotationType(
-      id             = AnnotationTypeId(nameGenerator.next[ParticipantAnnotationType]),
-      studyId        = disabledStudy.id,
-      version        = 0L,
-      timeAdded      = DateTime.now,
-      timeModified = None,
-      name           = nameGenerator.next[ParticipantAnnotationType],
-      description    = Some(nameGenerator.next[ParticipantAnnotationType]),
-      valueType      = valueType,
-      maxValueCount  = vtMaxValueCount,
-      options        = vtOptions,
-      required       = required)
+      id            = AnnotationTypeId(nameGenerator.next[ParticipantAnnotationType]),
+      studyId       = studyId,
+      version       = version,
+      timeAdded     = timeAdded,
+      timeModified  = timeModified,
+      name          = name,
+      description   = description,
+      valueType     = valueType,
+      maxValueCount = vtMaxValueCount,
+      options       = vtOptions,
+      required      = required)
     domainObjects = domainObjects + (classOf[ParticipantAnnotationType] -> annotationType)
     annotationType
   }
@@ -212,31 +257,46 @@ class Factory {
     createParticipantAnnotationType(AnnotationValueType.Text, 0, Seq.empty, false)
   }
 
-  def createSpecimenLinkAnnotationType: SpecimenLinkAnnotationType = {
-    val disabledStudy = defaultDisabledStudy
+  def createSpecimenLinkAnnotationType(valueType:     AnnotationValueType,
+                                       maxValueCount: Int,
+                                       options:       Seq[String])
+      : SpecimenLinkAnnotationType = {
+    val (studyId,
+         version,
+         timeAdded,
+         timeModified,
+         name,
+         description,
+         vtMaxValueCount,
+         vtOptions) = createAnnotationType(valueType, maxValueCount, options)
+
     val annotationType = SpecimenLinkAnnotationType(
       id             = AnnotationTypeId(nameGenerator.next[SpecimenLinkAnnotationType]),
-      studyId        = disabledStudy.id,
-      version        = 0L,
-      timeAdded      = DateTime.now,
-      timeModified = None,
-      name           = nameGenerator.next[SpecimenLinkAnnotationType],
-      description    = Some(nameGenerator.next[SpecimenLinkAnnotationType]),
-      valueType      = AnnotationValueType.Select,
-      maxValueCount  = Some(1),
-      options        = Seq(nameGenerator.next[String], nameGenerator.next[String]))
+      studyId        = studyId,
+      version        = version,
+      timeAdded      = timeAdded,
+      timeModified   = timeModified,
+      name           = name,
+      description    = description,
+      valueType      = valueType,
+      maxValueCount  = vtMaxValueCount,
+      options        = vtOptions)
     domainObjects = domainObjects + (classOf[SpecimenLinkAnnotationType] -> annotationType)
     annotationType
   }
 
-  def createProcessingType: ProcessingType = {
+  def createSpecimenLinkAnnotationType(): SpecimenLinkAnnotationType = {
+    createSpecimenLinkAnnotationType(AnnotationValueType.Text, 0, Seq.empty)
+  }
+
+  def createProcessingType(): ProcessingType = {
     val disabledStudy = defaultDisabledStudy
     val processingType = ProcessingType(
       id             = ProcessingTypeId(nameGenerator.next[ProcessingType]),
       studyId        = disabledStudy.id,
       version        = 0L,
       timeAdded      = DateTime.now,
-      timeModified = None,
+      timeModified   = None,
       name           = nameGenerator.next[ProcessingType],
       description    = Some(nameGenerator.next[ProcessingType]),
       enabled        = false)
@@ -245,13 +305,13 @@ class Factory {
     processingType
   }
 
-  def createSpecimenLinkType: SpecimenLinkType = {
+  def createSpecimenLinkType(): SpecimenLinkType = {
     val slt = SpecimenLinkType(
       id                    = SpecimenLinkTypeId(nameGenerator.next[SpecimenLinkType]),
       processingTypeId      = defaultProcessingType.id,
       version               = 0L,
       timeAdded             = DateTime.now,
-      timeModified        = None,
+      timeModified          = None,
       expectedInputChange   = BigDecimal(1.0),
       expectedOutputChange  = BigDecimal(1.0),
       inputCount            = 1,
@@ -266,14 +326,14 @@ class Factory {
     slt
   }
 
-  def createSpecimenLinkTypeAndSpecimenGroups: (SpecimenLinkType, SpecimenGroup, SpecimenGroup) = {
+  def createSpecimenLinkTypeAndSpecimenGroups(): (SpecimenLinkType, SpecimenGroup, SpecimenGroup) = {
     val inputSg = createSpecimenGroup
     val outputSg = createSpecimenGroup
     val slType = createSpecimenLinkType.copy(inputGroupId = inputSg.id, outputGroupId = outputSg.id)
     (slType, inputSg, outputSg)
   }
 
-  def createSpecimenLinkTypeAnnotationTypeData: SpecimenLinkTypeAnnotationTypeData = {
+  def createSpecimenLinkTypeAnnotationTypeData(): SpecimenLinkTypeAnnotationTypeData = {
     val annotationType = defaultSpecimenLinkAnnotationType
     val specimenLinkTypeAnnotationType = SpecimenLinkTypeAnnotationTypeData(
       annotationType.id.id, required = true)
@@ -282,7 +342,7 @@ class Factory {
     specimenLinkTypeAnnotationType
   }
 
-  def createParticipant: Participant = {
+  def createParticipant(): Participant = {
     val study = defaultEnabledStudy
     val participant = Participant(
       studyId      = study.id,
@@ -295,73 +355,98 @@ class Factory {
     )
     domainObjects = domainObjects + (classOf[Participant] -> participant)
     participant
+ }
+
+  def createAnnotationValues[T <: StudyAnnotationType](annotationType: T):
+      Tuple3[Option[String], Option[String], List[AnnotationOption]] = {
+    annotationType.valueType match {
+      case Text     =>
+        (Some(nameGenerator.next[Annotation[_]]), None, List.empty)
+      case Number   =>
+        (None, Some(scala.util.Random.nextFloat.toString), List.empty)
+      case AnnotationValueType.DateTime =>
+        (Some(ISODateTimeFormat.dateTime.print(DateTime.now)), None, List.empty)
+      case Select   =>
+        (None, None, List(AnnotationOption(annotationType.id, annotationType.options(0))))
+    }
   }
 
-  def createParticipantAnnotation: ParticipantAnnotation = {
-    val participant = defaultParticipant
+  def createParticipantAnnotation(): ParticipantAnnotation = {
     val annotationType = defaultParticipantAnnotationType
-
-    val ptcpAnnot = ParticipantAnnotation(
-      annotationTypeId = annotationType.id,
-      stringValue      =
-        if (annotationType.valueType == AnnotationValueType.Text)
-          Some(nameGenerator.next[ParticipantAnnotation])
-        else if (annotationType.valueType == AnnotationValueType.DateTime)
-          Some("2000-01-01 00:00")
-        else
-          None,
-      numberValue      =
-        if (annotationType.valueType == AnnotationValueType.Number)
-          Some("1.00")
-        else
-          None,
-      selectedValues   =
-        if (annotationType.valueType == AnnotationValueType.Select) {
-          // returns first option
-          List(AnnotationOption(annotationType.id, annotationType.options(0)))
-        } else {
-          List.empty
-        }
-    )
-    domainObjects = domainObjects + (classOf[ParticipantAnnotation] -> ptcpAnnot)
-    ptcpAnnot
+    val (stringValue, numberValue, selectedValues) = createAnnotationValues(annotationType)
+    val annot = ParticipantAnnotation(annotationTypeId = annotationType.id,
+                                      stringValue      = stringValue,
+                                      numberValue      = numberValue,
+                                      selectedValues   = selectedValues)
+    domainObjects = domainObjects + (classOf[ParticipantAnnotation] -> annot)
+    annot
   }
 
-  def createDisabledCentre: DisabledCentre = {
-    val centre = DisabledCentre(
-      id             = CentreId(nameGenerator.next[Centre]),
-      version        = 0L,
-      timeAdded      = DateTime.now,
-      timeModified = None,
-      name           = nameGenerator.next[Centre],
-      description    = Some(nameGenerator.next[Centre]))
+  def createCollectionEventAnnotation(annotationType: CollectionEventAnnotationType)
+      : CollectionEventAnnotation = {
+    val (stringValue, numberValue, selectedValues) = createAnnotationValues(annotationType)
+    val annot = CollectionEventAnnotation(annotationTypeId = annotationType.id,
+                                          stringValue      = stringValue,
+                                          numberValue      = numberValue,
+                                          selectedValues   = selectedValues)
+    domainObjects = domainObjects + (classOf[CollectionEventAnnotation] -> annot)
+    annot
+  }
+
+  def createCollectionEventAnnotation(): CollectionEventAnnotation = {
+    createCollectionEventAnnotation(defaultCollectionEventAnnotationType)
+  }
+
+  def createCollectionEvent(): CollectionEvent = {
+    val participant = defaultParticipant
+    val collectionEventType = defaultCollectionEventType
+
+    val cevent = CollectionEvent(
+      id                    = CollectionEventId(nameGenerator.next[CollectionEvent]),
+      participantId         = ParticipantId(participant.id.id),
+      collectionEventTypeId = CollectionEventTypeId(collectionEventType.id.id),
+      version               = 0,
+      timeAdded             = DateTime.now,
+      timeModified          = None,
+      timeCompleted         = DateTime.now,
+      visitNumber           = 1,
+      annotations           = Set.empty)
+    domainObjects = domainObjects + (classOf[CollectionEvent] -> cevent)
+    cevent
+  }
+
+  def createDisabledCentre(): DisabledCentre = {
+    val centre = DisabledCentre(id           = CentreId(nameGenerator.next[Centre]),
+                                version      = 0L,
+                                timeAdded    = DateTime.now,
+                                timeModified = None,
+                                name         = nameGenerator.next[Centre],
+                                description  = Some(nameGenerator.next[Centre]))
 
     domainObjects = domainObjects + (classOf[DisabledCentre] -> centre)
     centre
   }
 
-  def createEnabledCentre: EnabledCentre = {
-    val centre = EnabledCentre(
-      id             = CentreId(nameGenerator.next[Centre]),
-      version        = 0L,
-      timeAdded      = DateTime.now,
-      timeModified = None,
-      name           = nameGenerator.next[Centre],
-      description    = Some(nameGenerator.next[Centre]))
+  def createEnabledCentre(): EnabledCentre = {
+    val centre = EnabledCentre(id           = CentreId(nameGenerator.next[Centre]),
+                               version      = 0L,
+                               timeAdded    = DateTime.now,
+                               timeModified = None,
+                               name         = nameGenerator.next[Centre],
+                               description  = Some(nameGenerator.next[Centre]))
     domainObjects = domainObjects + (classOf[EnabledCentre] -> centre)
     centre
   }
 
-  def createLocation: Location = {
-    val location = Location(
-      LocationId(nameGenerator.next[Location]),
-      nameGenerator.next[Location],
-      nameGenerator.next[Location],
-      nameGenerator.next[Location],
-      nameGenerator.next[Location],
-      nameGenerator.next[Location],
-      Some(nameGenerator.next[Location]),
-      nameGenerator.next[Location])
+  def createLocation(): Location = {
+    val location = Location(LocationId(nameGenerator.next[Location]),
+                            nameGenerator.next[Location],
+                            nameGenerator.next[Location],
+                            nameGenerator.next[Location],
+                            nameGenerator.next[Location],
+                            nameGenerator.next[Location],
+                            Some(nameGenerator.next[Location]),
+                            nameGenerator.next[Location])
     domainObjects = domainObjects + (classOf[Location] -> location)
     location
   }
@@ -444,6 +529,14 @@ class Factory {
 
   def defaultParticipantAnnotation: ParticipantAnnotation = {
     defaultObject(classOf[ParticipantAnnotation], createParticipantAnnotation)
+  }
+
+  def defaultCollectionEventAnnotation: CollectionEventAnnotation = {
+    defaultObject(classOf[CollectionEventAnnotation], createCollectionEventAnnotation)
+  }
+
+  def defaultCollectionEvent(): CollectionEvent = {
+    defaultObject(classOf[CollectionEvent], createCollectionEvent)
   }
 
   def defaultDisabledCentre: DisabledCentre = {

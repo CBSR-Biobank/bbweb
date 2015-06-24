@@ -123,7 +123,7 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
       specimenGroupRepository.put(inputSg)
       specimenGroupRepository.put(outputSg)
 
-      askAddCommand(slType) mustFail "not found"
+      askAddCommand(slType) mustFailContains "not found"
     }
 
     "not add a specimen link type with the same specimen group as input and output" in {
@@ -145,15 +145,15 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
 
       val (slType2, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
 
-      askAddCommand(slType2) mustFail "not found"
+      askAddCommand(slType2) mustFailContains "not found"
 
       // save only one to the repository
       specimenGroupRepository.put(inputSg)
       val slType3 = slType.copy(inputGroupId = inputSg.id, outputGroupId = outputSg.id)
-      askAddCommand(slType3) mustFail "not found"
+      askAddCommand(slType3) mustFailContains "not found"
 
       val slType4 = slType.copy(inputGroupId = outputSg.id, outputGroupId = inputSg.id)
-      askAddCommand(slType4) mustFail "not found"
+      askAddCommand(slType4) mustFailContains "not found"
     }
 
     "update a specimen link type" in {
@@ -228,7 +228,7 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
       processingTypeRepository.put(pt2)
 
       val slType2 = slType.copy(processingTypeId = pt2.id)
-      askUpdateCommand(slType2) mustFail "processing type does not have specimen link type"
+      askUpdateCommand(slType2) mustFailContains "processing type does not have specimen link type"
     }
 
     "not update a specimen link type with an invalid version" in {
@@ -239,7 +239,7 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
       specimenLinkTypeRepository.put(slType)
 
       val slType2 = slType.copy(version = slType.version + 1)
-      askUpdateCommand(slType2) mustFail "expected version doesn't match current version"
+      askUpdateCommand(slType2) mustFailContains "expected version doesn't match current version"
     }
 
     "remove a specimen link type" in {
@@ -258,7 +258,7 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
         val v = specimenLinkTypeRepository.withId(
           pt.id,
           SpecimenLinkTypeId(removedEvent.getSpecimenLinkTypeId))
-        v mustFail "specimen link type does not exist"
+        v mustFailContains "specimen link type does not exist"
       }
     }
 
@@ -270,7 +270,7 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
       specimenLinkTypeRepository.put(slType)
 
       val slType2 = slType.copy(version = slType.version -1)
-      askRemoveCommand(slType2) mustFail "expected version doesn't match current version"
+      askRemoveCommand(slType2) mustFailContains "expected version doesn't match current version"
     }
 
     "not update a specimen group if it used by specimen link type" in {
@@ -287,7 +287,7 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
         inputSg.specimenType)
 
       val v = ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyEvent]].futureValue
-      v mustFail "specimen group is in use by specimen link type"
+      v mustFailContains "specimen group is in use by specimen link type"
 
       val cmd2 = new UpdateSpecimenGroupCmd(
         None, outputSg.studyId.id, outputSg.id.id,
@@ -296,7 +296,7 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
         outputSg.specimenType)
 
       val v2 =ask(studiesProcessor, cmd2).mapTo[DomainValidation[StudyEvent]].futureValue
-      v2 mustFail "specimen group is in use by specimen link type"
+      v2 mustFailContains "specimen group is in use by specimen link type"
     }
 
     "not remove a specimen group if used by specimen link type" in {
@@ -308,12 +308,12 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
       val cmd = new RemoveSpecimenGroupCmd(None, inputSg.studyId.id, inputSg.id.id, inputSg.version)
 
       val v = ask(studiesProcessor, cmd).mapTo[DomainValidation[StudyEvent]].futureValue
-      v mustFail "specimen group is in use by specimen link type"
+      v mustFailContains "specimen group is in use by specimen link type"
 
       val cmd2 = new RemoveSpecimenGroupCmd(None, outputSg.studyId.id, outputSg.id.id, outputSg.version)
 
       val v2 = ask(studiesProcessor, cmd2).mapTo[DomainValidation[StudyEvent]].futureValue
-      v2 mustFail "specimen group is in use by specimen link type"
+      v2 mustFailContains "specimen group is in use by specimen link type"
     }
 
     "not add a specimen group from a different study" in {
@@ -336,12 +336,12 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
       val slType = factory.createSpecimenLinkType.copy(
         inputGroupId = sg1.id,
         outputGroupId = sg2WrongStudy.id)
-      askAddCommand(slType) mustFail "wrong study"
+      askAddCommand(slType) mustFailContains "wrong study"
 
       val slType2 = slType.copy(
         inputGroupId = sg1WrongStudy.id,
         outputGroupId = sg2.id)
-      askAddCommand(slType2) mustFail "wrong study"
+      askAddCommand(slType2) mustFailContains "wrong study"
     }
 
     "not update a specimen link type with a specimen group from a different study" in {
@@ -368,13 +368,13 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
       val slType2 = slType.copy(
         inputGroupId = inputSg.id,
         outputGroupId = sg2WrongStudy.id)
-      askUpdateCommand(slType) mustFail "wrong study"
+      askUpdateCommand(slType) mustFailContains "wrong study"
 
       val slType3 = slType.copy(
         inputGroupId = sg1WrongStudy.id,
         outputGroupId = outputSg.id)
 
-      askUpdateCommand(slType3) mustFail "wrong study"
+      askUpdateCommand(slType3) mustFailContains "wrong study"
     }
 
     "add an annotation type to a specimen link type" in {
@@ -442,7 +442,7 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[StudyEvent]]
         .futureValue
-       v mustFail "annotation type is in use by specimen link type"
+       v mustFailContains "annotation type is in use by specimen link type"
     }
 
     "remove an annotation type from specimen link type" taggedAs(Tag("1")) in {
@@ -493,7 +493,7 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[StudyEvent]]
         .futureValue
-      v mustFail "annotation type is in use by specimen link type"
+      v mustFailContains "annotation type is in use by specimen link type"
     }
 
     "not add an annotation type if it is in wrong study" in {
@@ -515,7 +515,7 @@ class SpecimenLinkTypeProcessorSpec extends TestFixture {
         factory.createSpecimenLinkTypeAnnotationTypeData)
 
       val slType2 = slType.copy(annotationTypeData = slTypeAnnotationTypeData)
-      askUpdateCommand(slType2) mustFail "annotation type.*do not belong to study"
+      askUpdateCommand(slType2) mustFailContains "annotation type.*do not belong to study"
     }
   }
 }

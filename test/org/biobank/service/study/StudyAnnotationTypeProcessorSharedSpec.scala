@@ -82,7 +82,7 @@ trait StudyAnnotationTypeProcessorSpec[T <: StudyAnnotationType] extends TestFix
       val v = ask(studiesProcessor, addCommand(annotType))
         .mapTo[DomainValidation[StudyEvent]]
         .futureValue
-      v mustFail "name already exists"
+      v mustFailContains "name already exists"
     }
 
     "update an annotation type" in {
@@ -118,7 +118,7 @@ trait StudyAnnotationTypeProcessorSpec[T <: StudyAnnotationType] extends TestFix
       val v = ask(studiesProcessor, updateCommand(annotType3))
         .mapTo[DomainValidation[StudyEvent]]
         .futureValue
-      v mustFail "name already exists"
+      v mustFailContains "name already exists"
     }
 
     "not update an annotation type to the wrong study" in {
@@ -135,7 +135,7 @@ trait StudyAnnotationTypeProcessorSpec[T <: StudyAnnotationType] extends TestFix
       val v = ask(studiesProcessor, updateCommand(annotType2))
         .mapTo[DomainValidation[StudyEvent]]
         .futureValue
-      v mustFail "study does not have annotation type"
+      v mustFailContains "study does not have annotation type"
     }
 
     "not update an annotation type with an invalid version" in {
@@ -150,7 +150,7 @@ trait StudyAnnotationTypeProcessorSpec[T <: StudyAnnotationType] extends TestFix
         .mapTo[DomainValidation[StudyEvent]]
         .futureValue
 
-      v mustFail "doesn't match current version"
+      v mustFailContains "doesn't match current version"
     }
 
     "remove an annotation type" in {
@@ -179,7 +179,7 @@ trait StudyAnnotationTypeProcessorSpec[T <: StudyAnnotationType] extends TestFix
         .mapTo[DomainValidation[StudyEvent]]
         .futureValue
 
-      v mustFail "expected version doesn't match current version"
+      v mustFailContains "expected version doesn't match current version"
     }
 
   }

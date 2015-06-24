@@ -15,10 +15,6 @@ import play.api.Play.current
 
 class SpecimenGroupControllerSpec extends ControllerFixture {
 
-  val log = LoggerFactory.getLogger(this.getClass)
-
-  val nameGenerator = new NameGenerator(this.getClass)
-
   def uri(study: Study): String = s"/studies/${study.id.id}/sgroups"
 
   def uri(study: Study, specimenGroup: SpecimenGroup): String =
@@ -70,8 +66,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
     (json \ "message").as[String] must include ("is not disabled")
   }
 
-  def removeOnNonDisabledStudy(
-    study: Study,
+  def removeOnNonDisabledStudy(study: Study,
     sg: SpecimenGroup) = {
     studyRepository.put(study)
     specimenGroupRepository.put(sg)
@@ -140,7 +135,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
       "fail for an invalid study ID" in {
         val study = factory.createDisabledStudy
 
-        val json = makeRequest(GET, uri(study), BAD_REQUEST)
+        val json = makeRequest(GET, uri(study), NOT_FOUND)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("invalid study id")
       }
@@ -149,7 +144,7 @@ class SpecimenGroupControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         val sg = factory.createSpecimenGroup
 
-        val json = makeRequest(GET, uriWithQuery(study, sg), BAD_REQUEST)
+        val json = makeRequest(GET, uriWithQuery(study, sg), NOT_FOUND)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("invalid study id")
       }

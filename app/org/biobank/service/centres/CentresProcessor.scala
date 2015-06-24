@@ -1,6 +1,6 @@
 package org.biobank.service.centres
 
-import org.biobank.service.{ Processor, WrappedEvent }
+import org.biobank.service.Processor
 import org.biobank.domain.centre._
 import org.biobank.domain.study.StudyId
 import org.biobank.domain.{

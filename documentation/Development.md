@@ -140,7 +140,13 @@ git rebase -i HEAD~6
 git push nelson +nelson-dev
 ```
 
-### Gtags
+### Emacs
+
+### Ensime
+
+http://www.47deg.com/blog/scala-development-with-emacs
+
+#### Gtags
 
 Using helm-gtags in Emacs. To generate a tags file the following is required:
 

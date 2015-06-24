@@ -2,7 +2,6 @@ package org.biobank.service.study
 
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.service.{ WrappedEvent }
 import org.biobank.domain._
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._

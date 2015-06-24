@@ -13,7 +13,7 @@ import org.biobank.domain.study.{
   SpecimenGroupRepository
 }
 import org.slf4j.LoggerFactory
-import org.biobank.service.{ Processor, WrappedEvent }
+import org.biobank.service.Processor
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
@@ -87,8 +87,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     case cmd => log.error(s"CollectionEventTypeProcessor: message not handled: $cmd")
   }
 
-  private def processAddCollectionEventTypeCmd(cmd: AddCollectionEventTypeCmd)
-      : Unit = {
+  private def processAddCollectionEventTypeCmd(cmd: AddCollectionEventTypeCmd): Unit = {
     val timeNow = DateTime.now
     val studyId = StudyId(cmd.studyId)
     val id = collectionEventTypeRepository.nextIdentity
@@ -113,8 +112,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     process(event) { applyCollectionEventTypeAddedEvent(_) }
   }
 
-  private def processUpdateCollectionEventTypeCmd(cmd: UpdateCollectionEventTypeCmd)
-      : Unit = {
+  private def processUpdateCollectionEventTypeCmd(cmd: UpdateCollectionEventTypeCmd): Unit = {
     val studyId = StudyId(cmd.studyId)
     val v = update(cmd) { cet =>
       for {

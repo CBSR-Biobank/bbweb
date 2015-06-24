@@ -20,10 +20,6 @@ import org.scalatest.Tag
 class CentresControllerSpec extends ControllerFixture {
   import org.biobank.TestUtils._
 
-  val log = LoggerFactory.getLogger(this.getClass)
-
-  val nameGenerator = new NameGenerator(this.getClass)
-
   def uri: String = "/centres"
 
   def uri(centre: Centre): String = uri + s"/${centre.id.id}"
@@ -426,10 +422,10 @@ class CentresControllerSpec extends ControllerFixture {
       "not read an invalid centre" in {
         val centre = factory.createDisabledCentre
 
-        val json = makeRequest(GET, uri(centre), BAD_REQUEST)
+        val json = makeRequest(GET, uri(centre), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("invalid centre id")
+        (json \ "message").as[String] must include ("invalid centre id")
       }
     }
 
@@ -600,7 +596,9 @@ class CentresControllerSpec extends ControllerFixture {
 
         val inavlidLocId = nameGenerator.next[String]
 
-        val json = makeRequest(GET, uri(centre) + s"/locations?locationId=$inavlidLocId", BAD_REQUEST)
+        val json = makeRequest(GET,
+                               uri(centre) + s"/locations?locationId=$inavlidLocId",
+                               NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("invalid location id")

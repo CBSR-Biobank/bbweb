@@ -15,10 +15,6 @@ import org.scalatest.FlatSpec
 trait StudyAnnotTypeControllerSpec[T <: StudyAnnotationType]
     extends ControllerFixture {
 
-  val log = LoggerFactory.getLogger(this.getClass)
-
-  val nameGenerator = new NameGenerator(this.getClass)
-
   protected def annotationTypeRepository: ReadWriteRepository[AnnotationTypeId, T]
 
   protected def createAnnotationType(): T
@@ -125,7 +121,7 @@ trait StudyAnnotTypeControllerSpec[T <: StudyAnnotationType]
       "fail for an invalid study ID" in {
         val study = factory.createDisabledStudy
 
-        val json = makeRequest(GET, uri(study), BAD_REQUEST)
+        val json = makeRequest(GET, uri(study), NOT_FOUND)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("invalid study id")
       }
@@ -134,7 +130,7 @@ trait StudyAnnotTypeControllerSpec[T <: StudyAnnotationType]
         val study = factory.createDisabledStudy
         val annotType = createAnnotationType()
 
-        val json = makeRequest(GET, uriWithQuery(study, annotType), BAD_REQUEST)
+        val json = makeRequest(GET, uriWithQuery(study, annotType), NOT_FOUND)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("invalid study id")
       }

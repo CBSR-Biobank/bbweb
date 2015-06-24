@@ -107,7 +107,7 @@ class ProcessingTypeProcessorSpec extends TestFixture {
     "not add a processing type with a name that already exists" in {
       val procType = factory.createProcessingType
       processingTypeRepository.put(procType)
-      askAddCommand(procType) mustFail "name already exists"
+      askAddCommand(procType) mustFailContains "name already exists"
     }
 
     "update a processing type" in {
@@ -145,7 +145,7 @@ class ProcessingTypeProcessorSpec extends TestFixture {
       processingTypeRepository.put(procType2)
 
       val procType3 = procType2.copy(name = procType1.name)
-      askUpdateCommand(procType3) mustFail "name already exists"
+      askUpdateCommand(procType3) mustFailContains "name already exists"
     }
 
     "not update a processing type to wrong study" in {
@@ -156,7 +156,7 @@ class ProcessingTypeProcessorSpec extends TestFixture {
       studyRepository.put(study2)
 
       val procType2 = procType.copy(studyId = study2.id)
-      askUpdateCommand(procType2) mustFail "study does not have processing type"
+      askUpdateCommand(procType2) mustFailContains "study does not have processing type"
     }
 
     "not update a processing type with an invalid version" in {
@@ -164,7 +164,7 @@ class ProcessingTypeProcessorSpec extends TestFixture {
       processingTypeRepository.put(procType)
 
       val procTypeBadVersion = procType.copy(version = procType.version + 1)
-      askUpdateCommand(procTypeBadVersion) mustFail "doesn't match current version"
+      askUpdateCommand(procTypeBadVersion) mustFailContains "doesn't match current version"
     }
 
     "remove a processing type" in {
@@ -179,7 +179,7 @@ class ProcessingTypeProcessorSpec extends TestFixture {
         val v = processingTypeRepository.withId(
           disabledStudy.id,
           ProcessingTypeId(removedEvent.getProcessingTypeId))
-        v mustFail "processing type does not exist"
+        v mustFailContains "processing type does not exist"
       }
     }
 
@@ -188,7 +188,7 @@ class ProcessingTypeProcessorSpec extends TestFixture {
       processingTypeRepository.put(procType)
 
       val procTypeBadVersion = procType.copy(version = procType.version - 2)
-      askRemoveCommand(procTypeBadVersion) mustFail "expected version doesn't match current version"
+      askRemoveCommand(procTypeBadVersion) mustFailContains "expected version doesn't match current version"
     }
 
   }

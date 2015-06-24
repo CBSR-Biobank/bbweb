@@ -15,10 +15,6 @@ import play.api.Play.current
 
 class CeventTypeControllerSpec extends ControllerFixture {
 
-  val log = LoggerFactory.getLogger(this.getClass)
-
-  val nameGenerator = new NameGenerator(this.getClass)
-
   def uri(study: Study): String = s"/studies/${study.id.id}/cetypes"
 
   def uri(study: Study, ceventType: CollectionEventType): String =
@@ -189,7 +185,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
       "fail for invalid study id" in {
         val study = factory.createDisabledStudy
 
-        val json = makeRequest(GET, uri(study), BAD_REQUEST)
+        val json = makeRequest(GET, uri(study), NOT_FOUND)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("invalid study id")
       }
@@ -198,7 +194,7 @@ class CeventTypeControllerSpec extends ControllerFixture {
         val study = factory.createDisabledStudy
         val cet = factory.createCollectionEventType
 
-        val json = makeRequest(GET, uriWithQuery(study, cet), BAD_REQUEST)
+        val json = makeRequest(GET, uriWithQuery(study, cet), NOT_FOUND)
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("invalid study id")
       }

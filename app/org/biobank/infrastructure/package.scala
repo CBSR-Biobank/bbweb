@@ -35,21 +35,28 @@ package infrastructure {
 
   trait HasStudyIdentity {
 
-    /** An command or event that includes the study ID that it is related to. */
+    /** A command or event that includes the study ID that it is related to. */
     val studyId: String
+
+  }
+
+  trait HasCollectionEventTypeIdentity {
+
+    /** A command or event that includes the participant ID that it is related to. */
+    val collectionEventTypeId: String
 
   }
 
   trait HasParticipantIdentity {
 
-    /** An command or event that includes the study ID that it is related to. */
+    /** A command or event that includes the participant ID that it is related to. */
     val participantId: String
 
   }
 
   trait HasCentreIdentity {
 
-    /** An command or event that includes the study ID that it is related to. */
+    /** A command or event that includes the centre ID that it is related to. */
     val centreId: String
 
   }
@@ -77,15 +84,11 @@ package infrastructure {
   }
 
   /** Used to define annotation types to be used by a [[org.biobank.domain.study.CollectionEventType]]. */
-  case class CollectionEventTypeAnnotationTypeData(
-    annotationTypeId: String,
-    required: Boolean)
+  case class CollectionEventTypeAnnotationTypeData(annotationTypeId: String, required: Boolean)
       extends AnnotationTypeData
 
   /** Used to define annotation types to be used by a [[org.biobank.domain.study.SpecimenLinkType]]. */
-  case class SpecimenLinkTypeAnnotationTypeData(
-    annotationTypeId: String,
-    required: Boolean)
+  case class SpecimenLinkTypeAnnotationTypeData(annotationTypeId: String, required: Boolean)
       extends AnnotationTypeData
 
   /** Used to define which types of specimens (i.e. which [[org.biobank.domain.study.SpecimenGroup]]s) need to

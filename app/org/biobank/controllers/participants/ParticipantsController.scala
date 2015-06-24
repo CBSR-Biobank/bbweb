@@ -1,10 +1,10 @@
-package org.biobank.controllers.study
+package org.biobank.controllers.participants
 
 import org.biobank.controllers._
-import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
-import org.biobank.service.study.ParticipantsService
+import org.biobank.service.participants._
 
 import javax.inject.{Inject => javaxInject, Singleton}
 import scala.concurrent.Future

@@ -33,8 +33,10 @@ trait StudiesService {
 
   def getCountsByStatus(): StudyCountsByStatus
 
-  def getStudies[T <: Study]
-    (filter: String, status: String, sortFunc: (Study, Study) => Boolean, order: SortOrder)
+  def getStudies[T <: Study](filter:   String,
+                             status:   String,
+                             sortFunc: (Study, Study) => Boolean,
+                             order:    SortOrder)
       : DomainValidation[Seq[Study]]
 
   def getStudyNames(filter: String, order: SortOrder)
@@ -49,27 +51,25 @@ trait StudiesService {
 
   def specimenGroupsInUse(studyId: String): DomainValidation[Set[SpecimenGroupId]]
 
-  def collectionEventAnnotationTypeWithId
-    (studyId: String, annotationTypeId: String)
+  def collectionEventAnnotationTypeWithId(studyId: String,
+                                          annotationTypeId: String)
       : DomainValidation[CollectionEventAnnotationType]
 
   def collectionEventAnnotationTypesForStudy(studyId: String)
       : DomainValidation[Set[CollectionEventAnnotationType]]
 
-  def collectionEventTypeWithId
-    (studyId: String, collectionEventTypeId: String)
+  def collectionEventTypeWithId(studyId: String,
+                                collectionEventTypeId: String)
       : DomainValidation[CollectionEventType]
 
   def collectionEventTypesForStudy(studyId: String): DomainValidation[Set[CollectionEventType]]
 
-  def processingTypeWithId
-    (studyId: String, processingTypeId: String)
+  def processingTypeWithId(studyId: String,processingTypeId: String)
       : DomainValidation[ProcessingType]
 
   def processingTypesForStudy(studyId: String): DomainValidation[Set[ProcessingType]]
 
-  def specimenLinkTypeWithId
-    (studyId: String, specimenLinkTypeId: String)
+  def specimenLinkTypeWithId(studyId: String, specimenLinkTypeId: String)
       : DomainValidation[SpecimenLinkType]
 
   def specimenLinkTypesForProcessingType(processingTypeId: String)
@@ -189,6 +189,8 @@ class StudiesServiceImpl @javax.inject.Inject() (
   val participantRepository:                   ParticipantRepository)
     extends StudiesService {
 
+  import org.biobank.service.Utils._
+
   val log = LoggerFactory.getLogger(this.getClass)
 
   implicit val timeout: Timeout = 5.seconds
@@ -281,24 +283,20 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   def specimenGroupWithId(studyId: String, specimenGroupId: String)
       : DomainValidation[SpecimenGroup] = {
-    studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failureNel,
-      study => specimenGroupRepository.withId(study.id, SpecimenGroupId(specimenGroupId))
-    )
+    validStudyId(studyId) { study =>
+      specimenGroupRepository.withId(study.id, SpecimenGroupId(specimenGroupId))
+    }
   }
 
   def specimenGroupsForStudy(studyId: String) : DomainValidation[Set[SpecimenGroup]] = {
-    studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failureNel,
-      study => specimenGroupRepository.allForStudy(study.id).successNel
-    )
+    validStudyId(studyId) { study =>
+      specimenGroupRepository.allForStudy(study.id).successNel
+    }
   }
 
   def specimenGroupsInUse(studyId: String)
       : DomainValidation[Set[SpecimenGroupId]] = {
-    studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failureNel,
-      study => {
+    validStudyId(studyId) { study =>
         val cetSpecimenGroupIds = for {
           ceventType <- collectionEventTypeRepository.allForStudy(study.id)
           sgItem     <- ceventType.specimenGroupData
@@ -312,96 +310,84 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
         (cetSpecimenGroupIds ++ sltSpecimenGroupIds).success
       }
-    )
   }
 
   def collectionEventAnnotationTypeWithId(studyId: String, annotationTypeId: String)
       : DomainValidation[CollectionEventAnnotationType] = {
-    studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failureNel,
-      study => collectionEventAnnotationTypeRepository.withId(
+    validStudyId(studyId) { study =>
+      collectionEventAnnotationTypeRepository.withId(
         study.id, AnnotationTypeId(annotationTypeId))
-    )
+    }
   }
 
   def collectionEventAnnotationTypesForStudy(studyId: String)
       : DomainValidation[Set[CollectionEventAnnotationType]] = {
-    studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failureNel,
-      study => collectionEventAnnotationTypeRepository.allForStudy(study.id).successNel
-    )
+    validStudyId(studyId) { study =>
+      collectionEventAnnotationTypeRepository.allForStudy(study.id).successNel
+    }
   }
 
   def collectionEventTypeWithId(studyId: String, collectionEventTypeId: String)
       : DomainValidation[CollectionEventType] = {
-    studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failureNel,
-      study => collectionEventTypeRepository.withId(study.id, CollectionEventTypeId(collectionEventTypeId))
-    )
+    validStudyId(studyId) { study =>
+      collectionEventTypeRepository.withId(study.id, CollectionEventTypeId(collectionEventTypeId))
+    }
   }
 
   def collectionEventTypesForStudy(studyId: String)
       : DomainValidation[Set[CollectionEventType]] = {
-    studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failureNel,
-      study => collectionEventTypeRepository.allForStudy(study.id).success
-    )
+    validStudyId(studyId) { study =>
+      collectionEventTypeRepository.allForStudy(study.id).success
+    }
   }
 
   def participantAnnotationTypesForStudy(studyId: String)
       : DomainValidation[Set[ParticipantAnnotationType]] = {
-    studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failureNel,
-      study => participantAnnotationTypeRepository.allForStudy(study.id).success
-    )
+    validStudyId(studyId) { study =>
+      participantAnnotationTypeRepository.allForStudy(study.id).success
+    }
   }
 
   def participantAnnotationTypeWithId(studyId: String, annotationTypeId: String)
       : DomainValidation[ParticipantAnnotationType] = {
-    studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failureNel,
-      study => participantAnnotationTypeRepository.withId(study.id, AnnotationTypeId(annotationTypeId))
-    )
+    validStudyId(studyId) { study =>
+      participantAnnotationTypeRepository.withId(study.id, AnnotationTypeId(annotationTypeId))
+    }
   }
 
   def specimenLinkAnnotationTypeWithId(studyId: String, annotationTypeId: String)
       : DomainValidation[SpecimenLinkAnnotationType] = {
-    studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failureNel,
-      study => specimenLinkAnnotationTypeRepository.withId(study.id, AnnotationTypeId(annotationTypeId))
-    )
+    validStudyId(studyId) { study =>
+      specimenLinkAnnotationTypeRepository.withId(study.id, AnnotationTypeId(annotationTypeId))
+    }
   }
 
   def processingTypeWithId(studyId: String, processingTypeId: String)
       : DomainValidation[ProcessingType] = {
-    studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failureNel,
-      study => processingTypeRepository.withId(study.id, ProcessingTypeId(processingTypeId))
-    )
+    validStudyId(studyId) { study =>
+      processingTypeRepository.withId(study.id, ProcessingTypeId(processingTypeId))
+    }
   }
 
   def processingTypesForStudy(studyId: String)
       : DomainValidation[Set[ProcessingType]] = {
-    studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"invalid study id: $studyId").failureNel,
-      study => processingTypeRepository.allForStudy(study.id).success
-    )
+    validStudyId(studyId) { study =>
+      processingTypeRepository.allForStudy(study.id).success
+    }
   }
 
   def specimenLinkTypeWithId(processingTypeId: String, specimenLinkTypeId: String)
       : DomainValidation[SpecimenLinkType] = {
-    processingTypeRepository.getByKey(ProcessingTypeId(processingTypeId)).fold(
-      err => DomainError(s"invalid processing type id: $processingTypeId").failureNel,
-      pt => specimenLinkTypeRepository.withId(pt.id, SpecimenLinkTypeId(specimenLinkTypeId))
-    )
+    validProcessingTypeId(processingTypeId) { processingType =>
+      specimenLinkTypeRepository.withId(processingType.id, SpecimenLinkTypeId(specimenLinkTypeId))
+    }
   }
 
   def specimenLinkTypesForProcessingType(processingTypeId: String)
       : DomainValidation[Set[SpecimenLinkType]] = {
-    processingTypeRepository.getByKey(ProcessingTypeId(processingTypeId)).fold(
-      err => DomainError(s"invalid processing type id: $processingTypeId").failureNel,
-      pt => specimenLinkTypeRepository.allForProcessingType(pt.id).success
-    )
+    validProcessingTypeId(processingTypeId) { processingType =>
+      specimenLinkTypeRepository.allForProcessingType(processingType.id).success
+    }
   }
 
   def getCollectionDto(studyId: String): DomainValidation[CollectionDto] = {
@@ -448,6 +434,27 @@ class StudiesServiceImpl @javax.inject.Inject() (
     )
   }
 
+  private def validStudyId[T](studyId: String)(fn: Study => DomainValidation[T])
+      : DomainValidation[T] = {
+    studyRepository.getByKey(StudyId(studyId)).fold(
+      err => DomainError(s"invalid study id: $studyId").failureNel,
+      study => fn(study)
+    )
+  }
+
+  private def validProcessingTypeId[T](processingTypeId: String)(fn: ProcessingType => DomainValidation[T])
+      : DomainValidation[T] = {
+    processingTypeRepository.getByKey(ProcessingTypeId(processingTypeId)).fold(
+      err => DomainError(s"invalid processing type id: $processingTypeId").failureNel,
+      processingType => {
+        studyRepository.getByKey(processingType.studyId).fold(
+          err => DomainError(s"invalid study id: ${processingType.studyId}").failureNel,
+          study => fn(processingType)
+        )
+      }
+    )
+  }
+
   def addStudy(cmd: AddStudyCmd): Future[DomainValidation[Study]] = {
     replyWithStudy(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
   }
@@ -476,7 +483,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
     replyWithSpecimenGroup(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
 
   def removeSpecimenGroup(cmd: RemoveSpecimenGroupCmd): Future[DomainValidation[Boolean]] =
-    replyWithBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    validationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
 
   // collection event types
   def addCollectionEventType(cmd: AddCollectionEventTypeCmd)
@@ -490,7 +497,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   def removeCollectionEventType(cmd: RemoveCollectionEventTypeCmd)
       : Future[DomainValidation[Boolean]] =
-    replyWithBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    validationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
 
   // collection event annotation types
   def addCollectionEventAnnotationType(cmd: AddCollectionEventAnnotationTypeCmd)
@@ -505,7 +512,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   def removeCollectionEventAnnotationType(cmd: RemoveCollectionEventAnnotationTypeCmd)
     : Future[DomainValidation[Boolean]] =
-    replyWithBoolean(
+    validationToBoolean(
       ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
 
   // participant annotation types
@@ -521,7 +528,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   def removeParticipantAnnotationType(cmd: RemoveParticipantAnnotationTypeCmd)
     : Future[DomainValidation[Boolean]] =
-    replyWithBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    validationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
 
   // specimen link annotation types
   def specimenLinkAnnotationTypesForStudy(studyId: String)
@@ -543,7 +550,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   def removeSpecimenLinkAnnotationType(cmd: RemoveSpecimenLinkAnnotationTypeCmd)
     : Future[DomainValidation[Boolean]] =
-    replyWithBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    validationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
 
   // processing types
   def addProcessingType(cmd: AddProcessingTypeCmd)
@@ -557,7 +564,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   def removeProcessingType(cmd: RemoveProcessingTypeCmd)
     : Future[DomainValidation[Boolean]] =
-    replyWithBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    validationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
 
   // specimen link types
   def addSpecimenLinkType(cmd: AddSpecimenLinkTypeCmd)
@@ -571,7 +578,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   def removeSpecimenLinkType(cmd: RemoveSpecimenLinkTypeCmd)
       : Future[DomainValidation[Boolean]] =
-    replyWithBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    validationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
 
   private def replyWithStudy(future: Future[DomainValidation[StudyEvent]])
       : Future[DomainValidation[Study]] = {
@@ -701,12 +708,5 @@ class StudiesServiceImpl @javax.inject.Inject() (
       } yield slt
     }
   }
-
-  /**
-   * Returns 'ture' wrapped in a validation if the event does not fail validation.
-   */
-  private def replyWithBoolean(future: Future[DomainValidation[StudyEvent]])
-      : Future[DomainValidation[Boolean]] =
-    future map { validation => validation map { event => true } }
 
 }

@@ -1,4 +1,6 @@
- package org.biobank.infrastructure.event;
+package org.biobank.infrastructure.event;
+
+import "CommonEvents.proto";
 
 message StudyAddedEvent {
    optional string name        = 1;
@@ -214,29 +216,44 @@ message SpecimenLinkTypeRemovedEvent {
 }
 
 message ParticipantAddedEvent {
-
-   message ParticipantAnnotation {
-      optional string annotationTypeId = 1;
-      optional string stringValue      = 2;
-      optional string numberValue      = 3;
-      repeated string selectedValues   = 4;
-   }
-
-   optional string participantId              = 1;
-   optional string uniqueId                   = 2;
-   repeated ParticipantAnnotation annotations = 3;
+   optional string participantId   = 1;
+   optional string uniqueId        = 2;
+   repeated Annotation annotations = 3;
 }
 
 message ParticipantUpdatedEvent {
-   optional string participantId                                    = 1;
-   optional int64 version                                           = 2;
-   optional string uniqueId                                         = 3;
-   repeated ParticipantAddedEvent.ParticipantAnnotation annotations = 4;
+   optional string participantId   = 1;
+   optional int64 version          = 2;
+   optional string uniqueId        = 3;
+   repeated Annotation annotations = 4;
 
 }
 
+message CollectionEventAddedEvent {
+   optional string collectionEventId     = 1;
+   optional string participantId         = 2;
+   optional string collectionEventTypeId = 3;
+   optional string timeCompleted         = 4;
+   optional int32  visitNumber           = 5;
+   repeated Annotation annotations       = 6;
+}
+
+message CollectionEventUpdatedEvent {
+   optional string collectionEventId     = 1;
+   optional string participantId         = 2;
+   optional string collectionEventTypeId = 3;
+   optional int64  version               = 4;
+   optional string timeCompleted         = 5;
+   optional int32  visitNumber           = 6;
+   repeated Annotation annotations       = 7;
+}
+
+message CollectionEventRemovedEvent {
+   optional string collectionEventId     = 1;
+}
+
 message StudyEvent {
-   required string id = 1;
+   required string id     = 1;
    optional string userId = 2;
    optional string time   = 3;
 
@@ -270,5 +287,8 @@ message StudyEvent {
      SpecimenLinkTypeRemovedEvent              specimenLinkTypeRemoved              = 30;
      ParticipantAddedEvent                     participantAdded                     = 31;
      ParticipantUpdatedEvent                   participantUpdated                   = 32;
+     CollectionEventAddedEvent                 collectionEventAdded                 = 33;
+     CollectionEventUpdatedEvent               collectionEventUpdated               = 34;
+     CollectionEventRemovedEvent               collectionEventRemoved               = 35;
    }
 }

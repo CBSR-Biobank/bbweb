@@ -17,13 +17,14 @@ class StudySpec extends DomainSpec {
 
   "A study" can {
 
-    "be created" in{
+    "be created" in {
       val id = StudyId(nameGenerator.next[Study])
       val version = -1L
       val name = nameGenerator.next[Study]
       val description = some(nameGenerator.next[Study])
 
       val v = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
+
       v mustSucceed { study =>
         study mustBe a[DisabledStudy]
 

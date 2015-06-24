@@ -14,7 +14,6 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import com.mongodb.casbah.Imports._
 import org.scalatest._
 import org.scalatestplus.play._
-import play.api.Logger
 import play.api.Play
 import play.api.libs.json._
 import play.mvc.Http.RequestBuilder
@@ -50,11 +49,14 @@ trait BbwebFakeApplication {
 abstract class ControllerFixture
     extends PlaySpec
     with OneServerPerTest
+    with BeforeAndAfterEach
     with MustMatchers
     with OptionValues
     with BbwebFakeApplication {
 
-  private val log = LoggerFactory.getLogger(this.getClass)
+  val log = LoggerFactory.getLogger(this.getClass)
+
+  val nameGenerator = new NameGenerator(this.getClass)
 
   private val dbName = "bbweb-test"
 
@@ -106,18 +108,19 @@ abstract class ControllerFixture
     .header("X-XSRF-TOKEN", token)
     .cookie(new play.mvc.Http.Cookie("XSRF-TOKEN", token, 10, "", "", true, true))
 
-    Logger.debug(s"makeRequest: request: $builder, $json")
+    log.debug(s"makeRequest: request: $method, $path, $json")
 
     val result = Future.successful(play.test.Helpers.route(builder).toScala)
     val resultStatus = status(result)
 
     resultStatus match {
       case `expectedStatus` =>
-        contentType(result) mustBe Some("application/json")
         val jsonResult = contentAsJson(result)
-        Logger.info(s"makeRequest: status: $resultStatus, result: $jsonResult")
+        contentType(result) mustBe Some("application/json")
+        log.debug(s"makeRequest: status: $resultStatus, result: $jsonResult")
         jsonResult
       case _ =>
+        log.debug(contentAsString(result))
         fail(s"bad HTTP status: status: $resultStatus, expected: $expectedStatus")
     }
   }
@@ -142,7 +145,9 @@ abstract class ControllerFixture
   def specimenLinkAnnotationTypeRepository     = app.injector.instanceOf[SpecimenLinkAnnotationTypeRepository]
   def specimenLinkTypeRepository               = app.injector.instanceOf[SpecimenLinkTypeRepository]
   def studyRepository                          = app.injector.instanceOf[StudyRepository]
+
   def participantRepository                    = app.injector.instanceOf[ParticipantRepository]
+  def collectionEventRepository                = app.injector.instanceOf[CollectionEventRepository]
 
   def userRepository = app.injector.instanceOf[UserRepository]
 

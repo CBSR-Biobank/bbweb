@@ -1,4 +1,4 @@
-package org.biobank.controllers.study
+package org.biobank.controllers.participants
 
 import org.biobank.fixture._
 import org.biobank.domain.{ AnnotationTypeId, AnnotationOption, AnnotationValueType }
@@ -16,34 +16,13 @@ import org.joda.time.DateTime
  * Tests the REST API for [[Participants]].
  */
 class ParticipantsControllerSpec extends ControllerFixture {
-
-  val log = LoggerFactory.getLogger(this.getClass)
-
-  val nameGenerator = new NameGenerator(this.getClass)
+  import org.biobank.TestUtils._
+  import org.biobank.AnnotationTestUtils._
 
   def uri(study: Study): String = s"/studies/${study.id.id}/participants"
 
   def uri(study: Study, participant: Participant): String =
     s"/studies/${study.id.id}/participants/${participant.id.id}"
-
-  def annotationOptionToJson(annotationOption: AnnotationOption) = {
-    Json.obj(
-      "annotationTypeId" -> annotationOption.annotationTypeId,
-      "value"            -> annotationOption.value
-    )
-  }
-
-  /** Converts a participant annotation into a Json object.
-   */
-  def annotationToJson(annotation: ParticipantAnnotation) = {
-    val json = Json.obj(
-      "annotationTypeId" -> annotation.annotationTypeId,
-      "stringValue"      -> annotation.stringValue,
-      "numberValue"      -> annotation.numberValue
-    )
-
-    json ++ Json.obj("selectedValues" -> annotation.selectedValues.map(value => annotationOptionToJson(value)))
-  }
 
   /** Converts a participant into an Add command.
    */
@@ -66,18 +45,59 @@ class ParticipantsControllerSpec extends ControllerFixture {
 
   def createParticipantAnnotationType(study: Study) = {
     ParticipantAnnotationType(
-      study.id, AnnotationTypeId(nameGenerator.next[ParticipantAnnotationType]),
-      0L, DateTime.now, None, nameGenerator.next[ParticipantAnnotationType], None,
-      AnnotationValueType.Text, None, Seq.empty, false)
+      studyId       = study.id,
+      id            = AnnotationTypeId(nameGenerator.next[ParticipantAnnotationType]),
+      version       = 0L,
+      timeAdded     = DateTime.now,
+      timeModified  = None,
+      name          = nameGenerator.next[ParticipantAnnotationType],
+      description   = None,
+      valueType     = AnnotationValueType.Text,
+      maxValueCount = None,
+      options       = Seq.empty,
+      required      = false)
   }
 
-  // create pairs of annotation types and annotation of each value type plus a second of type select
-  // that allows multiple selections
-  //
-  // the result is a map where the keys are the annotation types and the values are the corresponding
-  // annotations
+  def addOnNonEnabledStudy(study: Study, participant: Participant) = {
+    study.status must not be (EnabledStudy.status)
+
+    studyRepository.put(study)
+
+    val cmdJson = participantToAddCmd(participant);
+    val json = makeRequest(POST, uri(study), BAD_REQUEST, cmdJson)
+
+    (json \ "status").as[String] must include ("error")
+    (json \ "message").as[String] must include ("is not enabled")
+  }
+
+  def updateOnNonEnabledStudy(study: Study, participant: Participant) = {
+    study.status must not be (EnabledStudy.status)
+
+    studyRepository.put(study)
+    participantRepository.put(participant)
+
+    val participant2 = factory.createParticipant.copy(id      = participant.id,
+                                                      studyId = participant.studyId)
+    val json = makeRequest(PUT,
+                           uri(study, participant2),
+                           BAD_REQUEST,
+                           participantToUpdateCmd(participant2))
+
+    (json \ "status").as[String] must include ("error")
+    (json \ "message").as[String] must include ("is not enabled")
+  }
+
+  /**
+   * create pairs of annotation types and annotation of each value type plus a second of type select that
+   * allows multiple selections
+   *
+   * the result is a map where the keys are the annotation types and the values are the corresponding
+   * annotations
+   */
   def createAnnotationsAndTypes() = {
-    val options = Seq("option1", "option2", "option3")
+    val options = Seq(nameGenerator.next[String],
+                      nameGenerator.next[String],
+                      nameGenerator.next[String])
 
     (AnnotationValueType.values.map { vt =>
        vt match {
@@ -171,35 +191,55 @@ class ParticipantsControllerSpec extends ControllerFixture {
     "POST /studies/{studyId}/participants" must {
 
       "add a participant with no annotation types" in {
-
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
         val participant = factory.createParticipant
         val json = makeRequest(POST, uri(study), json = participantToAddCmd(participant))
         (json \ "status").as[String] must include ("success")
+
+        val id = (json \ "data" \ "id").as[String]
+
+        participantRepository.getByKey(ParticipantId(id)) mustSucceed { pt =>
+          pt must have (
+            'version     (0),
+            'uniqueId    (participant.uniqueId),
+            'annotations (participant.annotations)
+          )
+
+          checkTimeStamps(participant, pt.timeAdded, None)
+        }
       }
 
-      "add a participant with annotation types" taggedAs(Tag("1")) in {
-
+      "add a participant with annotations" in {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
         val annotTypes = createAnnotationsAndTypes
+        val annotations = annotTypes.values.toSet
 
         annotTypes.keys.foreach { annotType =>
           participantAnnotationTypeRepository.put(annotType.copy(studyId = study.id))
         }
 
-        val participant = factory.createParticipant.copy(
-          annotations = annotTypes.values.toSet)
+        val participant = factory.createParticipant.copy(annotations = annotations)
 
         val json = makeRequest(POST, uri(study), json = participantToAddCmd(participant))
         (json \ "status").as[String] must include ("success")
+
+        val jsonAnnotations = (json \ "data" \ "annotations").as[List[JsObject]]
+        jsonAnnotations must have size annotations.size
+
+        jsonAnnotations.foreach { jsonAnnotation =>
+          val jsonAnnotationTypeId = (jsonAnnotation \ "annotationTypeId").as[String]
+          val annotation = annotations.find( x =>
+            x.annotationTypeId.id == jsonAnnotationTypeId)
+          annotation mustBe defined
+          compareAnnotation(jsonAnnotation, annotation.value)
+        }
       }
 
       "fail when adding participant with duplicate uniqueId" in {
-
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -213,7 +253,6 @@ class ParticipantsControllerSpec extends ControllerFixture {
       }
 
       "fail when missing a required annotation type" in {
-
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -229,7 +268,6 @@ class ParticipantsControllerSpec extends ControllerFixture {
       }
 
       "fail for an invalid annotation type" in {
-
         // annotation type belongs to a different study
         val annotType = factory.createParticipantAnnotationType
         participantAnnotationTypeRepository.put(annotType)
@@ -277,38 +315,80 @@ class ParticipantsControllerSpec extends ControllerFixture {
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("study id mismatch")
       }
+
+      "not add a participant on an disabled study" in {
+        val disabledStudy = factory.createDisabledStudy
+        val participant = factory.createParticipant.copy(studyId = disabledStudy.id)
+        addOnNonEnabledStudy(disabledStudy, participant)
+      }
+
+      "not add a participant on an retired study" in {
+        val retiredStudy = factory.createRetiredStudy
+        val participant = factory.createParticipant.copy(studyId = retiredStudy.id)
+        addOnNonEnabledStudy(retiredStudy, participant)
+      }
     }
 
     "PUT /studies/{studyId}/participants" must {
 
       "update a participant with no annotation types" in {
-
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
-        val participant = factory.createParticipant
+        val participant: Participant = factory.createParticipant.copy(version = 0L)
         participantRepository.put(participant)
 
-        val json = makeRequest(PUT, uri(study, participant), json = participantToUpdateCmd(participant))
+        val json = makeRequest(PUT, uri(study, participant),
+                               json = participantToUpdateCmd(participant))
         (json \ "status").as[String] must include ("success")
+        val id = (json \ "data" \ "id").as[String]
+
+        participantRepository.getByKey(ParticipantId(id)) mustSucceed { pt =>
+          pt must have (
+            'version                (participant.version + 1),
+            'uniqueId               (participant.uniqueId),
+            'annotations            (participant.annotations)
+          )
+
+          checkTimeStamps(pt, participant.timeAdded, DateTime.now)
+        }
       }
 
       "update a participant with annotation types" in {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
-        val participant = factory.createParticipant
-        participantRepository.put(participant)
-
         val annotTypes = createAnnotationsAndTypes
 
         annotTypes.keys.foreach { annotType =>
           participantAnnotationTypeRepository.put(annotType.copy(studyId = study.id))
         }
-        val p2 = participant.copy(annotations = annotTypes.values.toSet)
+
+        val participant = factory.createParticipant.copy(annotations = annotTypes.values.toSet)
+        participantRepository.put(participant)
+
+        val newAnnotations = annotTypes.keys.map { annotationType =>
+          val (stringValue, numberValue, selectedValues) =
+            factory.createAnnotationValues(annotationType)
+          ParticipantAnnotation(annotationTypeId = annotationType.id,
+                                stringValue      = stringValue,
+                                numberValue      = numberValue,
+                                selectedValues   = selectedValues)
+        }.toSet
+
+        val p2 = participant.copy(version = 0, annotations = newAnnotations)
 
         val json = makeRequest(PUT, uri(study, p2), json = participantToUpdateCmd(p2))
         (json \ "status").as[String] must include ("success")
+        val jsonAnnotations = (json \ "data" \ "annotations").as[List[JsObject]]
+
+        jsonAnnotations.foreach { jsonAnnotation =>
+          val jsonAnnotationTypeId = (jsonAnnotation \ "annotationTypeId").as[String]
+          val newAnnotation = newAnnotations.find( x =>
+            x.annotationTypeId.id == jsonAnnotationTypeId)
+          newAnnotation mustBe defined
+          compareAnnotation(jsonAnnotation, newAnnotation.value)
+        }
       }
 
       "update a participant to remove an annotation type" in {
@@ -328,7 +408,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
         (json \ "status").as[String] must include ("success")
       }
 
-      "fail when missing a required annotation type" in {
+      "fail when missing a required annotation" in {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -364,7 +444,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
         (json \ "message").as[String] must include ("annotation type(s) do not belong to study")
       }
 
-      "fail for more than one annotation with the same annotation type" in {
+      "fail for more than one annotation with the same annotation type ID" in {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -417,6 +497,18 @@ class ParticipantsControllerSpec extends ControllerFixture {
                                json = participantToUpdateCmd(participant))
         (json \ "status").as[String] must include ("error")
         (json \ "message").as[String] must include ("participant id mismatch")
+      }
+
+      "not update a participant on an disabled study" in {
+        val disabledStudy = factory.createDisabledStudy
+        val participant = factory.createParticipant.copy(studyId = disabledStudy.id)
+        updateOnNonEnabledStudy(disabledStudy, participant)
+      }
+
+      "not update a participant on an retired study" in {
+        val retiredStudy = factory.createRetiredStudy
+        val participant = factory.createParticipant.copy(studyId = retiredStudy.id)
+        updateOnNonEnabledStudy(retiredStudy, participant)
       }
     }
 

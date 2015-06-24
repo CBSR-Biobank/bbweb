@@ -70,7 +70,7 @@ class StudiesProcessorSpec extends TestFixture {
     "not add add a new study with a duplicate name" in {
       val study = factory.createDisabledStudy
       studyRepository.put(study)
-      askAddCommand(study) mustFail "study with name already exists"
+      askAddCommand(study) mustFailContains "study with name already exists"
     }
 
     "not add add a new study with a name less than 2 characters" in {
@@ -143,7 +143,7 @@ class StudiesProcessorSpec extends TestFixture {
       studyRepository.put(study2)
 
       val study3 = study2.copy(name = study.name)
-      askUpdateCommand(study3) mustFail "name already exists"
+      askUpdateCommand(study3) mustFailContains "name already exists"
     }
 
     "not update a study's name to something less than 2 characters" in {
@@ -159,7 +159,7 @@ class StudiesProcessorSpec extends TestFixture {
       studyRepository.put(study)
 
       val study2 = study.copy(version = study.version + 1)
-      askUpdateCommand(study2) mustFail "doesn't match current version"
+      askUpdateCommand(study2) mustFailContains "doesn't match current version"
     }
 
     "enable a study" in {
@@ -215,7 +215,7 @@ class StudiesProcessorSpec extends TestFixture {
     "not update an enabled study" in {
       val study = factory.createEnabledStudy
       studyRepository.put(study)
-      askUpdateCommand(study) mustFail "is not disabled"
+      askUpdateCommand(study) mustFailContains "is not disabled"
     }
 
     "disable an enabled study" in {
@@ -264,7 +264,7 @@ class StudiesProcessorSpec extends TestFixture {
     "not update a retired study" in {
       val study = factory.createEnabledStudy
       studyRepository.put(study)
-      askUpdateCommand(study) mustFail "is not disabled"
+      askUpdateCommand(study) mustFailContains "is not disabled"
     }
 
     "unretire a study" in {
@@ -291,7 +291,7 @@ class StudiesProcessorSpec extends TestFixture {
       val v = ask(studiesProcessor, UnretireStudyCmd(None, study.id.toString, study.version))
       .mapTo[DomainValidation[StudyEvent]]
       .futureValue
-      v mustFail "is not retired"
+      v mustFailContains "is not retired"
     }
 
     "not unretire an enabled study" in {
@@ -301,7 +301,7 @@ class StudiesProcessorSpec extends TestFixture {
       val v = ask(studiesProcessor, UnretireStudyCmd(None, study.id.toString, study.version))
       .mapTo[DomainValidation[StudyEvent]]
       .futureValue
-      v mustFail "is not retired"
+      v mustFailContains "is not retired"
     }
 
     "be recovered from journal" ignore {

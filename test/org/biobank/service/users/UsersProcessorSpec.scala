@@ -62,7 +62,7 @@ class UsersProcessorSpec extends TestFixture {
 
       val cmd = RegisterUserCmd(None, user.name, user.email, user.password, user.avatarUrl)
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]].futureValue
-      v mustFail "user with email already exists"
+      v mustFailContains "user with email already exists"
     }
 
     "activate a user" in {
@@ -88,7 +88,7 @@ class UsersProcessorSpec extends TestFixture {
       val v = ask(usersProcessor, ActivateUserCmd(None, user.id.id, user.version - 1))
         .mapTo[DomainValidation[UserEvent]]
         .futureValue
-      v mustFail "expected version doesn't match current version"
+      v mustFailContains "expected version doesn't match current version"
     }
 
     "update a user's name" in {
@@ -123,7 +123,7 @@ class UsersProcessorSpec extends TestFixture {
 
       val cmd = UpdateUserNameCmd(None, user.id.id, user.version - 1, newName)
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]].futureValue
-      v mustFail "expected version doesn't match current version"
+      v mustFailContains "expected version doesn't match current version"
     }
 
     "update a user's email" in {
@@ -159,7 +159,7 @@ class UsersProcessorSpec extends TestFixture {
 
       val cmd = UpdateUserEmailCmd(None, user.id.id, user.version - 1, newEmail)
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]].futureValue
-      v mustFail "expected version doesn't match current version"
+      v mustFailContains "expected version doesn't match current version"
     }
 
     "update a user's password" in {
@@ -201,7 +201,7 @@ class UsersProcessorSpec extends TestFixture {
 
       val cmd = UpdateUserPasswordCmd(None, user.id.id, user.version - 1, plainPassword, newPassword)
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]].futureValue
-      v mustFail "expected version doesn't match current version"
+      v mustFailContains "expected version doesn't match current version"
     }
 
     "reset a user's password" in {
@@ -237,7 +237,7 @@ class UsersProcessorSpec extends TestFixture {
 
       val cmd = ResetUserPasswordCmd(nameGenerator.nextEmail[User])
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]].futureValue
-      v mustFail "user with email not found"
+      v mustFailContains "user with email not found"
     }
 
     "lock an activated a user" in {
@@ -265,7 +265,7 @@ class UsersProcessorSpec extends TestFixture {
       val v = ask(usersProcessor, LockUserCmd(None, activeUser.id.id, activeUser.version - 1))
         .mapTo[DomainValidation[UserEvent]]
         .futureValue
-      v mustFail "expected version doesn't match current version"
+      v mustFailContains "expected version doesn't match current version"
     }
 
     "unlock a locked a user" in {
@@ -293,7 +293,7 @@ class UsersProcessorSpec extends TestFixture {
       val v = ask(usersProcessor, UnlockUserCmd(None, lockedUser.id.id, lockedUser.version - 1))
         .mapTo[DomainValidation[UserEvent]]
         .futureValue
-      v mustFail "expected version doesn't match current version"
+      v mustFailContains "expected version doesn't match current version"
     }
 
     "not lock a registered user" in {
@@ -303,7 +303,7 @@ class UsersProcessorSpec extends TestFixture {
       val v = ask(usersProcessor, LockUserCmd(None, user.id.id, user.version))
         .mapTo[DomainValidation[UserEvent]]
         .futureValue
-      v mustFail "not active"
+      v mustFailContains "not active"
     }
 
     "not unlock a registered user" in {
@@ -313,7 +313,7 @@ class UsersProcessorSpec extends TestFixture {
       val v = ask(usersProcessor, UnlockUserCmd(None, user.id.id, user.version))
         .mapTo[DomainValidation[UserEvent]]
         .futureValue
-      v mustFail "not locked"
+      v mustFailContains "not locked"
     }
 
     "not unlock an active user" in {
@@ -324,7 +324,7 @@ class UsersProcessorSpec extends TestFixture {
         .mapTo[DomainValidation[UserEvent]]
         .futureValue
 
-      v mustFail "not locked"
+      v mustFailContains "not locked"
     }
 
   }

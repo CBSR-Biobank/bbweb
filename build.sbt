@@ -17,7 +17,7 @@ lazy val root = (project in file("."))
 scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.6")
 
 scalacOptions in ThisBuild ++= Seq(
-  "-target:jvm-1.7",
+  "-target:jvm-1.8",
   "-encoding", "UTF-8",
   "deprecation",        // warning and location for usages of deprecated APIs
   "-feature",           // warning and location for usages of features that should be imported explicitly
@@ -79,7 +79,7 @@ libraryDependencies ++= Seq(
   "org.webjars"               %  "bootstrap"                         % "3.3.4" excludeAll(
     ExclusionRule(organization="org.webjars")
   ),
-  "org.webjars"               %  "angularjs"                         % "1.4.0" exclude(
+  "org.webjars"               %  "angularjs"                         % "1.4.1" exclude(
     "org.webjars", "jquery"),
   "org.webjars"               %  "angular-ui-bootstrap"              % "0.13.0" exclude(
     "org.webjars", "angularjs"),

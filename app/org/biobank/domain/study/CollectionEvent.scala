@@ -18,41 +18,48 @@ trait CollectionEventValidations {
 }
 
 /**
- * A collection event is used to record a visit by a participant to a Centre (e.g. a clinic). A collection
- * event must have a CollectionEventType as defined by the study.
+ * A collection event is used to record a visit by a participant to a {@link Centre} (e.g. a clinic). A
+ * collection event must have a CollectionEventType as defined by the study.
  *
- * @param timeDone a time stamp for when the participant made the visit to the centre.
+ * @param timeCompleted a time stamp for when the participant made the visit to the centre.
+ * @param visitNumber an positive integer used to uniquely identify the visit. The fist visit starts at 1.
  */
-case class CollectionEvent(participantId: ParticipantId,
-                           id:            CollectionEventId,
-                           version:       Long,
-                           timeAdded:     DateTime,
-                           timeModified:  Option[DateTime],
-                           timeDone:      DateTime,
-                           visitNumber:   Int)
+case class CollectionEvent(id:                    CollectionEventId,
+                           participantId:         ParticipantId,
+                           collectionEventTypeId: CollectionEventTypeId,
+                           version:               Long,
+                           timeAdded:             DateTime,
+                           timeModified:          Option[DateTime],
+                           timeCompleted:         DateTime,
+                           visitNumber:           Int,
+                           annotations:           Set[CollectionEventAnnotation])
     extends ConcurrencySafeEntity[CollectionEventId]
     with HasParticipantId {
 
-  def update(timeDone:      DateTime,
-             visitNumber:   Int)
-      : DomainValidation[CollectionEvent] = {
-    val v = CollectionEvent.create(this.participantId,
-                                   this.id,
+  def update(timeCompleted: DateTime,
+             visitNumber:   Int,
+             annotations:  Set[CollectionEventAnnotation]): DomainValidation[CollectionEvent] = {
+    val v = CollectionEvent.create(this.id,
+                                   this.participantId,
+                                   this.collectionEventTypeId,
                                    this.version,
                                    this.timeAdded,
-                                   timeDone,
-                                   visitNumber)
+                                   timeCompleted,
+                                   visitNumber,
+                                   annotations)
     v.map(_.copy(timeModified = Some(DateTime.now)))
   }
   override def toString: String =
     s"""|CollectionEvent:{
-        |  participantId: $participantId,
-        |  id:            $id,
-        |  version:       $version,
-        |  timeAdded:     $timeAdded,
-        |  timeModified:  $timeModified,
-        |  timeDone:      $timeDone,
-        |  visitNumber:   $visitNumber,
+        |  id:                    $id,
+        |  participantId:         $participantId,
+        |  collectionEventTypeId: $collectionEventTypeId
+        |  version:               $version,
+        |  timeAdded:             $timeAdded,
+        |  timeModified:          $timeModified,
+        |  timeCompleted:         $timeCompleted,
+        |  visitNumber:           $visitNumber,
+        |  annotations:           $annotations,
         |}""".stripMargin
 
 }
@@ -60,18 +67,25 @@ case class CollectionEvent(participantId: ParticipantId,
 object CollectionEvent extends CollectionEventValidations {
   import org.biobank.domain.CommonValidations._
 
-  def create(participantId: ParticipantId,
-             id:            CollectionEventId,
-             version:       Long,
-             dateTime:      DateTime,
-             timeDone:      DateTime,
-             visitNumber:   Int)
+  case object ParticipantIdRequired extends ValidationKey
+
+  case object CollectinEventTypeIdRequired extends ValidationKey
+
+  def create(id:                    CollectionEventId,
+             participantId:         ParticipantId,
+             collectionEventTypeId: CollectionEventTypeId,
+             version:               Long,
+             dateTime:              DateTime,
+             timeCompleted:         DateTime,
+             visitNumber:           Int,
+             annotations:           Set[CollectionEventAnnotation])
       : DomainValidation[CollectionEvent] = {
-    (validateId(participantId) |@|
-      validateId(id) |@|
+    (validateId(id) |@|
+      validateId(participantId, ParticipantIdRequired) |@|
+      validateId(collectionEventTypeId, CollectinEventTypeIdRequired) |@|
       validateAndIncrementVersion(version) |@|
-      validatePositiveNumber(visitNumber, VisitNumberInvalid)) {
-      CollectionEvent(_, _, _, dateTime, None, timeDone, _)
+      validateMinimum(visitNumber, 1, VisitNumberInvalid)) {
+      CollectionEvent(_, _, _, _, dateTime, None, timeCompleted, _, annotations)
     }
   }
 

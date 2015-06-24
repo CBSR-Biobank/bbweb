@@ -26,8 +26,8 @@ trait ParticipantValidations {
  *        the system. This identifier is not the same as the ParticipantId value object
  *        used by the domain model.
  */
-case class Participant(studyId:      StudyId,
-                       id:           ParticipantId,
+case class Participant(id:           ParticipantId,
+                       studyId:      StudyId,
                        version:      Long,
                        timeAdded:    DateTime,
                        timeModified: Option[DateTime],
@@ -63,18 +63,29 @@ object Participant extends ParticipantValidations {
   import org.biobank.domain.CommonValidations._
   import ParticipantAnnotation._
 
-  def create(studyId: StudyId,
-             id: ParticipantId,
-             version: Long,
-             dateTime: DateTime,
-             uniqueId: String,
+  def create(studyId:     StudyId,
+             id:          ParticipantId,
+             version:     Long,
+             dateTime:    DateTime,
+             uniqueId:    String,
              annotations: Set[ParticipantAnnotation])
       : DomainValidation[Participant] = {
-    (validateId(studyId) |@|
-      validateId(id) |@|
+
+    def validateAnnotation(annotation: ParticipantAnnotation)
+        : DomainValidation[ParticipantAnnotation] = {
+      ParticipantAnnotation.create(annotation.annotationTypeId,
+                                   annotation.stringValue,
+                                   annotation.numberValue,
+                                   annotation.selectedValues)
+    }
+
+    (validateId(id) |@|
+      validateId(studyId) |@|
       validateAndIncrementVersion(version) |@|
-      validateString(uniqueId, UniqueIdRequired)) {
-      Participant(_, _, _, dateTime, None, _, annotations)
+      validateString(uniqueId, UniqueIdRequired) |@|
+      annotations.toList.traverseU(validateAnnotation)) {
+      case (a1, a2, a3, a4, a5) =>
+        Participant(a1, a2, a3, dateTime, None, a4, a5.toSet)
     }
   }
 

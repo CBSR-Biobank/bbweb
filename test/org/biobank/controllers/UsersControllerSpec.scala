@@ -20,10 +20,6 @@ import play.api.test._
  */
 class UsersControllerSpec extends ControllerFixture {
 
-  val log = LoggerFactory.getLogger(this.getClass)
-
-  val nameGenerator = new NameGenerator(this.getClass)
-
   def uri: String = "/users"
 
   def uri(user: User): String = uri + s"/${user.id.id}"

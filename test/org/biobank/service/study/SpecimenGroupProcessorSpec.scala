@@ -180,7 +180,7 @@ class SpecimenGroupProcessorSpec extends TestFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[StudyEvent]]
         .futureValue
-      v mustFail "doesn't match current version"
+      v mustFailContains "doesn't match current version"
     }
 
     "not be added if the name already exists" in {
@@ -195,7 +195,7 @@ class SpecimenGroupProcessorSpec extends TestFixture {
         .mapTo[DomainValidation[StudyEvent]]
         .futureValue
 
-      v mustFail "name already exists"
+      v mustFailContains "name already exists"
     }
 
     "not be updated to name that already exists" in {
@@ -214,7 +214,7 @@ class SpecimenGroupProcessorSpec extends TestFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[StudyEvent]]
         .futureValue
-      v mustFail "name already exists"
+      v mustFailContains "name already exists"
     }
 
     "not be updated to wrong study" in {
@@ -231,7 +231,7 @@ class SpecimenGroupProcessorSpec extends TestFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[StudyEvent]]
         .futureValue
-      v mustFail "study does not have specimen group"
+      v mustFailContains "study does not have specimen group"
     }
 
     "can remove a specimen group" in {
@@ -252,7 +252,7 @@ class SpecimenGroupProcessorSpec extends TestFixture {
         val v2 = specimenGroupRepository.withId(
           disabledStudy.id,
           SpecimenGroupId(removedEvent.getSpecimenGroupId))
-        v2 mustFail "specimen group does not exist"
+        v2 mustFailContains "specimen group does not exist"
       }
     }
 
@@ -264,7 +264,7 @@ class SpecimenGroupProcessorSpec extends TestFixture {
       val v = ask(studiesProcessor, cmd)
         .mapTo[DomainValidation[StudyEvent]]
         .futureValue
-      v mustFail "expected version doesn't match current version"
+      v mustFailContains "expected version doesn't match current version"
     }
   }
 }

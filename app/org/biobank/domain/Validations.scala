@@ -1,5 +1,6 @@
 package org.biobank.domain
 
+import scala.util.control.Exception._
 import scalaz._
 import scalaz.Scalaz._
 
@@ -22,6 +23,12 @@ object CommonValidations {
 
   case object NonEmptyDescription extends ValidationKey
 
+  case object NonEmptyString extends ValidationKey
+
+  case object NonEmptyStringOption extends ValidationKey
+
+  case object InvalidNumberString extends ValidationKey
+
   def validateString(s: String, err: ValidationKey): DomainValidation[String] = {
     if ((s == null) || s.isEmpty()) err.failureNel else s.success
   }
@@ -37,19 +44,56 @@ object CommonValidations {
         }
       }
     )
+  }
 
+  def validateNumberString(s: String): DomainValidation[String] = {
+    validateString(s, InvalidNumberString).fold(
+      err => err.failure,
+      str => {
+        catching(classOf[NumberFormatException]).opt(str.toFloat) match {
+          case None => InvalidNumberString.failureNel
+          case _ => str.successNel
+        }
+      }
+    )
+  }
+
+  def validateNumberStringOption(maybeString: Option[String]): DomainValidation[Option[String]] = {
+    maybeString.fold {
+      none[String].successNel[String]
+    } { str =>
+      validateNumberString(str).fold(
+        err => err.failure,
+        numstr => Some(numstr).success
+      )
+    }
+  }
+
+  def validateNonEmptyOption(maybeString: Option[String], err: ValidationKey)
+      : DomainValidation[Option[String]] = {
+    maybeString.fold {
+      none[String].successNel[String]
+    } { value =>
+      validateString(value, err).fold(
+        err => err.failure,
+        str => Some(str).success
+      )
+    }
+  }
+
+  def validateMinimum(number: Int, min: Int, err: ValidationKey): DomainValidation[Int] = {
+    if (number < min) err.failureNel else number.success
   }
 
   def validatePositiveNumber(number: Int, err: ValidationKey): DomainValidation[Int] = {
-    if (number < 0) err.failureNel else number.success
+    validateMinimum(number, 0, err)
   }
 
   def validatePositiveNumber(number: BigDecimal, err: ValidationKey): DomainValidation[BigDecimal] = {
     if (number < 0) err.failureNel else number.success
   }
 
-  def validatePositiveNumberOption
-    (maybeNumber: Option[BigDecimal], err: ValidationKey)
+  def validatePositiveNumberOption(maybeNumber: Option[BigDecimal], err: ValidationKey)
       : DomainValidation[Option[BigDecimal]] = {
     maybeNumber.fold {
       none[BigDecimal].successNel[String]
@@ -58,20 +102,6 @@ object CommonValidations {
         err.toString.failureNel[Option[BigDecimal]]
       } else {
         maybeNumber.successNel
-      }
-    }
-  }
-
-  def validateNonEmptyOption
-    (maybeString: Option[String], err: ValidationKey)
-      : DomainValidation[Option[String]] = {
-    maybeString.fold {
-      none[String].successNel[String]
-    } { value =>
-      if ((value == null) || value.isEmpty()) {
-        err.toString.failureNel[Option[String]]
-      } else {
-        maybeString.successNel
       }
     }
   }
@@ -86,12 +116,7 @@ object CommonValidations {
       idString => id.success)
   }
 
-  def validateId[T <: IdentifiedValueObject[String]](id: T): DomainValidation[T] = {
-    validateId(id, IdRequired)
-  }
-
-  def validateId[T <: IdentifiedValueObject[String]]
-    (maybeId: Option[T], err: ValidationKey)
+  def validateId[T <: IdentifiedValueObject[String]](maybeId: Option[T], err: ValidationKey)
       : DomainValidation[Option[T]] = {
     maybeId.fold {
       none[T].successNel[String]
@@ -101,6 +126,10 @@ object CommonValidations {
         id => some(id).success
       )
     }
+  }
+
+  def validateId[T <: IdentifiedValueObject[String]](id: T): DomainValidation[T] = {
+    validateId(id, IdRequired)
   }
 
 }
