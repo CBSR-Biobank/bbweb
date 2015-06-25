@@ -26,6 +26,8 @@ sudo apt-get install sbt
 
 ### MongoDB
 
+*NOTE*: for Ubuntu 15.04 see these [instructions](ubuntu_1504_mongo_install.md).
+
 Install on Ubuntu:
 
 ```bash
