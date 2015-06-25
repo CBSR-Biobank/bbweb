@@ -2,6 +2,10 @@
 
 ## Required Software and Packages
 
+### Java SE Development Kit 8
+
+See page [Installing Java](InstallJava.md) for full instructions.
+
 ### Play Framework
 
 Intalling the Play Framework standalone distribution is optional. It is not required since
