@@ -52,8 +52,8 @@ testOptions in Test := Nil
 resolvers ++= Seq(
   Classpaths.sbtPluginReleases,
   "Typesafe repository"          at "https://repo.typesafe.com/typesafe/releases/",
-  "Akka Snapshots"               at "https://repo.akka.io/snapshots/",
-  "Sonatype OSS"                 at "https://oss.sonatype.org/content/repositories/releases"
+  "Sonatype OSS"                 at "https://oss.sonatype.org/content/repositories/releases",
+  "Akka Snapshots"               at "http://repo.akka.io/snapshots/"
 )
 
 libraryDependencies ++= Seq(
