@@ -8,24 +8,21 @@ Oracle. However, it can still be installed on Linux.
     http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
     ```
 
-    Note: Select the appropriate package for your architecture: x86 or x64.
-1. Make the file executable
-    ```
-    chmod +x /path/to/file/jdk-8u45-linux-*.bin
-    ```
+    and move the file to the `/usr/lib/jvm` directory.
 
-1. Run Sun/Oracle Java JDK binary
+    Note: Select the appropriate package for your architecture: x86 or x64.
+
+1. Extract the tarball (replace the `*` with the proper text):
     ```
-    /path/to/binary/jdk-8u45-linux-*.bin
+    cd /usr/lib/jvm
+    sudo tar zxvf jdk-8u45-linux-*.tag.gz
     ```
 
     There will be a newly created folder on the same path with the extracted files
-1. Move the folder to a system wide path and give it a more identifiable name
+
+1. Create a soft link to have a more generic name:
     ```
-    mkdir -p /usr/lib/jvm
-    cd /path/to/binary/
-    mv /path/to/binary/jdk1.8.0_45 /path/to/binary/java-8-oracle
-    mv /path/to/binary/java-8-oracle /usr/lib/jvm/
+    sudo ln -s jdk1.8.0_45 java-8-oracle
     ```
 
 1. Add the new version of java, javac and javaws as an system alternative and give it priority 1
