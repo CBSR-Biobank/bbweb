@@ -186,10 +186,10 @@ class Factory {
     val disabledStudy = defaultDisabledStudy
 
     val (vtMaxValueCount, vtOptions) = valueType match {
-      case AnnotationValueType.Text     => (0, Seq.empty)
-      case AnnotationValueType.Number   => (0, Seq.empty)
-      case AnnotationValueType.DateTime => (0, Seq.empty)
-      case AnnotationValueType.Select   => (maxValueCount, options)
+      case AnnotationValueType.Text     => (None, Seq.empty)
+      case AnnotationValueType.Number   => (None, Seq.empty)
+      case AnnotationValueType.DateTime => (None, Seq.empty)
+      case AnnotationValueType.Select   => (Some(maxValueCount), options)
     }
 
     val annotationType = ParticipantAnnotationType(
@@ -201,7 +201,7 @@ class Factory {
       name           = nameGenerator.next[ParticipantAnnotationType],
       description    = Some(nameGenerator.next[ParticipantAnnotationType]),
       valueType      = valueType,
-      maxValueCount  = Some(vtMaxValueCount),
+      maxValueCount  = vtMaxValueCount,
       options        = vtOptions,
       required       = required)
     domainObjects = domainObjects + (classOf[ParticipantAnnotationType] -> annotationType)
