@@ -7,6 +7,7 @@ import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 import org.biobank.domain.study.Study
 import org.biobank.domain.AnnotationValueType._
+import org.biobank.domain.participants.ParticipantRepository
 
 import akka.actor._
 import akka.persistence.SnapshotOffer

@@ -16,11 +16,4 @@ package study {
 
   }
 
-  trait HasParticipantId {
-
-    /** The ID of the study this object belongs to. */
-    val participantId: ParticipantId
-
-  }
-
 }

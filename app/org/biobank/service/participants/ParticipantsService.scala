@@ -5,6 +5,7 @@ import org.biobank.infrastructure.event.ParticipantEvents._
 import org.biobank.domain._
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
+import org.biobank.domain.participants._
 
 import javax.inject.{Inject => javaxInject, Named}
 import com.google.inject.ImplementedBy

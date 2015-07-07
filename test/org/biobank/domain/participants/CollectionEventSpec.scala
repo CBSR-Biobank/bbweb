@@ -1,7 +1,8 @@
-package org.biobank.domain.study
+package org.biobank.domain.participants
 
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
+import org.biobank.domain.study._
 
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime

@@ -1,6 +1,6 @@
 package org.biobank.infrastructure.event
 
-import org.biobank.domain.study._
+import org.biobank.domain.participants._
 
 import org.biobank.infrastructure.command.ParticipantCommands.ParticipantCommand
 import org.biobank.infrastructure.event.ParticipantEvents._

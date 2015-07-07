@@ -6,7 +6,7 @@ import org.biobank.domain.{
   AnnotationOption,
   AnnotationValueType
 }
-import org.biobank.domain.study.ParticipantAnnotation
+import org.biobank.domain.participants.ParticipantAnnotation
 
 import play.api.libs.json._
 import org.scalatest.Tag

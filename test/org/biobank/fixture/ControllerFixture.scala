@@ -5,6 +5,7 @@ import org.biobank.domain._
 import org.biobank.domain.user.{ UserRepository, UserRepositoryImpl }
 import org.biobank.domain.centre._
 import org.biobank.domain.study._
+import org.biobank.domain.participants._
 import org.biobank.service.{
   PasswordHasher,
   PasswordHasherImpl

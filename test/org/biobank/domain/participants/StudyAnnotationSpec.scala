@@ -1,4 +1,4 @@
-package org.biobank.domain.study
+package org.biobank.domain.participants
 
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._

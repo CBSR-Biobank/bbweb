@@ -8,6 +8,7 @@ import org.biobank.domain.{ AnnotationTypeId, AnnotationOption }
 import org.biobank.domain.user.UserId
 import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.domain.study._
+import org.biobank.domain.participants._
 
 import javax.inject.{Inject => javaxInject}
 import akka.actor._

@@ -3,6 +3,7 @@ package org.biobank.controllers.participants
 import org.biobank.fixture._
 import org.biobank.domain.{ AnnotationTypeId, AnnotationOption, AnnotationValueType }
 import org.biobank.domain.study._
+import org.biobank.domain.participants._
 import org.biobank.domain.JsonHelper._
 import org.biobank.fixture.ControllerFixture
 

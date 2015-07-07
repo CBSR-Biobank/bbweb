@@ -1,17 +1,17 @@
-package org.biobank.domain.study
+package org.biobank.domain.participants
 
 import org.biobank.domain._
 
-class CollectionEventAnnotationSpec extends StudyAnnotationSpec[CollectionEventAnnotation] {
+class ParticipantAnnotationSpec extends StudyAnnotationSpec[ParticipantAnnotation] {
 
   def createAnnotation(annotationTypeId: AnnotationTypeId,
                        stringValue:      Option[String],
                        numberValue:      Option[String],
                        selectedValues:   List[AnnotationOption]) = {
-    CollectionEventAnnotation.create(annotationTypeId, stringValue, numberValue, selectedValues)
+    ParticipantAnnotation.create(annotationTypeId, stringValue, numberValue, selectedValues)
   }
 
-  "A collectionEvent annotation" must {
+  "A participant annotation" should {
 
     annotationBehaviour
 

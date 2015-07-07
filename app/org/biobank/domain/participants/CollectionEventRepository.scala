@@ -1,4 +1,4 @@
-package org.biobank.domain.study
+package org.biobank.domain.participants
 
 import org.biobank.domain._
 import org.slf4j.LoggerFactory

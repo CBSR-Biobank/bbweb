@@ -1,4 +1,4 @@
-package org.biobank.domain.study
+package org.biobank.domain.participants
 
 import org.biobank.domain.{
   Annotation,
@@ -6,6 +6,7 @@ import org.biobank.domain.{
   AnnotationOption,
   DomainValidation
 }
+import org.biobank.domain.study._
 
 import play.api.libs.json._
 import play.api.libs.json.Reads._

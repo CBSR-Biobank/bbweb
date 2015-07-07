@@ -3,6 +3,7 @@ package org.biobank.domain
 import org.biobank.dto._
 import org.biobank.domain.user._
 import org.biobank.domain.study._
+import org.biobank.domain.participants._
 import org.biobank.domain.centre._
 import org.biobank.infrastructure._
 

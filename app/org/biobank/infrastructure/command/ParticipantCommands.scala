@@ -1,7 +1,8 @@
 package org.biobank.infrastructure.command
 
 import org.biobank.infrastructure._
-import org.biobank.domain.study._
+import org.biobank.domain.study.StudyId
+import org.biobank.domain.participants._
 import org.biobank.domain.ContainerTypeId
 
 import Commands._

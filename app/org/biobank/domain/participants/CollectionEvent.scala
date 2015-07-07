@@ -1,10 +1,11 @@
-package org.biobank.domain.study
+package org.biobank.domain.participants
 
 import org.biobank.domain.{
   ConcurrencySafeEntity,
   DomainValidation,
   ValidationKey
 }
+import org.biobank.domain.study._
 import org.biobank.infrastructure.JsonUtils._
 
 import org.joda.time.DateTime

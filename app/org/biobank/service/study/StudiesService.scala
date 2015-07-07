@@ -12,6 +12,7 @@ import org.biobank.domain.{
 }
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
+import org.biobank.domain.participants.ParticipantRepository
 
 import akka.util.Timeout
 import akka.actor._
