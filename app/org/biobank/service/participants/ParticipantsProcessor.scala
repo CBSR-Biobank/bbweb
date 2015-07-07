@@ -217,8 +217,8 @@ class ParticipantsProcessor @javaxInject() (
       val addedEvent = event.getParticipantAdded
 
       participantRepository.put(
-        Participant(studyId      = StudyId(event.id),
-                    id           = ParticipantId(event.id),
+        Participant(id           = ParticipantId(event.id),
+                    studyId      = StudyId(addedEvent.getStudyId),
                     version      = 0L,
                     timeAdded    = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
                     timeModified = None,

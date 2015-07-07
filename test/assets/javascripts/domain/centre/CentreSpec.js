@@ -61,8 +61,10 @@ define([
 
       Centre.list().then(function (pagedResult) {
         expect(pagedResult.items).toBeArrayOfSize(centres.length);
-        expect(pagedResult.items[0]).toEqual(jasmine.any(Centre));
-        pagedResult.items[0].compareToServerEntity(centres[0]);
+        _.each(pagedResult.items, function (item){
+          expect(item).toEqual(jasmine.any(Centre));
+          item.compareToServerEntity(centres[0]);
+        });
         done();
       });
       httpBackend.flush();

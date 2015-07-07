@@ -4,10 +4,11 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'underscore'], function(angular, _) {
+define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
   'use strict';
 
   extendedDomainEntities.$inject = [
+    'bbwebConfig',
     'ConcurrencySafeEntity',
     'AnnotationType',
     'Study',
@@ -18,7 +19,12 @@ define(['angular', 'underscore'], function(angular, _) {
     'ProcessingType',
     'SpecimenLinkType',
     'Participant',
-    'Annotation',
+    'CollectionEvent',
+    'DateTimeAnnotation',
+    'MultipleSelectAnnotation',
+    'NumberAnnotation',
+    'SingleSelectAnnotation',
+    'TextAnnotation',
     'AnnotationValueType',
     'Centre',
     'Location'
@@ -28,7 +34,8 @@ define(['angular', 'underscore'], function(angular, _) {
    * Extends domain entities by adding a 'compareToServerEntity' that can be called from test code to compare
    * a javascript domain object and a response from the server (for the same domain entity).
    */
-  function extendedDomainEntities(ConcurrencySafeEntity,
+  function extendedDomainEntities(bbwebConfig,
+                                  ConcurrencySafeEntity,
                                   AnnotationType,
                                   Study,
                                   SpecimenGroup,
@@ -38,7 +45,12 @@ define(['angular', 'underscore'], function(angular, _) {
                                   ProcessingType,
                                   SpecimenLinkType,
                                   Participant,
-                                  Annotation,
+                                  CollectionEvent,
+                                  DateTimeAnnotation,
+                                  MultipleSelectAnnotation,
+                                  NumberAnnotation,
+                                  SingleSelectAnnotation,
+                                  TextAnnotation,
                                   AnnotationValueType,
                                   Centre,
                                   Location) {
@@ -54,6 +66,7 @@ define(['angular', 'underscore'], function(angular, _) {
       var entity = args.shift();
 
       _.each(args, function(arg) {
+        //console.log('validateAttrs', arg, obj[arg], entity[arg]);
         expect(obj[arg]).toEqual(entity[arg]);
       });
     };
@@ -78,8 +91,7 @@ define(['angular', 'underscore'], function(angular, _) {
     };
 
     ConcurrencySafeEntity.prototype.compareToServerEntity = function (serverEntity) {
-      expect(this.isNew()).toBe(false);
-      validateAttrs(this, serverEntity, 'version');
+      validateAttrs(this, serverEntity, 'id', 'version');
     };
 
     AnnotationType.prototype.compareToServerEntity = function (serverEntity) {
@@ -157,33 +169,55 @@ define(['angular', 'underscore'], function(angular, _) {
       _.each(this.annotations, function (annotation) {
         var serverAnnotation = _.findWhere(serverEntity.annotations,
                                            { annotationTypeId: annotation.getAnnotationTypeId() });
-        Annotation.prototype.compareToServerEntity.call(annotation, serverEntity);
+        Annotation.prototype.compareToServerEntity.call(annotation, serverAnnotation);
       });
     };
 
-    Annotation.prototype.compareToServerEntity = function (serverEntity) {
-      switch (this.getValueType) {
+    CollectionEvent.prototype.compareToServerEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
+      validateAttrs(this,
+                    serverEntity,
+                    'participantId',
+                    'collectionEventTypeId',
+                    'timeCompleted',
+                    'visitNumber');
 
-      case AnnotationValueType.DATE_TIME():
-      case AnnotationValueType.TEXT():
-        expect(this.stringValue).toEqual(serverEntity.stringValue);
-        expect(this.numberValue).toBeNull();
-        expect(this.selectedValues).toBeEmptyArray();
-        break;
+      expect(this.annotations).toBeArrayOfSize(serverEntity.annotations.length);
+      _.each(this.annotations, function (annotation) {
 
-      case AnnotationValueType.NUMBER():
-        expect(this.numberValue).toEqual(serverEntity.numberValue);
-        expect(this.stringValue).toBeNull();
-        expect(this.selectedValues).toBeEmptyArray();
-        break;
+        // only compare annotations if annotation is of type Annotation
+        if (annotation.getAnnotationTypeId) {
+          var serverAnnotation = _.findWhere(serverEntity.annotations,
+                                             { annotationTypeId: annotation.getAnnotationTypeId() });
+          expect(serverAnnotation).toBeDefined();
+          annotation.compareToServerEntity.call(annotation, serverAnnotation);
+        }
+      });
+    };
 
-      case AnnotationValueType.SELECT():
-        expect(this.stringValue).toBeNull();
-        expect(this.numberValue).toBeNull();
-        expect(this.selectedValues).toBeArrayOfSize(serverEntity.selectedValues.length);
-        expect(this.selectedValues).toContainAll(serverEntity.selectedValues);
-        break;
-      }
+    DateTimeAnnotation.prototype.compareToServerEntity = function (serverEntity) {
+      expect(moment(this.date).local().format(bbwebConfig.dateTimeFormat))
+        .toEqual(serverEntity.stringValue);
+      expect(moment(this.time).local().format(bbwebConfig.dateTimeFormat))
+        .toEqual(serverEntity.stringValue);
+    };
+
+    MultipleSelectAnnotation.prototype.compareToServerEntity = function (serverEntity) {
+      expect(this.values).toBeArrayOfSize(serverEntity.selectedValues.length);
+      expect(this.values).toContainAll(_.pluck(serverEntity.selectedValues, 'value'));
+    };
+
+    NumberAnnotation.prototype.compareToServerEntity = function (serverEntity) {
+      expect(this.value.toString()).toEqual(serverEntity.numberValue.toString());
+    };
+
+    SingleSelectAnnotation.prototype.compareToServerEntity = function (serverEntity) {
+      expect(serverEntity.selectedValues).toBeArrayOfSize(1);
+      expect(this.value).toBe(_.pluck(serverEntity.selectedValues, 'value')[0]);
+    };
+
+    TextAnnotation.prototype.compareToServerEntity = function (serverEntity) {
+      expect(this.value).toEqual(serverEntity.stringValue);
     };
 
     Centre.prototype.compareToServerEntity = function (serverEntity) {

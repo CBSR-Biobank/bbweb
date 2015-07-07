@@ -49,7 +49,7 @@ define(['underscore'], function(_) {
     vm.paginationNumPages     = 5;
     vm.nameFilterUpdated      = nameFilterUpdated;
     vm.pageChanged            = pageChanged;
-    vm.clearFilter            = clearFiter;
+    vm.clearFilter            = clearFilter;
     vm.displayState           = getDisplayState();
     vm.navigateToStudyHref    = navigateToStudyHref;
     vm.showPagination         = getShowPagination();
@@ -90,7 +90,7 @@ define(['underscore'], function(_) {
       updateStudies();
     }
 
-    function clearFiter() {
+    function clearFilter() {
       vm.pagerOptions.filter = null;
       updateStudies();
     }

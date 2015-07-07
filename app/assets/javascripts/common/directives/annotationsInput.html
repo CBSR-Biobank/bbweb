@@ -7,7 +7,7 @@
            name="annotationValue"
            type="text"
            class="form-control"
-           ng-model="annotation.stringValue"
+           ng-model="annotation.value"
            ng-required="annotation.required"/>
 
     <!-- NUMBER -->
@@ -15,7 +15,7 @@
            name="annotationValue"
            type="number"
            class="form-control"
-           ng-model="annotation.numberValue"
+           ng-model="annotation.value"
            ng-required="annotation.required"/>
 
     <!-- DATE TIME -->
@@ -29,7 +29,7 @@
              datepicker-options="vm.datePicker.options"
              date-disabled="disabled(date, mode)"
              close-text="Close"
-             ng-model="annotation.dateTimeValue.date"
+             ng-model="annotation.date"
              ng-required="annotation.required"/>
       <span class="input-group-btn">
         <button type="button" class="btn btn-default" ng-click="vm.datePicker.open($event)">
@@ -38,7 +38,7 @@
       </span>
     </div>
     <div class="input-group" ng-switch-when="DateTime">
-      <timepicker ng-model="annotation.dateTimeValue.time"
+      <timepicker ng-model="annotation.time"
                   show-meridian="true"
                   ng-required="annotation.required"></timepicker>
     </div>
@@ -49,7 +49,7 @@
             name="annotationValue"
             class="form-control"
             name="annotationTypeValue"
-            ng-model="annotation.singleSelectValue"
+            ng-model="annotation.value"
             ng-options="option for option in annotation.annotationType.options"
             ng-required="annotation.required">
       <option value="">-- make a selection --</option>
@@ -59,7 +59,7 @@
     <div class="input-group"
          ng-switch-when="Select"
          ng-if="annotation.annotationType.maxValueCount > 1">
-      <div ng-repeat="value in annotation.multipleSelectValues">
+      <div ng-repeat="value in annotation.values">
         <label>
           <input type="checkbox"
                  name="annotationValue"

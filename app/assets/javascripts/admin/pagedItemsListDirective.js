@@ -51,7 +51,7 @@ define(['angular', 'underscore'], function(angular, _) {
     vm.statusFilterUpdated          = statusFilterUpdated;
     vm.pageChanged                  = pageChanged;
     vm.sortFieldSelected            = sortFieldSelected;
-    vm.clearFilters                 = clearFiters;
+    vm.clearFilters                 = clearFilters;
 
     vm.pagerOptions = {
       filter:     '',
@@ -131,7 +131,7 @@ define(['angular', 'underscore'], function(angular, _) {
       updateItems();
     }
 
-    function clearFiters() {
+    function clearFilters() {
       vm.pagerOptions.filter = null;
       vm.pagerOptions.status = vm.possibleStatuses[0];
       updateItems();

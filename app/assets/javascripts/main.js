@@ -8,7 +8,17 @@
   // -- RequireJS config --
   requirejs.config({
     // Packages = top-level folders; loads a contained file named 'main.js'
-    packages: ['common', 'admin', 'centres', 'collection', 'dashboard', 'domain', 'home', 'studies', 'users'],
+    packages: [
+      'common',
+      'admin',
+      'centres',
+      'collection',
+      'dashboard',
+      'domain',
+      'home',
+      'studies',
+      'users'
+    ],
 
     paths: {
       'requirejs':              '../lib/requirejs/require',

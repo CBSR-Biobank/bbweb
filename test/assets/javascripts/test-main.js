@@ -25,7 +25,17 @@ require.config({
   // Karma serves files under /base, which is the basePath from your config file
   baseUrl: '/base/app/assets/javascripts',
 
-  packages: ['admin', 'centres', 'collection', 'common', 'dashboard', 'domain', 'home', 'studies', 'users'],
+  packages: [
+    'admin',
+    'centres',
+    'collection',
+    'common',
+    'dashboard',
+    'domain',
+    'home',
+    'studies',
+    'users'
+  ],
 
   paths: {
     'jquery':             '../../../target/web/web-modules/main/webjars/lib/jquery/jquery',

@@ -137,7 +137,9 @@ define(['underscore'], function(_) {
     };
 
     function uri(/* studyId, specimenGroupId, version */) {
-      var studyId, specimenGroupId, version,
+      var studyId,
+          specimenGroupId,
+          version,
           result = '/studies',
           args = _.toArray(arguments);
 

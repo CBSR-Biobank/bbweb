@@ -71,7 +71,9 @@ define([
       _.each(annotationData, function (annotationItem) {
         var annotation = _.findWhere(participant.annotations,
                                      { annotationTypeId: annotationItem.annotationType.id });
+        expect(annotation).toEqual(jasmine.any(Annotation));
         annotation.compareToServerEntity(annotationItem.serverAnnotation);
+        expect(annotation.required).toBe(annotationItem.annotationType.required);
       });
     });
 
@@ -83,7 +85,7 @@ define([
       expect(participant.studyId).toBe(study.id);
     });
 
-    it('constructor with annotation type parameters has valid values', function() {
+    it('constructor with NO annotation type parameters has valid values', function() {
       var serverStudy = fakeEntities.study(),
           study = new Study(serverStudy),
           annotationData = generateAnnotationTypesAndServerAnnotations(serverStudy);
@@ -91,8 +93,11 @@ define([
       var participant = new Participant({}, study, _.pluck(annotationData, 'annotationType'));
 
       expect(participant.annotations).toBeArrayOfSize(annotationData.length);
-      _.each(participant.annotations, function (annotation) {
+      _.each(annotationData, function (annotationItem) {
+        var annotation = _.findWhere(participant.annotations,
+                                     { annotationTypeId: annotationItem.annotationType.id });
         expect(annotation).toEqual(jasmine.any(Annotation));
+        expect(annotation.required).toBe(annotationItem.annotationType.required);
       });
     });
 
@@ -193,39 +198,6 @@ define([
       });
       httpBackend.flush();
     });
-
-    function getParticipantEntities(isNew) {
-      var study,
-          serverAnnotationTypes,
-          serverParticipant,
-          annotationTypes,
-          participant;
-
-      study = fakeEntities.study();
-      serverAnnotationTypes = fakeEntities.allStudyAnnotationTypes(study);
-      serverParticipant = fakeEntities.participant({
-        studyId:         study.id,
-        annotationTypes: serverAnnotationTypes
-      });
-
-      annotationTypes = _.map(serverAnnotationTypes, function (serverAnnotationType) {
-        return new ParticipantAnnotationType(serverAnnotationType);
-      });
-
-      if (isNew) {
-        participant = new Participant(_.omit(serverParticipant, 'id'), study, annotationTypes);
-      } else {
-        participant = new Participant(serverParticipant, study, annotationTypes);
-      }
-
-      return {
-        serverStudy: study,
-        serverAnnotationTypes: serverAnnotationTypes,
-        serverParticipant: serverParticipant,
-        annotationTypes: annotationTypes,
-        participant: participant
-      };
-    }
 
     it('can add a participant with annotations', function(done) {
       var entities = getParticipantEntities(true), cmd;
@@ -330,6 +302,39 @@ define([
         }).toThrow();
       });
     });
+
+    function getParticipantEntities(isNew) {
+      var study,
+          serverAnnotationTypes,
+          serverParticipant,
+          annotationTypes,
+          participant;
+
+      study = fakeEntities.study();
+      serverAnnotationTypes = fakeEntities.allStudyAnnotationTypes(study);
+      serverParticipant = fakeEntities.participant({
+        studyId:         study.id,
+        annotationTypes: serverAnnotationTypes
+      });
+
+      annotationTypes = _.map(serverAnnotationTypes, function (serverAnnotationType) {
+        return new ParticipantAnnotationType(serverAnnotationType);
+      });
+
+      if (isNew) {
+        participant = new Participant(_.omit(serverParticipant, 'id'), study, annotationTypes);
+      } else {
+        participant = new Participant(serverParticipant, study, annotationTypes);
+      }
+
+      return {
+        serverStudy: study,
+        serverAnnotationTypes: serverAnnotationTypes,
+        serverParticipant: serverParticipant,
+        annotationTypes: annotationTypes,
+        participant: participant
+      };
+    }
 
     function generateAnnotationTypesAndServerAnnotations(serverStudy) {
       var annotationTypes = fakeEntities.allStudyAnnotationTypes(serverStudy);

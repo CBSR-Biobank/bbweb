@@ -51,9 +51,11 @@ define([
       studyAnnotationType:               studyAnnotationType,
       allStudyAnnotationTypes:           allStudyAnnotationTypes,
       study:                             study,
-      participant:                       participant,
       annotation:                        annotation,
       valueForAnnotation:                valueForAnnotation,
+
+      participant:                       participant,
+      collectionEvent:                   collectionEvent,
 
       centre:                            centre,
       location:                          location,
@@ -68,8 +70,10 @@ define([
       ENTITY_NAME_SPECIMEN_GROUP:        ENTITY_NAME_SPECIMEN_GROUP,
       ENTITY_NAME_ANNOTATION_TYPE:       ENTITY_NAME_ANNOTATION_TYPE,
       ENTITY_NAME_STUDY:                 ENTITY_NAME_STUDY,
-      ENTITY_NAME_PARTICIPANT:           ENTITY_NAME_PARTICIPANT,
       ENTITY_NAME_ANNOTATION:            ENTITY_NAME_ANNOTATION,
+
+      ENTITY_NAME_PARTICIPANT:           ENTITY_NAME_PARTICIPANT,
+      ENTITY_NAME_COLLECTION_EVENT:      ENTITY_NAME_COLLECTION_EVENT,
 
       ENTITY_NAME_CENTRE:                ENTITY_NAME_CENTRE,
       ENTITY_NAME_LOCATION:              ENTITY_NAME_LOCATION
@@ -82,8 +86,10 @@ define([
     function ENTITY_NAME_SPECIMEN_GROUP()        { return 'specimenGroup'; }
     function ENTITY_NAME_ANNOTATION_TYPE()       { return 'annotationType'; }
     function ENTITY_NAME_STUDY()                 { return 'study'; }
-    function ENTITY_NAME_PARTICIPANT()           { return 'participant'; }
     function ENTITY_NAME_ANNOTATION()            { return 'annotation'; }
+
+    function ENTITY_NAME_PARTICIPANT()           { return 'participant'; }
+    function ENTITY_NAME_COLLECTION_EVENT()      { return 'collectionEvent'; }
 
     function ENTITY_NAME_CENTRE()                { return 'centre'; }
     function ENTITY_NAME_LOCATION()              { return 'location'; }
@@ -330,23 +336,6 @@ define([
       return extendWithCommonFields(study);
     }
 
-    function participant(options) {
-      options = options || {};
-
-      var participant =  {
-        id:          utils.uuid(),
-        studyId:     options.studyId || null,
-        uniqueId:    domainEntityNameNext(ENTITY_NAME_PARTICIPANT())
-      };
-
-      options.annotationTypes = options.annotationTypes || {};
-      participant.annotations = _.map(options.annotationTypes, function (annotationType) {
-        return annotation(valueForAnnotation(annotationType), annotationType);
-      });
-
-      return extendWithCommonFields(participant);
-    }
-
     function annotation(value, annotationType) {
       var annotation = {
         annotationTypeId: annotationType.id,
@@ -365,14 +354,16 @@ define([
         break;
 
       case AnnotationValueType.SELECT():
-        if (annotationType.maxValueCount === 1) {
-          annotation.selectedValues =  [{ annotationTypeId: annotationType.id, value: value }];
-        } else if (annotationType.maxValueCount > 1) {
-          annotation.selectedValues =_.map(value, function (v) {
-            return { annotationTypeId: annotationType.id, value: v };
-          });
-        } else {
-          throw new Error('invalid max value count for annotation: ' + annotationType.maxValueCount);
+        if (value) {
+          if (annotationType.maxValueCount === 1) {
+            annotation.selectedValues =  [{ annotationTypeId: annotationType.id, value: value }];
+          } else if (annotationType.maxValueCount > 1) {
+            annotation.selectedValues =_.map(value, function (v) {
+              return { annotationTypeId: annotationType.id, value: v };
+            });
+          } else {
+            throw new Error('invalid max value count for annotation: ' + annotationType.maxValueCount);
+          }
         }
         break;
 
@@ -406,6 +397,42 @@ define([
       }
 
       throw new Error('invalid value type: ' + annotationType.valueType);
+    }
+
+    function participant(options) {
+      options = options || {};
+
+      var participant =  {
+        id:          utils.uuid(),
+        studyId:     options.studyId || null,
+        uniqueId:    domainEntityNameNext(ENTITY_NAME_PARTICIPANT())
+      };
+
+      options.annotationTypes = options.annotationTypes || {};
+      participant.annotations = _.map(options.annotationTypes, function (annotationType) {
+        return annotation(valueForAnnotation(annotationType), annotationType);
+      });
+
+      return extendWithCommonFields(participant);
+    }
+
+    function collectionEvent(options) {
+      options = options || {};
+
+      var collectionEvent =  {
+        id:                    utils.uuid(),
+        participantId:         options.participantId || null,
+        collectionEventTypeId: options.collectionEventTypeId || null,
+        timeCompleted:         moment(faker.date.recent(10)).format(),
+        visitNumber:           options.visitNumber || 1
+      };
+
+      options.annotationTypes = options.annotationTypes || {};
+      collectionEvent.annotations = _.map(options.annotationTypes, function (annotationType) {
+        return annotation(valueForAnnotation(annotationType), annotationType);
+      });
+
+      return extendWithCommonFields(collectionEvent);
     }
 
     function centre() {

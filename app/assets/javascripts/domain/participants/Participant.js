@@ -10,8 +10,8 @@ define(['underscore'], function(_) {
     'funutils',
     'validationService',
     'ConcurrencySafeEntity',
-    'participantsService',
-    'Annotation'
+    'biobankApi',
+    'annotationFactory'
   ];
 
   /**
@@ -20,8 +20,8 @@ define(['underscore'], function(_) {
   function ParticipantFactory(funutils,
                               validationService,
                               ConcurrencySafeEntity,
-                              participantsService,
-                              Annotation) {
+                              biobankApi,
+                              annotationFactory) {
 
     var requiredKeys = ['id', 'studyId', 'uniqueId', 'annotations', 'version'];
 
@@ -43,7 +43,13 @@ define(['underscore'], function(_) {
       createObj);
 
     /**
+     * To convert server side annotations to Annotation class call setAnnotationTypes().
+     *
      * @param {object} obj.annotations - server response for annotation.
+     *
+     * @param {ParticiapantAnnotationType} annotationTypes. If both collectionEventType and
+     * collectionEventTypes are passed to the constructor, the annotations will be converted to Annotation
+     * objects.
      */
     function Participant(obj, study, annotationTypes) {
       var defaults = {
@@ -62,7 +68,7 @@ define(['underscore'], function(_) {
       }
 
       if (annotationTypes) {
-        this.setAnnotationTypes(obj.annotations, annotationTypes);
+        this.setAnnotationTypes(annotationTypes);
       }
     }
 
@@ -90,15 +96,16 @@ define(['underscore'], function(_) {
     };
 
     Participant.get = function (studyId, id) {
-      return participantsService.get(studyId, id).then(function (reply) {
+      return biobankApi.get(uri(studyId, id)).then(function (reply) {
         return Participant.create(reply);
       });
     };
 
     Participant.getByUniqueId = function (studyId, uniqueId) {
-      return participantsService.getByUniqueId(studyId, uniqueId).then(function (reply) {
-        return Participant.create(reply);
-      });
+      return biobankApi.get(uri(studyId) + '/uniqueId/' + uniqueId)
+        .then(function (reply) {
+          return Participant.create(reply);
+        });
     };
 
     Participant.prototype.setStudy = function (study) {
@@ -106,27 +113,39 @@ define(['underscore'], function(_) {
       this.studyId = study.id;
     };
 
-    Participant.prototype.setAnnotationTypes = function (serverAnnotations, annotationTypes) {
+    /**
+     * Converts the server side annotations to Annotation objects, which make it easier to manage them.
+     *
+     * @param {ParticipantAnnotationType} annotationTypes - the annotation types allowed for this participant.
+     */
+    Participant.prototype.setAnnotationTypes = function (annotationTypes) {
+      var self = this,
+          differentIds;
+
+      self.annotations = self.annotations || [];
+
       // make sure the annotations ids match up with the corresponding annotation types
-      var differentIds = _.difference(_.pluck(serverAnnotations, 'annotationTypeId'),
-                                      _.pluck(annotationTypes, 'id'));
+      differentIds = _.difference(_.pluck(self.annotations, 'annotationTypeId'),
+                                  _.pluck(annotationTypes, 'id'));
 
       if (differentIds.length > 0) {
         throw new Error('annotation types not found: ' + differentIds);
       }
 
-      serverAnnotations = serverAnnotations || [];
-      this.annotations = _.map(annotationTypes, function (annotationType) {
-        var serverAnnotation = _.findWhere(serverAnnotations, { annotationTypeId: annotationType.id }) || {};
-        return new Annotation(serverAnnotation, annotationType);
+      self.annotations = _.map(annotationTypes, function (annotationType) {
+        var serverAnnotation = _.findWhere(self.annotations, { annotationTypeId: annotationType.id });
+
+        // undefined is valid input
+        return annotationFactory.create(serverAnnotation, annotationType);
       });
     };
 
     Participant.prototype.addOrUpdate = function () {
-      var self = this;
+      var self = this,
+          cmd = _.pick(self, 'studyId', 'uniqueId');
 
       // convert annotations to server side entities
-      self.annotations = _.map(self.annotations, function (annotation) {
+      cmd.annotations = _.map(self.annotations, function (annotation) {
         // make sure required annotations have values
         if (!annotation.isValid()) {
           throw new Error('required annotation has no value: annotationId: ' +
@@ -135,14 +154,45 @@ define(['underscore'], function(_) {
         return annotation.getServerAnnotation();
       });
 
-      return participantsService.addOrUpdate(self).then(function(reply) {
+      return addOrUpdateInternal(cmd).then(function(reply) {
         return Participant.create(reply);
       });
+
+      // --
+
+      function addOrUpdateInternal(cmd) {
+        if (self.isNew()) {
+          return biobankApi.post(uri(self.studyId), cmd);
+        }
+        _.extend(cmd, { id: self.id, expectedVersion: self.version });
+        return biobankApi.put(uri(self.studyId, self.id), cmd);
+      }
     };
 
     /** return constructor function */
     return Participant;
   }
 
+    function uri(/* studyId, participantId */) {
+      var studyId,
+          participantId,
+          result = '/studies',
+          args = _.toArray(arguments);
+
+      if (args.length < 1) {
+        throw new Error('participant id not specified');
+      }
+
+      studyId = args.shift();
+      result += '/' + studyId + '/participants';
+
+
+      if (args.length > 0) {
+        participantId = args.shift();
+        result += '/' + participantId;
+      }
+
+      return result;
+    }
   return ParticipantFactory;
 });

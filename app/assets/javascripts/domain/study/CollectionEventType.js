@@ -90,10 +90,9 @@ define(['underscore'], function(_) {
 
       obj = obj || {};
       ConcurrencySafeEntity.call(self, obj);
-
-      options = options || {};
       _.extend(self, defaults, _.pick(obj, _.keys(defaults)));
 
+      options = options || {};
       if (options.studySpecimenGroups) {
         self.studySpecimenGroups(options.studySpecimenGroups);
       }

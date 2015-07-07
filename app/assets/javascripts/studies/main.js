@@ -7,14 +7,13 @@
 define(function (require) {
   'use strict';
 
-  var angular                      = require('angular'),
+  var angular                           = require('angular'),
       ceventAnnotationTypesService      = require('./ceventAnnotationTypesService'),
-      participantsService          = require('./participantsService'),
       participantAnnotationTypesService = require('./participantAnnotationTypesService'),
-      specimenGroupsService        = require('./specimenGroupsService'),
+      specimenGroupsService             = require('./specimenGroupsService'),
       spcLinkAnnotationTypesService     = require('./spcLinkAnnotationTypesService'),
       StudyAnnotationTypesService       = require('./StudyAnnotationTypesService'),
-      studiesService               = require('./studiesService');
+      studiesService                    = require('./studiesService');
 
   var module = angular.module('biobank.studies', []);
 
@@ -22,10 +21,9 @@ define(function (require) {
 
   module.service('ceventAnnotationTypesService',      ceventAnnotationTypesService);
   module.service('participantAnnotationTypesService', participantAnnotationTypesService);
-  module.service('specimenGroupsService',        specimenGroupsService);
-  module.service('participantsService',          participantsService);
+  module.service('specimenGroupsService',             specimenGroupsService);
   module.service('spcLinkAnnotationTypesService',     spcLinkAnnotationTypesService);
-  module.service('studiesService',               studiesService);
+  module.service('studiesService',                    studiesService);
 
   return module;
 });

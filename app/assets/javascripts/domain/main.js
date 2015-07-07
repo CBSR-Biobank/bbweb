@@ -12,7 +12,6 @@ define(function (require) {
   var angular                             = require('angular'),
 
       AnatomicalSourceType                = require('./AnatomicalSourceType'),
-      Annotation                          = require('./Annotation'),
       AnnotationType                      = require('./AnnotationType'),
       AnnotationTypeData                  = require('./AnnotationTypeData'),
       AnnotationTypeViewer                = require('./AnnotationTypeViewer'),
@@ -20,6 +19,14 @@ define(function (require) {
       AnnotationMaxValueCount             = require('./AnnotationMaxValueCount'),
       annotationTypeValidation            = require('./annotationTypeValidation'),
       domainEntityService                 = require('./domainEntityService'),
+
+      annotationFactory                   = require('./annotations/AnnotationFactory'),
+      Annotation                          = require('./annotations/Annotation'),
+      DateTimeAnnotation                  = require('./annotations/DateTimeAnnotation'),
+      MultipleSelectAnnotation            = require('./annotations/MultipleSelectAnnotation'),
+      NumberAnnotation                    = require('./annotations/NumberAnnotation'),
+      SingleSelectAnnotation              = require('./annotations/SingleSelectAnnotation'),
+      TextAnnotation                      = require('./annotations/TextAnnotation'),
 
       Centre                              = require('./centre/Centre'),
       CentreCounts                        = require('./centre/CentreCounts'),
@@ -36,7 +43,6 @@ define(function (require) {
       CollectionDto                       = require('./study/CollectionDto'),
       CollectionEventAnnotationType       = require('./study/CollectionEventAnnotationType'),
       CollectionEventType                 = require('./study/CollectionEventType'),
-      Participant                         = require('./study/Participant'),
       ParticipantAnnotationType           = require('./study/ParticipantAnnotationType'),
       ProcessingDto                       = require('./study/ProcessingDto'),
       ProcessingType                      = require('./study/ProcessingType'),
@@ -56,6 +62,9 @@ define(function (require) {
       participantAnnotationTypeValidation = require('./study/participantAnnotationTypeValidation'),
       studyAnnotationTypeValidation       = require('./study/studyAnnotationTypeValidation'),
 
+      Participant                         = require('./participants/Participant'),
+      CollectionEvent                     = require('./participants/CollectionEvent'),
+
       User                                = require('./user/User'),
       UserCounts                          = require('./user/UserCounts'),
       UserStatus                          = require('./user/UserStatus'),
@@ -64,11 +73,18 @@ define(function (require) {
 
   var module = angular.module('biobank.domain', []);
 
-  module.factory('Annotation',                          Annotation);
   module.factory('AnnotationType',                      AnnotationType);
   module.factory('AnnotationTypeData',                  AnnotationTypeData);
   module.factory('AnnotationTypeViewer',                AnnotationTypeViewer);
   module.service('domainEntityService',                 domainEntityService);
+
+  module.factory('Annotation',                          Annotation);
+  module.factory('DateTimeAnnotation',                  DateTimeAnnotation);
+  module.factory('MultipleSelectAnnotation',            MultipleSelectAnnotation);
+  module.factory('NumberAnnotation',                    NumberAnnotation);
+  module.factory('SingleSelectAnnotation',              SingleSelectAnnotation);
+  module.factory('TextAnnotation',                      TextAnnotation);
+  module.service('annotationFactory',                   annotationFactory);
 
   module.factory('Centre',                              Centre);
   module.factory('CentreCounts',                        CentreCounts);
@@ -80,7 +96,6 @@ define(function (require) {
   module.factory('EntityViewer',                        EntityViewer);
   module.factory('Location',                            Location);
   module.factory('LocationViewer',                      LocationViewer);
-  module.factory('Participant',                         Participant);
   module.factory('ParticipantAnnotationType',           ParticipantAnnotationType);
   module.factory('ProcessingTypeViewer',                ProcessingTypeViewer);
   module.factory('SpcLinkTypeViewer',                   SpcLinkTypeViewer);
@@ -94,6 +109,9 @@ define(function (require) {
   module.factory('StudyCounts',                         StudyCounts);
   module.factory('StudyAnnotationType',                 StudyAnnotationType);
   module.factory('StudyViewer',                         StudyViewer);
+
+  module.factory('Participant',                         Participant);
+  module.factory('CollectionEvent',                     CollectionEvent);
 
   module.service('AnatomicalSourceType',                AnatomicalSourceType);
   module.service('AnnotationValueType',                 AnnotationValueType);

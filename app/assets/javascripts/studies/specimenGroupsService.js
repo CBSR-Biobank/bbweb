@@ -5,19 +5,19 @@
 define(['angular'], function(angular) {
   'use strict';
 
-  specimenGroupsServiceFactory.$inject = ['biobankApi', 'funutils'];
+  specimenGroupsServiceFactory.$inject = ['biobankApi'];
 
   /**
    * Service to access specimen groups.
    */
-  function specimenGroupsServiceFactory(biobankApi, funutils) {
+  function specimenGroupsServiceFactory(biobankApi) {
     var service = {
-      anatomicalSourceTypes   : anatomicalSourceTypes,
-      specimenTypes           : specimenTypes,
-      preservTypes            : preservTypes,
-      preservTempTypes        : preservTempTypes,
-      specimenGroupValueTypes : specimenGroupValueTypes,
-      specimenGroupIdsInUse   : specimenGroupIdsInUse
+      anatomicalSourceTypes:   anatomicalSourceTypes,
+      specimenTypes:           specimenTypes,
+      preservTypes:            preservTypes,
+      preservTempTypes:        preservTempTypes,
+      specimenGroupValueTypes: specimenGroupValueTypes,
+      specimenGroupIdsInUse:   specimenGroupIdsInUse
     };
     return service;
 

@@ -22,7 +22,7 @@ define([
     var scope,
         compile,
         element,
-        Annotation,
+        annotationFactory,
         ParticipantAnnotationType,
         AnnotationValueType,
         fakeEntities;
@@ -32,14 +32,14 @@ define([
     beforeEach(inject(function($compile,
                                $rootScope,
                                $templateCache,
-                               _Annotation_,
+                               _annotationFactory_,
                                _ParticipantAnnotationType_,
                                _AnnotationValueType_,
                                fakeDomainEntities) {
 
       compile                   = $compile;
       scope                     = $rootScope;
-      Annotation                = _Annotation_;
+      annotationFactory         = _annotationFactory_;
       ParticipantAnnotationType = _ParticipantAnnotationType_;
       AnnotationValueType       = _AnnotationValueType_;
       fakeEntities              = fakeDomainEntities;
@@ -54,8 +54,8 @@ define([
     }));
 
     function createAnnotation(valueType) {
-      return new Annotation(
-        {},
+      return annotationFactory.create(
+        undefined,
         new ParticipantAnnotationType(
           fakeEntities.annotationType({ valueType: valueType, required: true })
         ));
@@ -78,7 +78,7 @@ define([
       expect(element.find('input').length).toBe(1);
       expect(element.find('input').eq(0).attr('type')).toBe('text');
       scope.form.annotationSubForm.annotationValue.$setViewValue(annotationValue);
-      expect(scope.model.annotations[0].stringValue).toBe(annotationValue);
+      expect(scope.model.annotations[0].value).toBe(annotationValue);
       expect(scope.form.annotationSubForm.annotationValue.$valid).toBe(true);
     });
 
@@ -90,7 +90,7 @@ define([
       expect(element.find('input').length).toBe(1);
       expect(element.find('input').eq(0).attr('type')).toBe('number');
       scope.form.annotationSubForm.annotationValue.$setViewValue(annotationValue.toString());
-      expect(scope.model.annotations[0].numberValue).toBe(annotationValue);
+      expect(scope.model.annotations[0].value).toBe(annotationValue);
       expect(scope.form.annotationSubForm.annotationValue.$valid).toBe(true);
     });
 
@@ -134,7 +134,7 @@ define([
           required:      true
         }));
 
-      annotations = [ new Annotation({}, annotationType) ];
+      annotations = [ annotationFactory.create(undefined, annotationType) ];
 
       scope = createScope(annotations);
 
@@ -146,7 +146,7 @@ define([
 
       _.each(annotationType.options, function (option) {
         scope.form.annotationSubForm.annotationValue.$setViewValue(option);
-        expect(scope.model.annotations[0].singleSelectValue).toBe(option);
+        expect(scope.model.annotations[0].value).toBe(option);
         expect(scope.form.annotationSubForm.annotationValue.$valid).toBe(true);
       });
     });
@@ -161,7 +161,7 @@ define([
           options: [ 'option1', 'option2', 'option3' ],
           required: true }));
 
-      annotation = new Annotation({}, annotationType);
+      annotation = annotationFactory.create(undefined, annotationType);
 
       scope = createScope([ annotation ]);
 
@@ -185,7 +185,7 @@ define([
           required:      true
         }));
 
-      annotation = new Annotation({}, annotationType);
+      annotation = annotationFactory.create(undefined, annotationType);
 
       scope = createScope([ annotation ]);
 

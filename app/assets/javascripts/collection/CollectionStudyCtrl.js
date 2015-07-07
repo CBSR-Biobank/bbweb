@@ -10,7 +10,7 @@ define([], function() {
     '$state',
     'stateHelper',
     'modalService',
-    'participantsService',
+    'Participant',
     'study'
   ];
 
@@ -20,7 +20,7 @@ define([], function() {
   function CollectionStudyCtrl($state,
                                stateHelper,
                                modalService,
-                               participantsService,
+                               Participant,
                                study) {
     var vm = this;
 
@@ -34,7 +34,7 @@ define([], function() {
         return;
       }
 
-      participantsService.getByUniqueId(vm.study.id, vm.uniqueId)
+      Participant.getByUniqueId(vm.study.id, vm.uniqueId)
         .then(function (participant) {
           $state.go('home.collection.study.participant', { participantId: participant.id });
         })
