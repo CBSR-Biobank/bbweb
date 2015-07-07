@@ -4,7 +4,6 @@ import org.biobank.controllers._
 import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import org.biobank.service.participants.ParticipantsService
-import org.biobank.infrastructure.command.ParticipantCommands._
 
 import javax.inject.{Inject => javaxInject}
 import scala.concurrent.Future
@@ -15,6 +14,8 @@ class CollectionEventsController @javaxInject() (val authToken:      AuthToken,
                                                  val participantsService: ParticipantsService)
     extends CommandController
     with JsonController {
+
+  import org.biobank.infrastructure.command.ParticipantCommands._
 
   def get(participantId: String, ceventId: Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>

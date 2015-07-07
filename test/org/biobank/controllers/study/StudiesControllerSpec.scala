@@ -1,6 +1,5 @@
 package org.biobank.controllers.study
 
-import org.biobank.fixture.NameGenerator
 import org.biobank.controllers._
 import org.biobank.dto._
 import org.biobank.domain.study._

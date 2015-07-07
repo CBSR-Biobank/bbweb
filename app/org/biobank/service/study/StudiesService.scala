@@ -483,7 +483,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
     replyWithSpecimenGroup(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
 
   def removeSpecimenGroup(cmd: RemoveSpecimenGroupCmd): Future[DomainValidation[Boolean]] =
-    validationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    eventValidationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
 
   // collection event types
   def addCollectionEventType(cmd: AddCollectionEventTypeCmd)
@@ -497,7 +497,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   def removeCollectionEventType(cmd: RemoveCollectionEventTypeCmd)
       : Future[DomainValidation[Boolean]] =
-    validationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    eventValidationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
 
   // collection event annotation types
   def addCollectionEventAnnotationType(cmd: AddCollectionEventAnnotationTypeCmd)
@@ -512,7 +512,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   def removeCollectionEventAnnotationType(cmd: RemoveCollectionEventAnnotationTypeCmd)
     : Future[DomainValidation[Boolean]] =
-    validationToBoolean(
+    eventValidationToBoolean(
       ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
 
   // participant annotation types
@@ -528,7 +528,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   def removeParticipantAnnotationType(cmd: RemoveParticipantAnnotationTypeCmd)
     : Future[DomainValidation[Boolean]] =
-    validationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    eventValidationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
 
   // specimen link annotation types
   def specimenLinkAnnotationTypesForStudy(studyId: String)
@@ -550,7 +550,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   def removeSpecimenLinkAnnotationType(cmd: RemoveSpecimenLinkAnnotationTypeCmd)
     : Future[DomainValidation[Boolean]] =
-    validationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    eventValidationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
 
   // processing types
   def addProcessingType(cmd: AddProcessingTypeCmd)
@@ -564,7 +564,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   def removeProcessingType(cmd: RemoveProcessingTypeCmd)
     : Future[DomainValidation[Boolean]] =
-    validationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    eventValidationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
 
   // specimen link types
   def addSpecimenLinkType(cmd: AddSpecimenLinkTypeCmd)
@@ -578,7 +578,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   def removeSpecimenLinkType(cmd: RemoveSpecimenLinkTypeCmd)
       : Future[DomainValidation[Boolean]] =
-    validationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    eventValidationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
 
   private def replyWithStudy(future: Future[DomainValidation[StudyEvent]])
       : Future[DomainValidation[Study]] = {

@@ -2,7 +2,7 @@ package org.biobank.service.participants
 
 import org.biobank.service.Processor
 import org.biobank.infrastructure.command.ParticipantCommands._
-import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.infrastructure.event.ParticipantEvents._
 import org.biobank.infrastructure.event.CommonEvents._
 import org.biobank.domain.{ AnnotationTypeId, AnnotationOption }
 import org.biobank.domain.user.UserId
@@ -34,8 +34,10 @@ class CollectionEventsProcessor @javaxInject() (
   val annotationTypeRepository:      CollectionEventAnnotationTypeRepository,
   val participantRepository:         ParticipantRepository)
     extends Processor {
-  import StudyEvent.EventType
+
+  import ParticipantEvent.EventType
   import org.biobank.infrastructure.event.EventUtils._
+  import org.biobank.infrastructure.event.ParticipantEventsUtil._
 
   override def persistenceId = "collection-event-processor-id"
 
@@ -46,7 +48,7 @@ class CollectionEventsProcessor @javaxInject() (
    * processed to recreate the current state of the aggregate.
    */
   val receiveRecover: Receive = {
-    case event: StudyEvent => event.eventType match {
+    case event: ParticipantEvent => event.eventType match {
       case et: EventType.CollectionEventAdded   => applyCollectionEventAddedEvent(event)
       case et: EventType.CollectionEventUpdated => applyCollectionEventUpdatedEvent(event)
 
@@ -102,7 +104,6 @@ class CollectionEventsProcessor @javaxInject() (
       event                <- createEvent(participant, cmd).withCollectionEventAdded(
         CollectionEventAddedEvent(
           collectionEventId     = Some(collectionEventId.id),
-          participantId         = Some(cmd.participantId),
           collectionEventTypeId = Some(cmd.collectionEventTypeId),
           timeCompleted         = Some(ISODateTimeFormatter.print(cmd.timeCompleted)),
           visitNumber           = Some(cmd.visitNumber),
@@ -128,7 +129,6 @@ class CollectionEventsProcessor @javaxInject() (
         event                <- createEvent(participant, cmd).withCollectionEventUpdated(
           CollectionEventUpdatedEvent(
             collectionEventId     = Some(cevent.id.id),
-            participantId         = Some(cmd.participantId),
             collectionEventTypeId = Some(cmd.collectionEventTypeId),
             version               = Some(updatedCevent.version),
             timeCompleted         = Some(ISODateTimeFormatter.print(cmd.timeCompleted)),
@@ -150,8 +150,8 @@ class CollectionEventsProcessor @javaxInject() (
 
   def update
     (cmd: CollectionEventModifyCommand)
-    (fn: (Participant, CollectionEvent) => DomainValidation[StudyEvent])
-      : DomainValidation[StudyEvent] = {
+    (fn: (Participant, CollectionEvent) => DomainValidation[ParticipantEvent])
+      : DomainValidation[ParticipantEvent] = {
     val collectionEventId = CollectionEventId(cmd.id)
     val participantId = ParticipantId(cmd.participantId)
 
@@ -172,7 +172,7 @@ class CollectionEventsProcessor @javaxInject() (
     }
   }
 
-  private def applyCollectionEventAddedEvent(event: StudyEvent): Unit = {
+  private def applyCollectionEventAddedEvent(event: ParticipantEvent): Unit = {
     log.debug(s"applyCollectionEventAddedEvent: event:$event")
 
     if (event.eventType.isCollectionEventAdded) {
@@ -181,7 +181,7 @@ class CollectionEventsProcessor @javaxInject() (
       collectionEventRepository.put(
         CollectionEvent(
           id                    = CollectionEventId(addedEvent.getCollectionEventId),
-          participantId         = ParticipantId(addedEvent.getParticipantId),
+          participantId         = ParticipantId(event.id),
           collectionEventTypeId = CollectionEventTypeId(addedEvent.getCollectionEventTypeId),
           version               = 0L,
           timeAdded             = ISODateTimeParser.parseDateTime(event.getTime),
@@ -195,13 +195,13 @@ class CollectionEventsProcessor @javaxInject() (
     }
   }
 
-  private def applyCollectionEventUpdatedEvent(event: StudyEvent): Unit = {
+  private def applyCollectionEventUpdatedEvent(event: ParticipantEvent): Unit = {
     log.debug(s"applyCollectionEventUpdatedEvent: event:$event")
 
     if (event.eventType.isCollectionEventUpdated) {
       val updatedEvent = event.getCollectionEventUpdated
       val collectionEventId = CollectionEventId(updatedEvent.getCollectionEventId)
-      val participantId = ParticipantId(updatedEvent.getParticipantId)
+      val participantId = ParticipantId(event.id)
       val collectionEventTypeId = CollectionEventTypeId(updatedEvent.getCollectionEventTypeId)
 
       collectionEventRepository.withId(participantId, collectionEventId).fold(
@@ -222,7 +222,7 @@ class CollectionEventsProcessor @javaxInject() (
     }
   }
 
-  private def applyCollectionEventRemovedEvent(event: StudyEvent): Unit = {
+  private def applyCollectionEventRemovedEvent(event: ParticipantEvent): Unit = {
     if (event.eventType.isCollectionEventRemoved) {
       collectionEventRepository.getByKey(
         CollectionEventId(event.getCollectionEventRemoved.getCollectionEventId))
@@ -237,14 +237,6 @@ class CollectionEventsProcessor @javaxInject() (
       log.error(s"applyCollectionEventRemovedEvent: invalid event type: $event")
     }
   }
-
-  /**
-   * Creates an event with the userId for the user that issued the command, and the current date and time.
-   */
-  def createEvent(participant: Participant, command: CollectionEventCommand) =
-    StudyEvent(id     = participant.studyId.id,
-               userId = command.userId,
-               time   = Some(ISODateTimeFormat.dateTime.print(DateTime.now)))
 
   val ErrMsgVisitNumberExists = "a collection event with this visit number already exists"
 

@@ -1,11 +1,11 @@
 package org.biobank.service
 
 import org.biobank.domain.DomainValidation
-import org.biobank.infrastructure.event.StudyEvents._
 
 import scala.util.Random
 import scala.concurrent._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import com.trueaccord.scalapb.GeneratedMessage
 
 object Utils {
 
@@ -23,7 +23,7 @@ object Utils {
   /**
    * Returns 'true' wrapped in a validation if the event does not fail validation.
    */
-  def validationToBoolean(future: Future[DomainValidation[StudyEvent]])
+  def eventValidationToBoolean(future: Future[DomainValidation[GeneratedMessage]])
       : Future[DomainValidation[Boolean]] =
     future map { validation => validation map { event => true } }
 

@@ -1,7 +1,7 @@
 package org.biobank.service.participants
 
 import org.biobank.infrastructure.command.ParticipantCommands._
-import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.infrastructure.event.ParticipantEvents._
 import org.biobank.domain._
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
@@ -77,12 +77,12 @@ class ParticipantsServiceImpl @javaxInject() (
 
   def add(cmd: AddParticipantCmd)
       : Future[DomainValidation[Participant]] = {
-    replyWithParticipant(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    replyWithParticipant(ask(processor, cmd).mapTo[DomainValidation[ParticipantEvent]])
   }
 
   def update(cmd: UpdateParticipantCmd)
       : Future[DomainValidation[Participant]] = {
-    replyWithParticipant(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    replyWithParticipant(ask(processor, cmd).mapTo[DomainValidation[ParticipantEvent]])
   }
 
   //-- Collection Event
@@ -122,39 +122,32 @@ class ParticipantsServiceImpl @javaxInject() (
 
   def addCollectionEvent(cmd: AddCollectionEventCmd)
       : Future[DomainValidation[CollectionEvent]] =
-    replyWithCollectionEvent(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    replyWithCollectionEvent(ask(processor, cmd).mapTo[DomainValidation[ParticipantEvent]])
 
   def updateCollectionEvent(cmd: UpdateCollectionEventCmd)
       : Future[DomainValidation[CollectionEvent]] =
-    replyWithCollectionEvent(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    replyWithCollectionEvent(ask(processor, cmd).mapTo[DomainValidation[ParticipantEvent]])
 
   def removeCollectionEvent(cmd: RemoveCollectionEventCmd)
       : Future[DomainValidation[Boolean]] =
-    validationToBoolean(ask(processor, cmd).mapTo[DomainValidation[StudyEvent]])
+    eventValidationToBoolean(ask(processor, cmd).mapTo[DomainValidation[ParticipantEvent]])
 
   def checkUnique(uniqueId: String): DomainValidation[Boolean] = {
     val isUnique = ! participantRepository.getValues.exists(p => p.uniqueId == uniqueId)
     isUnique.success
   }
 
-  private def replyWithParticipant(future: Future[DomainValidation[StudyEvent]])
+  private def replyWithParticipant(future: Future[DomainValidation[ParticipantEvent]])
       : Future[DomainValidation[Participant]] = {
     future map { validation =>
       for {
         event <- validation
-        pt <- {
-          val pId = if (event.eventType.isParticipantAdded) {
-            event.getParticipantAdded.getParticipantId
-          } else {
-            event.getParticipantUpdated.getParticipantId
-          }
-          participantRepository.getByKey(ParticipantId(pId))
-        }
+        pt    <- participantRepository.getByKey(ParticipantId(event.id))
       } yield pt
     }
   }
 
-  private def replyWithCollectionEvent(future: Future[DomainValidation[StudyEvent]])
+  private def replyWithCollectionEvent(future: Future[DomainValidation[ParticipantEvent]])
       : Future[DomainValidation[CollectionEvent]] = {
     future map { validation =>
       for {

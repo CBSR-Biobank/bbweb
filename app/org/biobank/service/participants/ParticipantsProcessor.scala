@@ -2,7 +2,7 @@ package org.biobank.service.participants
 
 import org.biobank.service.Processor
 import org.biobank.infrastructure.command.ParticipantCommands._
-import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.infrastructure.event.ParticipantEvents._
 import org.biobank.infrastructure.event.CommonEvents._
 import org.biobank.domain.{ AnnotationTypeId, AnnotationOption, DomainValidation, DomainError }
 import org.biobank.domain.user.UserId
@@ -35,8 +35,8 @@ class ParticipantsProcessor @javaxInject() (
   val studyRepository:          StudyRepository)
     extends Processor {
 
-  import org.biobank.infrastructure.event.StudyEventsUtil._
-  import StudyEvent.EventType
+  import ParticipantEvent.EventType
+  import org.biobank.infrastructure.event.ParticipantEventsUtil._
 
   override def persistenceId = "participant-processor-id"
 
@@ -47,7 +47,7 @@ class ParticipantsProcessor @javaxInject() (
     * processed to recreate the current state of the aggregate.
     */
   val receiveRecover: Receive = {
-    case event: StudyEvent => event.eventType match {
+    case event: ParticipantEvent => event.eventType match {
         case et: EventType.ParticipantAdded   => applyParticipantAddedEvent(event)
         case et: EventType.ParticipantUpdated => applyParticipantUpdatedEvent(event)
 
@@ -172,9 +172,9 @@ class ParticipantsProcessor @javaxInject() (
                                               DateTime.now,
                                               cmd.uniqueId,
                                               cmd.annotations.toSet)
-      event             <- createStudyEvent(newParticip.studyId, cmd).withParticipantAdded(
+      event             <- createEvent(newParticip, cmd).withParticipantAdded(
         ParticipantAddedEvent(
-          participantId = Some(newParticip.id.id),
+          studyId       = Some(newParticip.studyId.id),
           uniqueId      = Some(cmd.uniqueId),
           annotations   = convertAnnotationsToEvent(cmd.annotations))).success
     } yield event
@@ -198,9 +198,9 @@ class ParticipantsProcessor @javaxInject() (
                                               DateTime.now,
                                               cmd.uniqueId,
                                               annotationsSet)
-      event             <- createStudyEvent(newParticip.studyId, cmd).withParticipantUpdated(
+      event             <- createEvent(newParticip, cmd).withParticipantUpdated(
         ParticipantUpdatedEvent(
-          participantId = Some(newParticip.id.id),
+          studyId       = Some(newParticip.studyId.id),
           version       = Some(newParticip.version),
           uniqueId      = Some(cmd.uniqueId),
           annotations   = convertAnnotationsToEvent(cmd.annotations))).success
@@ -209,7 +209,7 @@ class ParticipantsProcessor @javaxInject() (
     process(event){ applyParticipantUpdatedEvent(_) }
   }
 
-  private def applyParticipantAddedEvent(event: StudyEvent) = {
+  private def applyParticipantAddedEvent(event: ParticipantEvent) = {
     log.debug(s"applyParticipantAddedEvent: event: $event")
 
     if (event.eventType.isParticipantAdded) {
@@ -217,7 +217,7 @@ class ParticipantsProcessor @javaxInject() (
 
       participantRepository.put(
         Participant(studyId      = StudyId(event.id),
-                    id           = ParticipantId(addedEvent.getParticipantId),
+                    id           = ParticipantId(event.id),
                     version      = 0L,
                     timeAdded    = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
                     timeModified = None,
@@ -229,14 +229,14 @@ class ParticipantsProcessor @javaxInject() (
     }
   }
 
-  private def applyParticipantUpdatedEvent(event: StudyEvent) = {
+  private def applyParticipantUpdatedEvent(event: ParticipantEvent) = {
     log.debug(s"applyParticipantUpdatedEvent: event/$event")
 
     if (event.eventType.isParticipantUpdated) {
       val updatedEvent = event.getParticipantUpdated
 
-      val studyId = StudyId(event.id)
-      val participantId = ParticipantId(updatedEvent.getParticipantId)
+      val participantId = ParticipantId(event.id)
+      val studyId = StudyId(updatedEvent.getStudyId)
 
       participantRepository.withId(studyId, participantId).fold(
         err => log.error(s"updating participant from event failed: $err"),

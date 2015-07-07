@@ -1,0 +1,52 @@
+package org.biobank.infrastructure.event;
+
+import "CommonEvents.proto";
+
+message ParticipantAddedEvent {
+   optional string studyId         = 1;
+   optional string uniqueId        = 2;
+   repeated Annotation annotations = 3;
+}
+
+message ParticipantUpdatedEvent {
+   optional string studyId         = 1;
+   optional int64 version          = 2;
+   optional string uniqueId        = 3;
+   repeated Annotation annotations = 4;
+
+}
+
+message CollectionEventAddedEvent {
+   optional string collectionEventId     = 1;
+   optional string collectionEventTypeId = 2;
+   optional string timeCompleted         = 3;
+   optional int32  visitNumber           = 4;
+   repeated Annotation annotations       = 5;
+}
+
+message CollectionEventUpdatedEvent {
+   optional string collectionEventId     = 1;
+   optional string collectionEventTypeId = 2;
+   optional int64  version               = 3;
+   optional string timeCompleted         = 4;
+   optional int32  visitNumber           = 5;
+   repeated Annotation annotations       = 6;
+}
+
+message CollectionEventRemovedEvent {
+   optional string collectionEventId     = 1;
+}
+
+message ParticipantEvent {
+   required string id     = 1; // the participant id
+   optional string userId = 2;
+   optional string time   = 3;
+
+   oneof event_type {
+     ParticipantAddedEvent       participantAdded       = 4;
+     ParticipantUpdatedEvent     participantUpdated     = 5;
+     CollectionEventAddedEvent   collectionEventAdded   = 6;
+     CollectionEventUpdatedEvent collectionEventUpdated = 7;
+     CollectionEventRemovedEvent collectionEventRemoved = 8;
+   }
+}

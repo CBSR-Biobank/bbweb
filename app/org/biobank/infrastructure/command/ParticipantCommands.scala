@@ -12,7 +12,7 @@ import org.joda.time.DateTime
 
 object ParticipantCommands {
 
-  trait ParticipantCommand extends StudyCommands.StudyCommandWithStudyId
+  trait ParticipantCommand extends Command
 
   trait ParticipantModifyCommand
       extends ParticipantCommand
@@ -36,7 +36,7 @@ object ParticipantCommands {
   //--
 
   trait CollectionEventCommand
-      extends Command
+      extends ParticipantCommand
       with HasParticipantIdentity
 
   trait CollectionEventModifyCommand
@@ -69,9 +69,9 @@ object ParticipantCommands {
       extends CollectionEventModifyCommand
 
 
-  implicit val addParticipantCmdReads = Json.reads[AddParticipantCmd]
-  implicit val updateParticipantCmdReads = Json.reads[UpdateParticipantCmd]
-  implicit val addCollectionEventCmdReads = Json.reads[AddCollectionEventCmd]
+  implicit val addParticipantCmdReads        = Json.reads[AddParticipantCmd]
+  implicit val updateParticipantCmdReads     = Json.reads[UpdateParticipantCmd]
+  implicit val addCollectionEventCmdReads    = Json.reads[AddCollectionEventCmd]
   implicit val updateCollectionEventCmdReads = Json.reads[UpdateCollectionEventCmd]
   implicit val removeCollectionEventCmdReads = Json.reads[RemoveCollectionEventCmd]
 }

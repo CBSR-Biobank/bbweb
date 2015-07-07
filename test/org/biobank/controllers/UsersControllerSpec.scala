@@ -2,7 +2,7 @@ package org.biobank.controllers
 
 import org.biobank.Global
 import org.biobank.domain.user._
-import org.biobank.fixture.{ ControllerFixture, NameGenerator }
+import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper._
 import org.biobank.service.PasswordHasher
 

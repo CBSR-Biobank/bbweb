@@ -1,6 +1,5 @@
 package org.biobank.controllers
 
-import org.biobank.fixture.NameGenerator
 import org.biobank.domain.centre._
 import org.biobank.domain.{ Location, LocationId, LocationRepository }
 import org.biobank.domain.study.{ Study, StudyRepository }
