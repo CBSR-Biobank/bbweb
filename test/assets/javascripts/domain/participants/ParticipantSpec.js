@@ -377,7 +377,7 @@ define([
     }
 
     function uri(/* studyId, participantId */) {
-      var studyId, participantId, result = '/studies',
+      var studyId, participantId, result = '/participants',
           args = _.toArray(arguments);
 
       if (args.length < 1) {
@@ -385,7 +385,7 @@ define([
       }
 
       studyId = args.shift();
-      result += '/' + studyId + '/participants';
+      result += '/' + studyId;
 
       if (args.length > 0) {
         participantId = args.shift();

@@ -176,15 +176,15 @@ define(['underscore'], function(_) {
     function uri(/* studyId, participantId */) {
       var studyId,
           participantId,
-          result = '/studies',
+          result = '/participants',
           args = _.toArray(arguments);
 
       if (args.length < 1) {
-        throw new Error('participant id not specified');
+        throw new Error('study id not specified');
       }
 
       studyId = args.shift();
-      result += '/' + studyId + '/participants';
+      result += '/' + studyId;
 
 
       if (args.length > 0) {

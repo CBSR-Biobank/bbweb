@@ -75,10 +75,10 @@ PUT     /studies/:procTypeId/sltypes/:id        @org.biobank.controllers.study.S
 DELETE  /studies/:procTypeId/sltypes/:id/:ver   @org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(procTypeId, id, ver: Long)
 
 # participants
-GET     /studies/:studyId/participants/uniqueId/:id @org.biobank.controllers.participants.ParticipantsController.getByUniqueId(studyId, id: String)
-GET     /studies/:studyId/participants/:id          @org.biobank.controllers.participants.ParticipantsController.get(studyId, id: String)
-POST    /studies/:studyId/participants              @org.biobank.controllers.participants.ParticipantsController.addParticipant(studyId)
-PUT     /studies/:studyId/participants/:id          @org.biobank.controllers.participants.ParticipantsController.updateParticipant(studyId, id)
+GET     /participants/:studyId/uniqueId/:id     @org.biobank.controllers.participants.ParticipantsController.getByUniqueId(studyId, id: String)
+GET     /participants/:studyId/:id              @org.biobank.controllers.participants.ParticipantsController.get(studyId, id: String)
+POST    /participants/:studyId                  @org.biobank.controllers.participants.ParticipantsController.addParticipant(studyId)
+PUT     /participants/:studyId/:id              @org.biobank.controllers.participants.ParticipantsController.updateParticipant(studyId, id)
 
 # collection events
 GET     /participants/:participantId/cevents                  @org.biobank.controllers.participants.CollectionEventsController.get(participantId, ceventId: Option[String])
