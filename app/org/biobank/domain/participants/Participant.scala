@@ -2,8 +2,7 @@ package org.biobank.domain.participants
 
 import org.biobank.domain.{
   ConcurrencySafeEntity,
-  DomainValidation,
-  ValidationKey
+  DomainValidation
 }
 import org.biobank.domain.study._
 import org.biobank.infrastructure.JsonUtils._
@@ -11,14 +10,6 @@ import org.biobank.infrastructure.JsonUtils._
 import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
-
-trait ParticipantValidations {
-
-  case object UniqueIdInvalid extends ValidationKey
-
-  case object UniqueIdRequired extends ValidationKey
-
-}
 
 /** The subject for which a set of specimens were collected from. The subject can be human or non human.
  * A participant belongs to a single study.
@@ -42,7 +33,6 @@ case class Participant(id:           ParticipantId,
     val v = Participant.create(this.studyId,
                                this.id,
                                this.version,
-                               this.timeAdded,
                                uniqueId,
                                annotations)
     v.map(_.copy(timeModified = Some(DateTime.now)))
@@ -67,7 +57,6 @@ object Participant extends ParticipantValidations {
   def create(studyId:     StudyId,
              id:          ParticipantId,
              version:     Long,
-             dateTime:    DateTime,
              uniqueId:    String,
              annotations: Set[ParticipantAnnotation])
       : DomainValidation[Participant] = {
@@ -86,7 +75,7 @@ object Participant extends ParticipantValidations {
       validateString(uniqueId, UniqueIdRequired) |@|
       annotations.toList.traverseU(validateAnnotation)) {
       case (a1, a2, a3, a4, a5) =>
-        Participant(a1, a2, a3, dateTime, None, a4, a5.toSet)
+        Participant(a1, a2, a3, DateTime.now, None, a4, a5.toSet)
     }
   }
 

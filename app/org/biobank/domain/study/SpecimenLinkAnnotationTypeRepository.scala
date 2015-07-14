@@ -13,5 +13,9 @@ trait SpecimenLinkAnnotationTypeRepository
 class SpecimenLinkAnnotationTypeRepositoryImpl
     extends ReadWriteRepositoryRefImpl[AnnotationTypeId, SpecimenLinkAnnotationType](v => v.id)
     with StudyAnnotationTypeRepositoryImpl[SpecimenLinkAnnotationType]
-    with SpecimenLinkAnnotationTypeRepository
+    with SpecimenLinkAnnotationTypeRepository {
+
+  override val NotFoundError = "specimen link annotation type with id not found:"
+
+}
 

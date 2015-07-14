@@ -31,9 +31,6 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
   /** An optional URL to the user's avatar icon. */
   val avatarUrl: Option[String]
 
-  /** Contains the current state of the object, one of: Registered, Active, Locked. */
-  val status: String
-
   /**
    * Authenticate a user.
    */
@@ -53,34 +50,23 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
         |  password: $password,
         |  salt: $salt,
         |  avatarUrl: $avatarUrl,
-        |  status: $status
         |}""".stripMargin
 }
 
 object User {
 
-  val status: String = "User"
-
   implicit val userWrites = new Writes[User] {
     def writes(user: User) = {
-      var result = Json.obj(
+      Json.obj(
         "id"           -> user.id,
         "version"      -> user.version,
         "timeAdded"    -> user.timeAdded,
+        "timeModified" -> user.timeModified,
         "name"         -> user.name,
         "email"        -> user.email,
-        "status"       -> user.status
+        "avatarUrl"    -> user.avatarUrl,
+        "status"       -> user.getClass.getSimpleName
       )
-
-      result = user.timeModified match {
-        case Some(time) => result ++ Json.obj("timeModified" -> Json.toJson(time))
-        case None => result
-      }
-
-      user.avatarUrl match {
-        case Some(url) => result ++ Json.obj("avatarUrl" -> Json.toJson(url))
-        case None => result
-      }
     }
   }
 
@@ -97,7 +83,7 @@ object User {
   }
 
   def compareByStatus(a: User, b: User) = {
-    val statusCompare = a.status compare b.status
+    val statusCompare = a.getClass.getSimpleName compare b.getClass.getSimpleName
     if (statusCompare == 0) {
       compareByName(a, b)
     } else {
@@ -143,22 +129,27 @@ trait UserValidations {
 /** A user that just registered with the system. This user does not yet have full access
   * the system.
   */
-case class RegisteredUser (
-  id:           UserId,
-  version:      Long,
-  timeAdded:    DateTime,
-  timeModified: Option[DateTime],
-  name:         String,
-  email:        String,
-  password:     String,
-  salt:         String,
-  avatarUrl:    Option[String]) extends User with UserValidations {
-
-  override val status: String = RegisteredUser.status
+case class RegisteredUser(id:           UserId,
+                          version:      Long,
+                          timeAdded:    DateTime,
+                          timeModified: Option[DateTime],
+                          name:         String,
+                          email:        String,
+                          password:     String,
+                          salt:         String,
+                          avatarUrl:    Option[String]) extends User with UserValidations {
 
   /* Activates a registered user. */
-  def activate: DomainValidation[ActiveUser] = {
-    ActiveUser.create(this)
+  def activate(): DomainValidation[ActiveUser] = {
+    ActiveUser(id           = this.id,
+               version      = this.version + 1,
+               timeAdded    = this.timeAdded,
+               timeModified = this.timeModified,
+               name         = this.name,
+               email        = this.email,
+               password     = this.password,
+               salt         = this.salt,
+               avatarUrl    = this.avatarUrl).success
   }
 }
 
@@ -166,18 +157,14 @@ case class RegisteredUser (
 object RegisteredUser extends UserValidations {
   import CommonValidations._
 
-  val status: String = "Registered"
-
   /** Creates a registered user. */
-  def create(
-    id: UserId,
-    version: Long,
-    dateTime: DateTime,
-    name: String,
-    email: String,
-    password: String,
-    salt: String,
-    avatarUrl: Option[String]): DomainValidation[RegisteredUser] = {
+  def create(id:        UserId,
+             version:   Long,
+             name:      String,
+             email:     String,
+             password:  String,
+             salt:      String,
+             avatarUrl: Option[String]): DomainValidation[RegisteredUser] = {
 
     (validateId(id) |@|
       validateAndIncrementVersion(version) |@|
@@ -186,122 +173,94 @@ object RegisteredUser extends UserValidations {
       validateString(password, PasswordRequired) |@|
       validateString(salt, SaltRequired) |@|
       validateAvatarUrl(avatarUrl)) {
-        RegisteredUser(_, _, dateTime, None, _, _, _, _, _)
+        RegisteredUser(_, _, DateTime.now, None, _, _, _, _, _)
       }
   }
 
 }
 
 /** A user that has access to the system. */
-case class ActiveUser (
-  id: UserId,
-  version: Long = -1,
-  timeAdded: DateTime,
-  timeModified: Option[DateTime],
-  name: String,
-  email: String,
-  password: String,
-  salt: String,
-  avatarUrl: Option[String])
+case class ActiveUser(id:           UserId,
+                      version:      Long = -1,
+                      timeAdded:    DateTime,
+                      timeModified: Option[DateTime],
+                      name:         String,
+                      email:        String,
+                      password:     String,
+                      salt:         String,
+                      avatarUrl:    Option[String])
     extends User
     with UserValidations {
   import CommonValidations._
 
-  override val status: String = ActiveUser.status
-
-  def updateName(name: String): DomainValidation[ActiveUser] = {
+  def withName(name: String): DomainValidation[ActiveUser] = {
     validateString(name, NameMinLength, InvalidName).fold(
       err => err.failure,
-      x => copy(version = version + 1, name = x).success
+      n => copy(version = version + 1, name = n).success
     )
   }
 
-  def updateEmail(email: String): DomainValidation[ActiveUser] = {
+  def withEmail(email: String): DomainValidation[ActiveUser] = {
     validateEmail(email).fold(
       err => err.failure,
-      x => copy(version = version + 1, email = x).success
+      e => copy(version = version + 1, email = e).success
     )
   }
 
-  def updatePassword(password: String, salt: String): DomainValidation[ActiveUser] = {
+  def withPassword(password: String, salt: String): DomainValidation[ActiveUser] = {
     validateString(password, PasswordRequired).fold(
       err => err.failure,
-      pwd => copy(version = version + 1, password = pwd, salt = salt).success
+      pwd => copy(version      = version + 1,
+                  password     = pwd,
+                  salt         = salt).success
     )
   }
 
-  def updateAvatarUrl(avatarUrl: Option[String]): DomainValidation[ActiveUser] = {
+  def withAvatarUrl(avatarUrl: Option[String]): DomainValidation[ActiveUser] = {
     validateAvatarUrl(avatarUrl).fold(
       err => err.failure,
-      x => copy(version = version + 1, avatarUrl = x).success
+      a => copy(version = version + 1, avatarUrl = a).success
+
     )
   }
 
   /** Locks an active user. */
-  def lock: DomainValidation[LockedUser] = {
-    LockedUser.create(this)
+  def lock(): DomainValidation[LockedUser] = {
+    LockedUser(id           = this.id,
+               version      = this.version + 1,
+               timeAdded    = this.timeAdded,
+               timeModified = this.timeModified,
+               name         = this.name,
+               email        = this.email,
+               password     = this.password,
+               salt         = this.salt,
+               avatarUrl    = this.avatarUrl).success
   }
-}
-
-/** Factory object. */
-object ActiveUser extends UserValidations {
-  import CommonValidations._
-
-  val status: String = "Active"
-
-  /** Creates an active user from a registered user. */
-  def create[T <: User](user: T): DomainValidation[ActiveUser] = {
-    (validateId(user.id) |@|
-      validateAndIncrementVersion(user.version) |@|
-      validateString(user.name, NameMinLength, InvalidName) |@|
-      validateEmail(user.email) |@|
-      validateString(user.password, PasswordRequired) |@|
-      validateString(user.salt, SaltRequired) |@|
-      validateAvatarUrl(user.avatarUrl)) {
-        ActiveUser(_, _, user.timeAdded, None, _, _, _, _, _)
-      }
-  }
-
 }
 
 /** A user who no longer has access to the system. */
-case class LockedUser (
-  id: UserId,
-  version: Long = -1,
-  timeAdded: DateTime,
-  timeModified: Option[DateTime],
-  name: String,
-  email: String,
-  password: String,
-  salt: String,
-  avatarUrl: Option[String]) extends User {
-
-  override val status: String = LockedUser.status
+case class LockedUser(id:           UserId,
+                      version:      Long,
+                      timeAdded:    DateTime,
+                      timeModified: Option[DateTime],
+                      name:         String,
+                      email:        String,
+                      password:     String,
+                      salt:         String,
+                      avatarUrl:    Option[String])
+    extends User {
 
   /** Unlocks a locked user. */
-  def unlock: DomainValidation[ActiveUser] = {
-    ActiveUser.create(this)
-  }
-
-}
-
-/** Factory object. */
-object LockedUser extends UserValidations {
-  import CommonValidations._
-
-  val status: String = "Locked"
-
-  /** Creates an active user from a locked user. */
-  def create(user: ActiveUser): DomainValidation[LockedUser] = {
-    (validateId(user.id) |@|
-      validateAndIncrementVersion(user.version) |@|
-      validateString(user.name, NameMinLength, InvalidName) |@|
-      validateEmail(user.email) |@|
-      validateString(user.password, PasswordRequired) |@|
-      validateString(user.salt, SaltRequired) |@|
-      validateAvatarUrl(user.avatarUrl)) {
-        LockedUser(_, _, user.timeAdded, None, _, _, _, _, _)
-      }
+  def unlock(): DomainValidation[ActiveUser] = {
+    ActiveUser(id           = this.id,
+               version      = this.version + 1,
+               timeAdded    = this.timeAdded,
+               timeModified = this.timeModified,
+               name         = this.name,
+               email        = this.email,
+               password     = this.password,
+               salt         = this.salt,
+               avatarUrl    = this.avatarUrl).success
   }
 
 }

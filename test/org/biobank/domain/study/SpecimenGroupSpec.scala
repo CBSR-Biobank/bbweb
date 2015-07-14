@@ -31,7 +31,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.BuffyCoat
 
       val v = SpecimenGroup.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, units,
+        studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
       v mustSucceed { specimenGroup =>
         specimenGroup mustBe a[SpecimenGroup]
@@ -104,7 +104,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.BuffyCoat
 
       val v = SpecimenGroup.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, units,
+        studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => err.list must (have length 1 and contain("IdRequired")),
         user => fail
@@ -124,7 +124,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.BuffyCoat
 
       SpecimenGroup.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, units,
+        studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => err.list must (have length 1 and contain("IdRequired")),
         user => fail
@@ -144,7 +144,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.BuffyCoat
 
        val validation = SpecimenGroup.create(
-         studyId, id, version, org.joda.time.DateTime.now, name, description, units,
+         studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
       validation mustFail "InvalidVersion"
     }
@@ -162,7 +162,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.BuffyCoat
 
       SpecimenGroup.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, units,
+        studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => err.list must (have length 1 and contain("NameRequired")),
         user => fail
@@ -170,7 +170,7 @@ class SpecimenGroupSpec extends DomainSpec {
 
       name = ""
       SpecimenGroup.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, units,
+        studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => err.list must (have length 1 and contain("NameRequired")),
         user => fail
@@ -190,16 +190,16 @@ class SpecimenGroupSpec extends DomainSpec {
       val specimenType = SpecimenType.BuffyCoat
 
       SpecimenGroup.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, units,
+        studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
-        err => err.list must (have length 1 and contain("NonEmptyDescription")),
+        err => err.list must (have length 1 and contain("InvalidDescription")),
         user => fail
       )
 
       description = Some("")
-      SpecimenGroup.create(studyId, id, version, org.joda.time.DateTime.now, name, description, units,
+      SpecimenGroup.create(studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
-        err => err.list must (have length 1 and contain("NonEmptyDescription")),
+        err => err.list must (have length 1 and contain("InvalidDescription")),
         user => fail
       )
     }
@@ -216,7 +216,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
-      SpecimenGroup.create(studyId, id, version, org.joda.time.DateTime.now, name, description, units,
+      SpecimenGroup.create(studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => err.list must (have length 1 and contain("UnitsRequired")),
         user => fail
@@ -235,7 +235,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
-      SpecimenGroup.create(studyId, id, version, org.joda.time.DateTime.now, name, description, units,
+      SpecimenGroup.create(studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => {
           err.list must have length 2

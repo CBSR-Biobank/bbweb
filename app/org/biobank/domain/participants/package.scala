@@ -4,7 +4,7 @@ package participants {
 
   trait HasParticipantId {
 
-    /** The ID of the study this object belongs to. */
+    /** The ID of the participant this object belongs to. */
     val participantId: ParticipantId
 
   }

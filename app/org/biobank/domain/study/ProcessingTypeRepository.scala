@@ -24,7 +24,7 @@ class ProcessingTypeRepositoryImpl
     extends ReadWriteRepositoryRefImpl[ProcessingTypeId, ProcessingType](v => v.id)
     with ProcessingTypeRepository {
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  override val NotFoundError = "processing type with id not found:"
 
   def nextIdentity: ProcessingTypeId = new ProcessingTypeId(nextIdentityAsString)
 

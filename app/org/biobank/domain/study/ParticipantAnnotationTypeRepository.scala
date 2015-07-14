@@ -12,4 +12,8 @@ trait ParticipantAnnotationTypeRepository
 class ParticipantAnnotationTypeRepositoryImpl
     extends ReadWriteRepositoryRefImpl[AnnotationTypeId, ParticipantAnnotationType](v => v.id)
     with StudyAnnotationTypeRepositoryImpl[ParticipantAnnotationType]
-    with ParticipantAnnotationTypeRepository
+    with ParticipantAnnotationTypeRepository {
+
+  override val NotFoundError = "participant annotation type with id not found:"
+
+}

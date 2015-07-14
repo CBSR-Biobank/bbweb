@@ -23,32 +23,28 @@ class UserSpec extends DomainSpec {
   "A user" can {
 
     "be created" in {
-      val version = -1L
-      val name = nameGenerator.next[User]
-      val email = nameGenerator.nextEmail[User]
-      val id = UserId(email)
-      val password = nameGenerator.next[User]
-      val salt = nameGenerator.next[User]
-      val avatarUrl = Some("http://test.com/")
+      val user = factory.createRegisteredUser
+      val v = RegisteredUser.create(id        = user.id,
+                                    version   = -1,
+                                    name      = user.name,
+                                    email     = user.email,
+                                    password  = user.password,
+                                    salt      = user.salt,
+                                    avatarUrl = user.avatarUrl)
 
-      val timeNow = DateTime.now
-
-      val validation = RegisteredUser.create(
-        id, version, timeNow, name, email, password, salt, avatarUrl)
-      validation mustSucceed  { user =>
-        user mustBe a[RegisteredUser]
-        user must have (
-          'id (id),
-          'version (0L),
-          'name (name),
-          'email (email),
-          'password (password),
-          'salt (salt),
-          'avatarUrl (avatarUrl)
+      v mustSucceed  { u =>
+        u mustBe a[RegisteredUser]
+        u must have (
+          'id        (user.id),
+          'version   (0),
+          'name      (user.name),
+          'email     (user.email),
+          'password  (user.password),
+          'salt      (user.salt),
+          'avatarUrl (user.avatarUrl)
         )
 
-        user.timeAdded mustBe (timeNow)
-        user.timeModified mustBe (None)
+        checkTimeStamps(u, DateTime.now, None)
       }
     }
 
@@ -78,204 +74,140 @@ class UserSpec extends DomainSpec {
   "A user" must {
 
     "not be created with an empty id" in {
-      val id = UserId("")
-      val version = -1L
-      val name = nameGenerator.next[User]
-      val email = nameGenerator.nextEmail[User]
-      val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = nameGenerator.next[User]
-      val avatarUrl = Some("http://test.com/")
-
-      RegisteredUser.create(
-        id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => err.list must (have length 1 and contain("IdRequired")),
-        user => fail("id validation failed")
-      )
+      val v = RegisteredUser.create(id        = UserId(""),
+                                    version   = -1L,
+                                    name      = nameGenerator.next[User],
+                                    email     = nameGenerator.nextEmail[User],
+                                    password  = nameGenerator.next[User],
+                                    salt      = nameGenerator.next[User],
+                                    avatarUrl = Some(nameGenerator.nextUrl[User]))
+      v mustFail "IdRequired"
     }
 
     "not be created with an invalid version" in {
-      val id = UserId(nameGenerator.next[User])
-      val version = -2L
-      val name = nameGenerator.next[User]
-      val email = nameGenerator.nextEmail[User]
-      val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = nameGenerator.next[User]
-      val avatarUrl = Some("http://test.com/")
-
-      RegisteredUser.create(
-        id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => err.list must (have length 1 and contain("InvalidVersion")),
-        user => fail("version validation failed")
-      )
+      val v = RegisteredUser.create(id        = UserId(nameGenerator.next[User]),
+                                    version   = -2L,
+                                    name      = nameGenerator.next[User],
+                                    email     = nameGenerator.nextEmail[User],
+                                    password  = nameGenerator.next[User],
+                                    salt      = nameGenerator.next[User],
+                                    avatarUrl = Some(nameGenerator.nextUrl[User]))
+      v mustFail "InvalidVersion"
     }
 
     "not be created with an empty name" in {
-      val id = UserId(nameGenerator.next[User])
-      val version = 0L
-      val name = ""
-      val email = nameGenerator.nextEmail[User]
-      val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = nameGenerator.next[User]
-      val avatarUrl = Some("http://test.com/")
-
-      RegisteredUser.create(
-        id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => err.list must (have length 1 and contain("InvalidName")),
-        user => fail("name validation failed")
-      )
+      val v = RegisteredUser.create(id        = UserId(nameGenerator.next[User]),
+                                    version   = -1L,
+                                    name      = "",
+                                    email     = nameGenerator.nextEmail[User],
+                                    password  = nameGenerator.next[User],
+                                    salt      = nameGenerator.next[User],
+                                    avatarUrl = Some(nameGenerator.nextUrl[User]))
+      v mustFail "InvalidName"
     }
 
     "not be created with an empty email" in {
-      val id = UserId(nameGenerator.next[User])
-      val version = 0L
-      val name = nameGenerator.nextEmail[User]
-      val email = ""
-      val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = nameGenerator.next[User]
-      val avatarUrl = Some("http://test.com/")
-
-      RegisteredUser.create(
-        id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => {
-          err.list must have length 1
-          err.list.head must include("InvalidEmail")
-        },
-        user => fail("name validation failed")
-      )
+      val v = RegisteredUser.create(id        = UserId(nameGenerator.next[User]),
+                                    version   = -1L,
+                                    name      = nameGenerator.next[User],
+                                    email     = "",
+                                    password  = nameGenerator.next[User],
+                                    salt      = nameGenerator.next[User],
+                                    avatarUrl = Some(nameGenerator.nextUrl[User]))
+      v mustFail "InvalidEmail"
     }
 
     "not be created with an invalid email" in {
-      val id = UserId(nameGenerator.next[User])
-      val version = 0L
-      val name = nameGenerator.nextEmail[User]
-      val email = "abcdef"
-      val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = nameGenerator.next[User]
-      val avatarUrl = Some("http://test.com/")
-
-      RegisteredUser.create(
-        id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => {
-          err.list must have length 1
-          err.list.head must include("InvalidEmail")
-        },
-        user => fail("name validation failed")
-      )
+      val v = RegisteredUser.create(id        = UserId(nameGenerator.next[User]),
+                                    version   = -1L,
+                                    name      = nameGenerator.next[User],
+                                    email     = "abcdef",
+                                    password  = nameGenerator.next[User],
+                                    salt      = nameGenerator.next[User],
+                                    avatarUrl = Some(nameGenerator.nextUrl[User]))
+      v mustFail "InvalidEmail"
     }
 
     "not be created with an empty password" in {
-      val id = UserId(nameGenerator.next[User])
-      val version = 0L
-      val name = nameGenerator.next[User]
-      val email = nameGenerator.nextEmail[User]
-      val password = ""
-      val hasher = nameGenerator.next[User]
-      val salt = nameGenerator.next[User]
-      val avatarUrl = Some("http://test.com/")
-
-      RegisteredUser.create(
-        id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => err.list must (have length 1 and contain("PasswordRequired")),
-        user => fail("user password validation failed")
-      )
+      val v = RegisteredUser.create(id        = UserId(nameGenerator.next[User]),
+                                    version   = -1L,
+                                    name      = nameGenerator.next[User],
+                                    email     = nameGenerator.nextEmail[User],
+                                    password  = "",
+                                    salt      = nameGenerator.next[User],
+                                    avatarUrl = Some(nameGenerator.nextUrl[User]))
+      v mustFail "PasswordRequired"
     }
 
     "not be created with an empty salt option" in {
-      val id = UserId(nameGenerator.next[User])
-      val version = 0L
-      val name = nameGenerator.next[User]
-      val email = nameGenerator.nextEmail[User]
-      val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = ""
-      val avatarUrl = Some("http://test.com/")
-
-      RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => err.list must (have length 1 and contain("SaltRequired")),
-        user => fail("user salt validation failed")
-      )
+      val v = RegisteredUser.create(id        = UserId(nameGenerator.next[User]),
+                                    version   = -1L,
+                                    name      = nameGenerator.next[User],
+                                    email     = nameGenerator.nextEmail[User],
+                                    password  = nameGenerator.next[User],
+                                    salt      = "",
+                                    avatarUrl = Some(nameGenerator.nextUrl[User]))
+      v mustFail "SaltRequired"
     }
 
     "not be created with an invalid avatar url" in {
-      val id = UserId(nameGenerator.next[User])
-      val version = 0L
-      val name = nameGenerator.next[User]
-      val email = nameGenerator.nextEmail[User]
-      val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = nameGenerator.next[User]
-      val avatarUrl = Some(nameGenerator.next[User])
-
-      RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => {
-          err.list must have length 1
-          err.list.head must include("InvalidUrl")
-        },
-        user => fail("user avaltar url validation failed")
-      )
+      val v = RegisteredUser.create(id        = UserId(nameGenerator.next[User]),
+                                    version   = -1L,
+                                    name      = nameGenerator.next[User],
+                                    email     = nameGenerator.nextEmail[User],
+                                    password  = nameGenerator.next[User],
+                                    salt      = nameGenerator.next[User],
+                                    avatarUrl = Some(nameGenerator.next[User]))
+      v mustFail "InvalidUrl"
     }
 
     "pass authentication" in {
-      val id = UserId(nameGenerator.next[User])
-      val version = 0L
-      val name = nameGenerator.next[User]
       val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = nameGenerator.next[User]
-      val avatarUrl = Some("http://test.com/")
 
-      val v = RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl)
-      val user = v.getOrElse(fail("could not create user"))
-      val authenticatedUser = user.authenticate(email, password).getOrElse(fail("could authenticate user"))
-      authenticatedUser mustBe(user)
+      val v = RegisteredUser.create(id        = UserId(nameGenerator.next[User]),
+                                    version   = 0L,
+                                    name      = nameGenerator.next[User],
+                                    email     = email,
+                                    password  = password,
+                                    salt      = nameGenerator.next[User],
+                                    avatarUrl = Some(nameGenerator.nextUrl[User]))
+
+      v mustSucceed { user =>
+        user.authenticate(email, password) mustSucceed { authenticatedUser =>
+          authenticatedUser mustBe(user)
+        }
+      }
     }
 
     "fail authentication for bad password" in {
-      val id = UserId(nameGenerator.next[User])
-      val version = 0L
-      val name = nameGenerator.next[User]
       val email = nameGenerator.nextEmail[User]
       val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = nameGenerator.next[User]
-      val avatarUrl = Some("http://test.com/")
-
       val badPassword = nameGenerator.next[User]
 
-      val v = RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl)
-      val user = v.getOrElse(fail("could not create user"))
-      user.authenticate(email, badPassword).fold(
-        err => err.list must (have length 1 and contain("authentication failure")),
-        x => fail("authentication must fail")
-      )
+      val v = RegisteredUser.create(id        = UserId(nameGenerator.next[User]),
+                                    version   = 0L,
+                                    name      = nameGenerator.next[User],
+                                    email     = email,
+                                    password  = password,
+                                    salt      = nameGenerator.next[User],
+                                    avatarUrl = Some(nameGenerator.nextUrl[User]))
+
+      v mustSucceed { user =>
+        user.authenticate(email, badPassword) mustFail "authentication failure"
+      }
     }
 
     "have more than one validation fail" in {
-      val id = UserId(nameGenerator.next[User])
-      val version = -2L
-      val name = ""
-      val email = nameGenerator.nextEmail[User]
-      val password = nameGenerator.next[User]
-      val hasher = nameGenerator.next[User]
-      val salt = nameGenerator.next[User]
-      val avatarUrl = Some("http://test.com/")
+      val v = RegisteredUser.create(id        = UserId(nameGenerator.next[User]),
+                                    version   = -2L,
+                                    name      = "",
+                                    email     = nameGenerator.nextEmail[User],
+                                    password  = nameGenerator.next[User],
+                                    salt      = nameGenerator.next[User],
+                                    avatarUrl = Some(nameGenerator.nextUrl[User]))
 
-      val badPassword = nameGenerator.next[User]
-
-      RegisteredUser.create(id, version, DateTime.now, name, email, password, salt, avatarUrl).fold(
-        err => {
-          err.list must have length 2
-          err.list.head mustBe ("InvalidVersion")
-          err.list.tail.head mustBe ("InvalidName")
-        },
-        user => fail
-      )
+      v mustFail ("InvalidVersion", "InvalidName")
     }
 
   }

@@ -80,7 +80,6 @@ case class SpecimenGroup(studyId:                     StudyId,
     val v = SpecimenGroup.create(this.studyId,
                                  this.id,
                                  this.version,
-                                 this.timeAdded,
                                  name,
                                  description,
                                  units,
@@ -117,7 +116,6 @@ object SpecimenGroup extends SpecimenGroupValidations with StudyAnnotationTypeVa
   def create(studyId:                     StudyId,
              id:                          SpecimenGroupId,
              version:                     Long,
-             dateTime:                    DateTime,
              name:                        String,
              description:                 Option[String],
              units:                       String,
@@ -130,9 +128,9 @@ object SpecimenGroup extends SpecimenGroupValidations with StudyAnnotationTypeVa
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|
       validateString(name, NameRequired) |@|
-      validateNonEmptyOption(description, NonEmptyDescription) |@|
+      validateNonEmptyOption(description, InvalidDescription) |@|
       validateString(units, UnitsRequired)) {
-      SpecimenGroup(_, _, _, dateTime, None, _, _, _, anatomicalSourceType, preservationType,
+      SpecimenGroup(_, _, _, DateTime.now, None, _, _, _, anatomicalSourceType, preservationType,
         preservationTemperatureType, specimenType)
     }
   }

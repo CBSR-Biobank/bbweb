@@ -11,6 +11,8 @@ class LocationRepositoryImpl
     extends ReadWriteRepositoryRefImpl[LocationId, Location](v => v.id)
     with LocationRepository {
 
+  override val NotFoundError = "Location with id not found:"
+
   def nextIdentity: LocationId = new LocationId(nextIdentityAsString)
 
 }

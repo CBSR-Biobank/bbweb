@@ -1,7 +1,7 @@
 package org.biobank.infrastructure.command
 
 import org.biobank.infrastructure._
-import org.biobank.domain.ContainerTypeId
+import org.biobank.domain.containers.ContainerTypeId
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._

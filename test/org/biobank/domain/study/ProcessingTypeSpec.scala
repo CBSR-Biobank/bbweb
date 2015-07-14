@@ -27,7 +27,7 @@ class ProcessingTypeSpec @javaxInject() (
       val enabled = true
 
       val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
+        disabledStudy.id, processingTypeId, -1L, name, description, enabled)
       validation mustSucceed { processingType =>
         processingType mustBe a [ProcessingType]
         processingType must have (
@@ -78,7 +78,7 @@ class ProcessingTypeSpec @javaxInject() (
       val enabled = true
 
       val validation = ProcessingType.create(
-        studyId, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
+        studyId, processingTypeId, -1L, name, description, enabled)
       validation mustFail "IdRequired"
     }
 
@@ -91,7 +91,7 @@ class ProcessingTypeSpec @javaxInject() (
       val enabled = true
 
       val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
+        disabledStudy.id, processingTypeId, -1L, name, description, enabled)
       validation mustFail "IdRequired"
     }
 
@@ -103,7 +103,7 @@ class ProcessingTypeSpec @javaxInject() (
       val enabled = true
 
       val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -2L, org.joda.time.DateTime.now, name, description, enabled)
+        disabledStudy.id, processingTypeId, -2L, name, description, enabled)
       validation mustFail "InvalidVersion"
     }
 
@@ -115,12 +115,12 @@ class ProcessingTypeSpec @javaxInject() (
       val enabled = true
 
       val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
+        disabledStudy.id, processingTypeId, -1L, name, description, enabled)
       validation mustFail "NameRequired"
 
       name = ""
       val validation2 = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
+        disabledStudy.id, processingTypeId, -1L, name, description, enabled)
       validation2 mustFail "NameRequired"
     }
 
@@ -132,13 +132,13 @@ class ProcessingTypeSpec @javaxInject() (
       val enabled = true
 
       val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
-      validation mustFail "NonEmptyDescription"
+        disabledStudy.id, processingTypeId, -1L, name, description, enabled)
+      validation mustFail "InvalidDescription"
 
       description = Some("")
       val validation2 = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -1L, org.joda.time.DateTime.now, name, description, enabled)
-      validation2 mustFail "NonEmptyDescription"
+        disabledStudy.id, processingTypeId, -1L, name, description, enabled)
+      validation2 mustFail "InvalidDescription"
     }
 
     "have more than one validation fail" in {
@@ -149,8 +149,8 @@ class ProcessingTypeSpec @javaxInject() (
       val enabled = true
 
       val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -2L, org.joda.time.DateTime.now, name, description, enabled)
-      validation.mustFail("InvalidVersion", "NonEmptyDescription")
+        disabledStudy.id, processingTypeId, -2L, name, description, enabled)
+      validation.mustFail("InvalidVersion", "InvalidDescription")
     }
   }
 

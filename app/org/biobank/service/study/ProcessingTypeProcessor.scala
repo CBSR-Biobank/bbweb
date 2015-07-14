@@ -84,13 +84,17 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
   }
 
   private def processAddProcessingTypeCmd(cmd: AddProcessingTypeCmd): Unit = {
-    val timeNow = DateTime.now
     val studyId = StudyId(cmd.studyId)
     val id = processingTypeRepository.nextIdentity
 
     val event = for {
       nameValid <- nameAvailable(cmd.name, studyId)
-      newItem   <- ProcessingType.create(studyId, id, -1L, timeNow, cmd.name, cmd.description, cmd.enabled)
+      newItem   <- ProcessingType.create(studyId,
+                                         id,
+                                         -1L,
+                                         cmd.name,
+                                         cmd.description,
+                                         cmd.enabled)
       event     <- createStudyEvent(newItem.studyId, cmd).withProcessingTypeAdded(
         ProcessingTypeAddedEvent(
           processingTypeId = Some(newItem.id.id),
@@ -103,8 +107,6 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
   }
 
   private def processUpdateProcessingTypeCmd(cmd: UpdateProcessingTypeCmd): Unit = {
-    val timeNow = DateTime.now
-
     val v = update(cmd) { pt =>
       for {
         nameValid <- nameAvailable(cmd.name, StudyId(cmd.studyId), ProcessingTypeId(cmd.id))

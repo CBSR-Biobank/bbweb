@@ -6,7 +6,6 @@ import org.biobank.domain._
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 import org.biobank.domain.study.Study
-import org.biobank.domain.AnnotationValueType._
 import org.biobank.domain.participants.ParticipantRepository
 
 import akka.actor._
@@ -80,21 +79,18 @@ class ParticipantAnnotationTypeProcessor @javax.inject.Inject() (
 
   private def processAddParticipantAnnotationTypeCmd
     (cmd: AddParticipantAnnotationTypeCmd): Unit = {
-    val timeNow = DateTime.now
     val id = annotationTypeRepository.nextIdentity
     val v = for {
       nameValid <- nameAvailable(cmd.name, StudyId(cmd.studyId))
-      newItem <- ParticipantAnnotationType.create(
-        studyId       = StudyId(cmd.studyId),
-        id            = id,
-        version       = -1L,
-        dateTime      = timeNow,
-        name          = cmd.name,
-        description   = cmd.description,
-        valueType     = cmd.valueType,
-        maxValueCount = cmd.maxValueCount,
-        options       = cmd.options,
-        required      = cmd.required)
+      newItem <- ParticipantAnnotationType.create(studyId       = StudyId(cmd.studyId),
+                                                  id            = id,
+                                                  version       = -1L,
+                                                  name          = cmd.name,
+                                                  description   = cmd.description,
+                                                  valueType     = cmd.valueType,
+                                                  maxValueCount = cmd.maxValueCount,
+                                                  options       = cmd.options,
+                                                  required      = cmd.required)
       event <- createStudyEvent(newItem.studyId, cmd).withParticipantAnnotationTypeAdded(
         ParticipantAnnotationTypeAddedEvent(
           annotationTypeId = Some(newItem.id.id),
@@ -114,7 +110,6 @@ class ParticipantAnnotationTypeProcessor @javax.inject.Inject() (
     */
   private def processUpdateParticipantAnnotationTypeCmd
     (cmd: UpdateParticipantAnnotationTypeCmd): Unit = {
-    val timeNow = DateTime.now
     val v = update(cmd) { at =>
       for {
         noParticipants <- participantRepository.getValues.filter(p =>

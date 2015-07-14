@@ -6,6 +6,7 @@ import org.biobank.domain.study._
 
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
+import org.scalatest.Tag
 
 class CollectionEventSpec extends DomainSpec {
   import org.biobank.TestUtils._
@@ -14,9 +15,9 @@ class CollectionEventSpec extends DomainSpec {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  "A collection event" should {
+  "A collection event" can {
 
-    "can be created" when {
+    "be created" when {
 
       "valid arguments are used" in {
         val cevent = factory.createCollectionEvent
@@ -25,28 +26,26 @@ class CollectionEventSpec extends DomainSpec {
           id                     = cevent.id,
           participantId          = cevent.participantId,
           collectionEventTypeId  = cevent.collectionEventTypeId,
-          version                = cevent.version,
-          dateTime               = cevent.timeAdded,
+          version                = -1,
           timeCompleted          = cevent.timeCompleted,
           visitNumber            = cevent.visitNumber,
           annotations            = cevent.annotations
         )
 
-        v mustSucceed { cevent =>
-          cevent must have (
+        v mustSucceed { ce =>
+          ce must have (
             'id                     (cevent.id),
             'participantId          (cevent.participantId),
             'collectionEventTypeId  (cevent.collectionEventTypeId),
-            'version                (cevent.version),
-            'timeAdded              (cevent.timeAdded),
-            'timeModified           (None),
-            'timeCompleted          (cevent.timeCompleted),
+            'version                (0),
             'visitNumber            (cevent.visitNumber),
             'annotations            (cevent.annotations)
           )
+
+          checkTimeStamps(cevent, ce.timeAdded, ce.timeModified)
+          checkTimeStamps(cevent.timeCompleted, ce.timeCompleted)
         }
       }
-
     }
 
     "not be created" when {
@@ -57,7 +56,6 @@ class CollectionEventSpec extends DomainSpec {
           participantId          = ParticipantId(nameGenerator.next[ParticipantId]),
           collectionEventTypeId  = CollectionEventTypeId(nameGenerator.next[CollectionEventTypeId]),
           version                = -1,
-          dateTime               = DateTime.now,
           timeCompleted          = DateTime.now,
           visitNumber            = 1,
           annotations            = Set(factory.createCollectionEventAnnotation)
@@ -71,7 +69,6 @@ class CollectionEventSpec extends DomainSpec {
           participantId          = ParticipantId(""),
           collectionEventTypeId  = CollectionEventTypeId(nameGenerator.next[CollectionEventTypeId]),
           version                = -1,
-          dateTime               = DateTime.now,
           timeCompleted          = DateTime.now,
           visitNumber            = 1,
           annotations            = Set(factory.createCollectionEventAnnotation)
@@ -85,7 +82,6 @@ class CollectionEventSpec extends DomainSpec {
           participantId          = ParticipantId(nameGenerator.next[ParticipantId]),
           collectionEventTypeId  = CollectionEventTypeId(""),
           version                = -1,
-          dateTime               = DateTime.now,
           timeCompleted          = DateTime.now,
           visitNumber            = 1,
           annotations            = Set(factory.createCollectionEventAnnotation)
@@ -99,7 +95,6 @@ class CollectionEventSpec extends DomainSpec {
           participantId          = ParticipantId(nameGenerator.next[ParticipantId]),
           collectionEventTypeId  = CollectionEventTypeId(nameGenerator.next[CollectionEventTypeId]),
           version                = -1,
-          dateTime               = DateTime.now,
           timeCompleted          = DateTime.now,
           visitNumber            = 0,
           annotations            = Set(factory.createCollectionEventAnnotation)
@@ -113,7 +108,6 @@ class CollectionEventSpec extends DomainSpec {
           participantId          = ParticipantId(nameGenerator.next[ParticipantId]),
           collectionEventTypeId  = CollectionEventTypeId(nameGenerator.next[CollectionEventTypeId]),
           version                = -2,
-          dateTime               = DateTime.now,
           timeCompleted          = DateTime.now,
           visitNumber            = 1,
           annotations            = Set(factory.createCollectionEventAnnotation)

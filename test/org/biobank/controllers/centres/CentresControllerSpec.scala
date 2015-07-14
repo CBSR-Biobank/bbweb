@@ -458,7 +458,7 @@ class CentresControllerSpec extends ControllerFixture {
         val json = makeRequest(POST, uri(centre) + "/enable", NOT_FOUND, json = cmdJson)
 
         (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include regex ("centre.*does not exist")
+        (json \ "message").as[String] must include regex ("centre.*does not exist")
       }
 
       "fail when attempting to enable and the centre ids differ" in {

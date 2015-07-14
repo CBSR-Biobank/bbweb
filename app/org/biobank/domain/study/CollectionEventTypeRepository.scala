@@ -13,9 +13,8 @@ import Scalaz._
 trait CollectionEventTypeRepository
     extends ReadWriteRepository [CollectionEventTypeId, CollectionEventType] {
 
-  def withId(
-    studyId: StudyId,
-    ceventTypeId: CollectionEventTypeId): DomainValidation[CollectionEventType]
+  def withId(studyId: StudyId, ceventTypeId: CollectionEventTypeId)
+      : DomainValidation[CollectionEventType]
 
   def allForStudy(studyId: StudyId): Set[CollectionEventType]
 
@@ -30,24 +29,24 @@ class CollectionEventTypeRepositoryImpl
     extends ReadWriteRepositoryRefImpl[CollectionEventTypeId, CollectionEventType](v => v.id)
     with CollectionEventTypeRepository {
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  override val NotFoundError = "collection event type with id not found:"
 
   def nextIdentity: CollectionEventTypeId = new CollectionEventTypeId(nextIdentityAsString)
 
-  def withId(
-    studyId: StudyId,
-    ceventTypeId: CollectionEventTypeId): DomainValidation[CollectionEventType] = {
+  def withId(studyId: StudyId, ceventTypeId: CollectionEventTypeId)
+      : DomainValidation[CollectionEventType] = {
     getByKey(ceventTypeId).fold(
       err =>
       DomainError(
         s"collection event type does not exist: { studyId: $studyId, ceventTypeId: $ceventTypeId }")
         .failureNel,
-      cet =>
-      if (cet.studyId == studyId)
-        cet.success
-      else DomainError(
-        s"study does not have collection event type:{ studyId: $studyId, ceventTypeId: $ceventTypeId }")
+      cet => {
+        if (cet.studyId == studyId)
+          cet.success
+        else DomainError(
+          s"study does not have collection event type:{ studyId: $studyId, ceventTypeId: $ceventTypeId }")
         .failureNel
+      }
     )
   }
 

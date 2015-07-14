@@ -115,22 +115,22 @@ class StudiesProcessorSpec extends TestFixture {
         )
 
         studyRepository.getDisabled(StudyId(event.id)) mustSucceed { repoStudy =>
-          repoStudy.version mustBe (study.version + 1)
+          repoStudy.version must be > study.version
           checkTimeStamps(repoStudy, study.timeAdded, DateTime.now)
         }
-      }
 
-      // update something other than the name
-      val study3 = study2.copy(version     = study.version + 1,
-                               description = Some(nameGenerator.next[Study]))
+        // update something other than the name
+        val study3 = study2.copy(version     = event.getUpdated.getVersion,
+                                 description = Some(nameGenerator.next[Study]))
 
-      askUpdateCommand(study3) mustSucceed { event =>
-        event.getUpdated must have (
-          'name        (Some(study3.name)),
-          'description (study3.description)
-        )
-        studyRepository.getDisabled(StudyId(event.id)) mustSucceed { repoStudy =>
-          checkTimeStamps(repoStudy, study.timeAdded, DateTime.now)
+        askUpdateCommand(study3) mustSucceed { event =>
+          event.getUpdated must have (
+            'name        (Some(study3.name)),
+            'description (study3.description)
+          )
+          studyRepository.getDisabled(StudyId(event.id)) mustSucceed { repoStudy =>
+            checkTimeStamps(repoStudy, study.timeAdded, DateTime.now)
+          }
         }
       }
     }

@@ -94,15 +94,6 @@ class CentresServiceImpl @javaxInject() (@Named("centresProcessor") val processo
     )
   }
 
-  private def getStatus(status: String): DomainValidation[String] = {
-    status match {
-      case "all"      => Centre.status.successNel
-      case "disabled" => DisabledCentre.status.successNel
-      case "enabled"  => EnabledCentre.status.successNel
-      case _          => DomainError(s"invalid centre status: $status").failureNel
-    }
-  }
-
   def getCentres[T <: Centre](filter: String,
                               status: String,
                               sortFunc: (Centre, Centre) => Boolean,
@@ -117,12 +108,11 @@ class CentresServiceImpl @javaxInject() (@Named("centresProcessor") val processo
       allCentres
     }
 
-    val centresFilteredByStatus = getStatus(status).map { status =>
-      if (status == Centre.status) {
-        centresFilteredByName
-      } else {
-        centresFilteredByName.filter { centre => centre.status == status }
-      }
+    val centresFilteredByStatus = status match {
+      case "all"      => centresFilteredByName.success
+      case "disabled" => centresFilteredByName.collect { case s: DisabledCentre => s }.success
+      case "enabled"  => centresFilteredByName.collect { case s: EnabledCentre => s }.success
+      case _          => DomainError(s"invalid centre status: $status").failureNel
     }
 
     centresFilteredByStatus.map { centres =>

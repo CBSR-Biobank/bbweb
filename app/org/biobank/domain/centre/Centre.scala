@@ -27,9 +27,6 @@ sealed trait Centre
     with HasUniqueName
     with HasDescriptionOption {
 
-  /** @param status Contains the current state of the object, one of: Disabled, Enabled. */
-  val status: String
-
   override def toString =
     s"""|${this.getClass.getSimpleName}: {
         |  id: $id,
@@ -44,8 +41,6 @@ sealed trait Centre
 
 object Centre {
 
-  val status: String = "Centre"
-
   implicit val centreWrites = new Writes[Centre] {
     def writes(centre: Centre) = Json.obj(
       "id"           -> centre.id,
@@ -54,14 +49,14 @@ object Centre {
       "timeModified" -> centre.timeModified,
       "name"         -> centre.name,
       "description"  -> centre.description,
-      "status"       -> centre.status
+      "status"       -> centre.getClass.getSimpleName
     )
   }
 
   def compareByName(a: Centre, b: Centre) = (a.name compareToIgnoreCase b.name) < 0
 
   def compareByStatus(a: Centre, b: Centre) = {
-    val statusCompare = a.status compare b.status
+    val statusCompare = a.getClass.getSimpleName compare b.getClass.getSimpleName
     if (statusCompare == 0) {
       compareByName(a, b)
     } else {
@@ -90,20 +85,33 @@ case class DisabledCentre(id:           CentreId,
                           timeModified: Option[DateTime],
                           name:         String,
                           description:  Option[String])
-    extends Centre {
+    extends Centre with CentreValidations {
+  import org.biobank.domain.CommonValidations._
 
-  override val status: String = DisabledCentre.status
+  /** Used to change the name. */
+  def withName(name: String): DomainValidation[DisabledCentre] = {
+    validateString(name, NameMinLength, InvalidName) fold (
+      err => err.failure,
+      c   => copy(version = version + 1, name = name).success
+    )
+  }
 
-  /** Used to change the name or the description. */
-  def update(
-    name: String,
-    description: Option[String]): DomainValidation[DisabledCentre] = {
-    DisabledCentre.create(this.id, this.version, this.timeAdded, name, description)
+  /** Used to change the description. */
+  def withDescription(description: Option[String]): DomainValidation[DisabledCentre] = {
+    validateNonEmptyOption(description, InvalidDescription) fold (
+      err => err.failure,
+      c   => copy(version = version + 1, description = description).success
+    )
   }
 
   /** Used to enable a centre after it has been configured, or had configuration changes made on it. */
-  def enable: DomainValidation[EnabledCentre] = {
-    EnabledCentre.create(this)
+  def enable(): DomainValidation[EnabledCentre] = {
+    EnabledCentre(id           = this.id,
+                  version      = this.version + 1,
+                  timeAdded    = this.timeAdded,
+                  timeModified = this.timeModified,
+                  name         = this.name,
+                  description  = this.description).success
   }
 }
 
@@ -113,24 +121,20 @@ case class DisabledCentre(id:           CentreId,
 object DisabledCentre extends CentreValidations {
   import org.biobank.domain.CommonValidations._
 
-  val status: String = "Disabled"
-
   /**
     * The factory method to create a centre.
     *
     * Performs validation on fields.
     */
-  def create(
-    id: CentreId,
-    version: Long,
-    dateTime: DateTime,
-    name: String,
-    description: Option[String]): DomainValidation[DisabledCentre] = {
+  def create(id:          CentreId,
+             version:     Long,
+             name:        String,
+             description: Option[String]): DomainValidation[DisabledCentre] = {
     (validateId(id) |@|
       validateAndIncrementVersion(version) |@|
       validateString(name, NameMinLength, InvalidName) |@|
-      validateNonEmptyOption(description, NonEmptyDescription)) {
-        DisabledCentre(_, _, dateTime, None, _, _)
+      validateNonEmptyOption(description, InvalidDescription)) {
+        DisabledCentre(_, _, DateTime.now, None, _, _)
       }
   }
 }
@@ -141,38 +145,20 @@ object DisabledCentre extends CentreValidations {
   * This class has a private constructor and instances of this class can only be created using
   * the [[EnabledCentre.create]] method on the factory object.
   */
-case class EnabledCentre(
-  id: CentreId,
-  version: Long,
-  timeAdded: DateTime,
-  timeModified: Option[DateTime],
-  name: String,
-  description: Option[String])
-  extends Centre {
+case class EnabledCentre(id:           CentreId,
+                         version:      Long,
+                         timeAdded:    DateTime,
+                         timeModified: Option[DateTime],
+                         name:         String,
+                         description:  Option[String])
+    extends Centre {
 
-  override val status: String = EnabledCentre.status
-
-  def disable: DomainValidation[DisabledCentre] = {
-    DisabledCentre.create(this.id, this.version, this.timeAdded, name, description)
-  }
-}
-
-
-/**
-  * Factory object used to enable a centre.
-  */
-object EnabledCentre extends CentreValidations {
-  import CommonValidations._
-
-  val status: String = "Enabled"
-
-  /** A centre must be in a disabled state before it can be enabled. */
-  def create(centre: DisabledCentre): DomainValidation[EnabledCentre] = {
-    (validateId(centre.id) |@|
-      validateAndIncrementVersion(centre.version) |@|
-      validateString(centre.name, NameMinLength, InvalidName) |@|
-      validateNonEmptyOption(centre.description, NonEmptyDescription)) {
-        EnabledCentre(_, _, centre.timeAdded, None, _, _)
-      }
+  def disable(): DomainValidation[DisabledCentre] = {
+    DisabledCentre(id           = this.id,
+                   version      = this.version + 1,
+                   timeAdded    = this.timeAdded,
+                   timeModified = this.timeModified,
+                   name         = this.name,
+                   description  = this.description).success
   }
 }

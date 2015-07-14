@@ -88,15 +88,19 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
   }
 
   private def processAddCollectionEventTypeCmd(cmd: AddCollectionEventTypeCmd): Unit = {
-    val timeNow = DateTime.now
     val studyId = StudyId(cmd.studyId)
     val id = collectionEventTypeRepository.nextIdentity
 
     val event = for {
       nameValid <- nameAvailable(cmd.name, studyId)
-      newItem <- CollectionEventType.create(
-        studyId, id, -1L, timeNow, cmd.name, cmd.description, cmd.recurring,
-        cmd.specimenGroupData, cmd.annotationTypeData)
+      newItem <- CollectionEventType.create(studyId,
+                                            id,
+                                            -1L,
+                                            cmd.name,
+                                            cmd.description,
+                                            cmd.recurring,
+                                            cmd.specimenGroupData,
+                                            cmd.annotationTypeData)
       validSgData <- validateSpecimenGroupData(studyId, cmd.specimenGroupData)
       validAtData <- validateAnnotationTypeData(studyId, cmd.annotationTypeData)
       event <- createStudyEvent(newItem.studyId, cmd).withCollectionEventTypeAdded(

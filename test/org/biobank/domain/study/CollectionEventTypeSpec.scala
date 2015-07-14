@@ -29,7 +29,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
+        studyId, id, version, name, description, recurring,
         specimenGroupData, annotationTypeData)
 
       validation mustSucceed { cet =>
@@ -99,7 +99,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
+        studyId, id, version, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation mustFail "IdRequired"
     }
@@ -116,7 +116,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
+        studyId, id, version, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation mustFail "IdRequired"
     }
@@ -133,7 +133,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
+        studyId, id, version, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation mustFail "InvalidVersion"
     }
@@ -150,13 +150,13 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
+        studyId, id, version, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation mustFail "NameRequired"
 
       name = ""
       val validation2 = CollectionEventType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
+        studyId, id, version, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation2 mustFail "NameRequired"
     }
@@ -173,15 +173,15 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
+        studyId, id, version, name, description, recurring,
         specimenGroupData, annotationTypeData)
-      validation mustFail "NonEmptyDescription"
+      validation mustFail "InvalidDescription"
 
       description = Some("")
       val validation2 = CollectionEventType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
+        studyId, id, version, name, description, recurring,
         specimenGroupData, annotationTypeData)
-      validation2 mustFail "NonEmptyDescription"
+      validation2 mustFail "InvalidDescription"
     }
 
     "not be created with an empty specimen group id" in {
@@ -196,7 +196,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
+        studyId, id, version, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation mustFail "IdRequired"
     }
@@ -213,7 +213,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
+        studyId, id, version, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation mustFail "MaxCountInvalid"
     }
@@ -230,7 +230,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("x", false))
 
       val validation = CollectionEventType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
+        studyId, id, version, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation mustFail "AmountInvalid"
     }
@@ -247,7 +247,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("", false))
 
       val validation = CollectionEventType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
+        studyId, id, version, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation mustFail "IdRequired"
     }
@@ -264,7 +264,7 @@ class CollectionEventTypeSpec extends DomainSpec {
       val annotationTypeData = List(CollectionEventTypeAnnotationTypeData("1", false))
 
       val validation = CollectionEventType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, recurring,
+        studyId, id, version, name, description, recurring,
         specimenGroupData, annotationTypeData)
       validation.mustFail("InvalidVersion", "NameRequired")
     }

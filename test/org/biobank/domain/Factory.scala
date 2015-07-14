@@ -6,6 +6,7 @@ import org.biobank.domain.user._
 import org.biobank.domain.study._
 import org.biobank.domain.participants._
 import org.biobank.domain.centre._
+import org.biobank.domain.containers._
 import org.biobank.infrastructure.{
   CollectionEventTypeAnnotationTypeData,
   CollectionEventTypeSpecimenGroupData,
@@ -404,8 +405,8 @@ class Factory {
 
     val cevent = CollectionEvent(
       id                    = CollectionEventId(nameGenerator.next[CollectionEvent]),
-      participantId         = ParticipantId(participant.id.id),
-      collectionEventTypeId = CollectionEventTypeId(collectionEventType.id.id),
+      participantId         = participant.id,
+      collectionEventTypeId = collectionEventType.id,
       version               = 0,
       timeAdded             = DateTime.now,
       timeModified          = None,
@@ -414,6 +415,27 @@ class Factory {
       annotations           = Set.empty)
     domainObjects = domainObjects + (classOf[CollectionEvent] -> cevent)
     cevent
+  }
+
+  def createUsableSpecimen(): Specimen = {
+    val specimenGroup = defaultSpecimenGroup
+    val location = defaultLocation
+
+    val specimen = UsableSpecimen(
+      id               = SpecimenId(nameGenerator.next[Specimen]),
+      specimenGroupId  = specimenGroup.id,
+      version          = 0,
+      timeAdded        = DateTime.now,
+      timeModified     = None,
+      originLocationId = location.id,
+      locationId       = location.id,
+      containerId      = None,
+      positionId       = None,
+      timeCreated      = DateTime.now,
+      amount           = BigDecimal(1.0)
+    )
+    domainObjects = domainObjects + (classOf[Specimen] -> specimen)
+    specimen
   }
 
   def createDisabledCentre(): DisabledCentre = {
@@ -450,6 +472,53 @@ class Factory {
                             nameGenerator.next[Location])
     domainObjects = domainObjects + (classOf[Location] -> location)
     location
+  }
+
+  def createContainerSchema(): ContainerSchema = {
+    val containerSchema = ContainerSchema(
+      version      = 0L,
+      timeAdded    = DateTime.now,
+      timeModified = None,
+      id           = ContainerSchemaId(nameGenerator.next[ContainerSchema]),
+      name         = nameGenerator.next[ContainerSchema],
+      description  = Some(nameGenerator.next[ContainerSchema]),
+      shared       = true)
+    domainObjects = domainObjects + (classOf[ContainerSchema] -> containerSchema)
+    containerSchema
+  }
+
+  def createEnabledContainerType(centre: Centre): EnabledContainerType = {
+    val containerType = EnabledContainerType(
+      id           = ContainerTypeId(nameGenerator.next[ContainerType]),
+      centreId     = Some(centre.id),
+      schemaId     = defaultContainerSchema.id,
+      version      = 0L,
+      timeAdded    = DateTime.now,
+      timeModified = None,
+      name         = nameGenerator.next[ContainerType],
+      description  = Some(nameGenerator.next[ContainerType]),
+      shared       = true)
+    domainObjects = domainObjects + (classOf[EnabledContainerType] -> containerType)
+    containerType
+  }
+
+  def createEnabledContainerType(): EnabledContainerType = {
+    createEnabledContainerType(defaultEnabledCentre)
+  }
+
+  def createDisabledContainerType(): DisabledContainerType = {
+    val containerType = DisabledContainerType(
+      version      = 0L,
+      centreId     = Some(defaultEnabledCentre.id),
+      schemaId     = defaultContainerSchema.id,
+      timeAdded    = DateTime.now,
+      timeModified = None,
+      id           = ContainerTypeId(nameGenerator.next[ContainerType]),
+      name         = nameGenerator.next[ContainerType],
+      description  = Some(nameGenerator.next[ContainerType]),
+      shared       = true)
+    domainObjects = domainObjects + (classOf[DisabledContainerType] -> containerType)
+    containerType
   }
 
   def defaultRegisteredUser: RegisteredUser = {
@@ -550,6 +619,18 @@ class Factory {
 
   def defaultLocation: Location = {
     defaultObject(classOf[Location], createLocation)
+  }
+
+  def defaultContainerSchema: ContainerSchema = {
+    defaultObject(classOf[ContainerSchema], createContainerSchema)
+  }
+
+  def defaultDisabledContainerType: DisabledContainerType = {
+    defaultObject(classOf[DisabledContainerType], createDisabledContainerType)
+  }
+
+  def defaultEnabledContainerType: EnabledContainerType = {
+    defaultObject(classOf[EnabledContainerType], createEnabledContainerType)
   }
 
   /** Retrieves the class from the map, or calls 'create' if value does not exist

@@ -14,23 +14,28 @@ object TestUtils extends MustMatchers with OptionValues {
 
   val TimeCoparisonMillis = 600L
 
-  def checkTimeStamps[T <: ConcurrencySafeEntity[_]](entity: T,
-                                                     expectedAddedTime: DateTime,
-                                                     expectedLastUpdateTime: Option[DateTime]) = {
-    (entity.timeAdded to expectedAddedTime).millis must be < TimeCoparisonMillis
+  def checkTimeStamps(expectedTime:  DateTime, actualTime: DateTime): Unit = {
+    (expectedTime to actualTime).millis must be < TimeCoparisonMillis
+  }
+
+  def checkTimeStamps[T <: ConcurrencySafeEntity[_]]
+    (entity: T,
+     expectedAddedTime: DateTime,
+     expectedLastUpdateTime: Option[DateTime]): Unit = {
+    checkTimeStamps(entity.timeAdded, expectedAddedTime)
     expectedLastUpdateTime.fold {
       entity.timeModified mustBe (None)
     } {
-      dateTime => (entity.timeModified.value to dateTime).millis must be < TimeCoparisonMillis
+      dateTime => checkTimeStamps(entity.timeModified.value, dateTime)
     }
   }
 
   def checkTimeStamps[T <: ConcurrencySafeEntity[_]](entity: T,
                                                      expectedAddedTime: DateTime,
-                                                     expectedLastUpdateTime: DateTime) = {
+                                                     expectedLastUpdateTime: DateTime): Unit = {
     //log.debug(s"entity: $entity, expectedAddedTime: $expectedAddedTime, expectedLastUpdateTime: $expectedLastUpdateTime")
-    (entity.timeAdded to expectedAddedTime).millis must be < TimeCoparisonMillis
-    (entity.timeModified.value to expectedLastUpdateTime).millis must be < TimeCoparisonMillis
+    checkTimeStamps(entity.timeAdded, expectedAddedTime)
+    checkTimeStamps(entity.timeModified.value, expectedLastUpdateTime)
   }
 
   /**

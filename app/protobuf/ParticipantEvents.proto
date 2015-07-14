@@ -37,16 +37,60 @@ message CollectionEventRemovedEvent {
    optional string collectionEventId     = 1;
 }
 
+message SpecimenAddedEvent {
+   optional string specimenId         = 1;
+   optional string specimenGroupId    = 2;
+   optional string collectionEventId  = 3;
+   optional string originLocationId   = 4;
+   optional string locationId         = 5;
+   optional string containerId        = 6;
+   optional string positionId         = 7;
+   optional string timeCreated        = 8;
+   optional string amount             = 9;
+   optional bool   usable             = 10;
+}
+
+message SpecimenMovedEvent {
+   optional string specimenId         = 1;
+   optional string locationId         = 2;
+}
+
+message SpecimenPositionAssignedEvent {
+   optional string specimenId         = 1;
+   optional string positionId         = 9;
+}
+
+// TODO: check if this is needed
+message SpecimenAmountRemovedEvent {
+   optional string specimenId         = 1;
+   optional double amountRemoved      = 2;
+}
+
+message SpecimenUsableUpdatedEvent {
+   optional string specimenId         = 1;
+   repeated bool   usable             = 2;
+}
+
+message SpecimenRemovedEvent {
+   optional string specimenId     = 1;
+}
+
 message ParticipantEvent {
    required string id     = 1; // the participant id
    optional string userId = 2;
    optional string time   = 3;
 
    oneof event_type {
-     ParticipantAddedEvent       participantAdded       = 4;
-     ParticipantUpdatedEvent     participantUpdated     = 5;
-     CollectionEventAddedEvent   collectionEventAdded   = 6;
-     CollectionEventUpdatedEvent collectionEventUpdated = 7;
-     CollectionEventRemovedEvent collectionEventRemoved = 8;
+     ParticipantAddedEvent         participantAdded           = 4;
+     ParticipantUpdatedEvent       participantUpdated         = 5;
+     CollectionEventAddedEvent     collectionEventAdded       = 6;
+     CollectionEventUpdatedEvent   collectionEventUpdated     = 7;
+     CollectionEventRemovedEvent   collectionEventRemoved     = 8;
+     SpecimenAddedEvent            specimenAdded              = 9;
+     SpecimenMovedEvent            specimenMoved              = 10;
+     SpecimenPositionAssignedEvent specimenPosisitionAssigned = 11;
+     SpecimenAmountRemovedEvent    specimenAmountRemoved      = 12;
+     SpecimenUsableUpdatedEvent    specimenUsableUpdated      = 13;
+     SpecimenRemovedEvent          specimenRemoved            = 14;
    }
 }

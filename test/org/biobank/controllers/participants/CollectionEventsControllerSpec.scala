@@ -24,7 +24,7 @@ class CollectionEventsControllerSpec extends ControllerFixture {
   import org.biobank.domain.JsonHelper._
 
   def uri(participantId: ParticipantId): String =
-    s"/participants/${participantId.id}/cevents"
+    s"/participants/cevents/${participantId.id}"
 
   def uri(participantId: ParticipantId, cevent: CollectionEvent): String =
     uri(participantId) + s"/${cevent.id.id}"
@@ -33,19 +33,19 @@ class CollectionEventsControllerSpec extends ControllerFixture {
     uri(participantId) + s"/${cevent.id.id}/$version"
 
   def uri(participant: Participant): String =
-    s"/participants/${participant.id.id}/cevents"
+    uri(participant.id)
 
   def uri(participant: Participant, cevent: CollectionEvent): String =
-    uri(participant) + s"/${cevent.id.id}"
+    uri(participant.id, cevent)
 
   def uri(participant: Participant, cevent: CollectionEvent, version: Long): String =
-    uri(participant) + s"/${cevent.id.id}/$version"
+    uri(participant.id, cevent, version)
 
   def uriWithQuery(participant: Participant, cevent: CollectionEvent): String =
-    uri(participant) + s"?ceventId=${cevent.id.id}"
+    uri(participant.id) + s"?ceventId=${cevent.id.id}"
 
   def uriWithVisitNumber(participant: Participant, cevent: CollectionEvent): String =
-    uri(participant) + s"/visitNumber/${cevent.visitNumber}"
+    uri(participant.id) + s"/visitNumber/${cevent.visitNumber}"
 
   /** Converts a collectionEvent into an Add command.
    */
@@ -128,7 +128,7 @@ class CollectionEventsControllerSpec extends ControllerFixture {
   }
 
   def addOnNonEnabledStudy(study: Study, cevent: CollectionEvent) = {
-    study.status must not be (EnabledStudy.status)
+    study must not be an [EnabledStudy]
 
     studyRepository.put(study)
 
@@ -140,7 +140,7 @@ class CollectionEventsControllerSpec extends ControllerFixture {
   }
 
   def updateOnNonEnabledStudy(study: Study, cevent: CollectionEvent) = {
-    study.status must not be (EnabledStudy.status)
+    study must not be an [EnabledStudy]
 
     studyRepository.put(study)
     collectionEventRepository.put(cevent)
@@ -155,7 +155,7 @@ class CollectionEventsControllerSpec extends ControllerFixture {
   }
 
   def removeOnNonEnabledStudy(study: Study, cevent: CollectionEvent) = {
-    study.status must not be (EnabledStudy.status)
+    study must not be an [EnabledStudy]
 
     studyRepository.put(study)
     collectionEventRepository.put(cevent)
@@ -168,7 +168,7 @@ class CollectionEventsControllerSpec extends ControllerFixture {
 
   "Participant REST API" when {
 
-    "GET /participants/{participantId}/cevents" must {
+    "GET /participants/cevents/{participantId}" must {
 
       "list none" in {
         createEntities() { (study, participant, ceventType) =>
@@ -270,7 +270,7 @@ class CollectionEventsControllerSpec extends ControllerFixture {
 
     }
 
-    "GET /participants/{participantId}/cevents/visitNumber/{vn}" must {
+    "GET /participants/cevents/{participantId}/visitNumber/{vn}" must {
 
       "get a collection event by visit number" in {
         createEntities() { (study, participant, ceventType) =>
@@ -311,7 +311,7 @@ class CollectionEventsControllerSpec extends ControllerFixture {
       }
     }
 
-    "POST /participants/{participantId}/cevents" must {
+    "POST /participants/cevents/{participantId}" must {
 
       "add a collection event with no annotation in" in {
         createEntities() { (study, participant, ceventType) =>
@@ -506,7 +506,7 @@ class CollectionEventsControllerSpec extends ControllerFixture {
       }
     }
 
-    "PUT /participants/{participantId}/cevents/{id}" must {
+    "PUT /participants/cevents/{participantId}/{id}" must {
 
       "update a collection event with no annotation types" in {
         createEntities() { (study, participant, ceventType) =>
@@ -746,7 +746,7 @@ class CollectionEventsControllerSpec extends ControllerFixture {
 
     }
 
-    "DELETE /participants/{participantId}/cevents/{id}/{ver}" must {
+    "DELETE /participants/cevents/{participantId}/{id}/{ver}" must {
 
       "remove a collection event" in {
         createEntities() { (study, participant, ceventType) =>

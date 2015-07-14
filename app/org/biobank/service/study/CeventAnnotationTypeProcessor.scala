@@ -5,7 +5,6 @@ import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain._
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
-import org.biobank.domain.AnnotationValueType._
 
 import akka.actor._
 import akka.persistence.SnapshotOffer
@@ -76,14 +75,18 @@ class CeventAnnotationTypeProcessor @javax.inject.Inject() (
 
   private def processAddCollectionEventAnnotationTypeCmd
     (cmd: AddCollectionEventAnnotationTypeCmd): Unit = {
-    val timeNow = DateTime.now
     val studyId = StudyId(cmd.studyId)
     val id = annotationTypeRepository.nextIdentity
     val event = for {
       nameValid <- nameAvailable(cmd.name, studyId)
-      newItem <- CollectionEventAnnotationType.create(
-        studyId, id, -1L, timeNow, cmd.name, cmd.description,
-        cmd.valueType, cmd.maxValueCount, cmd.options)
+      newItem <- CollectionEventAnnotationType.create(studyId,
+                                                      id,
+                                                      -1L,
+                                                      cmd.name,
+                                                      cmd.description,
+                                                      cmd.valueType,
+                                                      cmd.maxValueCount,
+                                                      cmd.options)
       event <- createStudyEvent(newItem.studyId, cmd).withCollectionEventAnnotationTypeAdded(
         CollectionEventAnnotationTypeAddedEvent(
           annotationTypeId = Some(newItem.id.id),

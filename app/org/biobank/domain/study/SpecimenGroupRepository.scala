@@ -13,9 +13,8 @@ trait SpecimenGroupRepository extends ReadWriteRepository[SpecimenGroupId, Speci
 
   def allForStudy(studyId: StudyId): Set[SpecimenGroup]
 
-  def withId(
-    studyId: StudyId,
-    specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup]
+  def withId(studyId: StudyId, specimenGroupId: SpecimenGroupId)
+      : DomainValidation[SpecimenGroup]
 
 }
 
@@ -24,7 +23,7 @@ class SpecimenGroupRepositoryImpl
     extends ReadWriteRepositoryRefImpl[SpecimenGroupId, SpecimenGroup](v => v.id)
     with SpecimenGroupRepository {
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  override val NotFoundError = "specimen group with id not found:"
 
   def nextIdentity: SpecimenGroupId = new SpecimenGroupId(nextIdentityAsString)
 
@@ -32,9 +31,8 @@ class SpecimenGroupRepositoryImpl
     getValues.filter(x => x.studyId == studyId).toSet
   }
 
-  def withId(
-    studyId: StudyId,
-    specimenGroupId: SpecimenGroupId): DomainValidation[SpecimenGroup] = {
+  def withId(studyId: StudyId, specimenGroupId: SpecimenGroupId)
+      : DomainValidation[SpecimenGroup] = {
     getByKey(specimenGroupId).fold(
       err => DomainError(
         s"specimen group does not exist: { studyId: $studyId, specimenGroupId: $specimenGroupId }")

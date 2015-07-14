@@ -49,7 +49,6 @@ case class SpecimenLinkAnnotationType(studyId:       StudyId,
     val v = SpecimenLinkAnnotationType.create(this.studyId,
                                               this.id,
                                               this.version,
-                                              this.timeAdded,
                                               name,
                                               description,
                                               valueType,
@@ -66,7 +65,6 @@ object SpecimenLinkAnnotationType extends StudyAnnotationTypeValidations {
   def create(studyId:       StudyId,
              id:            AnnotationTypeId,
              version:       Long,
-             dateTime:      DateTime,
              name:          String,
              description:   Option[String],
              valueType:     AnnotationValueType,
@@ -77,13 +75,13 @@ object SpecimenLinkAnnotationType extends StudyAnnotationTypeValidations {
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|
       validateString(name, NameRequired) |@|
-      validateNonEmptyOption(description, NonEmptyDescription) |@|
+      validateNonEmptyOption(description, InvalidDescription) |@|
       validateMaxValueCount(maxValueCount) |@|
       validateOptions(options) |@|
       validateSelectParams(valueType, maxValueCount, options)) {
       case (p1, p2, p3, p4, p5, p6, p7, p8) =>
         // p8 not used to create a ParticipantAnnotationType
-        SpecimenLinkAnnotationType(p1, p2, p3, dateTime, None, p4, p5, valueType, p6, p7)
+        SpecimenLinkAnnotationType(p1, p2, p3, DateTime.now, None, p4, p5, valueType, p6, p7)
       }
   }
 

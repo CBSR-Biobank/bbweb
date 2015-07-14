@@ -86,7 +86,6 @@ class CentresProcessor @javaxInject() (val centreRepository:          CentreRepo
   }
 
   private def processAddCentreCmd(cmd: AddCentreCmd): Unit = {
-    val timeNow = DateTime.now
     val centreId = centreRepository.nextIdentity
 
     if (centreRepository.getByKey(centreId).isSuccess) {
@@ -95,7 +94,7 @@ class CentresProcessor @javaxInject() (val centreRepository:          CentreRepo
 
     val event = for {
       nameAvailable <- nameAvailable(cmd.name)
-      newCentre <- DisabledCentre.create(centreId, -1L, timeNow, cmd.name, cmd.description)
+      newCentre <- DisabledCentre.create(centreId, -1L, cmd.name, cmd.description)
       event <- createCentreEvent(newCentre.id, cmd).withAdded(
         CentreAddedEvent(name = Some(newCentre.name),
                          description = newCentre.description)).success
@@ -108,43 +107,40 @@ class CentresProcessor @javaxInject() (val centreRepository:          CentreRepo
     val v = updateDisabled(cmd) { centre =>
       for {
         nameAvailable <- nameAvailable(cmd.name, centre.id)
-        updatedCentre <- centre.update(cmd.name, cmd.description)
-      } yield updatedCentre
+        centre1       <- centre.withName(cmd.name)
+        centre2       <- centre.withDescription(cmd.description)
+        event         <- createCentreEvent(centre2.id, cmd).withUpdated(
+          CentreUpdatedEvent(version     = Some(centre2.version),
+                             name        = Some(centre2.name),
+                             description = centre2.description)).success
+      } yield event
     }
 
-    val event = v.fold(
-      err => err.failure,
-      centre => createCentreEvent(centre.id, cmd).withUpdated(
-        CentreUpdatedEvent(version = Some(centre.version),
-                           name = Some(centre.name),
-                           description = centre.description)).success
-    )
-
-    process (event) { applyCentreUpdatedEvent(_) }
+    process (v) { applyCentreUpdatedEvent(_) }
   }
 
   private def processEnableCentreCmd(cmd: EnableCentreCmd): Unit = {
-    val timeNow = DateTime.now
-    val v = updateDisabled(cmd) { c => c.enable }
+    val v = updateDisabled(cmd) { centre =>
+      for {
+        enabledCentre <- centre.enable()
+        event         <- createCentreEvent(enabledCentre.id, cmd).withEnabled(
+          CentreEnabledEvent(version = Some(enabledCentre.version))).success
+      } yield event
+    }
 
-    val  event = v.fold(
-      err => err.failure,
-      centre => createCentreEvent(centre.id, cmd).withEnabled(
-          CentreEnabledEvent(version = Some(centre.version))).success
-    )
-
-    process (event) { applyCentreEnabledEvent(_) }
+    process (v) { applyCentreEnabledEvent(_) }
   }
 
   private def processDisableCentreCmd(cmd: DisableCentreCmd): Unit = {
-    val v = updateEnabled(cmd) { c => c.disable }
-    val event = v.fold(
-      err => err.failure,
-      centre => createCentreEvent(centre.id, cmd).withDisabled(
-        CentreDisabledEvent(version = Some(centre.version))).success
-    )
+    val v = updateEnabled(cmd) { centre =>
+      for {
+      disabledCentre <- centre.disable()
+      event          <- createCentreEvent(disabledCentre.id, cmd).withDisabled(
+        CentreDisabledEvent(version = Some(disabledCentre.version))).success
+      } yield event
+    }
 
-    process (event) { applyCentreDisabledEvent(_) }
+    process (v) { applyCentreDisabledEvent(_) }
   }
 
   /**
@@ -442,8 +438,8 @@ class CentresProcessor @javaxInject() (val centreRepository:          CentreRepo
 
   private def updateCentre[T <: Centre]
     (cmd: CentreModifyCommand)
-    (fn: Centre => DomainValidation[T])
-      : DomainValidation[T] = {
+    (fn: Centre => DomainValidation[CentreEvent])
+      : DomainValidation[CentreEvent] = {
     centreRepository.getByKey(CentreId(cmd.id)).fold(
       err => DomainError(s"centre with id does not exist: $id").failureNel,
       centre => for {
@@ -455,8 +451,8 @@ class CentresProcessor @javaxInject() (val centreRepository:          CentreRepo
 
   private def updateDisabled[T <: Centre]
     (cmd: CentreModifyCommand)
-    (fn: DisabledCentre => DomainValidation[T])
-      : DomainValidation[T] = {
+    (fn: DisabledCentre => DomainValidation[CentreEvent])
+      : DomainValidation[CentreEvent] = {
     updateCentre(cmd) {
       case centre: DisabledCentre => fn(centre)
       case centre => DomainError(s"centre is not disabled: ${cmd.id}").failureNel
@@ -465,8 +461,8 @@ class CentresProcessor @javaxInject() (val centreRepository:          CentreRepo
 
   private def updateEnabled[T <: Centre]
     (cmd: CentreModifyCommand)
-    (fn: EnabledCentre => DomainValidation[T])
-      : DomainValidation[T] = {
+    (fn: EnabledCentre => DomainValidation[CentreEvent])
+      : DomainValidation[CentreEvent] = {
     updateCentre(cmd) {
       case centre: EnabledCentre => fn(centre)
       case centre => DomainError(s"centre is not enabled: ${cmd.id}").failureNel

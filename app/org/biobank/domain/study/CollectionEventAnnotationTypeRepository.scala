@@ -23,6 +23,8 @@ class CollectionEventAnnotationTypeRepositoryImpl
     with StudyAnnotationTypeRepositoryImpl[CollectionEventAnnotationType]
     with CollectionEventAnnotationTypeRepository {
 
+  override val NotFoundError = "collection event annotation type with id not found:"
+
   def allForCollectionEventType(collectionEventType: CollectionEventType)
       : Set[CollectionEventAnnotationType] = {
     val annotationTypeIds = collectionEventType.annotationTypeData.map { atDataItem =>

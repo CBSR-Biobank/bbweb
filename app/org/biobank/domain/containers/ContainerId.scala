@@ -1,4 +1,6 @@
-package org.biobank.domain
+package org.biobank.domain.containers
+
+import org.biobank.domain._
 
 import play.api.libs.json._
 import play.api.libs.json.Reads._

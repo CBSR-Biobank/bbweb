@@ -9,8 +9,8 @@ import scalaz.Scalaz._
   */
 trait ValidationKey {
   def failureNel = this.toString.failureNel
-  def nel = NonEmptyList(this.toString)
-  def failure = this.toString.failure
+  def nel        = NonEmptyList(this.toString)
+  def failure    = this.toString.failure
 }
 
 object CommonValidations {
@@ -19,15 +19,19 @@ object CommonValidations {
 
   case object InvalidVersion extends ValidationKey
 
+  case object InvalidName extends ValidationKey
+
   case object NameRequired extends ValidationKey
 
-  case object NonEmptyDescription extends ValidationKey
+  case object InvalidDescription extends ValidationKey
 
   case object NonEmptyString extends ValidationKey
 
   case object NonEmptyStringOption extends ValidationKey
 
   case object InvalidNumberString extends ValidationKey
+
+  case object CentreIdRequired extends ValidationKey
 
   def validateString(s: String, err: ValidationKey): DomainValidation[String] = {
     if ((s == null) || s.isEmpty()) err.failureNel else s.success
@@ -122,7 +126,7 @@ object CommonValidations {
       none[T].successNel[String]
     } { id =>
       validateId(id, err).fold(
-        err => err.toString.failureNel[Option[T]],
+        err => err.failure[Option[T]],
         id => some(id).success
       )
     }

@@ -24,6 +24,8 @@ class CentreStudiesRepositoryImpl
     extends ReadWriteRepositoryRefImpl[StudyCentreId, StudyCentre](v => v.id)
     with CentreStudiesRepository {
 
+  override val NotFoundError = "centre-study with id not found:"
+
   def nextIdentity: StudyCentreId = StudyCentreId(nextIdentityAsString)
 
   def withIds(studyId: StudyId, centreId: CentreId): DomainValidation[StudyCentre] = {

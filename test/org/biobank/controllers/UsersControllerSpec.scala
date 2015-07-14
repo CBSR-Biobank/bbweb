@@ -77,7 +77,7 @@ class UsersControllerSpec extends ControllerFixture {
         compareObj(jsonItem, user)
       }
 
-      "list multiple users" taggedAs(Tag("1")) in {
+      "list multiple users" in {
         val users = (0 until 2).map { x =>
           factory.createRegisteredUser
         }.map(user => userRepository.put(user)).toList
@@ -464,7 +464,7 @@ class UsersControllerSpec extends ControllerFixture {
 
         (json \ "status").as[String] must be ("success")
         (json \ "data" \ "version").as[Int] must be(user.version + 1)
-        (json \ "data" \ "avatarUrl") mustBe a[JsUndefined]
+        (json \ "data" \ "avatarUrl").asOpt[String] mustBe None
       }
 
       "not update a user's avatar URL if URL is invalid" in {

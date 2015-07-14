@@ -1,6 +1,7 @@
 package org.biobank.service.study
 
 import org.biobank.domain._
+import org.biobank.domain.containers.ContainerTypeId
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study.{
   ProcessingType,
@@ -92,7 +93,6 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
 
   private def processAddSpecimenLinkTypeCmd
     (cmd: AddSpecimenLinkTypeCmd): Unit = {
-    val timeNow = DateTime.now
     val processingTypeId = ProcessingTypeId(cmd.processingTypeId)
     val id = specimenLinkTypeRepository.nextIdentity
 
@@ -102,7 +102,6 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
         processingTypeId      = processingTypeId,
         id                    = id,
         version               = -1L,
-        dateTime              = timeNow,
         expectedInputChange   = cmd.expectedInputChange,
         expectedOutputChange  = cmd.expectedOutputChange,
         inputCount            = cmd.inputCount,

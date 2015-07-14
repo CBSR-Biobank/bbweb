@@ -44,7 +44,6 @@ case class ProcessingType(studyId:      StudyId,
     val v = ProcessingType.create(this.studyId,
                                   this.id,
                                   this.version,
-                                  this.timeAdded,
                                   name,
                                   description,
                                   enabled)
@@ -70,7 +69,6 @@ object ProcessingType {
   def create(studyId:     StudyId,
              id:          ProcessingTypeId,
              version:     Long,
-             dateTime:    DateTime,
              name:        String,
              description: Option[String],
              enabled:     Boolean)
@@ -79,8 +77,8 @@ object ProcessingType {
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|
       validateString(name, NameRequired) |@|
-      validateNonEmptyOption(description, NonEmptyDescription) ) {
-      ProcessingType(_, _, _, dateTime, None, _, _, enabled)
+      validateNonEmptyOption(description, InvalidDescription) ) {
+      ProcessingType(_, _, _, DateTime.now, None, _, _, enabled)
     }
   }
 

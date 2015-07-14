@@ -12,10 +12,14 @@ object ParticipantEventsUtil {
   /**
    * Creates an event with the userId for the user that issued the command, and the current date and time.
    */
-  def createEvent(participant: Participant, command: ParticipantCommand) =
-    ParticipantEvent(id     = participant.id.id,
+  def createEvent(participantId: ParticipantId, command: ParticipantCommand)
+      : ParticipantEvent =
+    ParticipantEvent(id     = participantId.id,
                      userId = command.userId,
                      time   = Some(EventUtils.ISODateTimeFormatter.print(DateTime.now)))
 
+  def createEvent(participant: Participant, command: ParticipantCommand)
+      : ParticipantEvent =
+    createEvent(participant.id, command)
 
 }

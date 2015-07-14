@@ -69,7 +69,6 @@ case class CollectionEventType(studyId:            StudyId,
     val v = CollectionEventType.create(this.studyId,
                                          this.id,
                                          this.version,
-                                         this.timeAdded,
                                          name,
                                          description,
                                          recurring,
@@ -97,32 +96,32 @@ case class CollectionEventType(studyId:            StudyId,
 object CollectionEventType extends CollectionEventTypeValidations with StudyAnnotationTypeValidations {
   import org.biobank.domain.CommonValidations._
 
-  def create(
-    studyId: StudyId,
-    id: CollectionEventTypeId,
-    version: Long,
-    dateTime: DateTime,
-    name: String,
-    description: Option[String],
-    recurring: Boolean,
-    specimenGroupData: List[CollectionEventTypeSpecimenGroupData],
-    annotationTypeData: List[CollectionEventTypeAnnotationTypeData]): DomainValidation[CollectionEventType] = {
+  def create(studyId:            StudyId,
+             id:                 CollectionEventTypeId,
+             version:            Long,
+             name:               String,
+             description:        Option[String],
+             recurring:          Boolean,
+             specimenGroupData:  List[CollectionEventTypeSpecimenGroupData],
+             annotationTypeData: List[CollectionEventTypeAnnotationTypeData])
+      : DomainValidation[CollectionEventType] = {
     (validateId(studyId) |@|
       validateId(id) |@|
       validateAndIncrementVersion(version) |@|
       validateString(name, NameRequired) |@|
-      validateNonEmptyOption(description, NonEmptyDescription) |@|
+      validateNonEmptyOption(description, InvalidDescription) |@|
       validateSpecimenGroupData(specimenGroupData) |@|
       validateAnnotationTypeData(annotationTypeData)) {
-      CollectionEventType(_, _, _, dateTime, None, _, _, recurring, _, _)
+      CollectionEventType(_, _, _, DateTime.now, None, _, _, recurring, _, _)
     }
   }
 
   /**
     *  Validates each item in the set and returns all failures.
     */
-  protected def validateSpecimenGroupData(
-    specimenGroupData: List[CollectionEventTypeSpecimenGroupData]): ValidationNel[String, List[CollectionEventTypeSpecimenGroupData]] = {
+  protected def validateSpecimenGroupData
+    (specimenGroupData: List[CollectionEventTypeSpecimenGroupData])
+      : ValidationNel[String, List[CollectionEventTypeSpecimenGroupData]] = {
 
     def validateSpecimenGroupItem(
       specimenGroupItem: CollectionEventTypeSpecimenGroupData): DomainValidation[CollectionEventTypeSpecimenGroupData] = {

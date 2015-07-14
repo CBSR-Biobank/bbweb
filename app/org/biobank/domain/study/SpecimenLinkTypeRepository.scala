@@ -26,7 +26,7 @@ class SpecimenLinkTypeRepositoryImpl
     extends ReadWriteRepositoryRefImpl[SpecimenLinkTypeId, SpecimenLinkType](v => v.id)
     with SpecimenLinkTypeRepository {
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  override val NotFoundError = "specimen link type with id not found:"
 
   def nextIdentity: SpecimenLinkTypeId = new SpecimenLinkTypeId(nextIdentityAsString)
 

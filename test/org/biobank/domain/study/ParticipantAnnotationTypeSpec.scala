@@ -65,7 +65,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
           AnnotationValueTypeToTuple(vt)
 
         val v = ParticipantAnnotationType.create(
-          studyId, id, version, DateTime.now, name, description, vt, maxValueCount, options, required)
+          studyId, id, version, name, description, vt, maxValueCount, options, required)
         v mustSucceed { annotType =>
           annotType mustBe a[ParticipantAnnotationType]
           annotType must have (
@@ -96,20 +96,18 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
         v mustSucceed { at =>
           at mustBe a[ParticipantAnnotationType]
           at must have (
-            'studyId (annotType.studyId),
-            'id (annotType.id),
-            'version (annotType.version + 1),
-            'name (name),
-            'description (description),
-            'valueType  (valueType),
-            'maxValueCount  (maxValueCount),
-            'options (options),
-            'required  (required)
+            'studyId       (annotType.studyId),
+            'id            (annotType.id),
+            'version       (annotType.version + 1),
+            'name          (name),
+            'description   (description),
+            'valueType     (valueType),
+            'maxValueCount (maxValueCount),
+            'options       (options),
+            'required      (required)
           )
 
-          at.timeAdded mustBe (annotType.timeAdded)
-          // last update date is assigned by the processor
-          at.timeModified must not be (None)
+          checkTimeStamps(annotType, at.timeAdded, None)
         }
       }
     }
@@ -123,7 +121,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val invalidStudyId = StudyId("")
 
       ParticipantAnnotationType.create(
-        invalidStudyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+        invalidStudyId, id, version, name, description, valueType,
         maxValueCount, options, required)
         .mustFail(1, "StudyIdRequired")
     }
@@ -133,7 +131,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
         textAnnotationTypeTuple
       val invalidId = AnnotationTypeId("")
 
-      ParticipantAnnotationType.create(studyId, invalidId, version, org.joda.time.DateTime.now,
+      ParticipantAnnotationType.create(studyId, invalidId, version,
         name, description, valueType, maxValueCount, options, required)
         .mustFail(1, "IdRequired")
     }
@@ -144,7 +142,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val invalidVersion = -2L
 
       ParticipantAnnotationType.create(
-        studyId, id, invalidVersion, DateTime.now, name, description, valueType,
+        studyId, id, invalidVersion, name, description, valueType,
         maxValueCount, options, required)
         .mustFail(1, "InvalidVersion")
     }
@@ -156,7 +154,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
 
       invalidNames.foreach(invalidName =>
         ParticipantAnnotationType.create(
-        studyId, id, version, DateTime.now, invalidName, description, valueType,
+        studyId, id, version, invalidName, description, valueType,
         maxValueCount, options, required)
           .mustFail(1, "NameRequired")
       )
@@ -169,9 +167,9 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
 
       invalidDescriptions.foreach(invalidDescription =>
         ParticipantAnnotationType.create(
-          studyId, id, version, org.joda.time.DateTime.now, name, invalidDescription, valueType,
+          studyId, id, version, name, invalidDescription, valueType,
           maxValueCount, options, required)
-          .mustFail(1, "NonEmptyDescription")
+          .mustFail(1, "InvalidDescription")
       )
     }
 
@@ -181,7 +179,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val invalidMaxValueCount = Some(-1)
 
       ParticipantAnnotationType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+        studyId, id, version, name, description, valueType,
         invalidMaxValueCount, options, required)
         .mustFail(1, "MaxValueCountError")
     }
@@ -192,13 +190,13 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       var invalidOptions = Seq("")
 
       ParticipantAnnotationType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+        studyId, id, version, name, description, valueType,
         maxValueCount, invalidOptions, required)
         .mustFail(1, "OptionRequired")
 
       invalidOptions = Seq("duplicate", "duplicate")
       ParticipantAnnotationType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+        studyId, id, version, name, description, valueType,
         maxValueCount, invalidOptions, required)
         .mustFail(1, "DuplicateOptionsError")
     }
@@ -210,7 +208,7 @@ class ParticipantAnnotationTypeSpec extends DomainSpec {
       val invalidName = ""
 
       ParticipantAnnotationType.create(
-        studyId, id, invalidVersion, org.joda.time.DateTime.now, invalidName, description,
+        studyId, id, invalidVersion, invalidName, description,
         valueType, maxValueCount, options, required)
         .mustFail("InvalidVersion", "NameRequired")
     }

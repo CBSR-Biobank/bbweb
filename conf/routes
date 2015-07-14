@@ -74,18 +74,18 @@ POST    /studies/:procTypeId/sltypes            @org.biobank.controllers.study.S
 PUT     /studies/:procTypeId/sltypes/:id        @org.biobank.controllers.study.SpecimenLinkTypeController.updateSpecimenLinkType(procTypeId, id)
 DELETE  /studies/:procTypeId/sltypes/:id/:ver   @org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(procTypeId, id, ver: Long)
 
+# collection events
+GET     /participants/cevents/:participantId                  @org.biobank.controllers.participants.CollectionEventsController.get(participantId, ceventId: Option[String])
+GET     /participants/cevents/:participantId/visitNumber/:vn  @org.biobank.controllers.participants.CollectionEventsController.getByVisitNumber(participantId, vn: Int)
+POST    /participants/cevents/:participantId                  @org.biobank.controllers.participants.CollectionEventsController.addCollectionEvent(participantId)
+PUT     /participants/cevents/:participantId/:id              @org.biobank.controllers.participants.CollectionEventsController.updateCollectionEvent(participantId, id)
+DELETE  /participants/cevents/:participantId/:id/:ver         @org.biobank.controllers.participants.CollectionEventsController.removeCollectionEvent(participantId, id, ver: Long)
+
 # participants
 GET     /participants/:studyId/uniqueId/:id     @org.biobank.controllers.participants.ParticipantsController.getByUniqueId(studyId, id: String)
 GET     /participants/:studyId/:id              @org.biobank.controllers.participants.ParticipantsController.get(studyId, id: String)
 POST    /participants/:studyId                  @org.biobank.controllers.participants.ParticipantsController.addParticipant(studyId)
 PUT     /participants/:studyId/:id              @org.biobank.controllers.participants.ParticipantsController.updateParticipant(studyId, id)
-
-# collection events
-GET     /participants/:participantId/cevents                  @org.biobank.controllers.participants.CollectionEventsController.get(participantId, ceventId: Option[String])
-GET     /participants/:participantId/cevents/visitNumber/:vn  @org.biobank.controllers.participants.CollectionEventsController.getByVisitNumber(participantId, vn: Int)
-POST    /participants/:participantId/cevents                  @org.biobank.controllers.participants.CollectionEventsController.addCollectionEvent(participantId)
-PUT     /participants/:participantId/cevents/:id              @org.biobank.controllers.participants.CollectionEventsController.updateCollectionEvent(participantId, id)
-DELETE  /participants/:participantId/cevents/:id/:ver         @org.biobank.controllers.participants.CollectionEventsController.removeCollectionEvent(participantId, id, ver: Long)
 
 # centres
 GET     /centres                                @org.biobank.controllers.centres.CentresController.list(filter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")

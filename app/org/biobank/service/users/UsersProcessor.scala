@@ -100,8 +100,12 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
 
     val event = for {
       emailAvailable <- emailAvailable(cmd.email)
-      user <- RegisteredUser.create(newUserId, -1L, DateTime.now, cmd.name, cmd.email,
-                                    encryptedPwd, salt, cmd.avatarUrl)
+      user <- RegisteredUser.create(newUserId, -1L,
+                                    cmd.name,
+                                    cmd.email,
+                                    encryptedPwd,
+                                    salt,
+                                    cmd.avatarUrl)
       event <- createUserEvent(user.id, cmd).withRegistered(
         UserRegisteredEvent(name      = Some(user.name),
                             email     = Some(user.email),
@@ -114,90 +118,78 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   def processActivateUserCmd(cmd: ActivateUserCmd): Unit = {
-    val timeNow = DateTime.now
-    val v = updateRegistered(cmd) { u => u.activate }
-    val event = v.fold(
-      err => err.failure,
-      user => createUserEvent(user.id, cmd).withActivated(
-        UserActivatedEvent(version = Some(user.version))).success
-    )
+    val v = updateRegistered(cmd) { u =>
+      for {
+        user <- u.activate
+        event <- createUserEvent(user.id, cmd).withActivated(
+          UserActivatedEvent(version = Some(user.version))).success
+      } yield event
+    }
 
-    process(event) { applyUserActivatedEvent(_) }
+    process(v) { applyUserActivatedEvent(_) }
   }
 
   def processUpdateUserNameCmd(cmd: UpdateUserNameCmd): Unit = {
-    val timeNow = DateTime.now
-    val v = updateActive(cmd) { _.updateName(cmd.name) }
-    val event = v.fold(
-      err => err.failure,
-      user => createUserEvent(user.id, cmd).withNameUpdated(
-        UserNameUpdatedEvent(
-          version = Some(user.version),
-          name    = Some(user.name))).success
-    )
+    val v = updateActive(cmd) { u =>
+      for {
+        user  <- u.withName(cmd.name)
+        event <- createUserEvent(user.id, cmd).withNameUpdated(
+          UserNameUpdatedEvent(
+            version = Some(user.version),
+            name    = Some(user.name))).success
+      } yield event
+    }
 
-    process(event) { applyUserNameUpdatedEvent(_) }
+    process(v) { applyUserNameUpdatedEvent(_) }
   }
 
   def processUpdateUserEmailCmd(cmd: UpdateUserEmailCmd): Unit = {
-    val timeNow = DateTime.now
-
     val v = updateActive(cmd) { user =>
       for {
         emailAvailable <- emailAvailable(cmd.email, user.id)
-        updatedUser <- user.updateEmail(cmd.email)
-      } yield updatedUser
+        updatedUser    <- user.withEmail(cmd.email)
+        event          <- createUserEvent(user.id, cmd).withEmailUpdated(
+        UserEmailUpdatedEvent(version = Some(updatedUser.version),
+                              email   = Some(updatedUser.email))).success
+      } yield event
     }
 
-    val event = v.fold(
-      err => err.failure,
-      user => createUserEvent(user.id, cmd).withEmailUpdated(
-        UserEmailUpdatedEvent(version = Some(user.version),
-                              email   = Some(user.email))).success
-    )
-
-    process(event) { applyUserEmailUpdatedEvent(_) }
+    process(v) { applyUserEmailUpdatedEvent(_) }
   }
 
   def processUpdateUserPasswordCmd(cmd: UpdateUserPasswordCmd): Unit = {
-    val timeNow = DateTime.now
-
-    val v = updateActive(cmd) { user =>
-      if (passwordHasher.valid(user.password, user.salt, cmd.currentPassword)) {
-        val passwordInfo = encryptPassword(user, cmd.newPassword)
-        user.updatePassword(passwordInfo.password, passwordInfo.salt)
-      } else {
-        DomainError("invalid password").failureNel
-      }
-    }
-
-    val event = v.fold(
-      err => err.failure[UserEvent],
-      user => createUserEvent(user.id, cmd).withPasswordUpdated(
+    val v = updateActive(cmd) { u =>
+      for {
+        user <- {
+          if (passwordHasher.valid(u.password, u.salt, cmd.currentPassword)) {
+            val passwordInfo = encryptPassword(u, cmd.newPassword)
+            u.withPassword(passwordInfo.password, passwordInfo.salt)
+          } else {
+            DomainError("invalid password").failureNel
+          }
+        }
+        event <- createUserEvent(user.id, cmd).withPasswordUpdated(
         UserPasswordUpdatedEvent(version  = Some(user.version),
                                  password = Some(user.password),
                                  salt     = Some(user.salt))).success
-    )
+      } yield event
+    }
 
-    process(event) { applyUserPasswordUpdatedEvent(_) }
+    process(v) { applyUserPasswordUpdatedEvent(_) }
   }
 
   def processUpdateUserAvatarUrlCmd(cmd: UpdateUserAvatarUrlCmd): Unit = {
-    val timeNow = DateTime.now
-
-    val v = updateActive(cmd) { user =>
-      user.updateAvatarUrl(cmd.avatarUrl)
-    }
-
-    val event = v.fold(
-      err => err.failure,
-      user => createUserEvent(user.id, cmd).withAvatarUrlUpdated(
+    val v = updateActive(cmd) { u =>
+      for {
+        user  <- u.withAvatarUrl(cmd.avatarUrl)
+        event <- createUserEvent(user.id, cmd).withAvatarUrlUpdated(
         UserAvatarUrlUpdatedEvent(
           version   = Some(user.version),
           avatarUrl = user.avatarUrl)).success
-    )
+      } yield event
+    }
 
-    process(event) { applyUserAvatarUrlUpdatedEvent(_) }
+    process(v) { applyUserAvatarUrlUpdatedEvent(_) }
   }
 
   // only active users can request a password reset
@@ -210,7 +202,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
             val plainPassword = Utils.randomString(8)
             val passwordInfo = encryptPassword(activeUser, plainPassword)
 
-            activeUser.updatePassword(passwordInfo.password, passwordInfo.salt).fold(
+            activeUser.withPassword(passwordInfo.password, passwordInfo.salt).fold(
               err => err.failure[UserEvent],
               updatedUser => {
                 emailService.passwordResetEmail(user.email, plainPassword)
@@ -232,32 +224,32 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   def processLockUserCmd(cmd: LockUserCmd): Unit = {
-    val timeNow = DateTime.now
-    val v = updateActive(cmd) { u => u.lock }
-    log.debug(s"command: $cmd")
-    val event = v.fold(
-      err => err.failure,
-      user => createUserEvent(user.id, cmd).withLocked(
-        UserLockedEvent(version = Some(user.version))).success
-    )
+    val v = updateActive(cmd) { u =>
+      for {
+        user  <- u.lock()
+        event <- createUserEvent(user.id, cmd).withLocked(
+          UserLockedEvent(version = Some(user.version))).success
+      } yield event
+    }
 
-    process(event) { applyUserLockedEvent(_) }
+    process(v) { applyUserLockedEvent(_) }
   }
 
   def processUnlockUserCmd(cmd: UnlockUserCmd): Unit = {
-    val timeNow = DateTime.now
-    val v = updateLocked(cmd) { u => u.unlock }
-    val event = v.fold(
-      err => err.failure,
-      user => createUserEvent(user.id, cmd).withUnlocked(
-        UserUnlockedEvent(version = Some(user.version))).success
-    )
+    val v = updateLocked(cmd) { u =>
+      for {
+        user  <- u.unlock
+        event <- createUserEvent(user.id, cmd).withUnlocked(
+          UserUnlockedEvent(version = Some(user.version))).success
+      } yield event
+    }
 
-    process(event) { applyUserUnlockedEvent(_) }
+    process(v) { applyUserUnlockedEvent(_) }
   }
 
-  def updateUser[T <: User](cmd: UserModifyCommand)(fn: User => DomainValidation[T])
-      : DomainValidation[T] = {
+  def updateUser[T <: User]
+    (cmd: UserModifyCommand)(fn: User => DomainValidation[UserEvent])
+      : DomainValidation[UserEvent] = {
     for {
       user         <- userRepository.getByKey(UserId(cmd.id))
       validVersion <- user.requireVersion(cmd.expectedVersion)
@@ -265,8 +257,9 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
     } yield updatedUser
   }
 
-  def updateRegistered[T <: User](cmd: UserModifyCommand)(fn: RegisteredUser => DomainValidation[T])
-      : DomainValidation[T] = {
+  def updateRegistered[T <: User]
+    (cmd: UserModifyCommand)(fn: RegisteredUser => DomainValidation[UserEvent])
+      : DomainValidation[UserEvent] = {
     updateUser(cmd) {
       case user: RegisteredUser => fn(user)
       case user => s"user is not registered: ${cmd.id}".failureNel
@@ -274,9 +267,8 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   def updateActive[T <: User]
-    (cmd: UserModifyCommand)
-                  (fn: ActiveUser => DomainValidation[T])
-      : DomainValidation[T] = {
+    (cmd: UserModifyCommand)(fn: ActiveUser => DomainValidation[UserEvent])
+      : DomainValidation[UserEvent] = {
     updateUser(cmd) {
       case user: ActiveUser => fn(user)
       case user => s"user is not active: ${cmd.id}".failureNel
@@ -284,9 +276,8 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   def updateLocked[T <: User]
-    (cmd: UserModifyCommand)
-                  (fn: LockedUser => DomainValidation[T])
-      : DomainValidation[T] = {
+    (cmd: UserModifyCommand)(fn: LockedUser => DomainValidation[UserEvent])
+      : DomainValidation[UserEvent] = {
     updateUser(cmd) {
       case user: LockedUser => fn(user)
       case user => s"user is not locked: ${cmd.id}".failureNel

@@ -25,7 +25,7 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
           AnnotationValueTypeToTuple(vt)
 
         val v = SpecimenLinkAnnotationType.create(
-          studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+          studyId, id, version, name, description, valueType,
           maxValueCount, options)
         v mustSucceed { annotType =>
           annotType mustBe a[SpecimenLinkAnnotationType]
@@ -58,18 +58,17 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
           annotType2 mustBe a[SpecimenLinkAnnotationType]
 
           annotType2 must have (
-            'studyId (annotType.studyId),
-            'id (annotType.id),
-            'version (annotType.version + 1),
-            'name (name),
-            'description (description),
-            'valueType  (valueType),
-            'maxValueCount  (maxValueCount),
-            'options (options)
+            'studyId       (annotType.studyId),
+            'id            (annotType.id),
+            'version       (annotType.version + 1),
+            'name          (name),
+            'description   (description),
+            'valueType     (valueType),
+            'maxValueCount (maxValueCount),
+            'options       (options)
           )
 
-          annotType2.timeAdded mustBe (annotType.timeAdded)
-          annotType2.timeModified must not be (None)
+          checkTimeStamps(annotType, annotType2.timeAdded, None)
         }
       }
     }
@@ -82,7 +81,7 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
         selectAnnotationTypeTuple
       val badStudyId = StudyId("")
 
-      SpecimenLinkAnnotationType.create(badStudyId, id, version, org.joda.time.DateTime.now, name,
+      SpecimenLinkAnnotationType.create(badStudyId, id, version, name,
         description, valueType, maxValueCount, options)
         .mustFail(1, "StudyIdRequired")
     }
@@ -92,7 +91,7 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
         selectAnnotationTypeTuple
       val badAnnotationTypeId = AnnotationTypeId("")
 
-      SpecimenLinkAnnotationType.create(studyId, badAnnotationTypeId, version, org.joda.time.DateTime.now,
+      SpecimenLinkAnnotationType.create(studyId, badAnnotationTypeId, version,
         name, description, valueType, maxValueCount, options)
         .mustFail(1, "IdRequired")
     }
@@ -102,7 +101,7 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
         selectAnnotationTypeTuple
       val invalidVersion = -2L
 
-      SpecimenLinkAnnotationType.create(studyId, id, invalidVersion, org.joda.time.DateTime.now, name,
+      SpecimenLinkAnnotationType.create(studyId, id, invalidVersion, name,
         description, valueType, maxValueCount, options)
         .mustFail(1, "InvalidVersion")
   }
@@ -113,7 +112,7 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       val invalidNames: List[String] = List(null, "")
 
       invalidNames.foreach(invalidName =>
-        SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now,
+        SpecimenLinkAnnotationType.create(studyId, id, version,
           invalidName, description, valueType, maxValueCount, options)
           .mustFail(1, "NameRequired")
       )
@@ -125,9 +124,9 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       var invalidDescriptions: List[Option[String]] = List(Some(null), Some(""))
 
       invalidDescriptions.foreach(invalidDescription =>
-        SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now,
+        SpecimenLinkAnnotationType.create(studyId, id, version,
           name, invalidDescription, valueType, maxValueCount, options)
-          .mustFail(1, "NonEmptyDescription")
+          .mustFail(1, "InvalidDescription")
       )
     }
 
@@ -136,7 +135,7 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
         selectAnnotationTypeTuple
       val invalidMaxValueCount = Some(-1)
 
-      SpecimenLinkAnnotationType.create(studyId, id, version, org.joda.time.DateTime.now, name,
+      SpecimenLinkAnnotationType.create(studyId, id, version, name,
         description, valueType, invalidMaxValueCount, options)
         .mustFail(1, "MaxValueCountError")
     }
@@ -148,13 +147,13 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       var invalidOptions = Seq("")
 
       SpecimenLinkAnnotationType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount,
+        studyId, id, version, name, description, valueType, maxValueCount,
         invalidOptions)
         .mustFail(1, "OptionRequired")
 
       invalidOptions = Seq("duplicate", "duplicate")
       SpecimenLinkAnnotationType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType, maxValueCount,
+        studyId, id, version, name, description, valueType, maxValueCount,
         invalidOptions)
         .mustFail(1, "DuplicateOptionsError")
     }
@@ -166,7 +165,7 @@ class SpecimenLinkAnnotationTypeSpec extends DomainSpec {
       val invalidName = ""
 
       SpecimenLinkAnnotationType.create(
-        studyId, id, invalidVersion, org.joda.time.DateTime.now, invalidName, description, valueType,
+        studyId, id, invalidVersion, invalidName, description, valueType,
         maxValueCount, options)
         .mustFail(2, "InvalidVersion", "NameRequired")
     }

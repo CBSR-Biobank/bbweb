@@ -30,9 +30,11 @@ object ParticipantsProcessor {
  */
 class ParticipantsProcessor @javaxInject() (
   @Named("collectionEvents") val collectionEventsProcessor: ActorRef,
+  @Named("specimens")        val specimensProcessor: ActorRef,
 
   val participantRepository:    ParticipantRepository,
   val annotationTypeRepository: ParticipantAnnotationTypeRepository,
+  val collectionEventRepository: CollectionEventRepository,
   val studyRepository:          StudyRepository)
     extends Processor {
 
@@ -44,29 +46,29 @@ class ParticipantsProcessor @javaxInject() (
   case class SnapshotState(participants: Set[Participant])
 
   /**
-    * These are the events that are recovered during journal recovery. They cannot fail and must be
-    * processed to recreate the current state of the aggregate.
-    */
+   * These are the events that are recovered during journal recovery. They cannot fail and must be
+   * processed to recreate the current state of the aggregate.
+   */
   val receiveRecover: Receive = {
     case event: ParticipantEvent => event.eventType match {
-        case et: EventType.ParticipantAdded   => applyParticipantAddedEvent(event)
-        case et: EventType.ParticipantUpdated => applyParticipantUpdatedEvent(event)
+      case et: EventType.ParticipantAdded   => applyParticipantAddedEvent(event)
+      case et: EventType.ParticipantUpdated => applyParticipantUpdatedEvent(event)
 
-        case event => log.error(s"event not handled: $event")
-      }
+      case event => log.error(s"event not handled: $event")
+    }
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
       snapshot.participants.foreach{ participant => participantRepository.put(participant) }
   }
 
   /**
-    * These are the commands that are requested. A command can fail, and will send the failure as a response
-    * back to the user. Each valid command generates one or more events and is journaled.
-    */
+   * These are the commands that are requested. A command can fail, and will send the failure as a response
+   * back to the user. Each valid command generates one or more events and is journaled.
+   */
   val receiveCommand: Receive = {
     case cmd: AddParticipantCmd      => processAddParticipantCmd(cmd)
     case cmd: UpdateParticipantCmd   => processUpdateParticipantCmd(cmd)
-    case cmd: CollectionEventCommand => validateAndForward(cmd)
+    case cmd: ParticipantCommand     => validateAndForward(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(participantRepository.getValues.toSet))
@@ -75,25 +77,37 @@ class ParticipantsProcessor @javaxInject() (
     case cmd => log.error(s"ParticipantsProcessor: message not handled: $cmd")
   }
 
-  private def validateAndForward(cmd: CollectionEventCommand) = {
-    participantRepository.getByKey(ParticipantId(cmd.participantId)).fold(
-      err => context.sender ! DomainError(s"invalid participant id: ${cmd.participantId}").failureNel,
-      participant => {
-        studyRepository.getByKey(participant.studyId).fold(
-          err => context.sender ! DomainError(s"invalid study id: ${cmd.participantId}").failureNel,
-          study => study match {
-            case s: EnabledStudy => collectionEventsProcessor forward cmd
-            case _ => context.sender ! DomainError(s"study is not enabled: ${study.id}").failureNel
-          }
-        )
-      }
+  private def validateAndForward(cmd: ParticipantCommand): Unit = {
+    val cmdValidation: DomainValidation[(ParticipantId, ActorRef)] = cmd match {
+      case cmd: CollectionEventCommand =>
+        (ParticipantId(cmd.participantId), collectionEventsProcessor).success
+
+      case cmd: SpecimenCommand =>
+        collectionEventRepository.getByKey(CollectionEventId(cmd.collectionEventId)) map { cevent =>
+          (cevent.participantId, specimensProcessor)
+        }
+
+      case cmd =>
+        DomainError(s"ParticipantsProcessor: participant message not handled: $cmd").failureNel
+    }
+
+    val studyValidation = for {
+      tuple       <- cmdValidation
+      (participantId, subProcessor) = tuple
+      participant <- participantRepository.getByKey(participantId)
+      study       <- studyRepository.getEnabled(participant.studyId)
+    } yield subProcessor
+
+    studyValidation.fold(
+      err          => context.sender ! studyValidation,
+      subProcessor => subProcessor forward cmd
     )
   }
 
   val ErrMsgUniqueIdExists = "participant with unique ID already exists"
 
   /** Searches the repository for a matching item.
-    */
+   */
   protected def uniqueIdAvailableMatcher(uniqueId: String)(matcher: Participant => Boolean)
       : DomainValidation[Boolean] = {
     val exists = participantRepository.getValues.exists { item =>
@@ -120,14 +134,14 @@ class ParticipantsProcessor @javaxInject() (
   }
 
   /**
-    * Checks the following:
-    *
-    *   - no more than one annotation per annotation type
-    *   - that each required annotation is present
-    *   - that all annotations belong to the same study as the annotation type.
-    *
-    * A DomainError is the result if these conditions fail.
-    */
+   * Checks the following:
+   *
+   *   - no more than one annotation per annotation type
+   *   - that each required annotation is present
+   *   - that all annotations belong to the same study as the annotation type.
+   *
+   * A DomainError is the result if these conditions fail.
+   */
   private def validateAnnotationTypes(studyId: StudyId, annotations: Set[ParticipantAnnotation])
       : DomainValidation[Boolean]= {
     val annotAnnotTypeIdsAsSet = annotations.map(v => v.annotationTypeId).toSet
@@ -170,7 +184,6 @@ class ParticipantsProcessor @javaxInject() (
       newParticip       <- Participant.create(studyId,
                                               participantId,
                                               -1L,
-                                              DateTime.now,
                                               cmd.uniqueId,
                                               cmd.annotations.toSet)
       event             <- createEvent(newParticip, cmd).withParticipantAdded(
@@ -196,7 +209,6 @@ class ParticipantsProcessor @javaxInject() (
       newParticip       <- Participant.create(studyId,
                                               participantId,
                                               particip.version,
-                                              DateTime.now,
                                               cmd.uniqueId,
                                               annotationsSet)
       event             <- createEvent(newParticip, cmd).withParticipantUpdated(
@@ -283,4 +295,5 @@ class ParticipantsProcessor @javaxInject() (
       )
     } toSet
   }
+
 }

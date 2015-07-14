@@ -6,8 +6,8 @@ import org.biobank.domain.study.StudyId
 
 import javax.inject.Singleton
 import com.google.inject.ImplementedBy
-import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[ParticipantRepositoryImpl])
 trait ParticipantRepository
@@ -26,24 +26,23 @@ class ParticipantRepositoryImpl
     extends ReadWriteRepositoryRefImpl[ParticipantId, Participant](v => v.id)
     with ParticipantRepository {
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  override val NotFoundError = "participant with id not found:"
 
   def nextIdentity: ParticipantId = new ParticipantId(nextIdentityAsString)
 
   def withId(studyId: StudyId, participantId: ParticipantId): DomainValidation[Participant] = {
-    getByKey(participantId).fold(
-      err => DomainError(
-        s"participant does not exist: { studyId: $studyId, participantId: $participantId }"
-      ).failureNel,
-      ptcp =>
-      if (ptcp.studyId != studyId) {
-        DomainError(
-          s"study does not have participant: { studyId: $studyId, participantId: $participantId }"
-        ).failureNel
-      } else {
-        ptcp.success
+    for {
+      ptcp <- getByKey(participantId)
+      validPtcp <- {
+        if (ptcp.studyId != studyId) {
+          DomainError(
+            s"study does not have participant: { studyId: $studyId, participantId: $participantId }"
+          ).failureNel
+        } else {
+          ptcp.success
+        }
       }
-    )
+    } yield validPtcp
   }
 
   def withUniqueId(studyId: StudyId, uniqueId: String): DomainValidation[Participant] = {

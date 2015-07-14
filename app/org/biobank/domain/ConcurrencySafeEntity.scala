@@ -22,10 +22,6 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
   /** The date and time when this entity was last updated. */
   val timeModified: Option[DateTime]
 
-  // FIXME: move these to another object
-  //  val addedBy: UserId
-  //  val updatedBy: Option[UserId]
-
   protected def invalidVersion(expected: Long) =
     DomainError(
     s"${this.getClass.getSimpleName}: expected version doesn't match current version: id: $id, version: $version, expectedVersion: $expected")

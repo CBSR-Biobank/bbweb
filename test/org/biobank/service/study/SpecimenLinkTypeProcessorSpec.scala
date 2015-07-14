@@ -5,10 +5,10 @@ import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.{
-  ContainerTypeId,
   DomainError,
   DomainValidation
 }
+import org.biobank.domain.containers.ContainerTypeId
 import org.biobank.domain.study._
 
 import org.joda.time.DateTime

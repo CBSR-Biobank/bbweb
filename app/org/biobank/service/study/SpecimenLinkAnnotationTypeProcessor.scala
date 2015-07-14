@@ -6,7 +6,6 @@ import org.biobank.domain._
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 import org.biobank.domain.study.Study
-import org.biobank.domain.AnnotationValueType._
 
 import akka.actor._
 import akka.persistence.SnapshotOffer
@@ -79,13 +78,17 @@ class SpecimenLinkAnnotationTypeProcessor @javax.inject.Inject() (
 
   private def processAddSpecimenLinkAnnotationTypeCmd
     (cmd: AddSpecimenLinkAnnotationTypeCmd): Unit = {
-    val timeNow = DateTime.now
     val id = annotationTypeRepository.nextIdentity
     val event = for {
       nameValid <- nameAvailable(cmd.name, StudyId(cmd.studyId))
-      newItem <- SpecimenLinkAnnotationType.create(
-        StudyId(cmd.studyId), id, -1L, timeNow, cmd.name, cmd.description, cmd.valueType,
-        cmd.maxValueCount, cmd.options)
+      newItem <- SpecimenLinkAnnotationType.create(StudyId(cmd.studyId),
+                                                   id,
+                                                   -1L,
+                                                   cmd.name,
+                                                   cmd.description,
+                                                   cmd.valueType,
+                                                   cmd.maxValueCount,
+                                                   cmd.options)
       event <- createStudyEvent(newItem.studyId, cmd).withSpecimenLinkAnnotationTypeAdded(
         SpecimenLinkAnnotationTypeAddedEvent(
           annotationTypeId = Some(newItem.id.id),
@@ -102,7 +105,6 @@ class SpecimenLinkAnnotationTypeProcessor @javax.inject.Inject() (
 
   private def processUpdateSpecimenLinkAnnotationTypeCmd
     (cmd: UpdateSpecimenLinkAnnotationTypeCmd): Unit = {
-    val timeNow = DateTime.now
     val v = update(cmd) { at =>
       for {
         nameAvailable <- nameAvailable(cmd.name, StudyId(cmd.studyId), AnnotationTypeId(cmd.id))

@@ -10,6 +10,7 @@ case class LocationId(id: String) extends IdentifiedValueObject[String]
 
 object LocationId {
 
+  implicit val locationIdReader = (__).read[String].map( new LocationId(_) )
   implicit val locationIdWriter = Writes{ (locationId: LocationId) => JsString(locationId.id) }
 
 }

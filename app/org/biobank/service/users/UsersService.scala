@@ -95,16 +95,6 @@ class UsersServiceImpl @javax.inject.Inject() (
       )
   }
 
-  private def getStatus(status: String): DomainValidation[String] = {
-    status match {
-      case "all"        => User.status.successNel
-      case "registered" => RegisteredUser.status.successNel
-      case "active"     => ActiveUser.status.successNel
-      case "locked"     => LockedUser.status.successNel
-      case _            => DomainError(s"invalid user status: $status").failureNel
-    }
-  }
-
   def getUsers[T <: User](nameFilter:  String,
                           emailFilter: String,
                           status:      String,
@@ -127,12 +117,12 @@ class UsersServiceImpl @javax.inject.Inject() (
       usersFilteredByName
     }
 
-    val usersFilteredByStatus = getStatus(status).map { status =>
-      if (status == User.status) {
-        usersFilteredByEmail
-      } else {
-        usersFilteredByEmail.filter { user => user.status == status }
-      }
+    val usersFilteredByStatus = status match {
+      case "all"        => usersFilteredByEmail.success
+      case "registered" => usersFilteredByEmail.collect { case u: RegisteredUser => u }.success
+      case "active"     => usersFilteredByEmail.collect { case u: ActiveUser => u }.success
+      case "locked"     => usersFilteredByEmail.collect { case u: LockedUser => u }.success
+      case _            => DomainError(s"invalid user status: $status").failureNel
     }
 
     usersFilteredByStatus.map { users =>

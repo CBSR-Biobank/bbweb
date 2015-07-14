@@ -1,6 +1,7 @@
 package org.biobank.domain.study
 
-import org.biobank.domain.{ DomainSpec, ContainerTypeId }
+import org.biobank.domain.DomainSpec
+import org.biobank.domain.containers.ContainerTypeId
 import org.biobank.infrastructure._
 import org.biobank.fixture.NameGenerator
 
@@ -34,7 +35,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(
-        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        processingType.id, id, -1L, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
       validation mustSucceed { slType =>
@@ -114,7 +115,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(
-        processingTypeId, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        processingTypeId, id, -1L, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
       validation mustFail "ProcessingTypeIdRequired"
@@ -133,7 +134,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(
-        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        processingType.id, id, -1L, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
       validation mustFail "IdRequired"
@@ -152,7 +153,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(
-        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        processingType.id, id, -1L, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, specimenGroupIdIn, specimenGroupIdOut,
         annotationTypeData = List.empty)
       validation mustBe('failure)
@@ -164,7 +165,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
       specimenGroupIdOut = SpecimenGroupId("")
 
       val validation2 = SpecimenLinkType.create(
-        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        processingType.id, id, -1L, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, specimenGroupIdIn, specimenGroupIdOut,
         annotationTypeData = List.empty)
       validation2 mustFail "SpecimenGroupIdRequired"
@@ -183,7 +184,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(
-        processingType.id, id, -2L, org.joda.time.DateTime.now, expectedInputChange,
+        processingType.id, id, -2L, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
       validation mustFail "InvalidVersion"
@@ -202,7 +203,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(
-        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        processingType.id, id, -1L, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
       validation mustBe('failure)
@@ -214,7 +215,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
       expectedOutputChange = BigDecimal(-1.0)
 
       val validation2 = SpecimenLinkType.create(
-        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        processingType.id, id, -1L, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
       validation2 mustFail "InvalidPositiveNumber"
@@ -233,7 +234,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(
-        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        processingType.id, id, -1L, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
       validation mustBe('failure)
@@ -244,7 +245,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
       inputCount = 1
       outputCount = -1
       val validation2 = SpecimenLinkType.create(
-        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        processingType.id, id, -1L, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
       validation2 mustFail "InvalidPositiveNumber"
@@ -265,7 +266,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(
-        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        processingType.id, id, -1L, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
       validation mustFail "ContainerTypeIdRequired"
@@ -273,7 +274,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
       containerTypeIdIn = Some(ContainerTypeId("abc"))
       containerTypeIdOut = Some(ContainerTypeId(""))
       val validation2 = SpecimenLinkType.create(
-        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        processingType.id, id, -1L, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         containerTypeIdIn, containerTypeIdOut, annotationTypeData = List.empty)
       validation2 mustFail "ContainerTypeIdRequired"
@@ -292,7 +293,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
       val disabledStudy = factory.defaultDisabledStudy
 
       val validation = SpecimenLinkType.create(
-        processingType.id, id, -2L, org.joda.time.DateTime.now, expectedInputChange,
+        processingType.id, id, -2L, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = List.empty)
       validation.mustFail("IdRequired", "InvalidVersion")
@@ -312,7 +313,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
       val annotationTypeData = List(SpecimenLinkTypeAnnotationTypeData("", false))
 
       val validation = SpecimenLinkType.create(
-        processingType.id, id, -1L, org.joda.time.DateTime.now, expectedInputChange,
+        processingType.id, id, -1L, expectedInputChange,
         expectedOutputChange, inputCount, outputCount, inputSpecimenGroup.id, outputSpecimenGroup.id,
         annotationTypeData = annotationTypeData)
       validation mustFail "IdRequired"

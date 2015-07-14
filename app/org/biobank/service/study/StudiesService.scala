@@ -200,7 +200,9 @@ class StudiesServiceImpl @javax.inject.Inject() (
     * FIXME: use paging and sorting
     */
   def getAll: Seq[StudyNameDto] = {
-    val result = studyRepository.getValues.map { s => StudyNameDto(s.id.id, s.name, s.status) }
+    val result = studyRepository.getValues.map { s =>
+      StudyNameDto(s.id.id, s.name, s.getClass.getSimpleName)
+    }
     result.toSeq.sortWith(StudyNameDto.compareByName)
   }
 
@@ -215,18 +217,10 @@ class StudiesServiceImpl @javax.inject.Inject() (
     )
   }
 
-  private def getStatus(status: String): DomainValidation[String] = {
-    status match {
-      case "all"      => Study.status.successNel
-      case "disabled" => DisabledStudy.status.successNel
-      case "enabled"  => EnabledStudy.status.successNel
-      case "retired"  => RetiredStudy.status.successNel
-      case _          => DomainError(s"invalid study status: $status").failureNel
-    }
-  }
-
-  def getStudies[T <: Study]
-    (filter: String, status: String, sortFunc: (Study, Study) => Boolean, order: SortOrder)
+  def getStudies[T <: Study](filter:   String,
+                             status:   String,
+                             sortFunc: (Study, Study) => Boolean,
+                             order:    SortOrder)
       : DomainValidation[Seq[Study]] = {
     val allStudies = studyRepository.getValues
 
@@ -237,12 +231,12 @@ class StudiesServiceImpl @javax.inject.Inject() (
       allStudies
     }
 
-    val studiesFilteredByStatus = getStatus(status).map { status =>
-      if (status == Study.status) {
-        studiesFilteredByName
-      } else {
-        studiesFilteredByName.filter { study => study.status == status }
-      }
+    val studiesFilteredByStatus = status match {
+      case "all"      => studiesFilteredByName.success
+      case "disabled" => studiesFilteredByName.collect { case s: DisabledStudy => s }.success
+      case "enabled"  => studiesFilteredByName.collect { case s: EnabledStudy => s }.success
+      case "retired"  => studiesFilteredByName.collect { case s: RetiredStudy => s }.success
+      case _          => DomainError(s"invalid study status: $status").failureNel
     }
 
     studiesFilteredByStatus.map { studies =>
@@ -256,8 +250,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
     }
   }
 
-  def getStudyNames(filter: String, order: SortOrder)
-      : DomainValidation[Seq[StudyNameDto]] = {
+  def getStudyNames(filter: String, order: SortOrder): DomainValidation[Seq[StudyNameDto]] = {
     val studies = studyRepository.getValues
 
     val filteredStudies = if (filter.isEmpty) {
@@ -268,7 +261,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
     val orderedStudies = filteredStudies.toSeq
     val result = orderedStudies.map { s =>
-      StudyNameDto(s.id.id, s.name, s.status)
+      StudyNameDto(s.id.id, s.name, s.getClass.getSimpleName)
     } sortWith(StudyNameDto.compareByName)
 
     if (order == AscendingOrder) {

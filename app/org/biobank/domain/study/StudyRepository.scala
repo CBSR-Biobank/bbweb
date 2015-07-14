@@ -25,6 +25,8 @@ class StudyRepositoryImpl
     extends ReadWriteRepositoryRefImpl[StudyId, Study](v => v.id)
     with StudyRepository {
 
+  override val NotFoundError = "study with id not found:"
+
   def nextIdentity: StudyId = new StudyId(nextIdentityAsString)
 
   def allStudies(): Set[Study] = getValues.toSet

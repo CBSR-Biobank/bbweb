@@ -96,7 +96,6 @@ class SpecimenGroupProcessor @javaxInject() (
   }
 
   private def processAddSpecimenGroupCmd(cmd: AddSpecimenGroupCmd): Unit = {
-    val timeNow = DateTime.now
     val studyId = StudyId(cmd.studyId)
     val sgId = specimenGroupRepository.nextIdentity
 
@@ -106,10 +105,16 @@ class SpecimenGroupProcessor @javaxInject() (
 
     val v = for {
       nameValid <- nameAvailable(cmd.name, studyId)
-      newItem <-SpecimenGroup.create(
-        StudyId(cmd.studyId), sgId, -1, timeNow, cmd.name, cmd.description,
-        cmd.units, cmd.anatomicalSourceType, cmd.preservationType,
-        cmd.preservationTemperatureType, cmd.specimenType)
+      newItem <-SpecimenGroup.create(StudyId(cmd.studyId),
+                                     sgId,
+                                     -1,
+                                     cmd.name,
+                                     cmd.description,
+                                     cmd.units,
+                                     cmd.anatomicalSourceType,
+                                     cmd.preservationType,
+                                     cmd.preservationTemperatureType,
+                                     cmd.specimenType)
       newEvent <- createStudyEvent(newItem.studyId, cmd).withSpecimenGroupAdded(
         SpecimenGroupAddedEvent(
           specimenGroupId             = Some(newItem.id.id),
@@ -126,7 +131,6 @@ class SpecimenGroupProcessor @javaxInject() (
   }
 
   private def processUpdateSpecimenGroupCmd(cmd: UpdateSpecimenGroupCmd): Unit = {
-    val timeNow = DateTime.now
     val studyId = StudyId(cmd.studyId)
     val specimenGroupId = SpecimenGroupId(cmd.id)
 

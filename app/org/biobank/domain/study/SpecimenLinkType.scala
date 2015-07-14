@@ -2,13 +2,13 @@ package org.biobank.domain.study
 
 import org.biobank.domain.{
   ConcurrencySafeEntity,
-  ContainerTypeId,
   DomainError,
   DomainValidation,
   ValidationKey
 }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.JsonUtils._
+import org.biobank.domain.containers.ContainerTypeId
 
 import play.api.libs.json._
 import com.github.nscala_time.time.Imports._
@@ -85,10 +85,18 @@ case class SpecimenLinkType(processingTypeId:      ProcessingTypeId,
              outputContainerTypeId: Option[ContainerTypeId] = None,
              annotationTypeData:    List[SpecimenLinkTypeAnnotationTypeData])
       : DomainValidation[SpecimenLinkType] = {
-    val v = SpecimenLinkType.create(this.processingTypeId, this.id, this.version, this.timeAdded,
-                                    expectedInputChange, expectedOutputChange, inputCount,
-                                    outputCount, inputGroupId, outputGroupId, inputContainerTypeId,
-                                    outputContainerTypeId, annotationTypeData)
+    val v = SpecimenLinkType.create(processingTypeId      = this.processingTypeId,
+                                    id                    = this.id,
+                                    version               = this.version,
+                                    expectedInputChange   = expectedInputChange,
+                                    expectedOutputChange  = expectedOutputChange,
+                                    inputCount            = inputCount,
+                                    outputCount           = outputCount,
+                                    inputGroupId          = inputGroupId,
+                                    outputGroupId         = outputGroupId,
+                                    inputContainerTypeId  = inputContainerTypeId,
+                                    outputContainerTypeId = outputContainerTypeId,
+                                    annotationTypeData    = annotationTypeData)
     v.map(_.copy(timeModified = Some(DateTime.now)))
   }
 
@@ -117,7 +125,6 @@ object SpecimenLinkType extends SpecimenLinkTypeValidations with StudyAnnotation
   def create(processingTypeId:      ProcessingTypeId,
              id:                    SpecimenLinkTypeId,
              version:               Long,
-             dateTime:              DateTime,
              expectedInputChange:   BigDecimal,
              expectedOutputChange:  BigDecimal,
              inputCount:            Int,
@@ -151,7 +158,7 @@ object SpecimenLinkType extends SpecimenLinkTypeValidations with StudyAnnotation
                   annotationTypeData:    List[SpecimenLinkTypeAnnotationTypeData],
                   ignore:                Boolean)
         : SpecimenLinkType = {
-      SpecimenLinkType(processingTypeId, id, version, dateTime, None, expectedInputChange,
+      SpecimenLinkType(processingTypeId, id, version, DateTime.now, None, expectedInputChange,
                        expectedOutputChange, inputCount, outputCount, inputGroupId, outputGroupId,
                        inputContainerTypeId, outputContainerTypeId, annotationTypeData)
     }

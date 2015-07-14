@@ -20,10 +20,10 @@ class ParticipantsControllerSpec extends ControllerFixture {
   import org.biobank.TestUtils._
   import org.biobank.AnnotationTestUtils._
 
-  def uri(study: Study): String = s"/studies/${study.id.id}/participants"
+  def uri(study: Study): String = s"/participants/${study.id.id}"
 
   def uri(study: Study, participant: Participant): String =
-    s"/studies/${study.id.id}/participants/${participant.id.id}"
+    uri(study) + s"/${participant.id.id}"
 
   /** Converts a participant into an Add command.
    */
@@ -60,7 +60,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
   }
 
   def addOnNonEnabledStudy(study: Study, participant: Participant) = {
-    study.status must not be (EnabledStudy.status)
+    study must not be an [EnabledStudy]
 
     studyRepository.put(study)
 
@@ -72,7 +72,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
   }
 
   def updateOnNonEnabledStudy(study: Study, participant: Participant) = {
-    study.status must not be (EnabledStudy.status)
+    study must not be an [EnabledStudy]
 
     studyRepository.put(study)
     participantRepository.put(participant)

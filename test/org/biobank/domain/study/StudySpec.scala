@@ -18,122 +18,88 @@ class StudySpec extends DomainSpec {
   "A study" can {
 
     "be created" in {
-      val id = StudyId(nameGenerator.next[Study])
-      val version = -1L
+      val study = factory.createDisabledStudy
+      val v = DisabledStudy.create(id          = study.id,
+                                   version     = -1,
+                                   name        = study.name,
+                                   description = study.description)
+
+      v mustSucceed { s =>
+        s mustBe a[DisabledStudy]
+
+        s must have (
+          'id          (study.id),
+          'version     (0L),
+          'name        (study.name),
+          'description (study.description)
+        )
+
+        checkTimeStamps(s, DateTime.now, None)
+      }
+    }
+
+    "have it's name updated" in {
+      val study = factory.createDisabledStudy
       val name = nameGenerator.next[Study]
-      val description = some(nameGenerator.next[Study])
 
-      val v = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
+      study.withName(name) mustSucceed { updatedStudy =>
+        updatedStudy must have (
+          'id          (study.id),
+          'version     (study.version + 1),
+          'name        (name),
+          'description (study.description)
+        )
 
-      v mustSucceed { study =>
-        study mustBe a[DisabledStudy]
+        checkTimeStamps(updatedStudy, DateTime.now, None)
+      }
+    }
 
-        study must have (
-          'id (id),
-          'version (0L),
-          'name (name),
+    "have it's description updated" in {
+      val study = factory.createDisabledStudy
+      val description = Some(nameGenerator.next[Study])
+
+      study.withDescription(description) mustSucceed { updatedStudy =>
+        updatedStudy must have (
+          'id          (study.id),
+          'version     (study.version + 1),
+          'name        (study.name),
           'description (description)
         )
 
-        (study.timeAdded to DateTime.now).millis must be < 500L
-        study.timeModified mustBe (None)
+        checkTimeStamps(updatedStudy, DateTime.now, None)
       }
     }
 
-    "be updated" in {
-      val id = StudyId(nameGenerator.next[Study])
-      val version = -1L
-      val name = nameGenerator.next[Study]
-      val description = some(nameGenerator.next[Study])
-
-      val v = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
-      v mustSucceed { study =>
-        study mustBe a[DisabledStudy]
-
-        val name2 = nameGenerator.next[Study]
-        val description2 = some(nameGenerator.next[Study])
-
-        study.update(name2, description2) mustSucceed { updatedStudy =>
-          updatedStudy must have (
-            'id (id),
-            'version (1L),
-            'name (name2),
-            'description (description2)
-          )
-
-          updatedStudy.timeAdded mustBe (study.timeAdded)
-        }
-      }
-
-    }
 
     "be enabled" in {
-      val id = StudyId(nameGenerator.next[Study])
-      val version = -1L
-      val name = nameGenerator.next[Study]
-      val description = some(nameGenerator.next[Study])
-
-      val v = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
-      v mustSucceed { study =>
-        study mustBe a[DisabledStudy]
-
-        study.enable(1, 1) mustSucceed { enabledStudy =>
-          enabledStudy mustBe a[EnabledStudy]
-          enabledStudy.timeAdded mustBe (study.timeAdded)
-        }
+      val study = factory.createDisabledStudy
+      study.enable(1, 1) mustSucceed { enabledStudy =>
+        enabledStudy mustBe a[EnabledStudy]
+        enabledStudy.timeAdded mustBe (study.timeAdded)
       }
     }
 
     "disable an enabled study" in {
-      val id = StudyId(nameGenerator.next[Study])
-      val version = -1L
-      val name = nameGenerator.next[Study]
-      val description = some(nameGenerator.next[Study])
-
-      val v = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
-      v mustSucceed { study =>
-        study.enable(1, 1) mustSucceed { enabledStudy =>
-          enabledStudy.disable mustSucceed { disabledStudy =>
-            disabledStudy mustBe a[DisabledStudy]
-            disabledStudy.timeAdded mustBe (study.timeAdded)
-          }
-        }
+      val study = factory.createEnabledStudy
+      study.disable mustSucceed { disabledStudy =>
+        disabledStudy mustBe a[DisabledStudy]
+        disabledStudy.timeAdded mustBe (study.timeAdded)
       }
     }
 
     "be retired" in {
-      val id = StudyId(nameGenerator.next[Study])
-      val version = -1L
-      val name = nameGenerator.next[Study]
-      val description = some(nameGenerator.next[Study])
-
-      val v = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
-      v mustSucceed { study =>
-        study mustBe a[DisabledStudy]
-
-        study.retire mustSucceed { retiredStudy =>
-          retiredStudy mustBe a[RetiredStudy]
-          retiredStudy.timeAdded mustBe (study.timeAdded)
-        }
+      val study = factory.createDisabledStudy
+      study.retire mustSucceed { retiredStudy =>
+        retiredStudy mustBe a[RetiredStudy]
+        retiredStudy.timeAdded mustBe (study.timeAdded)
       }
     }
 
     "unretire a study" in {
-      val id = StudyId(nameGenerator.next[Study])
-      val version = -1L
-      val name = nameGenerator.next[Study]
-      val description = some(nameGenerator.next[Study])
-
-      val v = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
-      v mustSucceed { study =>
-        study mustBe a[DisabledStudy]
-
-        study.retire mustSucceed { retiredStudy =>
-          retiredStudy.unretire mustSucceed { disabledStudy =>
-            disabledStudy mustBe a[DisabledStudy]
-            disabledStudy.timeAdded mustBe (study.timeAdded)
-          }
-        }
+      val study = factory.createRetiredStudy
+      study.unretire() mustSucceed { disabledStudy =>
+        disabledStudy mustBe a[DisabledStudy]
+        disabledStudy.timeAdded mustBe (study.timeAdded)
       }
     }
 
@@ -142,70 +108,62 @@ class StudySpec extends DomainSpec {
   "A study" must {
 
     "not be created with an empty id" in {
-      val id = StudyId("")
-      val version = -1L
-      val name = nameGenerator.next[Study]
-      val description = some(nameGenerator.next[Study])
-
-      val v = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
+      val v = DisabledStudy.create(id          = StudyId(""),
+                                   version     = -1L,
+                                   name        = nameGenerator.next[Study],
+                                   description = Some(nameGenerator.next[Study]))
       v mustFail "IdRequired"
     }
 
     "not be created with an invalid version" in {
-      val id = StudyId(nameGenerator.next[Study])
-      val version = -2L
-      val name = nameGenerator.next[Study]
-      val description = some(nameGenerator.next[Study])
-
-      val v = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
+      val v = DisabledStudy.create(id          = StudyId(nameGenerator.next[Study]),
+                                   version     = -2L,
+                                   name        = nameGenerator.next[Study],
+                                   description = Some(nameGenerator.next[Study]))
       v mustFail "InvalidVersion"
     }
 
     "not be created with an null or empty name" in {
-      val id = StudyId(nameGenerator.next[Study])
-      val version = -1L
-      var name: String = null
-      val description = some(nameGenerator.next[Study])
-
-      val v = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
+      var v = DisabledStudy.create(id          = StudyId(nameGenerator.next[Study]),
+                                   version     = -1L,
+                                   name        = null,
+                                   description = some(nameGenerator.next[Study]))
       v mustFail "InvalidName"
 
-      name = ""
-      val v2 = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
-      v2 mustFail "InvalidName"
+      v = DisabledStudy.create(id          = StudyId(nameGenerator.next[Study]),
+                               version     = -1L,
+                               name        = "",
+                               description = Some(nameGenerator.next[Study]))
+      v mustFail "InvalidName"
     }
 
     "not be created with an empty description option" in {
-      val id = StudyId(nameGenerator.next[Study])
-      val version = -1L
-      val name = nameGenerator.next[Study]
-      var description: Option[String] = Some(null)
+      var v = DisabledStudy.create(id          = StudyId(nameGenerator.next[Study]),
+                                   version     = -1L,
+                                   name        = nameGenerator.next[Study],
+                                   description = Some(null))
 
-      val v = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
-      v mustFail "NonEmptyDescription"
+      v mustFail "InvalidDescription"
 
-      description = Some("")
-      val v2 = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
-      v2 mustFail "NonEmptyDescription"
+      v = DisabledStudy.create(id          = StudyId(nameGenerator.next[Study]),
+                               version     = -1L,
+                               name        = nameGenerator.next[Study],
+                               description = Some(""))
+      v mustFail "InvalidDescription"
     }
 
     "have more than one validation fail" in {
-      val id = StudyId(nameGenerator.next[Study])
-      val version = -2L
-      val name = ""
-      val description = Some(nameGenerator.next[Study])
-
-      val validation = DisabledStudy.create(id, version, org.joda.time.DateTime.now, name, description)
-      validation.mustFail("InvalidVersion",  "InvalidName")
+      var v = DisabledStudy.create(id          = StudyId(nameGenerator.next[Study]),
+                                   version     = -2L,
+                                   name        = null,
+                                   description = some(nameGenerator.next[Study]))
+      v mustFail ("InvalidVersion",  "InvalidName")
     }
 
     "not be enabled without prior configuration" in {
-      val id = StudyId(nameGenerator.next[Study])
-      val name = nameGenerator.next[Study]
-      val v = DisabledStudy.create(id, -1L, org.joda.time.DateTime.now, name, None)
-      v mustSucceed { study =>
-        study.enable(0, 0) mustFail "no specimen groups"
-      }
+      val study = factory.createDisabledStudy
+      study.enable(0, 0) mustFail "no specimen groups"
+      study.enable(1, 0) mustFail "no collection event types"
     }
 
   }

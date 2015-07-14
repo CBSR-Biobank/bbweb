@@ -167,7 +167,6 @@ class StudiesProcessor @javax.inject.Inject() (
       nameAvailable <- nameAvailable(cmd.name)
       newStudy <- DisabledStudy.create(studyId,
                                        -1L,
-                                       org.joda.time.DateTime.now,
                                        cmd.name,
                                        cmd.description)
       event <- createStudyEvent(newStudy.id, cmd).withAdded(
@@ -183,12 +182,13 @@ class StudiesProcessor @javax.inject.Inject() (
     val v = updateDisabled(cmd) { s =>
       for {
         nameAvailable <- nameAvailable(cmd.name, StudyId(cmd.id))
-        updatedStudy <- s.update(cmd.name, cmd.description)
-        event <- createStudyEvent(updatedStudy.id, cmd).withUpdated(
+        study1 <- s.withName(cmd.name)
+        study2 <- study1.withDescription(cmd.description)
+        event <- createStudyEvent(study2.id, cmd).withUpdated(
           StudyUpdatedEvent(
-            version     = Some(updatedStudy.version),
-            name        = Some(updatedStudy.name),
-            description = updatedStudy.description)).success
+            version     = Some(study2.version),
+            name        = Some(study2.name),
+            description = study2.description)).success
       } yield event
     }
 
@@ -234,7 +234,7 @@ class StudiesProcessor @javax.inject.Inject() (
   private def processUnretireStudyCmd(cmd: UnretireStudyCmd): Unit = {
     val v = updateRetired(cmd) { s =>
       for {
-        study <- s.unretire
+        study <- s.unretire()
         event <- createStudyEvent(study.id, cmd).withUnretired(
           StudyUnretiredEvent(version = Some(study.version))).success
       } yield event

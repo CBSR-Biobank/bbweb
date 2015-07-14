@@ -40,7 +40,7 @@ class CollectionEventsProcessor @javaxInject() (
   import org.biobank.infrastructure.event.EventUtils._
   import org.biobank.infrastructure.event.ParticipantEventsUtil._
 
-  override def persistenceId = "collection-event-processor-id"
+  override def persistenceId = "collections-event-processor-id"
 
   case class SnapshotState(collectionEvents: Set[CollectionEvent])
 
@@ -52,6 +52,7 @@ class CollectionEventsProcessor @javaxInject() (
     case event: ParticipantEvent => event.eventType match {
       case et: EventType.CollectionEventAdded   => applyCollectionEventAddedEvent(event)
       case et: EventType.CollectionEventUpdated => applyCollectionEventUpdatedEvent(event)
+      case et: EventType.CollectionEventRemoved => applyCollectionEventRemovedEvent(event)
 
       case event => log.error(s"event not handled: $event")
     }
@@ -98,7 +99,6 @@ class CollectionEventsProcessor @javaxInject() (
                                                      participantId,
                                                      collectionEventTypeId,
                                                      -1L,
-                                                     DateTime.now,
                                                      cmd.timeCompleted,
                                                      cmd.visitNumber,
                                                      annotationsSet)
@@ -121,17 +121,17 @@ class CollectionEventsProcessor @javaxInject() (
     val v = update(cmd) { (participant, cevent) =>
       for {
         collectionEventType  <- collectionEventTypeRepository.getByKey(collectionEventTypeId)
-        studyIdMatching     <- studyIdsMatch(participant, collectionEventType)
+        studyIdMatching      <- studyIdsMatch(participant, collectionEventType)
         visitNumberAvailable <- visitNumberAvailable(cmd.visitNumber, cevent.id)
         annotTypes           <- validateAnnotationTypes(collectionEventType, annotationsSet)
-        updatedCevent        <- cevent.update(cmd.timeCompleted,
-                                              cmd.visitNumber,
-                                              annotationsSet)
+        updatedCevent1       <- cevent.withTimeCompleted(cmd.timeCompleted)
+        updatedCevent2       <- cevent.withVisitNumber(cmd.visitNumber)
+        updatedCevent3       <- cevent.withAnnotations(annotationsSet)
         event                <- createEvent(participant, cmd).withCollectionEventUpdated(
           CollectionEventUpdatedEvent(
-            collectionEventId     = Some(cevent.id.id),
+            collectionEventId     = Some(updatedCevent3.id.id),
             collectionEventTypeId = Some(cmd.collectionEventTypeId),
-            version               = Some(updatedCevent.version),
+            version               = Some(updatedCevent3.version),
             timeCompleted         = Some(ISODateTimeFormatter.print(cmd.timeCompleted)),
             visitNumber           = Some(cmd.visitNumber),
             annotations           = convertAnnotationsToEvent(cmd.annotations))).success
@@ -229,8 +229,8 @@ class CollectionEventsProcessor @javaxInject() (
         CollectionEventId(event.getCollectionEventRemoved.getCollectionEventId))
       .fold(
         err => log.error(s"removing collection event from event failed: $err"),
-        sg => {
-          collectionEventRepository.remove(sg)
+        cevent => {
+          collectionEventRepository.remove(cevent)
           ()
         }
       )

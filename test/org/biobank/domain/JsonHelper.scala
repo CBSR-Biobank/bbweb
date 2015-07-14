@@ -51,7 +51,7 @@ object JsonHelper extends MustMatchers with OptionValues {
     compareEntity(json, study)
     (json \ "name").as[String] mustBe (study.name)
     (json \ "description").asOpt[String] mustBe (study.description)
-    (json \ "status").as[String] mustBe (study.status)
+    (json \ "status").as[String] mustBe (study.getClass.getSimpleName)
   }
 
   def compareObj(json: JsValue, study: StudyNameDto) = {
@@ -206,7 +206,7 @@ object JsonHelper extends MustMatchers with OptionValues {
     compareEntity(json, centre)
     (json \ "name").as[String] mustBe (centre.name)
     (json \ "description").asOpt[String] mustBe (centre.description)
-    (json \ "status").as[String] mustBe (centre.status)
+    (json \ "status").as[String] mustBe (centre.getClass.getSimpleName)
   }
 
   def compareObj(json: JsValue, location: Location) = {

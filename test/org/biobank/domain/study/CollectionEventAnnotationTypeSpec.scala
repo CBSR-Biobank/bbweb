@@ -23,7 +23,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
           AnnotationValueTypeToTuple(vt)
 
         val v = CollectionEventAnnotationType.create(
-          studyId, id, version, DateTime.now, name, description, vt, maxValueCount, options)
+          studyId, id, version, name, description, vt, maxValueCount, options)
         v mustSucceed { annotType =>
           annotType mustBe a[CollectionEventAnnotationType]
           annotType must have (
@@ -54,18 +54,17 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
           annotType2 mustBe a[CollectionEventAnnotationType]
 
           annotType2 must have (
-            'studyId (annotType.studyId),
-            'id (annotType.id),
-            'version (annotType.version + 1),
-            'name (name),
-            'description (description),
-            'valueType (valueType),
+            'studyId       (annotType.studyId),
+            'id            (annotType.id),
+            'version       (annotType.version + 1),
+            'name          (name),
+            'description   (description),
+            'valueType     (valueType),
             'maxValueCount (maxValueCount),
-          'options (options)
+            'options       (options)
           )
 
-          annotType2.timeAdded mustBe (annotType.timeAdded)
-          annotType2.timeModified must not be (None)
+          checkTimeStamps(annotType, annotType2.timeAdded, None)
         }
       }
     }
@@ -80,7 +79,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val invalidStudyId = StudyId("")
 
       val validation = CollectionEventAnnotationType.create(
-        invalidStudyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+        invalidStudyId, id, version, name, description, valueType,
         maxValueCount, options)
       validation mustFail "StudyIdRequired"
     }
@@ -91,7 +90,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val invalidId = AnnotationTypeId("")
 
       val validation = CollectionEventAnnotationType.create(
-        studyId, invalidId, version, org.joda.time.DateTime.now, name, description, valueType,
+        studyId, invalidId, version, name, description, valueType,
         maxValueCount, options)
       validation mustFail "IdRequired"
     }
@@ -102,7 +101,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val invalidVersion = -2L
 
       val validation = CollectionEventAnnotationType.create(
-        studyId, id, invalidVersion, org.joda.time.DateTime.now, name, description, valueType,
+        studyId, id, invalidVersion, name, description, valueType,
         maxValueCount, options)
       validation mustFail "InvalidVersion"
     }
@@ -114,7 +113,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
 
       invalidNames.foreach(invalidName =>
         CollectionEventAnnotationType.create(
-          studyId, id, version, org.joda.time.DateTime.now, invalidName, description, valueType,
+          studyId, id, version, invalidName, description, valueType,
           maxValueCount, options)
           .mustFail("NameRequired")
       )
@@ -127,9 +126,9 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
 
       invalidDescriptions.foreach(invalidDescription =>
         CollectionEventAnnotationType.create(
-          studyId, id, version, org.joda.time.DateTime.now, name, invalidDescription, valueType,
+          studyId, id, version, name, invalidDescription, valueType,
           maxValueCount, options)
-          .mustFail("NonEmptyDescription")
+          .mustFail("InvalidDescription")
       )
     }
 
@@ -139,7 +138,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val invalidMaxValueCount = Some(-1)
 
       CollectionEventAnnotationType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+        studyId, id, version, name, description, valueType,
         invalidMaxValueCount, options)
         .mustFail(1, "MaxValueCountError")
     }
@@ -150,12 +149,12 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val invalidOptions = Seq("")
 
       CollectionEventAnnotationType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+        studyId, id, version, name, description, valueType,
         maxValueCount, invalidOptions)
         .mustFail(1, "OptionRequired")
 
       CollectionEventAnnotationType.create(
-        studyId, id, version, org.joda.time.DateTime.now, name, description, valueType,
+        studyId, id, version, name, description, valueType,
         maxValueCount, Seq("duplicate", "duplicate"))
         .mustFail(1, "DuplicateOptionsError")
     }
@@ -167,8 +166,7 @@ class CollectionEventAnnotationTypeSpec extends DomainSpec {
       val invalidName = ""
 
       val validation = CollectionEventAnnotationType.create(
-        studyId, id, invalidVersion, org.joda.time.DateTime.now,
-        invalidName, description, valueType, maxValueCount, options)
+        studyId, id, invalidVersion, invalidName, description, valueType, maxValueCount, options)
       validation.mustFail("InvalidVersion", "NameRequired")
     }
 
