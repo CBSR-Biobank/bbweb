@@ -6,7 +6,6 @@ import org.biobank.infrastructure.JsonUtils._
 
 import org.joda.time.DateTime
 import play.api.libs.json._
-import com.github.nscala_time.time.Imports._
 import scalaz.Scalaz._
 
 /** Used to add custom annotations to participants. The study can define multiple

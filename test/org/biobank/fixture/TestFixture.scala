@@ -60,8 +60,7 @@ trait TestFixture
    */
   override def afterAll: Unit = {
     // Cleanup
-    system.shutdown()
-    system.awaitTermination(10 seconds)
+    //Await.result(system.terminate(), 10 seconds)
     ()
   }
 

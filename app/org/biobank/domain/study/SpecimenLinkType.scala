@@ -9,9 +9,9 @@ import org.biobank.domain.{
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.JsonUtils._
 import org.biobank.domain.containers.ContainerTypeId
+import org.joda.time.DateTime
 
 import play.api.libs.json._
-import com.github.nscala_time.time.Imports._
 import scalaz._
 import Scalaz._
 

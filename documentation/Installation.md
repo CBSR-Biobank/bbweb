@@ -15,14 +15,7 @@ See [Installing Play](http://www.playframework.com/documentation/2.2.x/Installin
 
 ### SBT
 
-Install SBT on Ubuntu:
-
-```bash
-wget http://apt.typesafe.com/repo-deb-build-0002.deb
-sudo dpkg -i repo-deb-build-0002.deb
-sudo apt-get update
-sudo apt-get install sbt
-```
+Follow these instructions for Ubuntu: http://www.scala-sbt.org/0.13/tutorial/Installing-sbt-on-Linux.html
 
 ### MongoDB
 

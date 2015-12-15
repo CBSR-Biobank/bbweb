@@ -9,8 +9,6 @@ import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
 
-import com.github.nscala_time.time.Imports._
-
 /** Used to add custom annotations to processing specimens. The study can define multiple
   * annotation types on processed specimens to store different types of data.
   */

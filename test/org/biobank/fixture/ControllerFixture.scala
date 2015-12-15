@@ -12,7 +12,6 @@ import org.biobank.service.{
 }
 
 import play.api.inject.guice.GuiceApplicationBuilder
-import com.mongodb.casbah.Imports._
 import org.scalatest._
 import org.scalatestplus.play._
 import play.api.Play
@@ -79,8 +78,8 @@ abstract class ControllerFixture
 
   private def initializeAkkaPersitence(): Unit = {
     // ensure the database is empty
-    MongoConnection()(dbName)("messages").drop
-    MongoConnection()(dbName)("snapshots").drop
+    // MongoConnection()(dbName)("messages").drop
+    // MongoConnection()(dbName)("snapshots").drop
   }
 
   def doLogin(email: String = Global.DefaultUserEmail, password: String = "testuser") = {
@@ -159,4 +158,3 @@ abstract class ControllerFixture
 
 
 }
-

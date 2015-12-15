@@ -1,8 +1,9 @@
 package org.biobank
 
+import com.github.nscala_time.time.Imports._
+
 import org.biobank.domain.{ ConcurrencySafeEntity, DomainValidation }
 
-import com.github.nscala_time.time.Imports._
 import org.slf4j.LoggerFactory
 import org.scalatest._
 import org.scalatest.matchers.Matcher

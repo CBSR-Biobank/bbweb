@@ -8,9 +8,9 @@ import org.biobank.domain.{
   HasDescriptionOption
 }
 import org.biobank.infrastructure.JsonUtils._
+import org.joda.time.DateTime
 
 import play.api.libs.json._
-import com.github.nscala_time.time.Imports._
 import scalaz.Scalaz._
 
 /** Records a regularly preformed specimen processing procedure. There are one or more associated

@@ -59,14 +59,15 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   cache,
   filters,
-  "com.typesafe.akka"         %% "akka-persistence-experimental"     % "2.3.11"             % "compile" excludeAll(
+  "com.typesafe.akka"         %% "akka-persistence"     % "2.4.1" % "compile" excludeAll(
     ExclusionRule(organization="com.google.protobuf")
   ),
-  "com.typesafe.akka"         %% "akka-remote"                       % "2.3.11"             % "compile",
-  "com.typesafe.akka"         %% "akka-slf4j"                        % "2.3.11"             % "compile",
-  "org.scala-stm"             %% "scala-stm"                         % "0.7"                % "compile",
-  "org.scalaz"                %% "scalaz-core"                       % "7.1.2"              % "compile",
-  "com.github.ironfish"       %% "akka-persistence-mongo-casbah"     % "0.7.5"              % "compile",
+  "com.typesafe.akka"         %% "akka-remote"                       % "2.4.1"             % "compile",
+  "com.typesafe.akka"         %% "akka-slf4j"                        % "2.4.1"             % "compile",
+  "org.scala-stm"             %% "scala-stm"                         % "0.7"               % "compile",
+  "org.scalaz"                %% "scalaz-core"                       % "7.1.2"             % "compile",
+  "org.iq80.leveldb"          % "leveldb"                            % "0.7",
+  "org.fusesource.leveldbjni" % "leveldbjni-all"                     % "1.8",
   "com.github.t3hnar"         %% "scala-bcrypt"                      % "2.4",
   "com.typesafe.play"         %% "play-mailer"                       % "3.0.1",
   // WebJars infrastructure
@@ -93,6 +94,7 @@ libraryDependencies ++= Seq(
   "org.webjars"               %  "momentjs"                          % "2.10.3",
   // Testing
   "com.typesafe.akka"         %% "akka-testkit"                      % "2.3.11"             % "test",
+  "com.github.nscala-time"    %% "nscala-time"                       % "2.6.0"              % "test",
   "org.scalatestplus"         %% "play"                              % "1.4.0-M3"           % "test",
   "org.pegdown"               % "pegdown"                            % "1.5.0"              % "test"
 )

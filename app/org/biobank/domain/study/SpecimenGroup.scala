@@ -13,10 +13,10 @@ import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
 import org.biobank.infrastructure.JsonUtils._
 import org.biobank.infrastructure.command.StudyCommands._
+import org.joda.time.DateTime
 
 import play.api.libs.json._
 
-import com.github.nscala_time.time.Imports._
 import scalaz._
 import Scalaz._
 
