@@ -35,7 +35,7 @@ class StudiesControllerSpec extends ControllerFixture {
   "Study REST API" when {
 
     "GET /studies" must {
-      "list none" in {
+      "list none" taggedAs(Tag("1")) in {
         PagedResultsSpec(this).emptyResults(uri)
       }
 
