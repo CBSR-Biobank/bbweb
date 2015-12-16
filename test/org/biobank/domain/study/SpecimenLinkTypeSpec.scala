@@ -158,7 +158,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
         annotationTypeData = List.empty)
       validation mustBe('failure)
       validation.swap.map { err =>
-          err.list must (have length 1 and contain("SpecimenGroupIdRequired"))
+          err.list.toList must (have length 1 and contain("SpecimenGroupIdRequired"))
       }
 
       specimenGroupIdIn = specimenGroupRepository.nextIdentity
@@ -208,7 +208,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
         annotationTypeData = List.empty)
       validation mustBe('failure)
       validation.swap.map { err =>
-          err.list must (have length 1 and contain("InvalidPositiveNumber"))
+          err.list.toList must (have length 1 and contain("InvalidPositiveNumber"))
       }
 
       expectedInputChange = BigDecimal(1.0)
@@ -239,7 +239,7 @@ class SpecimenLinkTypeSpec @javaxInject() (
         annotationTypeData = List.empty)
       validation mustBe('failure)
       validation.swap.map { err =>
-          err.list must (have length 1 and contain("InvalidPositiveNumber"))
+          err.list.toList must (have length 1 and contain("InvalidPositiveNumber"))
       }
 
       inputCount = 1

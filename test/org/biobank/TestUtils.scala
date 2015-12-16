@@ -77,7 +77,7 @@ object TestUtils extends MustMatchers with OptionValues {
       */
     def mustSucceed(fn: T => Unit) = {
       validation.fold(
-        err => fail(err.list.mkString(", ")),
+        err => fail(err.list.toList.mkString(", ")),
         entity => fn(entity)
       )
     }
@@ -90,9 +90,9 @@ object TestUtils extends MustMatchers with OptionValues {
     def mustFail(expectedMessages: String*): Unit = {
       validation.fold(
         err => {
-          err.list must have size expectedMessages.size
+          err.list.toList must have size expectedMessages.size
           expectedMessages.foreach { em =>
-            err.list must containItemMatchingRegex (em)
+            err.list.toList must containItemMatchingRegex (em)
           }
         },
         event => fail(s"validation must have failed: $validation")
@@ -108,9 +108,9 @@ object TestUtils extends MustMatchers with OptionValues {
     def mustFail(minMessages: Int, expectedMessages: String*): Unit = {
       validation.fold(
         err => {
-          err.list.size must be >= minMessages
+          err.list.toList.size must be >= minMessages
           expectedMessages.foreach { em =>
-            err.list must containItemMatchingRegex (em)
+            err.list.toList must containItemMatchingRegex (em)
           }
         },
         event => fail(s"validation must have failed: $validation")
@@ -125,9 +125,9 @@ object TestUtils extends MustMatchers with OptionValues {
     def mustFailContains(expectedMessages: String*): Unit = {
       validation.fold(
         err => {
-          err.list must have size expectedMessages.size
+          err.list.toList must have size expectedMessages.size
           expectedMessages.foreach { em =>
-            err.list must containItemContainingRegex (em)
+            err.list.toList must containItemContainingRegex (em)
           }
         },
         event => fail(s"validation must have failed: $validation")

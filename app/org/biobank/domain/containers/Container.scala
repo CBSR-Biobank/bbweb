@@ -1,10 +1,10 @@
 package org.biobank.domain.containers
 
 import org.biobank.domain._
+import org.biobank.domain.study.StudyId
+import org.joda.time.DateTime
 
-// import org.joda.time.DateTime
 import play.api.libs.json._
-// import scalaz.Scalaz._
 
 trait ContainerValidations {
   val NameMinLength = 2
@@ -18,7 +18,7 @@ trait ContainerValidations {
  * container.
  */
 trait Container[T <: ContainerType]
-    extends ConcurrencySafeEntity[ContainerTypeId] {
+    extends ConcurrencySafeEntity[ContainerId] {
 
  /**
   * An inventory identifier, such as a barcode. Global uniqueness is required so that
@@ -54,13 +54,21 @@ object Container {
 
 }
 
-case class StorageContainer(inventoryId:     String,
+case class StorageContainer(id:              ContainerId,
+                            version:         Long,
+                            timeAdded:       DateTime,
+                            timeModified:    Option[DateTime],
+                            inventoryId:     String,
                             containerTypeId: ContainerTypeId,
                             parentId:        ContainerId,
                             position:        ContainerSchemaPositionId)
     extends Container[StorageContainerType]
 
-case class SpecimenContainer(inventoryId:     String,
+case class SpecimenContainer(id:              ContainerId,
+                             version:         Long,
+                             timeAdded:       DateTime,
+                             timeModified:    Option[DateTime],
+                             inventoryId:     String,
                              containerTypeId: ContainerTypeId,
                              parentId:        ContainerId,
                              position:        ContainerSchemaPositionId)

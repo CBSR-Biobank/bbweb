@@ -54,7 +54,7 @@ class StudiesController @javaxInject() (val authToken:      AuthToken,
       } yield results
 
       validation.fold(
-        err => BadRequest(err.list.mkString),
+        err => BadRequest(err.list.toList.mkString),
         results =>  Ok(results)
       )
     }
@@ -63,9 +63,9 @@ class StudiesController @javaxInject() (val authToken:      AuthToken,
     AuthAction(parse.empty) { (token, userId, request) =>
 
       SortOrder.fromString(order).fold(
-        err => BadRequest(err.list.mkString),
+        err => BadRequest(err.list.toList.mkString),
         so  => studiesService.getStudyNames(filter, so).fold(
-          err => BadRequest(err.list.mkString),
+          err => BadRequest(err.list.toList.mkString),
           studies => Ok(studies.toList)
         )
       )
@@ -171,4 +171,3 @@ class StudiesController @javaxInject() (val authToken:      AuthToken,
     }
 
 }
-

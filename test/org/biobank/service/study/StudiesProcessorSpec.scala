@@ -180,7 +180,7 @@ class StudiesProcessorSpec extends TestFixture {
         event.id must be (study.id.id)
         event.getEnabled.version must be (Some(study.version + 1))
         studyRepository.getEnabled(StudyId(event.id)).fold(
-          err => fail(err.list.mkString),
+          err => fail(err.list.toList.mkString),
           repoStudy => checkTimeStamps(repoStudy, study.timeAdded, DateTime.now)
         )
       }

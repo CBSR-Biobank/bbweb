@@ -487,43 +487,43 @@ class Factory {
     containerSchema
   }
 
-  def createEnabledContainerType(centre: Centre): EnabledContainerType = {
-    val containerType = EnabledContainerType(
-      id           = ContainerTypeId(nameGenerator.next[ContainerType]),
-      centreId     = Some(centre.id),
-      schemaId     = defaultContainerSchema.id,
-      version      = 0L,
-      timeAdded    = DateTime.now,
-      timeModified = None,
-      name         = nameGenerator.next[ContainerType],
-      description  = Some(nameGenerator.next[ContainerType]),
-      shared       = true)
-    domainObjects = domainObjects + (classOf[EnabledContainerType] -> containerType)
-    containerType
-  }
+  // def createEnabledContainerType(centre: Centre): EnabledContainerType = {
+  //   val containerType = EnabledContainerType(
+  //     id           = ContainerTypeId(nameGenerator.next[ContainerType]),
+  //     centreId     = Some(centre.id),
+  //     schemaId     = defaultContainerSchema.id,
+  //     version      = 0L,
+  //     timeAdded    = DateTime.now,
+  //     timeModified = None,
+  //     name         = nameGenerator.next[ContainerType],
+  //     description  = Some(nameGenerator.next[ContainerType]),
+  //     shared       = true)
+  //   domainObjects = domainObjects + (classOf[EnabledContainerType] -> containerType)
+  //   containerType
+  // }
 
-  def createEnabledContainerType(): EnabledContainerType = {
-    createEnabledContainerType(defaultEnabledCentre)
-  }
+  // def createEnabledContainerType(): EnabledContainerType = {
+  //   createEnabledContainerType(defaultEnabledCentre)
+  // }
 
-  def createDisabledContainerType(): DisabledContainerType = {
-    val containerType = DisabledContainerType(
-      version      = 0L,
-      centreId     = Some(defaultEnabledCentre.id),
-      schemaId     = defaultContainerSchema.id,
-      timeAdded    = DateTime.now,
-      timeModified = None,
-      id           = ContainerTypeId(nameGenerator.next[ContainerType]),
-      name         = nameGenerator.next[ContainerType],
-      description  = Some(nameGenerator.next[ContainerType]),
-      shared       = true)
-    domainObjects = domainObjects + (classOf[DisabledContainerType] -> containerType)
-    containerType
-  }
+  // def createDisabledContainerType(): DisabledContainerType = {
+  //   val containerType = DisabledContainerType(
+  //     version      = 0L,
+  //     centreId     = Some(defaultEnabledCentre.id),
+  //     schemaId     = defaultContainerSchema.id,
+  //     timeAdded    = DateTime.now,
+  //     timeModified = None,
+  //     id           = ContainerTypeId(nameGenerator.next[ContainerType]),
+  //     name         = nameGenerator.next[ContainerType],
+  //     description  = Some(nameGenerator.next[ContainerType]),
+  //     shared       = true)
+  //   domainObjects = domainObjects + (classOf[DisabledContainerType] -> containerType)
+  //   containerType
+  // }
 
-  def defaultRegisteredUser: RegisteredUser = {
-    defaultObject(classOf[RegisteredUser], createRegisteredUser)
-  }
+  // def defaultRegisteredUser: RegisteredUser = {
+  //   defaultObject(classOf[RegisteredUser], createRegisteredUser)
+  // }
 
   def defaultActiveUser: ActiveUser = {
     defaultObject(classOf[ActiveUser], createActiveUser)
@@ -625,13 +625,13 @@ class Factory {
     defaultObject(classOf[ContainerSchema], createContainerSchema)
   }
 
-  def defaultDisabledContainerType: DisabledContainerType = {
-    defaultObject(classOf[DisabledContainerType], createDisabledContainerType)
-  }
+  // def defaultDisabledContainerType: DisabledContainerType = {
+  //   defaultObject(classOf[DisabledContainerType], createDisabledContainerType)
+  // }
 
-  def defaultEnabledContainerType: EnabledContainerType = {
-    defaultObject(classOf[EnabledContainerType], createEnabledContainerType)
-  }
+  // def defaultEnabledContainerType: EnabledContainerType = {
+  //   defaultObject(classOf[EnabledContainerType], createEnabledContainerType)
+  // }
 
   /** Retrieves the class from the map, or calls 'create' if value does not exist
     */
@@ -639,4 +639,3 @@ class Factory {
     domainObjects.get(key).fold { create } { obj => key.cast(obj) }
   }
 }
-

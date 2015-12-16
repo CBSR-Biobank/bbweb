@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
 
-trait ContainerValidations {
+trait ContainerTypeValidations {
   val NameMinLength = 2
 
   case object ContainerSchemaIdInvalid extends ValidationKey
@@ -57,9 +57,9 @@ sealed trait ContainerType
     validateNonEmptyOption(description, InvalidDescription)
   }
 
-  def withShared(shared: Boolean): DomainValidation[StorageContainerType]
+  // def withShared(shared: Boolean): DomainValidation[StorageContainerType]
 
-  def withEnabled(enabled: Boolean): DomainValidation[StorageContainerType]
+  // def withEnabled(enabled: Boolean): DomainValidation[StorageContainerType]
 
   override def toString: String =
     s"""|ContainerType:{
@@ -106,23 +106,24 @@ case class StorageContainerType(id:           ContainerTypeId,
                                 enabled:      Boolean)
     extends ContainerType {
 
-  def withName(name: String): DomainValidation[StorageContainerType] = {
-    super.withName(name) map { _ => copy(version = version + 1, name = name) }
-  }
+  // override def withName(name: String): DomainValidation[StorageContainerType] = {
+  //   super.withName(name) map { _ => copy(version = version + 1, name = name) }
+  // }
 
-  def withDescription(description:  Option[String]): DomainValidation[StorageContainerType] = {
-    super.withDescription(description) map { _ =>
-      copy(version = version + 1, description = description)
-    }
-  }
+  // override def withDescription(description:  Option[String]): DomainValidation[StorageContainerType] = {
+  //   super.withDescription(description) map { _ =>
+  //     copy(version = version + 1, description = description)
+  //   }
+  // }
 
-  def withShared(shared: Boolean): DomainValidation[StorageContainerType] = {
-    copy(version = version + 1, shared = shared).success
-  }
+  // override def withShared(shared: Boolean): DomainValidation[StorageContainerType] = {
+  //   copy(version = version + 1, shared = shared).success
+  // }
 
-  def withEnabled(enabled: Boolean): DomainValidation[StorageContainerType] = {
-    copy(version = version + 1, enabled = enabled).success
-  }
+  // def withEnabled(enabled: Boolean): DomainValidation[StorageContainerType] = {
+  //   copy(version = version + 1, enabled = enabled).success
+  // }
+
 }
 
 object StorageContainerType extends ContainerValidations {
@@ -186,4 +187,3 @@ object SpecimenContainerType extends ContainerValidations {
     }
   }
 }
-

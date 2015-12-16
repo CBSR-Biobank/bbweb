@@ -272,7 +272,7 @@ class StudiesControllerSpec extends ControllerFixture {
 
         val eventStudyId = (json \ "data" \ "id").as[String]
         studyRepository.getByKey(StudyId(eventStudyId)).fold(
-          err => fail(err.list.mkString),
+          err => fail(err.list.toList.mkString),
           repoStudy => repoStudy.name mustBe ((json \ "data" \ "name").as[String])
         )
       }
@@ -295,7 +295,7 @@ class StudiesControllerSpec extends ControllerFixture {
 
         val eventStudyId = (json \ "data" \ "id").as[String]
         studyRepository.getByKey(StudyId(eventStudyId)).fold(
-          err => fail(err.list.mkString),
+          err => fail(err.list.toList.mkString),
           repoStudy => {
             repoStudy.name mustBe ((json \ "data" \ "name").as[String])
             repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
@@ -344,7 +344,7 @@ class StudiesControllerSpec extends ControllerFixture {
 
         val eventStudyId = (json \ "data" \ "id").as[String]
         studyRepository.getByKey(StudyId(eventStudyId)).fold(
-          err => fail(err.list.mkString),
+          err => fail(err.list.toList.mkString),
           repoStudy => repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
         )
       }
@@ -411,7 +411,7 @@ class StudiesControllerSpec extends ControllerFixture {
 
         val eventStudyId = (json \ "data" \ "id").as[String]
         studyRepository.getByKey(StudyId(eventStudyId)).fold(
-          err => fail(err.list.mkString),
+          err => fail(err.list.toList.mkString),
           repoStudy => repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
         )
       }
@@ -444,7 +444,7 @@ class StudiesControllerSpec extends ControllerFixture {
 
         val eventStudyId = (json \ "data" \ "id").as[String]
         studyRepository.getByKey(StudyId(eventStudyId)).fold(
-          err => fail(err.list.mkString),
+          err => fail(err.list.toList.mkString),
           repoStudy => repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
         )
       }
@@ -477,7 +477,7 @@ class StudiesControllerSpec extends ControllerFixture {
 
         val eventStudyId = (json \ "data" \ "id").as[String]
         studyRepository.getByKey(StudyId(eventStudyId)).fold(
-          err => fail(err.list.mkString),
+          err => fail(err.list.toList.mkString),
           repoStudy => repoStudy.version mustBe ((json \ "data" \ "version").as[Long])
         )
       }

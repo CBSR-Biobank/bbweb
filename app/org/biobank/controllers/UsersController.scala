@@ -56,15 +56,15 @@ class UsersController @javaxInject() (val authToken:      AuthToken,
         usersService.validatePassword(loginCredentials.email, loginCredentials.password).fold(
           err => {
             Logger.debug(s"login: error: $err")
-            val errStr = err.list.mkString(", ")
+            val errStr = err.list.toList.mkString(", ")
             // FIXME: what if user attempts multiple failed logins? lock the account after 3 attempts?
             // how long to lock the account?
             if (errStr.contains("not found") || errStr.contains("invalid password")) {
               Forbidden("invalid email or password")
             } else if (errStr.contains("not active") || errStr.contains("is locked")) {
-              Forbidden(err.list.mkString(", "))
+              Forbidden(err.list.toList.mkString(", "))
             } else {
-              NotFound(err.list.mkString(", "))
+              NotFound(err.list.toList.mkString(", "))
             }
           },
           user => {
@@ -81,7 +81,7 @@ class UsersController @javaxInject() (val authToken:      AuthToken,
     */
   def authenticateUser() = AuthAction(parse.empty) { (token, userId, request) =>
     usersService.getUser(userId.id).fold(
-      err  => BadRequest(err.list.mkString(", ")),
+      err  => BadRequest(err.list.toList.mkString(", ")),
       user => Ok(user)
     )
   }
@@ -111,7 +111,7 @@ class UsersController @javaxInject() (val authToken:      AuthToken,
         future.map { validation =>
           validation.fold(
             err => {
-              val errStr = err.list.mkString(", ")
+              val errStr = err.list.toList.mkString(", ")
               if (errStr.contains("not found")) {
                 NotFound("email address not registered")
               } else if (errStr.contains("not active")) {
@@ -162,7 +162,7 @@ class UsersController @javaxInject() (val authToken:      AuthToken,
       } yield results
 
       validation.fold(
-        err => BadRequest(err.list.mkString),
+        err => BadRequest(err.list.toList.mkString),
         results =>  Ok(results)
       )
     }
@@ -183,7 +183,7 @@ class UsersController @javaxInject() (val authToken:      AuthToken,
         future.map { validation =>
           validation.fold(
             err   => {
-              val errs = err.list.mkString(", ")
+              val errs = err.list.toList.mkString(", ")
               if (errs.contains("exists")) {
                 Forbidden("already registered")
               } else {

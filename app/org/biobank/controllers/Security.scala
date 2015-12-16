@@ -45,17 +45,17 @@ trait Security { self: Controller =>
     for {
       cookieXsrfToken <- {
         request.cookies.get(AuthTokenCookieKey)
-          .map(_.value.successNel)
+          .map(_.value.successNel[String])
           .getOrElse(DomainError("Invalid XSRF Token cookie").failureNel)
       }
       headerXsrfToken <- {
         request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey))
-          .map(_.successNel)
+          .map(_.successNel[String])
           .getOrElse(DomainError("No token").failureNel)
       }
       matchingTokens <- {
         if (cookieXsrfToken == headerXsrfToken) {
-          headerXsrfToken.successNel
+          headerXsrfToken.successNel[String]
         } else {
           DomainError(s"tokens did not match: cookie/$cookieXsrfToken, header/$headerXsrfToken").failureNel
         }
@@ -107,7 +107,8 @@ trait Security { self: Controller =>
       : Action[A] =
     Action(p) { implicit request =>
       validateToken(request).fold(
-        err => Unauthorized(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))),
+        err => Unauthorized(Json.obj("status"  -> "error",
+                                     "message" -> err.list.toList.mkString(", "))),
         authInfo => f(authInfo.token, authInfo.userId, request))
     }
 
@@ -123,7 +124,7 @@ trait Security { self: Controller =>
         err => {
           Logger.debug(s"AuthActionAsync: $err")
           Future.successful(
-            Unauthorized(Json.obj("status" ->"error", "message" -> err.list.mkString(", "))))
+            Unauthorized(Json.obj("status" ->"error", "message" -> err.list.toList.mkString(", "))))
         },
         authInfo => f(authInfo.token, authInfo.userId, request)
       )

@@ -104,7 +104,7 @@ case class DisabledStudy(id:           StudyId,
   }
 
   /** Used to enable a study after it has been configured, or had configuration changes made on it. */
-  def enable(specimenGroupCount:       Int, collectionEventTypeCount: Int)
+  def enable(specimenGroupCount: Int, collectionEventTypeCount: Int)
       : DomainValidation[EnabledStudy] = {
     for {
       sgCount <- {

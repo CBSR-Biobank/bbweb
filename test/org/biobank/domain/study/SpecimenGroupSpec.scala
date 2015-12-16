@@ -106,7 +106,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val v = SpecimenGroup.create(
         studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
-        err => err.list must (have length 1 and contain("IdRequired")),
+        err => err.list.toList must (have length 1 and contain("IdRequired")),
         user => fail
       )
     }
@@ -126,7 +126,7 @@ class SpecimenGroupSpec extends DomainSpec {
       SpecimenGroup.create(
         studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
-        err => err.list must (have length 1 and contain("IdRequired")),
+        err => err.list.toList must (have length 1 and contain("IdRequired")),
         user => fail
       )
     }
@@ -164,7 +164,7 @@ class SpecimenGroupSpec extends DomainSpec {
       SpecimenGroup.create(
         studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
-        err => err.list must (have length 1 and contain("NameRequired")),
+        err => err.list.toList must (have length 1 and contain("NameRequired")),
         user => fail
       )
 
@@ -172,7 +172,7 @@ class SpecimenGroupSpec extends DomainSpec {
       SpecimenGroup.create(
         studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
-        err => err.list must (have length 1 and contain("NameRequired")),
+        err => err.list.toList must (have length 1 and contain("NameRequired")),
         user => fail
       )
     }
@@ -192,14 +192,14 @@ class SpecimenGroupSpec extends DomainSpec {
       SpecimenGroup.create(
         studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
-        err => err.list must (have length 1 and contain("InvalidDescription")),
+        err => err.list.toList must (have length 1 and contain("InvalidDescription")),
         user => fail
       )
 
       description = Some("")
       SpecimenGroup.create(studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
-        err => err.list must (have length 1 and contain("InvalidDescription")),
+        err => err.list.toList must (have length 1 and contain("InvalidDescription")),
         user => fail
       )
     }
@@ -218,7 +218,7 @@ class SpecimenGroupSpec extends DomainSpec {
 
       SpecimenGroup.create(studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
-        err => err.list must (have length 1 and contain("UnitsRequired")),
+        err => err.list.toList must (have length 1 and contain("UnitsRequired")),
         user => fail
       )
     }
@@ -239,8 +239,8 @@ class SpecimenGroupSpec extends DomainSpec {
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => {
           err.list must have length 2
-          err.list.head mustBe ("InvalidVersion")
-          err.list.tail.head mustBe ("UnitsRequired")
+          err.list.toList.head mustBe ("InvalidVersion")
+          err.list.toList.tail.head mustBe ("UnitsRequired")
         },
         user => fail
       )

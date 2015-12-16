@@ -51,7 +51,7 @@ class CentresController @javaxInject() (val authToken:      AuthToken,
       } yield results
 
       validation.fold(
-        err => BadRequest(err.list.mkString),
+        err => BadRequest(err.list.toList.mkString),
         results =>  Ok(results)
       )
     }
@@ -137,4 +137,3 @@ class CentresController @javaxInject() (val authToken:      AuthToken,
     }
 
 }
-

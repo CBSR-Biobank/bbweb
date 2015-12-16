@@ -102,8 +102,8 @@ trait JsonController extends Controller {
       : Result = {
     validation.fold(
       err => {
-        Log.trace("*** ERROR ***: " + err.list.mkString(", "))
-        val errMsgs = err.list.mkString(", ")
+        Log.trace("*** ERROR ***: " + err.list.toList.mkString(", "))
+        val errMsgs = err.list.toList.mkString(", ")
         if (("does not exist".r.findAllIn(errMsgs).length > 0)
           || ("invalid.*id".r.findAllIn(errMsgs).length > 0)){
           NotFound(errMsgs)

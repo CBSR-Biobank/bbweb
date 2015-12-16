@@ -37,9 +37,9 @@ object Annotation {
 
     def validateAnnotationTypeIdEqual(id1: AnnotationTypeId, id2: AnnotationTypeId) = {
       if (id1 != id2) {
-        DomainError("invalid annotation type id in selected values").failureNel
+        DomainError("invalid annotation type id in selected values").failureNel[Boolean]
       } else {
-        true.successNel
+        true.successNel[String]
       }
     }
 
@@ -50,7 +50,7 @@ object Annotation {
       if ((stringValue.isDefined && !numberValue.isDefined && selectedValues.isEmpty)
         || (!stringValue.isDefined && numberValue.isDefined && selectedValues.isEmpty)
         || (!stringValue.isDefined && !numberValue.isDefined && !selectedValues.isEmpty)) {
-        true.successNel
+        true.successNel[String]
       } else if (!stringValue.isDefined && !numberValue.isDefined && selectedValues.isEmpty) {
         DomainError("at least one value must be assigned").failureNel
       } else {

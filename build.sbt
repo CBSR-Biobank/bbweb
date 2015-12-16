@@ -65,38 +65,38 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka"         %% "akka-remote"                       % "2.4.1"             % "compile",
   "com.typesafe.akka"         %% "akka-slf4j"                        % "2.4.1"             % "compile",
   "org.scala-stm"             %% "scala-stm"                         % "0.7"               % "compile",
-  "org.scalaz"                %% "scalaz-core"                       % "7.1.2"             % "compile",
+  "org.scalaz"                %% "scalaz-core"                       % "7.2.0"             % "compile",
   "org.iq80.leveldb"          % "leveldb"                            % "0.7",
   "org.fusesource.leveldbjni" % "leveldbjni-all"                     % "1.8",
-  "com.github.t3hnar"         %% "scala-bcrypt"                      % "2.4",
+  "com.github.t3hnar"         %% "scala-bcrypt"                      % "2.5",
   "com.typesafe.play"         %% "play-mailer"                       % "3.0.1",
   // WebJars infrastructure
   "org.webjars"               %% "webjars-play"                      % "2.4.0-1" exclude(
     "org.webjars", "requirejs"),
   // WebJars dependencies
-  "org.webjars"               %  "requirejs"                         % "2.1.18",
+  "org.webjars"               %  "requirejs"                         % "2.1.22",
   "org.webjars"               %  "underscorejs"                      % "1.8.3",
   "org.webjars"               %  "jquery"                            % "2.1.4",
-  "org.webjars"               %  "bootstrap"                         % "3.3.4" excludeAll(
+  "org.webjars"               %  "bootstrap"                         % "3.3.6" excludeAll(
     ExclusionRule(organization="org.webjars")
   ),
-  "org.webjars"               %  "angularjs"                         % "1.4.1" exclude(
+  "org.webjars"               %  "angularjs"                         % "1.4.8" exclude(
     "org.webjars", "jquery"),
-  "org.webjars"               %  "angular-ui-bootstrap"              % "0.13.0" exclude(
+  "org.webjars"               %  "angular-ui-bootstrap"              % "0.14.3" exclude(
     "org.webjars", "angularjs"),
   "org.webjars"               %  "angular-ui-router"                 % "0.2.15" exclude(
     "org.webjars", "angularjs"),
   "org.webjars"               %  "ng-table"                          % "0.3.3",
-  "org.webjars"               %  "toastr"                            % "2.1.0" exclude(
+  "org.webjars"               %  "toastr"                            % "2.1.1" exclude(
     "org.webjars", "jquery"),
   "org.webjars"               %  "angular-sanitize"                  % "1.3.11" exclude(
     "org.webjars", "angularjs"),
-  "org.webjars"               %  "momentjs"                          % "2.10.3",
+  "org.webjars"               %  "momentjs"                          % "2.10.6",
   // Testing
-  "com.typesafe.akka"         %% "akka-testkit"                      % "2.3.11"             % "test",
+  "com.typesafe.akka"         %% "akka-testkit"                      % "2.4.1"              % "test",
   "com.github.nscala-time"    %% "nscala-time"                       % "2.6.0"              % "test",
-  "org.scalatestplus"         %% "play"                              % "1.4.0-M3"           % "test",
-  "org.pegdown"               % "pegdown"                            % "1.5.0"              % "test"
+  "org.scalatestplus"         %% "play"                              % "1.4.0-M4"           % "test",
+  "org.pegdown"               % "pegdown"                            % "1.6.0"              % "test"
 )
 
 routesGenerator := InjectedRoutesGenerator
@@ -125,4 +125,4 @@ PB.runProtoc in PB.protobufConfig := (args =>
 // the application is run
 com.jamesward.play.BrowserNotifierKeys.shouldOpenBrowser := false
 
-ScoverageSbtPlugin.ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*"
+coverageExcludedPackages := "<empty>;Reverse.*"

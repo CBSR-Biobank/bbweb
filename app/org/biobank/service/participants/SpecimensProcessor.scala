@@ -40,8 +40,8 @@ class SpecimensProcessor @javaxInject() (
   val specimenGroupRepository:   SpecimenGroupRepository,
   val collectionEventRepository: CollectionEventRepository,
   val locationRepository:        LocationRepository,
-  val centreLocationsRepository: CentreLocationsRepository,
-  val containerRepository:       ContainerRepository)
+  val centreLocationsRepository: CentreLocationsRepository) //,
+  //val containerRepository:       ContainerRepository)
     extends Processor {
 
   import ParticipantEvent.EventType

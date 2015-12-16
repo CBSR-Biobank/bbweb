@@ -238,7 +238,7 @@ class TestData @Inject() (
               specimenGroupRepository.allForStudy(study.id).size,
               collectionEventTypeRepository.allForStudy(study.id).size)
             valid.fold(
-              err => Logger.error(err.list.mkString(",")),
+              err => Logger.error(err.list.toList.mkString(",")),
               study => {
                 studyRepository.put(study)
                 Logger.info(s"study ${study.name} enabled")
