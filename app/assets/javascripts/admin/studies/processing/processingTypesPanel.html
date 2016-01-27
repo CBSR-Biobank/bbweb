@@ -1,12 +1,12 @@
-<accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
-  <accordion-heading>
+<uib-accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
+  <uib-accordion-heading>
     Processing Types
     <panel-buttons on-add="vm.add(study)"
                    add-button-title="add processing type"
                    add-button-enabled="vm.modificationsAllowed"
                    panel-open="vm.panelOpen">
     </panel-buttons>
-  </accordion-heading>
+  </uib-accordion-heading>
   <p>
     A Processing Type describes a regularly performed specimen processing procedure with a unique name (unique
     to this study). There should be one or more associated Specimen Link Types that (1) further define legal
@@ -46,4 +46,4 @@
       </td>
     </tr>
   </table>
-</accordion-group>
+</uib-accordion-group>

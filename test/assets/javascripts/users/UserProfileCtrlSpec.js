@@ -31,7 +31,7 @@ define([
     function setupController(injector) {
       var $rootScope           = injector.get('$rootScope'),
           $controller          = injector.get('$controller'),
-          $modal               = injector.get('$modal'),
+          $uibModal            = injector.get('$uibModal'),
           modalService         = injector.get('modalService'),
           User                 = injector.get('User'),
           notificationsService = injector.get('notificationsService');
@@ -45,7 +45,7 @@ define([
 
         $controller('UserProfileCtrl as vm', {
           $scope:               scope,
-          $modal:               $modal,
+          $uibModal:            $uibModal,
           modalService:         modalService,
           notificationsService: notificationsService,
           User:                 User,

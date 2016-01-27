@@ -5,12 +5,12 @@
 define(['angular'], function(angular) {
   'use strict';
 
-  HeaderCtrl.$inject = ['$scope', '$state', 'usersService'];
+  HeaderCtrl.$inject = ['$scope', 'usersService', 'stateHelper'];
 
   /**
    * Controller for the page header. Contains the navigation bar.
    */
-  function HeaderCtrl($scope, $state, usersService) {
+  function HeaderCtrl($scope, usersService, stateHelper) {
     var vm = this;
     vm.logout = logout;
     vm.user = undefined;
@@ -29,7 +29,7 @@ define(['angular'], function(angular) {
     function logout() {
       usersService.logout().then(function () {
         $scope.user = undefined;
-        $state.go('home');
+        stateHelper.reloadStateAndReinit('home', {}, { reload: true });
       });
     }
   }

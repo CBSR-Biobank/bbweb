@@ -98,8 +98,8 @@ define([
 
       describe('(shared)', function() {
 
-        beforeEach(inject(function($modal, _AnnotationTypeViewer_) {
-          modal                = $modal;
+        beforeEach(inject(function($uibModal, _AnnotationTypeViewer_) {
+          modal                = $uibModal;
           AnnotationTypeViewer = _AnnotationTypeViewer_;
 
           annotationTypeType = context.annotationTypeType;

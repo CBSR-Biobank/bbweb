@@ -11,28 +11,28 @@
         <button class="btn btn-xs btn-success"
                 ng-click="vm.changeStatus('enable')"
                 title="Enable"
-                ng-if="vm.study.status === 'Disabled'">
+                ng-if="vm.study.isDisabled()">
           <i class="glyphicon glyphicon-ok-circle"></i>
         </button>
 
         <button class="btn btn-xs btn-danger"
                 ng-click="vm.changeStatus('disable')"
                 title="Disable"
-                ng-if="vm.study.status === 'Enabled'">
+                ng-if="vm.study.isEnabled()">
           <i class="glyphicon glyphicon-remove-sign"></i>
         </button>
 
         <button class="btn btn-xs btn-danger"
                 ng-click="vm.changeStatus('retire')"
                 title="Retire"
-                ng-if="vm.study.status === 'Disabled'">
+                ng-if="vm.study.isDisabled()">
           <i class="glyphicon glyphicon-arrow-down"></i>
         </button>
 
         <button class="btn btn-xs btn-danger"
                 ng-click="vm.changeStatus('unretire')"
                 title="Unretire"
-                ng-if="vm.study.status === 'Retired'">
+                ng-if="vm.study.isRetired()">
           <i class="glyphicon glyphicon-arrow-up"></i>
         </button>
 

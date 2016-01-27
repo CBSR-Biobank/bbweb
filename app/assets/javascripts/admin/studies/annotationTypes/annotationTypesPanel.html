@@ -26,7 +26,7 @@
                       'desc' : 'asc')">
           <div>{{column.title}}</div>
         </th>
-        <th ng-if="vm.study.status === 'Disabled'"><!-- heading for buttons: blank for now --></th>
+        <th ng-if="vm.study.isDisabled()"><!-- heading for buttons: blank for now --></th>
       </tr>
       <tr ng-repeat="annotationType in $data">
         <td ng-repeat="column in vm.columns" sortable="column.field">

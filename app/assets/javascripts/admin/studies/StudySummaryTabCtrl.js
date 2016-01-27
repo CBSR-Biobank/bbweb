@@ -8,6 +8,7 @@ define(['underscore'], function(_) {
   StudySummaryTabCtrl.$inject = [
     '$state',
     'modalService',
+    'notificationsService',
     'study'
   ];
 
@@ -17,6 +18,7 @@ define(['underscore'], function(_) {
    */
   function StudySummaryTabCtrl($state,
                                modalService,
+                               notificationsService,
                                study) {
     var validStatusActions = ['disable', 'enable', 'retire', 'unretire'],
         vm = this;
@@ -44,6 +46,7 @@ define(['underscore'], function(_) {
       modalService.showModal({}, modalOptions).then(function () {
         vm.study[statusAction]().then(function (study) {
           vm.study = study;
+          notificationsService.success('The study\'s status has been updated.', null, 2000);
         });
       });
     }

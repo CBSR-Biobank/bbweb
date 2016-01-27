@@ -60,7 +60,7 @@ define([
 
     it('should open a modal when created', function() {
       var count = 0;
-      var modal = this.$injector.get('$modal');
+      var modal = this.$injector.get('$uibModal');
       spyOn(modal, 'open').and.callFake(function () { return testUtils.fakeModal(); });
 
       _.each([false, true], function(recurring) {

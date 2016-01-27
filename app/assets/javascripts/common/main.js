@@ -17,7 +17,6 @@ define(function (require) {
       smartFloatDirective              = require('./directives/smartFloatDirective'),
       str2integerDirective             = require('./directives/str2integerDirective'),
       truncateToggleDirective          = require('./directives/truncateToggleDirective'),
-      uiBreadcrumbsDirective           = require('./directives/uiBreadcrumbsDirective'),
       updateRemoveButtonsDirective     = require('./directives/updateRemoveButtonsDirective'),
 
       timeagoFilter                    = require('./filters/timeagoFilter'),
@@ -33,7 +32,11 @@ define(function (require) {
       tableService                     = require('./services/tableService'),
       validationService                = require('./services/validationService');
 
-  var module = angular.module('biobank.common', ['ui.bootstrap', 'ngTable']);
+  var module = angular.module('biobank.common', [
+    'ui.bootstrap',
+    'ngTable',
+    'angularUtils.directives.uiBreadcrumbs'
+  ]);
 
   module.directive('annotationsInput',        annotationsInputDirective.directive);
   module.controller('AnnotationsInputCtrl',   annotationsInputDirective.controller);
@@ -48,7 +51,6 @@ define(function (require) {
   module.directive('smartFloat',              smartFloatDirective);
   module.directive('str2integer',             str2integerDirective);
   module.directive('truncateToggle',          truncateToggleDirective);
-  module.directive('uiBreadcrumbs',           uiBreadcrumbsDirective);
   module.directive('updateRemoveButtons',     updateRemoveButtonsDirective);
 
   module.filter('timeago',                    timeagoFilter);

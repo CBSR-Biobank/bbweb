@@ -76,7 +76,7 @@
       </div>
       <div class="row">
         <div class="col-md-5">
-          <small class="text-info"><strong>Status:</strong> {{entity.status}}</small>
+          <small class="text-info"><strong>Status:</strong> {{ entity.getStatusLabel() }}</small>
         </div>
         <div class="col-md-3">
           <small class="text-muted"><strong>Added:</strong> {{entity.timeAdded | timeago}}</small>
@@ -90,17 +90,17 @@
 
 </div>
 
-<pagination class="pagination-sm"
-            boundary-links="true"
-            total-items="vm.pagedResult.total"
-            ng-model="vm.pagerOptions.page"
-            items-per-page="vm.pagerOptions.pageSize"
-            ng-change="vm.pageChanged()"
-            num-pages="vm.paginationNumPages"
-            max-size="5"
-            rotate="false"
-            previous-text="&lsaquo;"
-            next-text="&rsaquo;"
-            first-text="&laquo;"
-            last-text="&raquo;"
-            ng-if="vm.displayState === vm.displayStates.HAVE_RESULTS"></pagination>
+<uib-pagination class="pagination-sm"
+                boundary-links="true"
+                total-items="vm.pagedResult.total"
+                ng-model="vm.pagerOptions.page"
+                items-per-page="vm.pagerOptions.pageSize"
+                ng-change="vm.pageChanged()"
+                num-pages="vm.paginationNumPages"
+                max-size="5"
+                rotate="false"
+                previous-text="&lsaquo;"
+                next-text="&rsaquo;"
+                first-text="&laquo;"
+                last-text="&raquo;"
+                ng-if="vm.displayState === vm.displayStates.HAVE_RESULTS"></uib-pagination>

@@ -1,12 +1,12 @@
-<accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
-  <accordion-heading>
+<uib-accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
+  <uib-accordion-heading>
     Specimen Groups
     <panel-buttons on-add="vm.add(study)"
                    add-button-title="add specimen group"
                    add-button-enabled="vm.modificationsAllowed"
                    panel-open="vm.panelOpen">
     </panel-buttons>
-  </accordion-heading>
+  </uib-accordion-heading>
   <p>
     A Specimen Group is used to configure a specimen type to be used by the study.  It records ownership,
     summary, storage, and classification information that applies to an entire group or collection of
@@ -48,4 +48,4 @@
       </td>
     </tr>
   </table>
-</accordion-group>
+</uib-accordion-group>

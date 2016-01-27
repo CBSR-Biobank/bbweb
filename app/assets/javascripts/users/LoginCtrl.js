@@ -54,32 +54,38 @@ define([], function() {
       var modalDefaults = {};
       var modalOptions = {};
 
-      switch (error.data.message)  {
-      case 'invalid email or password':
-        modalOptions.closeButtonText = 'Cancel';
-        modalOptions.actionButtonText = 'Retry';
-        modalOptions.headerHtml = 'Invalid login credentials';
-        modalOptions.bodyHtml = 'The email and / or password you entered are invalid.';
-        break;
+      if (!error.hasOwnProperty('data') || (error.data === null)) {
+          modalOptions.headerHtml = 'Login error';
+          modalOptions.bodyHtml = 'Cannot login: server is not reachable.';
+          modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
+      } else {
+        switch (error.data.message)  {
+        case 'invalid email or password':
+          modalOptions.closeButtonText = 'Cancel';
+          modalOptions.actionButtonText = 'Retry';
+          modalOptions.headerHtml = 'Invalid login credentials';
+          modalOptions.bodyHtml = 'The email and / or password you entered are invalid.';
+          break;
 
-      case 'the user is not active':
-        modalOptions.headerHtml = 'Login not active';
-        modalOptions.bodyHtml = 'Your login is not active yet. ' +
-          'Please contact your system admnistrator for more information.';
-        modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
-        break;
+        case 'the user is not active':
+          modalOptions.headerHtml = 'Login not active';
+          modalOptions.bodyHtml = 'Your login is not active yet. ' +
+            'Please contact your system admnistrator for more information.';
+          modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
+          break;
 
-      case 'the user is locked':
-        modalOptions.headerHtml = 'Login is locked';
-        modalOptions.bodyHtml = 'Your login is locked. ' +
-          'Please contact your system admnistrator for more information.';
-        modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
-        break;
+        case 'the user is locked':
+          modalOptions.headerHtml = 'Login is locked';
+          modalOptions.bodyHtml = 'Your login is locked. ' +
+            'Please contact your system admnistrator for more information.';
+          modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
+          break;
 
-      default:
-        modalOptions.headerHtml = 'Login error';
-        modalOptions.bodyHtml = 'Cannot login: ' + error.data.message;
-        modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
+        default:
+          modalOptions.headerHtml = 'Login error';
+          modalOptions.bodyHtml = 'Cannot login: ' + error.data.message;
+          modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
+        }
       }
 
       modalService.showModal(modalDefaults, modalOptions)

@@ -31,7 +31,7 @@ define([
     }));
 
     it('should open a modal when created', function() {
-      var modal = this.$injector.get('$modal'),
+      var modal = this.$injector.get('$uibModal'),
           study, processingType, viewer;
 
       spyOn(modal, 'open').and.callFake(function () { return testUtils.fakeModal(); });

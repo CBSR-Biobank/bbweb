@@ -26,8 +26,8 @@ define([], function() {
 
     //-------
 
-    function DISABLED() { return 'Disabled'; }
-    function ENABLED()  { return 'Enabled'; }
+    function DISABLED() { return 'DisabledCentre'; }
+    function ENABLED()  { return 'EnabledCentre'; }
 
     function values()    { return ALL_VALUES; }
   }

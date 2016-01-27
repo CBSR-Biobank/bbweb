@@ -11,14 +11,14 @@ define([], function() {
    * Displays a study in a modal.
    *
    */
-  function StudyViewerFactory($filter, EntityViewer) {
+   function StudyViewerFactory($filter, EntityViewer) {
 
     function StudyViewer(study) {
       var ev = new EntityViewer(study, 'Study');
 
       ev.addAttribute('Name',        study.name);
       ev.addAttribute('Description', $filter('truncate')(study.description, 60));
-      ev.addAttribute('Status',      study.status);
+      ev.addAttribute('Status',      study.getStatusLabel());
 
       ev.showModal();
     }

@@ -1,12 +1,12 @@
-<accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
-  <accordion-heading>
+<uib-accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
+  <uib-accordion-heading>
     {{vm.panelHeading}}
     <panel-buttons on-add="vm.add()"
                    add-button-title="Add annotation type"
                    add-button-enabled="vm.modificationsAllowed"
                    panel-open="vm.panelOpen">
     </panel-buttons>
-  </accordion-heading>
+  </uib-accordion-heading>
   <p ng-bind-html="vm.annotationTypeDescription"></p>
   <study-annotation-types-table
      study="study"
@@ -15,4 +15,4 @@
      annotation-type-ids-in-use="vm.annotationTypeIdsInUse"
      update-state-name="vm.updateStateName"
      has-required="true"></study-annotation-types-table>
-</accordion-group>
+</uib-accordion-group>

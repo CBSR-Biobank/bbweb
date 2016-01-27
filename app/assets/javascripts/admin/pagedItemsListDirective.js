@@ -74,7 +74,7 @@ define(['angular', 'underscore'], function(angular, _) {
 
     //---
 
-    // FIXME change this to a directive?
+    // TODO change this to a directive?
     function panelHeading(counts) {
       var panelHeadingItems = [
         { label: 'Disabled', value: counts.disabled, icon:  'glyphicon-cog' },

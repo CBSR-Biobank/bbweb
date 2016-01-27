@@ -28,9 +28,9 @@ define([], function() {
 
     //-------
 
-    function DISABLED() { return 'Disabled'; }
-    function ENABLED()  { return 'Enabled'; }
-    function RETIRED()  { return 'Retired'; }
+    function DISABLED() { return 'DisabledStudy'; }
+    function ENABLED()  { return 'EnabledStudy'; }
+    function RETIRED()  { return 'RetiredStudy'; }
 
     function values()    { return ALL_VALUES; }
   }

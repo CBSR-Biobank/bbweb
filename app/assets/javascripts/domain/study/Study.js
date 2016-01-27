@@ -130,7 +130,19 @@ define(['angular', 'underscore'], function(angular, _) {
     };
 
     Study.prototype.isRetired = function () {
-      return (this.status === StudyStatus.Retired());
+      return (this.status === StudyStatus.RETIRED());
+    };
+
+    Study.prototype.getStatusLabel = function () {
+      switch (this.status) {
+      case StudyStatus.DISABLED():
+        return 'Disabled';
+      case StudyStatus.ENABLED():
+        return 'Enabled';
+      case StudyStatus.RETIRED():
+        return 'Retired';
+      }
+      return new Error('invalid status for study' + this.status);
     };
 
     function changeState(obj, method) {
@@ -148,4 +160,3 @@ define(['angular', 'underscore'], function(angular, _) {
 /* Local Variables:  */
 /* mode: js          */
 /* End:              */
-

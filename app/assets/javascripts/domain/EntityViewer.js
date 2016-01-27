@@ -6,12 +6,12 @@
 define([], function() {
   'use strict';
 
-  EntityViewerFactory.$inject = ['$modal'];
+  EntityViewerFactory.$inject = ['$uibModal'];
 
   /**
    * Factory for EntityViewer.
    */
-  function EntityViewerFactory($modal) {
+  function EntityViewerFactory($uibModal) {
 
     /**
      * Used to display a domain entity in a modal.
@@ -49,9 +49,9 @@ define([], function() {
         controller: controller
       };
 
-      controller.$inject = ['$scope', '$modalInstance'];
+      controller.$inject = ['$scope', '$uibModalInstance'];
 
-      function controller($scope, $modalInstance) {
+      function controller($scope, $uibModalInstance) {
 
         $scope.modalOptions = {
           entityViewer: self,
@@ -61,11 +61,11 @@ define([], function() {
         //--
 
         function ok() {
-          $modalInstance.close();
+          $uibModalInstance.close();
         }
       }
 
-      return $modal.open(modalOptions).result;
+      return $uibModal.open(modalOptions).result;
     };
 
 

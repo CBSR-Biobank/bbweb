@@ -32,6 +32,7 @@ module.exports = function(config) {
       {pattern: 'target/web/web-modules/main/webjars/lib/jquery/jquery.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/toastr/toastr.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/momentjs/moment.js', included: false},
+      {pattern: 'target/web/web-modules/main/webjars/lib/angular-utils-ui-breadcrumbs/uiBreadcrumbs.js', included: false},
       {pattern: 'app/assets/javascripts/**/*.js', included: false},
       {pattern: 'test/assets/javascripts/**/*Spec.js', included: false},
       {pattern: 'test/assets/javascripts/test/**/*.js', included: false},

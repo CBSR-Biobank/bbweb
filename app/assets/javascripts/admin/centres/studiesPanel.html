@@ -1,5 +1,5 @@
-<accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
-  <accordion-heading>
+<uib-accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
+  <uib-accordion-heading>
     This centre is linked to these studies
     <div class="btn-group pull-right">
       <button class="btn btn-xs btn-default"
@@ -9,7 +9,7 @@
            ng-class="vm.panelOpen ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
       </button>
     </div>
-  </accordion-heading>
+  </uib-accordion-heading>
   <div class="panel panel-warning" ng-if="vm.centre.studyIds.length <= 0">
     <div class="panel-heading">
       No studies have been added yet.
@@ -25,7 +25,7 @@
         </span>
       </td>
       <td data-title="'Status'" sortable="'status'">
-        {{study.status}}
+        {{study.getStatusLabel()}}
       </td>
       <td>
         <!-- FIXME studies should only be removed if no centre is not storing specimens  -->
@@ -49,4 +49,4 @@
            placeholder="enter a study's name or partial name"
            class="form-control">
   </div>
-</accordion-group>
+</uib-accordion-group>

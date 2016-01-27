@@ -1,5 +1,5 @@
 <ng-include src="'/assets/javascripts/admin/studies/studyNotDisabledWarning.html'"></ng-include>
-<accordion close-others="false">
+<uib-accordion close-others="false">
   <study-annotation-types-panel
      study="study"
      annotation-types="collectionDto.collectionEventAnnotationTypes"
@@ -15,4 +15,4 @@
      annotation-types="collectionDto.collectionEventAnnotationTypes"
      annotation-types-in-use="collectionDto.collectionEventAnnotationTypeIdsInUse"
      specimen-groups="collectionDto.specimenGroups"></cevent-types-panel>
-</accordion>
+</uib-accordion>

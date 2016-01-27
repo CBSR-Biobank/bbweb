@@ -32,7 +32,7 @@ define([
 
     it('should open a modal when created', function() {
       var count = 0,
-          modal = this.$injector.get('$modal'),
+          modal = this.$injector.get('$uibModal'),
           study,
           specimenGroup,
           viewer;

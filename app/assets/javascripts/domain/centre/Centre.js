@@ -105,6 +105,16 @@ define(['angular', 'underscore'], function(angular, _) {
       return changeState(this, 'enable');
     };
 
+    Centre.prototype.getStatusLabel = function () {
+      switch (this.status) {
+      case CentreStatus.DISABLED():
+        return 'Disabled';
+      case CentreStatus.ENABLED():
+        return 'Enabled';
+      }
+      return new Error('invalid status for centre' + this.status);
+    };
+
     Centre.prototype.getLocations = function () {
       var self = this;
       if (self.id === null) {
@@ -224,4 +234,3 @@ define(['angular', 'underscore'], function(angular, _) {
 /* Local Variables:  */
 /* mode: js          */
 /* End:              */
-

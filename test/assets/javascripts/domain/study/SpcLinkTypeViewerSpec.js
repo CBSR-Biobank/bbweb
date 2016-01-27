@@ -70,7 +70,7 @@ define([
     }
 
     it('should open a modal when created', function() {
-      var modal = this.$injector.get('$modal'),
+      var modal = this.$injector.get('$uibModal'),
           entities = createEntities(),
           viewer;
 

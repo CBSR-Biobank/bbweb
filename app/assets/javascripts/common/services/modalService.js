@@ -5,7 +5,7 @@
 define(['angular'], function(angular) {
   'use strict';
 
-  modalService.$inject = ['$modal'];
+  modalService.$inject = ['$uibModal'];
 
   /**
    * Originally the code was taken from the URL given below, but then it was modified.
@@ -13,7 +13,7 @@ define(['angular'], function(angular) {
    * http://weblogs.asp.net/dwahlin/building-an-angularjs-modal-service
    *
    */
-  function modalService($modal) {
+  function modalService($uibModal) {
     var modalDefaults = { backdrop: true,
                           keyboard: true,
                           modalFade: true,
@@ -46,7 +46,7 @@ define(['angular'], function(angular) {
       var tempModalDefaults = {},
           tempModalOptions = {};
 
-      controller.$inject = ['$scope', '$modalInstance'];
+      controller.$inject = ['$scope', '$uibModalInstance'];
 
       angular.extend(tempModalDefaults, modalDefaults, customModalDefaults);
       angular.extend(tempModalOptions, modalOptions, customModalOptions);
@@ -55,17 +55,17 @@ define(['angular'], function(angular) {
         tempModalDefaults.controller = controller;
       }
 
-      return $modal.open(tempModalDefaults).result;
+      return $uibModal.open(tempModalDefaults).result;
 
       //--
 
-      function controller($scope, $modalInstance) {
+      function controller($scope, $uibModalInstance) {
         $scope.modalOptions = tempModalOptions;
         $scope.modalOptions.ok = function (result) {
-          $modalInstance.close(result);
+          $uibModalInstance.close(result);
         };
           $scope.modalOptions.close = function () {
-            $modalInstance.dismiss('cancel');
+            $uibModalInstance.dismiss('cancel');
           };
       }
     }
@@ -89,9 +89,9 @@ define(['angular'], function(angular) {
                               label,
                               defaultValue) {
 
-      controller.$inject = ['$scope', '$modalInstance', 'defaultValue'];
+      controller.$inject = ['$scope', '$uibModalInstance', 'defaultValue'];
 
-      return $modal.open({
+      return $uibModal.open({
         templateUrl: '/assets/javascripts/common/services/modalStringInput.html',
         controller: controller,
         resolve: {
@@ -106,7 +106,7 @@ define(['angular'], function(angular) {
 
       //--
 
-      function controller ($scope, $modalInstance, defaultValue) {
+      function controller ($scope, $uibModalInstance, defaultValue) {
         $scope.modal = {
           value: defaultValue,
           type: type,
@@ -115,10 +115,10 @@ define(['angular'], function(angular) {
         };
 
         $scope.modal.ok = function () {
-          $modalInstance.close($scope.modal.value);
+          $uibModalInstance.close($scope.modal.value);
         };
         $scope.modal.close = function () {
-          $modalInstance.dismiss('cancel');
+          $uibModalInstance.dismiss('cancel');
         };
       }
     }
@@ -127,9 +127,9 @@ define(['angular'], function(angular) {
      * Displays a modal asking for current password, new password, and confirm new password.
      */
     function passwordUpdateModal() {
-      controller.$inject = [ '$scope', '$modalInstance'];
+      controller.$inject = [ '$scope', '$uibModalInstance'];
 
-      return $modal.open({
+      return $uibModal.open({
         templateUrl: '/assets/javascripts/common/services/passwordUpdateModal.html',
         controller:  controller,
         backdrop:    true,
@@ -139,7 +139,7 @@ define(['angular'], function(angular) {
 
       //---
 
-      function controller($scope, $modalInstance) {
+      function controller($scope, $uibModalInstance) {
         $scope.model = {
           currentPassword: '',
           newPassword:     '',
@@ -149,14 +149,14 @@ define(['angular'], function(angular) {
         };
 
         function onOk() {
-          $modalInstance.close({
+          $uibModalInstance.close({
             currentPassword: $scope.model.currentPassword,
             newPassword: $scope.model.newPassword
           });
         }
 
         function onClose() {
-          $modalInstance.dismiss('cancel');
+          $uibModalInstance.dismiss('cancel');
         }
       }
     }

@@ -1,12 +1,12 @@
-<accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
-  <accordion-heading>
+<uib-accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
+  <uib-accordion-heading>
     Specimen Link Types
     <panel-buttons on-add="vm.add(study)"
                    add-button-title="add specimen link type"
                    add-button-enabled="vm.modificationsAllowed"
                    panel-open="vm.panelOpen">
     </panel-buttons>
-  </accordion-heading>
+  </uib-accordion-heading>
   <p>
     Specimen Link Types are assigned to a processing type, and used to represent a regularly performed
     processing procedure involving two Specimens: an input, which must be in a specific Specimen Group, and an
@@ -59,4 +59,4 @@
       </td>
     </tr>
   </table>
-</accordion-group>
+</uib-accordion-group>

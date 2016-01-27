@@ -6,7 +6,6 @@ define([], function() {
   'use strict';
 
   UserProfileCtrl.$inject = [
-    '$modal',
     'modalService',
     'notificationsService',
     'User',
@@ -16,8 +15,7 @@ define([], function() {
   /**
    * Displays a list of users in a table.
    */
-  function UserProfileCtrl($modal,
-                           modalService,
+  function UserProfileCtrl(modalService,
                            notificationsService,
                            User,
                            user) {

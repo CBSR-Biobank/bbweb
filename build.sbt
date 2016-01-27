@@ -68,8 +68,8 @@ libraryDependencies ++= Seq(
   filters,
   ("com.typesafe.akka"         %% "akka-persistence"     % "2.4.1" % "compile")
   .excludeAll(ExclusionRule(organization="com.google.protobuf")),
-  "org.mongodb"               %% "casbah"                            % "2.8.1"             % "compile",
-  "com.github.scullxbones"    %% "akka-persistence-mongo-casbah"     % "1.1.2"             % "compile",
+  "org.mongodb"               %% "casbah"                            % "2.8.2"             % "compile",
+  "com.github.scullxbones"    %% "akka-persistence-mongo-casbah"     % "1.1.9"             % "compile",
   "com.typesafe.akka"         %% "akka-remote"                       % "2.4.1"             % "compile",
   "com.typesafe.akka"         %% "akka-slf4j"                        % "2.4.1"             % "compile",
   "org.scala-stm"             %% "scala-stm"                         % "0.7"               % "compile",
@@ -84,23 +84,24 @@ libraryDependencies ++= Seq(
   // WebJars dependencies
   "org.webjars"               %  "requirejs"                         % "2.1.22",
   "org.webjars"               %  "underscorejs"                      % "1.8.3",
-  "org.webjars"               %  "jquery"                            % "2.1.4",
+  "org.webjars"               %  "jquery"                            % "2.2.0",
   ("org.webjars"              %  "bootstrap"                         % "3.3.6")
   .excludeAll(ExclusionRule(organization="org.webjars")),
   ("org.webjars"              %  "angularjs"                         % "1.4.8")
   .exclude("org.webjars", "jquery"),
   ("org.webjars"              %  "angular-ui-bootstrap"              % "0.14.3")
   .exclude("org.webjars", "angularjs"),
-  ("org.webjars"              %  "angular-ui-router"                 % "0.2.15")
+  ("org.webjars"              %  "angular-ui-router"                 % "0.2.17")
   .exclude("org.webjars", "angularjs"),
   "org.webjars"               %  "ng-table"                          % "0.3.3",
   ("org.webjars"              %  "toastr"                            % "2.1.1")
   .exclude("org.webjars", "jquery"),
   ("org.webjars"              %  "angular-sanitize"                  % "1.3.11")
   .exclude("org.webjars", "angularjs"),
-  "org.webjars"               %  "momentjs"                          % "2.10.6",
+  "org.webjars"               %  "momentjs"                          % "2.11.1",
+  "org.webjars.bower"         % "angular-utils-ui-breadcrumbs"       % "0.2.1",
   // Testing
-  "com.github.dnvriend"       %% "akka-persistence-inmemory"         % "1.1.5"              % "test",
+  "com.github.dnvriend"       %% "akka-persistence-inmemory"         % "1.2.0"              % "test",
   "com.typesafe.akka"         %% "akka-testkit"                      % "2.4.1"              % "test",
   "com.github.nscala-time"    %% "nscala-time"                       % "2.6.0"              % "test",
   "org.scalatestplus"         %% "play"                              % "1.4.0-M4"           % "test",
