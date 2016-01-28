@@ -1,6 +1,5 @@
 *.class
 *.log
-gtags.files
 GPATH
 GRTAGS
 GTAGS

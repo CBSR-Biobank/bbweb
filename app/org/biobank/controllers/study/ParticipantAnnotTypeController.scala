@@ -39,7 +39,7 @@ class ParticipantAnnotTypeController @javaxInject() (val authToken:      AuthTok
   }
 
   def addAnnotationType(studyId: String) =
-    commandAction { cmd: AddParticipantAnnotationTypeCmd => implicit userId =>
+    commandAction { cmd: AddParticipantAnnotationTypeCmd =>
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else {
@@ -49,7 +49,7 @@ class ParticipantAnnotTypeController @javaxInject() (val authToken:      AuthTok
     }
 
   def updateAnnotationType(studyId: String, id: String) =
-    commandAction { cmd: UpdateParticipantAnnotationTypeCmd => implicit userId =>
+    commandAction { cmd: UpdateParticipantAnnotationTypeCmd =>
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else if (cmd.id != id) {

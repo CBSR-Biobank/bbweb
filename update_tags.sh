@@ -2,11 +2,13 @@
 
 # this script requires GNU global to be installed
 
-OUTFILE='gtags.files'
-find app  -type f -name \*.scala -print > $OUTFILE
-find test -type f -name \*.scala -print >> $OUTFILE
-find app  -type f -name \*.js    -print >> $OUTFILE
-find test -type f -name \*.js    -print >> $OUTFILE
+TMPFILE="$(mktemp)"
+find app  -type f -name \*.scala -print > $TMPFILE
+find test -type f -name \*.scala -print >> $TMPFILE
+find app  -type f -name \*.js    -print >> $TMPFILE
+find test -type f -name \*.js    -print >> $TMPFILE
 
-#ctags -eL $OUTFILE
-gtags -v --gtagslabel ctags
+echo "TMPFILE is: $TMPFILE"
+
+#ctags-exuberant -eL $TMPFILE
+gtags -v --gtagslabel=ctags -f $TMPFILE

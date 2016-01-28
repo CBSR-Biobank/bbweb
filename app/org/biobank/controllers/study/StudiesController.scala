@@ -75,12 +75,12 @@ class StudiesController @javaxInject() (val authToken:      AuthToken,
     domainValidationReply(studiesService.getStudy(id))
   }
 
-  def add = commandAction { cmd: AddStudyCmd => implicit userId =>
+  def add = commandAction { cmd: AddStudyCmd =>
     val future = studiesService.addStudy(cmd)
     domainValidationReply(future)
   }
 
-  def update(id: String) = commandAction { cmd : UpdateStudyCmd => implicit userId =>
+  def update(id: String) = commandAction { cmd : UpdateStudyCmd =>
     if (cmd.id != id) {
       Future.successful(BadRequest("study id mismatch"))
     } else {
@@ -89,7 +89,7 @@ class StudiesController @javaxInject() (val authToken:      AuthToken,
     }
   }
 
-  def enable(id: String) = commandAction { cmd: EnableStudyCmd => implicit userId =>
+  def enable(id: String) = commandAction { cmd: EnableStudyCmd =>
     if (cmd.id != id) {
       Future.successful(BadRequest("study id mismatch"))
     } else {
@@ -98,7 +98,7 @@ class StudiesController @javaxInject() (val authToken:      AuthToken,
     }
   }
 
-  def disable(id: String) = commandAction { cmd: DisableStudyCmd => implicit userId =>
+  def disable(id: String) = commandAction { cmd: DisableStudyCmd =>
     if (cmd.id != id) {
       Future.successful(BadRequest("study id mismatch"))
     } else {
@@ -107,7 +107,7 @@ class StudiesController @javaxInject() (val authToken:      AuthToken,
     }
   }
 
-  def retire(id: String) = commandAction { cmd: RetireStudyCmd => implicit userId =>
+  def retire(id: String) = commandAction { cmd: RetireStudyCmd =>
     if (cmd.id != id) {
       Future.successful(BadRequest("study id mismatch"))
     } else {
@@ -116,7 +116,7 @@ class StudiesController @javaxInject() (val authToken:      AuthToken,
     }
   }
 
-  def unretire(id: String) = commandAction { cmd: UnretireStudyCmd => implicit userId =>
+  def unretire(id: String) = commandAction { cmd: UnretireStudyCmd =>
     if (cmd.id != id) {
       Future.successful(BadRequest("study id mismatch"))
     } else {

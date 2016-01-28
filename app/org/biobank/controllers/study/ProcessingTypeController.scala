@@ -31,7 +31,7 @@ class ProcessingTypeController @javaxInject() (val authToken:      AuthToken,
     }
 
   def addProcessingType(studyId: String) =
-    commandAction { cmd: AddProcessingTypeCmd => implicit userId =>
+    commandAction { cmd: AddProcessingTypeCmd =>
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else {
@@ -41,7 +41,7 @@ class ProcessingTypeController @javaxInject() (val authToken:      AuthToken,
   }
 
   def updateProcessingType(studyId: String, id: String) =
-    commandAction { cmd: UpdateProcessingTypeCmd => implicit userId =>
+    commandAction { cmd: UpdateProcessingTypeCmd =>
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else if (cmd.id != id) {

@@ -32,7 +32,7 @@ class CeventTypeController @javaxInject() (val authToken:      AuthToken,
     }
 
   def addCollectionEventType(studyId: String) =
-    commandAction { cmd: AddCollectionEventTypeCmd => implicit userId =>
+    commandAction { cmd: AddCollectionEventTypeCmd =>
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else {
@@ -42,7 +42,7 @@ class CeventTypeController @javaxInject() (val authToken:      AuthToken,
     }
 
   def updateCollectionEventType(studyId: String, id: String) =
-    commandAction { cmd: UpdateCollectionEventTypeCmd => implicit userId =>
+    commandAction { cmd: UpdateCollectionEventTypeCmd =>
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else if (cmd.id != id) {

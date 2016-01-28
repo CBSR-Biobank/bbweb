@@ -34,7 +34,7 @@ class CollectionEventsController @javaxInject() (val authToken:      AuthToken,
     }
 
   def addCollectionEvent(participantId: String) =
-    commandAction { cmd: AddCollectionEventCmd => implicit userId =>
+    commandAction { cmd: AddCollectionEventCmd =>
       if (cmd.participantId != participantId) {
         Future.successful(BadRequest("participant id mismatch"))
       } else {
@@ -44,7 +44,7 @@ class CollectionEventsController @javaxInject() (val authToken:      AuthToken,
     }
 
   def updateCollectionEvent(participantId: String, id: String) =
-    commandAction { cmd: UpdateCollectionEventCmd => implicit userId =>
+    commandAction { cmd: UpdateCollectionEventCmd =>
       if (cmd.participantId != participantId) {
         Future.successful(BadRequest("participant id mismatch"))
       } else if (cmd.id != id) {
@@ -66,4 +66,3 @@ class CollectionEventsController @javaxInject() (val authToken:      AuthToken,
     }
 
 }
-

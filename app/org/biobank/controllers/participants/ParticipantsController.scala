@@ -32,7 +32,7 @@ class ParticipantsController @javaxInject() (val authToken:      AuthToken,
     }
 
   def addParticipant(studyId: String) =
-    commandAction { cmd: AddParticipantCmd => implicit userId =>
+    commandAction { cmd: AddParticipantCmd =>
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else {
@@ -42,7 +42,7 @@ class ParticipantsController @javaxInject() (val authToken:      AuthToken,
     }
 
   def updateParticipant(studyId: String, id: String) =
-    commandAction { cmd: UpdateParticipantCmd => implicit userId =>
+    commandAction { cmd: UpdateParticipantCmd =>
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else if (cmd.id != id) {

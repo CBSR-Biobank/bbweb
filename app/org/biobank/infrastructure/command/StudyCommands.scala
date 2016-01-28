@@ -30,19 +30,19 @@ object StudyCommands {
       with HasIdentity
       with HasExpectedVersion
 
-  case class AddStudyCmd(userId:    Option[String],
-                         name: String,
+  case class AddStudyCmd(userId:      Option[String],
+                         name:        String,
                          description: Option[String] = None)
       extends StudyCommand
 
-  case class UpdateStudyCmd(userId:    Option[String],
+  case class UpdateStudyCmd(userId:          Option[String],
                             id:              String,
                             expectedVersion: Long,
                             name:            String,
                             description:     Option[String] = None)
       extends StudyModifyCommand
 
-  case class EnableStudyCmd(userId:    Option[String],
+  case class EnableStudyCmd(userId:          Option[String],
                             id:              String,
                             expectedVersion: Long)
       extends StudyModifyCommand

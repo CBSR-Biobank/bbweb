@@ -128,7 +128,6 @@ object TestData {
                    "84e2c48d6ae7478f8b623cc59607bbb3")
 
   val userData = List(
-    ("98cd257929e74a03bbef4a66067614cc", "Aaron Peck", "aaron.peck@ualberta.ca"),
     ("6e2385f6466d408697bc4c0d1c2b4e66", "Nelson Loyola", "loyola@ualberta.ca"),
     ("f417948d108c468eaa7ef0c2531de0ef", "Luisa Franco", "lfrancor@ucalgary.ca"),
     ("b94257c9c6274a5597ca32e9f5fb0875", "Corazon Oballo", "coballo@ucalgary.ca"),

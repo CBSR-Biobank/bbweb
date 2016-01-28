@@ -30,7 +30,7 @@ class SpecimenLinkAnnotTypeController @javaxInject() (val authToken:      AuthTo
     }
 
   def addAnnotationType(studyId: String) =
-    commandAction { cmd: AddSpecimenLinkAnnotationTypeCmd => implicit userId =>
+    commandAction { cmd: AddSpecimenLinkAnnotationTypeCmd =>
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else {
@@ -40,7 +40,7 @@ class SpecimenLinkAnnotTypeController @javaxInject() (val authToken:      AuthTo
     }
 
   def updateAnnotationType(studyId: String, id: String) =
-    commandAction { cmd: UpdateSpecimenLinkAnnotationTypeCmd => implicit userId =>
+    commandAction { cmd: UpdateSpecimenLinkAnnotationTypeCmd =>
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else if (cmd.id != id) {

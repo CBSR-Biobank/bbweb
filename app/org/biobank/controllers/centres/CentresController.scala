@@ -60,17 +60,17 @@ class CentresController @javaxInject() (val authToken:      AuthToken,
     domainValidationReply(centresService.getCentre(id))
   }
 
-  def add = commandAction { cmd: AddCentreCmd => implicit userId =>
+  def add = commandAction { cmd: AddCentreCmd =>
     val future = centresService.addCentre(cmd)
     domainValidationReply(future)
   }
 
-  def update(id: String) = commandAction { cmd : UpdateCentreCmd => implicit userId =>
+  def update(id: String) = commandAction { cmd : UpdateCentreCmd =>
     val future = centresService.updateCentre(cmd)
     domainValidationReply(future)
   }
 
-  def enable(id: String) = commandAction { cmd: EnableCentreCmd => implicit userId =>
+  def enable(id: String) = commandAction { cmd: EnableCentreCmd =>
       if (cmd.id != id) {
         Future.successful(BadRequest("centre id mismatch"))
       } else {
@@ -79,7 +79,7 @@ class CentresController @javaxInject() (val authToken:      AuthToken,
       }
   }
 
-  def disable(id: String) = commandAction { cmd: DisableCentreCmd => implicit userId =>
+  def disable(id: String) = commandAction { cmd: DisableCentreCmd =>
       if (cmd.id != id) {
         Future.successful(BadRequest("centre id mismatch"))
       } else {
@@ -99,7 +99,7 @@ class CentresController @javaxInject() (val authToken:      AuthToken,
       }
     }
 
-  def addLocation(centreId: String) = commandAction { cmd: AddCentreLocationCmd => implicit userId =>
+  def addLocation(centreId: String) = commandAction { cmd: AddCentreLocationCmd =>
     val future = centresService.addCentreLocation(cmd)
     domainValidationReply(future)
   }
@@ -117,7 +117,7 @@ class CentresController @javaxInject() (val authToken:      AuthToken,
     }
 
   def addStudy(centreId: String, studyId: String) =
-    commandAction { cmd: AddStudyToCentreCmd => implicit userId =>
+    commandAction { cmd: AddStudyToCentreCmd =>
       if (cmd.centreId != centreId) {
         Future.successful(BadRequest("centre id mismatch"))
       } else if (cmd.studyId != studyId) {

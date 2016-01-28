@@ -20,32 +20,31 @@ trait CommandController extends Controller with Security {
 
   implicit val usersService: UsersService
 
-  def commandAction[A, T <: Command]
-    (func: T => UserId => Future[Result])
-    (implicit reads: Reads[T]) = {
+  def commandAction[A, T <: Command](func: T => Future[Result])(implicit reads: Reads[T]) = {
     AuthActionAsync(parse.json) { (token, userId, request) =>
-        val cmdResult = request.body.validate[T]
-        cmdResult.fold(
-          errors => {
-            Future.successful(
-              BadRequest(Json.obj("status" ->"error", "message" -> JsError.toJson(errors))))
-          },
-          cmd => {
-            Logger.debug(s"commandAction: $cmd")
-            func(cmd)(userId)
-          }
-        )
+      val jsonWithUserId = request.body.as[JsObject] ++ Json.obj("userId" -> userId.id)
+      val cmdResult = jsonWithUserId.validate[T]
+      cmdResult.fold(
+        errors => {
+          Future.successful(
+            BadRequest(Json.obj("status" ->"error", "message" -> JsError.toJson(errors))))
+        },
+        cmd => {
+          Logger.debug(s"commandAction: $cmd")
+          func(cmd)
+        }
+      )
     }
   }
 
-  def commandAction[A, T <: Command](numFields: Integer)
-    (func: T => UserId => Future[Result])
-    (implicit reads: Reads[T]) = {
+  def commandAction[A, T <: Command](numFields: Integer)(func: T => Future[Result])
+                   (implicit reads: Reads[T]) = {
     AuthActionAsync(parse.json) { (token, userId, request) =>
       var jsonObj = request.body.as[JsObject]
       Logger.debug(s"commandAction: $jsonObj")
       if (jsonObj.keys.size == numFields) {
-        val cmdResult = request.body.validate[T]
+        val jsonWithUserId = request.body.as[JsObject] ++ Json.obj("userId" -> userId.id)
+        val cmdResult = jsonWithUserId.validate[T]
         cmdResult.fold(
           errors => {
             Future.successful(
@@ -53,14 +52,15 @@ trait CommandController extends Controller with Security {
           },
           cmd => {
             Logger.debug(s"commandAction: $cmd")
-            func(cmd)(userId)
+            func(cmd)
           }
         )
       } else {
         Future.successful(
-          BadRequest(Json.obj(
-            "status" ->"error",
-            "message" -> s"Invalid JSON object - missing attributes: expected $numFields, got ${jsonObj.keys.size}")))
+          BadRequest(
+            Json.obj(
+              "status" ->"error",
+              "message" -> s"Invalid JSON object - missing attributes: expected $numFields, got ${jsonObj.keys.size}")))
       }
     }
   }
@@ -68,8 +68,8 @@ trait CommandController extends Controller with Security {
 }
 
 /**
-  *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
-  */
+ *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
+ */
 trait JsonController extends Controller {
 
   import scala.language.reflectiveCalls

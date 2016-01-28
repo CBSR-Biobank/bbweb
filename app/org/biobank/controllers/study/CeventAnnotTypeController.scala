@@ -31,7 +31,7 @@ class CeventAnnotTypeController @javaxInject() (val authToken:      AuthToken,
     }
 
   def addAnnotationType(studyId: String) =
-    commandAction { cmd: AddCollectionEventAnnotationTypeCmd => implicit userId =>
+    commandAction { cmd: AddCollectionEventAnnotationTypeCmd =>
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else {
@@ -41,7 +41,7 @@ class CeventAnnotTypeController @javaxInject() (val authToken:      AuthToken,
     }
 
   def updateAnnotationType(studyId: String, id: String) =
-    commandAction { cmd: UpdateCollectionEventAnnotationTypeCmd => implicit userId =>
+    commandAction { cmd: UpdateCollectionEventAnnotationTypeCmd =>
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else if (cmd.id != id) {

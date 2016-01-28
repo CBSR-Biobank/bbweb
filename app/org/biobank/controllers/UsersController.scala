@@ -197,27 +197,27 @@ class UsersController @javaxInject() (val authToken:      AuthToken,
     )
   }
 
-  def updateName(id: String) =  commandAction { cmd: UpdateUserNameCmd => implicit userId =>
+  def updateName(id: String) =  commandAction { cmd: UpdateUserNameCmd =>
     val future = usersService.updateName(cmd)
     domainValidationReply(future)
   }
 
-  def updateEmail(id: String) =  commandAction { cmd: UpdateUserEmailCmd => implicit userId =>
+  def updateEmail(id: String) =  commandAction { cmd: UpdateUserEmailCmd =>
     val future = usersService.updateEmail(cmd)
     domainValidationReply(future)
   }
 
-  def updatePassword(id: String) =  commandAction { cmd: UpdateUserPasswordCmd => implicit userId =>
+  def updatePassword(id: String) =  commandAction { cmd: UpdateUserPasswordCmd =>
     val future = usersService.updatePassword(cmd)
     domainValidationReply(future)
   }
 
-  def updateAvatarUrl(id: String) =  commandAction { cmd: UpdateUserAvatarUrlCmd => implicit userId =>
+  def updateAvatarUrl(id: String) =  commandAction { cmd: UpdateUserAvatarUrlCmd =>
     val future = usersService.updateAvatarUrl(cmd)
     domainValidationReply(future)
   }
 
-  def activateUser(id: String) =  commandAction { cmd: ActivateUserCmd => implicit userId =>
+  def activateUser(id: String) =  commandAction { cmd: ActivateUserCmd =>
       if (cmd.id != id) {
         Future.successful(BadRequest("user id mismatch"))
       } else {
@@ -226,7 +226,7 @@ class UsersController @javaxInject() (val authToken:      AuthToken,
       }
   }
 
-  def lockUser(id: String) =  commandAction { cmd: LockUserCmd => implicit userId =>
+  def lockUser(id: String) =  commandAction { cmd: LockUserCmd =>
       if (cmd.id != id) {
         Future.successful(BadRequest("user id mismatch"))
       } else {
@@ -235,7 +235,7 @@ class UsersController @javaxInject() (val authToken:      AuthToken,
       }
   }
 
-  def unlockUser(id: String) =  commandAction { cmd: UnlockUserCmd => implicit userId =>
+  def unlockUser(id: String) =  commandAction { cmd: UnlockUserCmd =>
       if (cmd.id != id) {
         Future.successful(BadRequest("user id mismatch"))
       } else {

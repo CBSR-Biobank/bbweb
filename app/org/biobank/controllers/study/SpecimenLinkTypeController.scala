@@ -32,7 +32,7 @@ class SpecimenLinkTypeController @javaxInject() (val authToken:      AuthToken,
     }
 
   def addSpecimenLinkType(procTypeId: String) =
-    commandAction { cmd: AddSpecimenLinkTypeCmd => implicit userId =>
+    commandAction { cmd: AddSpecimenLinkTypeCmd =>
       if (cmd.processingTypeId != procTypeId) {
         Future.successful(BadRequest("processing type id mismatch"))
       } else {
@@ -42,7 +42,7 @@ class SpecimenLinkTypeController @javaxInject() (val authToken:      AuthToken,
     }
 
   def updateSpecimenLinkType(procTypeId: String, id: String) =
-    commandAction { cmd: UpdateSpecimenLinkTypeCmd => implicit userId =>
+    commandAction { cmd: UpdateSpecimenLinkTypeCmd =>
       if (cmd.processingTypeId != procTypeId) {
         Future.successful(BadRequest("processing type id mismatch"))
       } else if (cmd.id != id) {

@@ -47,25 +47,25 @@ trait UsersService {
 
   def register(cmd: RegisterUserCmd): Future[DomainValidation[User]]
 
-  def updateName(cmd: UpdateUserNameCmd)(implicit userId: UserId)
+  def updateName(cmd: UpdateUserNameCmd)
       : Future[DomainValidation[User]]
 
-  def updateEmail(cmd: UpdateUserEmailCmd)(implicit userId: UserId)
+  def updateEmail(cmd: UpdateUserEmailCmd)
       : Future[DomainValidation[User]]
 
-  def updatePassword(cmd: UpdateUserPasswordCmd)(implicit userId: UserId)
+  def updatePassword(cmd: UpdateUserPasswordCmd)
       : Future[DomainValidation[User]]
 
-  def updateAvatarUrl(cmd: UpdateUserAvatarUrlCmd)(implicit userId: UserId)
+  def updateAvatarUrl(cmd: UpdateUserAvatarUrlCmd)
       : Future[DomainValidation[User]]
 
-  def activate(cmd: ActivateUserCmd)(implicit userId: UserId)
+  def activate(cmd: ActivateUserCmd)
       : Future[DomainValidation[User]]
 
-  def lock(cmd: LockUserCmd)(implicit userId: UserId)
+  def lock(cmd: LockUserCmd)
       : Future[DomainValidation[User]]
 
-  def unlock(cmd: UnlockUserCmd)(implicit userId: UserId)
+  def unlock(cmd: UnlockUserCmd)
       : Future[DomainValidation[User]]
 
 }
@@ -170,37 +170,37 @@ class UsersServiceImpl @javax.inject.Inject() (
     replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
-  def updateName(cmd: UpdateUserNameCmd)(implicit userId: UserId)
+  def updateName(cmd: UpdateUserNameCmd)
       : Future[DomainValidation[User]] = {
     replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
-  def updateEmail(cmd: UpdateUserEmailCmd)(implicit userId: UserId)
+  def updateEmail(cmd: UpdateUserEmailCmd)
       : Future[DomainValidation[User]] = {
     replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
-  def updatePassword(cmd: UpdateUserPasswordCmd)(implicit userId: UserId)
+  def updatePassword(cmd: UpdateUserPasswordCmd)
       : Future[DomainValidation[User]] = {
     replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
-  def updateAvatarUrl(cmd: UpdateUserAvatarUrlCmd)(implicit userId: UserId)
+  def updateAvatarUrl(cmd: UpdateUserAvatarUrlCmd)
       : Future[DomainValidation[User]] = {
     replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
-  def activate(cmd: ActivateUserCmd)(implicit userId: UserId)
+  def activate(cmd: ActivateUserCmd)
       : Future[DomainValidation[User]] = {
     replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
-  def lock(cmd: LockUserCmd)(implicit userId: UserId)
+  def lock(cmd: LockUserCmd)
       : Future[DomainValidation[User]] = {
     replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
 
-  def unlock(cmd: UnlockUserCmd)(implicit userId: UserId)
+  def unlock(cmd: UnlockUserCmd)
       : Future[DomainValidation[User]] = {
     replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
   }
@@ -216,5 +216,3 @@ class UsersServiceImpl @javax.inject.Inject() (
   }
 
 }
-
-

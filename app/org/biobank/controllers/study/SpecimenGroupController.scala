@@ -39,7 +39,7 @@ class SpecimenGroupController @javaxInject() (val authToken:      AuthToken,
 
 
   def addSpecimenGroup(studyId: String) =
-    commandAction { cmd: AddSpecimenGroupCmd => implicit userId =>
+    commandAction { cmd: AddSpecimenGroupCmd =>
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else {
@@ -49,7 +49,7 @@ class SpecimenGroupController @javaxInject() (val authToken:      AuthToken,
     }
 
   def updateSpecimenGroup(studyId: String, id: String) =
-    commandAction { cmd: UpdateSpecimenGroupCmd => implicit userId =>
+    commandAction { cmd: UpdateSpecimenGroupCmd =>
       if (cmd.studyId != studyId) {
         Future.successful(BadRequest("study id mismatch"))
       } else if (cmd.id != id) {
