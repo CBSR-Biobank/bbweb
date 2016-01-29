@@ -22,7 +22,8 @@ define([], function() {
       ENABLED:  ENABLED,
       RETIRED:  RETIRED,
 
-      values:    values
+      values:   values,
+      label:    label
     };
     return service;
 
@@ -33,6 +34,18 @@ define([], function() {
     function RETIRED()  { return 'RetiredStudy'; }
 
     function values()    { return ALL_VALUES; }
+
+    function label(status) {
+      switch (status) {
+      case DISABLED():
+        return 'Disabled';
+      case ENABLED():
+        return 'Enabled';
+      case RETIRED():
+        return 'Retired';
+      }
+      return new Error('invalid status for study' + status);
+    }
   }
 
   return StudyStatus;

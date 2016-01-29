@@ -18,7 +18,7 @@ define([], function() {
 
       ev.addAttribute('Name',        study.name);
       ev.addAttribute('Description', $filter('truncate')(study.description, 60));
-      ev.addAttribute('Status',      study.getStatusLabel());
+      ev.addAttribute('Status',      study.statusLabel);
 
       ev.showModal();
     }

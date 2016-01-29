@@ -67,7 +67,7 @@ define([
           expect(attr.value).toBe(study.description);
           break;
         case 'Status':
-          expect(attr.value).toBe(study.status);
+          expect(attr.value).toBe(study.statusLabel);
           break;
         default:
           jasmine.getEnv().fail('label is invalid: ' + attr.label);

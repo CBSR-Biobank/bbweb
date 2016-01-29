@@ -20,7 +20,8 @@ define([], function() {
       DISABLED: DISABLED,
       ENABLED:  ENABLED,
 
-      values:    values
+      values:   values,
+      label:    label
     };
     return service;
 
@@ -30,6 +31,16 @@ define([], function() {
     function ENABLED()  { return 'EnabledCentre'; }
 
     function values()    { return ALL_VALUES; }
+
+    function label(status) {
+      switch (status) {
+      case DISABLED():
+        return 'Disabled';
+      case ENABLED():
+        return 'Enabled';
+      }
+      return new Error('invalid status for centre' + status);
+    }
   }
 
   return CentreStatus;

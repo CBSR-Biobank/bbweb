@@ -89,7 +89,7 @@ class CentresControllerSpec extends ControllerFixture {
           .map { centre => centreRepository.put(centre) }
 
         val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri, Map("status" -> "disabled"))
+          .singleItemResult(uri, Map("status" -> "DisabledCentre"))
         compareObj(jsonItem, centres(0))
       }
 
@@ -104,7 +104,7 @@ class CentresControllerSpec extends ControllerFixture {
         val expectedCentres = List(centres(0), centres(1))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
-          queryParams = Map("status" -> "disabled"),
+          queryParams = Map("status" -> "DisabledCentre"),
           offset = 0,
           total = expectedCentres.size,
           maybeNext = None,
@@ -125,7 +125,7 @@ class CentresControllerSpec extends ControllerFixture {
         val expectedCentres = List(centres(2), centres(3))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
-          queryParams = Map("status" -> "enabled"),
+          queryParams = Map("status" -> "EnabledCentre"),
           offset = 0,
           total = expectedCentres.size,
           maybeNext = None,

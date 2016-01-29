@@ -28,6 +28,13 @@ define([
   // We must already declare most dependencies here (except for common), or the submodules' routes
   // will not be resolved
   var app = angular.module('biobankApp', [
+    'ui.bootstrap',
+    'ui.router',
+    'ngSanitize',
+    'ngCookies',
+    'ngTable',
+    'smart-table',
+    'angularUtils.directives.uiBreadcrumbs',
     'biobank.admin',
     'biobank.centres',
     'biobank.collection',

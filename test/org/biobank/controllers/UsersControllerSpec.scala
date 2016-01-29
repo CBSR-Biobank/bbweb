@@ -119,7 +119,7 @@ class UsersControllerSpec extends ControllerFixture {
         .map(user => userRepository.put(user))
 
         val jsonItem = PagedResultsSpec(this)
-        .singleItemResult(uri, Map("status" -> "registered"))
+        .singleItemResult(uri, Map("status" -> "RegisteredUser"))
         compareObj(jsonItem, users(0))
       }
 
@@ -132,7 +132,7 @@ class UsersControllerSpec extends ControllerFixture {
         val expectedUsers = List(users(1), users(2))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
-          queryParams = Map("status" -> "active"),
+          queryParams = Map("status" -> "ActiveUser"),
           offset = 0,
           total = expectedUsers.size,
           maybeNext = None,
@@ -151,7 +151,7 @@ class UsersControllerSpec extends ControllerFixture {
         val expectedUsers = List(users(1), users(2))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
-          queryParams = Map("status" -> "locked"),
+          queryParams = Map("status" -> "LockedUser"),
           offset = 0,
           total = expectedUsers.size,
           maybeNext = None,

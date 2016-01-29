@@ -32,11 +32,7 @@ define(function (require) {
       tableService                     = require('./services/tableService'),
       validationService                = require('./services/validationService');
 
-  var module = angular.module('biobank.common', [
-    'ui.bootstrap',
-    'ngTable',
-    'angularUtils.directives.uiBreadcrumbs'
-  ]);
+  var module = angular.module('biobank.common', []);
 
   module.directive('annotationsInput',        annotationsInputDirective.directive);
   module.controller('AnnotationsInputCtrl',   annotationsInputDirective.controller);

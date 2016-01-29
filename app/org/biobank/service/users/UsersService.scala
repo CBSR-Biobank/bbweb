@@ -118,11 +118,16 @@ class UsersServiceImpl @javax.inject.Inject() (
     }
 
     val usersFilteredByStatus = status match {
-      case "all"        => usersFilteredByEmail.success
-      case "registered" => usersFilteredByEmail.collect { case u: RegisteredUser => u }.success
-      case "active"     => usersFilteredByEmail.collect { case u: ActiveUser => u }.success
-      case "locked"     => usersFilteredByEmail.collect { case u: LockedUser => u }.success
-      case _            => DomainError(s"invalid user status: $status").failureNel
+      case "all" =>
+        usersFilteredByEmail.success
+      case "RegisteredUser" =>
+        usersFilteredByEmail.collect { case u: RegisteredUser => u }.success
+      case "ActiveUser" =>
+        usersFilteredByEmail.collect { case u: ActiveUser => u }.success
+      case "LockedUser" =>
+        usersFilteredByEmail.collect { case u: LockedUser => u }.success
+      case _ =>
+        DomainError(s"invalid user status: $status").failureNel
     }
 
     usersFilteredByStatus.map { users =>

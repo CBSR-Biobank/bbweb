@@ -27,7 +27,7 @@ define([
             UserProfileCtrl) {
   'use strict';
 
-  var module = angular.module('biobank.users', ['ngCookies', 'biobank.common']);
+  var module = angular.module('biobank.users', ['biobank.common']);
 
   module.provider('authorization', authorizationService);
   module.controller('ForgotPasswordCtrl', ForgotPasswordCtrl);

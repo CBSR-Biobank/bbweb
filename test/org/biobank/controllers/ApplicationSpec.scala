@@ -18,13 +18,13 @@ class ApplicationSpec extends ControllerFixture {
 
   "Application" must {
 
-    "send 404 on a bad request" taggedAs(Tag("1")) in {
+    "send 404 on a bad request" in {
       val request = new RequestBuilder().method("GET").uri("/xyz")
       val result = Future.successful(play.test.Helpers.route(request).toScala)
       status(result) mustEqual NOT_FOUND
     }
 
-    "return results for index" taggedAs(Tag("1")) in {
+    "return results for index" in {
       val request = new RequestBuilder().method("GET").uri("/")
       val result = Future.successful(play.test.Helpers.route(request).toScala)
 
@@ -32,7 +32,7 @@ class ApplicationSpec extends ControllerFixture {
       contentType(result) mustBe (Some("text/html"))
     }
 
-    "return initial aggregate counts" in {
+    "return initial aggregate counts" taggedAs(Tag("1")) in {
       val json = makeRequest(GET, "/counts")
       val jsonObj = (json \ "data").as[JsObject]
 

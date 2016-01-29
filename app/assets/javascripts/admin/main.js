@@ -58,8 +58,6 @@ define(function (require) {
       usersStates                             = require('./users/states');
 
   var module = angular.module('biobank.admin', [
-    'ui.router',
-    'ngSanitize',
     'biobank.common',
     'biobank.users',
     'biobank.studies'

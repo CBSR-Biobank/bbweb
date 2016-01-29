@@ -42,6 +42,7 @@ define(['underscore'], function(_) {
       ConcurrencySafeEntity.call(this, obj);
       obj = obj || {};
       _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
+      this.statusLabel = UserStatus.label(this.status);
     }
 
     User.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -141,6 +142,18 @@ define(['underscore'], function(_) {
       return usersService.unlock(self).then(function(reply) {
         return new User(reply);
       });
+    };
+
+    User.prototype.isRegistered = function () {
+      return (this.status === UserStatus.REGISTERED());
+    };
+
+    User.prototype.isActive = function () {
+      return (this.status === UserStatus.ACTIVE());
+    };
+
+    User.prototype.isLocked = function () {
+      return (this.status === UserStatus.LOCKED());
     };
 
     return User;

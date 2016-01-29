@@ -22,17 +22,30 @@ define([], function() {
       ACTIVE:     ACTIVE,
       LOCKED:     LOCKED,
 
-      values:    values
+      values:    values,
+      label:    label
     };
     return service;
 
     //-------
 
-    function REGISTERED() { return 'Registered'; }
-    function ACTIVE()     { return 'Active'; }
-    function LOCKED()     { return 'Locked'; }
+    function REGISTERED() { return 'RegisteredUser'; }
+    function ACTIVE()     { return 'ActiveUser'; }
+    function LOCKED()     { return 'LockedUser'; }
 
     function values()    { return ALL_VALUES; }
+
+    function label(status) {
+      switch (status) {
+      case REGISTERED():
+        return 'Registered';
+      case ACTIVE():
+        return 'Active';
+      case LOCKED():
+        return 'Locked';
+      }
+      return new Error('invalid status for user' + status);
+    }
   }
 
   return UserStatus;

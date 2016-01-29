@@ -24,7 +24,7 @@ define(['underscore'], function(_) {
     vm.possibleStatuses = [ { id: 'all', label: 'All' } ];
 
     _.each(StudyStatus.values(), function (status) {
-      vm.possibleStatuses.push({id: status.toLowerCase(), label: status});
+      vm.possibleStatuses.push({id: status, label: StudyStatus.label(status)});
     });
   }
 

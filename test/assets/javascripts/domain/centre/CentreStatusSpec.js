@@ -16,16 +16,16 @@ define([
 
   describe('CentreStatus', function() {
 
-    var context = {},
-        statuses = ['Disabled', 'Enabled'];
+    var context = {};
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function (CentreStatus) {
       context.enumerationClass = CentreStatus;
-      context.valueMap = _.map(statuses, function (value) {
-        return [ value, testUtils.camelCaseToUnderscore(value)];
-      });
+      context.valueMap = [
+        [ 'DisabledCentre', 'DISABLED' ],
+        [ 'EnabledCentre',  'ENABLED' ]
+      ];
     }));
 
     enumSharedSpec(context);

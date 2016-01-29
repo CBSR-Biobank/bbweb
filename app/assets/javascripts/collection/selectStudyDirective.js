@@ -56,7 +56,7 @@ define(['underscore'], function(_) {
 
     vm.pagerOptions = {
       filter:    '',
-      status:    'enabled',
+      status:    'EnabledStudy',
       page:      1,
       pageSize:  vm.pageSize,
       sortField: 'name' // must be lower case

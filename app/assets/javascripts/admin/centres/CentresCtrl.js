@@ -25,7 +25,7 @@ define(['angular', 'underscore'], function(angular, _) {
     vm.possibleStatuses = [{ id: 'all', label: 'All' }];
 
     _.each(CentreStatus.values(), function(status) {
-      vm.possibleStatuses.push({id: status.toLowerCase(), label: status});
+      vm.possibleStatuses.push({id: status, label: CentreStatus.label(status)});
     });
   }
 

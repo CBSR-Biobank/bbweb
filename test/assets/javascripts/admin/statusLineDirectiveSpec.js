@@ -61,7 +61,7 @@ define([
         expect(small.eq(0)).toHaveClass('text-muted');
       });
 
-      expect(cells.eq(0).find('small').eq(0).text()).toContain(centre.status);
+      expect(cells.eq(0).find('small').eq(0).text()).toContain(centre.statusLabel);
       expect(cells.eq(1).find('small').eq(0).text()).toContain($filter('timeago')(centre.timeAdded));
     });
 

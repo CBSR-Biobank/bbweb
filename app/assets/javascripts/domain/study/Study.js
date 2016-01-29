@@ -45,6 +45,7 @@ define(['angular', 'underscore'], function(angular, _) {
       obj =  obj || {};
       ConcurrencySafeEntity.call(this, obj);
       _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
+      this.statusLabel = StudyStatus.label(this.status);
     }
 
     Study.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -131,18 +132,6 @@ define(['angular', 'underscore'], function(angular, _) {
 
     Study.prototype.isRetired = function () {
       return (this.status === StudyStatus.RETIRED());
-    };
-
-    Study.prototype.getStatusLabel = function () {
-      switch (this.status) {
-      case StudyStatus.DISABLED():
-        return 'Disabled';
-      case StudyStatus.ENABLED():
-        return 'Enabled';
-      case StudyStatus.RETIRED():
-        return 'Retired';
-      }
-      return new Error('invalid status for study' + this.status);
     };
 
     function changeState(obj, method) {

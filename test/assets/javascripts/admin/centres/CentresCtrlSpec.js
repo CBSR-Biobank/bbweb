@@ -62,7 +62,7 @@ define([
 
     it('scope is valid on startup', function() {
       var CentreStatus = this.$injector.get('CentreStatus'),
-          allStatuses = CentreStatus.values().concat('All'),
+          allStatuses = CentreStatus.values(),
           counts = createCentreCounts(1, 2, 3),
           scope = createController(counts);
 
@@ -70,8 +70,9 @@ define([
       expect(scope.vm.pageSize).toBeDefined();
 
       _.each(allStatuses, function(status) {
-        expect(scope.vm.possibleStatuses).toContain({ id: status.toLowerCase(), label: status});
+        expect(scope.vm.possibleStatuses).toContain({ id: status, label: CentreStatus.label(status)});
       });
+      expect(scope.vm.possibleStatuses).toContain({ id: 'all', label: 'All'});
     });
 
     it('updateCentres retrieves new list of centres', function() {

@@ -5,12 +5,12 @@
 define(['angular', 'jquery', 'underscore'], function(angular, $, _) {
   'use strict';
 
-  studiesServiceFactory.$inject = ['biobankApi', 'funutils', 'queryStringService'];
+  studiesServiceFactory.$inject = ['biobankApi', 'funutils', 'queryStringService', 'StudyStatus'];
 
   /**
    * Service to acccess studies.
    */
-  function studiesServiceFactory(biobankApi, funutils, queryStringService) {
+  function studiesServiceFactory(biobankApi, funutils, queryStringService, StudyStatus) {
     var service = {
       list:           list,
       getStudyCounts: getStudyCounts,
@@ -99,7 +99,13 @@ define(['angular', 'jquery', 'underscore'], function(angular, $, _) {
         url += paramsStr;
       }
 
-      return biobankApi.get(url + '/names');
+      // add statusLabel field to each study
+      return biobankApi.get(url + '/names').then(function(reply) {
+        return _.map(reply, function(obj) {
+          obj.statusLabel = StudyStatus.label(obj.status);
+          return obj;
+        });
+      });
     }
 
     function get(id) {

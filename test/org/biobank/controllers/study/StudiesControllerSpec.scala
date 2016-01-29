@@ -75,7 +75,8 @@ class StudiesControllerSpec extends ControllerFixture {
                            factory.createEnabledStudy,
                            factory.createRetiredStudy).map { study => studyRepository.put(study) }
 
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri, Map("status" -> "disabled"))
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri,
+                                                               Map("status" -> "DisabledStudy"))
         compareObj(jsonItem, studies(0))
       }
 
@@ -89,7 +90,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val expectedStudies = List(studies(0), studies(1))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
-          queryParams = Map("status" -> "disabled"),
+          queryParams = Map("status" -> "DisabledStudy"),
           offset = 0,
           total = expectedStudies.size,
           maybeNext = None,
@@ -110,7 +111,7 @@ class StudiesControllerSpec extends ControllerFixture {
         val expectedStudies = List(studies(2), studies(3))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
-          queryParams = Map("status" -> "enabled"),
+          queryParams = Map("status" -> "EnabledStudy"),
           offset = 0,
           total = expectedStudies.size,
           maybeNext = None,

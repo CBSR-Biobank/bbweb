@@ -51,7 +51,7 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
 
     function getPossibleStatuses() {
       var result = _.map(UserStatus.values(), function(status) {
-        return { id: status.toLowerCase(), title: status };
+        return { id: status, title: UserStatus.label(status) };
       });
       result.unshift({ id: 'all', title: 'All' });
       return result;
@@ -76,7 +76,7 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
         var options = {
           nameFilter:  vm.nameFilter,
           emailFilter: vm.emailFilter,
-          status:      vm.status.id,
+          status:      vm.status,
           sort:        sortKeys[0],
           page:        params.page(),
           pageSize:    params.count(),

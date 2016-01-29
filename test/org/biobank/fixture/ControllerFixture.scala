@@ -78,8 +78,6 @@ abstract class ControllerFixture
 
   private def initializeAkkaPersitence(): Unit = {
     // ensure the database is empty
-    // MongoConnection()(dbName)("messages").drop
-    // MongoConnection()(dbName)("snapshots").drop
   }
 
   def doLogin(email: String = Global.DefaultUserEmail, password: String = "testuser") = {
@@ -155,6 +153,5 @@ abstract class ControllerFixture
   def centreLocationsRepository = app.injector.instanceOf[CentreLocationsRepository]
   def centreStudiesRepository   = app.injector.instanceOf[CentreStudiesRepository]
   def locationRepository        = app.injector.instanceOf[LocationRepository]
-
 
 }

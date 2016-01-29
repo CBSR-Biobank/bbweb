@@ -5,18 +5,11 @@
   <p>No users have been added yet.</p>
 </div>
 <div ng-if="vm.haveUsers">
-  <div class="panel panel-default">
-    <div class="panel-body">
-      {{vm.message}}
-    </div>
-    <div class="panel-footer">
-      <span class="label label-info">
-        Narrow your search by using the filters.
-      </span>
-    </div>
-  </div>
+  {{vm.message}}
 
-  <form class="form-inline" style="margin-bottom: 20px;">
+  <p/>Narrow your search by using the filters.
+
+  <form class="form-inline" style="margin: 20px;">
     <div class="form-group">
       <label for="status" class="small">Email filter</label>
       <input type="text" class="form-control input-sm"
@@ -36,7 +29,7 @@
       <select class="form-control input-sm"
               name="status"
               ng-model="vm.status"
-              ng-options="status.title for status in vm.possibleStatuses"
+              ng-options="status.id as status.title for status in vm.possibleStatuses"
               ng-change="vm.statusFilterUpdated()">
       </select>
     </div>
@@ -55,12 +48,12 @@
         {{user.name}}
       </td>
       <td class="col-md-3" data-title="'Added'" sortable="'timeAdded'">
-        <a href tooltip="{{vm.getTimeAddedlocal(user)}}">
+        <a href uib-tooltip="{{vm.getTimeAddedlocal(user)}}">
           {{user.timeAdded | timeago}}
         </a>
       </td>
       <td class="col-md-1" data-title="'Status'" sortable="'status'">
-        <span class="badge">{{user.status}}</span>
+        <span class="badge">{{user.statusLabel}}</span>
       </td>
 
       <!-- BUTTONS -->
@@ -70,21 +63,21 @@
                   ng-click="vm.activate(user)"
                   data-toggle="tooltip"
                   title="Activate user"
-                  ng-if="user.status == 'Registered'">
+                  ng-if="user.isRegistered()">
             <i class="glyphicon glyphicon-check"></i>
           </button>
           <button class="btn btn-xs btn-warning"
                   ng-click="vm.lock(user)"
                   data-toggle="tooltip"
                   title="Lock user"
-                  ng-if="user.status == 'Active'">
+                  ng-if="user.isActive()">
             <i class="glyphicon glyphicon-lock"></i>
           </button>
           <button class="btn btn-xs btn-danger"
                   ng-click="vm.unlock(user)"
                   data-toggle="tooltip"
                   title="Unlock user"
-                  ng-if="user.status == 'Locked'">
+                  ng-if="user.isLocked()">
             <i class="glyphicon glyphicon-plus"></i>
           </button>
         </div>

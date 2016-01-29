@@ -6,7 +6,7 @@ import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 import org.biobank.service.centres.CentresService
-import org.biobank.query.StudyPersistenceQuery
+//import org.biobank.query.StudyPersistenceQuery
 
 import javax.inject._
 import play.api.mvc._
@@ -21,8 +21,9 @@ import scala.language.reflectiveCalls
 class Application @Inject() (val authToken:             AuthToken,
                              val usersService:          UsersService,
                              val studiesService:        StudiesService,
-                             val centresService:        CentresService,
-                             val studyPersistenceQuery: StudyPersistenceQuery)
+                             val centresService:        CentresService
+                             //, val studyPersistenceQuery: StudyPersistenceQuery
+                             )
     extends Controller
     with Security
     with JsonController {

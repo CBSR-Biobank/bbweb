@@ -109,10 +109,14 @@ class CentresServiceImpl @javaxInject() (@Named("centresProcessor") val processo
     }
 
     val centresFilteredByStatus = status match {
-      case "all"      => centresFilteredByName.success
-      case "disabled" => centresFilteredByName.collect { case s: DisabledCentre => s }.success
-      case "enabled"  => centresFilteredByName.collect { case s: EnabledCentre => s }.success
-      case _          => DomainError(s"invalid centre status: $status").failureNel
+      case "all" =>
+        centresFilteredByName.success
+      case "DisabledCentre" =>
+        centresFilteredByName.collect { case s: DisabledCentre => s }.success
+      case "EnabledCentre" =>
+        centresFilteredByName.collect { case s: EnabledCentre => s }.success
+      case _ =>
+        DomainError(s"invalid centre status: $status").failureNel
     }
 
     centresFilteredByStatus.map { centres =>

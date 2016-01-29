@@ -21,6 +21,9 @@ define([
     'PreservationTemperatureType',
     'PreservationType',
     'SpecimenType',
+    'StudyStatus',
+    'CentreStatus',
+    'UserStatus',
     'bbwebConfig'
   ];
 
@@ -35,6 +38,9 @@ define([
                               PreservationTemperatureType,
                               PreservationType,
                               SpecimenType,
+                              StudyStatus,
+                              CentreStatus,
+                              UserStatus,
                               bbwebConfig) {
     var nameCountByEntity = {};
 
@@ -331,8 +337,10 @@ define([
         id:          utils.uuid(),
         name:        domainEntityNameNext(ENTITY_NAME_STUDY()),
         description: randomFakerLoremWord(),
-        status:      'Disabled'
+        status:      StudyStatus.DISABLED()
       };
+      study.statusLabel = StudyStatus.label(study.status);
+
       return extendWithCommonFields(study);
     }
 
@@ -440,8 +448,9 @@ define([
         id:          utils.uuid(),
         name:        domainEntityNameNext(ENTITY_NAME_CENTRE()),
         description: randomFakerLoremWord(),
-        status:      'Disabled'
+        status:      CentreStatus.DISABLED()
       };
+      centre.statusLabel = CentreStatus.label(centre.status);
       return extendWithCommonFields(centre);
     }
 
@@ -467,8 +476,9 @@ define([
         name:        domainEntityNameNext(ENTITY_NAME_USER()),
         email:       faker.internet.email(),
         avatarUrl:   faker.internet.avatar(),
-        status:      'Registered'
+        status:      UserStatus.REGISTERED()
       };
+      user.statusLabel = UserStatus.label(user.status);
       return extendWithCommonFields(user);
     }
 

@@ -50,6 +50,7 @@ define(['angular', 'underscore'], function(angular, _) {
       ConcurrencySafeEntity.call(this, obj);
       obj =  obj || {};
       _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
+      this.statusLabel = CentreStatus.label(this.status);
     }
 
     Centre.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -103,16 +104,6 @@ define(['angular', 'underscore'], function(angular, _) {
 
     Centre.prototype.enable = function () {
       return changeState(this, 'enable');
-    };
-
-    Centre.prototype.getStatusLabel = function () {
-      switch (this.status) {
-      case CentreStatus.DISABLED():
-        return 'Disabled';
-      case CentreStatus.ENABLED():
-        return 'Enabled';
-      }
-      return new Error('invalid status for centre' + this.status);
     };
 
     Centre.prototype.getLocations = function () {

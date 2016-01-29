@@ -7,6 +7,7 @@ import org.biobank.domain.centre._
 import org.biobank.domain.user._
 import org.biobank.domain.user.UserId
 import org.biobank.service._
+//import org.biobank.query._
 
 import akka.actor.ActorRef
 import akka.actor._
@@ -110,6 +111,8 @@ trait TestFixture
     app.injector.instanceOf[NamedSpecimenLinkTypeProcessor].processor
 
   val studiesProcessor = app.injector.instanceOf[NamedStudiesProcessor].processor
+
+  //val studyPersistenceQuery =  app.injector.instanceOf[StudyPersistenceQuery]
 
 }
 

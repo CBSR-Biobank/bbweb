@@ -62,7 +62,7 @@ define([
 
     it('scope is valid on startup', function() {
       var StudyStatus = this.$injector.get('StudyStatus'),
-          allStatuses = StudyStatus.values().concat('All'),
+          allStatuses = StudyStatus.values(),
           counts = createStudyCounts(1, 2, 3),
           scope = createController(counts);
 
@@ -70,8 +70,9 @@ define([
       expect(scope.vm.pageSize).toBeDefined();
 
       _.each(allStatuses, function(status) {
-        expect(scope.vm.possibleStatuses).toContain({ id: status.toLowerCase(), label: status});
+        expect(scope.vm.possibleStatuses).toContain({ id: status, label: StudyStatus.label(status)});
       });
+      expect(scope.vm.possibleStatuses).toContain({ id: 'all', label: 'All'});
     });
 
     it('updateStudies retrieves new list of studies', function() {

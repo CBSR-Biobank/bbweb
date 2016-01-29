@@ -14,18 +14,18 @@ define([
 ], function(angular, mocks, _, enumSharedSpec, testUtils) {
   'use strict';
 
-  describe('StudyStatus', function() {
+  describe('UserStatus', function() {
 
     var context = {};
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (StudyStatus) {
-      context.enumerationClass = StudyStatus;
+    beforeEach(inject(function (UserStatus) {
+      context.enumerationClass = UserStatus;
       context.valueMap = [
-        [ 'DisabledStudy', 'DISABLED' ],
-        [ 'EnabledStudy',  'ENABLED' ],
-        [ 'RetiredStudy',  'RETIRED' ]
+        [ 'ActiveUser',     'ACTIVE' ],
+        [ 'RegisteredUser', 'REGISTERED' ],
+        [ 'LockedUser',     'LOCKED' ]
       ];
     }));
 

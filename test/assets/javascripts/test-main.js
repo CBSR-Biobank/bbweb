@@ -45,6 +45,7 @@ require.config({
     'underscore':                            '../../../target/web/web-modules/main/webjars/lib/underscorejs/underscore',
     'toastr':                                '../../../target/web/web-modules/main/webjars/lib/toastr/toastr',
     'ngTable':                               '../../../target/web/web-modules/main/webjars/lib/ng-table/ng-table',
+    'smart-table':                           '../../../target/web/web-modules/main/webjars/lib/smart-table/smart-table',
     'angular-ui-router':                     '../../../target/web/web-modules/main/webjars/lib/angular-ui-router/angular-ui-router',
     'ui-bootstrap':                          '../../../target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/ui-bootstrap-tpls',
     'angular-sanitize':                      '../../../target/web/web-modules/main/webjars/lib/angular-sanitize/angular-sanitize',
@@ -70,6 +71,7 @@ require.config({
              'angular-sanitize',
              'ui-bootstrap',
              'ngTable',
+             'smart-table',
              'angularUtils.directives.uiBreadcrumbs',
              'angular-cookies'
             ],

@@ -25,7 +25,7 @@
         </span>
       </td>
       <td data-title="'Status'" sortable="'status'">
-        {{study.getStatusLabel()}}
+        {{study.statusLabel}}
       </td>
       <td>
         <!-- FIXME studies should only be removed if no centre is not storing specimens  -->
@@ -44,7 +44,7 @@
     <span class="input-group-addon">Add Study</span>
     <input type="text"
            ng-model="vm.selected"
-           typeahead="study.name for study in vm.studyNames | filter:$viewValue | limitTo:8"
+           uib-typeahead="study.name for study in vm.studyNames | filter:$viewValue | limitTo:8"
            typeahead-on-select="vm.onSelect($item)"
            placeholder="enter a study's name or partial name"
            class="form-control">

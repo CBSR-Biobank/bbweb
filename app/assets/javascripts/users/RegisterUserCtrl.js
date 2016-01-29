@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['toastr'], function(toastr) {
+define([], function() {
   'use strict';
 
   RegisterUserCtrl.$inject = ['$state', 'User', 'notificationsService'];
@@ -36,7 +36,7 @@ define(['toastr'], function(toastr) {
       notificationsService.success(
         'Your account was created and is now pending administrator approval.',
         'Registration success',
-        2500);
+        4000);
       $state.go('home.users.login');
     }
 
@@ -49,7 +49,7 @@ define(['toastr'], function(toastr) {
       }
 
       // registration failed
-      notificationsService.error(message, 'Registration error', 2500);
+      notificationsService.error(message, 'Registration error', 4000);
     }
 
     function cancel() {

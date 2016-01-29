@@ -1,39 +1,37 @@
-package org.biobank.query
+// package org.biobank.query
 
-//import org.biobank.infrastructure.event.StudyEvents._
+// import javax.inject.{ Inject, Singleton }
 
-import javax.inject.{ Inject, Singleton }
+// import akka.actor.ActorSystem
+// import akka.stream.ActorMaterializer
+// import akka.stream.scaladsl.Source
+// import akka.persistence.query.PersistenceQuery
+// import akka.persistence.query.EventEnvelope
+// import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
+// import com.google.inject.ImplementedBy
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Source
-import akka.persistence.query.PersistenceQuery
-import akka.persistence.query.EventEnvelope
-import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
-import com.google.inject.ImplementedBy
+// import org.slf4j.LoggerFactory
 
-import org.slf4j.LoggerFactory
+// @ImplementedBy(classOf[StudyPersistenceQueryImplementation])
+// trait StudyPersistenceQuery {}
 
-@ImplementedBy(classOf[StudyPersistenceQueryImplementation])
-trait StudyPersistenceQuery {}
+// @Singleton
+// class StudyPersistenceQueryImplementation @Inject() (val actorSystem: ActorSystem)
+//     extends StudyPersistenceQuery {
 
-@Singleton
-class StudyPersistenceQueryImplementation @Inject() (val actorSystem: ActorSystem)
-    extends StudyPersistenceQuery {
+//   val Log = LoggerFactory.getLogger(this.getClass)
 
-  val Log = LoggerFactory.getLogger(this.getClass)
+//   implicit val mat = ActorMaterializer()(actorSystem)
+//   val queries = PersistenceQuery(actorSystem).readJournalFor[LeveldbReadJournal](
+//     LeveldbReadJournal.Identifier)
 
-  implicit val mat = ActorMaterializer()(actorSystem)
-  val queries = PersistenceQuery(actorSystem).readJournalFor[LeveldbReadJournal](
-    LeveldbReadJournal.Identifier)
+//   val src: Source[EventEnvelope, Unit] =
+//     queries.eventsByPersistenceId("study-processor-id", 0L, Long.MaxValue)
 
-  val src: Source[EventEnvelope, Unit] =
-    queries.eventsByPersistenceId("study-processor-id", 0L, Long.MaxValue)
+//   val events: Source[Any, Unit] = src.map(_.event)
 
-  val events: Source[Any, Unit] = src.map(_.event)
+//   events.runForeach { event =>
+//     Log.info(s"event: $event")
+//   }
 
-  events.runForeach { event =>
-    Log.info(s"event: $event")
-  }
-
-}
+// }

@@ -232,11 +232,15 @@ class StudiesServiceImpl @javax.inject.Inject() (
     }
 
     val studiesFilteredByStatus = status match {
-      case "all"      => studiesFilteredByName.success
-      case "disabled" => studiesFilteredByName.collect { case s: DisabledStudy => s }.success
-      case "enabled"  => studiesFilteredByName.collect { case s: EnabledStudy => s }.success
-      case "retired"  => studiesFilteredByName.collect { case s: RetiredStudy => s }.success
-      case _          => DomainError(s"invalid study status: $status").failureNel
+      case "all" =>
+        studiesFilteredByName.success
+      case "DisabledStudy" =>
+        studiesFilteredByName.collect { case s: DisabledStudy => s }.success
+      case "EnabledStudy" =>
+        studiesFilteredByName.collect { case s: EnabledStudy => s }.success
+      case "RetiredStudy" =>
+        studiesFilteredByName.collect { case s: RetiredStudy => s }.success
+      case _ => DomainError(s"invalid study status: $status").failureNel
     }
 
     studiesFilteredByStatus.map { studies =>

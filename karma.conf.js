@@ -29,6 +29,7 @@ module.exports = function(config) {
       {pattern: 'target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/ui-bootstrap-tpls.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/angular-sanitize/angular-sanitize.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/ng-table/ng-table.js', included: false},
+      {pattern: 'target/web/web-modules/main/webjars/lib/smart-table/smart-table.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/jquery/jquery.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/toastr/toastr.js', included: false},
       {pattern: 'target/web/web-modules/main/webjars/lib/momentjs/moment.js', included: false},

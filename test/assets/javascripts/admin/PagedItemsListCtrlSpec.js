@@ -27,28 +27,31 @@ define([
       var context = {};
 
       beforeEach(inject(function ($q, Centre, CentreStatus) {
-        var disabledStudies, enabledStudies;
+        var disabledCentres, enabledCentres;
 
-        disabledStudies = _.map(_.range(2), function() {
+        disabledCentres = _.map(_.range(2), function() {
           return new fakeEntities.centre();
         });
-        enabledStudies = _.map(_.range(3), function() {
+        enabledCentres = _.map(_.range(3), function() {
           var centre = new fakeEntities.centre();
           centre.status = CentreStatus.ENABLED();
           return centre;
         });
 
-        context.entities                     = disabledStudies.concat(enabledStudies);
-        context.counts                       = createCounts(disabledStudies.length, enabledStudies.length);
-        context.pageSize                     = disabledStudies.length;
+        context.entities
+          = disabledCentres.concat(enabledCentres);
+        context.counts
+          = createCounts(disabledCentres.length, enabledCentres.length);
+        context.pageSize                     = disabledCentres.length;
         context.messageNoItems               = 'No items present';
         context.messageNoResults             = 'No items match the criteria';
         context.entityNavigateState          = 'home.admin.centres.centre.summary';
         context.entityNavigateStateParamName = 'centreId';
 
-        context.possibleStatuses = _.map(['all'].concat(CentreStatus.values()), function (status) {
-          return { id: status.toLowerCase(), name: status };
-        });
+        context.possibleStatuses = [{ id: 'all', name: 'all' }].concat(
+          _.map(CentreStatus.values(), function (status) {
+            return { id: status, name: CentreStatus.label(status) };
+          }));
       }));
 
       function createCounts(disabled, enabled) {
@@ -60,7 +63,6 @@ define([
       }
 
       sharedBehaviour(context);
-
     });
 
     describe('Studies', function () {
@@ -83,7 +85,8 @@ define([
           return study;
         });
 
-        context.entities                     = disabledStudies.concat(enabledStudies.concat(retiredStudies));
+        context.entities
+          = disabledStudies.concat(enabledStudies.concat(retiredStudies));
         context.counts                       = createCounts(disabledStudies.length,
                                                             enabledStudies.length,
                                                             retiredStudies.length);
@@ -93,14 +96,15 @@ define([
         context.entityNavigateState          = 'home.admin.studies.study.summary';
         context.entityNavigateStateParamName = 'studyId';
 
-        context.possibleStatuses = _.map(['all'].concat(StudyStatus.values()), function (status) {
-          return { id: status.toLowerCase(), name: status };
-        });
+        context.possibleStatuses = [{ id: 'all', name: 'all' }].concat(
+          _.map(StudyStatus.values(), function (status) {
+            return { id: status, name: StudyStatus.label(status) };
+          }));
       }));
 
       function createCounts(disabled, enabled, retired) {
         return {
-          total:    disabled + enabled + retired,
+          total:    disabled + enabled,
           disabled: disabled,
           enabled:  enabled,
           retired:  retired
@@ -108,7 +112,6 @@ define([
       }
 
       sharedBehaviour(context);
-
     });
 
     function sharedBehaviour(context) {
@@ -137,7 +140,7 @@ define([
           entityNavigateState          = context.entityNavigateState;
           entityNavigateStateParamName = context.entityNavigateStateParamName;
 
-          createController = setupController(this.$injector);
+          createController             = setupController(this.$injector);
         }));
 
         function setupController(injector) {
@@ -180,7 +183,7 @@ define([
               offset:   0,
               total:    entities.length
             });
-              };
+          };
         }
 
         it('has valid scope', function() {
@@ -196,7 +199,7 @@ define([
           expect(scope.vm.sortFields).toContainAll(['Name', 'Status']);
 
           expect(scope.vm.pagerOptions.filter).toBeEmptyString();
-          expect(scope.vm.pagerOptions.status).toBe(possibleStatuses[0]);
+          expect(scope.vm.pagerOptions.status).toBe(possibleStatuses[0].id);
           expect(scope.vm.pagerOptions.pageSize).toBe(pageSize);
           expect(scope.vm.pagerOptions.sortField).toBe('name');
         });
@@ -219,7 +222,7 @@ define([
           scope.$digest();
           expect(getItemsSpy.calls.mostRecent().args[0]).toEqual({
             filter: nameFilterValue,
-            status: possibleStatuses[0],
+            status: possibleStatuses[0].id,
             page: 1,
             pageSize: pageSize,
             sortField: 'name'
@@ -261,7 +264,7 @@ define([
           scope.$digest();
           expect(getItemsSpy.calls.mostRecent().args[0]).toEqual({
             filter: '',
-            status: possibleStatuses[0],
+            status: possibleStatuses[0].id,
             page: 1,
             pageSize: pageSize,
             sortField: sortFieldValue.toLowerCase()
@@ -277,7 +280,7 @@ define([
           scope.$digest();
           expect(getItemsSpy.calls.mostRecent().args[0]).toEqual({
             filter: '',
-            status: possibleStatuses[0],
+            status: possibleStatuses[0].id,
             page: page,
             pageSize: pageSize,
             sortField: scope.vm.sortFields[0].toLowerCase()

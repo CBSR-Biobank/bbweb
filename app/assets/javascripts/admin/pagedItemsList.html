@@ -14,7 +14,7 @@
       <select class="form-control input-sm"
               name="status"
               ng-model="vm.pagerOptions.status"
-              ng-options="status.label for status in vm.possibleStatuses"
+              ng-options="status.id as status.label for status in vm.possibleStatuses"
               ng-change="vm.statusFilterUpdated()">
       </select>
     </div>
@@ -65,9 +65,9 @@
       <div class="row">
         <div class="col-md-12">
           <!-- FIXME replace this with a controller call -->
-          <i class="glyphicon glyphicon-cog" ng-if="entity.status === 'Disabled'"></i>
-          <i class="glyphicon glyphicon-ok-circle" ng-if="entity.status === 'Enabled'"></i>
-          <i class="glyphicon glyphicon-remove-sign" ng-if="entity.status === 'Retired'"></i>
+          <i class="glyphicon glyphicon-cog" ng-if="entity.isDisabled()"></i>
+          <i class="glyphicon glyphicon-ok-circle" ng-if="entity.isEnabled()"></i>
+          <i class="glyphicon glyphicon-remove-sign" ng-if="entity.isRetired()"></i>
           <strong><a ui-sref="{{entityNavigateState}}( { {{entityNavigateStateParamName}}: entity.id} )">
               {{entity.name}}</a>
           </strong>
@@ -76,7 +76,7 @@
       </div>
       <div class="row">
         <div class="col-md-5">
-          <small class="text-info"><strong>Status:</strong> {{ entity.getStatusLabel() }}</small>
+          <small class="text-info"><strong>Status:</strong> {{ entity.statusLabel }}</small>
         </div>
         <div class="col-md-3">
           <small class="text-muted"><strong>Added:</strong> {{entity.timeAdded | timeago}}</small>

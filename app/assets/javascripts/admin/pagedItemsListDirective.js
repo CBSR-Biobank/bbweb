@@ -55,7 +55,7 @@ define(['angular', 'underscore'], function(angular, _) {
 
     vm.pagerOptions = {
       filter:     '',
-      status:     $scope.possibleStatuses[0],
+      status:     $scope.possibleStatuses[0].id,
       page:       1,
       pageSize:   $scope.pageSize,
       sortField:  'name' // must be lower case

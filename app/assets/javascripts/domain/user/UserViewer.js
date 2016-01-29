@@ -17,7 +17,7 @@ define([], function() {
       this.ev = new EntityViewer(user, 'User');
       this.ev.addAttribute('Name', user.name);
       this.ev.addAttribute('Email',  user.email);
-      this.ev.addAttribute('Status', user.status);
+      this.ev.addAttribute('Status', user.statusLabel);
 
       this.ev.showModal();
     }

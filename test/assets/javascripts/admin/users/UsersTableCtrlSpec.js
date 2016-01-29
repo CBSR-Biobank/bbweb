@@ -70,7 +70,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     }
 
     it('scope is valid on startup', function() {
-      var allStatuses = UserStatus.values().concat('All'),
+      var allStatuses = UserStatus.values(),
           counts = createUserCounts(1, 2, 3),
           scope = createController(counts);
 
@@ -82,8 +82,9 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       expect(scope.vm.tableParams).toBeDefined();
 
       _.each(allStatuses, function(status) {
-        expect(scope.vm.possibleStatuses).toContain({ id: status.toLowerCase(), title: status});
+        expect(scope.vm.possibleStatuses).toContain({ id: status, title: UserStatus.label(status) });
       });
+      expect(scope.vm.possibleStatuses).toContain({ id: 'all', title: 'All'});
     });
 
     it('table is reloaded when filters are updated', function() {
