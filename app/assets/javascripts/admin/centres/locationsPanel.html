@@ -17,27 +17,36 @@
   </div>
   <table ng-show="vm.centre.locations.length > 0"
          class="table table-hover table-condensed"
-         ng-table="vm.tableParams">
-    <tr ng-repeat="location in $data">
-      <td data-title="'Name'" sortable="'name'">
-        <span ng-click="vm.information(location)">
-          <a href>{{location.name}}</a>
-        </span>
-      </td>
-      <td data-title="'Street'" sortable="'street'">
-        {{location.street | truncate:40}}
-      </td>
-      <td data-title="'City'" sortable="'city'">
-        {{location.city}}
-      </td>
-      <td ng-if="vm.modificationsAllowed">
-        <update-remove-buttons
-           on-update="vm.update(location)"
-           on-remove="vm.remove(location)"
-           update-button-enabled="vm.modificationsAllowed"
-           remove-button-enabled="vm.modificationsAllowed">
-        </update-remove-buttons>
-      </td>
-    </tr>
+         st-table="vm.centre.locations">
+    <thead>
+      <th st-sort="name">Name</th>
+      <th st-sort="street">Street</th>
+      <th st-sort="city">City</th>
+      <th></th>
+    </thead>
+
+    <tbody>
+      <tr ng-repeat="location in vm.centre.locations">
+        <td>
+          <span ng-click="vm.information(location)">
+            <a href>{{location.name}}</a>
+          </span>
+        </td>
+        <td>
+          {{location.street | truncate:40}}
+        </td>
+        <td>
+          {{location.city}}
+        </td>
+        <td ng-if="vm.modificationsAllowed">
+          <update-remove-buttons
+             on-update="vm.update(location)"
+             on-remove="vm.remove(location)"
+             update-button-enabled="vm.modificationsAllowed"
+             remove-button-enabled="vm.modificationsAllowed">
+          </update-remove-buttons>
+        </td>
+      </tr>
+    </tbody>
   </table>
 </uib-accordion-group>

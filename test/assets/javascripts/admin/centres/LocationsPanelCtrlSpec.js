@@ -50,8 +50,7 @@ define([
           $state              = injector.get('$state'),
           LocationViewer      = injector.get('LocationViewer'),
           Panel               = injector.get('Panel'),
-          domainEntityService = injector.get('domainEntityService'),
-          tableService        = injector.get('tableService');
+          domainEntityService = injector.get('domainEntityService');
 
       return create;
 
@@ -68,7 +67,6 @@ define([
           LocationViewer:      LocationViewer,
           Panel:               Panel,
           domainEntityService: domainEntityService,
-          tableService:        tableService
         });
         scope.$digest();
         return scope;
@@ -80,7 +78,6 @@ define([
           scope = createController(entities.centre);
 
       expect(scope.vm.centre).toBe(entities.centre);
-      expect(scope.vm.tableParams).toBeDefined();
     });
 
     it('can add a location', function() {
@@ -141,7 +138,6 @@ define([
       spyOn(entities.centre, 'removeLocation').and.callFake(function () {
         return $q.when(entities.centre);
       });
-      spyOn(scope.vm.tableParams, 'reload').and.callFake(function () {});
       scope.vm.remove(locationToRemove);
       scope.$digest();
       expect(entities.centre.removeLocation).toHaveBeenCalledWith(locationToRemove);
@@ -165,7 +161,6 @@ define([
         deferred.reject('error');
         return deferred.promise;
       });
-      spyOn(scope.vm.tableParams, 'reload').and.callFake(function () {});
       scope.vm.remove(locationToRemove);
       scope.$digest();
       expect(modalService.showModal.calls.count()).toBe(2);

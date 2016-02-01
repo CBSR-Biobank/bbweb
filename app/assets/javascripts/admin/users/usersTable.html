@@ -5,123 +5,98 @@
   <p>No users have been added yet.</p>
 </div>
 <div ng-if="vm.haveUsers">
-  {{vm.message}}
+  The following users are present.
 
-  <p/>Narrow your search by using the filters.
+  <table st-table="vm.users"
+         st-pipe="vm.getTableData"
+         class="table table-hover table-striped">
+    <thead>
+      <tr>
+        <th st-sort="email">Email</th>
+        <th st-sort="name">Name</th>
+        <th>Added</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+      <tr>
+        <th>
+          <input st-search="email" placeholder="search for email" class="input-sm form-control" type="search"/>
+        </th>
+        <th>
+          <input st-search="name" placeholder="search for name" class="input-sm form-control" type="search"/>
+        </th>
+        <th></th>
+        <th>
+          <select class="form-control input-sm"
+                  st-search="status"
+                  name="status"
+                  ng-model="vm.status"
+                  ng-options="status.id as status.title for status in vm.possibleStatuses">
+          </select>
+        </th>
+      </tr>
+    </thead>
+    <tbody ng-show="!vm.tableDataLoading">
+      <tr ng-repeat="user in vm.users">
+        <td class="col-md-3">
+          <span ng-click="vm.userInformation(user)">
+            <a href>{{user.email}}</a>
+          </span>
+        </td>
+        <td class="col-md-3">
+          {{user.name}}
+        </td>
+        <td class="col-md-2">
+          <a href uib-tooltip="{{vm.getTimeAddedLocal(user)}}">
+            {{user.timeAdded | timeago}}
+          </a>
+        </td>
+        <td class="col-md-2">
+          <span class="badge">{{user.statusLabel}}</span>
+        </td>
 
-  <form class="form-inline" style="margin: 20px;">
-    <div class="form-group">
-      <label for="status" class="small">Email filter</label>
-      <input type="text" class="form-control input-sm"
-             ng-model="vm.emailFilter"
-             ng-model-options="{ debounce: 1000 }"
-             ng-change="vm.emailFilterUpdated()">
-    </div>
-    <div class="form-group">
-      <label for="status" class="small">Name filter</label>
-      <input type="text" class="form-control input-sm"
-             ng-model="vm.nameFilter"
-             ng-model-options="{ debounce: 1000 }"
-             ng-change="vm.nameFilterUpdated()">
-    </div>
-    <div class="form-group">
-      <label for="status" class="small">Status filter</label>
-      <select class="form-control input-sm"
-              name="status"
-              ng-model="vm.status"
-              ng-options="status.id as status.title for status in vm.possibleStatuses"
-              ng-change="vm.statusFilterUpdated()">
-      </select>
-    </div>
-  </form>
+        <!-- BUTTONS -->
+        <td class="col-md-1" data-title="'Action'">
+          <div class="btn-group">
+            <button class="btn btn-xs btn-success"
+                    ng-click="vm.activate(user)"
+                    data-toggle="tooltip"
+                    title="Activate user"
+                    ng-if="user.isRegistered()">
+              <i class="glyphicon glyphicon-check"></i>
+            </button>
+            <button class="btn btn-xs btn-warning"
+                    ng-click="vm.lock(user)"
+                    data-toggle="tooltip"
+                    title="Lock user"
+                    ng-if="user.isActive()">
+              <i class="glyphicon glyphicon-lock"></i>
+            </button>
+            <button class="btn btn-xs btn-danger"
+                    ng-click="vm.unlock(user)"
+                    data-toggle="tooltip"
+                    title="Unlock user"
+                    ng-if="user.isLocked()">
+              <i class="glyphicon glyphicon-plus"></i>
+            </button>
+          </div>
+        </td>
 
-  <table ng-table="vm.tableParams"
-         class="table table-hover"
-         template-pagination="custom/pager">
-    <tr ng-repeat="user in $data">
-      <td class="col-md-3" data-title="'Email'" sortable="'email'">
-        <span ng-click="vm.userInformation(user)">
-          <a href>{{user.email}}</a>
-        </span>
-      </td>
-      <td class="col-md-3" data-title="'Name'" sortable="'name'">
-        {{user.name}}
-      </td>
-      <td class="col-md-3" data-title="'Added'" sortable="'timeAdded'">
-        <a href uib-tooltip="{{vm.getTimeAddedlocal(user)}}">
-          {{user.timeAdded | timeago}}
-        </a>
-      </td>
-      <td class="col-md-1" data-title="'Status'" sortable="'status'">
-        <span class="badge">{{user.statusLabel}}</span>
-      </td>
-
-      <!-- BUTTONS -->
-      <td class="col-md-1" data-title="'Action'">
-        <div class="btn-group pull-right">
-          <button class="btn btn-xs btn-success"
-                  ng-click="vm.activate(user)"
-                  data-toggle="tooltip"
-                  title="Activate user"
-                  ng-if="user.isRegistered()">
-            <i class="glyphicon glyphicon-check"></i>
-          </button>
-          <button class="btn btn-xs btn-warning"
-                  ng-click="vm.lock(user)"
-                  data-toggle="tooltip"
-                  title="Lock user"
-                  ng-if="user.isActive()">
-            <i class="glyphicon glyphicon-lock"></i>
-          </button>
-          <button class="btn btn-xs btn-danger"
-                  ng-click="vm.unlock(user)"
-                  data-toggle="tooltip"
-                  title="Unlock user"
-                  ng-if="user.isLocked()">
-            <i class="glyphicon glyphicon-plus"></i>
-          </button>
-        </div>
-      </td>
-
-    </tr>
+      </tr>
+    </tbody>
+    <tbody ng-show="vm.tableDataLoading">
+      <tr>
+	<td colspan="4" class="text-center">Loading ... </td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="5" class="text-center">
+          <div st-items-by-page="vm.pageSize"
+               st-pagination=""
+               st-template="/assets/javascripts/common/directives/pagination.html"></div>
+        </td>
+      </tr>
+    </tfoot>
   </table>
-
-  <script type="text/ng-template" id="custom/pager">
-
-    <div class="pull-right">
-      <span class="small">Records per page:</span>
-      <div ng-if="params.settings().counts.length" class="btn-group btn-group-xs">
-        <button type="button" ng-class="{'active':params.count() == 10}"
-                ng-click="params.count(10)"
-                class="btn btn-default">10</button>
-        <button type="button" ng-class="{'active':params.count() == 15}"
-                ng-click="params.count(15)"
-                class="btn btn-default">15</button>
-        <button type="button" ng-class="{'active':params.count() == 20}"
-                ng-click="params.count(20)"
-                class="btn btn-default">20</button>
-      </div>
-    </div>
-
-    <ul class="pagination ng-table-pagination">
-      <li ng-class="{'disabled': !page.active}" ng-repeat="page in pages" ng-switch="page.type">
-
-        <a ng-switch-when="prev" ng-click="params.page(page.number)"  href="">
-          <span class="glyphicon glyphicon-chevron-left"></span>&nbsp;Previous</a>
-        <a ng-switch-when="first" ng-click="params.page(page.number)" href="">
-          <span ng-bind="page.number"></span></a>
-        <a ng-switch-when="page" ng-click="params.page(page.number)"  href="">
-          <span ng-bind="page.number"></span></a>
-        <a ng-switch-when="more" ng-click="params.page(page.number)"  href="">
-          &#8230;</a>
-        <a ng-switch-when="last" ng-click="params.page(page.number)"  href="">
-          <span ng-bind="page.number"></span></a>
-        <a ng-switch-when="next" ng-click="params.page(page.number)"  href="">
-          Next&nbsp;<span class="glyphicon glyphicon-chevron-right"></span></a>
-
-      </li>
-    </ul>
-
-  </script>
-
 </div>

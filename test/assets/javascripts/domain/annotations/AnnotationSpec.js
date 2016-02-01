@@ -266,6 +266,7 @@ define([
             annotation = annotationFactory.create(serverAnnotation, annotationType, true);
             expect(annotation.isValid()).toBe(false);
           });
+
         });
 
         it('calling isValid returns TRUE if the annotation is required and has a value', function() {

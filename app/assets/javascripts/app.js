@@ -32,7 +32,6 @@ define([
     'ui.router',
     'ngSanitize',
     'ngCookies',
-    'ngTable',
     'smart-table',
     'angularUtils.directives.uiBreadcrumbs',
     'biobank.admin',

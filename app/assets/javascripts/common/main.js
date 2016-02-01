@@ -18,6 +18,7 @@ define(function (require) {
       str2integerDirective             = require('./directives/str2integerDirective'),
       truncateToggleDirective          = require('./directives/truncateToggleDirective'),
       updateRemoveButtonsDirective     = require('./directives/updateRemoveButtonsDirective'),
+      pageSelectDirective              = require('./directives/pageSelectDirective'),
 
       timeagoFilter                    = require('./filters/timeagoFilter'),
       truncateFilter                   = require('./filters/truncateFilter'),
@@ -29,7 +30,6 @@ define(function (require) {
       notificationsService             = require('./services/notificationsService'),
       queryStringService               = require('./services/queryStringService'),
       stateHelperService               = require('./services/stateHelperService'),
-      tableService                     = require('./services/tableService'),
       validationService                = require('./services/validationService');
 
   var module = angular.module('biobank.common', []);
@@ -49,6 +49,8 @@ define(function (require) {
   module.directive('truncateToggle',          truncateToggleDirective);
   module.directive('updateRemoveButtons',     updateRemoveButtonsDirective);
 
+  module.directive('pageSelect',              pageSelectDirective);
+
   module.filter('timeago',                    timeagoFilter);
   module.filter('truncate',                   truncateFilter);
 
@@ -59,7 +61,6 @@ define(function (require) {
   module.service('notificationsService',      notificationsService);
   module.service('queryStringService',        queryStringService);
   module.service('stateHelper',               stateHelperService);
-  module.service('tableService',              tableService);
   module.service('validationService',         validationService);
 
   return module;

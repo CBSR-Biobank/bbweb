@@ -50,7 +50,6 @@ define([
           Panel        = injector.get('Panel'),
           Study        = injector.get('Study'),
           StudyViewer  = injector.get('StudyViewer'),
-          tableService = injector.get('tableService'),
           modalService = injector.get('modalService');
 
       return create;
@@ -68,7 +67,6 @@ define([
           Panel:        Panel,
           Study:        Study,
           StudyViewer:  StudyViewer,
-          tableService: tableService,
           modalService: modalService
         });
         scope.$digest();
@@ -94,7 +92,6 @@ define([
       expect(scope.vm.studyNames.length).toBe(entities.studies.length);
       expect(scope.vm.studyNames).toContainAll(studyNames(entities.studies));
       expect(scope.vm.tableStudies).toBeDefined();
-      expect(scope.vm.tableParams).toBeDefined();
 
       _.each(entities.studies, function (study) {
         expect(scope.vm.studyNamesById[study.id].id).toBe(study.id);
@@ -114,7 +111,6 @@ define([
       expect(scope.vm.centre).toBe(entities.centre);
       expect(scope.vm.studyNames.length).toBe(entities.studies.length);
       expect(scope.vm.studyNames).toContainAll(studyNames(entities.studies));
-      expect(scope.vm.tableParams).toBeDefined();
 
       _.each(entities.studies, function (study) {
         expect(scope.vm.tableStudies).toContain(studyNameDto(linkedStudy));
@@ -134,11 +130,9 @@ define([
       spyOn(entities.centre, 'addStudy').and.callFake(function () {
         return $q.when(entities.centre);
       });
-      spyOn(scope.vm.tableParams, 'reload').and.callFake(function () {});
 
       scope.vm.onSelect(studyToAdd);
       scope.$digest();
-      expect(scope.vm.tableParams.reload).toHaveBeenCalled();
       expect(scope.vm.tableStudies).toContain(studyNameDto(studyToAdd));
     });
 
@@ -174,11 +168,9 @@ define([
       spyOn(entities.centre, 'removeStudy').and.callFake(function () {
         return $q.when(entities.centre);
       });
-      spyOn(scope.vm.tableParams, 'reload').and.callFake(function () {});
 
       scope.vm.remove(studyToRemove.id);
       scope.$digest();
-      expect(scope.vm.tableParams.reload).toHaveBeenCalled();
       expect(scope.vm.tableStudies).not.toContain(studyNameDto(studyToRemove));
     });
 

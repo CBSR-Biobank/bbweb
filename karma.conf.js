@@ -22,24 +22,15 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      {pattern: 'target/web/web-modules/main/webjars/lib/angularjs/angular.js', included: true},
-      {pattern: 'target/web/web-modules/main/webjars/lib/angularjs/angular-*.js', included: false},
-      {pattern: 'target/web/web-modules/main/webjars/lib/underscorejs/underscore.js', included: false},
-      {pattern: 'target/web/web-modules/main/webjars/lib/angular-ui-router/angular-ui-router.js', included: false},
-      {pattern: 'target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/ui-bootstrap-tpls.js', included: false},
-      {pattern: 'target/web/web-modules/main/webjars/lib/angular-sanitize/angular-sanitize.js', included: false},
-      {pattern: 'target/web/web-modules/main/webjars/lib/ng-table/ng-table.js', included: false},
-      {pattern: 'target/web/web-modules/main/webjars/lib/smart-table/smart-table.js', included: false},
-      {pattern: 'target/web/web-modules/main/webjars/lib/jquery/jquery.js', included: false},
-      {pattern: 'target/web/web-modules/main/webjars/lib/toastr/toastr.js', included: false},
-      {pattern: 'target/web/web-modules/main/webjars/lib/momentjs/moment.js', included: false},
-      {pattern: 'target/web/web-modules/main/webjars/lib/angular-utils-ui-breadcrumbs/uiBreadcrumbs.js', included: false},
-      {pattern: 'app/assets/javascripts/**/*.js', included: false},
-      {pattern: 'test/assets/javascripts/**/*Spec.js', included: false},
-      {pattern: 'test/assets/javascripts/test/**/*.js', included: false},
-      {pattern: 'test/assets/javascripts/fixtures/**/*.js', included: false},
+      'target/web/web-modules/main/webjars/lib/angularjs/angular.js',
+      { pattern: 'target/web/web-modules/main/webjars/lib/**/*.js', included: false },
+      { pattern: 'app/assets/javascripts/**/*.js', included: false },
+      { pattern: 'test/assets/javascripts/**/*Spec.js', included: false },
+      { pattern: 'test/assets/javascripts/test/**/*.js', included: false },
+      { pattern: 'test/assets/javascripts/fixtures/**/*.js', included: false },
+
       'app/assets/javascripts/**/*.html',
-      'test/assets/javascripts/test-main.js'
+      'test/assets/javascripts/test-main.js',
     ],
 
     // list of files to exclude

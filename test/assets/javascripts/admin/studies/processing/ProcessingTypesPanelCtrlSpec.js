@@ -49,7 +49,6 @@ define([
           controller           = injector.get('$controller'),
           state                = injector.get('$state'),
           Panel                = injector.get('Panel'),
-          tableService         = injector.get('tableService'),
           ProcessingTypeViewer = injector.get('ProcessingTypeViewer'),
           domainEntityService  = injector.get('domainEntityService');
 
@@ -67,7 +66,6 @@ define([
           $scope:               scope,
           $state:               state,
           Panel:                Panel,
-          tableService:         tableService,
           ProcessingTypeViewer: ProcessingTypeViewer,
           domainEntityService:  domainEntityService
         });
@@ -84,7 +82,6 @@ define([
       expect(scope.vm.study).toBe(entities.study);
       expect(scope.vm.processingTypes).toBeArrayOfSize(entities.processingTypes.length);
       expect(scope.vm.processingTypes).toContainAll(entities.processingTypes);
-      expect(scope.vm.tableParams).toBeDefined();
     });
 
     it('can add a processing type', function() {
@@ -154,9 +151,6 @@ define([
       });
     });
 
-    /**
-     * A spy is needed on scope.vm.tableParams due to a bug in ng-table.
-     */
     it('can remove a processing type', function() {
       var q                   = this.$injector.get('$q'),
           domainEntityService = this.$injector.get('domainEntityService'),
@@ -167,16 +161,12 @@ define([
       spyOn(domainEntityService, 'removeEntity').and.callFake(function () {
         return q.when('OK');
       });
-      spyOn(scope.vm.tableParams, 'reload').and.callFake(function () {});
       scope.vm.remove(ptToRemove);
       scope.$digest();
       expect(domainEntityService.removeEntity).toHaveBeenCalled();
       expect(scope.vm.processingTypes).toBeArrayOfSize(entities.processingTypes.length - 1);
     });
 
-    /**
-     * A spy is needed on scope.vm.tableParams due to a bug in ng-table.
-     */
     it('displays a modal if removal of a processing type fails', function() {
       var q             = this.$injector.get('$q'),
           modalService  = this.$injector.get('modalService'),
@@ -192,7 +182,6 @@ define([
       spyOn(modalService, 'showModal').and.callFake(function () {
         return q.when('OK');
       });
-      spyOn(scope.vm.tableParams, 'reload').and.callFake(function () {});
 
       scope.vm.remove(ptToRemove);
       scope.$digest();

@@ -54,7 +54,6 @@ define([
           state               = injector.get('$state'),
           Panel               = injector.get('Panel'),
           modalService        = injector.get('modalService'),
-          tableService        = injector.get('tableService'),
           domainEntityService = injector.get('domainEntityService'),
           SpecimenGroupViewer = injector.get('SpecimenGroupViewer'),
           specimenGroupUtils  = injector.get('specimenGroupUtils');
@@ -75,7 +74,6 @@ define([
           $state:              state,
           Panel:               Panel,
           modalService:        modalService,
-          tableService:        tableService,
           domainEntityService: domainEntityService,
           SpecimenGroupViewer: SpecimenGroupViewer,
           specimenGroupUtils:  specimenGroupUtils
@@ -94,7 +92,6 @@ define([
 
       expect(scope.vm.specimenGroupIdsInUse).toBeArrayOfSize(entities.specimenGroupIdsInUse.length);
       expect(scope.vm.specimenGroupIdsInUse).toContainAll(entities.specimenGroupIdsInUse);
-      expect(scope.vm.tableParams).toBeDefined();
     });
 
     it('can add specimen group', function() {
@@ -182,9 +179,6 @@ define([
       expect(modalService.modalOk).toHaveBeenCalled();
     });
 
-    /**
-     * A spy is needed on scope.vm.tableParams due to a bug in ng-table.
-     */
     it('can remove a specimen group', function() {
       var q                   = this.$injector.get('$q'),
           domainEntityService = this.$injector.get('domainEntityService'),
@@ -195,16 +189,12 @@ define([
       spyOn(domainEntityService, 'removeEntity').and.callFake(function () {
         return q.when('OK');
       });
-      spyOn(scope.vm.tableParams, 'reload').and.callFake(function () {});
       scope.vm.remove(sgToRemove);
       scope.$digest();
       expect(domainEntityService.removeEntity).toHaveBeenCalled();
       expect(scope.vm.specimenGroups).toBeArrayOfSize(entities.specimenGroups.length - 1);
     });
 
-    /**
-     * A spy is needed on scope.vm.tableParams due to a bug in ng-table.
-     */
     it('displays a modal if removal of a specimen group fails', function() {
       var q                   = this.$injector.get('$q'),
           modalService        = this.$injector.get('modalService'),
@@ -220,7 +210,6 @@ define([
       spyOn(modalService, 'showModal').and.callFake(function () {
         return q.when('OK');
       });
-      spyOn(scope.vm.tableParams, 'reload').and.callFake(function () {});
 
       scope.vm.remove(sgToRemove);
       scope.$digest();
@@ -230,5 +219,3 @@ define([
   });
 
 });
-
-

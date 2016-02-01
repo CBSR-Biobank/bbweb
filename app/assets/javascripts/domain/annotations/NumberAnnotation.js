@@ -24,7 +24,7 @@ define(['underscore'], function(_) {
       Annotation.call(this, annotationType, required);
 
       // convert number to a float
-      if (obj.numberValue) {
+      if (!_.isUndefined(obj.numberValue)) {
         this.value = parseFloat(obj.numberValue);
       }
     }
@@ -38,11 +38,12 @@ define(['underscore'], function(_) {
     NumberAnnotation.prototype.getServerAnnotation = function () {
       var value;
 
-      if (this.value) {
+      if (!_.isNaN(this.value)) {
         value = this.value.toString();
       } else {
         value = '';
       }
+
       return {
         annotationTypeId: this.getAnnotationTypeId(),
         numberValue:      value,
@@ -50,9 +51,12 @@ define(['underscore'], function(_) {
       };
     };
 
+    NumberAnnotation.prototype.isValid = function () {
+      return !(_.isNaN(this.value) || _.isUndefined(this.value));
+    };
+
     return NumberAnnotation;
   }
 
   return NumberAnnotationFactory;
 });
-

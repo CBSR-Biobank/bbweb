@@ -91,7 +91,6 @@ define([
           controller                 = injector.get('$controller'),
           state                      = injector.get('$state'),
           modalService               = injector.get('modalService'),
-          tableService               = injector.get('tableService'),
           domainEntityService        = injector.get('domainEntityService'),
           Panel                      = injector.get('Panel'),
           SpecimenLinkType           = injector.get('SpecimenLinkType'),
@@ -120,7 +119,6 @@ define([
           $scope:                     scope,
           $state:                     state,
           modalService:               modalService,
-          tableService:               tableService,
           domainEntityService:        domainEntityService,
           Panel:                      Panel,
           SpecimenLinkType:           SpecimenLinkType,
@@ -151,7 +149,6 @@ define([
       });
       expect(scope.vm.specimenLinkTypes).toBeArrayOfSize(entities.specimenLinkTypes.length);
       expect(scope.vm.specimenLinkTypes).toContainAll(entities.specimenLinkTypes);
-      expect(scope.vm.tableParams).toBeDefined();
     });
 
     it('cannot add a specimen link type if study has no specimen groups', function() {
@@ -256,9 +253,6 @@ define([
       });
     });
 
-    /**
-     * A spy is needed on scope.vm.tableParams due to a bug in ng-table.
-     */
     it('can remove a specimen link type', function() {
       var q                   = this.$injector.get('$q'),
           domainEntityService = this.$injector.get('domainEntityService'),
@@ -269,16 +263,12 @@ define([
       spyOn(domainEntityService, 'removeEntity').and.callFake(function () {
         return q.when('OK');
       });
-      spyOn(scope.vm.tableParams, 'reload').and.callFake(function () {});
       scope.vm.remove(sltToRemove);
       scope.$digest();
       expect(domainEntityService.removeEntity).toHaveBeenCalled();
       expect(scope.vm.specimenLinkTypes).toBeArrayOfSize(entities.specimenLinkTypes.length - 1);
     });
 
-    /**
-     * A spy is needed on scope.vm.tableParams due to a bug in ng-table.
-     */
     it('displays a modal if removal of a specimen link type fails', function() {
       var q                   = this.$injector.get('$q'),
           modalService        = this.$injector.get('modalService'),
@@ -294,8 +284,6 @@ define([
       spyOn(modalService, 'showModal').and.callFake(function () {
         return q.when('OK');
       });
-      spyOn(scope.vm.tableParams, 'reload').and.callFake(function () {});
-
       scope.vm.remove(sltToRemove);
       scope.$digest();
       expect(modalService.showModal.calls.count()).toBe(2);

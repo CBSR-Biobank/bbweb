@@ -3,7 +3,14 @@
 </div>
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">Profile</h3>
+    <h3 class="panel-title">Profile
+      <span class="btn-group pull-right">
+        <button class="btn btn-xs btn-default" ng-click="vm.updatePassword()">
+          <i class="glyphicon glyphicon-cog"></i>
+          Update password
+        </button>
+      </span>
+    </h3>
   </div>
 
   <ul class="list-group">
@@ -31,17 +38,6 @@
                   ng-click="vm.updateEmail()">
             <i class="glyphicon glyphicon-cog"></i>
             Update
-          </button>
-        </div>
-      </div>
-    </li>
-    <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-2"><strong>Password</strong></div>
-        <div class="col-md-8">
-          <button class="btn btn-xs btn-default" ng-click="vm.updatePassword()">
-            <i class="glyphicon glyphicon-cog"></i>
-            Update password
           </button>
         </div>
       </div>

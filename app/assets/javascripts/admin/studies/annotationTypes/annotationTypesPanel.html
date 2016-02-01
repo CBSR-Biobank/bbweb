@@ -11,24 +11,18 @@
 <div ng-if="vm.annotationTypes.length > 0">
   <p>The following annotation types are defined:</p>
   <table class="table table-condensed table-hover"
-         ng-table="vm.tableParams"
-         show-filter="true">
+         st-table="vm.annotationTypes">
     <!-- NOTE: tried to put the th tag in a thead but they would not display on the page -->
-    <tbody>
+    <thead>
       <tr>
-        <th ng-repeat="column in vm.columns"
-            class="text-center sortable"
-            ng-class="{
-                      'sort-asc': vm.tableParams.isSortBy(column.field, 'asc'),
-                      'sort-desc': vm.tableParams.isSortBy(column.field, 'desc')
-                      }"
-            ng-click="vm.tableParams.sorting(column.field, vm.tableParams.isSortBy(column.field, 'asc') ?
-                      'desc' : 'asc')">
-          <div>{{column.title}}</div>
+        <th ng-repeat="column in vm.columns" st-sort="{{column.field}}">
+          {{column.title}}
         </th>
         <th ng-if="vm.study.isDisabled()"><!-- heading for buttons: blank for now --></th>
       </tr>
-      <tr ng-repeat="annotationType in $data">
+    </thead>
+    <tbody>
+      <tr ng-repeat="annotationType in vm.annotationTypes">
         <td ng-repeat="column in vm.columns" sortable="column.field">
 
           <span ng-if="column.field === 'name'"

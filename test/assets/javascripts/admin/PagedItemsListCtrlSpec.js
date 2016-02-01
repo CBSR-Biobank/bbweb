@@ -38,10 +38,10 @@ define([
           return centre;
         });
 
-        context.entities
-          = disabledCentres.concat(enabledCentres);
-        context.counts
-          = createCounts(disabledCentres.length, enabledCentres.length);
+        context.entities =
+          disabledCentres.concat(enabledCentres);
+        context.counts =
+          createCounts(disabledCentres.length, enabledCentres.length);
         context.pageSize                     = disabledCentres.length;
         context.messageNoItems               = 'No items present';
         context.messageNoResults             = 'No items match the criteria';
@@ -85,11 +85,12 @@ define([
           return study;
         });
 
-        context.entities
-          = disabledStudies.concat(enabledStudies.concat(retiredStudies));
-        context.counts                       = createCounts(disabledStudies.length,
-                                                            enabledStudies.length,
-                                                            retiredStudies.length);
+        context.entities =
+          disabledStudies.concat(enabledStudies.concat(retiredStudies));
+        context.counts =
+          createCounts(disabledStudies.length,
+                       enabledStudies.length,
+                       retiredStudies.length);
         context.pageSize                     = disabledStudies.length;
         context.messageNoItems               = 'No items present';
         context.messageNoResults             = 'No items match the criteria';

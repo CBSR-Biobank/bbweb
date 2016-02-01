@@ -27,7 +27,6 @@ define(['angular', 'underscore'], function(angular, _) {
     '$state',
     'Panel',
     'modalService',
-    'tableService',
     'domainEntityService',
     'SpecimenGroupViewer',
     'specimenGroupUtils'
@@ -40,7 +39,6 @@ define(['angular', 'underscore'], function(angular, _) {
                                    $state,
                                    Panel,
                                    modalService,
-                                   tableService,
                                    domainEntityService,
                                    SpecimenGroupViewer,
                                    specimenGroupUtils) {
@@ -57,9 +55,6 @@ define(['angular', 'underscore'], function(angular, _) {
     vm.information           = information;
     vm.panelOpen             = panel.getPanelOpenState();
     vm.modificationsAllowed  = vm.study.isDisabled();
-    vm.tableParams           = tableService.getTableParamsWithCallback(getTableData,
-                                                                       {},
-                                                                       { counts: [] });
 
     $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                   angular.bind(panel, panel.watchPanelOpenChangeFunc));
@@ -114,12 +109,7 @@ define(['angular', 'underscore'], function(angular, _) {
         'Specimen group ' + specimenGroup.name + ' cannot be removed: '
       ).then(function () {
         vm.specimenGroups = _.without(vm.specimenGroups, specimenGroup);
-        vm.tableParams.reload();
       });
-    }
-
-    function getTableData() {
-      return vm.specimenGroups;
     }
   }
 

@@ -22,41 +22,46 @@
   </p>
   <table ng-show="vm.specimenLinkTypes.length > 0"
          class="table table-condensed table-hover"
-         ng-table="vm.tableParams">
-    <tr ng-repeat="specimenLinkType in $data">
-      <td data-title="'Processing Type'"
-          sortable="'processingTypeName'"
-          ng-click="vm.viewProcessingType(specimenLinkType.processingTypeId)">
-        <a href>{{vm.processingTypesById[specimenLinkType.processingTypeId].name}}</a>
-      </td>
-      <td data-title="'Input Specimen Group'"
-          sortable="'inputGroupName'"
-          ng-click="vm.viewSpecimenGroup(specimenLinkType.inputGroupId)">
-        <a href>{{specimenLinkType.inputGroup.name}}</a>
-      </td>
-      <td data-title="'Output Specimen Group'"
-          sortable="'outputGroupName'"
-          ng-click="vm.viewSpecimenGroup(specimenLinkType.outputGroupId)">
-        <a href>{{specimenLinkType.outputGroup.name}}</a>
-      </td>
-      <td data-title="'Annotation Types'">
-        <span ng-repeat="atItemId in specimenLinkType.annotationTypeDataIds()"
-             ng-click="vm.viewAnnotationType(atItemId)">
-          <a href>
-            {{specimenLinkType.getAnnotationTypeDataById(atItemId).annotationType.name}}
-          </a><span ng-if="!$last">, </span>
-        </span>
+         st-table="vm.specimenLinkTypes">
 
-      </td>
-      <td ng-if="vm.modificationsAllowed">
-        <info-update-remove-buttons
-           on-info="vm.information(specimenLinkType)"
-           on-update="vm.update(specimenLinkType)"
-           on-remove="vm.remove(specimenLinkType)"
-           update-button-enabled="vm.modificationsAllowed"
-           remove-button-enabled="vm.modificationsAllowed">
-        </info-update-remove-buttons>
-      </td>
-    </tr>
+    <thead>
+      <th st-sort="processingTypeName">Processing Type</th>
+      <th st-sort="inputGroupName">Input Specimen Group</th>
+      <th st-sort="outputGroupName">Output Specimen Group</th>
+      <th>Annotation Types</th>
+      <th></th>
+    </thead>
+
+    <tbody>
+      <tr ng-repeat="specimenLinkType in vm.specimenLinkTypes">
+        <td ng-click="vm.viewProcessingType(specimenLinkType.processingTypeId)">
+          <a href>{{vm.processingTypesById[specimenLinkType.processingTypeId].name}}</a>
+        </td>
+        <td ng-click="vm.viewSpecimenGroup(specimenLinkType.inputGroupId)">
+          <a href>{{specimenLinkType.inputGroup.name}}</a>
+        </td>
+        <td ng-click="vm.viewSpecimenGroup(specimenLinkType.outputGroupId)">
+          <a href>{{specimenLinkType.outputGroup.name}}</a>
+        </td>
+        <td>
+          <span ng-repeat="atItemId in specimenLinkType.annotationTypeDataIds()"
+                ng-click="vm.viewAnnotationType(atItemId)">
+            <a href>
+              {{specimenLinkType.getAnnotationTypeDataById(atItemId).annotationType.name}}
+            </a><span ng-if="!$last">, </span>
+          </span>
+
+        </td>
+        <td ng-if="vm.modificationsAllowed">
+          <info-update-remove-buttons
+             on-info="vm.information(specimenLinkType)"
+             on-update="vm.update(specimenLinkType)"
+             on-remove="vm.remove(specimenLinkType)"
+             update-button-enabled="vm.modificationsAllowed"
+             remove-button-enabled="vm.modificationsAllowed">
+          </info-update-remove-buttons>
+        </td>
+      </tr>
+    </tbody>
   </table>
 </uib-accordion-group>

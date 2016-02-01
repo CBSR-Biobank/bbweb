@@ -22,50 +22,60 @@
   </p>
   <table ng-show="vm.ceventTypes.length > 0"
          class="table table-condensed table-hover"
-         ng-table="vm.tableParams">
-    <tr ng-repeat="ceventType in $data">
-      <td data-title="'Name'" sortable="'name'">
-        <span ng-click="vm.information(ceventType)">
-          <a href>{{ceventType.name}}</a>
-        </span>
-      </td>
+         st-table="vm.ceventTypes">
+    <thead>
+      <th st-sort="name">Name</th>
+      <th>Specimen Groups</th>
+      <th>Annotation Types</th>
+      <th st-sort="recurring">Recurring</th>
+      <th st-sort="description">Description</th>
+      <th></th>
+    </thead>
+    <tbody>
+      <tr ng-repeat="ceventType in vm.ceventTypes">
+        <td>
+          <span ng-click="vm.information(ceventType)">
+            <a href>{{ceventType.name}}</a>
+          </span>
+        </td>
 
-      <!-- SPECIMEN GROUP DATA -->
-      <td data-title="'Specimen Groups'">
-        <span ng-repeat="sgItemId in ceventType.specimenGroupDataIds()"
-              ng-click="vm.viewSpecimenGroup(sgItemId)">
-          <a href>
-            {{ceventType.getSpecimenGroupDataById(sgItemId).specimenGroup.name}}
-          </a>
-          <span ng-if="!$last">, </span>
-        </span>
-      </td>
+        <!-- SPECIMEN GROUP DATA -->
+        <td>
+          <span ng-repeat="sgItemId in ceventType.specimenGroupDataIds()"
+                ng-click="vm.viewSpecimenGroup(sgItemId)">
+            <a href>
+              {{ceventType.getSpecimenGroupDataById(sgItemId).specimenGroup.name}}
+            </a>
+            <span ng-if="!$last">, </span>
+          </span>
+        </td>
 
-      <!-- ANNOTATION TYPE DATA -->
-      <td data-title="'Annotation Types'">
-        <span ng-repeat="atItemId in ceventType.annotationTypeDataIds()"
-              ng-click="vm.viewAnnotationType(atItemId)">
-          <a href>
-            {{ceventType.getAnnotationTypeDataById(atItemId).annotationType.name}}
-          </a>
-          <span ng-if="!$last">, </span>
-        </span>
+        <!-- ANNOTATION TYPE DATA -->
+        <td>
+          <span ng-repeat="atItemId in ceventType.annotationTypeDataIds()"
+                ng-click="vm.viewAnnotationType(atItemId)">
+            <a href>
+              {{ceventType.getAnnotationTypeDataById(atItemId).annotationType.name}}
+            </a>
+            <span ng-if="!$last">, </span>
+          </span>
 
-      </td>
-      <td data-title="'Recurring'" sortable="'recurring'">
-        {{ceventType.recurring ? 'Y' : 'N'}}
-      </td>
-      <td data-title="'Description'" sortable="'description'">
-        {{ceventType.description === null ? "" : ceventType.description | truncate:40}}
-      </td>
-      <td ng-if="vm.modificationsAllowed">
-        <update-remove-buttons
-           on-update="vm.update(ceventType)"
-           on-remove="vm.remove(ceventType)"
-           update-button-enabled="vm.modificationsAllowed"
-           remove-button-enabled="vm.modificationsAllowed">
-        </update-remove-buttons>
-      </td>
-    </tr>
+        </td>
+        <td>
+          {{ceventType.recurring ? 'Y' : 'N'}}
+        </td>
+        <td>
+          {{ceventType.description === null ? "" : ceventType.description | truncate:40}}
+        </td>
+        <td ng-if="vm.modificationsAllowed">
+          <update-remove-buttons
+             on-update="vm.update(ceventType)"
+             on-remove="vm.remove(ceventType)"
+             update-button-enabled="vm.modificationsAllowed"
+             remove-button-enabled="vm.modificationsAllowed">
+          </update-remove-buttons>
+        </td>
+      </tr>
+    </tbody>
   </table>
 </uib-accordion-group>

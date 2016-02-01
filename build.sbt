@@ -88,7 +88,6 @@ libraryDependencies ++= Seq(
   ( "org.webjars"             %  "angularjs"                           % "1.4.9"  ).exclude("org.webjars", "jquery"),
   ( "org.webjars"             %  "angular-ui-bootstrap"                % "0.14.3" ).exclude("org.webjars", "angularjs"),
   ( "org.webjars"             %  "angular-ui-router"                   % "0.2.17" ).exclude("org.webjars", "angularjs"),
-  "org.webjars"               %  "ng-table"                            % "0.3.3",
   "org.webjars"               % "smart-table"                          % "2.1.3-1",
   ( "org.webjars"             %  "toastr"                              % "2.1.1"  ).exclude("org.webjars", "jquery"),
   ( "org.webjars"             %  "angular-sanitize"                    % "1.3.11" ).exclude("org.webjars", "angularjs"),

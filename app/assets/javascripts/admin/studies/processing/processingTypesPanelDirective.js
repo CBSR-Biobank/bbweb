@@ -25,7 +25,6 @@ define(['angular', 'underscore'], function(angular, _) {
     '$scope',
     '$state',
     'Panel',
-    'tableService',
     'ProcessingTypeViewer',
     'domainEntityService'
   ];
@@ -36,7 +35,6 @@ define(['angular', 'underscore'], function(angular, _) {
   function ProcessingTypesPanelCtrl($scope,
                                     $state,
                                     Panel,
-                                    tableService,
                                     ProcessingTypeViewer,
                                     domainEntityService) {
     var vm = this,
@@ -51,9 +49,6 @@ define(['angular', 'underscore'], function(angular, _) {
     vm.information          = information;
     vm.panelOpen            = panel.getPanelOpenState();
     vm.modificationsAllowed = vm.study.isDisabled();
-    vm.tableParams          = tableService.getTableParamsWithCallback(getTableData,
-                                                                       {},
-                                                                       { counts: [] });
 
     $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                   angular.bind(panel, panel.watchPanelOpenChangeFunc));
@@ -95,14 +90,10 @@ define(['angular', 'underscore'], function(angular, _) {
         'Processing type ' + processingType.name + ' cannot be removed: '
       ).then(function () {
         vm.processingTypes = _.without(vm.processingTypes, processingType);
-        vm.tableParams.reload();
       });
 
     }
 
-    function getTableData() {
-      return vm.processingTypes;
-    }
   }
 
   return {

@@ -18,7 +18,7 @@ define([], function() {
       url: '^/users',
       views: {
         'main@': {
-          template: '<ui-view/>'
+          template: '<ui-view></ui-view>'
         }
       }
     });

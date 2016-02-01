@@ -4,7 +4,13 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
+define([
+  'angular',
+  'angularMocks',
+  'underscore',
+  'moment',
+  'biobankApp'
+], function(angular, mocks, _, moment) {
   'use strict';
 
   describe('Controller: UsersTableCtrl', function() {
@@ -12,7 +18,6 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         rootScope,
         controller,
         modalService,
-        tableService,
         User,
         UserCounts,
         UserStatus,
@@ -25,7 +30,6 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
                                $rootScope,
                                $controller,
                                _modalService_,
-                               _tableService_,
                                _User_,
                                _UserCounts_,
                                _UserStatus_,
@@ -35,7 +39,6 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       rootScope    = $rootScope;
       controller   = $controller;
       modalService = _modalService_;
-      tableService = _tableService_;
       User         = _User_;
       UserCounts   = _UserCounts_;
       UserStatus   = _UserStatus_;
@@ -58,7 +61,6 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       controller('UsersTableCtrl as vm', {
         $scope:       scope,
         modalService: modalService,
-        tableService: tableService,
         User:         User,
         UserStatus:   UserStatus,
         UserViewer:   UserViewer,
@@ -76,10 +78,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
       expect(scope.vm.users).toBeArrayOfSize(0);
       expect(scope.vm.haveUsers).toBe(counts.total > 0);
-      expect(scope.vm.pagedResults).toBeDefined();
-      expect(scope.vm.nameFilter).toBeDefined();
-      expect(scope.vm.status).toEqual({ id: 'all', title: 'All'});
-      expect(scope.vm.tableParams).toBeDefined();
+      expect(scope.vm.status).toEqual('all');
 
       _.each(allStatuses, function(status) {
         expect(scope.vm.possibleStatuses).toContain({ id: status, title: UserStatus.label(status) });
@@ -87,68 +86,79 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       expect(scope.vm.possibleStatuses).toContain({ id: 'all', title: 'All'});
     });
 
-    it('table is reloaded when filters are updated', function() {
-      var counts = createUserCounts(1, 2, 3),
-          scope = createController(counts);
-
-      spyOn(scope.vm.tableParams, 'reload');
-      scope.vm.nameFilterUpdated();
-      scope.$digest();
-      expect(scope.vm.tableParams.reload).toHaveBeenCalled();
-
-      scope.vm.emailFilterUpdated();
-      scope.$digest();
-      expect(scope.vm.tableParams.reload.calls.count()).toEqual(2);
-
-      scope.vm.statusFilterUpdated();
-      scope.$digest();
-      expect(scope.vm.tableParams.reload.calls.count()).toEqual(3);
-    });
-
-    /**
-     * Skip this for now, since running into ng-table bug
-     */
-    xit('changing a users status works', function() {
+    it('changing a users status works', function() {
       var counts = createUserCounts(1, 2, 3),
           statusFnNames = ['activate', 'lock', 'unlock'],
-          user = User.create(fakeEntities.user),
+          user = User.create(fakeEntities.user()),
           scope;
 
+      spyOn(User, 'get').and.callFake(function () {
+        return q.when(user);
+      });
+
       spyOn(User, 'list').and.callFake(function () {
-        return q.when([ user ]);
+        return q.when(fakeEntities.pagedResult([ user ]));
       });
 
       spyOn(modalService, 'showModal').and.callFake(function () {
-        return q.when('xxx');
+        return q.when('--dont-care--');
       });
 
       scope = createController(counts);
-      scope.vm.nameFilterUpdated(); // force a table update
+      scope.vm.getTableData({ pagination: { start: 0 }, search: {}, sort: {} });
       scope.$digest();
+      expect(scope.vm.users).toBeArrayOfSize(1);
 
       _.each(statusFnNames, function(statusFnName) {
-        spyOn(User.prototype, statusFnName).and.callThrough();
+        spyOn(User.prototype, statusFnName).and.callFake(function () {
+          return q.when('status changed');
+        });
 
-        scope.vm[statusFnName](scope.vm.users[0]);
+        scope.vm[statusFnName](user);
         scope.$digest();
         expect(User.prototype[statusFnName]).toHaveBeenCalled();
       });
     });
 
-    /**
-     * Skip this for now, since running into ng-table bug
-     */
-    xit('message is correct', function() {
-      var scope, counts = createUserCounts(1, 2, 3);
+    it('can view user information', function() {
+      var EntityViewer = this.$injector.get('EntityViewer'),
+          counts = createUserCounts(1, 2, 3),
+          user = User.create(fakeEntities.user()),
+          scope;
+
+      spyOn(User, 'list').and.callFake(function () {
+        return q.when(fakeEntities.pagedResult([ user ]));
+      });
 
       scope = createController(counts);
-      expect(scope.vm.message).toBe('The following users have been configured.');
-
-      scope.vm.nameFilter = 'abc';
+      scope.vm.getTableData({ pagination: { start: 0 }, search: {}, sort: {} });
       scope.$digest();
-      expect(scope.vm.message).toBe('The following users match the criteria:');
+      expect(scope.vm.users).toBeArrayOfSize(1);
+
+      spyOn(EntityViewer.prototype, 'showModal').and.callFake(function () { });
+      scope.vm.userInformation(user);
+      scope.$digest();
+      expect(EntityViewer.prototype.showModal).toHaveBeenCalled();
     });
 
+    it('can retrieve user local time added', function() {
+      var bbwebConfig = this.$injector.get('bbwebConfig'),
+          counts = createUserCounts(1, 2, 3),
+          user = User.create(fakeEntities.user()),
+          scope;
+
+      spyOn(User, 'list').and.callFake(function () {
+        return q.when(fakeEntities.pagedResult([ user ]));
+      });
+
+      scope = createController(counts);
+      scope.vm.getTableData({ pagination: { start: 0 }, search: {}, sort: {} });
+      scope.$digest();
+      expect(scope.vm.users).toBeArrayOfSize(1);
+
+      expect(scope.vm.getTimeAddedLocal(user))
+        .toBe(moment(user.timeAdded).format(bbwebConfig.dateTimeFormat));
+    });
 
   });
 

@@ -52,11 +52,26 @@ sh tmp.sh
 
 Using Karma and Jasmine for client unit tests. Also using Grunt to run the tests.
 
+```sh
+sudo npm install -g karma-cli
+```
+
 To run JavaScript code coverage use command:
 
 ```sh
 grunt karma:coverage
 ```
+
+###### Run tests in Chrome
+
+Use the following command to start tests in Chrome:
+
+```sh
+node_modules/karma/bin/karma start --browsers ChromeExtra --reporters progress --auto-watch --no-single-run --log-level debug
+```
+
+Press the `Debug` button, open a JavaScript file in DevTools to place a breakpoint, and reload the page.
+Execution stops at the breakpoint.
 
 ## Docker ##
 

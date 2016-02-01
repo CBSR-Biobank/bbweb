@@ -6,7 +6,6 @@
     <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")">
     @*-- CSS files go in this section -- *@
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/bootstrap/css/bootstrap.css")" />
-    <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/ng-table/ng-table.css")" />
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/toastr/toastr.css")" />
     <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
     @*-- Javascript files go in this section -- *@
@@ -57,7 +56,7 @@
       </div>
     </div>
     <div class="container" data-ng-cloak>
-        <div data-ui-view="main"></div>
+        <div ui-view="main"></div>
     </div>
     @*-- Footer -- *@
     <footer data-ng-controller="FooterCtrl as vm">

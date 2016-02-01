@@ -138,4 +138,3 @@ object CollectionEventType extends CollectionEventTypeValidations with StudyAnno
   implicit val collectionEventTypeWrites = Json.writes[CollectionEventType]
 
 }
-

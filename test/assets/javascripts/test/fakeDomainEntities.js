@@ -339,8 +339,6 @@ define([
         description: randomFakerLoremWord(),
         status:      StudyStatus.DISABLED()
       };
-      study.statusLabel = StudyStatus.label(study.status);
-
       return extendWithCommonFields(study);
     }
 
@@ -450,7 +448,6 @@ define([
         description: randomFakerLoremWord(),
         status:      CentreStatus.DISABLED()
       };
-      centre.statusLabel = CentreStatus.label(centre.status);
       return extendWithCommonFields(centre);
     }
 
@@ -478,7 +475,6 @@ define([
         avatarUrl:   faker.internet.avatar(),
         status:      UserStatus.REGISTERED()
       };
-      user.statusLabel = UserStatus.label(user.status);
       return extendWithCommonFields(user);
     }
 

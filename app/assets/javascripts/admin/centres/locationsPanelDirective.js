@@ -26,8 +26,7 @@ define(['angular'], function(angular) {
     '$state',
     'LocationViewer',
     'Panel',
-    'domainEntityService',
-    'tableService'
+    'domainEntityService'
   ];
 
   /**
@@ -37,8 +36,7 @@ define(['angular'], function(angular) {
                               $state,
                               LocationViewer,
                               Panel,
-                              domainEntityService,
-                              tableService) {
+                              domainEntityService) {
     var vm = this;
 
     var panel = new Panel('centre.panel.locations', 'home.admin.centres.centre.locationAdd');
@@ -50,9 +48,6 @@ define(['angular'], function(angular) {
     vm.information          = information;
     vm.panelOpen            = panel.getPanelOpenState();
     vm.modificationsAllowed = true; // not dependant on centre's state
-    vm.tableParams          = tableService.getTableParamsWithCallback(getTableData,
-                                                                      {},
-                                                                      { counts: [] });
 
     $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                   angular.bind(panel, panel.watchPanelOpenChangeFunc));
@@ -85,9 +80,6 @@ define(['angular'], function(angular) {
 
     }
 
-    function getTableData() {
-      return vm.centre.locations;
-    }
   }
 
   return {

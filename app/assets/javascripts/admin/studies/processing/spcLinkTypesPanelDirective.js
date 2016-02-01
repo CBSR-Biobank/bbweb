@@ -25,7 +25,6 @@ define(['angular', 'underscore'], function(angular, _) {
     '$scope',
     '$state',
     'modalService',
-    'tableService',
     'domainEntityService',
     'Panel',
     'SpecimenLinkType',
@@ -42,7 +41,6 @@ define(['angular', 'underscore'], function(angular, _) {
   function SpcLinkTypesPanelCtrl($scope,
                                  $state,
                                  modalService,
-                                 tableService,
                                  domainEntityService,
                                  Panel,
                                  SpecimenLinkType,
@@ -71,10 +69,6 @@ define(['angular', 'underscore'], function(angular, _) {
     vm.tableData            = [];
     vm.panelOpen            = panel.getPanelOpenState();
     vm.modificationsAllowed = vm.study.isDisabled();
-
-    vm.tableParams = tableService.getTableParamsWithCallback(getTableData,
-                                                             {},
-                                                             { counts: [] });
 
     $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                   angular.bind(panel, panel.watchPanelOpenChangeFunc));
@@ -144,12 +138,7 @@ define(['angular', 'underscore'], function(angular, _) {
         'specimen link type ' + slt.name + ' cannot be removed: '
       ).then(function () {
         vm.specimenLinkTypes = _.without(vm.specimenLinkTypes, slt);
-        vm.tableParams.reload();
       });
-    }
-
-    function getTableData() {
-      return vm.specimenLinkTypes;
     }
 
   }

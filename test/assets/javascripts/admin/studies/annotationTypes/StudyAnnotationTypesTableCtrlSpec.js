@@ -1,9 +1,9 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
+ *
+ * Jasmine test suite
  */
-// Jasmine test suite
-//
 define([
   'angular',
   'angularMocks',
@@ -105,7 +105,6 @@ define([
       var scope,
           state,
           modalService,
-          tableService,
           studyAnnotationTypeUtils,
           AnnotationTypeViewer;
 
@@ -116,13 +115,11 @@ define([
                                    $controller,
                                    _modalService_,
                                    _studyAnnotationTypeUtils_,
-                                   _AnnotationTypeViewer_,
-                                   _tableService_) {
+                                   _AnnotationTypeViewer_) {
           state                    = $state;
           modalService             = _modalService_;
           studyAnnotationTypeUtils = _studyAnnotationTypeUtils_;
           AnnotationTypeViewer     = _AnnotationTypeViewer_;
-          tableService             = _tableService_;
 
           scope                    = $rootScope.$new();
           scope.study              = context.study;
@@ -133,7 +130,6 @@ define([
           scope.hasRequired        = (scope.annotationTypeName === 'ParticipantAnnotationType');
 
           spyOn(state, 'go');
-          spyOn(tableService, 'getTableParams').and.callThrough();
 
           $controller('StudyAnnotationTypesTableCtrl as vm', {
             $scope:                   scope,
@@ -143,8 +139,6 @@ define([
             AnnotationTypeViewer:     AnnotationTypeViewer
           });
           scope.$digest();
-
-          spyOn(scope.vm.tableParams, 'reload').and.callFake(function () {});
         }));
 
         it('has valid scope', function() {

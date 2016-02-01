@@ -90,7 +90,6 @@ define([
           controller           = injector.get('$controller'),
           state                = injector.get('$state'),
           modalService         = injector.get('modalService'),
-          tableService         = injector.get('tableService'),
           Panel                = injector.get('Panel'),
           CollectionEventType  = injector.get('CollectionEventType'),
           CeventTypeViewer     = injector.get('CeventTypeViewer'),
@@ -113,7 +112,6 @@ define([
           $scope:               scope,
           $state:               state,
           modalService:         modalService,
-          tableService:         tableService,
           CollectionEventType:  CollectionEventType,
           Panel:                Panel,
           CeventTypeViewer:     CeventTypeViewer,
@@ -139,7 +137,6 @@ define([
       });
       expect(scope.vm.ceventTypes).toBeArrayOfSize(scope.ceventTypes.length);
       expect(scope.vm.ceventTypes).toContainAll(scope.ceventTypes);
-      expect(scope.vm.tableParams).toBeDefined();
     });
 
     it('cannot add a collection event type if study has no specimen groups', function() {
@@ -247,9 +244,6 @@ define([
       });
     });
 
-    /**
-     * A spy is needed on scope.vm.tableParams due to a bug in ng-table.
-     */
     it('can remove a collection event type', function() {
       var q                   = this.$injector.get('$q'),
           domainEntityService = this.$injector.get('domainEntityService'),
@@ -260,16 +254,12 @@ define([
       spyOn(domainEntityService, 'removeEntity').and.callFake(function () {
         return q.when('OK');
       });
-      spyOn(scope.vm.tableParams, 'reload').and.callFake(function () {});
       scope.vm.remove(cetToRemove);
       scope.$digest();
       expect(domainEntityService.removeEntity).toHaveBeenCalled();
       expect(scope.vm.ceventTypes).toBeArrayOfSize(entities.ceventTypes.length - 1);
     });
 
-    /**
-     * A spy is needed on scope.vm.tableParams due to a bug in ng-table.
-     */
     it('displays a modal if removal of a collection event type fails', function() {
       var q                   = this.$injector.get('$q'),
           modalService        = this.$injector.get('modalService'),
@@ -285,7 +275,6 @@ define([
       spyOn(modalService, 'showModal').and.callFake(function () {
         return q.when('OK');
       });
-      spyOn(scope.vm.tableParams, 'reload').and.callFake(function () {});
 
       scope.vm.remove(cetToRemove);
       scope.$digest();

@@ -7,6 +7,8 @@
 
   // -- RequireJS config --
   requirejs.config({
+    baseUrl: '/assets/javascripts',
+
     // Packages = top-level folders; loads a contained file named 'main.js'
     packages: [
       'common',
@@ -30,7 +32,6 @@
       'angular-ui-router':            '../lib/angular-ui-router/angular-ui-router',
       'bootstrap':                    '../lib/bootstrap/js/bootstrap',
       'ui-bootstrap':                 '../lib/angular-ui-bootstrap/ui-bootstrap-tpls',
-      'ng-table':                     '../lib/ng-table/ng-table',
       'smart-table':                  '../lib/smart-table/smart-table',
       'angular-utils-ui-breadcrumbs': '../lib/angular-utils-ui-breadcrumbs/uiBreadcrumbs',
       'toastr':                       '../lib/toastr/toastr',
@@ -50,7 +51,6 @@
       'angular-sanitize':             ['angular'],
       'angular-ui-router':            ['angular'],
       'bootstrap':                    ['jquery'],
-      'ng-table':                     ['angular'],
       'smart-table':                  ['angular'],
       'ui-bootstrap':                 ['angular'],
       'angular-utils-ui-breadcrumbs': ['angular']
@@ -69,7 +69,6 @@
     'angular-cookies',
     'angular-ui-router',
     'ui-bootstrap',
-    'ng-table',
     'smart-table',
     'angular-utils-ui-breadcrumbs',
     'angular-sanitize',

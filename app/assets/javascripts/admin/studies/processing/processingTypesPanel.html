@@ -22,28 +22,36 @@
   </p>
   <table ng-show="vm.processingTypes.length > 0"
          class="table table-condensed table-hover"
-         ng-table="vm.tableParams">
-    <tr ng-repeat="processingType in $data"
-        ng-class="{'active': user.$selected}" >
-      <td data-title="'Name'" sortable="'name'">
-        <span ng-click="vm.information(processingType)">
-          <a href>{{processingType.name}}</a>
-        </span>
-      </td>
-      <td data-title="'Enabled'" sortable="'enabled'">
-        {{processingType.enabled ? 'Yes' : 'No'}}
-      </td>
-      <td data-title="'Description'" sortable="'description'">
-        {{processingType.description === null ? '' : processingType.description | truncate:40}}
-      </td>
-      <td ng-if="vm.modificationsAllowed">
-        <update-remove-buttons
-           on-update="vm.update(processingType)"
-           on-remove="vm.remove(processingType)"
-           update-button-enabled="vm.modificationsAllowed"
-           remove-button-enabled="vm.modificationsAllowed">
-        </update-remove-buttons>
-      </td>
-    </tr>
+         st-table="vm.processingTypes">
+    <thead>
+      <th st-sort="name">Name</th>
+      <th st-sort="enabled">Enabled</th>
+      <th st-sort="description">Description</th>
+      <th></th>
+    </thead>
+
+    <tbody>
+      <tr ng-repeat="processingType in vm.processingTypes">
+        <td>
+          <span ng-click="vm.information(processingType)">
+            <a href>{{processingType.name}}</a>
+          </span>
+        </td>
+        <td>
+          {{processingType.enabled ? 'Yes' : 'No'}}
+        </td>
+        <td>
+          {{processingType.description === null ? '' : processingType.description | truncate:40}}
+        </td>
+        <td ng-if="vm.modificationsAllowed">
+          <update-remove-buttons
+             on-update="vm.update(processingType)"
+             on-remove="vm.remove(processingType)"
+             update-button-enabled="vm.modificationsAllowed"
+             remove-button-enabled="vm.modificationsAllowed">
+          </update-remove-buttons>
+        </td>
+      </tr>
+    </tbody>
   </table>
 </uib-accordion-group>

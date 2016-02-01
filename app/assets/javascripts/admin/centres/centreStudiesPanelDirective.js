@@ -27,7 +27,6 @@ define(['angular', 'underscore'], function(angular, _) {
     'Panel',
     'Study',
     'StudyViewer',
-    'tableService',
     'modalService'
   ];
 
@@ -38,7 +37,6 @@ define(['angular', 'underscore'], function(angular, _) {
                                   Panel,
                                   Study,
                                   StudyViewer,
-                                  tableService,
                                   modalService) {
 
     var vm = this;
@@ -72,12 +70,6 @@ define(['angular', 'underscore'], function(angular, _) {
       _.each(vm.centre.studyIds, function (studyId) {
         vm.tableStudies.push(vm.studyNamesById[studyId]);
       });
-
-      vm.tableParams = tableService.getTableParamsWithCallback(getTableData, {}, {counts: []});
-    }
-
-    function getTableData() {
-      return vm.tableStudies;
     }
 
     function onSelect(item) {
@@ -85,7 +77,6 @@ define(['angular', 'underscore'], function(angular, _) {
       if(_.indexOf(vm.centre.studyIds, item.id) < 0) {
         vm.centre.addStudy(item).then(function () {
           vm.tableStudies.push(vm.studyNamesById[item.id]);
-          vm.tableParams.reload();
         });
       }
       vm.selected = undefined;
@@ -110,7 +101,6 @@ define(['angular', 'underscore'], function(angular, _) {
         return vm.centre.removeStudy({id: studyId})
           .then(function () {
             vm.tableStudies = _.without(vm.tableStudies, vm.studyNamesById[studyId]);
-            vm.tableParams.reload();
           })
           .catch(removeFailed);
       });

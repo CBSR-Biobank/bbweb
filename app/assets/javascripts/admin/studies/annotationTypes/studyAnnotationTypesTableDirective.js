@@ -30,8 +30,7 @@ define(['angular', 'underscore'], function(angular, _) {
     '$state',
     'modalService',
     'studyAnnotationTypeUtils',
-    'AnnotationTypeViewer',
-    'tableService'
+    'AnnotationTypeViewer'
   ];
 
   /**
@@ -41,8 +40,7 @@ define(['angular', 'underscore'], function(angular, _) {
                                          $state,
                                          modalService,
                                          studyAnnotationTypeUtils,
-                                         AnnotationTypeViewer,
-                                         tableService) {
+                                         AnnotationTypeViewer) {
     var vm = this;
 
     vm.study                  = $scope.study;
@@ -57,7 +55,6 @@ define(['angular', 'underscore'], function(angular, _) {
     vm.modificationsAllowed   = vm.study.isDisabled();
 
     vm.columns = annotationTypeColumns($scope.annotationTypeName);
-    vm.tableParams = tableService.getTableParamsWithCallback(getTableData, {}, { counts: [] });
 
     //--
 
@@ -65,16 +62,16 @@ define(['angular', 'underscore'], function(angular, _) {
      * Order is important here.
      */
     function annotationTypeColumns(annotationTypeName) {
-      var result = [];
-
-      result.push({ title: 'Name', field: 'name',      filter: { 'name':        'text' } });
-      result.push({ title: 'Type', field: 'valueType', filter: { 'valueType':   'text' } });
+      var result =  [
+        { title: 'Name', field: 'name' },
+        { title: 'Type', field: 'valueType' }
+      ];
 
       if (annotationTypeName === 'ParticipantAnnotationType') {
-        result.push({ title: 'Required', field: 'required', filter: { 'required': 'text' } });
+        result.push({ title: 'Required', field: 'required' });
       }
 
-      result.push({ title: 'Description', field: 'description', filter: { 'description': 'text' } });
+      result.push({ title: 'Description', field: 'description' });
 
       return result;
     }
@@ -108,14 +105,10 @@ define(['angular', 'underscore'], function(angular, _) {
         studyAnnotationTypeUtils.remove(annotationType)
           .then(function () {
             vm.annotationTypes = _.without(vm.annotationTypes, annotationType);
-            vm.tableParams.reload();
           });
       }
     }
 
-    function getTableData() {
-      return vm.annotationTypes;
-    }
   }
 
   return {

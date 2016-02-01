@@ -29,7 +29,6 @@ define(['angular', 'underscore'], function(angular, _) {
     '$scope',
     '$state',
     'modalService',
-    'tableService',
     'CollectionEventType',
     'Panel',
     'CeventTypeViewer',
@@ -44,7 +43,6 @@ define(['angular', 'underscore'], function(angular, _) {
   function CeventTypesPanelCtrl($scope,
                                 $state,
                                 modalService,
-                                tableService,
                                 CollectionEventType,
                                 Panel,
                                 CeventTypeViewer,
@@ -69,9 +67,6 @@ define(['angular', 'underscore'], function(angular, _) {
     vm.viewSpecimenGroup    = viewSpecimenGroup;
     vm.panelOpen            = panel.getPanelOpenState();
     vm.modificationsAllowed = vm.study.isDisabled();
-    vm.tableParams          = tableService.getTableParamsWithCallback(getTableData,
-                                                                      {},
-                                                                      { counts: [] });
 
     $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                   angular.bind(panel, panel.watchPanelOpenChangeFunc));
@@ -138,12 +133,7 @@ define(['angular', 'underscore'], function(angular, _) {
         'Collection event type ' + ceventType.name + ' cannot be removed: '
       ).then(function () {
         vm.ceventTypes = _.without(vm.ceventTypes, ceventType);
-        vm.tableParams.reload();
       });
-    }
-
-    function getTableData() {
-      return vm.ceventTypes;
     }
 
   }

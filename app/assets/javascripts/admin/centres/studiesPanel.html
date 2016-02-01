@@ -17,29 +17,38 @@
   </div>
   <table ng-show="vm.centre.studyIds.length > 0"
          class="table table-hover table-condensed"
-         ng-table="vm.tableParams">
-    <tr ng-repeat="study in $data">
-      <td data-title="'Name'" sortable="'name'">
-        <span ng-click="vm.information(study.id)">
-          <a href>{{study.name}}</a>
-        </span>
-      </td>
-      <td data-title="'Status'" sortable="'status'">
-        {{study.statusLabel}}
-      </td>
-      <td>
-        <!-- FIXME studies should only be removed if no centre is not storing specimens  -->
-        <div class="btn-group pull-right">
-          <button class="btn btn-xs btn-warning"
-                  ng-click="vm.remove(study.id)"
-                  data-toggle="tooltip"
-                  title="Remove">
-            <i class="glyphicon glyphicon-remove"></i>
-          </button>
-        </div>
-      </td>
-    </tr>
+         st-table="vm.tableStudies">
+    <thead>
+      <th st-sort="name">Name</th>
+      <th st-sort="status">Status</th>
+      <th></th>
+    </thead>
+
+    <tbody>
+      <tr ng-repeat="study in vm.tableStudies">
+        <td>
+          <span ng-click="vm.information(study.id)">
+            <a href>{{study.name}}</a>
+          </span>
+        </td>
+        <td>
+          {{study.statusLabel}}
+        </td>
+        <td>
+          <!-- FIXME studies should only be removed if no centre is not storing specimens  -->
+          <div class="btn-group pull-right">
+            <button class="btn btn-xs btn-warning"
+                    ng-click="vm.remove(study.id)"
+                    data-toggle="tooltip"
+                    title="Remove">
+              <i class="glyphicon glyphicon-remove"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
   </table>
+
   <div class="input-group">
     <span class="input-group-addon">Add Study</span>
     <input type="text"
