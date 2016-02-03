@@ -22,7 +22,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'target/web/web-modules/main/webjars/lib/angularjs/angular.js',
+      { pattern: 'target/web/web-modules/main/webjars/lib/angularjs/angular.js', included: false },
       { pattern: 'target/web/web-modules/main/webjars/lib/**/*.js', included: false },
       { pattern: 'app/assets/javascripts/**/*.js', included: false },
       { pattern: 'test/assets/javascripts/**/*Spec.js', included: false },

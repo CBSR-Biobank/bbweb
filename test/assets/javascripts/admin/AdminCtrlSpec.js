@@ -5,11 +5,10 @@
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
 define([
-  'angular',
   'angularMocks',
   'underscore',
   'biobankApp'
-], function(angular, mocks, _) {
+], function(mocks, _) {
   'use strict';
 
   describe('Controller: AdminCtrl', function() {

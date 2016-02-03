@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
+define(['underscore', 'moment'], function(_, moment) {
   'use strict';
 
   UsersTableCtrl.$inject = [
