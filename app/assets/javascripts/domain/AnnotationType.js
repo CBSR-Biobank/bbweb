@@ -6,6 +6,7 @@ define(['angular', 'underscore'], function(angular, _) {
   'use strict';
 
   AnnotationTypeFactory.$inject = [
+    'funutils',
     'validationService',
     'ConcurrencySafeEntity',
     'AnnotationValueType',
@@ -15,10 +16,20 @@ define(['angular', 'underscore'], function(angular, _) {
   /**
    *
    */
-  function AnnotationTypeFactory(validationService,
+  function AnnotationTypeFactory(funutils,
+                                 validationService,
                                  ConcurrencySafeEntity,
                                  AnnotationValueType,
                                  AnnotationMaxValueCount) {
+
+    var requiredKeys = ['id', 'name', 'valueType', 'options'];
+
+    var validateObj = funutils.partial(
+      validationService.condition1(
+        validationService.validator('must be a map', _.isObject),
+        validationService.validator('has the correct keys',
+                                    validationService.hasKeys.apply(null, requiredKeys))),
+      _.identity);
 
     function AnnotationType(obj) {
       var defaults = {
@@ -29,14 +40,23 @@ define(['angular', 'underscore'], function(angular, _) {
         options:       []
       };
 
-      this._requiredKeys = ['id', 'name', 'valueType', 'options'];
-
       obj = obj || {};
       ConcurrencySafeEntity.call(this, obj);
       _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
     }
 
     AnnotationType.prototype = Object.create(ConcurrencySafeEntity.prototype);
+
+    /**
+     * Used by promise code, so it must return an error rather than throw one.
+     */
+    AnnotationType.create = function (obj) {
+      var validation = validateObj(obj);
+      if (!_.isObject(validation)) {
+        return new Error('invalid object from server: ' + validation);
+      }
+      return new AnnotationType(obj);
+    };
 
     AnnotationType.prototype.isValueTypeText = function () {
       return (this.valueType === AnnotationValueType.TEXT());

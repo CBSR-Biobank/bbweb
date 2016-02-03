@@ -22,8 +22,6 @@ class CentreLocationsRepositoryImpl
     extends ReadWriteRepositoryRefImpl[LocationId, CentreLocation](v => v.locationId)
     with CentreLocationsRepository {
 
-  override val NotFoundError = "Centre location with id not found:"
-
   // only existing center and location IDs should be stored, never new IDs
   def nextIdentity = throw new IllegalStateException("should not be used")
 

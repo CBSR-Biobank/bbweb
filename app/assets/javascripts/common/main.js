@@ -20,6 +20,7 @@ define(function (require) {
       updateRemoveButtonsDirective     = require('./directives/updateRemoveButtonsDirective'),
       pageSelectDirective              = require('./directives/pageSelectDirective'),
 
+      localTimeFilter                  = require('./filters/localTimeFilter'),
       timeagoFilter                    = require('./filters/timeagoFilter'),
       truncateFilter                   = require('./filters/truncateFilter'),
 
@@ -30,6 +31,7 @@ define(function (require) {
       notificationsService             = require('./services/notificationsService'),
       queryStringService               = require('./services/queryStringService'),
       stateHelperService               = require('./services/stateHelperService'),
+      timeService                      = require('./services/timeService'),
       validationService                = require('./services/validationService');
 
   var module = angular.module('biobank.common', []);
@@ -49,6 +51,7 @@ define(function (require) {
 
   module.directive('pageSelect',              pageSelectDirective);
 
+  module.filter('localTime',                  localTimeFilter);
   module.filter('timeago',                    timeagoFilter);
   module.filter('truncate',                   truncateFilter);
 
@@ -59,6 +62,7 @@ define(function (require) {
   module.service('notificationsService',      notificationsService);
   module.service('queryStringService',        queryStringService);
   module.service('stateHelper',               stateHelperService);
+  module.service('timeService',               timeService);
   module.service('validationService',         validationService);
 
   return module;

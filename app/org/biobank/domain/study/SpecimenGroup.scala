@@ -21,21 +21,26 @@ import scalaz._
 import Scalaz._
 
 /** Used to configure a [[SpecimenType]] used by a [[Study]].
-  *
-  * It records ownership, summary, storage, and classification information that applies to an
-  * entire group or collection of [[Specimen]]s. A specimen group is defined either for
-  * specimen types collected from participants, or for specimen types that are processed.
-  *
-  * This class has a private constructor and instances of this class can only be created using
-  * the [[SpecimenGroup.create]] method on the factory object.
-  *
-  * @param name A short identifying name that is unique to the study.
-  * @param units Specifies how the specimen amount is measured (e.g. volume, weight, length, etc.).
-  * @param anatomicalSourceType see [[AnatomicalSourceType]].
-  * @param preservationType see [[PreservationType]].
-  * @param preservationTemperatureType see [[PreservationTemperatureType]].
-  * @param specimenType see [[SpecimenType]].
-  */
+ *
+ * It records ownership, summary, storage, and classification information that applies to an
+ * entire group or collection of [[Specimen]]s. A specimen group is defined either for
+ * specimen types collected from participants, or for specimen types that are processed.
+ *
+ * This class has a private constructor and instances of this class can only be created using
+ * the [[SpecimenGroup.create]] method on the factory object.
+ *
+ * @param name A short identifying name that is unique to the study.
+ *
+ * @param units Specifies how the specimen amount is measured (e.g. volume, weight, length, etc.).
+ *
+ * @param anatomicalSourceType see [[AnatomicalSourceType]].
+ *
+ * @param preservationType see [[PreservationType]].
+ *
+ * @param preservationTemperatureType see [[PreservationTemperatureType]].
+ *
+ * @param specimenType see [[SpecimenType]].
+ */
 case class SpecimenGroup(studyId:                     StudyId,
                          id:                          SpecimenGroupId,
                          version:                     Long,

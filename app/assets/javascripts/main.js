@@ -25,18 +25,17 @@
     paths: {
       'requirejs':                    '../lib/requirejs/require',
       'jquery':                       '../lib/jquery/jquery',
-      'angular':                      '../lib/angularjs/angular',
+      'toastr':                       '../lib/toastr/toastr',
       'underscore':                   '../lib/underscorejs/underscore',
-      'angular-route':                '../lib/angularjs/angular-route',
+      'moment':                       '../lib/momentjs/moment',
+      'bootstrap':                    '../lib/bootstrap/js/bootstrap',
+      'angular':                      '../lib/angularjs/angular',
       'angular-cookies':              '../lib/angularjs/angular-cookies',
       'angular-ui-router':            '../lib/angular-ui-router/angular-ui-router',
-      'bootstrap':                    '../lib/bootstrap/js/bootstrap',
-      'ui-bootstrap':                 '../lib/angular-ui-bootstrap/ui-bootstrap-tpls',
-      'smart-table':                  '../lib/smart-table/smart-table',
-      'angular-utils-ui-breadcrumbs': '../lib/angular-utils-ui-breadcrumbs/uiBreadcrumbs',
-      'toastr':                       '../lib/toastr/toastr',
       'angular-sanitize':             '../lib/angular-sanitize/angular-sanitize',
-      'moment':                       '../lib/momentjs/moment'
+      'angular-utils-ui-breadcrumbs': '../lib/angular-utils-ui-breadcrumbs/uiBreadcrumbs',
+      'ui-bootstrap':                 '../lib/angular-ui-bootstrap/ui-bootstrap-tpls',
+      'smart-table':                  '../lib/smart-table/smart-table'
     },
 
     shim: {
@@ -47,13 +46,13 @@
       'underscore': {
         exports: '_'
       },
+      'bootstrap':                    ['jquery'],
       'angular-cookies':              ['angular'],
       'angular-sanitize':             ['angular'],
       'angular-ui-router':            ['angular'],
-      'bootstrap':                    ['jquery'],
+      'angular-utils-ui-breadcrumbs': ['angular'],
       'smart-table':                  ['angular'],
-      'ui-bootstrap':                 ['angular'],
-      'angular-utils-ui-breadcrumbs': ['angular']
+      'ui-bootstrap':                 ['angular']
     }
   });
 
@@ -68,10 +67,10 @@
     'bootstrap',
     'angular-cookies',
     'angular-ui-router',
-    'ui-bootstrap',
-    'smart-table',
     'angular-utils-ui-breadcrumbs',
     'angular-sanitize',
+    'ui-bootstrap',
+    'smart-table',
     './app'
   ], function(angular) {
     angular.bootstrap(document, ['biobankApp']);

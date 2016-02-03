@@ -2,31 +2,47 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-/* global define */
 define([], function() {
   'use strict';
 
-  CollectionStudyCtrl.$inject = [
+  /**
+   * Description
+   */
+  function participantGetDirective() {
+    var directive = {
+      restrict: 'E',
+      scope: {},
+      bindToController: {
+        study: '='
+      },
+      templateUrl : '/assets/javascripts/collection/directives/participantGet/participantGet.html',
+      controller: ParticipantGetCtrl,
+      controllerAs: 'vm'
+    };
+    return directive;
+
+  }
+
+  ParticipantGetCtrl.$inject = [
     '$state',
     'stateHelper',
     'modalService',
-    'Participant',
-    'study'
+    'Participant'
   ];
 
   /**
    *
    */
-  function CollectionStudyCtrl($state,
-                               stateHelper,
-                               modalService,
-                               Participant,
-                               study) {
+  function ParticipantGetCtrl($state,
+                              stateHelper,
+                              modalService,
+                              Participant) {
     var vm = this;
 
-    vm.study = study;
     vm.uniqueId = '';
     vm.uniqueIdChanged = uniqueIdChanged;
+
+    //--
 
     function uniqueIdChanged() {
       if (vm.uniqueId.length <= 0) {
@@ -36,13 +52,13 @@ define([], function() {
 
       Participant.getByUniqueId(vm.study.id, vm.uniqueId)
         .then(function (participant) {
-          $state.go('home.collection.study.participant', { participantId: participant.id });
+          $state.go('home.collection.study.participant.summary', { participantId: participant.id });
         })
         .catch(function (error) {
           if (error.status === 404) {
             createParticipantModal(vm.uniqueId);
           } else {
-            throw new Error('CollectionStudyCtrl:' + JSON.stringify(error));
+            throw new Error('ParticipantGetCtrl:' + JSON.stringify(error));
           }
         });
     }
@@ -66,5 +82,6 @@ define([], function() {
     }
   }
 
-  return CollectionStudyCtrl;
+  return participantGetDirective;
+
 });

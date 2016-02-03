@@ -89,7 +89,7 @@ define(['angular', 'underscore'], function(angular, _) {
      * Display a collection event type in a modal.
      */
     function information(ceventType) {
-      return new CeventTypeViewer(vm.study, ceventType, vm.specimenGroupsById, vm.annotationTypesById);
+      return new CeventTypeViewer(vm.study, ceventType);
     }
 
     /**

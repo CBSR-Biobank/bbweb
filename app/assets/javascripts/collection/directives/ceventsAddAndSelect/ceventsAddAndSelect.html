@@ -1,0 +1,46 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Events
+      <span class="btn-group pull-right">
+        <button class="btn btn-xs btn-default"
+                title="add collection event"
+                ng-click="vm.add()">
+          <i class="glyphicon glyphicon-plus"></i>
+        </button>
+      </span>
+    </h3>
+  </div>
+
+  <div class="panel-body" ng-if="vm.collectionEvents.length == 0">
+    <div class="panel panel-warning">
+      <div class="panel-heading">
+        No collection events added to this participant yet.
+      </div>
+    </div>
+  </div>
+
+  <table ng-show="vm.collectionEvents.length != 0"
+         class="table table-hover table-condensed"
+         st-table="vm.collectionEvents">
+    <thead>
+      <th st-sort="visitNumber">Visit#</th>
+      <th st-sort="timeCompleted">Time Completed</th>
+      <th></th>
+    </thead>
+    <tbody>
+      <tr ng-repeat="cevent in vm.collectionEvents">
+        <td>
+          <a href ng-click="vm.eventInformation(cevent)">
+            {{cevent.visitNumber}}
+          </a>
+        </td>
+        <td>
+          <a href ng-click="vm.eventInformation(cevent)">
+            {{cevent.timeCompleted | localTime}}
+          </a>
+        </td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

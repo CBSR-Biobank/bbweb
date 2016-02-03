@@ -17,6 +17,24 @@
     </li>
   </ul>
 
+  <div class="panel-footer text-center" style="padding:5px 10px;">
+    <uib-pagination class="pagination-sm"
+                    style="margin:0;"
+                    boundary-links="true"
+                    total-items="vm.pagedResult.total"
+                    ng-model="vm.pagerOptions.page"
+                    items-per-page="vm.pagerOptions.pageSize"
+                    ng-change="vm.pageChanged()"
+                    num-pages="vm.paginationNumPages"
+                    max-size="5"
+                    rotate="false"
+                    previous-text="&lsaquo;"
+                    next-text="&rsaquo;"
+                    first-text="&laquo;"
+                    last-text="&raquo;"
+                    ng-if="vm.showPagination"></uib-pagination>
+  </div>
+
   <div class="panel-footer">
     <form class="form-inline" name="filters">
       <div class="form-group">
@@ -36,20 +54,4 @@
       </div>
     </form>
   </div>
-
 </div>
-
-<pagination class="pagination-sm"
-            boundary-links="true"
-            total-items="vm.pagedResult.total"
-            ng-model="vm.pagerOptions.page"
-            items-per-page="vm.pagerOptions.pageSize"
-            ng-change="vm.pageChanged()"
-            num-pages="vm.paginationNumPages"
-            max-size="5"
-            rotate="false"
-            previous-text="&lsaquo;"
-            next-text="&rsaquo;"
-            first-text="&laquo;"
-            last-text="&raquo;"
-            ng-if="vm.showPagination"></pagination>

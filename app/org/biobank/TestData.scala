@@ -334,6 +334,18 @@ class TestData @Inject() (
               required      = true),
             ParticipantAnnotationType(
               studyId       = study.id,
+              id            = AnnotationTypeId("f12181cec89f4d1382df6acb9af96b52"),
+              version       = 0L,
+              timeAdded     = DateTime.now,
+              timeModified  = None,
+              name          = "Number annotation 2",
+              description   = None,
+              valueType     = AnnotationValueType.Number,
+              maxValueCount = None,
+              options       = Seq.empty,
+              required      = true),
+            ParticipantAnnotationType(
+              studyId       = study.id,
               id            = AnnotationTypeId("e6d4576cf8f1400f9779354629ec8a72"),
               version       = 0L,
               timeAdded     = DateTime.now,

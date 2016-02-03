@@ -31,7 +31,7 @@ define(['underscore'], function(_) {
     var vm = this;
 
     vm.annotations = $scope.annotations;
-    vm.openend = false;
+    vm.opened = false;
     vm.format = bbwebConfig.datepickerFormat;
     vm.datePicker = {
       options: {

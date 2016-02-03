@@ -37,6 +37,17 @@ define(['angular', 'underscore'], function(angular, _) {
 
     StudyAnnotationType.prototype = Object.create(AnnotationType.prototype);
 
+    StudyAnnotationType.create = function(obj) {
+      var annotationType = AnnotationType.create(obj);
+      if (!_.isObject(annotationType)) {
+        return annotationType;
+      }
+      if (!obj.studyId) {
+        return new Error('invalid object from server: missing studyId');
+      }
+      return new StudyAnnotationType(obj);
+    };
+
     /**
      * Factory function to get all study annotation types for studyId.
      *

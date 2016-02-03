@@ -139,9 +139,11 @@ define([], function() {
       },
       views: {
         'centreDetails': {
-          template: '<uib-accordion close-others="false">' +
-            '<locations-panel centre="centre"></locations-panel>' +
-            '</uib-accordion>',
+          template: [
+            '<uib-accordion close-others="false">',
+            '  <locations-panel centre="centre"></locations-panel>',
+            '</uib-accordion>'
+          ].join(''),
           controller: [
             '$scope', 'centre', 'locations',
             function($scope, centre, locations) {
@@ -218,13 +220,15 @@ define([], function() {
       },
       views: {
         'centreDetails': {
-          template: '<uib-accordion close-others="false">' +
-            '<centre-studies-panel  ' +
-            '  centre="centre" ' +
-            '  centre-studies="centreStudies" ' +
-            '  study-names="studyNames"> ' +
-            '  </centre-studies-panel>' +
-            '</uib-accordion>',
+          template: [
+            '<uib-accordion close-others="false">',
+            '  <centre-studies-panel',
+            '    centre="centre" ',
+            '    centre-studies="centreStudies" ',
+            '    study-names="studyNames"> ',
+            '    </centre-studies-panel>',
+            '</uib-accordion>'
+          ].join(''),
           controller: [
             '$scope', 'centre', 'centreStudies', 'studyNames',
             function($scope, centre, centreStudies, studyNames) {

@@ -229,6 +229,34 @@ define([
       httpBackend.flush();
     });
 
+    it('can retrieve collection events for a participant', function(done) {
+      var study = fakeEntities.study(),
+          participant = fakeEntities.participant({ studyId: study.id }),
+          ceventType = fakeEntities.collectionEventType(study),
+          collectionEvents = _.map(_.range(2), function () {
+            return fakeEntities.collectionEvent({
+              participantId: participant.id,
+              collectionEventTypeId: ceventType.id
+            });
+          });
+
+      httpBackend.whenGET(uri(participant.id))
+        .respond(serverReply(collectionEvents));
+
+      CollectionEvent.get(participant.id).then(function (reply) {
+        _.each(reply, function(obj) {
+          var serverEntity;
+
+          expect(obj).toEqual(jasmine.any(CollectionEvent));
+          serverEntity = _.findWhere(collectionEvents, { id: obj.id });
+          expect(serverEntity).toBeDefined();
+          obj.compareToServerEntity(serverEntity);
+        });
+        done();
+      });
+      httpBackend.flush();
+    });
+
     it('can retrieve a single collection event by visit number', function(done) {
       var entities              = getCollectionEventEntities(true),
           participant           = entities.participant,
@@ -478,7 +506,7 @@ define([
       var participantId,
           collectionEventId,
           version,
-          result = '/participants',
+          result = '/participants/cevents',
           args = _.toArray(arguments);
 
       if (args.length < 1) {
@@ -486,7 +514,7 @@ define([
       }
 
       participantId = args.shift();
-      result += '/' + participantId + '/cevents';
+      result += '/' + participantId;
 
       if (args.length > 0) {
         collectionEventId = args.shift();

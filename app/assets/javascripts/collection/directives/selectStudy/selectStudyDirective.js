@@ -11,7 +11,8 @@ define(['underscore'], function(_) {
   function selectStudyDirective() {
     var directive = {
       restrict: 'E',
-      scope: {
+      scope: {},
+      bindToController: {
         getHeader:              '&',
         getStudies:             '&',
         pageSize:               '=',
@@ -20,7 +21,7 @@ define(['underscore'], function(_) {
         navigateStateName:      '@',
         navigateStateParamName: '@'
       },
-      templateUrl : '/assets/javascripts/collection/selectStudy.html',
+      templateUrl : '/assets/javascripts/collection/directives/selectStudy/selectStudy.html',
       controller: SelectStudyCtr,
       controllerAs: 'vm'
     };
@@ -38,16 +39,7 @@ define(['underscore'], function(_) {
       HAVE_RESULTS: 1
     };
 
-    vm.getHeader              = $scope.getHeader;
-    vm.getStudies             = $scope.getStudies;
-    vm.icon                   = $scope.icon;
-    vm.messageNoResults       = $scope.messageNoResults;
-    vm.navigateStateName      = $scope.navigateStateName;
-    vm.navigateStateParamName = $scope.navigateStateParamName;
-
     vm.updateStudies          = updateStudies;
-
-    vm.pageSize               = 10;
     vm.pagedResult            = {};
     vm.paginationNumPages     = 5;
     vm.nameFilterUpdated      = nameFilterUpdated;

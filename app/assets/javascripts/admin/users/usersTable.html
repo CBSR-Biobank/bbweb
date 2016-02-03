@@ -1,15 +1,21 @@
 <div class="page-header">
   <h1>User administration</h1>
 </div>
-<div ng-if="! vm.haveUsers">
-  <p>No users have been added yet.</p>
-</div>
-<div ng-if="vm.haveUsers">
-  The following users are present.
-
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Users</h3>
+  </div>
+  <div class="panel-body" ng-if="! vm.haveUsers">
+    <p>No users have been added yet.</p>
+  </div>
+  <div class="panel-body" ng-if="vm.haveUsers">
+    <p>The following users are present:
+    </p>
+  </div>
   <table st-table="vm.users"
          st-pipe="vm.getTableData"
-         class="table table-hover table-striped">
+         class="table table-hover table-striped"
+         ng-if="vm.haveUsers">
     <thead>
       <tr>
         <th st-sort="email">Email</th>
@@ -86,7 +92,7 @@
     </tbody>
     <tbody ng-show="vm.tableDataLoading">
       <tr>
-	<td colspan="4" class="text-center">Loading ... </td>
+        <td colspan="4" class="text-center">Loading ... </td>
       </tr>
     </tbody>
     <tfoot>

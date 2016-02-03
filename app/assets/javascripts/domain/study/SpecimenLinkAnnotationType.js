@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([], function() {
+define(['underscore'], function(_) {
   'use strict';
 
   SpecimenLinkAnnotationTypeFactory.$inject = [
@@ -28,6 +28,10 @@ define([], function() {
     SpecimenLinkAnnotationType.prototype = Object.create(StudyAnnotationType.prototype);
 
     SpecimenLinkAnnotationType.create = function(obj) {
+      var annotationType = StudyAnnotationType.create(obj);
+      if (!_.isObject(annotationType)) {
+        return annotationType;
+      }
       return new SpecimenLinkAnnotationType(obj);
     };
 

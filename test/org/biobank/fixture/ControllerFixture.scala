@@ -146,6 +146,7 @@ abstract class ControllerFixture
 
   def participantRepository                    = app.injector.instanceOf[ParticipantRepository]
   def collectionEventRepository                = app.injector.instanceOf[CollectionEventRepository]
+  def ceventSpecimenRepository                 = app.injector.instanceOf[CeventSpecimenRepository]
 
   def userRepository = app.injector.instanceOf[UserRepository]
 

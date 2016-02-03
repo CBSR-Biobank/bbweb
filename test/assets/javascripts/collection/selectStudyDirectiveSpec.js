@@ -119,9 +119,10 @@ define([
 
     it('displays pagination controls', function() {
       var studies = _.map(_.range(20), function () { return fakeEntities.study(); }),
-          pageSize = studies.length / 2;
+          pageSize = studies.length / 2,
+          scope;
 
-      createScope({
+      scope = createScope({
         getStudies: createGetStudiesFn(studies),
         pageSize: pageSize
       });

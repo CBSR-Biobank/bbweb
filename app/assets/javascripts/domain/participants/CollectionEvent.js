@@ -111,13 +111,31 @@ define(['underscore'], function(_) {
       return new CollectionEvent(obj, collectionEventType, annotationTypes);
     };
 
+    /**
+     * @param collectionEventType can be undefined or null.
+     *
+     * @param annotationTypes can be undefined or null.
+     */
     CollectionEvent.get = function (participantId, id, collectionEventType, annotationTypes) {
-      return biobankApi.get(uri(participantId) + '?ceventId=' + id)
-        .then(function (reply) {
-          return CollectionEvent.create(reply, collectionEventType, annotationTypes);
+      if (id) {
+        return biobankApi.get(uri(participantId) + '?ceventId=' + id)
+          .then(function (reply) {
+            return CollectionEvent.create(reply, collectionEventType, annotationTypes);
+          });
+      }
+
+      return biobankApi.get(uri(participantId)).then(function (reply) {
+        return _.map(reply, function (entity) {
+          return CollectionEvent.create(entity);
         });
+      });
     };
 
+    /**
+     * @param collectionEventType can be undefined or null.
+     *
+     * @param annotationTypes can be undefined or null.
+     */
     CollectionEvent.getByVisitNumber = function (participantId,
                                                  visitNumber,
                                                  collectionEventType,
@@ -234,7 +252,7 @@ define(['underscore'], function(_) {
       }
 
       participantId = args.shift();
-      result += '/' + participantId + '/cevents';
+      result += '/cevents/' + participantId;
 
       if (args.length > 0) {
         collectionEventId = args.shift();

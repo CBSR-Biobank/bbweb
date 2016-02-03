@@ -2,11 +2,11 @@ package org.biobank.infrastructure.command
 
 import org.biobank.infrastructure._
 import org.biobank.domain.participants._
+import org.biobank.infrastructure.JsonUtils._
 
 import Commands._
 
 import play.api.libs.json._
-import play.api.libs.json.Reads._
 import org.joda.time.DateTime
 
 object ParticipantCommands {

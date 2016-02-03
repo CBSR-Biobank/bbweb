@@ -6,16 +6,15 @@
 define(['moment', 'underscore'], function(moment, _) {
   'use strict';
 
-  DateTimeAnnotationFactory.$inject = ['Annotation', 'bbwebConfig'];
+  DateTimeAnnotationFactory.$inject = ['Annotation', 'timeService'];
 
-  function DateTimeAnnotationFactory(Annotation, bbwebConfig) {
+  function DateTimeAnnotationFactory(Annotation, timeService) {
 
     /**
      * Please use annotationFactory.create to create annotation objects.
      */
     function DateTimeAnnotation(obj, annotationType, required) {
       var self = this,
-          date,
           defaults = {
             annotationTypeId     : null
           };
@@ -24,14 +23,7 @@ define(['moment', 'underscore'], function(moment, _) {
       _.extend(self, defaults, _.pick(obj, _.keys(defaults)));
       Annotation.call(this, annotationType, required);
 
-      if (obj.stringValue && (obj.stringValue !== '')) {
-        date = moment(obj.stringValue, bbwebConfig.dateTimeFormat).toDate();
-        this.date = date;
-        this.time = date;
-      } else {
-        this.date = null;
-        this.time = null;
-      }
+      _.extend(self, timeService.stringToDateAndTime(obj.stringValue));
     }
 
     DateTimeAnnotation.prototype = Object.create(Annotation.prototype);
@@ -40,48 +32,18 @@ define(['moment', 'underscore'], function(moment, _) {
      * Must return a string.
      */
     DateTimeAnnotation.prototype.getValue = function () {
-      var datetime;
-
-      if ((this.date === null) || (this.time === null)) {
-        return '';
-      } else {
-        if (this.time instanceof Date) {
-          this.time = moment(this.time);
-        }
-        datetime = moment(this.date).set({
-          'millisecond': 0,
-          'second':      0,
-          'minute':      this.time.minutes(),
-          'hour':        this.time.hours()
-        });
-        return datetime.local().format(bbwebConfig.dateTimeFormat);
-      }
+      return timeService.dateAndTimeToDisplayString(this.date, this.time);
     };
 
+    /**
+     * date part is kept in this.date and time in this.time,
+     *
+     * they must be combined
+     */
     DateTimeAnnotation.prototype.getServerAnnotation = function () {
-      var datetime, stringValue;
-
-      // date part is kept in this.date and time in this.time,
-      //
-      // they must be combined
-      if (this.date && this.time) {
-        if (this.time instanceof Date) {
-          this.time = moment(this.time);
-        }
-        datetime = moment(this.date).set({
-          'millisecond': 0,
-          'second':      0,
-          'minute':      this.time.minutes(),
-          'hour':        this.time.hours()
-        });
-        stringValue = datetime.local().format(bbwebConfig.dateTimeFormat);
-      } else {
-        stringValue = '';
-      }
-
       return {
         annotationTypeId: this.getAnnotationTypeId(),
-        stringValue:      stringValue,
+        stringValue:      timeService.dateAndTimeToUtcString(this.date, this.time),
         selectedValues:   []
       };
     };
@@ -91,4 +53,3 @@ define(['moment', 'underscore'], function(moment, _) {
 
   return DateTimeAnnotationFactory;
 });
-

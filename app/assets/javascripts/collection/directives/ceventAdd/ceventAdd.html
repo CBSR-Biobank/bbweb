@@ -1,0 +1,108 @@
+<div class="page-header">
+  <h1>{{vm.study.name}} <small>{{vm.title}}</small></h1>
+</div>
+
+<form class="form-horizontal"
+      name="collectionEventForm"
+      novalidate>
+
+  <!-- COLLECTION EVENT TYPE: read only -->
+  <div class="form-group"
+       ng-class="{ 'has-error' : collectionEventForm.ceventTypeId.$invalid &&
+                 !collectionEventForm.ceventTypeId.$pristine }">
+    <label for="ceventTypeId" class="col-md-2 control-label">Event Type</label>
+    <div class="col-md-8">
+      <input ng-readonly="true"
+             class="form-control"
+             ng-model="vm.collectionEvent.collectionEventType.name">
+    </div>
+  </div>
+
+  <!-- VISIT NUMBER -->
+  <div class="form-group"
+       ng-class="{ 'has-error' : collectionEventForm.visitNumber.$invalid &&
+                 !collectionEventForm.visitNumber.$pristine }">
+
+    <label for="visitNumber" class="col-md-2 control-label">Visit number</label>
+    <div class="col-md-8">
+      <input name="visitNumber"
+             type="number"
+             class="form-control"
+             ng-model="vm.collectionEvent.visitNumber"
+             min="1"
+             placeholder="A unique number for this participant"
+             focus-me="true"
+             required />
+    </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p class="help-block" ng-show="collectionEventForm.visitNumber.$error.required &&
+                                     !collectionEventForm.visitNumber.$pristine">
+        Visit number is required
+      </p>
+      <p class="help-block" ng-show="collectionEventForm.visitNumber.$error.min &&
+                                     !collectionEventForm.visitNumber.$pristine">
+        Visit number has to be a positive number
+      </p>
+    </div>
+  </div>
+
+  <!-- TIME COMPLETED -->
+  <!-- done with help from https://github.com/zhaber/angular-js-bootstrap-datetimepicker -->
+  <div class="form-group"
+       ng-class="{ 'has-error' : (collectionEventForm.timeCompletedDate.$invalid &&
+                   !collectionEventForm.timeCompletedDate.$pristine) ||
+                 (collectionEventForm.$error.time[0].$invalid &&
+                 !collectionEventForm.$error.time[0].$pristine) }">
+
+    <label for="timeCompleted" class="col-md-2 control-label">Time completed</label>
+    <div class="col-md-8">
+      <div class="datetimepicker-wrapper">
+        <input name="timeCompletedDate"
+               type="text"
+               class="form-control"
+               uib-datepicker-popup="{{vm.format}}"
+               is-open="vm.opened"
+               min-date="'2000-01-01'"
+               datepicker-options="vm.datePicker.options"
+               date-disabled="disabled(date, mode)"
+               close-text="Close"
+               ng-model="vm.timeCompleted.date"
+               ng-required="true"
+               ng-click="vm.datePicker.open($event)"/>
+      </div>
+      <div class="datetimepicker-wrapper" style="display:inline-block">
+        <uib-timepicker ng-model="vm.timeCompleted.time"
+                        show-meridian="true"
+                        ng-required="true">
+        </uib-timepicker>
+      </div>
+    </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p class="help-block" ng-show="collectionEventForm.timeCompletedDate.$error.date &&
+                                     !collectionEventForm.timeCompletedDate.$pristine">
+        date is invalid
+      </p>
+      <p class="help-block" ng-show="collectionEventForm.$error.time[0].$error.time &&
+                                     !collectionEventForm.$error.time[0].$pristine">
+        time is invalid
+      </p>
+    </div>
+  </div>
+
+  <!-- ANNOTATION TYPES  -->
+  <annotations-input annotations="vm.collectionEvent.annotations"></annotations-input>
+
+  <!-- BUTTONS  -->
+  <div class="form-group">
+    <div class="col-md-offset-2 col-md-10">
+      <button class="btn btn-primary"
+              ng-disabled="collectionEventForm.$invalid"
+              ng-click="vm.submit()">Submit</button>
+      <button type="button" class="btn" ng-click="vm.cancel()">Cancel</button>
+    </div>
+  </div>
+</form>
+
+<div class="row">
+  <div class="col-xs-12"><pre>CE: {{vm.collectionEvent | json}}</pre></div>
+</div>

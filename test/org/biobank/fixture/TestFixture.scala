@@ -75,7 +75,10 @@ trait TestFixture
   val specimenLinkAnnotationTypeRepository     = app.injector.instanceOf[SpecimenLinkAnnotationTypeRepository]
   val specimenLinkTypeRepository               = app.injector.instanceOf[SpecimenLinkTypeRepository]
   val studyRepository                          = app.injector.instanceOf[StudyRepository]
+
   val participantRepository                    = app.injector.instanceOf[ParticipantRepository]
+  val collectionEventRepository                = app.injector.instanceOf[CollectionEventRepository]
+  val ceventSpecimenRepository                 = app.injector.instanceOf[CeventSpecimenRepository]
 
   val userRepository = app.injector.instanceOf[UserRepository]
 

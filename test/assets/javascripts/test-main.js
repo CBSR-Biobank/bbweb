@@ -39,18 +39,18 @@ require.config({
 
   paths: {
     'jquery':                       '../../../target/web/web-modules/main/webjars/lib/jquery/jquery',
+    'faker':                        '../../../node_modules/karma-faker/node_modules/faker/build/build/faker',
+    'moment':                       '../../../target/web/web-modules/main/webjars/lib/momentjs/moment',
+    'toastr':                       '../../../target/web/web-modules/main/webjars/lib/toastr/toastr',
+    'underscore':                   '../../../target/web/web-modules/main/webjars/lib/underscorejs/underscore',
     'angular':                      '../../../target/web/web-modules/main/webjars/lib/angularjs/angular',
     'angularMocks':                 '../../../target/web/web-modules/main/webjars/lib/angularjs/angular-mocks',
     'angular-cookies':              '../../../target/web/web-modules/main/webjars/lib/angularjs/angular-cookies',
-    'underscore':                   '../../../target/web/web-modules/main/webjars/lib/underscorejs/underscore',
-    'toastr':                       '../../../target/web/web-modules/main/webjars/lib/toastr/toastr',
-    'smart-table':                  '../../../target/web/web-modules/main/webjars/lib/smart-table/smart-table',
-    'angular-ui-router':            '../../../target/web/web-modules/main/webjars/lib/angular-ui-router/angular-ui-router',
-    'ui-bootstrap':                 '../../../target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/ui-bootstrap-tpls',
     'angular-sanitize':             '../../../target/web/web-modules/main/webjars/lib/angular-sanitize/angular-sanitize',
+    'angular-ui-router':            '../../../target/web/web-modules/main/webjars/lib/angular-ui-router/angular-ui-router',
     'angular-utils-ui-breadcrumbs': '../../../target/web/web-modules/main/webjars/lib/angular-utils-ui-breadcrumbs/uiBreadcrumbs',
-    'moment':                       '../../../target/web/web-modules/main/webjars/lib/momentjs/moment',
-    'faker':                        '../../../node_modules/karma-faker/node_modules/faker/build/build/faker',
+    'smart-table':                  '../../../target/web/web-modules/main/webjars/lib/smart-table/smart-table',
+    'ui-bootstrap':                 '../../../target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/ui-bootstrap-tpls',
     'biobank.testUtils':            '../../../test/assets/javascripts/fixtures/testUtils',
     'biobankTest':                  '../../../test/assets/javascripts/test/module',
     'biobankApp':                   'app'
@@ -58,30 +58,19 @@ require.config({
 
   shim: {
     'angular' : {
-      'exports' : 'angular'
+      exports : 'angular'
     },
     'angularMocks': {
       deps: ['angular'],
       exports: 'angular.mock'
     },
-    'angular-ui-router': {
-      deps: ['angular']
-    },
-    'angular-sanitize': {
-      deps: ['angular']
-    },
-    'ui-bootstrap': {
-      deps: ['angular']
-    },
-    'smart-table': {
-      deps: ['angular']
-    },
-    'angular-utils-ui-breadcrumbs': {
-      deps: ['angular']
-    },
-    'angular-cookies': {
-      deps: ['angular']
-    },
+    'angular-cookies':              ['angular'],
+    'angular-sanitize':             ['angular'],
+    'angular-ui-router':            ['angular'],
+    'bootstrap':                    ['jquery'],
+    'smart-table':                  ['angular'],
+    'ui-bootstrap':                 ['angular'],
+    'angular-utils-ui-breadcrumbs': ['angular'],
     'biobankApp': {
       deps: ['angular',
              'angular-ui-router',

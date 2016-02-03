@@ -1,0 +1,24 @@
+<div class="page-header">
+  <h1>{{vm.study.name}} <small>Participant {{vm.participant.uniqueId}}</small></h1>
+</div>
+<!--
+    The 'ui-sref' attribute has to go on the 'tab' tag to have the state change when any part
+    of the tab is clicked on, not just the link.
+  -->
+<div class="row">
+  <div class="col-md-12">
+    <uib-tabset>
+      <uib-tab heading="Summary"
+           ui-sref="home.collection.study.participant.summary"
+           ui-sref-opts="{reload: true}"
+           active="vm.tabSummaryActive"></uib-tab>
+      <uib-tab heading="Collection Events"
+           ui-sref="home.collection.study.participant.cevents"
+           ui-sref-opts="{reload: true}"
+           active="vm.tabCeventsActive"></uib-tab>
+    </uib-tabset>
+  </div>
+</div>
+<div class="row">
+  <div ui-view="participantDetails" style="margin-top: 10px;"></div>
+</div>

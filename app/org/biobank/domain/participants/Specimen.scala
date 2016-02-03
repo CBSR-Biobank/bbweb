@@ -27,29 +27,29 @@ sealed trait Specimen
     with HasSpecimenGroupId {
 
   /** The [[SpecimenGroup]] this specimen belongs to, defined by the study it belongs to. */
-  val specimenGroupId:  SpecimenGroupId
+  val specimenGroupId: SpecimenGroupId
 
   /** The [[Centre]] where this specimen was created. */
   val originLocationId: LocationId
 
   /** The [[Centre]] where this specimen is currently located. */
-  val locationId:       LocationId
+  val locationId: LocationId
 
   /** The [[Container]] this specimen is stored in. */
-  val containerId:      Option[ContainerId]
+  val containerId: Option[ContainerId]
 
   /** The [[ContainerSchemaPosition]] (i.e. position or label) this specimen has in its container. . */
-  val positionId:       Option[ContainerSchemaPositionId]
+  val positionId: Option[ContainerSchemaPositionId]
 
   /**
-   *  The date and time when the specimen was physically created.
+   * The date and time when the specimen was physically created.
    *
-   *  Not necessarilly when this specimen was added to the application.
+   * Not necessarily when this specimen was added to the application.
    */
-  val timeCreated:      DateTime
+  val timeCreated: DateTime
 
   /** The amount, in units specified in the [[SpecimenGroup]], for this specimen. */
-  val amount:           BigDecimal
+  val amount: BigDecimal
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {

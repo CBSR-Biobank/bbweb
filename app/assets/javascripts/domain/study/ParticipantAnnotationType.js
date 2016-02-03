@@ -33,6 +33,10 @@ define(['underscore'], function(_) {
     ParticipantAnnotationType.prototype = Object.create(StudyAnnotationType.prototype);
 
     ParticipantAnnotationType.create = function(obj) {
+      var annotationType = StudyAnnotationType.create(obj);
+      if (!_.isObject(annotationType)) {
+        return annotationType;
+      }
       return new ParticipantAnnotationType(obj);
     };
 

@@ -1,17 +1,6 @@
-<div class="page-header">
-  <h1>{{vm.study.name}} <small>Participant {{vm.participant.uniqueId}}</small></h1>
-</div>
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">Participant
-      <span class="btn-group pull-right">
-        <a ui-sref="home.collection.study.participant.update({participantId: vm.participant.id})"
-           class="btn btn-xs btn-primary"
-           type="button" title="update">
-          <i class="glyphicon glyphicon-edit"></i>
-        </a>
-      </span>
-    </h3>
+    <h3 class="panel-title">Participant</h3>
   </div>
 
   <ul class="list-group">
@@ -46,5 +35,5 @@
       </div>
     </li>
   </ul>
-  <domain-entity-timestamps entity="vm.participant"></domain-entity-timestamps>
+  <status-line item="vm.participant"></status-line>
 </div>
