@@ -9,7 +9,7 @@ define(['angular', 'underscore'], function(angular, _) {
    *
    */
   function spcLinkTypesPanelDirective() {
-    return {
+    var directive = {
       require: '^tab',
       restrict: 'E',
       scope: {
@@ -17,8 +17,11 @@ define(['angular', 'underscore'], function(angular, _) {
         processingDto: '='
       },
       templateUrl: '/assets/javascripts/admin/studies/processing/spcLinkTypesPanel.html',
-      controller: 'SpcLinkTypesPanelCtrl as vm'
+      controller: SpcLinkTypesPanelCtrl,
+      controllerAs: 'vm'
     };
+
+    return directive;
   }
 
   SpcLinkTypesPanelCtrl.$inject = [
@@ -143,8 +146,5 @@ define(['angular', 'underscore'], function(angular, _) {
 
   }
 
-  return {
-    directive: spcLinkTypesPanelDirective,
-    controller: SpcLinkTypesPanelCtrl
-  };
+  return spcLinkTypesPanelDirective;
 });

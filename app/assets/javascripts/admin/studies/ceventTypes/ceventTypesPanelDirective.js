@@ -20,7 +20,8 @@ define(['angular', 'underscore'], function(angular, _) {
         specimenGroups:         '='
       },
       templateUrl: '/assets/javascripts/admin/studies/ceventTypes/ceventTypesPanel.html',
-      controller: 'CeventTypesPanelCtrl as vm'
+      controller: CeventTypesPanelCtrl,
+      controllerAs: 'vm'
     };
     return directive;
   }
@@ -138,8 +139,5 @@ define(['angular', 'underscore'], function(angular, _) {
 
   }
 
-  return {
-    directive: ceventTypesPanelDirective,
-    controller: CeventTypesPanelCtrl
-  };
+  return ceventTypesPanelDirective;
 });

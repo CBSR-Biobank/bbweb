@@ -9,7 +9,7 @@ define(['angular', 'underscore'], function(angular, _) {
    *
    */
   function specimenGroupsPanelDirective() {
-    return {
+    var directive = {
       require: '^tab',
       restrict: 'E',
       scope: {
@@ -18,8 +18,11 @@ define(['angular', 'underscore'], function(angular, _) {
         specimenGroupIdsInUse: '='
       },
       templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupsPanel.html',
-      controller: 'SpecimenGroupsPanelCtrl as vm'
+      controller: SpecimenGroupsPanelCtrl,
+      controllerAs: 'vm'
     };
+
+    return directive;
   }
 
   SpecimenGroupsPanelCtrl.$inject = [
@@ -113,8 +116,5 @@ define(['angular', 'underscore'], function(angular, _) {
     }
   }
 
-  return {
-    directive: specimenGroupsPanelDirective,
-    controller: SpecimenGroupsPanelCtrl
-  };
+  return specimenGroupsPanelDirective;
 });

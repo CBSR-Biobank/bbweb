@@ -9,7 +9,7 @@ define(['angular', 'underscore'], function(angular, _) {
    * This directive allows the user to link a center to one or more study.
    */
   function centreStudiesPanelDirective() {
-    return {
+    var directive = {
       require: '^tab',
       restrict: 'EA',
       scope: {
@@ -18,8 +18,11 @@ define(['angular', 'underscore'], function(angular, _) {
         studyNames:    '='
       },
       templateUrl: '/assets/javascripts/admin/centres/studiesPanel.html',
-      controller: 'CentreStudiesPanelCtrl as vm'
+      controller: CentreStudiesPanelCtrl,
+      controllerAs: 'vm'
     };
+
+    return directive;
   }
 
   CentreStudiesPanelCtrl.$inject = [
@@ -118,8 +121,5 @@ define(['angular', 'underscore'], function(angular, _) {
 
   }
 
-  return {
-    directive: centreStudiesPanelDirective,
-    controller: CentreStudiesPanelCtrl
-  };
+  return centreStudiesPanelDirective;
 });

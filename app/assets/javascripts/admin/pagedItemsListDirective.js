@@ -9,7 +9,7 @@ define(['underscore'], function(_) {
    * Displays items in a panel list. Can only be used for studies and centres.
    */
   function pagedItemsListDirective() {
-    return {
+    var directive = {
       restrict: 'E',
       scope:{
         counts:                       '=',
@@ -22,8 +22,11 @@ define(['underscore'], function(_) {
         entityNavigateStateParamName: '@'
       },
       templateUrl: '/assets/javascripts/admin/pagedItemsList.html',
-      controller: 'PagedItemsListCtrl as vm'
+      controller: PagedItemsListCtrl,
+      controllerAs: 'vm'
     };
+
+    return directive;
   }
 
   PagedItemsListCtrl.$inject = ['$scope'];
@@ -143,8 +146,5 @@ define(['underscore'], function(_) {
     }
   }
 
-  return {
-    directive: pagedItemsListDirective,
-    controller: PagedItemsListCtrl
-  };
+  return pagedItemsListDirective;
 });

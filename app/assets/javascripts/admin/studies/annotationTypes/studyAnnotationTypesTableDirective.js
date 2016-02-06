@@ -9,7 +9,7 @@ define(['angular', 'underscore'], function(angular, _) {
    *
    */
   function studyAnnotationTypesTableDirective() {
-    return {
+    var directive = {
       require: '^tab',
       restrict: 'E',
       scope: {
@@ -21,8 +21,11 @@ define(['angular', 'underscore'], function(angular, _) {
         hasRequired:            '@'
       },
       templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotationTypesPanel.html',
-      controller: 'StudyAnnotationTypesTableCtrl as vm'
+      controller: StudyAnnotationTypesTableCtrl,
+      controllerAs: 'vm'
     };
+
+    return directive;
   }
 
   StudyAnnotationTypesTableCtrl.$inject = [
@@ -111,8 +114,5 @@ define(['angular', 'underscore'], function(angular, _) {
 
   }
 
-  return {
-    directive: studyAnnotationTypesTableDirective,
-    controller: StudyAnnotationTypesTableCtrl
-  };
+  return studyAnnotationTypesTableDirective;
 });

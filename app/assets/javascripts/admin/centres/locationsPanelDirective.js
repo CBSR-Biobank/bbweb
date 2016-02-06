@@ -9,7 +9,7 @@ define(['angular'], function(angular) {
    *
    */
   function locationsPanelDirective() {
-    return {
+    var directive = {
       require: '^tab',
       restrict: 'EA',
       scope: {
@@ -17,8 +17,11 @@ define(['angular'], function(angular) {
         locations: '='
       },
       templateUrl: '/assets/javascripts/admin/centres/locationsPanel.html',
-      controller: 'LocationsPanelCtrl as vm'
+      controller: LocationsPanelCtrl,
+      controllerAs: 'vm'
     };
+
+    return directive;
   }
 
   LocationsPanelCtrl.$inject = [
@@ -82,8 +85,5 @@ define(['angular'], function(angular) {
 
   }
 
-  return {
-    directive: locationsPanelDirective,
-    controller: LocationsPanelCtrl
-  };
+  return locationsPanelDirective;
 });

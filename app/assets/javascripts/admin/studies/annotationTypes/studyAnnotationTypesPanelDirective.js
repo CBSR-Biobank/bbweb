@@ -9,7 +9,7 @@ define(['angular', 'underscore'], function(angular, _) {
    *
    */
   function studyAnnotationTypesPanelDirective() {
-    return {
+    var directive = {
       require: '^tab',
       restrict: 'E',
       scope: {
@@ -22,14 +22,14 @@ define(['angular', 'underscore'], function(angular, _) {
         updateStateName:        '@'
       },
       templateUrl: '/assets/javascripts/admin/studies/annotationTypes/studyAnnotationTypesPanel.html',
-      controller: 'StudyAnnotationTypesPanelCtrl as vm'
+      controller: StudyAnnotationTypesPanelCtrl,
+      controllerAs: 'vm'
     };
+
+    return directive;
   }
 
-  StudyAnnotationTypesPanelCtrl.$inject = [
-    '$scope',
-    'Panel'
-  ];
+  StudyAnnotationTypesPanelCtrl.$inject = [ '$scope', 'Panel' ];
 
   /**
    * A panel to display a study's participant annotation types.
@@ -99,8 +99,5 @@ define(['angular', 'underscore'], function(angular, _) {
     }
   }
 
-  return {
-    directive: studyAnnotationTypesPanelDirective,
-    controller: StudyAnnotationTypesPanelCtrl
-  };
+  return studyAnnotationTypesPanelDirective;
 });

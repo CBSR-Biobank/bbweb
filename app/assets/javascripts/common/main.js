@@ -34,15 +34,13 @@ define(function (require) {
 
   var module = angular.module('biobank.common', []);
 
-  module.directive('annotationsInput',        annotationsInputDirective.directive);
-  module.controller('AnnotationsInputCtrl',   annotationsInputDirective.controller);
+  module.directive('annotationsInput',        annotationsInputDirective);
 
   module.directive('focusMe',                 focusMeDirective);
   module.directive('infoUpdateRemoveButtons', infoUpdateRemoveButtonsDirective);
   module.directive('integer',                 integerDirective);
 
-  module.directive('panelButtons',            panelButtonsDirective.directive);
-  module.controller('PanelButtonsController', panelButtonsDirective.controller);
+  module.directive('panelButtons',            panelButtonsDirective);
 
   module.directive('smartFloat',              smartFloatDirective);
   module.directive('str2integer',             str2integerDirective);

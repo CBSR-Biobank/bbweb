@@ -75,17 +75,13 @@ define(function (require) {
   module.controller('CentreSummaryTabCtrl', CentreSummaryTabCtrl);
   module.controller('CentresCtrl', CentresCtrl);
 
-  module.directive('centreStudiesPanel', centreStudiesPanelDirective.directive);
-  module.controller('CentreStudiesPanelCtrl', centreStudiesPanelDirective.controller);
+  module.directive('centreStudiesPanel', centreStudiesPanelDirective);
 
-  module.directive('locationsPanel', locationsPanelDirective.directive);
-  module.controller('LocationsPanelCtrl', locationsPanelDirective.controller);
+  module.directive('locationsPanel', locationsPanelDirective);
 
   module.config(centreStates);
 
-  module.directive('pagedItemsList', pagedItemsListDirective.directive);
-  module.controller('PagedItemsListCtrl', pagedItemsListDirective.controller);
-
+  module.directive('pagedItemsList', pagedItemsListDirective);
   module.directive('statusLine', statusLineDirective);
 
   module.controller('StudiesCtrl', StudiesCtrl);
@@ -97,16 +93,13 @@ define(function (require) {
   module.controller('AnnotationTypeEditCtrl', AnnotationTypeEditCtrl);
   module.service('studyAnnotationTypeUtils', studyAnnotationTypeUtilsService);
 
-  module.directive('studyAnnotationTypesPanel', studyAnnotationTypesPanelDirective.directive);
-  module.controller('StudyAnnotationTypesPanelCtrl', studyAnnotationTypesPanelDirective.controller);
+  module.directive('studyAnnotationTypesPanel', studyAnnotationTypesPanelDirective);
 
-  module.directive('studyAnnotationTypesTable', studyAnnotationTypesTableDirective.directive);
-  module.controller('StudyAnnotationTypesTableCtrl', studyAnnotationTypesTableDirective.controller);
+  module.directive('studyAnnotationTypesTable', studyAnnotationTypesTableDirective);
 
   module.controller('CeventTypeEditCtrl', CeventTypeEditCtrl);
 
-  module.directive('ceventTypesPanel', ceventTypesPanelDirective.directive);
-  module.controller('CeventTypesPanelCtrl', ceventTypesPanelDirective.controller);
+  module.directive('ceventTypesPanel', ceventTypesPanelDirective);
 
   module.config(ceventTypesStates);
   module.config(participantsStates);
@@ -115,11 +108,9 @@ define(function (require) {
 
   module.controller('SpcLinkTypeEditCtrl', SpcLinkTypeEditCtrl);
 
-  module.directive('processingTypesPanel', processingTypesPanelDirective.directive);
-  module.controller('ProcessingTypesPanelCtrl', processingTypesPanelDirective.controller);
+  module.directive('processingTypesPanel', processingTypesPanelDirective);
 
-  module.directive('spcLinkTypesPanel', spcLinkTypesPanelDirective.directive);
-  module.controller('SpcLinkTypesPanelCtrl', spcLinkTypesPanelDirective.controller);
+  module.directive('spcLinkTypesPanel', spcLinkTypesPanelDirective);
 
   module.config(processingStates);
 
@@ -127,8 +118,7 @@ define(function (require) {
 
   module.service('specimenGroupUtils', specimenGroupUtilsService);
 
-  module.directive('specimenGroupsPanel', specimenGroupsPanelDirective.directive);
-  module.controller('SpecimenGroupsPanelCtrl', specimenGroupsPanelDirective.controller);
+  module.directive('specimenGroupsPanel', specimenGroupsPanelDirective);
 
   module.config(specimenGroupsStates);
 

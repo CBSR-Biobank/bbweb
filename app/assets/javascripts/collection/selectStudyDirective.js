@@ -9,7 +9,7 @@ define(['underscore'], function(_) {
    * This directive allows the user to select a {@link Study} from the list provided by function getStudies().
    */
   function selectStudyDirective() {
-    return {
+    var directive = {
       restrict: 'E',
       scope: {
         getHeader:              '&',
@@ -21,8 +21,11 @@ define(['underscore'], function(_) {
         navigateStateParamName: '@'
       },
       templateUrl : '/assets/javascripts/collection/selectStudy.html',
-      controller: 'SelectStudyCtr as vm'
+      controller: SelectStudyCtr,
+      controllerAs: 'vm'
     };
+
+    return directive;
   }
 
   SelectStudyCtr.$inject = ['$scope', '$state'];
@@ -110,8 +113,5 @@ define(['underscore'], function(_) {
     }
   }
 
-  return {
-    directive: selectStudyDirective,
-    controller: SelectStudyCtr
-  };
+  return selectStudyDirective;
 });

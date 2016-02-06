@@ -9,7 +9,7 @@ define(['angular', 'underscore'], function(angular, _) {
    *
    */
   function processingTypesPanelDirective() {
-    return {
+    var directive = {
       require: '^tab',
       restrict: 'E',
       scope: {
@@ -17,8 +17,11 @@ define(['angular', 'underscore'], function(angular, _) {
         processingTypes: '='
       },
       templateUrl: '/assets/javascripts/admin/studies/processing/processingTypesPanel.html',
-      controller: 'ProcessingTypesPanelCtrl as vm'
+      controller: ProcessingTypesPanelCtrl,
+      controllerAs: 'vm'
     };
+
+    return directive;
   }
 
   ProcessingTypesPanelCtrl.$inject = [
@@ -96,8 +99,5 @@ define(['angular', 'underscore'], function(angular, _) {
 
   }
 
-  return {
-    directive: processingTypesPanelDirective,
-    controller: ProcessingTypesPanelCtrl
-  };
+  return processingTypesPanelDirective;
 });

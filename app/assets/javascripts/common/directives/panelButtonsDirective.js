@@ -10,7 +10,7 @@ define([], function(){
    * Displays a right justified button with a 'plus' icon. Meant to be used in a pane to add a
    * domain object.
    */
-  function panelButtonsDirectiveFactory() {
+  function panelButtonsDirective() {
     var directive = {
       restrict: 'E',
       replace: true,
@@ -21,7 +21,8 @@ define([], function(){
         panelOpen: '='
       },
       templateUrl: '/assets/javascripts/common/directives/panelButtons.html',
-      controller: 'PanelButtonsController as vm'
+      controller: PanelButtonsController,
+      controllerAs: 'vm'
     };
     return directive;
   }
@@ -44,8 +45,5 @@ define([], function(){
     }
   }
 
-  return {
-    directive: panelButtonsDirectiveFactory,
-    controller: PanelButtonsController
-  };
+  return panelButtonsDirective;
 });

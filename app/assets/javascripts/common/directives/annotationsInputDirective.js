@@ -9,14 +9,17 @@ define(['underscore'], function(_) {
    * Annotations must contain an attribute named 'annotationType' with the annotation types information.
    */
   function annotationsInputDirective() {
-    return {
+    var directive = {
       restrict: 'E',
       scope: {
         annotations: '='
       },
       templateUrl : '/assets/javascripts/common/directives/annotationsInput.html',
-      controller: 'AnnotationsInputCtrl as vm'
+      controller: AnnotationsInputCtrl,
+      controllerAs: 'vm'
     };
+
+    return directive;
   }
 
   AnnotationsInputCtrl.$inject = ['$scope', 'bbwebConfig'];
@@ -44,8 +47,5 @@ define(['underscore'], function(_) {
     }
   }
 
-  return {
-    directive: annotationsInputDirective,
-    controller: AnnotationsInputCtrl
-  };
+  return annotationsInputDirective;
 });
