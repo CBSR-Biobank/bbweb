@@ -141,16 +141,17 @@ define([], function() {
         'centreDetails': {
           template: [
             '<uib-accordion close-others="false">',
-            '  <locations-panel centre="centre"></locations-panel>',
+            '  <locations-panel centre="vm.centre">',
+            '  </locations-panel>',
             '</uib-accordion>'
           ].join(''),
           controller: [
-            '$scope', 'centre', 'locations',
-            function($scope, centre, locations) {
-              $scope.centre = centre;
-              $scope.locations = locations;
+            'centre',
+            function(centre) {
+              this.centre = centre;
             }
-          ]
+          ],
+          controllerAs: 'vm'
         }
       },
       data: {
@@ -223,20 +224,22 @@ define([], function() {
           template: [
             '<uib-accordion close-others="false">',
             '  <centre-studies-panel',
-            '    centre="centre" ',
-            '    centre-studies="centreStudies" ',
-            '    study-names="studyNames"> ',
+            '    centre="vm.centre" ',
+            '    centre-studies="vm.centreStudies" ',
+            '    study-names="vm.studyNames"> ',
             '    </centre-studies-panel>',
             '</uib-accordion>'
           ].join(''),
           controller: [
-            '$scope', 'centre', 'centreStudies', 'studyNames',
-            function($scope, centre, centreStudies, studyNames) {
-              $scope.centre        = centre;
-              $scope.centreStudies = centreStudies;
-              $scope.studyNames    = studyNames;
+            'centre', 'centreStudies', 'studyNames',
+            function(centre, centreStudies, studyNames) {
+              var vm = this;
+              vm.centre        = centre;
+              vm.centreStudies = centreStudies;
+              vm.studyNames    = studyNames;
             }
-          ]
+          ],
+          controllerAs: 'vm'
         }
       },
       data: {

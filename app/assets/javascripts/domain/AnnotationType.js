@@ -47,6 +47,8 @@ define(['angular', 'underscore'], function(angular, _) {
 
     AnnotationType.prototype = Object.create(ConcurrencySafeEntity.prototype);
 
+    AnnotationType.prototype.constructor = AnnotationType;
+
     /**
      * Used by promise code, so it must return an error rather than throw one.
      */

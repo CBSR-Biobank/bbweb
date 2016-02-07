@@ -9,7 +9,7 @@ define(function (require) {
 
   var angular                          = require('angular'),
 
-      annotationsInputDirective        = require('./directives/annotationsInputDirective'),
+      annotationsInputDirective        = require('./directives/annotationsInput/annotationsInputDirective'),
       focusMeDirective                 = require('./directives/focusMeDirective'),
       infoUpdateRemoveButtonsDirective = require('./directives/infoUpdateRemoveButtonsDirective'),
       integerDirective                 = require('./directives/integerDirective'),
@@ -19,6 +19,7 @@ define(function (require) {
       truncateToggleDirective          = require('./directives/truncateToggleDirective'),
       updateRemoveButtonsDirective     = require('./directives/updateRemoveButtonsDirective'),
       pageSelectDirective              = require('./directives/pageSelectDirective'),
+      pagedItemsListDirective          = require('./directives/pagedItemsList/pagedItemsListDirective'),
 
       localTimeFilter                  = require('./filters/localTimeFilter'),
       timeagoFilter                    = require('./filters/timeagoFilter'),
@@ -50,6 +51,7 @@ define(function (require) {
   module.directive('updateRemoveButtons',     updateRemoveButtonsDirective);
 
   module.directive('pageSelect',              pageSelectDirective);
+  module.directive('pagedItemsList',          pagedItemsListDirective);
 
   module.filter('localTime',                  localTimeFilter);
   module.filter('timeago',                    timeagoFilter);

@@ -27,6 +27,8 @@ define(['underscore'], function(_) {
 
     SpecimenLinkAnnotationType.prototype = Object.create(StudyAnnotationType.prototype);
 
+    SpecimenLinkAnnotationType.prototype.constructor = SpecimenLinkAnnotationType;
+
     SpecimenLinkAnnotationType.create = function(obj) {
       var annotationType = StudyAnnotationType.create(obj);
       if (!_.isObject(annotationType)) {

@@ -57,9 +57,20 @@ define(['faker', 'underscore'], function(faker, _) {
     });
   }
 
-  function putHtmlTemplate($templateCache, template) {
-    $templateCache.put(template,
-      jasmine.getFixtures().getFixtureHtml_('../../../base/app' + template));
+  function putHtmlTemplates(/* $templateCache, template1, template2, ... */) {
+    var templateCache,
+        args = _.toArray(arguments);
+
+    if (args.length < 1) {
+      throw new Error('templateCache not specified');
+    }
+
+    templateCache = args.shift();
+
+    _.each(args, function (template) {
+      templateCache.put(template,
+                        jasmine.getFixtures().getFixtureHtml_('../../../base/app' + template));
+    });
   }
 
   function camelCaseToUnderscore(str) {
@@ -83,7 +94,7 @@ define(['faker', 'underscore'], function(faker, _) {
     fakeModal:                     fakeModal,
     expectedVersion:               expectedVersion,
     addCustomMatchers:             addCustomMatchers,
-    putHtmlTemplate:               putHtmlTemplate,
+    putHtmlTemplates:              putHtmlTemplates,
     camelCaseToUnderscore:         camelCaseToUnderscore
   };
 });

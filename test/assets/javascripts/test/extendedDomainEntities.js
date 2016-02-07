@@ -196,10 +196,9 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
     };
 
     DateTimeAnnotation.prototype.compareToServerEntity = function (serverEntity) {
-      expect(moment(this.date).local().format(bbwebConfig.dateTimeFormat))
-        .toEqual(serverEntity.stringValue);
-      expect(moment(this.time).local().format(bbwebConfig.dateTimeFormat))
-        .toEqual(serverEntity.stringValue);
+      // has to be comparetd to UTC time
+      expect(moment(this.date).local().format()).toEqual(serverEntity.stringValue);
+      expect(moment(this.time).local().format()).toEqual(serverEntity.stringValue);
     };
 
     MultipleSelectAnnotation.prototype.compareToServerEntity = function (serverEntity) {

@@ -390,7 +390,14 @@ define([
         return faker.random.number({precision: 0.05}).toString();
 
       case AnnotationValueType.DATE_TIME():
-        return moment(faker.date.past(1)).local().format(bbwebConfig.dateTimeFormat);
+        // has to be in UTC format, with no seconds or milliseconds
+        return moment(faker.date.past(1))
+          .set({
+            'millisecond': 0,
+            'second':      0
+          })
+          .local()
+          .format();
 
       case AnnotationValueType.SELECT():
         if (annotationType.maxValueCount === 1) {

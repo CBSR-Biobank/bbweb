@@ -27,7 +27,7 @@ define([
       rootScope = $rootScope;
       compile = $compile;
 
-      testUtils.putHtmlTemplate($templateCache,
+      testUtils.putHtmlTemplates($templateCache,
                                '/assets/javascripts/common/directives/truncateToggle.html');
 
       element = angular.element(

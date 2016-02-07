@@ -23,7 +23,7 @@ define([
       rootScope = $rootScope;
       compile = $compile;
 
-      testUtils.putHtmlTemplate($templateCache,
+      testUtils.putHtmlTemplates($templateCache,
                                '/assets/javascripts/common/directives/updateRemoveButtons.html');
 
       element = angular.element(

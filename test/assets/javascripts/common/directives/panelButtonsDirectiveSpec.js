@@ -26,7 +26,7 @@ define([
       rootScope = $rootScope;
       compile = $compile;
 
-      testUtils.putHtmlTemplate($templateCache,
+      testUtils.putHtmlTemplates($templateCache,
                                '/assets/javascripts/common/directives/panelButtons.html');
 
       element = angular.element(

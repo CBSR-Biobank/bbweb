@@ -27,6 +27,8 @@ define(['underscore'], function(_) {
 
     CollectionEventAnnotationType.prototype = Object.create(StudyAnnotationType.prototype);
 
+    CollectionEventAnnotationType.prototype.constructor = CollectionEventAnnotationType;
+
     CollectionEventAnnotationType.create = function(obj) {
       var annotationType = StudyAnnotationType.create(obj);
       if (!_.isObject(annotationType)) {

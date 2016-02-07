@@ -8,11 +8,12 @@ define([
   'angular',
   'angularMocks',
   'underscore',
+  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _) {
+], function(angular, mocks, _, testUtils) {
   'use strict';
 
-  describe('Controller: StudyAnnotationTypesPanelCtrl', function() {
+  describe('Directive: studyAnnotationTypesPanelDirective', function() {
     var Study,
         ParticipantAnnotationType,
         CollectionEventAnnotationType,
@@ -22,18 +23,13 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (_Study_,
-                                _ParticipantAnnotationType_,
-                                _CollectionEventAnnotationType_,
-                                _SpecimenLinkAnnotationType_,
-                                _AnnotationValueType_,
-                                fakeDomainEntities) {
-      Study                         = _Study_;
-      ParticipantAnnotationType     = _ParticipantAnnotationType_;
-      CollectionEventAnnotationType = _CollectionEventAnnotationType_;
-      SpecimenLinkAnnotationType    = _SpecimenLinkAnnotationType_;
-      AnnotationValueType           = _AnnotationValueType_;
-      fakeEntities                  = fakeDomainEntities;
+    beforeEach(inject(function () {
+      Study                         = this.$injector.get('Study');
+      ParticipantAnnotationType     = this.$injector.get('ParticipantAnnotationType');
+      CollectionEventAnnotationType = this.$injector.get('CollectionEventAnnotationType');
+      SpecimenLinkAnnotationType    = this.$injector.get('SpecimenLinkAnnotationType');
+      AnnotationValueType           = this.$injector.get('AnnotationValueType');
+      fakeEntities                  = this.$injector.get('fakeDomainEntities');
     }));
 
     describe('for Participant Annotation Types', function() {
@@ -49,9 +45,9 @@ define([
               context.study, {valueType: valueType, required: true}));
         });
         context.annotationTypeIdsInUse = [context.annotationTypes[0]];
-        context.annotationTypeName   = 'ParticipantAnnotationType';
-        context.panelId         = 'study.panel.participantAnnotationTypes';
-        context.addStateName    = 'home.admin.studies.study.participants.annotationTypeAdd';
+        context.annotationTypeName     = 'ParticipantAnnotationType';
+        context.panelId                = 'study.panel.participantAnnotationTypes';
+        context.addStateName           = 'home.admin.studies.study.participants.annotationTypeAdd';
       });
 
       sharedBehaviour(context);
@@ -101,61 +97,70 @@ define([
 
     function sharedBehaviour(context) {
 
-      var panelId;
-
       describe('(shared)', function() {
         var scope,
-            state,
-            Panel,
-            study,
-            annotationTypes,
-            annotationTypeIdsInUse,
-            annotationTypeName,
-            addStateName;
+            controller,
+            $state,
+            Panel;
 
         beforeEach(inject(function($window,
-                                   $state,
-                                   $controller,
-                                   $rootScope,
-                                   _Panel_) {
+                                   $compile,
+                                   $rootScope) {
+          var element,
+              $templateCache = this.$injector.get('$templateCache');
 
-          Panel             = _Panel_;
-          state             = $state;
-          study             = context.study;
-          annotationTypes        = context.annotationTypes;
-          annotationTypeIdsInUse = context.annotationTypeIdsInUse;
-          annotationTypeName     = context.annotationTypeName;
-          panelId           = context.panelId;
-          addStateName      = context.addStateName;
+          Panel = this.$injector.get('Panel');
+          $state = this.$injector.get('$state');
 
-          spyOn(state, 'go').and.callFake(function () {});
+          spyOn($state, 'go').and.callFake(function () {});
           spyOn(Panel.prototype, 'add').and.callThrough();
 
-          $window.localStorage.setItem(panelId, '');
+          $window.localStorage.setItem(context.panelId, '');
+
+          testUtils.putHtmlTemplates(
+            $templateCache,
+            '/assets/javascripts/admin/studies/annotationTypes/directives/studyAnnotationTypesPanel/studyAnnotationTypesPanel.html',
+            '/assets/javascripts/admin/studies/annotationTypes/directives/studyAnnotationTypesTable/studyAnnotationTypesTable.html',
+            '/assets/javascripts/common/directives/panelButtons.html',
+            '/assets/javascripts/common/directives/updateRemoveButtons.html');
+
+
+          element = angular.element([
+            '<uib-accordion close-others="false">',
+            '  <study-annotation-types-panel',
+            '     study="vm.study"',
+            '     annotation-types="vm.annotationTypes"',
+            '     annotation-type-ids-in-use="vm.annotationTypeIdsInUse"',
+            '     annotation-type-name="' + context.annotationTypeName + '"',
+            '     panel-id="' + context.panelId + '"',
+            '     add-state-name="' + context.addStateName + '"',
+            '     update-state-name="' + context.updateStateName + '">',
+            '  </study-annotation-types-panel>',
+            '</uib-accordion>'
+          ].join(''));
 
           scope = $rootScope.$new();
-          scope.study           = study;
-          scope.annotationTypes      = annotationTypes;
-          scope.annotationTypeIdsInUse = annotationTypeIdsInUse;
-          scope.annotationTypeName   = context.annotationTypeName;
-          scope.addStateName    = addStateName;
+          scope.vm = {
+            study:                  context.study,
+            annotationTypes:        context.annotationTypes,
+            annotationTypeIdsInUse: context.annotationTypeIdsInUse
+          };
 
-          $controller('StudyAnnotationTypesPanelCtrl as vm', {
-            $scope: scope,
-            Panel:  Panel
-          });
+          $compile(element)(scope);
           scope.$digest();
+          controller = element.find('study-annotation-types-panel')
+            .controller('studyAnnotationTypesPanel');
         }));
 
         it('has valid scope', function () {
-          expect(scope.vm.study).toEqual(study);
-          expect(scope.vm.annotationTypes).toEqual(annotationTypes);
-          expect(scope.vm.annotationTypeIdsInUse).toEqual(annotationTypeIdsInUse);
+          expect(controller.study).toEqual(context.study);
+          expect(controller.annotationTypes).toEqual(context.annotationTypes);
+          expect(controller.annotationTypeIdsInUse).toEqual(context.annotationTypeIdsInUse);
         });
 
         it('has valid panel heading', function () {
 
-          expect(scope.vm.panelHeading).toEqual(getHeading(annotationTypeName));
+          expect(controller.panelHeading).toEqual(getHeading(context.annotationTypeName));
 
           function getHeading(annotationTypeName) {
             switch (annotationTypeName) {
@@ -176,7 +181,8 @@ define([
         });
 
         it('has valid description', function () {
-          expect(scope.vm.annotationTypeDescription).toContain(getDescriptionSubString(annotationTypeName));
+          expect(controller.annotationTypeDescription)
+            .toContain(getDescriptionSubString(context.annotationTypeName));
 
           function getDescriptionSubString(annotationTypeName) {
             switch (annotationTypeName) {
@@ -197,9 +203,9 @@ define([
         });
 
         it('should invoke panel add function', function() {
-          scope.vm.add();
+          controller.add();
           expect(Panel.prototype.add).toHaveBeenCalled();
-          expect(state.go).toHaveBeenCalledWith(addStateName);
+          expect($state.go).toHaveBeenCalledWith(context.addStateName);
         });
 
       });

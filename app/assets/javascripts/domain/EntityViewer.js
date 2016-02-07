@@ -45,7 +45,7 @@ define([], function() {
         backdrop: true,
         keyboard: true,
         modalFade: true,
-        templateUrl: '/assets/javascripts/common/services/domainEntityModal.html',
+        templateUrl: '/assets/javascripts/domain/entityViewer.html',
         controller: controller
       };
 

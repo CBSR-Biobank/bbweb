@@ -33,8 +33,8 @@ define(['moment'], function(moment) {
     function dateAndTimeToLocal(date, time) {
       var datetime, momentTime;
 
-      if ((date === null) || (time === null)) {
-        return '';
+      if (!date || !time) {
+        throw new Error('date or time is invalid');
       } else {
         if (time instanceof Date) {
           momentTime = moment(time);
@@ -54,10 +54,16 @@ define(['moment'], function(moment) {
      * comes from 'time'.
      */
     function dateAndTimeToUtcString(date, time) {
+      if (!date || !time) {
+        return '';
+      }
       return dateAndTimeToLocal(date, time).format();
     }
 
     function dateAndTimeToDisplayString(date, time) {
+      if (!date || !time) {
+        return '';
+      }
       return dateAndTimeToLocal(date, time).format(bbwebConfig.dateTimeFormat);
     }
 

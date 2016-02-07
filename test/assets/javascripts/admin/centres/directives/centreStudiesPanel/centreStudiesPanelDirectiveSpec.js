@@ -13,16 +13,20 @@ define([
 ], function(angular, mocks, _, testUtils) {
   'use strict';
 
-  describe('Controller: CentreStudiesPanelCtrl', function() {
-    var createEntities, createController, fakeEntities;
+  describe('Directive: centreStudiesPanelDirective', function() {
+    var scope, createEntities, createController, fakeEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(fakeDomainEntities) {
+    beforeEach(inject(function($templateCache, fakeDomainEntities) {
       fakeEntities = fakeDomainEntities;
       createEntities = setupEntities(this.$injector);
       createController = setupController(this.$injector);
       testUtils.addCustomMatchers();
+
+      testUtils.putHtmlTemplates(
+        $templateCache,
+        '/assets/javascripts/admin/centres/directives/centreStudiesPanel/centreStudiesPanel.html');
     }));
 
     function setupEntities(injector) {
@@ -45,32 +49,37 @@ define([
     }
 
     function setupController(injector) {
-      var $rootScope   = injector.get('$rootScope'),
-          $controller  = injector.get('$controller'),
-          Panel        = injector.get('Panel'),
-          Study        = injector.get('Study'),
-          StudyViewer  = injector.get('StudyViewer'),
-          modalService = injector.get('modalService');
+      var $rootScope = injector.get('$rootScope'),
+          $compile   = injector.get('$compile');
 
       return create;
 
       //--
 
       function create(entities) {
-        var scope = $rootScope.$new();
+        var element = angular.element([
+          '<uib-accordion close-others="false">',
+          '  <centre-studies-panel',
+          '    centre="vm.centre" ',
+          '    centre-studies="vm.centreStudies" ',
+          '    study-names="vm.studyNames"> ',
+          '  </centre-studies-panel>',
+          '</uib-accordion>'
+        ].join(''));
 
-        scope.centre = entities.centre;
-        scope.studyNames = studyNames(entities.studies);
+        // must have at least 2 studies in entities.studies
+        expect(entities.studies.length).toBeGreaterThan(1);
 
-        $controller('CentreStudiesPanelCtrl as vm', {
-          $scope:       scope,
-          Panel:        Panel,
-          Study:        Study,
-          StudyViewer:  StudyViewer,
-          modalService: modalService
-        });
+        scope = $rootScope.$new();
+        scope.vm = {
+          centre:        entities.centre,
+          centreStudies: _.map(entities.studies.slice(0, 2), function (study) { return study.id }),
+          studyNames:    studyNames(entities.studies)
+        };
+
+        $compile(element)(scope);
         scope.$digest();
-        return scope;
+        return element.find('centre-studies-panel').controller('centreStudiesPanel');
       }
     }
 
@@ -86,54 +95,78 @@ define([
 
     it('has valid state for centre with no studies', function() {
       var entities = createEntities(),
-          scope = createController(entities);
+          controller = createController(entities);
 
-      expect(scope.vm.centre).toBe(entities.centre);
-      expect(scope.vm.studyNames.length).toBe(entities.studies.length);
-      expect(scope.vm.studyNames).toContainAll(studyNames(entities.studies));
-      expect(scope.vm.tableStudies).toBeDefined();
+      expect(controller.centre).toBe(entities.centre);
+      expect(controller.studyNames.length).toBe(entities.studies.length);
+      expect(controller.studyNames).toContainAll(studyNames(entities.studies));
+      expect(controller.tableStudies).toBeDefined();
 
       _.each(entities.studies, function (study) {
-        expect(scope.vm.studyNamesById[study.id].id).toBe(study.id);
-        expect(scope.vm.studyNamesById[study.id].name).toBe(study.name);
-        expect(scope.vm.studyNamesById[study.id].status).toBe(study.status);
+        expect(controller.studyNamesById[study.id].id).toBe(study.id);
+        expect(controller.studyNamesById[study.id].name).toBe(study.name);
+        expect(controller.studyNamesById[study.id].status).toBe(study.status);
       });
     });
 
     it('has valid state for centre with studies', function() {
       var entities = createEntities(),
           linkedStudy = entities.studies[0],
-          scope;
+          controller;
 
       entities.centre.studyIds.push(linkedStudy.id);
-      scope = createController(entities);
+      controller = createController(entities);
 
-      expect(scope.vm.centre).toBe(entities.centre);
-      expect(scope.vm.studyNames.length).toBe(entities.studies.length);
-      expect(scope.vm.studyNames).toContainAll(studyNames(entities.studies));
+      expect(controller.centre).toBe(entities.centre);
+      expect(controller.studyNames.length).toBe(entities.studies.length);
+      expect(controller.studyNames).toContainAll(studyNames(entities.studies));
 
       _.each(entities.studies, function (study) {
-        expect(scope.vm.tableStudies).toContain(studyNameDto(linkedStudy));
+        expect(controller.tableStudies).toContain(studyNameDto(linkedStudy));
 
-        expect(scope.vm.studyNamesById[study.id].id).toBe(study.id);
-        expect(scope.vm.studyNamesById[study.id].name).toBe(study.name);
-        expect(scope.vm.studyNamesById[study.id].status).toBe(study.status);
+        expect(controller.studyNamesById[study.id].id).toBe(study.id);
+        expect(controller.studyNamesById[study.id].name).toBe(study.name);
+        expect(controller.studyNamesById[study.id].status).toBe(study.status);
       });
     });
 
-    it('adds a study when selected', function() {
-      var $q           = this.$injector.get('$q'),
-          entities     = createEntities(),
-          scope        = createController(entities),
-          studyToAdd   = entities.studies[1];
-
+    function studyOnSelectCommon(injector, entities) {
+      var $q = injector.get('$q');
       spyOn(entities.centre, 'addStudy').and.callFake(function () {
         return $q.when(entities.centre);
       });
+    }
 
-      scope.vm.onSelect(studyToAdd);
+    it('adds a new study when selected', function() {
+      var entities   = createEntities(),
+          controller = createController(entities),
+          studyToAdd = entities.studies[2],
+          numStudiesBeforeAdd;
+
+      // studiesToAdd[2] is NOT one of the studies already associated with the centre
+
+      studyOnSelectCommon(this.$injector, entities);
+      numStudiesBeforeAdd = controller.tableStudies.length;
+      controller.onSelect(studyToAdd);
       scope.$digest();
-      expect(scope.vm.tableStudies).toContain(studyNameDto(studyToAdd));
+      expect(controller.tableStudies).toContain(studyNameDto(studyToAdd));
+      expect(controller.tableStudies.length).toBe(numStudiesBeforeAdd + 1);
+    });
+
+    it('does not add an exiting study when selected', function() {
+      var entities   = createEntities(),
+          controller = createController(entities),
+          studyToAdd = entities.studies[1],
+          numStudiesBeforeAdd;
+
+      // studiesToAdd[1] is already associated with the centre
+
+      studyOnSelectCommon(this.$injector, entities);
+      numStudiesBeforeAdd = controller.tableStudies.length;
+      controller.onSelect(studyToAdd);
+      scope.$digest();
+      expect(controller.tableStudies).toContain(studyNameDto(studyToAdd));
+      expect(controller.tableStudies.length).toBe(numStudiesBeforeAdd);
     });
 
     it('study viewer is displayed', function() {
@@ -141,13 +174,13 @@ define([
           EntityViewer = this.$injector.get('EntityViewer'),
           Study        = this.$injector.get('Study'),
           entities     = createEntities(),
-          scope        = createController(entities);
+          controller   = createController(entities);
 
       spyOn(EntityViewer.prototype, 'showModal').and.callFake(function () {});
       spyOn(Study, 'get').and.callFake(function () {
         return $q.when(entities.studies[0]);
       });
-      scope.vm.information(entities.studies[0].id);
+      controller.information(entities.studies[0].id);
       scope.$digest();
       expect(EntityViewer.prototype.showModal).toHaveBeenCalled();
     });
@@ -157,10 +190,10 @@ define([
           modalService  = this.$injector.get('modalService'),
           entities      = createEntities(),
           studyToRemove = entities.studies[1],
-          scope;
+          controller;
 
       entities.centre.studyIds.push(studyToRemove.id);
-      scope = createController(entities);
+      controller = createController(entities);
 
       spyOn(modalService, 'showModal').and.callFake(function () {
         return $q.when('OK');
@@ -169,16 +202,16 @@ define([
         return $q.when(entities.centre);
       });
 
-      scope.vm.remove(studyToRemove.id);
+      controller.remove(studyToRemove.id);
       scope.$digest();
-      expect(scope.vm.tableStudies).not.toContain(studyNameDto(studyToRemove));
+      expect(controller.tableStudies).not.toContain(studyNameDto(studyToRemove));
     });
 
     it('displays remove failed information modal if remove fails', function() {
       var $q            = this.$injector.get('$q'),
           modalService  = this.$injector.get('modalService'),
           entities      = createEntities(),
-          scope         = createController(entities),
+          controller    = createController(entities),
           studyToRemove = entities.studies[1];
 
       spyOn(entities.centre, 'removeStudy').and.callFake(function () {
@@ -190,7 +223,7 @@ define([
         return $q.when('OK');
       });
 
-      scope.vm.remove(studyToRemove.id);
+      controller.remove(studyToRemove.id);
       scope.$digest();
       expect(modalService.showModal.calls.count()).toBe(2);
     });

@@ -19,9 +19,10 @@ define([
    */
   describe('Directive: annotationsInput', function() {
 
-    var scope,
-        compile,
-        element,
+    var element,
+        scope,
+        controller,
+        createScope,
         annotationFactory,
         ParticipantAnnotationType,
         AnnotationValueType,
@@ -29,28 +30,18 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($compile,
-                               $rootScope,
-                               $templateCache,
-                               _annotationFactory_,
-                               _ParticipantAnnotationType_,
-                               _AnnotationValueType_,
-                               fakeDomainEntities) {
+    beforeEach(inject(function() {
+      var $templateCache = this.$injector.get('$templateCache');
 
-      compile                   = $compile;
-      scope                     = $rootScope;
-      annotationFactory         = _annotationFactory_;
-      ParticipantAnnotationType = _ParticipantAnnotationType_;
-      AnnotationValueType       = _AnnotationValueType_;
-      fakeEntities              = fakeDomainEntities;
+      annotationFactory         = this.$injector.get('annotationFactory');
+      ParticipantAnnotationType = this.$injector.get('ParticipantAnnotationType');
+      AnnotationValueType       = this.$injector.get('AnnotationValueType');
+      fakeEntities              = this.$injector.get('fakeDomainEntities');
 
-      testUtils.putHtmlTemplate($templateCache,
-                               '/assets/javascripts/common/directives/annotationsInput.html');
-      element = angular.element(
-        '<form name="form">' +
-          '  <annotations-input annotations="model.annotations">' +
-          '  </annotations-input>' +
-          '</form>');
+      createScope = setupController(this.$injector);
+
+      testUtils.putHtmlTemplates($templateCache,
+                               '/assets/javascripts/common/directives/annotationsInput/annotationsInput.html');
     }));
 
     function createAnnotation(valueType) {
@@ -61,70 +52,90 @@ define([
         ));
     }
 
-    function createScope(annotations) {
-      scope.model = {
-        annotations: annotations
-      };
-      compile(element)(scope);
-      scope.$digest();
-      return scope;
+    function setupController(injector) {
+      var $rootScope = injector.get('$rootScope'),
+          $compile   = injector.get('$compile');
+
+      return create;
+
+      //--
+
+      function create(annotations) {
+        element = angular.element([
+          '<form name="form">',
+          '  <annotations-input annotations="vm.annotations">',
+          '  </annotations-input>',
+          '</form>'
+        ].join(''));
+
+        scope = $rootScope.$new();
+        scope.vm = {
+          annotations: annotations
+        };
+        $compile(element)(scope);
+        scope.$digest();
+        return element.controller('annotationsInput');
+      }
     }
 
     it('works for a TEXT annotation', function() {
       var annotationValue = fakeEntities.stringNext(),
-          annotations = [ createAnnotation(AnnotationValueType.TEXT()) ],
-          scope = createScope(annotations);
+          annotations = [ createAnnotation(AnnotationValueType.TEXT()) ];
 
+      createScope(annotations);
       expect(element.find('input').length).toBe(1);
       expect(element.find('input').eq(0).attr('type')).toBe('text');
-      scope.form.annotationSubForm.annotationValue.$setViewValue(annotationValue);
-      expect(scope.model.annotations[0].value).toBe(annotationValue);
-      expect(scope.form.annotationSubForm.annotationValue.$valid).toBe(true);
+      scope.form.annotationSubForm.annotationTextValue.$setViewValue(annotationValue);
+      expect(scope.vm.annotations[0].value).toBe(annotationValue);
+      expect(scope.form.annotationSubForm.annotationTextValue.$valid).toBe(true);
     });
 
     it('works for a NUMBER annotation and a valid number', function() {
       var annotationValue = 111.01,
-          annotations = [ createAnnotation(AnnotationValueType.NUMBER()) ],
-          scope = createScope(annotations);
+          annotations = [ createAnnotation(AnnotationValueType.NUMBER()) ];
 
+      createScope(annotations);
       expect(element.find('input').length).toBe(1);
       expect(element.find('input').eq(0).attr('type')).toBe('number');
-      scope.form.annotationSubForm.annotationValue.$setViewValue(annotationValue.toString());
-      expect(scope.model.annotations[0].value).toBe(annotationValue);
-      expect(scope.form.annotationSubForm.annotationValue.$valid).toBe(true);
+      scope.form.annotationSubForm.annotationNumberValue.$setViewValue(annotationValue.toString());
+      expect(scope.vm.annotations[0].value).toBe(annotationValue);
+      expect(scope.form.annotationSubForm.annotationNumberValue.$valid).toBe(true);
     });
 
     it('validation fails for a NUMBER annotation and an invalid number', function() {
       var annotationValue = fakeEntities.stringNext(),
-          annotations = [ createAnnotation(AnnotationValueType.NUMBER()) ],
-          scope = createScope(annotations);
+          annotations = [ createAnnotation(AnnotationValueType.NUMBER()) ];
 
+      createScope(annotations);
       expect(element.find('input').length).toBe(1);
       expect(element.find('input').eq(0).attr('type')).toBe('number');
-      scope.form.annotationSubForm.annotationValue.$setViewValue(annotationValue);
-      expect(scope.model.annotations[0].numberValue).toBe(undefined);
-      expect(scope.form.annotationSubForm.annotationValue.$valid).toBe(false);
+      scope.form.annotationSubForm.annotationNumberValue.$setViewValue(annotationValue);
+      expect(scope.vm.annotations[0].numberValue).toBe(undefined);
+      expect(scope.form.annotationSubForm.annotationNumberValue.$valid).toBe(false);
     });
 
     /**
      * TODO: This test could be more thorough with regard to testing the time picker. Not sure how to do that
      * yet.
      */
-    xit('works for a DATE_TIME annotation and a valid number', function() {
-      var annotationValue = '2010-01-10 12:00 PM',
-          annotations = [ createAnnotation(AnnotationValueType.DATE_TIME()) ],
-          scope = createScope(annotations);
+    it('works for a DATE_TIME annotation and a valid number', function() {
+      var timeService = this.$injector.get('timeService'),
+          dateStr = '2010-01-10 12:00 PM',
+          annotation = createAnnotation(AnnotationValueType.DATE_TIME()),
+          annotations = [ annotation ];
 
-      expect(element.find('input').length).toBe(3); // 2 others are for time picker
+      _.extend(annotation, timeService.stringToDateAndTime(dateStr));
+
+      createScope(annotations);
+      expect(element.find('input').length).toBe(4); // 3 others are for time picker
       expect(element.find('input').eq(0).attr('type')).toBe('text');
 
-      scope.form.annotationSubForm.annotationValue.$setViewValue(annotationValue);
-      expect(scope.model.annotations[0].getValue()).toBe(annotationValue);
-      expect(scope.form.annotationSubForm.annotationValue.$valid).toBe(true);
+      expect(scope.vm.annotations[0].getValue()).toBe(dateStr);
+      expect(scope.form.annotationSubForm.annotationDateTimeValue.$valid).toBe(true);
     });
 
     it('works for a SELECT single annotation annotation', function() {
-      var annotationType, annotations, scope;
+      var annotationType, annotations;
 
       annotationType = new ParticipantAnnotationType(
         fakeEntities.annotationType({
@@ -136,8 +147,7 @@ define([
 
       annotations = [ annotationFactory.create(undefined, annotationType) ];
 
-      scope = createScope(annotations);
-
+      createScope(annotations);
       expect(element.find('select').length).toBe(1);
 
       // number of options is the number of annotationType options plus one for the '-- make a selection --'
@@ -145,14 +155,14 @@ define([
       expect(element.find('select option').length).toBe(annotationType.options.length + 1);
 
       _.each(annotationType.options, function (option) {
-        scope.form.annotationSubForm.annotationValue.$setViewValue(option);
-        expect(scope.model.annotations[0].value).toBe(option);
-        expect(scope.form.annotationSubForm.annotationValue.$valid).toBe(true);
+        scope.form.annotationSubForm.annotationSelectValue.$setViewValue(option);
+        expect(scope.vm.annotations[0].value).toBe(option);
+        expect(scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(true);
       });
     });
 
     it('works for a SELECT multiple annotation', function() {
-      var annotationType, annotation, scope;
+      var annotationType, annotation;
 
       annotationType = new ParticipantAnnotationType(
         fakeEntities.annotationType({
@@ -163,7 +173,7 @@ define([
 
       annotation = annotationFactory.create(undefined, annotationType);
 
-      scope = createScope([ annotation ]);
+      createScope([ annotation ]);
 
       // has the right number of check boxes
       expect(element.find('input').length).toBe(3);
@@ -175,7 +185,7 @@ define([
 
     // For a required SELECT MULTIPLE annotation type
     it('selecting and unselecting an option for a SELECT MULTIPLE makes the form invalid', function() {
-      var annotationType, annotation, scope;
+      var annotationType, annotation;
 
       annotationType = new ParticipantAnnotationType(
         fakeEntities.annotationType({
@@ -187,16 +197,16 @@ define([
 
       annotation = annotationFactory.create(undefined, annotationType);
 
-      scope = createScope([ annotation ]);
+      createScope([ annotation ]);
 
       // has the right number of check boxes
       expect(element.find('input').length).toBe(annotationType.options.length);
 
       _.each(_.range(annotationType.options.length), function (inputNum) {
         element.find('input').eq(inputNum).click();
-        expect(scope.form.annotationSubForm.annotationValue.$valid).toBe(true);
+        expect(scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(true);
         element.find('input').eq(inputNum).click();
-        expect(scope.form.annotationSubForm.annotationValue.$valid).toBe(false);
+        expect(scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(false);
       });
     });
 

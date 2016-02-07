@@ -1,5 +1,5 @@
 /**
- * Study configuration module.
+ * Study module.
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
@@ -12,15 +12,14 @@ define(function (require) {
       AdminCtrl                               = require('./AdminCtrl'),
       adminService                            = require('./adminService'),
       adminStates                             = require('./states'),
-      pagedItemsListDirective                 = require('./pagedItemsListDirective'),
-      statusLineDirective                     = require('./statusLineDirective'),
+      statusLineDirective                     = require('./directives/statusLine/statusLineDirective'),
 
       CentreCtrl                              = require('./centres/CentreCtrl'),
       CentreEditCtrl                          = require('./centres/CentreEditCtrl'),
       CentreSummaryTabCtrl                    = require('./centres/CentreSummaryTabCtrl'),
       CentresCtrl                             = require('./centres/CentresCtrl'),
-      centreStudiesPanelDirective             = require('./centres/centreStudiesPanelDirective'),
-      locationsPanelDirective                 = require('./centres/locationsPanelDirective'),
+      centreStudiesPanelDirective             = require('./centres/directives/centreStudiesPanel/centreStudiesPanelDirective'),
+      locationsPanelDirective                 = require('./centres/directives/locationsPanel/locationsPanelDirective'),
       centreStates                            = require('./centres/states'),
       LocationEditCtrl                        = require('./centres/LocationEditCtrl'),
 
@@ -29,29 +28,31 @@ define(function (require) {
       StudyEditCtrl                           = require('./studies/StudyEditCtrl'),
       StudySummaryTabCtrl                     = require('./studies/StudySummaryTabCtrl'),
       studiesStates                           = require('./studies/states'),
-      validAmountDirective                    = require('./studies/validAmountDirective'),
-      validCountDirective                     = require('./studies/validCountDirective'),
+      validAmountDirective                    = require('./studies/directives/validAmount/validAmountDirective'),
+      validCountDirective                     = require('./studies/directives/validCount/validCountDirective'),
 
       AnnotationTypeEditCtrl                  = require('./studies/annotationTypes/AnnotationTypeEditCtrl'),
       studyAnnotationTypeUtilsService         = require('./studies/annotationTypes/studyAnnotationTypeUtilsService'),
-      studyAnnotationTypesPanelDirective      = require('./studies/annotationTypes/studyAnnotationTypesPanelDirective'),
-      studyAnnotationTypesTableDirective      = require('./studies/annotationTypes/studyAnnotationTypesTableDirective'),
+
+      studyAnnotationTypesPanelDirective      = require('./studies/annotationTypes/directives/studyAnnotationTypesPanel/studyAnnotationTypesPanelDirective'),
+
+      studyAnnotationTypesTableDirective      = require('./studies/annotationTypes/directives/studyAnnotationTypesTable/studyAnnotationTypesTableDirective'),
 
       CeventTypeEditCtrl                      = require('./studies/ceventTypes/CeventTypeEditCtrl'),
-      ceventTypesPanelDirective               = require('./studies/ceventTypes/ceventTypesPanelDirective'),
+      ceventTypesPanelDirective               = require('./studies/ceventTypes/directives/ceventTypesPanel/ceventTypesPanelDirective'),
       ceventTypesStates                       = require('./studies/ceventTypes/states'),
 
       participantsStates                      = require('./studies/participants/states'),
 
       ProcessingTypeEditCtrl                  = require('./studies/processing/ProcessingTypeEditCtrl'),
       SpcLinkTypeEditCtrl                     = require('./studies/processing/SpcLinkTypeEditCtrl'),
-      processingTypesPanelDirective           = require('./studies/processing/processingTypesPanelDirective'),
-      spcLinkTypesPanelDirective              = require('./studies/processing/spcLinkTypesPanelDirective'),
+      processingTypesPanelDirective           = require('./studies/processing/directives/processingTypesPanel/processingTypesPanelDirective'),
+      spcLinkTypesPanelDirective              = require('./studies/processing/directives/spcLinkTypesPanel/spcLinkTypesPanelDirective'),
       processingStates                        = require('./studies/processing/states'),
 
       SpecimenGroupEditCtrl                   = require('./studies/specimenGroups/SpecimenGroupEditCtrl'),
       specimenGroupUtilsService               = require('./studies/specimenGroups/specimenGroupUtilsService'),
-      specimenGroupsPanelDirective            = require('./studies/specimenGroups/specimenGroupsPanelDirective'),
+      specimenGroupsPanelDirective            = require('./studies/specimenGroups/directives/specimenGroupsPanel/specimenGroupsPanelDirective'),
       specimenGroupsStates                    = require('./studies/specimenGroups/states'),
 
       UsersTableCtrl                          = require('./users/UsersTableCtrl'),
@@ -81,7 +82,6 @@ define(function (require) {
 
   module.config(centreStates);
 
-  module.directive('pagedItemsList', pagedItemsListDirective);
   module.directive('statusLine', statusLineDirective);
 
   module.controller('StudiesCtrl', StudiesCtrl);

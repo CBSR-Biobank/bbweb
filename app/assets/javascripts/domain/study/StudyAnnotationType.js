@@ -37,6 +37,8 @@ define(['angular', 'underscore'], function(angular, _) {
 
     StudyAnnotationType.prototype = Object.create(AnnotationType.prototype);
 
+    StudyAnnotationType.prototype.constructor = StudyAnnotationType;
+
     StudyAnnotationType.create = function(obj) {
       var annotationType = AnnotationType.create(obj);
       if (!_.isObject(annotationType)) {

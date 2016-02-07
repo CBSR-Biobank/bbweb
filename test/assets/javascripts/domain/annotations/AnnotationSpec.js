@@ -17,7 +17,8 @@ define([
 
   describe('Annotation', function() {
 
-    var Study,
+    var bbwebConfig,
+        Study,
         ParticipantAnnotationType,
         CollectionEventAnnotationType,
         SpecimenLinkAnnotationType,
@@ -28,23 +29,18 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(_Study_,
-                               _ParticipantAnnotationType_,
-                               _CollectionEventAnnotationType_,
-                               _SpecimenLinkAnnotationType_,
-                               _annotationFactory_,
-                               _Annotation_,
-                               _AnnotationValueType_,
-                               fakeDomainEntities,
-                               extendedDomainEntities) {
-      Study                         = _Study_;
-      ParticipantAnnotationType     = _ParticipantAnnotationType_;
-      CollectionEventAnnotationType = _CollectionEventAnnotationType_;
-      SpecimenLinkAnnotationType    = _SpecimenLinkAnnotationType_;
-      annotationFactory             = _annotationFactory_;
-      Annotation                    = _Annotation_;
-      AnnotationValueType           = _AnnotationValueType_;
-      fakeEntities                  = fakeDomainEntities;
+    beforeEach(inject(function() {
+      var extendedDomainEntities = this.$injector.get('extendedDomainEntities');
+
+      bbwebConfig                   = this.$injector.get('bbwebConfig');
+      Study                         = this.$injector.get('Study');
+      ParticipantAnnotationType     = this.$injector.get('ParticipantAnnotationType');
+      CollectionEventAnnotationType = this.$injector.get('CollectionEventAnnotationType');
+      SpecimenLinkAnnotationType    = this.$injector.get('SpecimenLinkAnnotationType');
+      annotationFactory             = this.$injector.get('annotationFactory');
+      Annotation                    = this.$injector.get('Annotation');
+      AnnotationValueType           = this.$injector.get('AnnotationValueType');
+      fakeEntities                  = this.$injector.get('fakeDomainEntities');
 
       testUtils.addCustomMatchers();
     }));
@@ -293,19 +289,23 @@ define([
               annotation,
               serverAnnotation,
               value,
-              valueTypes = [
-                AnnotationValueType.TEXT(),
-                AnnotationValueType.DATE_TIME()
-              ];
+              valueTypes = [ AnnotationValueType.TEXT(), AnnotationValueType.DATE_TIME() ],
+              timeStr;
 
           _.each(valueTypes, function (valueType) {
             annotationType = createAnnotationType({ valueType: valueType });
 
             value = fakeEntities.valueForAnnotation(annotationType);
             serverAnnotation = fakeEntities.annotation(value, annotationType);
-
             annotation = createAnnotation(serverAnnotation, annotationType);
-            expect(annotation.getValue()).toEqual(serverAnnotation.stringValue);
+
+            if (valueType == AnnotationValueType.TEXT()) {
+              expect(annotation.getValue()).toEqual(serverAnnotation.stringValue);
+            } else {
+              timeStr = moment(serverAnnotation.stringValue).local().format(bbwebConfig.dateTimeFormat);
+              expect(annotation.getValue()).toEqual(timeStr);
+            }
+
           });
         });
 
