@@ -49,7 +49,33 @@ define(['underscore'], function(_) {
 
     resolveCollectionEvents.$inject = ['CollectionEvent', 'participant'];
     function resolveCollectionEvents(CollectionEvent, participant) {
+      // returns all collection events for a participant
       return CollectionEvent.get(participant.id);
+    }
+
+    resolveCollectionEvent.$inject = [
+      'CollectionEvent',
+      'participant',
+      'collectionEventTypes',
+      'annotationTypes',
+      '$stateParams'
+    ];
+
+    function resolveCollectionEvent(CollectionEvent,
+                                    participant,
+                                    collectionEventTypes,
+                                    annotationTypes,
+                                    $stateParams) {
+      var cevent,
+          ceventType = _.findWhere(collectionEventTypes, { id: $stateParams.collectionEventTypeId });
+
+      if (!ceventType) {
+        throw new Error('could not find collection event type');
+      }
+      cevent = new CollectionEvent({}, ceventType, annotationTypes);
+      cevent.participantId = participant.id;
+      cevent.collectionEventTypeId = ceventType.id;
+      return cevent;
     }
 
     $urlRouterProvider.otherwise('/');
@@ -220,6 +246,12 @@ define(['underscore'], function(_) {
           'study',
           function(CollectionEventType, study) {
             return CollectionEventType.list(study.id);
+          }],
+        annotationTypes: [
+          'CollectionEventAnnotationType',
+          'study',
+          function(CollectionEventAnnotationType, study) {
+            return CollectionEventAnnotationType.list(study.id);
           }]
       },
       views: {
@@ -250,13 +282,7 @@ define(['underscore'], function(_) {
     $stateProvider.state('home.collection.study.participant.cevents.add', {
       url: '/cevent/add',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        annotationTypes: [
-          'CollectionEventAnnotationType',
-          'study',
-          function(CollectionEventAnnotationType, study) {
-            return CollectionEventAnnotationType.list(study.id);
-          }]
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'main@': {
@@ -290,29 +316,7 @@ define(['underscore'], function(_) {
       url: '/{collectionEventTypeId}',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        collectionEvent: [
-          'CollectionEvent',
-          'participant',
-          'collectionEventTypes',
-          'annotationTypes',
-          '$stateParams',
-          function (CollectionEvent,
-                    participant,
-                    collectionEventTypes,
-                    annotationTypes,
-                    $stateParams) {
-            var cevent,
-                ceventType = _.findWhere(collectionEventTypes,
-                                         { id: $stateParams.collectionEventTypeId });
-            if (!ceventType) {
-              throw new Error('could not find collection event type');
-            }
-            cevent = new CollectionEvent({}, ceventType, annotationTypes);
-            cevent.participantId = participant.id;
-            cevent.collectionEventTypeId = ceventType.id;
-            return cevent;
-          }
-        ]
+        collectionEvent: resolveCollectionEvent
       },
       views: {
         'main@': {
@@ -353,8 +357,26 @@ define(['underscore'], function(_) {
           '$stateParams',
           'CollectionEvent',
           'participant',
-          function ($stateParams, CollectionEvent, participant) {
-            return CollectionEvent.get(participant.id, $stateParams.collectionEventId);
+          'collectionEventTypes',
+          'annotationTypes',
+          function ($stateParams,
+                    CollectionEvent,
+                    participant,
+                    collectionEventTypes,
+                    annotationTypes) {
+            return CollectionEvent.get(participant.id, $stateParams.collectionEventId)
+              .then(function (cevent) {
+                var ceventType = _.findWhere(collectionEventTypes,
+                                             { id: cevent.collectionEventTypeId });
+
+                if (!ceventType) {
+                  throw new Error('could not find collection event type');
+                }
+
+                cevent.setCollectionEventType(ceventType);
+                cevent.setAnnotationTypes(annotationTypes);
+                return cevent;
+              });
           }
         ]
       },

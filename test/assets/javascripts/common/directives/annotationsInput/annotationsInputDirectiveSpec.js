@@ -21,7 +21,6 @@ define([
 
     var element,
         scope,
-        controller,
         createScope,
         annotationFactory,
         ParticipantAnnotationType,

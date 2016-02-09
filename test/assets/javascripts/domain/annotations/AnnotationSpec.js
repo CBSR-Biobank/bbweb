@@ -29,9 +29,7 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function() {
-      var extendedDomainEntities = this.$injector.get('extendedDomainEntities');
-
+    beforeEach(inject(function(extendedDomainEntities) {
       bbwebConfig                   = this.$injector.get('bbwebConfig');
       Study                         = this.$injector.get('Study');
       ParticipantAnnotationType     = this.$injector.get('ParticipantAnnotationType');
@@ -299,7 +297,7 @@ define([
             serverAnnotation = fakeEntities.annotation(value, annotationType);
             annotation = createAnnotation(serverAnnotation, annotationType);
 
-            if (valueType == AnnotationValueType.TEXT()) {
+            if (valueType === AnnotationValueType.TEXT()) {
               expect(annotation.getValue()).toEqual(serverAnnotation.stringValue);
             } else {
               timeStr = moment(serverAnnotation.stringValue).local().format(bbwebConfig.dateTimeFormat);

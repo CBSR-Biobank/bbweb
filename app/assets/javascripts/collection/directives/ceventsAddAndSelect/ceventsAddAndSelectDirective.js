@@ -62,7 +62,10 @@ define(['underscore'], function(_) {
 
     function eventInformation(cevent) {
       $state.go('home.collection.study.participant.cevents.details',
-                { collectionEventId: cevent.id });
+                {
+                  collectionEventId: cevent.id,
+                  collectionEventTypeId: cevent.collectionEventTypeId
+                });
     }
 
   }

@@ -2,4 +2,33 @@
   <div class="panel-heading">
     <h3 class="panel-title">Visit # {{vm.collectionEvent.visitNumber}}</h3>
   </div>
+  <ul class="list-group">
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-4">
+          <strong>Time Completed:</strong>
+        </div>
+        <div class="col-md-5">
+          {{vm.timeCompletedLocal}}
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item" ng-repeat="annotation in vm.collectionEvent.annotations">
+      <div class="row">
+        <div class="col-md-4">
+          <strong>{{annotation.getLabel()}}</strong>
+        </div>
+        <div class="col-md-5">
+          {{annotation.getValue()}}
+        </div>
+      </div>
+    </li>
+  </ul>
+  <status-line item="vm.collectionEvent"></status-line>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Specimens</h3>
+  </div>
 </div>

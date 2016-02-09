@@ -158,28 +158,6 @@ define([
           expect(controller.annotationTypeIdsInUse).toEqual(context.annotationTypeIdsInUse);
         });
 
-        it('has valid panel heading', function () {
-
-          expect(controller.panelHeading).toEqual(getHeading(context.annotationTypeName));
-
-          function getHeading(annotationTypeName) {
-            switch (annotationTypeName) {
-            case 'ParticipantAnnotationType':
-              return 'Participant Annotation Types';
-
-            case 'CollectionEventAnnotationType':
-              return 'Collection Event Annotation Types';
-
-            case 'SpecimenLinkAnnotationType':
-              return 'Specimen Link Annotation Types';
-
-            default:
-              jasmine.getEnv().fail('annotationTypeName is invalid: ' + annotationTypeName);
-              return '';
-            }
-          }
-        });
-
         it('has valid description', function () {
           expect(controller.annotationTypeDescription)
             .toContain(getDescriptionSubString(context.annotationTypeName));

@@ -22,12 +22,15 @@ define([], function() {
     return directive;
   }
 
-  // CeventViewCtrl.$inject = [];
+  CeventViewCtrl.$inject = ['timeService'];
 
   /**
    *
    */
-  function CeventViewCtrl() {
+  function CeventViewCtrl(timeService) {
+    var vm = this;
+
+    vm.timeCompletedLocal = timeService.timeToDisplayString(vm.collectionEvent.timeCompleted);
   }
 
   return ceventViewDirective;

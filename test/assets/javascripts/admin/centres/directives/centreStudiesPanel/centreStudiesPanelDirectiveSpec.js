@@ -73,7 +73,7 @@ define([
         scope = $rootScope.$new();
         scope.vm = {
           centre:        entities.centre,
-          centreStudies: _.map(entities.studies.slice(0, 2), function (study) { return study.id }),
+          centreStudies: _.map(entities.studies.slice(0, 2), function (study) { return study.id; }),
           studyNames:    studyNames(entities.studies)
         };
 

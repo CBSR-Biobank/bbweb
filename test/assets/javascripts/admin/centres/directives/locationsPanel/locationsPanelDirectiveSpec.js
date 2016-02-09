@@ -19,8 +19,6 @@ define([
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function($templateCache, fakeDomainEntities) {
-      var templates;
-
       fakeEntities = fakeDomainEntities;
       createEntities = setupEntities(this.$injector);
       createController = setupController(this.$injector);
