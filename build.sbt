@@ -49,6 +49,11 @@ javacOptions in ThisBuild  ++= Seq(
   "-Xlint"
 )
 
+javaOptions in run ++= Seq(
+    "-Xms256M", "-Xmx2G", "-XX:+UseConcMarkSweepGC")
+
+fork in run := true
+
 testOptions in Test := Nil
 
 (testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/report")
