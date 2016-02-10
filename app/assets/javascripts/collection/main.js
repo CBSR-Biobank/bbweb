@@ -4,44 +4,35 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(function(require) {
+define(function (require) {
   'use strict';
 
-  var angular                       = require('angular'),
+  var angular = require('angular'),
+      name = 'biobank.collection',
+      module;
 
-      collectionDirective           = require('./directives/collection/collectionDirective'),
-      selectStudyDirective          = require('./directives/selectStudy/selectStudyDirective'),
+  module = angular.module(name, [ 'biobank.users' ]);
 
-      participantAddDirective       = require('./directives/participantAdd/participantAddDirective'),
-      participantGetDirective       = require('./directives/participantGet/participantGetDirective'),
-      participantSummaryDirective   = require('./directives/participantSummary/participantSummaryDirective'),
-      participantViewDirective      = require('./directives/participantView/participantViewDirective'),
+  module.config(require('./states'));
 
-      ceventAddDirective            = require('./directives/ceventAdd/ceventAddDirective'),
-      ceventGetTypeDirective        = require('./directives/ceventGetType/ceventGetTypeDirective'),
-      ceventViewDirective           = require('./directives/ceventView/ceventViewDirective'),
-      ceventsAddAndSelect           = require('./directives/ceventsAddAndSelect/ceventsAddAndSelectDirective'),
-      ceventsListDirective          = require('./directives/ceventsList/ceventsListDirective'),
+  module.directive('collection',          require('./directives/collection/collectionDirective'));
+  module.directive('selectStudy',         require('./directives/selectStudy/selectStudyDirective'));
 
-      states                        = require('./states');
+  module.directive('participantAdd',      require('./directives/participantAdd/participantAddDirective'));
+  module.directive('participantGet',      require('./directives/participantGet/participantGetDirective'));
+  module.directive('participantSummary',
+                   require('./directives/participantSummary/participantSummaryDirective'));
+  module.directive('participantView',     require('./directives/participantView/participantViewDirective'));
 
-  var module = angular.module('biobank.collection', []);
+  module.directive('ceventAdd',           require('./directives/ceventAdd/ceventAddDirective'));
+  module.directive('ceventGetType',       require('./directives/ceventGetType/ceventGetTypeDirective'));
+  module.directive('ceventView',          require('./directives/ceventView/ceventViewDirective'));
+  module.directive('ceventsAddAndSelect',
+                   require('./directives/ceventsAddAndSelect/ceventsAddAndSelectDirective'));
+  module.directive('ceventsList',         require('./directives/ceventsList/ceventsListDirective'));
 
-  module.directive('collection',         collectionDirective);
-  module.directive('selectStudy',        selectStudyDirective);
-
-  module.directive('participantAdd',     participantAddDirective);
-  module.directive('participantGet',     participantGetDirective);
-  module.directive('participantSummary', participantSummaryDirective);
-  module.directive('participantView',    participantViewDirective);
-
-  module.directive('ceventAdd',           ceventAddDirective);
-  module.directive('ceventGetType',       ceventGetTypeDirective);
-  module.directive('ceventView',          ceventViewDirective);
-  module.directive('ceventsAddAndSelect', ceventsAddAndSelect);
-  module.directive('ceventsList',         ceventsListDirective);
-
-  module.config(states);
-
-  return module;
+  return {
+    name: name,
+    module: module
+  };
 });

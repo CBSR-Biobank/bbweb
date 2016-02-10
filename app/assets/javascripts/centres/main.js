@@ -4,19 +4,20 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
 */
-define([
-  'angular',
-  './centresService',
-  './centreLocationsService'
-], function(angular,
-            centresService,
-            centreLocationsService) {
+define(function (require) {
   'use strict';
 
-  var module = angular.module('biobank.centres', []);
+  var angular = require('angular'),
+      name = 'biobank.centres',
+      module;
 
-  module.service('centreLocationsService', centreLocationsService);
-  module.service('centresService', centresService);
+  module = angular.module(name, []);
 
-  return module;
+  module.service('centreLocationsService', require('./centreLocationsService'));
+  module.service('centresService',         require('./centresService'));
+
+  return {
+    name: name,
+    module: module
+  };
 });

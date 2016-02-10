@@ -9,128 +9,72 @@
 define(function (require) {
   'use strict';
 
-  var angular                             = require('angular'),
+  var angular = require('angular'),
+      name = 'biobank.domain',
+      module;
 
-      AnatomicalSourceType                = require('./AnatomicalSourceType'),
-      AnnotationType                      = require('./AnnotationType'),
-      AnnotationTypeData                  = require('./AnnotationTypeData'),
-      AnnotationTypeViewer                = require('./AnnotationTypeViewer'),
-      AnnotationValueType                 = require('./AnnotationValueType'),
-      AnnotationMaxValueCount             = require('./AnnotationMaxValueCount'),
-      annotationTypeValidation            = require('./annotationTypeValidation'),
-      domainEntityService                 = require('./domainEntityService'),
+  module = angular.module('biobank.domain', []);
 
-      annotationFactory                   = require('./annotations/AnnotationFactory'),
-      Annotation                          = require('./annotations/Annotation'),
-      DateTimeAnnotation                  = require('./annotations/DateTimeAnnotation'),
-      MultipleSelectAnnotation            = require('./annotations/MultipleSelectAnnotation'),
-      NumberAnnotation                    = require('./annotations/NumberAnnotation'),
-      SingleSelectAnnotation              = require('./annotations/SingleSelectAnnotation'),
-      TextAnnotation                      = require('./annotations/TextAnnotation'),
+  module.factory('AnnotationType',                      require('./AnnotationType'));
+  module.factory('AnnotationTypeData',                  require('./AnnotationTypeData'));
+  module.factory('AnnotationTypeViewer',                require('./AnnotationTypeViewer'));
+  module.factory('ConcurrencySafeEntity',               require('./ConcurrencySafeEntity'));
+  module.service('domainEntityService',                 require('./domainEntityService') );
+  module.factory('EntityViewer',                        require('./EntityViewer'));
+  module.factory('Location',                            require('./Location'));
+  module.factory('LocationViewer',                      require('./LocationViewer'));
 
-      Centre                              = require('./centre/Centre'),
-      CentreCounts                        = require('./centre/CentreCounts'),
-      CentreStatus                        = require('./centre/CentreStatus'),
+  module.service('AnatomicalSourceType',                require('./AnatomicalSourceType'));
+  module.service('AnnotationValueType',                 require('./AnnotationValueType'));
+  module.service('AnnotationMaxValueCount',             require('./AnnotationMaxValueCount'));
+  module.service('CentreStatus',                        require('./centre/CentreStatus'));
+  module.service('PreservationTemperatureType',         require('./PreservationTemperatureType'));
+  module.service('PreservationType',                    require('./PreservationType'));
+  module.service('annotationTypeValidation',            require('./annotationTypeValidation'));
 
-      ConcurrencySafeEntity               = require('./ConcurrencySafeEntity'),
-      EntityViewer                        = require('./EntityViewer'),
-      Location                            = require('./Location'),
-      LocationViewer                      = require('./LocationViewer'),
-      PreservationTemperatureType         = require('./PreservationTemperatureType'),
-      PreservationType                    = require('./PreservationType'),
+  module.factory('Annotation',                          require('./annotations/Annotation'));
+  module.factory('DateTimeAnnotation',                  require('./annotations/DateTimeAnnotation'));
+  module.factory('MultipleSelectAnnotation',            require('./annotations/MultipleSelectAnnotation'));
+  module.factory('NumberAnnotation',                    require('./annotations/NumberAnnotation'));
+  module.factory('SingleSelectAnnotation',              require('./annotations/SingleSelectAnnotation'));
+  module.factory('TextAnnotation',                      require('./annotations/TextAnnotation'));
+  module.service('annotationFactory',                   require('./annotations/AnnotationFactory'));
 
-      CeventTypeViewer                    = require('./study/CeventTypeViewer'),
-      CollectionDto                       = require('./study/CollectionDto'),
-      CollectionEventAnnotationType       = require('./study/CollectionEventAnnotationType'),
-      CollectionEventType                 = require('./study/CollectionEventType'),
-      ParticipantAnnotationType           = require('./study/ParticipantAnnotationType'),
-      ProcessingDto                       = require('./study/ProcessingDto'),
-      ProcessingType                      = require('./study/ProcessingType'),
-      ProcessingTypeViewer                = require('./study/ProcessingTypeViewer'),
-      SpcLinkTypeViewer                   = require('./study/SpcLinkTypeViewer'),
-      SpecimenGroup                       = require('./study/SpecimenGroup'),
-      SpecimenGroupData                   = require('./study/SpecimenGroupData'),
-      SpecimenGroupViewer                 = require('./study/SpecimenGroupViewer'),
-      SpecimenLinkAnnotationType          = require('./study/SpecimenLinkAnnotationType'),
-      SpecimenLinkType                    = require('./study/SpecimenLinkType'),
-      SpecimenType                        = require('./study/SpecimenType'),
-      Study                               = require('./study/Study'),
-      StudyCounts                         = require('./study/StudyCounts'),
-      StudyAnnotationType                 = require('./study/StudyAnnotationType'),
-      StudyStatus                         = require('./study/StudyStatus'),
-      StudyViewer                         = require('./study/StudyViewer'),
-      participantAnnotationTypeValidation = require('./study/participantAnnotationTypeValidation'),
-      studyAnnotationTypeValidation       = require('./study/studyAnnotationTypeValidation'),
+  module.factory('Centre',                              require('./centre/Centre'));
+  module.factory('CentreCounts',                        require('./centre/CentreCounts'));
 
-      Participant                         = require('./participants/Participant'),
-      CollectionEvent                     = require('./participants/CollectionEvent'),
+  module.factory('CeventTypeViewer',                    require('./study/CeventTypeViewer'));
+  module.factory('CollectionDto',                       require('./study/CollectionDto'));
+  module.factory('CollectionEventAnnotationType',       require('./study/CollectionEventAnnotationType'));
+  module.factory('CollectionEventType',                 require('./study/CollectionEventType'));
+  module.factory('ParticipantAnnotationType',           require('./study/ParticipantAnnotationType'));
+  module.factory('ProcessingTypeViewer',                require('./study/ProcessingTypeViewer'));
+  module.factory('SpcLinkTypeViewer',                   require('./study/SpcLinkTypeViewer'));
+  module.factory('SpecimenGroup',                       require('./study/SpecimenGroup'));
+  module.factory('SpecimenGroupData',                   require('./study/SpecimenGroupData'));
+  module.factory('SpecimenGroupViewer',                 require('./study/SpecimenGroupViewer'));
+  module.factory('SpecimenLinkAnnotationType',          require('./study/SpecimenLinkAnnotationType'));
+  module.factory('SpecimenLinkType',                    require('./study/SpecimenLinkType'));
+  module.factory('Study',                               require('./study/Study'));
+  module.factory('StudyCounts',                         require('./study/StudyCounts'));
+  module.factory('StudyAnnotationType',                 require('./study/StudyAnnotationType'));
+  module.factory('StudyViewer',                         require('./study/StudyViewer'));
+  module.service('ProcessingDto',                       require('./study/ProcessingDto'));
+  module.service('ProcessingType',                      require('./study/ProcessingType'));
+  module.service('SpecimenType',                        require('./study/SpecimenType'));
+  module.service('StudyStatus',                         require('./study/StudyStatus'));
+  module.service('participantAnnotationTypeValidation', require('./study/participantAnnotationTypeValidation'));
+  module.service('studyAnnotationTypeValidation',       require('./study/studyAnnotationTypeValidation'));
 
-      User                                = require('./user/User'),
-      UserCounts                          = require('./user/UserCounts'),
-      UserStatus                          = require('./user/UserStatus'),
-      UserViewer                          = require('./user/UserViewer');
+  module.factory('Participant',                         require('./participants/Participant'));
+  module.factory('CollectionEvent',                     require('./participants/CollectionEvent'));
 
+  module.factory('User',                                require('./user/User'));
+  module.factory('UserViewer',                          require('./user/UserViewer'));
+  module.service('UserCounts',                          require('./user/UserCounts'));
+  module.service('UserStatus',                          require('./user/UserStatus'));
 
-  var module = angular.module('biobank.domain', []);
-
-  module.factory('AnnotationType',                      AnnotationType);
-  module.factory('AnnotationTypeData',                  AnnotationTypeData);
-  module.factory('AnnotationTypeViewer',                AnnotationTypeViewer);
-  module.service('domainEntityService',                 domainEntityService);
-
-  module.factory('Annotation',                          Annotation);
-  module.factory('DateTimeAnnotation',                  DateTimeAnnotation);
-  module.factory('MultipleSelectAnnotation',            MultipleSelectAnnotation);
-  module.factory('NumberAnnotation',                    NumberAnnotation);
-  module.factory('SingleSelectAnnotation',              SingleSelectAnnotation);
-  module.factory('TextAnnotation',                      TextAnnotation);
-  module.service('annotationFactory',                   annotationFactory);
-
-  module.factory('Centre',                              Centre);
-  module.factory('CentreCounts',                        CentreCounts);
-  module.factory('CeventTypeViewer',                    CeventTypeViewer);
-  module.factory('CollectionDto',                       CollectionDto);
-  module.factory('CollectionEventAnnotationType',       CollectionEventAnnotationType);
-  module.factory('CollectionEventType',                 CollectionEventType);
-  module.factory('ConcurrencySafeEntity',               ConcurrencySafeEntity);
-  module.factory('EntityViewer',                        EntityViewer);
-  module.factory('Location',                            Location);
-  module.factory('LocationViewer',                      LocationViewer);
-  module.factory('ParticipantAnnotationType',           ParticipantAnnotationType);
-  module.factory('ProcessingTypeViewer',                ProcessingTypeViewer);
-  module.factory('SpcLinkTypeViewer',                   SpcLinkTypeViewer);
-  module.factory('SpecimenGroup',                       SpecimenGroup);
-  module.factory('SpecimenGroupData',                   SpecimenGroupData);
-  module.factory('SpecimenGroupViewer',                 SpecimenGroupViewer);
-  module.factory('SpecimenLinkAnnotationType',          SpecimenLinkAnnotationType);
-  module.factory('SpecimenLinkType',                    SpecimenLinkType);
-
-  module.factory('Study',                               Study);
-  module.factory('StudyCounts',                         StudyCounts);
-  module.factory('StudyAnnotationType',                 StudyAnnotationType);
-  module.factory('StudyViewer',                         StudyViewer);
-
-  module.factory('Participant',                         Participant);
-  module.factory('CollectionEvent',                     CollectionEvent);
-
-  module.service('AnatomicalSourceType',                AnatomicalSourceType);
-  module.service('AnnotationValueType',                 AnnotationValueType);
-  module.service('AnnotationMaxValueCount',             AnnotationMaxValueCount);
-  module.service('CentreStatus',                        CentreStatus);
-  module.service('PreservationTemperatureType',         PreservationTemperatureType);
-  module.service('PreservationType',                    PreservationType);
-  module.service('ProcessingDto',                       ProcessingDto);
-  module.service('ProcessingType',                      ProcessingType);
-  module.service('SpecimenType',                        SpecimenType);
-  module.service('StudyStatus',                         StudyStatus);
-  module.service('annotationTypeValidation',            annotationTypeValidation);
-  module.service('participantAnnotationTypeValidation', participantAnnotationTypeValidation);
-  module.service('studyAnnotationTypeValidation',       studyAnnotationTypeValidation);
-
-  module.factory('User',                                User);
-  module.factory('UserViewer',                          UserViewer);
-  module.service('UserCounts',                          UserCounts);
-  module.service('UserStatus',                          UserStatus);
-
-  return module;
-});
+  return {
+    name: name,
+    module: module
+  };});

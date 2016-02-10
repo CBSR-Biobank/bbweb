@@ -6,25 +6,23 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  './FooterCtrl',
-  './HeaderCtrl',
-  './HomeCtrl',
-  './states',
-], function(angular,
-            FooterCtrl,
-            HeaderCtrl,
-            HomeCtrl,
-            states) {
+define(function (require) {
   'use strict';
 
-  var module = angular.module('biobank.home', []);
+  var angular = require('angular'),
+      name = 'biobank.home',
+      module;
 
-  module.controller('FooterCtrl', FooterCtrl);
-  module.controller('HeaderCtrl', HeaderCtrl);
-  module.controller('HomeCtrl', HomeCtrl);
-  module.config(states);
+  module = angular.module(name, []);
 
-  return module;
+  module.config(require('./states'));
+
+  module.controller('FooterCtrl', require('./FooterCtrl'));
+  module.controller('HeaderCtrl', require('./HeaderCtrl'));
+  module.controller('HomeCtrl',   require('./HomeCtrl'));
+
+  return {
+    name: name,
+    module: module
+  };
 });

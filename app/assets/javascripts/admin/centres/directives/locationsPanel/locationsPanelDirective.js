@@ -15,7 +15,7 @@ define(['angular'], function(angular) {
       bindToController: {
         centre: '='
       },
-      templateUrl: '/assets/1javascripts/admin/centres/directives/locationsPanel/locationsPanel.html',
+      templateUrl: '/assets/javascripts/admin/centres/directives/locationsPanel/locationsPanel.html',
       controller: LocationsPanelCtrl,
       controllerAs: 'vm'
     };

@@ -49,8 +49,8 @@
     </tbody>
   </table>
 
-  <div class="input-group">
-    <span class="input-group-addon">Add Study</span>
+  <div class="input-group" style="margin-top: 10px;">
+    <span class="input-group-addon">Add Study <i class="glyphicon glyphicon-plus"></i></span>
     <input type="text"
            ng-model="vm.selected"
            uib-typeahead="study.name for study in vm.studyNames | filter:$viewValue | limitTo:8"

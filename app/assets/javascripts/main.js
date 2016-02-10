@@ -61,18 +61,7 @@
   };
 
   // Load the app. This is kept minimal so it doesn't need much updating.
-  require([
-    'angular',
-    'jquery',
-    'bootstrap',
-    'angular-cookies',
-    'angular-ui-router',
-    'angular-utils-ui-breadcrumbs',
-    'angular-sanitize',
-    'ui-bootstrap',
-    'smart-table',
-    './app'
-  ], function(angular) {
+  require([ 'angular', './app' ], function(angular) {
     angular.bootstrap(document, ['biobankApp']);
   });
 })(requirejs);

@@ -1,5 +1,5 @@
 /**
- * Dashboard shown after user is logged in.
+ * Study module.
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
@@ -8,12 +8,11 @@ define(function (require) {
   'use strict';
 
   var angular = require('angular'),
-      name = 'biobank.dashboard',
+      name = 'biobank.admin.studies.participants',
       module;
 
-  module = angular.module(name, []);
+  module = angular.module(name, [ 'biobank.users' ]);
 
-  module.controller('DashboardCtrl', require('./DashboardCtrl'));
   module.config(require('./states'));
 
   return {

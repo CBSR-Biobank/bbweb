@@ -4,7 +4,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([], function() {
+define(function () {
   'use strict';
 
   centreStates.$inject = ['$urlRouterProvider', '$stateProvider', 'authorizationProvider'];

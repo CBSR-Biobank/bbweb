@@ -36,16 +36,21 @@ define(['underscore'], function(_) {
       return cmd;
     }
 
-    function uri(centreId, locationId) {
-      var result;
+    function uri(/* centreId, locationId */) {
+      var result,
+          args = _.toArray(arguments),
+          centreId,
+          locationId;
 
-      if (arguments.length <= 0) {
+      if (args.length <= 0) {
         throw new Error('invalid arguments');
       }
 
+      centreId = args.shift();
       result = '/centres/' + centreId + '/locations';
 
-      if (arguments.length > 1) {
+      if (args.length > 0) {
+        locationId = args.shift();
         result += '/' + locationId;
       }
 

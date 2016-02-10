@@ -10,38 +10,49 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'toastr',
-  'admin',
-  'centres',
-  'collection',
-  'common',
-  'dashboard',
-  'domain',
-  'home',
-  'studies',
-  'users'
-], function(angular, toastr) {
+define(function(require) {
   'use strict';
+
+  var angular = require('angular'),
+      toastr = require('toastr'),
+      admin = require('admin'),
+      centres = require('centres'),
+      common = require('common'),
+      collection = require('collection'),
+      dashboard = require('dashboard'),
+      domain = require('domain'),
+      home = require('home'),
+      studies = require('studies'),
+      users = require('users'),
+      app;
+
+  require('jquery');
+  require('bootstrap');
+  require('ui-bootstrap');
+  require('angular-ui-router');
+  require('angular-sanitize');
+  require('angular-cookies');
+  require('smart-table');
+  require('angular-utils-ui-breadcrumbs');
 
   // We must already declare most dependencies here (except for common), or the submodules' routes
   // will not be resolved
-  var app = angular.module('biobankApp', [
+  app = angular.module('biobankApp', [
     'ui.bootstrap',
     'ui.router',
     'ngSanitize',
     'ngCookies',
     'smart-table',
     'angularUtils.directives.uiBreadcrumbs',
-    'biobank.admin',
-    'biobank.centres',
-    'biobank.collection',
-    'biobank.dashboard',
-    'biobank.domain',
-    'biobank.home',
-    'biobank.studies',
-    'biobank.users'
+    admin.name,
+    centres.name,
+    common.name,
+    collection.name,
+    dashboard.name,
+    domain.name,
+    home.name,
+    studies.name,
+    users.name
   ]);
 
   // For debugging
@@ -57,7 +68,6 @@ define([
   app.config(exceptionConfig);
 
   debugFunc.$inject = ['$rootScope'];
-
   function debugFunc($rootScope) {
     /*jshint unused: false*/
 

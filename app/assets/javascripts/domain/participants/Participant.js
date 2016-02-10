@@ -186,7 +186,6 @@ define(['underscore'], function(_) {
       studyId = args.shift();
       result += '/' + studyId;
 
-
       if (args.length > 0) {
         participantId = args.shift();
         result += '/' + participantId;

@@ -7,23 +7,19 @@
 define(function (require) {
   'use strict';
 
-  var angular                           = require('angular'),
-      ceventAnnotationTypesService      = require('./ceventAnnotationTypesService'),
-      participantAnnotationTypesService = require('./participantAnnotationTypesService'),
-      specimenGroupsService             = require('./specimenGroupsService'),
-      spcLinkAnnotationTypesService     = require('./spcLinkAnnotationTypesService'),
-      StudyAnnotationTypesService       = require('./StudyAnnotationTypesService'),
-      studiesService                    = require('./studiesService');
+  var angular = require('angular'),
+      name = 'biobank.studies',
+      module;
 
-  var module = angular.module('biobank.studies', []);
+  module = angular.module(name, []);
 
-  module.factory('StudyAnnotationTypesService',       StudyAnnotationTypesService);
+  module.factory('StudyAnnotationTypesService',       require('./StudyAnnotationTypesService'));
 
-  module.service('ceventAnnotationTypesService',      ceventAnnotationTypesService);
-  module.service('participantAnnotationTypesService', participantAnnotationTypesService);
-  module.service('specimenGroupsService',             specimenGroupsService);
-  module.service('spcLinkAnnotationTypesService',     spcLinkAnnotationTypesService);
-  module.service('studiesService',                    studiesService);
+  module.service('ceventAnnotationTypesService',      require('./ceventAnnotationTypesService'));
+  module.service('participantAnnotationTypesService', require('./participantAnnotationTypesService'));
+  module.service('specimenGroupsService',             require('./specimenGroupsService'));
+  module.service('spcLinkAnnotationTypesService',     require('./spcLinkAnnotationTypesService'));
+  module.service('studiesService',                    require('./studiesService'));
 
   return module;
 });

@@ -4,34 +4,31 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(function(require) {
+define(function (require) {
   'use strict';
 
-  var angular                = require('angular'),
-      authorizationService   = require('./authorizationService'),
-      ForgotPasswordCtrl     = require('./ForgotPasswordCtrl'),
-      LoginCtrl              = require('./LoginCtrl'),
-      PasswordSentCtrl       = require('./PasswordSentCtrl'),
-      passwordCheckDirective = require('./directives/passwordCheck/passwordCheckDirective'),
-      RegisterUserCtrl       = require('./RegisterUserCtrl'),
-      states                 = require('./states'),
-      usersService           = require('./usersService'),
-      UserProfileCtrl        = require('./UserProfileCtrl');
+  var angular = require('angular'),
+      name = 'biobank.users',
+      module;
 
-  var module = angular.module('biobank.users', ['biobank.common']);
+  module = angular.module(name, [ 'biobank.common' ]);
 
-  module.provider('authorization',        authorizationService);
-  module.controller('ForgotPasswordCtrl', ForgotPasswordCtrl);
-  module.controller('LoginCtrl',          LoginCtrl);
-  module.controller('PasswordSentCtrl',   PasswordSentCtrl);
-  module.directive('passwordCheck',       passwordCheckDirective);
-  module.controller('RegisterUserCtrl',   RegisterUserCtrl);
+  module.config(require('./states'));
 
-  module.config(states);
+  module.provider('authorization',        require('./authorizationService'));
 
-  module.service('usersService', usersService);
+  module.controller('ForgotPasswordCtrl', require('./ForgotPasswordCtrl'));
+  module.controller('LoginCtrl',          require('./LoginCtrl'));
+  module.controller('PasswordSentCtrl',   require('./PasswordSentCtrl'));
+  module.directive('passwordCheck',       require('./directives/passwordCheck/passwordCheckDirective'));
+  module.controller('RegisterUserCtrl',   require('./RegisterUserCtrl'));
 
-  module.controller('UserProfileCtrl', UserProfileCtrl);
+  module.service('usersService',          require('./usersService'));
 
-  return module;
+  module.controller('UserProfileCtrl',    require('./UserProfileCtrl'));
+
+  return {
+    name: name,
+    module: module
+  };
 });

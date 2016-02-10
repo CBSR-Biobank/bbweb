@@ -7,65 +7,40 @@
 define(function (require) {
   'use strict';
 
-  var angular                          = require('angular'),
+  var angular = require('angular'),
+      name = 'biobank.common',
+      module;
 
-      annotationsInputDirective        = require('./directives/annotationsInput/annotationsInputDirective'),
-      focusMeDirective                 = require('./directives/focusMeDirective'),
-      infoUpdateRemoveButtonsDirective = require('./directives/infoUpdateRemoveButtonsDirective'),
-      integerDirective                 = require('./directives/integerDirective'),
-      panelButtonsDirective            = require('./directives/panelButtonsDirective'),
-      smartFloatDirective              = require('./directives/smartFloatDirective'),
-      str2integerDirective             = require('./directives/str2integerDirective'),
-      truncateToggleDirective          = require('./directives/truncateToggleDirective'),
-      updateRemoveButtonsDirective     = require('./directives/updateRemoveButtonsDirective'),
-      pageSelectDirective              = require('./directives/pageSelectDirective'),
-      pagedItemsListDirective          = require('./directives/pagedItemsList/pagedItemsListDirective'),
+  module = angular.module('biobank.common', []);
 
-      localTimeFilter                  = require('./filters/localTimeFilter'),
-      timeagoFilter                    = require('./filters/timeagoFilter'),
-      truncateFilter                   = require('./filters/truncateFilter'),
+  module.directive('annotationsInput',        require('./directives/annotationsInput/annotationsInputDirective'));
+  module.directive('focusMe',                 require('./directives/focusMeDirective'));
+  module.directive('infoUpdateRemoveButtons', require('./directives/infoUpdateRemoveButtonsDirective'));
+  module.directive('integer',                 require('./directives/integerDirective'));
+  module.directive('panelButtons',            require('./directives/panelButtonsDirective'));
+  module.directive('smartFloat',              require('./directives/smartFloatDirective'));
+  module.directive('str2integer',             require('./directives/str2integerDirective'));
+  module.directive('truncateToggle',          require('./directives/truncateToggleDirective'));
+  module.directive('updateRemoveButtons',     require('./directives/updateRemoveButtonsDirective'));
+  module.directive('pageSelect',              require('./directives/pageSelectDirective'));
+  module.directive('pagedItemsList',          require('./directives/pagedItemsList/pagedItemsListDirective'));
 
-      Panel                            = require('./services/Panel'),
-      biobankApiService                = require('./services/biobankApiService'),
-      funutils                         = require('./services/funutils'),
-      modalService                     = require('./services/modalService'),
-      notificationsService             = require('./services/notificationsService'),
-      queryStringService               = require('./services/queryStringService'),
-      stateHelperService               = require('./services/stateHelperService'),
-      timeService                      = require('./services/timeService'),
-      validationService                = require('./services/validationService');
+  module.filter('localTime',                  require('./filters/localTimeFilter'));
+  module.filter('timeago',                    require('./filters/timeagoFilter'));
+  module.filter('truncate',                   require('./filters/truncateFilter'));
 
-  var module = angular.module('biobank.common', []);
+  module.service('Panel',                     require('./services/Panel'));
+  module.service('biobankApi',                require('./services/biobankApiService'));
+  module.service('funutils',                  require('./services/funutils'));
+  module.service('modalService',              require('./services/modalService'));
+  module.service('notificationsService',      require('./services/notificationsService'));
+  module.service('queryStringService',        require('./services/queryStringService'));
+  module.service('stateHelper',               require('./services/stateHelperService'));
+  module.service('timeService',               require('./services/timeService'));
+  module.service('validationService',         require('./services/validationService'));
 
-  module.directive('annotationsInput',        annotationsInputDirective);
-
-  module.directive('focusMe',                 focusMeDirective);
-  module.directive('infoUpdateRemoveButtons', infoUpdateRemoveButtonsDirective);
-  module.directive('integer',                 integerDirective);
-
-  module.directive('panelButtons',            panelButtonsDirective);
-
-  module.directive('smartFloat',              smartFloatDirective);
-  module.directive('str2integer',             str2integerDirective);
-  module.directive('truncateToggle',          truncateToggleDirective);
-  module.directive('updateRemoveButtons',     updateRemoveButtonsDirective);
-
-  module.directive('pageSelect',              pageSelectDirective);
-  module.directive('pagedItemsList',          pagedItemsListDirective);
-
-  module.filter('localTime',                  localTimeFilter);
-  module.filter('timeago',                    timeagoFilter);
-  module.filter('truncate',                   truncateFilter);
-
-  module.service('Panel',                     Panel);
-  module.service('biobankApi',                biobankApiService);
-  module.service('funutils',                  funutils);
-  module.service('modalService',              modalService);
-  module.service('notificationsService',      notificationsService);
-  module.service('queryStringService',        queryStringService);
-  module.service('stateHelper',               stateHelperService);
-  module.service('timeService',               timeService);
-  module.service('validationService',         validationService);
-
-  return module;
+  return {
+    name: name,
+    module: module
+  };
 });
