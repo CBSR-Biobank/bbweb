@@ -1,5 +1,6 @@
 package org.biobank.service.participants
 
+import org.biobank.infrastructure.{ SortOrder, AscendingOrder, DescendingOrder }
 import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.infrastructure.event.ParticipantEvents._
 import org.biobank.domain._
@@ -30,13 +31,12 @@ trait ParticipantsService {
 
   def update(cmd: UpdateParticipantCmd): Future[DomainValidation[Participant]]
 
-  /** Returns true if a participant with the 'uniqueId' does not exist in the system, false otherwise.
-   */
-  def checkUnique(uniqueId: String): DomainValidation[Boolean]
-
   //-- Collection Event
 
-  def getCollectionEvents(participantId: String): DomainValidation[Set[CollectionEvent]]
+  def getCollectionEvents(participantId: String,
+                          sortFunc: (CollectionEvent, CollectionEvent) => Boolean,
+                          order:    SortOrder)
+      : DomainValidation[Seq[CollectionEvent]]
 
   def getCollectionEvent(participantId: String, collectionEventId: String): DomainValidation[CollectionEvent]
 
@@ -88,9 +88,21 @@ class ParticipantsServiceImpl @javaxInject() (
 
   //-- Collection Event
 
-  def getCollectionEvents(participantId: String): DomainValidation[Set[CollectionEvent]] = {
+  def getCollectionEvents(participantId: String,
+                          sortFunc: (CollectionEvent, CollectionEvent) => Boolean,
+                          order:    SortOrder)
+      : DomainValidation[Seq[CollectionEvent]] = {
     validParticipantId(participantId) { participant =>
-      collectionEventRepository.allForParticipant(participant.id).successNel
+      val result = collectionEventRepository
+        .allForParticipant(ParticipantId(participantId))
+        .toSeq
+        .sortWith(sortFunc)
+
+      if (order == AscendingOrder) {
+        result.success
+      } else {
+        result.reverse.success
+      }
     }
   }
 
@@ -132,11 +144,6 @@ class ParticipantsServiceImpl @javaxInject() (
   def removeCollectionEvent(cmd: RemoveCollectionEventCmd)
       : Future[DomainValidation[Boolean]] =
     eventValidationToBoolean(ask(processor, cmd).mapTo[DomainValidation[ParticipantEvent]])
-
-  def checkUnique(uniqueId: String): DomainValidation[Boolean] = {
-    val isUnique = ! participantRepository.getValues.exists(p => p.uniqueId == uniqueId)
-    isUnique.success
-  }
 
   private def replyWithParticipant(future: Future[DomainValidation[ParticipantEvent]])
       : Future[DomainValidation[Participant]] = {

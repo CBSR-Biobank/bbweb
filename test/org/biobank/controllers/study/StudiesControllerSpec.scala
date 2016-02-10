@@ -47,8 +47,9 @@ class StudiesControllerSpec extends ControllerFixture {
       }
 
       "list multiple studies" taggedAs(Tag("1")) in {
-        val studies = List(factory.createDisabledStudy, factory.createDisabledStudy)
-        .map{ study => studyRepository.put(study) }
+        val studies = List(
+          factory.createDisabledStudy,
+          factory.createDisabledStudy).map{ study => studyRepository.put(study) }
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,

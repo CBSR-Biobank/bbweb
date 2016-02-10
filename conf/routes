@@ -75,7 +75,8 @@ PUT     /studies/:procTypeId/sltypes/:id        @org.biobank.controllers.study.S
 DELETE  /studies/:procTypeId/sltypes/:id/:ver   @org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(procTypeId, id, ver: Long)
 
 # collection events - order matters: this section must be before participants
-GET     /participants/cevents/:participantId                  @org.biobank.controllers.participants.CollectionEventsController.get(participantId, ceventId: Option[String])
+GET     /participants/cevents/:participantId                  @org.biobank.controllers.participants.CollectionEventsController.get(participantId, ceventId: String)
+GET     /participants/cevents/:participantId/list             @org.biobank.controllers.participants.CollectionEventsController.list(participantId, sort: String ?= "visitNumber", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
 GET     /participants/cevents/:participantId/visitNumber/:vn  @org.biobank.controllers.participants.CollectionEventsController.getByVisitNumber(participantId, vn: Int)
 POST    /participants/cevents/:participantId                  @org.biobank.controllers.participants.CollectionEventsController.addCollectionEvent(participantId)
 PUT     /participants/cevents/:participantId/:id              @org.biobank.controllers.participants.CollectionEventsController.updateCollectionEvent(participantId, id)

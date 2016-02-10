@@ -53,10 +53,4 @@ class ParticipantsController @javaxInject() (val authToken:      AuthToken,
       }
     }
 
-  def checkUnique(uniqueId: String) =
-    AuthAction(parse.empty) { (token, userId, request) =>
-      Logger.debug(s"ParticipantsController.checkUnique: uniqueId: $uniqueId")
-      domainValidationReply(participantsService.checkUnique(uniqueId))
-    }
-
 }

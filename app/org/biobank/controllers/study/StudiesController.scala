@@ -1,6 +1,11 @@
 package org.biobank.controllers.study
 
-import org.biobank.controllers._
+import org.biobank.controllers.{
+  CommandController,
+  JsonController,
+  PagedQuery,
+  PagedResults
+}
 import org.biobank.domain._
 import org.biobank.service.users.UsersService
 import org.biobank.domain.study._
@@ -12,7 +17,6 @@ import org.biobank.controllers.PagedResults._
 
 import javax.inject.{Inject => javaxInject, Singleton}
 import play.api.Logger
-import play.api.Play.current
 import play.api.mvc._
 import scala.concurrent.Future
 import scala.language.reflectiveCalls
@@ -28,8 +32,6 @@ class StudiesController @javaxInject() (val authToken:      AuthToken,
     extends CommandController
     with JsonController {
 
-  private val PageSizeDefault = 5
-
   private val PageSizeMax = 10
 
   def studyCounts() =
@@ -37,21 +39,27 @@ class StudiesController @javaxInject() (val authToken:      AuthToken,
       Ok(studiesService.getCountsByStatus)
     }
 
-  def list(filter: String, status: String, sort: String, page: Int, pageSize: Int, order: String) =
+  def list(filter:   String,
+           status:   String,
+           sort:     String,
+           page:     Int,
+           pageSize: Int,
+           order:    String) =
     AuthAction(parse.empty) { (token, userId, request) =>
 
       Logger.debug(s"StudiesController:list: filter/$filter, status/$status, sort/$sort, page/$page, pageSize/$pageSize, order/$order")
 
       val pagedQuery = PagedQuery(sort, page, pageSize, order)
       val validation = for {
-        sortField   <- pagedQuery.getSortField(Seq("name", "status"))
-        sortWith    <- (if (sortField == "status") (Study.compareByStatus _) else (Study.compareByName _)).success
-        sortOrder   <- pagedQuery.getSortOrder
-        studies     <- studiesService.getStudies(filter, status, sortWith, sortOrder)
-        page        <- pagedQuery.getPage(PageSizeMax, studies.size)
-        pageSize    <- pagedQuery.getPageSize(PageSizeMax)
-        results     <- PagedResults.create(studies, page, pageSize)
-      } yield results
+          sortField   <- pagedQuery.getSortField(Seq("name", "status"))
+          sortWith    <- (if (sortField == "status") (Study.compareByStatus _)
+                          else (Study.compareByName _)).success
+          sortOrder   <- pagedQuery.getSortOrder
+          studies     <- studiesService.getStudies(filter, status, sortWith, sortOrder)
+          page        <- pagedQuery.getPage(PageSizeMax, studies.size)
+          pageSize    <- pagedQuery.getPageSize(PageSizeMax)
+          results     <- PagedResults.create(studies, page, pageSize)
+        } yield results
 
       validation.fold(
         err => BadRequest(err.list.toList.mkString),

@@ -4,6 +4,7 @@ import org.biobank.fixture._
 import org.biobank.domain.{ AnnotationTypeId, AnnotationOption, AnnotationValueType }
 import org.biobank.domain.study._
 import org.biobank.domain.participants._
+import org.biobank.controllers._
 import org.biobank.fixture.ControllerFixture
 import org.biobank.infrastructure.CollectionEventTypeAnnotationTypeData
 
@@ -22,6 +23,9 @@ class CollectionEventsControllerSpec extends ControllerFixture {
   import org.biobank.TestUtils._
   import org.biobank.AnnotationTestUtils._
   import org.biobank.domain.JsonHelper._
+
+  def listUri(participantId: ParticipantId): String =
+    s"/participants/cevents/${participantId.id}/list"
 
   def uri(participantId: ParticipantId): String =
     s"/participants/cevents/${participantId.id}"
@@ -58,6 +62,14 @@ class CollectionEventsControllerSpec extends ControllerFixture {
       "annotations"           -> collectionEvent.annotations.map(annotation =>
         annotationToJson(annotation))
     )
+  }
+
+  def compareObjs(jsonList: List[JsObject], cevents: List[CollectionEvent]) = {
+    val ceventsMap = cevents.map { cevent => (cevent.id, cevent) }.toMap
+    jsonList.foreach { jsonObj =>
+      val jsonId = CollectionEventId((jsonObj \ "id").as[String])
+      compareObj(jsonObj, ceventsMap(jsonId))
+    }
   }
 
   /** Converts a collectionEvent into an Update command.
@@ -168,61 +180,7 @@ class CollectionEventsControllerSpec extends ControllerFixture {
 
   "Participant REST API" when {
 
-    "GET /participants/cevents/{participantId}" must {
-
-      "list none" in {
-        createEntities() { (study, participant, ceventType) =>
-          val json = makeRequest(GET, uri(participant))
-          (json \ "status").as[String] must include ("success")
-          val jsonList = (json \ "data").as[List[JsObject]]
-          jsonList must have size 0
-        }
-      }
-
-      "list a single collection event" in {
-        createEntities() { (study, participant, ceventType) =>
-          val cevent = factory.createCollectionEvent
-          collectionEventRepository.put(cevent)
-
-          val json = makeRequest(GET, uri(participant))
-          (json \ "status").as[String] must include ("success")
-          val jsonList = (json \ "data").as[List[JsObject]]
-          jsonList must have size 1
-          compareObj(jsonList(0), cevent)
-        }
-      }
-
-      "get all collection events for a participant" in {
-        createEntities() { (study, participant, ceventType) =>
-          val participants = (0 until 2).map { x =>
-            val participant = factory.createParticipant.copy(studyId = study.id)
-            participantRepository.put(participant)
-            participant
-          }
-
-          val cevents = participants.map { participant =>
-            (participant.id -> (0 until 2).map { x =>
-               val cevent = factory.createCollectionEvent.copy(participantId = participant.id)
-               collectionEventRepository.put(cevent)
-               cevent
-             })
-          }.toMap
-
-          participants.foreach { participant =>
-            val participantCevents = cevents(participant.id)
-
-            val json = makeRequest(GET, uri(participant))
-            (json \ "status").as[String] must include ("success")
-            val jsonList = (json \ "data").as[List[JsObject]]
-            jsonList must have size participantCevents.size
-            jsonList.foreach { jsonItem =>
-              val ceventMaybe = participantCevents.find { x => x.id.id == (jsonItem \ "id").as[String]}
-              ceventMaybe mustBe defined
-              ceventMaybe.map { compareObj(jsonItem, _) }
-            }
-          }
-        }
-      }
+    "GET /participants/cevents/{participantId}?ceventId={ceventId}" must {
 
       "get a single collection event for a participant" in {
         createEntities() { (study, participant, ceventType) =>
@@ -239,14 +197,6 @@ class CollectionEventsControllerSpec extends ControllerFixture {
           val jsonObj = (json \ "data").as[JsObject]
           compareObj(jsonObj, ceventToGet)
         }
-      }
-
-      "fail for invalid participant id" in {
-        val participant = factory.createParticipant
-
-        val json = makeRequest(GET, uri(participant), NOT_FOUND)
-        (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("invalid participant id")
       }
 
       "fail for invalid participant id when querying for a single collection event id" in {
@@ -270,6 +220,194 @@ class CollectionEventsControllerSpec extends ControllerFixture {
 
     }
 
+    "GET /participants/cevents/{participantId}/list" must {
+
+      "list none" in {
+        createEntities() { (study, participant, ceventType) =>
+          PagedResultsSpec(this).emptyResults(listUri(participant.id))
+        }
+      }
+
+      "list a single collection event" in {
+        createEntities() { (study, participant, ceventType) =>
+          val cevent = factory.createCollectionEvent
+          collectionEventRepository.put(cevent)
+
+          val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+            uri = listUri(participant.id),
+            offset = 0,
+            total = 1,
+            maybeNext = None,
+            maybePrev = None)
+          jsonItems must have size 1
+          //log.info(s"--> $jsonItems")
+          compareObjs(jsonItems, List(cevent))
+        }
+      }
+
+      "get all collection events for a participant" in {
+        createEntities() { (study, participant, ceventType) =>
+          val participants = (0 until 2).map { x =>
+            val participant = factory.createParticipant.copy(studyId = study.id)
+            participantRepository.put(participant)
+            participant
+          }
+
+          val cevents = participants.map { participant =>
+            (participant.id -> (0 until 2).map { x =>
+               val cevent = factory.createCollectionEvent.copy(participantId = participant.id)
+               collectionEventRepository.put(cevent)
+               cevent
+             })
+          }.toMap
+
+          participants.foreach { participant =>
+            val participantCevents = cevents(participant.id).toList
+
+            val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+              uri       = listUri(participant.id),
+              offset    = 0,
+              total     = cevents.size,
+              maybeNext = None,
+              maybePrev = None)
+            jsonItems must have size cevents.size
+            //log.info(s"--> $jsonItems")
+            compareObjs(jsonItems, participantCevents)
+          }
+        }
+      }
+
+      "list collection events sorted by visit number" in {
+        createEntities() { (study, participant, ceventType) =>
+          val cevents = (1 to 4).map { visitNumber =>
+              val cevent = factory.createCollectionEvent.copy(
+                  participantId = participant.id,
+                  visitNumber = visitNumber)
+              collectionEventRepository.put(cevent)
+              cevent
+            }
+
+          List("asc", "desc").foreach{ ordering =>
+            val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+                uri         = listUri(participant.id),
+                queryParams = Map("sort" -> "visitNumber", "order" -> ordering),
+                offset      = 0,
+                total       = cevents.size,
+                maybeNext   = None,
+                maybePrev   = None)
+
+            jsonItems must have size cevents.size
+            if (ordering == "asc") {
+              compareObj(jsonItems(0), cevents(0))
+              compareObj(jsonItems(1), cevents(1))
+              compareObj(jsonItems(2), cevents(2))
+              compareObj(jsonItems(3), cevents(3))
+            } else {
+              compareObj(jsonItems(0), cevents(3))
+              compareObj(jsonItems(1), cevents(2))
+              compareObj(jsonItems(2), cevents(1))
+              compareObj(jsonItems(3), cevents(0))
+            }
+          }
+
+        }
+      }
+
+      "list collection events sorted by time completed" in {
+        createEntities() { (study, participant, ceventType) =>
+          val cevents = (1 to 4).map { hour =>
+              val cevent = factory.createCollectionEvent.copy(
+                  participantId = participant.id,
+                  timeCompleted = DateTime.now.hour(hour))
+              collectionEventRepository.put(cevent)
+              cevent
+            }
+
+          List("asc", "desc").foreach{ ordering =>
+            val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+                uri         = listUri(participant.id),
+                queryParams = Map("sort" -> "timeCompleted", "order" -> ordering),
+                offset      = 0,
+                total       = cevents.size,
+                maybeNext   = None,
+                maybePrev   = None)
+
+            jsonItems must have size cevents.size
+            if (ordering == "asc") {
+              compareObj(jsonItems(0), cevents(0))
+              compareObj(jsonItems(1), cevents(1))
+              compareObj(jsonItems(2), cevents(2))
+              compareObj(jsonItems(3), cevents(3))
+            } else {
+              compareObj(jsonItems(0), cevents(3))
+              compareObj(jsonItems(1), cevents(2))
+              compareObj(jsonItems(2), cevents(1))
+              compareObj(jsonItems(3), cevents(0))
+            }
+          }
+
+        }
+      }
+
+      "list the first collection event in a paged query" in {
+        createEntities() { (study, participant, ceventType) =>
+          val cevents = (1 to 4).map { hour =>
+              val cevent = factory.createCollectionEvent.copy(
+                  participantId = participant.id,
+                  timeCompleted = DateTime.now.hour(hour))
+              collectionEventRepository.put(cevent)
+              cevent
+            }
+
+          val jsonItem = PagedResultsSpec(this).singleItemResult(
+              uri         = listUri(participant.id),
+              queryParams = Map("sort" -> "timeCompleted", "pageSize" -> "1"),
+              total       = cevents.size,
+              maybeNext   = Some(2))
+
+          compareObj(jsonItem, cevents(0))
+        }
+      }
+
+      "list the last collection event in a paged query" in {
+        createEntities() { (study, participant, ceventType) =>
+          val cevents = (1 to 4).map { hour =>
+              val cevent = factory.createCollectionEvent.copy(
+                  participantId = participant.id,
+                  timeCompleted = DateTime.now.hour(hour))
+              collectionEventRepository.put(cevent)
+              cevent
+            }
+
+          val jsonItem = PagedResultsSpec(this).singleItemResult(
+              uri         = listUri(participant.id),
+              queryParams = Map("sort" -> "timeCompleted", "page" -> "4", "pageSize" -> "1"),
+              total       = cevents.size,
+              offset      = 3,
+              maybeNext   = None,
+              maybePrev   = Some(3))
+
+          compareObj(jsonItem, cevents(3))
+        }
+      }
+
+      "fail when using an invalid query parameters" in {
+        createEntities() { (study, participant, ceventType) =>
+          PagedResultsSpec(this).failWithInvalidParams(listUri(participant.id))
+        }
+      }
+
+      "fail for invalid participant id" in {
+        val participant = factory.createParticipant
+        val json = makeRequest(GET, listUri(participant.id), BAD_REQUEST)
+
+        (json \ "status").as[String] must include ("error")
+
+        (json \ "message").as[String] must include ("invalid participant id")
+      }
+
+    }
+
     "GET /participants/cevents/{participantId}/visitNumber/{vn}" must {
 
       "get a collection event by visit number" in {
@@ -281,8 +419,8 @@ class CollectionEventsControllerSpec extends ControllerFixture {
           }
 
           val ceventToGet = cevents(0)
-
           val json = makeRequest(GET, uriWithVisitNumber(participant, ceventToGet))
+
           (json \ "status").as[String] must include ("success")
           val jsonObj = (json \ "data").as[JsObject]
           compareObj(jsonObj, ceventToGet)
@@ -370,6 +508,26 @@ class CollectionEventsControllerSpec extends ControllerFixture {
             annotation mustBe defined
             compareAnnotation(jsonAnnotation, annotation.value)
           }
+        }
+      }
+
+      "fail when adding collection event for a different study than participant's" in {
+        createEntities() { (study, participant, ceventType) =>
+          var otherStudy = factory.createDisabledStudy
+          val otherCeventType = factory.createCollectionEventType.copy(studyId = otherStudy.id)
+
+          studyRepository.put(otherStudy)
+          collectionEventTypeRepository.put(otherCeventType)
+
+          val cevent = factory.createCollectionEvent
+          val json = makeRequest(method         = POST,
+                                 path           = uri(participant),
+                                 expectedStatus = BAD_REQUEST,
+                                 json           = collectionEventToAddCmd(cevent))
+          (json \ "status").as[String] must include ("error")
+
+          (json \ "message").as[String] must include (
+            "participant and collection event type not in the same study")
         }
       }
 
@@ -635,6 +793,33 @@ class CollectionEventsControllerSpec extends ControllerFixture {
         }
       }
 
+      "fail when updating collection event to a different study than participant's" in {
+        createEntities() { (study, participant, ceventType) =>
+          val cevent1 = factory.createCollectionEvent
+          collectionEventRepository.put(cevent1)
+
+          var otherStudy = factory.createDisabledStudy
+          val otherCeventType = factory.createCollectionEventType.copy(studyId = otherStudy.id)
+
+          studyRepository.put(otherStudy)
+          collectionEventTypeRepository.put(otherCeventType)
+
+          val cevent2 = factory.createCollectionEvent.copy(id = cevent1.id)
+
+          val json = makeRequest(method         = PUT,
+                                 path           = uri(participant, cevent2),
+                                 expectedStatus = BAD_REQUEST,
+                                 json           = collectionEventToUpdateCmd(cevent2))
+
+          (json \ "status").as[String] must include ("error")
+
+          log.info(s"--> " + (json \ "message"))
+
+          (json \ "message").as[String] must include (
+            "participant and collection event type not in the same study")
+        }
+      }
+
       "fail for an invalid annotation type" in {
         createEntities() { (study, participant, ceventType) =>
 
@@ -778,4 +963,3 @@ class CollectionEventsControllerSpec extends ControllerFixture {
 
   }
 }
-

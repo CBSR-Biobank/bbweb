@@ -39,14 +39,12 @@ case class CollectionEvent(id:                    CollectionEventId,
     )
   }
 
-  def withTimeCompleted(timeCompleted: DateTime): DomainValidation[CollectionEvent] = {
+  def withTimeCompleted(timeCompleted: DateTime): DomainValidation[CollectionEvent] =
     copy(version = version + 1, timeCompleted = timeCompleted).success
-  }
 
   def withAnnotations(annotations: Set[CollectionEventAnnotation])
-      : DomainValidation[CollectionEvent] = {
+      : DomainValidation[CollectionEvent] =
     copy(version = version + 1, annotations = annotations).success
-  }
 
   override def toString: String =
     s"""|CollectionEvent:{
@@ -82,6 +80,12 @@ object CollectionEvent extends ParticipantValidations {
       CollectionEvent(_, _, _, _, DateTime.now, None, timeCompleted, _, annotations)
     }
   }
+
+  def compareByVisitNumber(a: CollectionEvent, b: CollectionEvent) =
+    (a.visitNumber compareTo b.visitNumber) < 0
+
+  def compareByTimeCompleted(a: CollectionEvent, b: CollectionEvent) =
+    (a.timeCompleted compareTo b.timeCompleted) < 0
 
   implicit val collectionEventWrites = Json.writes[CollectionEvent]
 }
