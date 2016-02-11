@@ -27,7 +27,7 @@ define(function (require) {
 
   module.config(require('./states'));
 
-  module.controller('StudiesCtrl',         require('./StudiesCtrl'));
+  module.directive('studiesList',          require('./directives/studiesList/studiesListDirective'));
   module.controller('StudyCtrl',           require('./StudyCtrl'));
   module.controller('StudyEditCtrl',       require('./StudyEditCtrl'));
   module.controller('StudySummaryTabCtrl', require('./StudySummaryTabCtrl'));

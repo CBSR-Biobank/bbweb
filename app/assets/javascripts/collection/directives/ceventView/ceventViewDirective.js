@@ -30,7 +30,16 @@ define([], function() {
   function CeventViewCtrl(timeService) {
     var vm = this;
 
+    vm.specimens          = [];
     vm.timeCompletedLocal = timeService.timeToDisplayString(vm.collectionEvent.timeCompleted);
+
+    vm.addSpecimen        = addSpecimen;
+
+    //--
+
+    function addSpecimen() {
+    }
+
   }
 
   return ceventViewDirective;

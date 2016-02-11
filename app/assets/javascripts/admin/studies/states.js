@@ -42,8 +42,15 @@ define([], function() {
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/studies.html',
-          controller: 'StudiesCtrl as vm'
+          template: [
+            '<studies-list',
+            '  study-counts="vm.studyCounts">',
+            '</studies-list>'
+          ].join(''),
+          controller: ['studyCounts', function (studyCounts) {
+            this.studyCounts = studyCounts;
+          }],
+          controllerAs: 'vm'
         }
       },
       data: {

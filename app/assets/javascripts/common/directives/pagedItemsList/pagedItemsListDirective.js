@@ -135,7 +135,8 @@ define(['underscore'], function(_) {
     }
 
     function sortFieldSelected(sortField) {
-      vm.pagerOptions.sortField = sortField.toLowerCase(); // must be lower case
+      vm.pagerOptions.page = 1;
+      vm.pagerOptions.sort = sortField.toLowerCase(); // must be lower case
       updateItems();
     }
   }

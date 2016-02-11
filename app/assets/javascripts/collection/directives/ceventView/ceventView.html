@@ -29,6 +29,23 @@
 
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">Specimens</h3>
+    <h3 class="panel-title">Specimens
+      <span class="btn-group pull-right">
+        <button class="btn btn-xs btn-default"
+                title="add specimen"
+                ng-click="vm.addSpecimen()">
+          <i class="glyphicon glyphicon-plus"></i>
+        </button>
+      </span>
+    </h3>
   </div>
+
+  <div class="panel-body" ng-if="vm.specimens.length <= 0">
+    <div class="panel panel-warning">
+      <div class="panel-heading">
+        No specimens collected yet.
+      </div>
+    </div>
+  </div>
+
 </div>
