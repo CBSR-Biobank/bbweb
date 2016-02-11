@@ -32,16 +32,16 @@ define(['underscore'], function(_) {
     var vm = this,
         action = annotationType.isNew() ? 'Add' : 'Update',
         possibleReturnStateNames = [
-          'home.admin.studies.study.collection',
+          'home.admin.studies.study.collection.view',
           'home.admin.studies.study.participants',
-          'home.admin.studies.study.processing'
+          'home.admin.studies.study.processing.view'
         ],
         returnState;
 
     returnState = determineReturnState();
 
     vm.study                 = study;
-    vm.annotationType             = annotationType;
+    vm.annotationType        = annotationType;
     vm.title                 =  action + ' Annotation Type';
     vm.hasRequiredField      = (annotationType instanceof ParticipantAnnotationType);
     vm.valueTypes            = AnnotationValueType.values();

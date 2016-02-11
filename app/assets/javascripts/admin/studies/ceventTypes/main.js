@@ -19,6 +19,8 @@ define(function (require) {
 
   module.controller('CeventTypeEditCtrl', require('./CeventTypeEditCtrl'));
   module.directive('ceventTypesPanel', require('./directives/ceventTypesPanel/ceventTypesPanelDirective'));
+  module.directive('ceventTypesAddAndSelect', require('./directives/ceventTypesAddAndSelect/ceventTypesAddAndSelectDirective'));
+  module.directive('ceventTypeView', require('./directives/ceventTypeView/ceventTypeViewDirective'));
 
   return {
     name: name,

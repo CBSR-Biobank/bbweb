@@ -1,6 +1,6 @@
-<div class="panel panel-default">
+  <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">Events
+    <h3 class="panel-title">Event Types
       <span class="btn-group pull-right">
         <button class="btn btn-xs btn-default"
                 title="add collection event"
@@ -11,37 +11,32 @@
     </h3>
   </div>
 
-  <div class="panel-body" ng-if="vm.collectionEvents.length <= 0">
+  <div class="panel-body" ng-if="vm.ceventTypes.length <= 0">
     <div class="panel panel-warning">
       <div class="panel-heading">
-        No collection events added to this participant yet.
+        No collection event types added to this study yet.
       </div>
     </div>
   </div>
 
-  <table ng-show="vm.collectionEvents.length > 0"
+  <table ng-show="vm.ceventTypes.length > 0"
          class="table table-hover table-condensed"
-         st-table="vm.collectionEvents">
-    <thead>
-      <th st-sort="visitNumber">Visit#</th>
-      <th st-sort="timeCompleted">Time Completed</th>
-    </thead>
+         st-table="vm.ceventTypes">
     <tbody>
-      <tr ng-repeat="cevent in vm.collectionEvents">
+      <tr ng-repeat="ceventType in vm.ceventTypes">
         <td>
-          <a href ng-click="vm.eventInformation(cevent)">
-            {{cevent.visitNumber}}
+          <a href ng-click="vm.information(ceventType)">
+            {{ceventType.name}}
           </a>
         </td>
         <td>
-          <a href ng-click="vm.eventInformation(cevent)">
-            {{cevent.timeCompleted | localTime}}
-          </a>
+          <span class="badge">{{vm.getRecurringLabel(ceventType)}}</span>
         </td>
       </tr>
     </tbody>
   </table>
 
+  <!-- TODO: add pagination -->
   <div class="panel-footer text-center"
        style="padding:5px 10px;"
        ng-if="vm.showPagination">

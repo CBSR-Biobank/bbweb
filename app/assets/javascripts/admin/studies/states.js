@@ -229,16 +229,21 @@ define(function () {
       },
       views: {
         'studyDetails': {
-          templateUrl: '/assets/javascripts/admin/studies/studyCollectionTab.html',
+          template: [
+            '<study-collection',
+            '  study="vm.study"',
+            '  collection-dto="vm.collectionDto"',
+            '</study-collection>',
+          ].join(''),
           controller: [
-            '$scope',
             'study',
             'collectionDto',
-            function($scope, study, collectionDto) {
-              $scope.study = study;
-              $scope.collectionDto = collectionDto;
+            function(study, collectionDto) {
+              this.study = study;
+              this.collectionDto = collectionDto;
             }
-          ]
+          ],
+          controllerAs: 'vm'
         }
       },
       data: {

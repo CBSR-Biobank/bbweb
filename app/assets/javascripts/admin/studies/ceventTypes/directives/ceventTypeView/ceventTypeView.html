@@ -1,0 +1,63 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      {{vm.ceventType.name}}
+      <span class="pull-right">
+        <button class="btn btn-xs btn-primary"
+                ng-click="vm.addAnnotationType()">
+          Add annotation type
+          <i class="glyphicon glyphicon-plus"></i>
+        </button>
+        <button class="btn btn-xs btn-primary"
+                ng-click="vm.addSpecimenGroup()">
+          Add specimen group
+          <i class="glyphicon glyphicon-plus"></i>
+        </button>
+      </span>
+    </h3>
+  </div>
+  <ul class="list-group">
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-4">
+          <strong>Name:</strong>
+        </div>
+        <div class="col-md-5">
+          {{vm.ceventType.name}}
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-4">
+          <strong>Description:</strong>
+        </div>
+        <div class="col-md-5">
+          {{vm.ceventType.description | truncate:40}}
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-4">
+          <strong>Recurring:</strong>
+        </div>
+        <div class="col-md-5" ng-if="vm.ceventType.recurring">Yes</div>
+        <div class="col-md-5" ng-if="!vm.ceventType.recurring">No</div>
+      </div>
+    </li>
+    <li class="list-group-item" ng-repeat="annotationType in vm.ceventType.annotationTypes">
+      <div class="row">
+        <div class="col-md-4">
+          <strong>Recurring:</strong>
+        </div>
+        <div class="col-md-5">Yes</div>
+      </div>
+    </li>
+  </ul>
+  <status-line item="vm.ceventType"></status-line>
+</div>
+
+<div class="row">
+  <div class="col-xs-12"><pre>Type: {{vm.ceventType | json}}</pre></div>
+</div>

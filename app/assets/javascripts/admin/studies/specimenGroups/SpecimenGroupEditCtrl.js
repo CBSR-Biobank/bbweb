@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([], function() {
+define(['underscore'], function(_) {
   'use strict';
 
   SpecimenGroupEditCtrl.$inject = [
@@ -29,7 +29,14 @@ define([], function() {
                                  SpecimenType,
                                  study,
                                  specimenGroup) {
-    var vm = this;
+    var vm = this,
+        possibleReturnStateNames = [
+          'home.admin.studies.study.collection.view',
+          'home.admin.studies.study.processing.view'
+        ],
+        returnState;
+
+    returnState = determineReturnState();
 
     vm.title                 = (specimenGroup.isNew() ? 'Add' : 'Update') + ' Specimen Group';
     vm.study                 = study;
@@ -44,13 +51,32 @@ define([], function() {
 
     //--
 
-    function gotoReturnState() {
-      return $state.go('home.admin.studies.study.specimens', {}, {reload: true});
+    /**
+     * Determines the state to transition to when the user submits the form or cancels it.
+     */
+    function determineReturnState() {
+      var returnStateName = _.filter(possibleReturnStateNames, function(name) {
+        return ($state.current.name.indexOf(name) >= 0);
+      });
+
+      if (returnStateName.length !== 1) {
+        throw new Error('invalid current state name: ' + $state.current.name);
+      }
+
+      return {
+        name:    _.first(returnStateName),
+        params:  { studyId: study.id },
+        options: { reload: true }
+      };
+    }
+
+    function gotoReturnState(state) {
+      return $state.go(state.name, state.params, state.options);
     }
 
     function submitSuccess() {
       notificationsService.submitSuccess();
-      gotoReturnState();
+      gotoReturnState(returnState);
     }
 
     function submit(specimenGroup) {
@@ -63,7 +89,7 @@ define([], function() {
     }
 
     function cancel() {
-      gotoReturnState();
+      gotoReturnState(returnState);
     }
 
   }

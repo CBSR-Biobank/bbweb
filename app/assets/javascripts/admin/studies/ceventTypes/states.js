@@ -28,6 +28,36 @@ define(function () {
 
     $urlRouterProvider.otherwise('/');
 
+    $stateProvider.state('home.admin.studies.study.collection.view', {
+      url: '/cetype/{ceventTypeId}',
+      resolve: {
+        user: authorizationProvider.requireAuthenticatedUser,
+        ceventType: [
+          '$stateParams',
+          'study',
+          'CollectionEventType',
+          function ($stateParams, study, CollectionEventType) {
+            return CollectionEventType.get(study.id, $stateParams.ceventTypeId);
+          }
+        ]
+      },
+      views: {
+        'ceventTypeDetails': {
+          template: '<cevent-type-view cevent-type="vm.ceventType"></cevent-type-view>',
+          controller: [
+            'ceventType',
+            function (ceventType) {
+              this.ceventType = ceventType;
+            }
+          ],
+          controllerAs: 'vm'
+        }
+      },
+      data: {
+        displayName: '{{ceventType.name}}'
+      }
+    });
+
     /**
      * Collection Event Type Add
      */
@@ -103,8 +133,8 @@ define(function () {
     /**
      * Collection Event Annotation Type Add
      */
-    $stateProvider.state('home.admin.studies.study.collection.ceventAnnotationTypeAdd', {
-      url: '/cevent/annottype/add',
+    $stateProvider.state('home.admin.studies.study.collection.view.annotationTypeAdd', {
+      url: '/cetype/annottype/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         annotationType: ['CollectionEventAnnotationType', function(CollectionEventAnnotationType) {
@@ -118,13 +148,14 @@ define(function () {
         }
       },
       data: {
-        displayName: 'Collection Event Annotation Type'
+        displayName: 'Annotation Type'
       }
     });
 
     /**
      * Collection Event Annotation Type Update
      */
+    // FIXME - no longer require
     $stateProvider.state('home.admin.studies.study.collection.ceventAnnotationTypeUpdate', {
       url: '/cevent/annottype/update/{annotationTypeId}',
       resolve: {
@@ -148,6 +179,29 @@ define(function () {
       }
     });
 
+    $stateProvider.state('home.admin.studies.study.collection.view.specimenGroupAdd', {
+      url: '/spcgroup/add',
+      resolve: {
+        user: authorizationProvider.requireAuthenticatedUser,
+        specimenGroup: [
+          '$stateParams',
+          'SpecimenGroup',
+          function($stateParams, SpecimenGroup) {
+            var sg = new SpecimenGroup();
+            sg.studyId = $stateParams.studyId;
+            return sg;
+          }]
+      },
+      views: {
+        'main@': {
+          templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupForm.html',
+          controller: 'SpecimenGroupEditCtrl as vm'
+        }
+      },
+      data: {
+        displayName: 'Add Specimen Group'
+      }
+    });
   }
 
   return config;
