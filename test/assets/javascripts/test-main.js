@@ -26,10 +26,10 @@ require.config({
   baseUrl: '/base/app/assets/javascripts',
 
   packages: [
+    'common',
     'admin',
     'centres',
     'collection',
-    'common',
     'dashboard',
     'domain',
     'home',
@@ -39,6 +39,7 @@ require.config({
 
   paths: {
     'jquery':                       '../../../target/web/web-modules/main/webjars/lib/jquery/jquery',
+    'bootstrap':                    '../../../target/web/web-modules/main/webjars/lib/bootstrap/js/bootstrap',
     'faker':                        '../../../node_modules/karma-faker/node_modules/faker/build/build/faker',
     'moment':                       '../../../target/web/web-modules/main/webjars/lib/momentjs/moment',
     'toastr':                       '../../../target/web/web-modules/main/webjars/lib/toastr/toastr',
@@ -57,9 +58,7 @@ require.config({
   },
 
   shim: {
-    'angular' : {
-      exports : 'angular'
-    },
+    'angular' : { exports : 'angular' },
     'angularMocks': {
       deps: ['angular'],
       exports: 'angular.mock'
@@ -71,17 +70,7 @@ require.config({
     'smart-table':                  ['angular'],
     'ui-bootstrap':                 ['angular'],
     'angular-utils-ui-breadcrumbs': ['angular'],
-    'biobankApp': {
-      deps: ['angular',
-             'angular-ui-router',
-             'angular-sanitize',
-             'ui-bootstrap',
-             'smart-table',
-             'angular-utils-ui-breadcrumbs',
-             'angular-cookies'
-            ],
-      exports: 'biobankApp'
-    }
+    'biobankApp':                   { exports: 'biobankApp' }
   },
 
   // dynamically load all test files

@@ -10,6 +10,7 @@ define(['underscore'], function(_) {
     'funutils',
     'validationService',
     'ConcurrencySafeEntity',
+    'queryStringService',
     'biobankApi',
     'annotationFactory'
   ];
@@ -20,6 +21,7 @@ define(['underscore'], function(_) {
   function CollectionEventFactory(funutils,
                                   validationService,
                                   ConcurrencySafeEntity,
+                                  queryStringService,
                                   biobankApi,
                                   annotationFactory) {
 
@@ -112,22 +114,55 @@ define(['underscore'], function(_) {
     };
 
     /**
+     * @param participantId the ID of the participant this collection event belongs to.
+     *
+     * @param id the collection event's ID.
+     *
      * @param collectionEventType can be undefined or null.
      *
      * @param annotationTypes can be undefined or null.
      */
     CollectionEvent.get = function (participantId, id, collectionEventType, annotationTypes) {
-      if (id) {
-        return biobankApi.get(uri(participantId) + '?ceventId=' + id)
-          .then(function (reply) {
-            return CollectionEvent.create(reply, collectionEventType, annotationTypes);
-          });
+      if (!id) {
+        throw new Error('collection event id not specified');
       }
 
-      return biobankApi.get(uri(participantId)).then(function (reply) {
-        return _.map(reply, function (entity) {
-          return CollectionEvent.create(entity);
+      return biobankApi.get(uri(participantId) + '?ceventId=' + id)
+        .then(function (reply) {
+          return CollectionEvent.create(reply, collectionEventType, annotationTypes);
         });
+    };
+
+    /**
+     * @eturn a paged result.
+     */
+    CollectionEvent.list = function (participantId, options) {
+      var validKeys = [
+        'sort',
+        'page',
+        'pageSize',
+        'order'
+      ];
+      var url = uri(participantId) + '/list';
+      var paramsStr = '';
+
+      if (arguments.length > 0) {
+        paramsStr = queryStringService.param(options, function (value, key) {
+          return _.contains(validKeys, key);
+        });
+      }
+
+      if (paramsStr) {
+        url += paramsStr;
+      }
+
+      return biobankApi.get(url).then(function(reply) {
+        // reply is a paged result
+        reply.items = _.map(reply.items, function(obj) {
+          var result = CollectionEvent.create(obj);
+          return result;
+        });
+        return reply;
       });
     };
 
@@ -161,8 +196,6 @@ define(['underscore'], function(_) {
           annotationTypeDataById,
           ceventTypeAnnotationTypeIds,
           serverAnnotationsById;
-
-      self.annotations = self.annotations || [];
 
       if (_.isUndefined(self.collectionEventType)) {
         throw new Error('collection event type not defined');

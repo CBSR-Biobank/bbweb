@@ -47,10 +47,10 @@ define(['underscore'], function(_) {
       throw new Error('state parameter studyId is invalid');
     }
 
-    resolveCollectionEvents.$inject = ['CollectionEvent', 'participant'];
-    function resolveCollectionEvents(CollectionEvent, participant) {
+    resolveCollectionEventsPagedResult.$inject = ['CollectionEvent', 'participant'];
+    function resolveCollectionEventsPagedResult(CollectionEvent, participant) {
       // returns all collection events for a participant
-      return CollectionEvent.get(participant.id);
+      return CollectionEvent.list(participant.id);
     }
 
     resolveCollectionEvent.$inject = [
@@ -240,7 +240,7 @@ define(['underscore'], function(_) {
       url: '/cevents',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        collectionEvents: resolveCollectionEvents,
+        collectionEventsPagedResult: resolveCollectionEventsPagedResult,
         collectionEventTypes: [
           'CollectionEventType',
           'study',
@@ -258,16 +258,19 @@ define(['underscore'], function(_) {
         'participantDetails': {
           template: [
             '<cevents-list',
-            '  collection-events="vm.collectionEvents"',
+            '  participant="vm.participant"',
+            '  collection-events-paged-result="vm.collectionEventsPagedResult"',
             '  collection-event-types="vm.collectionEventTypes">',
             '</cevents-list>'
           ].join(''),
           controller: [
-            'collectionEvents',
+            'participant',
+            'collectionEventsPagedResult',
             'collectionEventTypes',
-            function (collectionEvents, collectionEventTypes) {
+            function (participant, collectionEventsPagedResult, collectionEventTypes) {
               var vm = this;
-              vm.collectionEvents = collectionEvents;
+              vm.participant = participant;
+              vm.collectionEventsPagedResult = collectionEventsPagedResult;
               vm.collectionEventTypes = collectionEventTypes;
             }
           ],

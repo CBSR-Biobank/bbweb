@@ -96,7 +96,7 @@ define(['underscore'], function(_) {
 
     function submitSuccess(reply) {
       notificationsService.submitSuccess();
-      $state.go('home.collection.study.participant.cevents');
+      $state.go('home.collection.study.participant.cevents', {}, { reload: true });
     }
 
     function cancel() {

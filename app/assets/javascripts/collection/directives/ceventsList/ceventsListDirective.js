@@ -13,7 +13,8 @@ define(['underscore'], function(_) {
       restrict: 'E',
       scope: {},
       bindToController: {
-        collectionEvents: '=',
+        participant: '=',
+        collectionEventsPagedResult: '=',
         collectionEventTypes: '='
       },
       templateUrl : '/assets/javascripts/collection/directives/ceventsList/ceventsList.html',
@@ -24,14 +25,13 @@ define(['underscore'], function(_) {
   }
 
   CeventsListCtrl.$inject = [
-    '$state',
-    'CeventTypeViewer'
+    '$state'
   ];
 
   /**
    *
    */
-  function CeventsListCtrl($state, CeventTypeViewer) {
+  function CeventsListCtrl($state) {
     var vm = this;
 
     if (vm.collectionEventTypes.length <= 0) {

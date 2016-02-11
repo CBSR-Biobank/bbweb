@@ -131,7 +131,7 @@ define([
       });
     });
 
-    it('constructor with invalid annotation parameter throws error', function() {
+    it('fails when constructing with invalid annotation parameter', function() {
       var serverAnnotation = {},
           ceventType;
 
@@ -157,7 +157,7 @@ define([
                            serverAnnotation.annotationTypeId));
     });
 
-    it('fails when using constructor with invalid collection event type', function() {
+    it('fails when constructing with invalid collection event type', function() {
       var serverCollectionEvent,
           ceventType;
 
@@ -174,6 +174,22 @@ define([
         return new CollectionEvent(serverCollectionEvent, ceventType);
       }).toThrow(new Error('invalid collection event type'));
     });
+
+    it('fails when constructing a collection event with annotations and no collection event type',
+       function() {
+         var serverAnnotationTypes = fakeEntities.allStudyAnnotationTypes(serverStudy);
+
+         _.each(serverAnnotationTypes, function (serverAnnotationType) {
+           var annotationType, serverCevent;
+
+           annotationType = new CollectionEventAnnotationType(serverAnnotationType);
+           serverCevent = _.omit(fakeEntities.collectionEvent(), 'id)');
+
+           expect(function () {
+             return new CollectionEvent(serverCevent, undefined, [ annotationType ]);
+           }).toThrow(new Error('collection event type not defined'));
+         });
+       });
 
     it('fails when creating from a non object', function() {
       expect(CollectionEvent.create(1))
@@ -229,7 +245,15 @@ define([
       httpBackend.flush();
     });
 
-    it('can retrieve collection events for a participant', function(done) {
+    it('get fails when collection event ID not specified', function() {
+      var participant = fakeEntities.participant();
+
+      expect(function () {
+        return CollectionEvent.get(participant.id);
+      }).toThrow(new Error('collection event id not specified'));
+    });
+
+    it('can list collection events for a participant', function(done) {
       var study = fakeEntities.study(),
           participant = fakeEntities.participant({ studyId: study.id }),
           ceventType = fakeEntities.collectionEventType(study),
@@ -238,15 +262,17 @@ define([
               participantId: participant.id,
               collectionEventTypeId: ceventType.id
             });
-          });
+          }),
+          reply = fakeEntities.pagedResult(collectionEvents),
+          serverEntity;
 
-      httpBackend.whenGET(uri(participant.id))
-        .respond(serverReply(collectionEvents));
+      httpBackend.whenGET(uri(participant.id) + '/list')
+        .respond(serverReply(reply));
 
-      CollectionEvent.get(participant.id).then(function (reply) {
-        _.each(reply, function(obj) {
-          var serverEntity;
+      CollectionEvent.list(participant.id).then(function (pagedResult) {
+        expect(pagedResult.items).toBeArrayOfSize(collectionEvents.length);
 
+        _.each(pagedResult.items, function(obj) {
           expect(obj).toEqual(jasmine.any(CollectionEvent));
           serverEntity = _.findWhere(collectionEvents, { id: obj.id });
           expect(serverEntity).toBeDefined();
@@ -256,6 +282,59 @@ define([
       });
       httpBackend.flush();
     });
+
+    it('can list collection events sorted by corresponding fields',
+       function(done) {
+         var study = fakeEntities.study(),
+             participant = fakeEntities.participant({ studyId: study.id }),
+             reply = fakeEntities.pagedResult([]),
+             sortFields = [ 'visitNumber', 'timeCompleted'];
+
+         _.each(sortFields, function (sortField) {
+           httpBackend.whenGET(uri(participant.id) + '/list?sort=' + sortField)
+             .respond(serverReply(reply));
+
+           CollectionEvent.list(participant.id, { sort: sortField }).then(function (pagedResult) {
+             expect(pagedResult.items).toBeEmptyArray();
+             done();
+           });
+           httpBackend.flush();
+         });
+       });
+
+    it('can list collection events using a page number',
+       function(done) {
+         var study = fakeEntities.study(),
+             participant = fakeEntities.participant({ studyId: study.id }),
+             reply = fakeEntities.pagedResult([]),
+             pageNumber = 2;
+
+         httpBackend.whenGET(uri(participant.id) + '/list?page=' + pageNumber)
+           .respond(serverReply(reply));
+
+         CollectionEvent.list(participant.id, { page: pageNumber }).then(function (pagedResult) {
+           expect(pagedResult.items).toBeEmptyArray();
+           done();
+         });
+         httpBackend.flush();
+       });
+
+    it('can list collection events using a page size',
+       function(done) {
+         var study = fakeEntities.study(),
+             participant = fakeEntities.participant({ studyId: study.id }),
+             reply = fakeEntities.pagedResult([]),
+             pageSize = 2;
+
+         httpBackend.whenGET(uri(participant.id) + '/list?pageSize=' + pageSize)
+           .respond(serverReply(reply));
+
+         CollectionEvent.list(participant.id, { pageSize: pageSize }).then(function (pagedResult) {
+           expect(pagedResult.items).toBeEmptyArray();
+           done();
+         });
+         httpBackend.flush();
+       });
 
     it('can retrieve a single collection event by visit number', function(done) {
       var entities              = getCollectionEventEntities(true),
@@ -276,6 +355,49 @@ define([
         });
       httpBackend.flush();
     });
+
+    it('can list collection events using ordering',
+       function(done) {
+         var study = fakeEntities.study(),
+             participant = fakeEntities.participant({ studyId: study.id }),
+             reply = fakeEntities.pagedResult([]),
+             orderingTypes = [ 'asc', 'desc'];
+
+         _.each(orderingTypes, function (orderingType) {
+           httpBackend.whenGET(uri(participant.id) + '/list?order=' + orderingType)
+             .respond(serverReply(reply));
+
+           CollectionEvent.list(participant.id, { order: orderingType }).then(function (pagedResult) {
+             expect(pagedResult.items).toBeEmptyArray();
+             done();
+           });
+           httpBackend.flush();
+         });
+       });
+
+    it('setting annotation types fails when it does not belong to collection event type',
+        function() {
+          var annotationData      = generateAnnotationTypesAndServerAnnotations(serverStudy),
+              annotationTypes     = _.pluck(annotationData, 'annotationType'),
+              badAnnotationTypeId = 'bad-annotation-type-id',
+              ceventType,
+              collectionEvent;
+
+          ceventType = CollectionEventType.create(
+            fakeEntities.collectionEventType(serverStudy, {
+              specimenGroups:  serverStudy.specimenGroups,
+              annotationTypes: annotationTypes
+            }));
+          collectionEvent = new CollectionEvent({}, ceventType);
+
+          // replace id with a bad one
+          annotationTypes[0].id = badAnnotationTypeId;
+          expect(function () {
+            collectionEvent.setAnnotationTypes(annotationTypes);
+          }).toThrow(new Error(
+            'annotation types not belonging to collection event type found: ' +
+              badAnnotationTypeId));
+        });
 
     it('can add a collectionEvent', function(done) {
       var participant = fakeEntities.participant(),

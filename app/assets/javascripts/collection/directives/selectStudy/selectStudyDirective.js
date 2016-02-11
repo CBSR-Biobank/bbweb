@@ -41,7 +41,6 @@ define(['underscore'], function(_) {
 
     vm.updateStudies          = updateStudies;
     vm.pagedResult            = {};
-    vm.paginationNumPages     = 5;
     vm.nameFilterUpdated      = nameFilterUpdated;
     vm.pageChanged            = pageChanged;
     vm.clearFilter            = clearFilter;

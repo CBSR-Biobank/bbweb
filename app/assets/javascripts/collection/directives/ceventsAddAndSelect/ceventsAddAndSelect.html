@@ -43,4 +43,39 @@
       </tr>
     </tbody>
   </table>
+
+  <div class="panel-footer text-center"
+       style="padding:5px 10px;"
+       ng-if="vm.showPagination">
+    <uib-pagination
+       class="pagination-sm"
+       style="margin:0;"
+       boundary-links="true"
+       total-items="vm.collectionEventsPagedResult.total"
+       items-per-page="vm.pagerOptions.pageSize"
+       ng-model="vm.pagerOptions.page"
+       ng-change="vm.pageChanged()"
+       max-size="5"
+       rotate="false"
+       previous-text="&lsaquo;"
+       next-text="&rsaquo;"
+       first-text="&laquo;"
+       last-text="&raquo;">
+    </uib-pagination>
+  </div>
+
+  <div class="panel-footer"
+       ng-if="vm.showPagination">
+    <form class="form-inline" name="filters">
+      <div class="form-group">
+        <label for="nameFilter" class="small">Visit# filter:</label>
+        <input type="text"
+               class="form-control input-sm"
+               name="nameFilter"
+               ng-model="vm.pagerOptions.filter"
+               ng-model-options="{ debounce: 500 }"
+               ng-change="vm.nameFilterUpdated()">
+      </div>
+    </form>
+  </div>
 </div>

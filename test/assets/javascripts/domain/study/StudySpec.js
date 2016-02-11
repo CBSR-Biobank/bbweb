@@ -68,14 +68,22 @@ define([
     });
 
     it('can retrieve studies', function(done) {
-      var studies = [fakeEntities.study()];
-      var reply = fakeEntities.pagedResult(studies);
+      var studies = [ fakeEntities.study() ],
+          reply = fakeEntities.pagedResult(studies),
+          serverEntity;
+
       httpBackend.whenGET(uri()).respond(serverReply(reply));
 
       Study.list().then(function (pagedResult) {
         expect(pagedResult.items).toBeArrayOfSize(studies.length);
-        expect(pagedResult.items[0]).toEqual(jasmine.any(Study));
-        pagedResult.items[0].compareToServerEntity(studies[0]);
+
+        _.each(pagedResult.items, function (study) {
+          expect(study).toEqual(jasmine.any(Study));
+
+          serverEntity = _.findWhere(studies, { id: study.id });
+          expect(serverEntity).toBeDefined();
+          study.compareToServerEntity(serverEntity);
+        });
         done();
       });
       httpBackend.flush();
