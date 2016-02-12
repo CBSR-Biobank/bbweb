@@ -3,7 +3,7 @@
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
 /* global define */
-define([], function() {
+define(function () {
   'use strict';
 
   EntityViewerFactory.$inject = ['$uibModal'];

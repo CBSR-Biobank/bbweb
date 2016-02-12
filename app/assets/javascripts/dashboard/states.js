@@ -4,7 +4,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([], function() {
+define(function () {
   'use strict';
 
   config.$inject = ['$urlRouterProvider', '$stateProvider', 'authorizationProvider'];

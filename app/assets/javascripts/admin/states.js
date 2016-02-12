@@ -4,7 +4,7 @@
  *
  * Configures routes for the administration module.
  */
-define([], function() {
+define(function () {
   'use strict';
 
   config.$inject = [
