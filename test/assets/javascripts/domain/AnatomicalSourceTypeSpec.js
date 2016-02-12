@@ -9,9 +9,8 @@ define([
   'angularMocks',
   'underscore',
   './enumSharedSpec',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, enumSharedSpec, testUtils) {
+], function(angular, mocks, _, enumSharedSpec) {
   'use strict';
 
   describe('AnatomicalSourceType', function() {
@@ -38,7 +37,7 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (AnatomicalSourceType) {
+    beforeEach(inject(function (testUtils, AnatomicalSourceType) {
       context.enumerationClass = AnatomicalSourceType;
       context.valueMap = _.map(values, function (value) {
         return [ value, testUtils.camelCaseToUnderscore(value)];

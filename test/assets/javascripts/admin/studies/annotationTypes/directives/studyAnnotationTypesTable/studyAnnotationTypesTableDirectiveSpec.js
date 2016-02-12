@@ -8,9 +8,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, testUtils) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('Directive: studyAnnotationTypesTableDirective', function() {
@@ -112,23 +111,18 @@ define([
 
       describe('(shared)', function() {
 
-        beforeEach(inject(function($state,
-                                   $rootScope,
+        beforeEach(inject(function($rootScope,
                                    $compile,
-                                   $templateCache,
-                                   _modalService_,
-                                   _studyAnnotationTypeUtils_,
-                                   _AnnotationTypeViewer_) {
+                                   testUtils) {
           var element,
               hasRequired = (context.annotationTypeName === 'ParticipantAnnotationType');
 
-          state                    = $state;
-          modalService             = _modalService_;
-          studyAnnotationTypeUtils = _studyAnnotationTypeUtils_;
-          AnnotationTypeViewer     = _AnnotationTypeViewer_;
+          state                    = this.$injector.get('$state');
+          modalService             = this.$injector.get('modalService');
+          studyAnnotationTypeUtils = this.$injector.get('studyAnnotationTypeUtils');
+          AnnotationTypeViewer     = this.$injector.get('AnnotationTypeViewer');
 
           testUtils.putHtmlTemplates(
-            $templateCache,
             '/assets/javascripts/admin/studies/annotationTypes/directives/studyAnnotationTypesTable/studyAnnotationTypesTable.html',
             '/assets/javascripts/common/directives/updateRemoveButtons.html');
 

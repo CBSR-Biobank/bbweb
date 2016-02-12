@@ -8,9 +8,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, testUtils) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('Directive: statusLineDirective', function() {
@@ -18,9 +17,9 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($templateCache, fakeDomainEntities) {
-      testUtils.putHtmlTemplates($templateCache,
-                                '/assets/javascripts/admin/directives/statusLine/statusLine.html');
+    beforeEach(inject(function(fakeDomainEntities, testUtils) {
+      testUtils.putHtmlTemplates(
+        '/assets/javascripts/admin/directives/statusLine/statusLine.html');
 
       createScope = setupScope(this.$injector);
       fakeEntities = fakeDomainEntities;

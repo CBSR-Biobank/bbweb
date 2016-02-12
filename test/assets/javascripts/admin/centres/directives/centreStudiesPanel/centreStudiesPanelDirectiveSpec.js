@@ -8,9 +8,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, testUtils) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('Directive: centreStudiesPanelDirective', function() {
@@ -18,14 +17,13 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($templateCache, fakeDomainEntities) {
-      fakeEntities = fakeDomainEntities;
+    beforeEach(inject(function(testUtils) {
+      fakeEntities = this.$injector.get('fakeDomainEntities');
       createEntities = setupEntities(this.$injector);
       createController = setupController(this.$injector);
       testUtils.addCustomMatchers();
 
       testUtils.putHtmlTemplates(
-        $templateCache,
         '/assets/javascripts/admin/centres/directives/centreStudiesPanel/centreStudiesPanel.html');
     }));
 

@@ -8,9 +8,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, testUtils) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('Directive: studyAnnotationTypesPanelDirective', function() {
@@ -105,9 +104,9 @@ define([
 
         beforeEach(inject(function($window,
                                    $compile,
-                                   $rootScope) {
-          var element,
-              $templateCache = this.$injector.get('$templateCache');
+                                   $rootScope,
+                                   testUtils) {
+          var element;
 
           Panel = this.$injector.get('Panel');
           $state = this.$injector.get('$state');
@@ -118,7 +117,6 @@ define([
           $window.localStorage.setItem(context.panelId, '');
 
           testUtils.putHtmlTemplates(
-            $templateCache,
             '/assets/javascripts/admin/studies/annotationTypes/directives/studyAnnotationTypesPanel/studyAnnotationTypesPanel.html',
             '/assets/javascripts/admin/studies/annotationTypes/directives/studyAnnotationTypesTable/studyAnnotationTypesTable.html',
             '/assets/javascripts/common/directives/panelButtons.html',

@@ -7,12 +7,7 @@ define([
   'underscore',
   'faker',
   'moment',
-  'biobank.testUtils'
-], function(angular,
-            _,
-            faker,
-            moment,
-            utils) {
+], function(angular, _, faker, moment) {
   'use strict';
 
   fakeDomainEntities.$inject = [
@@ -24,7 +19,8 @@ define([
     'StudyStatus',
     'CentreStatus',
     'UserStatus',
-    'bbwebConfig'
+    'bbwebConfig',
+    'testUtils'
   ];
 
   /**
@@ -41,7 +37,8 @@ define([
                               StudyStatus,
                               CentreStatus,
                               UserStatus,
-                              bbwebConfig) {
+                              bbwebConfig,
+                              testUtils) {
     var nameCountByEntity = {};
 
     var service = {
@@ -148,13 +145,13 @@ define([
     function annotationTypeData(annotationType) {
       return {
         annotationTypeId: annotationType.id,
-        required: utils.randomBoolean()
+        required: testUtils.randomBoolean()
       };
     }
 
     function specimenLinkType(processingType, options) {
       var slt = {
-        id: utils.uuid(),
+        id: testUtils.uuid(),
         processingTypeId: processingType.id,
 
         expectedInputChange:   faker.random.number({precision: 0.5}),
@@ -191,7 +188,7 @@ define([
 
     function processingType(study) {
       var pt =  {
-        id:          utils.uuid(),
+        id:          testUtils.uuid(),
         studyId:     study.id,
         name:        domainEntityNameNext(ENTITY_NAME_PROCESSING_TYPE()),
         description: randomFakerLoremWord(),
@@ -206,7 +203,7 @@ define([
      */
     function collectionEventType(study, options) {
       var cet = {
-        id:                 utils.uuid(),
+        id:                 testUtils.uuid(),
         studyId:            study.id,
         name:               domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE()),
         description:        randomFakerLoremWord(),
@@ -250,7 +247,7 @@ define([
 
     function specimenGroup(study) {
       var sg = {
-        id:                          utils.uuid(),
+        id:                          testUtils.uuid(),
         studyId:                     study.id,
         name:                        domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP()),
         description:                 randomFakerLoremWord(),
@@ -284,7 +281,7 @@ define([
       }
 
       var at = {
-        id:        utils.uuid(),
+        id:        testUtils.uuid(),
         studyId:   options.studyId || null,
         valueType: options.valueType,
         name:      domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE()),
@@ -334,7 +331,7 @@ define([
 
     function study() {
       var study =  {
-        id:          utils.uuid(),
+        id:          testUtils.uuid(),
         name:        domainEntityNameNext(ENTITY_NAME_STUDY()),
         description: randomFakerLoremWord(),
         status:      StudyStatus.DISABLED()
@@ -416,7 +413,7 @@ define([
       options = options || {};
 
       var participant =  {
-        id:          utils.uuid(),
+        id:          testUtils.uuid(),
         studyId:     options.studyId || null,
         uniqueId:    domainEntityNameNext(ENTITY_NAME_PARTICIPANT())
       };
@@ -433,7 +430,7 @@ define([
       options = options || {};
 
       var collectionEvent =  {
-        id:                    utils.uuid(),
+        id:                    testUtils.uuid(),
         participantId:         options.participantId || null,
         collectionEventTypeId: options.collectionEventTypeId || null,
         timeCompleted:         moment(faker.date.recent(10)).format(),
@@ -450,7 +447,7 @@ define([
 
     function centre() {
       var centre =  {
-        id:          utils.uuid(),
+        id:          testUtils.uuid(),
         name:        domainEntityNameNext(ENTITY_NAME_CENTRE()),
         description: randomFakerLoremWord(),
         status:      CentreStatus.DISABLED()
@@ -463,7 +460,7 @@ define([
      */
     function location() {
       return  {
-        id:             utils.uuid(),
+        id:             testUtils.uuid(),
         name:           domainEntityNameNext(ENTITY_NAME_LOCATION()),
         street:         faker.address.streetAddress(),
         city:           faker.address.city(),
@@ -476,7 +473,7 @@ define([
 
     function user() {
       var user =  {
-        id:          utils.uuid(),
+        id:          testUtils.uuid(),
         name:        domainEntityNameNext(ENTITY_NAME_USER()),
         email:       faker.internet.email(),
         avatarUrl:   faker.internet.avatar(),

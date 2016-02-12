@@ -8,10 +8,9 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   '../annotationTypeDataSharedSpec',
   'biobankApp'
-], function(angular, mocks, _, testUtils, annotationTypeDataSharedSpec) {
+], function(angular, mocks, _, annotationTypeDataSharedSpec) {
   'use strict';
 
   describe('SpecimenLinkType', function() {
@@ -23,15 +22,11 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($httpBackend,
-                               _funutils_,
-                               _SpecimenLinkType_,
-                               fakeDomainEntities,
-                               extendedDomainEntities) {
-      httpBackend      = $httpBackend;
-      funutils         = _funutils_;
-      SpecimenLinkType = _SpecimenLinkType_;
-      fakeEntities     = fakeDomainEntities;
+    beforeEach(inject(function(testUtils, extendedDomainEntities) {
+      httpBackend      = this.$injector.get('$httpBackend');
+      funutils         = this.$injector.get('funutils');
+      SpecimenLinkType = this.$injector.get('SpecimenLinkType');
+      fakeEntities     = this.$injector.get('fakeDomainEntities');
       testUtils.addCustomMatchers();
     }));
 

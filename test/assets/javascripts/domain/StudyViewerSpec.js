@@ -8,12 +8,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular,
-            mocks,
-            _,
-            testUtils) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('StudyViewer', function() {
@@ -32,17 +28,19 @@ define([
       centre = fakeEntities.centre();
     }));
 
-    it('should open a modal when created', function() {
+    it('should open a modal when created', inject(function (testUtils) {
       var count = 0;
       var modal = this.$injector.get('$uibModal');
-      spyOn(modal, 'open').and.callFake(function () { return testUtils.fakeModal(); });
+      spyOn(modal, 'open').and.callFake(function () {
+        return testUtils.fakeModal();
+      });
 
       // jshint unused:false
       var study = fakeEntities.study();
       var viewer = new StudyViewer(study);
 
       expect(modal.open).toHaveBeenCalled();
-    });
+    }));
 
     it('should display valid attributes', function() {
       var EntityViewer = this.$injector.get('EntityViewer');

@@ -8,9 +8,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, testUtils) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('Directive: specimenGroupsPanelDirective', function() {
@@ -22,16 +21,13 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function () {
-      var $templateCache = this.$injector.get('$templateCache');
-
+    beforeEach(inject(function (testUtils) {
       createEntities = setupEntities(this.$injector);
       createController = setupController(this.$injector);
       testUtils.addCustomMatchers();
 
 
       testUtils.putHtmlTemplates(
-        $templateCache,
         '/assets/javascripts/admin/studies/specimenGroups/directives/specimenGroupsPanel/specimenGroupsPanel.html',
         '/assets/javascripts/common/directives/panelButtons.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html');

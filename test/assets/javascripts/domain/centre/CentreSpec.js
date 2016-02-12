@@ -7,9 +7,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, testUtils) {
+], function(angular, mocks, _) {
   'use strict';
 
   /**
@@ -21,23 +20,24 @@ define([
    */
   describe('Centre', function() {
 
-    var httpBackend, Centre, CentreStatus, Location, funutils, fakeEntities;
+    var httpBackend,
+        Centre,
+        CentreStatus,
+        Location,
+        funutils,
+        testUtils,
+        fakeEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($httpBackend,
-                               _Centre_,
-                               _CentreStatus_,
-                               _Location_,
-                               _funutils_,
-                               fakeDomainEntities,
-                               extendedDomainEntities) {
-      httpBackend  = $httpBackend;
-      Centre       = _Centre_;
-      CentreStatus = _CentreStatus_;
-      Location     = _Location_;
-      funutils     = _funutils_;
-      fakeEntities = fakeDomainEntities;
+    beforeEach(inject(function (extendedDomainEntities) {
+      httpBackend  = this.$injector.get('$httpBackend');
+      Centre       = this.$injector.get('Centre');
+      CentreStatus = this.$injector.get('CentreStatus');
+      Location     = this.$injector.get('Location');
+      funutils     = this.$injector.get('funutils');
+      testUtils    = this.$injector.get('testUtils');
+      fakeEntities = this.$injector.get('fakeDomainEntities');
     }));
 
     it('constructor with no parameters has default values', function() {

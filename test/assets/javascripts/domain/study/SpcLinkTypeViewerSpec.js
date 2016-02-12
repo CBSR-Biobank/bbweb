@@ -8,12 +8,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular,
-            mocks,
-            _,
-            testUtils) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('SpcLinkTypeViewer', function() {
@@ -69,17 +65,19 @@ define([
       };
     }
 
-    it('should open a modal when created', function() {
+    it('should open a modal when created', inject(function (testUtils) {
       var modal = this.$injector.get('$uibModal'),
           entities = createEntities(),
           viewer;
 
-      spyOn(modal, 'open').and.callFake(function () { return testUtils.fakeModal(); });
+      spyOn(modal, 'open').and.callFake(function () {
+        return testUtils.fakeModal();
+      });
 
       // jshint unused:false
       viewer = new SpcLinkTypeViewer(entities.slt, entities.processingType);
       expect(modal.open).toHaveBeenCalled();
-    });
+    }));
 
     it('should display valid attributes', function() {
       var EntityViewer = this.$injector.get('EntityViewer'),

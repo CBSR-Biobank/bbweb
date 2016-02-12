@@ -8,9 +8,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, testUtils) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('Directive: pagedItemsListDirective', function() {
@@ -20,7 +19,6 @@ define([
 
     beforeEach(inject(function(fakeDomainEntities) {
       fakeEntities = fakeDomainEntities;
-      testUtils.addCustomMatchers();
     }));
 
     describe('Centres', function () {
@@ -131,8 +129,8 @@ define([
 
       describe('(shared)', function () {
 
-        beforeEach(inject(function (_$q_, $templateCache) {
-          $q                           = _$q_;
+        beforeEach(inject(function (testUtils) {
+          $q                           = this.$injector('$q');
           entities                     = context.entities;
           counts                       = context.counts;
           pageSize                     = context.pageSize;
@@ -143,8 +141,9 @@ define([
           entityNavigateStateParamName = context.entityNavigateStateParamName;
 
           testUtils.putHtmlTemplates(
-            $templateCache,
             '/assets/javascripts/common/directives/pagedItemsList/pagedItemsList.html');
+
+          testUtils.addCustomMatchers();
 
           createController             = setupController(this.$injector);
         }));

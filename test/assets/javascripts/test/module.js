@@ -9,14 +9,13 @@
 define(function (require) {
   'use strict';
 
-  var angular                = require('angular'),
-      extendedDomainEntities = require('../../../test/assets/javascripts/test/extendedDomainEntities'),
-      fakeDomainEntities     = require('../../../test/assets/javascripts/test/fakeDomainEntities');
+  var angular = require('angular');
 
   var module = angular.module('biobank.test', []);
 
-  module.service('extendedDomainEntities', extendedDomainEntities);
-  module.service('fakeDomainEntities',     fakeDomainEntities);
+  module.service('extendedDomainEntities', require('../../../test/assets/javascripts/test/extendedDomainEntities'));
+  module.service('fakeDomainEntities',     require('../../../test/assets/javascripts/test/fakeDomainEntities'));
+  module.service('testUtils',              require('../../../test/assets/javascripts/test/testUtils'));
 
   return module;
 });

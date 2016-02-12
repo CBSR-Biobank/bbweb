@@ -8,9 +8,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, testUtils) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('Directive: infoUpdateRemoveButtons', function() {
@@ -19,12 +18,12 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, $templateCache) {
+    beforeEach(inject(function ($rootScope, $compile, testUtils) {
       rootScope = $rootScope;
       compile = $compile;
 
-      testUtils.putHtmlTemplates($templateCache,
-                               '/assets/javascripts/common/directives/infoUpdateRemoveButtons.html');
+      testUtils.putHtmlTemplates(
+        '/assets/javascripts/common/directives/infoUpdateRemoveButtons.html');
 
       element  = angular.element(
         '<info-update-remove-buttons' +

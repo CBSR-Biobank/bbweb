@@ -10,9 +10,8 @@ define([
   'underscore',
   'faker',
   'moment',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, faker, moment, testUtils) {
+], function(angular, mocks, _, faker, moment) {
   'use strict';
 
   describe('Participant', function() {
@@ -24,27 +23,21 @@ define([
         AnnotationValueType,
         ParticipantAnnotationType,
         bbwebConfig,
-        fakeEntities;
+        fakeEntities,
+        testUtils;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($httpBackend,
-                               _Participant_,
-                               _Study_,
-                               _Annotation_,
-                               _AnnotationValueType_,
-                               _ParticipantAnnotationType_,
-                               _bbwebConfig_,
-                               fakeDomainEntities,
-                               extendedDomainEntities) {
-      httpBackend               = $httpBackend;
-      Participant               = _Participant_;
-      Study                     = _Study_;
-      Annotation                = _Annotation_;
-      AnnotationValueType       = _AnnotationValueType_;
-      ParticipantAnnotationType = _ParticipantAnnotationType_;
-      bbwebConfig               = _bbwebConfig_;
-      fakeEntities              = fakeDomainEntities;
+    beforeEach(inject(function(extendedDomainEntities) {
+      httpBackend               = this.$injector.get('$httpBackend');
+      Participant               = this.$injector.get('Participant');
+      Study                     = this.$injector.get('Study');
+      Annotation                = this.$injector.get('Annotation');
+      AnnotationValueType       = this.$injector.get('AnnotationValueType');
+      ParticipantAnnotationType = this.$injector.get('ParticipantAnnotationType');
+      bbwebConfig               = this.$injector.get('bbwebConfig');
+      fakeEntities              = this.$injector.get('fakeDomainEntities');
+      testUtils                 = this.$injector.get('testUtils');
 
       testUtils.addCustomMatchers();
     }));

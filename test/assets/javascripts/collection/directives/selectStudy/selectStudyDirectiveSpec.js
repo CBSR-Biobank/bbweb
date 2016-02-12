@@ -8,9 +8,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, testUtils) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('Directive: selectStudy', function() {
@@ -27,21 +26,14 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($q,
-                               $compile,
-                               $rootScope,
-                               $templateCache,
-                               $state,
-                               fakeDomainEntities) {
-
-      q            = $q;
-      compile      = $compile;
-      scope        = $rootScope;
-      state        = $state;
-      fakeEntities = fakeDomainEntities;
+    beforeEach(inject(function(testUtils) {
+      q            = this.$injector.get('$q');
+      compile      = this.$injector.get('$compile');
+      scope        = this.$injector.get('$rootScope');
+      state        = this.$injector.get('$state');
+      fakeEntities = this.$injector.get('fakeDomainEntities');
 
       testUtils.putHtmlTemplates(
-        $templateCache,
         '/assets/javascripts/collection/directives/selectStudy/selectStudy.html');
 
       element = generateElement(navigateStateName, navigateStateParamName);

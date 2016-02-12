@@ -9,9 +9,8 @@ define([
   'angularMocks',
   'underscore',
   './enumSharedSpec',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, enumSharedSpec, testUtils) {
+], function(angular, mocks, _, enumSharedSpec) {
   'use strict';
 
   describe('AnnotationValueType', function() {
@@ -23,7 +22,7 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (AnnotationValueType) {
+    beforeEach(inject(function (testUtils, AnnotationValueType) {
 
       context.enumerationClass = AnnotationValueType;
       context.valueMap = _.map(values, function (value) {

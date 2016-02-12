@@ -4,7 +4,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore', 'biobank.testUtils'], function(_, testUtils) {
+define(['underscore'], function(_) {
   'use strict';
 
   /**
@@ -17,7 +17,7 @@ define(['underscore', 'biobank.testUtils'], function(_, testUtils) {
 
       var EnumerationClass, valueMap;
 
-      beforeEach(inject(function($httpBackend, _funutils_) {
+      beforeEach(inject(function($httpBackend, testUtils) {
         testUtils.addCustomMatchers();
 
         EnumerationClass = context.enumerationClass;

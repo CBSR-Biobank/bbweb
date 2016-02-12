@@ -10,9 +10,8 @@ define([
   'underscore',
   'faker',
   'moment',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, faker, moment, testUtils) {
+], function(angular, mocks, _, faker, moment) {
   'use strict';
 
   describe('CollectionEvent', function() {
@@ -27,29 +26,22 @@ define([
         bbwebConfig,
         fakeEntities,
         serverStudy,
-        cetFromServer;
+        cetFromServer,
+        testUtils;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($httpBackend,
-                               _CollectionEvent_,
-                               _Annotation_,
-                               _AnnotationValueType_,
-                               _Participant_,
-                               _CollectionEventType_,
-                               _CollectionEventAnnotationType_,
-                               _bbwebConfig_,
-                               fakeDomainEntities,
-                               extendedDomainEntities) {
-      httpBackend                   = $httpBackend;
-      Participant                   = _Participant_;
-      CollectionEventType           = _CollectionEventType_;
-      CollectionEvent               = _CollectionEvent_;
-      Annotation                    = _Annotation_;
-      AnnotationValueType           = _AnnotationValueType_;
-      CollectionEventAnnotationType = _CollectionEventAnnotationType_;
-      bbwebConfig                   = _bbwebConfig_;
-      fakeEntities                  = fakeDomainEntities;
+    beforeEach(inject(function(extendedDomainEntities) {
+      httpBackend                   = this.$injector.get('$httpBackend');
+      Participant                   = this.$injector.get('Participant');
+      CollectionEventType           = this.$injector.get('CollectionEventType');
+      CollectionEvent               = this.$injector.get('CollectionEvent');
+      Annotation                    = this.$injector.get('Annotation');
+      AnnotationValueType           = this.$injector.get('AnnotationValueType');
+      CollectionEventAnnotationType = this.$injector.get('CollectionEventAnnotationType');
+      bbwebConfig                   = this.$injector.get('bbwebConfig');
+      fakeEntities                  = this.$injector.get('fakeDomainEntities');
+      testUtils                     = this.$injector.get('testUtils');
 
       testUtils.addCustomMatchers();
 

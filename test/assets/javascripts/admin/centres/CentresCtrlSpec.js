@@ -8,9 +8,8 @@ define([
   'angular',
   'underscore',
   'angularMocks',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, _, mocks, testUtils) {
+], function(angular, _, mocks) {
   'use strict';
 
   describe('Controller: CentresCtrl', function() {
@@ -18,10 +17,9 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(_CentreCounts_,
-                               fakeDomainEntities) {
-      CentreCounts = _CentreCounts_;
-      fakeEntities = fakeDomainEntities;
+    beforeEach(inject(function(testUtils) {
+      CentreCounts = this.$injector.get('CentreCounts');
+      fakeEntities = this.$injector.get('fakeDomainEntities');
       createController = setupController(this.$injector);
       testUtils.addCustomMatchers();
     }));

@@ -52,7 +52,6 @@ require.config({
     'angular-utils-ui-breadcrumbs': '../../../target/web/web-modules/main/webjars/lib/angular-utils-ui-breadcrumbs/uiBreadcrumbs',
     'smart-table':                  '../../../target/web/web-modules/main/webjars/lib/smart-table/smart-table',
     'ui-bootstrap':                 '../../../target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/ui-bootstrap-tpls',
-    'biobank.testUtils':            '../../../test/assets/javascripts/fixtures/testUtils',
     'biobankTest':                  '../../../test/assets/javascripts/test/module',
     'biobankApp':                   'app'
   },

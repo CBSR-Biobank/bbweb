@@ -9,9 +9,8 @@ define([
   'angularMocks',
   'underscore',
   'faker',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, faker, testUtils) {
+], function(angular, mocks, _, faker) {
   'use strict';
 
   /**
@@ -23,12 +22,12 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, $templateCache) {
+    beforeEach(inject(function ($rootScope, $compile, testUtils) {
       rootScope = $rootScope;
       compile = $compile;
 
-      testUtils.putHtmlTemplates($templateCache,
-                               '/assets/javascripts/common/directives/truncateToggle.html');
+      testUtils.putHtmlTemplates(
+        '/assets/javascripts/common/directives/truncateToggle.html');
 
       element = angular.element(
         '<truncate-toggle' +

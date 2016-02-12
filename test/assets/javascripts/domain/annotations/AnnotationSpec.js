@@ -10,9 +10,8 @@ define([
   'underscore',
   'faker',
   'moment',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, faker, moment, testUtils) {
+], function(angular, mocks, _, faker, moment) {
   'use strict';
 
   describe('Annotation', function() {
@@ -29,7 +28,7 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(extendedDomainEntities) {
+    beforeEach(inject(function(testUtils, extendedDomainEntities) {
       bbwebConfig                   = this.$injector.get('bbwebConfig');
       Study                         = this.$injector.get('Study');
       ParticipantAnnotationType     = this.$injector.get('ParticipantAnnotationType');

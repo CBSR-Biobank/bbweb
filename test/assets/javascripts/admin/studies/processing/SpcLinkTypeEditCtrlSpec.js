@@ -8,9 +8,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, testUtils) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('Controller: SpcLinkTypeEditCtrl', function() {
@@ -21,11 +20,11 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($injector) {
-      createEntities   = setupEntities($injector);
-      createController = setupController($injector);
-      SpecimenLinkType = $injector.get('SpecimenLinkType');
-      fakeEntities     = $injector.get('fakeDomainEntities');
+    beforeEach(inject(function(testUtils) {
+      createEntities   = setupEntities(this.$injector);
+      createController = setupController(this.$injector);
+      SpecimenLinkType = this.$injector.get('SpecimenLinkType');
+      fakeEntities     = this.$injector.get('fakeDomainEntities');
       testUtils.addCustomMatchers();
     }));
 

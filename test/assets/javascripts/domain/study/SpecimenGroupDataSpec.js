@@ -8,9 +8,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, testUtils) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('SpecimenGroupData', function() {
@@ -24,10 +23,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (fakeDomainEntities, _SpecimenGroupData_) {
+    beforeEach(inject(function (testUtils, fakeDomainEntities) {
       testUtils.addCustomMatchers();
 
-      SpecimenGroupData = _SpecimenGroupData_;
+      SpecimenGroupData = this.$injector.get('SpecimenGroupData');
       fakeEntities = fakeDomainEntities;
       study = fakeEntities.study();
 

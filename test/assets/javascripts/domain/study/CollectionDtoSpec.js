@@ -8,9 +8,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, testUtils) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('CollectionDto', function() {
@@ -21,16 +20,13 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($injector,
-                               $httpBackend,
-                               _CollectionDto_,
-                               fakeDomainEntities) {
-      httpBackend   = $httpBackend;
-      CollectionDto = _CollectionDto_;
-      fakeEntities  = fakeDomainEntities;
+    beforeEach(inject(function(testUtils) {
+      httpBackend   = this.$injector.get('$httpBackend');
+      CollectionDto = this.$injector.get('CollectionDto');
+      fakeEntities  = this.$injector.get('fakeDomainEntities');
       testUtils.addCustomMatchers();
 
-      createEntities = setupEntities($injector);
+      createEntities = setupEntities(this.$injector);
     }));
 
     function setupEntities(injector) {

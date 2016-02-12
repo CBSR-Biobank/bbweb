@@ -9,9 +9,8 @@ define([
   'angularMocks',
   'underscore',
   'moment',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, moment, testUtils) {
+], function(angular, mocks, _, moment) {
   'use strict';
 
   /**
@@ -29,9 +28,7 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function() {
-      var $templateCache = this.$injector.get('$templateCache');
-
+    beforeEach(inject(function(testUtils) {
       annotationFactory         = this.$injector.get('annotationFactory');
       ParticipantAnnotationType = this.$injector.get('ParticipantAnnotationType');
       AnnotationValueType       = this.$injector.get('AnnotationValueType');
@@ -39,8 +36,8 @@ define([
 
       createScope = setupController(this.$injector);
 
-      testUtils.putHtmlTemplates($templateCache,
-                               '/assets/javascripts/common/directives/annotationsInput/annotationsInput.html');
+      testUtils.putHtmlTemplates(
+        '/assets/javascripts/common/directives/annotationsInput/annotationsInput.html');
     }));
 
     function createAnnotation(valueType) {

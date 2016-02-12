@@ -8,9 +8,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, testUtils) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('Controller: SpecimenGroupEditCtrl', function() {
@@ -23,14 +22,14 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($injector) {
-      createEntities   = setupEntities($injector);
-      createController = setupController($injector);
+    beforeEach(inject(function(testUtils) {
+      createEntities   = setupEntities(this.$injector);
+      createController = setupController(this.$injector);
 
-      AnatomicalSourceType        = $injector.get('AnatomicalSourceType');
-      PreservationType            = $injector.get('PreservationType');
-      PreservationTemperatureType = $injector.get('PreservationTemperatureType');
-      SpecimenType                = $injector.get('SpecimenType');
+      AnatomicalSourceType        = this.$injector.get('AnatomicalSourceType');
+      PreservationType            = this.$injector.get('PreservationType');
+      PreservationTemperatureType = this.$injector.get('PreservationTemperatureType');
+      SpecimenType                = this.$injector.get('SpecimenType');
 
       testUtils.addCustomMatchers();
     }));

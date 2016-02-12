@@ -7,9 +7,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, testUtils) {
+], function(angular, mocks, _) {
   'use strict';
 
   /**
@@ -21,21 +20,17 @@ define([
    */
   describe('Study', function() {
 
-    var httpBackend, Study, StudyStatus, funutils, fakeEntities;
+    var httpBackend, Study, StudyStatus, funutils, testUtils, fakeEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($httpBackend,
-                               _Study_,
-                               _StudyStatus_,
-                               _funutils_,
-                               fakeDomainEntities,
-                               extendedDomainEntities) {
-      httpBackend  = $httpBackend;
-      Study        = _Study_;
-      StudyStatus  = _StudyStatus_;
-      funutils     = _funutils_;
-      fakeEntities = fakeDomainEntities;
+    beforeEach(inject(function(extendedDomainEntities) {
+      httpBackend  = this.$injector.get('$httpBackend');
+      Study        = this.$injector.get('Study');
+      StudyStatus  = this.$injector.get('StudyStatus');
+      funutils     = this.$injector.get('funutils');
+      fakeEntities = this.$injector.get('fakeDomainEntities');
+      testUtils    = this.$injector.get('testUtils');
     }));
 
     it('constructor with no parameters has default values', function() {
@@ -154,7 +149,8 @@ define([
     }
 
     function changeStatusCommand(study) {
-      return _.extend(_.pick(study, 'id'), testUtils.expectedVersion(study.version));
+      return _.extend(_.pick(study, 'id'),
+                      testUtils.expectedVersion(study.version));
     }
 
     function replyStudy(study, newValues) {

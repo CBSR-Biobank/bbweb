@@ -8,12 +8,10 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobank.testUtils',
   'biobankApp'
 ], function(angular,
             mocks,
-            _,
-            testUtils) {
+            _) {
   'use strict';
 
   describe('AnnotationTypeViewer', function() {
@@ -114,7 +112,7 @@ define([
           ];
         }));
 
-        it('should open a modal when created', function() {
+        it('should open a modal when created', inject(function (testUtils) {
           var count = 0;
 
           spyOn(modal, 'open').and.callFake(function () { return testUtils.fakeModal(); });
@@ -127,7 +125,7 @@ define([
             count++;
             expect(modal.open.calls.count()).toBe(count);
           });
-        });
+        }));
 
         it('should throw an error when created when it has no options', function() {
           var annotationType = createAnnotationType({

@@ -9,9 +9,8 @@ define([
   'angularMocks',
   'underscore',
   '../enumSharedSpec',
-  'biobank.testUtils',
   'biobankApp'
-], function(angular, mocks, _, enumSharedSpec, testUtils) {
+], function(angular, mocks, _, enumSharedSpec) {
   'use strict';
 
   describe('StudyStatus', function() {
