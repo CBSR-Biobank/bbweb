@@ -55,7 +55,7 @@ define(['underscore'], function(_) {
       status:     vm.possibleStatuses[0].id,
       page:       1,
       pageSize:   vm.pageSize,
-      sortField:  'name' // must be lower case
+      sort:       'name' // must be lower case
     };
 
     vm.displayStates = {

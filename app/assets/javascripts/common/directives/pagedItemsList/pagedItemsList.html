@@ -14,7 +14,7 @@
       <select class="form-control input-sm"
               name="status"
               ng-model="vm.pagerOptions.status"
-              ng-options="status.id as status.label for status in vm.possibleStatuses"
+              ng-options="status.id as status.label for status in vm.possibleStatuses track by status.id"
               ng-change="vm.statusFilterUpdated()">
       </select>
     </div>

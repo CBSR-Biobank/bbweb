@@ -4,56 +4,26 @@
  */
 // Jasmine test suite
 //
-define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
+define([
+  'angular',
+  'angularMocks',
+  'underscore',
+], function(angular, mocks, _) {
   'use strict';
 
   describe('Controller: AnnotationTypeEditCtrl', function() {
-    var scope,
-        state,
-        controller,
-        rootScope,
-        fakeEntities,
-        domainEntityService,
-        notificationsService,
-        ParticipantAnnotationType,
-        AnnotationValueType,
-        study;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function($state,
-                               $controller,
-                               $rootScope,
-                               _domainEntityService_,
-                               _notificationsService_,
-                               Study,
-                               _ParticipantAnnotationType_,
-                               _AnnotationValueType_,
-                               fakeDomainEntities) {
-      state                     = $state;
-      controller                = $controller;
-      rootScope                 = $rootScope;
-      fakeEntities              = fakeDomainEntities;
-      domainEntityService   = _domainEntityService_;
-      notificationsService      = _notificationsService_;
-      ParticipantAnnotationType = _ParticipantAnnotationType_;
-      AnnotationValueType       = _AnnotationValueType_;
-
-      study = new Study(fakeEntities.study());
-
-      spyOn(state, 'go');
-    }));
 
     describe('for participant annotation types', function() {
       var context = {};
 
-      beforeEach(inject(function (ParticipantAnnotationType) {
-        var baseAnnotationType = fakeEntities.annotationType({ required: true }),
+      beforeEach(inject(function (ParticipantAnnotationType, fakeDomainEntities) {
+        var baseAnnotationType = fakeDomainEntities.annotationType({ required: true }),
             stateName = 'home.admin.studies.study.participants';
 
-
-        context.state           = { current: { name: stateName } };
-        context.returnState     = stateName;
+        context.state                = { current: { name: stateName } };
+        context.returnState          = stateName;
         context.annotationTypeNew    = new ParticipantAnnotationType(_.omit(baseAnnotationType, 'id'));
         context.annotationTypeWithId = new ParticipantAnnotationType(baseAnnotationType);
       }));
@@ -64,11 +34,11 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     describe('for collection event annotation types', function() {
       var context = {};
 
-      beforeEach(inject(function (CollectionEventAnnotationType) {
-        var baseAnnotationType = fakeEntities.annotationType();
+      beforeEach(inject(function (CollectionEventAnnotationType, fakeDomainEntities) {
+        var baseAnnotationType = fakeDomainEntities.annotationType();
 
-        context.state           = { current: { name: 'home.admin.studies.study.collection' } };
-        context.returnState     = 'home.admin.studies.study.collection';
+        context.state                = { current: { name: 'home.admin.studies.study.collection.view' } };
+        context.returnState          = 'home.admin.studies.study.collection.view';
         context.annotationTypeNew    = new CollectionEventAnnotationType(_.omit(baseAnnotationType, 'id'));
         context.annotationTypeWithId = new CollectionEventAnnotationType(baseAnnotationType);
       }));
@@ -79,10 +49,9 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     describe('for specimen link annotation types', function() {
       var context = {};
 
-      beforeEach(inject(function (SpecimenLinkAnnotationType) {
-        var baseAnnotationType = fakeEntities.annotationType({ required: true }),
+      beforeEach(inject(function (SpecimenLinkAnnotationType, fakeDomainEntities) {
+        var baseAnnotationType = fakeDomainEntities.annotationType({ required: true }),
             stateName = 'home.admin.studies.study.processing';
-
 
         context.state           = { current: { name: stateName } };
         context.returnState     = stateName;
@@ -93,227 +62,260 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       sharedBehaviour(context);
     });
 
-
     function sharedBehaviour(context) {
 
       describe('(shared)', function() {
 
-        var q, state, returnState, annotationTypeNew, annotationTypeWithId, ParticipantAnnotationType;
+        beforeEach(inject(function ($state, Study, fakeDomainEntities) {
+          this.$q                        = this.$injector.get('$q');
+          this.$state                    = this.$injector.get('$state');
+          this.$rootScope                = this.$injector.get('$rootScope');
+          this.$controller               = this.$injector.get('$controller');
+          this.domainEntityService       = this.$injector.get('domainEntityService');
+          this.ParticipantAnnotationType = this.$injector.get('ParticipantAnnotationType');
+          this.AnnotationValueType       = this.$injector.get('AnnotationValueType');
+          this.context                   = context;
 
-        beforeEach(inject(function ($q, _ParticipantAnnotationType_) {
-          q               = $q;
-          state           = context.state;
-          returnState     = context.returnState;
-          annotationTypeNew    = context.annotationTypeNew;
-          annotationTypeWithId = context.annotationTypeWithId;
-          ParticipantAnnotationType = _ParticipantAnnotationType_;
+          spyOn($state, 'go').and.callFake(function () {} );
 
-          state.go = function () {};
-          spyOn(state, 'go');
+          this.study = new Study(fakeDomainEntities.study());
         }));
 
         it('scope should be valid when adding', function() {
-          createController(state, annotationTypeNew);
+          this.annotationType = this.context.annotationTypeNew;
 
-          expect(scope.vm.study).toEqual(study);
-          expect(scope.vm.annotationType).toEqual(annotationTypeNew);
-          expect(scope.vm.title).toBe('Add Annotation Type');
-          expect(scope.vm.hasRequiredField).toEqual(annotationTypeNew instanceof ParticipantAnnotationType);
-          expect(scope.vm.valueTypes).toEqual(AnnotationValueType.values());
+          createController(this);
+
+          expect(this.scope.vm.study).toEqual(this.study);
+          expect(this.scope.vm.annotationType).toEqual(this.annotationType);
+          expect(this.scope.vm.title).toBe('Add Annotation Type');
+          expect(this.scope.vm.hasRequiredField)
+            .toEqual(this.annotationType instanceof this.ParticipantAnnotationType);
+          expect(this.scope.vm.valueTypes).toEqual(this.AnnotationValueType.values());
         });
 
         it('scope should be valid when updating', function() {
-          createController(state, annotationTypeWithId);
+          this.annotationType = this.context.annotationTypeWithId;
 
-          expect(scope.vm.study).toEqual(study);
-          expect(scope.vm.annotationType).toEqual(annotationTypeWithId);
-          expect(scope.vm.title).toBe('Update Annotation Type');
-          expect(scope.vm.hasRequiredField).toEqual(annotationTypeWithId instanceof ParticipantAnnotationType);
-          expect(scope.vm.valueTypes).toEqual(AnnotationValueType.values());
+          createController(this);
+
+          expect(this.scope.vm.study).toEqual(this.study);
+          expect(this.scope.vm.annotationType).toEqual(this.annotationType);
+          expect(this.scope.vm.title).toBe('Update Annotation Type');
+          expect(this.scope.vm.hasRequiredField)
+            .toEqual(this.annotationType instanceof this.ParticipantAnnotationType);
+          expect(this.scope.vm.valueTypes).toEqual(this.AnnotationValueType.values());
         });
 
         it('throws an exception if the current state is invalid', function() {
-          var invalidState = { current: { name: 'xyz' } };
+          var self = this,
+              invalidStateName = 'xyz';
+
+          this.context.state = { current: { name: invalidStateName } };
+          this.annotationType = this.context.annotationTypeWithId;
           expect(function () {
-            createController(invalidState, annotationTypeWithId);
-          }).toThrow(new Error('invalid current state name: ' + invalidState.current.name));
+            createController(self);
+          }).toThrow(new Error('invalid current state name: ' + invalidStateName));
         });
 
         it('maxValueCountRequired is valid', function() {
-          annotationTypeWithId.valueType = AnnotationValueType.SELECT();
-          annotationTypeWithId.maxValueCount = 0;
-          createController(state, annotationTypeWithId);
+          this.annotationType = this.context.annotationTypeWithId;
 
-          annotationTypeWithId.maxValueCount = 0;
-          expect(scope.vm.maxValueCountRequired()).toBe(true);
+          this.annotationType.valueType = this.AnnotationValueType.SELECT();
+          this.annotationType.maxValueCount = 0;
+          createController(this);
 
-          annotationTypeWithId.maxValueCount = 3;
-          expect(scope.vm.maxValueCountRequired()).toBe(true);
+          this.annotationType.maxValueCount = 0;
+          expect(this.scope.vm.maxValueCountRequired()).toBe(true);
 
-          annotationTypeWithId.maxValueCount = 1;
-          expect(scope.vm.maxValueCountRequired()).toBe(false);
+          this.annotationType.maxValueCount = 3;
+          expect(this.scope.vm.maxValueCountRequired()).toBe(true);
 
-          annotationTypeWithId.maxValueCount = 2;
-          expect(scope.vm.maxValueCountRequired()).toBe(false);
+          this.annotationType.maxValueCount = 1;
+          expect(this.scope.vm.maxValueCountRequired()).toBe(false);
+
+          this.annotationType.maxValueCount = 2;
+          expect(this.scope.vm.maxValueCountRequired()).toBe(false);
         });
 
         it('calling valueTypeChange clears the options array', function() {
-          annotationTypeWithId.valueType = 'Select';
-          annotationTypeWithId.maxValueCount = 1;
-          createController(state, annotationTypeWithId);
+          this.annotationType = this.context.annotationTypeWithId;
 
-          scope.vm.valueTypeChange();
-          expect(annotationTypeWithId.options).toBeArray();
-          expect(annotationTypeWithId.options).toBeEmptyArray();
+          this.annotationType.valueType = 'Select';
+          this.annotationType.maxValueCount = 1;
+          createController(this);
+
+          this.scope.vm.valueTypeChange();
+          expect(this.annotationType.options).toBeArray();
+          expect(this.annotationType.options).toBeEmptyArray();
         });
 
         it('calling optionAdd creates the options array', function() {
-          createController(state, annotationTypeWithId);
-          annotationTypeWithId.valueType = 'Select';
-          annotationTypeWithId.maxValueCount = 1;
-          annotationTypeWithId.valueTypeChanged();
+          this.annotationType = this.context.annotationTypeWithId;
 
-          scope.vm.optionAdd();
-          expect(annotationTypeWithId.options).toBeArrayOfSize(1);
-          expect(annotationTypeWithId.options).toBeArrayOfStrings();
+          createController(this);
+          this.annotationType.valueType = 'Select';
+          this.annotationType.maxValueCount = 1;
+          this.annotationType.valueTypeChanged();
+
+          this.scope.vm.optionAdd();
+          expect(this.annotationType.options).toBeArrayOfSize(1);
+          expect(this.annotationType.options).toBeArrayOfStrings();
         });
 
         it('calling optionAdd appends to the options array', function() {
-          annotationTypeWithId.valueType = 'Select';
-          annotationTypeWithId.maxValueCount = 1;
-          annotationTypeWithId.valueTypeChanged();
-          createController(state, annotationTypeWithId);
+          this.annotationType = this.context.annotationTypeWithId;
 
-          scope.vm.optionAdd();
-          expect(annotationTypeWithId.options).toBeArrayOfSize(1);
-          expect(annotationTypeWithId.options).toBeArrayOfStrings();
+          this.annotationType.valueType = 'Select';
+          this.annotationType.maxValueCount = 1;
+          this.annotationType.valueTypeChanged();
+          createController(this);
+
+          this.scope.vm.optionAdd();
+          expect(this.annotationType.options).toBeArrayOfSize(1);
+          expect(this.annotationType.options).toBeArrayOfStrings();
         });
 
         it('calling optionRemove throws an error on empty array', function() {
-          annotationTypeWithId.valueType = 'Select';
-          annotationTypeWithId.maxValueCount = 1;
-          annotationTypeWithId.valueTypeChanged();
-          createController(state, annotationTypeWithId);
-          expect(function () { scope.vm.optionRemove('abc'); }).toThrow();
+          this.annotationType = this.context.annotationTypeWithId;
+
+          this.annotationType.valueType = 'Select';
+          this.annotationType.maxValueCount = 1;
+          this.annotationType.valueTypeChanged();
+          createController(this);
+          expect(function () { this.scope.vm.optionRemove('abc'); }).toThrow();
         });
 
         it('calling optionRemove throws an error if removal results in empty array', function() {
-          annotationTypeWithId.valueType = 'Select';
-          annotationTypeWithId.maxValueCount = 1;
-          annotationTypeWithId.valueTypeChanged();
-          annotationTypeWithId.options = ['abc'];
-          createController(state, annotationTypeWithId);
-          expect(function () { scope.vm.optionRemove('abc'); }).toThrow();
+          this.annotationType = this.context.annotationTypeWithId;
+
+          this.annotationType.valueType = 'Select';
+          this.annotationType.maxValueCount = 1;
+          this.annotationType.valueTypeChanged();
+          this.annotationType.options = ['abc'];
+          createController(this);
+          expect(function () { this.scope.vm.optionRemove('abc'); }).toThrow();
         });
 
         it('calling optionRemove removes an option', function() {
+          this.annotationType = this.context.annotationTypeWithId;
+
           // note: more than two strings in options array
           var options = ['abc', 'def'];
-          annotationTypeWithId.valueType = 'Select';
-          annotationTypeWithId.maxValueCount = 1;
-          annotationTypeWithId.valueTypeChanged();
-          annotationTypeWithId.options = options.slice(0);
-          createController(state, annotationTypeWithId);
-          scope.vm.optionRemove('abc');
-          expect(annotationTypeWithId.options).toBeArrayOfSize(options.length - 1);
+          this.annotationType.valueType = 'Select';
+          this.annotationType.maxValueCount = 1;
+          this.annotationType.valueTypeChanged();
+          this.annotationType.options = options.slice(0);
+          createController(this);
+          this.scope.vm.optionRemove('abc');
+          expect(this.annotationType.options).toBeArrayOfSize(options.length - 1);
         });
 
         it('calling removeButtonDisabled returns valid results', function() {
+          this.annotationType = this.context.annotationTypeWithId;
+
           // note: more than two strings in options array
           var options = ['abc', 'def'];
-          annotationTypeWithId.valueType = 'Select';
-          annotationTypeWithId.maxValueCount = 1;
-          annotationTypeWithId.valueTypeChanged();
-          annotationTypeWithId.options = options.slice(0);
-          createController(state, annotationTypeWithId);
+          this.annotationType.valueType = 'Select';
+          this.annotationType.maxValueCount = 1;
+          this.annotationType.valueTypeChanged();
+          this.annotationType.options = options.slice(0);
+          createController(this);
 
-          expect(scope.vm.removeButtonDisabled()).toEqual(false);
+          expect(this.scope.vm.removeButtonDisabled()).toEqual(false);
 
-          annotationTypeWithId.options = options.slice(1);
-          expect(scope.vm.removeButtonDisabled()).toEqual(true);
+          this.annotationType.options = options.slice(1);
+          expect(this.scope.vm.removeButtonDisabled()).toEqual(true);
         });
 
         it('when adding should return to the valid state on submit', function() {
-          onSubmit(state, annotationTypeNew, returnState);
+          this.annotationType = this.context.annotationTypeNew;
+          onSubmit(this);
         });
 
         it('when adding should return to the valid state on cancel', function() {
-          onCancel(state, annotationTypeNew, returnState);
+          this.annotationType = this.context.annotationTypeNew;
+          onCancel(this);
         });
 
         it('when submitting and server responds with an error, the error message is displayed', function() {
-          var domainEntityService = this.$injector.get('domainEntityService');
+          this.annotationType = this.context.annotationTypeNew;
 
-          spyOn(domainEntityService, 'updateErrorModal')
+          spyOn(this.domainEntityService, 'updateErrorModal')
             .and.callFake(function () {});
 
-          spyOnAnnotationTypeAddOrUpdateAndReject(annotationTypeNew);
+          spyOnAnnotationTypeAddOrUpdateAndReject(this);
 
-          createController(state, annotationTypeNew);
-          scope.vm.submit(annotationTypeNew);
-          scope.$digest();
+          createController(this);
+          this.scope.vm.submit(this.context.annotationTypeNew);
+          this.scope.$digest();
 
-          expect(domainEntityService.updateErrorModal).toHaveBeenCalled();
+          expect(this.domainEntityService.updateErrorModal).toHaveBeenCalled();
         });
 
         it('when updating should return to the valid state on submit', function() {
-          onSubmit(state, annotationTypeWithId, returnState);
+          this.annotationType = this.context.annotationTypeWithId;
+          onSubmit(this);
         });
 
         it('when updating should return to the valid state on cancel', function() {
-          onCancel(state, annotationTypeWithId, returnState);
+          this.annotationType = this.context.annotationTypeWithId;
+          onCancel(this);
         });
 
-        function createController(state, annotationType) {
-          scope = rootScope.$new();
+        function createController(userContext) {
+          var notificationsService = userContext.$injector.get('notificationsService');
 
-          controller('AnnotationTypeEditCtrl as vm', {
-            $scope:                    scope,
-            $state:                    state,
+          userContext.scope = userContext.$rootScope.$new();
+          userContext.$state.current.name = userContext.context.state.current.name;
+
+          userContext.$controller('AnnotationTypeEditCtrl as vm', {
+            $scope:                    userContext.scope,
+            $state:                    userContext.$state,
             notificationsService:      notificationsService,
-            domainEntityService:   domainEntityService,
-            ParticipantAnnotationType: ParticipantAnnotationType,
-            AnnotationValueType:       AnnotationValueType,
-            study:                     study,
-            annotationType:                 annotationType
+            domainEntityService:       userContext.domainEntityService,
+            ParticipantAnnotationType: userContext.ParticipantAnnotationType,
+            AnnotationValueType:       userContext.AnnotationValueType,
+            study:                     userContext.study,
+            annotationType:            userContext.annotationType
           });
-          scope.$digest();
+          userContext.scope.$digest();
         }
 
-        function spyOnAnnotationTypeAddOrUpdateAndResolve(annotationType) {
-          spyOn(annotationType, 'addOrUpdate').and.callFake(function () {
-            var deferred = q.defer();
-            deferred.resolve('xxx');
-            return deferred.promise;
+        function spyOnAnnotationTypeAddOrUpdateAndResolve(userContext) {
+          spyOn(userContext.annotationType, 'addOrUpdate').and.callFake(function () {
+            return userContext.$q.when('');
           });
         }
 
-        function spyOnAnnotationTypeAddOrUpdateAndReject(annotationType) {
-          spyOn(annotationType, 'addOrUpdate').and.callFake(function () {
-            var deferred = q.defer();
+        function spyOnAnnotationTypeAddOrUpdateAndReject(userContext) {
+          spyOn(userContext.annotationType, 'addOrUpdate').and.callFake(function () {
+            var deferred = userContext.$q.defer();
             deferred.reject({ data: { message: 'error'} });
             return deferred.promise;
           });
         }
 
-        function onSubmit(state, annotationType, returnState) {
-          spyOnAnnotationTypeAddOrUpdateAndResolve(annotationType);
+        function onSubmit(userContext) {
+          spyOnAnnotationTypeAddOrUpdateAndResolve(userContext);
 
-          createController(state, annotationType);
-          scope.vm.submit(annotationType);
-          scope.$digest();
-          expect(state.go).toHaveBeenCalledWith(
-            returnState, {studyId: study.id}, {reload: true});
+          createController(userContext);
+          userContext.scope.vm.submit(userContext.annotationType);
+          userContext.scope.$digest();
+          expect(userContext.$state.go).toHaveBeenCalledWith(
+            userContext.context.returnState,
+            {studyId: userContext.study.id}, {reload: true});
         }
 
-        function onCancel(state, annotationType, returnState) {
-          spyOnAnnotationTypeAddOrUpdateAndResolve(annotationType);
+        function onCancel(userContext) {
+          spyOnAnnotationTypeAddOrUpdateAndResolve(userContext);
 
-          createController(state, annotationType);
-          scope.vm.cancel();
-          scope.$digest();
-          expect(state.go).toHaveBeenCalledWith(
-            returnState, {studyId: study.id}, {reload: true});
+          createController(userContext);
+          userContext.scope.vm.cancel();
+          userContext.scope.$digest();
+          expect(userContext.$state.go).toHaveBeenCalledWith(
+            userContext.context.returnState,
+            {studyId: userContext.study.id}, {reload: true});
         }
 
       });

@@ -32,7 +32,7 @@ define(['underscore'], function(_) {
     var vm = this,
         possibleReturnStateNames = [
           'home.admin.studies.study.collection.view',
-          'home.admin.studies.study.processing.view'
+          'home.admin.studies.study.processing'
         ],
         returnState;
 
@@ -55,9 +55,10 @@ define(['underscore'], function(_) {
      * Determines the state to transition to when the user submits the form or cancels it.
      */
     function determineReturnState() {
-      var returnStateName = _.filter(possibleReturnStateNames, function(name) {
-        return ($state.current.name.indexOf(name) >= 0);
-      });
+      var stateParams = {},
+          returnStateName = _.filter(possibleReturnStateNames, function(name) {
+            return ($state.current.name.indexOf(name) >= 0);
+          });
 
       if (returnStateName.length !== 1) {
         throw new Error('invalid current state name: ' + $state.current.name);
@@ -65,7 +66,7 @@ define(['underscore'], function(_) {
 
       return {
         name:    _.first(returnStateName),
-        params:  { studyId: study.id },
+        params:  stateParams,
         options: { reload: true }
       };
     }

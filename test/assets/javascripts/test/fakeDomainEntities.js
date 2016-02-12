@@ -491,7 +491,6 @@ define([
         pageSize: 5,
         next:     2,
         maxPages: 4
-
       };
     }
   }

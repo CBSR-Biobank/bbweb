@@ -43,6 +43,6 @@ define(['underscore'], function(_) {
       vm.possibleStatuses.push({id: status, label: StudyStatus.label(status)});
     });
   }
-  return studiesListDirective;
 
+  return studiesListDirective;
 });

@@ -34,7 +34,7 @@ define(['underscore'], function(_) {
         possibleReturnStateNames = [
           'home.admin.studies.study.collection.view',
           'home.admin.studies.study.participants',
-          'home.admin.studies.study.processing.view'
+          'home.admin.studies.study.processing'
         ],
         returnState;
 

@@ -13,33 +13,59 @@ define([
   'use strict';
 
   describe('Directive: pagedItemsListDirective', function() {
-    var fakeEntities;
+
+    function createCounts(/* disabled, enabled, retired */) {
+      var args = _.toArray(arguments),
+          result = {};
+
+      if (args.length < 1) {
+        throw new Error('disabled count not specified');
+      }
+
+      result.disabled = args.shift();
+      result.total = result.disabled;
+
+      if (args.length < 1) {
+        throw new Error('enabled count not specified');
+      }
+
+      result.enabled = args.shift();
+      result.total += result.enabled;
+
+      if (args.length > 0) {
+        result.retired = args.shift();
+        result.total += result.retired;
+      }
+
+      return result;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(fakeDomainEntities) {
-      fakeEntities = fakeDomainEntities;
+    beforeEach(inject(function (fakeDomainEntities) {
+      this.fakeEntities = fakeDomainEntities;
     }));
 
     describe('Centres', function () {
       var context = {};
 
       beforeEach(inject(function ($q, Centre, CentreStatus) {
-        var disabledCentres, enabledCentres;
+        var self = this,
+            disabledCentres,
+            enabledCentres;
 
         disabledCentres = _.map(_.range(2), function() {
-          return new fakeEntities.centre();
+          return new self.fakeEntities.centre();
         });
         enabledCentres = _.map(_.range(3), function() {
-          var centre = new fakeEntities.centre();
+          var centre = new self.fakeEntities.centre();
           centre.status = CentreStatus.ENABLED();
           return centre;
         });
 
-        context.entities =
-          disabledCentres.concat(enabledCentres);
-        context.counts =
-          createCounts(disabledCentres.length, enabledCentres.length);
+        context.entities                     = disabledCentres.concat(enabledCentres);
+        context.counts                       = createCounts(disabledCentres.length,
+                                                            enabledCentres.length);
         context.pageSize                     = disabledCentres.length;
         context.messageNoItems               = 'No items present';
         context.messageNoResults             = 'No items match the criteria';
@@ -52,14 +78,6 @@ define([
           }));
       }));
 
-      function createCounts(disabled, enabled) {
-        return {
-          total:    disabled + enabled,
-          disabled: disabled,
-          enabled:  enabled
-        };
-      }
-
       sharedBehaviour(context);
     });
 
@@ -67,28 +85,29 @@ define([
       var context = {};
 
       beforeEach(inject(function ($q, Study, StudyStatus) {
-        var disabledStudies, enabledStudies, retiredStudies;
+        var self = this,
+            disabledStudies,
+            enabledStudies,
+            retiredStudies;
 
         disabledStudies = _.map(_.range(2), function() {
-          return new fakeEntities.study();
+          return new self.fakeEntities.study();
         });
         enabledStudies = _.map(_.range(3), function() {
-          var study = new fakeEntities.study();
+          var study = new self.fakeEntities.study();
           study.status = StudyStatus.ENABLED();
           return study;
         });
         retiredStudies = _.map(_.range(3), function() {
-          var study = new fakeEntities.study();
+          var study = new self.fakeEntities.study();
           study.status = StudyStatus.RETIRED();
           return study;
         });
 
-        context.entities =
-          disabledStudies.concat(enabledStudies.concat(retiredStudies));
-        context.counts =
-          createCounts(disabledStudies.length,
-                       enabledStudies.length,
-                       retiredStudies.length);
+        context.entities                     = disabledStudies.concat(enabledStudies.concat(retiredStudies));
+        context.counts                       = createCounts(disabledStudies.length,
+                                                            enabledStudies.length,
+                                                            retiredStudies.length);
         context.pageSize                     = disabledStudies.length;
         context.messageNoItems               = 'No items present';
         context.messageNoResults             = 'No items match the criteria';
@@ -101,210 +120,189 @@ define([
           }));
       }));
 
-      function createCounts(disabled, enabled, retired) {
-        return {
-          total:    disabled + enabled,
-          disabled: disabled,
-          enabled:  enabled,
-          retired:  retired
-        };
-      }
-
       sharedBehaviour(context);
     });
 
     function sharedBehaviour(context) {
-      var $q,
-          scope,
-          createController,
-          entities,
-          counts,
-          pageSize,
-          possibleStatuses,
-          messageNoItems,
-          messageNoResults,
-          entityNavigateState,
-          entityNavigateStateParamName,
-          getItemsSpy = jasmine.createSpy('getItemsSpy');
 
       describe('(shared)', function () {
 
         beforeEach(inject(function (testUtils) {
-          $q                           = this.$injector('$q');
-          entities                     = context.entities;
-          counts                       = context.counts;
-          pageSize                     = context.pageSize;
-          possibleStatuses             = context.possibleStatuses;
-          messageNoItems               = context.messageNoItems;
-          messageNoResults             = context.messageNoResults;
-          entityNavigateState          = context.entityNavigateState;
-          entityNavigateStateParamName = context.entityNavigateStateParamName;
+          this.$q                     = this.$injector.get('$q');
+          this.context                = context;
+          this.createController       = setupController(this);
+          this.getItemsSpy            = jasmine.createSpy('getItemsSpy');
+          this.getItemsWrapperDefault = createDefaultGetItemsWrapper(this);
 
           testUtils.putHtmlTemplates(
             '/assets/javascripts/common/directives/pagedItemsList/pagedItemsList.html');
 
           testUtils.addCustomMatchers();
-
-          createController             = setupController(this.$injector);
         }));
 
-        function setupController(injector) {
-          var $rootScope = injector.get('$rootScope'),
-              $compile   = injector.get('$compile');
+        function setupController(userContext) {
+          var $rootScope = userContext.$injector.get('$rootScope'),
+              $compile   = userContext.$injector.get('$compile');
 
           return create;
 
           //--
 
           function create(getItemsWrapper) {
-            var element;
-
-            scope = $rootScope.$new();
-
-            element = angular.element([
+            var element = angular.element([
               '<paged-items-list',
               '  counts="vm.counts"',
               '  page-size="vm.pageSize"',
               '  possible-statuses="vm.possibleStatuses"',
-              '  message-no-items="' + messageNoItems + '"',
-              '  message-no-results="' + messageNoResults + '"',
+              '  message-no-items="' + userContext.context.messageNoItems + '"',
+              '  message-no-results="' + userContext.context.messageNoResults + '"',
               '  get-items="vm.getItems"',
-              '  entity-navigate-state="' + entityNavigateState + '"',
-              '  entity-navigate-state-param-name="' + entityNavigateStateParamName + '">',
+              '  entity-navigate-state="' + userContext.context.entityNavigateState + '"',
+              '  entity-navigate-state-param-name="' + userContext.context.entityNavigateStateParamName + '">',
               '</paged-items-list>'
             ].join(''));
 
-            scope.vm = {
-              counts:           counts,
-              pageSize:         pageSize,
-              possibleStatuses: possibleStatuses,
+            userContext.scope = $rootScope.$new();
+            userContext.scope.vm = {
+              counts:           userContext.context.counts,
+              pageSize:         userContext.context.pageSize,
+              possibleStatuses: userContext.context.possibleStatuses,
               getItems:         getItemsWrapper
             };
 
-            $compile(element)(scope);
-            scope.$digest();
-            return element.controller('pagedItemsList');
+            $compile(element)(userContext.scope);
+            userContext.scope.$digest();
+            userContext.controller = element.controller('pagedItemsList');
           }
         }
 
-        function getItemsWrapperDefault(options) {
-          getItemsSpy(options);
-          return $q.when({
-            items:    entities.slice(0, pageSize),
-            page:     options.page,
-            pageSize: pageSize,
-            offset:   0,
-            total:    entities.length
-          });
+        function createDefaultGetItemsWrapper(userContext) {
+          return get;
+
+          function get(options) {
+            userContext.getItemsSpy(options);
+            return userContext.$q.when({
+              items:    userContext.context.entities.slice(0, userContext.pageSize),
+              page:     options.page,
+              pageSize: userContext.pageSize,
+              offset:   0,
+              total:    userContext.context.entities.length
+            });
+          };
         }
 
         it('has valid scope', function() {
-          var controller = createController(getItemsWrapperDefault);
+          this.createController(this.getItemsWrapperDefault);
 
-          expect(controller.counts).toBe(counts);
-          expect(controller.possibleStatuses).toBe(possibleStatuses);
-          expect(controller.sortFields).toContainAll(['Name', 'Status']);
+          expect(this.controller.counts).toBe(this.context.counts);
+          expect(this.controller.possibleStatuses).toBe(this.context.possibleStatuses);
+          expect(this.controller.sortFields).toContainAll(['Name', 'Status']);
 
-          expect(controller.pagerOptions.filter).toBeEmptyString();
-          expect(controller.pagerOptions.status).toBe(possibleStatuses[0].id);
-          expect(controller.pagerOptions.pageSize).toBe(pageSize);
-          expect(controller.pagerOptions.sortField).toBe('name');
+          expect(this.controller.pagerOptions.filter).toBeEmptyString();
+          expect(this.controller.pagerOptions.status).toBe(this.context.possibleStatuses[0].id);
+          expect(this.controller.pagerOptions.pageSize).toBe(this.context.pageSize);
+          expect(this.controller.pagerOptions.sort).toBe('name');
         });
 
         it('has a valid panel heading', function() {
-          var controller = createController(getItemsWrapperDefault);
-          _.each(possibleStatuses, function (status) {
+          var self = this;
+
+          self.createController(self.getItemsWrapperDefault);
+
+          _.each(self.context.possibleStatuses, function (status) {
             if (status.id !== 'all') {
-              expect(controller.panelHeading).toContain(status.name);
+              expect(self.controller.panelHeading).toContain(status.name);
             }
           });
         });
 
         it('updates items when name filter is updated', function() {
-          var controller = createController(getItemsWrapperDefault),
-              nameFilterValue = 'test';
+          var nameFilterValue = 'test';
 
-          controller.pagerOptions.filter = nameFilterValue;
-          controller.nameFilterUpdated();
-          scope.$digest();
-          expect(getItemsSpy.calls.mostRecent().args[0]).toEqual({
+          this.createController(this.getItemsWrapperDefault);
+
+          this.controller.pagerOptions.filter = nameFilterValue;
+          this.controller.nameFilterUpdated();
+          this.scope.$digest();
+          expect(this.getItemsSpy.calls.mostRecent().args[0]).toEqual({
             filter: nameFilterValue,
-            status: possibleStatuses[0].id,
+            status: this.context.possibleStatuses[0].id,
             page: 1,
-            pageSize: pageSize,
-            sortField: 'name'
+            pageSize: this.context.pageSize,
+            sort: 'name'
           });
         });
 
         it('updates items when name status filter is updated', function() {
-          var controller = createController(getItemsWrapperDefault),
-              statusFilterValue = possibleStatuses[1];
+          var statusFilterValue = this.context.possibleStatuses[1];
 
-          controller.pagerOptions.status = statusFilterValue;
-          controller.statusFilterUpdated();
-          scope.$digest();
-          expect(getItemsSpy.calls.mostRecent().args[0]).toEqual({
+          this.createController(this.getItemsWrapperDefault);
+          this.controller.pagerOptions.status = statusFilterValue;
+          this.controller.statusFilterUpdated();
+          this.scope.$digest();
+          expect(this.getItemsSpy.calls.mostRecent().args[0]).toEqual({
             filter: '',
             status: statusFilterValue,
             page: 1,
-            pageSize: pageSize,
-            sortField: controller.sortFields[0].toLowerCase()
+            pageSize: this.context.pageSize,
+            sort: this.controller.sortFields[0].toLowerCase()
           });
         });
 
         it('clears filters', function() {
-          var controller = createController(getItemsWrapperDefault);
-
-          controller.pagerOptions.filter = 'test';
-          controller.pagerOptions.status = possibleStatuses[1];
-          controller.clearFilters();
-          scope.$digest();
-          expect(controller.pagerOptions.filter).toBeNull();
-          expect(controller.pagerOptions.status).toBe(possibleStatuses[0]);
+          this.createController(this.getItemsWrapperDefault);
+          this.controller.pagerOptions.filter = 'test';
+          this.controller.pagerOptions.status = this.context.possibleStatuses[1];
+          this.controller.clearFilters();
+          this.scope.$digest();
+          expect(this.controller.pagerOptions.filter).toBeNull();
+          expect(this.controller.pagerOptions.status).toBe(this.context.possibleStatuses[0]);
         });
 
         it('updates items when name sort field is updated', function() {
-          var controller = createController(getItemsWrapperDefault),
-              sortFieldValue = controller.sortFields[1];
+          var sortFieldValue;
 
-          controller.sortFieldSelected(sortFieldValue);
-          scope.$digest();
-          expect(getItemsSpy.calls.mostRecent().args[0]).toEqual({
+          this.createController(this.getItemsWrapperDefault);
+          sortFieldValue = this.controller.sortFields[1];
+          this.controller.sortFieldSelected(sortFieldValue);
+          this.scope.$digest();
+          expect(this.getItemsSpy.calls.mostRecent().args[0]).toEqual({
             filter: '',
-            status: possibleStatuses[0].id,
+            status: this.context.possibleStatuses[0].id,
             page: 1,
-            pageSize: pageSize,
-            sortField: sortFieldValue.toLowerCase()
+            pageSize: this.context.pageSize,
+            sort: sortFieldValue.toLowerCase()
           });
         });
 
         it('updates items when name page number is changed', function() {
-          var controller = createController(getItemsWrapperDefault),
-              page = 2;
+          var page = 2;
 
-          controller.pagerOptions.page = page;
-          controller.pageChanged();
-          scope.$digest();
-          expect(getItemsSpy.calls.mostRecent().args[0]).toEqual({
+          this.createController(this.getItemsWrapperDefault);
+          this.controller.pagerOptions.page = page;
+          this.controller.pageChanged();
+          this.scope.$digest();
+          expect(this.getItemsSpy.calls.mostRecent().args[0]).toEqual({
             filter: '',
-            status: possibleStatuses[0].id,
+            status: this.context.possibleStatuses[0].id,
             page: page,
-            pageSize: pageSize,
-            sortField: controller.sortFields[0].toLowerCase()
+            pageSize: this.context.pageSize,
+            sort: this.controller.sortFields[0].toLowerCase()
           });
         });
 
         it('has valid display state when there are no entities for criteria', function() {
-          var controller = createController(getItemsWrapper);
+          var self = this;
 
-          expect(controller.displayState).toBe(1); // NO_RESULTS
+          this.createController(getItemsWrapper);
+          expect(this.controller.displayState).toBe(1); // NO_RESULTS
 
           function getItemsWrapper(options) {
-            getItemsSpy(options);
-            return $q.when({
-              items:    entities.slice(0, pageSize),
+            self.getItemsSpy(options);
+            return self.$q.when({
+              items:    [],
               page:     options.page,
-              pageSize: pageSize,
+              pageSize: self.context.pageSize,
               offset:   0,
               total:    0
             });
@@ -312,30 +310,29 @@ define([
         });
 
         it('has valid display state when there are entities for criteria', function() {
-          var controller = createController(getItemsWrapper);
+          var self = this;
 
-          expect(controller.displayState).toBe(2); // HAVE_RESULTS
+          this.createController(getItemsWrapper);
+          expect(self.controller.displayState).toBe(2); // HAVE_RESULTS
 
           function getItemsWrapper(options) {
-            getItemsSpy(options);
-            return $q.when({
-              items:    entities.slice(0, pageSize),
+            self.getItemsSpy(options);
+            return self.$q.when({
+              items:    self.context.entities.slice(0, self.context.pageSize),
               page:     options.page,
-              pageSize: pageSize,
+              pageSize: self.context.pageSize,
               offset:   0,
-              total:    entities.length + 1
+              total:    self.context.entities.length + 1
             });
           }
         });
 
         it('has valid display state when there are no entities', function() {
-          var controller;
-
-          counts = _.mapObject(counts, function (val) {
+          this.context.counts = _.mapObject(this.context.counts, function (val) {
             return 0;
           });
-          controller = createController(getItemsWrapperDefault);
-          expect(controller.displayState).toBe(0); // NO_ENTITIES
+          this.createController(this.getItemsWrapperDefault);
+          expect(this.controller.displayState).toBe(0); // NO_ENTITIES
         });
 
       });

@@ -1,93 +1,110 @@
 /**
+ * Jasmine test suite
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-// Jasmine test suite
-//
 define([
   'angular',
   'underscore',
-  'angularMocks',
-  'biobankApp'
+  'angularMocks'
 ], function(angular, _, mocks) {
   'use strict';
 
-  describe('Controller: StudiesCtrl', function() {
-    var StudyCounts, fakeEntities, createController;
+  describe('Directive: studiesListDirective', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testUtils) {
-      StudyCounts = this.$injector.get('StudyCounts');
-      fakeEntities = this.$injector.get('fakeDomainEntities');
-      createController = setupController(this.$injector);
+    beforeEach(inject(function (testUtils) {
+      this.$q                = this.$injector.get('$q');
+      this.Study             = this.$injector.get('Study');
+      this.fakeEntities      = this.$injector.get('fakeDomainEntities');
+      this.createStudyCounts = setupCountsCreator(this);
+      this.createController  = setupController(this);
       testUtils.addCustomMatchers();
+
+      testUtils.putHtmlTemplates(
+        '/assets/javascripts/admin/studies/directives/studiesList/studiesList.html',
+        '/assets/javascripts/common/directives/pagedItemsList/pagedItemsList.html');
     }));
 
-    function createStudyCounts(disabled, enabled, retired) {
-      return new StudyCounts({
-        total:    disabled + enabled + retired,
-        disabled: disabled,
-        enabled:  enabled,
-        retired:  retired
-      });
+    function setupCountsCreator(userContext) {
+      var StudyCounts = userContext.$injector.get('StudyCounts');
+
+      return create;
+
+      //--
+
+      function create(disabled, enabled, retired) {
+        return new StudyCounts({
+          total:    disabled + enabled + retired,
+          disabled: disabled,
+          enabled:  enabled,
+          retired:  retired
+        });
+      }
     }
 
-    function setupController(injector) {
-      var $rootScope = injector.get('$rootScope'),
-          $controller = injector.get('$controller'),
-          Study = injector.get('Study'),
-          StudyStatus = injector.get('StudyStatus');
+    function setupController(userContext) {
+      var $rootScope = userContext.$injector.get('$rootScope'),
+          $compile   = userContext.$injector.get('$compile');
 
       return create;
 
       //---
 
       function create(studyCounts) {
-        var scope = $rootScope.$new();
+        var element = angular.element([
+          '<studies-list',
+          '  study-counts="vm.studyCounts">',
+          '</studies-list>'
+        ].join(''));
 
-        $controller('StudiesCtrl as vm', {
-          $scope:      scope,
-          Study:       Study,
-          StudyStatus: StudyStatus,
-          studyCounts: studyCounts
-        });
-
-        scope.$digest();
-        return scope;
+        userContext.scope = $rootScope.$new();
+        userContext.scope.vm = { studyCounts: studyCounts };
+        $compile(element)(userContext.scope);
+        userContext.scope.$digest();
+        userContext.controller = element.controller('studiesList');
       }
     }
 
     it('scope is valid on startup', function() {
-      var StudyStatus = this.$injector.get('StudyStatus'),
+      var self        = this,
+          StudyStatus = this.$injector.get('StudyStatus'),
           allStatuses = StudyStatus.values(),
-          counts = createStudyCounts(1, 2, 3),
-          scope = createController(counts);
+          counts      = this.createStudyCounts(1, 2, 3);
 
-      expect(scope.vm.studyCounts).toEqual(counts);
-      expect(scope.vm.pageSize).toBeDefined();
+      spyOn(self.Study, 'list').and.callFake(function () {
+        return self.$q.when(self.fakeEntities.pagedResult([]));
+      });
+
+      self.createController(counts);
+
+      expect(self.controller.studyCounts).toEqual(counts);
+      expect(self.controller.pageSize).toBeDefined();
 
       _.each(allStatuses, function(status) {
-        expect(scope.vm.possibleStatuses).toContain({ id: status, label: StudyStatus.label(status)});
+        expect(self.controller.possibleStatuses)
+          .toContain({ id: status, label: StudyStatus.label(status)});
       });
-      expect(scope.vm.possibleStatuses).toContain({ id: 'all', label: 'All'});
+      expect(self.controller.possibleStatuses).toContain({ id: 'all', label: 'All'});
     });
 
     it('updateStudies retrieves new list of studies', function() {
-      var Study = this.$injector.get('Study'),
-          counts = createStudyCounts(1, 2, 3),
-          listOptions = {},
-          scope;
+      var self = this,
+          counts = self.createStudyCounts(1, 2, 3),
+          listOptions = { dummy: 'value' };
 
-      spyOn(Study, 'list').and.callFake(function () {});
+      spyOn(self.Study, 'list').and.callFake(function () {
+        return self.$q.when(self.fakeEntities.pagedResult([]));
+      });
 
-      scope = createController(counts);
-      scope.vm.updateStudies(listOptions);
-      scope.$digest();
+      self.createController(counts);
+      self.controller.updateStudies(listOptions);
+      self.scope.$digest();
 
-      expect(Study.list).toHaveBeenCalledWith(listOptions);
+      expect(self.Study.list).toHaveBeenCalledWith(listOptions);
     });
-
 
   });
 

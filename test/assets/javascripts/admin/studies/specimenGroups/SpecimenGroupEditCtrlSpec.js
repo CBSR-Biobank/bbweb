@@ -13,164 +13,190 @@ define([
   'use strict';
 
   describe('Controller: SpecimenGroupEditCtrl', function() {
-    var createEntities,
-        createController,
-        AnatomicalSourceType,
-        PreservationType,
-        PreservationTemperatureType,
-        SpecimenType;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testUtils) {
-      createEntities   = setupEntities(this.$injector);
-      createController = setupController(this.$injector);
+    describe('for collection event types', function() {
+      var context = {};
 
-      AnatomicalSourceType        = this.$injector.get('AnatomicalSourceType');
-      PreservationType            = this.$injector.get('PreservationType');
-      PreservationTemperatureType = this.$injector.get('PreservationTemperatureType');
-      SpecimenType                = this.$injector.get('SpecimenType');
+      beforeEach(inject(function () {
+        context.currentState         = 'home.admin.studies.study.collection.view';
+        context.returnState          = context.currentState;
+      }));
 
-      testUtils.addCustomMatchers();
-    }));
+      sharedBehaviour(context);
+    });
 
-    function setupEntities(injector) {
-      var Study         = injector.get('Study'),
-          SpecimenGroup = injector.get('SpecimenGroup'),
-          fakeEntities  = injector.get('fakeDomainEntities');
+    // TODO: enable this test once processing types GUI is refactored
+    xdescribe('for processing types', function() {
+      var context = {};
 
-      return create;
+      beforeEach(inject(function () {
+        context.currentState         = 'home.admin.studies.study.processing';
+        context.returnState          = context.currentState;
+      }));
 
-      //--
+      sharedBehaviour(context);
+    });
 
-      function create(options) {
-        var study, specimenGroup;
+    function sharedBehaviour(context) {
 
-        options = options || {};
+      describe('(shared)', function() {
 
-        study         = new Study(fakeEntities.study());
+        beforeEach(inject(function(testUtils) {
+          this.createEntities   = setupEntities(this);
+          this.createController = setupController(this);
+          this.context          = context;
 
-        if (options.noSgId) {
-          specimenGroup = new SpecimenGroup(_.omit(fakeEntities.processingType(study), 'id'));
-        } else {
-          specimenGroup = new SpecimenGroup(fakeEntities.processingType(study));
+          this.AnatomicalSourceType        = this.$injector.get('AnatomicalSourceType');
+          this.PreservationType            = this.$injector.get('PreservationType');
+          this.PreservationTemperatureType = this.$injector.get('PreservationTemperatureType');
+          this.SpecimenType                = this.$injector.get('SpecimenType');
+
+          testUtils.addCustomMatchers();
+        }));
+
+        function setupEntities(userContext) {
+          var Study         = userContext.$injector.get('Study'),
+              SpecimenGroup = userContext.$injector.get('SpecimenGroup'),
+              fakeEntities  = userContext.$injector.get('fakeDomainEntities');
+
+          return create;
+
+          //--
+
+          function create(options) {
+            var specimenGroup,
+                study = new Study(fakeEntities.study());
+
+            options = options || {};
+            if (options.noSgId) {
+              specimenGroup = new SpecimenGroup(_.omit(fakeEntities.processingType(study), 'id'));
+            } else {
+              specimenGroup = new SpecimenGroup(fakeEntities.processingType(study));
+            }
+
+            return {
+              study:         study,
+              specimenGroup: specimenGroup
+            };
+          }
         }
 
-        return {
-          study:         study,
-          specimenGroup: specimenGroup
-        };
-      }
-    }
+        function setupController(userContext) {
+          var $rootScope           = userContext.$injector.get('$rootScope'),
+              $controller          = userContext.$injector.get('$controller'),
+              $state               = userContext.$injector.get('$state'),
+              domainEntityService  = userContext.$injector.get('domainEntityService'),
+              notificationsService = userContext.$injector.get('notificationsService');
 
-    function setupController(injector) {
-      var rootScope                   = injector.get('$rootScope'),
-          controller                  = injector.get('$controller'),
-          state                       = injector.get('$state'),
-          domainEntityService         = injector.get('domainEntityService'),
-          notificationsService        = injector.get('notificationsService');
+          return create;
 
-      return create;
+          //--
 
-      //--
+          function create(entities) {
+            userContext.scope = $rootScope.$new();
 
-      function create(entities) {
-        var scope = rootScope.$new();
+            $state.current.name = userContext.context.currentState;
 
-        controller('SpecimenGroupEditCtrl as vm', {
-          $scope:                      scope,
-          $state:                      state,
-          domainEntityService:         domainEntityService,
-          notificationsService:        notificationsService,
-          AnatomicalSourceType:        AnatomicalSourceType,
-          PreservationType:            PreservationType,
-          PreservationTemperatureType: PreservationTemperatureType,
-          SpecimenType:                SpecimenType,
-          study:                       entities.study,
-          specimenGroup:               entities.specimenGroup
+            $controller('SpecimenGroupEditCtrl as vm', {
+              $scope:                      userContext.scope,
+              $state:                      $state,
+              domainEntityService:         domainEntityService,
+              notificationsService:        notificationsService,
+              AnatomicalSourceType:        userContext.AnatomicalSourceType,
+              PreservationType:            userContext.PreservationType,
+              PreservationTemperatureType: userContext.PreservationTemperatureType,
+              SpecimenType:                userContext.SpecimenType,
+              study:                       entities.study,
+              specimenGroup:               entities.specimenGroup
+            });
+
+            userContext.scope.$digest();
+          }
+        }
+
+        describe('has valid scope when created', function () {
+
+          it('for new specimen group', function() {
+            var entities = this.createEntities({ noSgId: true });
+
+            this.createController(entities);
+
+            expect(this.scope.vm.title).toBe('Add Specimen Group');
+            checkInitialScope(this, entities);
+          });
+
+          it('for existing specimen group', function() {
+            var entities = this.createEntities();
+            this.createController(entities);
+            expect(this.scope.vm.title).toBe('Update Specimen Group');
+            checkInitialScope(this, entities);
+          });
+
+          function checkInitialScope(userContext, entities) {
+            expect(userContext.scope.vm.study).toBe(entities.study);
+            expect(userContext.scope.vm.specimenGroup).toBe(entities.specimenGroup);
+            expect(userContext.scope.vm.anatomicalSourceTypes ).toBe(userContext.AnatomicalSourceType.values());
+            expect(userContext.scope.vm.preservTypes).toBe(userContext.PreservationType.values());
+            expect(userContext.scope.vm.preservTempTypes).toBe(userContext.PreservationTemperatureType.values());
+            expect(userContext.scope.vm.specimenTypes).toBe(userContext.SpecimenType.values());
+          }
+
         });
 
-        scope.$digest();
-        return scope;
-      }
+        it('can submit a specimen group', function() {
+          var $q       = this.$injector.get('$q'),
+              $state   = this.$injector.get('$state'),
+              entities = this.createEntities();
+
+          this.createController(entities);
+          spyOn(entities.specimenGroup, 'addOrUpdate').and.callFake(function () {
+            return $q.when(entities.specimenGroup);
+          });
+          spyOn($state, 'go').and.callFake(function () {});
+          this.scope.vm.submit(entities.specimenGroup);
+          this.scope.$digest();
+
+          expect($state.go).toHaveBeenCalledWith(
+            this.context.currentState, {}, { reload: true });
+        });
+
+        it('on submit error, displays an error modal', function() {
+          var q                   = this.$injector.get('$q'),
+              domainEntityService = this.$injector.get('domainEntityService'),
+              entities            = this.createEntities();
+
+          this.createController(entities);
+          spyOn(entities.specimenGroup, 'addOrUpdate').and.callFake(function () {
+            var deferred = q.defer();
+            deferred.reject('xxx');
+            return deferred.promise;
+          });
+          spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
+
+          this.scope.vm.submit(entities.specimenGroup);
+          this.scope.$digest();
+
+          expect(domainEntityService.updateErrorModal)
+            .toHaveBeenCalledWith('xxx', 'specimen group');
+        });
+
+        it('when user presses the cancel button, goes to correct state', function() {
+          var state    = this.$injector.get('$state'),
+              entities            = this.createEntities();
+
+          this.createController(entities);
+          spyOn(state, 'go').and.callFake(function () {});
+          this.scope.vm.cancel();
+          this.scope.$digest();
+          expect(state.go).toHaveBeenCalledWith(
+            this.context.currentState, {}, { reload: true });
+        });
+
+      });
+
     }
-
-    describe('has valid scope when created', function () {
-
-      it('for new specimen group', function() {
-        var entities = createEntities({ noSgId: true }),
-            scope = createController(entities);
-
-        expect(scope.vm.title).toBe('Add Specimen Group');
-        initScopeCommon(entities, scope);
-      });
-
-      it('for existing specimen group', function() {
-        var entities = createEntities(),
-            scope = createController(entities);
-        expect(scope.vm.title).toBe('Update Specimen Group');
-        initScopeCommon(entities, scope);
-      });
-
-      function initScopeCommon(entities, scope) {
-        expect(scope.vm.study).toBe(entities.study);
-        expect(scope.vm.specimenGroup).toBe(entities.specimenGroup);
-        expect(scope.vm.anatomicalSourceTypes ).toBe(AnatomicalSourceType.values());
-        expect(scope.vm.preservTypes).toBe(PreservationType.values());
-        expect(scope.vm.preservTempTypes).toBe(PreservationTemperatureType.values());
-        expect(scope.vm.specimenTypes).toBe(SpecimenType.values());
-      }
-
-    });
-
-    it('can submit a specimen group', function() {
-      var q        = this.$injector.get('$q'),
-          state    = this.$injector.get('$state'),
-          entities = createEntities(),
-          scope    = createController(entities);
-
-      spyOn(entities.specimenGroup, 'addOrUpdate').and.callFake(function () {
-        return q.when(entities.specimenGroup);
-      });
-      spyOn(state, 'go').and.callFake(function () {});
-      scope.vm.submit(entities.specimenGroup);
-      scope.$digest();
-
-      expect(state.go).toHaveBeenCalledWith(
-        'home.admin.studies.study.specimens', {}, {reload: true});
-    });
-
-    it('on submit error, displays an error modal', function() {
-      var q                   = this.$injector.get('$q'),
-          domainEntityService = this.$injector.get('domainEntityService'),
-          entities            = createEntities(),
-          scope               = createController(entities);
-
-      spyOn(entities.specimenGroup, 'addOrUpdate').and.callFake(function () {
-        var deferred = q.defer();
-        deferred.reject('xxx');
-        return deferred.promise;
-      });
-      spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
-
-      scope.vm.submit(entities.specimenGroup);
-      scope.$digest();
-
-      expect(domainEntityService.updateErrorModal)
-        .toHaveBeenCalledWith('xxx', 'specimen group');
-    });
-
-    it('when user presses the cancel button, goes to correct state', function() {
-      var state    = this.$injector.get('$state'),
-          entities = createEntities(),
-          scope    = createController(entities);
-
-      spyOn(state, 'go').and.callFake(function () {});
-      scope.vm.cancel();
-      scope.$digest();
-      expect(state.go).toHaveBeenCalledWith(
-        'home.admin.studies.study.specimens', {}, {reload: true});
-    });
 
   });
 
