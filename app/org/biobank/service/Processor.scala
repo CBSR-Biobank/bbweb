@@ -37,9 +37,10 @@ trait Processor extends PersistentActor with ActorLogging {
     )
   }
 
-  /** Searches the repository for a matching item.
-    */
-  protected def nameAvailableMatcher[T <: ConcurrencySafeEntity[_]]
+  /**
+   * Searches the repository for a matching item.
+   */
+  protected def nameAvailableMatcher[T <: IdentifiedDomainObject[_]]
     (name: String, repository: ReadRepository[_, T], errMsgPrefix: String)
     (matcher: T => Boolean)
       : DomainValidation[Boolean] = {

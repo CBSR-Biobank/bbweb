@@ -4,7 +4,7 @@ import org.biobank.dto._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
-import org.biobank.domain.{ DomainValidation, DomainError, Location, LocationId, LocationRepository }
+import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study.{ Study, StudyId, StudyRepository }
 import org.biobank.domain.centre._
@@ -35,25 +35,7 @@ trait CentresService {
 
   def getCentre(id: String): DomainValidation[Centre]
 
-  def getCentreLocations(centreId: String, locationIdOpt: Option[String]): DomainValidation[Set[Location]]
-
-  def getCentreStudies(centreId: String): DomainValidation[Set[StudyId]]
-
-  def addCentre(cmd: AddCentreCmd): Future[DomainValidation[Centre]]
-
-  def updateCentre(cmd: UpdateCentreCmd): Future[DomainValidation[Centre]]
-
-  def enableCentre(cmd: EnableCentreCmd): Future[DomainValidation[Centre]]
-
-  def disableCentre(cmd: DisableCentreCmd): Future[DomainValidation[Centre]]
-
-  def addCentreLocation(cmd: AddCentreLocationCmd): Future[DomainValidation[Location]]
-
-  def removeCentreLocation(cmd: RemoveCentreLocationCmd): Future[DomainValidation[Boolean]]
-
-  def addStudyToCentre(cmd: AddStudyToCentreCmd): Future[DomainValidation[Study]]
-
-  def removeStudyFromCentre(cmd: RemoveStudyFromCentreCmd): Future[DomainValidation[Boolean]]
+  def processCommand(cmd: CentreCommand): Future[DomainValidation[Centre]]
 }
 
 /**
@@ -67,9 +49,6 @@ trait CentresService {
  */
 class CentresServiceImpl @javaxInject() (@Named("centresProcessor") val processor: ActorRef,
                                          val centreRepository:          CentreRepository,
-                                         val locationRepository:        LocationRepository,
-                                         val centreStudiesRepository:   CentreStudiesRepository,
-                                         val centreLocationsRepository: CentreLocationsRepository,
                                          val studyRepository:           StudyRepository)
     extends CentresService {
 
@@ -137,89 +116,12 @@ class CentresServiceImpl @javaxInject() (@Named("centresProcessor") val processo
     )
   }
 
-  def getCentreLocations(centreId: String,
-                         locationIdOpt: Option[String])
-      : DomainValidation[Set[Location]] = {
-    centreRepository.getByKey(CentreId(centreId)).fold(
-      err => DomainError(s"invalid centre id: $centreId").failureNel[Set[Location]],
-      centre => {
-        val locationIds = centreLocationsRepository.withCentreId(centre.id).map { x => x.locationId }
-        val locations = locationRepository.getValues.filter(x => locationIds.contains(x.id)).toSet
-        locationIdOpt.fold {
-          locations.successNel[String]
-        } { locationId =>
-          locationRepository.getByKey(LocationId(locationId)).fold(
-            err => DomainError(s"invalid location id: $locationId").failureNel[Set[Location]],
-            location => {
-              val locsFound = locations.filter(_.id.id == locationId)
-              if (locsFound.isEmpty) {
-                DomainError(s"centre does not have location with id: $locationId").failureNel[Set[Location]]
-              } else {
-                Set(location).successNel[String]
-              }
-            }
-          )
-        }
-      }
-    )
-  }
-
-  def getCentreStudies(centreId: String): DomainValidation[Set[StudyId]] = {
-    centreRepository.getByKey(CentreId(centreId)).fold(
-      err => DomainError(s"invalid centre id: $centreId").failureNel,
-      centre => centreStudiesRepository.withCentreId(CentreId(centreId)).map(x => x.studyId).toSet.success
-    )
-  }
-
-  def addCentre(cmd: AddCentreCmd): Future[DomainValidation[Centre]] =
-    replyWithCentre(ask(processor, cmd).mapTo[DomainValidation[CentreEvent]])
-
-  def updateCentre(cmd: UpdateCentreCmd): Future[DomainValidation[Centre]] =
-    replyWithCentre(ask(processor, cmd).mapTo[DomainValidation[CentreEvent]])
-
-  def enableCentre(cmd: EnableCentreCmd): Future[DomainValidation[Centre]] =
-    replyWithCentre(ask(processor, cmd).mapTo[DomainValidation[CentreEvent]])
-
-  def disableCentre(cmd: DisableCentreCmd): Future[DomainValidation[Centre]] =
-    replyWithCentre(ask(processor, cmd).mapTo[DomainValidation[CentreEvent]])
-
-  def addCentreLocation(cmd: AddCentreLocationCmd): Future[DomainValidation[Location]] = {
-    ask(processor, cmd).mapTo[DomainValidation[CentreEvent]] map { validation =>
-      for {
-        event <- validation
-        location <- locationRepository.getByKey(LocationId(event.getLocationAdded.getLocationId))
-      } yield location
-    }
-  }
-
-  def removeCentreLocation(cmd: RemoveCentreLocationCmd): Future[DomainValidation[Boolean]] = {
-    ask(processor, cmd).mapTo[DomainValidation[CentreEvent]] map { validation =>
-      validation map { event => true }
-    }
-  }
-
-  def addStudyToCentre(cmd: AddStudyToCentreCmd): Future[DomainValidation[Study]] = {
-    ask(processor, cmd).mapTo[DomainValidation[CentreEvent]] map { validation =>
-      for {
-        event <- validation
-        study <- studyRepository.getByKey(StudyId(event.getStudyAdded.getStudyId))
-      } yield study
-    }
-  }
-
-  def removeStudyFromCentre(cmd: RemoveStudyFromCentreCmd): Future[DomainValidation[Boolean]] = {
-    ask(processor, cmd).mapTo[DomainValidation[CentreEvent]] map { validation =>
-      validation map { event => true }
-    }
-  }
-
-  private def replyWithCentre(future: Future[DomainValidation[CentreEvent]])
-      : Future[DomainValidation[Centre]] = {
-    future map { validation =>
+  def processCommand(cmd: CentreCommand): Future[DomainValidation[Centre]] =
+    ask(processor, cmd).mapTo[DomainValidation[CentreEvent]].map { validation =>
       for {
         event <- validation
         centre <- centreRepository.getByKey(CentreId(event.id))
       } yield centre
     }
-  }
+
 }

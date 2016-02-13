@@ -188,7 +188,7 @@ define([
               offset:   0,
               total:    userContext.context.entities.length
             });
-          };
+          }
         }
 
         it('has valid scope', function() {

@@ -142,8 +142,17 @@ object StorageContainerType extends ContainerValidations {
       validateId(schemaId, ContainerSchemaIdInvalid) |@|
       validateAndIncrementVersion(version) |@|
       validateString(name, NameMinLength, InvalidName) |@|
-      validateNonEmptyOption(description, InvalidDescription)) {
-      StorageContainerType(_, _, _, _, DateTime.now, None, _, _, shared, enabled)
+       validateNonEmptyOption(description, InvalidDescription)) {
+      case (_, _, _, _, _, _) => StorageContainerType(id,
+                                                      centreId,
+                                                      schemaId,
+                                                      version,
+                                                      DateTime.now,
+                                                      None,
+                                                      name,
+                                                      description,
+                                                      shared,
+                                                      enabled)
     }
   }
 
@@ -178,12 +187,21 @@ object SpecimenContainerType extends ContainerValidations {
              shared:       Boolean,
              enabled:      Boolean): DomainValidation[SpecimenContainerType] = {
     (validateId(id) |@|
-      validateId(centreId, CentreIdRequired) |@|
-      validateId(schemaId, ContainerSchemaIdInvalid) |@|
-      validateAndIncrementVersion(version) |@|
-      validateString(name, NameMinLength, InvalidName) |@|
-      validateNonEmptyOption(description, InvalidDescription)) {
-      SpecimenContainerType(_, _, _, _, DateTime.now, None, _, _, shared, enabled)
+       validateId(centreId, CentreIdRequired) |@|
+       validateId(schemaId, ContainerSchemaIdInvalid) |@|
+       validateAndIncrementVersion(version) |@|
+       validateString(name, NameMinLength, InvalidName) |@|
+       validateNonEmptyOption(description, InvalidDescription)) {
+      case (_, _, _, _, _, _) => SpecimenContainerType(id,
+                                                       centreId,
+                                                       schemaId,
+                                                       version,
+                                                       DateTime.now,
+                                                       None,
+                                                       name,
+                                                       description,
+                                                       shared,
+                                                       enabled)
     }
   }
 }

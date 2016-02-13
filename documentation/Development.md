@@ -227,6 +227,16 @@ Use `run -DapplyEvolutions.default=true` sbt command to automatically apply data
 
 ## Scalatest
 
+### Run one or more tests within a Suite
+
+Use the `-z` flag to run a test with the specified substring:
+
+```sbt
+test-only *__CLASS_NAME__ -- -z "sub string"
+```
+
+### Tags
+
 Tag a test by adding the following import:
 
 ```scala

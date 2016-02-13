@@ -4,15 +4,14 @@ import org.biobank.service.Processor
 import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.infrastructure.event.ParticipantEvents._
 import org.biobank.domain.{
-  AnnotationTypeId,
-  AnnotationOption,
-  Location,
-  LocationId,
-  LocationRepository
+  Annotation,
+  AnnotationType,
+  DomainValidation,
+  DomainError,
+  Location
 }
 import org.biobank.domain.user.UserId
-import org.biobank.domain.{ DomainValidation, DomainError }
-import org.biobank.domain.centre.{ CentreLocation, CentreLocationsRepository }
+import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.study.{ SpecimenGroupId, SpecimenGroupRepository }
 import org.biobank.domain.participants._
 
@@ -39,8 +38,7 @@ class SpecimensProcessor @javaxInject() (
   val specimenRepository:        SpecimenRepository,
   val specimenGroupRepository:   SpecimenGroupRepository,
   val collectionEventRepository: CollectionEventRepository,
-  val locationRepository:        LocationRepository,
-  val centreLocationsRepository: CentreLocationsRepository) //,
+  val centreRepository:          CentreRepository) //,
   //val containerRepository:       ContainerRepository)
     extends Processor {
 
@@ -102,8 +100,8 @@ class SpecimensProcessor @javaxInject() (
     var v = for {
       collectionEvent <- collectionEventRepository.getByKey(CollectionEventId(cmd.collectionEventId))
       specimenGroup   <- specimenGroupRepository.getByKey(SpecimenGroupId(cmd.specimenGroupId))
-      location        <- validateLocationId(cmd.locationId)
-      originLocation  <- validateLocationId(cmd.originLocationId)
+      location        <- centreRepository.getByLocationId(cmd.locationId)
+      originLocation  <- centreRepository.getByLocationId(cmd.originLocationId)
       //---
       event           <- createEvent(collectionEvent.participantId, cmd).withSpecimenAdded(
         SpecimenAddedEvent(
@@ -121,13 +119,6 @@ class SpecimensProcessor @javaxInject() (
     } yield event
 
     process(v) { applySpecimenAddedEvent(_) }
-  }
-
-  def validateLocationId(id: String): DomainValidation[CentreLocation] = {
-    for {
-      location  <- locationRepository.getByKey(LocationId(id))
-      centreLoc <- centreLocationsRepository.withLocationId(location.id)
-    } yield centreLoc
   }
 
   private def processMoveSpecimenCmd(cmd: MoveSpecimenCmd): Unit = {

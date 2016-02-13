@@ -1,0 +1,256 @@
+// package org.biobank.infrastructure.event;
+
+// import "CommonEvents.proto";
+
+// message StudyAddedEvent {
+//    optional string name        = 1;
+//    optional string description = 2;
+// }
+
+// message StudyNameUpdatedEvent {
+//    optional int64  version     = 1;
+//    optional string name        = 2;
+// }
+
+// message StudyDescriptionUpdatedEvent {
+//    optional int64  version     = 1;
+//    optional string description = 3;
+// }
+
+// message StudyEnabledEvent {
+//    optional int64  version = 1;
+// }
+
+// message StudyDisabledEvent {
+//    optional int64  version = 1;
+// }
+
+// message StudyRetiredEvent {
+//    optional int64  version = 1;
+// }
+
+// message StudyUnretiredEvent {
+//    optional int64  version = 1;
+// }
+
+// message CollectionEventAnnotationTypeAddedEvent {
+//    optional string annotationTypeId = 1;
+//    optional string name             = 2;
+//    optional string description      = 3;
+//    optional string valueType        = 4; // a scala enum is used here
+//    optional int32  maxValueCount    = 5;
+//    repeated string options          = 6;
+//    optional bool   required         = 7;
+// }
+
+// message CollectionEventAnnotationTypeUpdatedEvent {
+//    optional string annotationTypeId = 1;
+//    optional int64  version          = 2;
+//    optional string name             = 3;
+//    optional string description      = 4;
+//    optional string valueType        = 5; // a scala enum is used here
+//    optional int32  maxValueCount    = 6;
+//    repeated string options          = 7;
+//    optional bool   required         = 8;
+// }
+
+// message CollectionEventAnnotationTypeRemovedEvent {
+//    optional string annotationTypeId = 1;
+// }
+
+// message ParticipantAnnotationTypeAddedEvent {
+//    optional string annotationTypeId = 1;
+//    optional string name             = 2;
+//    optional string description      = 3;
+//    optional string valueType        = 4; // a scala enum is used here
+//    optional int32  maxValueCount    = 5;
+//    repeated string options          = 6;
+//    optional bool   required         = 7;
+// }
+
+// message ParticipantAnnotationTypeUpdatedEvent {
+//    optional string annotationTypeId = 1;
+//    optional int64  version          = 2;
+//    optional string name             = 3;
+//    optional string description      = 4;
+//    optional string valueType        = 5; // a scala enum is used here
+//    optional int32  maxValueCount    = 6;
+//    repeated string options          = 7;
+//    optional bool   required         = 8;
+// }
+
+// message ParticipantAnnotationTypeRemovedEvent {
+//    optional string annotationTypeId = 1;
+// }
+
+// message SpecimenLinkAnnotationTypeAddedEvent {
+//    optional string annotationTypeId = 1;
+//    optional string name             = 2;
+//    optional string description      = 3;
+//    optional string valueType        = 4; // a scala enum is used here
+//    optional int32  maxValueCount    = 5;
+//    repeated string options          = 6;
+//    optional bool   required         = 7;
+// }
+
+// message SpecimenLinkAnnotationTypeUpdatedEvent {
+//    optional string annotationTypeId = 1;
+//    optional int64  version          = 2;
+//    optional string name             = 3;
+//    optional string description      = 4;
+//    optional string valueType        = 5; // a scala enum is used here
+//    optional int32  maxValueCount    = 6;
+//    repeated string options          = 7;
+//    optional bool   required         = 8;
+// }
+
+// message SpecimenLinkAnnotationTypeRemovedEvent {
+//    optional string annotationTypeId = 1;
+// }
+
+// message CollectionEventTypeAddedEvent {
+//    optional string collectionEventTypeId = 1;
+//    optional string name                  = 2;
+//    optional string description           = 3;
+//    optional bool   recurring             = 4;
+// }
+
+// message CollectionEventTypeUpdatedEvent {
+//    optional string collectionEventTypeId = 1;
+//    optional int64  version               = 2;
+//    optional string name                  = 3;
+//    optional string description           = 4;
+//    optional bool   recurring             = 5;
+// }
+
+// message CollectionEventTypeRemovedEvent {
+//    optional string collectionEventTypeId = 1;
+// }
+
+// message SpecimenGroupAddedEvent {
+//    optional string specimenGroupId             = 1;
+//    optional string name                        = 2;
+//    optional string description                 = 3;
+//    optional string units                       = 4;
+//    optional string anatomicalSourceType        = 5;
+//    optional string preservationType            = 6;
+//    optional string preservationTemperatureType = 7;
+//    optional string specimenType                = 8;
+// }
+
+// message SpecimenGroupUpdatedEvent {
+//    optional string specimenGroupId             = 1;
+//    optional int64  version                     = 2;
+//    optional string name                        = 3;
+//    optional string description                 = 4;
+//    optional string units                       = 5;
+//    optional string anatomicalSourceType        = 6;
+//    optional string preservationType            = 7;
+//    optional string preservationTemperatureType = 8;
+//    optional string specimenType                = 9;
+// }
+
+// message SpecimenGroupRemovedEvent {
+//    optional string specimenGroupId = 1;
+// }
+
+//   // procesing type events
+// message ProcessingTypeAddedEvent {
+//    optional string processingTypeId = 1;
+//    optional string name             = 2;
+//    optional string description      = 3;
+//    optional bool   enabled          = 4;
+// }
+
+// message ProcessingTypeUpdatedEvent {
+//    optional string processingTypeId = 1;
+//    optional int64  version          = 2;
+//    optional string name             = 3;
+//    optional string description      = 4;
+//    optional bool   enabled          = 5;
+// }
+
+// message ProcessingTypeRemovedEvent {
+//    optional string processingTypeId = 1;
+// }
+
+// message SpecimenLinkTypeAddedEvent {
+//    optional string processingTypeId      = 1;
+//    optional string specimenLinkTypeId    = 2;
+//    optional double expectedInputChange   = 3;
+//    optional double expectedOutputChange  = 4;
+//    optional int32  inputCount            = 5;
+//    optional int32  outputCount           = 6;
+//    optional string inputGroupId          = 7;
+//    optional string outputGroupId         = 8;
+//    optional string inputContainerTypeId  = 9;
+//    optional string outputContainerTypeId = 10;
+// }
+
+// message SpecimenLinkTypeUpdatedEvent {
+//    optional string processingTypeId      = 1;
+//    optional string specimenLinkTypeId    = 2;
+//    optional int64  version               = 3;
+//    optional double expectedInputChange   = 4;
+//    optional double expectedOutputChange  = 5;
+//    optional int32  inputCount            = 6;
+//    optional int32  outputCount           = 7;
+//    optional string inputGroupId          = 8;
+//    optional string outputGroupId         = 9;
+//    optional string inputContainerTypeId  = 10;
+//    optional string outputContainerTypeId = 11;
+// }
+
+// message SpecimenLinkTypeRemovedEvent {
+//    optional string processingTypeId   = 1;
+//    optional string specimenLinkTypeId = 2;
+// }
+
+// message StudyEvent {
+//    required string id     = 1;
+//    optional string userId = 2;
+//    optional string time   = 3;
+
+//    oneof event_type {
+//      StudyAddedEvent                added                 =  1;
+//      StudyNameUpdatedEvent          nameUpdated           =  2;
+//      StudyDescriptionUpdatedEvent   descriptionUpdated    =  3;
+//      StudyEnabledEvent              enabled               =  4;
+//      StudyDisabledEvent             disabled              =  5;
+//      StudyRetiredEvent              retired               =  6;
+//      StudyUnretiredEvent            unretired             =  7;
+//      AnnotationTypeAddedEvent       annotationTypeAdded   =  8;
+//      AnnotationTypeRemovedEvent     annotationTypeRemoved =  9;
+//    }
+// }
+
+// message CollectionEventTypeEvent {
+//    required string id      = 1;
+//    optional string studyId = 2;
+//    optional string userId  = 3;
+//    optional string time    = 4;
+
+//    oneof event_type {
+//      CollectionEventTypeAddedEvent             collectionEventTypeAdded             = 10;
+//      CollectionEventTypeRemovedEvent           collectionEventTypeRemoved           = 12;
+//      CollectionEventTypeNameUpdatedEvent       collectionEventTypeUpdated           = 11;
+//      CollectionEventTypeDescriptionUpdatedEvent       collectionEventTypeUpdated           = 11;
+//      CollectionEventTypeUpdatedEvent       collectionEventTypeUpdated           = 11;
+//      CollectionEventAnnotationTypeAddedEvent   collectionEventAnnotationTypeAdded   = 13;
+//      CollectionEventAnnotationTypeRemovedEvent collectionEventAnnotationTypeRemoved = 14;
+//      SpecimenGroupAddedEvent                   specimenGroupAdded                   = 15;
+//      SpecimenGroupRemovedEvent                 specimenGroupRemoved                 = 16;
+//    }
+// }
+
+// message CollectionEvntTypeEvent {
+
+//    oneof event_type {
+//      ProcessingTypeAddedEvent                  processingTypeAdded                  = 17;
+//      ProcessingTypeRemovedEvent                processingTypeRemoved                = 19;
+//      SpecimenLinkTypeAddedEvent                specimenLinkTypeAdded                = 20;
+//      SpecimenLinkTypeRemovedEvent              specimenLinkTypeRemoved              = 22;
+//      SpecimenLinkAnnotationTypeAddedEvent      specimenLinkAnnotationTypeAdded      = 23;
+//      SpecimenLinkAnnotationTypeRemovedEvent    specimenLinkAnnotationTypeRemoved    = 24;
+//    }
+// }

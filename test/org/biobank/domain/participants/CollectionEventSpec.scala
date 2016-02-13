@@ -58,7 +58,7 @@ class CollectionEventSpec extends DomainSpec {
           version                = -1,
           timeCompleted          = DateTime.now,
           visitNumber            = 1,
-          annotations            = Set(factory.createCollectionEventAnnotation)
+          annotations            = Set(factory.createAnnotation)
         )
         v mustFail "IdRequired"
       }
@@ -71,7 +71,7 @@ class CollectionEventSpec extends DomainSpec {
           version                = -1,
           timeCompleted          = DateTime.now,
           visitNumber            = 1,
-          annotations            = Set(factory.createCollectionEventAnnotation)
+          annotations            = Set(factory.createAnnotation)
         )
         v mustFail "ParticipantIdRequired"
       }
@@ -84,7 +84,7 @@ class CollectionEventSpec extends DomainSpec {
           version                = -1,
           timeCompleted          = DateTime.now,
           visitNumber            = 1,
-          annotations            = Set(factory.createCollectionEventAnnotation)
+          annotations            = Set(factory.createAnnotation)
         )
         v mustFail "CollectinEventTypeIdRequired"
       }
@@ -97,7 +97,7 @@ class CollectionEventSpec extends DomainSpec {
           version                = -1,
           timeCompleted          = DateTime.now,
           visitNumber            = 0,
-          annotations            = Set(factory.createCollectionEventAnnotation)
+          annotations            = Set(factory.createAnnotation)
         )
         v mustFail "VisitNumberInvalid"
       }
@@ -110,7 +110,7 @@ class CollectionEventSpec extends DomainSpec {
           version                = -2,
           timeCompleted          = DateTime.now,
           visitNumber            = 1,
-          annotations            = Set(factory.createCollectionEventAnnotation)
+          annotations            = Set(factory.createAnnotation)
         )
         v mustFail "InvalidVersion"
       }

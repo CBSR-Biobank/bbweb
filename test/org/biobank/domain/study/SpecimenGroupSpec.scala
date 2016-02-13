@@ -1,7 +1,6 @@
 package org.biobank.domain.study
 
 import org.biobank.domain.DomainSpec
-import org.biobank.domain.AnnotationTypeId
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain.AnatomicalSourceType
 import org.biobank.domain.PreservationType

@@ -74,11 +74,18 @@ object ProcessingType {
              enabled:     Boolean)
       : DomainValidation[ProcessingType] = {
     (validateId(studyId) |@|
-      validateId(id) |@|
-      validateAndIncrementVersion(version) |@|
-      validateString(name, NameRequired) |@|
-      validateNonEmptyOption(description, InvalidDescription) ) {
-      ProcessingType(_, _, _, DateTime.now, None, _, _, enabled)
+       validateId(id) |@|
+       validateAndIncrementVersion(version) |@|
+       validateString(name, NameRequired) |@|
+       validateNonEmptyOption(description, InvalidDescription) ) {
+      case (_, _, _, _, _) => ProcessingType(studyId,
+                                             id,
+                                             version,
+                                             DateTime.now,
+                                             None,
+                                             name,
+                                             description,
+                                             enabled)
     }
   }
 

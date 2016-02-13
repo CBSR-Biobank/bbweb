@@ -2,8 +2,7 @@ package org.biobank.domain.participants
 
 import org.biobank.domain.{
   ConcurrencySafeEntity,
-  DomainValidation,
-  LocationId
+  DomainValidation
 }
 import org.biobank.domain.study.{ SpecimenGroupId, HasSpecimenGroupId, StudyValidations }
 import org.biobank.domain.containers.{
@@ -30,10 +29,10 @@ sealed trait Specimen
   val specimenGroupId: SpecimenGroupId
 
   /** The [[Centre]] where this specimen was created. */
-  val originLocationId: LocationId
+  val originLocationId: String
 
   /** The [[Centre]] where this specimen is currently located. */
-  val locationId: LocationId
+  val locationId: String
 
   /** The [[Container]] this specimen is stored in. */
   val containerId: Option[ContainerId]
@@ -95,8 +94,8 @@ case class UsableSpecimen(id:               SpecimenId,
                           version:          Long,
                           timeAdded:        DateTime,
                           timeModified:     Option[DateTime],
-                          originLocationId: LocationId,
-                          locationId:       LocationId,
+                          originLocationId: String,
+                          locationId:       String,
                           containerId:      Option[ContainerId],
                           positionId:       Option[ContainerSchemaPositionId],
                           timeCreated:      DateTime,
@@ -114,8 +113,8 @@ case class UsableSpecimen(id:               SpecimenId,
     )
   }
 
-  def withLocation(locationId: LocationId): DomainValidation[Specimen] = {
-    validateId(locationId, LocationIdInvalid) fold (
+  def withLocation(locationId: String): DomainValidation[Specimen] = {
+    validateString(locationId, LocationIdInvalid) fold (
       err => err.failure,
       s   => copy(version = version + 1, locationId = locationId).success
     )
@@ -150,22 +149,32 @@ object UsableSpecimen extends ParticipantValidations with StudyValidations {
   def create(id:               SpecimenId,
              specimenGroupId:  SpecimenGroupId,
              version:          Long,
-             originLocationId: LocationId,
-             locationId:       LocationId,
+             originLocationId: String,
+             locationId:       String,
              containerId:      Option[ContainerId],
              positionId:       Option[ContainerSchemaPositionId],
              timeCreated:      DateTime,
              amount:           BigDecimal)
       : DomainValidation[UsableSpecimen] = {
     (validateId(id) |@|
-      validateId(specimenGroupId, InvalidSpecimenGroupId) |@|
-      validateAndIncrementVersion(version) |@|
-      validateId(originLocationId, OriginLocationIdInvalid) |@|
-      validateId(locationId, LocationIdInvalid) |@|
-      validateId(containerId, ContainerIdInvalid) |@|
-      validateId(positionId, PositionInvalid) |@|
-      validatePositiveNumber(amount, AmountInvalid)) {
-      UsableSpecimen(_, _, _, DateTime.now, None, _, _, _, _, timeCreated, _)
+       validateId(specimenGroupId, InvalidSpecimenGroupId) |@|
+       validateAndIncrementVersion(version) |@|
+       validateString(originLocationId, OriginLocationIdInvalid) |@|
+       validateString(locationId, LocationIdInvalid) |@|
+       validateId(containerId, ContainerIdInvalid) |@|
+       validateId(positionId, PositionInvalid) |@|
+       validatePositiveNumber(amount, AmountInvalid)) {
+      case (_, _, _, _, _, _, _, _) => UsableSpecimen(id,
+                                                      specimenGroupId,
+                                                      version,
+                                                      DateTime.now,
+                                                      None,
+                                                      originLocationId,
+                                                      locationId,
+                                                      containerId,
+                                                      positionId,
+                                                      timeCreated,
+                                                      amount)
     }
   }
 
@@ -181,8 +190,8 @@ case class UnusableSpecimen(id:               SpecimenId,
                             version:          Long,
                             timeAdded:        DateTime,
                             timeModified:     Option[DateTime],
-                            originLocationId: LocationId,
-                            locationId:       LocationId,
+                            originLocationId: String,
+                            locationId:       String,
                             containerId:      Option[ContainerId],
                             positionId:       Option[ContainerSchemaPositionId],
                             timeCreated:      DateTime,

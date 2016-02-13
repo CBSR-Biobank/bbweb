@@ -2,11 +2,8 @@ package org.biobank
 
 import org.biobank.domain.{
   Annotation,
-  AnnotationTypeId,
-  AnnotationOption,
   AnnotationValueType
 }
-import org.biobank.domain.participants.ParticipantAnnotation
 
 import play.api.libs.json._
 import org.scalatest.Tag
@@ -18,23 +15,15 @@ import org.joda.time.DateTime
  */
 object AnnotationTestUtils {
 
-  def annotationOptionToJson(annotationOption: AnnotationOption) = {
-    Json.obj(
-      "annotationTypeId" -> annotationOption.annotationTypeId,
-      "value"            -> annotationOption.value
-    )
-  }
-
   /** Converts a participant annotation into a Json object.
    */
-  def annotationToJson[T <: Annotation[_]](annotation: T) = {
-    val json = Json.obj(
-      "annotationTypeId" -> annotation.annotationTypeId,
-      "stringValue"      -> annotation.stringValue,
-      "numberValue"      -> annotation.numberValue
+  def annotationToJson(annotation: Annotation) = {
+    Json.obj(
+      "annotationTypeUniqueId" -> annotation.annotationTypeUniqueId,
+      "stringValue"            -> annotation.stringValue,
+      "numberValue"            -> annotation.numberValue,
+      "selectedValues"         -> annotation.selectedValues
     )
-
-    json ++ Json.obj("selectedValues" -> annotation.selectedValues.map(value => annotationOptionToJson(value)))
   }
 
 }

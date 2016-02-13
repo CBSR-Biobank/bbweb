@@ -1,7 +1,7 @@
 package org.biobank.infrastructure.command
 
 import org.biobank.infrastructure._
-import org.biobank.domain.participants._
+import org.biobank.domain.Annotation
 import org.biobank.infrastructure.JsonUtils._
 
 import Commands._
@@ -21,7 +21,7 @@ object ParticipantCommands {
   case class AddParticipantCmd(userId:      Option[String],
                                studyId:     String,
                                uniqueId:    String,
-                               annotations: List[ParticipantAnnotation])
+                               annotations: List[Annotation])
       extends ParticipantCommand
 
   case class UpdateParticipantCmd(userId:    Option[String],
@@ -29,7 +29,7 @@ object ParticipantCommands {
                                   id:              String,
                                   expectedVersion: Long,
                                   uniqueId:        String,
-                                  annotations:     List[ParticipantAnnotation])
+                                  annotations:     List[Annotation])
       extends ParticipantModifyCommand
 
   //--
@@ -48,7 +48,7 @@ object ParticipantCommands {
                                    collectionEventTypeId: String,
                                    timeCompleted:         DateTime,
                                    visitNumber:           Int,
-                                   annotations:           List[CollectionEventAnnotation])
+                                   annotations:           List[Annotation])
       extends CollectionEventCommand
 
   case class UpdateCollectionEventCmd(userId:                Option[String],
@@ -58,7 +58,7 @@ object ParticipantCommands {
                                       expectedVersion:       Long,
                                       timeCompleted:         DateTime,
                                       visitNumber:           Int,
-                                      annotations:           List[CollectionEventAnnotation])
+                                      annotations:           List[Annotation])
       extends CollectionEventModifyCommand
 
   case class RemoveCollectionEventCmd(userId:          Option[String],

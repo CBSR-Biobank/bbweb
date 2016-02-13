@@ -23,6 +23,7 @@ import play.api.test.Helpers._
 import akka.actor.ActorSystem
 import scala.concurrent.Future
 import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging._
 
 trait BbwebFakeApplication {
 
@@ -34,8 +35,18 @@ trait BbwebFakeApplication {
 
   def makeRequest(method:         String,
                   path:           String,
-                  expectedStatus: Int     = OK,
-                  json:           JsValue = JsNull): JsValue
+                  expectedStatus: Int,
+                  json:           JsValue): JsValue
+
+  def makeRequest(method:         String,
+                  path:           String,
+                  expectedStatus: Int): JsValue
+
+  def makeRequest(method: String,
+                  path:   String,
+                  json:   JsValue): JsValue
+
+  def makeRequest(method: String, path: String): JsValue
 
 }
 
@@ -54,7 +65,7 @@ abstract class ControllerFixture
     with OptionValues
     with BbwebFakeApplication {
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  val log = Logger(LoggerFactory.getLogger(this.getClass.getSimpleName))
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -102,11 +113,18 @@ abstract class ControllerFixture
                   expectedStatus: Int,
                   json:           JsValue,
                   token:          String): JsValue = {
-    val builder = new RequestBuilder().method(method).uri(path).bodyJson(json)
-    .header("X-XSRF-TOKEN", token)
-    .cookie(new play.mvc.Http.Cookie("XSRF-TOKEN", token, 10, "", "", true, true))
+    val builder = new RequestBuilder()
+      .method(method)
+      .uri(path)
+      .bodyJson(json)
+      .header("X-XSRF-TOKEN", token)
+      .cookie(new play.mvc.Http.Cookie("XSRF-TOKEN", token, 10, "", "", true, true))
 
-    log.debug(s"makeRequest: request: $method, $path, $json")
+    if (json != JsNull) {
+      log.info(s"request: $method, $path,\n${Json.prettyPrint(json)}")
+    } else {
+      log.info(s"request: $method, $path")
+    }
 
     val result = Future.successful(play.test.Helpers.route(builder).toScala)
     val resultStatus = status(result)
@@ -115,19 +133,38 @@ abstract class ControllerFixture
       case `expectedStatus` =>
         val jsonResult = contentAsJson(result)
         contentType(result) mustBe Some("application/json")
-        log.debug(s"makeRequest: status: $resultStatus, result: $jsonResult")
+        log.info(s"reply: status: $resultStatus,\nresult: ${Json.prettyPrint(jsonResult)}")
         jsonResult
       case _ =>
-        log.debug(contentAsString(result))
+        contentType(result) match {
+          case Some("application/json") => log.info("reply: " + Json.prettyPrint(contentAsJson(result)))
+          case _ => log.info("reply: " + contentAsString(result))
+        }
         fail(s"bad HTTP status: status: $resultStatus, expected: $expectedStatus")
     }
   }
 
   def makeRequest(method:         String,
                   path:           String,
-                  expectedStatus: Int     = OK,
+                  expectedStatus: Int,
                   json:           JsValue = JsNull): JsValue = {
     makeRequest(method, path, expectedStatus, json, "bbweb-test-token")
+  }
+
+  def makeRequest(method:         String,
+                  path:           String,
+                  expectedStatus: Int): JsValue = {
+    makeRequest(method, path, expectedStatus, JsNull, "bbweb-test-token")
+  }
+
+  def makeRequest(method: String,
+                  path:   String,
+                  json:   JsValue): JsValue = {
+    makeRequest(method, path, OK, json, "bbweb-test-token")
+  }
+
+  def makeRequest(method: String, path: String): JsValue = {
+    makeRequest(method, path, OK, JsNull, "bbweb-test-token")
   }
 
   // for the following getters: a new application is created for each test, therefore,
@@ -135,12 +172,9 @@ abstract class ControllerFixture
 
   def passwordHasher = app.injector.instanceOf[PasswordHasher]
 
-  def collectionEventAnnotationTypeRepository  = app.injector.instanceOf[CollectionEventAnnotationTypeRepository]
   def collectionEventTypeRepository            = app.injector.instanceOf[CollectionEventTypeRepository]
-  def participantAnnotationTypeRepository      = app.injector.instanceOf[ParticipantAnnotationTypeRepository]
   def processingTypeRepository                 = app.injector.instanceOf[ProcessingTypeRepository]
   def specimenGroupRepository                  = app.injector.instanceOf[SpecimenGroupRepository]
-  def specimenLinkAnnotationTypeRepository     = app.injector.instanceOf[SpecimenLinkAnnotationTypeRepository]
   def specimenLinkTypeRepository               = app.injector.instanceOf[SpecimenLinkTypeRepository]
   def studyRepository                          = app.injector.instanceOf[StudyRepository]
 
@@ -151,8 +185,5 @@ abstract class ControllerFixture
   def userRepository = app.injector.instanceOf[UserRepository]
 
   def centreRepository          = app.injector.instanceOf[CentreRepository]
-  def centreLocationsRepository = app.injector.instanceOf[CentreLocationsRepository]
-  def centreStudiesRepository   = app.injector.instanceOf[CentreStudiesRepository]
-  def locationRepository        = app.injector.instanceOf[LocationRepository]
 
 }

@@ -515,7 +515,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
     }
   }
 
-  val errMsgNameExists = "user with email already exists"
+  val ErrMsgNameExists = "user with email already exists"
 
   private def emailAvailable(email: String): DomainValidation[Boolean] = {
     emailAvailableMatcher(email){ item =>

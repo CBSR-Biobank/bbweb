@@ -119,8 +119,8 @@ case class SpecimenLinkType(processingTypeId:      ProcessingTypeId,
         |}""".stripMargin
 }
 
-object SpecimenLinkType extends SpecimenLinkTypeValidations with StudyAnnotationTypeValidations {
-  import org.biobank.domain.CommonValidations._
+object SpecimenLinkType extends SpecimenLinkTypeValidations {
+  //import org.biobank.domain.CommonValidations._
 
   def create(processingTypeId:      ProcessingTypeId,
              id:                    SpecimenLinkTypeId,
@@ -163,21 +163,25 @@ object SpecimenLinkType extends SpecimenLinkTypeValidations with StudyAnnotation
                        inputContainerTypeId, outputContainerTypeId, annotationTypeData)
     }
 
+    ???
+
     // these have to be in reverse order
-    validateSpecimenGroups(inputGroupId, outputGroupId) <*>
-    (validateAnnotationTypeData(annotationTypeData) <*>
-      (validateId(outputContainerTypeId, ContainerTypeIdRequired) <*>
-        (validateId(inputContainerTypeId, ContainerTypeIdRequired) <*>
-          (validateId(outputGroupId, SpecimenGroupIdRequired) <*>
-            (validateId(inputGroupId, SpecimenGroupIdRequired) <*>
-              (validatePositiveNumber(outputCount, InvalidPositiveNumber) <*>
-                (validatePositiveNumber(inputCount, InvalidPositiveNumber) <*>
-                  (validatePositiveNumber(expectedOutputChange, InvalidPositiveNumber) <*>
-                    (validatePositiveNumber(expectedInputChange, InvalidPositiveNumber) <*>
-                      (validateAndIncrementVersion(version) <*>
-                        (validateId(id, IdRequired) <*>
-                          (validateId(processingTypeId, ProcessingTypeIdRequired) map (applyFunc _).curried)
-                        )))))))))))
+    // validateSpecimenGroups(inputGroupId, outputGroupId) <*>
+    // (validateAnnotationTypeData(annotationTypeData) <*>
+    //   (validateId(outputContainerTypeId, ContainerTypeIdRequired) <*>
+    //     (validateId(inputContainerTypeId, ContainerTypeIdRequired) <*>
+    //       (validateId(outputGroupId, SpecimenGroupIdRequired) <*>
+    //         (validateId(inputGroupId, SpecimenGroupIdRequired) <*>
+    //           (validatePositiveNumber(outputCount, InvalidPositiveNumber) <*>
+    //             (validatePositiveNumber(inputCount, InvalidPositiveNumber) <*>
+    //               (validatePositiveNumber(expectedOutputChange, InvalidPositiveNumber) <*>
+    //                 (validatePositiveNumber(expectedInputChange, InvalidPositiveNumber) <*>
+    //                   (validateAndIncrementVersion(version) <*>
+    //                     (validateId(id, IdRequired) <*>
+    //                        (validateId(processingTypeId, ProcessingTypeIdRequired) map (
+    //                           SpecimenLinkType.apply _).curried)
+    //                     )))))))))))
+
   }
 
   private def validateSpecimenGroups(inputGroupId: SpecimenGroupId, outputGroupId: SpecimenGroupId)

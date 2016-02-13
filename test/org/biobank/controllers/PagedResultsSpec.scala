@@ -61,9 +61,9 @@ case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers 
   }
 
   def failWithInvalidStatus(uri: String) = {
-    val json = fakeApp.makeRequest(GET, uri + "?sort=xxx", BAD_REQUEST)
+    val json = fakeApp.makeRequest(GET, uri + "?status=xxx", BAD_REQUEST)
     (json \ "status").as[String] must include ("error")
-    (json \ "message").as[String] must include ("invalid sort field")
+    (json \ "message").as[String] must include regex ("invalid.*status")
   }
 
   def failWithNegativePageNumber(uri: String) = {

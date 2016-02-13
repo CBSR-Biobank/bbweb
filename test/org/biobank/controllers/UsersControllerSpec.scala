@@ -3,7 +3,7 @@ package org.biobank.controllers
 import org.biobank.Global
 import org.biobank.domain.user._
 import org.biobank.fixture.ControllerFixture
-import org.biobank.domain.JsonHelper._
+import org.biobank.domain.JsonHelper
 import org.biobank.service.PasswordHasher
 
 import org.joda.time.DateTime
@@ -18,7 +18,7 @@ import play.api.test._
 /**
  * Tests the REST API for [[User]].
  */
-class UsersControllerSpec extends ControllerFixture {
+class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
   def uri: String = "/users"
 

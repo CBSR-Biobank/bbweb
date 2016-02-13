@@ -1,6 +1,7 @@
 package org.biobank.domain.participants
 
 import org.biobank.domain.{
+  Annotation,
   ConcurrencySafeEntity,
   DomainValidation
 }
@@ -24,11 +25,11 @@ case class Participant(id:           ParticipantId,
                        timeAdded:    DateTime,
                        timeModified: Option[DateTime],
                        uniqueId:     String,
-                       annotations:  Set[ParticipantAnnotation])
+                       annotations:  Set[Annotation])
     extends ConcurrencySafeEntity[ParticipantId]
     with HasStudyId {
 
-  def update(uniqueId: String, annotations: Set[ParticipantAnnotation])
+  def update(uniqueId: String, annotations: Set[Annotation])
       : DomainValidation[Participant] = {
     val v = Participant.create(this.studyId,
                                this.id,
@@ -52,30 +53,29 @@ case class Participant(id:           ParticipantId,
 
 object Participant extends ParticipantValidations {
   import org.biobank.domain.CommonValidations._
-  import ParticipantAnnotation._
+  import Annotation._
 
   def create(studyId:     StudyId,
              id:          ParticipantId,
              version:     Long,
              uniqueId:    String,
-             annotations: Set[ParticipantAnnotation])
+             annotations: Set[Annotation])
       : DomainValidation[Participant] = {
 
-    def validateAnnotation(annotation: ParticipantAnnotation)
-        : DomainValidation[ParticipantAnnotation] = {
-      ParticipantAnnotation.create(annotation.annotationTypeId,
-                                   annotation.stringValue,
-                                   annotation.numberValue,
-                                   annotation.selectedValues)
+    def validateAnnotation(annotation: Annotation): DomainValidation[Annotation] = {
+      Annotation.create(annotation.annotationTypeUniqueId,
+                        annotation.stringValue,
+                        annotation.numberValue,
+                        annotation.selectedValues)
     }
 
     (validateId(id) |@|
-      validateId(studyId) |@|
-      validateAndIncrementVersion(version) |@|
-      validateString(uniqueId, UniqueIdRequired) |@|
-      annotations.toList.traverseU(validateAnnotation)) {
-      case (a1, a2, a3, a4, a5) =>
-        Participant(a1, a2, a3, DateTime.now, None, a4, a5.toSet)
+       validateId(studyId) |@|
+       validateAndIncrementVersion(version) |@|
+       validateString(uniqueId, UniqueIdRequired) |@|
+       annotations.toList.traverseU(Annotation.validate)) {
+      case (_, _, _, _, _) =>
+        Participant(id, studyId, version, DateTime.now, None, uniqueId, annotations)
     }
   }
 

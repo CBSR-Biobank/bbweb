@@ -60,26 +60,16 @@ class CollectionEventsController @javaxInject() (val authToken:      AuthToken,
       domainValidationReply(participantsService.getCollectionEventByVisitNumber(participantId, vn))
     }
 
-  def addCollectionEvent(participantId: String) =
+  def addCollectionEvent() =
     commandAction { cmd: AddCollectionEventCmd =>
-      if (cmd.participantId != participantId) {
-        Future.successful(BadRequest("participant id mismatch"))
-      } else {
-        val future = participantsService.addCollectionEvent(cmd)
-        domainValidationReply(future)
-      }
+      val future = participantsService.addCollectionEvent(cmd)
+      domainValidationReply(future)
     }
 
-  def updateCollectionEvent(participantId: String, id: String) =
+  def updateCollectionEvent() =
     commandAction { cmd: UpdateCollectionEventCmd =>
-      if (cmd.participantId != participantId) {
-        Future.successful(BadRequest("participant id mismatch"))
-      } else if (cmd.id != id) {
-        Future.successful(BadRequest("collection event id mismatch"))
-      } else {
-        val future = participantsService.updateCollectionEvent(cmd)
-        domainValidationReply(future)
-      }
+      val future = participantsService.updateCollectionEvent(cmd)
+      domainValidationReply(future)
     }
 
   def removeCollectionEvent(participantId: String, id: String, ver: Long) =

@@ -167,13 +167,14 @@ object RegisteredUser extends UserValidations {
              avatarUrl: Option[String]): DomainValidation[RegisteredUser] = {
 
     (validateId(id) |@|
-      validateAndIncrementVersion(version) |@|
-      validateString(name, NameMinLength, InvalidName) |@|
-      validateEmail(email) |@|
-      validateString(password, PasswordRequired) |@|
-      validateString(salt, SaltRequired) |@|
-      validateAvatarUrl(avatarUrl)) {
-        RegisteredUser(_, _, DateTime.now, None, _, _, _, _, _)
+       validateAndIncrementVersion(version) |@|
+       validateString(name, NameMinLength, InvalidName) |@|
+       validateEmail(email) |@|
+       validateString(password, PasswordRequired) |@|
+       validateString(salt, SaltRequired) |@|
+       validateAvatarUrl(avatarUrl)) {
+      case (_, _, _, _, _, _, _) =>
+        RegisteredUser(id, version, DateTime.now, None, name, email, password, salt, avatarUrl)
       }
   }
 

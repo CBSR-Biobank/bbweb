@@ -1,10 +1,16 @@
 package org.biobank.service.participants
 
-import org.biobank.service.Processor
+import org.biobank.service.{ Processor, Utils }
 import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.infrastructure.event.ParticipantEvents._
-import org.biobank.infrastructure.event.CommonEvents._
-import org.biobank.domain.{ AnnotationTypeId, AnnotationOption, DomainValidation, DomainError }
+import org.biobank.infrastructure.event.CommonEvents. {
+  Annotation => EventAnnotation
+}
+import org.biobank.domain.{
+  Annotation,
+  AnnotationType,
+  DomainValidation,
+  DomainError }
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 import org.biobank.domain.participants._
@@ -33,7 +39,6 @@ class ParticipantsProcessor @javaxInject() (
   @Named("specimens")        val specimensProcessor: ActorRef,
 
   val participantRepository:    ParticipantRepository,
-  val annotationTypeRepository: ParticipantAnnotationTypeRepository,
   val collectionEventRepository: CollectionEventRepository,
   val studyRepository:          StudyRepository)
     extends Processor {
@@ -133,43 +138,7 @@ class ParticipantsProcessor @javaxInject() (
     }
   }
 
-  /**
-   * Checks the following:
-   *
-   *   - no more than one annotation per annotation type
-   *   - that each required annotation is present
-   *   - that all annotations belong to the same study as the annotation type.
-   *
-   * A DomainError is the result if these conditions fail.
-   */
-  private def validateAnnotationTypes(studyId: StudyId, annotations: Set[ParticipantAnnotation])
-      : DomainValidation[Boolean]= {
-    val annotAnnotTypeIdsAsSet = annotations.map(v => v.annotationTypeId).toSet
-    val annotAnnotTypeIdsAsList = annotations.toList.map(v => v.annotationTypeId).toList
-
-    if (annotAnnotTypeIdsAsSet.size != annotAnnotTypeIdsAsList.size) {
-      DomainError("duplicate annotation types in annotations").failureNel
-    } else {
-      val requiredAnnotTypeIds = annotationTypeRepository.getValues.filter(at =>
-        at.studyId.equals(studyId) && at.required).map(at => at.id).toSet
-
-      if (requiredAnnotTypeIds.intersect(annotAnnotTypeIdsAsSet).size != requiredAnnotTypeIds.size) {
-        DomainError("missing required annotation type(s)").failureNel
-      } else {
-        val invalidSet = annotAnnotTypeIdsAsSet.map { id =>
-          (id -> annotationTypeRepository.withId(studyId, id).isSuccess)
-        }.filter(x => !x._2).map(_._1)
-
-        if (! invalidSet.isEmpty) {
-          DomainError("annotation type(s) do not belong to study: " + invalidSet.mkString(", ")).failureNel
-        } else {
-          true.success
-        }
-      }
-    }
-  }
-
-  private def processAddParticipantCmd(cmd: AddParticipantCmd): Unit = {
+private def processAddParticipantCmd(cmd: AddParticipantCmd): Unit = {
     val studyId = StudyId(cmd.studyId)
     val participantId = participantRepository.nextIdentity
 
@@ -180,7 +149,8 @@ class ParticipantsProcessor @javaxInject() (
     val event = for {
       study             <- studyRepository.getEnabled(studyId)
       uniqueIdAvailable <- uniqueIdAvailable(cmd.uniqueId)
-      annotTypes        <- validateAnnotationTypes(studyId, cmd.annotations.toSet)
+      annotTypes        <- Annotation.validateAnnotations(study.annotationTypes,
+                                                          cmd.annotations.toSet)
       newParticip       <- Participant.create(studyId,
                                               participantId,
                                               -1L,
@@ -190,7 +160,7 @@ class ParticipantsProcessor @javaxInject() (
         ParticipantAddedEvent(
           studyId       = Some(newParticip.studyId.id),
           uniqueId      = Some(cmd.uniqueId),
-          annotations   = convertAnnotationsToEvent(cmd.annotations))).success
+          annotations   = Utils.convertAnnotationsToEvent(cmd.annotations))).success
     } yield event
 
     process(event) { applyParticipantAddedEvent(_) }
@@ -204,7 +174,7 @@ class ParticipantsProcessor @javaxInject() (
     val event = for {
       study             <- studyRepository.getEnabled(studyId)
       uniqueIdAvailable <- uniqueIdAvailable(cmd.uniqueId, participantId)
-      annotTypes        <- validateAnnotationTypes(studyId, annotationsSet)
+      annotTypes        <- Annotation.validateAnnotations(study.annotationTypes, annotationsSet)
       particip          <- participantRepository.getByKey(participantId)
       newParticip       <- Participant.create(studyId,
                                               participantId,
@@ -216,7 +186,7 @@ class ParticipantsProcessor @javaxInject() (
           studyId       = Some(newParticip.studyId.id),
           version       = Some(newParticip.version),
           uniqueId      = Some(cmd.uniqueId),
-          annotations   = convertAnnotationsToEvent(cmd.annotations))).success
+          annotations   = Utils.convertAnnotationsToEvent(cmd.annotations))).success
     } yield event
 
     process(event){ applyParticipantUpdatedEvent(_) }
@@ -235,7 +205,7 @@ class ParticipantsProcessor @javaxInject() (
                     timeAdded    = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
                     timeModified = None,
                     uniqueId     = addedEvent.getUniqueId,
-                    annotations  = convertAnnotationsFromEvent(addedEvent.annotations)))
+                    annotations  = Utils.convertAnnotationsFromEvent(addedEvent.annotations)))
       ()
     } else {
       log.error(s"invalid event type: $event")
@@ -258,42 +228,13 @@ class ParticipantsProcessor @javaxInject() (
             p.copy(version      = updatedEvent.getVersion,
                    uniqueId     = updatedEvent.getUniqueId,
                    timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
-                   annotations  = convertAnnotationsFromEvent(updatedEvent.annotations)))
+                   annotations  = Utils.convertAnnotationsFromEvent(updatedEvent.annotations)))
           ()
         }
       )
     } else {
       log.error(s"invalid event type: $event")
     }
-  }
-
-  private def convertAnnotationsToEvent(annotations: List[ParticipantAnnotation])
-      : Seq[Annotation] = {
-    annotations.map { annot =>
-      Annotation(
-        annotationTypeId = Some(annot.annotationTypeId.id),
-        stringValue      = annot.stringValue,
-        numberValue      = annot.numberValue,
-        selectedValues   = annot.selectedValues.map(_.value)
-      )
-    }
-  }
-
-  private def convertAnnotationsFromEvent(annotations: Seq[Annotation])
-      : Set[ParticipantAnnotation] = {
-    annotations.map { eventAnnot =>
-      ParticipantAnnotation(
-        annotationTypeId = AnnotationTypeId(eventAnnot.getAnnotationTypeId),
-        stringValue      = eventAnnot.stringValue,
-        numberValue      = eventAnnot.numberValue,
-        selectedValues   = eventAnnot.selectedValues.map { selectedValue =>
-          AnnotationOption(
-            annotationTypeId = AnnotationTypeId(eventAnnot.getAnnotationTypeId),
-            value            = selectedValue
-          )
-        } toList
-      )
-    } toSet
   }
 
 }

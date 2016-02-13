@@ -1,14 +1,20 @@
 package org.biobank.infrastructure.event;
 
+import "CommonEvents.proto";
+
 message CentreAddedEvent {
    optional string name        = 1;
    optional string description = 2;
 }
 
-message CentreUpdatedEvent {
+message CentreNameUpdatedEvent {
    optional int64  version     = 1;
    optional string name        = 2;
-   optional string description = 3;
+}
+
+message CentreDescriptionUpdatedEvent {
+   optional int64  version     = 1;
+   optional string description = 2;
 }
 
 message CentreEnabledEvent {
@@ -20,26 +26,23 @@ message CentreDisabledEvent {
 }
 
 message CentreLocationAddedEvent {
-   optional string locationId     = 1;
-   optional string name           = 2;
-   optional string street         = 3;
-   optional string city           = 4;
-   optional string province       = 5;
-   optional string postalCode     = 6;
-   optional string poBoxNumber    = 7;
-   optional string countryIsoCode = 8;
+   optional int64    version  = 1;
+   optional Location location = 2;
 }
 
 message CentreLocationRemovedEvent {
-   optional string locationId = 1;
+   optional int64  version    = 1;
+   optional string locationId = 2;
 }
 
 message StudyAddedToCentreEvent {
-   optional string studyId  = 1;
+   optional int64  version  = 1;
+   optional string studyId  = 2;
 }
 
 message StudyRemovedFromCentreEvent {
-   optional string studyId  = 1;
+   optional int64  version  = 1;
+   optional string studyId  = 2;
 }
 
 message CentreEvent {
@@ -48,13 +51,14 @@ message CentreEvent {
    optional string time   = 3;
 
    oneof event_type {
-      CentreAddedEvent            added           = 4;
-      CentreUpdatedEvent          updated         = 5;
-      CentreEnabledEvent          enabled         = 6;
-      CentreDisabledEvent         disabled        = 7;
-      CentreLocationAddedEvent    locationAdded   = 8;
-      CentreLocationRemovedEvent  locationRemoved = 9;
-      StudyAddedToCentreEvent     studyAdded      = 10;
-      StudyRemovedFromCentreEvent studyRemoved    = 11;
+      CentreAddedEvent              added              = 4;
+      CentreNameUpdatedEvent        nameUpdated        = 5;
+      CentreDescriptionUpdatedEvent descriptionUpdated = 6;
+      CentreEnabledEvent            enabled            = 7;
+      CentreDisabledEvent           disabled           = 8;
+      CentreLocationAddedEvent      locationAdded      = 9;
+      CentreLocationRemovedEvent    locationRemoved    = 10;
+      StudyAddedToCentreEvent       studyAdded         = 11;
+      StudyRemovedFromCentreEvent   studyRemoved       = 12;
    }
 }

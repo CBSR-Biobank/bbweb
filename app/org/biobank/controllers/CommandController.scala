@@ -1,7 +1,7 @@
 package org.biobank.controllers
 
 import org.biobank.service.users.UsersService
-import org.biobank.domain.{ DomainValidation }
+import org.biobank.domain.DomainValidation
 import org.biobank.domain.user.UserId
 import org.biobank.service.AuthToken
 import org.biobank.infrastructure.command.Commands._
@@ -20,11 +20,11 @@ trait CommandController extends Controller with Security {
 
   implicit val usersService: UsersService
 
-  def commandAction[A, T <: Command](func: T => Future[Result])(implicit reads: Reads[T]) = {
+  def commandAction[T <: Command](additionalJson: JsObject)(func: T => Future[Result])
+                   (implicit reads: Reads[T]): Action[JsValue] = {
     AuthActionAsync(parse.json) { (token, userId, request) =>
-      val jsonWithUserId = request.body.as[JsObject] ++ Json.obj("userId" -> userId.id)
-      val cmdResult = jsonWithUserId.validate[T]
-      cmdResult.fold(
+      val jsonCmd = request.body.as[JsObject] ++ additionalJson ++ Json.obj("userId" -> userId.id)
+      jsonCmd.validate[T].fold(
         errors => {
           Future.successful(
             BadRequest(Json.obj("status" ->"error", "message" -> JsError.toJson(errors))))
@@ -35,6 +35,11 @@ trait CommandController extends Controller with Security {
         }
       )
     }
+  }
+
+  def commandAction[T <: Command](func: T => Future[Result])
+                   (implicit reads: Reads[T]): Action[JsValue] = {
+    commandAction(Json.obj()) { cmd: T => func(cmd) }
   }
 
   def commandAction[A, T <: Command](numFields: Integer)(func: T => Future[Result])
@@ -97,15 +102,15 @@ trait JsonController extends Controller {
 
   }
 
-  protected def domainValidationReply[T]
-    (validation: DomainValidation[T])(implicit writes: Writes[T])
-      : Result = {
+  protected def domainValidationReply[T](validation: DomainValidation[T])
+                                     (implicit writes: Writes[T]): Result = {
     validation.fold(
       err => {
         Log.trace("*** ERROR ***: " + err.list.toList.mkString(", "))
         val errMsgs = err.list.toList.mkString(", ")
-        if (("does not exist".r.findAllIn(errMsgs).length > 0)
-          || ("invalid.*id".r.findAllIn(errMsgs).length > 0)){
+        if ((("with id not found").r.findAllIn(errMsgs).length > 0)
+              || ("does not exist".r.findAllIn(errMsgs).length > 0)
+              || ("invalid.*id".r.findAllIn(errMsgs).length > 0)) {
           NotFound(errMsgs)
         } else if (errMsgs.contains("already exists")) {
           Forbidden(errMsgs)
@@ -120,9 +125,8 @@ trait JsonController extends Controller {
     )
   }
 
-  protected def domainValidationReply[T]
-    (future: Future[DomainValidation[T]])(implicit writes: Writes[T])
-      : Future[Result] =
+  protected def domainValidationReply[T](future: Future[DomainValidation[T]])
+                                     (implicit writes: Writes[T]): Future[Result] =
     future.map { validation => domainValidationReply(validation) }
 
 }

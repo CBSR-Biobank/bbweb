@@ -27,14 +27,20 @@ sealed trait Centre
     with HasUniqueName
     with HasDescriptionOption {
 
+  val studyIds: Set[StudyId]
+
+  val locations: Set[Location]
+
   override def toString =
     s"""|${this.getClass.getSimpleName}: {
-        |  id: $id,
-        |  version: $version,
-        |  timeAdded: $timeAdded,
+        |  id:           $id,
+        |  version:      $version,
+        |  timeAdded:    $timeAdded,
         |  timeModified: $timeModified,
-        |  name: $name,
-        |  description: $description
+        |  name:         $name,
+        |  description:  $description,
+        |  studyIds:     $studyIds,
+        |  locations:    $locations
         |}""".stripMargin
 
 }
@@ -49,6 +55,8 @@ object Centre {
       "timeModified" -> centre.timeModified,
       "name"         -> centre.name,
       "description"  -> centre.description,
+      "studyIds"     -> centre.studyIds,
+      "locations"    -> centre.locations,
       "status"       -> centre.getClass.getSimpleName
     )
   }
@@ -69,6 +77,8 @@ trait CentreValidations {
   val NameMinLength = 2
 
   case object InvalidName extends ValidationKey
+
+  case object InvalidStudyId extends ValidationKey
 }
 
 
@@ -84,24 +94,71 @@ case class DisabledCentre(id:           CentreId,
                           timeAdded:    DateTime,
                           timeModified: Option[DateTime],
                           name:         String,
-                          description:  Option[String])
+                          description:  Option[String],
+                          studyIds:     Set[StudyId],
+                          locations:    Set[Location])
     extends Centre with CentreValidations {
   import org.biobank.domain.CommonValidations._
 
   /** Used to change the name. */
   def withName(name: String): DomainValidation[DisabledCentre] = {
-    validateString(name, NameMinLength, InvalidName) fold (
-      err => err.failure,
-      c   => copy(version = version + 1, name = name).success
-    )
+    validateString(name, NameMinLength, InvalidName) map { _ =>
+      copy(name         = name,
+           version      = version + 1,
+           timeModified = Some(DateTime.now))
+    }
   }
 
   /** Used to change the description. */
   def withDescription(description: Option[String]): DomainValidation[DisabledCentre] = {
-    validateNonEmptyOption(description, InvalidDescription) fold (
-      err => err.failure,
-      c   => copy(version = version + 1, description = description).success
-    )
+    validateNonEmptyOption(description, InvalidDescription) map { _ =>
+      copy(description  = description,
+           version      = version + 1,
+           timeModified = Some(DateTime.now))
+    }
+  }
+
+  /** Associates a study to this centre. Nothing happens if the studyId is already associated. */
+  def withStudyId(studyId: StudyId): DomainValidation[DisabledCentre] = {
+    validateId(studyId, InvalidStudyId).map { _ =>
+      copy(studyIds     = studyIds + studyId,
+           version      = version + 1,
+           timeModified = Some(DateTime.now))
+
+    }
+  }
+
+  /** Removes a study from this centre. */
+  def removeStudyId(studyId: StudyId): DomainValidation[DisabledCentre] = {
+    studyIds.find { x => x == studyId }.fold {
+      DomainError(s"studyId not associated with centre: $studyId").failureNel[DisabledCentre]
+    } { _ =>
+      copy(studyIds     = studyIds - studyId,
+           version      = version + 1,
+           timeModified = Some(DateTime.now)).success
+    }
+  }
+
+  /** adds a location to this centre. */
+  def withLocation(location: Location): DomainValidation[DisabledCentre] = {
+    Location.validate(location).map { _ =>
+      // replaces previous annotation type with same unique id
+      copy(locations    = locations - location + location,
+           version      = version + 1,
+           timeModified = Some(DateTime.now))
+    }
+  }
+
+  /** removes a location from this centre. */
+  def removeLocation(locationUniqueId: String): DomainValidation[DisabledCentre] = {
+    locations.find { x => x.uniqueId == locationUniqueId }.fold {
+      DomainError(s"location does not exist: $locationUniqueId")
+        .failureNel[DisabledCentre]
+    } { location =>
+      copy(locations    = locations - location,
+           version      = version + 1,
+           timeModified = Some(DateTime.now)).success
+    }
   }
 
   /** Used to enable a centre after it has been configured, or had configuration changes made on it. */
@@ -111,7 +168,9 @@ case class DisabledCentre(id:           CentreId,
                   timeAdded    = this.timeAdded,
                   timeModified = this.timeModified,
                   name         = this.name,
-                  description  = this.description).success
+                  description  = this.description,
+                  studyIds     = this.studyIds,
+                  locations    = this.locations).success
   }
 }
 
@@ -129,13 +188,21 @@ object DisabledCentre extends CentreValidations {
   def create(id:          CentreId,
              version:     Long,
              name:        String,
-             description: Option[String]): DomainValidation[DisabledCentre] = {
+             description: Option[String],
+             studyIds:     Set[StudyId],
+             locations:    Set[Location]): DomainValidation[DisabledCentre] = {
+
+    def validateStudyId(studyId: StudyId) = validateId(studyId, InvalidStudyId)
+
     (validateId(id) |@|
-      validateAndIncrementVersion(version) |@|
-      validateString(name, NameMinLength, InvalidName) |@|
-      validateNonEmptyOption(description, InvalidDescription)) {
-        DisabledCentre(_, _, DateTime.now, None, _, _)
-      }
+       validateAndIncrementVersion(version) |@|
+       validateString(name, NameMinLength, InvalidName) |@|
+       validateNonEmptyOption(description, InvalidDescription) |@|
+       studyIds.toList.traverseU(validateStudyId) |@|
+       locations.toList.traverseU(Location.validate)) {
+      case (_, validVersion, _, _, _, _) =>
+        DisabledCentre(id, validVersion, DateTime.now, None, name, description, studyIds, locations)
+    }
   }
 }
 
@@ -150,7 +217,9 @@ case class EnabledCentre(id:           CentreId,
                          timeAdded:    DateTime,
                          timeModified: Option[DateTime],
                          name:         String,
-                         description:  Option[String])
+                         description:  Option[String],
+                         studyIds:     Set[StudyId],
+                         locations:    Set[Location])
     extends Centre {
 
   def disable(): DomainValidation[DisabledCentre] = {
@@ -159,6 +228,8 @@ case class EnabledCentre(id:           CentreId,
                    timeAdded    = this.timeAdded,
                    timeModified = this.timeModified,
                    name         = this.name,
-                   description  = this.description).success
+                   description  = this.description,
+                   studyIds     = this.studyIds,
+                   locations    = this.locations).success
   }
 }

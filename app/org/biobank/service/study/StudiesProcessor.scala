@@ -1,9 +1,15 @@
 package org.biobank.service.study
 
 import org.biobank.service.Processor
+import org.biobank.domain.{
+  AnnotationType,
+  AnnotationValueType,
+  DomainValidation,
+  DomainError
+}
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.domain.{ DomainValidation, DomainError }
+import org.biobank.infrastructure.event.EventUtils
 import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 import org.biobank.TestData
@@ -33,11 +39,7 @@ object StudiesProcessor {
  */
 class StudiesProcessor @javax.inject.Inject() (
   @Named("collectionEventType")        val collectionEventTypeProcessor:        ActorRef,
-  @Named("ceventAnnotationType")       val ceventAnnotationTypeProcessor:       ActorRef,
-  @Named("participantAnnotationType")  val participantAnnotationTypeProcessor:  ActorRef,
   @Named("processingType")             val processingTypeProcessor:             ActorRef,
-  @Named("specimenGroup")              val specimenGroupProcessor:              ActorRef,
-  @Named("specimenLinkAnnotationType") val specimenLinkAnnotationTypeProcessor: ActorRef,
   @Named("specimenLinkType")           val specimenLinkTypeProcessor:           ActorRef,
 
   val studyRepository:               StudyRepository,
@@ -45,9 +47,8 @@ class StudiesProcessor @javax.inject.Inject() (
   val specimenGroupRepository:       SpecimenGroupRepository,
   val collectionEventTypeRepository: CollectionEventTypeRepository,
   val testData:                      TestData)
-    extends Processor {
-  import org.biobank.infrastructure.event.StudyEventsUtil._
-  import StudyEvent.EventType
+    extends Processor
+    with StudyServiceErrorMessages {
 
   override def persistenceId = "study-processor-id"
 
@@ -58,13 +59,16 @@ class StudiesProcessor @javax.inject.Inject() (
    * processed to recreate the current state of the aggregate.
    */
   val receiveRecover: Receive = {
-    case event: StudyEvent => event.eventType match {
-      case et: EventType.Added     => applyStudyAddedEvent(event)
-      case et: EventType.Updated   => applyStudyUpdatedEvent(event)
-      case et: EventType.Enabled   => applyStudyEnabledEvent(event)
-      case et: EventType.Disabled  => applyStudyDisabledEvent(event)
-      case et: EventType.Retired   => applyStudyRetiredEvent(event)
-      case et: EventType.Unretired => applyStudyUnretiredEvent(event)
+    case event: StudyEvent2 => event.eventType match {
+      case et: StudyEvent2.EventType.Added                 => applyStudyAddedEvent(event)
+      case et: StudyEvent2.EventType.NameUpdated           => applyStudyNameUpdatedEvent(event)
+      case et: StudyEvent2.EventType.DescriptionUpdated    => applyStudyDescriptionUpdatedEvent(event)
+      case et: StudyEvent2.EventType.AnnotationTypeAdded   => applyParticipantAnnotationTypeAddedEvent(event)
+      case et: StudyEvent2.EventType.AnnotationTypeRemoved => applyParticipantAnnotationTypeRemovedEvent(event)
+      case et: StudyEvent2.EventType.Enabled               => applyStudyEnabledEvent(event)
+      case et: StudyEvent2.EventType.Disabled              => applyStudyDisabledEvent(event)
+      case et: StudyEvent2.EventType.Retired               => applyStudyRetiredEvent(event)
+      case et: StudyEvent2.EventType.Unretired             => applyStudyUnretiredEvent(event)
 
       case event => log.error(s"event not handled: $event")
     }
@@ -81,7 +85,6 @@ class StudiesProcessor @javax.inject.Inject() (
    *
    *  - [[CeventAnnotationTypeProcessor]]
    *  - [[CollectionEventTypeProcessor]]
-   *  - [[ParticipantAnnotationTypeProcessor]]
    *  - [[ProcessingTypeProcessor]]
    *  - [[SpecimenGroupProcessor]]
    *  - [[SpecimenLinkAnnotationTypeProcessor]]
@@ -90,14 +93,17 @@ class StudiesProcessor @javax.inject.Inject() (
    *  - [[StudyAnnotationTypeProcessor]]
    */
   val receiveCommand: Receive = {
-    case cmd: StudyCommandWithStudyId => validateAndForward(cmd)
-    case cmd: SpecimenLinkTypeCommand => validateAndForward(cmd)
-    case cmd: AddStudyCmd             => processAddStudyCmd(cmd)
-    case cmd: UpdateStudyCmd          => processUpdateStudyCmd(cmd)
-    case cmd: EnableStudyCmd          => processEnableStudyCmd(cmd)
-    case cmd: DisableStudyCmd         => processDisableStudyCmd(cmd)
-    case cmd: RetireStudyCmd          => processRetireStudyCmd(cmd)
-    case cmd: UnretireStudyCmd        => processUnretireStudyCmd(cmd)
+    case cmd: StudyCommandWithStudyId            => validateAndForward(cmd)
+    case cmd: SpecimenLinkTypeCommand            => validateAndForward(cmd)
+    case cmd: AddStudyCmd                        => processAddStudyCmd(cmd)
+    case cmd: UpdateStudyNameCmd                 => processUpdateStudyNameCmd(cmd)
+    case cmd: UpdateStudyDescriptionCmd          => processUpdateStudyDescriptionCmd(cmd)
+    case cmd: UpdateStudyAddAnnotationTypeCmd    => processAddAnnotationTypeCmd(cmd)
+    case cmd: UpdateStudyRemoveAnnotationTypeCmd => processRemoveAnnotationTypeCmd(cmd)
+    case cmd: EnableStudyCmd                     => processEnableStudyCmd(cmd)
+    case cmd: DisableStudyCmd                    => processDisableStudyCmd(cmd)
+    case cmd: RetireStudyCmd                     => processRetireStudyCmd(cmd)
+    case cmd: UnretireStudyCmd                   => processUnretireStudyCmd(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(studyRepository.getValues.toSet))
@@ -110,28 +116,15 @@ class StudiesProcessor @javax.inject.Inject() (
     cmd match {
       case cmd: StudyCommandWithStudyId =>
         studyRepository.getByKey(StudyId(cmd.studyId)).fold(
-          err => context.sender ! DomainError(s"invalid study id: ${cmd.studyId}").failureNel,
+          err => context.sender ! DomainError(s"$StudyNotFound: ${cmd.studyId}").failureNel,
           study => study match {
             case study: DisabledStudy => {
               val childActor = cmd match {
-                case _: SpecimenGroupCommand                 => specimenGroupProcessor
-                case _: CollectionEventTypeCommand           => collectionEventTypeProcessor
-                case _: ProcessingTypeCommand                => processingTypeProcessor
-                case _: SpecimenLinkTypeCommand              => specimenLinkTypeProcessor
+                  case _: CollectionEventTypeCommand => collectionEventTypeProcessor
+                  case _: ProcessingTypeCommand      => processingTypeProcessor
+                  case _: SpecimenLinkTypeCommand    => specimenLinkTypeProcessor
 
-                case _: AddCollectionEventAnnotationTypeCmd
-                  | _: UpdateCollectionEventAnnotationTypeCmd
-                  | _: RemoveCollectionEventAnnotationTypeCmd => ceventAnnotationTypeProcessor
-
-                case _: AddParticipantAnnotationTypeCmd
-                  | _: UpdateParticipantAnnotationTypeCmd
-                  | _: RemoveParticipantAnnotationTypeCmd => participantAnnotationTypeProcessor
-
-                case _: AddSpecimenLinkAnnotationTypeCmd
-                  | _: UpdateSpecimenLinkAnnotationTypeCmd
-                  | _: RemoveSpecimenLinkAnnotationTypeCmd => specimenLinkAnnotationTypeProcessor
-
-              }
+                }
               childActor forward cmd
             }
             case study => context.sender ! DomainError(s"study is not disabled: studyId: ${study.id}").failureNel
@@ -140,9 +133,9 @@ class StudiesProcessor @javax.inject.Inject() (
 
       case cmd: SpecimenLinkTypeCommand =>
         val validation = for {
-          processingType <- processingTypeRepository.getByKey(ProcessingTypeId(cmd.processingTypeId))
-          study <- studyRepository.getByKey(processingType.studyId)
-        } yield study
+            processingType <- processingTypeRepository.getByKey(ProcessingTypeId(cmd.processingTypeId))
+            study <- studyRepository.getByKey(processingType.studyId)
+          } yield study
 
         validation.fold(
           err => context.sender ! err.failure,
@@ -160,93 +153,148 @@ class StudiesProcessor @javax.inject.Inject() (
     val studyId = studyRepository.nextIdentity
 
     if (studyRepository.getByKey(studyId).isSuccess) {
-      log.error(s"study with id already exsits: $studyId")
+      log.error(s"$StudyAlreadyExists: $studyId")
     }
 
-    val v = for {
-      nameAvailable <- nameAvailable(cmd.name)
-      newStudy <- DisabledStudy.create(studyId,
-                                       -1L,
-                                       cmd.name,
-                                       cmd.description)
-      event <- createStudyEvent(newStudy.id, cmd).withAdded(
-        StudyAddedEvent(
-          name        = Some(newStudy.name),
-          description = newStudy.description)).success
-      } yield event
+    val v = (nameAvailable(cmd.name) |@|
+               DisabledStudy.create(studyId, -1L, cmd.name, cmd.description, Set.empty)) {
+        case (_, study) =>
+          StudyEvent2(study.id.id).update(
+            _.optionalUserId            := cmd.userId,
+            _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
+            _.added.name                := cmd.name,
+            _.added.optionalDescription := cmd.description)
+      }
 
     process(v) { applyStudyAddedEvent(_) }
   }
 
-  private def processUpdateStudyCmd(cmd: UpdateStudyCmd): Unit = {
-    val v = updateDisabled(cmd) { s =>
-      for {
-        nameAvailable <- nameAvailable(cmd.name, StudyId(cmd.id))
-        study1 <- s.withName(cmd.name)
-        study2 <- study1.withDescription(cmd.description)
-        event <- createStudyEvent(study2.id, cmd).withUpdated(
-          StudyUpdatedEvent(
-            version     = Some(study2.version),
-            name        = Some(study2.name),
-            description = study2.description)).success
-      } yield event
-    }
+  private def processUpdateStudyNameCmd(cmd: UpdateStudyNameCmd): Unit = {
+    val v = updateDisabled(cmd) { study =>
+        (nameAvailable(cmd.name, StudyId(cmd.id)) |@|
+           study.withName(cmd.name)) { case (_, _) =>
+            StudyEvent2(study.id.id).update(
+              _.optionalUserId      := cmd.userId,
+              _.time                := ISODateTimeFormat.dateTime.print(DateTime.now),
+              _.nameUpdated.version := cmd.expectedVersion,
+              _.nameUpdated.name    := cmd.name)
+        }
+      }
 
-    process(v){ applyStudyUpdatedEvent(_) }
+    process(v){ applyStudyNameUpdatedEvent(_) }
+  }
+
+  private def processUpdateStudyDescriptionCmd(cmd: UpdateStudyDescriptionCmd): Unit = {
+    val v = updateDisabled(cmd) { study =>
+        study.withDescription(cmd.description).map { _ =>
+          StudyEvent2(study.id.id).update(
+            _.optionalUserId                         := cmd.userId,
+            _.time                                   := ISODateTimeFormat.dateTime.print(DateTime.now),
+            _.descriptionUpdated.version             := cmd.expectedVersion,
+            _.descriptionUpdated.optionalDescription := cmd.description)
+        }
+      }
+
+    process(v){ applyStudyDescriptionUpdatedEvent(_) }
+  }
+
+  private def processAddAnnotationTypeCmd(cmd: UpdateStudyAddAnnotationTypeCmd): Unit = {
+    val v = updateDisabled(cmd) { study =>
+        for {
+          annotationType <- {
+            // need to call AnnotationType.create so that a new uniqueId is generated
+            AnnotationType.create(cmd.name,
+                                  cmd.description,
+                                  cmd.valueType,
+                                  cmd.maxValueCount,
+                                  cmd.options,
+                                  cmd.required)
+          }
+          updatedStudy <- study.withParticipantAnnotationType(annotationType)
+        } yield StudyEvent2(study.id.id).update(
+          _.optionalUserId                     := cmd.userId,
+          _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.annotationTypeAdded.version        := cmd.expectedVersion,
+          _.annotationTypeAdded.annotationType := EventUtils.annotationTypeToEvent(annotationType))
+      }
+
+    process(v){ applyParticipantAnnotationTypeAddedEvent(_) }
+  }
+
+  private def processRemoveAnnotationTypeCmd(cmd: UpdateStudyRemoveAnnotationTypeCmd): Unit = {
+    val v = updateDisabled(cmd) { study =>
+        study.removeParticipantAnnotationType(cmd.uniqueId) map { s =>
+          StudyEvent2(study.id.id).update(
+            _.optionalUserId                 := cmd.userId,
+            _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
+            _.annotationTypeRemoved.version  := cmd.expectedVersion,
+            _.annotationTypeRemoved.uniqueId := cmd.uniqueId)
+        }
+      }
+    process(v){ applyParticipantAnnotationTypeRemovedEvent(_) }
   }
 
   private def processEnableStudyCmd(cmd: EnableStudyCmd): Unit = {
-    val studyId = StudyId(cmd.id)
-    val specimenGroupCount = specimenGroupRepository.allForStudy(studyId).size
-    val collectionEventtypeCount = collectionEventTypeRepository.allForStudy(studyId).size
-    val v = updateDisabled(cmd) { s =>
-      for {
-        study <- s.enable(specimenGroupCount, collectionEventtypeCount)
-        event <- createStudyEvent(study.id, cmd).withEnabled(
-          StudyEnabledEvent(version = Some(study.version))).success
-      } yield event
-    }
+    val v = updateDisabled(cmd) { study =>
+        val collectionEventTypes = collectionEventTypeRepository.allForStudy(study.id)
+
+        if (collectionEventTypes.isEmpty) {
+          DomainError("no collection event types").failureNel[StudyEvent2]
+        } else if (collectionEventTypes.filter { cet => cet.hasSpecimenSpecs }.isEmpty) {
+          DomainError("no collection specimen specs").failureNel[StudyEvent2]
+        } else {
+          study.enable.map { _ =>
+            StudyEvent2(study.id.id).update(
+              _.optionalUserId  := cmd.userId,
+              _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
+              _.enabled.version := cmd.expectedVersion)
+          }
+        }
+      }
+
     process(v) { applyStudyEnabledEvent(_) }
   }
 
   private def processDisableStudyCmd(cmd: DisableStudyCmd): Unit = {
-    val v = updateEnabled(cmd) { s =>
-      for {
-        study <- s.disable
-        event <- createStudyEvent(study.id, cmd).withDisabled(
-          StudyDisabledEvent(version = Some(study.version))).success
-      } yield event
-    }
+    val v = updateEnabled(cmd) {  study =>
+        study.disable map { _ =>
+          StudyEvent2(study.id.id).update(
+            _.optionalUserId   := cmd.userId,
+            _.time             := ISODateTimeFormat.dateTime.print(DateTime.now),
+            _.disabled.version := cmd.expectedVersion)
+        }
+      }
     process(v){ applyStudyDisabledEvent(_) }
   }
 
   private def processRetireStudyCmd(cmd: RetireStudyCmd): Unit = {
-    val v = updateDisabled(cmd) { s =>
-      for {
-        study <- s.retire
-        event <- createStudyEvent(study.id, cmd).withRetired(
-          StudyRetiredEvent(version = Some(study.version))).success
-      } yield event
-    }
+    val v = updateDisabled(cmd) { study =>
+        study.retire map { _ =>
+          StudyEvent2(study.id.id).update(
+            _.optionalUserId  := cmd.userId,
+            _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
+            _.retired.version := cmd.expectedVersion)
+        }
+      }
     process(v){ applyStudyRetiredEvent(_) }
   }
 
   private def processUnretireStudyCmd(cmd: UnretireStudyCmd): Unit = {
-    val v = updateRetired(cmd) { s =>
-      for {
-        study <- s.unretire()
-        event <- createStudyEvent(study.id, cmd).withUnretired(
-          StudyUnretiredEvent(version = Some(study.version))).success
-      } yield event
-    }
+    val v = updateRetired(cmd) { study =>
+        study.unretire map { _ =>
+          StudyEvent2(study.id.id).update(
+            _.optionalUserId    := cmd.userId,
+            _.time              := ISODateTimeFormat.dateTime.print(DateTime.now),
+            _.unretired.version := cmd.expectedVersion)
+        }
+      }
     process(v) { applyStudyUnretiredEvent(_) }
   }
 
-  def updateStudy
-    (cmd: StudyModifyCommand)(fn: Study => DomainValidation[StudyEvent])
-      : DomainValidation[StudyEvent] = {
+  def updateStudy(cmd: StudyModifyCommand)(fn: Study => DomainValidation[StudyEvent2])
+      : DomainValidation[StudyEvent2] = {
     studyRepository.getByKey(StudyId(cmd.id)).fold(
-      err => DomainError(s"invalid study id: ${cmd.id}").failureNel,
+      err => DomainError(s"$StudyNotFound: ${cmd.id}").failureNel,
       study => for {
         validVersion <-  study.requireVersion(cmd.expectedVersion)
         updatedStudy <- fn(study)
@@ -254,172 +302,245 @@ class StudiesProcessor @javax.inject.Inject() (
     )
   }
 
-  def updateDisabled
-    (cmd: StudyModifyCommand)(fn: DisabledStudy => DomainValidation[StudyEvent])
-      : DomainValidation[StudyEvent] = {
+  def updateDisabled(cmd: StudyModifyCommand)(fn: DisabledStudy => DomainValidation[StudyEvent2])
+      : DomainValidation[StudyEvent2] = {
     updateStudy(cmd) {
       case study: DisabledStudy => fn(study)
-      case study => s"$study for $cmd is not disabled".failureNel
+      case study => s"study is not disabled: ${study.id}".failureNel
     }
   }
 
-  def updateEnabled
-    (cmd: StudyModifyCommand)(fn: EnabledStudy => DomainValidation[StudyEvent])
-      : DomainValidation[StudyEvent] = {
+  def updateEnabled(cmd: StudyModifyCommand)(fn: EnabledStudy => DomainValidation[StudyEvent2])
+      : DomainValidation[StudyEvent2] = {
     updateStudy(cmd) {
       case study: EnabledStudy => fn(study)
-      case study => s"$study for $cmd is not enabled".failureNel
+      case study => s"study is not enabled: ${study.id}".failureNel
     }
   }
 
-  def updateRetired
-    (cmd: StudyModifyCommand)(fn: RetiredStudy => DomainValidation[StudyEvent])
-      : DomainValidation[StudyEvent] = {
+  def updateRetired(cmd: StudyModifyCommand)(fn: RetiredStudy => DomainValidation[StudyEvent2])
+      : DomainValidation[StudyEvent2] = {
     updateStudy(cmd) {
       case study: RetiredStudy => fn(study)
-      case study => s"$study for $cmd is not retired".failureNel
+      case study => s"study is not retired: ${study.id}".failureNel
     }
   }
 
-  private def applyStudyAddedEvent(event: StudyEvent) : Unit = {
-    if (event.eventType.isAdded) {
+  def onValidEventStudyAndVersion(event: StudyEvent2,
+                                  eventType: Boolean,
+                                  eventVersion: Long)
+                                 (fn: Study => Unit): Unit = {
+    if (!eventType) {
+      log.error(s"invalid event type: $event")
+    } else {
+      studyRepository.getByKey(StudyId(event.id)).fold(
+        err => log.error(s"study from event does not exist: $err"),
+        study => {
+          if (study.version != eventVersion) {
+            log.error(s"event version check failed: study version: ${study.version}, event: $event")
+          } else {
+            fn(study)
+          }
+        }
+      )
+    }
+  }
+
+  def onValidEventDisabledStudyAndVersion(event: StudyEvent2,
+                                          eventType: Boolean,
+                                          eventVersion: Long)
+                                         (fn: DisabledStudy => Unit): Unit = {
+    onValidEventStudyAndVersion(event, eventType, eventVersion) {
+      case study: DisabledStudy => fn(study)
+      case study => log.error(s"$study for $event is not disabled")
+    }
+  }
+
+  def onValidEventEnabledStudyAndVersion(event: StudyEvent2,
+                                         eventType: Boolean,
+                                         eventVersion: Long)
+                                        (fn: EnabledStudy => Unit): Unit = {
+    onValidEventStudyAndVersion(event, eventType, eventVersion) {
+      case study: EnabledStudy => fn(study)
+      case study => log.error(s"$study for $event is not disabled")
+    }
+  }
+
+  def onValidEventRetiredStudyAndVersion(event: StudyEvent2,
+                                         eventType: Boolean,
+                                         eventVersion: Long)
+                                        (fn: RetiredStudy => Unit): Unit = {
+    onValidEventStudyAndVersion(event, eventType, eventVersion) {
+      case study: RetiredStudy => fn(study)
+      case study => log.error(s"$study for $event is not disabled")
+    }
+  }
+
+  private def applyStudyAddedEvent(event: StudyEvent2): Unit = {
+    if (!event.eventType.isAdded) {
+      log.error(s"invalid event type: $event")
+    } else {
       val addedEvent = event.getAdded
 
-      studyRepository.put(
-        DisabledStudy(id           = StudyId(event.id),
-                      version      = 0L,
-                      timeAdded    = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
-                      timeModified = None,
-                      name         = addedEvent.getName,
-                      description  = addedEvent.description))
-      ()
-    } else {
-      log.error(s"invalid event type: $event")
+      DisabledStudy.create(id                         = StudyId(event.id),
+                           version                    = -1L,
+                           name                       = addedEvent.getName,
+                           description                = addedEvent.description,
+                           annotationTypes = Set.empty
+      ).fold (
+        err => log.error(s"could not add study from event: $event"),
+        s => {
+          studyRepository.put(
+            s.copy(timeAdded = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)))
+          ()
+        }
+      )
     }
   }
 
-  private def applyStudyUpdatedEvent(event: StudyEvent) : Unit = {
-    if (event.eventType.isUpdated) {
-      val updatedEvent = event.getUpdated
+  private def applyStudyNameUpdatedEvent(event: StudyEvent2) : Unit = {
+    onValidEventDisabledStudyAndVersion(event,
+                                        event.eventType.isNameUpdated,
+                                        event.getNameUpdated.getVersion) { study =>
+      val nameUpdatedEvent = event.getNameUpdated
 
-      studyRepository.getDisabled(StudyId(event.id)).fold(
+      study.withName(nameUpdatedEvent.getName).fold(
         err => log.error(s"updating study from event failed: $err"),
         s => {
           studyRepository.put(
-            s.copy(version      = updatedEvent.getVersion,
-                   timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
-                   name         = updatedEvent.getName,
-                   description  = updatedEvent.description))
+            s.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
           ()
         }
       )
-    } else {
-      log.error(s"invalid event type: $event")
     }
   }
 
-  private def applyStudyEnabledEvent(event: StudyEvent) : Unit = {
-    if (event.eventType.isEnabled) {
-      val enabledEvent = event.getEnabled
+  private def applyStudyDescriptionUpdatedEvent(event: StudyEvent2) : Unit = {
+    onValidEventDisabledStudyAndVersion(event,
+                                        event.eventType.isDescriptionUpdated,
+                                        event.getDescriptionUpdated.getVersion) { study =>
+      val descriptionUpdatedEvent = event.getDescriptionUpdated
 
-      studyRepository.getDisabled(StudyId(event.id)).fold(
-        err => log.error(s"enabling study from event failed: $err"),
+      study.withDescription(descriptionUpdatedEvent.description).fold(
+        err => log.error(s"updating study from event failed: $err"),
         s => {
           studyRepository.put(
-            EnabledStudy(
-              id           = s.id,
-              version      = enabledEvent.getVersion,
-              timeAdded    = s.timeAdded,
-              timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
-              name         = s.name,
-              description  = s.description))
+            s.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
           ()
         }
       )
-    } else {
-      log.error(s"invalid event type: $event")
     }
   }
 
-  private def applyStudyDisabledEvent(event: StudyEvent) : Unit = {
-    if (event.eventType.isDisabled) {
-      val disabledEvent = event.getDisabled
+  private def applyParticipantAnnotationTypeAddedEvent(event: StudyEvent2) : Unit = {
+    onValidEventDisabledStudyAndVersion(event,
+                                        event.eventType.isAnnotationTypeAdded,
+                                        event.getAnnotationTypeAdded.getVersion) { study =>
+      val eventAnnotationType = event.getAnnotationTypeAdded.getAnnotationType
 
-      studyRepository.getEnabled(StudyId(event.id)).fold(
-        err => log.error(s"disabling study from event failed: $err"),
+      study.withParticipantAnnotationType(
+        AnnotationType(eventAnnotationType.getUniqueId,
+                       eventAnnotationType.getName,
+                       eventAnnotationType.description,
+                       AnnotationValueType.withName(eventAnnotationType.getValueType),
+                       eventAnnotationType.maxValueCount,
+                       eventAnnotationType.options,
+                       eventAnnotationType.getRequired)).fold(
+        err => log.error(s"updating study from event failed: $err"),
         s => {
           studyRepository.put(
-            DisabledStudy(
-              id           = s.id,
-              version      = disabledEvent.getVersion,
-              timeAdded    = s.timeAdded,
-              timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
-              name         = s.name,
-              description  = s.description))
+            s.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
           ()
         }
       )
-    } else {
-      log.error(s"invalid event type: $event")
     }
   }
 
-  private def applyStudyRetiredEvent(event: StudyEvent) : Unit = {
-    if (event.eventType.isRetired) {
-      val retiredEvent = event.getRetired
+  private def applyParticipantAnnotationTypeRemovedEvent(event: StudyEvent2) : Unit = {
+    onValidEventDisabledStudyAndVersion(event,
+                                        event.eventType.isAnnotationTypeRemoved,
+                                        event.getAnnotationTypeRemoved.getVersion) { study =>
+      val removedEvent = event.getAnnotationTypeRemoved
 
-      studyRepository.getDisabled(StudyId(event.id)).fold(
-        err => log.error(s"retiring study from event failed: $err"),
+      study.removeParticipantAnnotationType(removedEvent.getUniqueId).fold(
+        err => log.error(s"updating study from event failed: $err"),
         s => {
           studyRepository.put(
-            RetiredStudy(
-              id           = s.id,
-              version      = retiredEvent.getVersion,
-              timeAdded    = s.timeAdded,
-              timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
-              name         = s.name,
-              description  = s.description))
+            s.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
           ()
         }
       )
-    } else {
-      log.error(s"invalid event type: $event")
     }
   }
 
-  private def applyStudyUnretiredEvent(event: StudyEvent) : Unit = {
-    if (event.eventType.isUnretired) {
-      val unretiredEvent = event.getUnretired
-
-      studyRepository.getRetired(StudyId(event.id)).fold(
-        err => log.error(s"disabling study from event failed: $err"),
+  private def applyStudyEnabledEvent(event: StudyEvent2) : Unit = {
+    onValidEventDisabledStudyAndVersion(event,
+                                        event.eventType.isEnabled,
+                                        event.getEnabled.getVersion) { study =>
+      study.enable.fold(
+        err => log.error(s"updating study from event failed: $err"),
         s => {
           studyRepository.put(
-            DisabledStudy(
-              id           = s.id,
-              version      = unretiredEvent.getVersion,
-              timeAdded    = s.timeAdded,
-              timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
-              name         = s.name,
-              description  = s.description))
+            s.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
           ()
         }
       )
-    } else {
-      log.error(s"invalid event type: $event")
     }
   }
 
-  val errMsgNameExists = "study with name already exists"
+  private def applyStudyDisabledEvent(event: StudyEvent2) : Unit = {
+    onValidEventEnabledStudyAndVersion(event,
+                                       event.eventType.isDisabled,
+                                       event.getDisabled.getVersion) { study =>
+      study.disable.fold(
+        err => log.error(s"updating study from event failed: $err"),
+        s => {
+          studyRepository.put(
+            s.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
+          ()
+        }
+      )
+    }
+  }
+
+  private def applyStudyRetiredEvent(event: StudyEvent2) : Unit = {
+    onValidEventDisabledStudyAndVersion(event,
+                                        event.eventType.isRetired,
+                                        event.getRetired.getVersion) { study =>
+      study.retire.fold(
+        err => log.error(s"updating study from event failed: $err"),
+        s => {
+          studyRepository.put(
+            s.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
+          ()
+        }
+      )
+    }
+  }
+
+  private def applyStudyUnretiredEvent(event: StudyEvent2) : Unit = {
+    onValidEventRetiredStudyAndVersion(event,
+                                       event.eventType.isUnretired,
+                                       event.getUnretired.getVersion) { study =>
+      study.unretire.fold(
+        err => log.error(s"updating study from event failed: $err"),
+        s => {
+          studyRepository.put(
+            s.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
+          ()
+        }
+      )
+    }
+  }
 
   private def nameAvailable(name: String): DomainValidation[Boolean] = {
-    nameAvailableMatcher(name, studyRepository, errMsgNameExists){ item =>
+    nameAvailableMatcher(name, studyRepository, ErrMsgNameExists){ item =>
       item.name == name
     }
   }
 
   private def nameAvailable(name: String, excludeStudyId: StudyId): DomainValidation[Boolean] = {
-    nameAvailableMatcher(name, studyRepository, errMsgNameExists){ item =>
+    nameAvailableMatcher(name, studyRepository, ErrMsgNameExists){ item =>
       (item.name == name) && (item.id != excludeStudyId)
     }
   }

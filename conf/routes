@@ -8,10 +8,6 @@
 # Home page
 GET     /                                      @org.biobank.controllers.Application.index
 
-# studies
-GET     /studies                               @org.biobank.controllers.study.StudiesController.list(filter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
-POST    /studies                               @org.biobank.controllers.study.StudiesController.add
-
 # value objects
 GET     /studies/counts                        @org.biobank.controllers.study.StudiesController.studyCounts()
 GET     /studies/valuetypes                    @org.biobank.controllers.study.StudiesController.valueTypes
@@ -21,106 +17,96 @@ GET     /studies/preservtypes                  @org.biobank.controllers.study.St
 GET     /studies/preservtemptypes              @org.biobank.controllers.study.StudiesController.preservTempTypes
 GET     /studies/sgvaluetypes                  @org.biobank.controllers.study.StudiesController.specimenGroupValueTypes
 
+# collection event types
+GET     /studies/cetypes/:studyId                              @org.biobank.controllers.study.CeventTypeController.get(studyId, cetId: Option[String])
+POST    /studies/cetypes/:studyId                              @org.biobank.controllers.study.CeventTypeController.add(studyId)
+DELETE  /studies/cetypes/:studyId/:id/:ver                     @org.biobank.controllers.study.CeventTypeController.remove(studyId, id, ver: Long)
+POST    /studies/cetypes/name/:id                              @org.biobank.controllers.study.CeventTypeController.updateName(id)
+POST    /studies/cetypes/description/:id                       @org.biobank.controllers.study.CeventTypeController.updateDescription(id)
+POST    /studies/cetypes/recurring/:id                         @org.biobank.controllers.study.CeventTypeController.updateRecurring(id)
+POST    /studies/cetypes/spcspec/:id                           @org.biobank.controllers.study.CeventTypeController.addSpecimenSpec(id)
+DELETE  /studies/cetypes/spcspec/:studyId/:id/:ver/:uniqueId   @org.biobank.controllers.study.CeventTypeController.removeSpecimenSpec(studyId, id, ver: Long, uniqueId)
+POST    /studies/cetypes/annottype/:id                         @org.biobank.controllers.study.CeventTypeController.addAnnotationType(id)
+DELETE  /studies/cetypes/annottype/:studyId/:id/:ver/:uniqueId @org.biobank.controllers.study.CeventTypeController.removeAnnotationType(studyId, id, ver: Long, uniqueId)
+
+# processing types
+GET     /studies/proctypes/:studyId             @org.biobank.controllers.study.ProcessingTypeController.get(studyId, procTypeId: Option[String])
+POST    /studies/proctypes                      @org.biobank.controllers.study.ProcessingTypeController.addProcessingType
+PUT     /studies/proctypes                      @org.biobank.controllers.study.ProcessingTypeController.updateProcessingType
+DELETE  /studies/proctypes/:studyId/:id/:ver    @org.biobank.controllers.study.ProcessingTypeController.removeProcessingType(studyId, id, ver: Long)
+
+# specimen link types
+GET     /studies/proctypes/sltypes/:procTypeId            @org.biobank.controllers.study.SpecimenLinkTypeController.get(procTypeId, sltId: Option[String])
+POST    /studies/proctypes/sltypes                        @org.biobank.controllers.study.SpecimenLinkTypeController.addSpecimenLinkType
+PUT     /studies/proctypes/sltypes                        @org.biobank.controllers.study.SpecimenLinkTypeController.updateSpecimenLinkType
+DELETE  /studies/proctypes/sltypes/:procTypeId/:id/:ver   @org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(procTypeId, id, ver: Long)
+
 # Study DTOs
 GET     /studies/names                          @org.biobank.controllers.study.StudiesController.listNames(filter: String ?= "", order: String ?= "asc")
 
-GET     /studies/:id                           @org.biobank.controllers.study.StudiesController.query(id)
-PUT     /studies/:id                           @org.biobank.controllers.study.StudiesController.update(id)
-POST    /studies/:id/enable                    @org.biobank.controllers.study.StudiesController.enable(id)
-POST    /studies/:id/disable                   @org.biobank.controllers.study.StudiesController.disable(id)
-POST    /studies/:id/retire                    @org.biobank.controllers.study.StudiesController.retire(id)
-POST    /studies/:id/unretire                  @org.biobank.controllers.study.StudiesController.unretire(id)
-
-# specimen groups
-GET     /studies/:studyId/sgroups              @org.biobank.controllers.study.SpecimenGroupController.get(studyId, sgId: Option[String])
-POST    /studies/:studyId/sgroups              @org.biobank.controllers.study.SpecimenGroupController.addSpecimenGroup(studyId)
-PUT     /studies/:studyId/sgroups/:id          @org.biobank.controllers.study.SpecimenGroupController.updateSpecimenGroup(studyId, id)
-DELETE  /studies/:studyId/sgroups/:id/:ver     @org.biobank.controllers.study.SpecimenGroupController.removeSpecimenGroup(studyId, id, ver: Long)
-GET     /studies/:studyId/sgroups/inuse        @org.biobank.controllers.study.SpecimenGroupController.getInUse(studyId, sgId: Option[String])
-
-# collection event types
-GET     /studies/:studyId/cetypes              @org.biobank.controllers.study.CeventTypeController.get(studyId, cetId: Option[String])
-POST    /studies/:studyId/cetypes              @org.biobank.controllers.study.CeventTypeController.addCollectionEventType(studyId)
-PUT     /studies/:studyId/cetypes/:id          @org.biobank.controllers.study.CeventTypeController.updateCollectionEventType(studyId, id)
-DELETE  /studies/:studyId/cetypes/:id/:ver     @org.biobank.controllers.study.CeventTypeController.removeCollectionEventType(studyId, id, ver: Long)
-
-## collection event annotation types
-GET     /studies/:studyId/ceannottypes          @org.biobank.controllers.study.CeventAnnotTypeController.get(studyId, annotTypeId: Option[String])
-POST    /studies/:studyId/ceannottypes          @org.biobank.controllers.study.CeventAnnotTypeController.addAnnotationType(studyId)
-PUT     /studies/:studyId/ceannottypes/:id      @org.biobank.controllers.study.CeventAnnotTypeController.updateAnnotationType(studyId, id)
-DELETE  /studies/:studyId/ceannottypes/:id/:ver @org.biobank.controllers.study.CeventAnnotTypeController.removeAnnotationType(studyId, id, ver: Long)
-
-# participant annotation types
-GET     /studies/:studyId/pannottypes           @org.biobank.controllers.study.ParticipantAnnotTypeController.get(studyId, annotTypeId: Option[String])
-POST    /studies/:studyId/pannottypes           @org.biobank.controllers.study.ParticipantAnnotTypeController.addAnnotationType(studyId)
-PUT     /studies/:studyId/pannottypes/:id       @org.biobank.controllers.study.ParticipantAnnotTypeController.updateAnnotationType(studyId, id)
-DELETE  /studies/:studyId/pannottypes/:id/:ver  @org.biobank.controllers.study.ParticipantAnnotTypeController.removeAnnotationType(studyId, id, ver: Long)
-
-# specimenlink annotation types
-GET     /studies/:studyId/slannottypes          @org.biobank.controllers.study.SpecimenLinkAnnotTypeController.get(studyId, annotTypeId: Option[String])
-POST    /studies/:studyId/slannottypes          @org.biobank.controllers.study.SpecimenLinkAnnotTypeController.addAnnotationType(studyId)
-PUT     /studies/:studyId/slannottypes/:id      @org.biobank.controllers.study.SpecimenLinkAnnotTypeController.updateAnnotationType(studyId, id)
-DELETE  /studies/:studyId/slannottypes/:id/:ver @org.biobank.controllers.study.SpecimenLinkAnnotTypeController.removeAnnotationType(studyId, id, ver: Long)
-
-# processing types
-GET     /studies/:studyId/proctypes             @org.biobank.controllers.study.ProcessingTypeController.get(studyId, procTypeId: Option[String])
-POST    /studies/:studyId/proctypes             @org.biobank.controllers.study.ProcessingTypeController.addProcessingType(studyId)
-PUT     /studies/:studyId/proctypes/:id         @org.biobank.controllers.study.ProcessingTypeController.updateProcessingType(studyId, id)
-DELETE  /studies/:studyId/proctypes/:id/:ver    @org.biobank.controllers.study.ProcessingTypeController.removeProcessingType(studyId, id, ver: Long)
-
-# specimen link types
-GET     /studies/:procTypeId/sltypes            @org.biobank.controllers.study.SpecimenLinkTypeController.get(procTypeId, slTypeId: Option[String])
-POST    /studies/:procTypeId/sltypes            @org.biobank.controllers.study.SpecimenLinkTypeController.addSpecimenLinkType(procTypeId)
-PUT     /studies/:procTypeId/sltypes/:id        @org.biobank.controllers.study.SpecimenLinkTypeController.updateSpecimenLinkType(procTypeId, id)
-DELETE  /studies/:procTypeId/sltypes/:id/:ver   @org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(procTypeId, id, ver: Long)
+# studies
+GET     /studies                                @org.biobank.controllers.study.StudiesController.list(filter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
+POST    /studies                                @org.biobank.controllers.study.StudiesController.add
+GET     /studies/:id                            @org.biobank.controllers.study.StudiesController.query(id)
+POST    /studies/name/:id                       @org.biobank.controllers.study.StudiesController.updateName(id)
+POST    /studies/description/:id                @org.biobank.controllers.study.StudiesController.updateDescription(id)
+POST    /studies/pannottype/:id                 @org.biobank.controllers.study.StudiesController.addAnnotationType(id)
+DELETE  /studies/pannottype/:id/:ver/:uniqueId  @org.biobank.controllers.study.StudiesController.removeAnnotationType(id, ver: Long, uniqueId)
+POST    /studies/enable/:id                     @org.biobank.controllers.study.StudiesController.enable(id)
+POST    /studies/disable/:id                    @org.biobank.controllers.study.StudiesController.disable(id)
+POST    /studies/retire/:id                     @org.biobank.controllers.study.StudiesController.retire(id)
+POST    /studies/unretire/:id                   @org.biobank.controllers.study.StudiesController.unretire(id)
 
 # collection events - order matters: this section must be before participants
+GET     /participants/cevents/list/:participantId             @org.biobank.controllers.participants.CollectionEventsController.list(participantId, sort: String ?= "visitNumber", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
+GET     /participants/cevents/visitNumber/:participantId/:vn  @org.biobank.controllers.participants.CollectionEventsController.getByVisitNumber(participantId, vn: Int)
 GET     /participants/cevents/:participantId                  @org.biobank.controllers.participants.CollectionEventsController.get(participantId, ceventId: String)
-GET     /participants/cevents/:participantId/list             @org.biobank.controllers.participants.CollectionEventsController.list(participantId, sort: String ?= "visitNumber", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
-GET     /participants/cevents/:participantId/visitNumber/:vn  @org.biobank.controllers.participants.CollectionEventsController.getByVisitNumber(participantId, vn: Int)
-POST    /participants/cevents/:participantId                  @org.biobank.controllers.participants.CollectionEventsController.addCollectionEvent(participantId)
-PUT     /participants/cevents/:participantId/:id              @org.biobank.controllers.participants.CollectionEventsController.updateCollectionEvent(participantId, id)
+POST    /participants/cevents                                 @org.biobank.controllers.participants.CollectionEventsController.addCollectionEvent
+PUT     /participants/cevents                                 @org.biobank.controllers.participants.CollectionEventsController.updateCollectionEvent
 DELETE  /participants/cevents/:participantId/:id/:ver         @org.biobank.controllers.participants.CollectionEventsController.removeCollectionEvent(participantId, id, ver: Long)
 
 # participants
-GET     /participants/:studyId/uniqueId/:id     @org.biobank.controllers.participants.ParticipantsController.getByUniqueId(studyId, id: String)
+GET     /participants/uniqueId/:studyId/:id     @org.biobank.controllers.participants.ParticipantsController.getByUniqueId(studyId, id: String)
 GET     /participants/:studyId/:id              @org.biobank.controllers.participants.ParticipantsController.get(studyId, id: String)
-POST    /participants/:studyId                  @org.biobank.controllers.participants.ParticipantsController.addParticipant(studyId)
-PUT     /participants/:studyId/:id              @org.biobank.controllers.participants.ParticipantsController.updateParticipant(studyId, id)
-
-# centres
-GET     /centres                                @org.biobank.controllers.centres.CentresController.list(filter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
-GET     /centres/counts                         @org.biobank.controllers.centres.CentresController.centreCounts()
-POST    /centres                                @org.biobank.controllers.centres.CentresController.add
-GET     /centres/:id                            @org.biobank.controllers.centres.CentresController.query(id)
-PUT     /centres/:id                            @org.biobank.controllers.centres.CentresController.update(id)
-POST    /centres/:id/enable                     @org.biobank.controllers.centres.CentresController.enable(id)
-POST    /centres/:id/disable                    @org.biobank.controllers.centres.CentresController.disable(id)
+POST    /participants                           @org.biobank.controllers.participants.ParticipantsController.addParticipant
+PUT     /participants                           @org.biobank.controllers.participants.ParticipantsController.updateParticipant
 
 # centre location
-GET     /centres/:centreId/locations            @org.biobank.controllers.centres.CentresController.getLocations(centreId, locationId: Option[String])
-POST    /centres/:centreId/locations            @org.biobank.controllers.centres.CentresController.addLocation(centreId)
-DELETE  /centres/:centreId/locations/:id        @org.biobank.controllers.centres.CentresController.removeLocation(centreId, id)
+POST    /centres/locations/:centreId                   @org.biobank.controllers.centres.CentresController.addLocation(centreId)
+DELETE  /centres/locations/:centreId/:ver/:locationId  @org.biobank.controllers.centres.CentresController.removeLocation(centreId, ver: Long, locationId)
 
 # centre to study link
-GET     /centres/:centreId/studies              @org.biobank.controllers.centres.CentresController.getStudies(centreId)
-POST    /centres/:centreId/studies/:studyId     @org.biobank.controllers.centres.CentresController.addStudy(centreId, studyId)
-DELETE  /centres/:centreId/studies/:studyId     @org.biobank.controllers.centres.CentresController.removeStudy(centreId, studyId)
+POST    /centres/studies/:centreId               @org.biobank.controllers.centres.CentresController.addStudy(centreId)
+DELETE  /centres/studies/:centreId/:ver/:studyId @org.biobank.controllers.centres.CentresController.removeStudy(centreId, ver: Long, studyId)
+
+# centres
+GET     /centres/counts                         @org.biobank.controllers.centres.CentresController.centreCounts()
+GET     /centres/:id                            @org.biobank.controllers.centres.CentresController.query(id)
+GET     /centres                                @org.biobank.controllers.centres.CentresController.list(filter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
+POST    /centres                                @org.biobank.controllers.centres.CentresController.add
+POST    /centres/name/:id                       @org.biobank.controllers.centres.CentresController.updateName(id)
+POST    /centres/description/:id                @org.biobank.controllers.centres.CentresController.updateDescription(id)
+POST    /centres/studies/:id                    @org.biobank.controllers.centres.CentresController.addStudy(id)
+POST    /centres/locations/:id                  @org.biobank.controllers.centres.CentresController.addLocation(id)
+POST    /centres/enable/:id                     @org.biobank.controllers.centres.CentresController.enable(id)
+POST    /centres/disable/:id                    @org.biobank.controllers.centres.CentresController.disable(id)
+DELETE  /centres/studies/:id/:ver/:studyId      @org.biobank.controllers.centres.CentresController.removeStudy(id, ver: Long, studyId)
+DELETE  /centres/locations/:id/:ver/:uniqueId   @org.biobank.controllers.centres.CentresController.removeLocation(id, ver: Long, uniqueId)
 
 # Users
 GET     /users/counts                           @org.biobank.controllers.UsersController.userCounts()
 GET     /users                                  @org.biobank.controllers.UsersController.list(nameFilter: String ?= "", emailFilter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
 POST    /users                                  @org.biobank.controllers.UsersController.registerUser()
 GET     /users/:id                              @org.biobank.controllers.UsersController.user(id)
-PUT     /users/:id/name                         @org.biobank.controllers.UsersController.updateName(id)
-PUT     /users/:id/email                        @org.biobank.controllers.UsersController.updateEmail(id)
-PUT     /users/:id/password                     @org.biobank.controllers.UsersController.updatePassword(id)
-PUT     /users/:id/avatarurl                    @org.biobank.controllers.UsersController.updateAvatarUrl(id)
-POST    /users/:id/activate                     @org.biobank.controllers.UsersController.activateUser(id)
-POST    /users/:id/lock                         @org.biobank.controllers.UsersController.lockUser(id)
-POST    /users/:id/unlock                       @org.biobank.controllers.UsersController.unlockUser(id)
+PUT     /users/name                             @org.biobank.controllers.UsersController.updateName
+PUT     /users/email                            @org.biobank.controllers.UsersController.updateEmail
+PUT     /users/password                         @org.biobank.controllers.UsersController.updatePassword
+PUT     /users/avatarurl                        @org.biobank.controllers.UsersController.updateAvatarUrl
+POST    /users/activate                         @org.biobank.controllers.UsersController.activateUser
+POST    /users/lock                             @org.biobank.controllers.UsersController.lockUser
+POST    /users/unlock                           @org.biobank.controllers.UsersController.unlockUser
 
-GET     /users/:id/studies                      @org.biobank.controllers.UsersController.userStudies(id, query: Option[String], sort: Option[String], order: Option[String])
+GET     /users/studies/:id                      @org.biobank.controllers.UsersController.userStudies(id, query: Option[String], sort: Option[String], order: Option[String])
 
 # Authentication
 GET     /authenticate                           @org.biobank.controllers.UsersController.authenticateUser()
@@ -129,9 +115,7 @@ POST    /logout                                 @org.biobank.controllers.UsersCo
 POST    /passreset                              @org.biobank.controllers.UsersController.passwordReset()
 
 # DTOs
-GET     /studies/:studyId/dto/collection        @org.biobank.controllers.study.StudiesController.getCollectionDto(studyId)
-GET     /studies/:studyId/dto/processing        @org.biobank.controllers.study.StudiesController.getProcessingDto(studyId)
 GET     /counts                                 @org.biobank.controllers.Application.aggregateCounts()
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file                         controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file                           controllers.Assets.versioned(path="/public", file: Asset)

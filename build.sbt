@@ -58,7 +58,7 @@ testOptions in Test := Nil
 
 (testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/report")
 
-(testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-oDF")
+(testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-oDS")
 
 resolvers ++= Seq(
   Classpaths.sbtPluginReleases,
@@ -72,17 +72,16 @@ libraryDependencies ++= Seq(
   cache,
   filters,
   ( "com.typesafe.akka"         %% "akka-persistence"                   % "2.4.1" % "compile" ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
-  "com.typesafe.akka"         %% "akka-persistence-query-experimental" % "2.4.1",
-  "org.mongodb"               %% "casbah"                              % "2.8.2"             % "compile",
-  "com.github.scullxbones"    %% "akka-persistence-mongo-casbah"       % "1.1.9"             % "compile",
-  "com.typesafe.akka"         %% "akka-remote"                         % "2.4.1"             % "compile",
-  "com.typesafe.akka"         %% "akka-slf4j"                          % "2.4.1"             % "compile",
-  "org.scala-stm"             %% "scala-stm"                           % "0.7"               % "compile",
-  "org.scalaz"                %% "scalaz-core"                         % "7.2.0"             % "compile",
-  "org.iq80.leveldb"          % "leveldb"                              % "0.7",
-  "org.fusesource.leveldbjni" % "leveldbjni-all"                       % "1.8",
-  "com.github.t3hnar"         %% "scala-bcrypt"                        % "2.5",
-  "com.typesafe.play"         %% "play-mailer"                         % "3.0.1",
+  "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.1",
+  "com.typesafe.akka"           %% "akka-remote"                         % "2.4.1"             % "compile",
+  "com.typesafe.akka"           %% "akka-slf4j"                          % "2.4.1"             % "compile",
+  "org.scala-stm"               %% "scala-stm"                           % "0.7"               % "compile",
+  "org.scalaz"                  %% "scalaz-core"                         % "7.2.0"             % "compile",
+  "org.iq80.leveldb"            % "leveldb"                              % "0.7",
+  "org.fusesource.leveldbjni"   % "leveldbjni-all"                       % "1.8",
+  "com.github.t3hnar"           %% "scala-bcrypt"                        % "2.5",
+  "com.typesafe.play"           %% "play-mailer"                         % "3.0.1",
+  "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.1.0",
   // WebJars infrastructure
   ( "org.webjars"               %% "webjars-play"                       % "2.4.0-1").exclude("org.webjars", "requirejs"),
   // WebJars dependencies
@@ -99,11 +98,12 @@ libraryDependencies ++= Seq(
   "org.webjars"               %  "momentjs"                            % "2.11.1",
   "org.webjars.bower"         % "angular-utils-ui-breadcrumbs"         % "0.2.1",
   // Testing
-  "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "1.2.0"              % "test",
+  "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "1.2.5"              % "test",
   "com.typesafe.akka"         %% "akka-testkit"                        % "2.4.1"              % "test",
-  "com.github.nscala-time"    %% "nscala-time"                         % "2.6.0"              % "test",
-  "org.scalatestplus"         %% "play"                                % "1.4.0-M4"           % "test",
-  "org.pegdown"               % "pegdown"                              % "1.6.0"              % "test"
+  "com.github.nscala-time"    %% "nscala-time"                         % "2.8.0"              % "test",
+  "org.scalatestplus"         %% "play"                                % "1.4.0"              % "test",
+  "org.pegdown"               %  "pegdown"                             % "1.6.0"              % "test",
+  "org.codehaus.janino"       %  "janino"                              % "2.6.1"              % "test"
 )
 
 routesGenerator := InjectedRoutesGenerator

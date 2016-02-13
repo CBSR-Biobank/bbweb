@@ -36,7 +36,7 @@ object ContainerSchemaPosition extends ContainerSchemaPositionValidations {
     (validateId(id) |@|
       validateId(schemaId, InvalidContainerSchemaId) |@|
       validateString(label, LabelMinLength, InvalidLabel)) {
-      ContainerSchemaPosition(_, _, _)
+      case (_, _, _) => ContainerSchemaPosition(id, schemaId, label)
     }
   }
 

@@ -15,9 +15,7 @@ trait SpecimenLinkTypeRepository extends ReadWriteRepository [SpecimenLinkTypeId
 
   def allForProcessingType(processingTypeId: ProcessingTypeId): Set[SpecimenLinkType]
 
-  def specimenGroupCanBeUpdated(specimenGroupId: SpecimenGroupId): Boolean
-
-  def annotationTypeInUse(annotationType: SpecimenLinkAnnotationType): Boolean
+  def specimenSpecCanBeUpdated(specimenGroupId: SpecimenGroupId): Boolean
 
 }
 
@@ -51,13 +49,9 @@ class SpecimenLinkTypeRepositoryImpl
     getValues.filter(x => x.processingTypeId == processingTypeId).toSet
   }
 
-  def specimenGroupCanBeUpdated(specimenGroupId: SpecimenGroupId): Boolean = {
+  def specimenSpecCanBeUpdated(specimenGroupId: SpecimenGroupId): Boolean = {
     getValues.exists(slType =>
       (slType.inputGroupId == specimenGroupId) || (slType.outputGroupId == specimenGroupId))
   }
 
-  def annotationTypeInUse(annotationType: SpecimenLinkAnnotationType): Boolean = {
-    getValues.exists(slType =>
-      slType.annotationTypeData.exists(atd => atd.annotationTypeId == annotationType.id.id))
-  }
 }

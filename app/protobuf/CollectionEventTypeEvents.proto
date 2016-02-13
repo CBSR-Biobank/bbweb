@@ -1,0 +1,72 @@
+package org.biobank.infrastructure.event;
+
+import "CommonEvents.proto";
+
+message CollectionEventTypeEvent {
+
+   message Added {
+      optional string name        = 1;
+      optional string description = 2;
+      optional bool   recurring   = 3;
+   }
+
+   message Removed {
+      optional int64  version     = 1;
+   }
+
+   message NameUpdated {
+      optional int64  version     = 1;
+      optional string name        = 2;
+   }
+
+   message DescriptionUpdated {
+      optional int64  version     = 1;
+      optional string description = 3;
+   }
+
+   message RecurringUpdated {
+      optional int64 version   = 1;
+      optional bool  recurring = 2;
+   }
+
+   message CetAnnotationTypeAdded {
+      optional int64               version        = 1;
+      optional AnnotationTypeAdded annotationType = 2;
+   };
+
+   message SpecimenSpecAdded {
+      optional int64  version                     = 1;
+      optional string uniqueId                    = 2;
+      optional string name                        = 3;
+      optional string description                 = 4;
+      optional string units                       = 5;
+      optional string anatomicalSourceType        = 6;
+      optional string preservationType            = 7;
+      optional string preservationTemperatureType = 8;
+      optional string specimenType                = 9;
+      optional int32  maxCount                    = 10;
+      optional double amount                      = 11;
+  }
+
+   message SpecimenSpecRemoved {
+      optional int64  version  = 1;
+      optional string uniqueId = 2;
+   }
+
+   required string id      = 1;
+   optional string studyId = 2;
+   optional string userId  = 3;
+   optional string time    = 4;
+
+   oneof event_type {
+      Added                  added                 = 5;
+      Removed                removed               = 6;
+      NameUpdated            nameUpdated           = 7;
+      DescriptionUpdated     descriptionUpdated    = 8;
+      RecurringUpdated       recurringUpdated      = 9;
+      CetAnnotationTypeAdded annotationTypeAdded   = 10;
+      AnnotationTypeRemoved  annotationTypeRemoved = 11;
+      SpecimenSpecAdded      specimenSpecAdded     = 12;
+      SpecimenSpecRemoved    specimenSpecRemoved   = 13;
+   }
+}

@@ -197,27 +197,27 @@ class UsersController @javaxInject() (val authToken:      AuthToken,
     )
   }
 
-  def updateName(id: String) =  commandAction { cmd: UpdateUserNameCmd =>
+  def updateName() =  commandAction { cmd: UpdateUserNameCmd =>
     val future = usersService.updateName(cmd)
     domainValidationReply(future)
   }
 
-  def updateEmail(id: String) =  commandAction { cmd: UpdateUserEmailCmd =>
+  def updateEmail() =  commandAction { cmd: UpdateUserEmailCmd =>
     val future = usersService.updateEmail(cmd)
     domainValidationReply(future)
   }
 
-  def updatePassword(id: String) =  commandAction { cmd: UpdateUserPasswordCmd =>
+  def updatePassword() =  commandAction { cmd: UpdateUserPasswordCmd =>
     val future = usersService.updatePassword(cmd)
     domainValidationReply(future)
   }
 
-  def updateAvatarUrl(id: String) =  commandAction { cmd: UpdateUserAvatarUrlCmd =>
+  def updateAvatarUrl() =  commandAction { cmd: UpdateUserAvatarUrlCmd =>
     val future = usersService.updateAvatarUrl(cmd)
     domainValidationReply(future)
   }
 
-  def activateUser(id: String) =  commandAction { cmd: ActivateUserCmd =>
+  def activateUser() =  commandAction { cmd: ActivateUserCmd =>
       if (cmd.id != id) {
         Future.successful(BadRequest("user id mismatch"))
       } else {
@@ -226,7 +226,7 @@ class UsersController @javaxInject() (val authToken:      AuthToken,
       }
   }
 
-  def lockUser(id: String) =  commandAction { cmd: LockUserCmd =>
+  def lockUser() =  commandAction { cmd: LockUserCmd =>
       if (cmd.id != id) {
         Future.successful(BadRequest("user id mismatch"))
       } else {
@@ -235,7 +235,7 @@ class UsersController @javaxInject() (val authToken:      AuthToken,
       }
   }
 
-  def unlockUser(id: String) =  commandAction { cmd: UnlockUserCmd =>
+  def unlockUser() =  commandAction { cmd: UnlockUserCmd =>
       if (cmd.id != id) {
         Future.successful(BadRequest("user id mismatch"))
       } else {

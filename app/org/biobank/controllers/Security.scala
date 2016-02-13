@@ -101,10 +101,8 @@ trait Security { self: Controller =>
     * Ensures that the request has the proper authorization.
     *
     */
-  def AuthAction[A]
-    (p: BodyParser[A] = parse.anyContent)
-    (f: (String, UserId,  Request[A]) => Result)
-      : Action[A] =
+  def AuthAction[A](p: BodyParser[A] = parse.anyContent)
+                (f: (String, UserId,  Request[A]) => Result): Action[A] =
     Action(p) { implicit request =>
       validateToken(request).fold(
         err => Unauthorized(Json.obj("status"  -> "error",
@@ -116,9 +114,8 @@ trait Security { self: Controller =>
     * Ensures that the request has the proper authorization.
     *
     */
-  def AuthActionAsync[A]
-    (p: BodyParser[A] = parse.anyContent)
-    (f: (String, UserId, Request[A]) => Future[Result]) =
+  def AuthActionAsync[A](p: BodyParser[A] = parse.anyContent)
+                     (f: (String, UserId, Request[A]) => Future[Result]): Action[A] =
     Action.async(p) { implicit request =>
       validateToken(request).fold(
         err => {

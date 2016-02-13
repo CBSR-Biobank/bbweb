@@ -1,24 +1,21 @@
 <configuration>
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <!-- Play 2.4.x bug: during startup, Play _always_ (even in test) resets
-         logger configuration. But it shows a warning if we try to specify
-         a log file. https://github.com/playframework/playframework/issues/4574
-    -->
-    <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-      <evaluator>
-        <expression>event.getMessage().contains("Logger configuration in conf files is deprecated and has no effect.")</expression>
-      </evaluator>
-      <onMatch>DENY</onMatch>
-    </filter>
     <!-- encoders are assigned the type
          ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
     <encoder>
       <!-- pattern>%d{HH:mm:ss.SSS} %-5level %c{1}:%L - %msg%n</pattern -->
-      <pattern>%date{HH:mm:ss.SSS} %-5level %C{36}.%M\(%line\) | %X{akkaSource} | %msg%n</pattern>
+      <pattern>%d{ABSOLUTE} %5p %c{1}:%L - %m%n</pattern>
       <immediateFlush>true</immediateFlush>
     </encoder>
   </appender>
+
+  <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+     <file>logs/tests.log</file>
+     <encoder>
+       <pattern>%date - [%level] - from %logger in %thread %n%message%n%xException%n</pattern>
+     </encoder>
+   </appender>
 
   <logger name="application" level="INFO" />
   <logger name="play" level="DEBUG" />
@@ -32,5 +29,6 @@
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />
+    <appender-ref ref="FILE" />
   </root>
 </configuration>

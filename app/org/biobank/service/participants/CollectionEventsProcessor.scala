@@ -1,12 +1,11 @@
 package org.biobank.service.participants
 
-import org.biobank.service.Processor
+import org.biobank.domain.{ Annotation, DomainValidation, DomainError }
+import org.biobank.service.{ Processor, Utils }
 import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.infrastructure.event.ParticipantEvents._
 import org.biobank.infrastructure.event.CommonEvents._
-import org.biobank.domain.{ AnnotationTypeId, AnnotationOption }
 import org.biobank.domain.user.UserId
-import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.domain.study._
 import org.biobank.domain.participants._
 
@@ -32,7 +31,6 @@ object CollectionEventsProcessor {
 class CollectionEventsProcessor @javaxInject() (
   val collectionEventRepository:     CollectionEventRepository,
   val collectionEventTypeRepository: CollectionEventTypeRepository,
-  val annotationTypeRepository:      CollectionEventAnnotationTypeRepository,
   val participantRepository:         ParticipantRepository)
     extends Processor {
 
@@ -93,7 +91,8 @@ class CollectionEventsProcessor @javaxInject() (
       participant          <- participantRepository.getByKey(participantId)
       collectionEventType  <- collectionEventTypeRepository.getByKey(collectionEventTypeId)
       studyIdMatching      <- studyIdsMatch(participant, collectionEventType)
-      annotTypes           <- validateAnnotationTypes(collectionEventType, annotationsSet)
+      annotTypes           <- Annotation.validateAnnotations(collectionEventType.annotationTypes,
+                                                             annotationsSet)
       visitNumberAvailable <- visitNumberAvailable(cmd.visitNumber)
       newCollectionEvent   <- CollectionEvent.create(collectionEventId,
                                                      participantId,
@@ -108,7 +107,7 @@ class CollectionEventsProcessor @javaxInject() (
           collectionEventTypeId = Some(cmd.collectionEventTypeId),
           timeCompleted         = Some(ISODateTimeFormatter.print(cmd.timeCompleted)),
           visitNumber           = Some(cmd.visitNumber),
-          annotations           = convertAnnotationsToEvent(cmd.annotations))).success
+          annotations           = Utils.convertAnnotationsToEvent(cmd.annotations))).success
     } yield event
 
     process(event) { applyCollectionEventAddedEvent(_) }
@@ -123,7 +122,8 @@ class CollectionEventsProcessor @javaxInject() (
         collectionEventType  <- collectionEventTypeRepository.getByKey(collectionEventTypeId)
         studyIdMatching      <- studyIdsMatch(participant, collectionEventType)
         visitNumberAvailable <- visitNumberAvailable(cmd.visitNumber, cevent.id)
-        annotTypes           <- validateAnnotationTypes(collectionEventType, annotationsSet)
+        annotTypes           <- Annotation.validateAnnotations(collectionEventType.annotationTypes,
+                                                               annotationsSet)
         updatedCevent1       <- cevent.withTimeCompleted(cmd.timeCompleted)
         updatedCevent2       <- cevent.withVisitNumber(cmd.visitNumber)
         updatedCevent3       <- cevent.withAnnotations(annotationsSet)
@@ -134,7 +134,7 @@ class CollectionEventsProcessor @javaxInject() (
             version               = Some(updatedCevent3.version),
             timeCompleted         = Some(ISODateTimeFormatter.print(cmd.timeCompleted)),
             visitNumber           = Some(cmd.visitNumber),
-            annotations           = convertAnnotationsToEvent(cmd.annotations))).success
+            annotations           = Utils.convertAnnotationsToEvent(cmd.annotations))).success
       } yield event
     }
 
@@ -189,7 +189,7 @@ class CollectionEventsProcessor @javaxInject() (
           timeModified          = None,
           timeCompleted         = ISODateTimeParser.parseDateTime(addedEvent.getTimeCompleted),
           visitNumber           = addedEvent.getVisitNumber,
-          annotations           = convertAnnotationsFromEvent(addedEvent.annotations)))
+          annotations           = Utils.convertAnnotationsFromEvent(addedEvent.annotations)))
       ()
     } else {
       log.error(s"applyCollectionEventAddedEvent: invalid event type: $event")
@@ -213,7 +213,7 @@ class CollectionEventsProcessor @javaxInject() (
               version       = updatedEvent.getVersion,
               timeCompleted = ISODateTimeFormat.dateTime.parseDateTime(updatedEvent.getTimeCompleted),
               visitNumber   = updatedEvent.getVisitNumber,
-              annotations   = convertAnnotationsFromEvent(updatedEvent.annotations),
+              annotations   = Utils.convertAnnotationsFromEvent(updatedEvent.annotations),
               timeModified  = Some(ISODateTimeParser.parseDateTime(event.getTime))))
           ()
         }
@@ -266,101 +266,5 @@ class CollectionEventsProcessor @javaxInject() (
     visitNumberAvailableMatcher(visitNumber){ item =>
       (item.visitNumber == visitNumber) && (item.id != excludeCollectionEventId)
     }
-  }
-
-  /**
-   * Checks the following:
-   *
-   *   - no more than one annotation per annotation type
-   *   - that each required annotation is present
-   *   - that all annotations belong to the same study as the annotation type.
-   *
-   * A DomainError is the result if these conditions fail.
-   */
-  private def validateAnnotationTypes(collectionEventType: CollectionEventType,
-                                      annotations:        Set[CollectionEventAnnotation])
-      : DomainValidation[Boolean]= {
-    if (collectionEventType.annotationTypeData.isEmpty && annotations.isEmpty) {
-      true.success
-    } else {
-      val annotAnnotTypeIdsAsSet = annotations.map(v => v.annotationTypeId.id).toSet
-      for {
-        hasAnnotationTypes <- {
-          if (collectionEventType.annotationTypeData.isEmpty) {
-            DomainError("collection event type has no annotation type data").failureNel
-          } else {
-            true.success
-          }
-        }
-        noDuplicates <- {
-          val annotAnnotTypeIdsAsList = annotations.toList.map(v => v.annotationTypeId.id).toList
-
-          if (annotAnnotTypeIdsAsSet.size != annotAnnotTypeIdsAsList.size) {
-            DomainError("duplicate annotation types in annotations").failureNel
-          } else {
-            true.success
-          }
-        }
-        haveRequired <- {
-          val requiredAnnotTypeIds = collectionEventType.annotationTypeData
-          .filter(atDataItem => atDataItem.required)
-          .map(atDataItem => atDataItem.annotationTypeId)
-          .toSet
-
-          if (requiredAnnotTypeIds.intersect(annotAnnotTypeIdsAsSet).size != requiredAnnotTypeIds.size) {
-            DomainError("missing required annotation type(s)").failureNel
-          } else {
-            true.success
-          }
-        }
-        allBelong <- {
-          if (annotAnnotTypeIdsAsSet.isEmpty) {
-            // no annotations present
-            true.success
-          } else {
-            val annotTypeIds = collectionEventType.annotationTypeData
-            .map(atDataItem => atDataItem.annotationTypeId)
-            .toSet
-
-            val notBelonging = annotTypeIds.diff(annotAnnotTypeIdsAsSet)
-            if (notBelonging.isEmpty) {
-              true.success
-            } else {
-              DomainError("annotation type(s) do not belong to collection event type: "
-                + notBelonging.mkString(", ")).failureNel
-            }
-          }
-        }
-      } yield allBelong
-    }
-  }
-
-  private def convertAnnotationsToEvent(annotations: List[CollectionEventAnnotation])
-      : Seq[Annotation] = {
-    annotations.map { annot =>
-      Annotation(
-        annotationTypeId = Some(annot.annotationTypeId.id),
-        stringValue      = annot.stringValue,
-        numberValue      = annot.numberValue,
-        selectedValues   = annot.selectedValues.map(_.value)
-      )
-    }
-  }
-
-  private def convertAnnotationsFromEvent(annotations: Seq[Annotation])
-      : Set[CollectionEventAnnotation] = {
-    annotations.map { eventAnnot =>
-      CollectionEventAnnotation(
-        annotationTypeId = AnnotationTypeId(eventAnnot.getAnnotationTypeId),
-        stringValue      = eventAnnot.stringValue,
-        numberValue      = eventAnnot.numberValue,
-        selectedValues   = eventAnnot.selectedValues.map { selectedValue =>
-          AnnotationOption(
-            annotationTypeId = AnnotationTypeId(eventAnnot.getAnnotationTypeId),
-            value            = selectedValue
-          )
-        } toList
-      )
-    } toSet
   }
 }

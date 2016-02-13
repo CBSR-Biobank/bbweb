@@ -106,7 +106,7 @@ trait SpecimenGroupValidations {
 /**
   * Factory object used to create a [[SpecimenGroup]].
   */
-object SpecimenGroup extends SpecimenGroupValidations with StudyAnnotationTypeValidations {
+object SpecimenGroup extends SpecimenGroupValidations {
   import org.biobank.domain.CommonValidations._
 
   /**
@@ -130,13 +130,23 @@ object SpecimenGroup extends SpecimenGroupValidations with StudyAnnotationTypeVa
              specimenType:                SpecimenType)
       : DomainValidation[SpecimenGroup] =  {
     (validateId(studyId) |@|
-      validateId(id) |@|
-      validateAndIncrementVersion(version) |@|
-      validateString(name, NameRequired) |@|
-      validateNonEmptyOption(description, InvalidDescription) |@|
-      validateString(units, UnitsRequired)) {
-      SpecimenGroup(_, _, _, DateTime.now, None, _, _, _, anatomicalSourceType, preservationType,
-        preservationTemperatureType, specimenType)
+       validateId(id) |@|
+       validateAndIncrementVersion(version) |@|
+       validateString(name, NameRequired) |@|
+       validateNonEmptyOption(description, InvalidDescription) |@|
+       validateString(units, UnitsRequired)) {
+      case (_, _, _, _, _, _) => SpecimenGroup(studyId,
+                                               id,
+                                               version,
+                                               DateTime.now,
+                                               None,
+                                               name,
+                                               description,
+                                               units,
+                                               anatomicalSourceType,
+                                               preservationType,
+                                               preservationTemperatureType,
+                                               specimenType)
     }
   }
 

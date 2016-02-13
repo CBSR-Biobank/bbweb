@@ -10,7 +10,7 @@ import javax.inject.{Inject => javaxInject, Singleton}
 import scala.concurrent.Future
 import scala.language.postfixOps
 import play.api.Logger
-import play.api.Play.current
+import play.api.libs.json._
 import scala.language.reflectiveCalls
 
 @Singleton
@@ -31,33 +31,61 @@ class CeventTypeController @javaxInject() (val authToken:      AuthToken,
       }
     }
 
-  def addCollectionEventType(studyId: String) =
-    commandAction { cmd: AddCollectionEventTypeCmd =>
-      if (cmd.studyId != studyId) {
-        Future.successful(BadRequest("study id mismatch"))
-      } else {
-        val future = studiesService.addCollectionEventType(cmd)
-        domainValidationReply(future)
-      }
-    }
+  def add(studyId: String) =
+    commandAction(Json.obj("studyId" -> studyId)) {
+      cmd: AddCollectionEventTypeCmd => processCommand(cmd) }
 
-  def updateCollectionEventType(studyId: String, id: String) =
-    commandAction { cmd: UpdateCollectionEventTypeCmd =>
-      if (cmd.studyId != studyId) {
-        Future.successful(BadRequest("study id mismatch"))
-      } else if (cmd.id != id) {
-        Future.successful(BadRequest("annotation type id mismatch"))
-      } else {
-        val future = studiesService.updateCollectionEventType(cmd)
-        domainValidationReply(future)
-      }
-    }
-
-  def removeCollectionEventType(studyId: String, id: String, ver: Long) =
+  def remove(studyId: String, id: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveCollectionEventTypeCmd(Some(userId.id), studyId, id, ver)
-      val future = studiesService.removeCollectionEventType(cmd)
+      val future = studiesService.processRemoveCollectionEventTypeCommand(cmd)
       domainValidationReply(future)
   }
 
+  def updateName(id: String) =
+    commandAction(Json.obj("id" -> id)) {
+      cmd: UpdateCollectionEventTypeNameCmd => processCommand(cmd) }
+
+  def updateDescription(id: String) =
+    commandAction(Json.obj("id" -> id)) {
+      cmd: UpdateCollectionEventTypeDescriptionCmd => processCommand(cmd) }
+
+  def updateRecurring(id: String) =
+    commandAction(Json.obj("id" -> id)) {
+      cmd: UpdateCollectionEventTypeRecurringCmd => processCommand(cmd) }
+
+  def addAnnotationType(id: String) =
+    commandAction(Json.obj("id" -> id)) {
+        cmd: AddCollectionEventTypeAnnotationTypeCmd => processCommand(cmd) }
+
+  def removeAnnotationType(studyId: String, id: String, ver: Long, uniqueId: String) =
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
+      val cmd = RemoveCollectionEventTypeAnnotationTypeCmd(
+          userId                = Some(userId.id),
+          studyId               = studyId,
+          id                    = id,
+          expectedVersion       = ver,
+          uniqueId              = uniqueId)
+      processCommand(cmd)
+  }
+
+  def addSpecimenSpec(id: String) =
+    commandAction(Json.obj("id" -> id)) {
+      cmd: AddCollectionSpecimenSpecCmd => processCommand(cmd) }
+
+  def removeSpecimenSpec(studyId: String, id: String, ver: Long, uniqueId: String) =
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
+      val cmd = RemoveCollectionSpecimenSpecCmd(
+          userId                = Some(userId.id),
+          studyId               = studyId,
+          id                    = id,
+          expectedVersion       = ver,
+          uniqueId              = uniqueId)
+      processCommand(cmd)
+  }
+
+  private def processCommand(cmd: StudyCommand) = {
+    val future = studiesService.processCollectionEventTypeCommand(cmd)
+    domainValidationReply(future)
+  }
 }

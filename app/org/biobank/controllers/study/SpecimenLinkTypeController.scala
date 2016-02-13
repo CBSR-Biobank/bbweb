@@ -31,32 +31,22 @@ class SpecimenLinkTypeController @javaxInject() (val authToken:      AuthToken,
       }
     }
 
-  def addSpecimenLinkType(procTypeId: String) =
+  def addSpecimenLinkType() =
     commandAction { cmd: AddSpecimenLinkTypeCmd =>
-      if (cmd.processingTypeId != procTypeId) {
-        Future.successful(BadRequest("processing type id mismatch"))
-      } else {
-        val future = studiesService.addSpecimenLinkType(cmd)
-        domainValidationReply(future)
-      }
+      val future = studiesService.processCommand(cmd)
+      domainValidationReply(future)
     }
 
-  def updateSpecimenLinkType(procTypeId: String, id: String) =
+  def updateSpecimenLinkType() =
     commandAction { cmd: UpdateSpecimenLinkTypeCmd =>
-      if (cmd.processingTypeId != procTypeId) {
-        Future.successful(BadRequest("processing type id mismatch"))
-      } else if (cmd.id != id) {
-        Future.successful(BadRequest("specimen link type id mismatch"))
-      } else {
-        val future = studiesService.updateSpecimenLinkType(cmd)
-        domainValidationReply(future)
-      }
+      val future = studiesService.processCommand(cmd)
+      domainValidationReply(future)
     }
 
   def removeSpecimenLinkType(processingTypeId: String, id: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveSpecimenLinkTypeCmd(Some(userId.id), processingTypeId, id, ver)
-      val future = studiesService.removeSpecimenLinkType(cmd)
+      val future = studiesService.processCommand(cmd)
       domainValidationReply(future)
     }
 

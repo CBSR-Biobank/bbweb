@@ -31,26 +31,16 @@ class ParticipantsController @javaxInject() (val authToken:      AuthToken,
       domainValidationReply(participantsService.getByUniqueId(studyId, uniqueId))
     }
 
-  def addParticipant(studyId: String) =
+  def addParticipant() =
     commandAction { cmd: AddParticipantCmd =>
-      if (cmd.studyId != studyId) {
-        Future.successful(BadRequest("study id mismatch"))
-      } else {
-        val future = participantsService.add(cmd)
-        domainValidationReply(future)
-      }
+      val future = participantsService.add(cmd)
+      domainValidationReply(future)
     }
 
-  def updateParticipant(studyId: String, id: String) =
+  def updateParticipant() =
     commandAction { cmd: UpdateParticipantCmd =>
-      if (cmd.studyId != studyId) {
-        Future.successful(BadRequest("study id mismatch"))
-      } else if (cmd.id != id) {
-        Future.successful(BadRequest("participant id mismatch"))
-      } else {
-        val future = participantsService.update(cmd)
-        domainValidationReply(future)
-      }
+      val future = participantsService.update(cmd)
+      domainValidationReply(future)
     }
 
 }

@@ -18,14 +18,15 @@ import org.biobank.controllers.PagedResults._
 import javax.inject.{Inject => javaxInject, Singleton}
 import play.api.Logger
 import play.api.mvc._
+import play.api.libs.json._
 import scala.concurrent.Future
 import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 /**
-  *
-  */
+ *
+ */
 class StudiesController @javaxInject() (val authToken:      AuthToken,
                                         val usersService:   UsersService,
                                         val studiesService: StudiesService)
@@ -72,110 +73,81 @@ class StudiesController @javaxInject() (val authToken:      AuthToken,
 
       SortOrder.fromString(order).fold(
         err => BadRequest(err.list.toList.mkString),
-        so  => studiesService.getStudyNames(filter, so).fold(
-          err => BadRequest(err.list.toList.mkString),
-          studies => Ok(studies.toList)
-        )
+        so  => Ok(studiesService.getStudyNames(filter, so))
       )
     }
 
   def query(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
-    domainValidationReply(studiesService.getStudy(id))
-  }
-
-  def add = commandAction { cmd: AddStudyCmd =>
-    val future = studiesService.addStudy(cmd)
-    domainValidationReply(future)
-  }
-
-  def update(id: String) = commandAction { cmd : UpdateStudyCmd =>
-    if (cmd.id != id) {
-      Future.successful(BadRequest("study id mismatch"))
-    } else {
-      val future = studiesService.updateStudy(cmd)
-      domainValidationReply(future)
+      domainValidationReply(studiesService.getStudy(id))
     }
-  }
 
-  def enable(id: String) = commandAction { cmd: EnableStudyCmd =>
-    if (cmd.id != id) {
-      Future.successful(BadRequest("study id mismatch"))
-    } else {
-      val future = studiesService.enableStudy(cmd)
-      domainValidationReply(future)
+  def add() = commandAction { cmd: AddStudyCmd =>
+      processCommand(cmd)
     }
-  }
 
-  def disable(id: String) = commandAction { cmd: DisableStudyCmd =>
-    if (cmd.id != id) {
-      Future.successful(BadRequest("study id mismatch"))
-    } else {
-      val future = studiesService.disableStudy(cmd)
-      domainValidationReply(future)
-    }
-  }
+  def updateName(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd : UpdateStudyNameCmd => processCommand(cmd) }
 
-  def retire(id: String) = commandAction { cmd: RetireStudyCmd =>
-    if (cmd.id != id) {
-      Future.successful(BadRequest("study id mismatch"))
-    } else {
-      val future = studiesService.retireStudy(cmd)
-      domainValidationReply(future)
-    }
-  }
+  def updateDescription(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd : UpdateStudyDescriptionCmd => processCommand(cmd) }
 
-  def unretire(id: String) = commandAction { cmd: UnretireStudyCmd =>
-    if (cmd.id != id) {
-      Future.successful(BadRequest("study id mismatch"))
-    } else {
-      val future = studiesService.unretireStudy(cmd)
-      domainValidationReply(future)
+  def addAnnotationType(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd : UpdateStudyAddAnnotationTypeCmd => processCommand(cmd) }
+
+  def removeAnnotationType(studyId: String, ver: Long, uniqueId: String) =
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
+      val cmd = UpdateStudyRemoveAnnotationTypeCmd(Some(userId.id), studyId, ver, uniqueId)
+      processCommand(cmd)
     }
-  }
+
+  def enable(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd: EnableStudyCmd => processCommand(cmd) }
+
+  def disable(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd: DisableStudyCmd => processCommand(cmd) }
+
+  def retire(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd: RetireStudyCmd => processCommand(cmd) }
+
+  def unretire(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd: UnretireStudyCmd => processCommand(cmd) }
 
   def valueTypes = Action(parse.empty) { request =>
-    Ok(AnnotationValueType.values.map(x => x.toString))
-  }
+      Ok(AnnotationValueType.values.map(x => x.toString))
+    }
 
   def anatomicalSourceTypes = Action(parse.empty) { request =>
-    Ok(AnatomicalSourceType.values.map(x => x.toString))
-  }
+      Ok(AnatomicalSourceType.values.map(x => x.toString))
+    }
 
   def specimenTypes = Action(parse.empty) { request =>
-    Ok(SpecimenType.values.map(x => x.toString))
-  }
+      Ok(SpecimenType.values.map(x => x.toString))
+    }
 
   def preservTypes = Action(parse.empty) { request =>
-    Ok(PreservationType.values.map(x => x.toString))
-  }
+      Ok(PreservationType.values.map(x => x.toString))
+    }
 
   def preservTempTypes = Action(parse.empty) { request =>
-    Ok(PreservationTemperatureType.values.map(x => x.toString))
-  }
+      Ok(PreservationTemperatureType.values.map(x => x.toString))
+    }
 
   /** Value types used by Specimen groups.
-    *
-    */
+   *
+   */
   def specimenGroupValueTypes = Action(parse.empty) { request =>
-    // FIXME add container types to this response
-    Ok(Map(
-      "anatomicalSourceType"        -> AnatomicalSourceType.values.map(x => x.toString),
-      "preservationType"            -> PreservationType.values.map(x => x.toString),
-      "preservationTemperatureType" -> PreservationTemperatureType.values.map(x => x.toString),
-      "specimenType"                -> SpecimenType.values.map(x => x.toString)
-    ))
+      // FIXME add container types to this response
+      Ok(Map(
+           "anatomicalSourceType"        -> AnatomicalSourceType.values.map(x => x.toString),
+           "preservationType"            -> PreservationType.values.map(x => x.toString),
+           "preservationTemperatureType" -> PreservationTemperatureType.values.map(x => x.toString),
+           "specimenType"                -> SpecimenType.values.map(x => x.toString)
+         ))
+    }
+
+  private def processCommand(cmd: StudyCommand) = {
+    val future = studiesService.processCommand(cmd)
+    domainValidationReply(future)
   }
-
-  def getCollectionDto(studyId: String) =
-    AuthAction(parse.empty) { (token, userId, request) =>
-      Logger.debug(s"StudiesController.getCollectionDto: studyId: $studyId")
-      domainValidationReply(studiesService.getCollectionDto(studyId))
-    }
-
-  def getProcessingDto(studyId: String) =
-    AuthAction(parse.empty) { (token, userId, request) =>
-      Logger.debug(s"StudiesController.getProcessingDto: studyId: $studyId")
-      domainValidationReply(studiesService.getProcessingDto(studyId))
-    }
 
 }

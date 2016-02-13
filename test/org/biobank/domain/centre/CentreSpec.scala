@@ -19,12 +19,13 @@ class CentreSpec extends DomainSpec {
 
     "be created" in {
       val centre = factory.createDisabledCentre
-      val v = DisabledCentre.create(id          = centre.id,
-                                    version     = -1,
-                                    name        = centre.name,
-                                    description = centre.description)
-
-      v mustSucceed { s =>
+      DisabledCentre.create(id          = centre.id,
+                            version     = -1,
+                            name        = centre.name,
+                            description = centre.description,
+                            studyIds    = Set.empty,
+                            locations   = Set.empty
+      ).mustSucceed { s =>
         s mustBe a[DisabledCentre]
 
         s must have (
@@ -33,6 +34,9 @@ class CentreSpec extends DomainSpec {
           'name        (centre.name),
           'description (centre.description)
         )
+
+        centre.studyIds must have size 0
+        centre.locations must have size 0
 
         checkTimeStamps(s, DateTime.now, None)
       }
@@ -50,7 +54,10 @@ class CentreSpec extends DomainSpec {
           'description (centre.description)
         )
 
-        checkTimeStamps(updatedCentre, DateTime.now, None)
+        updatedCentre.studyIds must have size 0
+        updatedCentre.locations must have size 0
+
+        checkTimeStamps(updatedCentre, DateTime.now, DateTime.now)
       }
     }
 
@@ -66,10 +73,12 @@ class CentreSpec extends DomainSpec {
           'description (description)
         )
 
-        checkTimeStamps(updatedCentre, DateTime.now, None)
+        updatedCentre.studyIds must have size 0
+        updatedCentre.locations must have size 0
+
+        checkTimeStamps(updatedCentre, DateTime.now, DateTime.now)
       }
     }
-
 
     "be enabled" in {
       val centre = factory.createDisabledCentre
@@ -89,59 +98,101 @@ class CentreSpec extends DomainSpec {
 
   }
 
-  "A centre" must {
+  "A centre" can {
+
+    def createFrom(centre: DisabledCentre) = {
+      DisabledCentre.create(id          = centre.id,
+                            version     = centre.version,
+                            name        = centre.name,
+                            description = centre.description,
+                            studyIds    = centre.studyIds,
+                            locations   = centre.locations)
+    }
 
     "not be created with an empty id" in {
-      val v = DisabledCentre.create(id          = CentreId(""),
-                                    version     = -1L,
-                                    name        = nameGenerator.next[Centre],
-                                    description = Some(nameGenerator.next[Centre]))
-      v mustFail "IdRequired"
+      val centre = factory.createDisabledCentre.copy(id = CentreId(""))
+      createFrom(centre) mustFail "IdRequired"
     }
 
     "not be created with an invalid version" in {
-      val v = DisabledCentre.create(id          = CentreId(nameGenerator.next[Centre]),
-                                    version     = -2L,
-                                    name        = nameGenerator.next[Centre],
-                                    description = Some(nameGenerator.next[Centre]))
-      v mustFail "InvalidVersion"
+      val centre = factory.createDisabledCentre.copy(version = -2L)
+      createFrom(centre) mustFail "InvalidVersion"
     }
 
-    "not be created with an null or empty name" in {
-      var v = DisabledCentre.create(id          = CentreId(nameGenerator.next[Centre]),
-                                    version     = -1L,
-                                    name        = null,
-                                    description = some(nameGenerator.next[Centre]))
-      v mustFail "InvalidName"
-
-      v = DisabledCentre.create(id          = CentreId(nameGenerator.next[Centre]),
-                                version     = -1L,
-                                name        = "",
-                                description = Some(nameGenerator.next[Centre]))
-      v mustFail "InvalidName"
+    "not be created with a null or empty name" in {
+      List("", null).foreach { name =>
+        var centre = factory.createDisabledCentre.copy(name = name)
+        createFrom(centre) mustFail "InvalidName"
+      }
     }
 
     "not be created with an empty description option" in {
-      var v = DisabledCentre.create(id          = CentreId(nameGenerator.next[Centre]),
-                                    version     = -1L,
-                                    name        = nameGenerator.next[Centre],
-                                    description = Some(null))
-
-      v mustFail "InvalidDescription"
-
-      v = DisabledCentre.create(id          = CentreId(nameGenerator.next[Centre]),
-                                version     = -1L,
-                                name        = nameGenerator.next[Centre],
-                                description = Some(""))
-      v mustFail "InvalidDescription"
+      List(Some(""), Some(null)).foreach { description =>
+        var centre = factory.createDisabledCentre.copy(description = description)
+        createFrom(centre) mustFail "InvalidDescription"
+      }
     }
 
     "have more than one validation fail" in {
-      var v = DisabledCentre.create(id          = CentreId(nameGenerator.next[Centre]),
-                                    version     = -2L,
-                                    name        = null,
-                                    description = some(nameGenerator.next[Centre]))
-      v mustFail ("InvalidVersion",  "InvalidName")
+      var centre = factory.createDisabledCentre.copy(version = -2L, name = null)
+      createFrom(centre) mustFail ("InvalidVersion",  "InvalidName")
+    }
+
+  }
+
+  "A centre" can {
+
+    "add a studyId" in {
+      val centre = factory.createDisabledCentre.copy(studyIds = Set.empty)
+      val study = factory.createDisabledStudy
+
+      centre.withStudyId(study.id) mustSucceed { c =>
+        c.studyIds must have size 1
+        c.studyIds must contain (study.id)
+      }
+    }
+
+    "remove a studyId" in {
+      val study = factory.createDisabledStudy
+      val centre = factory.createDisabledCentre.copy(studyIds = Set(study.id))
+
+      centre.removeStudyId(study.id) mustSucceed { c =>
+        c.studyIds must have size 0
+      }
+    }
+
+  }
+
+  "A centre" can {
+
+    "add a location" in {
+      val centre = factory.createDisabledCentre.copy(locations = Set.empty)
+      val location = factory.createLocation
+
+      centre.withLocation(location) mustSucceed { c =>
+        c.locations must have size 1
+        c.locations must contain (location)
+      }
+    }
+
+    "replace a location" in {
+      val location = factory.createLocation
+      val location2 = factory.createLocation.copy(uniqueId = location.uniqueId)
+      val centre = factory.createDisabledCentre.copy(locations = Set(location))
+
+      centre.withLocation(location2) mustSucceed { c =>
+        c.locations must have size 1
+        c.locations must contain (location2)
+      }
+    }
+
+    "remove a location" in {
+      val location = factory.createLocation
+      val centre = factory.createDisabledCentre.copy(locations = Set(location))
+
+      centre.removeLocation(location.uniqueId) mustSucceed { c =>
+        c.studyIds must have size 0
+      }
     }
 
   }

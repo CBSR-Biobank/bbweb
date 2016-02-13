@@ -2,7 +2,6 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-/* global define */
 define(['underscore'], function(_) {
   'use strict';
 
@@ -59,4 +58,3 @@ define(['underscore'], function(_) {
 
   return SingleSelectAnnotationFactory;
 });
-

@@ -32,7 +32,7 @@ class ApplicationSpec extends ControllerFixture {
       contentType(result) mustBe (Some("text/html"))
     }
 
-    "return initial aggregate counts" taggedAs(Tag("1")) in {
+    "return initial aggregate counts" in {
       val json = makeRequest(GET, "/counts")
       val jsonObj = (json \ "data").as[JsObject]
 

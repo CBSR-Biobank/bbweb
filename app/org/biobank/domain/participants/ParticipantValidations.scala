@@ -10,7 +10,7 @@ trait ParticipantValidations {
 
   case object ParticipantIdRequired extends ValidationKey
 
-  case object CollectinEventTypeIdRequired extends ValidationKey
+  case object CollectionEventTypeIdRequired extends ValidationKey
 
   case object AmountInvalid extends ValidationKey
 
@@ -25,4 +25,3 @@ trait ParticipantValidations {
   case object VisitNumberInvalid extends ValidationKey
 
 }
-

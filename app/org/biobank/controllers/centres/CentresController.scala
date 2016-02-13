@@ -8,10 +8,8 @@ import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.domain.centre.Centre
 
 import javax.inject.{Inject => javaxInject, Singleton}
-import play.api.Play.current
-import scala.concurrent.Future
 import play.api.Logger
-import play.api.Play.current
+import play.api.libs.json._
 import scala.concurrent.Future
 import scala.language.reflectiveCalls
 import scalaz.Scalaz._
@@ -60,80 +58,39 @@ class CentresController @javaxInject() (val authToken:      AuthToken,
     domainValidationReply(centresService.getCentre(id))
   }
 
-  def add = commandAction { cmd: AddCentreCmd =>
-    val future = centresService.addCentre(cmd)
-    domainValidationReply(future)
-  }
+  def add() = commandAction { cmd: AddCentreCmd => processCommand(cmd) }
 
-  def update(id: String) = commandAction { cmd : UpdateCentreCmd =>
-    val future = centresService.updateCentre(cmd)
-    domainValidationReply(future)
-  }
+  def updateName(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd : UpdateCentreNameCmd => processCommand(cmd) }
 
-  def enable(id: String) = commandAction { cmd: EnableCentreCmd =>
-      if (cmd.id != id) {
-        Future.successful(BadRequest("centre id mismatch"))
-      } else {
-        val future = centresService.enableCentre(cmd)
-        domainValidationReply(future)
-      }
-  }
+  def updateDescription(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd : UpdateCentreDescriptionCmd => processCommand(cmd) }
 
-  def disable(id: String) = commandAction { cmd: DisableCentreCmd =>
-      if (cmd.id != id) {
-        Future.successful(BadRequest("centre id mismatch"))
-      } else {
-        val future = centresService.disableCentre(cmd)
-        domainValidationReply(future)
-      }
-  }
+  def addStudy(centreId: String) =
+    commandAction(Json.obj("id" -> centreId)) { cmd : AddStudyToCentreCmd => processCommand(cmd) }
 
-  def getLocations(centreId: String, locationId: Option[String]) =
-    AuthAction(parse.empty) { (token, userId, request) =>
-      val validation = centresService.getCentreLocations(centreId, locationId)
-      locationId.fold {
-        domainValidationReply(validation)
-      } { id =>
-        // return the first element
-        domainValidationReply(validation.map(_.head))
-      }
-    }
-
-  def addLocation(centreId: String) = commandAction { cmd: AddCentreLocationCmd =>
-    val future = centresService.addCentreLocation(cmd)
-    domainValidationReply(future)
-  }
-
-  def removeLocation(centreId: String, id: String) =
+  def removeStudy(centreId: String, ver: Long, studyId: String) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val future = centresService.removeCentreLocation(
-        RemoveCentreLocationCmd(Some(userId.id), centreId, id))
-      domainValidationReply(future)
+      processCommand(RemoveStudyFromCentreCmd(Some(userId.id), centreId, ver, studyId))
     }
 
-  def getStudies(centreId: String) =
-    AuthAction(parse.empty) { (token, userId, request) =>
-      domainValidationReply(centresService.getCentreStudies(centreId))
-    }
+  def addLocation(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd : AddCentreLocationCmd => processCommand(cmd) }
 
-  def addStudy(centreId: String, studyId: String) =
-    commandAction { cmd: AddStudyToCentreCmd =>
-      if (cmd.centreId != centreId) {
-        Future.successful(BadRequest("centre id mismatch"))
-      } else if (cmd.studyId != studyId) {
-        Future.successful(BadRequest("study id mismatch"))
-      } else {
-        val future = centresService.addStudyToCentre(cmd)
-        domainValidationReply(future)
-      }
-    }
-
-  def removeStudy(centreId: String, studyId: String) =
+  def removeLocation(centreId: String, ver: Long, locationId: String) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      Logger.debug(s"removeStudy: $centreId, $studyId")
-      val future = centresService.removeStudyFromCentre(
-        RemoveStudyFromCentreCmd(Some(userId.id), centreId, studyId))
-      domainValidationReply(future)
+      processCommand(RemoveCentreLocationCmd(Some(userId.id), centreId, ver, locationId))
     }
+
+  def enable(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd : EnableCentreCmd => processCommand(cmd) }
+
+  def disable(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd : DisableCentreCmd => processCommand(cmd) }
+
+  private def processCommand(cmd: CentreCommand) = {
+    val future = centresService.processCommand(cmd)
+    domainValidationReply(future)
+  }
 
 }

@@ -2,13 +2,14 @@ package org.biobank.service.centres
 
 import org.biobank.service.Processor
 import org.biobank.domain.centre._
-import org.biobank.domain.study.StudyId
+import org.biobank.domain.study. {
+  StudyId,
+  StudyRepository
+}
 import org.biobank.domain.{
   DomainValidation,
   DomainError,
-  Location,
-  LocationId,
-  LocationRepository
+  Location
 }
 import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.command.CentreCommands._
@@ -32,11 +33,9 @@ object CentresProcessor {
 
 }
 
-class CentresProcessor @javaxInject() (val centreRepository:          CentreRepository,
-                                       val locationRepository:        LocationRepository,
-                                       val centreStudiesRepository:   CentreStudiesRepository,
-                                       val centreLocationsRepository: CentreLocationsRepository,
-                                       val testData:                  TestData)
+class CentresProcessor @javaxInject() (val centreRepository: CentreRepository,
+                                       val studyRepository:  StudyRepository,
+                                       val testData:         TestData)
     extends Processor {
   import CentreEvent.EventType
 
@@ -44,18 +43,19 @@ class CentresProcessor @javaxInject() (val centreRepository:          CentreRepo
 
   case class SnapshotState(centres: Set[Centre])
 
-  val errMsgNameExists = "centre with name already exists"
+  val ErrMsgNameExists = "centre with name already exists"
 
   val receiveRecover: Receive = {
     case event: CentreEvent => event.eventType match {
-        case et: EventType.Added           => applyCentreAddedEvent(event)
-        case et: EventType.Updated         => applyCentreUpdatedEvent(event)
-        case et: EventType.Enabled         => applyCentreEnabledEvent(event)
-        case et: EventType.Disabled        => applyCentreDisabledEvent(event)
-        case et: EventType.LocationAdded   => applyCentreLocationAddedEvent(event)
-        case et: EventType.LocationRemoved => applyCentreLocationRemovedEvent(event)
-        case et: EventType.StudyAdded      => applyCentreAddedToStudyEvent(event)
-        case et: EventType.StudyRemoved    => applyCentreRemovedFromStudyEvent(event)
+        case et: EventType.Added              => applyCentreAddedEvent(event)
+        case et: EventType.NameUpdated        => applyCentreNameUpdatedEvent(event)
+        case et: EventType.DescriptionUpdated => applyCentreDescriptionUpdatedEvent(event)
+        case et: EventType.Enabled            => applyCentreEnabledEvent(event)
+        case et: EventType.Disabled           => applyCentreDisabledEvent(event)
+        case et: EventType.LocationAdded      => applyCentreLocationAddedEvent(event)
+        case et: EventType.LocationRemoved    => applyCentreLocationRemovedEvent(event)
+        case et: EventType.StudyAdded         => applyCentreStudyAddedEvent(event)
+        case et: EventType.StudyRemoved       => applyCentreRemovedFromStudyEvent(event)
 
         case et => log.error(s"event not handled: $event")
       }
@@ -69,14 +69,15 @@ class CentresProcessor @javaxInject() (val centreRepository:          CentreRepo
   }
 
   val receiveCommand: Receive = {
-    case cmd: AddCentreCmd             => processAddCentreCmd(cmd)
-    case cmd: UpdateCentreCmd          => processUpdateCentreCmd(cmd)
-    case cmd: EnableCentreCmd          => processEnableCentreCmd(cmd)
-    case cmd: DisableCentreCmd         => processDisableCentreCmd(cmd)
-    case cmd: AddCentreLocationCmd     => processAddCentreLocationCmd(cmd)
-    case cmd: RemoveCentreLocationCmd  => processRemoveCentreLocationCmd(cmd)
-    case cmd: AddStudyToCentreCmd      => processAddStudyToCentreCmd(cmd)
-    case cmd: RemoveStudyFromCentreCmd => processRemoveStudyFromCentreCmd(cmd)
+    case cmd: AddCentreCmd               => processAddCentreCmd(cmd)
+    case cmd: UpdateCentreNameCmd        => processUpdateCentreNameCmd(cmd)
+    case cmd: UpdateCentreDescriptionCmd => processUpdateCentreDescriptionCmd(cmd)
+    case cmd: EnableCentreCmd            => processEnableCentreCmd(cmd)
+    case cmd: DisableCentreCmd           => processDisableCentreCmd(cmd)
+    case cmd: AddCentreLocationCmd       => processAddCentreLocationCmd(cmd)
+    case cmd: RemoveCentreLocationCmd    => processRemoveCentreLocationCmd(cmd)
+    case cmd: AddStudyToCentreCmd        => processAddStudyToCmd(cmd)
+    case cmd: RemoveStudyFromCentreCmd   => processRemoveStudyCmd(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(centreRepository.getValues.toSet))
@@ -93,80 +94,86 @@ class CentresProcessor @javaxInject() (val centreRepository:          CentreRepo
     }
 
     val event = for {
-      nameAvailable <- nameAvailable(cmd.name)
-      newCentre <- DisabledCentre.create(centreId, -1L, cmd.name, cmd.description)
-      event <- createCentreEvent(newCentre.id, cmd).withAdded(
-        CentreAddedEvent(name = Some(newCentre.name),
-                         description = newCentre.description)).success
-    } yield event
+        nameAvailable <- nameAvailable(cmd.name)
+        newCentre <- DisabledCentre.create(centreId, -1L, cmd.name, cmd.description, Set.empty, Set.empty)
+      } yield createCentreEvent(newCentre.id, cmd).update(
+        _.added.name                := cmd.name,
+        _.added.optionalDescription := cmd.description
+      )
 
     process (event) { applyCentreAddedEvent(_) }
   }
 
-  private def processUpdateCentreCmd(cmd: UpdateCentreCmd): Unit = {
+  private def processUpdateCentreNameCmd(cmd: UpdateCentreNameCmd): Unit = {
     val v = updateDisabled(cmd) { centre =>
-      for {
-        nameAvailable <- nameAvailable(cmd.name, centre.id)
-        centre1       <- centre.withName(cmd.name)
-        centre2       <- centre.withDescription(cmd.description)
-        event         <- createCentreEvent(centre2.id, cmd).withUpdated(
-          CentreUpdatedEvent(version     = Some(centre2.version),
-                             name        = Some(centre2.name),
-                             description = centre2.description)).success
-      } yield event
-    }
+        for {
+          nameAvailable <- nameAvailable(cmd.name, centre.id)
+          centre        <- centre.withName(cmd.name)
+        } yield createCentreEvent(centre.id, cmd).update(
+          _.nameUpdated.version := cmd.expectedVersion,
+          _.nameUpdated.name    := cmd.name
+        )
+      }
 
-    process (v) { applyCentreUpdatedEvent(_) }
+    process (v) { applyCentreNameUpdatedEvent(_) }
+  }
+
+  private def processUpdateCentreDescriptionCmd(cmd: UpdateCentreDescriptionCmd): Unit = {
+    val v = updateDisabled(cmd) { centre =>
+        centre.withDescription(cmd.description).map { _ =>
+          createCentreEvent(centre .id, cmd).update(
+            _.descriptionUpdated.version             := cmd.expectedVersion,
+            _.descriptionUpdated.optionalDescription := cmd.description
+          )
+        }
+      }
+
+    process (v) { applyCentreDescriptionUpdatedEvent(_) }
   }
 
   private def processEnableCentreCmd(cmd: EnableCentreCmd): Unit = {
     val v = updateDisabled(cmd) { centre =>
-      for {
-        enabledCentre <- centre.enable()
-        event         <- createCentreEvent(enabledCentre.id, cmd).withEnabled(
-          CentreEnabledEvent(version = Some(enabledCentre.version))).success
-      } yield event
-    }
+        centre.enable.map { _ =>
+          createCentreEvent(centre.id, cmd).update(_.enabled.version := cmd.expectedVersion)
+        }
+      }
 
     process (v) { applyCentreEnabledEvent(_) }
   }
 
   private def processDisableCentreCmd(cmd: DisableCentreCmd): Unit = {
     val v = updateEnabled(cmd) { centre =>
-      for {
-      disabledCentre <- centre.disable()
-      event          <- createCentreEvent(disabledCentre.id, cmd).withDisabled(
-        CentreDisabledEvent(version = Some(disabledCentre.version))).success
-      } yield event
-    }
+        centre.disable.map { _ =>
+          createCentreEvent(centre.id, cmd).update(_.disabled.version := cmd.expectedVersion)
+        }
+      }
 
     process (v) { applyCentreDisabledEvent(_) }
   }
 
   /**
-   * Locations can be added regardless of the centre's status.
+   * FIXME: Locations should be added regardless of the centre's status.
    */
   private def processAddCentreLocationCmd(cmd: AddCentreLocationCmd): Unit = {
-    val locationId = locationRepository.nextIdentity
-
-    val event = centreRepository.getByKey(CentreId(cmd.centreId)).fold(
-      err => DomainError(s"centre with id does not exist: $id").failureNel,
-      centre => {
+    val event = updateDisabled(cmd) { centre =>
         for {
-          location <- Location(locationId, cmd.name, cmd.street, cmd.city, cmd.province,
-                               cmd.postalCode, cmd.poBoxNumber, cmd.countryIsoCode).success
-          event <- createCentreEvent(centre.id, cmd).withLocationAdded(
-            CentreLocationAddedEvent(locationId     = Some(locationId.id),
-                                     name           = Some(cmd.name),
-                                     street         = Some(cmd.street),
-                                     city           = Some(cmd.city),
-                                     province       = Some(cmd.province),
-                                     postalCode     = Some(cmd.postalCode),
-                                     poBoxNumber    = cmd.poBoxNumber,
-                                     countryIsoCode = Some(cmd.countryIsoCode))).success
-        } yield event
+          location <- {
+            // need to call Location.create so that a new uniqueId is generated
+            Location.create(cmd.name, cmd.street, cmd.city, cmd.province,
+                            cmd.postalCode, cmd.poBoxNumber, cmd.countryIsoCode)
+          }
+          updatedCentre <- centre.withLocation(location)
+        } yield createCentreEvent(centre.id, cmd)
+          .update(_.locationAdded.version                      := cmd.expectedVersion,
+                  _.locationAdded.location.locationId          := location.uniqueId,
+                  _.locationAdded.location.name                := cmd.name,
+                  _.locationAdded.location.street              := cmd.street,
+                  _.locationAdded.location.city                := cmd.city,
+                  _.locationAdded.location.province            := cmd.province,
+                  _.locationAdded.location.postalCode          := cmd.postalCode,
+                  _.locationAdded.location.optionalPoBoxNumber := cmd.poBoxNumber,
+                  _.locationAdded.location.countryIsoCode      := cmd.countryIsoCode)
       }
-    )
 
     process (event) { applyCentreLocationAddedEvent(_) }
   }
@@ -175,16 +182,13 @@ class CentresProcessor @javaxInject() (val centreRepository:          CentreRepo
    * Locations can be removed regardless of the centre's status.
    */
   private def processRemoveCentreLocationCmd(cmd: RemoveCentreLocationCmd): Unit = {
-    val event = centreRepository.getByKey(CentreId(cmd.centreId)).fold(
-      err => DomainError(s"centre with id does not exist: $id").failureNel,
-      centre => {
-        locationRepository.getByKey(LocationId(cmd.locationId)).fold(
-          err => DomainError(s"location with id does not exist: $id").failureNel,
-          location => createCentreEvent(centre.id, cmd).withLocationRemoved(
-            CentreLocationRemovedEvent(Some(cmd.locationId))).success
-        )
+    val event = updateDisabled(cmd) { centre =>
+        centre.removeLocation(cmd.locationId) map { _ =>
+          createCentreEvent(centre.id, cmd).update(
+            _.locationRemoved.version    := cmd.expectedVersion,
+            _.locationRemoved.locationId := cmd.locationId)
+        }
       }
-    )
 
     process (event) { applyCentreLocationRemovedEvent(_) }
   }
@@ -192,253 +196,254 @@ class CentresProcessor @javaxInject() (val centreRepository:          CentreRepo
   /**
    * Studies can be added regardless of the centre's status.
    */
-  private def processAddStudyToCentreCmd(cmd: AddStudyToCentreCmd): Unit = {
-    val event = centreRepository.getByKey(CentreId(cmd.centreId)).fold(
-      err => DomainError(s"centre with id does not exist: $id").failureNel,
-      centre => {
-        for {
-          notLinked <- centreStudyNotLinked(centre.id, StudyId(cmd.studyId))
-          event <- createCentreEvent(centre.id, cmd).withStudyAdded(
-            StudyAddedToCentreEvent(Some(cmd.studyId))).success
-        } yield event
+  private def processAddStudyToCmd(cmd: AddStudyToCentreCmd): Unit = {
+    val event = updateDisabled(cmd) { centre =>
+        studyRepository.getByKey(StudyId(cmd.studyId)).map { _ =>
+          createCentreEvent(centre.id, cmd).update(
+            _.studyAdded.version := cmd.expectedVersion,
+            _.studyAdded.studyId := cmd.studyId)
+        }
       }
-    )
 
-    process (event) { applyCentreAddedToStudyEvent(_) }
+    process (event) { applyCentreStudyAddedEvent(_) }
   }
 
   /**
    * Studies can be removed regardless of the centre's status.
    */
-  private def processRemoveStudyFromCentreCmd(cmd: RemoveStudyFromCentreCmd): Unit = {
-    val event = for {
-      centre <- centreRepository.getByKey(CentreId(cmd.centreId))
-      item <- centreStudiesRepository.withIds(StudyId(cmd.studyId), centre.id)
-      event <- createCentreEvent(centre.id, cmd).withStudyRemoved(
-        StudyRemovedFromCentreEvent(Some(cmd.studyId))).success
-    } yield event
+  private def processRemoveStudyCmd(cmd: RemoveStudyFromCentreCmd): Unit = {
+    val event = updateDisabled(cmd) { centre =>
+        for {
+          studyExists <- studyRepository.getByKey(StudyId(cmd.studyId))
+          canRemove   <- centre.removeStudyId(StudyId(cmd.studyId))
+        } yield createCentreEvent(centre.id, cmd).update(
+          _.studyRemoved.version := cmd.expectedVersion,
+          _.studyRemoved.studyId := cmd.studyId)
+      }
 
     process (event) { applyCentreRemovedFromStudyEvent(_) }
   }
 
-  private def applyCentreAddedEvent(event: CentreEvent): Unit = {
-    if (event.eventType.isAdded) {
-      val addedEvent = event.getAdded
-
-      centreRepository.put(
-        DisabledCentre(id           = CentreId(event.id),
-                       version      = 0L,
-                       timeAdded    = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
-                       timeModified = None,
-                       name         = addedEvent.getName,
-                       description  = addedEvent.description))
-      ()
-    } else {
+  def onValidEventCentreAndVersion(event: CentreEvent,
+                                   eventType: Boolean,
+                                   eventVersion: Long)
+                                  (fn: Centre => Unit): Unit = {
+    if (!eventType) {
       log.error(s"invalid event type: $event")
+    } else {
+      centreRepository.getByKey(CentreId(event.id)).fold(
+        err => log.error(s"centre from event does not exist: $err"),
+        centre => {
+          if (centre.version != eventVersion) {
+            log.error(s"event version check failed: centre version: ${centre.version}, event: $event")
+          } else {
+            fn(centre)
+          }
+        }
+      )
     }
   }
 
-  private def applyCentreUpdatedEvent(event: CentreEvent): Unit = {
-    if (event.eventType.isUpdated) {
-      val updatedEvent = event.getUpdated
+  def onValidEventDisabledCentreAndVersion(event: CentreEvent,
+                                           eventType: Boolean,
+                                           eventVersion: Long)
+                                          (fn: DisabledCentre => Unit): Unit = {
+    onValidEventCentreAndVersion(event, eventType, eventVersion) {
+      case centre: DisabledCentre => fn(centre)
+      case centre => log.error(s"$centre for $event is not disabled")
+    }
+  }
 
-      getDisabled(event.id).fold(
-        err => log.error(s"updating centre from event failed: $err"),
-        centre => {
+  def onValidEventEnabledCentreAndVersion(event: CentreEvent,
+                                          eventType: Boolean,
+                                          eventVersion: Long)
+                                         (fn: EnabledCentre => Unit): Unit = {
+    onValidEventCentreAndVersion(event, eventType, eventVersion) {
+      case centre: EnabledCentre => fn(centre)
+      case centre => log.error(s"$centre for $event is not enabled")
+    }
+  }
+
+  private def applyCentreAddedEvent(event: CentreEvent): Unit = {
+    if (!event.eventType.isAdded) {
+      log.error(s"invalid event type: $event")
+    } else {
+      val addedEvent = event.getAdded
+      DisabledCentre.create(id           = CentreId(event.id),
+                            version      = -1L,
+                            name         = addedEvent.getName,
+                            description  = addedEvent.description,
+                            studyIds     = Set.empty,
+                            locations    = Set.empty
+      ).fold (
+        err => log.error(s"could not add study from event: $event"),
+        c => {
           centreRepository.put(
-            centre.copy(version      = updatedEvent.getVersion,
-                        timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
-                        name         = updatedEvent.getName,
-                        description  = updatedEvent.description))
+            c.copy(timeAdded = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)))
           ()
         }
       )
-    } else {
-      log.error(s"invalid event type: $event")
+    }
+  }
+
+  private def applyCentreNameUpdatedEvent(event: CentreEvent): Unit = {
+    onValidEventDisabledCentreAndVersion(event,
+                                         event.eventType.isNameUpdated,
+                                         event.getNameUpdated.getVersion) { centre =>
+      val updatedEvent = event.getNameUpdated
+
+      centre.withName(updatedEvent.getName).fold (
+        err => log.error(s"updating centre from event failed: $err"),
+        c => {
+          centreRepository.put(
+            c.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
+          ()
+        }
+      )
+    }
+  }
+
+  private def applyCentreDescriptionUpdatedEvent(event: CentreEvent): Unit = {
+    onValidEventDisabledCentreAndVersion(event,
+                                         event.eventType.isDescriptionUpdated,
+                                         event.getDescriptionUpdated.getVersion) { centre =>
+      val descriptionUpdated = event.getDescriptionUpdated
+
+      centre.withDescription(descriptionUpdated.description).fold (
+        err => log.error(s"updating centre from event failed: $err"),
+        c => {
+          centreRepository.put(
+            c.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
+          ()
+        }
+      )
     }
   }
 
   private def applyCentreEnabledEvent(event: CentreEvent): Unit = {
-    if (event.eventType.isEnabled) {
+    onValidEventDisabledCentreAndVersion(event,
+                                         event.eventType.isEnabled,
+                                         event.getEnabled.getVersion) { centre =>
       val enabledEvent = event.getEnabled
 
-      getDisabled(event.id).fold(
+      centre.enable.fold(
         err => log.error(s"enabling centre from event failed: $err"),
-        centre => {
+        c => {
           centreRepository.put(
-            EnabledCentre(id           = CentreId(event.id),
-                          version      = event.getEnabled.getVersion,
-                          timeAdded    = centre.timeAdded,
-                          timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
-                          name         = centre.name,
-                          description  = centre.description))
+            c.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
           ()
         }
       )
-    } else {
-      log.error(s"invalid event type: $event")
     }
   }
 
   private def applyCentreDisabledEvent(event: CentreEvent): Unit = {
-    if (event.eventType.isDisabled) {
-      val disabledEvent = event.getDisabled
-
-      getEnabled(event.id).fold(
+    onValidEventEnabledCentreAndVersion(event,
+                                        event.eventType.isDisabled,
+                                        event.getDisabled.getVersion) { centre =>
+      centre.disable.fold(
         err => log.error(s"disabling centre from event failed: $err"),
-        centre => {
+        c => {
+          val disabledEvent = event.getDisabled
           centreRepository.put(
-            DisabledCentre(id           = CentreId(event.id),
-                           version      = event.getDisabled.getVersion,
-                           timeAdded    = centre.timeAdded,
-                           timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
-                           name         = centre.name,
-                           description  = centre.description))
+            c.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
           ()
         }
       )
-    } else {
-      log.error(s"invalid event type: $event")
     }
   }
 
   private def applyCentreLocationAddedEvent(event: CentreEvent): Unit = {
-    if (event.eventType.isLocationAdded) {
+    onValidEventDisabledCentreAndVersion(event,
+                                         event.eventType.isLocationAdded,
+                                         event.getLocationAdded.getVersion) { centre =>
       val locationAddedEvent = event.getLocationAdded
 
-      val centreId = CentreId(event.id)
-      val locationId = LocationId(locationAddedEvent.getLocationId)
-
-      locationRepository.put(
-        Location(id             = locationId,
-                 name           = locationAddedEvent.getName,
-                 street         = locationAddedEvent.getStreet,
-                 city           = locationAddedEvent.getCity,
-                 province       = locationAddedEvent.getProvince,
-                 postalCode     = locationAddedEvent.getPostalCode,
-                 poBoxNumber    = locationAddedEvent.poBoxNumber,
-                 countryIsoCode = locationAddedEvent.getCountryIsoCode))
-      centreLocationsRepository.put(CentreLocation(centreId, locationId))
-      ()
-    } else {
-      log.error(s"invalid event type: $event")
+      centre.withLocation(Location(uniqueId       = locationAddedEvent.getLocation.getLocationId,
+                                   name           = locationAddedEvent.getLocation.getName,
+                                   street         = locationAddedEvent.getLocation.getStreet,
+                                   city           = locationAddedEvent.getLocation.getCity,
+                                   province       = locationAddedEvent.getLocation.getProvince,
+                                   postalCode     = locationAddedEvent.getLocation.getPostalCode,
+                                   poBoxNumber    = locationAddedEvent.getLocation.poBoxNumber,
+                                   countryIsoCode = locationAddedEvent.getLocation.getCountryIsoCode)
+      ).fold(
+        err => log.error(s"adding location from event failed: $err"),
+        c => {
+          centreRepository.put(
+            c.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
+          ()
+        }
+      )
     }
   }
 
   private def applyCentreLocationRemovedEvent(event: CentreEvent): Unit = {
-    if (event.eventType.isLocationRemoved) {
+    onValidEventDisabledCentreAndVersion(event,
+                                         event.eventType.isLocationRemoved,
+                                         event.getLocationRemoved.getVersion) { centre =>
+
       val locationRemovedEvent = event.getLocationRemoved
 
-      val centreId = CentreId(event.id)
-      val locationId = LocationId(locationRemovedEvent.getLocationId)
-
-      val validation = for {
-        location <- locationRepository.getByKey(locationId)
-        removed <- locationRepository.remove(location).success
-        link <- centreLocationsRepository.remove(CentreLocation(centreId, locationId)).success
-      } yield location
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        log.error("removing centre location with event failed")
-      }
-    } else {
-      log.error(s"invalid event type: $event")
+      centre.removeLocation(locationRemovedEvent.getLocationId).fold(
+        err => log.error(s"updating centre from event failed: $err"),
+        c => {
+          centreRepository.put(
+            c.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
+          ()
+        }
+      )
     }
   }
 
-  private def applyCentreAddedToStudyEvent(event: CentreEvent): Unit = {
-    if (event.eventType.isStudyAdded) {
+  private def applyCentreStudyAddedEvent(event: CentreEvent): Unit = {
+    onValidEventDisabledCentreAndVersion(event,
+                                         event.eventType.isStudyAdded,
+                                         event.getStudyAdded.getVersion) { centre =>
       val studyAddedEvent = event.getStudyAdded
 
-      val centreId = CentreId(event.id)
-      val studyId = StudyId(studyAddedEvent.getStudyId)
-      val studyCentreId = centreStudiesRepository.nextIdentity
-      centreStudiesRepository.put(StudyCentre(studyCentreId, studyId, centreId))
-      ()
-    } else {
-      log.error(s"invalid event type: $event")
+      centre.withStudyId(StudyId(studyAddedEvent.getStudyId)).fold(
+        err => log.error(s"updating centre from event failed: $err"),
+        c => {
+          centreRepository.put(
+            c.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
+          ()
+        }
+      )
     }
   }
 
   private def applyCentreRemovedFromStudyEvent(event: CentreEvent): Unit = {
-    if (event.eventType.isStudyRemoved) {
+    onValidEventDisabledCentreAndVersion(event,
+                                         event.eventType.isStudyRemoved,
+                                         event.getStudyRemoved.getVersion) { centre =>
       val studyRemovedEvent = event.getStudyRemoved
 
-      val centreId = CentreId(event.id)
-      val studyId = StudyId(studyRemovedEvent.getStudyId)
-
-      val validation = for {
-        studyCentre <- centreStudiesRepository.withIds(studyId, centreId)
-        removed <- centreStudiesRepository.remove(studyCentre).success
-      } yield removed
-
-      if (validation.isFailure) {
-        // this should never happen because the only way to get here is when the
-        // command passed validation
-        log.error(s"removing study centre link with event failed: $validation")
-      }
-    } else {
-      log.error(s"invalid event type: $event")
-    }
-  }
-
-  /** Returns true if the centre and study are NOT linked.
-    *
-    */
-  private def centreStudyNotLinked(centreId: CentreId, studyId: StudyId): DomainValidation[Boolean] = {
-    val exists = centreStudiesRepository.getValues.exists { x =>
-      (x.centreId == centreId) && (x.studyId == studyId)
-    }
-    if (exists) {
-      DomainError(s"centre and study already linked: { centreId: $centreId, studyId: $studyId }").failureNel
-    } else {
-      true.success
+      centre.removeStudyId(StudyId(studyRemovedEvent.getStudyId)).fold(
+        err => log.error(s"updating centre from event failed: $err"),
+        c => {
+          centreRepository.put(
+            c.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
+          ()
+        }
+      )
     }
   }
 
   private def nameAvailable(name: String): DomainValidation[Boolean] = {
-    nameAvailableMatcher(name, centreRepository, errMsgNameExists){ item =>
+    nameAvailableMatcher(name, centreRepository, ErrMsgNameExists){ item =>
       item.name == name
     }
   }
 
   private def nameAvailable(name: String, excludeId: CentreId): DomainValidation[Boolean] = {
-    nameAvailableMatcher(name, centreRepository, errMsgNameExists){ item =>
+    nameAvailableMatcher(name, centreRepository, ErrMsgNameExists){ item =>
       (item.name == name) && (item.id != excludeId)
     }
   }
 
-  /**
-    * Utility method to validiate state of a centre
-    */
-  private def getDisabled(id: String): DomainValidation[DisabledCentre] = {
-    centreRepository.getByKey(CentreId(id)).fold(
-      err => DomainError(s"centre with id does not exist: $id").failureNel,
-      centre => centre match {
-        case centre: DisabledCentre => centre.success
-        case centre => DomainError(s"centre is not disabled: $centre").failureNel
-      }
-    )
-  }
-
-  /**
-    * Utility method to validiate state of a centre
-    */
-  private def getEnabled(id: String): DomainValidation[EnabledCentre] = {
-    centreRepository.getByKey(CentreId(id)).fold(
-      err => DomainError(s"centre with id does not exist: $id").failureNel,
-      centre => centre match {
-        case centre: EnabledCentre => centre.success
-        case centre => DomainError(s"centre is not enabled: $centre").failureNel
-      }
-    )
-  }
-
-  private def updateCentre[T <: Centre]
-    (cmd: CentreModifyCommand)
-    (fn: Centre => DomainValidation[CentreEvent])
+  private def updateCentre[T <: Centre](cmd: CentreModifyCommand)
+                          (fn: Centre => DomainValidation[CentreEvent])
       : DomainValidation[CentreEvent] = {
     centreRepository.getByKey(CentreId(cmd.id)).fold(
       err => DomainError(s"centre with id does not exist: $id").failureNel,
@@ -449,9 +454,8 @@ class CentresProcessor @javaxInject() (val centreRepository:          CentreRepo
     )
   }
 
-  private def updateDisabled[T <: Centre]
-    (cmd: CentreModifyCommand)
-    (fn: DisabledCentre => DomainValidation[CentreEvent])
+  private def updateDisabled[T <: Centre](cmd: CentreModifyCommand)
+                            (fn: DisabledCentre => DomainValidation[CentreEvent])
       : DomainValidation[CentreEvent] = {
     updateCentre(cmd) {
       case centre: DisabledCentre => fn(centre)
@@ -459,9 +463,8 @@ class CentresProcessor @javaxInject() (val centreRepository:          CentreRepo
     }
   }
 
-  private def updateEnabled[T <: Centre]
-    (cmd: CentreModifyCommand)
-    (fn: EnabledCentre => DomainValidation[CentreEvent])
+  private def updateEnabled[T <: Centre](cmd: CentreModifyCommand)
+                           (fn: EnabledCentre => DomainValidation[CentreEvent])
       : DomainValidation[CentreEvent] = {
     updateCentre(cmd) {
       case centre: EnabledCentre => fn(centre)

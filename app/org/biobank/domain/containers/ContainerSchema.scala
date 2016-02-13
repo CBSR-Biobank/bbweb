@@ -70,13 +70,12 @@ object ContainerSchema extends ContainerSchemaValidations {
              shared:      Boolean)
       : DomainValidation[ContainerSchema] = {
     (validateId(id) |@|
-      validateAndIncrementVersion(version) |@|
-      validateString(name, NameMinLength, InvalidName) |@|
-      validateNonEmptyOption(description, InvalidDescription)) {
-        ContainerSchema(_, _, DateTime.now, None, _, _, shared)
-      }
+       validateAndIncrementVersion(version) |@|
+       validateString(name, NameMinLength, InvalidName) |@|
+       validateNonEmptyOption(description, InvalidDescription)) {
+      case (_, _, _, _) => ContainerSchema(id, version, DateTime.now, None, name, description, shared)
+    }
   }
 
   implicit val containerSchemaWrites = Json.writes[ContainerSchema]
 }
-

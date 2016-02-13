@@ -1,6 +1,7 @@
 package org.biobank.domain.participants
 
 import org.biobank.domain.{
+  Annotation,
   ConcurrencySafeEntity,
   DomainValidation
 }
@@ -26,7 +27,7 @@ case class CollectionEvent(id:                    CollectionEventId,
                            timeModified:          Option[DateTime],
                            timeCompleted:         DateTime,
                            visitNumber:           Int,
-                           annotations:           Set[CollectionEventAnnotation])
+                           annotations:           Set[Annotation])
     extends ConcurrencySafeEntity[CollectionEventId]
     with HasParticipantId
     with ParticipantValidations {
@@ -42,7 +43,7 @@ case class CollectionEvent(id:                    CollectionEventId,
   def withTimeCompleted(timeCompleted: DateTime): DomainValidation[CollectionEvent] =
     copy(version = version + 1, timeCompleted = timeCompleted).success
 
-  def withAnnotations(annotations: Set[CollectionEventAnnotation])
+  def withAnnotations(annotations: Set[Annotation])
       : DomainValidation[CollectionEvent] =
     copy(version = version + 1, annotations = annotations).success
 
@@ -70,14 +71,22 @@ object CollectionEvent extends ParticipantValidations {
              version:               Long,
              timeCompleted:         DateTime,
              visitNumber:           Int,
-             annotations:           Set[CollectionEventAnnotation])
+             annotations:           Set[Annotation])
       : DomainValidation[CollectionEvent] = {
     (validateId(id) |@|
-      validateId(participantId, ParticipantIdRequired) |@|
-      validateId(collectionEventTypeId, CollectinEventTypeIdRequired) |@|
-      validateAndIncrementVersion(version) |@|
-      validateMinimum(visitNumber, 1, VisitNumberInvalid)) {
-      CollectionEvent(_, _, _, _, DateTime.now, None, timeCompleted, _, annotations)
+       validateId(participantId, ParticipantIdRequired) |@|
+       validateId(collectionEventTypeId, CollectionEventTypeIdRequired) |@|
+       validateAndIncrementVersion(version) |@|
+       validateMinimum(visitNumber, 1, VisitNumberInvalid)) {
+      case (_, _, _, _, _) => CollectionEvent(id,
+                                              participantId,
+                                              collectionEventTypeId,
+                                              version,
+                                              DateTime.now,
+                                              None,
+                                              timeCompleted,
+                                              visitNumber,
+                                              annotations)
     }
   }
 

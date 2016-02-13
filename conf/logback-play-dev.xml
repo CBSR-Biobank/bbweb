@@ -8,7 +8,8 @@
          ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
     <encoder>
       <!-- Using %L for logging is slow, replace this for production server -->
-      <pattern>%d{HH:mm:ss.SSS} %-5level %c{1}:%L - %msg%n</pattern>
+      <!-- pattern>%d{HH:mm:ss.SSS} %-5level %c{1}:%L - %msg%n</pattern -->
+      <pattern>%d{ABSOLUTE} %5p %c{1}:%L - %m%n</pattern>
       <immediateFlush>true</immediateFlush>
     </encoder>
   </appender>

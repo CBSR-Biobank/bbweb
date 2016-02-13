@@ -1,8 +1,34 @@
 package org.biobank.infrastructure.event;
 
+message AnnotationTypeAdded {
+   optional string uniqueId      = 2;
+   optional string name          = 3;
+   optional string description   = 4;
+   optional string valueType     = 5; // a scala enum is used here
+   optional int32  maxValueCount = 6;
+   repeated string options       = 7;
+   optional bool   required      = 8;
+}
+
+message AnnotationTypeRemoved {
+   optional int64  version  = 1;
+   optional string uniqueId = 2;
+}
+
 message Annotation {
-   optional string annotationTypeId = 1;
-   optional string stringValue      = 2;
-   optional string numberValue      = 3;
-   repeated string selectedValues   = 4;
+   optional string annotationTypeUniqueId = 1;
+   optional string stringValue            = 2;
+   optional string numberValue            = 3;
+   repeated string selectedValues         = 4;
+}
+
+message Location {
+   optional string locationId     = 1;
+   optional string name           = 2;
+   optional string street         = 3;
+   optional string city           = 4;
+   optional string province       = 5;
+   optional string postalCode     = 6;
+   optional string poBoxNumber    = 7;
+   optional string countryIsoCode = 8;
 }

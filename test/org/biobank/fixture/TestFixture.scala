@@ -67,12 +67,9 @@ trait TestFixture
 
   val passwordHasher = app.injector.instanceOf[PasswordHasher]
 
-  val collectionEventAnnotationTypeRepository  = app.injector.instanceOf[CollectionEventAnnotationTypeRepository]
   val collectionEventTypeRepository            = app.injector.instanceOf[CollectionEventTypeRepository]
-  val participantAnnotationTypeRepository      = app.injector.instanceOf[ParticipantAnnotationTypeRepository]
   val processingTypeRepository                 = app.injector.instanceOf[ProcessingTypeRepository]
   val specimenGroupRepository                  = app.injector.instanceOf[SpecimenGroupRepository]
-  val specimenLinkAnnotationTypeRepository     = app.injector.instanceOf[SpecimenLinkAnnotationTypeRepository]
   val specimenLinkTypeRepository               = app.injector.instanceOf[SpecimenLinkTypeRepository]
   val studyRepository                          = app.injector.instanceOf[StudyRepository]
 
@@ -83,9 +80,6 @@ trait TestFixture
   val userRepository = app.injector.instanceOf[UserRepository]
 
   val centreRepository          = app.injector.instanceOf[CentreRepository]
-  val centreLocationsRepository = app.injector.instanceOf[CentreLocationsRepository]
-  val centreStudiesRepository   = app.injector.instanceOf[CentreStudiesRepository]
-  val locationRepository        = app.injector.instanceOf[LocationRepository]
 
   val usersProcessor = app.injector.instanceOf[NamedUsersProcessor].processor
 
@@ -95,20 +89,8 @@ trait TestFixture
   val collectionEventTypeProcessor =
     app.injector.instanceOf[NamedCollectionEventTypeProcessor].processor
 
-  val ceventAnnotationTypeProcessor =
-    app.injector.instanceOf[NamedCeventAnnotationTypeProcessor].processor
-
-  val participantAnnotationTypeProcessor =
-    app.injector.instanceOf[NamedParticipantAnnotationTypeProcessor].processor
-
   val processingTypeProcessor =
     app.injector.instanceOf[NamedProcessingTypeProcessor].processor
-
-  val specimenGroupProcessor =
-    app.injector.instanceOf[NamedSpecimenGroupProcessor].processor
-
-  val specimenLinkAnnotationTypeProcessor =
-    app.injector.instanceOf[NamedSpecimenLinkAnnotationTypeProcessor].processor
 
   val specimenLinkTypeProcessor =
     app.injector.instanceOf[NamedSpecimenLinkTypeProcessor].processor
@@ -123,23 +105,11 @@ case class NamedUsersProcessor @Inject() (@Named("usersProcessor") processor: Ac
 
 case class NamedCentresProcessor @Inject() (@Named("centresProcessor") processor: ActorRef)
 
-case class NamedCeventAnnotationTypeProcessor @Inject() (
-  @Named("collectionEventType") processor: ActorRef)
-
 case class NamedCollectionEventTypeProcessor @Inject()        (
   @Named("collectionEventType") processor: ActorRef)
 
-case class NamedParticipantAnnotationTypeProcessor  @Inject() (
-  @Named("participantAnnotationType") processor: ActorRef)
-
 case class NamedProcessingTypeProcessor @Inject() (
   @Named("processingType") processor: ActorRef)
-
-case class NamedSpecimenGroupProcessor @Inject() (
-  @Named("specimenGroup") processor: ActorRef)
-
-case class NamedSpecimenLinkAnnotationTypeProcessor @Inject() (
-  @Named("specimenLinkAnnotationType") processor: ActorRef)
 
 case class NamedSpecimenLinkTypeProcessor @Inject() (
   @Named("specimenLinkType") processor: ActorRef)

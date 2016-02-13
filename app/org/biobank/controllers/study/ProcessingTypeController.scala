@@ -30,32 +30,22 @@ class ProcessingTypeController @javaxInject() (val authToken:      AuthToken,
       }
     }
 
-  def addProcessingType(studyId: String) =
+  def addProcessingType() =
     commandAction { cmd: AddProcessingTypeCmd =>
-      if (cmd.studyId != studyId) {
-        Future.successful(BadRequest("study id mismatch"))
-      } else {
-        val future = studiesService.addProcessingType(cmd)
-        domainValidationReply(future)
-      }
+      val future = studiesService.processCommand(cmd)
+      domainValidationReply(future)
   }
 
-  def updateProcessingType(studyId: String, id: String) =
+  def updateProcessingType() =
     commandAction { cmd: UpdateProcessingTypeCmd =>
-      if (cmd.studyId != studyId) {
-        Future.successful(BadRequest("study id mismatch"))
-      } else if (cmd.id != id) {
-        Future.successful(BadRequest("processing type id mismatch"))
-      } else {
-        val future = studiesService.updateProcessingType(cmd)
-        domainValidationReply(future)
-      }
+      val future = studiesService.processCommand(cmd)
+      domainValidationReply(future)
   }
 
   def removeProcessingType(studyId: String, id: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveProcessingTypeCmd(Some(userId.id), studyId, id, ver)
-      val future = studiesService.removeProcessingType(cmd)
+      val future = studiesService.processCommand(cmd)
       domainValidationReply(future)
     }
 

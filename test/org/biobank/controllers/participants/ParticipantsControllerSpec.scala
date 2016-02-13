@@ -1,10 +1,10 @@
 package org.biobank.controllers.participants
 
 import org.biobank.fixture._
-import org.biobank.domain.{ AnnotationTypeId, AnnotationOption, AnnotationValueType }
+import org.biobank.domain.{ Annotation, AnnotationType, AnnotationValueType }
 import org.biobank.domain.study._
 import org.biobank.domain.participants._
-import org.biobank.domain.JsonHelper._
+import org.biobank.domain.JsonHelper
 import org.biobank.fixture.ControllerFixture
 
 import play.api.test.Helpers._
@@ -16,7 +16,7 @@ import org.joda.time.DateTime
 /**
  * Tests the REST API for [[Participants]].
  */
-class ParticipantsControllerSpec extends ControllerFixture {
+class ParticipantsControllerSpec extends ControllerFixture with JsonHelper {
   import org.biobank.TestUtils._
   import org.biobank.AnnotationTestUtils._
 
@@ -44,14 +44,10 @@ class ParticipantsControllerSpec extends ControllerFixture {
     )
   }
 
-  def createParticipantAnnotationType(study: Study) = {
-    ParticipantAnnotationType(
-      studyId       = study.id,
-      id            = AnnotationTypeId(nameGenerator.next[ParticipantAnnotationType]),
-      version       = 0L,
-      timeAdded     = DateTime.now,
-      timeModified  = None,
-      name          = nameGenerator.next[ParticipantAnnotationType],
+  def createAnnotationType() = {
+    AnnotationType(
+      uniqueId      = nameGenerator.next[AnnotationType],
+      name          = nameGenerator.next[AnnotationType],
       description   = None,
       valueType     = AnnotationValueType.Text,
       maxValueCount = None,
@@ -103,15 +99,17 @@ class ParticipantsControllerSpec extends ControllerFixture {
     (AnnotationValueType.values.map { vt =>
        vt match {
          case AnnotationValueType.Select   =>
-           (factory.createParticipantAnnotationType(vt, 1, options, true),
-            factory.createParticipantAnnotation)
+           (factory.createAnnotationType(vt, Some(1), options),
+            factory.createAnnotation)
          case _ =>
-           (factory.createParticipantAnnotationType(vt, 0, Seq.empty, true),
-            factory.createParticipantAnnotation)
+           (factory.createAnnotationType(vt, None, Seq.empty),
+            factory.createAnnotation)
        }
      }.toList ++ List(
-       (factory.createParticipantAnnotationType(AnnotationValueType.Select, 2, options, true),
-        factory.createParticipantAnnotation))).toMap
+       (factory.createAnnotationType(AnnotationValueType.Select,
+                                     Some(2),
+                                     options),
+        factory.createAnnotation))).toMap
   }
 
 
@@ -125,7 +123,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
         studyRepository.put(study)
 
         val participant = factory.defaultParticipant.copy(
-          annotations = Set(factory.createParticipantAnnotation))
+          annotations = Set(factory.createAnnotation))
         participantRepository.put(participant)
 
         val json = makeRequest(GET, uri(factory.defaultEnabledStudy, participant))
@@ -213,15 +211,11 @@ class ParticipantsControllerSpec extends ControllerFixture {
       }
 
       "add a participant with annotations" in {
-        val study = factory.createEnabledStudy
-        studyRepository.put(study)
-
         val annotTypes = createAnnotationsAndTypes
         val annotations = annotTypes.values.toSet
 
-        annotTypes.keys.foreach { annotType =>
-          participantAnnotationTypeRepository.put(annotType.copy(studyId = study.id))
-        }
+        val study = factory.createEnabledStudy.copy(annotationTypes = annotTypes.keys.toSet)
+        studyRepository.put(study)
 
         val participant = factory.createParticipant.copy(annotations = annotations)
 
@@ -233,8 +227,7 @@ class ParticipantsControllerSpec extends ControllerFixture {
 
         jsonAnnotations.foreach { jsonAnnotation =>
           val jsonAnnotationTypeId = (jsonAnnotation \ "annotationTypeId").as[String]
-          val annotation = annotations.find( x =>
-            x.annotationTypeId.id == jsonAnnotationTypeId)
+          val annotation = annotations.find( x => x.annotationTypeUniqueId == jsonAnnotationTypeId)
           annotation mustBe defined
           compareAnnotation(jsonAnnotation, annotation.value)
         }
@@ -254,13 +247,9 @@ class ParticipantsControllerSpec extends ControllerFixture {
       }
 
       "fail when missing a required annotation type" in {
-        val study = factory.createEnabledStudy
+        val annotType = factory.createAnnotationType.copy(required = true);
+        val study = factory.createEnabledStudy.copy(annotationTypes = Set(annotType))
         studyRepository.put(study)
-
-        val annotType = factory.createParticipantAnnotationType.copy(
-          studyId = study.id, required = true);
-        participantAnnotationTypeRepository.put(annotType)
-        factory.defaultParticipantAnnotationType(annotType)
 
         val participant = factory.createParticipant
         val json = makeRequest(POST, uri(study), BAD_REQUEST, json = participantToAddCmd(participant))
@@ -270,11 +259,10 @@ class ParticipantsControllerSpec extends ControllerFixture {
 
       "fail for an invalid annotation type" in {
         // annotation type belongs to a different study
-        val annotType = factory.createParticipantAnnotationType
-        participantAnnotationTypeRepository.put(annotType)
-        val annotation = factory.createParticipantAnnotation
+        val annotType = factory.createAnnotationType
+        val annotation = factory.createAnnotation
 
-        val study = factory.createEnabledStudy
+        val study = factory.createEnabledStudy.copy(annotationTypes = Set(annotType))
         studyRepository.put(study)
         val participant = factory.createParticipant.copy(annotations = Set(annotation))
 
@@ -284,16 +272,13 @@ class ParticipantsControllerSpec extends ControllerFixture {
       }
 
       "fail for more than one annotation with the same annotation type" in {
-
-        val study = factory.createEnabledStudy
+        val pat = createAnnotationType
+        val study = factory.createEnabledStudy.copy(annotationTypes = Set(pat))
         studyRepository.put(study)
 
-        val pat = createParticipantAnnotationType(study)
-        factory.defaultParticipantAnnotationType(pat)
-        participantAnnotationTypeRepository.put(pat)
-
-        val annotation = factory.createParticipantAnnotation
-        val annotation2 = annotation.copy(stringValue = Some(nameGenerator.next[ParticipantAnnotation]))
+        val annotation = factory.createAnnotation
+        val annotation2 = annotation
+          .copy(stringValue = Some(nameGenerator.next[Annotation]))
 
         val participant = factory.createParticipant.copy(
           annotations = Set(annotation, annotation2))
@@ -356,14 +341,10 @@ class ParticipantsControllerSpec extends ControllerFixture {
       }
 
       "update a participant with annotation types" in {
-        val study = factory.createEnabledStudy
-        studyRepository.put(study)
-
         val annotTypes = createAnnotationsAndTypes
-
-        annotTypes.keys.foreach { annotType =>
-          participantAnnotationTypeRepository.put(annotType.copy(studyId = study.id))
-        }
+        val study = factory.createEnabledStudy
+          .copy(annotationTypes = annotTypes.keys.toSet)
+        studyRepository.put(study)
 
         val participant = factory.createParticipant.copy(annotations = annotTypes.values.toSet)
         participantRepository.put(participant)
@@ -371,10 +352,10 @@ class ParticipantsControllerSpec extends ControllerFixture {
         val newAnnotations = annotTypes.keys.map { annotationType =>
           val (stringValue, numberValue, selectedValues) =
             factory.createAnnotationValues(annotationType)
-          ParticipantAnnotation(annotationTypeId = annotationType.id,
-                                stringValue      = stringValue,
-                                numberValue      = numberValue,
-                                selectedValues   = selectedValues)
+          Annotation(annotationTypeUniqueId = annotationType.uniqueId,
+                     stringValue            = stringValue,
+                     numberValue            = numberValue,
+                     selectedValues         = selectedValues)
         }.toSet
 
         val p2 = participant.copy(version = 0, annotations = newAnnotations)
@@ -386,19 +367,17 @@ class ParticipantsControllerSpec extends ControllerFixture {
         jsonAnnotations.foreach { jsonAnnotation =>
           val jsonAnnotationTypeId = (jsonAnnotation \ "annotationTypeId").as[String]
           val newAnnotation = newAnnotations.find( x =>
-            x.annotationTypeId.id == jsonAnnotationTypeId)
+            x.annotationTypeUniqueId == jsonAnnotationTypeId)
           newAnnotation mustBe defined
           compareAnnotation(jsonAnnotation, newAnnotation.value)
         }
       }
 
       "update a participant to remove an annotation type" in {
-        val study = factory.createEnabledStudy
+        val annotType = factory.createAnnotationType
+        val annotation = factory.createAnnotation
+        val study = factory.createEnabledStudy.copy(annotationTypes = Set(annotType))
         studyRepository.put(study)
-
-        val annotType = factory.createParticipantAnnotationType.copy(studyId = study.id)
-        participantAnnotationTypeRepository.put(annotType)
-        val annotation = factory.createParticipantAnnotation
 
         val participant = factory.createParticipant.copy(annotations = Set(annotation))
         participantRepository.put(participant)
@@ -410,14 +389,12 @@ class ParticipantsControllerSpec extends ControllerFixture {
       }
 
       "fail when missing a required annotation" in {
-        val study = factory.createEnabledStudy
+        val annotType = factory.createAnnotationType.copy(required = true)
+        val study = factory.createEnabledStudy.copy(annotationTypes = Set(annotType))
         studyRepository.put(study)
 
-        val annotType = factory.createParticipantAnnotationType.copy(
-          studyId = study.id, required = true)
-        participantAnnotationTypeRepository.put(annotType)
         val participant = factory.createParticipant.copy(
-          annotations = Set(factory.createParticipantAnnotation))
+          annotations = Set(factory.createAnnotation))
         participantRepository.put(participant)
 
         val p2 = participant.copy(annotations = Set.empty)
@@ -429,11 +406,9 @@ class ParticipantsControllerSpec extends ControllerFixture {
 
       "fail for an invalid annotation type" in {
         // annotation type belongs to a different study
-        val annotType = factory.createParticipantAnnotationType
-        participantAnnotationTypeRepository.put(annotType)
-        val annotation = factory.createParticipantAnnotation
-
-        val study = factory.createEnabledStudy
+        val annotType = factory.createAnnotationType
+        val annotation = factory.createAnnotation
+        val study = factory.createEnabledStudy.copy(annotationTypes = Set(annotType))
         studyRepository.put(study)
         val participant = factory.createParticipant
         participantRepository.put(participant)
@@ -446,15 +421,12 @@ class ParticipantsControllerSpec extends ControllerFixture {
       }
 
       "fail for more than one annotation with the same annotation type ID" in {
-        val study = factory.createEnabledStudy
+        val pat = createAnnotationType
+        val study = factory.createEnabledStudy.copy(annotationTypes = Set(pat))
         studyRepository.put(study)
 
-        val pat = createParticipantAnnotationType(study)
-        factory.defaultParticipantAnnotationType(pat)
-        participantAnnotationTypeRepository.put(pat)
-
-        val annotation = factory.createParticipantAnnotation
-        val annotation2 = annotation.copy(stringValue = Some(nameGenerator.next[ParticipantAnnotation]))
+        val annotation = factory.createAnnotation
+        val annotation2 = annotation.copy(stringValue = Some(nameGenerator.next[Annotation]))
 
         val participant = factory.createParticipant
         participantRepository.put(participant)
@@ -516,4 +488,3 @@ class ParticipantsControllerSpec extends ControllerFixture {
   }
 
 }
-

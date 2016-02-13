@@ -60,8 +60,8 @@ class SpecimenSpec extends DomainSpec {
                 specimenGroupId  = SpecimenGroupId(nameGenerator.next[SpecimenGroupId]),
                 version          = -1,
                 timeCreated      = DateTime.now,
-                originLocationId = LocationId(nameGenerator.next[LocationId]),
-                locationId       = LocationId(nameGenerator.next[LocationId]),
+                originLocationId = nameGenerator.next[Location],
+                locationId       = nameGenerator.next[Location],
                 containerId      = None,
                 positionId       = None,
                 amount           = BigDecimal(1.01))
@@ -74,8 +74,8 @@ class SpecimenSpec extends DomainSpec {
                 specimenGroupId  = SpecimenGroupId(""),
                 version          = -1,
                 timeCreated      = DateTime.now,
-                originLocationId = LocationId(nameGenerator.next[LocationId]),
-                locationId       = LocationId(nameGenerator.next[LocationId]),
+                originLocationId = nameGenerator.next[Location],
+                locationId       = nameGenerator.next[Location],
                 containerId      = None,
                 positionId       = None,
                 amount           = BigDecimal(1.01))
@@ -88,8 +88,8 @@ class SpecimenSpec extends DomainSpec {
                 specimenGroupId  = SpecimenGroupId(nameGenerator.next[SpecimenGroupId]),
                 version          = -2,
                 timeCreated      = DateTime.now,
-                originLocationId = LocationId(nameGenerator.next[LocationId]),
-                locationId       = LocationId(nameGenerator.next[LocationId]),
+                originLocationId = nameGenerator.next[Location],
+                locationId       = nameGenerator.next[Location],
                 containerId      = None,
                 positionId       = None,
                 amount           = BigDecimal(1.01))
@@ -102,8 +102,8 @@ class SpecimenSpec extends DomainSpec {
                 specimenGroupId  = SpecimenGroupId(nameGenerator.next[SpecimenGroupId]),
                 version          = -1,
                 timeCreated      = DateTime.now,
-                originLocationId = LocationId(""),
-                locationId       = LocationId(nameGenerator.next[LocationId]),
+                originLocationId = nameGenerator.next[Location],
+                locationId       = nameGenerator.next[Location],
                 containerId      = None,
                 positionId       = None,
                 amount           = BigDecimal(1.01))
@@ -116,8 +116,8 @@ class SpecimenSpec extends DomainSpec {
                 specimenGroupId  = SpecimenGroupId(nameGenerator.next[SpecimenGroupId]),
                 version          = -1,
                 timeCreated      = DateTime.now,
-                originLocationId = LocationId(nameGenerator.next[LocationId]),
-                locationId       = LocationId(""),
+                originLocationId = nameGenerator.next[Location],
+                locationId       = nameGenerator.next[Location],
                 containerId      = None,
                 positionId       = None,
                 amount           = BigDecimal(1.01))
@@ -130,8 +130,8 @@ class SpecimenSpec extends DomainSpec {
                 specimenGroupId  = SpecimenGroupId(nameGenerator.next[SpecimenGroupId]),
                 version          = -1,
                 timeCreated      = DateTime.now,
-                originLocationId = LocationId(nameGenerator.next[LocationId]),
-                locationId       = LocationId(nameGenerator.next[LocationId]),
+                originLocationId = nameGenerator.next[Location],
+                locationId       = nameGenerator.next[Location],
                 containerId      = Some(ContainerId("")),
                 positionId       = None,
                 amount           = BigDecimal(1.01))
@@ -144,8 +144,8 @@ class SpecimenSpec extends DomainSpec {
                 specimenGroupId  = SpecimenGroupId(nameGenerator.next[SpecimenGroupId]),
                 version          = -1,
                 timeCreated      = DateTime.now,
-                originLocationId = LocationId(nameGenerator.next[LocationId]),
-                locationId       = LocationId(nameGenerator.next[LocationId]),
+                originLocationId = nameGenerator.next[Location],
+                locationId       = nameGenerator.next[Location],
                 containerId      = None,
                 positionId       = Some(ContainerSchemaPositionId("")),
                 amount           = BigDecimal(1.01))
@@ -158,8 +158,8 @@ class SpecimenSpec extends DomainSpec {
                 specimenGroupId  = SpecimenGroupId(nameGenerator.next[SpecimenGroupId]),
                 version          = -1,
                 timeCreated      = DateTime.now,
-                originLocationId = LocationId(nameGenerator.next[LocationId]),
-                locationId       = LocationId(nameGenerator.next[LocationId]),
+                originLocationId = nameGenerator.next[Location],
+                locationId       = nameGenerator.next[Location],
                 containerId      = None,
                 positionId       = None,
                 amount           = BigDecimal(-1))
@@ -170,4 +170,3 @@ class SpecimenSpec extends DomainSpec {
 
   }
 }
-

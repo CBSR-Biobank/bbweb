@@ -3,7 +3,7 @@ package org.biobank.controllers.study
 import org.biobank.fixture._
 import org.biobank.domain.study.{ Study, ProcessingType }
 import org.biobank.fixture.ControllerFixture
-import org.biobank.domain.JsonHelper._
+import org.biobank.domain.JsonHelper
 import org.biobank.domain.study._
 
 import play.api.test.Helpers._
@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 import play.api.Play.current
 
-class ProcessingTypeControllerSpec extends ControllerFixture {
+class ProcessingTypeControllerSpec extends ControllerFixture with JsonHelper {
 
   def uri(study: Study): String = s"/studies/${study.id.id}/proctypes"
 

@@ -13,30 +13,39 @@ object TestUtils extends MustMatchers with OptionValues {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  val TimeCoparisonMillis = 600L
+  val TimeCoparisonMillis = 1500L
 
   def checkTimeStamps(expectedTime:  DateTime, actualTime: DateTime): Unit = {
-    (expectedTime to actualTime).millis must be < TimeCoparisonMillis
-  }
-
-  def checkTimeStamps[T <: ConcurrencySafeEntity[_]]
-    (entity: T,
-     expectedAddedTime: DateTime,
-     expectedLastUpdateTime: Option[DateTime]): Unit = {
-    checkTimeStamps(entity.timeAdded, expectedAddedTime)
-    expectedLastUpdateTime.fold {
-      entity.timeModified mustBe (None)
-    } {
-      dateTime => checkTimeStamps(entity.timeModified.value, dateTime)
+    if (expectedTime < actualTime) {
+      (expectedTime to actualTime).millis must be < TimeCoparisonMillis
+    } else {
+      (actualTime to expectedTime).millis must be < TimeCoparisonMillis
     }
   }
 
-  def checkTimeStamps[T <: ConcurrencySafeEntity[_]](entity: T,
-                                                     expectedAddedTime: DateTime,
-                                                     expectedLastUpdateTime: DateTime): Unit = {
-    //log.debug(s"entity: $entity, expectedAddedTime: $expectedAddedTime, expectedLastUpdateTime: $expectedLastUpdateTime")
-    checkTimeStamps(entity.timeAdded, expectedAddedTime)
-    checkTimeStamps(entity.timeModified.value, expectedLastUpdateTime)
+  def checkTimeStamps(entity:               ConcurrencySafeEntity[_],
+                      expectedTimeAdded:    DateTime,
+                      expectedTimeModified: Option[DateTime]): Unit = {
+    checkTimeStamps(entity.timeAdded, expectedTimeAdded)
+    entity.timeModified.fold {
+      expectedTimeModified.fold { /* both are NONE, do nothing */ }
+      { dateTime => fail("entity has NO modified time, but expected is not NONE") }
+    } { timeModified =>
+      expectedTimeModified.fold { fail("entity has modified time, but expected is NONE") }
+      { dateTime => checkTimeStamps(timeModified, dateTime) }
+    }
+
+    expectedTimeModified.fold {
+      entity.timeModified mustBe (None)
+    } { dateTime =>
+      checkTimeStamps(entity.timeModified.value, dateTime)
+    }
+  }
+
+  def checkTimeStamps(entity:               ConcurrencySafeEntity[_],
+                      expectedTimeAdded:    DateTime,
+                      expectedTimeModified: DateTime): Unit = {
+    checkTimeStamps(entity, expectedTimeAdded, Some(expectedTimeModified))
   }
 
   /**

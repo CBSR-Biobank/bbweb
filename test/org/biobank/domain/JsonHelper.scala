@@ -1,9 +1,14 @@
 package org.biobank.domain
 
+import org.biobank.TestUtils
 import org.biobank.dto._
 import org.biobank.domain.user._
 import org.biobank.domain.study._
-import org.biobank.domain.participants._
+import org.biobank.domain.participants.{
+  CollectionEvent,
+  Participant,
+  Specimen
+}
 import org.biobank.domain.centre._
 import org.biobank.infrastructure._
 
@@ -12,32 +17,20 @@ import com.github.nscala_time.time.Imports._
 import org.scalatest._
 import org.slf4j.LoggerFactory
 import org.joda.time.format.DateTimeFormat
+import com.typesafe.scalalogging._
 
-object JsonHelper extends MustMatchers with OptionValues {
+trait JsonHelper extends MustMatchers with OptionValues {
   import org.biobank.infrastructure.JsonUtils._
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  val log: Logger
 
   private def compareEntity[T <: IdentifiedDomainObject[_]](json: JsValue, entity: ConcurrencySafeEntity[T]) = {
     (json \ "id").as[String] mustBe (entity.id.toString)
     (json \ "version").as[Long] mustBe (entity.version)
 
-    ((json \ "timeAdded").as[DateTime] to entity.timeAdded).millis must be < 1000L
-
-    (json \ "timeModified").asOpt[DateTime] match {
-      case Some(jsonTimeModified) => {
-        entity.timeModified match {
-          case Some(entityTimeModified) => (jsonTimeModified to entityTimeModified).millis must be < 1000L
-          case None => fail("entity does has no time modified")
-        }
-      }
-      case None => {
-        entity.timeModified match {
-          case Some(entityTimeModified) => fail("json object has no time modified")
-          case None => // test passes
-        }
-      }
-    }
+    TestUtils.checkTimeStamps(entity,
+                              (json \ "timeAdded").as[DateTime],
+                              (json \ "timeModified").asOpt[DateTime])
   }
 
   def compareObj(json: JsValue, user: User) = {
@@ -47,11 +40,27 @@ object JsonHelper extends MustMatchers with OptionValues {
     (json \ "avatarUrl").asOpt[String] mustBe (user.avatarUrl)
   }
 
-  def compareObj(json: JsValue, study: Study) = {
+  def compareObj[T <: Study](json: JsValue, study: T) = {
     compareEntity(json, study)
+
     (json \ "name").as[String] mustBe (study.name)
+
     (json \ "description").asOpt[String] mustBe (study.description)
+
     (json \ "status").as[String] mustBe (study.getClass.getSimpleName)
+
+    val jsonAnnotationTypes = (json \ "annotationTypes").as[List[JsObject]]
+
+    jsonAnnotationTypes must have size (study.annotationTypes.size)
+
+    jsonAnnotationTypes.foreach { json =>
+      val jsonUniqueId = (json \ "uniqueId").as[String]
+      study.annotationTypes.find { at => at.uniqueId == jsonUniqueId }.fold {
+        fail(s"could not find annotation type in study: $jsonUniqueId")
+      } {
+        compareAnnotationType(json, _)
+      }
+    }
   }
 
   def compareObj(json: JsValue, study: StudyNameDto) = {
@@ -64,20 +73,23 @@ object JsonHelper extends MustMatchers with OptionValues {
 
   def compareObj(json: JsValue, specimenGroup: SpecimenGroup) = {
     compareEntity(json, specimenGroup)
-    (json \ "studyId").as[String] mustBe (specimenGroup.studyId.id)
-    (json \ "name").as[String] mustBe (specimenGroup.name)
-    (json \ "description").asOpt[String] mustBe (specimenGroup.description)
-    (json \ "units").as[String] mustBe (specimenGroup.units)
-    (json \ "anatomicalSourceType").as[String] mustBe (specimenGroup.anatomicalSourceType.toString)
-    (json \ "preservationType").as[String] mustBe (specimenGroup.preservationType.toString)
-    (json \ "preservationTemperatureType").as[String] mustBe (specimenGroup.preservationTemperatureType.toString)
-    (json \ "specimenType").as[String] mustBe (specimenGroup.specimenType.toString)
   }
 
-  def compareSgData(json: JsValue, specimenGroupData: CollectionEventTypeSpecimenGroupData) = {
-    (json \ "specimenGroupId").as[String] mustBe (specimenGroupData.specimenGroupId)
-    (json \ "maxCount").as[Int] mustBe (specimenGroupData.maxCount)
-    (json \ "amount").asOpt[BigDecimal] mustBe (specimenGroupData.amount)
+  def compareSpecimenSpec(json: JsValue, specimenSpec: SpecimenSpec): Unit = {
+    (json \ "uniqueId").as[String]                    mustBe (specimenSpec.uniqueId)
+    (json \ "name").as[String]                        mustBe (specimenSpec.name)
+    (json \ "description").asOpt[String]              mustBe (specimenSpec.description)
+    (json \ "units").as[String]                       mustBe (specimenSpec.units)
+    (json \ "anatomicalSourceType").as[String]        mustBe (specimenSpec.anatomicalSourceType.toString)
+    (json \ "preservationType").as[String]            mustBe (specimenSpec.preservationType.toString)
+    (json \ "preservationTemperatureType").as[String] mustBe (specimenSpec.preservationTemperatureType.toString)
+    (json \ "specimenType").as[String]                mustBe (specimenSpec.specimenType.toString)
+  }
+
+  def compareCollectionSpecimenSpec(json: JsValue, specimenSpec: CollectionSpecimenSpec): Unit = {
+    compareSpecimenSpec(json, specimenSpec)
+    (json \ "maxCount").as[Int]         mustBe (specimenSpec.maxCount)
+    (json \ "amount").asOpt[BigDecimal] mustBe (specimenSpec.amount)
   }
 
   def compareAnnotData(json: JsValue, annotationTypeData: AnnotationTypeData) = {
@@ -92,41 +104,32 @@ object JsonHelper extends MustMatchers with OptionValues {
     (json \ "description").asOpt[String] mustBe (ceventType.description)
     (json \ "recurring").as[Boolean] mustBe (ceventType.recurring)
 
-    (json \ "specimenGroupData").as[List[JsObject]] must have size ceventType.specimenGroupData.size
-    (json \ "annotationTypeData").as[List[JsObject]] must have size ceventType.annotationTypeData.size
+    (json \ "specimenSpecs").as[List[JsObject]] must have size ceventType.specimenSpecs.size
+    (json \ "annotationTypes").as[List[JsObject]] must have size ceventType.annotationTypes.size
 
-    (json \ "specimenGroupData")
-      .as[List[JsObject]].zip(ceventType.specimenGroupData).foreach { item =>
-        compareSgData(item._1, item._2)
-      }
+    (json \ "specimenSpecs").as[List[JsObject]].foreach { jsItem =>
+      val jsonId = (jsItem \ "uniqueId").as[String]
+      val sg = ceventType.specimenSpecs.find { x => x.uniqueId == jsonId }
+      sg mustBe defined
+      sg.map { compareCollectionSpecimenSpec(jsItem, _) }
+    }
 
-    (json \ "annotationTypeData")
-      .as[List[JsObject]].zip(ceventType.annotationTypeData).foreach { item =>
-        compareAnnotData(item._1, item._2)
-      }
+    (json \ "annotationTypes").as[List[JsObject]].foreach { jsItem =>
+      val jsonId = (jsItem \ "uniqueId").as[String]
+      val at = ceventType.annotationTypes.find { x => x.uniqueId == jsonId }
+      at mustBe defined
+      at.map { compareAnnotationType(jsItem, _) }
+    }
   }
 
-  def compareObj(json: JsValue, annotType: StudyAnnotationType) = {
-    compareEntity(json, annotType)
-    (json \ "studyId").as[String] mustBe (annotType.studyId.id)
-    (json \ "name").as[String] mustBe (annotType.name)
+  def compareAnnotationType(json: JsValue, annotType: AnnotationType) = {
+    (json \ "uniqueId").as[String]       mustBe (annotType.uniqueId)
+    (json \ "name").as[String]           mustBe (annotType.name)
     (json \ "description").asOpt[String] mustBe (annotType.description)
-    (json \ "valueType").as[String] mustBe (annotType.valueType.toString)
-    (json \ "maxValueCount").asOpt[Int] mustBe (annotType.maxValueCount)
-
-    (json \ "options").as[Seq[String]] mustBe (annotType.options)
-  }
-
-  def compareObj(json: JsValue, annotType: ParticipantAnnotationType) = {
-    compareEntity(json, annotType)
-    (json \ "studyId").as[String] mustBe (annotType.studyId.id)
-    (json \ "name").as[String] mustBe (annotType.name)
-    (json \ "description").asOpt[String] mustBe (annotType.description)
-    (json \ "valueType").as[String] mustBe (annotType.valueType.toString)
-    (json \ "maxValueCount").asOpt[Int] mustBe (annotType.maxValueCount)
-    (json \ "required").as[Boolean] mustBe (annotType.required)
-
-    (json \ "options").as[Seq[String]] mustBe (annotType.options)
+    (json \ "valueType").as[String]      mustBe (annotType.valueType.toString)
+    (json \ "maxValueCount").asOpt[Int]  mustBe (annotType.maxValueCount)
+    (json \ "options").as[Seq[String]]   mustBe (annotType.options)
+    (json \ "required").as[Boolean]      mustBe (annotType.required)
   }
 
   def compareObj(json: JsValue, processingType: ProcessingType) = {
@@ -157,17 +160,15 @@ object JsonHelper extends MustMatchers with OptionValues {
       }
   }
 
-  def compareAnnotation[T <: Annotation[_]](json: JsValue, annotation: T): Unit = {
-    (json \ "annotationTypeId").as[String] mustBe (annotation.annotationTypeId.id)
+  def compareAnnotation(json: JsValue, annotation: Annotation): Unit = {
+    (json \ "annotationTypeUniqueId").as[String] mustBe (annotation.annotationTypeUniqueId)
     (json \ "stringValue").asOpt[String] mustBe (annotation.stringValue)
     (json \ "numberValue").asOpt[String] mustBe (annotation.numberValue)
 
-    (json \ "selectedValues").as[List[JsObject]] must have size annotation.selectedValues.size
+    (json \ "selectedValues").as[List[String]] must have size annotation.selectedValues.size
 
-    (json \ "selectedValues").as[List[JsObject]].foreach { svJson =>
-      val sv = AnnotationOption(AnnotationTypeId((svJson \ "annotationTypeId").as[String]),
-                                (svJson \ "value").as[String])
-      annotation.selectedValues.contains(sv)
+    (json \ "selectedValues").as[List[String]].foreach { svJson =>
+      annotation.selectedValues.contains(svJson)
     }
   }
 
@@ -178,17 +179,17 @@ object JsonHelper extends MustMatchers with OptionValues {
 
     (json \ "annotations").as[List[JsObject]] must have size participant.annotations.size
 
-    (json \ "annotations").as[List[JsObject]].foreach { annotation =>
-      val annotationTypeId = (annotation \ "annotationTypeId").as[String]
+    (json \ "annotations").as[List[JsObject]].foreach { jsAnnotation =>
+      val annotationTypeUniqueId = (jsAnnotation \ "annotationTypeUniqueId").as[String]
       val participantAnnotationMaybe = participant.annotations.find { a  =>
-        a.annotationTypeId.id == annotationTypeId
+        a.annotationTypeUniqueId == annotationTypeUniqueId
       }
 
       participantAnnotationMaybe match {
         case Some(participantAnnotation) =>
-          compareAnnotation(annotation, participantAnnotation)
+          compareAnnotation(jsAnnotation, participantAnnotation)
         case None =>
-          fail(s"annotation with annotationTypeId not found on participant: $annotationTypeId")
+          fail(s"annotation with annotationTypeId not found on participant: $annotationTypeUniqueId")
       }
     }
   }
@@ -204,20 +205,62 @@ object JsonHelper extends MustMatchers with OptionValues {
 
   def compareObj(json: JsValue, centre: Centre) = {
     compareEntity(json, centre)
+
     (json \ "name").as[String] mustBe (centre.name)
     (json \ "description").asOpt[String] mustBe (centre.description)
     (json \ "status").as[String] mustBe (centre.getClass.getSimpleName)
+
+    (json \ "studyIds").as[List[String]].foreach { jsStudyId =>
+      centre.studyIds must contain (StudyId(jsStudyId))
+    }
+
+    (json \ "locations").as[List[JsObject]].foreach { jsLocation =>
+      val jsLocationId = (jsLocation \ "uniqueId").as[String]
+      centre.locations.find { x => x.uniqueId == jsLocationId }
+        .fold { fail(s"annotation with id not found on centre: $jsLocationId")
+      } { location => compareLocation(jsLocation, location) }
+    }
   }
 
-  def compareObj(json: JsValue, location: Location) = {
-    (json \ "id").as[String] mustBe (location.id.id)
-    (json \ "name").as[String] mustBe (location.name)
-    (json \ "street").as[String] mustBe (location.street)
-    (json \ "city").as[String] mustBe (location.city)
-    (json \ "province").as[String] mustBe (location.province)
-    (json \ "postalCode").as[String] mustBe (location.postalCode)
+  def compareLocation(json: JsValue, location: Location): Unit = {
+    (json \ "uniqueId").as[String]       mustBe (location.uniqueId)
+    (json \ "name").as[String]           mustBe (location.name)
+    (json \ "street").as[String]         mustBe (location.street)
+    (json \ "city").as[String]           mustBe (location.city)
+    (json \ "province").as[String]       mustBe (location.province)
+    (json \ "postalCode").as[String]     mustBe (location.postalCode)
     (json \ "countryIsoCode").as[String] mustBe (location.countryIsoCode)
     (json \ "poBoxNumber").asOpt[String] mustBe (location.poBoxNumber)
+  }
+
+  def annotationTypeToJson(annotType: AnnotationType): JsObject = {
+    Json.obj("uniqueId"    -> annotType.uniqueId,
+             "name"        -> annotType.name,
+             "description" -> annotType.description,
+             "valueType"   -> annotType.valueType,
+             "options"     -> annotType.options,
+             "required"    -> annotType.required)
+  }
+
+  def annotationTypeToJsonNoId(annotType: AnnotationType): JsObject = {
+    annotationTypeToJson(annotType) - "id"
+  }
+
+  def collectionSpecimenSpecToJson(spec: CollectionSpecimenSpec): JsObject = {
+    Json.obj("uniqueId"                    -> spec.uniqueId,
+             "name"                        -> spec.name,
+             "description"                 -> spec.description,
+             "units"                       -> spec.units,
+             "anatomicalSourceType"        -> spec.anatomicalSourceType.toString,
+             "preservationType"            -> spec.preservationType.toString,
+             "preservationTemperatureType" -> spec.preservationTemperatureType.toString,
+             "specimenType"                -> spec.specimenType.toString,
+             "maxCount"                    -> spec.maxCount,
+             "amount"                      -> spec.amount)
+  }
+
+  def collectionSpecimenSpecToJsonNoId(spec: CollectionSpecimenSpec): JsObject = {
+    collectionSpecimenSpecToJson(spec) - "id"
   }
 
 }
