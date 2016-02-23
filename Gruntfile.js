@@ -40,6 +40,14 @@ module.exports = function(grunt) {
         dest: 'docs',
         scripts: ['../app.min.js'],
       }
+    },
+
+    jshint: {
+      files: ['app/assets/javascripts/**/*.js', 'test/assets/javascripts/**/*.js'],
+      options: {
+        jshintrc: '.jshintrc',
+        reporter: './node_modules/grunt-contrib-jshint/node_modules/jshint/src/reporters/unix'
+      }
     }
 
     // ngAnnotate: {
@@ -57,13 +65,6 @@ module.exports = function(grunt) {
     //         extDot: 'last'       // Extensions in filenames begin after the last dot
     //       },
     //     ],
-    //   }
-    // },
-
-    // jshint: {
-    //   files: ['Gruntfile.js', 'app/assets/javascripts/**/*.js', 'test/assets/javascripts/**/*.js'],
-    //   options: {
-    //     jshintrc: '.jshintrc'
     //   }
     // },
 
@@ -88,6 +89,7 @@ module.exports = function(grunt) {
 
   grunt.loadNpmTasks('grunt-karma');
   grunt.loadNpmTasks('grunt-ngdocs');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
 
   // grunt.registerTask('test', 'Run tests on singleRun karma server', function () {
   //   if (grunt.option('coverage')) {

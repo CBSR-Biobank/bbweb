@@ -2,37 +2,45 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'underscore'], function(angular, _) {
+define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sprintf) {
   'use strict';
 
   CentreFactory.$inject = [
+    '$q',
     'funutils',
-    'validationService',
+    'biobankApi',
     'ConcurrencySafeEntity',
     'CentreStatus',
     'Location',
-    'centresService',
-    'centreLocationsService'
+    'queryStringService'
   ];
 
   /**  *
    */
-  function CentreFactory(funutils,
-                         validationService,
+  function CentreFactory($q,
+                         funutils,
+                         biobankApi,
                          ConcurrencySafeEntity,
                          CentreStatus,
                          Location,
-                         centresService,
-                         centreLocationsService) {
+                         queryStringService) {
 
-    var requiredKeys = ['id', 'version', 'timeAdded', 'name', 'status'];
-
-    var validateObj = funutils.partial(
-      validationService.condition1(
-        validationService.validator('must be a map', _.isObject),
-        validationService.validator('has the correct keys',
-                                    validationService.hasKeys.apply(null, requiredKeys))),
-      _.identity);
+    var schema = {
+      'id': 'Centre',
+      'type': 'object',
+      'properties': {
+        'id':           { 'type': 'string'},
+        'version':      { 'type': 'integer', 'minimum': 0},
+        'timeAdded':    { 'type': 'string'},
+        'timeModified': { 'type': 'string'},
+        'name':         { 'type': 'string'},
+        'description':  { 'type': 'string'},
+        'studyIds':     { 'type': 'array'},
+        'locations':    { 'type': 'array'},
+        'status':       { 'type': 'string'}
+      },
+      'required': [ 'id', 'version', 'timeAdded', 'name', 'status' ]
+    };
 
     /**
      *
@@ -42,8 +50,8 @@ define(['angular', 'underscore'], function(angular, _) {
         name:        '',
         description: null,
         status:      CentreStatus.DISABLED(),
-        locations:   [],
-        studyIds:    []
+        studyIds:    [],
+        locations:   []
       };
 
       ConcurrencySafeEntity.call(this, obj);
@@ -54,38 +62,190 @@ define(['angular', 'underscore'], function(angular, _) {
 
     Centre.prototype = Object.create(ConcurrencySafeEntity.prototype);
 
+    Centre.prototype.constructor = Centre;
+
     /**
      * Used by promise code, so it must return an error rather than throw one.
      */
     Centre.create = function (obj) {
-      var validation = validateObj(obj);
-      if (!_.isObject(validation)) {
-        return new Error('invalid object from server: ' + validation);
+      if (!tv4.validate(obj, schema)) {
+        throw new Error('invalid object from server: ' + tv4.error);
       }
+
+      if (!validStudyIds(obj.studyIds)) {
+        throw new Error('invalid object from server: bad study ids');
+      }
+
+      if (!validLocations(obj.locations)) {
+        throw new Error('invalid object from server: bad locations');
+      }
+
       return new Centre(obj);
     };
 
+    /**
+     * @param {string} options.filter The filter to use on centre names. Default is empty string.
+     *
+     * @param {string} options.status Returns centres filtered by status. The following are valid: 'all' to
+     * return all centres, 'disabled' to return only disabled centres, 'enabled' to reutrn only enable
+     * centres, and 'retired' to return only retired centres. For any other values the response is an error.
+     *
+     * @param {string} options.sortField Centres can be sorted by 'name' or by 'status'. Values other than
+     * these two yield an error.
+     *
+     * @param {int} options.page If the total results are longer than pageSize, then page selects which
+     * centres should be returned. If an invalid value is used then the response is an error.
+     *
+     * @param {int} options.pageSize The total number of centres to return per page. The maximum page size is
+     * 10. If a value larger than 10 is used then the response is an error.
+     *
+     * @param {string} options.order One of 'asc' or 'desc'. If an invalid value is used then
+     * the response is an error.
+     *
+     * @return A promise. If the promise succeeds then a paged result is returned.
+     */
     Centre.list = function (options) {
+      var validKeys = [
+        'filter',
+        'status',
+        'sort',
+        'page',
+        'pageSize',
+        'order'
+      ];
+      var url = uri();
+      var paramsStr = '';
+
       options = options || {};
-      return centresService.list(options).then(function(reply) {
-        // reply is a paged result
-        reply.items = _.map(reply.items, function(obj){
-          return Centre.create(obj);
-        });
-        return reply;
+
+      paramsStr = queryStringService.param(options, function (value, key) {
+        return _.contains(validKeys, key);
+      });
+
+      if (paramsStr.length) {
+        url += paramsStr;
+      }
+
+      return biobankApi.get(url).then(function(reply) {
+        var deferred = $q.defer();
+        try {
+          // reply is a paged result
+          reply.items = _.map(reply.items, function(obj){
+            return Centre.create(obj);
+          });
+          deferred.resolve(reply);
+        } catch (e) {
+          deferred.reject('invalid centres from server');
+        }
+        return deferred.promise;
       });
     };
 
     Centre.get = function (id) {
-      return centresService.get(id).then(function(reply) {
-        return Centre.create(reply);
+      return biobankApi.get(uri(id)).then(function(reply) {
+        return asyncCreate(reply);
       });
     };
 
-    Centre.prototype.addOrUpdate = function () {
-      var self = this;
-      return centresService.addOrUpdate(self).then(function(reply) {
-        return new Centre.create(reply);
+    Centre.prototype.add = function () {
+      var self = this,
+          json = { name: this.name };
+      angular.extend(json, funutils.pickOptional(self, 'description'));
+      return biobankApi.post(uri(), json).then(function(reply) {
+        return asyncCreate(reply);
+      });
+    };
+
+    Centre.prototype.updateName = function (name) {
+      var self = this,
+          json = {
+            name:            name,
+            expectedVersion: self.version
+          };
+
+      return biobankApi.post(uri('name', self.id), json).then(function(reply) {
+        return asyncCreate(reply);
+      });
+    };
+
+    Centre.prototype.updateDescription = function (description) {
+      var self = this,
+          json = {
+            expectedVersion: self.version
+          };
+
+      if (description) {
+        json.description = description;
+      }
+
+      return biobankApi.post(uri('description', self.id), json).then(function(reply) {
+        return asyncCreate(reply);
+      });
+    };
+
+    Centre.prototype.addStudy = function (study) {
+      var self = this, json;
+
+      json = { studyId: study.id, expectedVersion: self.version };
+      return biobankApi.post(uri('studies', self.id), json).then(function(reply) {
+        return asyncCreate(reply);
+      });
+    };
+
+    Centre.prototype.removeStudy = function (study) {
+      var self = this, url;
+
+      if (!_.contains(self.studyIds, study.id)) {
+        throw new Error('study ID not present: ' + study.id);
+      }
+
+      url = sprintf.sprintf('%s/%d/%s', uri('studies', self.id), self.version, study.id);
+
+      return biobankApi.del(url).then(function(reply) {
+        return asyncCreate(
+          _.extend(self, {
+            version: self.version + 1,
+            studyIds: _.without(self.studyIds, study.id)
+          }));
+      });
+    };
+
+    Centre.prototype.addLocation = function (location) {
+      var self = this,
+          json = {
+            expectedVersion: self.version,
+            name:            location.name,
+            street:          location.street,
+            city:            location.city,
+            province:        location.province,
+            postalCode:      location.postalCode,
+            poBoxNumber:     location.poBoxNumber,
+            countryIsoCode:  location.countryIsoCode
+          };
+
+      return biobankApi.post(uri('locations', self.id), json).then(function(reply) {
+        return asyncCreate(reply);
+      });
+    };
+
+    Centre.prototype.removeLocation = function (location) {
+      var self = this, existingLoc, url;
+
+      existingLoc = _.findWhere(self.locations, { uniqueId: location.uniqueId });
+      if (_.isUndefined(existingLoc)) {
+        throw new Error('location does not exist: ' + location.id);
+      }
+
+      url = sprintf.sprintf('%s/%d/%s', uri('locations', self.id), self.version, location.uniqueId);
+
+      return biobankApi.del(url).then(function(reply) {
+        return asyncCreate(
+          _.extend(self, {
+            version: self.version + 1,
+            locations: _.filter(self.locations, function(loc) {
+              return loc.uniqueId !== location.uniqueId;
+            })
+          }));
       });
     };
 
@@ -98,121 +258,94 @@ define(['angular', 'underscore'], function(angular, _) {
     };
 
     Centre.prototype.disable = function () {
+      if (this.isDisabled()) {
+        throw new Error('already disabled');
+      }
       return changeState(this, 'disable');
     };
 
     Centre.prototype.enable = function () {
-      return changeState(this, 'enable');
+       if (this.isEnabled()) {
+        throw new Error('already enabled');
+      }
+     return changeState(this, 'enable');
     };
 
-    Centre.prototype.getLocations = function () {
-      var self = this;
-      if (self.id === null) {
-        throw new Error('id is null');
+    function asyncCreate(obj) {
+      var deferred = $q.defer();
+
+      if (!tv4.validate(obj, schema)) {
+        deferred.reject('invalid object from server: ' + tv4.error);
+      } else if (!validStudyIds(obj.studyIds)) {
+        deferred.reject('invalid study IDs from server: ' + tv4.error);
+      } else if (!validLocations(obj.locations)) {
+        deferred.reject('invalid locations from server: ' + tv4.error);
+      } else {
+        deferred.resolve(new Centre(obj));
       }
-      return centreLocationsService.list(self.id).then(function(reply){
-        self.locations = _.map(reply, function(loc) {
-          return Location.create(loc);
-        });
-        return self;
+
+      return deferred.promise;
+    }
+
+    function changeState(centre, status) {
+      var json = { expectedVersion: centre.version };
+      return biobankApi.post(uri(status, centre.id), json).then(function (reply) {
+        return asyncCreate(reply);
       });
-    };
+    }
 
-    Centre.prototype.getLocation = function (locationId) {
-      var self = this;
-      if (self.id === null) {
-        throw new Error('id is null');
+    /**
+     * Ensures that all studyIds are valid.
+     */
+    function validStudyIds(studyIds) {
+      var result;
+
+      if (_.isUndefined(studyIds) || (studyIds.length <= 0)) {
+        // there are no study IDs, nothing to validate
+        return true;
       }
-      return centreLocationsService.query(self.id, locationId).then(function(reply){
-        self.locations.push(Location.create(reply));
-        return self;
+      result = _.find(studyIds, function (studyId) {
+        return (studyId === null) || (studyId === '');
       });
-    };
 
-    Centre.prototype.addLocation = function (location) {
-      var self = this, existingLoc;
+      return _.isUndefined(result);
+    }
 
-      if (self.id === null) {
-        throw new Error('id is null');
+    /**
+     * Ensures that all locations are valid.
+     */
+    function validLocations(locations) {
+      var result;
+
+      if (_.isUndefined(locations) || (locations.length <= 0)) {
+        // there are no study IDs, nothing to validate
+        return true;
       }
-
-      existingLoc = _.findWhere(self.locations, { id: location.id });
-      if (existingLoc) {
-        // remove this location first
-        return self.removeLocation(location).then(addInternal);
-      }
-      return addInternal();
-
-      function addInternal() {
-        return centreLocationsService.add(self, location).then(function(event) {
-          var newLoc = Location.create(_.extend(funutils.renameKeys(event, { locationId: 'id' }), location));
-          self.locations.push(newLoc);
-          return self;
-        });
-      }
-    };
-
-    Centre.prototype.removeLocation = function (location) {
-      var self = this, existingLoc;
-
-      if (self.id === null) {
-        throw new Error('id is null');
-      }
-
-      existingLoc = _.findWhere(self.locations, { id: location.id });
-      if (_.isUndefined(existingLoc)) {
-        throw new Error('location not present: ' + location.id);
-      }
-
-      return centreLocationsService.remove(this, location).then(function(reply) {
-        self.locations = _.without(self.locations, location);
-        return self;
+      result = _.find(locations, function (location) {
+        return !Location.valid(location);
       });
-    };
 
-    Centre.prototype.getStudyIds = function() {
-      var self = this;
-      if (self.id === null) {
-        throw new Error('id is null');
-      }
-      return centresService.studies(this).then(function(reply) {
-        self.studyIds = _.union(self.studyIds, reply);
-        return self;
-      });
-    };
+      return _.isUndefined(result);
+    }
 
-    Centre.prototype.addStudy = function (study) {
-      var self = this;
-      if (self.id === null) {
-        throw new Error('id is null');
-      }
-      if (_.contains(self.studyIds, study.id)) {
-        throw new Error('study ID already present: ' + study.id);
-      }
-      return centresService.addStudy(this, study.id).then(function(reply) {
-        self.studyIds.push(study.id);
-        return self;
-      });
-    };
+    function uri(/* path, centreId */) {
+      var args = _.toArray(arguments),
+          centreId,
+          path;
 
-    Centre.prototype.removeStudy = function (study) {
-      var self = this;
-      if (self.id === null) {
-        throw new Error('id is null');
-      }
-      if (! _.contains(self.studyIds, study.id)) {
-        throw new Error('study ID not present: ' + study.id);
-      }
-      return centresService.removeStudy(this, study.id).then(function(reply) {
-        self.studyIds = _.without(self.studyIds, study.id);
-        return self;
-      });
-    };
+      var result = '/centres';
 
-    function changeState(obj, method) {
-      return centresService[method](obj).then(function(reply) {
-        return new Centre.create(reply);
-      });
+      if (args.length > 0) {
+        path = args.shift();
+        result += '/' + path;
+      }
+
+      if (args.length > 0) {
+        centreId = args.shift();
+        result += '/' + centreId;
+      }
+
+      return result;
     }
 
     return Centre;

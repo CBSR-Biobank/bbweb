@@ -5,26 +5,19 @@
 define(function () {
   'use strict';
 
-  annotationTypeViewerFactory.$inject = [
-    'EntityViewer',
-    'ParticipantAnnotationType'
-  ];
+  annotationTypeViewerFactory.$inject = [ 'EntityViewer' ];
 
   /**
    *
    */
-  function annotationTypeViewerFactory(EntityViewer,
-                                      ParticipantAnnotationType) {
+  function annotationTypeViewerFactory(EntityViewer) {
 
     function AnnotationTypeViewer(annotationType, title) {
       var ev = new EntityViewer(annotationType, title);
 
       ev.addAttribute('Name', annotationType.name);
       ev.addAttribute('Type', annotationType.valueType);
-
-      if (annotationType instanceof ParticipantAnnotationType) {
-        ev.addAttribute('Required', annotationType.required ? 'Yes' : 'No');
-      }
+      ev.addAttribute('Required', annotationType.required ? 'Yes' : 'No');
 
       if (annotationType.isValueTypeSelect()) {
         if (!annotationType.options || annotationType.options.length < 1) {

@@ -37,6 +37,7 @@
     "jasmine":    true,
     "spyOn":      true,
     "xdescribe":  true,
-    "xit":        true
+    "xit":        true,
+    "fail":       true
   }
 }

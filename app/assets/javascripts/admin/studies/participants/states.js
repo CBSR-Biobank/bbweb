@@ -20,10 +20,7 @@ define(function () {
     $stateProvider.state('home.admin.studies.study.participants.annotationTypeAdd', {
       url: '/annottype/add',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        annotationType: ['ParticipantAnnotationType', function(ParticipantAnnotationType) {
-          return new ParticipantAnnotationType();
-        }]
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'main@': {
@@ -42,15 +39,7 @@ define(function () {
     $stateProvider.state('home.admin.studies.study.participants.annotationTypeUpdate', {
       url: '/annottype/update/{annotationTypeId}',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        annotationType: [
-          '$stateParams',
-          'ParticipantAnnotationType',
-          function($stateParams, ParticipantAnnotationType) {
-            return ParticipantAnnotationType.get($stateParams.studyId,
-                                                 $stateParams.annotationTypeId);
-          }
-        ]
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'main@': {

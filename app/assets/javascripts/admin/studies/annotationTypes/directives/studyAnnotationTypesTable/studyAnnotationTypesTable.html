@@ -3,10 +3,10 @@
     Annotation types have not been defined for this study yet.
   </div>
 </div>
-<div ng-if="vm.annotationTypes.length > 0">
+<div ng-if="vm.study.annotationTypes.length > 0">
   <p>The following annotation types are defined:</p>
   <table class="table table-condensed table-hover"
-         st-table="vm.annotationTypes">
+         st-table="vm.study.annotationTypes">
     <!-- NOTE: tried to put the th tag in a thead but they would not display on the page -->
     <thead>
       <tr>
@@ -17,7 +17,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr ng-repeat="annotationType in vm.annotationTypes">
+      <tr ng-repeat="annotationType in vm.study.annotationTypes">
         <td ng-repeat="column in vm.columns" sortable="column.field">
 
           <span ng-if="column.field === 'name'"

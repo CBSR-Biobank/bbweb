@@ -15,7 +15,6 @@ define(['angular', 'underscore'], function(angular, _) {
       scope: {},
       bindToController: {
         study:                  '=',
-        annotationTypes:        '=',
         annotationTypeIdsInUse: '=',
         annotationTypeName:     '@',
         panelId:                '@',
@@ -30,12 +29,12 @@ define(['angular', 'underscore'], function(angular, _) {
     return directive;
   }
 
-  StudyAnnotationTypesPanelCtrl.$inject = [ '$scope', 'Panel' ];
+  StudyAnnotationTypesPanelCtrl.$inject = [ '$scope', '$state', 'Panel' ];
 
   /**
    * A panel to display a study's participant annotation types.
    */
-  function StudyAnnotationTypesPanelCtrl($scope, Panel) {
+  function StudyAnnotationTypesPanelCtrl($scope, $state, Panel) {
     var vm = this,
         panel = new Panel(vm.panelId, vm.addStateName);
 
@@ -50,7 +49,7 @@ define(['angular', 'underscore'], function(angular, _) {
     //--
 
     function add() {
-      return panel.add();
+      $state.go(vm.addStateName);
     }
 
     function annotationTypeDescription(annotationTypeName) {

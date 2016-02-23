@@ -31,8 +31,10 @@ define(['faker', 'underscore'], function(faker, _) {
     function uuid() {
       var RFC4122_TEMPLATE = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
       var replacePlaceholders = function (placeholder) {
-        var random = Math.random()*16|0;
-        var value = placeholder == 'x' ? random : (random &0x3 | 0x8);
+        /* jshint bitwise: false */
+        var random = Math.random() * 16 | 0;
+        var value = (placeholder === 'x') ? random : (random &0x3 | 0x8);
+        /* jshint bitwise: true */
         return value.toString(16);
       };
       return RFC4122_TEMPLATE.replace(/[xy]/g, replacePlaceholders);
@@ -92,7 +94,7 @@ define(['faker', 'underscore'], function(faker, _) {
         .replace(/([A-Z])/g, '_$1').toUpperCase()
         .replace(' ', '');
       return result;
-    };
+    }
 
     function expectedVersion(version) {
       return { expectedVersion: version};

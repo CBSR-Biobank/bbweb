@@ -16,18 +16,17 @@ define(function () {
      * Used to display a domain entity in a modal.
      *
      * The modal will display all the attributes added with method 'addAttribute' and also the
-     * timeAdded and timeModified values from the entity.
+     * timeAdded and timeModified values from the entity if they exist.
      *
      * The modal shows the items in the order they are added.
      */
     function EntityViewer(entity, title) {
       var self = this;
-      if (arguments.length === 0) { return; }
-      self.entity = entity;
-      self.title = title;
-      self.items = [];
-      self.timeAdded = entity.timeAdded;
-      self.timeModified = entity.timeModified;
+      if (arguments.length > 0) {
+        self.entity = entity;
+        self.title = title;
+        self.items = [];
+      }
     }
 
     EntityViewer.prototype.addAttribute = function (label, value) {

@@ -27,7 +27,6 @@ module.exports = function(config) {
       { pattern: 'app/assets/javascripts/**/*.js', included: false },
       { pattern: 'test/assets/javascripts/**/*Spec.js', included: false },
       { pattern: 'test/assets/javascripts/test/**/*.js', included: false },
-      { pattern: 'test/assets/javascripts/fixtures/**/*.js', included: false },
 
       'app/assets/javascripts/**/*.html',
       'test/assets/javascripts/test-main.js',

@@ -96,6 +96,8 @@ libraryDependencies ++= Seq(
   ( "org.webjars"             %  "toastr"                              % "2.1.1"  ).exclude("org.webjars", "jquery"),
   ( "org.webjars"             %  "angular-sanitize"                    % "1.3.11" ).exclude("org.webjars", "angularjs"),
   "org.webjars"               %  "momentjs"                            % "2.11.1",
+  "org.webjars"               %  "sprintf.js"                          % "1.0.0",
+  "org.webjars"               %  "tv4"                                 % "1.0.17-1",
   "org.webjars.bower"         % "angular-utils-ui-breadcrumbs"         % "0.2.1",
   // Testing
   "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "1.2.5"              % "test",

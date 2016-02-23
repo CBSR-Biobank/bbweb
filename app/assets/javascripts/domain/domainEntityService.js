@@ -75,7 +75,7 @@ define(['underscore'], function(_) {
      * @return A promise. The promise is resolved if the entity was removed. The promise is rejected if the
      * user does not want to remove the entity or if the server does not allow the entity to be removed.
      */
-    function removeEntity(entity,
+    function removeEntity(promise,
                           headerHtml,
                           bodyHtml,
                           removeFailedHeaderHtml,
@@ -94,7 +94,7 @@ define(['underscore'], function(_) {
       //--
 
       function removeConfirmed() {
-        return entity.remove()
+        return promise()
           .then(deferred.resolve)
           .catch(function (error) {
             var modalOptions = {

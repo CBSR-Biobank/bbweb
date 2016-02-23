@@ -145,23 +145,15 @@ define(function () {
     $stateProvider.state('home.admin.studies.study.participants', {
       url: '/participants',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        annotationTypes: [
-          '$stateParams',
-          'ParticipantAnnotationType',
-          function($stateParams, ParticipantAnnotationType) {
-            return ParticipantAnnotationType.list($stateParams.studyId);
-          }
-        ]
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'studyDetails': {
           templateUrl: '/assets/javascripts/admin/studies/studyParticipantsTab.html',
           controller: [
-            '$scope', 'study', 'annotationTypes',
-            function($scope, study, annotationTypes) {
+            '$scope', 'study',
+            function($scope, study) {
               $scope.study = study;
-              $scope.annotationTypes = annotationTypes;
               // FIXME this is set to empty array for now, but will have to call the correct method in the future
               $scope.annotationTypeIdsInUse = [];
             }

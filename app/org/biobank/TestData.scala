@@ -6,13 +6,14 @@ import org.biobank.domain.participants._
 import org.biobank.domain.centre._
 import org.biobank.domain.user._
 import org.biobank.service.PasswordHasher
-import org.biobank.infrastructure._
 
 import org.slf4j.LoggerFactory
 import javax.inject.{ Inject, Singleton }
 import akka.actor.ActorSystem
 import play.api.Logger
 import org.joda.time.DateTime
+import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /**
  * Provides initial data to test with.
@@ -220,7 +221,6 @@ class TestData @Inject() (
           studyRepository.put(study)
         }
 
-      addSpecimenGroups
       addCollectionEvents
       addAnnotationTypes
 
@@ -241,51 +241,45 @@ class TestData @Inject() (
     }
   }
 
-  def addSpecimenGroups() = {
-    Logger.debug("addSpecimenGroups")
-
-    studyRepository.getValues.take(sgIds.size).zip(sgIds).foreach { case (study, sgId) =>
-      val sg = SpecimenGroup(studyId                     = study.id,
-                             id                          = SpecimenGroupId(sgId),
-                             version                     = 0L,
-                             timeAdded                   = DateTime.now,
-                             timeModified                = None,
-                             name                        = study.name + " SG",
-                             description                 = None,
-                             units                       = "mL",
-                             anatomicalSourceType        = AnatomicalSourceType.Blood,
-                             preservationType            = PreservationType.FrozenSpecimen,
-                             preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
-                             specimenType                = SpecimenType.Rna)
-
-      specimenGroupRepository.put(sg)
-    }
-  }
-
   def addCollectionEvents() = {
     Logger.debug("addCollectionEvents")
 
-    specimenGroupRepository.getValues.zip(cetIds).foreach { case (sg, cetId) =>
-      studyRepository.getDisabled(sg.studyId).fold(
-        err => Logger.error(s"disabled study not found: $err"),
-        study => {
-          val sgData = CollectionEventTypeSpecimenGroupData(specimenGroupId = sg.id.id,
-                                                            maxCount        = 1,
-                                                            amount          = Some(0.1))
-          val cet = CollectionEventType(studyId            = study.id,
-                                        id                 = CollectionEventTypeId(cetId),
-                                        version            = 0L,
-                                        timeAdded          = DateTime.now,
-                                        timeModified       = None,
-                                        name               = study.name + " CET",
-                                        description        = None,
-                                        recurring          = true,
-                                        specimenSpecs      = Set.empty,
-                                        annotationTypes    = Set.empty)
-          collectionEventTypeRepository.put(cet)
-          ()
+    studyRepository.getValues.take(cetIds.size).zip(cetIds).foreach { case (study, cetId) =>
+      for {
+        spec  <- {
+          CollectionSpecimenSpec.create(
+            name                        = study.name + " CET SSpec",
+            description                 = None,
+            units                       = "mL",
+            anatomicalSourceType        = AnatomicalSourceType.Blood,
+            preservationType            = PreservationType.FrozenSpecimen,
+            preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
+            specimenType                = SpecimenType.Rna,
+            maxCount                    = 1,
+            amount                      = Some(0.1))
         }
-      )
+        annotType <- {
+          AnnotationType.create(name          = "Text annotation",
+                                description   = None,
+                                valueType     = AnnotationValueType.Text,
+                                maxValueCount = None,
+                                options       = Seq.empty,
+                                required      = true)
+        }
+      } yield {
+        val cet = CollectionEventType(studyId            = study.id,
+                                      id                 = CollectionEventTypeId(cetId),
+                                      version            = 0L,
+                                      timeAdded          = DateTime.now,
+                                      timeModified       = None,
+                                      name               = study.name + " CET",
+                                      description        = None,
+                                      recurring          = true,
+                                      specimenSpecs      = Set(spec),
+                                      annotationTypes    = Set(annotType))
+        collectionEventTypeRepository.put(cet)
+        ()
+      }
     }
   }
 
@@ -299,58 +293,58 @@ class TestData @Inject() (
         case None =>
           Logger.error(s"addAnnotationTypes: study with name not found: $studyName")
         case Some(study)  =>
-          val patList = List(
-              AnnotationType(
-                uniqueId      = "f53c5dca-d34f-11e5-ab30-625662870761",
-                name          = "Text annotation",
-                description   = None,
-                valueType     = AnnotationValueType.Text,
-                maxValueCount = None,
-                options       = Seq.empty,
-                required      = true),
-              AnnotationType(
-                uniqueId      = "f53c616c-d34f-11e5-ab30-625662870761",
-                name          = "Number annotation",
-                description   = None,
-                valueType     = AnnotationValueType.Number,
-                maxValueCount = None,
-                options       = Seq.empty,
-                required      = true),
-              AnnotationType(
-                uniqueId      = "f53c6360-d34f-11e5-ab30-625662870761",
-                name          = "Number annotation 2",
-                description   = None,
-                valueType     = AnnotationValueType.Number,
-                maxValueCount = None,
-                options       = Seq.empty,
-                required      = true),
-              AnnotationType(
-                uniqueId      = "f53c6766-d34f-11e5-ab30-625662870761",
-                name          = "DateTime annotation",
-                description   = None,
-                valueType     = AnnotationValueType.DateTime,
-                maxValueCount = None,
-                options       = Seq.empty,
-                required      = true),
-              AnnotationType(
-                uniqueId      = "f53c690a-d34f-11e5-ab30-625662870761",
-                name          = "Select single annotation",
-                description   = None,
-                valueType     = AnnotationValueType.Select,
-                maxValueCount = Some(1),
-                options       = Seq("option1", "option2"),
-                required      = true),
-              AnnotationType(
-                uniqueId      = "f53c6a9a-d34f-11e5-ab30-625662870761",
-                name          = "Select multiple annotation",
-                description   = None,
-                valueType     = AnnotationValueType.Select,
-                maxValueCount = Some(2),
-                options       = Seq("option1", "option2", "option3"),
-                required      = true)
-            )
-          // TODO: annotationTypeRefactor add these to the study
-          //patList.foreach { pat => annotationTypeRepository.put(pat) }
+          val annotTypes = Set(AnnotationType(
+                                 uniqueId      = "f53c5dca-d34f-11e5-ab30-625662870761",
+                                 name          = "Text annotation",
+                                 description   = None,
+                                 valueType     = AnnotationValueType.Text,
+                                 maxValueCount = None,
+                                 options       = Seq.empty,
+                                 required      = true),
+                               AnnotationType(
+                                 uniqueId      = "f53c616c-d34f-11e5-ab30-625662870761",
+                                 name          = "Number annotation",
+                                 description   = None,
+                                 valueType     = AnnotationValueType.Number,
+                                 maxValueCount = None,
+                                 options       = Seq.empty,
+                                 required      = true),
+                               AnnotationType(
+                                 uniqueId      = "f53c6360-d34f-11e5-ab30-625662870761",
+                                 name          = "Number annotation 2",
+                                 description   = None,
+                                 valueType     = AnnotationValueType.Number,
+                                 maxValueCount = None,
+                                 options       = Seq.empty,
+                                 required      = true),
+                               AnnotationType(
+                                 uniqueId      = "f53c6766-d34f-11e5-ab30-625662870761",
+                                 name          = "DateTime annotation",
+                                 description   = None,
+                                 valueType     = AnnotationValueType.DateTime,
+                                 maxValueCount = None,
+                                 options       = Seq.empty,
+                                 required      = true),
+                               AnnotationType(
+                                 uniqueId      = "f53c690a-d34f-11e5-ab30-625662870761",
+                                 name          = "Select single annotation",
+                                 description   = None,
+                                 valueType     = AnnotationValueType.Select,
+                                 maxValueCount = Some(1),
+                                 options       = Seq("option1", "option2"),
+                                 required      = true),
+                               AnnotationType(
+                                 uniqueId      = "f53c6a9a-d34f-11e5-ab30-625662870761",
+                                 name          = "Select multiple annotation",
+                                 description   = None,
+                                 valueType     = AnnotationValueType.Select,
+                                 maxValueCount = Some(2),
+                                 options       = Seq("option1", "option2", "option3"),
+                                 required      = true))
+          studyRepository.getDisabled(study.id).fold (
+            err => s"could not get disabled study: ${study.name}",
+            s => studyRepository.put(s.copy(annotationTypes = annotTypes))
+          )
       }
     }
 

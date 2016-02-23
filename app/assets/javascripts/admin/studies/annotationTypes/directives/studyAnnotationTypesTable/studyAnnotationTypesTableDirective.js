@@ -58,20 +58,15 @@ define(['angular', 'underscore'], function(angular, _) {
     function annotationTypeColumns(annotationTypeName) {
       var result =  [
         { title: 'Name', field: 'name' },
-        { title: 'Type', field: 'valueType' }
+        { title: 'Type', field: 'valueType' },
+        { title: 'Required', field: 'required' },
+        { title: 'Description', field: 'description' }
       ];
-
-      if (annotationTypeName === 'ParticipantAnnotationType') {
-        result.push({ title: 'Required', field: 'required' });
-      }
-
-      result.push({ title: 'Description', field: 'description' });
-
       return result;
     }
 
     function information(annotationType) {
-      return new AnnotationTypeViewer(annotationType, vm.annotationTypeName);
+      return new AnnotationTypeViewer(annotationType, annotationType.name);
     }
 
     /**
@@ -83,7 +78,7 @@ define(['angular', 'underscore'], function(angular, _) {
       }
 
       if (_.contains(vm.annotationTypeIdsInUse, annotationType.id)) {
-        studyAnnotationTypeUtils.updateInUseModal(annotationType);
+        studyAnnotationTypeUtils.updateInUseModal(annotationType, vm.annotationTypeName);
       } else {
         $state.go(vm.updateStateName, { annotationTypeId: annotationType.id });
       }
@@ -91,18 +86,21 @@ define(['angular', 'underscore'], function(angular, _) {
 
     function remove(annotationType) {
       if (_.contains(vm.annotationTypeIdsInUse, annotationType.id)) {
-        studyAnnotationTypeUtils.removeInUseModal(annotationType);
+        studyAnnotationTypeUtils.removeInUseModal(annotationType, vm.annotationTypeName);
       } else {
         if (!vm.study.isDisabled()) {
           throw new Error('study is not disabled');
         }
-        studyAnnotationTypeUtils.remove(annotationType)
-          .then(function () {
-            vm.annotationTypes = _.without(vm.annotationTypes, annotationType);
+        studyAnnotationTypeUtils.remove(removeAnnotationType, annotationType)
+          .then(function (study) {
+            vm.study = study;
           });
       }
-    }
 
+      function removeAnnotationType() {
+        return vm.study.removeAnnotationType(annotationType);
+      }
+    }
   }
 
   return studyAnnotationTypesTableDirective;

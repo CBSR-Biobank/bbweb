@@ -10,6 +10,8 @@ define([
 ], function(angular, _, faker, moment) {
   'use strict';
 
+  /*jshint camelcase: false */
+
   fakeDomainEntities.$inject = [
     'AnnotationValueType',
     'AnatomicalSourceType',
@@ -44,15 +46,12 @@ define([
     var service = {
       domainEntityNameNext:              domainEntityNameNext,
       stringNext:                        stringNext,
-      specimenGroupData:                 specimenGroupData,
-      annotationTypeData:                annotationTypeData,
       specimenLinkType:                  specimenLinkType,
       processingType:                    processingType,
       collectionEventType:               collectionEventType,
       specimenGroup:                     specimenGroup,
       annotationType:                    annotationType,
-      studyAnnotationType:               studyAnnotationType,
-      allStudyAnnotationTypes:           allStudyAnnotationTypes,
+      allAnnotationTypes:                allAnnotationTypes,
       study:                             study,
       annotation:                        annotation,
       valueForAnnotation:                valueForAnnotation,
@@ -99,12 +98,12 @@ define([
 
     function ENTITY_NAME_USER()                  { return 'user'; }
 
-    function extendWithCommonFields(obj) {
-      return _.extend(obj, {
+    function commonFields(obj) {
+      return {
         version:      0,
         timeAdded:    moment(faker.date.recent(10)).format(),
         timeModified: moment(faker.date.recent(5)).format()
-      });
+      };
     }
 
     /**
@@ -134,21 +133,6 @@ define([
       return domainEntityType + '_' + nameCountByEntity[domainEntityType];
     }
 
-    function specimenGroupData(specimenGroup) {
-      return {
-        specimenGroupId: specimenGroup.id,
-        maxCount: faker.random.number() + 1,
-        amount: faker.random.number({precision: 0.5}) + 1
-      };
-    }
-
-    function annotationTypeData(annotationType) {
-      return {
-        annotationTypeId: annotationType.id,
-        required: testUtils.randomBoolean()
-      };
-    }
-
     function specimenLinkType(processingType, options) {
       var slt = {
         id: testUtils.uuid(),
@@ -175,11 +159,9 @@ define([
         slt.outputContainerTypeId = options.outputContainerType.id;
       }
 
-      slt.annotationTypeData = _.map(options.annotationTypes, function(at) {
-        return annotationTypeData(at);
-      });
+      slt.annotationTypeData = [];
 
-      return extendWithCommonFields(slt);
+      return _.extend(slt, commonFields());
     }
 
     function stringNext() {
@@ -194,8 +176,7 @@ define([
         description: randomFakerLoremWord(),
         enabled:     false
       };
-      return extendWithCommonFields(pt);
-
+      return _.extend(pt, commonFields());
     }
 
     /**
@@ -214,19 +195,14 @@ define([
       options = options || {};
 
       if (options.specimenGroups) {
-        cet.specimenGroupData = _.map(options.specimenGroups, function(sg) {
-          return specimenGroupData(sg);
-        });
+        cet.specimenGroupData = [];
       }
       if (options.annotationTypes) {
-        cet.annotationTypeData = _.map(options.annotationTypes, function(at) {
-          return annotationTypeData(at);
-        });
+        cet.annotationTypeData = [];
       }
 
       cet.recurring = _.isUndefined(options.recurring) ? false : options.recurring;
-
-      return extendWithCommonFields(cet);
+      return _.extend(cet, commonFields());
     }
 
     function randomAnatomicalSourceType() {
@@ -257,15 +233,11 @@ define([
         preservationTemperatureType: randomPreservationTemperatureTypeType(),
         specimenType:                randomSpecimenType()
       };
-      return extendWithCommonFields(sg);
+      return _.extend(sg, commonFields());
     }
 
     /**
      * If you need a study annotatoin type then use function 'studyAnnotationType'.
-     *
-     * @param {Study} study the study this annotation type belongs to.
-     *
-     * @param {Boolean} option.required use only when creating an Participant Annotation Type.
      *
      * @param {ValueType} option.valueType the type of annotation Type to create. Valid types are: Text,
      * Number, DateTime and Select.
@@ -281,11 +253,11 @@ define([
       }
 
       var at = {
-        id:        testUtils.uuid(),
-        studyId:   options.studyId || null,
+        uniqueId:  testUtils.uuid(),
         valueType: options.valueType,
         name:      domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE()),
-        options:   []
+        options:   [],
+        required:   false
       };
 
       if (options.valueType === AnnotationValueType.SELECT()) {
@@ -306,22 +278,14 @@ define([
         at.maxValueCount = options.maxValueCount;
       }
 
-      if (!_.isUndefined(options.required)) {
-        at.required = options.required;
-      }
-
-      return extendWithCommonFields(at);
+      return at;
     }
 
-    function studyAnnotationType(study, options) {
-      return _.extend(annotationType(options), { studyId: study.id });
-    }
-
-    function allStudyAnnotationTypes(study) {
+    function allAnnotationTypes() {
       var annotationTypes = _.map(AnnotationValueType.values(), function (valueType) {
-        return studyAnnotationType(study, { valueType: valueType });
+        return annotationType({ valueType: valueType });
       });
-      annotationTypes.push(studyAnnotationType(study, {
+      annotationTypes.push(annotationType({
         valueType:     AnnotationValueType.SELECT(),
         maxValueCount: 2,
         options:       [ 'opt1', 'opt2', 'opt3' ]
@@ -329,18 +293,21 @@ define([
       return annotationTypes;
     }
 
-    function study() {
-      var study =  {
-        id:          testUtils.uuid(),
-        name:        domainEntityNameNext(ENTITY_NAME_STUDY()),
-        description: randomFakerLoremWord(),
-        status:      StudyStatus.DISABLED()
+    function study(options) {
+      var s =  {
+        id:              testUtils.uuid(),
+        name:            domainEntityNameNext(ENTITY_NAME_STUDY()),
+        description:     randomFakerLoremWord(),
+        studyIds:        [],
+        annotationTypes: [],
+        status:          StudyStatus.DISABLED()
       };
-      return extendWithCommonFields(study);
+      options = options || {};
+      return _.extend(s, commonFields(), options);
     }
 
     function annotation(value, annotationType) {
-      var annotation = {
+      var annot = {
         annotationTypeId: annotationType.id,
         selectedValues:   []
       };
@@ -349,19 +316,19 @@ define([
 
       case AnnotationValueType.TEXT():
       case AnnotationValueType.DATE_TIME():
-        annotation.stringValue = value;
+        annot.stringValue = value;
         break;
 
       case AnnotationValueType.NUMBER():
-        annotation.numberValue = value;
+        annot.numberValue = value;
         break;
 
       case AnnotationValueType.SELECT():
         if (value) {
           if (annotationType.maxValueCount === 1) {
-            annotation.selectedValues =  [{ annotationTypeId: annotationType.id, value: value }];
+            annot.selectedValues =  [{ annotationTypeId: annotationType.id, value: value }];
           } else if (annotationType.maxValueCount > 1) {
-            annotation.selectedValues =_.map(value, function (v) {
+            annot.selectedValues =_.map(value, function (v) {
               return { annotationTypeId: annotationType.id, value: v };
             });
           } else {
@@ -374,7 +341,7 @@ define([
         throw new Error('invalid value type: ' + annotationType.valueType);
       }
 
-      return annotation;
+      return annot;
     }
 
     function valueForAnnotation(annotationType) {
@@ -412,24 +379,24 @@ define([
     function participant(options) {
       options = options || {};
 
-      var participant =  {
+      var p =  {
         id:          testUtils.uuid(),
         studyId:     options.studyId || null,
         uniqueId:    domainEntityNameNext(ENTITY_NAME_PARTICIPANT())
       };
 
       options.annotationTypes = options.annotationTypes || {};
-      participant.annotations = _.map(options.annotationTypes, function (annotationType) {
+      p.annotations = _.map(options.annotationTypes, function (annotationType) {
         return annotation(valueForAnnotation(annotationType), annotationType);
       });
 
-      return extendWithCommonFields(participant);
+      return _.extend(p, commonFields());
     }
 
     function collectionEvent(options) {
       options = options || {};
 
-      var collectionEvent =  {
+      var ce =  {
         id:                    testUtils.uuid(),
         participantId:         options.participantId || null,
         collectionEventTypeId: options.collectionEventTypeId || null,
@@ -438,29 +405,30 @@ define([
       };
 
       options.annotationTypes = options.annotationTypes || {};
-      collectionEvent.annotations = _.map(options.annotationTypes, function (annotationType) {
+      ce.annotations = _.map(options.annotationTypes, function (annotationType) {
         return annotation(valueForAnnotation(annotationType), annotationType);
       });
 
-      return extendWithCommonFields(collectionEvent);
+      return _.extend(ce, commonFields());
     }
 
-    function centre() {
-      var centre =  {
+    function centre(options) {
+      var c =  {
         id:          testUtils.uuid(),
         name:        domainEntityNameNext(ENTITY_NAME_CENTRE()),
         description: randomFakerLoremWord(),
         status:      CentreStatus.DISABLED()
       };
-      return extendWithCommonFields(centre);
+      options = options || {};
+      return _.extend(c, commonFields(), options);
     }
 
     /**
      * This is a value object, so it does not have the common fields.
      */
-    function location() {
-      return  {
-        id:             testUtils.uuid(),
+    function location(options) {
+      var loc = {
+        uniqueId:       testUtils.uuid(),
         name:           domainEntityNameNext(ENTITY_NAME_LOCATION()),
         street:         faker.address.streetAddress(),
         city:           faker.address.city(),
@@ -469,17 +437,20 @@ define([
         poBoxNumber:    randomFakerLoremWord(),
         countryIsoCode: randomFakerLoremWord()
       };
+      options = options || {};
+      _.extend(loc, options);
+      return loc;
     }
 
     function user() {
-      var user =  {
+      var u =  {
         id:          testUtils.uuid(),
         name:        domainEntityNameNext(ENTITY_NAME_USER()),
         email:       faker.internet.email(),
         avatarUrl:   faker.internet.avatar(),
         status:      UserStatus.REGISTERED()
       };
-      return extendWithCommonFields(user);
+      return _.extend(u, commonFields());
     }
 
     function pagedResult(entities) {
@@ -494,6 +465,8 @@ define([
       };
     }
   }
+
+  /*jshint camelcase: true */
 
   return fakeDomainEntities;
 });

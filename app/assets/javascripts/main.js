@@ -35,7 +35,9 @@
       'angular-sanitize':             '../lib/angular-sanitize/angular-sanitize',
       'angular-utils-ui-breadcrumbs': '../lib/angular-utils-ui-breadcrumbs/uiBreadcrumbs',
       'ui-bootstrap':                 '../lib/angular-ui-bootstrap/ui-bootstrap-tpls',
-      'smart-table':                  '../lib/smart-table/smart-table'
+      'smart-table':                  '../lib/smart-table/smart-table',
+      'sprintf':                      '../lib/sprintf.js/sprintf.min',
+      'tv4':                          '../lib/tv4/tv4'
     },
 
     shim: {

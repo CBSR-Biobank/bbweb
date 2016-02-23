@@ -11,10 +11,9 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
     'bbwebConfig',
     'ConcurrencySafeEntity',
     'AnnotationType',
+    'Annotation',
     'Study',
     'SpecimenGroup',
-    'StudyAnnotationType',
-    'ParticipantAnnotationType',
     'CollectionEventType',
     'ProcessingType',
     'SpecimenLinkType',
@@ -37,10 +36,9 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
   function extendedDomainEntities(bbwebConfig,
                                   ConcurrencySafeEntity,
                                   AnnotationType,
+                                  Annotation,
                                   Study,
                                   SpecimenGroup,
-                                  StudyAnnotationType,
-                                  ParticipantAnnotationType,
                                   CollectionEventType,
                                   ProcessingType,
                                   SpecimenLinkType,
@@ -69,7 +67,7 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
         //console.log('validateAttrs', arg, obj[arg], entity[arg]);
         expect(obj[arg]).toEqual(entity[arg]);
       });
-    };
+    }
 
     /**
      * @param obj the JS domain entity.
@@ -88,29 +86,18 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
           expect(entity[attr]).toBeUndefined();
         }
       });
-    };
+    }
 
     ConcurrencySafeEntity.prototype.compareToServerEntity = function (serverEntity) {
       validateAttrs(this, serverEntity, 'id', 'version');
     };
 
     AnnotationType.prototype.compareToServerEntity = function (serverEntity) {
-      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
-      validateAttrs(this, serverEntity, 'name', 'valueType', 'options');
+      validateAttrs(this, serverEntity, 'name', 'valueType', 'options', 'required');
       validateOptional(this, serverEntity, 'description', 'maxValueCount');
     };
 
-    StudyAnnotationType.prototype.compareToServerEntity = function (serverEntity) {
-      AnnotationType.prototype.compareToServerEntity.call(this, serverEntity);
-      validateAttrs(this, serverEntity, 'studyId');
-    };
-
-    ParticipantAnnotationType.prototype.compareToServerEntity = function (serverEntity) {
-      StudyAnnotationType.prototype.compareToServerEntity.call(this, serverEntity);
-      validateAttrs(this, serverEntity, 'required');
-    };
-
-    CollectionEventType.compareToServerEntity = function (serverEntity) {
+    CollectionEventType.prototype.compareToServerEntity = function (serverEntity) {
       ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
       validateAttrs(this, serverEntity, 'name', 'recurring');
       validateOptional(this, serverEntity, 'description');
@@ -122,13 +109,13 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
       expect(this.annotationTypeData).toBeContainAll(serverEntity.annotationTypeData);
     };
 
-    ProcessingType.compareToServerEntity = function (serverEntity) {
+    ProcessingType.prototype.compareToServerEntity = function (serverEntity) {
       ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
       validateAttrs(this, serverEntity, 'name', 'enabled');
       validateOptional(this, serverEntity, 'description');
     };
 
-    SpecimenLinkType.compareToServerEntity = function (serverEntity) {
+    SpecimenLinkType.prototype.compareToServerEntity = function (serverEntity) {
       ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
       validateAttrs(this,
                     serverEntity,

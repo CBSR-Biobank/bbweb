@@ -15,22 +15,6 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    describe('for participant annotation types', function() {
-      var context = {};
-
-      beforeEach(inject(function (ParticipantAnnotationType, fakeDomainEntities) {
-        var baseAnnotationType = fakeDomainEntities.annotationType({ required: true }),
-            stateName = 'home.admin.studies.study.participants';
-
-        context.state                = { current: { name: stateName } };
-        context.returnState          = stateName;
-        context.annotationTypeNew    = new ParticipantAnnotationType(_.omit(baseAnnotationType, 'id'));
-        context.annotationTypeWithId = new ParticipantAnnotationType(baseAnnotationType);
-      }));
-
-      sharedBehaviour(context);
-    });
-
     describe('for collection event annotation types', function() {
       var context = {};
 
@@ -72,7 +56,6 @@ define([
           this.$rootScope                = this.$injector.get('$rootScope');
           this.$controller               = this.$injector.get('$controller');
           this.domainEntityService       = this.$injector.get('domainEntityService');
-          this.ParticipantAnnotationType = this.$injector.get('ParticipantAnnotationType');
           this.AnnotationValueType       = this.$injector.get('AnnotationValueType');
           this.context                   = context;
 
@@ -89,8 +72,7 @@ define([
           expect(this.scope.vm.study).toEqual(this.study);
           expect(this.scope.vm.annotationType).toEqual(this.annotationType);
           expect(this.scope.vm.title).toBe('Add Annotation Type');
-          expect(this.scope.vm.hasRequiredField)
-            .toEqual(this.annotationType instanceof this.ParticipantAnnotationType);
+          expect(this.scope.vm.hasRequiredField).toEqual(true);
           expect(this.scope.vm.valueTypes).toEqual(this.AnnotationValueType.values());
         });
 

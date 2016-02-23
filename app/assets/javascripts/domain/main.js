@@ -47,7 +47,6 @@ define(function (require) {
   module.factory('CollectionDto',                       require('./study/CollectionDto'));
   module.factory('CollectionEventAnnotationType',       require('./study/CollectionEventAnnotationType'));
   module.factory('CollectionEventType',                 require('./study/CollectionEventType'));
-  module.factory('ParticipantAnnotationType',           require('./study/ParticipantAnnotationType'));
   module.factory('ProcessingTypeViewer',                require('./study/ProcessingTypeViewer'));
   module.factory('SpcLinkTypeViewer',                   require('./study/SpcLinkTypeViewer'));
   module.factory('SpecimenGroup',                       require('./study/SpecimenGroup'));

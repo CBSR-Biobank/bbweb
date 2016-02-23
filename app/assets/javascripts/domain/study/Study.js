@@ -2,61 +2,84 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'underscore'], function(angular, _) {
+define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf, tv4) {
   'use strict';
 
   StudyFactory.$inject = [
+    '$q',
     'funutils',
-    'validationService',
+    'biobankApi',
+    'queryStringService',
     'ConcurrencySafeEntity',
     'StudyStatus',
-    'studiesService'
+    'AnnotationType'
   ];
 
   /**
    *
    */
-  function StudyFactory(funutils,
-                        validationService,
+  function StudyFactory($q,
+                        funutils,
+                        biobankApi,
+                        queryStringService,
                         ConcurrencySafeEntity,
                         StudyStatus,
-                        studiesService) {
+                        AnnotationType) {
 
-    var requiredKeys = ['id', 'version', 'timeAdded', 'name', 'status'];
-
-    var validateObj = funutils.partial(
-      validationService.condition1(
-        validationService.validator('must be a map', _.isObject),
-        validationService.validator('has the correct keys',
-                                    validationService.hasKeys.apply(null, requiredKeys))),
-      _.identity);
+    var schema = {
+      'id': 'Study',
+      'type': 'object',
+      'properties': {
+        'id':              { 'type': 'string'},
+        'version':         { 'type': 'integer', 'minimum': 0},
+        'timeAdded':       { 'type': 'string'},
+        'timeModified':    { 'type': 'string'},
+        'name':            { 'type': 'string'},
+        'description':     { 'type': 'string'},
+        'annotationTypes': { 'type': 'array'},
+        'status':          { 'type': 'string'}
+      },
+      'required': [ 'id', 'version', 'timeAdded', 'name', 'status' ]
+    };
 
     /**
      *
      */
     function Study(obj) {
       var defaults = {
-        name:        '',
-        description: null,
-        status:      StudyStatus.DISABLED()
+        name:            '',
+        description:     null,
+        studyIds:        [],
+        annotationTypes: [],
+        status:          StudyStatus.DISABLED()
       };
 
-      obj =  obj || {};
+      obj = obj || {};
       ConcurrencySafeEntity.call(this, obj);
       _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
       this.statusLabel = StudyStatus.label(this.status);
+
+      this.annotationTypes = _.map(this.annotationTypes, function (annotationType) {
+        return new AnnotationType(annotationType);
+      });
     }
 
     Study.prototype = Object.create(ConcurrencySafeEntity.prototype);
+
+    Study.prototype.constructor = Study;
 
     /**
      * Used by promise code, so it must return an error rather than throw one.
      */
     Study.create = function (obj) {
-      var validation = validateObj(obj);
-      if (!_.isObject(validation)) {
-        return new Error('invalid object from server: ' + validation);
+      if (!tv4.validate(obj, schema)) {
+        throw new Error('invalid object from server: ' + tv4.error);
       }
+
+      if (!validAnnotationTypes(obj.annotationTypes)) {
+        throw new Error('invalid object from server: bad annotation type');
+      }
+
       return new Study(obj);
     };
 
@@ -82,43 +105,147 @@ define(['angular', 'underscore'], function(angular, _) {
      * @return A promise. If the promise succeeds then a paged result is returned.
      */
     Study.list = function (options) {
+      var validKeys = [
+        'filter',
+        'status',
+        'sort',
+        'page',
+        'pageSize',
+        'order'
+      ];
+      var url = uri();
+      var paramsStr = '';
+
       options = options || {};
-      return studiesService.list(options).then(function(reply) {
-        // reply is a paged result
-        reply.items = _.map(reply.items, function(obj){
-          return Study.create(obj);
-        });
-        return reply;
+
+      paramsStr = queryStringService.param(options, function (value, key) {
+        return _.contains(validKeys, key);
+      });
+
+      if (paramsStr) {
+        url += paramsStr;
+      }
+
+      return biobankApi.get(url).then(function(reply) {
+        var deferred = $q.defer();
+        try {
+          // reply is a paged result
+          reply.items = _.map(reply.items, function(obj){
+            return Study.create(obj);
+          });
+          deferred.resolve(reply);
+        } catch (e) {
+          deferred.reject('invalid studies from server');
+        }
+        return deferred.promise;
       });
     };
 
     Study.get = function (id) {
-      return studiesService.get(id).then(function(reply) {
-        return Study.create(reply);
+      return biobankApi.get(uri(id)).then(function(reply) {
+        return asyncCreate(reply);
       });
     };
 
-    Study.prototype.addOrUpdate = function () {
-      var self = this;
-      return studiesService.addOrUpdate(self).then(function(reply) {
-        return Study.create(reply);
+    Study.prototype.add = function () {
+      var self = this,
+          json = { name: this.name };
+      angular.extend(json, funutils.pickOptional(self, 'description'));
+      return biobankApi.post(uri(), json).then(function(reply) {
+        return asyncCreate(reply);
+      });
+    };
+
+    Study.prototype.updateName = function (name) {
+      var self = this,
+          json = {
+            name:            name,
+            expectedVersion: self.version
+          };
+
+      return biobankApi.post(uri('name', self.id), json).then(function(reply) {
+        return asyncCreate(reply);
+      });
+    };
+
+    Study.prototype.updateDescription = function (description) {
+      var self = this,
+          json = {
+            expectedVersion: self.version
+          };
+
+      if (description) {
+        json.description = description;
+      }
+
+      return biobankApi.post(uri('description', self.id), json).then(function(reply) {
+        return asyncCreate(reply);
+      });
+    };
+
+    Study.prototype.addAnnotationType = function (annotationType) {
+      var self = this,
+          json = _.extend({ expectedVersion: self.version }, _.omit(annotationType, 'uniqueId')),
+          found;
+
+      found = _.findWhere(self.annotationTypes,  { uniqueId: annotationType.uniqueId });
+      if (found) {
+        throw new Error('annotation type with ID already present: ' + annotationType.uniqueId);
+      }
+
+      return biobankApi.post(uri('pannottype', self.id), json).then(function(reply) {
+        return asyncCreate(reply);
+      });
+    };
+
+    Study.prototype.removeAnnotationType = function (annotationType) {
+      var self = this,
+          url = sprintf.sprintf('%s/%d/%s',
+                                uri('pannottype', self.id), self.version, annotationType.uniqueId),
+          found;
+
+      found = _.findWhere(self.annotationTypes,  { uniqueId: annotationType.uniqueId });
+      if (!found) {
+        throw new Error('annotation type with ID not present: ' + annotationType.uniqueId);
+      }
+
+      return biobankApi.del(url).then(function () {
+        return asyncCreate(
+          _.extend(self, {
+            version: self.version + 1,
+            annotationTypes: _.filter(self.annotationTypes, function(at) {
+              return at.uniqueId !== annotationType.uniqueId;
+            })
+          }));
       });
     };
 
     Study.prototype.disable = function () {
-      return changeState(this, 'disable');
+      if (this.isDisabled()) {
+        throw new Error('already disabled');
+      }
+      return changeState.call(this, 'disable');
     };
 
     Study.prototype.enable = function () {
-      return changeState(this, 'enable');
+      if (this.isEnabled()) {
+        throw new Error('already enabled');
+      }
+      return changeState.call(this, 'enable');
     };
 
     Study.prototype.retire = function () {
-      return changeState(this, 'retire');
+      if (this.isRetired()) {
+        throw new Error('already retired');
+      }
+      return changeState.call(this, 'retire');
     };
 
     Study.prototype.unretire = function () {
-      return changeState(this, 'unretire');
+      if (!this.isRetired()) {
+        throw new Error('already disabled');
+      }
+      return changeState.call(this, 'unretire');
     };
 
     Study.prototype.isDisabled = function () {
@@ -133,10 +260,60 @@ define(['angular', 'underscore'], function(angular, _) {
       return (this.status === StudyStatus.RETIRED());
     };
 
-    function changeState(obj, method) {
-      return studiesService[method](obj).then(function(reply) {
-        return new Study.create(reply);
+    function asyncCreate(obj) {
+      var deferred = $q.defer();
+
+      if (!tv4.validate(obj, schema)) {
+        deferred.reject('invalid object from server: ' + tv4.error);
+      } else if (!validAnnotationTypes(obj.annotationTypes)) {
+        deferred.reject('invalid annotation types from server: ' + tv4.error);
+      } else {
+        deferred.resolve(new Study(obj));
+      }
+
+      return deferred.promise;
+    }
+
+    function validAnnotationTypes(annotationTypes) {
+      var result;
+
+      if (annotationTypes.length <= 0) {
+        // there are no annotation types, nothing to validate
+        return true;
+      }
+      result = _.find(annotationTypes, function (annotType) {
+        return !AnnotationType.valid(annotType);
       });
+
+      return _.isUndefined(result);
+    }
+
+    function changeState(state) {
+      /* jshint validthis:true */
+      var self = this,
+          json = { expectedVersion: self.version };
+
+      return biobankApi.post(uri(state, self.id), json);
+    }
+
+    function uri(/* path, studyId */) {
+      var args = _.toArray(arguments),
+          studyId,
+          path;
+
+      var result = '/studies';
+
+      if (args.length > 0) {
+        path = args.shift();
+        result += '/' + path;
+      }
+
+      if (args.length > 0) {
+        studyId = args.shift();
+        result += '/' + studyId;
+      }
+
+      return result;
     }
 
     return Study;

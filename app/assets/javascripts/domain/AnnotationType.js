@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'underscore'], function(angular, _) {
+define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
   'use strict';
 
   AnnotationTypeFactory.$inject = [
@@ -22,40 +22,43 @@ define(['angular', 'underscore'], function(angular, _) {
                                  AnnotationValueType,
                                  AnnotationMaxValueCount) {
 
-    var requiredKeys = ['id', 'name', 'valueType', 'options'];
-
-    var validateObj = funutils.partial(
-      validationService.condition1(
-        validationService.validator('must be a map', _.isObject),
-        validationService.validator('has the correct keys',
-                                    validationService.hasKeys.apply(null, requiredKeys))),
-      _.identity);
+    var schema = {
+      'id': 'Study',
+      'type': 'object',
+      'properties': {
+        'uniqueId':        { 'type': 'string'  },
+        'name':            { 'type': 'string'  },
+        'description':     { 'type': 'string'  },
+        'valueType':       { 'type': 'string'  },
+        'maxValueCount':   { 'type': 'integer' },
+        'options':         { 'type': 'array'   },
+        'required':        { 'type': 'boolean' }
+      },
+      'required': [ 'uniqueId', 'name', 'valueType', 'required' ]
+    };
 
     function AnnotationType(obj) {
       var defaults = {
+        uniqueId:      '',
         name:          '',
         description:   null,
         valueType:     '',
         maxValueCount: null,
-        options:       []
+        options:       [],
+        required:      false
       };
 
       obj = obj || {};
-      ConcurrencySafeEntity.call(this, obj);
       _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
     }
 
-    AnnotationType.prototype = Object.create(ConcurrencySafeEntity.prototype);
+    AnnotationType.valid = function (obj) {
+      return tv4.validate(obj, schema);
+    };
 
-    AnnotationType.prototype.constructor = AnnotationType;
-
-    /**
-     * Used by promise code, so it must return an error rather than throw one.
-     */
     AnnotationType.create = function (obj) {
-      var validation = validateObj(obj);
-      if (!_.isObject(validation)) {
-        return new Error('invalid object from server: ' + validation);
+      if (!tv4.validate(obj, schema)) {
+        throw new Error('invalid object from server: ' + tv4.error);
       }
       return new AnnotationType(obj);
     };

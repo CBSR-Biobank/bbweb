@@ -8,9 +8,6 @@ define(['underscore'], function(_) {
   studyAnnotationTypeUtils.$inject = [
     '$q',
     'modalService',
-    'ParticipantAnnotationType',
-    'CollectionEventAnnotationType',
-    'SpecimenLinkAnnotationType',
     'domainEntityService'
   ];
 
@@ -19,9 +16,6 @@ define(['underscore'], function(_) {
    */
   function studyAnnotationTypeUtils($q,
                                     modalService,
-                                    ParticipantAnnotationType,
-                                    CollectionEventAnnotationType,
-                                    SpecimenLinkAnnotationType,
                                     domainEntityService) {
     var service = {
       updateInUseModal: updateInUseModal,
@@ -32,19 +26,19 @@ define(['underscore'], function(_) {
 
     //-------
 
-    function inUseModal(annotationType, action) {
+    function inUseModal(annotationType, type, action) {
       var headerHtml = 'Cannot ' + action + ' this annotation type',
           bodyHtml;
 
-      if (annotationType instanceof ParticipantAnnotationType) {
+      if (type === 'ParticipantAnnotationType') {
         bodyHtml = 'This annotation type is in use by participants. ' +
           'If you want to make changes to the annotation type, ' +
           'it must first be removed from the participants that use it.';
-      } else if (annotationType instanceof CollectionEventAnnotationType) {
+      } else if (type === 'CollectionEventAnnotationType') {
         bodyHtml = 'This annotation type is in use by a collection event type. ' +
           'If you want to make changes to the annotation type, ' +
           'it must first be removed from the collection event type(s) that use it.';
-      } else if (annotationType instanceof SpecimenLinkAnnotationType) {
+      } else if (type === 'SpecimenLinkAnnotationType') {
         bodyHtml = 'This annotation type is in use by a specimen link type. ' +
           'If you want to make changes to the annotation type, ' +
           'it must first be removed from the specimen link type(s) that use it.';
@@ -54,18 +48,18 @@ define(['underscore'], function(_) {
       return modalService.modalOk(headerHtml, bodyHtml);
     }
 
-    function updateInUseModal(annotationType) {
-      return inUseModal(annotationType, 'update');
+    function updateInUseModal(annotationType, type) {
+      return inUseModal(annotationType, type, 'update');
     }
 
-    function removeInUseModal(annotationType) {
-      return inUseModal(annotationType, 'remove');
+    function removeInUseModal(annotationType, type) {
+      return inUseModal(annotationType, type, 'remove');
     }
 
-    function remove(annotationType) {
+    function remove(removePromiseFunc, annotationType) {
 
       return domainEntityService.removeEntity(
-        annotationType,
+        removePromiseFunc,
         'Remove Annotation Type',
         'Are you sure you want to remove annotation type ' + annotationType.name + '?',
         'Remove failed',

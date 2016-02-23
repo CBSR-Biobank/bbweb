@@ -9,10 +9,9 @@ define(['underscore'], function(_) {
     '$state',
     'domainEntityService',
     'notificationsService',
-    'ParticipantAnnotationType',
+    'AnnotationType',
     'AnnotationValueType',
-    'study',
-    'annotationType'
+    'study'
   ];
 
   /**
@@ -25,12 +24,10 @@ define(['underscore'], function(_) {
   function AnnotationTypeEditCtrl($state,
                                   domainEntityService,
                                   notificationsService,
-                                  ParticipantAnnotationType,
+                                  AnnotationType,
                                   AnnotationValueType,
-                                  study,
-                                  annotationType) {
+                                  study) {
     var vm = this,
-        action = annotationType.isNew() ? 'Add' : 'Update',
         possibleReturnStateNames = [
           'home.admin.studies.study.collection.view',
           'home.admin.studies.study.participants',
@@ -41,9 +38,8 @@ define(['underscore'], function(_) {
     returnState = determineReturnState();
 
     vm.study                 = study;
-    vm.annotationType        = annotationType;
-    vm.title                 =  action + ' Annotation Type';
-    vm.hasRequiredField      = (annotationType instanceof ParticipantAnnotationType);
+    vm.annotationType        = new AnnotationType();
+    vm.title                 = 'Add Annotation Type';
     vm.valueTypes            = AnnotationValueType.values();
 
     vm.valueTypeChange       = valueTypeChange;
