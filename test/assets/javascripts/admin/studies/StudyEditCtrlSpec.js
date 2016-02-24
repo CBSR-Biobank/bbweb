@@ -9,13 +9,13 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
   describe('Controller: StudyEditCtrl', function() {
 
-    var Study, fakeEntities;
+    var Study, jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (_Study_, fakeDomainEntities) {
+    beforeEach(inject(function (_Study_, jsonEntities) {
       Study = _Study_;
-      fakeEntities = fakeDomainEntities;
+      jsonEntities = jsonEntities;
     }));
 
     describe('when adding a study', function() {
@@ -38,7 +38,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       var context = {};
 
       beforeEach(function() {
-        context.study = new Study(fakeEntities.study());
+        context.study = new Study(jsonEntities.study());
         context.titleContains = 'Update';
         context.returnState = {
           name: 'home.admin.studies.study.summary',

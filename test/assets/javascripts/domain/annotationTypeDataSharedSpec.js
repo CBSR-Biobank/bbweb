@@ -11,12 +11,12 @@ define(['underscore'], function(_) {
 
     describe('(shared)', function() {
 
-      var parentObj, annotationTypes, fakeEntities;
+      var parentObj, annotationTypes, jsonEntities;
 
       beforeEach(function () {
         parentObj          = context.parentObj;
         annotationTypes    = context.annotationTypes;
-        fakeEntities       = context.fakeEntities;
+        jsonEntities       = context.jsonEntities;
       });
 
       it('getAnnotationTypeDataById returns valid results', function() {
@@ -27,7 +27,7 @@ define(['underscore'], function(_) {
       });
 
       it('getAnnotationTypeDataById throws an error if not found', function() {
-        var badId = fakeEntities.stringNext();
+        var badId = jsonEntities.stringNext();
         expect(function () { parentObj.getAnnotationTypeDataById(badId); })
           .toThrow(new Error('annotation type data with id not found: ' + badId));
       });

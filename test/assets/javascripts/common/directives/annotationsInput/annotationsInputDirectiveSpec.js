@@ -24,7 +24,7 @@ define([
         annotationFactory,
         ParticipantAnnotationType,
         AnnotationValueType,
-        fakeEntities;
+        jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -32,7 +32,7 @@ define([
       annotationFactory         = this.$injector.get('annotationFactory');
       ParticipantAnnotationType = this.$injector.get('ParticipantAnnotationType');
       AnnotationValueType       = this.$injector.get('AnnotationValueType');
-      fakeEntities              = this.$injector.get('fakeDomainEntities');
+      jsonEntities              = this.$injector.get('jsonEntities');
 
       createScope = setupController(this.$injector);
 
@@ -44,7 +44,7 @@ define([
       return annotationFactory.create(
         undefined,
         new ParticipantAnnotationType(
-          fakeEntities.annotationType({ valueType: valueType, required: true })
+          jsonEntities.annotationType({ valueType: valueType, required: true })
         ));
     }
 
@@ -75,7 +75,7 @@ define([
     }
 
     it('works for a TEXT annotation', function() {
-      var annotationValue = fakeEntities.stringNext(),
+      var annotationValue = jsonEntities.stringNext(),
           annotations = [ createAnnotation(AnnotationValueType.TEXT()) ];
 
       createScope(annotations);
@@ -99,7 +99,7 @@ define([
     });
 
     it('validation fails for a NUMBER annotation and an invalid number', function() {
-      var annotationValue = fakeEntities.stringNext(),
+      var annotationValue = jsonEntities.stringNext(),
           annotations = [ createAnnotation(AnnotationValueType.NUMBER()) ];
 
       createScope(annotations);
@@ -134,7 +134,7 @@ define([
       var annotationType, annotations;
 
       annotationType = new ParticipantAnnotationType(
-        fakeEntities.annotationType({
+        jsonEntities.annotationType({
           valueType:     AnnotationValueType.SELECT(),
           maxValueCount: 1,
           options:       [ 'option1', 'option2' ],
@@ -161,7 +161,7 @@ define([
       var annotationType, annotation;
 
       annotationType = new ParticipantAnnotationType(
-        fakeEntities.annotationType({
+        jsonEntities.annotationType({
           valueType: AnnotationValueType.SELECT(),
           maxValueCount: 2,
           options: [ 'option1', 'option2', 'option3' ],
@@ -184,7 +184,7 @@ define([
       var annotationType, annotation;
 
       annotationType = new ParticipantAnnotationType(
-        fakeEntities.annotationType({
+        jsonEntities.annotationType({
           valueType:     AnnotationValueType.SELECT(),
           maxValueCount: 2,
           options:       [ 'option1', 'option2', 'option3' ],

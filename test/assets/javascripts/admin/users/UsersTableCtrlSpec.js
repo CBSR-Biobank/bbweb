@@ -22,7 +22,7 @@ define([
         UserCounts,
         UserStatus,
         UserViewer,
-        fakeEntities;
+        jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -34,7 +34,7 @@ define([
                                _UserCounts_,
                                _UserStatus_,
                                _UserViewer_,
-                               fakeDomainEntities) {
+                               jsonEntities) {
       q            = $q;
       rootScope    = $rootScope;
       controller   = $controller;
@@ -43,7 +43,7 @@ define([
       UserCounts   = _UserCounts_;
       UserStatus   = _UserStatus_;
       UserViewer   = _UserViewer_;
-      fakeEntities = fakeDomainEntities;
+      jsonEntities = jsonEntities;
     }));
 
     function createUserCounts(registered, active, locked) {
@@ -89,7 +89,7 @@ define([
     it('changing a users status works', function() {
       var counts = createUserCounts(1, 2, 3),
           statusFnNames = ['activate', 'lock', 'unlock'],
-          user = User.create(fakeEntities.user()),
+          user = User.create(jsonEntities.user()),
           scope;
 
       spyOn(User, 'get').and.callFake(function () {
@@ -97,7 +97,7 @@ define([
       });
 
       spyOn(User, 'list').and.callFake(function () {
-        return q.when(fakeEntities.pagedResult([ user ]));
+        return q.when(jsonEntities.pagedResult([ user ]));
       });
 
       spyOn(modalService, 'showModal').and.callFake(function () {
@@ -123,11 +123,11 @@ define([
     it('can view user information', function() {
       var EntityViewer = this.$injector.get('EntityViewer'),
           counts = createUserCounts(1, 2, 3),
-          user = User.create(fakeEntities.user()),
+          user = User.create(jsonEntities.user()),
           scope;
 
       spyOn(User, 'list').and.callFake(function () {
-        return q.when(fakeEntities.pagedResult([ user ]));
+        return q.when(jsonEntities.pagedResult([ user ]));
       });
 
       scope = createController(counts);
@@ -144,11 +144,11 @@ define([
     it('can retrieve user local time added', function() {
       var bbwebConfig = this.$injector.get('bbwebConfig'),
           counts = createUserCounts(1, 2, 3),
-          user = User.create(fakeEntities.user()),
+          user = User.create(jsonEntities.user()),
           scope;
 
       spyOn(User, 'list').and.callFake(function () {
-        return q.when(fakeEntities.pagedResult([ user ]));
+        return q.when(jsonEntities.pagedResult([ user ]));
       });
 
       scope = createController(counts);

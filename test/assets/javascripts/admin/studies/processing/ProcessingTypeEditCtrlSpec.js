@@ -17,7 +17,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
         ProcessingType,
         domainEntityService,
         notificationsService,
-        fakeEntities;
+        jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -29,7 +29,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
                                _ProcessingType_,
                                _domainEntityService_,
                                _notificationsService_,
-                               fakeDomainEntities) {
+                               jsonEntities) {
       q                          = $q;
       rootScope                  = $rootScope;
       controller                 = $controller;
@@ -38,7 +38,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       ProcessingType             = _ProcessingType_;
       domainEntityService        = _domainEntityService_;
       notificationsService       = _notificationsService_;
-      fakeEntities               = fakeDomainEntities;
+      jsonEntities               = jsonEntities;
     }));
 
     function createEntities(options) {
@@ -46,12 +46,12 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
       options = options || {};
 
-      study = new Study(fakeEntities.study());
+      study = new Study(jsonEntities.study());
 
       if (options.noPtId) {
-        serverPt = _.omit(fakeEntities.processingType(study), 'id');
+        serverPt = _.omit(jsonEntities.processingType(study), 'id');
       } else {
-        serverPt = fakeEntities.processingType(study);
+        serverPt = jsonEntities.processingType(study);
       }
 
       processingType = new ProcessingType(serverPt);

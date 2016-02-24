@@ -13,13 +13,13 @@ define([
   'use strict';
 
   describe('Controller: CentresCtrl', function() {
-    var CentreCounts, fakeEntities, createController;
+    var CentreCounts, jsonEntities, createController;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(testUtils) {
       CentreCounts = this.$injector.get('CentreCounts');
-      fakeEntities = this.$injector.get('fakeDomainEntities');
+      jsonEntities = this.$injector.get('jsonEntities');
       createController = setupController(this.$injector);
       testUtils.addCustomMatchers();
     }));

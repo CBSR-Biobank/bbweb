@@ -18,33 +18,33 @@ define([
     var httpBackend,
         CollectionEventType,
         cetFromServer,
-        fakeEntities,
+        jsonEntities,
         study;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function($httpBackend,
                                _CollectionEventType_,
-                               fakeDomainEntities,
+                               jsonEntities,
                                extendedDomainEntities) {
       httpBackend         = $httpBackend;
       CollectionEventType = _CollectionEventType_;
-      fakeEntities        = fakeDomainEntities;
+      jsonEntities        = jsonEntities;
 
-      study = fakeEntities.study();
+      study = jsonEntities.study();
 
       study.specimenGroups = _.map(_.range(2), function() {
-        return fakeEntities.specimenGroup(study);
+        return jsonEntities.specimenGroup(study);
       });
 
       study.annotationTypes = _.map(_.range(2), function() {
-        return fakeEntities.annotationType(study);
+        return jsonEntities.annotationType(study);
       });
 
       study.specimenGroupsById = _.indexBy(study.specimenGroups, 'id');
       study.annotationTypesById = _.indexBy(study.annotationTypes, 'id');
 
-      cetFromServer = fakeEntities.collectionEventType(study);
+      cetFromServer = jsonEntities.collectionEventType(study);
     }));
 
     it('constructor with no parameters has default values', function() {
@@ -64,7 +64,7 @@ define([
     });
 
     it('fails when creating from bad specimen group data', function() {
-      cetFromServer = fakeEntities.collectionEventType(study);
+      cetFromServer = jsonEntities.collectionEventType(study);
       cetFromServer.specimenGroupData.push({ 1: 'abc' });
 
       expect(CollectionEventType.create(cetFromServer))
@@ -72,7 +72,7 @@ define([
     });
 
     it('fails when creating from bad annotation type data', function() {
-      cetFromServer = fakeEntities.collectionEventType(study);
+      cetFromServer = jsonEntities.collectionEventType(study);
       cetFromServer.annotationTypeData.push({ 1: 'abc' });
 
       expect(CollectionEventType.create(cetFromServer))
@@ -82,7 +82,7 @@ define([
     it('has valid values when creating from server response', function() {
       var ceventType;
 
-      cetFromServer = fakeEntities.collectionEventType(study, {
+      cetFromServer = jsonEntities.collectionEventType(study, {
         specimenGroups: study.specimenGroups,
         annotationTypes: study.annotationTypes
       });
@@ -135,7 +135,7 @@ define([
     it('can update a collection event type with specimen group data and annotation type data', function() {
       var ceventType;
 
-      cetFromServer = fakeEntities.collectionEventType(study, {
+      cetFromServer = jsonEntities.collectionEventType(study, {
         specimenGroups: study.specimenGroups,
         annotationTypes: study.annotationTypes
       });
@@ -161,7 +161,7 @@ define([
     it('should remove a collection event type', function() {
       var ceventType;
 
-      cetFromServer = fakeEntities.collectionEventType(study, {
+      cetFromServer = jsonEntities.collectionEventType(study, {
         specimenGroups: study.specimenGroups,
         annotationTypes: study.annotationTypes
       });
@@ -197,7 +197,7 @@ define([
     it('should be initialized with specimen group and annotation type server objects', function() {
       var cetFromServer, cet;
 
-      cetFromServer = fakeEntities.collectionEventType(study, {
+      cetFromServer = jsonEntities.collectionEventType(study, {
         specimenGroups: study.specimenGroups,
         annotationTypes: study.annotationTypes
       });
@@ -217,7 +217,7 @@ define([
     });
 
     it('should return the correct size for specimen group data', function() {
-      var cetFromServer = fakeEntities.collectionEventType(
+      var cetFromServer = jsonEntities.collectionEventType(
         study,
         { specimenGroups: study.specimenGroups });
       var cet = new CollectionEventType(
@@ -229,7 +229,7 @@ define([
     it('should return the specimen group IDs', function() {
       var specimenGroupIds = _.pluck(study.specimenGroups, 'id');
 
-      var cetFromServer = fakeEntities.collectionEventType(
+      var cetFromServer = jsonEntities.collectionEventType(
         study,
         { specimenGroups: study.specimenGroups });
       var cet = new CollectionEventType(
@@ -243,7 +243,7 @@ define([
     });
 
     it('should return the specimen group IDs', function() {
-      var cetFromServer = fakeEntities.collectionEventType(
+      var cetFromServer = jsonEntities.collectionEventType(
         study,
         { specimenGroups: study.specimenGroups });
       var cet = new CollectionEventType(
@@ -271,7 +271,7 @@ define([
     });
 
     it('returns specimen group data as a string', function() {
-      var cetFromServer = fakeEntities.collectionEventType(study, { specimenGroups: study.specimenGroups});
+      var cetFromServer = jsonEntities.collectionEventType(study, { specimenGroups: study.specimenGroups});
       var cet = new CollectionEventType(cetFromServer,
                                         { studySpecimenGroups: study.specimenGroups });
       expect(cet.getSpecimenGroupsAsString()).toEqual(
@@ -298,7 +298,7 @@ define([
     it('should return the annotation type IDs', function() {
       var annotationTypeIds = _.pluck(study.annotationTypes, 'id');
 
-      var cetFromServer = fakeEntities.collectionEventType(
+      var cetFromServer = jsonEntities.collectionEventType(
         study,
         { annotationTypes: study.annotationTypes });
       var cet = new CollectionEventType(
@@ -312,7 +312,7 @@ define([
     });
 
     it('should return the annotation type IDs', function() {
-      var cetFromServer = fakeEntities.collectionEventType(
+      var cetFromServer = jsonEntities.collectionEventType(
         study,
         { annotationTypes: study.annotationTypes });
       var cet = new CollectionEventType(
@@ -343,14 +343,14 @@ define([
       var context = {};
 
       beforeEach(inject(function(CollectionEventType,
-                                 fakeDomainEntities) {
+                                 jsonEntities) {
 
-        study = fakeDomainEntities.study();
+        study = jsonEntities.study();
         annotationTypes = _.map(_.range(2), function() {
-          return fakeDomainEntities.annotationType(study);
+          return jsonEntities.annotationType(study);
         });
 
-        cetFromServer = fakeEntities.collectionEventType(study, { annotationTypes: annotationTypes});
+        cetFromServer = jsonEntities.collectionEventType(study, { annotationTypes: annotationTypes});
         cetFromServer.annotationTypeData[0].required = true;
         cetFromServer.annotationTypeData[0].required = false;
 
@@ -358,7 +358,7 @@ define([
                                       { studyAnnotationTypes: annotationTypes });
         context.parentObj = cet;
         context.annotationTypes = annotationTypes;
-        context.fakeEntities = fakeEntities;
+        context.jsonEntities = jsonEntities;
       }));
 
       annotationTypeDataSharedSpec(context);

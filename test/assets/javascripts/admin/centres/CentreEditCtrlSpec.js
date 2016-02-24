@@ -9,13 +9,13 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
   describe('Controller: CentreEditCtrl', function() {
 
-    var Centre, fakeEntities;
+    var Centre, jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (_Centre_, fakeDomainEntities) {
+    beforeEach(inject(function (_Centre_, jsonEntities) {
       Centre = _Centre_;
-      fakeEntities = fakeDomainEntities;
+      jsonEntities = jsonEntities;
     }));
 
     describe('when adding a centre', function() {
@@ -38,7 +38,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       var context = {};
 
       beforeEach(function() {
-        context.centre = new Centre(fakeEntities.centre());
+        context.centre = new Centre(jsonEntities.centre());
         context.titleContains = 'Update';
         context.returnState = {
           name: 'home.admin.centres.centre.summary',

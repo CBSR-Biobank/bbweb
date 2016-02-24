@@ -15,7 +15,7 @@ define([
   describe('SpecimenGroupData', function() {
 
     var SpecimenGroupData,
-        fakeEntities,
+        jsonEntities,
         study,
         specimenGroups,
         specimenGroupData,
@@ -23,19 +23,19 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (testUtils, fakeDomainEntities) {
+    beforeEach(inject(function (testUtils, jsonEntities) {
       testUtils.addCustomMatchers();
 
       SpecimenGroupData = this.$injector.get('SpecimenGroupData');
-      fakeEntities = fakeDomainEntities;
-      study = fakeEntities.study();
+      jsonEntities = jsonEntities;
+      study = jsonEntities.study();
 
       specimenGroups = _.map(_.range(3), function() {
-        return fakeEntities.specimenGroup(study);
+        return jsonEntities.specimenGroup(study);
       });
 
       specimenGroupData = _.map(specimenGroups, function(sg) {
-        return fakeEntities.specimenGroupData(sg);
+        return jsonEntities.specimenGroupData(sg);
       });
 
       testObj = _.extend({specimenGroupData: specimenGroupData}, SpecimenGroupData);
@@ -59,7 +59,7 @@ define([
     });
 
     it('getSpecimenGroupDataById should throw an error for an invalid id', function() {
-      var badId = fakeEntities.stringNext();
+      var badId = jsonEntities.stringNext();
       expect(function () { testObj.getSpecimenGroupDataById(badId); })
         .toThrow(new Error('specimen group data with id not found: ' + badId));
     });

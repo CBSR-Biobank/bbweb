@@ -10,13 +10,13 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
   describe('Controller: CeventTypeEditCtrl', function() {
     var createEntities,
         createController,
-        fakeEntities;
+        jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function($injector,
-                               fakeDomainEntities) {
-      fakeEntities = fakeDomainEntities;
+                               jsonEntities) {
+      jsonEntities = jsonEntities;
       createEntities = setupEntities($injector);
       createController = setupController($injector);
     }));
@@ -36,19 +36,19 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
         options = options || {};
 
-        study = fakeEntities.study();
+        study = jsonEntities.study();
         specimenGroups = _.map(_.range(2), function () {
-          return fakeEntities.specimenGroup(study);
+          return jsonEntities.specimenGroup(study);
         });
         annotationTypes = _.map(
           AnnotationValueType.values(),
           function(valueType) {
             return new CollectionEventAnnotationType(
-              fakeEntities.studyAnnotationType(
+              jsonEntities.studyAnnotationType(
                 study, { valueType: valueType }));
           });
 
-        serverCet = fakeEntities.collectionEventType(study, {
+        serverCet = jsonEntities.collectionEventType(study, {
           specimenGroups: specimenGroups,
           annotationTypes: annotationTypes
         });
@@ -132,7 +132,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           scope                = createController(entities);
 
       spyOn(entities.ceventType, 'addOrUpdate').and.callFake(function () {
-        return q.when(fakeEntities.collectionEventType(
+        return q.when(jsonEntities.collectionEventType(
           entities.study, {
             specimenGroups: entities.specimenGroups,
             annotationTypes: entities.annotationTypes
@@ -186,7 +186,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           scope;
 
       entities.ceventType = new CollectionEventType(
-        fakeEntities.collectionEventType(entities.study));
+        jsonEntities.collectionEventType(entities.study));
 
       scope = createController(entities);
 
@@ -200,7 +200,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           entities = createEntities(), scope;
 
       entities.ceventType = new CollectionEventType(
-        fakeEntities.collectionEventType(entities.study));
+        jsonEntities.collectionEventType(entities.study));
 
       scope = createController(entities);
 
@@ -217,7 +217,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           entities = createEntities(), scope;
 
       entities.ceventType = new CollectionEventType(
-        fakeEntities.collectionEventType(entities.study));
+        jsonEntities.collectionEventType(entities.study));
 
       scope = createController(entities);
 
@@ -233,7 +233,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           entities = createEntities({ noCetId: true }), scope;
 
       entities.ceventType = new CollectionEventType(
-        fakeEntities.collectionEventType(entities.study));
+        jsonEntities.collectionEventType(entities.study));
       scope = createController(entities);
 
       expect(scope.vm.ceventType.annotationTypeData).toBeArrayOfSize(0);
@@ -246,7 +246,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           entities = createEntities({ noCetId: true }), scope;
 
       entities.ceventType = new CollectionEventType(
-        fakeEntities.collectionEventType(entities.study));
+        jsonEntities.collectionEventType(entities.study));
       scope = createController(entities);
 
       scope.vm.addAnnotationType();
@@ -262,7 +262,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           entities = createEntities({ noCetId: true }), scope;
 
       entities.ceventType = new CollectionEventType(
-        fakeEntities.collectionEventType(entities.study));
+        jsonEntities.collectionEventType(entities.study));
       scope = createController(entities);
 
       expect(function () { scope.vm.removeAnnotationType(-1); })
@@ -275,7 +275,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     it('getSpecimenGroupUnits returns valid results', function() {
       var entities = createEntities({ noCetId: true }),
           scope = createController(entities),
-          badSgId = fakeEntities.stringNext();
+          badSgId = jsonEntities.stringNext();
 
       expect(function () {
         scope.vm.getSpecimenGroupUnits(badSgId);

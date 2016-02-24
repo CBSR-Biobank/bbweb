@@ -19,7 +19,7 @@ define([
         CollectionEventAnnotationType,
         SpecimenLinkAnnotationType,
         AnnotationValueType,
-        fakeEntities;
+        jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -28,25 +28,25 @@ define([
                                 _CollectionEventAnnotationType_,
                                 _SpecimenLinkAnnotationType_,
                                 _AnnotationValueType_,
-                                fakeDomainEntities) {
+                                jsonEntities) {
       Study                         = _Study_;
       ParticipantAnnotationType     = _ParticipantAnnotationType_;
       CollectionEventAnnotationType = _CollectionEventAnnotationType_;
       SpecimenLinkAnnotationType    = _SpecimenLinkAnnotationType_;
       AnnotationValueType           = _AnnotationValueType_;
-      fakeEntities                  = fakeDomainEntities;
+      jsonEntities                  = jsonEntities;
     }));
 
     describe('for Participant Annotation Types', function() {
       var context = {};
 
       beforeEach(function () {
-        context.study = new Study(fakeEntities.study());
+        context.study = new Study(jsonEntities.study());
         context.annotationTypes = _.map(
           AnnotationValueType.values(),
           function(valueType) {
             return new ParticipantAnnotationType(
-              fakeEntities.studyAnnotationType(
+              jsonEntities.studyAnnotationType(
                 context.study,
                 { valueType: valueType, required: true }));
           });
@@ -62,12 +62,12 @@ define([
       var context = {};
 
       beforeEach(function () {
-        context.study = new Study(fakeEntities.study());
+        context.study = new Study(jsonEntities.study());
         context.annotationTypes = _.map(
           AnnotationValueType.values(),
           function(valueType) {
             return new CollectionEventAnnotationType(
-              fakeEntities.studyAnnotationType(
+              jsonEntities.studyAnnotationType(
                 context.study,
                 { valueType: valueType }));
           });
@@ -83,12 +83,12 @@ define([
       var context = {};
 
       beforeEach(function () {
-        context.study = new Study(fakeEntities.study());
+        context.study = new Study(jsonEntities.study());
         context.annotationTypes = _.map(
           AnnotationValueType.values(),
           function(valueType) {
             return new SpecimenLinkAnnotationType(
-              fakeEntities.studyAnnotationType(
+              jsonEntities.studyAnnotationType(
                 context.study,
                 { valueType: valueType }));
           });

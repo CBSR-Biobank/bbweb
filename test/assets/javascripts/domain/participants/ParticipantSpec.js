@@ -23,7 +23,7 @@ define([
         AnnotationValueType,
         ParticipantAnnotationType,
         bbwebConfig,
-        fakeEntities,
+        jsonEntities,
         testUtils;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
@@ -36,7 +36,7 @@ define([
       AnnotationValueType       = this.$injector.get('AnnotationValueType');
       ParticipantAnnotationType = this.$injector.get('ParticipantAnnotationType');
       bbwebConfig               = this.$injector.get('bbwebConfig');
-      fakeEntities              = this.$injector.get('fakeDomainEntities');
+      jsonEntities              = this.$injector.get('jsonEntities');
       testUtils                 = this.$injector.get('testUtils');
 
       testUtils.addCustomMatchers();
@@ -53,7 +53,7 @@ define([
     });
 
     it('constructor with annotation parameter has valid values', function() {
-      var serverStudy = fakeEntities.study(),
+      var serverStudy = jsonEntities.study(),
           study = new Study(serverStudy),
           annotationData = generateAnnotationTypesAndServerAnnotations(serverStudy);
 
@@ -71,7 +71,7 @@ define([
     });
 
     it('constructor with study parameter has valid values', function() {
-      var study = new Study(fakeEntities.study());
+      var study = new Study(jsonEntities.study());
       var participant = new Participant({}, study);
 
       expect(participant.study).toEqual(study);
@@ -79,7 +79,7 @@ define([
     });
 
     it('constructor with NO annotation type parameters has valid values', function() {
-      var serverStudy = fakeEntities.study(),
+      var serverStudy = jsonEntities.study(),
           study = new Study(serverStudy),
           annotationData = generateAnnotationTypesAndServerAnnotations(serverStudy);
 
@@ -95,18 +95,18 @@ define([
     });
 
     it('constructor with invalid annotation parameter throws error', function() {
-      var serverStudy = fakeEntities.study(),
+      var serverStudy = jsonEntities.study(),
           study = new Study(serverStudy),
           serverAnnotation = {};
 
       var annotationType = new ParticipantAnnotationType(
-        fakeEntities.studyAnnotationType(serverStudy, { valueType: AnnotationValueType.TEXT() }));
+        jsonEntities.studyAnnotationType(serverStudy, { valueType: AnnotationValueType.TEXT() }));
 
       // put an invalid value in serverAnnotation.annotationTypeId
       _.extend(
         serverAnnotation,
-        fakeEntities.annotation(fakeEntities.valueForAnnotation(annotationType), annotationType),
-        { annotationTypeId: fakeEntities.stringNext() });
+        jsonEntities.annotation(jsonEntities.valueForAnnotation(annotationType), annotationType),
+        { annotationTypeId: jsonEntities.stringNext() });
 
       expect(function () {
         return new Participant({ annotations: [ serverAnnotation ] },
@@ -129,8 +129,8 @@ define([
     });
 
     it('fails when creating from an object with annotation with invalid keys', function() {
-      var study = fakeEntities.study(),
-          serverParticipant = fakeEntities.participant(study);
+      var study = jsonEntities.study(),
+          serverParticipant = jsonEntities.participant(study);
 
       serverParticipant.annotations = [{ tmp: 1 }];
       expect(Participant.create(serverParticipant))
@@ -138,8 +138,8 @@ define([
     });
 
     it('has valid values when creating from a server response', function() {
-      var study = fakeEntities.study(),
-          serverParticipant = fakeEntities.participant(study);
+      var study = jsonEntities.study(),
+          serverParticipant = jsonEntities.participant(study);
 
       // TODO: add annotations to the server response
       var participant = Participant.create(serverParticipant);
@@ -147,8 +147,8 @@ define([
     });
 
     it('can retrieve a single participant', function(done) {
-      var study = fakeEntities.study();
-      var participant = fakeEntities.participant({ studyId: study.id });
+      var study = jsonEntities.study();
+      var participant = jsonEntities.participant({ studyId: study.id });
       httpBackend.whenGET(uri(study.id, participant.id)).respond(serverReply(participant));
 
       Participant.get(study.id, participant.id).then(function (reply) {
@@ -160,8 +160,8 @@ define([
     });
 
     it('can retrieve a single participant by uniqueId', function(done) {
-      var study = fakeEntities.study();
-      var participant = fakeEntities.participant({ studyId: study.id });
+      var study = jsonEntities.study();
+      var participant = jsonEntities.participant({ studyId: study.id });
       httpBackend.whenGET(uri(study.id) + '/uniqueId/' + participant.uniqueId)
         .respond(serverReply(participant));
 
@@ -174,8 +174,8 @@ define([
     });
 
     it('can add a participant', function(done) {
-      var study = fakeEntities.study();
-      var baseParticipant = fakeEntities.participant({ studyId: study.id });
+      var study = jsonEntities.study();
+      var baseParticipant = jsonEntities.participant({ studyId: study.id });
       var participant = new Participant(_.omit(baseParticipant, 'id'));
       var cmd = addCommand(participant);
 
@@ -216,8 +216,8 @@ define([
           serverAnnotationTypes,
           serverParticipant;
 
-      study = fakeEntities.study();
-      serverAnnotationTypes = fakeEntities.allStudyAnnotationTypes(study);
+      study = jsonEntities.study();
+      serverAnnotationTypes = jsonEntities.allStudyAnnotationTypes(study);
 
       _.each(serverAnnotationTypes, function (serverAnnotationType) {
         var annotationType = new ParticipantAnnotationType(serverAnnotationType),
@@ -235,8 +235,8 @@ define([
     });
 
     it('can update a participant', function(done) {
-      var study = fakeEntities.study();
-      var baseParticipant = fakeEntities.participant({ studyId: study.id });
+      var study = jsonEntities.study();
+      var baseParticipant = jsonEntities.participant({ studyId: study.id });
       var participant = new Participant(baseParticipant);
       var cmd = updateCommand(participant);
       var reply = replyParticipant(baseParticipant);
@@ -278,8 +278,8 @@ define([
           serverAnnotationTypes,
           serverParticipant;
 
-      study = fakeEntities.study();
-      serverAnnotationTypes = fakeEntities.allStudyAnnotationTypes(study);
+      study = jsonEntities.study();
+      serverAnnotationTypes = jsonEntities.allStudyAnnotationTypes(study);
 
       _.each(serverAnnotationTypes, function (serverAnnotationType) {
         var annotationType = new ParticipantAnnotationType(serverAnnotationType),
@@ -303,9 +303,9 @@ define([
           annotationTypes,
           participant;
 
-      study = fakeEntities.study();
-      serverAnnotationTypes = fakeEntities.allStudyAnnotationTypes(study);
-      serverParticipant = fakeEntities.participant({
+      study = jsonEntities.study();
+      serverAnnotationTypes = jsonEntities.allStudyAnnotationTypes(study);
+      serverParticipant = jsonEntities.participant({
         studyId:         study.id,
         annotationTypes: serverAnnotationTypes
       });
@@ -330,11 +330,11 @@ define([
     }
 
     function generateAnnotationTypesAndServerAnnotations(serverStudy) {
-      var annotationTypes = fakeEntities.allStudyAnnotationTypes(serverStudy);
+      var annotationTypes = jsonEntities.allStudyAnnotationTypes(serverStudy);
 
       return _.map(annotationTypes, function (annotationType) {
-        var value = fakeEntities.valueForAnnotation(annotationType);
-        var serverAnnotation = fakeEntities.annotation(value, annotationType);
+        var value = jsonEntities.valueForAnnotation(annotationType);
+        var serverAnnotation = jsonEntities.annotation(value, annotationType);
 
         return {
           annotationType: new ParticipantAnnotationType(annotationType),

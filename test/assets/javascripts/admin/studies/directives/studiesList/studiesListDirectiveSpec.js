@@ -18,7 +18,7 @@ define([
     beforeEach(inject(function (testUtils) {
       this.$q                = this.$injector.get('$q');
       this.Study             = this.$injector.get('Study');
-      this.fakeEntities      = this.$injector.get('fakeDomainEntities');
+      this.jsonEntities      = this.$injector.get('jsonEntities');
       this.createStudyCounts = setupCountsCreator(this);
       this.createController  = setupController(this);
       testUtils.addCustomMatchers();
@@ -75,7 +75,7 @@ define([
           counts      = this.createStudyCounts(1, 2, 3);
 
       spyOn(self.Study, 'list').and.callFake(function () {
-        return self.$q.when(self.fakeEntities.pagedResult([]));
+        return self.$q.when(self.jsonEntities.pagedResult([]));
       });
 
       self.createController(counts);
@@ -96,7 +96,7 @@ define([
           listOptions = { dummy: 'value' };
 
       spyOn(self.Study, 'list').and.callFake(function () {
-        return self.$q.when(self.fakeEntities.pagedResult([]));
+        return self.$q.when(self.jsonEntities.pagedResult([]));
       });
 
       self.createController(counts);

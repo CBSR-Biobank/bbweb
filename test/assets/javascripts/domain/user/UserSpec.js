@@ -12,7 +12,7 @@ define([
 
   describe('User', function() {
 
-    var httpBackend, User, UserStatus, funutils, fakeEntities;
+    var httpBackend, User, UserStatus, funutils, jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -20,13 +20,13 @@ define([
                                _User_,
                                _UserStatus_,
                                _funutils_,
-                               fakeDomainEntities,
+                               jsonEntities,
                                extendedDomainEntities) {
       httpBackend  = $httpBackend;
       User         = _User_;
       UserStatus   = _UserStatus_;
       funutils     = _funutils_;
-      fakeEntities = fakeDomainEntities;
+      jsonEntities = jsonEntities;
     }));
 
     it('creating a user with no parameters has default values', function() {
@@ -54,7 +54,7 @@ define([
     });
 
     it('fails when creating from object with missing required keys', function() {
-      var obj = fakeEntities.user();
+      var obj = jsonEntities.user();
       var requiredKeys = ['id', 'name', 'email', 'status'];
 
       _.each(requiredKeys, function (key) {
@@ -66,8 +66,8 @@ define([
     });
 
     it('can retrieve users', function(done) {
-      var users = [ fakeEntities.user() ];
-      httpBackend.whenGET(uri()).respond(serverReply(fakeEntities.pagedResult(users)));
+      var users = [ jsonEntities.user() ];
+      httpBackend.whenGET(uri()).respond(serverReply(jsonEntities.pagedResult(users)));
 
       User.list().then(function (pagedResult) {
         expect(pagedResult.items).toBeArrayOfSize(users.length);
@@ -79,7 +79,7 @@ define([
     });
 
     it('can retrieve a single user', function(done) {
-      var user = fakeEntities.user();
+      var user = jsonEntities.user();
       httpBackend.whenGET(uri(user.id)).respond(serverReply(user));
 
       User.get(user.id).then(function (reply) {
@@ -91,8 +91,8 @@ define([
     });
 
     it('can register a user', function(done) {
-      var password = fakeEntities.stringNext();
-      var user = new User(_.omit(fakeEntities.user(), 'id'));
+      var password = jsonEntities.stringNext();
+      var user = new User(_.omit(jsonEntities.user(), 'id'));
       var cmd = registerCommand(user, password);
 
       httpBackend.expectPOST(uri(), cmd).respond(201, serverReply());
@@ -105,8 +105,8 @@ define([
     });
 
     it('can update a users name', function(done) {
-      var newName = fakeEntities.stringNext();
-      var baseUser = fakeEntities.user();
+      var newName = jsonEntities.stringNext();
+      var baseUser = jsonEntities.user();
       var user = new User(baseUser);
       var reply = replyUser(baseUser, { name: newName });
       var cmd = updateNameCommand(user, newName);
@@ -123,8 +123,8 @@ define([
     });
 
     it('can update a users email', function(done) {
-      var newEmail = fakeEntities.stringNext();
-      var baseUser = fakeEntities.user();
+      var newEmail = jsonEntities.stringNext();
+      var baseUser = jsonEntities.user();
       var user = new User(baseUser);
       var reply = replyUser(baseUser, { email: newEmail });
       var cmd = updateEmailCommand(user, newEmail);
@@ -141,8 +141,8 @@ define([
     });
 
     it('can update a users avatar url', function(done) {
-      var newAvatarUrl = fakeEntities.stringNext();
-      var baseUser = fakeEntities.user();
+      var newAvatarUrl = jsonEntities.stringNext();
+      var baseUser = jsonEntities.user();
       var user = new User(baseUser);
       var reply = replyUser(baseUser, { avatarUrl: newAvatarUrl });
       var cmd = updateAvatarUrlCommand(user, newAvatarUrl);
@@ -159,9 +159,9 @@ define([
     });
 
     it('can update a users password', function(done) {
-      var currentPassword = fakeEntities.stringNext();
-      var newPassword = fakeEntities.stringNext();
-      var baseUser = fakeEntities.user();
+      var currentPassword = jsonEntities.stringNext();
+      var newPassword = jsonEntities.stringNext();
+      var baseUser = jsonEntities.user();
       var user = new User(baseUser);
       var reply = replyUser(baseUser);
       var cmd = updatePasswordCommand(user, currentPassword, newPassword);
@@ -177,17 +177,17 @@ define([
     });
 
     it('can activate a registered user', function() {
-      var user = new User(fakeEntities.user());
+      var user = new User(jsonEntities.user());
       statusChangeShared(user, '/activate', 'activate', UserStatus.ACTIVE());
     });
 
     it('can lock an active user', function() {
-      var user = new User(_.extend(fakeEntities.user(), { status: UserStatus.ACTIVE() }));
+      var user = new User(_.extend(jsonEntities.user(), { status: UserStatus.ACTIVE() }));
       statusChangeShared(user, '/lock', 'lock', UserStatus.LOCKED());
     });
 
     it('can unlock a locked user', function() {
-      var user = new User(_.extend(fakeEntities.user(), { status: UserStatus.LOCKED() }));
+      var user = new User(_.extend(jsonEntities.user(), { status: UserStatus.LOCKED() }));
       statusChangeShared(user, '/unlock', 'unlock', UserStatus.ACTIVE());
     });
 
@@ -195,7 +195,7 @@ define([
       var status = [ UserStatus.ACTIVE(), UserStatus.LOCKED() ];
 
       _.each(status, function () {
-        var user = new User(_.extend(fakeEntities.user(), { status: status }));
+        var user = new User(_.extend(jsonEntities.user(), { status: status }));
 
         expect(function () { user.activate(); })
           .toThrow(new Error('user status is not registered: ' + status));
@@ -206,7 +206,7 @@ define([
       var status = [ UserStatus.REGISTERED(), UserStatus.LOCKED() ];
 
       _.each(status, function () {
-        var user = new User(_.extend(fakeEntities.user(), { status: status }));
+        var user = new User(_.extend(jsonEntities.user(), { status: status }));
 
         expect(function () { user.lock(); })
           .toThrow(new Error('user status is not active: ' + status));
@@ -217,7 +217,7 @@ define([
       var status = [ UserStatus.REGISTERED(), UserStatus.ACTIVE() ];
 
       _.each(status, function () {
-        var user = new User(_.extend(fakeEntities.user(), { status: status }));
+        var user = new User(_.extend(jsonEntities.user(), { status: status }));
 
         expect(function () { user.unlock(); })
           .toThrow(new Error('user status is not locked: ' + status));

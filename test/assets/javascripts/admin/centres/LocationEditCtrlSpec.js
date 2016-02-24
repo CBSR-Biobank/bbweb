@@ -13,23 +13,23 @@ define([
   'use strict';
 
   describe('Controller: LocationEditCtrl', function() {
-    var Centre, Location, fakeEntities;
+    var Centre, Location, jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function (_Centre_,
                                 _Location_,
-                                fakeDomainEntities) {
+                                jsonEntities) {
       Centre       = _Centre_;
       Location     = _Location_;
-      fakeEntities = fakeDomainEntities;
+      jsonEntities = jsonEntities;
     }));
 
     describe('when adding a location', function() {
       var context = {};
 
       beforeEach(function() {
-        context.centre = new Centre(fakeEntities.centre());
+        context.centre = new Centre(jsonEntities.centre());
         context.location = new Location();
         context.titleContains = 'Add';
         context.currentState = {
@@ -49,8 +49,8 @@ define([
       var context = {};
 
       beforeEach(function() {
-        context.centre = new Centre(fakeEntities.centre());
-        context.location = new Location(fakeEntities.location());
+        context.centre = new Centre(jsonEntities.centre());
+        context.location = new Location(jsonEntities.location());
 
         context.centre.locations.push(context.location);
 

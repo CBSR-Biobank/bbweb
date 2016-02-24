@@ -13,16 +13,16 @@ define([
   'use strict';
 
   describe('Directive: statusLineDirective', function() {
-    var element, createScope, fakeEntities;
+    var element, createScope, jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(fakeDomainEntities, testUtils) {
+    beforeEach(inject(function(jsonEntities, testUtils) {
       testUtils.putHtmlTemplates(
         '/assets/javascripts/admin/directives/statusLine/statusLine.html');
 
       createScope = setupScope(this.$injector);
-      fakeEntities = fakeDomainEntities;
+      jsonEntities = jsonEntities;
     }));
 
     function setupScope(injector) {
@@ -49,7 +49,7 @@ define([
     it('has the correct number of table cells', function() {
       var Centre = this.$injector.get('Centre'),
           $filter = this.$injector.get('$filter'),
-          centre = new Centre(fakeEntities.centre()),
+          centre = new Centre(jsonEntities.centre()),
           cells;
 
       createScope(centre);
@@ -67,7 +67,7 @@ define([
     it('displays correct value if timeModified has a value', function() {
       var Centre = this.$injector.get('Centre'),
           $filter = this.$injector.get('$filter'),
-          centre = new Centre(fakeEntities.centre()),
+          centre = new Centre(jsonEntities.centre()),
           scope,
           cells;
 
@@ -80,7 +80,7 @@ define([
 
     it('displays correct value if timeModified is undefined', function() {
       var Centre = this.$injector.get('Centre'),
-          centre = new Centre(fakeEntities.centre()),
+          centre = new Centre(jsonEntities.centre()),
           scope,
           cells;
 

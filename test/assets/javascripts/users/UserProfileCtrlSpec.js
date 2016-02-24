@@ -15,7 +15,7 @@ define([
   describe('Controller: UserProfileCtrl', function() {
     var ctrlMethods = ['updateName', 'updateEmail', 'updateAvatarUrl'],
         createController,
-        fakeEntities;
+        jsonEntities;
 
     //   var scope, stateHelper, usersService, domainEntityService;
     //   var state = {current: {data: {returnState: 'admin.users'}}};
@@ -23,9 +23,9 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(fakeDomainEntities) {
+    beforeEach(inject(function(jsonEntities) {
       createController = setupController(this.$injector);
-      fakeEntities = fakeDomainEntities;
+      jsonEntities = jsonEntities;
     }));
 
     function setupController(injector) {
@@ -58,7 +58,7 @@ define([
 
     it('should have valid scope', function() {
       var User = this.$injector.get('User'),
-          user = fakeEntities.user(),
+          user = jsonEntities.user(),
           scope = createController(user);
 
       expect(scope.vm.user).toEqual(new User(user));
@@ -101,7 +101,7 @@ define([
       var $q           = injector.get('$q'),
           modalService = injector.get('modalService'),
           User         = injector.get('User'),
-          user         = fakeEntities.user(),
+          user         = jsonEntities.user(),
           scope;
 
       spyOn(modalService, 'modalStringInput').and.callFake(function () {
@@ -125,7 +125,7 @@ define([
           modalService         = this.$injector.get('modalService'),
           notificationsService = this.$injector.get('notificationsService'),
           User                 = this.$injector.get('User'),
-          user                 = fakeEntities.user(),
+          user                 = jsonEntities.user(),
           scope;
 
       spyOn(modalService, 'showModal').and.callFake(function () {
@@ -147,7 +147,7 @@ define([
           modalService         = this.$injector.get('modalService'),
           notificationsService = this.$injector.get('notificationsService'),
           User                 = this.$injector.get('User'),
-          user                 = fakeEntities.user(),
+          user                 = jsonEntities.user(),
           scope;
 
       spyOn(modalService, 'showModal').and.callFake(function () {
@@ -171,7 +171,7 @@ define([
           modalService         = this.$injector.get('modalService'),
           notificationsService = this.$injector.get('notificationsService'),
           User                 = this.$injector.get('User'),
-          user                 = fakeEntities.user(),
+          user                 = jsonEntities.user(),
           scope;
 
       spyOn(modalService, 'passwordUpdateModal').and.callFake(function () {
@@ -193,7 +193,7 @@ define([
           modalService         = this.$injector.get('modalService'),
           notificationsService = this.$injector.get('notificationsService'),
           User                 = this.$injector.get('User'),
-          user                 = fakeEntities.user(),
+          user                 = jsonEntities.user(),
           scope;
 
       spyOn(modalService, 'passwordUpdateModal').and.callFake(function () {
@@ -217,7 +217,7 @@ define([
           modalService         = this.$injector.get('modalService'),
           notificationsService = this.$injector.get('notificationsService'),
           User                 = this.$injector.get('User'),
-          user                 = fakeEntities.user(),
+          user                 = jsonEntities.user(),
           scope;
 
       spyOn(modalService, 'passwordUpdateModal').and.callFake(function () {

@@ -14,27 +14,27 @@ define([
   'use strict';
 
   describe('AnnotationTypeData', function() {
-    var AnnotationTypeData, fakeEntities;
+    var AnnotationTypeData, jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_AnnotationTypeData_,
-                               fakeDomainEntities) {
+                               jsonEntities) {
       AnnotationTypeData = _AnnotationTypeData_;
-      fakeEntities = fakeDomainEntities;
+      jsonEntities = jsonEntities;
     }));
 
     function createEntities() {
       var entities = {};
 
-      entities.study = fakeEntities.study();
+      entities.study = jsonEntities.study();
 
       entities.annotationTypes = _.map(_.range(2), function() {
-        return fakeEntities.annotationType(entities.study);
+        return jsonEntities.annotationType(entities.study);
       });
 
       entities.annotationTypeData = _.map(entities.annotationTypes, function(at) {
-        return fakeEntities.annotationTypeData(at);
+        return jsonEntities.annotationTypeData(at);
       });
 
       return entities;
@@ -61,7 +61,7 @@ define([
 
         context.parentObj = testObj;
         context.annotationTypes = entities.annotationTypes;
-        context.fakeEntities = fakeEntities;
+        context.jsonEntities = jsonEntities;
       });
 
       annotationTypeDataSharedSpec(context);

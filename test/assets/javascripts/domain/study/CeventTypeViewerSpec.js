@@ -14,29 +14,29 @@ define([
 
   describe('CeventTypeViewer', function() {
 
-    var CeventTypeViewer, CollectionEventType, fakeEntities, study;
+    var CeventTypeViewer, CollectionEventType, jsonEntities, study;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_CeventTypeViewer_,
                                _CollectionEventType_,
-                               fakeDomainEntities) {
+                               jsonEntities) {
       CeventTypeViewer = _CeventTypeViewer_;
       CollectionEventType = _CollectionEventType_;
-      fakeEntities         = fakeDomainEntities;
+      jsonEntities         = jsonEntities;
 
-      study = fakeEntities.study();
+      study = jsonEntities.study();
       study.specimenGroups = _.map(_.range(2), function() {
-        return fakeEntities.specimenGroup(study);
+        return jsonEntities.specimenGroup(study);
       });
 
       study.annotationTypes = _.map(_.range(2), function() {
-        return fakeEntities.annotationType(study);
+        return jsonEntities.annotationType(study);
       });
     }));
 
     function createCeventObjects(study, recurring) {
-      var serverCeventType = fakeEntities.collectionEventType(
+      var serverCeventType = jsonEntities.collectionEventType(
         study,
         {
           specimenGroups:  study.specimenGroups,

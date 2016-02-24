@@ -12,7 +12,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
    */
   describe('States: home.admin.studies', function() {
 
-    var injector, rootScope, location, state, templateCache, fakeEntities, user;
+    var injector, rootScope, location, state, templateCache, jsonEntities, user;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -41,7 +41,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
                                 $httpBackend,
                                 adminService,
                                 StudyCounts,
-                                fakeDomainEntities) {
+                                jsonEntities) {
       var templates = [
         '/assets/javascripts/home/home.html',
         '/assets/javascripts/admin/adminDetails.html',
@@ -53,8 +53,8 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       location      = $location;
       state         = $state;
       templateCache = $templateCache;
-      fakeEntities  = fakeDomainEntities;
-      user          = fakeEntities.user();
+      jsonEntities  = jsonEntities;
+      user          = jsonEntities.user();
 
       _.each(templates, function(template) {
         mockTemplate(template);

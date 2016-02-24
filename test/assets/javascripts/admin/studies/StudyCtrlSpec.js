@@ -8,7 +8,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
   describe('Controller: StudyCtrl', function() {
-    var windowService, Study, createController, fakeEntities;
+    var windowService, Study, createController, jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test', function($provide) {
       windowService = {
@@ -22,9 +22,9 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       $provide.value('$window', windowService);
     }));
 
-    beforeEach(inject(function($q, _Study_, fakeDomainEntities) {
+    beforeEach(inject(function($q, _Study_, jsonEntities) {
       Study = _Study_;
-      fakeEntities = fakeDomainEntities;
+      jsonEntities = jsonEntities;
       createController = setupController(this.$injector);
     }));
 
@@ -58,14 +58,14 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
     }
 
     it('should contain a valid study', function() {
-      var study = new Study(fakeEntities.study()),
+      var study = new Study(jsonEntities.study()),
           scope = createController(study);
 
       expect(scope.vm.study).toBe(study);
     });
 
     it('should contain initialized panels', function() {
-      var study = new Study(fakeEntities.study()),
+      var study = new Study(jsonEntities.study()),
           scope = createController(study);
 
       expect(scope.vm.tabSummaryActive).toBe(false);
@@ -76,7 +76,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
     });
 
     it('should contain initialized local storage', function() {
-      var study = new Study(fakeEntities.study());
+      var study = new Study(jsonEntities.study());
 
       createController(study);
 
@@ -98,7 +98,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
     it('should initialize the tab of the current state', function() {
       var $timeout = this.$injector.get('$timeout'),
-          study = new Study(fakeEntities.study()),
+          study = new Study(jsonEntities.study()),
           scope = createController(study);
 
       $timeout.flush();

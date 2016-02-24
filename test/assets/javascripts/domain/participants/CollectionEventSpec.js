@@ -24,7 +24,7 @@ define([
         CollectionEventType,
         CollectionEventAnnotationType,
         bbwebConfig,
-        fakeEntities,
+        jsonEntities,
         serverStudy,
         cetFromServer,
         testUtils;
@@ -40,20 +40,20 @@ define([
       AnnotationValueType           = this.$injector.get('AnnotationValueType');
       CollectionEventAnnotationType = this.$injector.get('CollectionEventAnnotationType');
       bbwebConfig                   = this.$injector.get('bbwebConfig');
-      fakeEntities                  = this.$injector.get('fakeDomainEntities');
+      jsonEntities                  = this.$injector.get('jsonEntities');
       testUtils                     = this.$injector.get('testUtils');
 
       testUtils.addCustomMatchers();
 
-      serverStudy = fakeEntities.study();
+      serverStudy = jsonEntities.study();
 
       serverStudy.specimenGroups = _.map(_.range(2), function() {
-        return fakeEntities.specimenGroup(serverStudy);
+        return jsonEntities.specimenGroup(serverStudy);
       });
 
       serverStudy.specimenGroupsById = _.indexBy(serverStudy.specimenGroups, 'id');
 
-      cetFromServer = fakeEntities.collectionEventType(serverStudy);
+      cetFromServer = jsonEntities.collectionEventType(serverStudy);
     }));
 
     it('constructor with no parameters has default values', function() {
@@ -74,7 +74,7 @@ define([
           annotationTypeDataById,
           ceventType;
 
-      cetFromServer = fakeEntities.collectionEventType(serverStudy, {
+      cetFromServer = jsonEntities.collectionEventType(serverStudy, {
         specimenGroups:  serverStudy.specimenGroups,
         annotationTypes: annotationTypes
       });
@@ -103,7 +103,7 @@ define([
           annotationTypeDataById,
           ceventType;
 
-      cetFromServer = fakeEntities.collectionEventType(serverStudy, {
+      cetFromServer = jsonEntities.collectionEventType(serverStudy, {
         specimenGroups:  serverStudy.specimenGroups,
         annotationTypes: annotationTypes
       });
@@ -128,15 +128,15 @@ define([
           ceventType;
 
       var annotationType = new CollectionEventAnnotationType(
-        fakeEntities.studyAnnotationType(serverStudy, { valueType: AnnotationValueType.TEXT() }));
+        jsonEntities.studyAnnotationType(serverStudy, { valueType: AnnotationValueType.TEXT() }));
 
       // put an invalid value in serverAnnotation.annotationTypeId
       _.extend(
         serverAnnotation,
-        fakeEntities.annotation(fakeEntities.valueForAnnotation(annotationType), annotationType),
-        { annotationTypeId: fakeEntities.stringNext() });
+        jsonEntities.annotation(jsonEntities.valueForAnnotation(annotationType), annotationType),
+        { annotationTypeId: jsonEntities.stringNext() });
 
-      cetFromServer = fakeEntities.collectionEventType(serverStudy,
+      cetFromServer = jsonEntities.collectionEventType(serverStudy,
                                                        { annotationTypes: [annotationType] });
 
       ceventType = CollectionEventType.create(cetFromServer);
@@ -154,13 +154,13 @@ define([
           ceventType;
 
       serverCollectionEvent =
-        _.extend(fakeEntities.collectionEvent(),
+        _.extend(jsonEntities.collectionEvent(),
                  {
-                   collectionEventTypeId: fakeEntities.domainEntityNameNext(
-                     fakeEntities.ENTITY_NAME_COLLECTION_EVENT_TYPE())
+                   collectionEventTypeId: jsonEntities.domainEntityNameNext(
+                     jsonEntities.ENTITY_NAME_COLLECTION_EVENT_TYPE())
                  });
       ceventType = CollectionEventType.create(
-        fakeEntities.collectionEventType(serverStudy));
+        jsonEntities.collectionEventType(serverStudy));
 
       expect(function () {
         return new CollectionEvent(serverCollectionEvent, ceventType);
@@ -169,13 +169,13 @@ define([
 
     it('fails when constructing a collection event with annotations and no collection event type',
        function() {
-         var serverAnnotationTypes = fakeEntities.allStudyAnnotationTypes(serverStudy);
+         var serverAnnotationTypes = jsonEntities.allStudyAnnotationTypes(serverStudy);
 
          _.each(serverAnnotationTypes, function (serverAnnotationType) {
            var annotationType, serverCevent;
 
            annotationType = new CollectionEventAnnotationType(serverAnnotationType);
-           serverCevent = _.omit(fakeEntities.collectionEvent(), 'id)');
+           serverCevent = _.omit(jsonEntities.collectionEvent(), 'id)');
 
            expect(function () {
              return new CollectionEvent(serverCevent, undefined, [ annotationType ]);
@@ -199,12 +199,12 @@ define([
           annotationType,
           ceventType;
 
-      serverCollectionEvent = _.extend(fakeEntities.collectionEvent(),
+      serverCollectionEvent = _.extend(jsonEntities.collectionEvent(),
                                        { annotations: [{ tmp: 1 }] });
-      annotationType = fakeEntities.studyAnnotationType(serverStudy,
+      annotationType = jsonEntities.studyAnnotationType(serverStudy,
                                                         { valueType: AnnotationValueType.TEXT() });
       ceventType = CollectionEventType.create(
-        fakeEntities.collectionEventType(serverStudy,
+        jsonEntities.collectionEventType(serverStudy,
                                          { annotationTypes: [annotationType] }));
 
       expect(CollectionEvent.create(serverCollectionEvent))
@@ -214,15 +214,15 @@ define([
     it('has valid values when creating from a server response', function() {
       var annotationData    = generateAnnotationTypesAndServerAnnotations(serverStudy),
           annotationTypes   = _.pluck(annotationData, 'annotationType'),
-          serverCollectionEvent = fakeEntities.collectionEvent({annotationTypes: annotationTypes});
+          serverCollectionEvent = jsonEntities.collectionEvent({annotationTypes: annotationTypes});
 
       var collectionEvent = CollectionEvent.create(serverCollectionEvent);
       collectionEvent.compareToServerEntity(serverCollectionEvent);
     });
 
     it('can retrieve a single collection event', function(done) {
-      var participant = fakeEntities.participant(),
-          collectionEvent = fakeEntities.collectionEvent({
+      var participant = jsonEntities.participant(),
+          collectionEvent = jsonEntities.collectionEvent({
             participantId: participant.id
           });
 
@@ -238,7 +238,7 @@ define([
     });
 
     it('get fails when collection event ID not specified', function() {
-      var participant = fakeEntities.participant();
+      var participant = jsonEntities.participant();
 
       expect(function () {
         return CollectionEvent.get(participant.id);
@@ -246,16 +246,16 @@ define([
     });
 
     it('can list collection events for a participant', function(done) {
-      var study = fakeEntities.study(),
-          participant = fakeEntities.participant({ studyId: study.id }),
-          ceventType = fakeEntities.collectionEventType(study),
+      var study = jsonEntities.study(),
+          participant = jsonEntities.participant({ studyId: study.id }),
+          ceventType = jsonEntities.collectionEventType(study),
           collectionEvents = _.map(_.range(2), function () {
-            return fakeEntities.collectionEvent({
+            return jsonEntities.collectionEvent({
               participantId: participant.id,
               collectionEventTypeId: ceventType.id
             });
           }),
-          reply = fakeEntities.pagedResult(collectionEvents),
+          reply = jsonEntities.pagedResult(collectionEvents),
           serverEntity;
 
       httpBackend.whenGET(uri(participant.id) + '/list')
@@ -277,9 +277,9 @@ define([
 
     it('can list collection events sorted by corresponding fields',
        function(done) {
-         var study = fakeEntities.study(),
-             participant = fakeEntities.participant({ studyId: study.id }),
-             reply = fakeEntities.pagedResult([]),
+         var study = jsonEntities.study(),
+             participant = jsonEntities.participant({ studyId: study.id }),
+             reply = jsonEntities.pagedResult([]),
              sortFields = [ 'visitNumber', 'timeCompleted'];
 
          _.each(sortFields, function (sortField) {
@@ -296,9 +296,9 @@ define([
 
     it('can list collection events using a page number',
        function(done) {
-         var study = fakeEntities.study(),
-             participant = fakeEntities.participant({ studyId: study.id }),
-             reply = fakeEntities.pagedResult([]),
+         var study = jsonEntities.study(),
+             participant = jsonEntities.participant({ studyId: study.id }),
+             reply = jsonEntities.pagedResult([]),
              pageNumber = 2;
 
          httpBackend.whenGET(uri(participant.id) + '/list?page=' + pageNumber)
@@ -313,9 +313,9 @@ define([
 
     it('can list collection events using a page size',
        function(done) {
-         var study = fakeEntities.study(),
-             participant = fakeEntities.participant({ studyId: study.id }),
-             reply = fakeEntities.pagedResult([]),
+         var study = jsonEntities.study(),
+             participant = jsonEntities.participant({ studyId: study.id }),
+             reply = jsonEntities.pagedResult([]),
              pageSize = 2;
 
          httpBackend.whenGET(uri(participant.id) + '/list?pageSize=' + pageSize)
@@ -350,9 +350,9 @@ define([
 
     it('can list collection events using ordering',
        function(done) {
-         var study = fakeEntities.study(),
-             participant = fakeEntities.participant({ studyId: study.id }),
-             reply = fakeEntities.pagedResult([]),
+         var study = jsonEntities.study(),
+             participant = jsonEntities.participant({ studyId: study.id }),
+             reply = jsonEntities.pagedResult([]),
              orderingTypes = [ 'asc', 'desc'];
 
          _.each(orderingTypes, function (orderingType) {
@@ -376,7 +376,7 @@ define([
               collectionEvent;
 
           ceventType = CollectionEventType.create(
-            fakeEntities.collectionEventType(serverStudy, {
+            jsonEntities.collectionEventType(serverStudy, {
               specimenGroups:  serverStudy.specimenGroups,
               annotationTypes: annotationTypes
             }));
@@ -392,8 +392,8 @@ define([
         });
 
     it('can add a collectionEvent', function(done) {
-      var participant = fakeEntities.participant(),
-          baseCollectionEvent = fakeEntities.collectionEvent({
+      var participant = jsonEntities.participant(),
+          baseCollectionEvent = jsonEntities.collectionEvent({
             participantId: participant.id
           }),
           collectionEvent     = new CollectionEvent(_.omit(baseCollectionEvent, 'id')),
@@ -430,16 +430,16 @@ define([
     });
 
     it('can not add a collection event with empty required annotations', function() {
-      var serverAnnotationTypes = fakeEntities.allStudyAnnotationTypes(serverStudy);
+      var serverAnnotationTypes = jsonEntities.allStudyAnnotationTypes(serverStudy);
 
       _.each(serverAnnotationTypes, function (serverAnnotationType) {
         var annotationType, ceventType, serverCevent, collectionEvent;
 
         annotationType = new CollectionEventAnnotationType(serverAnnotationType);
-        ceventType = CollectionEventType.create(fakeEntities.collectionEventType(
+        ceventType = CollectionEventType.create(jsonEntities.collectionEventType(
           serverStudy, { annotationTypes: [ annotationType ] } ));
         ceventType.annotationTypeData[0].required = true;
-        serverCevent = _.omit(fakeEntities.collectionEvent(), 'id)');
+        serverCevent = _.omit(jsonEntities.collectionEvent(), 'id)');
         collectionEvent = new CollectionEvent(serverCevent, ceventType, [ annotationType ]);
 
         _.each(collectionEvent.annotations, function (annotation) {
@@ -531,20 +531,20 @@ define([
           annotationTypes,
           collectionEvent;
 
-      study = fakeEntities.study();
-      participant = fakeEntities.participant(study);
-      serverAnnotationTypes = fakeEntities.allStudyAnnotationTypes(study);
+      study = jsonEntities.study();
+      participant = jsonEntities.participant(study);
+      serverAnnotationTypes = jsonEntities.allStudyAnnotationTypes(study);
       annotationTypes = _.map(serverAnnotationTypes, function (serverAnnotationType) {
         return new CollectionEventAnnotationType(serverAnnotationType);
       });
 
       collectionEventType = CollectionEventType.create(
-        fakeEntities.collectionEventType(serverStudy, {
+        jsonEntities.collectionEventType(serverStudy, {
           specimenGroups:  serverStudy.specimenGroups,
           annotationTypes: annotationTypes
         }));
 
-      serverCollectionEvent = fakeEntities.collectionEvent({
+      serverCollectionEvent = jsonEntities.collectionEvent({
         participantId:         participant.id,
         collectionEventTypeId: collectionEventType.id,
         annotationTypes:       serverAnnotationTypes
@@ -568,11 +568,11 @@ define([
     }
 
     function generateAnnotationTypesAndServerAnnotations(serverStudy) {
-      var annotationTypes = fakeEntities.allStudyAnnotationTypes(serverStudy);
+      var annotationTypes = jsonEntities.allStudyAnnotationTypes(serverStudy);
 
       return _.map(annotationTypes, function (annotationType) {
-        var value = fakeEntities.valueForAnnotation(annotationType);
-        var serverAnnotation = fakeEntities.annotation(value, annotationType);
+        var value = jsonEntities.valueForAnnotation(annotationType);
+        var serverAnnotation = jsonEntities.annotation(value, annotationType);
 
         return {
           annotationType: new CollectionEventAnnotationType(annotationType),

@@ -21,7 +21,7 @@ define([
         CollectionEventAnnotationType,
         SpecimenLinkAnnotationType,
         AnnotationValueType,
-        fakeEntities;
+        jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -30,25 +30,25 @@ define([
                                _CollectionEventAnnotationType_,
                                _SpecimenLinkAnnotationType_,
                                _AnnotationValueType_,
-                               fakeDomainEntities) {
+                               jsonEntities) {
       Study                         = _Study_;
       ParticipantAnnotationType     = _ParticipantAnnotationType_;
       CollectionEventAnnotationType = _CollectionEventAnnotationType_;
       SpecimenLinkAnnotationType    = _SpecimenLinkAnnotationType_;
       AnnotationValueType           = _AnnotationValueType_;
-      fakeEntities                  = fakeDomainEntities;
+      jsonEntities                  = jsonEntities;
     }));
 
     describe('for Participant Annotation Types', function() {
       var context = {};
 
       beforeEach(function () {
-        var study = new Study(fakeEntities.study());
+        var study = new Study(jsonEntities.study());
 
         context.annotationTypeType = ParticipantAnnotationType;
         context.createAnnotationType = function (options) {
           return new ParticipantAnnotationType(
-            fakeEntities.studyAnnotationType(study, options));
+            jsonEntities.studyAnnotationType(study, options));
         };
 
       });
@@ -60,12 +60,12 @@ define([
       var context = {};
 
       beforeEach(function () {
-        var study = new Study(fakeEntities.study());
+        var study = new Study(jsonEntities.study());
 
         context.annotationTypeType = CollectionEventAnnotationType;
         context.createAnnotationType = function (options) {
           return new CollectionEventAnnotationType(
-            fakeEntities.studyAnnotationType(study, options));
+            jsonEntities.studyAnnotationType(study, options));
         };
 
       });
@@ -77,12 +77,12 @@ define([
       var context = {};
 
       beforeEach(function () {
-        var study = new Study(fakeEntities.study());
+        var study = new Study(jsonEntities.study());
 
         context.annotationTypeType = SpecimenLinkAnnotationType;
         context.createAnnotationType = function (options) {
           return new SpecimenLinkAnnotationType(
-            fakeEntities.studyAnnotationType(study, options));
+            jsonEntities.studyAnnotationType(study, options));
         };
 
       });

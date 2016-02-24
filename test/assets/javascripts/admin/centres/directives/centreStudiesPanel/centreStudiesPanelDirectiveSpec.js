@@ -13,12 +13,12 @@ define([
   'use strict';
 
   describe('Directive: centreStudiesPanelDirective', function() {
-    var scope, createEntities, createController, fakeEntities;
+    var scope, createEntities, createController, jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(testUtils) {
-      fakeEntities = this.$injector.get('fakeDomainEntities');
+      jsonEntities = this.$injector.get('jsonEntities');
       createEntities = setupEntities(this.$injector);
       createController = setupController(this.$injector);
       testUtils.addCustomMatchers();
@@ -37,9 +37,9 @@ define([
 
       function create() {
         var entities = {};
-        entities.centre = new Centre(fakeEntities.centre());
+        entities.centre = new Centre(jsonEntities.centre());
         entities.studies = _.map(_.range(3), function () {
-          return new Study(fakeEntities.study());
+          return new Study(jsonEntities.study());
         });
         return entities;
       }

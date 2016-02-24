@@ -17,19 +17,19 @@ define([
     var httpBackend,
         funutils,
         SpecimenGroup,
-        fakeEntities;
+        jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function($httpBackend,
                                _funutils_,
                                _SpecimenGroup_,
-                               fakeDomainEntities,
+                               jsonEntities,
                                extendedDomainEntities) {
       httpBackend   = $httpBackend;
       funutils      = _funutils_;
       SpecimenGroup = _SpecimenGroup_;
-      fakeEntities  = fakeDomainEntities;
+      jsonEntities  = jsonEntities;
     }));
 
     function uri(/* studyId, specimenGroupId, version */) {
@@ -54,8 +54,8 @@ define([
     }
 
     function createEntities(options) {
-      var study = fakeEntities.study(),
-          serverSg = fakeEntities.specimenGroup(study),
+      var study = jsonEntities.study(),
+          serverSg = jsonEntities.specimenGroup(study),
           specimenGroup;
 
       options = options || {};

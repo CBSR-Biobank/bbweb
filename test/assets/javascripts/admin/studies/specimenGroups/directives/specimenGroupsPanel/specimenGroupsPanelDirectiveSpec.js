@@ -36,7 +36,7 @@ define([
     function setupEntities(injector) {
       var Study         = injector.get('Study'),
           SpecimenGroup = injector.get('SpecimenGroup'),
-          fakeEntities  = injector.get('fakeDomainEntities');
+          jsonEntities  = injector.get('jsonEntities');
 
       return create;
 
@@ -45,9 +45,9 @@ define([
       function create() {
         var entities = {};
 
-        entities.study = new Study(fakeEntities.study());
+        entities.study = new Study(jsonEntities.study());
         entities.specimenGroups = _.map(_.range(2), function () {
-          return new SpecimenGroup(fakeEntities.processingType(entities.study));
+          return new SpecimenGroup(jsonEntities.processingType(entities.study));
         });
         entities.specimenGroupIdsInUse = [ entities.specimenGroups[0].id ];
 

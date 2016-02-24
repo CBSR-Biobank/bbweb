@@ -14,15 +14,15 @@ define([
 
   describe('CollectionEventAnnotationType', function() {
 
-    var context = {}, CollectionEventAnnotationType, fakeEntities;
+    var context = {}, CollectionEventAnnotationType, jsonEntities;
     var requiredKeys = ['id', 'studyId', 'name', 'valueType', 'options'];
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_CollectionEventAnnotationType_,
-                               fakeDomainEntities) {
+                               jsonEntities) {
       CollectionEventAnnotationType = _CollectionEventAnnotationType_;
-      fakeEntities = fakeDomainEntities;
+      jsonEntities = jsonEntities;
 
       context.annotationTypeType            = CollectionEventAnnotationType;
       context.createAnnotationTypeFn        = createAnnotationType;
@@ -34,9 +34,9 @@ define([
     }));
 
     function createServerAnnotationType(options) {
-      var study = fakeEntities.study();
+      var study = jsonEntities.study();
       options = options || {};
-      return fakeEntities.studyAnnotationType(study, options);
+      return jsonEntities.studyAnnotationType(study, options);
     }
 
     function createAnnotationType(obj) {

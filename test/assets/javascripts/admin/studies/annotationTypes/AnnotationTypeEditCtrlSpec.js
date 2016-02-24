@@ -18,8 +18,8 @@ define([
     describe('for collection event annotation types', function() {
       var context = {};
 
-      beforeEach(inject(function (CollectionEventAnnotationType, fakeDomainEntities) {
-        var baseAnnotationType = fakeDomainEntities.annotationType();
+      beforeEach(inject(function (CollectionEventAnnotationType, jsonEntities) {
+        var baseAnnotationType = jsonEntities.annotationType();
 
         context.state                = { current: { name: 'home.admin.studies.study.collection.view' } };
         context.returnState          = 'home.admin.studies.study.collection.view';
@@ -33,8 +33,8 @@ define([
     describe('for specimen link annotation types', function() {
       var context = {};
 
-      beforeEach(inject(function (SpecimenLinkAnnotationType, fakeDomainEntities) {
-        var baseAnnotationType = fakeDomainEntities.annotationType({ required: true }),
+      beforeEach(inject(function (SpecimenLinkAnnotationType, jsonEntities) {
+        var baseAnnotationType = jsonEntities.annotationType({ required: true }),
             stateName = 'home.admin.studies.study.processing';
 
         context.state           = { current: { name: stateName } };
@@ -50,7 +50,7 @@ define([
 
       describe('(shared)', function() {
 
-        beforeEach(inject(function ($state, Study, fakeDomainEntities) {
+        beforeEach(inject(function ($state, Study, jsonEntities) {
           this.$q                        = this.$injector.get('$q');
           this.$state                    = this.$injector.get('$state');
           this.$rootScope                = this.$injector.get('$rootScope');
@@ -61,7 +61,7 @@ define([
 
           spyOn($state, 'go').and.callFake(function () {} );
 
-          this.study = new Study(fakeDomainEntities.study());
+          this.study = new Study(jsonEntities.study());
         }));
 
         it('scope should be valid when adding', function() {

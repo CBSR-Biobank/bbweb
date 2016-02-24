@@ -8,7 +8,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
   describe('Controller: CentreCtrl', function() {
-    var windowService, Centre, createController, fakeEntities;
+    var windowService, Centre, createController, jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test', function($provide) {
       windowService = {
@@ -22,9 +22,9 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       $provide.value('$window', windowService);
     }));
 
-    beforeEach(inject(function($q, _Centre_, fakeDomainEntities) {
+    beforeEach(inject(function($q, _Centre_, jsonEntities) {
       Centre = _Centre_;
-      fakeEntities = fakeDomainEntities;
+      jsonEntities = jsonEntities;
       createController = setupController(this.$injector);
     }));
 
@@ -58,14 +58,14 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
     }
 
     it('should contain a valid centre', function() {
-      var centre = new Centre(fakeEntities.centre()),
+      var centre = new Centre(jsonEntities.centre()),
           scope = createController(centre);
 
       expect(scope.vm.centre).toBe(centre);
     });
 
     it('should contain initialized panels', function() {
-      var centre = new Centre(fakeEntities.centre()),
+      var centre = new Centre(jsonEntities.centre()),
           scope = createController(centre);
 
       expect(scope.vm.tabSummaryActive).toBe(false);
@@ -74,7 +74,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
     });
 
     it('should contain initialized local storage', function() {
-      var centre = new Centre(fakeEntities.centre());
+      var centre = new Centre(jsonEntities.centre());
 
       createController(centre);
       expect(windowService.localStorage.setItem)
@@ -83,7 +83,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
     it('should initialize the tab of the current state', function() {
       var $timeout = this.$injector.get('$timeout'),
-          centre = new Centre(fakeEntities.centre()),
+          centre = new Centre(jsonEntities.centre()),
           scope = createController(centre);
 
       $timeout.flush();

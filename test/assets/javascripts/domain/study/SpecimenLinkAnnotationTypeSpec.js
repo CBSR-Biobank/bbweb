@@ -14,15 +14,15 @@ define([
 
   describe('SpecimenLinkAnnotationType', function() {
 
-    var context = {}, SpecimenLinkAnnotationType, fakeEntities;
+    var context = {}, SpecimenLinkAnnotationType, jsonEntities;
     var requiredKeys = ['id', 'studyId', 'name', 'valueType', 'options'];
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_SpecimenLinkAnnotationType_,
-                               fakeDomainEntities) {
+                               jsonEntities) {
       SpecimenLinkAnnotationType = _SpecimenLinkAnnotationType_;
-      fakeEntities = fakeDomainEntities;
+      jsonEntities = jsonEntities;
 
       context.annotationTypeType            = SpecimenLinkAnnotationType;
       context.createAnnotationTypeFn        = createAnnotationType;
@@ -34,9 +34,9 @@ define([
     }));
 
     function createServerAnnotationType(options) {
-      var study = fakeEntities.study();
+      var study = jsonEntities.study();
       options = options || {};
-      return fakeEntities.studyAnnotationType(study, options);
+      return jsonEntities.studyAnnotationType(study, options);
     }
 
     function createAnnotationType(obj) {

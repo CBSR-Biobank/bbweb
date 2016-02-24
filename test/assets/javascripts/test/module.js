@@ -14,7 +14,7 @@ define(function (require) {
   var module = angular.module('biobank.test', []);
 
   module.service('extendedDomainEntities', require('../../../test/assets/javascripts/test/extendedDomainEntities'));
-  module.service('fakeDomainEntities',     require('../../../test/assets/javascripts/test/fakeDomainEntities'));
+  module.service('jsonEntities',           require('../../../test/assets/javascripts/test/jsonEntities'));
   module.service('testUtils',              require('../../../test/assets/javascripts/test/testUtils'));
 
   return module;

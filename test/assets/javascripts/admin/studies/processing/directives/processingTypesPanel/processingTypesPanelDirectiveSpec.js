@@ -34,7 +34,7 @@ define([
     function setupEntities(injector) {
       var Study          = injector.get('Study'),
           ProcessingType = injector.get('ProcessingType'),
-          fakeEntities   = injector.get('fakeDomainEntities');
+          jsonEntities   = injector.get('jsonEntities');
 
       return create;
 
@@ -42,9 +42,9 @@ define([
 
       function create() {
         var entities = {};
-        entities.study = new Study(fakeEntities.study());
+        entities.study = new Study(jsonEntities.study());
         entities.processingTypes = _.map(_.range(2), function () {
-          return new ProcessingType(fakeEntities.processingType(entities.study));
+          return new ProcessingType(jsonEntities.processingType(entities.study));
         });
         return entities;
       }

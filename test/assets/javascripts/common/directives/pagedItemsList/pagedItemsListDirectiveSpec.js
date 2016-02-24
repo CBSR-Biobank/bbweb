@@ -42,8 +42,8 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (fakeDomainEntities) {
-      this.fakeEntities = fakeDomainEntities;
+    beforeEach(inject(function (jsonEntities) {
+      this.jsonEntities = jsonEntities;
     }));
 
     describe('Centres', function () {
@@ -55,10 +55,10 @@ define([
             enabledCentres;
 
         disabledCentres = _.map(_.range(2), function() {
-          return new self.fakeEntities.centre();
+          return new self.jsonEntities.centre();
         });
         enabledCentres = _.map(_.range(3), function() {
-          var centre = new self.fakeEntities.centre();
+          var centre = new self.jsonEntities.centre();
           centre.status = CentreStatus.ENABLED();
           return centre;
         });
@@ -91,15 +91,15 @@ define([
             retiredStudies;
 
         disabledStudies = _.map(_.range(2), function() {
-          return new self.fakeEntities.study();
+          return new self.jsonEntities.study();
         });
         enabledStudies = _.map(_.range(3), function() {
-          var study = new self.fakeEntities.study();
+          var study = new self.jsonEntities.study();
           study.status = StudyStatus.ENABLED();
           return study;
         });
         retiredStudies = _.map(_.range(3), function() {
-          var study = new self.fakeEntities.study();
+          var study = new self.jsonEntities.study();
           study.status = StudyStatus.RETIRED();
           return study;
         });

@@ -16,14 +16,14 @@ define([
     var httpBackend,
         ProcessingDto,
         createEntities,
-        fakeEntities;
+        jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(testUtils) {
       httpBackend   = this.$injector.get('$httpBackend');
       ProcessingDto = this.$injector.get('ProcessingDto');
-      fakeEntities  = this.$injector.get('fakeDomainEntities');
+      jsonEntities  = this.$injector.get('jsonEntities');
       testUtils.addCustomMatchers();
 
       createEntities = setupEntities(this.$injector);
@@ -37,23 +37,23 @@ define([
       //--
       function create() {
         var entities = {};
-        entities.study = fakeEntities.study();
+        entities.study = jsonEntities.study();
         entities.processingTypes = _.map(_.range(2), function () {
-          return fakeEntities.processingType(entities.study);
+          return jsonEntities.processingType(entities.study);
         });
         entities.specimenGroups = _.map(_.range(2), function () {
-          return fakeEntities.specimenGroup(entities.study);
+          return jsonEntities.specimenGroup(entities.study);
         });
         entities.specimenLinkAnnotationTypes = _.map(
           AnnotationValueType.values(),
           function (valueType) {
-            return fakeEntities.studyAnnotationType(entities.study, {
+            return jsonEntities.studyAnnotationType(entities.study, {
               valueType: valueType
             });
           });
         entities.specimenLinkAnnotationTypeIdsInUse = [ entities.specimenLinkAnnotationTypes[0] ];
         entities.specimenLinkTypes = _.map(_.range(2), function (id) {
-          return fakeEntities.specimenLinkType(entities.processingTypes[id], {
+          return jsonEntities.specimenLinkType(entities.processingTypes[id], {
             inputGroup: entities.specimenGroups[0],
             outputGorup: entities.specimenGroups[1],
             annotationTypes: entities.specimenLinkAnnotationTypes

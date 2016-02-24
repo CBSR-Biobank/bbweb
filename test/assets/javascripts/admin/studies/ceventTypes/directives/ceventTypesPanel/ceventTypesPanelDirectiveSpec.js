@@ -38,7 +38,7 @@ define([
           SpecimenGroup                 = injector.get('SpecimenGroup'),
           CollectionEventAnnotationType = injector.get('CollectionEventAnnotationType'),
           AnnotationValueType           = injector.get('AnnotationValueType'),
-          fakeEntities                  = injector.get('fakeDomainEntities');
+          jsonEntities                  = injector.get('jsonEntities');
 
       return create;
 
@@ -52,11 +52,11 @@ define([
           studyHasAnnotationTypes: true
         };
 
-        entities.study = new Study(fakeEntities.study());
+        entities.study = new Study(jsonEntities.study());
 
         if (options.studyHasSpecimenGroups) {
           entities.specimenGroups = _.map(_.range(2), function () {
-            return new SpecimenGroup(fakeEntities.specimenGroup(entities.study));
+            return new SpecimenGroup(jsonEntities.specimenGroup(entities.study));
           });
         } else {
           entities.specimenGroups = [];
@@ -67,7 +67,7 @@ define([
             AnnotationValueType.values(),
             function(valueType) {
               return new CollectionEventAnnotationType(
-                fakeEntities.studyAnnotationType(
+                jsonEntities.studyAnnotationType(
                   entities.study, { valueType: valueType }));
             });
           entities.annotationTypeIdsInUse = [entities.annotationTypes[0]];
@@ -77,7 +77,7 @@ define([
 
         entities.ceventTypes = _.map(_.range(2), function () {
           var serverObj =
-              fakeEntities.collectionEventType(entities.study, {
+              jsonEntities.collectionEventType(entities.study, {
                 specimenGroups: entities.specimenGroups,
                 annotationTypes: entities.annotationTypes
               });

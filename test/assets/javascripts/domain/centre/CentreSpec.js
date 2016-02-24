@@ -35,7 +35,7 @@ define([
       this.Location     = this.$injector.get('Location');
       this.funutils     = this.$injector.get('funutils');
       this.testUtils    = this.$injector.get('testUtils');
-      this.fakeEntities = this.$injector.get('fakeDomainEntities');
+      this.jsonEntities = this.$injector.get('jsonEntities');
     }));
 
     it('constructor with no parameters has default values', function() {
@@ -54,21 +54,21 @@ define([
 
     it('fails when creating from a non object', function() {
       var self = this,
-          badStudyJson = _.omit(self.fakeEntities.centre(), 'name');
+          badStudyJson = _.omit(self.jsonEntities.centre(), 'name');
 
       expect(function () { self.Centre.create(badStudyJson); }).toThrowErrorOfType('Error');
     });
 
     it('fails when creating from a bad study ID', function() {
       var self = this,
-          badCentreJson = self.fakeEntities.centre({ studyIds: [ null, '' ] });
+          badCentreJson = self.jsonEntities.centre({ studyIds: [ null, '' ] });
 
       expect(function () { self.Centre.create(badCentreJson); }).toThrowErrorOfType('Error');
     });
 
     it('fails when creating from a bad location', function() {
       var self = this,
-          badCentreJson = self.fakeEntities.centre({ locations: [ 1 ] });
+          badCentreJson = self.jsonEntities.centre({ locations: [ 1 ] });
 
       expect(function () { self.Centre.create(badCentreJson); }).toThrowErrorOfType('Error');
     });
@@ -76,14 +76,14 @@ define([
     it('status predicates return valid results', function() {
       var self = this;
       _.each(self.CentreStatus.values(), function(status) {
-        var centre = new self.Centre(self.fakeEntities.centre({ status: status }));
+        var centre = new self.Centre(self.jsonEntities.centre({ status: status }));
         expect(centre.isDisabled()).toBe(status === self.CentreStatus.DISABLED());
         expect(centre.isEnabled()).toBe(status === self.CentreStatus.ENABLED());
       });
     });
 
     it('can retrieve a single centre', function(done) {
-      var self = this, centre = self.fakeEntities.centre();
+      var self = this, centre = self.jsonEntities.centre();
 
       self.httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
@@ -98,7 +98,7 @@ define([
 
     it('fails when getting a centre and it has a bad format', function(done) {
       var self = this,
-          centre = _.omit(self.fakeEntities.centre(), 'name');
+          centre = _.omit(self.jsonEntities.centre(), 'name');
       self.httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
       self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail).finally(done);
@@ -115,7 +115,7 @@ define([
 
     it('fails when getting a centre and it has a bad study ID', function(done) {
       var self = this,
-          centre = self.fakeEntities.centre({ studyIds: [ '' ]});
+          centre = self.jsonEntities.centre({ studyIds: [ '' ]});
 
       self.httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
@@ -133,8 +133,8 @@ define([
 
     it('fails when getting a centre and it has a bad location', function(done) {
       var self = this,
-          location = _.omit(self.fakeEntities.location(), 'name'),
-          centre = self.fakeEntities.centre({ locations: [ location ]});
+          location = _.omit(self.jsonEntities.location(), 'name'),
+          centre = self.jsonEntities.centre({ locations: [ location ]});
 
       self.httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
@@ -152,8 +152,8 @@ define([
 
     it('can retrieve centres', function(done) {
       var self = this,
-          centres = [ self.fakeEntities.centre() ],
-          reply = self.fakeEntities.pagedResult(centres);
+          centres = [ self.jsonEntities.centre() ],
+          reply = self.jsonEntities.pagedResult(centres);
 
       self.httpBackend.whenGET(uri()).respond(serverReply(reply));
 
@@ -181,8 +181,8 @@ define([
           ];
 
       _.each(optionList, function (options) {
-        var centres = [ self.fakeEntities.centre() ],
-            reply   = self.fakeEntities.pagedResult(centres),
+        var centres = [ self.jsonEntities.centre() ],
+            reply   = self.jsonEntities.pagedResult(centres),
             url     = sprintf.sprintf('%s?%s', uri(), $.param(options, true));
 
         self.httpBackend.whenGET(url).respond(serverReply(reply));
@@ -205,8 +205,8 @@ define([
 
     it('fails when list returns an invalid centre', function(done) {
       var self = this,
-          centres = [ _.omit(self.fakeEntities.centre(), 'name') ],
-          reply = self.fakeEntities.pagedResult(centres);
+          centres = [ _.omit(self.jsonEntities.centre(), 'name') ],
+          reply = self.jsonEntities.pagedResult(centres);
 
       self.httpBackend.whenGET(uri()).respond(serverReply(reply));
 
@@ -224,7 +224,7 @@ define([
 
     it('can add a centre', function(done) {
       var self = this,
-          baseCentre = self.fakeEntities.centre(),
+          baseCentre = self.jsonEntities.centre(),
           centre = new self.Centre(_.omit(baseCentre, 'id')),
           json = _.pick(centre, 'name', 'description');
 
@@ -243,8 +243,8 @@ define([
 
     it('can update the name on a centre', function(done) {
       var self       = this,
-          newName    = self.fakeEntities.stringNext(),
-          baseCentre = self.fakeEntities.centre(),
+          newName    = self.jsonEntities.stringNext(),
+          baseCentre = self.jsonEntities.centre(),
           centre     = new self.Centre(baseCentre),
           reply      = replyCentre(baseCentre),
           json       = _.extend({ name: newName }, self.testUtils.expectedVersion(centre.version));
@@ -267,7 +267,7 @@ define([
       var self = this;
 
       _.each([null, 'dont-care'], function (description) {
-        var baseCentre = self.fakeEntities.centre(),
+        var baseCentre = self.jsonEntities.centre(),
             centre     = new self.Centre(baseCentre),
             reply      = replyCentre(baseCentre, { description: description }),
             json       = self.testUtils.expectedVersion(centre.version);
@@ -291,23 +291,23 @@ define([
     });
 
     it('can disable a centre', function(done) {
-      var jsonCentre = this.fakeEntities.centre({ status: this.CentreStatus.ENABLED() });
+      var jsonCentre = this.jsonEntities.centre({ status: this.CentreStatus.ENABLED() });
       changeStatusShared.call(this, done, jsonCentre, 'disable', this.CentreStatus.DISABLED());
     });
 
     it('throws an error when disabling a centre and it is already disabled', function() {
-      var centre = new this.Centre(this.fakeEntities.centre({ status: this.CentreStatus.DISABLED() }));
+      var centre = new this.Centre(this.jsonEntities.centre({ status: this.CentreStatus.DISABLED() }));
       expect(function () { centre.disable(); })
         .toThrowErrorOfType('Error');
     });
 
     it('can enable a centre', function(done) {
-      var jsonCentre = this.fakeEntities.centre({ status: this.CentreStatus.DISABLED() });
+      var jsonCentre = this.jsonEntities.centre({ status: this.CentreStatus.DISABLED() });
       changeStatusShared.call(this, done, jsonCentre, 'enable', this.CentreStatus.ENABLED());
     });
 
     it('throws an error when enabling a centre and it is already enabled', function() {
-      var centre = new this.Centre(this.fakeEntities.centre({ status: this.CentreStatus.ENABLED() }));
+      var centre = new this.Centre(this.jsonEntities.centre({ status: this.CentreStatus.ENABLED() }));
       expect(function () { centre.enable(); })
         .toThrowErrorOfType('Error');
     });
@@ -379,8 +379,8 @@ define([
 
       it('adds a location', function(done) {
         var self         = this,
-            jsonLocation = this.fakeEntities.location(),
-            jsonCentre   = this.fakeEntities.centre(),
+            jsonLocation = this.jsonEntities.location(),
+            jsonCentre   = this.jsonEntities.centre(),
             centre       = new self.Centre(jsonCentre),
             location     = new self.Location(jsonLocation),
             json         = locationToJson(centre, location),
@@ -409,8 +409,8 @@ define([
 
       it('can remove a location', function(done) {
         var self         = this,
-            jsonLocation = new self.Location(self.fakeEntities.location()),
-            jsonCentre   = self.fakeEntities.centre({ locations: [ jsonLocation ]}),
+            jsonLocation = new self.Location(self.jsonEntities.location()),
+            jsonCentre   = self.jsonEntities.centre({ locations: [ jsonLocation ]}),
             centre       = new self.Centre(jsonCentre),
             url          = sprintf.sprintf('%s/%d/%s',
                                            uri('location', centre.id),
@@ -436,8 +436,8 @@ define([
 
       it('can add a study', function(done) {
         var self       = this,
-            jsonStudy  = self.fakeEntities.study(),
-            jsonCentre = self.fakeEntities.centre(),
+            jsonStudy  = self.jsonEntities.study(),
+            jsonCentre = self.jsonEntities.centre(),
             centre     = new self.Centre(jsonCentre),
             json       = { studyId: jsonStudy.id, expectedVersion: centre.version },
             reply      = replyCentre(jsonCentre, { studyIds: [ jsonStudy.id ]});
@@ -457,8 +457,8 @@ define([
 
       it('can remove a study', function(done) {
         var self       = this,
-            jsonStudy  = self.fakeEntities.study(),
-            jsonCentre = self.fakeEntities.centre({ studyIds: [ jsonStudy.id ]}),
+            jsonStudy  = self.jsonEntities.study(),
+            jsonCentre = self.jsonEntities.centre({ studyIds: [ jsonStudy.id ]}),
             centre     = new self.Centre(jsonCentre),
             url        = sprintf.sprintf('%s/%d/%s',
                                          uri('studies', centre.id),
@@ -477,8 +477,8 @@ define([
 
       it('should not remove a study that does not exist', function() {
         var self = this,
-            study = self.fakeEntities.study(),
-            centre = new self.Centre(self.fakeEntities.centre());
+            study = self.jsonEntities.study(),
+            centre = new self.Centre(self.jsonEntities.centre());
 
         expect(function () {
           centre.removeStudy(study);

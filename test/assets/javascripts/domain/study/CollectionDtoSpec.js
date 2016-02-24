@@ -16,14 +16,14 @@ define([
     var httpBackend,
         CollectionDto,
         createEntities,
-        fakeEntities;
+        jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(testUtils) {
       httpBackend   = this.$injector.get('$httpBackend');
       CollectionDto = this.$injector.get('CollectionDto');
-      fakeEntities  = this.$injector.get('fakeDomainEntities');
+      jsonEntities  = this.$injector.get('jsonEntities');
       testUtils.addCustomMatchers();
 
       createEntities = setupEntities(this.$injector);
@@ -37,20 +37,20 @@ define([
       //--
       function create() {
         var entities = {};
-        entities.study = fakeEntities.study();
+        entities.study = jsonEntities.study();
         entities.collectionEventAnnotationTypes = _.map(
           AnnotationValueType.values(),
           function (valueType) {
-            return fakeEntities.studyAnnotationType(entities.study, {
+            return jsonEntities.studyAnnotationType(entities.study, {
               valueType: valueType
             });
         });
         entities.specimenGroups = _.map(_.range(2), function () {
-          return fakeEntities.specimenGroup(entities.study);
+          return jsonEntities.specimenGroup(entities.study);
         });
         entities.collectionEventAnnotationTypeIdsInUse = [ entities.collectionEventAnnotationTypes[0].id ];
         entities.collectionEventTypes = _.map(_.range(2), function () {
-          return fakeEntities.collectionEventType(entities.study, {
+          return jsonEntities.collectionEventType(entities.study, {
             specimenGroups: entities.specimenGroups,
             annotationTypes: entities.collectionEventAnnotationTypes
           });

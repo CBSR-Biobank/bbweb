@@ -14,16 +14,16 @@ define([
 
   describe('Service: specimenGroupsService', function() {
 
-    var specimenGroupsService, httpBackend, fakeEntities;
+    var specimenGroupsService, httpBackend, jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function ($httpBackend,
                                 _specimenGroupsService_,
-                               fakeDomainEntities) {
+                               jsonEntities) {
       specimenGroupsService = _specimenGroupsService_;
       httpBackend = $httpBackend;
-      fakeEntities = fakeDomainEntities;
+      jsonEntities = jsonEntities;
     }));
 
     afterEach(function() {
@@ -36,7 +36,7 @@ define([
     }
 
     function getValueType(uri, serviceFn) {
-      var studyId = fakeEntities.stringNext();
+      var studyId = jsonEntities.stringNext();
 
       httpBackend.whenGET('/studies/' + uri).respond({
         status: 'success',
@@ -49,8 +49,8 @@ define([
     }
 
     it('should retrieve specimen groups in use', function() {
-      var studyId = fakeEntities.stringNext(),
-          specimenGroupId = fakeEntities.stringNext();
+      var studyId = jsonEntities.stringNext(),
+          specimenGroupId = jsonEntities.stringNext();
 
       httpBackend.whenGET(uri(studyId) + '/inuse').respond({
         status: 'success',

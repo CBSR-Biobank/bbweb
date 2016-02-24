@@ -18,7 +18,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
                                $state,
                                _Study_,
                                _modalService_,
-                               fakeDomainEntities) {
+                               jsonEntities) {
       q            = $q;
       scope        = $rootScope.$new();
       Study        = _Study_;
@@ -30,7 +30,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
         return deferred.promise;
       });
 
-      study = new Study(fakeDomainEntities.study());
+      study = new Study(jsonEntities.study());
 
       $controller('StudySummaryTabCtrl as vm', {
         $scope:       scope,

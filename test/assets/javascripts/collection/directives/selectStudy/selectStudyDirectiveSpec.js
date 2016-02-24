@@ -19,7 +19,7 @@ define([
         compile,
         element,
         state,
-        fakeEntities,
+        jsonEntities,
         panelHeader = 'selectStudy directive header',
         navigateStateName = 'test-navigate-state-name',
         navigateStateParamName = 'test-navigate-state-param-name';
@@ -31,7 +31,7 @@ define([
       compile      = this.$injector.get('$compile');
       scope        = this.$injector.get('$rootScope');
       state        = this.$injector.get('$state');
-      fakeEntities = this.$injector.get('fakeDomainEntities');
+      jsonEntities = this.$injector.get('jsonEntities');
 
       testUtils.putHtmlTemplates(
         '/assets/javascripts/collection/directives/selectStudy/selectStudy.html');
@@ -77,7 +77,7 @@ define([
     }
 
     it('displays the list of studies', function() {
-      var studies = _.map(_.range(20), function () { return fakeEntities.study(); }),
+      var studies = _.map(_.range(20), function () { return jsonEntities.study(); }),
           pageSize = studies.length / 2;
 
       createScope({
@@ -90,7 +90,7 @@ define([
     });
 
     it('displays the pannel header correctly', function() {
-      var studies = _.map(_.range(20), function () { return fakeEntities.study(); }),
+      var studies = _.map(_.range(20), function () { return jsonEntities.study(); }),
           pageSize = studies.length / 2;
 
       createScope({
@@ -101,7 +101,7 @@ define([
     });
 
     it('has a name filter', function() {
-      var studies = _.map(_.range(10), function () { return fakeEntities.study(); });
+      var studies = _.map(_.range(10), function () { return jsonEntities.study(); });
 
       createScope({
         getStudies: createGetStudiesFn(studies),
@@ -111,7 +111,7 @@ define([
     });
 
     it('displays pagination controls', function() {
-      var studies = _.map(_.range(20), function () { return fakeEntities.study(); }),
+      var studies = _.map(_.range(20), function () { return jsonEntities.study(); }),
           pageSize = studies.length / 2,
           scope;
 
@@ -125,7 +125,7 @@ define([
     });
 
     it('updates to name filter cause studies to be re-loaded', function() {
-      var studies = _.map(_.range(20), function () { return fakeEntities.study(); }),
+      var studies = _.map(_.range(20), function () { return jsonEntities.study(); }),
           pageSize = studies.length / 2,
           scope = createScope({
             getStudies: createGetStudiesFn(studies),
@@ -138,7 +138,7 @@ define([
     });
 
     it('page change studies to be re-loaded', function() {
-      var studies = _.map(_.range(20), function () { return fakeEntities.study(); }),
+      var studies = _.map(_.range(20), function () { return jsonEntities.study(); }),
           pageSize = studies.length / 2,
           scope = createScope({
             getStudies: createGetStudiesFn(studies),
@@ -151,7 +151,7 @@ define([
     });
 
     it('clear filter studies to be re-loaded', function() {
-      var studies = _.map(_.range(20), function () { return fakeEntities.study(); }),
+      var studies = _.map(_.range(20), function () { return jsonEntities.study(); }),
           pageSize = studies.length / 2,
           scope = createScope({
             getStudies: createGetStudiesFn(studies),
@@ -164,9 +164,9 @@ define([
     });
 
     it('navigateToStudyHref returns valid link', function() {
-      var studies = _.map(_.range(20), function () { return fakeEntities.study(); }),
+      var studies = _.map(_.range(20), function () { return jsonEntities.study(); }),
           pageSize = studies.length / 2,
-          fakeUrl = fakeEntities.stringNext(),
+          fakeUrl = jsonEntities.stringNext(),
           stateNameParam = {},
           studyToNavigateTo = studies[0];
 

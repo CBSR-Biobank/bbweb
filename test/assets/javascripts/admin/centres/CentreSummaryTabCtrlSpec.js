@@ -8,7 +8,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
   describe('Controller: CentreSummaryTabCtrl', function() {
-    var q, Centre, CentreStatus, fakeEntities, createController;
+    var q, Centre, CentreStatus, jsonEntities, createController;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -16,11 +16,11 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
                                _Centre_,
                                _CentreStatus_,
                                modalService,
-                               fakeDomainEntities) {
+                               jsonEntities) {
       q            = $q;
       Centre       = _Centre_;
       CentreStatus = _CentreStatus_;
-      fakeEntities = fakeDomainEntities;
+      jsonEntities = jsonEntities;
 
       spyOn(modalService, 'showModal').and.callFake(function () {
         return $q.when('modalResult');
@@ -51,7 +51,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
     }
 
     it('should contain valid settings to display the centre summary', function() {
-      var centre = new Centre(fakeEntities.centre()),
+      var centre = new Centre(jsonEntities.centre()),
           scope = createController(centre);
 
       expect(scope.vm.centre).toBe(centre);
@@ -76,12 +76,12 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       }
 
       it('should enable a centre', function() {
-        var centre = new Centre(fakeEntities.centre());
+        var centre = new Centre(jsonEntities.centre());
         checkStatusChange(centre, 'enable', CentreStatus.ENABLED());
       });
 
       it('should disable a centre', function() {
-        var centre = new Centre(fakeEntities.centre());
+        var centre = new Centre(jsonEntities.centre());
         centre.status = CentreStatus.ENABLED();
         checkStatusChange(centre, 'disable', CentreStatus.DISABLED());
       });

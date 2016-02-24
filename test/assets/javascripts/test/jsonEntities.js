@@ -12,7 +12,7 @@ define([
 
   /*jshint camelcase: false */
 
-  fakeDomainEntities.$inject = [
+  jsonEntities.$inject = [
     'AnnotationValueType',
     'AnatomicalSourceType',
     'PreservationTemperatureType',
@@ -31,16 +31,16 @@ define([
    * This has to be an AngularJS service so that it's dependencies from the real application
    * can be injected (i.e. AnnotationValueType).
    */
-  function fakeDomainEntities(AnnotationValueType,
-                              AnatomicalSourceType,
-                              PreservationTemperatureType,
-                              PreservationType,
-                              SpecimenType,
-                              StudyStatus,
-                              CentreStatus,
-                              UserStatus,
-                              bbwebConfig,
-                              testUtils) {
+  function jsonEntities(AnnotationValueType,
+                        AnatomicalSourceType,
+                        PreservationTemperatureType,
+                        PreservationType,
+                        SpecimenType,
+                        StudyStatus,
+                        CentreStatus,
+                        UserStatus,
+                        bbwebConfig,
+                        testUtils) {
     var nameCountByEntity = {};
 
     var service = {
@@ -468,5 +468,5 @@ define([
 
   /*jshint camelcase: true */
 
-  return fakeDomainEntities;
+  return jsonEntities;
 });

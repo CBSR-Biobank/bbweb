@@ -33,7 +33,7 @@ define([
       this.Study              = this.$injector.get('Study');
       this.StudyStatus        = this.$injector.get('StudyStatus');
       this.funutils           = this.$injector.get('funutils');
-      this.fakeEntities       = this.$injector.get('fakeDomainEntities');
+      this.jsonEntities       = this.$injector.get('jsonEntities');
       this.testUtils          = this.$injector.get('testUtils');
     }));
 
@@ -52,21 +52,21 @@ define([
 
     it('fails when creating from an invalid object', function() {
       var self = this,
-          badStudyJson = _.omit(self.fakeEntities.study(), 'name');
+          badStudyJson = _.omit(self.jsonEntities.study(), 'name');
 
       expect(function () { self.Study.create(badStudyJson); }).toThrowErrorOfType('Error');
     });
 
     it('fails when creating from a non object for an annotation type', function() {
       var self = this,
-          badStudyJson = self.fakeEntities.study({ annotationTypes: [ 1 ]});
+          badStudyJson = self.jsonEntities.study({ annotationTypes: [ 1 ]});
       expect(function () { self.Study.create(1); }).toThrowErrorOfType('Error');
     });
 
     it('status predicates return valid results', function() {
       var self = this;
       _.each(self.StudyStatus.values(), function(status) {
-        var study = new self.Study(self.fakeEntities.study({ status: status }));
+        var study = new self.Study(self.jsonEntities.study({ status: status }));
         expect(study.isDisabled()).toBe(status === self.StudyStatus.DISABLED());
         expect(study.isEnabled()).toBe(status === self.StudyStatus.ENABLED());
         expect(study.isRetired()).toBe(status === self.StudyStatus.RETIRED());
@@ -75,7 +75,7 @@ define([
 
     it('can retrieve a single study', function(done) {
       var self = this,
-          study = self.fakeEntities.study();
+          study = self.jsonEntities.study();
       self.httpBackend.whenGET(uri(study.id)).respond(serverReply(study));
 
       self.Study.get(study.id).then(checkResult).catch(failTest).finally(done);
@@ -90,7 +90,7 @@ define([
 
     it('fails when getting a study and it has a bad format', function(done) {
       var self = this,
-          study = _.omit(self.fakeEntities.study(), 'name');
+          study = _.omit(self.jsonEntities.study(), 'name');
       self.httpBackend.whenGET(uri(study.id)).respond(serverReply(study));
 
       self.Study.get(study.id).then(shouldNotFail).catch(shouldFail).finally(done);
@@ -107,8 +107,8 @@ define([
 
     it('fails when getting a study and it has a bad annotation type', function(done) {
       var self = this,
-          annotationType = self.fakeEntities.annotationType(),
-          study = self.fakeEntities.study({ annotationTypes: [ annotationType ]});
+          annotationType = self.jsonEntities.annotationType(),
+          study = self.jsonEntities.study({ annotationTypes: [ annotationType ]});
 
       self.httpBackend.whenGET(uri(study.id)).respond(serverReply(study));
 
@@ -126,8 +126,8 @@ define([
 
     it('can retrieve studies', function(done) {
       var self = this,
-          studies = [ self.fakeEntities.study({ annotationTypes: [] }) ],
-          reply = self.fakeEntities.pagedResult(studies),
+          studies = [ self.jsonEntities.study({ annotationTypes: [] }) ],
+          reply = self.jsonEntities.pagedResult(studies),
           serverEntity;
 
       self.httpBackend.whenGET(uri()).respond(serverReply(reply));
@@ -160,8 +160,8 @@ define([
           ];
 
       _.each(optionList, function (options) {
-        var studies = [ self.fakeEntities.study() ],
-            reply   = self.fakeEntities.pagedResult(studies),
+        var studies = [ self.jsonEntities.study() ],
+            reply   = self.jsonEntities.pagedResult(studies),
             url     = sprintf.sprintf('%s?%s', uri(), $.param(options, true));
 
         self.httpBackend.whenGET(url).respond(serverReply(reply));
@@ -184,8 +184,8 @@ define([
 
     it('fails when list returns an invalid study', function(done) {
       var self = this,
-          studies = [ _.omit(self.fakeEntities.study(), 'name') ],
-          reply = self.fakeEntities.pagedResult(studies);
+          studies = [ _.omit(self.jsonEntities.study(), 'name') ],
+          reply = self.jsonEntities.pagedResult(studies);
 
       self.httpBackend.whenGET(uri()).respond(serverReply(reply));
 
@@ -203,7 +203,7 @@ define([
 
     it('can add a study', function(done) {
       var self = this,
-          serverStudy = self.fakeEntities.study(),
+          serverStudy = self.jsonEntities.study(),
           study = new self.Study(_.omit(serverStudy, 'id')),
           json = _.pick(study, 'name', 'description');
 
@@ -223,8 +223,8 @@ define([
 
     it('can update the name on a study', function(done) {
       var self = this,
-          newName   = self.fakeEntities.stringNext(),
-          baseStudy = self.fakeEntities.study(),
+          newName   = self.jsonEntities.stringNext(),
+          baseStudy = self.jsonEntities.study(),
           study     = new self.Study(baseStudy),
           reply     = replyStudy(baseStudy, { name: newName }),
           json      = _.extend({ name: newName }, self.testUtils.expectedVersion(study.version));
@@ -248,7 +248,7 @@ define([
       var self = this;
 
       _.each([null, 'dont-care'], function (description) {
-        var baseStudy = self.fakeEntities.study(),
+        var baseStudy = self.jsonEntities.study(),
             study     = new self.Study(baseStudy),
             reply     = replyStudy(baseStudy, { description: description }),
             json      = self.testUtils.expectedVersion(study.version);
@@ -273,9 +273,9 @@ define([
 
     it('can add an annotation on a study', function(done) {
       var self = this,
-          baseStudy      = self.fakeEntities.study(),
+          baseStudy      = self.jsonEntities.study(),
           study          = new self.Study(baseStudy),
-          annotationType = self.fakeEntities.annotationType(),
+          annotationType = self.jsonEntities.annotationType(),
           reply          = replyStudy(baseStudy, { annotationTypes: [ annotationType ]}),
           json           = _.extend(self.testUtils.expectedVersion(study.version),
                                     _.omit(annotationType, 'uniqueId'));
@@ -297,8 +297,8 @@ define([
 
     it('can remove an annotation on a study', function(done) {
       var self = this,
-          annotationType = self.fakeEntities.annotationType(),
-          baseStudy      = self.fakeEntities.study({ annotationTypes: [ annotationType ] }),
+          annotationType = self.jsonEntities.annotationType(),
+          baseStudy      = self.jsonEntities.study({ annotationTypes: [ annotationType ] }),
           study          = new self.Study(baseStudy),
           url            = sprintf.sprintf('%s/%d/%s', uri('pannottype', study.id),
                                            study.version, annotationType.uniqueId);
@@ -348,7 +348,7 @@ define([
     function changeStatusShared(done, action, status) {
       /* jshint validthis:true */
       var self  = this,
-          baseStudy = self.fakeEntities.study(),
+          baseStudy = self.jsonEntities.study(),
           study = new self.Study(baseStudy),
           json =  { expectedVersion: study.version },
           reply = replyStudy(baseStudy, { status: status });

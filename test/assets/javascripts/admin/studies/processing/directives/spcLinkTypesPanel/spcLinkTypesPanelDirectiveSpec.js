@@ -37,7 +37,7 @@ define([
           SpecimenLinkAnnotationType = injector.get('SpecimenLinkAnnotationType'),
           AnnotationValueType        = injector.get('AnnotationValueType'),
           SpecimenLinkType           = injector.get('SpecimenLinkType'),
-          fakeEntities               = injector.get('fakeDomainEntities');
+          jsonEntities               = injector.get('jsonEntities');
 
       return create;
 
@@ -51,14 +51,14 @@ define([
           studyHasAnnotationTypes: true
         };
 
-        entities.study = new Study(fakeEntities.study());
+        entities.study = new Study(jsonEntities.study());
         entities.processingTypes = _.map(_.range(2), function () {
-          return new ProcessingType(fakeEntities.processingType(entities.study));
+          return new ProcessingType(jsonEntities.processingType(entities.study));
         });
 
         if (options.studyHasSpecimenGroups) {
           entities.specimenGroups = _.map(_.range(2), function () {
-            return fakeEntities.specimenGroup(entities.study);
+            return jsonEntities.specimenGroup(entities.study);
           });
         } else {
           entities.specimenGroups = [];
@@ -69,7 +69,7 @@ define([
             AnnotationValueType.values(),
             function(valueType) {
               return new SpecimenLinkAnnotationType(
-                fakeEntities.studyAnnotationType(
+                jsonEntities.studyAnnotationType(
                   entities.study, { valueType: valueType }));
             });
           entities.annotationTypeIdsInUse = [entities.annotationTypes[0]];
@@ -78,7 +78,7 @@ define([
         }
 
         entities.specimenLinkTypes = _.map(_.range(2), function () {
-          var slt = new SpecimenLinkType(fakeEntities.processingType(entities.study));
+          var slt = new SpecimenLinkType(jsonEntities.processingType(entities.study));
           if (options.studyHasSpecimenGroups) {
             slt.studySpecimenGroups(entities.specimenGroups);
           }
