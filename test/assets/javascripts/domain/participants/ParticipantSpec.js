@@ -65,7 +65,7 @@ define([
         var annotation = _.findWhere(participant.annotations,
                                      { annotationTypeId: annotationItem.annotationType.id });
         expect(annotation).toEqual(jasmine.any(Annotation));
-        annotation.compareToServerEntity(annotationItem.serverAnnotation);
+        annotation.compareToJsonEntity(annotationItem.serverAnnotation);
         expect(annotation.required).toBe(annotationItem.annotationType.required);
       });
     });
@@ -143,7 +143,7 @@ define([
 
       // TODO: add annotations to the server response
       var participant = Participant.create(serverParticipant);
-      participant.compareToServerEntity(serverParticipant);
+      participant.compareToJsonEntity(serverParticipant);
     });
 
     it('can retrieve a single participant', function(done) {
@@ -153,7 +153,7 @@ define([
 
       Participant.get(study.id, participant.id).then(function (reply) {
         expect(reply).toEqual(jasmine.any(Participant));
-        reply.compareToServerEntity(participant);
+        reply.compareToJsonEntity(participant);
         done();
       });
       httpBackend.flush();
@@ -167,7 +167,7 @@ define([
 
       Participant.getByUniqueId(study.id, participant.uniqueId).then(function (reply) {
         expect(reply).toEqual(jasmine.any(Participant));
-        reply.compareToServerEntity(participant);
+        reply.compareToJsonEntity(participant);
         done();
       });
       httpBackend.flush();

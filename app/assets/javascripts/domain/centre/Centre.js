@@ -143,8 +143,24 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
 
     Centre.get = function (id) {
       return biobankApi.get(uri(id)).then(function(reply) {
-        return asyncCreate(reply);
+        return Centre.prototype.asyncCreate(reply);
       });
+    };
+
+    Centre.prototype.asyncCreate = function (obj) {
+      var deferred = $q.defer();
+
+      if (!tv4.validate(obj, schema)) {
+        deferred.reject('invalid object from server: ' + tv4.error);
+      } else if (!validStudyIds(obj.studyIds)) {
+        deferred.reject('invalid study IDs from server: ' + tv4.error);
+      } else if (!validLocations(obj.locations)) {
+        deferred.reject('invalid locations from server: ' + tv4.error);
+      } else {
+        deferred.resolve(new Centre(obj));
+      }
+
+      return deferred.promise;
     };
 
     Centre.prototype.add = function () {
@@ -152,44 +168,23 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
           json = { name: this.name };
       angular.extend(json, funutils.pickOptional(self, 'description'));
       return biobankApi.post(uri(), json).then(function(reply) {
-        return asyncCreate(reply);
+        return self.asyncCreate(reply);
       });
     };
 
     Centre.prototype.updateName = function (name) {
-      var self = this,
-          json = {
-            name:            name,
-            expectedVersion: self.version
-          };
-
-      return biobankApi.post(uri('name', self.id), json).then(function(reply) {
-        return asyncCreate(reply);
-      });
+      return update.call(this, 'name', { name: name });
     };
 
     Centre.prototype.updateDescription = function (description) {
-      var self = this,
-          json = {
-            expectedVersion: self.version
-          };
-
       if (description) {
-        json.description = description;
+        return update.call(this, 'description', { description: description });
       }
-
-      return biobankApi.post(uri('description', self.id), json).then(function(reply) {
-        return asyncCreate(reply);
-      });
+      return update.call(this, 'description');
     };
 
     Centre.prototype.addStudy = function (study) {
-      var self = this, json;
-
-      json = { studyId: study.id, expectedVersion: self.version };
-      return biobankApi.post(uri('studies', self.id), json).then(function(reply) {
-        return asyncCreate(reply);
-      });
+      return update.call(this, 'studies', { studyId: study.id });
     };
 
     Centre.prototype.removeStudy = function (study) {
@@ -202,7 +197,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
       url = sprintf.sprintf('%s/%d/%s', uri('studies', self.id), self.version, study.id);
 
       return biobankApi.del(url).then(function(reply) {
-        return asyncCreate(
+        return self.asyncCreate(
           _.extend(self, {
             version: self.version + 1,
             studyIds: _.without(self.studyIds, study.id)
@@ -211,21 +206,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
     };
 
     Centre.prototype.addLocation = function (location) {
-      var self = this,
-          json = {
-            expectedVersion: self.version,
-            name:            location.name,
-            street:          location.street,
-            city:            location.city,
-            province:        location.province,
-            postalCode:      location.postalCode,
-            poBoxNumber:     location.poBoxNumber,
-            countryIsoCode:  location.countryIsoCode
-          };
-
-      return biobankApi.post(uri('locations', self.id), json).then(function(reply) {
-        return asyncCreate(reply);
-      });
+      return update.call(this, 'locations', _.omit(location, 'uniqueId'));
     };
 
     Centre.prototype.removeLocation = function (location) {
@@ -239,7 +220,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
       url = sprintf.sprintf('%s/%d/%s', uri('locations', self.id), self.version, location.uniqueId);
 
       return biobankApi.del(url).then(function(reply) {
-        return asyncCreate(
+        return self.asyncCreate(
           _.extend(self, {
             version: self.version + 1,
             locations: _.filter(self.locations, function(loc) {
@@ -271,26 +252,24 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
      return changeState(this, 'enable');
     };
 
-    function asyncCreate(obj) {
-      var deferred = $q.defer();
-
-      if (!tv4.validate(obj, schema)) {
-        deferred.reject('invalid object from server: ' + tv4.error);
-      } else if (!validStudyIds(obj.studyIds)) {
-        deferred.reject('invalid study IDs from server: ' + tv4.error);
-      } else if (!validLocations(obj.locations)) {
-        deferred.reject('invalid locations from server: ' + tv4.error);
-      } else {
-        deferred.resolve(new Centre(obj));
-      }
-
-      return deferred.promise;
-    }
-
     function changeState(centre, status) {
       var json = { expectedVersion: centre.version };
       return biobankApi.post(uri(status, centre.id), json).then(function (reply) {
-        return asyncCreate(reply);
+        return Centre.prototype.asyncCreate(reply);
+      });
+    }
+
+    function update(path, additionalJson) {
+      /* jshint validthis:true */
+      var self = this,
+          json = { expectedVersion: self.version };
+
+      if (additionalJson) {
+        // in the case of description, the value could be undefined
+        _.extend(json, additionalJson);
+      }
+      return biobankApi.post(uri(path, self.id), json).then(function(reply) {
+        return self.asyncCreate(reply);
       });
     }
 

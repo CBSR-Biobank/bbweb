@@ -213,7 +213,7 @@ define([
 
         it('has valid values when created from server response', function() {
           _.each(getAnnotationAndTypeForAllValueTypes(), function (entities) {
-            entities.annotation.compareToServerEntity(entities.serverAnnotation);
+            entities.annotation.compareToJsonEntity(entities.serverAnnotation);
           });
         });
 

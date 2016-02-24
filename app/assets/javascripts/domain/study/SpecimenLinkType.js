@@ -9,8 +9,7 @@ define(['underscore'], function(_) {
     'funutils',
     'validationService',
     'biobankApi',
-    'ConcurrencySafeEntity',
-    'AnnotationTypeData'
+    'ConcurrencySafeEntity'
   ];
 
   /**
@@ -19,8 +18,7 @@ define(['underscore'], function(_) {
   function SpecimenLinkTypeFactory(funutils,
                                    validationService,
                                    biobankApi,
-                                   ConcurrencySafeEntity,
-                                   AnnotationTypeData) {
+                                   ConcurrencySafeEntity) {
 
     var requiredKeys = [
       'id',
@@ -91,7 +89,6 @@ define(['underscore'], function(_) {
     }
 
     SpecimenLinkType.prototype = Object.create(ConcurrencySafeEntity.prototype);
-    _.extend(SpecimenLinkType.prototype, AnnotationTypeData);
 
     /**
      * Used by promise code, so it must return an error rather than throw one.

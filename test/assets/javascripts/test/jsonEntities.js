@@ -49,6 +49,7 @@ define([
       specimenLinkType:                  specimenLinkType,
       processingType:                    processingType,
       collectionEventType:               collectionEventType,
+      collectionSpecimenSpec:            collectionSpecimenSpec,
       specimenGroup:                     specimenGroup,
       annotationType:                    annotationType,
       allAnnotationTypes:                allAnnotationTypes,
@@ -184,25 +185,19 @@ define([
      */
     function collectionEventType(study, options) {
       var cet = {
-        id:                 testUtils.uuid(),
-        studyId:            study.id,
-        name:               domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE()),
-        description:        randomFakerLoremWord(),
-        specimenGroupData:  [],
-        annotationTypeData: []
+        id:              testUtils.uuid(),
+        studyId:         study.id,
+        name:            domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE()),
+        description:     randomFakerLoremWord(),
+        specimenSpecs:   [],
+        annotationTypes: []
       };
 
       options = options || {};
-
-      if (options.specimenGroups) {
-        cet.specimenGroupData = [];
-      }
-      if (options.annotationTypes) {
-        cet.annotationTypeData = [];
-      }
-
       cet.recurring = _.isUndefined(options.recurring) ? false : options.recurring;
-      return _.extend(cet, commonFields());
+      return _.extend(cet,
+                      commonFields(),
+                      _.pick(options, 'specimenSpecs', 'annotationTypes'));
     }
 
     function randomAnatomicalSourceType() {
@@ -219,6 +214,23 @@ define([
 
     function randomSpecimenType() {
       return faker.random.array_element(SpecimenType.values());
+    }
+
+    function collectionSpecimenSpec(options) {
+      var spec = {
+        uniqueId:                    testUtils.uuid(),
+        name:                        domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP()),
+        description:                 randomFakerLoremWord(),
+        units:                       'mL',
+        anatomicalSourceType:        randomAnatomicalSourceType(),
+        preservationType:            randomPreservationType(),
+        preservationTemperatureType: randomPreservationTemperatureTypeType(),
+        specimenType:                randomSpecimenType(),
+        maxCount:                    1,
+        amount:                      0.5
+      };
+      options = options || {};
+      return _.extend(spec, options);
     }
 
     function specimenGroup(study) {
@@ -298,7 +310,6 @@ define([
         id:              testUtils.uuid(),
         name:            domainEntityNameNext(ENTITY_NAME_STUDY()),
         description:     randomFakerLoremWord(),
-        studyIds:        [],
         annotationTypes: [],
         status:          StudyStatus.DISABLED()
       };

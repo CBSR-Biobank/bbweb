@@ -16,7 +16,7 @@ define(function (require) {
   module = angular.module('biobank.domain', []);
 
   module.factory('AnnotationType',                      require('./AnnotationType'));
-  module.factory('AnnotationTypeData',                  require('./AnnotationTypeData'));
+  module.factory('AnnotationTypes',                     require('./AnnotationTypes'));
   module.factory('AnnotationTypeViewer',                require('./AnnotationTypeViewer'));
   module.factory('ConcurrencySafeEntity',               require('./ConcurrencySafeEntity'));
   module.service('domainEntityService',                 require('./domainEntityService') );
@@ -45,12 +45,12 @@ define(function (require) {
 
   module.factory('CeventTypeViewer',                    require('./study/CeventTypeViewer'));
   module.factory('CollectionDto',                       require('./study/CollectionDto'));
-  module.factory('CollectionEventAnnotationType',       require('./study/CollectionEventAnnotationType'));
   module.factory('CollectionEventType',                 require('./study/CollectionEventType'));
+  module.factory('CollectionSpecimenSpec',              require('./study/CollectionSpecimenSpec'));
+  module.factory('CollectionSpecimenSpecs',             require('./study/CollectionSpecimenSpecs'));
   module.factory('ProcessingTypeViewer',                require('./study/ProcessingTypeViewer'));
   module.factory('SpcLinkTypeViewer',                   require('./study/SpcLinkTypeViewer'));
   module.factory('SpecimenGroup',                       require('./study/SpecimenGroup'));
-  module.factory('SpecimenGroupData',                   require('./study/SpecimenGroupData'));
   module.factory('SpecimenGroupViewer',                 require('./study/SpecimenGroupViewer'));
   module.factory('SpecimenLinkAnnotationType',          require('./study/SpecimenLinkAnnotationType'));
   module.factory('SpecimenLinkType',                    require('./study/SpecimenLinkType'));

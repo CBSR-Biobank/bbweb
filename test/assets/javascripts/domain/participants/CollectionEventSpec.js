@@ -91,7 +91,7 @@ define([
         var annotation = _.findWhere(collectionEvent.annotations,
                                      { annotationTypeId: annotationItem.annotationType.id });
         expect(annotation).toEqual(jasmine.any(Annotation));
-        annotation.compareToServerEntity(annotationItem.serverAnnotation);
+        annotation.compareToJsonEntity(annotationItem.serverAnnotation);
         expect(annotation.required)
           .toBe(annotationTypeDataById[annotationItem.annotationType.id].required);
       });
@@ -217,7 +217,7 @@ define([
           serverCollectionEvent = jsonEntities.collectionEvent({annotationTypes: annotationTypes});
 
       var collectionEvent = CollectionEvent.create(serverCollectionEvent);
-      collectionEvent.compareToServerEntity(serverCollectionEvent);
+      collectionEvent.compareToJsonEntity(serverCollectionEvent);
     });
 
     it('can retrieve a single collection event', function(done) {
@@ -231,7 +231,7 @@ define([
 
       CollectionEvent.get(participant.id, collectionEvent.id).then(function (reply) {
         expect(reply).toEqual(jasmine.any(CollectionEvent));
-        reply.compareToServerEntity(collectionEvent);
+        reply.compareToJsonEntity(collectionEvent);
         done();
       });
       httpBackend.flush();
@@ -268,7 +268,7 @@ define([
           expect(obj).toEqual(jasmine.any(CollectionEvent));
           serverEntity = _.findWhere(collectionEvents, { id: obj.id });
           expect(serverEntity).toBeDefined();
-          obj.compareToServerEntity(serverEntity);
+          obj.compareToJsonEntity(serverEntity);
         });
         done();
       });
@@ -342,7 +342,7 @@ define([
                                        entities.annotationTypes)
         .then(function (reply) {
           expect(reply).toEqual(jasmine.any(CollectionEvent));
-          reply.compareToServerEntity(serverCollectionEvent);
+          reply.compareToJsonEntity(serverCollectionEvent);
           done();
         });
       httpBackend.flush();
@@ -403,7 +403,7 @@ define([
 
       collectionEvent.addOrUpdate().then(function(replyCollectionEvent) {
         _.extend(collectionEvent, { id: replyCollectionEvent.id });
-        collectionEvent.compareToServerEntity(replyCollectionEvent);
+        collectionEvent.compareToJsonEntity(replyCollectionEvent);
         done();
       });
       httpBackend.flush();

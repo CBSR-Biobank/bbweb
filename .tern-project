@@ -1,4 +1,5 @@
 {
+  "ecmaVersion": 5,
   "libs": [
     "browser",
     "jquery"
@@ -8,14 +9,12 @@
     "test/assets/javascripts/**/*.js"
   ],
   "plugins": {
-    "node": {},
+    "jasmine": {},
+    "jasminematchers": {},
     "angular": "./target/web/web-modules/main/webjars/lib/angularjs",
     "requirejs": {
-      "baseURL": "./app/assets/javascripts",
-      "paths":   {
-        "lib": "../../../target/web/web-modules/main/webjars/lib"
-      }
+      "baseURL": "./",
+      "paths":   {}
     }
   }
 }
-

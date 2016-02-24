@@ -87,7 +87,7 @@ define([
     it('has valid values when creating from server response', function() {
       var entities = createEntities();
       entities.processingType = ProcessingType.create(entities.serverPt);
-      entities.processingType.compareToServerEntity(entities.serverPt);
+      entities.processingType.compareToJsonEntity(entities.serverPt);
     });
 
     it('can retrieve a processing type', function(done) {
@@ -96,7 +96,7 @@ define([
         .respond(serverReply(entities.serverPt));
 
       ProcessingType.get(entities.study.id, entities.serverPt.id).then(function(pt) {
-        pt.compareToServerEntity(entities.serverPt);
+        pt.compareToJsonEntity(entities.serverPt);
         done();
       });
       httpBackend.flush();
@@ -107,7 +107,7 @@ define([
       httpBackend.whenGET(uri(entities.study.id)).respond(serverReply([ entities.serverPt ]));
       ProcessingType.list(entities.study.id).then(function(list) {
         _.each(list, function (pt) {
-          pt.compareToServerEntity(entities.serverPt);
+          pt.compareToJsonEntity(entities.serverPt);
         });
         done();
       });
@@ -122,7 +122,7 @@ define([
         .respond(201, serverReply(entities.serverPt));
 
       entities.processingType.addOrUpdate().then(function(pt) {
-        pt.compareToServerEntity(entities.serverPt);
+        pt.compareToJsonEntity(entities.serverPt);
       });
       httpBackend.flush();
     });
@@ -135,7 +135,7 @@ define([
         .respond(201, serverReply(entities.serverPt));
 
       entities.processingType.addOrUpdate().then(function(pt) {
-        pt.compareToServerEntity(entities.serverPt);
+        pt.compareToJsonEntity(entities.serverPt);
         done();
       });
       httpBackend.flush();

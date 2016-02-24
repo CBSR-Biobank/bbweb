@@ -50,8 +50,6 @@ define(['underscore'], function(_) {
     vm.submit                = submit;
     vm.cancel                = cancel;
 
-    vm.annotationType.studyId = vm.study.id;
-
     //--
 
     /**
@@ -134,7 +132,7 @@ define(['underscore'], function(_) {
      * Called when the user presses the submit button on the form.
      *
      * Since this form is used for collection event, participant and specimen link annotation types, the
-     * function to call to submit the  changes is passed in as a parameter to the controller. It is assumed
+     * function to call to submit the changes is passed in as a parameter to the controller. It is assumed
      * that this function returns a promise.
      */
     function submit(annotationType) {

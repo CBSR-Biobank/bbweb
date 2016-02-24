@@ -52,10 +52,10 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           }),
           annotationType = self.AnnotationType.create(annotationTypeJson);
 
-      annotationType.compareToServerEntity(annotationTypeJson);
+      annotationType.compareToJsonEntity(annotationTypeJson);
     });
 
-    it('create fails for invalid objects', function () {
+    it('create fails for invalid JSON', function () {
       var self = this,
           annotationTypeJson = self.jsonEntities.annotationType({
             valueType: self.AnnotationValueType.SELECT(),

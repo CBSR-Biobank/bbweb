@@ -8,9 +8,8 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  '../annotationTypeDataSharedSpec',
   'biobankApp'
-], function(angular, mocks, _, annotationTypeDataSharedSpec) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('SpecimenLinkType', function() {
@@ -111,7 +110,7 @@ define([
 
     it('has valid values when creating from server response', function() {
       var entities = entitiesWithLinkedSpecimenLinkType();
-      entities.slt.compareToServerEntity(entities.sltFromServer);
+      entities.slt.compareToJsonEntity(entities.sltFromServer);
     });
 
     it('can retrieve a specimen link type', function(done) {
@@ -124,7 +123,7 @@ define([
         .respond(serverReply(entities.sltFromServer));
 
       SpecimenLinkType.get(entities.processingType.id, entities.sltFromServer.id).then(function(slt) {
-        slt.compareToServerEntity(entities.sltFromServer);
+        slt.compareToJsonEntity(entities.sltFromServer);
         done();
       });
       httpBackend.flush();
@@ -138,7 +137,7 @@ define([
 
       SpecimenLinkType.list(entities.processingType.id).then(function(list) {
         _.each(list, function (slt) {
-          slt.compareToServerEntity(entities.sltFromServer);
+          slt.compareToJsonEntity(entities.sltFromServer);
         });
         done();
       });
@@ -162,7 +161,7 @@ define([
         .respond(201, serverReply(entities.sltFromServer));
 
       slt.addOrUpdate().then(function(reply) {
-        reply.compareToServerEntity(entities.sltFromServer);
+        reply.compareToJsonEntity(entities.sltFromServer);
       });
       httpBackend.flush();
     });
@@ -262,37 +261,6 @@ define([
          expect(slt.getAnnotationTypeDataAsString()).toBeEmptyString();
        });
 
-    describe('uses annotation type set correctly', function () {
-
-      var study, processingType, annotationTypes, sltFromServer, slt;
-      var context = {};
-
-      beforeEach(inject(function(SpecimenLinkType,
-                                 jsonEntities) {
-
-        study = jsonEntities.study();
-        processingType = jsonEntities.processingType(study);
-        annotationTypes = _.map(_.range(2), function() {
-          return jsonEntities.annotationType(study);
-        });
-
-        sltFromServer = jsonEntities.specimenLinkType(
-          processingType,
-          { annotationTypes: annotationTypes});
-
-        sltFromServer.annotationTypeData[0].required = true;
-        sltFromServer.annotationTypeData[0].required = false;
-
-        slt = new SpecimenLinkType(sltFromServer,
-                                   { studyAnnotationTypes: annotationTypes });
-        context.parentObj = slt;
-        context.annotationTypes = annotationTypes;
-        context.jsonEntities = jsonEntities;
-      }));
-
-      annotationTypeDataSharedSpec(context);
-    });
-
     function serverReply(obj) {
       return { status: 'success', data: obj };
     }
@@ -327,7 +295,7 @@ define([
         .respond(201, serverReply(sltFromServer));
 
       slt.addOrUpdate().then(function(reply) {
-        reply.compareToServerEntity(sltFromServer);
+        reply.compareToJsonEntity(sltFromServer);
       });
       httpBackend.flush();
     }

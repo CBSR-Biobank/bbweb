@@ -2,199 +2,233 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function(_) {
+define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
   'use strict';
 
   CollectionEventTypeFactory.$inject = [
+    '$q',
     'funutils',
-    'validationService',
     'biobankApi',
     'ConcurrencySafeEntity',
-    'SpecimenGroupData',
-    'AnnotationTypeData'
+    'CollectionSpecimenSpec',
+    'AnnotationType',
+    'CollectionSpecimenSpecs',
+    'AnnotationTypes'
   ];
 
   /**
    * Factory for collectionEventTypes.
    */
-  function CollectionEventTypeFactory(funutils,
-                                      validationService,
+  function CollectionEventTypeFactory($q,
+                                      funutils,
                                       biobankApi,
                                       ConcurrencySafeEntity,
-                                      SpecimenGroupData,
-                                      AnnotationTypeData) {
-    var requiredKeys = [
-      'id',
-      'studyId',
-      'version',
-      'name',
-      'recurring',
-      'specimenGroupData',
-      'annotationTypeData'
-    ];
+                                      CollectionSpecimenSpec,
+                                      AnnotationType,
+                                      CollectionSpecimenSpecs,
+                                      AnnotationTypes) {
 
-    var validateIsMap = validationService.condition1(
-      validationService.validator('must be a map', _.isObject));
-
-    var createObj = funutils.partial1(validateIsMap, _.identity);
-
-    var validateObj = funutils.partial(
-      validationService.condition1(
-        validationService.validator('has the correct keys',
-                                    validationService.hasKeys.apply(null, requiredKeys))),
-      createObj);
-
-    var validateAnnotationTypeData = funutils.partial(
-      validationService.condition1(
-        validationService.validator('has the correct keys',
-                                    validationService.hasKeys('annotationTypeId', 'required'))),
-      createObj);
-
-    var validateSpecimenGroupData = funutils.partial(
-      validationService.condition1(
-        validationService.validator('has the correct keys',
-                                    validationService.hasKeys('specimenGroupId',
-                                                              'maxCount',
-                                                              'amount'))),
-      createObj);
+    var schema = {
+      'id': 'CollectionEventType',
+      'type': 'object',
+      'properties': {
+        'id':              { 'type': 'string' },
+        'version':         { 'type': 'integer', 'minimum': 0 },
+        'timeAdded':       { 'type': 'string' },
+        'timeModified':    { 'type': 'string' },
+        'name':            { 'type': 'string' },
+        'description':     { 'type': 'string' },
+        'recurring':       { 'type': 'boolean' },
+        'specimenSpecs':   { 'type': 'array' },
+        'annotationTypes': { 'type': 'array' }
+      },
+      'required': [ 'id', 'version', 'timeAdded', 'name', 'recurring' ]
+    };
 
     /**
      * Creates a collection event type object with helper methods.
      *
-     * @param {Object} collectionEventType the collection event type returned by the server.
+     * @param {Object} collectionEventType the collection event type JSON returned by the server.
      *
      * @param {Study} options.study the study this collection even type belongs to.
-     *
-     * @param {SpecimenGroup array} options.studySpecimenGroups all specimen groups for the study. Should be a
-     * list returned by the server.
-     *
-     * @param {AnnotationType array} options.studyAnnotationTypes all the collection event annotation types
-     * for the study. Should be a list returned by the server.
-     *
-     * @param {Array} options.studySpecimenGroups all specimen groups for the study.
-     *
-     * @param {Array} options.studyAnnotationTypes all the collection event annotation types for the
-     * study.
      */
     function CollectionEventType(obj, options) {
       var self = this,
           defaults = {
-            studyId:            null,
-            name:               '',
-            description:        null,
-            recurring:          false,
-            specimenGroupData:  [],
-            annotationTypeData: []
+            studyId:         null,
+            name:            '',
+            description:     null,
+            recurring:       false,
+            specimenSpecs:   [],
+            annotationTypes: []
           };
 
       obj = obj || {};
-      ConcurrencySafeEntity.call(self, obj);
-      _.extend(self, defaults, _.pick(obj, _.keys(defaults)));
-
       options = options || {};
-      if (options.studySpecimenGroups) {
-        self.studySpecimenGroups(options.studySpecimenGroups);
-      }
+      ConcurrencySafeEntity.call(self, obj);
+      _.extend(self, defaults, _.pick(obj, _.keys(defaults)), _.pick(options, 'study'));
 
-      if (options.studyAnnotationTypes) {
-        self.studyAnnotationTypes(options.studyAnnotationTypes);
-      }
+      this.specimenSpecs = _.map(this.specimenSpecs, function (specimenSpec) {
+        return new CollectionSpecimenSpec(specimenSpec);
+      });
+
+      this.annotationTypes = _.map(this.annotationTypes, function (annotationType) {
+        return new AnnotationType(annotationType);
+      });
     }
 
     CollectionEventType.prototype = Object.create(ConcurrencySafeEntity.prototype);
-    _.extend(CollectionEventType.prototype, SpecimenGroupData);
-    _.extend(CollectionEventType.prototype, AnnotationTypeData);
+    CollectionEventType.prototype.constructor = CollectionEventType;
 
-    /**
-     * Used by promise code, so it must return an error rather than throw one.
-     */
+    _.extend(CollectionEventType.prototype, CollectionSpecimenSpecs, AnnotationTypes);
+
+
     CollectionEventType.create = function (obj) {
-      var validation = validateObj(obj), atdValid, sgdValid;
-
-      if (!_.isObject(validation)) {
-        return new Error('invalid object: ' + validation);
+      if (!tv4.validate(obj, schema)) {
+        throw new Error('invalid collection event types from server: ' + tv4.error);
       }
 
-      atdValid = _.reduce(obj.annotationTypeData, function(memo, atd) {
-        var validation = validateAnnotationTypeData(atd);
-        return memo && _.isObject(validation);
-      }, true);
-
-      if (!atdValid) {
-        return new Error('invalid object from server: bad annotation type data');
+      if (!CollectionSpecimenSpecs.validSpecimenSpecs(obj.specimenSpecs)) {
+        throw new Error('invalid specimen specs from server: ' + tv4.error);
       }
 
-      sgdValid = _.reduce(obj.specimenGroupData, function(memo, sgd) {
-        var validation = validateSpecimenGroupData(sgd);
-        return memo && _.isObject(validation);
-      }, true);
-
-      if (!sgdValid) {
-        return new Error('invalid object from server: bad specimen group data');
+      if (!AnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
+        throw new Error('invalid annotation types from server: ' + tv4.error);
       }
 
       return new CollectionEventType(obj);
     };
 
     CollectionEventType.get = function(studyId, id) {
-      return biobankApi.get(uri(studyId) + '?cetId=' + id)
-        .then(function(reply) {
-          return CollectionEventType.create(reply);
-        });
+      return biobankApi.get(uri(studyId) + '?cetId=' + id).then(function(reply) {
+        return CollectionEventType.prototype.asyncCreate(reply);
+      });
     };
 
     CollectionEventType.list = function(studyId) {
       return biobankApi.get(uri(studyId)).then(function(reply) {
-        return _.map(reply, function (cet) {
-          return CollectionEventType.create(cet);
-        });
+        var deferred = $q.defer(),
+            result;
+
+        try {
+          result = _.map(reply, function (cet) {
+            return CollectionEventType.create(cet);
+          });
+          deferred.resolve(result);
+        } catch (e) {
+          deferred.reject(e);
+        }
+        return deferred.promise;
       });
     };
 
-    CollectionEventType.prototype.addOrUpdate = function (annotationTypes) {
+    CollectionEventType.prototype.asyncCreate = function (obj) {
+      var deferred = $q.defer();
+
+      if (!tv4.validate(obj, schema)) {
+        deferred.reject('invalid collection event types from server: ' + tv4.error);
+      } else if (!CollectionSpecimenSpecs.validSpecimenSpecs(obj.specimenSpecs)) {
+        deferred.reject('invalid specimen specs from server: ' + tv4.error);
+      } else if (!AnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
+        deferred.reject('invalid annotation types from server: ' + tv4.error);
+      } else {
+        deferred.resolve(new CollectionEventType(obj));
+      }
+
+      return deferred.promise;
+    };
+
+    CollectionEventType.prototype.add = function() {
       var self = this,
-          cmd = _.extend(_.pick(self,
-                                'studyId',
-                                'name',
-                                'recurring'),
+          json = _.extend(_.pick(self, 'studyId','name', 'recurring'),
                          funutils.pickOptional(self, 'description'));
 
-      cmd.specimenGroupData = self.getSpecimenGroupData();
-      cmd.annotationTypeData = self.getAnnotationTypeData();
-
-      return addOrUpdateInternal().then(function(reply) {
-        return CollectionEventType.create(reply);
-      });
-
-      // --
-
-      function addOrUpdateInternal() {
-        if (self.isNew()) {
-          return biobankApi.post(uri(self.studyId), cmd);
-        }
-        _.extend(cmd, { id: self.id, expectedVersion: self.version });
-        return biobankApi.put(uri(self.studyId, self.id), cmd);
-      }
+      return biobankApi.post(sprintf.sprintf('%s/%s', uri(), self.studyId), json)
+        .then(function(reply) {
+          return self.asyncCreate(reply);
+        });
     };
 
     CollectionEventType.prototype.remove = function () {
-      return biobankApi.del(uri(this.studyId, this.id, this.version));
+      var url = sprintf.sprintf('%s/%s/%s/%d', uri(), this.studyId, this.id, this.version);
+      return biobankApi.del(url);
     };
 
-    function uri(studyId, ceventTypeId, version) {
-      var result = '/studies';
-      if (arguments.length <= 0) {
-        throw new Error('study id not specified');
-      } else {
-        result += '/' + studyId + '/cetypes';
+    CollectionEventType.prototype.updateName = function (name) {
+      return ConcurrencySafeEntity.prototype.update.call(
+        this, uri('name', this.id), { name: name });
+    };
 
-        if (arguments.length > 1) {
-          result += '/' + ceventTypeId;
-        }
+    CollectionEventType.prototype.updateDescription = function (description) {
+      return ConcurrencySafeEntity.prototype.update.call(
+        this,
+        uri('description', this.id),
+        description ? { description: description } : {});
+    };
 
-        if (arguments.length > 2) {
-          result += '/' + version;
-        }
+    CollectionEventType.prototype.updateRecurring = function (recurring) {
+      return ConcurrencySafeEntity.prototype.update.call(
+        this,
+        uri('recurring', this.id),
+        { recurring: recurring });
+    };
+
+    CollectionEventType.prototype.addSpecimenSpec = function (specimenSpec) {
+      return ConcurrencySafeEntity.prototype.update.call(
+        this, uri('spcspec', this.id), _.omit(specimenSpec, 'uniqueId'));
+    };
+
+    CollectionEventType.prototype.removeSpecimenSpec = function (specimenSpec) {
+      var self = this,
+          url,
+          found = _.findWhere(self.specimenSpecs,  { uniqueId: specimenSpec.uniqueId });
+
+      if (!found) {
+        throw new Error('specimen spec with ID not present: ' + specimenSpec.uniqueId);
+      }
+
+      url = sprintf.sprintf('%s/%d/%s',
+                            uri('spcspec', this.id),
+                            this.version,
+                            specimenSpec.uniqueId);
+
+      return biobankApi.del(url).then(function () {
+        return self.asyncCreate(
+          _.extend(self, {
+            version: self.version + 1,
+            specimenSpecs: _.filter(self.specimenSpecs, function(ss) {
+              return ss.uniqueId !== specimenSpec.uniqueId;
+            })
+          }));
+      });
+    };
+
+    CollectionEventType.prototype.addAnnotationType = function (annotationType) {
+      return ConcurrencySafeEntity.prototype.update.call(
+        this, uri('annottype', this.id), _.omit(annotationType, 'uniqueId'));
+    };
+
+    CollectionEventType.prototype.removeAnnotationType = function (annotationType) {
+      var url = sprintf.sprintf('%s/%d/%s',
+                                uri('annottype', this.id), this.version, annotationType.uniqueId);
+
+      return AnnotationTypes.removeAnnotationType.call(this, annotationType, url);
+    };
+
+    function uri(/* path, ceventTypeId */) {
+      var args = _.toArray(arguments),
+          result = '/studies/cetypes',
+          path,
+          ceventTypeId;
+
+      if (args.length > 0) {
+        path = args.shift();
+        result += '/' + path;
+      }
+
+      if (args.length > 0) {
+        ceventTypeId = args.shift();
+        result += '/' + ceventTypeId;
       }
       return result;
     }

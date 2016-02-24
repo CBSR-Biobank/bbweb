@@ -30,7 +30,7 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
   ];
 
   /**
-   * Extends domain entities by adding a 'compareToServerEntity' that can be called from test code to compare
+   * Extends domain entities by adding a 'compareToJsonEntity' that can be called from test code to compare
    * a javascript domain object and a response from the server (for the same domain entity).
    */
   function extendedDomainEntities(bbwebConfig,
@@ -88,35 +88,52 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
       });
     }
 
-    ConcurrencySafeEntity.prototype.compareToServerEntity = function (serverEntity) {
+    ConcurrencySafeEntity.prototype.compareToJsonEntity = function (serverEntity) {
       validateAttrs(this, serverEntity, 'id', 'version');
     };
 
-    AnnotationType.prototype.compareToServerEntity = function (serverEntity) {
+    AnnotationType.prototype.compareToJsonEntity = function (serverEntity) {
       validateAttrs(this, serverEntity, 'name', 'valueType', 'options', 'required');
       validateOptional(this, serverEntity, 'description', 'maxValueCount');
     };
 
-    CollectionEventType.prototype.compareToServerEntity = function (serverEntity) {
-      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
+    Study.prototype.compareToJsonEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToJsonEntity.call(this, serverEntity);
+      validateAttrs(this, serverEntity, 'name', 'Status');
+      validateOptional(this, serverEntity, 'description');
+
+      expect(this.annotationTypes).toBeArrayOfSize(serverEntity.annotationTypes.length);
+      expect(this.annotationTypes).toContainAll(serverEntity.annotationTypes);
+    };
+
+    CollectionEventType.prototype.compareToJsonEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToJsonEntity.call(this, serverEntity);
       validateAttrs(this, serverEntity, 'name', 'recurring');
       validateOptional(this, serverEntity, 'description');
 
-      expect(this.specimenGroupData).toBeArrayOfSize(serverEntity.specimenGroupData.length);
-      expect(this.annotationTypeData).toBeArrayOfSize(serverEntity.annotationTypeData.length);
+      if (this.specimenSpecs && serverEntity.specimenSpecs) {
+        expect(this.specimenSpecs).toBeArrayOfSize(serverEntity.specimenSpecs.length);
+        expect(this.specimenSpecs).toContainAll(serverEntity.specimenSpecs);
+      } else {
+        fail('specimen specs mismatch');
+      }
 
-      expect(this.specimenGroupData).toBeContainAll(serverEntity.specimenGroupData);
-      expect(this.annotationTypeData).toBeContainAll(serverEntity.annotationTypeData);
+      if (this.annotationTypes && serverEntity.annotationTypes) {
+        expect(this.annotationTypes).toBeArrayOfSize(serverEntity.annotationTypes.length);
+        expect(this.annotationTypes).toContainAll(serverEntity.annotationTypes);
+      } else {
+        fail('annotation types mismatch');
+      }
     };
 
-    ProcessingType.prototype.compareToServerEntity = function (serverEntity) {
-      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
+    ProcessingType.prototype.compareToJsonEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToJsonEntity.call(this, serverEntity);
       validateAttrs(this, serverEntity, 'name', 'enabled');
       validateOptional(this, serverEntity, 'description');
     };
 
-    SpecimenLinkType.prototype.compareToServerEntity = function (serverEntity) {
-      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
+    SpecimenLinkType.prototype.compareToJsonEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToJsonEntity.call(this, serverEntity);
       validateAttrs(this,
                     serverEntity,
                     'processingTypeId',
@@ -130,8 +147,8 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
       expect(this.annotationTypeData).toBeContainAll(serverEntity.annotationTypeData);
     };
 
-    SpecimenGroup.prototype.compareToServerEntity = function (serverEntity) {
-      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
+    SpecimenGroup.prototype.compareToJsonEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToJsonEntity.call(this, serverEntity);
       validateAttrs(this,
                     serverEntity,
                     'name',
@@ -143,25 +160,19 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
       validateOptional(this, serverEntity, 'description');
     };
 
-    Study.prototype.compareToServerEntity = function (serverEntity) {
-      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
-      validateAttrs(this, serverEntity, 'name', 'Status');
-      validateOptional(this, serverEntity, 'description');
-    };
-
-    Participant.prototype.compareToServerEntity = function (serverEntity) {
-      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
+    Participant.prototype.compareToJsonEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToJsonEntity.call(this, serverEntity);
       validateAttrs(this, serverEntity, 'studyId', 'uniqueId');
 
       _.each(this.annotations, function (annotation) {
         var serverAnnotation = _.findWhere(serverEntity.annotations,
                                            { annotationTypeId: annotation.getAnnotationTypeId() });
-        Annotation.prototype.compareToServerEntity.call(annotation, serverAnnotation);
+        Annotation.prototype.compareToJsonEntity.call(annotation, serverAnnotation);
       });
     };
 
-    CollectionEvent.prototype.compareToServerEntity = function (serverEntity) {
-      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
+    CollectionEvent.prototype.compareToJsonEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToJsonEntity.call(this, serverEntity);
       validateAttrs(this,
                     serverEntity,
                     'participantId',
@@ -177,42 +188,42 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
           var serverAnnotation = _.findWhere(serverEntity.annotations,
                                              { annotationTypeId: annotation.getAnnotationTypeId() });
           expect(serverAnnotation).toBeDefined();
-          annotation.compareToServerEntity.call(annotation, serverAnnotation);
+          annotation.compareToJsonEntity.call(annotation, serverAnnotation);
         }
       });
     };
 
-    DateTimeAnnotation.prototype.compareToServerEntity = function (serverEntity) {
+    DateTimeAnnotation.prototype.compareToJsonEntity = function (serverEntity) {
       // has to be comparetd to UTC time
       expect(moment(this.date).local().format()).toEqual(serverEntity.stringValue);
       expect(moment(this.time).local().format()).toEqual(serverEntity.stringValue);
     };
 
-    MultipleSelectAnnotation.prototype.compareToServerEntity = function (serverEntity) {
+    MultipleSelectAnnotation.prototype.compareToJsonEntity = function (serverEntity) {
       expect(this.values).toBeArrayOfSize(serverEntity.selectedValues.length);
       expect(this.values).toContainAll(_.pluck(serverEntity.selectedValues, 'value'));
     };
 
-    NumberAnnotation.prototype.compareToServerEntity = function (serverEntity) {
+    NumberAnnotation.prototype.compareToJsonEntity = function (serverEntity) {
       expect(this.value.toString()).toEqual(serverEntity.numberValue.toString());
     };
 
-    SingleSelectAnnotation.prototype.compareToServerEntity = function (serverEntity) {
+    SingleSelectAnnotation.prototype.compareToJsonEntity = function (serverEntity) {
       expect(serverEntity.selectedValues).toBeArrayOfSize(1);
       expect(this.value).toBe(_.pluck(serverEntity.selectedValues, 'value')[0]);
     };
 
-    TextAnnotation.prototype.compareToServerEntity = function (serverEntity) {
+    TextAnnotation.prototype.compareToJsonEntity = function (serverEntity) {
       expect(this.value).toEqual(serverEntity.stringValue);
     };
 
-    Centre.prototype.compareToServerEntity = function (serverEntity) {
-      ConcurrencySafeEntity.prototype.compareToServerEntity.call(this, serverEntity);
+    Centre.prototype.compareToJsonEntity = function (serverEntity) {
+      ConcurrencySafeEntity.prototype.compareToJsonEntity.call(this, serverEntity);
       validateAttrs(this, serverEntity, 'name', 'Status');
       validateOptional(this, serverEntity, 'description');
     };
 
-    Location.prototype.compareToServerEntity = function (serverEntity) {
+    Location.prototype.compareToJsonEntity = function (serverEntity) {
       validateAttrs(this,
                     serverEntity,
                     'name',

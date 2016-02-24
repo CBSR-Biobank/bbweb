@@ -94,7 +94,7 @@ define([
     it('has valid values when creating from server response', function() {
       var entities = createEntities();
       entities.specimenGroup = SpecimenGroup.create(entities.serverSg);
-      entities.specimenGroup.compareToServerEntity(entities.serverSg);
+      entities.specimenGroup.compareToJsonEntity(entities.serverSg);
     });
 
     it('can retrieve a specimen group', function(done) {
@@ -103,7 +103,7 @@ define([
         .respond(serverReply(entities.serverSg));
 
       SpecimenGroup.get(entities.study.id, entities.serverSg.id).then(function(sg) {
-        sg.compareToServerEntity(entities.serverSg);
+        sg.compareToJsonEntity(entities.serverSg);
         done();
       });
       httpBackend.flush();
@@ -114,7 +114,7 @@ define([
       httpBackend.whenGET(uri(entities.study.id)).respond(serverReply([ entities.serverSg ]));
       SpecimenGroup.list(entities.study.id).then(function(list) {
         _.each(list, function (sg) {
-          sg.compareToServerEntity(entities.serverSg);
+          sg.compareToJsonEntity(entities.serverSg);
         });
         done();
       });
@@ -129,7 +129,7 @@ define([
         .respond(201, serverReply(entities.serverSg));
 
       entities.specimenGroup.addOrUpdate().then(function(sg) {
-        sg.compareToServerEntity(entities.serverSg);
+        sg.compareToJsonEntity(entities.serverSg);
       });
       httpBackend.flush();
     });
@@ -142,7 +142,7 @@ define([
         .respond(201, serverReply(entities.serverSg));
 
       entities.specimenGroup.addOrUpdate().then(function(sg) {
-        sg.compareToServerEntity(entities.serverSg);
+        sg.compareToJsonEntity(entities.serverSg);
       });
       httpBackend.flush();
     });

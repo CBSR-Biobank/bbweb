@@ -19,12 +19,9 @@ define([
    * directly. If the service layer is kept then these tests will have to be modified and only mock the
    * service methods in 'centresService'.
    */
-  fdescribe('Centre', function() {
+  describe('Centre', function() {
 
-    // used by promise tests
-    function failTest(error) {
-      expect(error).toBeUndefined();
-    }
+    var Centre;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -36,7 +33,14 @@ define([
       this.funutils     = this.$injector.get('funutils');
       this.testUtils    = this.$injector.get('testUtils');
       this.jsonEntities = this.$injector.get('jsonEntities');
+
+      Centre = this.Centre;
     }));
+
+    afterEach(function() {
+      this.httpBackend.verifyNoOutstandingExpectation();
+      this.httpBackend.verifyNoOutstandingRequest();
+    });
 
     it('constructor with no parameters has default values', function() {
       var centre = new this.Centre();
@@ -92,7 +96,7 @@ define([
 
       function checkReply(reply) {
         expect(reply).toEqual(jasmine.any(self.Centre));
-        reply.compareToServerEntity(centre);
+        reply.compareToJsonEntity(centre);
       }
     });
 
@@ -164,7 +168,7 @@ define([
         expect(pagedResult.items).toBeArrayOfSize(centres.length);
         _.each(pagedResult.items, function (item) {
           expect(item).toEqual(jasmine.any(self.Centre));
-          item.compareToServerEntity(centres[0]);
+          item.compareToJsonEntity(centres[0]);
         });
       }
     });
@@ -243,51 +247,46 @@ define([
 
     it('can update the name on a centre', function(done) {
       var self       = this,
-          newName    = self.jsonEntities.stringNext(),
           baseCentre = self.jsonEntities.centre(),
-          centre     = new self.Centre(baseCentre),
-          reply      = replyCentre(baseCentre),
-          json       = _.extend({ name: newName }, self.testUtils.expectedVersion(centre.version));
+          centre     = new self.Centre(baseCentre);
 
-      self.httpBackend.expectPOST(uri('name', centre.id), json).respond(201, serverReply(reply));
-
-      centre.updateName(newName).then(checkReply).catch(failTest).finally(done);
-      self.httpBackend.flush();
-
-      function checkReply(replyCentre) {
-        expect(replyCentre.id).toEqual(centre.id);
-        expect(replyCentre.version).toEqual(centre.version + 1);
-        expect(replyCentre.name).toEqual(centre.name);
-        expect(replyCentre.description).toEqual(centre.description);
-        done();
-      }
+      this.testUtils.updateEntity.call(this,
+                                       centre,
+                                       'updateName',
+                                       centre.name,
+                                       uri('name', centre.id),
+                                       { name: centre.name },
+                                       baseCentre,
+                                       expectCentre,
+                                       failTest,
+                                       done);
     });
 
     it('can update the description on a centre', function(done) {
-      var self = this;
+      var self = this,
+          baseCentre = self.jsonEntities.centre(),
+          centre     = new self.Centre(baseCentre);
 
-      _.each([null, 'dont-care'], function (description) {
-        var baseCentre = self.jsonEntities.centre(),
-            centre     = new self.Centre(baseCentre),
-            reply      = replyCentre(baseCentre, { description: description }),
-            json       = self.testUtils.expectedVersion(centre.version);
+      this.testUtils.updateEntity.call(this,
+                                       centre,
+                                       'updateDescription',
+                                       undefined,
+                                       uri('description', centre.id),
+                                       { },
+                                       baseCentre,
+                                       expectCentre,
+                                       failTest);
 
-        if (description === null) {
-          reply = _.omit(reply, 'description');
-        }
-
-        self.httpBackend.expectPOST(uri('description', centre.id), json).respond(201, serverReply(reply));
-        centre.updateDescription(description).then(testCentre).catch(failTest).finally(done);
-        self.httpBackend.flush();
-
-        function testCentre(replyCentre) {
-          expect(replyCentre).toEqual(jasmine.any(self.Centre));
-          expect(replyCentre.id).toEqual(centre.id);
-          expect(replyCentre.version).toEqual(centre.version + 1);
-          expect(replyCentre.name).toEqual(centre.name);
-          expect(replyCentre.description).toEqual(description);
-        }
-      });
+      this.testUtils.updateEntity.call(this,
+                                       centre,
+                                       'updateDescription',
+                                       centre.description,
+                                       uri('description', centre.id),
+                                       { description: centre.description },
+                                       baseCentre,
+                                       expectCentre,
+                                       failTest,
+                                       done);
     });
 
     it('can disable a centre', function(done) {
@@ -311,6 +310,117 @@ define([
       expect(function () { centre.enable(); })
         .toThrowErrorOfType('Error');
     });
+
+    describe('locations', function () {
+
+      it('adds a location', function(done) {
+        var self         = this,
+            jsonLocation = this.jsonEntities.location(),
+            jsonCentre   = this.jsonEntities.centre(),
+            centre       = new self.Centre(jsonCentre);
+
+        this.testUtils.updateEntity.call(this,
+                                         centre,
+                                         'addLocation',
+                                         _.omit(jsonLocation, 'uniqueId'),
+                                         uri('locations', centre.id),
+                                         _.omit(jsonLocation, 'uniqueId'),
+                                         jsonCentre,
+                                         expectCentre,
+                                         failTest,
+                                         done);
+      });
+
+      it('throws an error when removing a location that does not exists', function() {
+        var self = this,
+            centre = new self.Centre();
+
+        expect(function () { centre.removeLocation(new self.Location()); }).toThrowErrorOfType('Error');
+      });
+
+      it('can remove a location', function(done) {
+        var self         = this,
+            jsonLocation = new self.Location(self.jsonEntities.location()),
+            jsonCentre   = self.jsonEntities.centre({ locations: [ jsonLocation ]}),
+            centre       = new self.Centre(jsonCentre),
+            url          = sprintf.sprintf('%s/%d/%s',
+                                           uri('locations', centre.id),
+                                           centre.version,
+                                           jsonLocation.uniqueId);
+
+        self.httpBackend.expectDELETE(url).respond(201, serverReply(true));
+        centre.removeLocation(jsonLocation).then(checkCentre).catch(failTest).finally(done);
+        self.httpBackend.flush();
+
+        function checkCentre(reply) {
+          expect(reply).toEqual(jasmine.any(self.Centre));
+          expect(reply.locations).toBeEmptyArray();
+        }
+      });
+
+    });
+
+    describe('studies', function () {
+
+      it('can add a study', function(done) {
+        var self       = this,
+            jsonStudy  = self.jsonEntities.study(),
+            jsonCentre = self.jsonEntities.centre(),
+            centre     = new self.Centre(jsonCentre);
+
+        this.testUtils.updateEntity.call(this,
+                                         centre,
+                                         'addStudy',
+                                         jsonStudy,
+                                         uri('studies', centre.id),
+                                         { studyId : jsonStudy.id },
+                                         jsonCentre,
+                                         expectCentre,
+                                         failTest,
+                                         done);
+      });
+
+      it('can remove a study', function(done) {
+        var self       = this,
+            jsonStudy  = self.jsonEntities.study(),
+            jsonCentre = self.jsonEntities.centre({ studyIds: [ jsonStudy.id ]}),
+            centre     = new self.Centre(jsonCentre),
+            url        = sprintf.sprintf('%s/%d/%s',
+                                         uri('studies', centre.id),
+                                         centre.version,
+                                         jsonStudy.id);
+
+        self.httpBackend.expectDELETE(url).respond(201, serverReply(true));
+        centre.removeStudy(jsonStudy).then(checkCentre).catch(failTest).finally(done);
+        this.httpBackend.flush();
+
+        function checkCentre(replyCentre) {
+          expect(replyCentre).toEqual(jasmine.any(self.Centre));
+          expect(replyCentre.studyIds).toBeEmptyArray();
+        }
+      });
+
+      it('should not remove a study that does not exist', function() {
+        var self = this,
+            study = self.jsonEntities.study(),
+            centre = new self.Centre(self.jsonEntities.centre());
+
+        expect(function () {
+          centre.removeStudy(study);
+        }).toThrow(new Error('study ID not present: ' + study.id));
+      });
+
+    });
+
+    // used by promise tests
+    function expectCentre(entity) {
+      expect(entity).toEqual(jasmine.any(Centre));
+    }
+
+    // used by promise tests
+    function failTest(error) {
+      expect(error).toBeUndefined();
+    }
 
     function replyCentre(centre, newValues) {
       newValues = newValues || {};
@@ -361,131 +471,6 @@ define([
       return result;
     }
 
-    describe('locations', function () {
-
-      function locationToJson(centre, location) {
-        var json = {
-          expectedVersion: centre.version,
-          name:            location.name,
-          street:          location.street,
-          city:            location.city,
-          province:        location.province,
-          postalCode:      location.postalCode,
-          poBoxNumber:     location.poBoxNumber,
-          countryIsoCode:  location.countryIsoCode
-        };
-        return json;
-      }
-
-      it('adds a location', function(done) {
-        var self         = this,
-            jsonLocation = this.jsonEntities.location(),
-            jsonCentre   = this.jsonEntities.centre(),
-            centre       = new self.Centre(jsonCentre),
-            location     = new self.Location(jsonLocation),
-            json         = locationToJson(centre, location),
-            reply        = replyCentre(jsonCentre, { locations: [ jsonLocation ]});
-
-        this.httpBackend.expectPOST(uri('locations', centre.id), json)
-          .respond(201, serverReply(reply));
-
-        centre.addLocation(location).then(checkCentre).catch(failTest).finally(done);
-        this.httpBackend.flush();
-
-        function checkCentre(reply) {
-          expect(reply).toEqual(jasmine.any(self.Centre));
-          expect(reply.id).toEqual(centre.id);
-          expect(reply.version).toEqual(centre.version + 1);
-          expect(reply.locations).toBeArrayOfSize(1);
-        }
-      });
-
-      it('throws an error when removing a location that does not exists', function() {
-        var self = this,
-            centre = new self.Centre();
-
-        expect(function () { centre.removeLocation(new self.Location()); }).toThrowErrorOfType('Error');
-      });
-
-      it('can remove a location', function(done) {
-        var self         = this,
-            jsonLocation = new self.Location(self.jsonEntities.location()),
-            jsonCentre   = self.jsonEntities.centre({ locations: [ jsonLocation ]}),
-            centre       = new self.Centre(jsonCentre),
-            url          = sprintf.sprintf('%s/%d/%s',
-                                           uri('location', centre.id),
-                                           centre.version,
-                                           jsonLocation.uniqueId);
-
-        self.httpBackend.expectDELETE(
-          uri('locations', centre.id) + '/' + centre.version + '/' + jsonLocation.uniqueId
-        ).respond(201, serverReply(true));
-
-        centre.removeLocation(jsonLocation).then(checkCentre).catch(failTest).finally(done);
-        self.httpBackend.flush();
-
-        function checkCentre(reply) {
-          expect(reply).toEqual(jasmine.any(self.Centre));
-          expect(reply.locations).toBeEmptyArray();
-        }
-      });
-
-    });
-
-    describe('studies', function () {
-
-      it('can add a study', function(done) {
-        var self       = this,
-            jsonStudy  = self.jsonEntities.study(),
-            jsonCentre = self.jsonEntities.centre(),
-            centre     = new self.Centre(jsonCentre),
-            json       = { studyId: jsonStudy.id, expectedVersion: centre.version },
-            reply      = replyCentre(jsonCentre, { studyIds: [ jsonStudy.id ]});
-
-        self.httpBackend.expectPOST(uri('studies', centre.id), json)
-          .respond(201, serverReply(reply));
-
-        centre.addStudy(jsonStudy).then(checkCentre).catch(failTest).finally(done);
-        self.httpBackend.flush();
-
-        function checkCentre(replyCentre) {
-          expect(replyCentre).toEqual(jasmine.any(self.Centre));
-          expect(replyCentre.studyIds).toBeArrayOfSize(1);
-          expect(replyCentre.studyIds).toContain(jsonStudy.id);
-        }
-      });
-
-      it('can remove a study', function(done) {
-        var self       = this,
-            jsonStudy  = self.jsonEntities.study(),
-            jsonCentre = self.jsonEntities.centre({ studyIds: [ jsonStudy.id ]}),
-            centre     = new self.Centre(jsonCentre),
-            url        = sprintf.sprintf('%s/%d/%s',
-                                         uri('studies', centre.id),
-                                         centre.version,
-                                         jsonStudy.id);
-
-        self.httpBackend.expectDELETE(url).respond(201, serverReply(true));
-        centre.removeStudy(jsonStudy).then(checkCentre).catch(failTest).finally(done);
-        this.httpBackend.flush();
-
-        function checkCentre(replyCentre) {
-          expect(replyCentre).toEqual(jasmine.any(self.Centre));
-          expect(replyCentre.studyIds).toBeEmptyArray();
-        }
-      });
-
-      it('should not remove a study that does not exist', function() {
-        var self = this,
-            study = self.jsonEntities.study(),
-            centre = new self.Centre(self.jsonEntities.centre());
-
-        expect(function () {
-          centre.removeStudy(study);
-        }).toThrow(new Error('study ID not present: ' + study.id));
-      });
-
-    });
   });
 
 });

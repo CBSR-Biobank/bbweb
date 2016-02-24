@@ -31,8 +31,6 @@ define([
                                 extendedDomainEntities,
                                 CollectionEventAnnotationType,
                                 ceventAnnotationTypesService) {
-      var jsonEntities = jsonEntities;
-
       context.httpBackend            = $httpBackend;
       context.annotationTypeType     = CollectionEventAnnotationType;
       context.studyAnnotationTypesService = ceventAnnotationTypesService;
@@ -60,8 +58,6 @@ define([
                                 extendedDomainEntities,
                                 SpecimenLinkAnnotationType,
                                 spcLinkAnnotationTypesService) {
-      var jsonEntities = jsonEntities;
-
       context.httpBackend            = $httpBackend;
       context.annotationTypeType     = SpecimenLinkAnnotationType;
       context.studyAnnotationTypesService = spcLinkAnnotationTypesService;
@@ -89,8 +85,6 @@ define([
                                 extendedDomainEntities,
                                 ParticipantAnnotationType,
                                 participantAnnotationTypesService) {
-      var jsonEntities = jsonEntities;
-
       context.httpBackend            = $httpBackend;
       context.annotationTypeType     = ParticipantAnnotationType;
       context.studyAnnotationTypesService = participantAnnotationTypesService;

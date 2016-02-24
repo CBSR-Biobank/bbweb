@@ -23,7 +23,7 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
                                  AnnotationMaxValueCount) {
 
     var schema = {
-      'id': 'Study',
+      'id': 'AnnotationType',
       'type': 'object',
       'properties': {
         'uniqueId':        { 'type': 'string'  },
@@ -98,6 +98,16 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
       }
       return ((this.maxValueCount === null) ||
               (this.maxValueCount === AnnotationMaxValueCount.NONE()));
+    };
+
+    /**
+     * Called when the annotation type's value type has been changed.
+     */
+    AnnotationType.prototype.valueTypeChanged = function () {
+      if (!this.isValueTypeSelect()) {
+        this.maxValueCount = null;
+      }
+      this.options = [];
     };
 
     /**

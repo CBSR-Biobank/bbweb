@@ -12,7 +12,8 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
     'queryStringService',
     'ConcurrencySafeEntity',
     'StudyStatus',
-    'AnnotationType'
+    'AnnotationType',
+    'AnnotationTypes'
   ];
 
   /**
@@ -24,20 +25,21 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
                         queryStringService,
                         ConcurrencySafeEntity,
                         StudyStatus,
-                        AnnotationType) {
+                        AnnotationType,
+                        AnnotationTypes) {
 
     var schema = {
       'id': 'Study',
       'type': 'object',
       'properties': {
-        'id':              { 'type': 'string'},
-        'version':         { 'type': 'integer', 'minimum': 0},
-        'timeAdded':       { 'type': 'string'},
-        'timeModified':    { 'type': 'string'},
-        'name':            { 'type': 'string'},
-        'description':     { 'type': 'string'},
-        'annotationTypes': { 'type': 'array'},
-        'status':          { 'type': 'string'}
+        'id':              { 'type': 'string' },
+        'version':         { 'type': 'integer', 'minimum': 0 },
+        'timeAdded':       { 'type': 'string' },
+        'timeModified':    { 'type': 'string' },
+        'name':            { 'type': 'string' },
+        'description':     { 'type': 'string' },
+        'annotationTypes': { 'type': 'array' },
+        'status':          { 'type': 'string' }
       },
       'required': [ 'id', 'version', 'timeAdded', 'name', 'status' ]
     };
@@ -65,6 +67,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
     }
 
     Study.prototype = Object.create(ConcurrencySafeEntity.prototype);
+    _.extend(Study.prototype, AnnotationTypes);
 
     Study.prototype.constructor = Study;
 
@@ -76,7 +79,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
         throw new Error('invalid object from server: ' + tv4.error);
       }
 
-      if (!validAnnotationTypes(obj.annotationTypes)) {
+      if (!AnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
         throw new Error('invalid object from server: bad annotation type');
       }
 
@@ -143,8 +146,22 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
 
     Study.get = function (id) {
       return biobankApi.get(uri(id)).then(function(reply) {
-        return asyncCreate(reply);
+        return Study.prototype.asyncCreate(reply);
       });
+    };
+
+    Study.prototype.asyncCreate = function (obj) {
+      var deferred = $q.defer();
+
+      if (!tv4.validate(obj, schema)) {
+        deferred.reject('invalid object from server: ' + tv4.error);
+      } else if (!AnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
+        deferred.reject('invalid annotation types from server: ' + tv4.error);
+      } else {
+        deferred.resolve(new Study(obj));
+      }
+
+      return deferred.promise;
     };
 
     Study.prototype.add = function () {
@@ -152,72 +169,33 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
           json = { name: this.name };
       angular.extend(json, funutils.pickOptional(self, 'description'));
       return biobankApi.post(uri(), json).then(function(reply) {
-        return asyncCreate(reply);
+        return self.asyncCreate(reply);
       });
     };
 
     Study.prototype.updateName = function (name) {
-      var self = this,
-          json = {
-            name:            name,
-            expectedVersion: self.version
-          };
-
-      return biobankApi.post(uri('name', self.id), json).then(function(reply) {
-        return asyncCreate(reply);
-      });
+      return ConcurrencySafeEntity.prototype.update.call(
+        this, uri('name', this.id), { name: name });
     };
 
     Study.prototype.updateDescription = function (description) {
-      var self = this,
-          json = {
-            expectedVersion: self.version
-          };
-
-      if (description) {
-        json.description = description;
-      }
-
-      return biobankApi.post(uri('description', self.id), json).then(function(reply) {
-        return asyncCreate(reply);
-      });
+      return ConcurrencySafeEntity.prototype.update.call(
+        this,
+        uri('description', this.id),
+        description ? { description: description } : {});
     };
 
     Study.prototype.addAnnotationType = function (annotationType) {
-      var self = this,
-          json = _.extend({ expectedVersion: self.version }, _.omit(annotationType, 'uniqueId')),
-          found;
-
-      found = _.findWhere(self.annotationTypes,  { uniqueId: annotationType.uniqueId });
-      if (found) {
-        throw new Error('annotation type with ID already present: ' + annotationType.uniqueId);
-      }
-
-      return biobankApi.post(uri('pannottype', self.id), json).then(function(reply) {
-        return asyncCreate(reply);
-      });
+      return ConcurrencySafeEntity.prototype.update.call(
+        this,
+        uri('pannottype', this.id),
+        _.omit(annotationType, 'uniqueId'));
     };
 
     Study.prototype.removeAnnotationType = function (annotationType) {
-      var self = this,
-          url = sprintf.sprintf('%s/%d/%s',
-                                uri('pannottype', self.id), self.version, annotationType.uniqueId),
-          found;
-
-      found = _.findWhere(self.annotationTypes,  { uniqueId: annotationType.uniqueId });
-      if (!found) {
-        throw new Error('annotation type with ID not present: ' + annotationType.uniqueId);
-      }
-
-      return biobankApi.del(url).then(function () {
-        return asyncCreate(
-          _.extend(self, {
-            version: self.version + 1,
-            annotationTypes: _.filter(self.annotationTypes, function(at) {
-              return at.uniqueId !== annotationType.uniqueId;
-            })
-          }));
-      });
+      var url = sprintf.sprintf('%s/%d/%s',
+                                uri('pannottype', this.id), this.version, annotationType.uniqueId);
+      return AnnotationTypes.removeAnnotationType.call(this, annotationType, url);
     };
 
     Study.prototype.disable = function () {
@@ -260,48 +238,21 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
       return (this.status === StudyStatus.RETIRED());
     };
 
-    function asyncCreate(obj) {
-      var deferred = $q.defer();
-
-      if (!tv4.validate(obj, schema)) {
-        deferred.reject('invalid object from server: ' + tv4.error);
-      } else if (!validAnnotationTypes(obj.annotationTypes)) {
-        deferred.reject('invalid annotation types from server: ' + tv4.error);
-      } else {
-        deferred.resolve(new Study(obj));
-      }
-
-      return deferred.promise;
-    }
-
-    function validAnnotationTypes(annotationTypes) {
-      var result;
-
-      if (annotationTypes.length <= 0) {
-        // there are no annotation types, nothing to validate
-        return true;
-      }
-      result = _.find(annotationTypes, function (annotType) {
-        return !AnnotationType.valid(annotType);
-      });
-
-      return _.isUndefined(result);
-    }
-
     function changeState(state) {
       /* jshint validthis:true */
       var self = this,
           json = { expectedVersion: self.version };
 
-      return biobankApi.post(uri(state, self.id), json);
+      return biobankApi.post(uri(state, self.id), json).then(function (reply) {
+        return self.asyncCreate(reply);
+      });
     }
 
     function uri(/* path, studyId */) {
       var args = _.toArray(arguments),
           studyId,
-          path;
-
-      var result = '/studies';
+          path,
+          result = '/studies';
 
       if (args.length > 0) {
         path = args.shift();

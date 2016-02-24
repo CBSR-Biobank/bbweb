@@ -32,25 +32,6 @@ define(function () {
         displayName: 'Participant Annotation Type'
       }
     });
-
-    /**
-     * Prticipant Annotation Type Update
-     */
-    $stateProvider.state('home.admin.studies.study.participants.annotationTypeUpdate', {
-      url: '/annottype/update/{annotationTypeId}',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
-      views: {
-        'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotationTypeForm.html',
-          controller: 'AnnotationTypeEditCtrl as vm'
-        }
-      },
-      data: {
-        displayName: 'Participant Annotation Type'
-      }
-    });
   }
 
   return config;

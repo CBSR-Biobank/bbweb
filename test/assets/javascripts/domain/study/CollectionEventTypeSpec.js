@@ -8,382 +8,342 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  '../annotationTypeDataSharedSpec',
+  'sprintf',
   'biobankApp'
-], function(angular, mocks, _, annotationTypeDataSharedSpec) {
+], function(angular, mocks, _, sprintf) {
   'use strict';
 
   describe('CollectionEventType', function() {
 
-    var httpBackend,
-        CollectionEventType,
-        cetFromServer,
-        jsonEntities,
-        study;
+    var CollectionEventType;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($httpBackend,
-                               _CollectionEventType_,
-                               jsonEntities,
-                               extendedDomainEntities) {
-      httpBackend         = $httpBackend;
-      CollectionEventType = _CollectionEventType_;
-      jsonEntities        = jsonEntities;
+    beforeEach(inject(function( extendedDomainEntities) {
+      this.httpBackend         = this.$injector.get('$httpBackend');
+      this.CollectionEventType = this.$injector.get('CollectionEventType');
+      this.jsonEntities        = this.$injector.get('jsonEntities');
+      this.testUtils           = this.$injector.get('testUtils');
 
-      study = jsonEntities.study();
+      this.jsonStudy = this.jsonEntities.study();
+      this.jsonCet   = this.jsonEntities.collectionEventType(this.jsonStudy);
 
-      study.specimenGroups = _.map(_.range(2), function() {
-        return jsonEntities.specimenGroup(study);
-      });
-
-      study.annotationTypes = _.map(_.range(2), function() {
-        return jsonEntities.annotationType(study);
-      });
-
-      study.specimenGroupsById = _.indexBy(study.specimenGroups, 'id');
-      study.annotationTypesById = _.indexBy(study.annotationTypes, 'id');
-
-      cetFromServer = jsonEntities.collectionEventType(study);
+      this.testUtils.addCustomMatchers();
+      CollectionEventType = this.CollectionEventType;
     }));
 
+    afterEach(function() {
+      this.httpBackend.verifyNoOutstandingExpectation();
+      this.httpBackend.verifyNoOutstandingRequest();
+    });
+
     it('constructor with no parameters has default values', function() {
-      var ceventType = new CollectionEventType();
+      var ceventType = new this.CollectionEventType();
 
       expect(ceventType.isNew()).toBe(true);
       expect(ceventType.studyId).toBe(null);
       expect(ceventType.name).toBe('');
       expect(ceventType.recurring).toBe(false);
-      expect(ceventType.specimenGroupData).toBeArrayOfSize(0);
-      expect(ceventType.annotationTypeData).toBeArrayOfSize(0);
+      expect(ceventType.specimenSpecs).toBeArrayOfSize(0);
+      expect(ceventType.annotationTypes).toBeArrayOfSize(0);
     });
 
-    it('fails when creating from a non object', function() {
-      expect(CollectionEventType.create(1))
-        .toEqual(new Error('invalid object: has the correct keys'));
+    it('fails when creating from an invalid json object', function() {
+      var badJsonCet = _.omit(this.jsonEntities.collectionEventType(this.jsonStudy), 'name');
+      expect(function () { CollectionEventType.create(badJsonCet); })
+        .toThrowErrorOfType('Error');
     });
 
-    it('fails when creating from bad specimen group data', function() {
-      cetFromServer = jsonEntities.collectionEventType(study);
-      cetFromServer.specimenGroupData.push({ 1: 'abc' });
+    it('fails when creating from a bad json specimen spec', function() {
+      var jsonSpec = _.omit(this.jsonEntities.collectionSpecimenSpec(), 'name'),
+          badJsonCet = _.extend(this.jsonEntities.collectionEventType(this.jsonStudy),
+                                { specimenSpecs: [ jsonSpec ] });
 
-      expect(CollectionEventType.create(cetFromServer))
-        .toEqual(new Error('invalid object from server: bad specimen group data'));
+      expect(function () { CollectionEventType.create(badJsonCet); })
+        .toThrowErrorOfType('Error');
     });
 
-    it('fails when creating from bad annotation type data', function() {
-      cetFromServer = jsonEntities.collectionEventType(study);
-      cetFromServer.annotationTypeData.push({ 1: 'abc' });
+    it('fails when creating from bad json annotation type data', function() {
+      var jsonAnnotType = _.omit(this.jsonEntities.annotationType(), 'name'),
+          badJsonCet = _.extend(this.jsonEntities.collectionEventType(this.jsonStudy),
+                                { annotationTypes: [ jsonAnnotType ] });
 
-      expect(CollectionEventType.create(cetFromServer))
-        .toEqual(new Error('invalid object from server: bad annotation type data'));
+      expect(function () { CollectionEventType.create(badJsonCet); })
+        .toThrowErrorOfType('Error');
     });
 
     it('has valid values when creating from server response', function() {
-      var ceventType;
-
-      cetFromServer = jsonEntities.collectionEventType(study, {
-        specimenGroups: study.specimenGroups,
-        annotationTypes: study.annotationTypes
-      });
-
-      ceventType = CollectionEventType.create(cetFromServer);
-      ceventType.compareToServerEntity(cetFromServer);
+      var jsonCet = this.jsonEntities.collectionEventType(this.jsonStudy),
+          ceventType = CollectionEventType.create(jsonCet);
+      ceventType.compareToJsonEntity(jsonCet);
     });
 
-    it('can retrieve a collection event type', function(done) {
-      httpBackend.whenGET('/studies/' + study.id + '/cetypes?cetId=' + cetFromServer.id)
-        .respond(serverReply(cetFromServer));
+    it('can retrieve a collection event type', function() {
+      var url = sprintf.sprintf('%s/%s?cetId=%s',
+                                uri(),
+                                this.jsonStudy.id,
+                                this.jsonCet.id);
 
-      CollectionEventType.get(study.id, cetFromServer.id).then(function(cet) {
-        cet.compareToServerEntity(cetFromServer);
-        done();
-      });
-      httpBackend.flush();
+      this.httpBackend.whenGET(url).respond(serverReply(this.jsonCet));
+      CollectionEventType.get(this.jsonStudy.id, this.jsonCet.id)
+        .then(expectCet).catch(failTest);
+      this.httpBackend.flush();
     });
 
-    it('can list collection event types', function(done) {
-      httpBackend.whenGET('/studies/' + study.id + '/cetypes')
-        .respond(serverReply([ cetFromServer ]));
-      CollectionEventType.list(study.id).then(function(list) {
-        _.each(list, function (cet) {
-          cet.compareToServerEntity(cetFromServer);
-        });
-        done();
-      });
-      httpBackend.flush();
-    });
+    it('fails when getting a collection event type and it has a bad format', function() {
+      var self = this,
+          data = getBadCollectionEventTypes(self.jsonEntities, self.jsonStudy);
 
-    it('can add a collection event type', function() {
-      var ceventType = new CollectionEventType(_.omit(cetFromServer, 'id')),
-          cmd = ceventTypeToAddCommand(ceventType);
+      _.each(data, function (item) {
+        var url = sprintf.sprintf('%s/%s?cetId=%s',
+                                  uri(),
+                                  self.jsonStudy.id,
+                                  item.cet.id);
 
-      httpBackend.expectPOST('/studies/' + study.id + '/cetypes', cmd)
-        .respond(201, serverReply(cetFromServer));
+        self.httpBackend.whenGET(url).respond(serverReply(item.cet));
+        CollectionEventType.get(self.jsonStudy.id, item.cet.id)
+          .then(getFail).catch(shouldFail);
+        self.httpBackend.flush();
 
-      ceventType.addOrUpdate().then(function(cet) {
-        cet.compareToServerEntity(cetFromServer);
-      });
-      httpBackend.flush();
-    });
+        function getFail(reply) {
+          fail('function should not be called');
+        }
 
-    it('can update a collection event type', function() {
-      var ceventType = new CollectionEventType(cetFromServer);
-      updateCeventTypeSharedBehaviour(ceventType, cetFromServer, study.id);
-    });
-
-    it('can update a collection event type with specimen group data and annotation type data', function() {
-      var ceventType;
-
-      cetFromServer = jsonEntities.collectionEventType(study, {
-        specimenGroups: study.specimenGroups,
-        annotationTypes: study.annotationTypes
-      });
-
-      ceventType = new CollectionEventType(cetFromServer, {
-        studySpecimenGroups: study.specimenGroups,
-        studyAnnotationTypes: study.annotationTypes
-      });
-      updateCeventTypeSharedBehaviour(ceventType, cetFromServer, study.id);
-    });
-
-    function updateCeventTypeSharedBehaviour(ceventType, cetFromServer, studyId) {
-      var cmd = ceventTypeToUpdateCommand(ceventType);
-      httpBackend.expectPUT('/studies/' + studyId + '/cetypes/' + ceventType.id, cmd)
-        .respond(201, serverReply(cetFromServer));
-
-      ceventType.addOrUpdate().then(function(cet) {
-        cet.compareToServerEntity(cetFromServer);
-      });
-      httpBackend.flush();
-    }
-
-    it('should remove a collection event type', function() {
-      var ceventType;
-
-      cetFromServer = jsonEntities.collectionEventType(study, {
-        specimenGroups: study.specimenGroups,
-        annotationTypes: study.annotationTypes
-      });
-
-      ceventType = new CollectionEventType(cetFromServer, {
-        studySpecimenGroups: study.specimenGroups,
-        studyAnnotationTypes: study.annotationTypes
-      });
-
-      httpBackend.expectDELETE('/studies/' + study.id + '/cetypes/' + ceventType.id + '/' + ceventType.version )
-        .respond(201, serverReply(true));
-
-      ceventType.remove();
-      httpBackend.flush();
-    });
-
-    it('isNew should be true for a collection event type with no ID', function() {
-      var cetNoId = _.omit(cetFromServer, 'id');
-      var cet = new CollectionEventType(cetNoId);
-      expect(cet.isNew()).toBe(true);
-    });
-
-    it('study ID matches the study', function() {
-      var cet = new CollectionEventType(cetFromServer);
-      expect(cet.studyId).toBe(study.id);
-    });
-
-    it('isNew should be false for a collection event type that has an ID', function() {
-      var cet = new CollectionEventType(cetFromServer);
-      expect(cet.isNew()).toBe(false);
-    });
-
-    it('should be initialized with specimen group and annotation type server objects', function() {
-      var cetFromServer, cet;
-
-      cetFromServer = jsonEntities.collectionEventType(study, {
-        specimenGroups: study.specimenGroups,
-        annotationTypes: study.annotationTypes
-      });
-
-      cet = new CollectionEventType(cetFromServer, {
-        studySpecimenGroups: study.specimenGroups,
-        studyAnnotationTypes: study.annotationTypes
-      });
-
-      _.each(study.specimenGroups, function(sg) {
-        expect(cet.getSpecimenGroupDataById(sg.id).specimenGroup).toEqual(sg);
-      });
-
-      _.each(study.annotationTypes, function(at) {
-        expect(cet.getAnnotationTypeDataById(at.id).annotationType).toEqual(at);
+        function shouldFail(error) {
+          expect(error).toStartWith(item.errMsg);
+        }
       });
     });
 
-    it('should return the correct size for specimen group data', function() {
-      var cetFromServer = jsonEntities.collectionEventType(
-        study,
-        { specimenGroups: study.specimenGroups });
-      var cet = new CollectionEventType(
-        cetFromServer,
-        { studySpecimenGroups: study.specimenGroups });
-      expect(cet.getSpecimenGroupData()).toBeArrayOfSize(cetFromServer.specimenGroupData.length);
-    });
+    it('can list collection event types', function() {
+      var url = sprintf.sprintf('%s/%s', uri(), this.jsonStudy.id);
 
-    it('should return the specimen group IDs', function() {
-      var specimenGroupIds = _.pluck(study.specimenGroups, 'id');
+      this.httpBackend.whenGET(url).respond(serverReply([ this.jsonCet ]));
+      CollectionEventType.list(this.jsonStudy.id)
+        .then(expectCetArray).catch(failTest);
+      this.httpBackend.flush();
 
-      var cetFromServer = jsonEntities.collectionEventType(
-        study,
-        { specimenGroups: study.specimenGroups });
-      var cet = new CollectionEventType(
-        cetFromServer,
-        { studySpecimenGroups: study.specimenGroups });
-      expect(cet.specimenGroupDataIds()).toBeArrayOfSize(cetFromServer.specimenGroupData.length);
-
-      _.each(cet.specimenGroupDataIds(), function(id) {
-        expect(specimenGroupIds).toContain(id);
-      });
-    });
-
-    it('should return the specimen group IDs', function() {
-      var cetFromServer = jsonEntities.collectionEventType(
-        study,
-        { specimenGroups: study.specimenGroups });
-      var cet = new CollectionEventType(
-        cetFromServer,
-        { studySpecimenGroups: study.specimenGroups });
-
-      _.each(cetFromServer.specimenGroupData, function(serverSgDataItem) {
-        var sgDataItem = cet.getSpecimenGroupDataById(serverSgDataItem.specimenGroupId);
-        expect(serverSgDataItem.specimenGroupId).toBe(sgDataItem.specimenGroupId);
-        expect(serverSgDataItem.maxCount).toBe(sgDataItem.maxCount);
-        expect(serverSgDataItem.amount).toBe(sgDataItem.amount);
-      });
-    });
-
-    it('should throw an error if there are no specimen group data items', function() {
-      var cet = new CollectionEventType(cetFromServer);
-      expect(function () { cet.getSpecimenGroupDataById(study.specimenGroups[0].id); })
-        .toThrow(new Error('no data items'));
-    });
-
-    it('getSpecimenGroupDataById should throw an error if there are no specimen group data items', function() {
-      var cet = new CollectionEventType(cetFromServer);
-      expect(function () { cet.getSpecimenGroupDataById(study.specimenGroups[0].id); })
-        .toThrow(new Error('no data items'));
-    });
-
-    it('returns specimen group data as a string', function() {
-      var cetFromServer = jsonEntities.collectionEventType(study, { specimenGroups: study.specimenGroups});
-      var cet = new CollectionEventType(cetFromServer,
-                                        { studySpecimenGroups: study.specimenGroups });
-      expect(cet.getSpecimenGroupsAsString()).toEqual(
-        getSpecimenGroupsAsStringFromServerData(cetFromServer, study.specimenGroups).join(', '));
-
-      function getSpecimenGroupsAsStringFromServerData(cetFromServer, specimenGroups) {
-        return _.map(cetFromServer.specimenGroupData, function (dataItem) {
-          var sg = _.findWhere(specimenGroups, { id: dataItem.specimenGroupId });
-          if (_.isUndefined(sg)) {
-            throw new Error('specimen group with id not found: ' + dataItem.specimenGroupId);
-          }
-          return sg.name + ' (' + dataItem.maxCount + ', ' + dataItem.amount +
-            ' ' + sg.units + ')';
-        });
+      function expectCetArray(array) {
+        expect(array).toBeArrayOfSize(1);
+        expect(array[0]).toEqual(jasmine.any(CollectionEventType));
       }
     });
 
-    it('getSpecimenGroupsAsString should throw an error if there are no specimen group data items', function() {
-      var cet = new CollectionEventType(cetFromServer);
-      expect(function () { cet.getSpecimenGroupsAsString(); })
-        .toThrow(new Error('no data items'));
-    });
+    it('fails when listing collection event types and they have a bad format', function() {
+      // assigns result of self.httpBackend.whenGET() to variable so that the response
+      // can be changed inside the loop
+      var self = this,
+          data = getBadCollectionEventTypes(self.jsonEntities, self.jsonStudy),
+          url = sprintf.sprintf('%s/%s', uri(), self.jsonStudy.id),
+          reqHandler = self.httpBackend.whenGET(url);
 
-    it('should return the annotation type IDs', function() {
-      var annotationTypeIds = _.pluck(study.annotationTypes, 'id');
+      _.each(data, function (item) {
+        reqHandler.respond(serverReply([ item.cet ]));
+        CollectionEventType.list(self.jsonStudy.id).then(getFail).catch(shouldFail);
+        self.httpBackend.flush();
 
-      var cetFromServer = jsonEntities.collectionEventType(
-        study,
-        { annotationTypes: study.annotationTypes });
-      var cet = new CollectionEventType(
-        cetFromServer,
-        { studyAnnotationTypes: study.annotationTypes });
-      expect(cet.annotationTypeDataIds()).toBeArrayOfSize(cetFromServer.annotationTypeData.length);
+        function getFail(reply) {
+          fail('function should not be called');
+        }
 
-      _.each(cet.annotationTypeDataIds(), function(id) {
-        expect(annotationTypeIds).toContain(id);
+        function shouldFail(error) {
+          expect(error.message).toStartWith(item.errMsg);
+        }
       });
     });
 
-    it('should return the annotation type IDs', function() {
-      var cetFromServer = jsonEntities.collectionEventType(
-        study,
-        { annotationTypes: study.annotationTypes });
-      var cet = new CollectionEventType(
-        cetFromServer,
-        { studyAnnotationTypes: study.annotationTypes });
-
-      _.each(cetFromServer.annotationTypeData, function(serverAtDataItem) {
-        var atDataItem = cet.getAnnotationTypeDataById(serverAtDataItem.annotationTypeId);
-        expect(serverAtDataItem.annotationTypeId).toBe(atDataItem.annotationTypeId);
-        expect(serverAtDataItem.maxCount).toBe(atDataItem.maxCount);
-        expect(serverAtDataItem.amount).toBe(atDataItem.amount);
-      });
+    it('isNew should be true for a collection event type with no ID', function() {
+      var cet = new CollectionEventType(_.omit(this.jsonCet, 'id'));
+      expect(cet.isNew()).toBe(true);
     });
 
-    it('getAnnotationTypeData throws an error if there are no annotation type data items', function() {
-      var cet = new CollectionEventType(cetFromServer);
-      expect(function () { cet.getAnnotationTypeDataById(study.annotationTypes[0].id); })
-        .toThrow(new Error('no data items'));
+    it('isNew should be false for a collection event type that has an ID', function() {
+      var cet = new CollectionEventType(this.jsonCet);
+      expect(cet.isNew()).toBe(false);
     });
 
-    it('getAnnotationTypeAsString returns an empty string if there are no annotation type data items', function() {
-      var cet = new CollectionEventType(cetFromServer);
-      expect(cet.getAnnotationTypeDataAsString()).toBeEmptyString();
+    it('can add a collection event type', function() {
+      var ceventType = new CollectionEventType(this.jsonCet),
+          url = sprintf.sprintf('%s/%s', uri(), this.jsonStudy.id);
+
+      this.httpBackend.expectPOST(url).respond(201, serverReply(this.jsonCet));
+
+      ceventType.add().then(expectCet).catch(failTest);
+      this.httpBackend.flush();
     });
 
-    describe('uses annotation type set correctly', function () {
-      var study, annotationTypes, cetFromServer, cet;
-      var context = {};
+    it('should remove a collection event type', function() {
+      var ceventType = new CollectionEventType(this.jsonCet),
+          url = sprintf.sprintf('%s/%s/%s/%d',
+                                uri(),
+                                this.jsonStudy.id,
+                                ceventType.id,
+                                ceventType.version);
 
-      beforeEach(inject(function(CollectionEventType,
-                                 jsonEntities) {
-
-        study = jsonEntities.study();
-        annotationTypes = _.map(_.range(2), function() {
-          return jsonEntities.annotationType(study);
-        });
-
-        cetFromServer = jsonEntities.collectionEventType(study, { annotationTypes: annotationTypes});
-        cetFromServer.annotationTypeData[0].required = true;
-        cetFromServer.annotationTypeData[0].required = false;
-
-        cet = new CollectionEventType(cetFromServer,
-                                      { studyAnnotationTypes: annotationTypes });
-        context.parentObj = cet;
-        context.annotationTypes = annotationTypes;
-        context.jsonEntities = jsonEntities;
-      }));
-
-      annotationTypeDataSharedSpec(context);
+      this.httpBackend.expectDELETE(url).respond(201, serverReply(true));
+      ceventType.remove();
+      this.httpBackend.flush();
     });
+
+    it('should update name', function () {
+      var cet = new this.CollectionEventType(this.jsonCet);
+      this.testUtils.updateEntity.call(this,
+                                       cet,
+                                       'updateName',
+                                       cet.name,
+                                       uri('name', cet.id),
+                                       { name: cet.name },
+                                       this.jsonCet,
+                                       expectCet,
+                                       failTest);
+    });
+
+    it('should update description', function () {
+      var cet = new this.CollectionEventType(this.jsonCet);
+
+      this.testUtils.updateEntity.call(this,
+                                       cet,
+                                       'updateDescription',
+                                       undefined,
+                                       uri('description', cet.id),
+                                       { },
+                                       this.jsonCet,
+                                       expectCet,
+                                       failTest);
+
+      this.testUtils.updateEntity.call(this,
+                                       cet,
+                                       'updateDescription',
+                                       cet.description,
+                                       uri('description', cet.id),
+                                       { description: cet.description },
+                                       this.jsonCet,
+                                       expectCet,
+                                       failTest);
+    });
+
+    it('should update recurring', function () {
+      var cet = new this.CollectionEventType(this.jsonCet);
+      this.testUtils.updateEntity.call(this,
+                                       cet,
+                                       'updateRecurring',
+                                       cet.recurring,
+                                       uri('recurring', cet.id),
+                                       { recurring: cet.recurring },
+                                       this.jsonCet,
+                                       expectCet,
+                                       failTest);
+    });
+
+    it('should add a specimen spec', function () {
+      var jsonSpec = this.jsonEntities.collectionSpecimenSpec(),
+          cet = new this.CollectionEventType(this.jsonCet);
+      this.testUtils.updateEntity.call(this,
+                                       cet,
+                                       'addSpecimenSpec',
+                                       _.omit(jsonSpec, 'uniqueId'),
+                                       uri('spcspec', cet.id),
+                                       _.omit(jsonSpec, 'uniqueId'),
+                                       this.jsonCet,
+                                       expectCet,
+                                       failTest);
+    });
+
+    it('should remove a specimen spec', function () {
+      var jsonSpec = this.jsonEntities.collectionSpecimenSpec(),
+          jsonCet  = _.extend(this.jsonCet, { specimenSpecs: [ jsonSpec ]}),
+          cet      = new this.CollectionEventType(jsonCet),
+          url      = sprintf.sprintf('%s/%d/%s', uri('spcspec', cet.id),
+                                     cet.version, jsonSpec.uniqueId);
+
+      this.httpBackend.whenDELETE(url).respond(201, serverReply(true));
+      cet.removeSpecimenSpec(jsonSpec).then(expectCet).catch(failTest);
+      this.httpBackend.flush();
+    });
+
+    it('should add an annotation tye', function () {
+      var jsonAnnotType = this.jsonEntities.collectionSpecimenSpec(),
+          cet = new this.CollectionEventType(this.jsonCet);
+      this.testUtils.updateEntity.call(this,
+                                       cet,
+                                       'addAnnotationType',
+                                       _.omit(jsonAnnotType, 'uniqueId'),
+                                       uri('annottype', cet.id),
+                                       _.omit(jsonAnnotType, 'uniqueId'),
+                                       this.jsonCet,
+                                       expectCet,
+                                       failTest);
+    });
+
+    it('should remove an annotation type', function () {
+      var jsonAnnotType = this.jsonEntities.collectionSpecimenSpec(),
+          jsonCet       = _.extend(this.jsonCet, { annotationTypes: [ jsonAnnotType ]}),
+          cet           = new this.CollectionEventType(jsonCet),
+          url           = sprintf.sprintf('%s/%d/%s', uri('annottype', cet.id),
+                                          cet.version, jsonAnnotType.uniqueId);
+
+      this.httpBackend.whenDELETE(url).respond(201, serverReply(true));
+      cet.removeAnnotationType(jsonAnnotType).then(expectCet).catch(failTest);
+      this.httpBackend.flush();
+    });
+
+    // used by promise tests
+    function expectCet(entity) {
+      expect(entity).toEqual(jasmine.any(CollectionEventType));
+    }
+
+    // used by promise tests
+    function failTest(error) {
+      expect(error).toBeUndefined();
+    }
 
     function serverReply(obj) {
       return { status: 'success', data: obj };
     }
 
-    function ceventTypeToAddCommand(ceventType) {
-      return {
-        studyId:            ceventType.studyId,
-        name:               ceventType.name,
-        description:        ceventType.description,
-        recurring:          ceventType.recurring,
-        specimenGroupData:  ceventType.getSpecimenGroupData(),
-        annotationTypeData: ceventType.getAnnotationTypeData()
-      };
+    /**
+     * Returns 3 collection event types, each one with a different missing field.
+     */
+    function getBadCollectionEventTypes(jsonEntities, jsonStudy) {
+      var badSpecimenSpec   = _.omit(jsonEntities.collectionSpecimenSpec(), 'name'),
+          badAnnotationType = _.omit(jsonEntities.annotationType(), 'name'),
+          data = [
+            {
+              cet: _.omit(jsonEntities.collectionEventType(jsonStudy), 'name'),
+              errMsg : 'invalid collection event types from server'
+            },
+            {
+              cet: jsonEntities.collectionEventType(jsonStudy,
+                                                         { specimenSpecs: [ badSpecimenSpec ]}),
+              errMsg : 'invalid specimen specs from server'
+            },
+            {
+              cet: jsonEntities.collectionEventType(jsonStudy,
+                                                    { annotationTypes: [ badAnnotationType ]}),
+              errMsg : 'invalid annotation types from server'
+            }
+          ];
+      return data;
     }
 
-    function ceventTypeToUpdateCommand(ceventType) {
-      return _.extend(ceventTypeToAddCommand(ceventType), {
-        id: ceventType.id,
-        expectedVersion: ceventType.version
-      });
+    function uri(/* path, cetypeId */) {
+      var args = _.toArray(arguments),
+          cetypeId,
+          path;
+
+      var result = '/studies/cetypes';
+
+      if (args.length > 0) {
+        path = args.shift();
+        result += '/' + path;
+      }
+
+      if (args.length > 0) {
+        cetypeId = args.shift();
+        result += '/' + cetypeId;
+      }
+
+      return result;
     }
   });
 

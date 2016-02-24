@@ -72,7 +72,7 @@ define([
       User.list().then(function (pagedResult) {
         expect(pagedResult.items).toBeArrayOfSize(users.length);
         expect(pagedResult.items[0]).toEqual(jasmine.any(User));
-        pagedResult.items[0].compareToServerEntity(users[0]);
+        pagedResult.items[0].compareToJsonEntity(users[0]);
         done();
       });
       httpBackend.flush();
@@ -84,7 +84,7 @@ define([
 
       User.get(user.id).then(function (reply) {
         expect(reply).toEqual(jasmine.any(User));
-        reply.compareToServerEntity(user);
+        reply.compareToJsonEntity(user);
         done();
       });
       httpBackend.flush();
