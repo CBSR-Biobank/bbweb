@@ -5,20 +5,30 @@
 define(function () {
   'use strict';
 
-  AdminCtrl.$inject = ['aggregateCounts'];
+  AdminCtrl.$inject = ['adminService'];
 
   /**
    * Administration controllers.
    *
    */
-  function AdminCtrl(aggregateCounts) {
+  function AdminCtrl(adminService) {
     var vm = this;
 
-    vm.counts = {
-      studies: aggregateCounts.studies,
-      centres: aggregateCounts.centres,
-      users:   aggregateCounts.users
-    };
+    vm.counts = {};
+
+    init();
+
+    //--
+
+    function init() {
+      adminService.aggregateCounts().then(function (aggregateCounts) {
+        vm.counts = {
+          studies: aggregateCounts.studies,
+          centres: aggregateCounts.centres,
+          users:   aggregateCounts.users
+        };
+      });
+    }
   }
 
   return AdminCtrl;

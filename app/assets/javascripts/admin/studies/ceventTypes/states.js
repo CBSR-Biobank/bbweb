@@ -64,21 +64,7 @@ define(function () {
     $stateProvider.state('home.admin.studies.study.collection.ceventTypeAdd', {
       url: '/cetypes/add',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        studySpecimenGroups: resolveSpecimenGroups,
-        studyAnnotationTypes: resolveAnnotationTypes,
-        ceventType: [
-          'CollectionEventType',
-          'studySpecimenGroups',
-          'studyAnnotationTypes',
-          function(CollectionEventType,
-                   studySpecimenGroups,
-                   studyAnnotationTypes) {
-            var cet = new CollectionEventType();
-            cet.studySpecimenGroups(studySpecimenGroups);
-            cet.studyAnnotationTypes(studyAnnotationTypes);
-            return cet;
-          }]
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'main@': {

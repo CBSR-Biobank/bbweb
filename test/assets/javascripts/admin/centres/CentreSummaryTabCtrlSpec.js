@@ -8,82 +8,81 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
   describe('Controller: CentreSummaryTabCtrl', function() {
-    var q, Centre, CentreStatus, jsonEntities, createController;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($q,
-                               _Centre_,
-                               _CentreStatus_,
-                               modalService,
-                               jsonEntities) {
-      q            = $q;
-      Centre       = _Centre_;
-      CentreStatus = _CentreStatus_;
-      jsonEntities = jsonEntities;
+    beforeEach(inject(function(modalService) {
+      var self = this;
+
+      self.$q           = self.$injector.get('$q');
+      self.Centre       = self.$injector.get('Centre');
+      self.CentreStatus = self.$injector.get('CentreStatus');
+      self.jsonEntities = self.$injector.get('jsonEntities');
+
+      self.centre = new self.Centre(self.jsonEntities.centre());
 
       spyOn(modalService, 'showModal').and.callFake(function () {
-        return $q.when('modalResult');
+        return self.$q.when('modalResult');
       });
 
-      createController = setupController(this.$injector);
-    }));
-
-    function setupController(injector) {
-      var $rootScope  = injector.get('$rootScope'),
-          $controller = injector.get('$controller'),
-          $filter     = injector.get('$filter');
-
-      return create;
+      self.createController = setupController();
 
       //--
 
-      function create(centre) {
-        var scope = $rootScope.$new();
-        $controller('CentreSummaryTabCtrl as vm', {
-          $scope:  scope,
-          $filter: $filter,
-          centre:   centre
-        });
-        scope.$digest();
-        return scope;
+      function setupController() {
+        var $rootScope  = self.$injector.get('$rootScope'),
+            $controller = self.$injector.get('$controller'),
+            $filter     = self.$injector.get('$filter');
+
+        return create;
+
+        //--
+
+        function create(centre) {
+          self.scope = $rootScope.$new();
+          $controller('CentreSummaryTabCtrl as vm', {
+            $scope:  self.scope,
+            $filter: $filter,
+            centre:  centre
+          });
+          self.scope.$digest();
+        }
       }
-    }
+    }));
 
     it('should contain valid settings to display the centre summary', function() {
-      var centre = new Centre(jsonEntities.centre()),
-          scope = createController(centre);
-
-      expect(scope.vm.centre).toBe(centre);
-      expect(scope.vm.descriptionToggleLength).toBeDefined();
+      this.createController(this.centre);
+      expect(this.scope.vm.centre).toBe(this.centre);
+      expect(this.scope.vm.descriptionToggleLength).toBeDefined();
     });
 
     describe('change centre status', function() {
 
       function checkStatusChange(centre, status, newStatus) {
-        var scope = createController(centre);
+        /* jshint validthis: true */
+        var self = this;
 
-        spyOn(Centre.prototype, status).and.callFake(function () {
-          centre.status = (centre.status === CentreStatus.ENABLED()) ?
-            CentreStatus.DISABLED() : CentreStatus.ENABLED();
-          return q.when(centre);
+        self.createController(self.centre);
+
+        spyOn(self.Centre.prototype, status).and.callFake(function () {
+          centre.status = (centre.status === self.CentreStatus.ENABLED()) ?
+            self.CentreStatus.DISABLED() : self.CentreStatus.ENABLED();
+          return self.$q.when(centre);
         });
 
-        scope.vm.changeStatus(status);
-        scope.$digest();
-        expect(Centre.prototype[status]).toHaveBeenCalled();
-        expect(scope.vm.centre.status).toBe(newStatus);
+        self.scope.vm.changeStatus(status);
+        self.scope.$digest();
+        expect(self.Centre.prototype[status]).toHaveBeenCalled();
+        expect(self.scope.vm.centre.status).toBe(newStatus);
       }
 
       it('should enable a centre', function() {
-        var centre = new Centre(jsonEntities.centre());
-        checkStatusChange(centre, 'enable', CentreStatus.ENABLED());
+        checkStatusChange.call(this, this.centre, 'enable', this.CentreStatus.ENABLED());
       });
 
       it('should disable a centre', function() {
-        var centre = new Centre(jsonEntities.centre());
-        centre.status = CentreStatus.ENABLED();
-        checkStatusChange(centre, 'disable', CentreStatus.DISABLED());
+        this.centre.status = this.CentreStatus.ENABLED();
+        checkStatusChange.call(this, this.centre, 'disable', this.CentreStatus.DISABLED());
       });
 
     });

@@ -92,7 +92,12 @@ class StudiesController @javaxInject() (val authToken:      AuthToken,
     commandAction(Json.obj("id" -> id)) { cmd : UpdateStudyDescriptionCmd => processCommand(cmd) }
 
   def addAnnotationType(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : UpdateStudyAddAnnotationTypeCmd => processCommand(cmd) }
+    commandAction(Json.obj("id" -> id)) { cmd : StudyAddParticipantAnnotationTypeCmd => processCommand(cmd) }
+
+  def updateAnnotationType(id: String, uniqueId: String) =
+    commandAction(Json.obj("id" -> id, "uniqueId" -> uniqueId)) {
+      cmd : StudyUpdateParticipantAnnotationTypeCmd => processCommand(cmd)
+    }
 
   def removeAnnotationType(studyId: String, ver: Long, uniqueId: String) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>

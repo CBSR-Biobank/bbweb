@@ -13,7 +13,8 @@ define(['angular'], function(angular) {
       restrict: 'E',
       scope: {},
       bindToController: {
-        centre: '='
+        centre: '=',
+        onRemove: '&'
       },
       templateUrl: '/assets/javascripts/admin/centres/directives/locationsPanel/locationsPanel.html',
       controller: LocationsPanelCtrl,
@@ -66,19 +67,16 @@ define(['angular'], function(angular) {
     }
 
     function remove(location) {
-      var fakeEntity = {
-        remove: function () {
-          return vm.centre.removeLocation(location);
-        }
-      };
-
       domainEntityService.removeEntity(
-        fakeEntity,
+        callback,
         'Remove Location',
         'Are you sure you want to remove location ' + location.name + '?',
         'Remove Failed',
         'Location ' + location.name + ' cannot be removed: ');
 
+      function callback() {
+        return vm.onRemove()(location);
+      }
     }
 
   }

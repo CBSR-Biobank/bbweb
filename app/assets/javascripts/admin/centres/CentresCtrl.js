@@ -5,7 +5,7 @@
 define(['underscore'], function(_) {
   'use strict';
 
-  CentresCtrl.$inject = ['$scope', 'Centre', 'CentreStatus', 'centreCounts'];
+  CentresCtrl.$inject = ['$scope', 'Centre', 'CentreStatus', 'CentreCounts'];
 
   /**
    * Displays a list of centres with each in its own mini-panel.
@@ -16,10 +16,10 @@ define(['underscore'], function(_) {
    *
    * @param {CentreCounts} centreCounts - the counts of centres broken down by status.
    */
-  function CentresCtrl($scope, Centre, CentreStatus, centreCounts) {
+  function CentresCtrl($scope, Centre, CentreStatus, CentreCounts) {
     var vm = this;
 
-    vm.centreCounts     = centreCounts;
+    vm.centreCounts     = {};
     vm.pageSize         = 5;
     vm.updateCentres    = Centre.list;
     vm.possibleStatuses = [{ id: 'all', label: 'All' }];
@@ -27,6 +27,16 @@ define(['underscore'], function(_) {
     _.each(CentreStatus.values(), function(status) {
       vm.possibleStatuses.push({id: status, label: CentreStatus.label(status)});
     });
+
+    init();
+
+    //--
+
+    function init() {
+      CentreCounts.get().then(function (counts) {
+        vm.centreCounts = counts;
+      });
+    }
   }
 
   return CentresCtrl;

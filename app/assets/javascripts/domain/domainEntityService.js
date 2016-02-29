@@ -86,7 +86,7 @@ define(['underscore'], function(_) {
         closeButtonText: 'Cancel',
         headerHtml: headerHtml,
         bodyHtml: bodyHtml
-        };
+      };
 
       modalService.showModal({}, modalOptions).then(removeConfirmed).catch(deferred.reject);
       return deferred.promise;

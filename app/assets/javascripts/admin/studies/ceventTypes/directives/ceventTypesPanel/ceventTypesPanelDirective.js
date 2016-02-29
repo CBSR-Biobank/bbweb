@@ -15,9 +15,7 @@ define(['angular', 'underscore'], function(angular, _) {
       bindToController: {
         study:                  '=',
         ceventTypes:            '=',
-        annotationTypes:        '=',
-        annotationTypeIdsInUse: '=',
-        specimenGroups:         '='
+        annotationTypeIdsInUse: '='
       },
       templateUrl: '/assets/javascripts/admin/studies/ceventTypes/directives/ceventTypesPanel/ceventTypesPanel.html',
       controller: CeventTypesPanelCtrl,
@@ -52,9 +50,6 @@ define(['angular', 'underscore'], function(angular, _) {
         panel = new Panel('study.panel.collectionEventTypes',
                           'home.admin.studies.study.collection.ceventTypeAdd');
 
-    vm.specimenGroupsById  = _.indexBy(vm.specimenGroups, 'id');
-    vm.annotationTypesById = _.indexBy(vm.annotationTypes, 'id');
-
     vm.update               = update;
     vm.remove               = remove;
     vm.add                  = add;
@@ -70,14 +65,7 @@ define(['angular', 'underscore'], function(angular, _) {
     //--
 
     function add() {
-      if (vm.specimenGroups.length <= 0) {
-        var headerHtml = 'Cannot add a collection event type';
-        var bodyHtml = 'No <em>specimen groups</em> have been added to this study yet. ' +
-            'Please add specimen groups first and then add a collection event type.';
-        return modalService.modalOk(headerHtml, bodyHtml);
-      } else {
-        return $state.go('home.admin.studies.study.collection.ceventTypeAdd');
-      }
+      return $state.go('home.admin.studies.study.collection.ceventTypeAdd');
     }
 
     /**

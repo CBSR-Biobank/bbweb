@@ -26,10 +26,7 @@ define(function () {
         }
       },
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        aggregateCounts: ['adminService', function(adminService) {
-          return adminService.aggregateCounts();
-        }]
+        user: authorizationProvider.requireAuthenticatedUser
       },
       data: {
         displayName: 'Administration'

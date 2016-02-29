@@ -30,22 +30,36 @@ message CollectionEventTypeEvent {
    }
 
    message CetAnnotationTypeAdded {
-      optional int64               version        = 1;
-      optional AnnotationTypeAdded annotationType = 2;
+      optional int64          version        = 1;
+      optional AnnotationType annotationType = 2;
    };
 
+   message CetAnnotationTypeUpdated {
+      optional int64          version        = 1;
+      optional AnnotationType annotationType = 2;
+   };
+
+   message SpecimenSpec {
+      optional string uniqueId                    = 1;
+      optional string name                        = 2;
+      optional string description                 = 3;
+      optional string units                       = 4;
+      optional string anatomicalSourceType        = 5;
+      optional string preservationType            = 6;
+      optional string preservationTemperatureType = 7;
+      optional string specimenType                = 8;
+      optional int32  maxCount                    = 9;
+      optional double amount                      = 10;
+  }
+
    message SpecimenSpecAdded {
-      optional int64  version                     = 1;
-      optional string uniqueId                    = 2;
-      optional string name                        = 3;
-      optional string description                 = 4;
-      optional string units                       = 5;
-      optional string anatomicalSourceType        = 6;
-      optional string preservationType            = 7;
-      optional string preservationTemperatureType = 8;
-      optional string specimenType                = 9;
-      optional int32  maxCount                    = 10;
-      optional double amount                      = 11;
+      optional int64        version      = 1;
+      optional SpecimenSpec specimenSpec = 2;
+  }
+
+   message SpecimenSpecUpdated {
+      optional int64        version      = 1;
+      optional SpecimenSpec specimenSpec = 2;
   }
 
    message SpecimenSpecRemoved {
@@ -59,14 +73,16 @@ message CollectionEventTypeEvent {
    optional string time    = 4;
 
    oneof event_type {
-      Added                  added                 = 5;
-      Removed                removed               = 6;
-      NameUpdated            nameUpdated           = 7;
-      DescriptionUpdated     descriptionUpdated    = 8;
-      RecurringUpdated       recurringUpdated      = 9;
-      CetAnnotationTypeAdded annotationTypeAdded   = 10;
-      AnnotationTypeRemoved  annotationTypeRemoved = 11;
-      SpecimenSpecAdded      specimenSpecAdded     = 12;
-      SpecimenSpecRemoved    specimenSpecRemoved   = 13;
+      Added                    added                 = 5;
+      Removed                  removed               = 6;
+      NameUpdated              nameUpdated           = 7;
+      DescriptionUpdated       descriptionUpdated    = 8;
+      RecurringUpdated         recurringUpdated      = 9;
+      CetAnnotationTypeAdded   annotationTypeAdded   = 10;
+      CetAnnotationTypeUpdated annotationTypeUpdated = 11;
+      AnnotationTypeRemoved    annotationTypeRemoved = 12;
+      SpecimenSpecAdded        specimenSpecAdded     = 13;
+      SpecimenSpecUpdated      specimenSpecUpdated   = 14;
+      SpecimenSpecRemoved      specimenSpecRemoved   = 15;
    }
 }

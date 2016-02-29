@@ -23,13 +23,11 @@ define(function () {
       ev.addAttribute('Name', ceventType.name);
       ev.addAttribute('Recurring', ceventType.recurring ? 'Yes' : 'No');
 
-      if ((ceventType.specimenGroupData.length > 0) &&
-          ceventType.specimenGroupData[0].specimenGroup) {
-        ev.addAttribute('Specimen Groups (Count, Amount)', ceventType.getSpecimenGroupsAsString());
+      if (ceventType.specimenSpecs.length > 0) {
+        ev.addAttribute('Specimen Specs (Count, Amount)', ceventType.getSpecimenGroupsAsString());
       }
 
-      if ((ceventType.annotationTypeData.length > 0) &&
-          ceventType.annotationTypeData[0].annotationType) {
+      if (ceventType.annotationTypes.length > 0) {
         ev.addAttribute('Annotation Types', ceventType.getAnnotationTypeDataAsString());
       }
       ev.addAttribute('Description', ceventType.description);

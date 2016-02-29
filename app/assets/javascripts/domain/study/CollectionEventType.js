@@ -178,6 +178,13 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
         this, uri('spcspec', this.id), _.omit(specimenSpec, 'uniqueId'));
     };
 
+    CollectionEventType.prototype.updateSpecimenSpec = function (specimenSpec) {
+      return ConcurrencySafeEntity.prototype.update.call(
+        this,
+        uri('spcspec', this.id) + '/' + specimenSpec.uniqueId,
+        _.omit(specimenSpec, 'uniqueId'));
+    };
+
     CollectionEventType.prototype.removeSpecimenSpec = function (specimenSpec) {
       var self = this,
           url,
@@ -206,6 +213,13 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     CollectionEventType.prototype.addAnnotationType = function (annotationType) {
       return ConcurrencySafeEntity.prototype.update.call(
         this, uri('annottype', this.id), _.omit(annotationType, 'uniqueId'));
+    };
+
+    CollectionEventType.prototype.updateAnnotationType = function (annotationType) {
+      return ConcurrencySafeEntity.prototype.update.call(
+        this,
+        uri('annottype', this.id) + '/' + annotationType.uniqueId,
+        _.omit(annotationType, 'uniqueId'));
     };
 
     CollectionEventType.prototype.removeAnnotationType = function (annotationType) {

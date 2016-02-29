@@ -25,11 +25,16 @@ define(['angular'], function(angular) {
                        };
 
     var service = {
-      showModal:           showModal,
-      show:                show,
-      modalOk:             modalOk,
-      modalStringInput:    modalStringInput,
-      passwordUpdateModal: passwordUpdateModal
+      showModal:                showModal,
+      show:                     show,
+      modalOk:                  modalOk,
+      modalTextInput:           modalTextInput,
+      modalTextAreaInput:       modalTextAreaInput,
+      modalEmailInput:          modalEmailInput,
+      modalUrlInput:            modalUrlInput,
+      modalBooleanInput:        modalBooleanInput,
+      modalCommaDelimitedInput: modalCommaDelimitedInput,
+      passwordUpdateModal:      passwordUpdateModal
     };
 
     return service;
@@ -121,6 +126,30 @@ define(['angular'], function(angular) {
           $uibModalInstance.dismiss('cancel');
         };
       }
+    }
+
+    function modalTextInput(title, label, defaultValue) {
+      return modalStringInput('text', title, label, defaultValue);
+    }
+
+    function modalTextAreaInput(title, label, defaultValue) {
+      return modalStringInput('textarea', title, label, defaultValue);
+    }
+
+    function modalEmailInput(title, label, defaultValue) {
+      return modalStringInput('email', title, label, defaultValue);
+    }
+
+    function modalUrlInput(title, label, defaultValue) {
+      return modalStringInput('url', title, label, defaultValue);
+    }
+
+    function modalBooleanInput(title, label, defaultValue) {
+      return modalStringInput('boolean', title, label, defaultValue);
+    }
+
+    function modalCommaDelimitedInput(title, label, defaultValue) {
+      return modalStringInput('comma-delimited', title, label, defaultValue);
     }
 
     /**

@@ -13,11 +13,7 @@ define(function () {
       restrict: 'E',
       scope: {},
       bindToController: {
-        study:                  '=',
-        ceventTypes:            '=',
-        annotationTypes:        '=',
-        annotationTypeIdsInUse: '=',
-        specimenGroups:         '='
+        study:                  '='
       },
       templateUrl : '/assets/javascripts/admin/studies/ceventTypes/directives/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html',
       controller: CeventTypesAddAndSelectCtrl,

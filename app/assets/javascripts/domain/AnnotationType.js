@@ -28,9 +28,9 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
       'properties': {
         'uniqueId':        { 'type': 'string'  },
         'name':            { 'type': 'string'  },
-        'description':     { 'type': 'string'  },
+        'description':     { 'type': [ 'string', 'null' ] },
         'valueType':       { 'type': 'string'  },
-        'maxValueCount':   { 'type': 'integer' },
+        'maxValueCount':   { 'type': [ 'integer', 'null' ] },
         'options':         { 'type': 'array'   },
         'required':        { 'type': 'boolean' }
       },
@@ -61,6 +61,24 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
         throw new Error('invalid object from server: ' + tv4.error);
       }
       return new AnnotationType(obj);
+    };
+
+    // returns a string that can be displayed to the user
+    AnnotationType.prototype.getType = function () {
+      switch (this.valueType) {
+      case AnnotationValueType.TEXT():
+        return AnnotationValueType.TEXT();
+      case AnnotationValueType.NUMBER():
+        return AnnotationValueType.NUMBER();
+      case AnnotationValueType.DATE_TIME():
+        return AnnotationValueType.DATE_TIME();
+      case AnnotationValueType.SELECT():
+        if (this.isSingleSelect()) {
+          return 'Single Select';
+        }
+        return 'Multiple Select';
+      }
+      throw new Error('invalid type for annotation type: ' + this.valueType);
     };
 
     AnnotationType.prototype.isValueTypeText = function () {

@@ -16,11 +16,6 @@ define(function () {
       return Centre.get($stateParams.centreId);
     }
 
-    resolveCentreCounts.$inject = ['CentreCounts'];
-    function resolveCentreCounts(CentreCounts) {
-      return CentreCounts.get();
-    }
-
     $urlRouterProvider.otherwise('/');
 
     /**
@@ -29,8 +24,7 @@ define(function () {
     $stateProvider.state('home.admin.centres', {
       url: '/centres',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        centreCounts: resolveCentreCounts
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'main@': {

@@ -1,9 +1,9 @@
 /**
+ * Jasmine test suite
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-// Jasmine test suite
-//
 define([
   'angular',
   'angularMocks',
@@ -13,37 +13,31 @@ define([
   'use strict';
 
   describe('Directive: studyAnnotationTypesPanelDirective', function() {
-    var Study,
-        ParticipantAnnotationType,
-        CollectionEventAnnotationType,
-        SpecimenLinkAnnotationType,
-        AnnotationValueType,
-        jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function () {
-      Study                         = this.$injector.get('Study');
-      ParticipantAnnotationType     = this.$injector.get('ParticipantAnnotationType');
-      CollectionEventAnnotationType = this.$injector.get('CollectionEventAnnotationType');
-      SpecimenLinkAnnotationType    = this.$injector.get('SpecimenLinkAnnotationType');
-      AnnotationValueType           = this.$injector.get('AnnotationValueType');
-      jsonEntities                  = this.$injector.get('jsonEntities');
+      this.Study                      = this.$injector.get('Study');
+      this.SpecimenLinkAnnotationType = this.$injector.get('SpecimenLinkAnnotationType');
+      this.AnnotationType             = this.$injector.get('AnnotationType');
+      this.AnnotationValueType        = this.$injector.get('AnnotationValueType');
+      this.jsonEntities               = this.$injector.get('jsonEntities');
     }));
 
     describe('for Participant Annotation Types', function() {
       var context = {};
 
       beforeEach(function () {
-        context.study = new Study(jsonEntities.study());
+        var self = this;
+
+        context.study = new self.Study(self.jsonEntities.study());
         context.annotationTypes = _.map(
-          AnnotationValueType.values(),
+          self.AnnotationValueType.values(),
           function(valueType) {
-          return new ParticipantAnnotationType(
-            jsonEntities.studyAnnotationType(
-              context.study, {valueType: valueType, required: true}));
-        });
-        context.annotationTypeIdsInUse = [context.annotationTypes[0]];
+            return new self.AnnotationType(
+              self.jsonEntities.annotationType(context.study, { valueType: valueType }));
+          });
+        context.annotationTypeIdsInUse = [ context.annotationTypes[0]] ;
         context.annotationTypeName     = 'ParticipantAnnotationType';
         context.panelId                = 'study.panel.participantAnnotationTypes';
         context.addStateName           = 'home.admin.studies.study.participants.annotationTypeAdd';
@@ -56,51 +50,48 @@ define([
       var context = {};
 
       beforeEach(function () {
-        context.study = new Study(jsonEntities.study());
+        var self = this;
+
+        context.study = new self.Study(self.jsonEntities.study());
         context.annotationTypes = _.map(
-          AnnotationValueType.values(),
+          self.AnnotationValueType.values(),
           function(valueType) {
-          return new CollectionEventAnnotationType(
-            jsonEntities.studyAnnotationType(
-              context.study, {valueType: valueType, required: true}));
-        });
-        context.annotationTypeIdsInUse = [context.annotationTypes[0]];
-        context.annotationTypeName   = 'CollectionEventAnnotationType';
-        context.panelId         = 'study.panel.collectionEventAnnotationTypes';
-        context.addStateName    = 'home.admin.studies.study.collection.ceventAnnotationTypeAdd';
+            return new self.AnnotationType(
+              self.jsonEntities.annotationType(context.study, { valueType: valueType }));
+          });
+        context.annotationTypeIdsInUse = [ context.annotationTypes[0] ];
+        context.annotationTypeName     = 'CollectionEventAnnotationType';
+        context.panelId                = 'study.panel.collectionEventAnnotationTypes';
+        context.addStateName           = 'home.admin.studies.study.collection.ceventAnnotationTypeAdd';
       });
 
       sharedBehaviour(context);
     });
 
-    describe('for Specimen Link Annotation Types', function() {
-      var context = {};
+    // describe('for Specimen Link Annotation Types', function() {
+    //   var context = {};
 
-      beforeEach(function () {
-        context.study = new Study(jsonEntities.study());
-        context.annotationTypes = _.map(
-          AnnotationValueType.values(),
-          function(valueType) {
-          return new SpecimenLinkAnnotationType(
-            jsonEntities.studyAnnotationType(
-              context.study, {valueType: valueType, required: true}));
-        });
-        context.annotationTypeIdsInUse = [context.annotationTypes[0]];
-        context.annotationTypeName   = 'SpecimenLinkAnnotationType';
-        context.panelId         = 'study.panel.specimenLinkAnnotationTypes';
-        context.addStateName    = 'home.admin.studies.study.processing.spcLinkAnnotationTypeAdd';
-      });
+    //   beforeEach(function () {
+    //     context.study = new this.Study(this.jsonEntities.study());
+    //     context.annotationTypes = _.map(
+    //       this.AnnotationValueType.values(),
+    //       function(valueType) {
+    //       return new SpecimenLinkAnnotationType(
+    //         jsonEntities.studyAnnotationType(
+    //           context.study, {valueType: valueType, required: true}));
+    //     });
+    //     context.annotationTypeIdsInUse = [context.annotationTypes[0]];
+    //     context.annotationTypeName   = 'SpecimenLinkAnnotationType';
+    //     context.panelId         = 'study.panel.specimenLinkAnnotationTypes';
+    //     context.addStateName    = 'home.admin.studies.study.processing.spcLinkAnnotationTypeAdd';
+    //   });
 
-      sharedBehaviour(context);
-    });
+    //   sharedBehaviour(context);
+    // });
 
     function sharedBehaviour(context) {
 
       describe('(shared)', function() {
-        var scope,
-            controller,
-            $state,
-            Panel;
 
         beforeEach(inject(function($window,
                                    $compile,
@@ -108,11 +99,11 @@ define([
                                    testUtils) {
           var element;
 
-          Panel = this.$injector.get('Panel');
-          $state = this.$injector.get('$state');
+          this.Panel = this.$injector.get('Panel');
+          this.$state = this.$injector.get('$state');
 
-          spyOn($state, 'go').and.callFake(function () {});
-          spyOn(Panel.prototype, 'add').and.callThrough();
+          spyOn(this.$state, 'go').and.callFake(function () {});
+          spyOn(this.Panel.prototype, 'add').and.callThrough();
 
           $window.localStorage.setItem(context.panelId, '');
 
@@ -132,32 +123,32 @@ define([
             '     annotation-type-name="' + context.annotationTypeName + '"',
             '     panel-id="' + context.panelId + '"',
             '     add-state-name="' + context.addStateName + '"',
-            '     update-state-name="' + context.updateStateName + '">',
+            '     view-state-name="' + context.viewStateName + '">',
             '  </study-annotation-types-panel>',
             '</uib-accordion>'
           ].join(''));
 
-          scope = $rootScope.$new();
-          scope.vm = {
+          this.scope = $rootScope.$new();
+          this.scope.vm = {
             study:                  context.study,
             annotationTypes:        context.annotationTypes,
             annotationTypeIdsInUse: context.annotationTypeIdsInUse
           };
 
-          $compile(element)(scope);
-          scope.$digest();
-          controller = element.find('study-annotation-types-panel')
+          $compile(element)(this.scope);
+          this.scope.$digest();
+          this.controller = element.find('study-annotation-types-panel')
             .controller('studyAnnotationTypesPanel');
         }));
 
         it('has valid scope', function () {
-          expect(controller.study).toEqual(context.study);
-          expect(controller.annotationTypes).toEqual(context.annotationTypes);
-          expect(controller.annotationTypeIdsInUse).toEqual(context.annotationTypeIdsInUse);
+          expect(this.controller.study).toEqual(context.study);
+          expect(this.controller.annotationTypes).toEqual(context.annotationTypes);
+          expect(this.controller.annotationTypeIdsInUse).toEqual(context.annotationTypeIdsInUse);
         });
 
         it('has valid description', function () {
-          expect(controller.annotationTypeDescription)
+          expect(this.controller.annotationTypeDescription)
             .toContain(getDescriptionSubString(context.annotationTypeName));
 
           function getDescriptionSubString(annotationTypeName) {
@@ -179,10 +170,14 @@ define([
         });
 
         it('should invoke panel add function', function() {
-          controller.add();
-          expect(Panel.prototype.add).toHaveBeenCalled();
-          expect($state.go).toHaveBeenCalledWith(context.addStateName);
+          this.controller.add();
+          expect(this.$state.go).toHaveBeenCalledWith(context.addStateName);
         });
+
+        it('should change to valid state on update', function() {
+          jasmine.getEnv().fail('should change to valid state on update');
+        });
+
 
       });
 

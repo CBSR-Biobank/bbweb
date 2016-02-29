@@ -8,13 +8,9 @@ define(['underscore'], function(_) {
   CeventTypeEditCtrl.$inject = [
     '$state',
     'CollectionEventType',
-    'SpecimenGroup',
     'domainEntityService',
     'notificationsService',
-    'study',
-    'ceventType',
-    'studySpecimenGroups',
-    'studyAnnotationTypes'
+    'study'
   ];
 
   /**
@@ -22,30 +18,17 @@ define(['underscore'], function(_) {
    */
   function CeventTypeEditCtrl($state,
                               CollectionEventType,
-                              SpecimenGroup,
                               domainEntityService,
                               notificationsService,
-                              study,
-                              ceventType,
-                              studySpecimenGroups,
-                              studyAnnotationTypes) {
+                              study) {
     var vm = this;
 
-    vm.ceventType            = ceventType;
-    vm.studySpecimenGroups   = studySpecimenGroups;
-    vm.studyAnnotationTypes  = studyAnnotationTypes;
+    vm.ceventType            = new CollectionEventType();
+    vm.ceventType.studyId = study.id;
 
-    vm.title                 = (ceventType.isNew() ? 'Add' : 'Update') + ' Collection Event Type';
+    vm.title                 = 'Add Collection Event Type';
     vm.submit                = submit;
     vm.cancel                = cancel;
-
-    vm.addSpecimenGroup      = addSpecimenGroup;
-    vm.removeSpecimenGroup   = removeSpecimenGroup;
-    vm.addAnnotationType     = addAnnotationType;
-    vm.removeAnnotationType  = removeAnnotationType;
-    vm.getSpecimenGroupUnits = getSpecimenGroupUnits;
-
-    vm.ceventType.studyId = study.id;
 
     //---
 
@@ -71,31 +54,6 @@ define(['underscore'], function(_) {
       gotoReturnState();
     }
 
-    function addSpecimenGroup() {
-      vm.ceventType.specimenGroupData.push({specimenGroupId: '', maxCount: null, amount: null});
-    }
-
-    function removeSpecimenGroup(index) {
-      if ((index < 0) || (index >= vm.ceventType.specimenGroupData.length)) {
-        throw new Error('index is invalid: ' + index);
-      }
-      vm.ceventType.specimenGroupData.splice(index, 1);
-    }
-
-    function addAnnotationType() {
-      vm.ceventType.annotationTypeData.push({annotationTypeId:'', required: false});
-    }
-
-    function removeAnnotationType(index) {
-      if ((index < 0) || (index >= vm.ceventType.annotationTypeData.length)) {
-        throw new Error('index is invalid: ' + index);
-      }
-      vm.ceventType.annotationTypeData.splice(index, 1);
-    }
-
-    function getSpecimenGroupUnits(sgId) {
-      return SpecimenGroup.getUnits(vm.studySpecimenGroups, sgId);
-    }
   }
 
   return CeventTypeEditCtrl;

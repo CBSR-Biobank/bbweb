@@ -8,101 +8,96 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
   describe('Controller: StudyCtrl', function() {
-    var windowService, Study, createController, jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test', function($provide) {
-      windowService = {
+      $provide.value('$window', {
         localStorage: {
-          setItem: function() {},
-          getItem: function() { return {}; }
+          setItem: jasmine.createSpy('mockWindowService.setItem'),
+          getItem: jasmine.createSpy('mockWindowService.getItem')
         }
-      };
-
-      spyOn(windowService.localStorage, 'setItem');
-      $provide.value('$window', windowService);
+      });
     }));
 
     beforeEach(inject(function($q, _Study_, jsonEntities) {
-      Study = _Study_;
-      jsonEntities = jsonEntities;
-      createController = setupController(this.$injector);
-    }));
+      var self = this;
 
-    function setupController(injector) {
-      var $rootScope  = injector.get('$rootScope'),
-          $controller = injector.get('$controller'),
-          $window     = injector.get('$window'),
-          $timeout    = injector.get('$timeout');
+      self.$window      = self.$injector.get('$window');
+      self.Study        = self.$injector.get('Study');
+      self.jsonEntities = self.$injector.get('jsonEntities');
 
-      return create;
+      self.createController = setupController();
+      self.study = new self.Study(self.jsonEntities.study());
 
       //--
 
-      function create(study) {
-        var scope = $rootScope.$new(),
-            state = {
-              params: {studyId: study.id},
-              current: {name: 'home.admin.studies.study.processing'}
-            };
+      function setupController() {
+        var $rootScope  = self.$injector.get('$rootScope'),
+            $controller = self.$injector.get('$controller'),
+            $window     = self.$injector.get('$window'),
+            $timeout    = self.$injector.get('$timeout');
 
-        $controller('StudyCtrl as vm', {
-          $window:  $window,
-          $scope:   scope,
-          $state:   state,
-          $timeout: $timeout,
-          study:    study
-        });
-        scope.$digest();
-        return scope;
+        return create;
+
+        //--
+
+        function create(study) {
+          var state = {
+            params:  { studyId: study.id },
+            current: { name: 'home.admin.studies.study.processing' }
+          };
+
+          self.scope = $rootScope.$new();
+          $controller('StudyCtrl as vm',
+                      {
+                        $window:  $window,
+                        $scope:   self.scope,
+                        $state:   state,
+                        $timeout: $timeout,
+                        study:    study
+                      });
+          self.scope.$digest();
+        }
       }
-    }
+    }));
 
     it('should contain a valid study', function() {
-      var study = new Study(jsonEntities.study()),
-          scope = createController(study);
-
-      expect(scope.vm.study).toBe(study);
+      this.createController(this.study);
+      expect(this.scope.vm.study).toBe(this.study);
     });
 
     it('should contain initialized panels', function() {
-      var study = new Study(jsonEntities.study()),
-          scope = createController(study);
-
-      expect(scope.vm.tabSummaryActive).toBe(false);
-      expect(scope.vm.tabParticipantsActive).toBe(false);
-      expect(scope.vm.tabSpecimensActive).toBe(false);
-      expect(scope.vm.tabCollectionActive).toBe(false);
-      expect(scope.vm.tabProcessingActive).toBe(false);
+      this.createController(this.study);
+      expect(this.scope.vm.tabSummaryActive).toBe(false);
+      expect(this.scope.vm.tabParticipantsActive).toBe(false);
+      expect(this.scope.vm.tabSpecimensActive).toBe(false);
+      expect(this.scope.vm.tabCollectionActive).toBe(false);
+      expect(this.scope.vm.tabProcessingActive).toBe(false);
     });
 
     it('should contain initialized local storage', function() {
-      var study = new Study(jsonEntities.study());
-
-      createController(study);
-
-      expect(windowService.localStorage.setItem)
+      this.createController(this.study);
+      expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.collectionEventTypes', true);
-      expect(windowService.localStorage.setItem)
+      expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.participantAnnotationTypes', true);
-      expect(windowService.localStorage.setItem)
+      expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.participantAnnotationTypes', true);
-      expect(windowService.localStorage.setItem)
+      expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.processingTypes', true);
-      expect(windowService.localStorage.setItem)
+      expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.specimenGroups', true);
-      expect(windowService.localStorage.setItem)
+      expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.specimenLinkAnnotationTypes', true);
-      expect(windowService.localStorage.setItem)
+      expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.specimenLinkTypes', true);
     });
 
     it('should initialize the tab of the current state', function() {
-      var $timeout = this.$injector.get('$timeout'),
-          study = new Study(jsonEntities.study()),
-          scope = createController(study);
+      var $timeout = this.$injector.get('$timeout');
 
+      this.createController(this.study);
       $timeout.flush();
-      expect(scope.vm.tabProcessingActive).toBe(true);
+      expect(this.scope.vm.tabProcessingActive).toBe(true);
     });
 
   });

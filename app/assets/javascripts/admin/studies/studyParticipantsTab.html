@@ -1,12 +1,15 @@
-<study-not-disabled-warning></study-not-disabled-warning>
+<study-not-disabled-warning
+   study="vm.study">
+</study-not-disabled-warning>
 <uib-accordion close-others="false">
   <study-annotation-types-panel
-     study="study"
-     annotation-types="annotationTypes"
+     study="vm.study"
+     annotation-types="vm.annotationTypes"
      annotation-type-ids-in-use="vm.annotationTypeIdsInUse"
      annotation-type-name="ParticipantAnnotationType"
      panel-id="study.panel.participantAnnotationTypes"
      add-state-name="home.admin.studies.study.participants.annotationTypeAdd"
-     update-state-name="home.admin.studies.study.participants.annotationTypeUpdate">
+     view-state-name="home.admin.studies.study.participants.annotationTypeView"
+     on-remove="vm.onAnnotTypeRemove">
   </study-annotation-types-panel>
 </uib-accordion>

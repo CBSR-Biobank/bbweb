@@ -12,8 +12,7 @@ define([], function() {
     var directive = {
       restrict: 'E',
       scope: {
-        study: '=',
-        collectionDto: '='
+        study: '='
       },
       templateUrl : '/assets/javascripts/admin/studies/directives/studyCollection/studyCollection.html'
     };

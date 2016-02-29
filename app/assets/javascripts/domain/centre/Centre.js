@@ -32,9 +32,9 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
         'id':           { 'type': 'string'},
         'version':      { 'type': 'integer', 'minimum': 0},
         'timeAdded':    { 'type': 'string'},
-        'timeModified': { 'type': 'string'},
+        'timeModified': { 'type': [ 'string', 'null' ] },
         'name':         { 'type': 'string'},
-        'description':  { 'type': 'string'},
+        'description':  { 'type': [ 'string', 'null' ] },
         'studyIds':     { 'type': 'array'},
         'locations':    { 'type': 'array'},
         'status':       { 'type': 'string'}

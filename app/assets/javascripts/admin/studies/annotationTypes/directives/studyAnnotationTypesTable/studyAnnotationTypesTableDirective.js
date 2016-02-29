@@ -18,8 +18,8 @@ define(['angular', 'underscore'], function(angular, _) {
         annotationTypes:        '=',
         annotationTypeIdsInUse: '=',
         annotationTypeName:     '=',
-        updateStateName:        '=',
-        hasRequired:            '@'
+        viewStateName:          '=',
+        onRemove:               '&'
       },
       templateUrl: '/assets/javascripts/admin/studies/annotationTypes/directives/studyAnnotationTypesTable/studyAnnotationTypesTable.html',
       controller: StudyAnnotationTypesTableCtrl,
@@ -47,6 +47,7 @@ define(['angular', 'underscore'], function(angular, _) {
     vm.remove                 = remove;
     vm.information            = information;
     vm.modificationsAllowed   = vm.study.isDisabled();
+    vm.annotationTypes        = _.map(vm.study.annotationTypes, _.clone);
 
     vm.columns = annotationTypeColumns(vm.annotationTypeName);
 
@@ -77,28 +78,25 @@ define(['angular', 'underscore'], function(angular, _) {
         throw new Error('study is not disabled');
       }
 
-      if (_.contains(vm.annotationTypeIdsInUse, annotationType.id)) {
+      if (_.contains(vm.annotationTypeIdsInUse, annotationType.uniqueId)) {
         studyAnnotationTypeUtils.updateInUseModal(annotationType, vm.annotationTypeName);
       } else {
-        $state.go(vm.updateStateName, { annotationTypeId: annotationType.id });
+        $state.go(vm.viewStateName, { annotationTypeId: annotationType.uniqueId });
       }
     }
 
     function remove(annotationType) {
-      if (_.contains(vm.annotationTypeIdsInUse, annotationType.id)) {
+      if (_.contains(vm.annotationTypeIdsInUse, annotationType.uniqueId)) {
         studyAnnotationTypeUtils.removeInUseModal(annotationType, vm.annotationTypeName);
       } else {
         if (!vm.study.isDisabled()) {
           throw new Error('study is not disabled');
         }
-        studyAnnotationTypeUtils.remove(removeAnnotationType, annotationType)
-          .then(function (study) {
-            vm.study = study;
-          });
+        studyAnnotationTypeUtils.remove(callback, annotationType);
       }
 
-      function removeAnnotationType() {
-        return vm.study.removeAnnotationType(annotationType);
+      function callback() {
+        return vm.onRemove()(annotationType);
       }
     }
   }

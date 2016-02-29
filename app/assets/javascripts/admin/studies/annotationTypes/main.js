@@ -13,8 +13,17 @@ define(function (require) {
 
   module = angular.module(name, ['biobank.users']);
 
-  module.controller('AnnotationTypeEditCtrl', require('./AnnotationTypeEditCtrl'));
   module.service('studyAnnotationTypeUtils',  require('./studyAnnotationTypeUtilsService'));
+
+  module.directive(
+    'annotationTypeAdd',
+    require('./directives/annotationTypeAdd/annotationTypeAddDirective'));
+  module.directive(
+    'annotationTypeView',
+    require('./directives/annotationTypeView/annotationTypeViewDirective'));
+  module.directive(
+    'participantAnnotationTypeAdd',
+    require('./directives/participantAnnotationTypeAdd/participantAnnotationTypeAddDirective'));
   module.directive(
     'studyAnnotationTypesPanel',
     require('./directives/studyAnnotationTypesPanel/studyAnnotationTypesPanelDirective'));

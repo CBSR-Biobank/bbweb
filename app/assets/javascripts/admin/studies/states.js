@@ -23,11 +23,6 @@ define(function () {
       throw new Error('state parameter studyId is invalid');
     }
 
-    resolveStudyCounts.$inject = ['StudyCounts'];
-    function resolveStudyCounts(StudyCounts) {
-      return StudyCounts.get();
-    }
-
     $urlRouterProvider.otherwise('/');
 
     /**
@@ -37,20 +32,11 @@ define(function () {
     $stateProvider.state('home.admin.studies', {
       url: '/studies',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        studyCounts: resolveStudyCounts
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'main@': {
-          template: [
-            '<studies-list',
-            '  study-counts="vm.studyCounts">',
-            '</studies-list>'
-          ].join(''),
-          controller: ['studyCounts', function (studyCounts) {
-            this.studyCounts = studyCounts;
-          }],
-          controllerAs: 'vm'
+          template: '<studies-list></studies-list>'
         }
       },
       data: {
@@ -151,13 +137,20 @@ define(function () {
         'studyDetails': {
           templateUrl: '/assets/javascripts/admin/studies/studyParticipantsTab.html',
           controller: [
-            '$scope', 'study',
-            function($scope, study) {
-              $scope.study = study;
+            'study',
+            function(study) {
+              var vm = this;
+              vm.study = study;
               // FIXME this is set to empty array for now, but will have to call the correct method in the future
-              $scope.annotationTypeIdsInUse = [];
+              vm.annotationTypeIdsInUse = [];
+              vm.onAnnotTypeRemove = onAnnotTypeRemove;
+
+              function onAnnotTypeRemove(annotationType) {
+                return vm.study.removeAnnotationType(annotationType);
+              }
             }
-          ]
+          ],
+          controllerAs: 'vm'
         }
       },
       data: {
@@ -210,29 +203,19 @@ define(function () {
     $stateProvider.state('home.admin.studies.study.collection', {
       url: '/collection',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        collectionDto: [
-          '$stateParams',
-          'CollectionDto',
-          function ($stateParams,  CollectionDto) {
-            return CollectionDto.get($stateParams.studyId);
-          }
-        ]
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'studyDetails': {
           template: [
             '<study-collection',
             '  study="vm.study"',
-            '  collection-dto="vm.collectionDto"',
             '</study-collection>',
           ].join(''),
           controller: [
             'study',
-            'collectionDto',
-            function(study, collectionDto) {
+            function(study) {
               this.study = study;
-              this.collectionDto = collectionDto;
             }
           ],
           controllerAs: 'vm'

@@ -30,12 +30,6 @@ define(function () {
 
     //--
 
-    var modalInputTypes = {
-      text: 'text',
-      email: 'email',
-      url: 'url'
-    };
-
     function updateError(err) {
       notificationsService.error(
         'Your change could not be saved: ' + err.data.message,
@@ -50,11 +44,11 @@ define(function () {
     }
 
     function updateName() {
-      modalService.modalStringInput(
-        modalInputTypes.text,
+      var name = vm.user.name;
+      modalService.modalTextInput(
         'Update user name',
         'Name',
-        vm.user.name
+        name
       ).then(function (name) {
         vm.user.updateName(name)
           .then(postUpdate('User name updated successfully.',
@@ -65,8 +59,7 @@ define(function () {
     }
 
     function updateEmail() {
-      modalService.modalStringInput(
-        modalInputTypes.email,
+      modalService.modalEmailInput(
         'Update user email',
         'Email',
         vm.user.email
@@ -80,8 +73,7 @@ define(function () {
     }
 
     function updateAvatarUrl() {
-      modalService.modalStringInput(
-        modalInputTypes.url,
+      modalService.modalUrlInput(
         'Update avatar URL',
         'Avatar URL',
         vm.user.avatarUrl

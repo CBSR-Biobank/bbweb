@@ -25,8 +25,10 @@ POST    /studies/cetypes/name/:id                              @org.biobank.cont
 POST    /studies/cetypes/description/:id                       @org.biobank.controllers.study.CeventTypeController.updateDescription(id)
 POST    /studies/cetypes/recurring/:id                         @org.biobank.controllers.study.CeventTypeController.updateRecurring(id)
 POST    /studies/cetypes/spcspec/:id                           @org.biobank.controllers.study.CeventTypeController.addSpecimenSpec(id)
+POST    /studies/cetypes/spcspec/:id/:uniqueId                 @org.biobank.controllers.study.CeventTypeController.updateSpecimenSpec(id, uniqueId)
 DELETE  /studies/cetypes/spcspec/:studyId/:id/:ver/:uniqueId   @org.biobank.controllers.study.CeventTypeController.removeSpecimenSpec(studyId, id, ver: Long, uniqueId)
 POST    /studies/cetypes/annottype/:id                         @org.biobank.controllers.study.CeventTypeController.addAnnotationType(id)
+POST    /studies/cetypes/annottype/:id/:uniqueId               @org.biobank.controllers.study.CeventTypeController.updateAnnotationType(id, uniqueId)
 DELETE  /studies/cetypes/annottype/:studyId/:id/:ver/:uniqueId @org.biobank.controllers.study.CeventTypeController.removeAnnotationType(studyId, id, ver: Long, uniqueId)
 
 # processing types
@@ -51,6 +53,7 @@ GET     /studies/:id                            @org.biobank.controllers.study.S
 POST    /studies/name/:id                       @org.biobank.controllers.study.StudiesController.updateName(id)
 POST    /studies/description/:id                @org.biobank.controllers.study.StudiesController.updateDescription(id)
 POST    /studies/pannottype/:id                 @org.biobank.controllers.study.StudiesController.addAnnotationType(id)
+POST    /studies/pannottype/:id/:uniqueId       @org.biobank.controllers.study.StudiesController.updateAnnotationType(id, uniqueId)
 DELETE  /studies/pannottype/:id/:ver/:uniqueId  @org.biobank.controllers.study.StudiesController.removeAnnotationType(id, ver: Long, uniqueId)
 POST    /studies/enable/:id                     @org.biobank.controllers.study.StudiesController.enable(id)
 POST    /studies/disable/:id                    @org.biobank.controllers.study.StudiesController.disable(id)

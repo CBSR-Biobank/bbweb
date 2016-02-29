@@ -56,7 +56,11 @@ class CeventTypeController @javaxInject() (val authToken:      AuthToken,
 
   def addAnnotationType(id: String) =
     commandAction(Json.obj("id" -> id)) {
-        cmd: AddCollectionEventTypeAnnotationTypeCmd => processCommand(cmd) }
+        cmd: CollectionEventTypeAddAnnotationTypeCmd => processCommand(cmd) }
+
+  def updateAnnotationType(id: String, uniqueId: String) =
+    commandAction(Json.obj("id" -> id, "uniqueId" -> uniqueId)) {
+        cmd: CollectionEventTypeUpdateAnnotationTypeCmd => processCommand(cmd) }
 
   def removeAnnotationType(studyId: String, id: String, ver: Long, uniqueId: String) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
@@ -72,6 +76,10 @@ class CeventTypeController @javaxInject() (val authToken:      AuthToken,
   def addSpecimenSpec(id: String) =
     commandAction(Json.obj("id" -> id)) {
       cmd: AddCollectionSpecimenSpecCmd => processCommand(cmd) }
+
+  def updateSpecimenSpec(id: String, uniqueId: String) =
+    commandAction(Json.obj("id" -> id, "uniqueId" -> uniqueId)) {
+      cmd: UpdateCollectionSpecimenSpecCmd => processCommand(cmd) }
 
   def removeSpecimenSpec(studyId: String, id: String, ver: Long, uniqueId: String) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>

@@ -35,9 +35,9 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
         'id':              { 'type': 'string' },
         'version':         { 'type': 'integer', 'minimum': 0 },
         'timeAdded':       { 'type': 'string' },
-        'timeModified':    { 'type': 'string' },
+        'timeModified':    { 'type': [ 'string', 'null' ] },
         'name':            { 'type': 'string' },
-        'description':     { 'type': 'string' },
+        'description':     { 'type': [ 'string', 'null' ] },
         'annotationTypes': { 'type': 'array' },
         'status':          { 'type': 'string' }
       },
@@ -189,6 +189,13 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
       return ConcurrencySafeEntity.prototype.update.call(
         this,
         uri('pannottype', this.id),
+        _.omit(annotationType, 'uniqueId'));
+    };
+
+    Study.prototype.updateAnnotationType = function (annotationType) {
+      return ConcurrencySafeEntity.prototype.update.call(
+        this,
+        uri('pannottype', this.id) + '/' + annotationType.uniqueId,
         _.omit(annotationType, 'uniqueId'));
     };
 

@@ -13,163 +13,110 @@ define([
   'use strict';
 
   describe('Controller: LocationEditCtrl', function() {
-    var Centre, Location, jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (_Centre_,
-                                _Location_,
-                                jsonEntities) {
-      Centre       = _Centre_;
-      Location     = _Location_;
-      jsonEntities = jsonEntities;
+    beforeEach(inject(function ($state) {
+      var self = this;
+
+      self.$state       = self.$injector.get('$state');
+      self.Centre       = self.$injector.get('Centre');
+      self.Location     = self.$injector.get('Location');
+      self.jsonEntities = self.$injector.get('jsonEntities');
+
+      self.centre = new self.Centre(self.jsonEntities.centre());
+      self.location = new self.Location();
+
+      self.currentState = {
+        current: { name: 'home.admin.centres.centre.locationAdd'}
+      };
+
+      self.returnState = {
+        name: 'home.admin.centres.centre.locations',
+        params: {}
+      };
+
+      self.createController = setupController();
+
+      //--
+
+      function setupController() {
+        var $rootScope           = self.$injector.get('$rootScope'),
+            $controller          = self.$injector.get('$controller'),
+            domainEntityService  = self.$injector.get('domainEntityService'),
+            notificationsService = self.$injector.get('notificationsService');
+
+        return create;
+
+        //--
+
+        function create(location) {
+          self.scope = $rootScope.$new();
+
+          $controller('LocationEditCtrl as vm', {
+            $scope:               self.scope,
+            $state:               $state,
+            Location:             self.Location,
+            domainEntityService:  domainEntityService,
+            notificationsService: notificationsService,
+            centre:               self.centre
+          });
+          self.scope.$digest();
+        }
+      }
+
     }));
 
-    describe('when adding a location', function() {
-      var context = {};
-
-      beforeEach(function() {
-        context.centre = new Centre(jsonEntities.centre());
-        context.location = new Location();
-        context.titleContains = 'Add';
-        context.currentState = {
-          current: { name: 'home.admin.centres.centre.locationAdd'}
-        };
-        context.returnState = {
-          name: 'home.admin.centres.centre.locations',
-          params: {}
-        };
-      });
-
-      sharedBehaviour(context);
+    it('scope should be valid', function() {
+      this.createController(this.location);
+      expect(this.scope.vm.centre).toBe(this.centre);
+      expect(this.scope.vm.location).toEqual(this.location);
     });
 
-    describe('when updating a location', function() {
-
-      var context = {};
-
-      beforeEach(function() {
-        context.centre = new Centre(jsonEntities.centre());
-        context.location = new Location(jsonEntities.location());
-
-        context.centre.locations.push(context.location);
-
-        context.titleContains = 'Update';
-        context.currentState = {
-          current: { name: 'home.admin.centres.centre.locationUpdate'},
-          params: { locationId: context.location.id }
-        };
-        context.returnState = {
-          name: 'home.admin.centres.centre.locations',
-          params: {}
-        };
-      });
-
-      sharedBehaviour(context);
-
+    it('should return to valid state on cancel', function() {
+      this.createController(this.location);
+      spyOn(this.$state, 'go').and.callFake(function () {} );
+      this.scope.vm.cancel();
+      expect(this.$state.go).toHaveBeenCalledWith(this.returnState.name,
+                                                  this.returnState.params,
+                                                  { reload: false });
     });
 
-    function sharedBehaviour(context) {
+    it('should display failure information on invalid submit', function() {
+      var $q                  = this.$injector.get('$q'),
+          domainEntityService = this.$injector.get('domainEntityService');
 
-      describe('(shared)', function () {
+      this.createController(this.location);
 
-        var centre, location, state, titleContains, currentState, returnState, createController;
-
-        function setupController(injector) {
-          var $rootScope           = injector.get('$rootScope'),
-              $controller          = injector.get('$controller'),
-              Location             = injector.get('Location'),
-              domainEntityService  = injector.get('domainEntityService'),
-              notificationsService = injector.get('notificationsService');
-
-          return create;
-
-          //--
-
-          function create(location) {
-            var scope = $rootScope.$new();
-
-            $controller('LocationEditCtrl as vm', {
-              $scope:               scope,
-              $state:               state,
-              Location:             Location,
-              domainEntityService:  domainEntityService,
-              notificationsService: notificationsService,
-              centre:               centre
-            });
-            scope.$digest();
-            return scope;
-          }
-        }
-
-        beforeEach(inject(function ($injector) {
-          centre = context.centre;
-          location = context.location;
-          titleContains = context.titleContains;
-          currentState = context.currentState;
-          returnState = context.returnState;
-          createController = setupController($injector);
-
-          state = currentState;
-          state.go = function () {};
-        }));
-
-        it('scope should be valid', function() {
-          var scope = createController(location);
-
-          expect(scope.vm.centre).toBe(centre);
-          expect(scope.vm.location).toEqual(location);
-          expect(scope.vm.title).toContain(titleContains);
-        });
-
-        it('should return to valid state on cancel', function() {
-          var scope = createController(location);
-
-          spyOn(state, 'go').and.callFake(function () {} );
-          scope.vm.cancel();
-          expect(state.go).toHaveBeenCalledWith(returnState.name,
-                                                 returnState.params,
-                                                 { reload: false });
-        });
-
-        it('should display failure information on invalid submit', function() {
-          var $q                  = this.$injector.get('$q'),
-              domainEntityService = this.$injector.get('domainEntityService'),
-              scope               = createController(location);
-
-          spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
-          spyOn(Centre.prototype, 'addLocation').and.callFake(function () {
-            var deferred = $q.defer();
-            deferred.reject('err');
-            return deferred.promise;
-          });
-
-          scope.vm.submit(location);
-          scope.$digest();
-          expect(domainEntityService.updateErrorModal)
-            .toHaveBeenCalledWith('err', 'location');
-        });
-
-
-        it('should return to valid state on submit', function() {
-          var $q     = this.$injector.get('$q'),
-              scope  = createController(location);
-
-          spyOn(state, 'go').and.callFake(function () {} );
-          spyOn(Centre.prototype, 'addLocation').and.callFake(function () {
-            return $q.when('test');
-          });
-
-          scope.vm.submit(location);
-          scope.$digest();
-          expect(state.go).toHaveBeenCalledWith(returnState.name,
-                                                returnState.params,
-                                                { reload: true });
-        });
-
+      spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
+      spyOn(this.Centre.prototype, 'addLocation').and.callFake(function () {
+        var deferred = $q.defer();
+        deferred.reject('err');
+        return deferred.promise;
       });
 
-    }
+      this.scope.vm.submit(this.location);
+      this.scope.$digest();
+      expect(domainEntityService.updateErrorModal)
+        .toHaveBeenCalledWith('err', 'location');
+    });
+
+
+    it('should return to valid state on submit', function() {
+      var $q = this.$injector.get('$q');
+
+      this.createController(this.location);
+      spyOn(this.$state, 'go').and.callFake(function () {} );
+      spyOn(this.Centre.prototype, 'addLocation').and.callFake(function () {
+        return $q.when('test');
+      });
+
+      this.scope.vm.submit(this.location);
+      this.scope.$digest();
+      expect(this.$state.go).toHaveBeenCalledWith(this.returnState.name,
+                                                  this.returnState.params,
+                                                  { reload: true });
+    });
 
   });
 

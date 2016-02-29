@@ -9,143 +9,104 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
   describe('Controller: StudyEditCtrl', function() {
 
-    var Study, jsonEntities;
-
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function (_Study_, jsonEntities) {
-      Study = _Study_;
-      jsonEntities = jsonEntities;
+      var self = this;
+
+      self.Study        = self.$injector.get('Study');
+      self.jsonEntities = self.$injector.get('jsonEntities');
+
+      self.study = new this.Study();
+      self.titleContains = 'Add';
+      self.returnState = {
+        name: 'home.admin.studies',
+        params: {}
+      };
+
+      self.createController = setupController();
+
+      //--
+
+      function setupController() {
+        var $rootScope           = self.$injector.get('$rootScope'),
+            $controller          = self.$injector.get('$controller'),
+            $state               = self.$injector.get('$state'),
+            notificationsService = self.$injector.get('notificationsService'),
+            domainEntityService  = self.$injector.get('domainEntityService');
+
+        return create;
+
+        //--
+
+        function create(study) {
+          self.scope = $rootScope.$new();
+          $controller('StudyEditCtrl as vm', {
+            $scope:               self.scope,
+            $state:               $state,
+            notificationsService: notificationsService,
+            domainEntityService:  domainEntityService,
+            study:                study
+          });
+          self.scope.$digest();
+        }
+      }
     }));
 
-    describe('when adding a study', function() {
-      var context = {};
-
-      beforeEach(function() {
-        context.study = new Study();
-        context.titleContains = 'Add';
-        context.returnState = {
-          name: 'home.admin.studies',
-          params: {}
-        };
-      });
-
-      sharedBehaviour(context);
+   it('should contain valid settings to update a study', function() {
+      this.createController(this.study);
+      expect(this.scope.vm.study).toEqual(this.study);
+      expect(this.scope.vm.returnState.name).toBe(this.returnState.name);
+      expect(this.scope.vm.returnState.params).toEqual(this.returnState.params);
     });
 
-    describe('when updating a study', function() {
+    it('should return to valid state on cancel', function() {
+      var $state = this.$injector.get('$state');
 
-      var context = {};
-
-      beforeEach(function() {
-        context.study = new Study(jsonEntities.study());
-        context.titleContains = 'Update';
-        context.returnState = {
-          name: 'home.admin.studies.study.summary',
-          params: {studyId: context.study.id}
-        };
-      });
-
-      sharedBehaviour(context);
-
+      this.createController(this.study);
+      spyOn($state, 'go').and.callFake(function () {} );
+      this.scope.vm.cancel();
+      expect($state.go).toHaveBeenCalledWith(this.returnState.name,
+                                             this.returnState.params,
+                                             { reload: false });
     });
 
-    function sharedBehaviour(context) {
+    it('should return to valid state on invalid submit', function() {
+      var $q                  = this.$injector.get('$q'),
+          domainEntityService = this.$injector.get('domainEntityService');
 
-      describe('(shared)', function () {
+      this.createController(this.study);
 
-        var study, titleContains, returnState, createController;
-
-        function setupController(injector) {
-          var $rootScope           = injector.get('$rootScope'),
-              $controller          = injector.get('$controller'),
-              $state               = injector.get('$state'),
-              notificationsService = injector.get('notificationsService'),
-              domainEntityService  = injector.get('domainEntityService');
-
-          return create;
-
-          //--
-
-          function create(study) {
-            var scope = $rootScope.$new();
-            $controller('StudyEditCtrl as vm', {
-              $scope:               scope,
-              $state:               $state,
-              notificationsService: notificationsService,
-              domainEntityService:  domainEntityService,
-              study:                study
-            });
-            scope.$digest();
-            return scope;
-          }
-        }
-
-        beforeEach(inject(function ($injector) {
-          study = context.study;
-          titleContains = context.titleContains;
-          returnState = context.returnState;
-          createController = setupController($injector);
-        }));
-
-        it('should contain valid settings to update a study', function() {
-          var scope = createController(study);
-
-          expect(scope.vm.study).toEqual(study);
-          expect(scope.vm.title).toContain(titleContains);
-          expect(scope.vm.returnState.name).toBe(returnState.name);
-          expect(scope.vm.returnState.params).toEqual(returnState.params);
-        });
-
-        it('should return to valid state on cancel', function() {
-          var $state = this.$injector.get('$state'),
-              scope = createController(study);
-          spyOn($state, 'go').and.callFake(function () {} );
-          scope.vm.cancel();
-          expect($state.go).toHaveBeenCalledWith(returnState.name,
-                                                 returnState.params,
-                                                 { reload: false });
-        });
-
-        it('should return to valid state on invalid submit', function() {
-          var $q                  = this.$injector.get('$q'),
-              domainEntityService = this.$injector.get('domainEntityService'),
-              scope               = createController(study);
-
-          spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
-          spyOn(Study.prototype, 'addOrUpdate').and.callFake(function () {
-            var deferred = $q.defer();
-            deferred.reject('err');
-            return deferred.promise;
-          });
-
-          scope.vm.submit(study);
-          scope.$digest();
-          expect(domainEntityService.updateErrorModal)
-            .toHaveBeenCalledWith('err', 'study');
-        });
-
-
-        it('should return to valid state on submit', function() {
-          var $q     = this.$injector.get('$q'),
-              $state = this.$injector.get('$state'),
-              scope  = createController(study);
-
-          spyOn($state, 'go').and.callFake(function () {} );
-          spyOn(Study.prototype, 'addOrUpdate').and.callFake(function () {
-            return $q.when('test');
-          });
-
-          scope.vm.submit(study);
-          scope.$digest();
-          expect($state.go).toHaveBeenCalledWith(returnState.name,
-                                                 returnState.params,
-                                                 { reload: true });
-        });
-
+      spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
+      spyOn(this.Study.prototype, 'add').and.callFake(function () {
+        var deferred = $q.defer();
+        deferred.reject('err');
+        return deferred.promise;
       });
 
-    }
+      this.scope.vm.submit(this.study);
+      this.scope.$digest();
+      expect(domainEntityService.updateErrorModal)
+        .toHaveBeenCalledWith('err', 'study');
+    });
+
+
+    it('should return to valid state on submit', function() {
+      var $q     = this.$injector.get('$q'),
+          $state = this.$injector.get('$state');
+
+      this.createController(this.study);
+      spyOn($state, 'go').and.callFake(function () {} );
+      spyOn(this.Study.prototype, 'add').and.callFake(function () {
+        return $q.when('test');
+      });
+
+      this.scope.vm.submit(this.study);
+      this.scope.$digest();
+      expect($state.go).toHaveBeenCalledWith(this.returnState.name,
+                                             this.returnState.params,
+                                             { reload: true });
+    });
 
   });
 

@@ -57,18 +57,6 @@ case class AnnotationType(uniqueId:      String,
         |  required:              $required
         |}""".stripMargin
 
-  // TODO: annotationTypeRefactor implement these
-  //
-  // def withName(name: String): DomainValidation[AnnotationType]
-
-  // def withDescription(description: Option[String]): DomainValidation[AnnotationType]
-
-  // def withValueType(valueType: AnnotationValueType): DomainValidation[AnnotationType]
-
-  // def withSelect(maxValueCount: Option[Int], options: Seq[String]): DomainValidation[AnnotationType]
-
-  // def withRequired(required: Boolean): DomainValidation[AnnotationType]
-
 }
 
 trait AnnotationTypeValidations {

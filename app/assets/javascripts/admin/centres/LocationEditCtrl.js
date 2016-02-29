@@ -26,15 +26,8 @@ define(['underscore'], function(_) {
 
     vm.centre = centre;
     vm.returnStateName = 'home.admin.centres.centre.locations';
-
-    if ($state.current.name === 'home.admin.centres.centre.locationAdd') {
-      vm.location = new Location();
-      vm.title =  'Add Location';
-    } else {
-      vm.location = _.findWhere(centre.locations, { id: $state.params.locationId });
-      vm.title = 'Update Location';
-    }
-
+    vm.location = new Location();
+    vm.title =  'Add Location';
     vm.submit = submit;
     vm.cancel = cancel;
 

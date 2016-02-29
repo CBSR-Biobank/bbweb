@@ -49,23 +49,15 @@ object Centre {
 
   implicit val centreWrites = new Writes[Centre] {
       def writes(centre: Centre) = {
-        var json = Json.obj("id"        -> centre.id,
-                            "version"   -> centre.version,
-                            "timeAdded" -> centre.timeAdded,
-                            "name"      -> centre.name,
-                            "studyIds"  -> centre.studyIds,
-                            "locations" -> centre.locations,
-                            "status"    -> centre.getClass.getSimpleName)
-
-        if (centre.description.isDefined) {
-          json = json ++ Json.obj("description" -> centre.description)
-        }
-
-        if (centre.timeModified.isDefined) {
-          json = json ++ Json.obj("timeModified" -> centre.timeModified)
-        }
-
-        json
+        Json.obj("id"           -> centre.id,
+                 "version"      -> centre.version,
+                 "timeAdded"    -> centre.timeAdded,
+                 "timeModified" -> centre.timeModified,
+                 "name"         -> centre.name,
+                 "description"  -> centre.description,
+                 "studyIds"     -> centre.studyIds,
+                 "locations"    -> centre.locations,
+                 "status"       -> centre.getClass.getSimpleName)
       }
   }
 

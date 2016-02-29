@@ -11,6 +11,9 @@ define(function () {
   function studyNotDisabledWarningDirective() {
     var directive = {
       restrict: 'E',
+      scope: {
+        study: '='
+      },
       templateUrl : '/assets/javascripts/admin/studies/directives/studyNotDisabledWarning/studyNotDisabledWarning.html'
     };
     return directive;

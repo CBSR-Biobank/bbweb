@@ -16,16 +16,14 @@ define(function () {
       var ev = new EntityViewer(annotationType, title);
 
       ev.addAttribute('Name', annotationType.name);
-      ev.addAttribute('Type', annotationType.valueType);
       ev.addAttribute('Required', annotationType.required ? 'Yes' : 'No');
 
+      ev.addAttribute('Type', annotationType.getType());
       if (annotationType.isValueTypeSelect()) {
         if (!annotationType.options || annotationType.options.length < 1) {
           throw new Error('invalid annotation type options');
         }
 
-        ev.addAttribute('Selections Allowed',
-                        annotationType.isSingleSelect() ? 'Single' : 'Multiple');
         ev.addAttribute('Selections', annotationType.options.join(', '));
       }
 

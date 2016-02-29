@@ -64,6 +64,7 @@ class StudiesProcessor @javax.inject.Inject() (
       case et: StudyEvent2.EventType.NameUpdated           => applyStudyNameUpdatedEvent(event)
       case et: StudyEvent2.EventType.DescriptionUpdated    => applyStudyDescriptionUpdatedEvent(event)
       case et: StudyEvent2.EventType.AnnotationTypeAdded   => applyParticipantAnnotationTypeAddedEvent(event)
+      case et: StudyEvent2.EventType.AnnotationTypeUpdated => applyParticipantAnnotationTypeUpdatedEvent(event)
       case et: StudyEvent2.EventType.AnnotationTypeRemoved => applyParticipantAnnotationTypeRemovedEvent(event)
       case et: StudyEvent2.EventType.Enabled               => applyStudyEnabledEvent(event)
       case et: StudyEvent2.EventType.Disabled              => applyStudyDisabledEvent(event)
@@ -93,17 +94,18 @@ class StudiesProcessor @javax.inject.Inject() (
    *  - [[StudyAnnotationTypeProcessor]]
    */
   val receiveCommand: Receive = {
-    case cmd: StudyCommandWithStudyId            => validateAndForward(cmd)
-    case cmd: SpecimenLinkTypeCommand            => validateAndForward(cmd)
-    case cmd: AddStudyCmd                        => processAddStudyCmd(cmd)
-    case cmd: UpdateStudyNameCmd                 => processUpdateStudyNameCmd(cmd)
-    case cmd: UpdateStudyDescriptionCmd          => processUpdateStudyDescriptionCmd(cmd)
-    case cmd: UpdateStudyAddAnnotationTypeCmd    => processAddAnnotationTypeCmd(cmd)
-    case cmd: UpdateStudyRemoveAnnotationTypeCmd => processRemoveAnnotationTypeCmd(cmd)
-    case cmd: EnableStudyCmd                     => processEnableStudyCmd(cmd)
-    case cmd: DisableStudyCmd                    => processDisableStudyCmd(cmd)
-    case cmd: RetireStudyCmd                     => processRetireStudyCmd(cmd)
-    case cmd: UnretireStudyCmd                   => processUnretireStudyCmd(cmd)
+    case cmd: StudyCommandWithStudyId                 => validateAndForward(cmd)
+    case cmd: SpecimenLinkTypeCommand                 => validateAndForward(cmd)
+    case cmd: AddStudyCmd                             => processAddStudyCmd(cmd)
+    case cmd: UpdateStudyNameCmd                      => processUpdateStudyNameCmd(cmd)
+    case cmd: UpdateStudyDescriptionCmd               => processUpdateStudyDescriptionCmd(cmd)
+    case cmd: StudyAddParticipantAnnotationTypeCmd    => processAddAnnotationTypeCmd(cmd)
+    case cmd: StudyUpdateParticipantAnnotationTypeCmd => processUpdateAnnotationTypeCmd(cmd)
+    case cmd: UpdateStudyRemoveAnnotationTypeCmd      => processRemoveAnnotationTypeCmd(cmd)
+    case cmd: EnableStudyCmd                          => processEnableStudyCmd(cmd)
+    case cmd: DisableStudyCmd                         => processDisableStudyCmd(cmd)
+    case cmd: RetireStudyCmd                          => processRetireStudyCmd(cmd)
+    case cmd: UnretireStudyCmd                        => processUnretireStudyCmd(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(studyRepository.getValues.toSet))
@@ -198,11 +200,10 @@ class StudiesProcessor @javax.inject.Inject() (
     process(v){ applyStudyDescriptionUpdatedEvent(_) }
   }
 
-  private def processAddAnnotationTypeCmd(cmd: UpdateStudyAddAnnotationTypeCmd): Unit = {
+  private def processAddAnnotationTypeCmd(cmd: StudyAddParticipantAnnotationTypeCmd): Unit = {
     val v = updateDisabled(cmd) { study =>
         for {
           annotationType <- {
-            // need to call AnnotationType.create so that a new uniqueId is generated
             AnnotationType.create(cmd.name,
                                   cmd.description,
                                   cmd.valueType,
@@ -211,14 +212,41 @@ class StudiesProcessor @javax.inject.Inject() (
                                   cmd.required)
           }
           updatedStudy <- study.withParticipantAnnotationType(annotationType)
-        } yield StudyEvent2(study.id.id).update(
-          _.optionalUserId                     := cmd.userId,
-          _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.annotationTypeAdded.version        := cmd.expectedVersion,
-          _.annotationTypeAdded.annotationType := EventUtils.annotationTypeToEvent(annotationType))
+        } yield {
+          StudyEvent2(study.id.id).update(
+            _.optionalUserId                     := cmd.userId,
+            _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
+            _.annotationTypeAdded.version        := cmd.expectedVersion,
+            _.annotationTypeAdded.annotationType := EventUtils.annotationTypeToEvent(annotationType))
+          }
       }
 
     process(v){ applyParticipantAnnotationTypeAddedEvent(_) }
+  }
+
+  private def processUpdateAnnotationTypeCmd(cmd: StudyUpdateParticipantAnnotationTypeCmd): Unit = {
+    val v = updateDisabled(cmd) { study =>
+        for {
+          annotationType <- {
+            AnnotationType(cmd.uniqueId,
+                           cmd.name,
+                           cmd.description,
+                           cmd.valueType,
+                           cmd.maxValueCount,
+                           cmd.options,
+                           cmd.required).success
+          }
+          updatedStudy <- study.withParticipantAnnotationType(annotationType)
+        } yield {
+          StudyEvent2(study.id.id).update(
+            _.optionalUserId                       := cmd.userId,
+            _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
+            _.annotationTypeUpdated.version        := cmd.expectedVersion,
+            _.annotationTypeUpdated.annotationType := EventUtils.annotationTypeToEvent(annotationType))
+          }
+      }
+
+    process(v){ applyParticipantAnnotationTypeUpdatedEvent(_) }
   }
 
   private def processRemoveAnnotationTypeCmd(cmd: UpdateStudyRemoveAnnotationTypeCmd): Unit = {
@@ -437,6 +465,30 @@ class StudiesProcessor @javax.inject.Inject() (
                                         event.eventType.isAnnotationTypeAdded,
                                         event.getAnnotationTypeAdded.getVersion) { study =>
       val eventAnnotationType = event.getAnnotationTypeAdded.getAnnotationType
+
+      study.withParticipantAnnotationType(
+        AnnotationType(eventAnnotationType.getUniqueId,
+                       eventAnnotationType.getName,
+                       eventAnnotationType.description,
+                       AnnotationValueType.withName(eventAnnotationType.getValueType),
+                       eventAnnotationType.maxValueCount,
+                       eventAnnotationType.options,
+                       eventAnnotationType.getRequired)).fold(
+        err => log.error(s"updating study from event failed: $err"),
+        s => {
+          studyRepository.put(
+            s.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
+          ()
+        }
+      )
+    }
+  }
+
+  private def applyParticipantAnnotationTypeUpdatedEvent(event: StudyEvent2) : Unit = {
+    onValidEventDisabledStudyAndVersion(event,
+                                        event.eventType.isAnnotationTypeUpdated,
+                                        event.getAnnotationTypeUpdated.getVersion) { study =>
+      val eventAnnotationType = event.getAnnotationTypeUpdated.getAnnotationType
 
       study.withParticipantAnnotationType(
         AnnotationType(eventAnnotationType.getUniqueId,

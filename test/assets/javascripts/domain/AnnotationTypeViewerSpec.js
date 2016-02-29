@@ -9,207 +9,128 @@ define([
   'angularMocks',
   'underscore',
   'biobankApp'
-], function(angular,
-            mocks,
-            _) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('AnnotationTypeViewer', function() {
 
-    var Study,
-        ParticipantAnnotationType,
-        CollectionEventAnnotationType,
-        SpecimenLinkAnnotationType,
-        AnnotationValueType,
-        jsonEntities;
-
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(_Study_,
-                               _ParticipantAnnotationType_,
-                               _CollectionEventAnnotationType_,
-                               _SpecimenLinkAnnotationType_,
-                               _AnnotationValueType_,
-                               jsonEntities) {
-      Study                         = _Study_;
-      ParticipantAnnotationType     = _ParticipantAnnotationType_;
-      CollectionEventAnnotationType = _CollectionEventAnnotationType_;
-      SpecimenLinkAnnotationType    = _SpecimenLinkAnnotationType_;
-      AnnotationValueType           = _AnnotationValueType_;
-      jsonEntities                  = jsonEntities;
+    beforeEach(inject(function() {
+      this.modal                = this.$injector.get('$uibModal');
+      this.Study                = this.$injector.get('Study');
+      this.AnnotationType       = this.$injector.get('AnnotationType');
+      this.AnnotationValueType  = this.$injector.get('AnnotationValueType');
+      this.AnnotationTypeViewer = this.$injector.get('AnnotationTypeViewer');
+      this.jsonEntities         = this.$injector.get('jsonEntities');
+
+      this.study = new this.Study(this.jsonEntities.study());
+
+      this.annotatationTypeOptions = [
+        { valueType: this.AnnotationValueType.TEXT()      },
+        { valueType: this.AnnotationValueType.NUMBER()    },
+        { valueType: this.AnnotationValueType.DATE_TIME() },
+        { valueType: this.AnnotationValueType.SELECT(),   maxValueCount: 1 },
+        { valueType: this.AnnotationValueType.SELECT(),   maxValueCount: 2 }
+      ];
     }));
 
-    describe('for Participant Annotation Types', function() {
-      var context = {};
+    it('should open a modal when created', inject(function (testUtils) {
+      var self = this,
+          count = 0;
 
-      beforeEach(function () {
-        var study = new Study(jsonEntities.study());
+      spyOn(self.modal, 'open').and.callFake(function () { return testUtils.fakeModal(); });
 
-        context.annotationTypeType = ParticipantAnnotationType;
-        context.createAnnotationType = function (options) {
-          return new ParticipantAnnotationType(
-            jsonEntities.studyAnnotationType(study, options));
-        };
-
+      _.each(this.annotatationTypeOptions, function (options) {
+        // jshint unused:false
+        var annotationType = new self.AnnotationType(self.jsonEntities.annotationType(options)).
+            viewer = new self.AnnotationTypeViewer(annotationType);
+        count++;
+        expect(self.modal.open.calls.count()).toBe(count);
       });
+    }));
 
-      sharedBehaviour(context);
+    it('should throw an error when created when it has no options', function() {
+      var self = this,
+          annotationType = new this.AnnotationType(
+            self.jsonEntities.annotationType({
+              valueType: self.AnnotationValueType.SELECT(),
+              options: []
+            }));
+
+      expect(function () { return new self.AnnotationTypeViewer(annotationType); })
+        .toThrow(new Error('invalid annotation type options'));
     });
 
-    describe('for Collection Event Annotation Types', function() {
-      var context = {};
+    it('should display valid attributes for all value types', function() {
+      var self = this,
+          EntityViewer = this.$injector.get('EntityViewer'),
+          attributes = [];
 
-      beforeEach(function () {
-        var study = new Study(jsonEntities.study());
-
-        context.annotationTypeType = CollectionEventAnnotationType;
-        context.createAnnotationType = function (options) {
-          return new CollectionEventAnnotationType(
-            jsonEntities.studyAnnotationType(study, options));
-        };
-
+      spyOn(EntityViewer.prototype, 'addAttribute').and.callFake(function (label, value) {
+        attributes.push({label: label, value: value});
       });
 
-      sharedBehaviour(context);
-    });
+      _.each(self.annotatationTypeOptions, function (options) {
+        var annotationType, viewer, numAttributesExpected = 4;
 
-    describe('for Specimen Link Annotation Types', function() {
-      var context = {};
+        attributes = [];
 
-      beforeEach(function () {
-        var study = new Study(jsonEntities.study());
+        annotationType = new self.AnnotationType(self.jsonEntities.annotationType(options));
+        viewer = new self.AnnotationTypeViewer(annotationType);
 
-        context.annotationTypeType = SpecimenLinkAnnotationType;
-        context.createAnnotationType = function (options) {
-          return new SpecimenLinkAnnotationType(
-            jsonEntities.studyAnnotationType(study, options));
-        };
+        if (annotationType.isValueTypeSelect()) {
+          numAttributesExpected += 2;
+        }
 
-      });
+        expect(attributes).toBeArrayOfSize(numAttributesExpected);
 
-      sharedBehaviour(context);
-    });
+        _.each(attributes, function(attr) {
+          switch (attr.label) {
+          case 'Name':
+            expect(attr.value).toBe(annotationType.name);
+            break;
 
-    function sharedBehaviour(context) {
+          case 'Type':
+            expect(attr.value).toBe(annotationType.valueType);
+            break;
 
-      var modal, AnnotationTypeViewer, annotationTypeType, createAnnotationType, annotatationTypeOptions;
-
-      describe('(shared)', function() {
-
-        beforeEach(inject(function($uibModal, _AnnotationTypeViewer_) {
-          modal                = $uibModal;
-          AnnotationTypeViewer = _AnnotationTypeViewer_;
-
-          annotationTypeType = context.annotationTypeType;
-          createAnnotationType = context.createAnnotationType;
-
-          annotatationTypeOptions = [
-            { valueType: AnnotationValueType.TEXT()      },
-            { valueType: AnnotationValueType.NUMBER()    },
-            { valueType: AnnotationValueType.DATE_TIME() },
-            { valueType: AnnotationValueType.SELECT(),   maxValueCount: 1 },
-            { valueType: AnnotationValueType.SELECT(),   maxValueCount: 2 }
-          ];
-        }));
-
-        it('should open a modal when created', inject(function (testUtils) {
-          var count = 0;
-
-          spyOn(modal, 'open').and.callFake(function () { return testUtils.fakeModal(); });
-
-          _.each(annotatationTypeOptions, function (options) {
-            // jshint unused:false
-            var annotationType = createAnnotationType(options);
-            var viewer = new AnnotationTypeViewer(annotationType);
-
-            count++;
-            expect(modal.open.calls.count()).toBe(count);
-          });
-        }));
-
-        it('should throw an error when created when it has no options', function() {
-          var annotationType = createAnnotationType({
-            valueType: AnnotationValueType.SELECT(),
-            options: []
-          });
-          expect(function () { return new AnnotationTypeViewer(annotationType); })
-            .toThrow(new Error('invalid annotation type options'));
-        });
-
-        it('should display valid attributes for all value types', function() {
-          var EntityViewer = this.$injector.get('EntityViewer');
-          var attributes = [];
-
-          spyOn(EntityViewer.prototype, 'addAttribute').and.callFake(function (label, value) {
-            attributes.push({label: label, value: value});
-          });
-
-          _.each(annotatationTypeOptions, function (options) {
-            var annotationType, viewer, numAttributesExpected = 3;
-
-            if (annotationTypeType === ParticipantAnnotationType) {
-              numAttributesExpected++;
+          case 'Required':
+            if (!_.isUndefined(annotationType.required)) {
+              expect(attr.value).toBe(annotationType.required ? 'Yes' : 'No');
+            } else {
+              jasmine.getEnv().fail('annotation type does not have a required attribute');
             }
+            break;
 
-            attributes = [];
-
-            annotationType = createAnnotationType(options);
-            viewer = new AnnotationTypeViewer(annotationType);
-
-            if (annotationType.isValueTypeSelect()) {
-              numAttributesExpected += 2;
+          case 'Selections Allowed':
+            if (annotationType.valueType === self.AnnotationValueType.SELECT()) {
+              expect(attr.value).toBe(annotationType.maxValueCount === 1 ? 'Single' : 'Multiple');
+            } else {
+              jasmine.getEnv().fail('not a select annotation type' + annotationType.valueType);
             }
+            break;
 
-            expect(attributes).toBeArrayOfSize(numAttributesExpected);
+          case 'Selections':
+            if (annotationType.valueType === self.AnnotationValueType.SELECT()) {
+              expect(attr.value).toBe(annotationType.options.join(', '));
+            } else {
+              jasmine.getEnv().fail('not a select annotation type' + annotationType.valueType);
+            }
+            break;
 
-            _.each(attributes, function(attr) {
-              switch (attr.label) {
-              case 'Name':
-                expect(attr.value).toBe(annotationType.name);
-                break;
+          case 'Description':
+            expect(attr.value).toBe(annotationType.description);
+            break;
 
-              case 'Type':
-                expect(attr.value).toBe(annotationType.valueType);
-                break;
-
-              case 'Required':
-                if (!_.isUndefined(annotationType.required)) {
-                  expect(attr.value).toBe(annotationType.required ? 'Yes' : 'No');
-                } else {
-                  jasmine.getEnv().fail('annotation type does not have a required attribute');
-                }
-                break;
-
-              case 'Selections Allowed':
-                if (annotationType.valueType === AnnotationValueType.SELECT()) {
-                  expect(attr.value).toBe(annotationType.maxValueCount === 1 ? 'Single' : 'Multiple');
-                } else {
-                  jasmine.getEnv().fail('not a select annotation type' + annotationType.valueType);
-                }
-                break;
-
-              case 'Selections':
-                if (annotationType.valueType === AnnotationValueType.SELECT()) {
-                  expect(attr.value).toBe(annotationType.options.join(', '));
-                } else {
-                  jasmine.getEnv().fail('not a select annotation type' + annotationType.valueType);
-                }
-                break;
-
-              case 'Description':
-                expect(attr.value).toBe(annotationType.description);
-                break;
-
-              default:
-                jasmine.getEnv().fail('label is invalid: ' + attr.label);
-              }
-            });
-          });
+          default:
+            jasmine.getEnv().fail('label is invalid: ' + attr.label);
+          }
         });
 
       });
 
-    }
+    });
 
   });
 

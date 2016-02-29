@@ -14,8 +14,9 @@ import org.slf4j.LoggerFactory
 import org.biobank.service.Processor
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.EventUtils
-//import org.biobank.infrastructure.event.CommonEvents._
-//import org.biobank.infrastructure.event.CollectionEventTypeEvents._
+import org.biobank.infrastructure.event.CommonEvents. {
+  AnnotationType => EventAnnotationType
+}
 import akka.actor._
 import akka.persistence.{ SnapshotOffer, RecoveryCompleted }
 import org.joda.time.DateTime
@@ -64,6 +65,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
         case et: EventType.AnnotationTypeAdded   => applyAnnotationTypeAddedEvent(event)
         case et: EventType.AnnotationTypeRemoved => applyAnnotationTypeRemovedEvent(event)
         case et: EventType.SpecimenSpecAdded     => applySpecimenSpecAddedEvent(event)
+        case et: EventType.SpecimenSpecUpdated   => applySpecimenSpecUpdatedEvent(event)
         case et: EventType.SpecimenSpecRemoved   => applySpecimenSpecRemovedEvent(event)
 
         case event => log.error(s"event not handled: $event")
@@ -90,9 +92,11 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     case cmd: UpdateCollectionEventTypeNameCmd           => processUpdateNameCommand(cmd)
     case cmd: UpdateCollectionEventTypeDescriptionCmd    => processUpdateDescriptionCommand(cmd)
     case cmd: UpdateCollectionEventTypeRecurringCmd      => processUpdateRecurringCommand(cmd)
-    case cmd: AddCollectionEventTypeAnnotationTypeCmd    => processAddAnnotationTypeCommand(cmd)
+    case cmd: CollectionEventTypeAddAnnotationTypeCmd    => processAddAnnotationTypeCommand(cmd)
+    case cmd: CollectionEventTypeUpdateAnnotationTypeCmd => processUpdateAnnotationTypeCommand(cmd)
     case cmd: RemoveCollectionEventTypeAnnotationTypeCmd => processRemoveAnnotationTypeCommand(cmd)
     case cmd: AddCollectionSpecimenSpecCmd               => processAddSepcimenSpecCommand(cmd)
+    case cmd: UpdateCollectionSpecimenSpecCmd            => processUpdateSepcimenSpecCommand(cmd)
     case cmd: RemoveCollectionSpecimenSpecCmd            => processRemoveSpecimenSpecCommand(cmd)
 
     case "snap" =>
@@ -188,7 +192,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     process(v){ applyRecurringUpdatedEvent(_) }
   }
 
-  def processAddAnnotationTypeCommand(cmd: AddCollectionEventTypeAnnotationTypeCmd): Unit = {
+  def processAddAnnotationTypeCommand(cmd: CollectionEventTypeAddAnnotationTypeCmd): Unit = {
     val v = update(cmd) { cet =>
         for {
           annotationType <- {
@@ -210,6 +214,30 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       }
 
     process(v){ applyAnnotationTypeAddedEvent(_) }
+  }
+
+  def processUpdateAnnotationTypeCommand(cmd: CollectionEventTypeUpdateAnnotationTypeCmd): Unit = {
+    val v = update(cmd) { cet =>
+        for {
+          annotationType <- {
+            AnnotationType(cmd.uniqueId,
+                           cmd.name,
+                           cmd.description,
+                           cmd.valueType,
+                           cmd.maxValueCount,
+                           cmd.options,
+                           cmd.required).success
+          }
+          updatedCet <- cet.withAnnotationType(annotationType)
+        } yield CollectionEventTypeEvent(cet.id.id).update(
+          _.studyId                              := cet.studyId.id,
+          _.optionalUserId                       := cmd.userId,
+          _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.annotationTypeUpdated.version        := cmd.expectedVersion,
+          _.annotationTypeUpdated.annotationType := EventUtils.annotationTypeToEvent(annotationType))
+      }
+
+    process(v){ applyAnnotationTypeUpdatedEvent(_) }
   }
 
   def processRemoveAnnotationTypeCommand(cmd: RemoveCollectionEventTypeAnnotationTypeCmd): Unit = {
@@ -243,23 +271,41 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
           }
           updatedCet <- cet.withSpecimenSpec(specimenSpec)
         } yield CollectionEventTypeEvent(cet.id.id).update(
-          _.studyId                                       := cet.studyId.id,
-          _.optionalUserId                                := cmd.userId,
-          _.time                                          := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.specimenSpecAdded.version                     := cmd.expectedVersion,
-          _.specimenSpecAdded.uniqueId                    := specimenSpec.uniqueId,
-          _.specimenSpecAdded.name                        := cmd.name,
-          _.specimenSpecAdded.optionalDescription         := cmd.description,
-          _.specimenSpecAdded.units                       := cmd.units,
-          _.specimenSpecAdded.anatomicalSourceType        := cmd.anatomicalSourceType.toString,
-          _.specimenSpecAdded.preservationType            := cmd.preservationType.toString,
-          _.specimenSpecAdded.preservationTemperatureType := cmd.preservationTemperatureType.toString,
-          _.specimenSpecAdded.specimenType                := cmd.specimenType.toString,
-          _.specimenSpecAdded.maxCount                    := cmd.maxCount,
-          _.specimenSpecAdded.optionalAmount              := cmd.amount.map(_.doubleValue))
+          _.studyId                        := cet.studyId.id,
+          _.optionalUserId                 := cmd.userId,
+          _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.specimenSpecAdded.version      := cmd.expectedVersion,
+          _.specimenSpecAdded.specimenSpec := EventUtils.specimenSpecToEvent(specimenSpec))
       }
 
     process(v){ applySpecimenSpecAddedEvent(_) }
+  }
+
+  def processUpdateSepcimenSpecCommand(cmd: UpdateCollectionSpecimenSpecCmd): Unit = {
+    val v = update(cmd) { cet =>
+        for {
+          specimenSpec <- {
+            CollectionSpecimenSpec(cmd.uniqueId,
+                                   cmd.name,
+                                   cmd.description,
+                                   cmd.units,
+                                   cmd.anatomicalSourceType,
+                                   cmd.preservationType,
+                                   cmd.preservationTemperatureType,
+                                   cmd.specimenType,
+                                   cmd.maxCount,
+                                   cmd.amount).success
+          }
+          updatedCet <- cet.withSpecimenSpec(specimenSpec)
+        } yield CollectionEventTypeEvent(cet.id.id).update(
+          _.studyId                          := cet.studyId.id,
+          _.optionalUserId                   := cmd.userId,
+          _.time                             := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.specimenSpecUpdated.version      := cmd.expectedVersion,
+          _.specimenSpecUpdated.specimenSpec := EventUtils.specimenSpecToEvent(specimenSpec))
+      }
+
+    process(v){ applySpecimenSpecUpdatedEvent(_) }
   }
 
   def processRemoveSpecimenSpecCommand(cmd: RemoveCollectionSpecimenSpecCmd): Unit = {
@@ -403,14 +449,24 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                            event.eventType.isAnnotationTypeAdded,
                            event.getAnnotationTypeAdded.getVersion) { cet =>
       val eventAnnotationType = event.getAnnotationTypeAdded.getAnnotationType
-      cet.withAnnotationType(
-        AnnotationType(eventAnnotationType.getUniqueId,
-                       eventAnnotationType.getName,
-                       eventAnnotationType.description,
-                       AnnotationValueType.withName(eventAnnotationType.getValueType),
-                       eventAnnotationType.maxValueCount,
-                       eventAnnotationType.options,
-                       eventAnnotationType.getRequired)).fold(
+      cet.withAnnotationType(EventUtils.annotationTypeFromEvent(eventAnnotationType)).fold(
+        err => log.error(s"updating cevent type from event failed: $err"),
+        c => {
+          collectionEventTypeRepository.put(
+            c.copy(
+              timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
+          ()
+        }
+      )
+    }
+  }
+
+  private def applyAnnotationTypeUpdatedEvent(event: CollectionEventTypeEvent): Unit = {
+    onValidEventAndVersion(event,
+                           event.eventType.isAnnotationTypeUpdated,
+                           event.getAnnotationTypeUpdated.getVersion) { cet =>
+      val eventAnnotationType = event.getAnnotationTypeUpdated.getAnnotationType
+      cet.withAnnotationType(EventUtils.annotationTypeFromEvent(eventAnnotationType)).fold(
         err => log.error(s"updating cevent type from event failed: $err"),
         c => {
           collectionEventTypeRepository.put(
@@ -443,18 +499,24 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                            event.eventType.isSpecimenSpecAdded,
                            event.getSpecimenSpecAdded.getVersion) { cet =>
       val eventSpecimenSpec = event.getSpecimenSpecAdded
-      cet.withSpecimenSpec(
-        CollectionSpecimenSpec(
-          eventSpecimenSpec.getUniqueId,
-          eventSpecimenSpec.getName,
-          eventSpecimenSpec.description,
-          eventSpecimenSpec.getUnits,
-          AnatomicalSourceType.withName(eventSpecimenSpec.getAnatomicalSourceType),
-          PreservationType.withName(eventSpecimenSpec.getPreservationType),
-          PreservationTemperatureType.withName(eventSpecimenSpec.getPreservationTemperatureType),
-          SpecimenType.withName(eventSpecimenSpec.getSpecimenType),
-          eventSpecimenSpec.getMaxCount,
-          eventSpecimenSpec.amount.map(BigDecimal(_)))).fold(
+      cet.withSpecimenSpec(EventUtils.specimenSpecFromEvent(eventSpecimenSpec.getSpecimenSpec)).fold(
+        err => log.error(s"updating cevent type from event failed: $err"),
+        c => {
+          collectionEventTypeRepository.put(
+            c.copy(
+              timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
+          ()
+        }
+      )
+    }
+  }
+
+  def applySpecimenSpecUpdatedEvent(event: CollectionEventTypeEvent): Unit = {
+    onValidEventAndVersion(event,
+                           event.eventType.isSpecimenSpecUpdated,
+                           event.getSpecimenSpecUpdated.getVersion) { cet =>
+      val eventSpecimenSpec = event.getSpecimenSpecUpdated
+      cet.withSpecimenSpec(EventUtils.specimenSpecFromEvent(eventSpecimenSpec.getSpecimenSpec)).fold(
         err => log.error(s"updating cevent type from event failed: $err"),
         c => {
           collectionEventTypeRepository.put(

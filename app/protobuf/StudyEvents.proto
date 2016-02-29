@@ -1,14 +1,6 @@
 package org.biobank.infrastructure.event;
 
-message AnnotationType {
-   optional string uniqueId      = 1;
-   optional string name          = 2;
-   optional string description   = 3;
-   optional string valueType     = 4; // a scala enum is used here
-   optional int32  maxValueCount = 5;
-   repeated string options       = 6;
-   optional bool   required      = 7;
-}
+import "CommonEvents.proto";
 
 message StudyAddedEvent {
    optional string name        = 1;
@@ -235,37 +227,36 @@ message StudyEvent {
 
       StudyDescriptionUpdatedEvent              descriptionUpdated                   =  6;
       StudyAnnotationTypeAddedEvent             annotationTypeAdded                  =  7;
-      StudyAnnotationTypeRemovedEvent           annotationTypeRemoved                =  8;
+      StudyAnnotationTypeAddedEvent             annotationTypeUpdated                =  8;
+      StudyAnnotationTypeRemovedEvent           annotationTypeRemoved                =  9;
 
-      StudyEnabledEvent                         enabled                              =  9;
-      StudyDisabledEvent                        disabled                             = 10;
-      StudyRetiredEvent                         retired                              = 11;
-      StudyUnretiredEvent                       unretired                            = 12;
-      CollectionEventAnnotationTypeAddedEvent   collectionEventAnnotationTypeAdded   = 13;
-      CollectionEventAnnotationTypeUpdatedEvent collectionEventAnnotationTypeUpdated = 14;
-      CollectionEventAnnotationTypeRemovedEvent collectionEventAnnotationTypeRemoved = 15;
-      ParticipantAnnotationTypeAddedEvent       participantAnnotationTypeAdded       = 16;
-      ParticipantAnnotationTypeUpdatedEvent     participantAnnotationTypeUpdated     = 17;
-      ParticipantAnnotationTypeRemovedEvent     participantAnnotationTypeRemoved     = 18;
-      SpecimenLinkAnnotationTypeAddedEvent      specimenLinkAnnotationTypeAdded      = 19;
-      SpecimenLinkAnnotationTypeUpdatedEvent    specimenLinkAnnotationTypeUpdated    = 20;
-      SpecimenLinkAnnotationTypeRemovedEvent    specimenLinkAnnotationTypeRemoved    = 21;
-      CollectionEventTypeAddedEvent             collectionEventTypeAdded             = 22;
-      CollectionEventTypeUpdatedEvent           collectionEventTypeUpdated           = 23;
-      CollectionEventTypeRemovedEvent           collectionEventTypeRemoved           = 24;
-      SpecimenGroupAddedEvent                   specimenGroupAdded                   = 25;
-      SpecimenGroupUpdatedEvent                 specimenGroupUpdated                 = 26;
-      SpecimenGroupRemovedEvent                 specimenGroupRemoved                 = 27;
-      ProcessingTypeAddedEvent                  processingTypeAdded                  = 28;
-      ProcessingTypeUpdatedEvent                processingTypeUpdated                = 29;
-      ProcessingTypeRemovedEvent                processingTypeRemoved                = 30;
-      SpecimenLinkTypeAddedEvent                specimenLinkTypeAdded                = 31;
-      SpecimenLinkTypeUpdatedEvent              specimenLinkTypeUpdated              = 32;
-      SpecimenLinkTypeRemovedEvent              specimenLinkTypeRemoved              = 33;
+      StudyEnabledEvent                         enabled                              = 10;
+      StudyDisabledEvent                        disabled                             = 11;
+      StudyRetiredEvent                         retired                              = 12;
+      StudyUnretiredEvent                       unretired                            = 13;
+      CollectionEventAnnotationTypeAddedEvent   collectionEventAnnotationTypeAdded   = 14;
+      CollectionEventAnnotationTypeUpdatedEvent collectionEventAnnotationTypeUpdated = 15;
+      CollectionEventAnnotationTypeRemovedEvent collectionEventAnnotationTypeRemoved = 16;
+      ParticipantAnnotationTypeAddedEvent       participantAnnotationTypeAdded       = 17;
+      ParticipantAnnotationTypeUpdatedEvent     participantAnnotationTypeUpdated     = 18;
+      ParticipantAnnotationTypeRemovedEvent     participantAnnotationTypeRemoved     = 19;
+      SpecimenLinkAnnotationTypeAddedEvent      specimenLinkAnnotationTypeAdded      = 20;
+      SpecimenLinkAnnotationTypeUpdatedEvent    specimenLinkAnnotationTypeUpdated    = 21;
+      SpecimenLinkAnnotationTypeRemovedEvent    specimenLinkAnnotationTypeRemoved    = 22;
+      CollectionEventTypeAddedEvent             collectionEventTypeAdded             = 23;
+      CollectionEventTypeUpdatedEvent           collectionEventTypeUpdated           = 24;
+      CollectionEventTypeRemovedEvent           collectionEventTypeRemoved           = 25;
+      SpecimenGroupAddedEvent                   specimenGroupAdded                   = 26;
+      SpecimenGroupUpdatedEvent                 specimenGroupUpdated                 = 27;
+      SpecimenGroupRemovedEvent                 specimenGroupRemoved                 = 28;
+      ProcessingTypeAddedEvent                  processingTypeAdded                  = 29;
+      ProcessingTypeUpdatedEvent                processingTypeUpdated                = 30;
+      ProcessingTypeRemovedEvent                processingTypeRemoved                = 31;
+      SpecimenLinkTypeAddedEvent                specimenLinkTypeAdded                = 32;
+      SpecimenLinkTypeUpdatedEvent              specimenLinkTypeUpdated              = 33;
+      SpecimenLinkTypeRemovedEvent              specimenLinkTypeRemoved              = 34;
    }
 }
-
-import "CommonEvents.proto";
 
 message StudyEvent2 {
 
@@ -301,8 +292,13 @@ message StudyEvent2 {
    }
 
    message StudyAnnotationTypeAdded {
-      optional int64               version        = 1;
-      optional AnnotationTypeAdded annotationType = 2;
+      optional int64          version        = 1;
+      optional AnnotationType annotationType = 2;
+   }
+
+   message StudyAnnotationTypeUpdated {
+      optional int64          version        = 1;
+      optional AnnotationType annotationType = 2;
    }
 
    required string id     = 1;
@@ -318,6 +314,7 @@ message StudyEvent2 {
       Retired                  retired               = 9;
       Unretired                unretired             = 10;
       StudyAnnotationTypeAdded annotationTypeAdded   = 11;
-      AnnotationTypeRemoved    annotationTypeRemoved = 12;
+      StudyAnnotationTypeAdded annotationTypeUpdated = 12;
+      AnnotationTypeRemoved    annotationTypeRemoved = 13;
    }
 }

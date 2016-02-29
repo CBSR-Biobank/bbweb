@@ -55,7 +55,7 @@ define(['underscore'], function(_) {
     }
 
     function submit(study) {
-      study.addOrUpdate()
+      study.add()
         .then(submitSuccess)
         .catch(submitError);
     }

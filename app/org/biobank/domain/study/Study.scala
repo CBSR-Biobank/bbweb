@@ -45,22 +45,14 @@ object Study {
 
   implicit val studyWrites = new Writes[Study] {
       def writes(study: Study) = {
-        var json = Json.obj("id"              -> study.id,
-                            "version"         -> study.version,
-                            "timeAdded"       -> study.timeAdded,
-                            "name"            -> study.name,
-                            "annotationTypes" -> study.annotationTypes,
-                            "status"          -> study.getClass.getSimpleName)
-
-        if (study.description.isDefined) {
-          json = json ++ Json.obj("description" -> study.description)
-        }
-
-        if (study.timeModified.isDefined) {
-          json = json ++ Json.obj("timeModified" -> study.timeModified)
-        }
-
-        json
+        Json.obj("id"              -> study.id,
+                 "version"         -> study.version,
+                 "timeAdded"       -> study.timeAdded,
+                 "timeModified"    -> study.timeModified,
+                 "name"            -> study.name,
+                 "description"     -> study.description,
+                 "annotationTypes" -> study.annotationTypes,
+                 "status"          -> study.getClass.getSimpleName)
       }
 
     }

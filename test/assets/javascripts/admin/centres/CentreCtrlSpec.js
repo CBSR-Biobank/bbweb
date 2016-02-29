@@ -8,86 +8,80 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
   describe('Controller: CentreCtrl', function() {
-    var windowService, Centre, createController, jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test', function($provide) {
-      windowService = {
+      $provide.value('$window', {
         localStorage: {
-          setItem: function() {},
-          getItem: function() { return {}; }
+          setItem: jasmine.createSpy('mockWindowService.setItem'),
+          getItem: jasmine.createSpy('mockWindowService.getItem')
         }
-      };
-
-      spyOn(windowService.localStorage, 'setItem');
-      $provide.value('$window', windowService);
+      });
     }));
 
-    beforeEach(inject(function($q, _Centre_, jsonEntities) {
-      Centre = _Centre_;
-      jsonEntities = jsonEntities;
-      createController = setupController(this.$injector);
-    }));
+    beforeEach(inject(function() {
+      var self = this;
 
-    function setupController(injector) {
-      var $rootScope  = injector.get('$rootScope'),
-          $controller = injector.get('$controller'),
-          $window     = injector.get('$window'),
-          $timeout    = injector.get('$timeout');
+      self.$window          = self.$injector.get('$window');
+      self.Centre           = self.$injector.get('Centre');
+      self.jsonEntities     = self.$injector.get('jsonEntities');
 
-      return create;
+      self.createController = setupController();
+      self.centre = new self.Centre(self.jsonEntities.centre());
 
-      //--
+      function setupController() {
+        var $rootScope  = self.$injector.get('$rootScope'),
+            $controller = self.$injector.get('$controller'),
+            $window     = self.$injector.get('$window'),
+            $timeout    = self.$injector.get('$timeout');
 
-      function create(centre) {
-        var scope = $rootScope.$new(),
-            state = {
-              params: {centreId: centre.id},
-              current: {name: 'home.admin.centres.centre.locations'}
-            };
+        return create;
 
-        $controller('CentreCtrl as vm', {
-          $window:  $window,
-          $scope:   scope,
-          $state:   state,
-          $timeout: $timeout,
-          centre:    centre
-        });
-        scope.$digest();
-        return scope;
+        //--
+
+        function create(centre) {
+          var state = {
+            params: {centreId: centre.id},
+            current: {name: 'home.admin.centres.centre.locations'}
+          };
+
+          self.scope = $rootScope.$new();
+
+          $controller('CentreCtrl as vm', {
+            $window:  $window,
+            $scope:   self.scope,
+            $state:   state,
+            $timeout: $timeout,
+            centre:   centre
+          });
+          self.scope.$digest();
+        }
       }
-    }
+    }));
 
     it('should contain a valid centre', function() {
-      var centre = new Centre(jsonEntities.centre()),
-          scope = createController(centre);
-
-      expect(scope.vm.centre).toBe(centre);
+      this.createController(this.centre);
+      expect(this.scope.vm.centre).toBe(this.centre);
     });
 
     it('should contain initialized panels', function() {
-      var centre = new Centre(jsonEntities.centre()),
-          scope = createController(centre);
-
-      expect(scope.vm.tabSummaryActive).toBe(false);
-      expect(scope.vm.tabLocationsActive).toBe(false);
-      expect(scope.vm.tabStudiesActive).toBe(false);
+      this.createController(this.centre);
+      expect(this.scope.vm.tabSummaryActive).toBe(false);
+      expect(this.scope.vm.tabLocationsActive).toBe(false);
+      expect(this.scope.vm.tabStudiesActive).toBe(false);
     });
 
     it('should contain initialized local storage', function() {
-      var centre = new Centre(jsonEntities.centre());
-
-      createController(centre);
-      expect(windowService.localStorage.setItem)
+      this.createController(this.centre);
+      expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('centre.panel.locations', true);
     });
 
     it('should initialize the tab of the current state', function() {
-      var $timeout = this.$injector.get('$timeout'),
-          centre = new Centre(jsonEntities.centre()),
-          scope = createController(centre);
+      var $timeout = this.$injector.get('$timeout');
 
+      this.createController(this.centre);
       $timeout.flush();
-      expect(scope.vm.tabLocationsActive).toBe(true);
+      expect(this.scope.vm.tabLocationsActive).toBe(true);
     });
 
   });

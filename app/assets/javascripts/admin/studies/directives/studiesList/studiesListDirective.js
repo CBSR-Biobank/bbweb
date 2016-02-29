@@ -12,9 +12,7 @@ define(['underscore'], function(_) {
     var directive = {
       restrict: 'E',
       scope: {},
-      bindToController: {
-        studyCounts: '='
-      },
+      bindToController: {},
       templateUrl : '/assets/javascripts/admin/studies/directives/studiesList/studiesList.html',
       controller: StudiesListCtrl,
       controllerAs: 'vm'
@@ -25,16 +23,18 @@ define(['underscore'], function(_) {
 
   StudiesListCtrl.$inject = [
     'Study',
-    'StudyStatus'
+    'StudyStatus',
+    'StudyCounts'
   ];
 
   /**
    * Displays a list of studies with each in its own mini-panel.
    *
    */
-  function StudiesListCtrl(Study, StudyStatus) {
+  function StudiesListCtrl(Study, StudyStatus, StudyCounts) {
     var vm = this;
 
+    vm.studyCounts      = {};
     vm.pageSize         = 5;
     vm.updateStudies    = Study.list;
     vm.possibleStatuses = [ { id: 'all', label: 'All' } ];
@@ -42,6 +42,16 @@ define(['underscore'], function(_) {
     _.each(StudyStatus.values(), function (status) {
       vm.possibleStatuses.push({id: status, label: StudyStatus.label(status)});
     });
+
+    init();
+
+    //--
+
+    function init() {
+      StudyCounts.get().then(function (counts) {
+        vm.studyCounts = counts;
+      });
+    }
   }
 
   return studiesListDirective;

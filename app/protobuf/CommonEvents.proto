@@ -1,6 +1,6 @@
 package org.biobank.infrastructure.event;
 
-message AnnotationTypeAdded {
+message AnnotationType {
    optional string uniqueId      = 2;
    optional string name          = 3;
    optional string description   = 4;

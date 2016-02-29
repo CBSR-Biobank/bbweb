@@ -30,7 +30,7 @@ define(['underscore'], function(_) {
     return directive;
   }
 
-  //PagedItemsListCtrl.$inject = [];
+  PagedItemsListCtrl.$inject = ['$scope'];
 
   /**
    * @param {Array} $scope.possibleStatuses - an array with 2 keys: 'id' and 'name'. The value for the 'id'
@@ -38,7 +38,7 @@ define(['underscore'], function(_) {
    * for the 'Name' key is what is displayed in the 'Status' drop down box. The first item of the array should be
    * { id: 'all', name: 'All' } so that all items are displayed.
    */
-  function PagedItemsListCtrl() {
+  function PagedItemsListCtrl($scope) {
     var vm = this;
 
     vm.pagedResult                  = { total: vm.counts.total };
@@ -68,6 +68,10 @@ define(['underscore'], function(_) {
     vm.panelHeading = panelHeading(vm.counts);
 
     updateItems();
+
+    $scope.$watch('vm.counts', function () {
+      vm.panelHeading = panelHeading(vm.counts);
+    });
 
     //---
 

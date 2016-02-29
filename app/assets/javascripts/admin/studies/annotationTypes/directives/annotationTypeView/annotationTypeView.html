@@ -1,0 +1,97 @@
+<div class="page-header">
+  <h1>{{vm.study.name}} <small>Annotation Type {{vm.annotationType.name}}</small></h1>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">{{vm.annotationType.name}}</h3>
+  </div>
+  <ul class="list-group">
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-5">
+          <strong>Name:</strong>
+        </div>
+        <div class="col-md-5">
+          {{vm.annotationType.name}}
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-xs btn-default pull-right"
+                  title="Edit name"
+                  ng-click="vm.editName()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-5">
+          <strong>Required:</strong>
+        </div>
+        <div class="col-md-5">
+          {{vm.annotationType.required ? 'Yes' : 'No'}}
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-xs btn-default pull-right"
+                  title="Edit required"
+                  ng-click="vm.editRequired()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-5">
+          <strong>Description:</strong>
+        </div>
+        <div class="col-md-5">
+          {{vm.annotationType.description}}
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-xs btn-default pull-right"
+                  title="Update description"
+                  ng-click="vm.editDescription()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-5">
+          <strong>Type:</strong>
+        </div>
+        <div class="col-md-5">
+          {{vm.annotationType.getType()}}
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item" ng-if="vm.annotationType.isValueTypeSelect()">
+      <div class="row">
+        <div class="col-md-5">
+          <strong>Selections:</strong>
+        </div>
+        <div class="col-md-5">
+          {{vm.annotationType.options.join(', ')}}
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-xs btn-default pull-right"
+                  title="Add selection option"
+                  ng-click="vm.addSelectionOptions()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+<div class="row">
+  <div class="col-md-1">
+    <button class="btn btn btn-primary"
+            title="Back"
+            ng-click="vm.back()">Back
+    </button>
+  </div>
+</div>

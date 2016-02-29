@@ -15,11 +15,13 @@ define(['angular', 'underscore'], function(angular, _) {
       scope: {},
       bindToController: {
         study:                  '=',
+        annotationTypes:        '=',
         annotationTypeIdsInUse: '=',
         annotationTypeName:     '@',
         panelId:                '@',
         addStateName:           '@',
-        updateStateName:        '@'
+        viewStateName:          '@',
+        onRemove:               '&'
       },
       templateUrl: '/assets/javascripts/admin/studies/annotationTypes/directives/studyAnnotationTypesPanel/studyAnnotationTypesPanel.html',
       controller: StudyAnnotationTypesPanelCtrl,
@@ -42,6 +44,7 @@ define(['angular', 'underscore'], function(angular, _) {
     vm.add                       = add;
     vm.panelOpen                 = panel.getPanelOpenState();
     vm.modificationsAllowed      = vm.study.isDisabled();
+    vm.onAnnotTypeRemove         = onAnnotTypeRemove;
 
     $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                   angular.bind(panel, panel.watchPanelOpenChangeFunc));
@@ -50,6 +53,11 @@ define(['angular', 'underscore'], function(angular, _) {
 
     function add() {
       $state.go(vm.addStateName);
+    }
+
+    // remove returns a promise
+    function onAnnotTypeRemove(annotType) {
+      return vm.onRemove()(annotType);
     }
 
     function annotationTypeDescription(annotationTypeName) {
