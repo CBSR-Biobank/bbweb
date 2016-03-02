@@ -156,33 +156,36 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
 
     CollectionEventType.prototype.updateName = function (name) {
       return ConcurrencySafeEntity.prototype.update.call(
-        this, uri('name', this.id), { name: name });
+        this, uri('name', this.id), { studyId: this.studyId, name: name });
     };
 
     CollectionEventType.prototype.updateDescription = function (description) {
-      return ConcurrencySafeEntity.prototype.update.call(
-        this,
-        uri('description', this.id),
-        description ? { description: description } : {});
+      var json = { studyId: this.studyId };
+      if (description) {
+        json.description = description;
+      }
+      return ConcurrencySafeEntity.prototype.update.call(this, uri('description', this.id), json);
     };
 
     CollectionEventType.prototype.updateRecurring = function (recurring) {
       return ConcurrencySafeEntity.prototype.update.call(
         this,
         uri('recurring', this.id),
-        { recurring: recurring });
+        { studyId: this.studyId, recurring: recurring });
     };
 
     CollectionEventType.prototype.addSpecimenSpec = function (specimenSpec) {
       return ConcurrencySafeEntity.prototype.update.call(
-        this, uri('spcspec', this.id), _.omit(specimenSpec, 'uniqueId'));
+        this,
+        uri('spcspec', this.id),
+        _.extend({ studyId: this.studyId }, _.omit(specimenSpec, 'uniqueId')));
     };
 
     CollectionEventType.prototype.updateSpecimenSpec = function (specimenSpec) {
       return ConcurrencySafeEntity.prototype.update.call(
         this,
         uri('spcspec', this.id) + '/' + specimenSpec.uniqueId,
-        _.omit(specimenSpec, 'uniqueId'));
+        _.extend({ studyId: this.studyId }, _.omit(specimenSpec, 'uniqueId')));
     };
 
     CollectionEventType.prototype.removeSpecimenSpec = function (specimenSpec) {
@@ -212,14 +215,16 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
 
     CollectionEventType.prototype.addAnnotationType = function (annotationType) {
       return ConcurrencySafeEntity.prototype.update.call(
-        this, uri('annottype', this.id), _.omit(annotationType, 'uniqueId'));
+        this,
+        uri('annottype', this.id),
+        _.extend({ studyId: this.studyId }, _.omit(annotationType, 'uniqueId')));
     };
 
     CollectionEventType.prototype.updateAnnotationType = function (annotationType) {
       return ConcurrencySafeEntity.prototype.update.call(
         this,
         uri('annottype', this.id) + '/' + annotationType.uniqueId,
-        _.omit(annotationType, 'uniqueId'));
+        _.extend({ studyId: this.studyId }, _.omit(annotationType, 'uniqueId')));
     };
 
     CollectionEventType.prototype.removeAnnotationType = function (annotationType) {

@@ -2,13 +2,6 @@
   <div class="panel-heading">
     <h3 class="panel-title">{{vm.study.name}}
       <span class="btn-group pull-right">
-
-        <a ui-sref="home.admin.studies.study.summary.update({studyId: vm.study.id})"
-           class="btn btn-xs btn-primary"
-           type="button" title="update">
-          <i class="glyphicon glyphicon-edit"></i>
-        </a>
-
         <button class="btn btn-xs btn-success"
                 ng-click="vm.changeStatus('enable')"
                 title="Enable"
@@ -40,11 +33,40 @@
       </span>
     </h3>
   </div>
-  <div class="panel-body">
-    <truncate-toggle
-       text="vm.study.description"
-       toggle-length="vm.descriptionToggleLength"
-       text-empty-warning="Description not entered yet."></truncate-toggle>
-  </div>
+  <ul class="list-group">
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-2">
+          <strong>Name:</strong>
+        </div>
+        <div class="col-md-8">
+          {{vm.study.name}}
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-xs btn-default pull-right"
+                  title="Edit name"
+                  ng-click="vm.editName()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-2">
+          <strong>Description:</strong>
+        </div>
+        <div class="col-md-10">
+          <truncate-toggle
+             text="vm.study.description"
+             toggle-length="vm.descriptionToggleLength"
+             text-empty-warning="Description not entered yet."
+             allow-edit="true"
+             on-edit="vm.editDescription()">
+          </truncate-toggle>
+        </div>
+      </div>
+    </li>
+  </ul>
   <status-line item="vm.study"></status-line>
 </div>

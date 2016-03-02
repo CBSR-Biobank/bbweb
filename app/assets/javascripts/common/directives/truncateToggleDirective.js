@@ -2,48 +2,63 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(function (){
+define(function () {
   'use strict';
 
   /**
    *
    */
-  function truncateToggleDirectiveFactory() {
+  function truncateToggleDirective() {
     var directive = {
       restrict: 'E',
-      replace: true,
-      scope: {
-        text: '=',
-        toggleLength: '=',
-        textEmptyWarning: '@'
+      scope: {},
+      bindToController: {
+        text:             '=',
+        toggleLength:     '=',
+        textEmptyWarning: '@',
+        allowEdit:        '=',
+        onEdit:           '&'
       },
       templateUrl : '/assets/javascripts/common/directives/truncateToggle.html',
-      controller: controller
+      controller: TruncateToggleCtrl,
+      controllerAs: 'vm'
     };
-
-    controller.$inject = ['$scope', '$filter'];
-
-    function controller($scope, $filter) {
-      $scope.displayText = $scope.text || '';
-      $scope.toggleState = true;
-      $scope.buttonLabel = 'Collapse';
-      $scope.toggleText  = toggleText;
-
-      //---
-      function toggleText() {
-        if ($scope.toggleState) {
-          $scope.displayText = $filter('truncate')($scope.text, $scope.toggleLength);
-          $scope.buttonLabel = 'Expand';
-        } else {
-          $scope.displayText = $scope.text;
-          $scope.buttonLabel = 'Collapse';
-        }
-        $scope.toggleState = !$scope.toggleState;
-      }
-    }
 
     return directive;
   }
 
-  return truncateToggleDirectiveFactory;
+  TruncateToggleCtrl.$inject = ['$scope', '$filter'];
+
+  var showLessLabel = 'Show less',
+      showMoreLabel = 'Show more';
+
+  function TruncateToggleCtrl($scope, $filter) {
+    var vm = this;
+
+    vm.displayText = vm.text || '';
+    vm.toggleState = true;
+    vm.buttonLabel = showLessLabel;
+    vm.toggleText  = toggleText;
+
+    $scope.$watch('vm.text', function() {
+      vm.displayText = vm.text || '';
+    });
+
+    //---
+
+    function toggleText() {
+      if (vm.toggleState) {
+        vm.displayText = $filter('truncate')(vm.text, vm.toggleLength);
+        vm.buttonLabel = showMoreLabel;
+      } else {
+        vm.displayText = vm.text;
+        vm.buttonLabel = showLessLabel;
+      }
+      vm.toggleState = !vm.toggleState;
+    }
+
+  }
+
+  return truncateToggleDirective;
+
 });

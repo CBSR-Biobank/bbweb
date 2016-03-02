@@ -1,9 +1,25 @@
 <div>
-  <p>{{displayText}}</p>
-  <button  ng-if="text.length > toggleLength" class="btn btn-xs btn-primary" ng-click="toggleText()">
-    {{buttonLabel}}
-  </button>
-  <div ng-if="(text == null) || text.length <= 0" class="alert alert-warning" role="alert">
-    <p><span class="glyphicon glyphicon-warning-sign"></span> {{textEmptyWarning}}</p>
+  <div class="row">
+    <div class="col-md-10">
+      <button ng-if="vm.text.length > vm.toggleLength"
+              class="btn btn-xs btn-default"
+              title="Edit"
+              ng-click="vm.toggleText()">
+        {{vm.buttonLabel}}
+      </button>
+    </div>
+    <div class="col-md-2">
+      <button ng-if="vm.allowEdit"
+              class="btn btn-xs btn-default pull-right"
+              ng-click="vm.onEdit()">
+        <i class="glyphicon glyphicon-edit"></i>
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12" ng-bind-html="vm.displayText | nl2br"></div>
+  </div>
+  <div ng-if="(vm.text == null) || vm.text.length <= 0" class="alert alert-warning" role="alert">
+    <p><span class="glyphicon glyphicon-warning-sign"></span> {{vm.textEmptyWarning}}</p>
   </div>
 </div>

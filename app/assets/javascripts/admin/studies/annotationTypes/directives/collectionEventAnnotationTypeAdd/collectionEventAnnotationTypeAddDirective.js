@@ -8,12 +8,12 @@ define(function () {
   /**
    *
    */
-  function participantAnnotationTypeAddDirective() {
+  function collectionEventAnnotationTypeAddDirective() {
     var directive = {
       restrict: 'E',
       scope: {},
       bindToController: {
-        study: '='
+        collectionEventType: '='
       },
       template : [
         '<annotation-type-add',
@@ -21,20 +21,20 @@ define(function () {
         '  on-cancel="vm.onCancel()"',
         '</annotation-type-add>',
       ].join(''),
-      controller: ParticipantAnnotationTypeAddCtrl,
+      controller: CollectionEventAnnotationTypeAddCtrl,
       controllerAs: 'vm'
     };
 
     return directive;
   }
 
-  ParticipantAnnotationTypeAddCtrl.$inject = [
+  CollectionEventAnnotationTypeAddCtrl.$inject = [
     'annotationTypeAddService'
   ];
 
-  var returnState = 'home.admin.studies.study.participants';
+  var returnState = 'home.admin.studies.study.collection.view';
 
-  function ParticipantAnnotationTypeAddCtrl(annotationTypeAddService) {
+  function CollectionEventAnnotationTypeAddCtrl(annotationTypeAddService) {
     var vm = this;
 
     vm.onSubmit        = onSubmit;
@@ -44,11 +44,11 @@ define(function () {
     //--
 
     function onSubmit(annotationType) {
-      vm.study.addAnnotationType(annotationType)
+      vm.collectionEventType.addAnnotationType(annotationType)
         .then(vm.onAddsuccessful).catch(annotationTypeAddService.addFailed);
     }
   }
 
-  return participantAnnotationTypeAddDirective;
+  return collectionEventAnnotationTypeAddDirective;
 
 });

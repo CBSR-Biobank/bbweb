@@ -26,6 +26,8 @@ define(['underscore'], function(_) {
     vm.study = study;
     vm.descriptionToggleLength = 100;
     vm.changeStatus = changeStatus;
+    vm.editName = editName;
+    vm.editDescription = editDescription;
 
     //--
 
@@ -49,6 +51,35 @@ define(['underscore'], function(_) {
           notificationsService.success('The study\'s status has been updated.', null, 2000);
         });
       });
+    }
+
+    function postUpdate(message, title, timeout) {
+      return function (study) {
+        vm.study = study;
+        notificationsService.success(message, title, timeout);
+      };
+    }
+
+    function editName() {
+      modalService.modalTextAreaInput('Edit name', 'Name', vm.study.name)
+        .then(function (name) {
+          vm.study.updateName(name)
+            .then(postUpdate('Name changed successfully.',
+                             'Change successful',
+                             1500))
+            .catch(notificationsService.updateError);
+        });
+    }
+
+    function editDescription() {
+      modalService.modalTextAreaInput('Edit description', 'Description', vm.study.description)
+        .then(function (description) {
+          vm.study.updateDescription(description)
+            .then(postUpdate('Description changed successfully.',
+                             'Change successful',
+                             1500))
+            .catch(notificationsService.updateError);
+        });
     }
   }
 

@@ -5,12 +5,12 @@
       <span class="pull-right">
         <button class="btn btn-xs btn-primary"
                 ng-click="vm.addAnnotationType()">
-          Add annotation type
+          Add annotation
           <i class="glyphicon glyphicon-plus"></i>
         </button>
         <button class="btn btn-xs btn-primary"
-                ng-click="vm.addSpecimenGroup()">
-          Add specimen group
+                ng-click="vm.addSpecimenSpec()">
+          Add specimen spec
           <i class="glyphicon glyphicon-plus"></i>
         </button>
       </span>
@@ -19,45 +19,70 @@
   <ul class="list-group">
     <li class="list-group-item">
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-2">
           <strong>Name:</strong>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-8">
           {{vm.ceventType.name}}
         </div>
+        <div class="col-md-2">
+          <button class="btn btn-xs btn-default pull-right"
+                  title="Edit name"
+                  ng-click="vm.editName()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
       </div>
     </li>
     <li class="list-group-item">
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-2">
           <strong>Description:</strong>
         </div>
-        <div class="col-md-5">
-          {{vm.ceventType.description | truncate:40}}
+        <div class="col-md-10">
+          <truncate-toggle
+             text="vm.ceventType.description"
+             toggle-length="60"
+             text-empty-warning="Description not entered yet."
+             allow-edit="true"
+             on-edit="vm.editDescription()">
+          </truncate-toggle>
         </div>
       </div>
     </li>
     <li class="list-group-item">
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-2">
           <strong>Recurring:</strong>
         </div>
-        <div class="col-md-5" ng-if="vm.ceventType.recurring">Yes</div>
-        <div class="col-md-5" ng-if="!vm.ceventType.recurring">No</div>
+        <div class="col-md-8" ng-if="vm.ceventType.recurring">Yes</div>
+        <div class="col-md-8" ng-if="!vm.ceventType.recurring">No</div>
+        <div class="col-md-2">
+          <button class="btn btn-xs btn-default pull-right"
+                  title="Edit recurring"
+                  ng-click="vm.editRecurring()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
       </div>
     </li>
-    <li class="list-group-item" ng-repeat="annotationType in vm.ceventType.annotationTypes">
+    <li class="list-group-item" ng-repeat="annotType in vm.ceventType.annotationTypes">
       <div class="row">
-        <div class="col-md-4">
-          <strong>Recurring:</strong>
+        <div class="col-md-2">
+          <strong>Annotation:</strong>
         </div>
-        <div class="col-md-5">Yes</div>
+        <div class="col-md-8">
+          <annotation-type-summary annotation-type="annotType"></annotation-type-summary>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-xs btn-default pull-right"
+                  title="View annotation"
+                  ng-click="vm.editAnnotationType(annotType)">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
       </div>
     </li>
   </ul>
   <status-line item="vm.ceventType"></status-line>
-</div>
-
-<div class="row">
-  <div class="col-xs-12"><pre>Type: {{vm.ceventType | json}}</pre></div>
 </div>

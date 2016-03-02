@@ -9,10 +9,10 @@
   <ul class="list-group">
     <li class="list-group-item">
       <div class="row">
-        <div class="col-md-5">
+        <div class="col-md-2">
           <strong>Name:</strong>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-8">
           {{vm.annotationType.name}}
         </div>
         <div class="col-md-2">
@@ -26,10 +26,10 @@
     </li>
     <li class="list-group-item">
       <div class="row">
-        <div class="col-md-5">
+        <div class="col-md-2">
           <strong>Required:</strong>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-8">
           {{vm.annotationType.required ? 'Yes' : 'No'}}
         </div>
         <div class="col-md-2">
@@ -43,37 +43,36 @@
     </li>
     <li class="list-group-item">
       <div class="row">
-        <div class="col-md-5">
+        <div class="col-md-2">
           <strong>Description:</strong>
         </div>
-        <div class="col-md-5">
-          {{vm.annotationType.description}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-default pull-right"
-                  title="Update description"
-                  ng-click="vm.editDescription()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
+        <div class="col-md-10">
+          <truncate-toggle
+             text="vm.annotationType.description"
+             toggle-length="60"
+             text-empty-warning="Description not entered yet."
+             allow-edit="true"
+             on-edit="vm.editDescription()">
+          </truncate-toggle>
         </div>
       </div>
     </li>
     <li class="list-group-item">
       <div class="row">
-        <div class="col-md-5">
+        <div class="col-md-2">
           <strong>Type:</strong>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-8">
           {{vm.annotationType.getType()}}
         </div>
       </div>
     </li>
     <li class="list-group-item" ng-if="vm.annotationType.isValueTypeSelect()">
       <div class="row">
-        <div class="col-md-5">
+        <div class="col-md-2">
           <strong>Selections:</strong>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-8">
           {{vm.annotationType.options.join(', ')}}
         </div>
         <div class="col-md-2">

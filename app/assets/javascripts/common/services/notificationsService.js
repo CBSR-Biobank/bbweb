@@ -13,8 +13,9 @@ define(['toastr'], function(toastr) {
   function notificationsService() {
     var service = {
       submitSuccess: submitSuccess,
-      success: success,
-      error: error
+      success:       success,
+      error:         error,
+      updateError:   updateError
     };
     return service;
 
@@ -46,6 +47,20 @@ define(['toastr'], function(toastr) {
       };
 
       toastr.error(message, title, options);
+    }
+
+    /**
+     * Error is the error returned from a biobankApiService call that failed.
+     */
+    function updateError(err) {
+      if (err.data) {
+        error(
+          'Your change could not be saved: ' + err.data.message,
+          'Cannot apply your change');
+      } else {
+        error('Your change could not be saved',
+              'Cannot apply your change');
+      }
     }
 
   }

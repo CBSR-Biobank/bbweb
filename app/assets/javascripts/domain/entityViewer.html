@@ -13,9 +13,7 @@
           <div class="col-md-4">
             <strong>{{item.label}}</strong>
           </div>
-          <div class="col-md-8">
-            {{item.value}}
-          </div>
+          <div class="col-md-8" ng-bind-html="item.value | nl2br"></div>
         </div>
       </li>
     </ul>

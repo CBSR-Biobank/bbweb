@@ -5,6 +5,9 @@
 define(['underscore'], function (_) {
   'use strict';
 
+  // FIXME: right now can only be used to update study participant annotation types, should
+  // be generic to also edit collection event annotation types
+
   /**
    *
    */
@@ -14,7 +17,9 @@ define(['underscore'], function (_) {
       scope: {},
       bindToController: {
         study:          '=',
-        annotationType: '='
+        annotationType: '=',
+        returnState:    '@',
+        onUpdate:       '&'
       },
       templateUrl : '/assets/javascripts/admin/studies/annotationTypes/directives/annotationTypeView/annotationTypeView.html',
       controller: AnnotationTypeViewCtrl,
@@ -43,95 +48,49 @@ define(['underscore'], function (_) {
 
     //--
 
-    function updateError(err) {
-      notificationsService.error(
-        'Your change could not be saved: ' + err.data.message,
-        'Cannot apply your change');
-    }
-
-    function postUpdate(message, title, timeout) {
-      return function (study) {
-        vm.study = study;
-        vm.annotationType = _.findWhere(vm.study.annotationTypes,
-                                        { uniqueId: vm.annotationType.uniqueId });
-        if (_.isUndefined(vm.annotationType)) {
-          throw new Error('could not update annotation type');
-        }
-        notificationsService.success(message, title, timeout);
-      };
-    }
-
     function editName() {
-      var name = vm.annotationType.name;
-      modalService.modalTextInput(
-        'Edit Annotation Type name',
-        'Name',
-        name
-      ).then(function (name) {
-        var annotationType = _.extend({}, vm.annotationType, { name: name });
-
-        vm.study.updateAnnotationType(annotationType)
-          .then(postUpdate('Annotation type changed successfully.',
-                           'Change successful',
-                           1500))
-          .catch(updateError);
-      });
+      modalService.modalTextInput('Edit Annotation Type name',
+                                  'Name',
+                                  vm.annotationType.name)
+        .then(function (name) {
+          var annotationType = _.extend({}, vm.annotationType, { name: name  });
+          vm.onUpdate()(annotationType);
+        });
     }
 
     function editRequired() {
-      var required = vm.annotationType.required.toString();
-      modalService.modalBooleanInput(
-        'Edit Annotation Type required',
-        'Required',
-        required
-      ).then(function (required) {
-        var annotationType = _.extend({}, vm.annotationType, { required: required === 'true' });
-
-        vm.study.updateAnnotationType(annotationType)
-          .then(postUpdate('Annotation type changed successfully.',
-                           'Change successful',
-                           1500))
-          .catch(updateError);
-      });
+      modalService.modalBooleanInput('Edit Annotation Type required',
+                                     'Required',
+                                     vm.annotationType.required.toString())
+        .then(function (required) {
+          var annotationType = _.extend({}, vm.annotationType, { required: required === 'true' });
+          vm.onUpdate()(annotationType);
+        });
     }
 
     function editDescription() {
-      var description = vm.annotationType.description;
-      modalService.modalTextAreaInput(
-        'Edit Annotation Type description',
-        'Description',
-        description
-      ).then(function (description) {
-        var annotationType = _.extend({}, vm.annotationType, { description: description });
-
-        vm.study.updateAnnotationType(annotationType)
-          .then(postUpdate('Annotation type changed successfully.',
-                           'Change successful',
-                           1500))
-          .catch(updateError);
-      });
+      modalService.modalTextAreaInput('Edit Annotation Type description',
+                                      'Description',
+                                      vm.annotationType.description)
+        .then(function (description) {
+          var annotationType = _.extend({}, vm.annotationType, { description: description });
+          vm.onUpdate()(annotationType);
+        });
     }
 
     function addSelectionOptions() {
       // FIXME: if selections are in use they cannot be modified
-      var selections = vm.annotationType.options.join(', ');
-      modalService.modalCommaDelimitedInput(
-        'Edit Annotation Type selections',
-        'Add selections',
-        selections
-      ).then(function (selections) {
-        var annotationType = _.extend({}, vm.annotationType, { options: selections.split(/[ ,]+/) });
-
-        vm.study.updateAnnotationType(annotationType)
-          .then(postUpdate('Annotation type changed successfully.',
-                           'Change successful',
-                           1500))
-          .catch(updateError);
-      });
+      modalService.modalCommaDelimitedInput('Edit Annotation Type selections',
+                                            'Add selections',
+                                            vm.annotationType.options.join(', '))
+        .then(function (selections) {
+          var annotationType = _.extend({}, vm.annotationType, { options: selections.split(/[ ,]+/) });
+          vm.onUpdate()(annotationType);
+        });
     }
 
     function back() {
-      $state.go('home.admin.studies.study.participants', {}, { reload: true });
+      $state.go(vm.returnState, {}, { reload: true });
     }
   }
 

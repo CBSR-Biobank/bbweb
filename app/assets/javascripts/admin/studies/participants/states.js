@@ -43,9 +43,6 @@ define(['underscore'], function (_) {
       }
     });
 
-    /**
-     * Prticipant Annotation Type Add
-     */
     $stateProvider.state('home.admin.studies.study.participants.annotationTypeView', {
       url: '/annottype/{annotationTypeId}',
       resolve: {
@@ -66,24 +63,25 @@ define(['underscore'], function (_) {
       views: {
         'main@': {
           template: [
-            '<annotation-type-view',
+            '<participant-annotation-type-view',
             '  study="vm.study"',
             '  annotation-type="vm.annotationType"',
-            '</annotation-type-view>'
+            '</participant-annotation-type-view>'
           ].join(''),
           controller: [
             'study',
             'annotationType',
             function (study, annotationType) {
-              this.study = study;
-              this.annotationType = annotationType;
+              var vm = this;
+              vm.study = study;
+              vm.annotationType = annotationType;
             }
           ],
           controllerAs: 'vm'
         }
       },
       data: {
-        displayName: 'Participant Annotation Type {{annotationType.name}}'
+        displayName: 'Participant Annotation {{annotationType.name}}'
       }
     });
   }

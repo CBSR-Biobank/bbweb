@@ -5,56 +5,65 @@
 define(['underscore'], function(_) {
   'use strict';
 
-  CeventTypeEditCtrl.$inject = [
+  /**
+   *
+   */
+  function ceventTypeAddDirective() {
+    var directive = {
+      restrict: 'E',
+      scope: {},
+      bindToController: {
+        study: '='
+      },
+      templateUrl : '/assets/javascripts/admin/studies/ceventTypes/directives/ceventTypeAdd/ceventTypeAdd.html',
+      controller: CeventTypeAddCtrl,
+      controllerAs: 'vm'
+    };
+
+    return directive;
+  }
+
+  CeventTypeAddCtrl.$inject = [
     '$state',
     'CollectionEventType',
     'domainEntityService',
-    'notificationsService',
-    'study'
+    'notificationsService'
   ];
 
-  /**
-   * Used to add or update a collection event type.
-   */
-  function CeventTypeEditCtrl($state,
-                              CollectionEventType,
-                              domainEntityService,
-                              notificationsService,
-                              study) {
+  function CeventTypeAddCtrl($state,
+                             CollectionEventType,
+                             domainEntityService,
+                             notificationsService) {
     var vm = this;
 
-    vm.ceventType            = new CollectionEventType();
-    vm.ceventType.studyId = study.id;
+    vm.ceventType  = new CollectionEventType({ studyId: vm.study.id });
+    vm.returnState = 'home.admin.studies.study.collection';
 
-    vm.title                 = 'Add Collection Event Type';
-    vm.submit                = submit;
-    vm.cancel                = cancel;
+    vm.title       = 'Add Collection Event Type';
+    vm.submit      = submit;
+    vm.cancel      = cancel;
 
     //---
 
-    function gotoReturnState() {
-      return $state.go('home.admin.studies.study.collection', {}, {reload: true});
-    }
-
-    function submitSuccess() {
-      notificationsService.submitSuccess();
-      gotoReturnState();
-    }
-
     function submit(ceventType) {
-      ceventType.addOrUpdate()
-        .then(submitSuccess)
-        .catch(function(error) {
-          domainEntityService.updateErrorModal(
-            error, 'collection event type');
-        });
+      ceventType.add().then(submitSuccess).catch(submitError);
+
+      function submitSuccess() {
+        notificationsService.submitSuccess();
+        return $state.go(vm.returnState, {}, { reload: true });
+      }
+
+      function submitError(error) {
+        domainEntityService.updateErrorModal(error, 'collection event type');
+      }
     }
 
     function cancel() {
-      gotoReturnState();
+      return $state.go(vm.returnState);
     }
 
   }
 
-  return CeventTypeEditCtrl;
+  return ceventTypeAddDirective;
+
 });

@@ -17,10 +17,14 @@ define(function (require) {
 
   module.config(require('./states'));
 
-  module.controller('CeventTypeEditCtrl', require('./CeventTypeEditCtrl'));
-  module.directive('ceventTypesPanel', require('./directives/ceventTypesPanel/ceventTypesPanelDirective'));
-  module.directive('ceventTypesAddAndSelect', require('./directives/ceventTypesAddAndSelect/ceventTypesAddAndSelectDirective'));
-  module.directive('ceventTypeView', require('./directives/ceventTypeView/ceventTypeViewDirective'));
+  module.directive('ceventTypesPanel',
+                   require('./directives/ceventTypesPanel/ceventTypesPanelDirective'));
+  module.directive('ceventTypeAdd',
+                   require('./directives/ceventTypeAdd/ceventTypeAddDirective'));
+  module.directive('ceventTypesAddAndSelect',
+                   require('./directives/ceventTypesAddAndSelect/ceventTypesAddAndSelectDirective'));
+  module.directive('ceventTypeView',
+                   require('./directives/ceventTypeView/ceventTypeViewDirective'));
 
   return {
     name: name,

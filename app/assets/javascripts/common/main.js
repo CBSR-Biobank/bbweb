@@ -26,6 +26,7 @@ define(function (require) {
   module.directive('pagedItemsList',          require('./directives/pagedItemsList/pagedItemsListDirective'));
 
   module.filter('localTime',                  require('./filters/localTimeFilter'));
+  module.filter('nl2br',                      require('./filters/nl2brFilter'));
   module.filter('timeago',                    require('./filters/timeagoFilter'));
   module.filter('truncate',                   require('./filters/truncateFilter'));
 

@@ -107,25 +107,6 @@ define(function () {
     });
 
     /**
-     * Study summary information update
-     */
-    $stateProvider.state('home.admin.studies.study.summary.update', {
-      url: '/update',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
-      views: {
-        'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/studyForm.html',
-          controller: 'StudyEditCtrl as vm'
-        }
-      },
-      data: {
-        displayName: 'Update'
-      }
-    });
-
-    /**
      * Study view participatns information
      */
     $stateProvider.state('home.admin.studies.study.participants', {

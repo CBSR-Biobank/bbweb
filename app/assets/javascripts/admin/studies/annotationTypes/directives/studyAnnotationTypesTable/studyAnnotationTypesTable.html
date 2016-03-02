@@ -1,10 +1,10 @@
 <div class="panel panel-warning" ng-if="vm.study.annotationTypes.length <= 0">
   <div class="panel-heading">
-    Annotation types have not been defined for this study yet.
+    Annotation have not been defined for this study yet.
   </div>
 </div>
 <div ng-if="vm.study.annotationTypes.length > 0">
-  <p>The following annotation types are defined:</p>
+  <p>The following annotation are defined:</p>
   <table class="table table-condensed table-hover"
          st-table="vm.annotationTypes"
          st-safe-src="vm.study.annotationTypes">

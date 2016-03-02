@@ -163,6 +163,21 @@ object TestData {
       ("88346afcb2884e53853a25da6930fb64", "Paivi Koski", "paivi.koski@ppshp.fi")
     )
 
+  val ahfemDescription =
+      s"""|Magnis turpis mollis. Duis commodo libero. Turpis magnis massa morbi cras non mollis, maecenas
+          |dictumst venenatis augue, rhoncus id non eros nec odio. Ut wisi ullamcorper elit parturient,
+          |venenatis libero et, pellentesque sed, purus erat nonummy diam. Hendrerit porro lobortis.
+          |
+          |Eget proin ligula blandit ante magna aenean. Purus et maecenas, venenatis nonummy dolor quam
+          |dictumst. Auctor etiam, ligula eu, senectus iaculis ante. Sed urna, viverra pellentesque
+          |scelerisque libero vel, vitae neque nascetur nibh turpis, ridiculus pede maecenas rutrum per
+          |cubilia ultrices. Lacus sapien odio per ac nulla lectus. Morbi vitae a laoreet vehicula lectus,
+          |rutrum convallis diam, arcu ipsum egestas facilis eleifend, tellus neque rutrum ut wisi in. Sit
+          |velit sociis placerat neque id, imperdiet ut a urna ac, sed accumsan, fusce nunc dolor, et donec
+          |orci quis. Magnis vestibulum dapibus leo consectetuer blandit, ac eget, porta tempor semper urna
+          |tempor diam.
+          |""".stripMargin
+
 }
 
 /**
@@ -211,12 +226,15 @@ class TestData @Inject() (
       Logger.debug("addMultipleStudies")
 
       val studies = studyData.map { case (id, name, description) =>
+          val descMaybe = if (name == "AHFEM") { Some(s"$description\n\n$ahfemDescription")}
+                            else { Some(description) }
+
           val study: Study = DisabledStudy(id              = StudyId(id),
                                            version         = 0L,
                                            timeAdded       = DateTime.now,
                                            timeModified    = None,
                                            name            = name,
-                                           description     = Some(description),
+                                           description     = descMaybe,
                                            annotationTypes = Set())
           studyRepository.put(study)
         }

@@ -12,7 +12,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  fdescribe('Directive: studyAnnotationTypesTableDirective', function() {
+  describe('Directive: studyAnnotationTypesTableDirective', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 

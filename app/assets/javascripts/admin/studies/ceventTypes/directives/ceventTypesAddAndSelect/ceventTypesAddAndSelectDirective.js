@@ -13,7 +13,7 @@ define(function () {
       restrict: 'E',
       scope: {},
       bindToController: {
-        study:                  '='
+        study: '='
       },
       templateUrl : '/assets/javascripts/admin/studies/ceventTypes/directives/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html',
       controller: CeventTypesAddAndSelectCtrl,
@@ -23,25 +23,34 @@ define(function () {
     return directive;
   }
 
-  CeventTypesAddAndSelectCtrl.$injector = [ '$state' ];
+  CeventTypesAddAndSelectCtrl.$injector = [ '$state', 'CollectionEventType' ];
 
-  function CeventTypesAddAndSelectCtrl($state) {
+  function CeventTypesAddAndSelectCtrl($state, CollectionEventType) {
     var vm = this;
 
-    vm.showPagination = false;
-    vm.add = add;
-    vm.information = information;
-    vm.getRecurringLabel = getRecurringLabel;
+    vm.collectionEventTypes = [];
+    vm.showPagination       = false;
+    vm.add                  = add;
+    vm.select               = select;
+    vm.getRecurringLabel    = getRecurringLabel;
+
+    init();
 
     // TODO: add pagination
 
-    //-
+    //--
+
+    function init() {
+      CollectionEventType.list(vm.study.id).then(function (list) {
+        vm.collectionEventTypes = list;
+      });
+    }
 
     function add() {
       $state.go('home.admin.studies.study.collection.ceventTypeAdd');
     }
 
-    function information(ceventType) {
+    function select(ceventType) {
       $state.go('home.admin.studies.study.collection.view', { ceventTypeId: ceventType.id });
     }
 

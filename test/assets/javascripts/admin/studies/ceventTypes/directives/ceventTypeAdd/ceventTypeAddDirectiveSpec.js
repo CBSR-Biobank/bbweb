@@ -7,284 +7,110 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  describe('Controller: CeventTypeEditCtrl', function() {
-    var createEntities,
-        createController,
-        jsonEntities;
+  describe('Directive: ceventTypeAddDirective', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($injector,
-                               jsonEntities) {
-      jsonEntities = jsonEntities;
-      createEntities = setupEntities($injector);
-      createController = setupController($injector);
+    beforeEach(inject(function(testUtils) {
+      var self = this;
+
+      self.Study               = self.$injector.get('Study');
+      self.CollectionEventType = self.$injector.get('CollectionEventType');
+      self.jsonEntities        = self.$injector.get('jsonEntities');
+
+      self.study = new self.Study(self.jsonEntities.study());
+      self.createController = setupController();
+
+      testUtils.putHtmlTemplates(
+        '/assets/javascripts/admin/studies/ceventTypes/directives/ceventTypeAdd/ceventTypeAdd.html');
+
+      //--
+
+      function setupController(injector) {
+        var $rootScope = self.$injector.get('$rootScope'),
+            $compile   = self.$injector.get('$compile');
+
+        return create;
+
+        //--
+
+        function create(study) {
+          self.element = angular.element([
+            '<cevent-type-add',
+            '  study="vm.study">',
+            '<cevent-type-add>'
+          ].join(''));
+
+          self.scope = $rootScope.$new();
+          self.scope.vm = { study: study };
+
+          $compile(self.element)(self.scope);
+          self.scope.$digest();
+          self.controller = self.element.controller('ceventTypeAdd');
+        }
+      }
+
     }));
 
-    function setupEntities(injector) {
-      var Study                         = injector.get('Study'),
-          CollectionEventType           = injector.get('CollectionEventType'),
-          CollectionEventAnnotationType = injector.get('CollectionEventAnnotationType'),
-          AnnotationValueType           = injector.get('AnnotationValueType');
-
-      return create;
-
-      //--
-
-      function create(options) {
-        var study, specimenGroups, annotationTypes, ceventType, serverCet;
-
-        options = options || {};
-
-        study = jsonEntities.study();
-        specimenGroups = _.map(_.range(2), function () {
-          return jsonEntities.specimenGroup(study);
-        });
-        annotationTypes = _.map(
-          AnnotationValueType.values(),
-          function(valueType) {
-            return new CollectionEventAnnotationType(
-              jsonEntities.studyAnnotationType(
-                study, { valueType: valueType }));
-          });
-
-        serverCet = jsonEntities.collectionEventType(study, {
-          specimenGroups: specimenGroups,
-          annotationTypes: annotationTypes
-        });
-
-        if (options.noCetId) {
-          ceventType = new CollectionEventType(_.omit(serverCet, 'id'));
-        } else {
-          ceventType = new CollectionEventType(serverCet);
-        }
-        ceventType.studySpecimenGroups(specimenGroups);
-        ceventType.studyAnnotationTypes(annotationTypes);
-
-        return {
-          study:           new Study(study),
-          specimenGroups:  specimenGroups,
-          annotationTypes: annotationTypes,
-          ceventType:      ceventType
-        };
-      }
-    }
-
-    function setupController(injector) {
-      var rootScope            = injector.get('$rootScope'),
-          controller           = injector.get('$controller'),
-          state                = injector.get('$state'),
-          CollectionEventType  = injector.get('CollectionEventType'),
-          domainEntityService  = injector.get('domainEntityService'),
-          notificationsService = injector.get('notificationsService');
-
-      return create;
-
-      //--
-
-      function create(entities) {
-        var scope = rootScope.$new();
-
-        controller('CeventTypeEditCtrl as vm', {
-          $scope:               scope,
-          $state:               state,
-          CollectionEventType:  CollectionEventType,
-          domainEntityService:  domainEntityService,
-          notificationsService: notificationsService,
-          study:                entities.study,
-          ceventType:           entities.ceventType,
-          studySpecimenGroups:  entities.specimenGroups,
-          studyAnnotationTypes: entities.annotationTypes
-        });
-
-        scope.$digest();
-        return scope;
-      }
-    }
-
-    describe('has valid scope when created', function () {
-
-      it('for new collection event type', function() {
-        var entities = createEntities({ noCetId: true }),
-            scope = createController(entities);
-
-        expect(scope.vm.ceventType).toBe(entities.ceventType);
-        expect(scope.vm.studySpecimenGroups).toBe(entities.specimenGroups);
-        expect(scope.vm.title).toBe('Add Collection Event Type');
-      });
-
-      it('for existing collection event type', function() {
-        var entities = createEntities(),
-            scope = createController(entities);
-
-        expect(scope.vm.ceventType).toBe(entities.ceventType);
-        expect(scope.vm.studySpecimenGroups).toBe(entities.specimenGroups);
-        expect(scope.vm.title).toBe('Update Collection Event Type');
-      });
-
+    it('has valid scope when created', function () {
+      this.createController(this.study);
+      expect(this.controller.ceventType.isNew()).toBe(true);
     });
 
     it('can submit a collection event type', function() {
-      var q                    = this.$injector.get('$q'),
+      var $q                   = this.$injector.get('$q'),
           notificationsService = this.$injector.get('notificationsService'),
-          state                = this.$injector.get('$state'),
-          entities             = createEntities(),
-          scope                = createController(entities);
+          $state               = this.$injector.get('$state'),
+          ceventType;
 
-      spyOn(entities.ceventType, 'addOrUpdate').and.callFake(function () {
-        return q.when(jsonEntities.collectionEventType(
-          entities.study, {
-            specimenGroups: entities.specimenGroups,
-            annotationTypes: entities.annotationTypes
-          }));
+      ceventType = new this.CollectionEventType(this.jsonEntities.collectionEventType(this.study));
+      this.createController(this.study);
+
+      spyOn(this.CollectionEventType.prototype, 'add').and.callFake(function () {
+        return $q.when();
       });
       spyOn(notificationsService, 'submitSuccess').and.callFake(function () {});
-      spyOn(state, 'go').and.callFake(function () {});
+      spyOn($state, 'go').and.callFake(function () {});
 
-      scope.vm.submit(entities.ceventType);
-      scope.$digest();
+      this.controller.submit(ceventType);
+      this.scope.$digest();
 
       expect(notificationsService.submitSuccess).toHaveBeenCalled();
-      expect(state.go).toHaveBeenCalledWith(
-        'home.admin.studies.study.collection', {}, {reload: true});
+      expect($state.go).toHaveBeenCalledWith(
+        'home.admin.studies.study.collection', {}, { reload: true });
     });
 
     it('on submit error, displays an error modal', function() {
       var q                   = this.$injector.get('$q'),
           domainEntityService = this.$injector.get('domainEntityService'),
-          entities            = createEntities(),
-          scope               = createController(entities);
+          ceventType;
 
-      spyOn(entities.ceventType, 'addOrUpdate').and.callFake(function () {
+      ceventType = new this.CollectionEventType(this.jsonEntities.collectionEventType(this.study));
+      this.createController(this.study);
+
+      spyOn(this.CollectionEventType.prototype, 'add').and.callFake(function () {
         var deferred = q.defer();
-        deferred.reject('xxx');
+        deferred.reject('simulated error for test');
         return deferred.promise;
       });
       spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
 
-      scope.vm.submit(entities.ceventType);
-      scope.$digest();
+      this.controller.submit(ceventType);
+      this.scope.$digest();
 
-      expect(domainEntityService.updateErrorModal).toHaveBeenCalledWith('xxx', 'collection event type');
+      expect(domainEntityService.updateErrorModal)
+        .toHaveBeenCalledWith('simulated error for test', 'collection event type');
     });
 
     it('when user presses the cancel button, goes to correct state', function() {
-      var state    = this.$injector.get('$state'),
-          entities = createEntities(),
-          scope    = createController(entities);
+      var state = this.$injector.get('$state');
 
       spyOn(state, 'go').and.callFake(function () {});
-      scope.vm.cancel();
-      scope.$digest();
-      expect(state.go).toHaveBeenCalledWith(
-        'home.admin.studies.study.collection', {}, {reload: true});
-    });
+      this.createController(this.study);
 
-    it('can add specimen group data', function() {
-      var CollectionEventType = this.$injector.get('CollectionEventType'),
-          entities = createEntities(),
-          scope;
-
-      entities.ceventType = new CollectionEventType(
-        jsonEntities.collectionEventType(entities.study));
-
-      scope = createController(entities);
-
-      expect(scope.vm.ceventType.specimenGroupData).toBeArrayOfSize(0);
-      scope.vm.addSpecimenGroup();
-      expect(scope.vm.ceventType.specimenGroupData).toBeArrayOfSize(1);
-    });
-
-    it('can remove specimen group data', function() {
-      var CollectionEventType = this.$injector.get('CollectionEventType'),
-          entities = createEntities(), scope;
-
-      entities.ceventType = new CollectionEventType(
-        jsonEntities.collectionEventType(entities.study));
-
-      scope = createController(entities);
-
-      scope.vm.addSpecimenGroup();
-      scope.vm.addSpecimenGroup();
-      expect(scope.vm.ceventType.specimenGroupData).toBeArrayOfSize(2);
-
-      scope.vm.removeSpecimenGroup(0);
-      expect(scope.vm.ceventType.specimenGroupData).toBeArrayOfSize(1);
-    });
-
-    it('removing a specimen group data with invalid index throws an error', function() {
-      var CollectionEventType = this.$injector.get('CollectionEventType'),
-          entities = createEntities(), scope;
-
-      entities.ceventType = new CollectionEventType(
-        jsonEntities.collectionEventType(entities.study));
-
-      scope = createController(entities);
-
-      expect(function () { scope.vm.removeSpecimenGroup(-1); })
-        .toThrow(new Error('index is invalid: -1'));
-
-      expect(function () { scope.vm.removeSpecimenGroup(1); })
-        .toThrow(new Error('index is invalid: 1'));
-    });
-
-    it('can add an annotation type', function() {
-      var CollectionEventType = this.$injector.get('CollectionEventType'),
-          entities = createEntities({ noCetId: true }), scope;
-
-      entities.ceventType = new CollectionEventType(
-        jsonEntities.collectionEventType(entities.study));
-      scope = createController(entities);
-
-      expect(scope.vm.ceventType.annotationTypeData).toBeArrayOfSize(0);
-      scope.vm.addAnnotationType();
-      expect(scope.vm.ceventType.annotationTypeData).toBeArrayOfSize(1);
-    });
-
-    it('can remove an annotation type', function() {
-      var CollectionEventType = this.$injector.get('CollectionEventType'),
-          entities = createEntities({ noCetId: true }), scope;
-
-      entities.ceventType = new CollectionEventType(
-        jsonEntities.collectionEventType(entities.study));
-      scope = createController(entities);
-
-      scope.vm.addAnnotationType();
-      scope.vm.addAnnotationType();
-      expect(scope.vm.ceventType.annotationTypeData).toBeArrayOfSize(2);
-
-      scope.vm.removeAnnotationType(0);
-      expect(scope.vm.ceventType.annotationTypeData).toBeArrayOfSize(1);
-    });
-
-    it('removing an annotation type data with invalid index throws an error', function() {
-      var CollectionEventType = this.$injector.get('CollectionEventType'),
-          entities = createEntities({ noCetId: true }), scope;
-
-      entities.ceventType = new CollectionEventType(
-        jsonEntities.collectionEventType(entities.study));
-      scope = createController(entities);
-
-      expect(function () { scope.vm.removeAnnotationType(-1); })
-        .toThrow(new Error('index is invalid: -1'));
-
-      expect(function () { scope.vm.removeAnnotationType(1); })
-        .toThrow(new Error('index is invalid: 1'));
-    });
-
-    it('getSpecimenGroupUnits returns valid results', function() {
-      var entities = createEntities({ noCetId: true }),
-          scope = createController(entities),
-          badSgId = jsonEntities.stringNext();
-
-      expect(function () {
-        scope.vm.getSpecimenGroupUnits(badSgId);
-      }).toThrow(new Error('specimen group ID not found: ' + badSgId));
-
-      expect(scope.vm.getSpecimenGroupUnits(entities.specimenGroups[0].id))
-        .toBe(entities.specimenGroups[0].units);
-
-      expect(scope.vm.getSpecimenGroupUnits()).toBe('Amount');
+      this.controller.cancel();
+      this.scope.$digest();
+      expect(state.go).toHaveBeenCalledWith('home.admin.studies.study.collection');
     });
 
   });

@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(function () {
+define(['underscore'], function (_) {
   'use strict';
 
   config.$inject = [
@@ -13,18 +13,7 @@ define(function () {
 
   function config($urlRouterProvider,
                   $stateProvider,
-                  authorizationProvider
-                 ) {
-
-    resolveSpecimenGroups.$inject = ['$stateParams', 'SpecimenGroup'];
-    function resolveSpecimenGroups($stateParams, SpecimenGroup) {
-      return SpecimenGroup.list($stateParams.studyId);
-    }
-
-    resolveAnnotationTypes.$inject = ['CollectionEventAnnotationType', 'study'];
-    function resolveAnnotationTypes(CollectionEventAnnotationType, study) {
-      return CollectionEventAnnotationType.list(study.id);
-    }
+                  authorizationProvider) {
 
     $urlRouterProvider.otherwise('/');
 
@@ -68,47 +57,14 @@ define(function () {
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/ceventTypes/ceventTypeForm.html',
-          controller: 'CeventTypeEditCtrl as vm'
-        }
-      },
-      data: {
-        displayName: 'Collection Event Type'
-      }
-    });
-
-    /**
-     * Collection Event Type Update
-     */
-    $stateProvider.state('home.admin.studies.study.collection.ceventTypeUpdate', {
-      url: '/cetypes/update/{ceventTypeId}',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        studySpecimenGroups: resolveSpecimenGroups,
-        studyAnnotationTypes: resolveAnnotationTypes,
-        ceventType: [
-          '$stateParams',
-          'CollectionEventType',
-          'studySpecimenGroups',
-          'studyAnnotationTypes',
-          function($stateParams,
-                   CollectionEventType,
-                   studySpecimenGroups,
-                   studyAnnotationTypes) {
-            return CollectionEventType.get(
-              $stateParams.studyId,
-              $stateParams.ceventTypeId).then(function (cet) {
-                cet.studySpecimenGroups(studySpecimenGroups);
-                cet.studyAnnotationTypes(studyAnnotationTypes);
-                return cet;
-              });
-          }
-        ]
-      },
-      views: {
-        'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/ceventTypes/ceventTypeForm.html',
-          controller: 'CeventTypeEditCtrl as vm'
+          template: '<cevent-type-add study="vm.study"></cevent-type-add>',
+          controller: [
+            'study',
+            function (study) {
+              this.study = study;
+            }
+          ],
+          controllerAs: 'vm'
         }
       },
       data: {
@@ -122,15 +78,22 @@ define(function () {
     $stateProvider.state('home.admin.studies.study.collection.view.annotationTypeAdd', {
       url: '/cetype/annottype/add',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        annotationType: ['CollectionEventAnnotationType', function(CollectionEventAnnotationType) {
-          return new CollectionEventAnnotationType();
-        }]
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotationTypeForm.html',
-          controller: 'AnnotationTypeEditCtrl as vm'
+          template: [
+            '<collection-event-annotation-type-add',
+            '  collection-event-type="vm.ceventType">',
+            '</collection-event-annotation-type-add>'
+          ].join(''),
+          controller: [
+            'ceventType',
+            function (ceventType) {
+              this.ceventType = ceventType;
+            }
+          ],
+          controllerAs: 'vm'
         }
       },
       data: {
@@ -138,56 +101,47 @@ define(function () {
       }
     });
 
-    /**
-     * Collection Event Annotation Type Update
-     */
-    // FIXME - no longer require
-    $stateProvider.state('home.admin.studies.study.collection.ceventAnnotationTypeUpdate', {
-      url: '/cevent/annottype/update/{annotationTypeId}',
+    $stateProvider.state('home.admin.studies.study.collection.view.annotationTypeView', {
+      url: '/annottype/{annotationTypeId}',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         annotationType: [
-          '$stateParams', 'CollectionEventAnnotationType',
-          function($stateParams, CollectionEventAnnotationType) {
-            return CollectionEventAnnotationType.get($stateParams.studyId,
-                                                     $stateParams.annotationTypeId);
+          'ceventType',
+          '$stateParams',
+          function (ceventType, $stateParams) {
+            var annotationType = _.findWhere(ceventType.annotationTypes,
+                                             { uniqueId: $stateParams.annotationTypeId });
+            if (_.isUndefined(annotationType)) {
+              throw new Error('could not find annotation type: ' + $stateParams.annotationTypeId);
+            }
+            return annotationType;
           }
         ]
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotationTypeForm.html',
-          controller: 'AnnotationTypeEditCtrl as vm'
+          template: [
+            '<collection-event-annotation-type-view',
+            '  collection-event-type="vm.ceventType"',
+            '  annotation-type="vm.annotationType">',
+            '</collection-event-annotation-type-view>'
+          ].join(''),
+          controller: [
+            'ceventType',
+            'annotationType',
+            function (ceventType, annotationType) {
+              this.ceventType = ceventType;
+              this.annotationType = annotationType;
+            }
+          ],
+          controllerAs: 'vm'
         }
       },
       data: {
-        displayName: 'Collection Event Annotation Type'
+        displayName: 'Annotation {{annotationType.name}}'
       }
     });
 
-    $stateProvider.state('home.admin.studies.study.collection.view.specimenGroupAdd', {
-      url: '/spcgroup/add',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        specimenGroup: [
-          '$stateParams',
-          'SpecimenGroup',
-          function($stateParams, SpecimenGroup) {
-            var sg = new SpecimenGroup();
-            sg.studyId = $stateParams.studyId;
-            return sg;
-          }]
-      },
-      views: {
-        'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupForm.html',
-          controller: 'SpecimenGroupEditCtrl as vm'
-        }
-      },
-      data: {
-        displayName: 'Add Specimen Group'
-      }
-    });
   }
 
   return config;

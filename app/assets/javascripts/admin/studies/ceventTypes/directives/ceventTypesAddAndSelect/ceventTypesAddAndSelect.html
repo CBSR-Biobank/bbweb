@@ -1,6 +1,6 @@
   <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">Event Types
+    <h3 class="panel-title">Events
       <span class="btn-group pull-right">
         <button class="btn btn-xs btn-default"
                 title="add collection event"
@@ -11,7 +11,7 @@
     </h3>
   </div>
 
-  <div class="panel-body" ng-if="vm.ceventTypes.length <= 0">
+  <div class="panel-body" ng-if="vm.collectionEventTypes.length <= 0">
     <div class="panel panel-warning">
       <div class="panel-heading">
         No collection event types added to this study yet.
@@ -19,13 +19,13 @@
     </div>
   </div>
 
-  <table ng-show="vm.ceventTypes.length > 0"
+  <table ng-show="vm.collectionEventTypes.length > 0"
          class="table table-hover table-condensed"
-         st-table="vm.ceventTypes">
+         st-table="vm.collectionEventTypes">
     <tbody>
-      <tr ng-repeat="ceventType in vm.ceventTypes">
+      <tr ng-repeat="ceventType in vm.collectionEventTypes">
         <td>
-          <a href ng-click="vm.information(ceventType)">
+          <a href ng-click="vm.select(ceventType)">
             {{ceventType.name}}
           </a>
         </td>
