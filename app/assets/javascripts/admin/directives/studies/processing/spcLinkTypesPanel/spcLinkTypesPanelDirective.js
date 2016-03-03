@@ -16,7 +16,7 @@ define(['angular', 'underscore'], function(angular, _) {
         study: '=',
         processingDto: '='
       },
-      templateUrl: '/assets/javascripts/admin/studies/processing/directives/spcLinkTypesPanel/spcLinkTypesPanel.html',
+      templateUrl: '/assets/javascripts/admin/directives/studies/processing/spcLinkTypesPanel/spcLinkTypesPanel.html',
       controller: SpcLinkTypesPanelCtrl,
       controllerAs: 'vm'
     };

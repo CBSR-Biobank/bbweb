@@ -10,7 +10,6 @@ define(function (require) {
   var angular = require('angular'),
       name = 'biobank.admin.studies',
       module,
-      participants = require('./participants/main'),
       processing = require('./processing/main'),
       specimenGroups = require('./specimenGroups/main');
 

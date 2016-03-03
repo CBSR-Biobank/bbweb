@@ -17,7 +17,7 @@ define(['angular', 'underscore'], function(angular, _) {
         study: '=',
         processingTypes: '='
       },
-      templateUrl: '/assets/javascripts/admin/studies/processing/directives/processingTypesPanel/processingTypesPanel.html',
+      templateUrl: '/assets/javascripts/admin/directives/studies/processing/processingTypesPanel/processingTypesPanel.html',
       controller: ProcessingTypesPanelCtrl,
       controllerAs: 'vm'
     };

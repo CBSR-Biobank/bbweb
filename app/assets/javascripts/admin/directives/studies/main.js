@@ -16,7 +16,8 @@ define(function (require) {
 
   module = angular.module(name, [
     annotationTypes.name,
-    ceventTypes.name
+    ceventTypes.name,
+    processing.name
   ]);
 
   module.directive('studiesList',             require('./studiesList/studiesListDirective'));
