@@ -5,65 +5,63 @@
 define(['underscore'], function(_) {
   'use strict';
 
-  StudyEditCtrl.$inject = [
+  /**
+   *
+   */
+  function studyAddDirective() {
+    var directive = {
+      restrict: 'E',
+      scope: {},
+      bindToController: {
+        study: '='
+      },
+      templateUrl : '/assets/javascripts/admin/directives/studies/studyAdd/studyAdd.html',
+      controller: StudyAddCtrl,
+      controllerAs: 'vm'
+    };
+
+    return directive;
+  }
+
+  StudyAddCtrl.$inject = [
     '$state',
     'notificationsService',
-    'domainEntityService',
-    'study'
+    'domainEntityService'
   ];
 
-  /**
-   * Adds or updates a study.
-   */
-  function StudyEditCtrl($state,
+  function StudyAddCtrl($state,
                          notificationsService,
-                         domainEntityService,
-                         study) {
-    var vm = this,
-        action;
+                         domainEntityService) {
 
-    vm.study = study;
+    var vm = this;
+
+    vm.title =  'Add study';
     vm.submit = submit;
     vm.cancel = cancel;
-    vm.returnState = {options: { reload: true } };
-
-    if (study.isNew()) {
-      action = 'Add';
-      vm.returnState.name = 'home.admin.studies';
-      vm.returnState.params = { };
-    } else {
-      action = 'Update';
-      vm.returnState.name = 'home.admin.studies.study.summary';
-      vm.returnState.params = { studyId: study.id };
-    }
-
-    vm.title =  action + ' study';
+    vm.returnState = 'home.admin.studies';
 
     //--
-
-    function gotoReturnState(state) {
-      $state.go(state.name, state.params, state.options);
-    }
-
-    function submitSuccess() {
-      notificationsService.submitSuccess();
-      gotoReturnState(vm.returnState);
-    }
-
-    function submitError(error) {
-      domainEntityService.updateErrorModal(error, 'study');
-    }
 
     function submit(study) {
       study.add()
         .then(submitSuccess)
         .catch(submitError);
+
+      function submitSuccess() {
+        notificationsService.submitSuccess();
+        $state.go(vm.returnState);
+      }
+
+      function submitError(error) {
+        domainEntityService.updateErrorModal(error, 'study');
+      }
     }
 
     function cancel() {
-      gotoReturnState(_.extend({}, vm.returnState, { options:{ reload: false } }));
+      $state.go(vm.returnState);
     }
   }
 
-  return StudyEditCtrl;
+  return studyAddDirective;
+
 });
