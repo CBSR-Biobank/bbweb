@@ -21,7 +21,7 @@ define(['angular', 'underscore'], function(angular, _) {
         viewStateName:          '=',
         onRemove:               '&'
       },
-      templateUrl: '/assets/javascripts/admin/studies/annotationTypes/directives/studyAnnotationTypesTable/studyAnnotationTypesTable.html',
+      templateUrl: '/assets/javascripts/admin/directives/studies/annotationTypes/studyAnnotationTypesTable/studyAnnotationTypesTable.html',
       controller: StudyAnnotationTypesTableCtrl,
       controllerAs: 'vm'
     };

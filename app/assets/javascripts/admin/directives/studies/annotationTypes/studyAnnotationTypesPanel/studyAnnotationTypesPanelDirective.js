@@ -23,7 +23,7 @@ define(['angular', 'underscore'], function(angular, _) {
         viewStateName:          '@',
         onRemove:               '&'
       },
-      templateUrl: '/assets/javascripts/admin/studies/annotationTypes/directives/studyAnnotationTypesPanel/studyAnnotationTypesPanel.html',
+      templateUrl: '/assets/javascripts/admin/directives/studies/annotationTypes/studyAnnotationTypesPanel/studyAnnotationTypesPanel.html',
       controller: StudyAnnotationTypesPanelCtrl,
       controllerAs: 'vm'
     };

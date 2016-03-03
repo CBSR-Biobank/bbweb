@@ -21,7 +21,7 @@ define(['underscore'], function (_) {
         returnState:    '@',
         onUpdate:       '&'
       },
-      templateUrl : '/assets/javascripts/admin/studies/annotationTypes/directives/annotationTypeView/annotationTypeView.html',
+      templateUrl : '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeView/annotationTypeView.html',
       controller: AnnotationTypeViewCtrl,
       controllerAs: 'vm'
     };
