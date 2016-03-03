@@ -19,7 +19,7 @@ define(function () {
         onSubmit: '&', // annotation type is passed as parameter
         onCancel: '&'
       },
-      templateUrl : '/assets/javascripts/admin/studies/annotationTypes/directives/annotationTypeAdd/annotationTypeAdd.html',
+      templateUrl : '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeAdd/annotationTypeAdd.html',
       controller: AnnotationTypeAddCtrl,
       controllerAs: 'vm'
     };

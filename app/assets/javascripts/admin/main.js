@@ -10,12 +10,14 @@ define(function (require) {
       module,
       centres = require('./centres/main'),
       studies = require('./studies/main'),
-      users = require('./users/main');
+      users = require('./users/main'),
+      directivesStudies = require('./directives/studies/main');
 
   module = angular.module(name, [
     centres.name,
     studies.name,
     users.name,
+    directivesStudies.name,
     'biobank.common',
     'biobank.users',
     'biobank.studies'
