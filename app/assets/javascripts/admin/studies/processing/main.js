@@ -17,10 +17,6 @@ define(function (require) {
 
   module.controller('ProcessingTypeEditCtrl', require('./ProcessingTypeEditCtrl'));
   module.controller('SpcLinkTypeEditCtrl',    require('./SpcLinkTypeEditCtrl'));
-  module.directive('processingTypesPanel',
-                   require('./directives/processingTypesPanel/processingTypesPanelDirective'));
-  module.directive('spcLinkTypesPanel',
-                   require('./directives/spcLinkTypesPanel/spcLinkTypesPanelDirective'));
 
   return {
     name: name,

@@ -11,7 +11,8 @@ define(function (require) {
       name = 'biobank.admin.directives.studies',
       module,
       annotationTypes = require('./annotationTypes/main'),
-      ceventTypes = require('./ceventTypes/main');
+      ceventTypes = require('./ceventTypes/main'),
+      processing = require('./processing/main');
 
   module = angular.module(name, [
     annotationTypes.name,

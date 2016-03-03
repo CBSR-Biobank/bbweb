@@ -15,7 +15,6 @@ define(function (require) {
       specimenGroups = require('./specimenGroups/main');
 
   module = angular.module(name, [
-    participants.name,
     processing.name,
     specimenGroups.name,
     'biobank.users'
@@ -23,6 +22,7 @@ define(function (require) {
 
   module.config(require('./states'));
   module.config(require('./ceventTypes/states'));
+  module.config(require('./participants/states'));
 
   module.controller('StudyCtrl',           require('./StudyCtrl'));
   module.controller('StudyEditCtrl',       require('./StudyEditCtrl'));
