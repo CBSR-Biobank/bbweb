@@ -8,15 +8,13 @@ define(function (require) {
   'use strict';
 
   var angular = require('angular'),
-      name = 'biobank.admin.directives.studies.processing',
+      name = 'biobank.admin..studies.processing',
       module;
 
-  module = angular.module(name, [ 'biobank.users' ]);
+  module = angular.module(name, []);
 
-  module.directive('processingTypesPanel',
-                   require('./processingTypesPanel/processingTypesPanelDirective'));
-  module.directive('spcLinkTypesPanel',
-                   require('./spcLinkTypesPanel/spcLinkTypesPanelDirective'));
+  module.controller('ProcessingTypeEditCtrl', require('./ProcessingTypeEditCtrl'));
+  module.controller('SpcLinkTypeEditCtrl',    require('./SpcLinkTypeEditCtrl'));
 
   return {
     name: name,

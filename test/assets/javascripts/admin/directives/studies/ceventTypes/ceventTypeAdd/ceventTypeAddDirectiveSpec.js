@@ -22,7 +22,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       self.createController = setupController();
 
       testUtils.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/ceventTypes/directives/ceventTypeAdd/ceventTypeAdd.html');
+        '/assets/javascripts/admin/directives/studies/ceventTypes/ceventTypeAdd/ceventTypeAdd.html');
 
       //--
 

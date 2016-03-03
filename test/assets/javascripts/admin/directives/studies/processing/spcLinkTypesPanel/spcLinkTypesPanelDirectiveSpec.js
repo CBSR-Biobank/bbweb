@@ -26,7 +26,7 @@ define([
       testUtils.addCustomMatchers();
 
       testUtils.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/processing/directives/spcLinkTypesPanel/spcLinkTypesPanel.html',
+        '/assets/javascripts/admin/directives/studies/processing/spcLinkTypesPanel/spcLinkTypesPanel.html',
         '/assets/javascripts/common/directives/panelButtons.html',
         '/assets/javascripts/common/directives/infoUpdateRemoveButtons.html');
     }));

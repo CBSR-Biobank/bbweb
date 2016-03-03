@@ -65,11 +65,11 @@ define(function () {
       $timeout(activeTabUpdate, 0);
 
       function activeTabUpdate() {
-        vm.tabSummaryActive      = ($state.current.name.startsWith('home.admin.studies.study.summary'));
-        vm.tabParticipantsActive = ($state.current.name.startsWith('home.admin.studies.study.participants'));
-        vm.tabSpecimensActive    = ($state.current.name.startsWith('home.admin.studies.study.specimens'));
-        vm.tabCollectionActive   = ($state.current.name.startsWith('home.admin.studies.study.collection'));
-        vm.tabProcessingActive   = ($state.current.name.startsWith('home.admin.studies.study.processing'));
+        vm.tabSummaryActive      = ($state.current.name.indexOf('home.admin.studies.study.summary') >= 0);
+        vm.tabParticipantsActive = ($state.current.name.indexOf('home.admin.studies.study.participants') >= 0);
+        vm.tabSpecimensActive    = ($state.current.name.indexOf('home.admin.studies.study.specimens') >= 0);
+        vm.tabCollectionActive   = ($state.current.name.indexOf('home.admin.studies.study.collection') >= 0);
+        vm.tabProcessingActive   = ($state.current.name.indexOf('home.admin.studies.study.processing') >= 0);
       }
 
     }

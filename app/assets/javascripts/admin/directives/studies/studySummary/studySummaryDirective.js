@@ -5,25 +5,37 @@
 define(['underscore'], function(_) {
   'use strict';
 
-  StudySummaryTabCtrl.$inject = [
+  /**
+   *
+   */
+  function studySummaryDirective() {
+    var directive = {
+      restrict: 'E',
+      scope: {},
+      bindToController: {
+        study: '='
+      },
+      templateUrl : '/assets/javascripts/admin/directives/studies/studySummary/studySummary.html',
+      controller: StudySummaryCtrl,
+      controllerAs: 'vm'
+    };
+
+    return directive;
+  }
+
+  StudySummaryCtrl.$inject = [
     '$state',
     'modalService',
-    'notificationsService',
-    'study'
+    'notificationsService'
   ];
 
-  /**
-   * Displays the study administrtion page, with a number of tabs. Each tab displays the configuration
-   * for a different aspect of the study.
-   */
-  function StudySummaryTabCtrl($state,
-                               modalService,
-                               notificationsService,
-                               study) {
+  function StudySummaryCtrl($state,
+                            modalService,
+                            notificationsService) {
+
     var validStatusActions = ['disable', 'enable', 'retire', 'unretire'],
         vm = this;
 
-    vm.study = study;
     vm.descriptionToggleLength = 100;
     vm.changeStatus = changeStatus;
     vm.editName = editName;
@@ -83,5 +95,6 @@ define(['underscore'], function(_) {
     }
   }
 
-  return StudySummaryTabCtrl;
+  return studySummaryDirective;
+
 });

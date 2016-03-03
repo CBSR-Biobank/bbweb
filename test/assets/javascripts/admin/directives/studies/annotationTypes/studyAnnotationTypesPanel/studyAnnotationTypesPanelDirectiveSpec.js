@@ -108,8 +108,8 @@ define([
           $window.localStorage.setItem(context.panelId, '');
 
           testUtils.putHtmlTemplates(
-            '/assets/javascripts/admin/studies/annotationTypes/directives/studyAnnotationTypesPanel/studyAnnotationTypesPanel.html',
-            '/assets/javascripts/admin/studies/annotationTypes/directives/studyAnnotationTypesTable/studyAnnotationTypesTable.html',
+            '/assets/javascripts/admin/directives/studies/annotationTypes/studyAnnotationTypesPanel/studyAnnotationTypesPanel.html',
+            '/assets/javascripts/admin/directives/studies/annotationTypes/studyAnnotationTypesTable/studyAnnotationTypesTable.html',
             '/assets/javascripts/common/directives/panelButtons.html',
             '/assets/javascripts/common/directives/updateRemoveButtons.html');
 

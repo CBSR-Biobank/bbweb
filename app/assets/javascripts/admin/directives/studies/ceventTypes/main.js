@@ -15,8 +15,6 @@ define(function (require) {
     'biobank.users'
   ]);
 
-  module.directive('ceventTypesPanel',
-                   require('./ceventTypesPanel/ceventTypesPanelDirective'));
   module.directive('ceventTypeAdd',
                    require('./ceventTypeAdd/ceventTypeAddDirective'));
   module.directive('ceventTypesAddAndSelect',

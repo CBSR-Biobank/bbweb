@@ -7,9 +7,9 @@
 define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
-  describe('Controller: StudyCtrl', function() {
+  describe('Directive: studyViewDirective', function() {
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test', function($provide) {
+    beforeEach(mocks.module('biobankApp', 'ui.router', 'biobank.test', function($provide) {
       $provide.value('$window', {
         localStorage: {
           setItem: jasmine.createSpy('mockWindowService.setItem'),
@@ -18,64 +18,41 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       });
     }));
 
-    beforeEach(inject(function($q, _Study_, jsonEntities) {
+    beforeEach(inject(function($rootScope, $compile, testUtils, $state) {
       var self = this;
 
       self.$window      = self.$injector.get('$window');
+      self.$state       = self.$injector.get('$state');
       self.Study        = self.$injector.get('Study');
       self.jsonEntities = self.$injector.get('jsonEntities');
 
-      self.createController = setupController();
       self.study = new self.Study(self.jsonEntities.study());
 
-      //--
+      testUtils.putHtmlTemplates(
+        '/assets/javascripts/admin/directives/studies/studyView/studyView.html');
 
-      function setupController() {
-        var $rootScope  = self.$injector.get('$rootScope'),
-            $controller = self.$injector.get('$controller'),
-            $window     = self.$injector.get('$window'),
-            $timeout    = self.$injector.get('$timeout');
+      self.element = angular.element('<study-view study="vm.study"></study-view>');
+      self.scope = $rootScope.$new();
+      self.scope.vm = { study: self.study };
 
-        return create;
-
-        //--
-
-        function create(study) {
-          var state = {
-            params:  { studyId: study.id },
-            current: { name: 'home.admin.studies.study.processing' }
-          };
-
-          self.scope = $rootScope.$new();
-          $controller('StudyCtrl as vm',
-                      {
-                        $window:  $window,
-                        $scope:   self.scope,
-                        $state:   state,
-                        $timeout: $timeout,
-                        study:    study
-                      });
-          self.scope.$digest();
-        }
-      }
+      $compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('studyView');
     }));
 
     it('should contain a valid study', function() {
-      this.createController(this.study);
-      expect(this.scope.vm.study).toBe(this.study);
+      expect(this.controller.study).toBe(this.study);
     });
 
     it('should contain initialized panels', function() {
-      this.createController(this.study);
-      expect(this.scope.vm.tabSummaryActive).toBe(false);
-      expect(this.scope.vm.tabParticipantsActive).toBe(false);
-      expect(this.scope.vm.tabSpecimensActive).toBe(false);
-      expect(this.scope.vm.tabCollectionActive).toBe(false);
-      expect(this.scope.vm.tabProcessingActive).toBe(false);
+      expect(this.controller.tabSummaryActive).toBe(false);
+      expect(this.controller.tabParticipantsActive).toBe(false);
+      expect(this.controller.tabSpecimensActive).toBe(false);
+      expect(this.controller.tabCollectionActive).toBe(false);
+      expect(this.controller.tabProcessingActive).toBe(false);
     });
 
     it('should contain initialized local storage', function() {
-      this.createController(this.study);
       expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.collectionEventTypes', true);
       expect(this.$window.localStorage.setItem)
@@ -93,11 +70,9 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
     });
 
     it('should initialize the tab of the current state', function() {
-      var $timeout = this.$injector.get('$timeout');
-
-      this.createController(this.study);
-      $timeout.flush();
-      expect(this.scope.vm.tabProcessingActive).toBe(true);
+      this.$state.current.name = 'home.admin.studies.study.processing';
+      this.$injector.get('$timeout').flush();
+      expect(this.controller.tabProcessingActive).toBe(true);
     });
 
   });

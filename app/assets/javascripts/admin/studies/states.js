@@ -109,8 +109,14 @@ define(function () {
       },
       views: {
         'studyDetails': {
-          templateUrl: '/assets/javascripts/admin/studies/studySummaryTab.html',
-          controller: 'StudySummaryTabCtrl as vm'
+          template: '<study-summary study="vm.study"></study-summary>',
+          controller: [
+            'study',
+            function (study) {
+              this.study = study;
+            }
+          ],
+          controllerAs: 'vm'
         }
       },
       data: {

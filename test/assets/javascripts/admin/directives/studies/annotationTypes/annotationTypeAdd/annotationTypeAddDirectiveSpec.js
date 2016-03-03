@@ -1,9 +1,9 @@
 /**
+ * Jasmine test suite
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-// Jasmine test suite
-//
 define([
   'angular',
   'angularMocks',
@@ -21,7 +21,7 @@ define([
       this.jsonEntities        = this.$injector.get('jsonEntities');
 
       testUtils.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/annotationTypes/directives/annotationTypeAdd/annotationTypeAdd.html');
+        '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeAdd/annotationTypeAdd.html');
 
       this.onSubmit = jasmine.createSpy('onSubmit');
       this.onCancel = jasmine.createSpy('onCancel');

@@ -21,7 +21,7 @@ define([
       this.study = new this.Study(this.jsonEntities.study());
 
       testUtils.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/annotationTypes/directives/annotationTypeAdd/annotationTypeAdd.html');
+        '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeAdd/annotationTypeAdd.html');
 
       this.element = angular.element([
         '<participant-annotation-type-add',

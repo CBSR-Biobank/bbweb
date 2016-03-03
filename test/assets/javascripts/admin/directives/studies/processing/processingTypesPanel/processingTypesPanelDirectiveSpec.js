@@ -26,7 +26,7 @@ define([
       testUtils.addCustomMatchers();
 
       testUtils.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/processing/directives/processingTypesPanel/processingTypesPanel.html',
+        '/assets/javascripts/admin/directives/studies/processing/processingTypesPanel/processingTypesPanel.html',
         '/assets/javascripts/common/directives/panelButtons.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html');
     }));

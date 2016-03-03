@@ -24,7 +24,7 @@ define([
       testUtils.addCustomMatchers();
 
       testUtils.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/directives/studiesList/studiesList.html',
+        '/assets/javascripts/admin/directives/studies/studiesList/studiesList.html',
         '/assets/javascripts/common/directives/pagedItemsList/pagedItemsList.html');
     }));
 

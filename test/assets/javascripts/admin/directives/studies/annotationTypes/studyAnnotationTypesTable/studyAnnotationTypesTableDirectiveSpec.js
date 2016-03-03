@@ -85,7 +85,7 @@ define([
           this.AnnotationTypeViewer     = this.$injector.get('AnnotationTypeViewer');
 
           testUtils.putHtmlTemplates(
-            '/assets/javascripts/admin/studies/annotationTypes/directives/studyAnnotationTypesTable/studyAnnotationTypesTable.html',
+            '/assets/javascripts/admin/directives/studies/annotationTypes/studyAnnotationTypesTable/studyAnnotationTypesTable.html',
             '/assets/javascripts/common/directives/updateRemoveButtons.html');
 
           spyOn(this.state, 'go');

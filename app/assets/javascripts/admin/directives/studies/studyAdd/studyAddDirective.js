@@ -49,7 +49,7 @@ define(['underscore'], function(_) {
 
       function submitSuccess() {
         notificationsService.submitSuccess();
-        $state.go(vm.returnState);
+        $state.go(vm.returnState, {}, { reload: true });
       }
 
       function submitError(error) {
