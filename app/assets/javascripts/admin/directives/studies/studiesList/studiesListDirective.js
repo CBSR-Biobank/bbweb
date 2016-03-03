@@ -13,7 +13,7 @@ define(['underscore'], function(_) {
       restrict: 'E',
       scope: {},
       bindToController: {},
-      templateUrl : '/assets/javascripts/admin/studies/directives/studiesList/studiesList.html',
+      templateUrl : '/assets/javascripts/admin/directives/studies/studiesList/studiesList.html',
       controller: StudiesListCtrl,
       controllerAs: 'vm'
     };

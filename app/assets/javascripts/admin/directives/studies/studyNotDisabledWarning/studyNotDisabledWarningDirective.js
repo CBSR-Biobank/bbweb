@@ -14,7 +14,7 @@ define(function () {
       scope: {
         study: '='
       },
-      templateUrl : '/assets/javascripts/admin/studies/directives/studyNotDisabledWarning/studyNotDisabledWarning.html'
+      templateUrl : '/assets/javascripts/admin/directives/studies/studyNotDisabledWarning/studyNotDisabledWarning.html'
     };
     return directive;
   }

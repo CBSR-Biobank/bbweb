@@ -14,7 +14,7 @@ define([], function() {
       scope: {
         study: '='
       },
-      templateUrl : '/assets/javascripts/admin/studies/directives/studyCollection/studyCollection.html'
+      templateUrl : '/assets/javascripts/admin/directives/studies/studyCollection/studyCollection.html'
     };
     return directive;
   }
