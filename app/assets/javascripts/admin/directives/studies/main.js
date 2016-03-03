@@ -10,10 +10,12 @@ define(function (require) {
   var angular = require('angular'),
       name = 'biobank.admin.directives.studies',
       module,
-      annotationTypes = require('./annotationTypes/main');
+      annotationTypes = require('./annotationTypes/main'),
+      ceventTypes = require('./ceventTypes/main');
 
   module = angular.module(name, [
-    annotationTypes.name
+    annotationTypes.name,
+    ceventTypes.name
   ]);
 
   return {

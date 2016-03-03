@@ -10,13 +10,11 @@ define(function (require) {
   var angular = require('angular'),
       name = 'biobank.admin.studies',
       module,
-      ceventTypes = require('./ceventTypes/main'),
       participants = require('./participants/main'),
       processing = require('./processing/main'),
       specimenGroups = require('./specimenGroups/main');
 
   module = angular.module(name, [
-    ceventTypes.name,
     participants.name,
     processing.name,
     specimenGroups.name,
@@ -24,6 +22,8 @@ define(function (require) {
   ]);
 
   module.config(require('./states'));
+
+  module.config(require('./ceventTypes/states'));
 
   module.directive('studiesList',             require('./directives/studiesList/studiesListDirective'));
   module.directive('studyCollection',         require('./directives/studyCollection/studyCollectionDirective'));

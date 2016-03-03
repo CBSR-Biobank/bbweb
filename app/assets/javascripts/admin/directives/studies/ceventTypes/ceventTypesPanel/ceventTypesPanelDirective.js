@@ -17,7 +17,7 @@ define(['angular', 'underscore'], function(angular, _) {
         ceventTypes:            '=',
         annotationTypeIdsInUse: '='
       },
-      templateUrl: '/assets/javascripts/admin/studies/ceventTypes/directives/ceventTypesPanel/ceventTypesPanel.html',
+      templateUrl: '/assets/javascripts/admin/directives/studies/ceventTypes/ceventTypesPanel/ceventTypesPanel.html',
       controller: CeventTypesPanelCtrl,
       controllerAs: 'vm'
     };

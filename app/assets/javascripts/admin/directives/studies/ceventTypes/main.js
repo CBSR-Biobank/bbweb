@@ -8,23 +8,21 @@ define(function (require) {
   'use strict';
 
   var angular = require('angular'),
-      name = 'biobank.admin.studies.ceventTypes',
+      name = 'biobank.admin.directives.studies.ceventTypes',
       module;
 
   module = angular.module(name, [
     'biobank.users'
   ]);
 
-  module.config(require('./states'));
-
   module.directive('ceventTypesPanel',
-                   require('./directives/ceventTypesPanel/ceventTypesPanelDirective'));
+                   require('./ceventTypesPanel/ceventTypesPanelDirective'));
   module.directive('ceventTypeAdd',
-                   require('./directives/ceventTypeAdd/ceventTypeAddDirective'));
+                   require('./ceventTypeAdd/ceventTypeAddDirective'));
   module.directive('ceventTypesAddAndSelect',
-                   require('./directives/ceventTypesAddAndSelect/ceventTypesAddAndSelectDirective'));
+                   require('./ceventTypesAddAndSelect/ceventTypesAddAndSelectDirective'));
   module.directive('ceventTypeView',
-                   require('./directives/ceventTypeView/ceventTypeViewDirective'));
+                   require('./ceventTypeView/ceventTypeViewDirective'));
 
   return {
     name: name,
