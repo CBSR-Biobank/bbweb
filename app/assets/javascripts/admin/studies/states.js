@@ -57,8 +57,14 @@ define(function () {
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/studyForm.html',
-          controller: 'StudyEditCtrl as vm'
+          template: '<study-add study="vm.study"></study-add>',
+          controller: [
+            'study',
+            function (study) {
+              this.study = study;
+            }
+          ],
+          controllerAs: 'vm'
         }
       },
       data: {
@@ -78,8 +84,14 @@ define(function () {
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/studyView.html',
-          controller: 'StudyCtrl as vm'
+          template: '<study-view study="vm.study"></study-view>',
+          controller: [
+            'study',
+            function (study) {
+              this.study = study;
+            }
+          ],
+          controllerAs: 'vm'
         }
       },
       data: {

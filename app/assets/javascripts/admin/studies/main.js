@@ -23,8 +23,6 @@ define(function (require) {
   module.config(require('./ceventTypes/states'));
   module.config(require('./participants/states'));
 
-  module.controller('StudyCtrl',           require('./StudyCtrl'));
-  module.controller('StudyEditCtrl',       require('./StudyEditCtrl'));
   module.controller('StudySummaryTabCtrl', require('./StudySummaryTabCtrl'));
 
   return {

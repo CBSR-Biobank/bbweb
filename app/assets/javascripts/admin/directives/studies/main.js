@@ -21,7 +21,9 @@ define(function (require) {
   ]);
 
   module.directive('studiesList',             require('./studiesList/studiesListDirective'));
+  module.directive('studyAdd',                require('./studyAdd/studyAddDirective'));
   module.directive('studyCollection',         require('./studyCollection/studyCollectionDirective'));
+  module.directive('studyView',               require('./studyView/studyViewDirective'));
   module.directive('studyNotDisabledWarning',
                    require('./studyNotDisabledWarning/studyNotDisabledWarningDirective'));
   module.directive('validAmount',          require('./validAmount/validAmountDirective'));

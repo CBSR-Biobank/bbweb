@@ -1,19 +1,33 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 define(function () {
   'use strict';
 
-  StudyCtrl.$inject = ['$window', '$state', '$timeout', 'study'];
-
   /**
    *
    */
-  function StudyCtrl($window, $state, $timeout, study) {
+  function studyViewDirective() {
+    var directive = {
+      restrict: 'E',
+      scope: {},
+      bindToController: {
+        study: '='
+      },
+      templateUrl : '/assets/javascripts/admin/directives/studies/studyView/studyView.html',
+      controller: StudyViewCtrl,
+      controllerAs: 'vm'
+    };
+
+    return directive;
+  }
+
+  StudyViewCtrl.$inject = ['$window', '$state', '$timeout'];
+
+  function StudyViewCtrl($window, $state, $timeout) {
     var vm = this;
 
-    vm.study                 = study;
     vm.tabSummaryActive      = false;
     vm.tabParticipantsActive = false;
     vm.tabSpecimensActive    = false;
@@ -57,9 +71,9 @@ define(function () {
         vm.tabCollectionActive   = ($state.current.name.startsWith('home.admin.studies.study.collection'));
         vm.tabProcessingActive   = ($state.current.name.startsWith('home.admin.studies.study.processing'));
       }
-    }
 
+    }
   }
 
-  return StudyCtrl;
+  return studyViewDirective;
 });
