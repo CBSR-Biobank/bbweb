@@ -130,9 +130,9 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
       }
 
       return biobankApi.get(url).then(function(reply) {
+        // reply is a paged result
         var deferred = $q.defer();
         try {
-          // reply is a paged result
           reply.items = _.map(reply.items, function(obj){
             return Study.create(obj);
           });

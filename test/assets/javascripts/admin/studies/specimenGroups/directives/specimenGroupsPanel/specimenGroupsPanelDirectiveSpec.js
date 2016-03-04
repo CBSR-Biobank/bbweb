@@ -203,17 +203,15 @@ define([
       var q                   = this.$injector.get('$q'),
           modalService        = this.$injector.get('modalService'),
           entities            = createEntities(),
-          sgToRemove          = entities.specimenGroups[1];
+          sgToRemove          = entities.specimenGroups[1],
+          deferred            = q.defer();
 
       createController(entities);
-      spyOn(sgToRemove, 'remove').and.callFake(function () {
-        var deferred = q.defer();
-        deferred.reject('error');
-        return deferred.promise;
-      });
+      spyOn(sgToRemove, 'remove').and.returnValue(deferred.promise);
       spyOn(modalService, 'showModal').and.callFake(function () {
         return q.when('OK');
       });
+      deferred.reject('simulated error');
 
       controller.remove(sgToRemove);
       scope.$digest();

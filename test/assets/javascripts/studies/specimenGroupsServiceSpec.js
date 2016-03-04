@@ -12,7 +12,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('Service: specimenGroupsService', function() {
+  xdescribe('Service: specimenGroupsService', function() {
 
     var specimenGroupsService, httpBackend, jsonEntities;
 

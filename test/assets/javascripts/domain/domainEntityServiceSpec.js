@@ -9,28 +9,27 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
   describe('Service: domainEntityService', function() {
 
-    var rootScope, domainEntityService, modalService;
-
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, _domainEntityService_, _modalService_) {
-      rootScope = $rootScope;
-      domainEntityService = _domainEntityService_;
-      modalService = _modalService_;
+    beforeEach(inject(function () {
+      this.$q                  = this.$injector.get('$q');
+      this.rootScope           = this.$injector.get('$rootScope');
+      this.domainEntityService = this.$injector.get('domainEntityService');
+      this.modalService        = this.$injector.get('modalService');
     }));
 
     describe('updateErrorModal', function () {
 
-      beforeEach(function () {
-        spyOn(modalService, 'showModal').and.callFake(function () {});
-      });
+      beforeEach(inject(function () {
+        spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+      }));
 
       it('opens a modal when error is a version mismatch error', function() {
         /*jshint -W053 */
         var err = { data: { message: new String('expected version doesn\'t match current version') } };
         var domainEntityName = 'entity';
-        domainEntityService.updateErrorModal(err, domainEntityName);
-        expect(modalService.showModal).toHaveBeenCalledWith({
+        this.domainEntityService.updateErrorModal(err, domainEntityName);
+        expect(this.modalService.showModal).toHaveBeenCalledWith({
           templateUrl: '/assets/javascripts/common/modalConcurrencyError.html'
         }, {
           closeButtonText: 'Cancel',
@@ -42,8 +41,8 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       it('opens a modal when error is a string', function() {
         /*jshint -W053 */
         var err = { data: { message: new String('update error') } };
-        domainEntityService.updateErrorModal(err, 'entity');
-        expect(modalService.showModal).toHaveBeenCalledWith({}, {
+        this.domainEntityService.updateErrorModal(err, 'entity');
+        expect(this.modalService.showModal).toHaveBeenCalledWith({}, {
           closeButtonText: 'Cancel',
           actionButtonText: 'OK',
           headerHtml: 'Cannot submit this change',
@@ -53,8 +52,8 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
       it('opens a modal when error is a list', function() {
         var err = { data: { message: [ 'update error1', 'update error2' ] } };
-        domainEntityService.updateErrorModal(err, 'entity');
-        expect(modalService.showModal).toHaveBeenCalledWith({}, {
+        this.domainEntityService.updateErrorModal(err, 'entity');
+        expect(this.modalService.showModal).toHaveBeenCalledWith({}, {
           closeButtonText: 'Cancel',
           actionButtonText: 'OK',
           headerHtml: 'Cannot submit this change',
@@ -65,42 +64,27 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     });
 
     describe('removeEntity', function () {
-      var q;
 
-      beforeEach(inject(function ($q) {
-        q = $q;
+      beforeEach(inject(function () {
+        this.remove = jasmine.createSpy('remove').and.returnValue(this.$q.when(true));
       }));
-
-      function removeEntity() {
-        return {
-          remove: function () {
-            return q.when('yyy');
-          }
-        };
-      }
 
       it('remove works when user confirms the removal', function(done) {
         var header = 'header',
             body = 'body',
             removeFailedHeader = 'removeFailedHeaderHtml',
-            removeFailedBody = 'removeFailedBody',
-            entity = removeEntity();
+            removeFailedBody = 'removeFailedBody';
 
-        spyOn(entity, 'remove').and.callThrough();
-        spyOn(modalService, 'showModal').and.callFake(function () {
-          return q.when('xxx');
-        });
+        spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
 
-        domainEntityService.removeEntity(entity,
-                                         header,
-                                         body,
-                                         removeFailedHeader,
-                                         removeFailedBody)
-          .then(function () {
-            expect(entity.remove).toHaveBeenCalled();
-            done();
-          });
-        rootScope.$digest();
+        this.domainEntityService.removeEntity(this.remove,
+                                              header,
+                                              body,
+                                              removeFailedHeader,
+                                              removeFailedBody)
+          .then(function () { done(); });
+        this.rootScope.$digest();
+        expect(this.remove).toHaveBeenCalled();
       });
 
       it('works when user cancels the removal', function() {
@@ -108,51 +92,41 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
             body = 'body',
             removeFailedHeader = 'removeFailedHeaderHtml',
             removeFailedBody = 'removeFailedBody',
-            entity = removeEntity();
+            deferred = this.$q.defer();
 
-        spyOn(entity, 'remove').and.callThrough();
-        spyOn(modalService, 'showModal').and.callFake(function () {
-          var deferred = q.defer();
-          deferred.reject('xxx');
-          return deferred.promise;
-        });
+        spyOn(this.modalService, 'showModal').and.returnValue(deferred.promise);
+        deferred.reject('simulated error');
 
-        domainEntityService.removeEntity(entity,
-                                         header,
-                                         body,
-                                         removeFailedHeader,
-                                         removeFailedBody);
+        this.domainEntityService.removeEntity(this.remove,
+                                              header,
+                                              body,
+                                              removeFailedHeader,
+                                              removeFailedBody);
 
-        rootScope.$digest();
-        expect(entity.remove).not.toHaveBeenCalled();
+        this.rootScope.$digest();
+        expect(this.remove).not.toHaveBeenCalled();
       });
 
       it('displays the removal failed modal', function() {
-        var header = 'header',
+        var self = this,
+            header = 'header',
             body = 'body',
             removeFailedHeader = 'removeFailedHeaderHtml',
             removeFailedBody = 'removeFailedBody',
-            entity =  {
-              remove: function () {
-                var deferred = q.defer();
-                deferred.reject('yyy');
-                return deferred.promise;
-              }
-            };
+            deferred = self.$q.defer();
 
-        spyOn(entity, 'remove').and.callThrough();
-        spyOn(modalService, 'showModal').and.callFake(function () {
-          return q.when('xxx');
-        });
+        spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+        this.remove = jasmine.createSpy('remove').and.returnValue(deferred.promise);
+        deferred.reject('simulated error');
 
-        domainEntityService.removeEntity(entity,
+        this.domainEntityService.removeEntity(this.remove,
                                          header,
                                          body,
                                          removeFailedHeader,
                                          removeFailedBody);
-        rootScope.$digest();
-        expect(entity.remove).toHaveBeenCalled();
-        expect(modalService.showModal.calls.count()).toEqual(2);
+        this.rootScope.$digest();
+        expect(this.remove).toHaveBeenCalled();
+        expect(this.modalService.showModal.calls.count()).toEqual(2);
       });
 
     });

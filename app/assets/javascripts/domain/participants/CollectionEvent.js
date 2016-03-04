@@ -2,13 +2,14 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function(_) {
+define(['underscore', 'tv4'], function(_, tv4) {
   'use strict';
 
   CollectionEventFactory.$inject = [
+    '$q',
     'funutils',
-    'validationService',
     'ConcurrencySafeEntity',
+    'Annotation',
     'queryStringService',
     'biobankApi',
     'annotationFactory'
@@ -17,39 +18,38 @@ define(['underscore'], function(_) {
   /**
    * Factory for participants.
    */
-  function CollectionEventFactory(funutils,
-                                  validationService,
+  function CollectionEventFactory($q,
+                                  funutils,
                                   ConcurrencySafeEntity,
+                                  Annotation,
                                   queryStringService,
                                   biobankApi,
                                   annotationFactory) {
 
-    var requiredKeys = [
-      'id',
-      'participantId',
-      'collectionEventTypeId',
-      'timeCompleted',
-      'visitNumber',
-      'annotations',
-      'version'
-    ];
-
-    var validateIsMap = validationService.condition1(
-      validationService.validator('must be a map', _.isObject));
-
-    var createObj = funutils.partial1(validateIsMap, _.identity);
-
-    var validateObj = funutils.partial(
-      validationService.condition1(
-        validationService.validator('has the correct keys',
-                                    validationService.hasKeys.apply(null, requiredKeys))),
-      createObj);
-
-    var validateAnnotations = funutils.partial(
-      validationService.condition1(
-        validationService.validator('has the correct keys',
-                                    validationService.hasKeys('annotationTypeId', 'selectedValues'))),
-      createObj);
+    var schema = {
+      'id': 'CollectionEvent',
+      'type': 'object',
+      'properties': {
+        'id':                    { 'type': 'string' },
+        'participantId':         { 'type': 'string' },
+        'collectionEventTypeId': { 'type': 'string' },
+        'version':               { 'type': 'integer', 'minimum': 0 },
+        'timeAdded':             { 'type': 'string' },
+        'timeModified':          { 'type': [ 'string', 'null' ] },
+        'timeCompleted':         { 'type': 'string' },
+        'visitNumber':           { 'type': 'integer' },
+        'annotations':           { 'type': 'array' }
+      },
+      'required': [
+        'id',
+        'participantId',
+        'collectionEventTypeId',
+        'timeCompleted',
+        'visitNumber',
+        'annotations',
+        'version'
+      ]
+    };
 
     /**
      * To convert server side annotations to Annotation class call setAnnotationTypes().
@@ -61,7 +61,7 @@ define(['underscore'], function(_) {
      * @param {CollectionEventAnnotationType} annotationTypes. If both collectionEventType and annotationTypes
      * are passed to the constructor, the annotations will be converted to Annotation objects.
      */
-    function CollectionEvent(obj, collectionEventType, annotationTypes) {
+    function CollectionEvent(obj, collectionEventType) {
       var defaults = {
         participantId:         null,
         collectionEventTypeId: null,
@@ -81,35 +81,27 @@ define(['underscore'], function(_) {
       }
 
       this.setCollectionEventType(collectionEventType);
-
-      if (annotationTypes) {
-        this.setAnnotationTypes(annotationTypes);
-      }
     }
 
     CollectionEvent.prototype = Object.create(ConcurrencySafeEntity.prototype);
 
+    CollectionEvent.isValid = function(obj) {
+      return tv4.validate(obj, schema);
+    };
+
     /**
      * Used by promise code, so it must return an error rather than throw one.
      */
-    CollectionEvent.create = function (obj, collectionEventType, annotationTypes) {
-      var annotValid,
-          validation =
-          validateObj(obj);
-
-      if (!_.isObject(validation)) {
-        return new Error('invalid object from server: ' + validation);
+    CollectionEvent.create = function (obj, collectionEventType) {
+      if (!tv4.validate(obj, schema)) {
+        throw new Error('invalid object from server: ' + tv4.error);
       }
 
-      annotValid =_.reduce(obj.annotations, function (memo, annotation) {
-        var validation = validateAnnotations(annotation);
-        return memo && _.isObject(validation);
-      }, true);
-
-      if (!annotValid) {
-        return new Error('invalid annotation object from server');
+      if (!Annotation.validAnnotations(obj.annotations)) {
+        throw new Error('invalid object from server: bad annotations');
       }
-      return new CollectionEvent(obj, collectionEventType, annotationTypes);
+
+      return new CollectionEvent(obj, collectionEventType);
     };
 
     /**
@@ -121,15 +113,29 @@ define(['underscore'], function(_) {
      *
      * @param annotationTypes can be undefined or null.
      */
-    CollectionEvent.get = function (participantId, id, collectionEventType, annotationTypes) {
+    CollectionEvent.get = function (participantId, id, collectionEventType) {
       if (!id) {
         throw new Error('collection event id not specified');
       }
 
       return biobankApi.get(uri(participantId) + '?ceventId=' + id)
         .then(function (reply) {
-          return CollectionEvent.create(reply, collectionEventType, annotationTypes);
+          return CollectionEvent.prototype.asyncCreate(reply);
         });
+    };
+
+    CollectionEvent.prototype.asyncCreate = function (obj) {
+      var deferred = $q.defer();
+
+      if (!tv4.validate(obj, schema)) {
+        deferred.reject('invalid object from server: ' + tv4.error);
+      } else if (!Annotation.validAnnotations(obj.annotationTypes)) {
+        deferred.reject('invalid annotation types from server: ' + tv4.error);
+      } else {
+        deferred.resolve(new CollectionEvent(obj));
+      }
+
+      return deferred.promise;
     };
 
     /**
@@ -157,11 +163,16 @@ define(['underscore'], function(_) {
 
       return biobankApi.get(url).then(function(reply) {
         // reply is a paged result
-        reply.items = _.map(reply.items, function(obj) {
-          var result = CollectionEvent.create(obj);
-          return result;
-        });
-        return reply;
+        var deferred = $q.defer();
+        try {
+          reply.items = _.map(reply.items, function(obj){
+            return CollectionEvent.create(obj);
+          });
+          deferred.resolve(reply);
+        } catch (e) {
+          deferred.reject('invalid studies from server');
+        }
+        return deferred.promise;
       });
     };
 
@@ -172,11 +183,10 @@ define(['underscore'], function(_) {
      */
     CollectionEvent.getByVisitNumber = function (participantId,
                                                  visitNumber,
-                                                 collectionEventType,
-                                                 annotationTypes) {
+                                                 collectionEventType) {
       return biobankApi.get(uri(participantId) + '/visitNumber/' + visitNumber)
         .then(function (reply) {
-          return CollectionEvent.create(reply, collectionEventType, annotationTypes);
+          return CollectionEvent.create(reply, collectionEventType);
         });
     };
 
@@ -184,67 +194,16 @@ define(['underscore'], function(_) {
       this.collectionEventType = collectionEventType;
     };
 
-    /**
-     * Converts the server side annotations to Annotation objects, which make it easier to manage them.
-     *
-     * @param {CollectionEventAnnotationType} annotationTypes - the annotation types allowed for this
-     * participant.
-     */
-    CollectionEvent.prototype.setAnnotationTypes = function (annotationTypes) {
+    CollectionEvent.prototype.add = function () {
       var self = this,
-          annotationTypeDataById,
-          ceventTypeAnnotationTypeIds,
-          serverAnnotationsById;
-
-      if (_.isUndefined(self.collectionEventType)) {
-        throw new Error('collection event type not defined');
-      }
-
-      annotationTypeDataById      = _.indexBy(self.collectionEventType.annotationTypeData,
-                                              'annotationTypeId');
-      ceventTypeAnnotationTypeIds = _.keys(annotationTypeDataById);
-      serverAnnotationsById       = _.indexBy(self.annotations, 'annotationTypeId');
-
-      checkValidIds(ceventTypeAnnotationTypeIds);
-      self.annotationTypes = annotationTypes;
-      self.annotations = _.map(annotationTypes, function (annotationType) {
-        var serverAnnotation = serverAnnotationsById[annotationType.id];
-        return annotationFactory.create(serverAnnotation,
-                                        annotationType,
-                                        annotationTypeDataById[annotationType.id].required);
-      });
-
-      function checkValidIds(ceventTypeAnnotationTypeIds) {
-        // make sure the annotations ids match up with the corresponding annotation types
-        var differentIds = _.difference(_.pluck(self.annotations, 'annotationTypeId'),
-                                        ceventTypeAnnotationTypeIds);
-
-        if (differentIds.length > 0) {
-          throw new Error('annotations with invalid annotation type IDs found: ' +
-                          differentIds);
-        }
-
-        differentIds = _.difference(_.pluck(annotationTypes, 'id'),
-                                    ceventTypeAnnotationTypeIds);
-
-        if (differentIds.length > 0) {
-          throw new Error('annotation types not belonging to collection event type found: ' +
-                          differentIds);
-        }
-        return true;
-      }
-    };
-
-    CollectionEvent.prototype.addOrUpdate = function () {
-      var self = this,
-          cmd = _.pick(self,
+          json = _.pick(self,
                        'participantId',
                        'collectionEventTypeId',
                        'timeCompleted',
                        'visitNumber');
 
       // convert annotations to server side entities
-      cmd.annotations = _.map(self.annotations, function (annotation) {
+      json.annotations = _.map(self.annotations, function (annotation) {
         // make sure required annotations have values
         if (!annotation.isValid()) {
           throw new Error('required annotation has no value: annotationId: ' +
@@ -253,23 +212,23 @@ define(['underscore'], function(_) {
         return annotation.getServerAnnotation();
       });
 
-      return addOrUpdateInternal(cmd).then(function(reply) {
-        return CollectionEvent.create(reply);
+      return biobankApi.post(uri(self.participantId), json).then(function(reply) {
+        return self.asyncCreate(reply);
       });
-
-      // --
-
-      function addOrUpdateInternal(cmd) {
-        if (self.isNew()) {
-          return biobankApi.post(uri(self.participantId), cmd);
-        }
-        _.extend(cmd, { id: self.id, expectedVersion: self.version });
-        return biobankApi.put(uri(self.participantId, self.id), cmd);
-      }
     };
 
     CollectionEvent.prototype.remove = function () {
       return biobankApi.del(uri(this.participantId, this.id, this.version));
+    };
+
+    CollectionEvent.prototype.updateVisitNumber = function (visitNumber) {
+      return ConcurrencySafeEntity.prototype.update.call(
+        this, uri('visitNumber', this.id), { visitNumber: visitNumber });
+    };
+
+    CollectionEvent.prototype.updateTimeCompleted = function (timeCompleted) {
+      return ConcurrencySafeEntity.prototype.update.call(
+        this, uri('timeCompleted', this.id), { timeCompleted: timeCompleted });
     };
 
     function uri(/* participantId, collectionEventId, version */) {

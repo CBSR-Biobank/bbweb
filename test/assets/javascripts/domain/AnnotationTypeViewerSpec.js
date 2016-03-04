@@ -23,6 +23,7 @@ define([
       this.AnnotationValueType  = this.$injector.get('AnnotationValueType');
       this.AnnotationTypeViewer = this.$injector.get('AnnotationTypeViewer');
       this.jsonEntities         = this.$injector.get('jsonEntities');
+      this.testUtils            = this.$injector.get('testUtils');
 
       this.study = new this.Study(this.jsonEntities.study());
 
@@ -35,20 +36,20 @@ define([
       ];
     }));
 
-    it('should open a modal when created', inject(function (testUtils) {
+    it('should open a modal when created', function () {
       var self = this,
           count = 0;
 
-      spyOn(self.modal, 'open').and.callFake(function () { return testUtils.fakeModal(); });
+      spyOn(self.modal, 'open').and.returnValue(this.testUtils.fakeModal());
 
       _.each(this.annotatationTypeOptions, function (options) {
         // jshint unused:false
-        var annotationType = new self.AnnotationType(self.jsonEntities.annotationType(options)).
+        var annotationType = new self.AnnotationType(self.jsonEntities.annotationType(options)),
             viewer = new self.AnnotationTypeViewer(annotationType);
         count++;
         expect(self.modal.open.calls.count()).toBe(count);
       });
-    }));
+    });
 
     it('should throw an error when created when it has no options', function() {
       var self = this,
@@ -80,7 +81,7 @@ define([
         viewer = new self.AnnotationTypeViewer(annotationType);
 
         if (annotationType.isValueTypeSelect()) {
-          numAttributesExpected += 2;
+          numAttributesExpected += 1;
         }
 
         expect(attributes).toBeArrayOfSize(numAttributesExpected);
@@ -92,7 +93,7 @@ define([
             break;
 
           case 'Type':
-            expect(attr.value).toBe(annotationType.valueType);
+            expect(attr.value).toBe(annotationType.getType());
             break;
 
           case 'Required':

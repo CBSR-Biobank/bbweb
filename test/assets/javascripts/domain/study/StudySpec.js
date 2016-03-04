@@ -80,19 +80,19 @@ define([
       });
     });
 
-    it('can retrieve a single study', function(done) {
+    it('can retrieve a single study', function() {
       var self = this;
       self.httpBackend.whenGET(uri(this.jsonStudy.id)).respond(serverReply(this.jsonStudy));
-      self.Study.get(this.jsonStudy.id).then(expectStudy).catch(failTest).finally(done);
+      self.Study.get(this.jsonStudy.id).then(expectStudy).catch(failTest);
       self.httpBackend.flush();
     });
 
-    it('fails when getting a study and it has a bad format', function(done) {
+    it('fails when getting a study and it has a bad format', function() {
       var self = this,
           study = _.omit(self.jsonStudy, 'name');
       self.httpBackend.whenGET(uri(study.id)).respond(serverReply(study));
 
-      self.Study.get(study.id).then(shouldNotFail).catch(shouldFail).finally(done);
+      self.Study.get(study.id).then(shouldNotFail).catch(shouldFail);
       self.httpBackend.flush();
 
       function shouldNotFail(reply) {
@@ -104,14 +104,14 @@ define([
       }
     });
 
-    it('fails when getting a study and it has a bad annotation type', function(done) {
+    it('fails when getting a study and it has a bad annotation type', function() {
       var self = this,
           annotationType = _.omit(self.jsonEntities.annotationType(), 'name'),
           study = self.jsonEntities.study({ annotationTypes: [ annotationType ]});
 
       self.httpBackend.whenGET(uri(study.id)).respond(serverReply(study));
 
-      self.Study.get(study.id).then(shouldNotFail).catch(shouldFail).finally(done);
+      self.Study.get(study.id).then(shouldNotFail).catch(shouldFail);
       self.httpBackend.flush();
 
       function shouldNotFail(error) {
@@ -123,14 +123,14 @@ define([
       }
     });
 
-    it('can retrieve studies', function(done) {
+    it('can retrieve studies', function() {
       var self = this,
           studies = [ self.jsonEntities.study({ annotationTypes: [] }) ],
           reply = self.jsonEntities.pagedResult(studies);
 
       self.httpBackend.whenGET(uri()).respond(serverReply(reply));
 
-      self.Study.list().then(testStudy).catch(failTest).finally(done);
+      self.Study.list().then(testStudy).catch(failTest);
       self.httpBackend.flush();
 
       function testStudy(pagedResult) {
@@ -140,7 +140,7 @@ define([
       }
     });
 
-    it('can list studies using options', function(done) {
+    it('can list studies using options', function() {
       var self = this,
           optionList = [
             { filter: 'name' },
@@ -166,21 +166,17 @@ define([
           _.each(pagedResult.items, function (study) {
             expect(study).toEqual(jasmine.any(self.Study));
           });
-
-          if (options.order) {
-            done();
-          }
         }
       });
     });
 
-    it('fails when list returns an invalid study', function(done) {
+    it('fails when list returns an invalid study', function() {
       var self = this,
           studies = [ _.omit(self.jsonStudy, 'name') ],
           reply = self.jsonEntities.pagedResult(studies);
 
       self.httpBackend.whenGET(uri()).respond(serverReply(reply));
-      self.Study.list().then(listFail).catch(shouldFail).finally(done);
+      self.Study.list().then(listFail).catch(shouldFail);
       self.httpBackend.flush();
 
       function listFail(reply) {
@@ -192,18 +188,18 @@ define([
       }
     });
 
-    it('can add a study', function(done) {
+    it('can add a study', function() {
       var self = this,
           study = new self.Study(_.omit(this.jsonStudy, 'id')),
           json = _.pick(study, 'name', 'description');
 
       self.httpBackend.expectPOST(uri(), json).respond(201, serverReply(this.jsonStudy));
 
-      study.add().then(expectStudy).catch(failTest).finally(done);
+      study.add().then(expectStudy).catch(failTest);
       self.httpBackend.flush();
     });
 
-    it('can update the name on a study', function(done) {
+    it('can update the name on a study', function() {
       var self  = this,
           study = new self.Study(this.jsonStudy);
 
@@ -215,11 +211,10 @@ define([
                                        { name: study.name },
                                        this.jsonStudy,
                                        expectStudy,
-                                       failTest,
-                                       done);
+                                       failTest);
     });
 
-    it('can update the description on a study', function(done) {
+    it('can update the description on a study', function() {
       var self = this,
           study = new self.Study(this.jsonStudy);
 
@@ -241,11 +236,10 @@ define([
                                        { description: study.description },
                                        this.jsonStudy,
                                        expectStudy,
-                                       failTest,
-                                       done);
+                                       failTest);
     });
 
-    it('can add an annotation type on a study', function(done) {
+    it('can add an annotation type on a study', function() {
       var self = this,
           annotationType = self.jsonEntities.annotationType(),
           study          = new self.Study(this.jsonStudy);
@@ -258,11 +252,10 @@ define([
                                        _.omit(annotationType, 'uniqueId'),
                                        this.jsonStudy,
                                        expectStudy,
-                                       failTest,
-                                       done);
+                                       failTest);
     });
 
-    it('can remove an annotation on a study', function(done) {
+    it('can remove an annotation on a study', function() {
       var self = this,
           annotationType = self.jsonEntities.annotationType(),
           baseStudy      = self.jsonEntities.study({ annotationTypes: [ annotationType ] }),
@@ -271,13 +264,13 @@ define([
                                            study.version, annotationType.uniqueId);
 
       self.httpBackend.whenDELETE(url).respond(201, serverReply(true));
-      study.removeAnnotationType(annotationType).then(expectStudy).catch(failTest).finally(done);
+      study.removeAnnotationType(annotationType).then(expectStudy).catch(failTest);
       self.httpBackend.flush();
     });
 
-    it('can disable a study', function(done) {
+    it('can disable a study', function() {
       var jsonStudy = this.jsonEntities.study({ status: this.StudyStatus.ENABLED() });
-      changeStatusShared.call(this, done, jsonStudy, 'disable', this.StudyStatus.DISABLED());
+      changeStatusShared.call(this, jsonStudy, 'disable', this.StudyStatus.DISABLED());
     });
 
     it('throws an error when disabling a study and it is already disabled', function() {
@@ -286,9 +279,9 @@ define([
         .toThrowErrorOfType('Error');
     });
 
-    it('can enable a study', function(done) {
+    it('can enable a study', function() {
       var jsonStudy = this.jsonEntities.study({ status: this.StudyStatus.DISABLED() });
-      changeStatusShared.call(this, done, jsonStudy, 'enable', this.StudyStatus.ENABLED());
+      changeStatusShared.call(this, jsonStudy, 'enable', this.StudyStatus.ENABLED());
     });
 
     it('throws an error when enabling a study and it is already enabled', function() {
@@ -297,9 +290,9 @@ define([
         .toThrowErrorOfType('Error');
     });
 
-    it('can retire a study', function(done) {
+    it('can retire a study', function() {
       var jsonStudy = this.jsonEntities.study({ status: this.StudyStatus.DISABLED() });
-      changeStatusShared.call(this, done, jsonStudy, 'retire', this.StudyStatus.RETIRED());
+      changeStatusShared.call(this, jsonStudy, 'retire', this.StudyStatus.RETIRED());
     });
 
     it('throws an error when retiring a study and it is already retired', function() {
@@ -308,9 +301,9 @@ define([
         .toThrowErrorOfType('Error');
     });
 
-    it('can unretire a study', function(done) {
+    it('can unretire a study', function() {
       var jsonStudy = this.jsonEntities.study({ status: this.StudyStatus.RETIRED() });
-      changeStatusShared.call(this, done, jsonStudy, 'unretire', this.StudyStatus.DISABLED());
+      changeStatusShared.call(this, jsonStudy, 'unretire', this.StudyStatus.DISABLED());
     });
 
     it('throws an error when unretiring a study and it is not retired', function() {
@@ -332,7 +325,7 @@ define([
       return { status: 'success', data: event };
     }
 
-    function changeStatusShared(done, jsonStudy, action, status) {
+    function changeStatusShared(jsonStudy, action, status) {
       /* jshint validthis:true */
       var self  = this,
           study = new self.Study(jsonStudy),
@@ -341,7 +334,7 @@ define([
 
       self.httpBackend.expectPOST(uri(action, study.id), json).respond(201, serverReply(reply));
       expect(study[action]).toBeFunction();
-      study[action]().then(checkStudy).catch(failTest).finally(done);
+      study[action]().then(checkStudy).catch(failTest);
       self.httpBackend.flush();
 
       function checkStudy(replyStudy) {

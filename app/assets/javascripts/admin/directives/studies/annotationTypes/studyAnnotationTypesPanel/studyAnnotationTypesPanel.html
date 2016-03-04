@@ -10,10 +10,10 @@
   </uib-accordion-heading>
   <p ng-bind-html="vm.annotationTypeDescription"></p>
   <study-annotation-types-table
-     study="vm.study"
      annotation-types="vm.annotationTypes"
      annotation-type-name="vm.annotationTypeName"
      annotation-type-ids-in-use="vm.annotationTypeIdsInUse"
+     modifications-allowed="vm.modificationsAllowed"
      view-state-name="vm.viewStateName"
      on-remove="vm.onAnnotTypeRemove">
   </study-annotation-types-table>

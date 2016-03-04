@@ -12,15 +12,11 @@ define(['underscore'], function(_) {
     /**
      * Please use annotationFactory.create to create annotation objects.
      */
-    function MultipleSelectAnnotation(obj, annotationType, required) {
-      var self = this,
-          defaults = {
-            annotationTypeId     : null
-          };
+    function MultipleSelectAnnotation(obj, annotationType) {
+      var self = this;
 
       obj = obj || {};
-      _.extend(self, defaults, _.pick(obj, _.keys(defaults)));
-      Annotation.call(this, annotationType, required);
+      Annotation.call(this, obj, annotationType);
 
       self.values = initializeMultipleSelect();
 
@@ -51,7 +47,7 @@ define(['underscore'], function(_) {
       selectedValues =  _.chain(self.values)
         .filter(function (sv) { return sv.checked; })
         .map(function (sv) {
-          return { annotationTypeId: self.annotationType.id, value: sv.name };
+          return { value: sv.name };
         })
         .value();
 

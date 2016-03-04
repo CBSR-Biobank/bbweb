@@ -148,6 +148,21 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
       this.options = _.without(this.options, option);
     };
 
+    /**
+     * Returns true if each of the options in the options array are valid options for this annotation type.
+     *
+     * Options is an array of objects with keys: value and checked.
+     */
+    AnnotationType.prototype.validOptions = function (options) {
+      var self = this;
+
+      return _.reduce(options,
+                      function (memo, option) {
+                        return memo && _.contains(self.options, option.value);
+                      },
+                      true);
+    };
+
     return AnnotationType;
   }
 

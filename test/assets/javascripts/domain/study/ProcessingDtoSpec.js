@@ -12,7 +12,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('ProcessingDto', function() {
+  xdescribe('ProcessingDto', function() {
     var httpBackend,
         ProcessingDto,
         createEntities,

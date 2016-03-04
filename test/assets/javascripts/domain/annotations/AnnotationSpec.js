@@ -18,9 +18,7 @@ define([
 
     var bbwebConfig,
         Study,
-        ParticipantAnnotationType,
-        CollectionEventAnnotationType,
-        SpecimenLinkAnnotationType,
+        AnnotationType,
         annotationFactory,
         Annotation,
         AnnotationValueType,
@@ -31,9 +29,7 @@ define([
     beforeEach(inject(function(testUtils, extendedDomainEntities) {
       bbwebConfig                   = this.$injector.get('bbwebConfig');
       Study                         = this.$injector.get('Study');
-      ParticipantAnnotationType     = this.$injector.get('ParticipantAnnotationType');
-      CollectionEventAnnotationType = this.$injector.get('CollectionEventAnnotationType');
-      SpecimenLinkAnnotationType    = this.$injector.get('SpecimenLinkAnnotationType');
+      AnnotationType                = this.$injector.get('AnnotationType');
       annotationFactory             = this.$injector.get('annotationFactory');
       Annotation                    = this.$injector.get('Annotation');
       AnnotationValueType           = this.$injector.get('AnnotationValueType');
@@ -46,13 +42,12 @@ define([
       var context = {};
 
       beforeEach(function () {
-        var study = new Study(jsonEntities.study());
+        //var study = new Study(jsonEntities.study());
 
-        context.annotationTypeType = ParticipantAnnotationType;
+        context.annotationTypeType = AnnotationType;
         context.createAnnotationType = function (options) {
           options = options || {};
-          return new ParticipantAnnotationType(
-            jsonEntities.studyAnnotationType(study, options));
+          return new AnnotationType(jsonEntities.annotationType(options));
         };
       });
 
@@ -63,13 +58,12 @@ define([
       var context = {};
 
       beforeEach(function () {
-        var study = new Study(jsonEntities.study());
+        //var study = new Study(jsonEntities.study());
 
-        context.annotationTypeType = CollectionEventAnnotationType;
+        context.annotationTypeType = AnnotationType;
         context.createAnnotationType = function (options) {
           options = options || {};
-          return new CollectionEventAnnotationType(
-            jsonEntities.studyAnnotationType(study, options));
+          return new AnnotationType(jsonEntities.annotationType(options));
         };
 
       });
@@ -81,13 +75,12 @@ define([
       var context = {};
 
       beforeEach(function () {
-        var study = new Study(jsonEntities.study());
+        //var study = new Study(jsonEntities.study());
 
-        context.annotationTypeType = SpecimenLinkAnnotationType;
+        context.annotationTypeType = AnnotationType;
         context.createAnnotationType = function (options) {
           options = options || {};
-          return new SpecimenLinkAnnotationType(
-            jsonEntities.studyAnnotationType(study, options));
+          return new AnnotationType(jsonEntities.annotationType(options));
         };
 
       });
@@ -106,30 +99,21 @@ define([
           createAnnotationType = context.createAnnotationType;
         }));
 
-        function getRequired() {
-          if (annotationTypeType === ParticipantAnnotationType) {
-            return undefined;
-          }
-          return true;
-        }
-
         function createAnnotation(baseObj, annotationType) {
-          return annotationFactory.create(baseObj, annotationType, getRequired());
+          return annotationFactory.create(baseObj, annotationType);
         }
 
         it('can create annotation with empty value', function() {
           _.each(getAnnotationTypeOptionsForAll(), function (annotationTypeOptions) {
             var annotationType,
-                serverAnnotation,
+                jsonAnnotation,
                 annotation;
 
-            if (annotationTypeType === ParticipantAnnotationType) {
-              annotationTypeOptions.required = true;
-            }
+            annotationTypeOptions.required = true;
 
             annotationType = createAnnotationType(annotationTypeOptions);
-            serverAnnotation = jsonEntities.annotation(null, annotationType);
-            annotation = annotationFactory.create(serverAnnotation, annotationType, true);
+            jsonAnnotation = jsonEntities.annotation(null, annotationType);
+            annotation = annotationFactory.create(jsonAnnotation, annotationType);
             expect(annotation.getValue()).toBeFalsy();
           });
         });
@@ -142,17 +126,10 @@ define([
         it('fails when creating with required parameter omitted', function() {
           var annotationType;
 
-          annotationType = createAnnotationType({
-            valueType: AnnotationValueType.TEXT()
-          });
+          annotationType = createAnnotationType({ valueType: AnnotationValueType.TEXT() });
 
-          if (annotationTypeType === ParticipantAnnotationType) {
-            expect(function () { return annotationFactory.create(undefined, annotationType); })
-              .not.toThrow(new Error('required not assigned'));
-          } else {
-            expect(function () { return annotationFactory.create(undefined, annotationType); })
-              .toThrow(new Error('required not assigned'));
-          }
+          expect(function () { return annotationFactory.create(undefined, annotationType); })
+            .not.toThrow(new Error('required not assigned'));
         });
 
         it('creation fails if value type is invalid', function() {
@@ -190,25 +167,36 @@ define([
              });
 
              serverAnnotation = jsonEntities.annotation(value, annotationType);
-             serverAnnotation.selectedValues = _.map(annotationType.options, function(opt){
-               return { annotationTypeId: annotationType.id, value: opt };
-             });
+             serverAnnotation.selectedValues = annotationType.options;
              expect(function () { return createAnnotation(serverAnnotation, annotationType); })
-               .toThrow(new Error('invalid value for selected values'));
+               .toThrow(new Error('invalid selected values in object from server'));
            });
 
         it('fails when creating from a non object', function() {
-          expect(function () { annotationFactory.create(1); })
-            .toThrow(new Error('invalid object from server: has the correct keys'));
+          var annotationType = createAnnotationType({
+            valueType:     AnnotationValueType.SELECT(),
+            maxValueCount: 1,
+            options:       [ 'option1', 'option2', 'option3' ],
+            required:      true
+          });
+          expect(function () { annotationFactory.create(1, annotationType); })
+            .toThrowErrorOfType('Error');
         });
 
         it('fails when creating from server response with bad selections', function() {
-          var serverObj = {
-            annotationTypeId: jsonEntities.stringNext(),
-            selectedValues: { tmp: 1 }
+          var annotationType = createAnnotationType(
+            {
+              valueType:     AnnotationValueType.SELECT(),
+              maxValueCount: 1,
+              options:       [ 'option1', 'option2', 'option3' ],
+              required:      true
+            }),
+              jsonAnnotation = {
+                annotationTypeId: jsonEntities.stringNext(),
+                selectedValues: { tmp: 1 }
           };
-          expect(function () { annotationFactory.create(serverObj); })
-            .toThrow(new Error('invalid selected values in object from server'));
+          expect(function () { annotationFactory.create(jsonAnnotation, annotationType); })
+            .toThrowErrorOfType('Error');
         });
 
         it('has valid values when created from server response', function() {
@@ -220,7 +208,7 @@ define([
         it('calling getAnnotationTypeId gives a valid result', function() {
           _.each(getAnnotationAndTypeForAllValueTypes(), function (entities) {
             expect(entities.annotation.getAnnotationTypeId())
-              .toBe(entities.annotationType.id);
+              .toBe(entities.annotationType.uniqueId);
           });
         });
 
@@ -250,9 +238,7 @@ define([
                 serverAnnotation,
                 annotation;
 
-            if (annotationTypeType === ParticipantAnnotationType) {
-              annotationTypeOptions.required = true;
-            }
+            annotationTypeOptions.required = true;
 
             annotationType = createAnnotationType(annotationTypeOptions);
             serverAnnotation = jsonEntities.annotation(null, annotationType);
@@ -269,9 +255,7 @@ define([
                 serverAnnotation,
                 annotation;
 
-            if (annotationTypeType === ParticipantAnnotationType) {
-              annotationTypeOptions.required = true;
-            }
+            annotationTypeOptions.required = true;
 
             annotationType   = createAnnotationType(annotationTypeOptions);
             value            = jsonEntities.valueForAnnotation(annotationType);
@@ -375,9 +359,7 @@ define([
                 serverAnnotation,
                 annotation;
 
-            if (annotationTypeType === ParticipantAnnotationType) {
-              annotationTypeOptions.required = true;
-            }
+            annotationTypeOptions.required = true;
 
             annotationType = createAnnotationType(annotationTypeOptions);
             serverAnnotation = jsonEntities.annotation('', annotationType);
@@ -409,19 +391,19 @@ define([
         function getAnnotationAndType(annotTypeOptions) {
           var annotationType,
               value,
-              serverAnnotation,
+              jsonAnnotation,
               annotation;
 
           annotTypeOptions = annotTypeOptions || {};
 
           annotationType   = createAnnotationType(annotTypeOptions);
           value            = jsonEntities.valueForAnnotation(annotationType);
-          serverAnnotation = jsonEntities.annotation(value, annotationType);
-          annotation       = createAnnotation(serverAnnotation, annotationType);
+          jsonAnnotation   = jsonEntities.annotation(value, annotationType);
+          annotation       = createAnnotation(jsonAnnotation, annotationType);
 
           return {
             annotationType:   annotationType,
-            serverAnnotation: serverAnnotation,
+            serverAnnotation: jsonAnnotation,
             annotation:       annotation
           };
         }

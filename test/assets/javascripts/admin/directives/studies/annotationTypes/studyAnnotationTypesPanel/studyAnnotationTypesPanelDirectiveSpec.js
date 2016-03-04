@@ -16,172 +16,111 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function () {
-      this.Study                      = this.$injector.get('Study');
-      this.SpecimenLinkAnnotationType = this.$injector.get('SpecimenLinkAnnotationType');
-      this.AnnotationType             = this.$injector.get('AnnotationType');
-      this.AnnotationValueType        = this.$injector.get('AnnotationValueType');
-      this.jsonEntities               = this.$injector.get('jsonEntities');
-    }));
+    beforeEach(inject(function($window,
+                               $compile,
+                               $rootScope,
+                               testUtils) {
+      var self = this;
 
-    describe('for Participant Annotation Types', function() {
-      var context = {};
+      self.Study                      = self.$injector.get('Study');
+      self.SpecimenLinkAnnotationType = self.$injector.get('SpecimenLinkAnnotationType');
+      self.AnnotationType             = self.$injector.get('AnnotationType');
+      self.AnnotationValueType        = self.$injector.get('AnnotationValueType');
+      self.jsonEntities               = self.$injector.get('jsonEntities');
+      self.Panel                      = self.$injector.get('Panel');
+      self.$state                     = self.$injector.get('$state');
 
-      beforeEach(function () {
-        var self = this;
+      self.annotationTypes = _.map(
+        self.AnnotationValueType.values(),
+        function(valueType) {
+          return new self.AnnotationType(
+            self.jsonEntities.annotationType({ valueType: valueType }));
+        });
+      self.annotationTypeIdsInUse    = [ self.annotationTypes[0].uniqueId ] ;
+      self.annotationTypeName        = 'ParticipantAnnotationType';
+      self.modificationsAllowed      = true;
+      self.panelId                   = 'study.panel.participantAnnotationTypes';
+      self.addStateName              = 'home.admin.studies.study.participants.annotationTypeAdd';
+      self.viewStateName             = 'home.admin.studies.study.participants.annotationTypeView';
+      self.annotationTypeDescription = 'annotation type description';
 
-        context.study = new self.Study(self.jsonEntities.study());
-        context.annotationTypes = _.map(
-          self.AnnotationValueType.values(),
-          function(valueType) {
-            return new self.AnnotationType(
-              self.jsonEntities.annotationType(context.study, { valueType: valueType }));
-          });
-        context.annotationTypeIdsInUse = [ context.annotationTypes[0]] ;
-        context.annotationTypeName     = 'ParticipantAnnotationType';
-        context.panelId                = 'study.panel.participantAnnotationTypes';
-        context.addStateName           = 'home.admin.studies.study.participants.annotationTypeAdd';
-      });
+      spyOn(self.$state, 'go').and.callFake(function () {});
+      spyOn(self.Panel.prototype, 'add').and.callThrough();
 
-      sharedBehaviour(context);
-    });
+      $window.localStorage.setItem(self.panelId, '');
 
-    describe('for Collection Event Annotation Types', function() {
-      var context = {};
+      testUtils.putHtmlTemplates(
+        '/assets/javascripts/admin/directives/studies/annotationTypes/studyAnnotationTypesPanel/studyAnnotationTypesPanel.html',
+        '/assets/javascripts/admin/directives/studies/annotationTypes/studyAnnotationTypesTable/studyAnnotationTypesTable.html',
+        '/assets/javascripts/common/directives/panelButtons.html',
+        '/assets/javascripts/common/directives/updateRemoveButtons.html');
 
-      beforeEach(function () {
-        var self = this;
+      this.createController = setupController();
 
-        context.study = new self.Study(self.jsonEntities.study());
-        context.annotationTypes = _.map(
-          self.AnnotationValueType.values(),
-          function(valueType) {
-            return new self.AnnotationType(
-              self.jsonEntities.annotationType(context.study, { valueType: valueType }));
-          });
-        context.annotationTypeIdsInUse = [ context.annotationTypes[0] ];
-        context.annotationTypeName     = 'CollectionEventAnnotationType';
-        context.panelId                = 'study.panel.collectionEventAnnotationTypes';
-        context.addStateName           = 'home.admin.studies.study.collection.ceventAnnotationTypeAdd';
-      });
+      function setupController() {
+        return create;
 
-      sharedBehaviour(context);
-    });
-
-    // describe('for Specimen Link Annotation Types', function() {
-    //   var context = {};
-
-    //   beforeEach(function () {
-    //     context.study = new this.Study(this.jsonEntities.study());
-    //     context.annotationTypes = _.map(
-    //       this.AnnotationValueType.values(),
-    //       function(valueType) {
-    //       return new SpecimenLinkAnnotationType(
-    //         jsonEntities.studyAnnotationType(
-    //           context.study, {valueType: valueType, required: true}));
-    //     });
-    //     context.annotationTypeIdsInUse = [context.annotationTypes[0]];
-    //     context.annotationTypeName   = 'SpecimenLinkAnnotationType';
-    //     context.panelId         = 'study.panel.specimenLinkAnnotationTypes';
-    //     context.addStateName    = 'home.admin.studies.study.processing.spcLinkAnnotationTypeAdd';
-    //   });
-
-    //   sharedBehaviour(context);
-    // });
-
-    function sharedBehaviour(context) {
-
-      describe('(shared)', function() {
-
-        beforeEach(inject(function($window,
-                                   $compile,
-                                   $rootScope,
-                                   testUtils) {
-          var element;
-
-          this.Panel = this.$injector.get('Panel');
-          this.$state = this.$injector.get('$state');
-
-          spyOn(this.$state, 'go').and.callFake(function () {});
-          spyOn(this.Panel.prototype, 'add').and.callThrough();
-
-          $window.localStorage.setItem(context.panelId, '');
-
-          testUtils.putHtmlTemplates(
-            '/assets/javascripts/admin/directives/studies/annotationTypes/studyAnnotationTypesPanel/studyAnnotationTypesPanel.html',
-            '/assets/javascripts/admin/directives/studies/annotationTypes/studyAnnotationTypesTable/studyAnnotationTypesTable.html',
-            '/assets/javascripts/common/directives/panelButtons.html',
-            '/assets/javascripts/common/directives/updateRemoveButtons.html');
-
-
-          element = angular.element([
+        function create() {
+          self.element = angular.element([
             '<uib-accordion close-others="false">',
             '  <study-annotation-types-panel',
-            '     study="vm.study"',
             '     annotation-types="vm.annotationTypes"',
             '     annotation-type-ids-in-use="vm.annotationTypeIdsInUse"',
-            '     annotation-type-name="' + context.annotationTypeName + '"',
-            '     panel-id="' + context.panelId + '"',
-            '     add-state-name="' + context.addStateName + '"',
-            '     view-state-name="' + context.viewStateName + '">',
+            '     annotation-type-description="' + self.annotationTypeDescription + '"',
+            '     annotation-type-name="' + self.annotationTypeName + '"',
+            '     panel-id="' + self.panelId + '"',
+            '     modifications-allowed="vm.modificationsAllowed"',
+            '     add-state-name="' + self.addStateName + '"',
+            '     view-state-name="' + self.viewStateName + '"',
+            '     on-remove="vm.onRemove">',
             '  </study-annotation-types-panel>',
             '</uib-accordion>'
           ].join(''));
 
-          this.scope = $rootScope.$new();
-          this.scope.vm = {
-            study:                  context.study,
-            annotationTypes:        context.annotationTypes,
-            annotationTypeIdsInUse: context.annotationTypeIdsInUse
+          self.onRemove = jasmine.createSpy('onRemove');
+
+          self.scope = $rootScope.$new();
+          self.scope.vm = {
+            annotationTypes:        self.annotationTypes,
+            annotationTypeIdsInUse: self.annotationTypeIdsInUse,
+            modificationsAllowed:   self.modificationsAllowed,
+            onRemove:               self.onRemove
           };
 
-          $compile(element)(this.scope);
-          this.scope.$digest();
-          this.controller = element.find('study-annotation-types-panel')
+          $compile(self.element)(self.scope);
+          self.scope.$digest();
+          self.controller = self.element.find('study-annotation-types-panel')
             .controller('studyAnnotationTypesPanel');
-        }));
+        }
+      }
+    }));
 
-        it('has valid scope', function () {
-          expect(this.controller.study).toEqual(context.study);
-          expect(this.controller.annotationTypes).toEqual(context.annotationTypes);
-          expect(this.controller.annotationTypeIdsInUse).toEqual(context.annotationTypeIdsInUse);
-        });
+    it('has valid scope', function () {
+      this.createController();
+      expect(this.controller.annotationTypes).toEqual(this.annotationTypes);
+      expect(this.controller.annotationTypeIdsInUse).toEqual(this.annotationTypeIdsInUse);
+      expect(this.controller.annotationTypeDescription).toEqual(this.annotationTypeDescription);
+      expect(this.controller.panelId).toEqual(this.panelId);
+      expect(this.controller.modificationsAllowed).toEqual(this.modificationsAllowed);
+      expect(this.controller.addStateName).toEqual(this.addStateName);
+      expect(this.controller.viewStateName).toEqual(this.viewStateName);
+    });
 
-        it('has valid description', function () {
-          expect(this.controller.annotationTypeDescription)
-            .toContain(getDescriptionSubString(context.annotationTypeName));
+    it('should invoke panel add function', function() {
+      this.createController();
+      this.controller.add();
+      expect(this.$state.go).toHaveBeenCalledWith(this.addStateName);
+    });
 
-          function getDescriptionSubString(annotationTypeName) {
-            switch (annotationTypeName) {
-            case 'ParticipantAnnotationType':
-              return 'Participant';
-
-            case 'CollectionEventAnnotationType':
-              return 'Collection event';
-
-            case 'SpecimenLinkAnnotationType':
-              return 'Specimen link';
-
-            default:
-              jasmine.getEnv().fail('annotationTypeName is invalid: ' + annotationTypeName);
-              return '';
-            }
-          }
-        });
-
-        it('should invoke panel add function', function() {
-          this.controller.add();
-          expect(this.$state.go).toHaveBeenCalledWith(context.addStateName);
-        });
-
-        it('should change to valid state on update', function() {
-          jasmine.getEnv().fail('should change to valid state on update');
-        });
+    it('should call correct function on remove', function() {
+      var annotationType = this.annotationTypes[0];
+      this.createController();
+      this.controller.onAnnotTypeRemove(annotationType);
+      expect(this.onRemove).toHaveBeenCalledWith(annotationType);
+    });
 
 
-      });
-
-    }
   });
+
 
 });

@@ -192,7 +192,7 @@ define([
                                        'updateName',
                                        cet.name,
                                        uri('name', cet.id),
-                                       { name: cet.name },
+                                       { name: cet.name, studyId: cet.studyId },
                                        this.jsonCet,
                                        expectCet,
                                        failTest);
@@ -206,7 +206,7 @@ define([
                                        'updateDescription',
                                        undefined,
                                        uri('description', cet.id),
-                                       { },
+                                       { studyId: cet.studyId },
                                        this.jsonCet,
                                        expectCet,
                                        failTest);
@@ -216,7 +216,7 @@ define([
                                        'updateDescription',
                                        cet.description,
                                        uri('description', cet.id),
-                                       { description: cet.description },
+                                       { description: cet.description, studyId: cet.studyId },
                                        this.jsonCet,
                                        expectCet,
                                        failTest);
@@ -229,7 +229,7 @@ define([
                                        'updateRecurring',
                                        cet.recurring,
                                        uri('recurring', cet.id),
-                                       { recurring: cet.recurring },
+                                       { recurring: cet.recurring, studyId: cet.studyId },
                                        this.jsonCet,
                                        expectCet,
                                        failTest);
@@ -243,7 +243,7 @@ define([
                                        'addSpecimenSpec',
                                        _.omit(jsonSpec, 'uniqueId'),
                                        uri('spcspec', cet.id),
-                                       _.omit(jsonSpec, 'uniqueId'),
+                                       _.extend(_.omit(jsonSpec, 'uniqueId'), { studyId: cet.studyId }),
                                        this.jsonCet,
                                        expectCet,
                                        failTest);
@@ -269,7 +269,7 @@ define([
                                        'addAnnotationType',
                                        _.omit(jsonAnnotType, 'uniqueId'),
                                        uri('annottype', cet.id),
-                                       _.omit(jsonAnnotType, 'uniqueId'),
+                                       _.extend(_.omit(jsonAnnotType, 'uniqueId'), { studyId: cet.studyId }),
                                        this.jsonCet,
                                        expectCet,
                                        failTest);

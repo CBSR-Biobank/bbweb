@@ -21,7 +21,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
                                 ConcurrencySafeEntity) {
 
     var schema = {
-      'id': 'CollectionEventType',
+      'id': 'CollectionSpecimenSpec',
       'type': 'object',
       'properties': {
         'uniqueId':                    { 'type': 'string' },

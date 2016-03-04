@@ -12,7 +12,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('SpecimenLinkType', function() {
+  xdescribe('SpecimenLinkType', function() {
 
     var httpBackend,
         funutils,

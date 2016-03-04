@@ -16,11 +16,14 @@ define([
     var scope,
         controller,
         createEntities,
-        createController;
+        createController,
+        jsonEntities;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function (testUtils) {
+      jsonEntities = this.$injector.get('jsonEntities');
+
       createEntities = setupEntities(this.$injector);
       createController = setupController(this.$injector);
       testUtils.addCustomMatchers();
@@ -69,8 +72,7 @@ define([
             AnnotationValueType.values(),
             function(valueType) {
               return new SpecimenLinkAnnotationType(
-                jsonEntities.studyAnnotationType(
-                  entities.study, { valueType: valueType }));
+                jsonEntities.annotationType({ valueType: valueType }));
             });
           entities.annotationTypeIdsInUse = [entities.annotationTypes[0]];
         } else {
@@ -81,9 +83,6 @@ define([
           var slt = new SpecimenLinkType(jsonEntities.processingType(entities.study));
           if (options.studyHasSpecimenGroups) {
             slt.studySpecimenGroups(entities.specimenGroups);
-          }
-          if (options.studyHasAnnotationTypes) {
-            slt.studyAnnotationTypes(entities.annotationTypes);
           }
           return slt;
         });
@@ -140,9 +139,6 @@ define([
       });
       _.each(entities.specimenGroups, function (sg) {
         expect(controller.specimenGroupsById[sg.id]).toBe(sg);
-      });
-      _.each(entities.annotationTypes, function (at) {
-        expect(controller.annotationTypesById[at.id]).toBe(at);
       });
       expect(controller.specimenLinkTypes).toBeArrayOfSize(entities.specimenLinkTypes.length);
       expect(controller.specimenLinkTypes).toContainAll(entities.specimenLinkTypes);

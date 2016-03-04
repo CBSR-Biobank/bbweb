@@ -83,9 +83,9 @@ define(['underscore'], function(_) {
         self.studySpecimenGroups(options.studySpecimenGroups);
       }
 
-      if (options.studyAnnotationTypes) {
-        self.studyAnnotationTypes(options.studyAnnotationTypes);
-      }
+      // if (options.studyAnnotationTypes) {
+      //   self.studyAnnotationTypes(options.studyAnnotationTypes);
+      // }
     }
 
     SpecimenLinkType.prototype = Object.create(ConcurrencySafeEntity.prototype);

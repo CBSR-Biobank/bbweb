@@ -20,13 +20,13 @@ define([
                                _User_,
                                _UserStatus_,
                                _funutils_,
-                               jsonEntities,
+                               _jsonEntities_,
                                extendedDomainEntities) {
       httpBackend  = $httpBackend;
       User         = _User_;
       UserStatus   = _UserStatus_;
       funutils     = _funutils_;
-      jsonEntities = jsonEntities;
+      jsonEntities = _jsonEntities_;
     }));
 
     it('creating a user with no parameters has default values', function() {

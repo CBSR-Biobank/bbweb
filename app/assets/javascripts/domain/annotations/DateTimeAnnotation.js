@@ -12,15 +12,11 @@ define(['moment', 'underscore'], function(moment, _) {
     /**
      * Please use annotationFactory.create to create annotation objects.
      */
-    function DateTimeAnnotation(obj, annotationType, required) {
-      var self = this,
-          defaults = {
-            annotationTypeId     : null
-          };
+    function DateTimeAnnotation(obj, annotationType) {
+      var self = this;
 
       obj = obj || {};
-      _.extend(self, defaults, _.pick(obj, _.keys(defaults)));
-      Annotation.call(this, annotationType, required);
+      Annotation.call(this, obj, annotationType);
 
       _.extend(self, timeService.stringToDateAndTime(obj.stringValue));
     }

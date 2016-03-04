@@ -22,7 +22,7 @@ define([
         scope,
         createScope,
         annotationFactory,
-        ParticipantAnnotationType,
+        AnnotationType,
         AnnotationValueType,
         jsonEntities;
 
@@ -30,7 +30,7 @@ define([
 
     beforeEach(inject(function(testUtils) {
       annotationFactory         = this.$injector.get('annotationFactory');
-      ParticipantAnnotationType = this.$injector.get('ParticipantAnnotationType');
+      AnnotationType            = this.$injector.get('AnnotationType');
       AnnotationValueType       = this.$injector.get('AnnotationValueType');
       jsonEntities              = this.$injector.get('jsonEntities');
 
@@ -43,7 +43,7 @@ define([
     function createAnnotation(valueType) {
       return annotationFactory.create(
         undefined,
-        new ParticipantAnnotationType(
+        new AnnotationType(
           jsonEntities.annotationType({ valueType: valueType, required: true })
         ));
     }
@@ -106,7 +106,7 @@ define([
       expect(element.find('input').length).toBe(1);
       expect(element.find('input').eq(0).attr('type')).toBe('number');
       scope.form.annotationSubForm.annotationNumberValue.$setViewValue(annotationValue);
-      expect(scope.vm.annotations[0].numberValue).toBe(undefined);
+      expect(scope.vm.annotations[0].numberValue).toBe(null);
       expect(scope.form.annotationSubForm.annotationNumberValue.$valid).toBe(false);
     });
 
@@ -133,7 +133,7 @@ define([
     it('works for a SELECT single annotation annotation', function() {
       var annotationType, annotations;
 
-      annotationType = new ParticipantAnnotationType(
+      annotationType = new AnnotationType(
         jsonEntities.annotationType({
           valueType:     AnnotationValueType.SELECT(),
           maxValueCount: 1,
@@ -160,7 +160,7 @@ define([
     it('works for a SELECT multiple annotation', function() {
       var annotationType, annotation;
 
-      annotationType = new ParticipantAnnotationType(
+      annotationType = new AnnotationType(
         jsonEntities.annotationType({
           valueType: AnnotationValueType.SELECT(),
           maxValueCount: 2,
@@ -183,7 +183,7 @@ define([
     it('selecting and unselecting an option for a SELECT MULTIPLE makes the form invalid', function() {
       var annotationType, annotation;
 
-      annotationType = new ParticipantAnnotationType(
+      annotationType = new AnnotationType(
         jsonEntities.annotationType({
           valueType:     AnnotationValueType.SELECT(),
           maxValueCount: 2,

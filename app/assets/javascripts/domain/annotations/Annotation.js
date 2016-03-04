@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['moment', 'underscore'], function(moment, _) {
+define(['moment', 'underscore', 'tv4'], function(moment, _, tv4) {
   'use strict';
 
   AnnotationFactory.$inject = [
@@ -11,14 +11,35 @@ define(['moment', 'underscore'], function(moment, _) {
 
   function AnnotationFactory(AnnotationValueType) {
 
+    var schema = {
+      'id': 'Annotation',
+      'type': 'object',
+      'properties': {
+        'annotationType': { 'type': 'string' },
+        'stringValue':    { 'type': [ 'string', 'null' ] },
+        'numberValue':    { 'type': [ 'string', 'null' ] },
+        'selectedValues': { 'type': 'array' }
+      },
+      'required': [ 'annotationTypeId', 'selectedValues' ]
+    };
+
     /**
      * Please use annotationFactory.create to create annotation objects.
      */
-    function Annotation(annotationType, required) {
-      var self = this;
+    function Annotation(obj, annotationType) {
+      var self = this,
+          defaults = {
+            annotationTypeId: null,
+            stringValue:      null,
+            numberValue:      null,
+            selectedValues:   []
+          };
+
+      obj = obj || {};
+      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
 
       if (annotationType) {
-        self.annotationTypeId = annotationType.id;
+        self.annotationTypeId = annotationType.uniqueId;
         self.annotationType = annotationType;
 
         if (!_.contains(AnnotationValueType.values(), annotationType.valueType)) {
@@ -26,13 +47,10 @@ define(['moment', 'underscore'], function(moment, _) {
         }
 
         if (_.isUndefined(annotationType.required)) {
-          if (_.isUndefined(required)) {
-            throw new Error('required not assigned');
-          }
-          self.required = required;
-        } else {
-          self.required = annotationType.required;
+          throw new Error('required not assigned');
         }
+
+        self.required = annotationType.required;
 
         if (annotationType.valueType === AnnotationValueType.SELECT()) {
           if (!annotationType.isMultipleSelect() && !annotationType.isSingleSelect()) {
@@ -42,6 +60,30 @@ define(['moment', 'underscore'], function(moment, _) {
       }
     }
 
+    Annotation.isValid = function (obj) {
+      return tv4.validate(obj, schema);
+    };
+
+    Annotation.validAnnotations = function (annotations) {
+      return _.reduce(
+        annotations,
+        function (memo, annotation) {
+          return memo && tv4.validate(annotation, schema);
+        },
+        true);
+    };
+
+    Annotation.getInvalidError = function () {
+      return tv4.error;
+    };
+
+    Annotation.create = function (obj) {
+      if (!Annotation.validate(obj)) {
+        throw new Error('invalid object to create from: ' + tv4.error);
+      }
+      return new Annotation(obj);
+    };
+
     /**
      *
      */
@@ -49,7 +91,7 @@ define(['moment', 'underscore'], function(moment, _) {
       if (_.isUndefined(this.annotationType)) {
         throw new Error('annotation type not assigned');
       }
-      return this.annotationType.id;
+      return this.annotationType.uniqueId;
     };
 
     /**

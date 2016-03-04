@@ -3,7 +3,7 @@ define(['underscore'], function(_) {
 
   annotationFactoryFactory.$inject = [
     'funutils',
-    'validationService',
+    'Annotation',
     'AnnotationValueType',
     'DateTimeAnnotation',
     'MultipleSelectAnnotation',
@@ -13,7 +13,7 @@ define(['underscore'], function(_) {
   ];
 
   function annotationFactoryFactory(funutils,
-                                    validationService,
+                                    Annotation,
                                     AnnotationValueType,
                                     DateTimeAnnotation,
                                     MultipleSelectAnnotation,
@@ -21,28 +21,7 @@ define(['underscore'], function(_) {
                                     SingleSelectAnnotation,
                                     TextAnnotation) {
 
-    var requiredKeys = ['annotationTypeId', 'selectedValues'];
-
-    var validateIsMap = validationService.condition1(
-      validationService.validator('must be a map', _.isObject));
-
-    var createObj = funutils.partial1(validateIsMap, _.identity);
-
-    var validateObj = funutils.partial(
-      validationService.condition1(
-        validationService.validator('has the correct keys',
-                                    validationService.hasKeys.apply(null, requiredKeys))),
-      createObj);
-
-    var validateSelectedValues = funutils.partial(
-      validationService.condition1(
-        validationService.validator('has the correct keys',
-                                    validationService.hasKeys('annotationTypeId', 'value'))),
-      createObj);
-
-    var service = {
-      create: create
-    };
+    var service = { create: create };
     return service;
 
     //--
@@ -60,51 +39,47 @@ define(['underscore'], function(_) {
      *
      * @param {boolean} required set only if annotationType does not have a 'required' attribute.
      */
-    function create(obj, annotationType, required) {
-      var annotValid,
-          validation,
-          annotation;
-
-      if (obj) {
-        validation = validateObj(obj);
-
-        if (!_.isObject(validation)) {
-          throw new Error('invalid object from server: ' + validation);
-        }
-
-        annotValid =_.reduce(obj.selectedValues, function (memo, selectedValue) {
-          var validation = validateSelectedValues(selectedValue);
-          return memo && _.isObject(validation);
-        }, true);
-
-        if (!annotValid) {
-          throw new Error('invalid selected values in object from server');
-        }
-      }
+    function create(obj, annotationType) {
+      var valid, annotation;
 
       if (_.isUndefined(annotationType)) {
         throw new Error('annotation type is undefined');
       }
 
+      if (obj) {
+        valid = Annotation.isValid(obj);
+        if (!valid) {
+          throw new Error('invalid object from server: ' + Annotation.getInvalidError());
+        }
+
+        if (obj.selectedValues) {
+          valid = annotationType.validOptions(obj.selectedValues);
+        }
+
+        if (!valid) {
+          throw new Error('invalid selected values in object from server');
+        }
+      }
+
       switch (annotationType.valueType) {
 
       case AnnotationValueType.TEXT():
-        annotation = new TextAnnotation(obj, annotationType, required);
+        annotation = new TextAnnotation(obj, annotationType);
         break;
 
       case AnnotationValueType.NUMBER():
-        annotation = new NumberAnnotation(obj, annotationType, required);
+        annotation = new NumberAnnotation(obj, annotationType);
         break;
 
       case AnnotationValueType.DATE_TIME():
-        annotation = new DateTimeAnnotation(obj, annotationType, required);
+        annotation = new DateTimeAnnotation(obj, annotationType);
         break;
 
       case AnnotationValueType.SELECT():
         if (annotationType.isSingleSelect()) {
-          annotation = new SingleSelectAnnotation(obj, annotationType, required);
+          annotation = new SingleSelectAnnotation(obj, annotationType);
         } else if (annotationType.isMultipleSelect()) {
-          annotation = new MultipleSelectAnnotation(obj, annotationType, required);
+          annotation = new MultipleSelectAnnotation(obj, annotationType);
         } else {
           throw new Error('invalid select annotation: ' + annotationType.maxValueCount);
         }

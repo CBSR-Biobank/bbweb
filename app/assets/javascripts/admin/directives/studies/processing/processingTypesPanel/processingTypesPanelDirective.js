@@ -85,7 +85,7 @@ define(['angular', 'underscore'], function(angular, _) {
         throw new Error('study is not disabled');
       }
       domainEntityService.removeEntity(
-        processingType,
+        callback,
         'Remove Processing Type',
         'Are you sure you want to remove processing type ' + processingType.name + '?',
         'Remove Failed',
@@ -93,6 +93,10 @@ define(['angular', 'underscore'], function(angular, _) {
       ).then(function () {
         vm.processingTypes = _.without(vm.processingTypes, processingType);
       });
+
+      function callback() {
+        return processingType.remove();
+      }
 
     }
 

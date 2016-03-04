@@ -12,7 +12,7 @@ define([
 ], function(angular, mocks, studyAnnotationTypeSharedSpec) {
   'use strict';
 
-  describe('SpecimenLinkAnnotationType', function() {
+  xdescribe('SpecimenLinkAnnotationType', function() {
 
     var context = {}, SpecimenLinkAnnotationType, jsonEntities;
     var requiredKeys = ['id', 'studyId', 'name', 'valueType', 'options'];

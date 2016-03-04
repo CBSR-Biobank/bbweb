@@ -12,15 +12,9 @@ define(['underscore'], function(_) {
     /**
      * Please use annotationFactory.create to create annotation objects.
      */
-    function TextAnnotation(obj, annotationType, required) {
-      var self = this,
-          defaults = {
-            annotationTypeId     : null
-          };
-
+    function TextAnnotation(obj, annotationType) {
       obj = obj || {};
-      _.extend(self, defaults, _.pick(obj, _.keys(defaults)));
-      Annotation.call(this, annotationType, required);
+      Annotation.call(this, obj, annotationType);
 
       if (obj.stringValue) {
         this.value = obj.stringValue;

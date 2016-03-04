@@ -13,7 +13,7 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
   function LocationFactory() {
 
     var schema = {
-      'id': 'Centre',
+      'id': 'Location',
       'type': 'object',
       'properties': {
         'uniqueId':       { 'type': 'string'},

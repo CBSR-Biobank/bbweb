@@ -144,6 +144,10 @@ define(function () {
               vm.annotationTypeIdsInUse = [];
               vm.onAnnotTypeRemove = onAnnotTypeRemove;
 
+              vm.annotationTypeDescription = 'Participant annotations allow a study to collect custom named and ' +
+                'defined pieces of data for each participant. Annotations are optional and ' +
+                'are not required to be defined.';
+
               function onAnnotTypeRemove(annotationType) {
                 return vm.study.removeAnnotationType(annotationType);
               }
@@ -248,6 +252,9 @@ define(function () {
             function($scope, study, processingDto) {
               $scope.study = study;
               $scope.processingDto = processingDto;
+              $scope.annotationTypeDescription = 'Specimen link annotations allow a study to collect custom named and '+
+                'defined pieces of data when processing specimens. Annotations are optional and ' +
+                'are not required to be defined.';
             }
           ]
         }

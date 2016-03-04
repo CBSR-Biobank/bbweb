@@ -129,7 +129,7 @@ define(['angular', 'underscore'], function(angular, _) {
         throw new Error('study is not disabled');
       }
       domainEntityService.removeEntity(
-        slt,
+        promiseFunc,
         'Remove Specimen Link Type',
         'Are you sure you want to remove this specimen link type?',
         'Remove Failed',
@@ -137,6 +137,10 @@ define(['angular', 'underscore'], function(angular, _) {
       ).then(function () {
         vm.specimenLinkTypes = _.without(vm.specimenLinkTypes, slt);
       });
+
+      function promiseFunc() {
+        return slt.remove();
+      }
     }
 
   }

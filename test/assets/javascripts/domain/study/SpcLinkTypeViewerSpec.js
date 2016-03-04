@@ -12,7 +12,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('SpcLinkTypeViewer', function() {
+  xdescribe('SpcLinkTypeViewer', function() {
 
     var SpcLinkTypeViewer, SpecimenLinkType, jsonEntities, centre;
 

@@ -20,10 +20,10 @@ define([
 
     beforeEach(inject(function(_LocationViewer_,
                                _Location_,
-                               jsonEntities) {
+                               _jsonEntities_) {
       LocationViewer = _LocationViewer_;
       Location       = _Location_;
-      jsonEntities   = jsonEntities;
+      jsonEntities   = _jsonEntities_;
 
       centre = jsonEntities.centre();
     }));

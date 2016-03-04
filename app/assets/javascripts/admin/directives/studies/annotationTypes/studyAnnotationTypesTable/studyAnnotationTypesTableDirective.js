@@ -14,10 +14,10 @@ define(['angular', 'underscore'], function(angular, _) {
       restrict: 'E',
       scope: {},
       bindToController: {
-        study:                  '=',
         annotationTypes:        '=',
         annotationTypeIdsInUse: '=',
         annotationTypeName:     '=',
+        modificationsAllowed:   '=',
         viewStateName:          '=',
         onRemove:               '&'
       },
@@ -43,11 +43,9 @@ define(['angular', 'underscore'], function(angular, _) {
                                          AnnotationTypeViewer) {
     var vm = this;
 
-    vm.update                 = update;
-    vm.remove                 = remove;
-    vm.information            = information;
-    vm.modificationsAllowed   = vm.study.isDisabled();
-    vm.annotationTypes        = _.map(vm.study.annotationTypes, _.clone);
+    vm.update      = update;
+    vm.remove      = remove;
+    vm.information = information;
 
     vm.columns = annotationTypeColumns(vm.annotationTypeName);
 
@@ -74,8 +72,8 @@ define(['angular', 'underscore'], function(angular, _) {
      * Switches state to update a participant annotation type.
      */
     function update(annotationType) {
-      if (!vm.study.isDisabled()) {
-        throw new Error('study is not disabled');
+      if (!vm.modificationsAllowed) {
+        throw new Error('modifications not allowed');
       }
 
       if (_.contains(vm.annotationTypeIdsInUse, annotationType.uniqueId)) {
@@ -89,9 +87,10 @@ define(['angular', 'underscore'], function(angular, _) {
       if (_.contains(vm.annotationTypeIdsInUse, annotationType.uniqueId)) {
         studyAnnotationTypeUtils.removeInUseModal(annotationType, vm.annotationTypeName);
       } else {
-        if (!vm.study.isDisabled()) {
-          throw new Error('study is not disabled');
+        if (!vm.modificationsAllowed) {
+          throw new Error('modifications not allowed');
         }
+
         studyAnnotationTypeUtils.remove(callback, annotationType);
       }
 

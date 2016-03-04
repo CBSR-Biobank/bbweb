@@ -34,7 +34,7 @@ define([
                                _UserCounts_,
                                _UserStatus_,
                                _UserViewer_,
-                               jsonEntities) {
+                               _jsonEntities_) {
       q            = $q;
       rootScope    = $rootScope;
       controller   = $controller;
@@ -43,7 +43,7 @@ define([
       UserCounts   = _UserCounts_;
       UserStatus   = _UserStatus_;
       UserViewer   = _UserViewer_;
-      jsonEntities = jsonEntities;
+      jsonEntities = _jsonEntities_;
     }));
 
     function createUserCounts(registered, active, locked) {

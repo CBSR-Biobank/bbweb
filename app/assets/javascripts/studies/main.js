@@ -15,7 +15,6 @@ define(function (require) {
 
   module.factory('StudyAnnotationTypesService',       require('./StudyAnnotationTypesService'));
 
-  module.service('ceventAnnotationTypesService',      require('./ceventAnnotationTypesService'));
   module.service('specimenGroupsService',             require('./specimenGroupsService'));
   module.service('spcLinkAnnotationTypesService',     require('./spcLinkAnnotationTypesService'));
 

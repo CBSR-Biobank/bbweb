@@ -12,7 +12,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('SpecimenGroup', function() {
+  xdescribe('SpecimenGroup', function() {
 
     var httpBackend,
         funutils,

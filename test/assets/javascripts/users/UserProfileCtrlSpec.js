@@ -17,15 +17,13 @@ define([
         createController,
         jsonEntities;
 
-    //   var scope, stateHelper, usersService, domainEntityService;
-    //   var state = {current: {data: {returnState: 'admin.users'}}};
-    //   var user  = {name: 'User1', email: 'admin@admin.com'};
-
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(jsonEntities) {
+    beforeEach(inject(function(_jsonEntities_, testUtils) {
       createController = setupController(this.$injector);
-      jsonEntities = jsonEntities;
+      jsonEntities = _jsonEntities_;
+
+      testUtils.putHtmlTemplates('/assets/javascripts/common/services/modalStringInput.html');
     }));
 
     function setupController(injector) {
@@ -104,9 +102,7 @@ define([
           user         = jsonEntities.user(),
           scope;
 
-      spyOn(modalService, 'modalStringInput').and.callFake(function () {
-        return $q.when('OK');
-      });
+      spyOn(modalService, 'modalTextInput').and.returnValue($q.when('OK'));
       scope = createController(user);
 
       _.each(ctrlMethods, function (ctrlMethod) {

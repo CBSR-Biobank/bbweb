@@ -12,42 +12,46 @@ define([
   'use strict';
 
   describe('Controller: AdminCtrl', function() {
-    var createController;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function() {
-      createController = setupController(this.$injector);
+    beforeEach(inject(function($rootScope, $controller) {
+      var self = this;
+
+      self.$q               = self.$injector.get('$q');
+      self.adminService     = self.$injector.get('adminService');
+      self.createController = setupController();
+
+      function setupController() {
+        return create;
+
+        //--
+
+        function create(counts) {
+          self.scope = $rootScope.$new();
+
+          $controller('AdminCtrl as vm', {
+            $scope:       self.scope,
+            adminService: self.adminService
+          });
+          self.scope.$digest();
+        }
+      }
     }));
 
-    function setupController(injector) {
-      var $rootScope  = injector.get('$rootScope'),
-          $controller = injector.get('$controller');
-
-      return create;
-
-      //--
-
-      function create(counts) {
-        var scope = $rootScope.$new();
-
-        $controller('AdminCtrl as vm', {
-          $scope: scope,
-          aggregateCounts: counts
-        });
-        scope.$digest();
-        return scope;
-      }
-    }
-
     it('has valid scope', function() {
-      var counts = { studies: 1,
+      var self = this,
+          counts = { studies: 1,
                      centres: 2,
                      users: 3
-                   },
-          scope = createController(counts);
+                   };
 
-      expect(scope.vm.counts).toEqual(counts);
+      spyOn(self.adminService, 'aggregateCounts').and.callFake(function () {
+        return self.$q.when(counts);
+      });
+
+      self.createController(counts);
+      expect(self.scope.vm.counts).toEqual(counts);
     });
 
   });

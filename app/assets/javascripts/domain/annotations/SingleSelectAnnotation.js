@@ -12,15 +12,11 @@ define(['underscore'], function(_) {
     /**
      * Please use annotationFactory.create to create annotation objects.
      */
-    function SingleSelectAnnotation(obj, annotationType, required) {
-      var self = this,
-          defaults = {
-            annotationTypeId     : null
-          };
+    function SingleSelectAnnotation(obj, annotationType) {
+      var self = this;
 
       obj = obj || {};
-      _.extend(self, defaults, _.pick(obj, _.keys(defaults)));
-      Annotation.call(this, annotationType, required);
+      Annotation.call(this, obj, annotationType);
 
       if (!_.isUndefined(obj.selectedValues)) {
         if (obj.selectedValues.length === 0) {
@@ -44,7 +40,7 @@ define(['underscore'], function(_) {
           selectedValues = [];
 
       if (this.value) {
-        selectedValues.push({ annotationTypeId: self.annotationType.id, value: self.value });
+        selectedValues.push({ value: self.value });
       }
 
       return {

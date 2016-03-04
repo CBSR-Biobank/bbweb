@@ -19,9 +19,9 @@ define([
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_SpecimenGroupViewer_,
-                               jsonEntities) {
+                               _jsonEntities_) {
       SpecimenGroupViewer = _SpecimenGroupViewer_;
-      jsonEntities   = jsonEntities;
+      jsonEntities   = _jsonEntities_;
 
       centre = jsonEntities.centre();
     }));

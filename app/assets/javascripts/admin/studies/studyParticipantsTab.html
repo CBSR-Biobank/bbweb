@@ -3,11 +3,12 @@
 </study-not-disabled-warning>
 <uib-accordion close-others="false">
   <study-annotation-types-panel
-     study="vm.study"
      annotation-types="vm.annotationTypes"
      annotation-type-ids-in-use="vm.annotationTypeIdsInUse"
+     annotation-type-description="{{vm.annotationTypeDescription}}"
      annotation-type-name="ParticipantAnnotationType"
      panel-id="study.panel.participantAnnotationTypes"
+     modifications-allowed="vm.study.isDisabled()"
      add-state-name="home.admin.studies.study.participants.annotationTypeAdd"
      view-state-name="home.admin.studies.study.participants.annotationTypeView"
      on-remove="vm.onAnnotTypeRemove">

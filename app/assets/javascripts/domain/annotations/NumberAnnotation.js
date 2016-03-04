@@ -12,15 +12,9 @@ define(['underscore'], function(_) {
     /**
      * Please use annotationFactory.create to create annotation objects.
      */
-    function NumberAnnotation(obj, annotationType, required) {
-      var self = this,
-          defaults = {
-            annotationTypeId : null
-          };
-
+    function NumberAnnotation(obj, annotationType) {
       obj = obj || {};
-      _.extend(self, defaults, _.pick(obj, _.keys(defaults)));
-      Annotation.call(this, annotationType, required);
+      Annotation.call(this, obj, annotationType);
 
       // convert number to a float
       if (!_.isUndefined(obj.numberValue)) {

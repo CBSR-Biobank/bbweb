@@ -20,10 +20,10 @@ define([
 
     beforeEach(inject(function(_StudyViewer_,
                                _Study_,
-                               jsonEntities) {
-      StudyViewer = _StudyViewer_;
-      Study       = _Study_;
-      jsonEntities   = jsonEntities;
+                               _jsonEntities_) {
+      StudyViewer    = _StudyViewer_;
+      Study          = _Study_;
+      jsonEntities   = _jsonEntities_;
 
       centre = jsonEntities.centre();
     }));

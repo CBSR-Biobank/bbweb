@@ -43,8 +43,6 @@ define(function (require) {
   module.factory('Centre',                              require('./centre/Centre'));
   module.factory('CentreCounts',                        require('./centre/CentreCounts'));
 
-  module.factory('CeventTypeViewer',                    require('./study/CeventTypeViewer'));
-  module.factory('CollectionDto',                       require('./study/CollectionDto'));
   module.factory('CollectionEventType',                 require('./study/CollectionEventType'));
   module.factory('CollectionSpecimenSpec',              require('./study/CollectionSpecimenSpec'));
   module.factory('CollectionSpecimenSpecs',             require('./study/CollectionSpecimenSpecs'));

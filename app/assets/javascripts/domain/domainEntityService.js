@@ -75,36 +75,30 @@ define(['underscore'], function(_) {
      * @return A promise. The promise is resolved if the entity was removed. The promise is rejected if the
      * user does not want to remove the entity or if the server does not allow the entity to be removed.
      */
-    function removeEntity(promise,
+    function removeEntity(promiseFunc,
                           headerHtml,
                           bodyHtml,
                           removeFailedHeaderHtml,
                           removeFaileBodyHtml) {
-      var deferred = $q.defer();
-
       var modalOptions = {
         closeButtonText: 'Cancel',
         headerHtml: headerHtml,
         bodyHtml: bodyHtml
       };
 
-      modalService.showModal({}, modalOptions).then(removeConfirmed).catch(deferred.reject);
-      return deferred.promise;
-
-      //--
+      return modalService.showModal({}, modalOptions).then(removeConfirmed);
 
       function removeConfirmed() {
-        return promise()
-          .then(deferred.resolve)
-          .catch(function (error) {
-            var modalOptions = {
-              closeButtonText: 'Cancel',
-              headerHtml:      removeFailedHeaderHtml,
-              bodyHtml:        removeFaileBodyHtml + ': ' + error
-            };
-            modalService.showModal({}, modalOptions).then(deferred.reject);
-          });
+        return promiseFunc().catch(function (error) {
+          var modalOptions = {
+            closeButtonText: 'Cancel',
+            headerHtml:      removeFailedHeaderHtml,
+            bodyHtml:        removeFaileBodyHtml + ': ' + error
+          };
+          modalService.showModal({}, modalOptions);
+        });
       }
+
     }
   }
 

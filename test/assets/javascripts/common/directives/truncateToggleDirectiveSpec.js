@@ -13,94 +13,99 @@ define([
 ], function(angular, mocks, _, faker) {
   'use strict';
 
-  /**
-   *
-   */
   describe('Directive: truncateToggle', function() {
-    var rootScope, compile, element,
-        textEmptyWarning = 'text not entered yet.';
+    var textEmptyWarning = 'text not entered yet.';
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function ($rootScope, $compile, testUtils) {
-      rootScope = $rootScope;
-      compile = $compile;
+      var self = this;
+
+      this.$filter = this.$injector.get('$filter');
 
       testUtils.putHtmlTemplates(
         '/assets/javascripts/common/directives/truncateToggle.html');
 
-      element = angular.element(
+      self.element = angular.element(
         '<truncate-toggle' +
           '   text="model.text"' +
           '   toggle-length="model.toggleLength"' +
           '   text-empty-warning="' + textEmptyWarning + '">' +
           '</truncate-toggle>');
+
+      self.createScope = setupScope();
+
+      function setupScope() {
+        return create;
+
+        function create(text, toggleLength) {
+          self.scope = $rootScope;
+
+          self.scope.model = {
+            text:         text,
+            toggleLength: toggleLength
+          };
+
+          $compile(self.element)(self.scope);
+          self.scope.$digest();
+        }
+      }
     }));
 
-    function createScope(text, toggleLength) {
-      var scope = rootScope;
-
-      scope.model = {
-        text:         text,
-        toggleLength: toggleLength
-      };
-
-      compile(element)(scope);
-      scope.$digest();
-      return scope;
-    }
-
     it('pressing the button truncates the string', function() {
-      var pars,
+      var divs,
           buttons,
-          text = faker.lorem.paragraphs(1),
-          scope = createScope(text, 20);
+          text = '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ' +
+          '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ';
 
-      pars = element.find('p');
-      expect(pars.length).toBe(1);
-      expect(pars.eq(0).text()).toBe(scope.model.text);
+      this.createScope(text, 20);
 
-      buttons = element.find('button');
+      divs = angular.element(this.element[0].getElementsByClassName('col-md-12'));
+      expect(divs.length).toBe(1);
+      expect(divs.eq(0).text()).toBe(text);
+
+      buttons = this.element.find('button');
       expect(buttons.length).toBe(1);
       buttons.eq(0).click();
-      expect(pars.eq(0).text().length).toBe(scope.model.toggleLength);
+      expect(divs.eq(0).text().length).toBe(this.scope.model.toggleLength);
     });
 
     it('pressing the button twice displays whole string', function() {
-      var pars,
+      var divs,
           buttons,
-          text = faker.lorem.paragraphs(1),
-          scope = createScope(text, 20);
+          text = '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ' +
+          '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ';
 
-      pars = element.find('p');
-      expect(pars.length).toBe(1);
-      expect(pars.eq(0).text()).toBe(scope.model.text);
+      this.createScope(text, 20);
 
-      buttons = element.find('button');
+      divs = angular.element(this.element[0].getElementsByClassName('col-md-12'));
+      expect(divs.length).toBe(1);
+
+      buttons = this.element.find('button');
       expect(buttons.length).toBe(1);
       buttons.eq(0).click();
       buttons.eq(0).click();
-      expect(pars.eq(0).text().trim().length).toBe(scope.model.text.length);
+      expect(divs.eq(0).text()).toBe(text);
     });
 
     it('button is labelled correctly', function() {
       var buttons,
           text = faker.lorem.paragraphs(1);
 
-      createScope(text, 20);
-      buttons = element.find('button');
+      this.createScope(text, 20);
+      buttons = this.element.find('button');
       expect(buttons.length).toBe(1);
-      expect(buttons.eq(0).text().trim()).toBe('Collapse');
+      expect(buttons.eq(0).text().trim()).toBe('Show less');
     });
 
     it('if text is null then warning message is displayed', function() {
-      var pars,
+      var divs,
           text = '';
 
-      createScope(text, 20);
-      pars = element.find('p');
-      expect(pars.length).toBe(2);
-      expect(pars.eq(1).text().trim()).toBe(textEmptyWarning);
+      this.createScope(text, 20);
+      divs = angular.element(this.element[0].getElementsByClassName('alert'));
+      expect(divs.length).toBe(1);
+      expect(divs.eq(0).text().trim()).toBe(textEmptyWarning);
     });
 
   });

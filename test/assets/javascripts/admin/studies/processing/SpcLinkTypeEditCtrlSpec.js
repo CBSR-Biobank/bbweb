@@ -31,7 +31,7 @@ define([
     function setupEntities(injector) {
       var Study                      = injector.get('Study'),
           ProcessingType             = injector.get('ProcessingType'),
-          SpecimenLinkAnnotationType = injector.get('SpecimenLinkAnnotationType'),
+          AnnotationType             = injector.get('AnnotationType'),
           AnnotationValueType        = injector.get('AnnotationValueType');
 
       return create;
@@ -51,9 +51,7 @@ define([
         annotationTypes = _.map(
           AnnotationValueType.values(),
           function(valueType) {
-            return new SpecimenLinkAnnotationType(
-              jsonEntities.studyAnnotationType(
-                study, { valueType: valueType }));
+            return new AnnotationType({ valueType: valueType });
           });
 
         serverSlt = jsonEntities.specimenLinkType(processingType, {
@@ -69,7 +67,6 @@ define([
         }
 
         specimenLinkType.studySpecimenGroups(specimenGroups);
-        specimenLinkType.studyAnnotationTypes(annotationTypes);
 
         return {
           study:            new Study(study),

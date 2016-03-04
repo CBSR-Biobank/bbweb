@@ -13,77 +13,93 @@ define([
   'use strict';
 
   describe('Controller: CentresCtrl', function() {
-    var CentreCounts, jsonEntities, createController;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testUtils) {
-      CentreCounts = this.$injector.get('CentreCounts');
-      jsonEntities = this.$injector.get('jsonEntities');
-      createController = setupController(this.$injector);
+    beforeEach(inject(function($rootScope, $controller, testUtils) {
+      var self = this;
+
+      self.$q           = this.$injector.get('$q');
+      self.CentreCounts = this.$injector.get('CentreCounts');
+      self.jsonEntities = this.$injector.get('jsonEntities');
+
+      self.createController = setupController();
+      self.createCentreCounts = centreCounts;
+
       testUtils.addCustomMatchers();
+
+      function centreCounts(disabled, enabled, retired) {
+        return create;
+
+        function create() {
+          return new self.CentreCounts({
+            total:    disabled + enabled + retired,
+            disabled: disabled,
+            enabled:  enabled,
+            retired:  retired
+          });
+        }
+      }
+
+      function setupController() {
+        var Centre       = self.$injector.get('Centre'),
+            CentreStatus = self.$injector.get('CentreStatus');
+
+        return create;
+
+        //---
+
+        function create(centreCounts) {
+          self.scope = $rootScope.$new();
+
+          $controller('CentresCtrl as vm', {
+            $scope:       self.scope,
+            Centre:       Centre,
+            CentreStatus: CentreStatus,
+            CentreCounts: self.CentreCounts
+          });
+
+          self.scope.$digest();
+        }
+      }
     }));
 
-    function createCentreCounts(disabled, enabled, retired) {
-      return new CentreCounts({
-        total:    disabled + enabled + retired,
-        disabled: disabled,
-        enabled:  enabled,
-        retired:  retired
-      });
-    }
-
-    function setupController(injector) {
-      var $rootScope = injector.get('$rootScope'),
-          $controller = injector.get('$controller'),
-          Centre = injector.get('Centre'),
-          CentreStatus = injector.get('CentreStatus');
-
-      return create;
-
-      //---
-
-      function create(centreCounts) {
-        var scope = $rootScope.$new();
-
-        $controller('CentresCtrl as vm', {
-          $scope:      scope,
-          Centre:       Centre,
-          CentreStatus: CentreStatus,
-          centreCounts: centreCounts
-        });
-
-        scope.$digest();
-        return scope;
-      }
-    }
-
     it('scope is valid on startup', function() {
-      var CentreStatus = this.$injector.get('CentreStatus'),
+      var self = this,
+          CentreStatus = self.$injector.get('CentreStatus'),
           allStatuses = CentreStatus.values(),
-          counts = createCentreCounts(1, 2, 3),
-          scope = createController(counts);
+          counts = self.createCentreCounts(1, 2, 3);
 
-      expect(scope.vm.centreCounts).toEqual(counts);
-      expect(scope.vm.pageSize).toBeDefined();
+      spyOn(self.CentreCounts, 'get').and.callFake(function () {
+        return self.$q.when(counts);
+      });
+
+      self.createController(counts);
+
+      expect(self.scope.vm.centreCounts).toEqual(counts);
+      expect(self.scope.vm.pageSize).toBeDefined();
 
       _.each(allStatuses, function(status) {
-        expect(scope.vm.possibleStatuses).toContain({ id: status, label: CentreStatus.label(status)});
+        expect(self.scope.vm.possibleStatuses).toContain({ id: status, label: CentreStatus.label(status)});
       });
-      expect(scope.vm.possibleStatuses).toContain({ id: 'all', label: 'All'});
+      expect(self.scope.vm.possibleStatuses).toContain({ id: 'all', label: 'All'});
     });
 
     it('updateCentres retrieves new list of centres', function() {
-      var Centre = this.$injector.get('Centre'),
-          counts = createCentreCounts(1, 2, 3),
-          listOptions = {},
-          scope;
+      var self = this,
+          Centre = this.$injector.get('Centre'),
+          counts = this.createCentreCounts(1, 2, 3),
+          listOptions = {};
+
+      spyOn(self.CentreCounts, 'get').and.callFake(function () {
+        return self.$q.when(counts);
+      });
 
       spyOn(Centre, 'list').and.callFake(function () {});
 
-      scope = createController(counts);
-      scope.vm.updateCentres(listOptions);
-      scope.$digest();
+      self.createController(counts);
+      self.scope.vm.updateCentres(listOptions);
+      self.scope.$digest();
 
       expect(Centre.list).toHaveBeenCalledWith(listOptions);
     });

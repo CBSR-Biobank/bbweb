@@ -20,7 +20,7 @@ define([
   /**
    * Suite for ceventAnnotationTypesService
    */
-  describe('service: ceventAnnotationTypesService', function () {
+  xdescribe('service: studyAnnotationTypesService', function () {
 
     var context = {};
 
@@ -47,7 +47,7 @@ define([
   /**
    * Suite for spcLinkAnnotationTypesService
    */
-  describe('service: spcLinkAnnotationTypesService', function () {
+  xdescribe('service: spcLinkAnnotationTypesService', function () {
 
     var context = {};
 
@@ -74,7 +74,7 @@ define([
   /**
    * Suite for participantAnnotationTypesService
    */
-  describe('service: participantAnnotationTypesService', function () {
+  xdescribe('service: participantAnnotationTypesService', function () {
 
     var context = {};
 

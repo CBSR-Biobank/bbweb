@@ -86,12 +86,12 @@ define([
       });
     });
 
-    it('can retrieve a single centre', function(done) {
+    it('can retrieve a single centre', function() {
       var self = this, centre = self.jsonEntities.centre();
 
       self.httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
-      self.Centre.get(centre.id).then(checkReply).catch(failTest).finally(done);
+      self.Centre.get(centre.id).then(checkReply).catch(failTest);
       self.httpBackend.flush();
 
       function checkReply(reply) {
@@ -100,12 +100,12 @@ define([
       }
     });
 
-    it('fails when getting a centre and it has a bad format', function(done) {
+    it('fails when getting a centre and it has a bad format', function() {
       var self = this,
           centre = _.omit(self.jsonEntities.centre(), 'name');
       self.httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
-      self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail).finally(done);
+      self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
       self.httpBackend.flush();
 
       function shouldNotFail(reply) {
@@ -117,13 +117,13 @@ define([
       }
     });
 
-    it('fails when getting a centre and it has a bad study ID', function(done) {
+    it('fails when getting a centre and it has a bad study ID', function() {
       var self = this,
           centre = self.jsonEntities.centre({ studyIds: [ '' ]});
 
       self.httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
-      self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail).finally(done);
+      self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
       self.httpBackend.flush();
 
       function shouldNotFail(reply) {
@@ -135,14 +135,14 @@ define([
       }
     });
 
-    it('fails when getting a centre and it has a bad location', function(done) {
+    it('fails when getting a centre and it has a bad location', function() {
       var self = this,
           location = _.omit(self.jsonEntities.location(), 'name'),
           centre = self.jsonEntities.centre({ locations: [ location ]});
 
       self.httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
-      self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail).finally(done);
+      self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
       self.httpBackend.flush();
 
       function shouldNotFail(reply) {
@@ -154,14 +154,14 @@ define([
       }
     });
 
-    it('can retrieve centres', function(done) {
+    it('can retrieve centres', function() {
       var self = this,
           centres = [ self.jsonEntities.centre() ],
           reply = self.jsonEntities.pagedResult(centres);
 
       self.httpBackend.whenGET(uri()).respond(serverReply(reply));
 
-      self.Centre.list().then(checkReply).catch(failTest).finally(done);
+      self.Centre.list().then(checkReply).catch(failTest);
       self.httpBackend.flush();
 
       function checkReply(pagedResult) {
@@ -173,7 +173,7 @@ define([
       }
     });
 
-    it('can list centres using options', function(done) {
+    it('can list centres using options', function() {
       var self = this,
           optionList = [
             { filter: 'name' },
@@ -199,22 +199,18 @@ define([
           _.each(pagedResult.items, function (study) {
             expect(study).toEqual(jasmine.any(self.Centre));
           });
-
-          if (options.order) {
-            done();
-          }
         }
       });
     });
 
-    it('fails when list returns an invalid centre', function(done) {
+    it('fails when list returns an invalid centre', function() {
       var self = this,
           centres = [ _.omit(self.jsonEntities.centre(), 'name') ],
           reply = self.jsonEntities.pagedResult(centres);
 
       self.httpBackend.whenGET(uri()).respond(serverReply(reply));
 
-      self.Centre.list().then(listFail).catch(shouldFail).finally(done);
+      self.Centre.list().then(listFail).catch(shouldFail);
       self.httpBackend.flush();
 
       function listFail(reply) {
@@ -226,7 +222,7 @@ define([
       }
     });
 
-    it('can add a centre', function(done) {
+    it('can add a centre', function() {
       var self = this,
           baseCentre = self.jsonEntities.centre(),
           centre = new self.Centre(_.omit(baseCentre, 'id')),
@@ -234,7 +230,7 @@ define([
 
       self.httpBackend.expectPOST(uri(), json).respond(201, serverReply(baseCentre));
 
-      centre.add().then(checkReply).catch(failTest).finally(done);
+      centre.add().then(checkReply).catch(failTest);
       self.httpBackend.flush();
 
       function checkReply(replyCentre) {
@@ -245,7 +241,7 @@ define([
       }
     });
 
-    it('can update the name on a centre', function(done) {
+    it('can update the name on a centre', function() {
       var self       = this,
           baseCentre = self.jsonEntities.centre(),
           centre     = new self.Centre(baseCentre);
@@ -258,11 +254,10 @@ define([
                                        { name: centre.name },
                                        baseCentre,
                                        expectCentre,
-                                       failTest,
-                                       done);
+                                       failTest);
     });
 
-    it('can update the description on a centre', function(done) {
+    it('can update the description on a centre', function() {
       var self = this,
           baseCentre = self.jsonEntities.centre(),
           centre     = new self.Centre(baseCentre);
@@ -285,13 +280,12 @@ define([
                                        { description: centre.description },
                                        baseCentre,
                                        expectCentre,
-                                       failTest,
-                                       done);
+                                       failTest);
     });
 
-    it('can disable a centre', function(done) {
+    it('can disable a centre', function() {
       var jsonCentre = this.jsonEntities.centre({ status: this.CentreStatus.ENABLED() });
-      changeStatusShared.call(this, done, jsonCentre, 'disable', this.CentreStatus.DISABLED());
+      changeStatusShared.call(this, jsonCentre, 'disable', this.CentreStatus.DISABLED());
     });
 
     it('throws an error when disabling a centre and it is already disabled', function() {
@@ -300,9 +294,9 @@ define([
         .toThrowErrorOfType('Error');
     });
 
-    it('can enable a centre', function(done) {
+    it('can enable a centre', function() {
       var jsonCentre = this.jsonEntities.centre({ status: this.CentreStatus.DISABLED() });
-      changeStatusShared.call(this, done, jsonCentre, 'enable', this.CentreStatus.ENABLED());
+      changeStatusShared.call(this, jsonCentre, 'enable', this.CentreStatus.ENABLED());
     });
 
     it('throws an error when enabling a centre and it is already enabled', function() {
@@ -313,7 +307,7 @@ define([
 
     describe('locations', function () {
 
-      it('adds a location', function(done) {
+      it('adds a location', function() {
         var self         = this,
             jsonLocation = this.jsonEntities.location(),
             jsonCentre   = this.jsonEntities.centre(),
@@ -327,8 +321,7 @@ define([
                                          _.omit(jsonLocation, 'uniqueId'),
                                          jsonCentre,
                                          expectCentre,
-                                         failTest,
-                                         done);
+                                         failTest);
       });
 
       it('throws an error when removing a location that does not exists', function() {
@@ -338,7 +331,7 @@ define([
         expect(function () { centre.removeLocation(new self.Location()); }).toThrowErrorOfType('Error');
       });
 
-      it('can remove a location', function(done) {
+      it('can remove a location', function() {
         var self         = this,
             jsonLocation = new self.Location(self.jsonEntities.location()),
             jsonCentre   = self.jsonEntities.centre({ locations: [ jsonLocation ]}),
@@ -349,7 +342,7 @@ define([
                                            jsonLocation.uniqueId);
 
         self.httpBackend.expectDELETE(url).respond(201, serverReply(true));
-        centre.removeLocation(jsonLocation).then(checkCentre).catch(failTest).finally(done);
+        centre.removeLocation(jsonLocation).then(checkCentre).catch(failTest);
         self.httpBackend.flush();
 
         function checkCentre(reply) {
@@ -362,7 +355,7 @@ define([
 
     describe('studies', function () {
 
-      it('can add a study', function(done) {
+      it('can add a study', function() {
         var self       = this,
             jsonStudy  = self.jsonEntities.study(),
             jsonCentre = self.jsonEntities.centre(),
@@ -376,11 +369,10 @@ define([
                                          { studyId : jsonStudy.id },
                                          jsonCentre,
                                          expectCentre,
-                                         failTest,
-                                         done);
+                                         failTest);
       });
 
-      it('can remove a study', function(done) {
+      it('can remove a study', function() {
         var self       = this,
             jsonStudy  = self.jsonEntities.study(),
             jsonCentre = self.jsonEntities.centre({ studyIds: [ jsonStudy.id ]}),
@@ -391,7 +383,7 @@ define([
                                          jsonStudy.id);
 
         self.httpBackend.expectDELETE(url).respond(201, serverReply(true));
-        centre.removeStudy(jsonStudy).then(checkCentre).catch(failTest).finally(done);
+        centre.removeStudy(jsonStudy).then(checkCentre).catch(failTest);
         this.httpBackend.flush();
 
         function checkCentre(replyCentre) {
@@ -431,7 +423,7 @@ define([
       return { status: 'success', data: event };
     }
 
-    function changeStatusShared(done, jsonCentre, action, status) {
+    function changeStatusShared(jsonCentre, action, status) {
       /* jshint validthis:true */
       var self       = this,
           centre     = new self.Centre(jsonCentre),
@@ -440,7 +432,7 @@ define([
 
       self.httpBackend.expectPOST(uri(action, centre.id), json).respond(201, serverReply(reply));
       expect(centre[action]).toBeFunction();
-      centre[action]().then(checkCentre).catch(failTest).finally(done);
+      centre[action]().then(checkCentre).catch(failTest);
       this.httpBackend.flush();
 
       function checkCentre(reply) {

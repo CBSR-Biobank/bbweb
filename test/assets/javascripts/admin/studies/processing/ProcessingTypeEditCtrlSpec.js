@@ -29,7 +29,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
                                _ProcessingType_,
                                _domainEntityService_,
                                _notificationsService_,
-                               jsonEntities) {
+                               _jsonEntities_) {
       q                          = $q;
       rootScope                  = $rootScope;
       controller                 = $controller;
@@ -38,7 +38,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       ProcessingType             = _ProcessingType_;
       domainEntityService        = _domainEntityService_;
       notificationsService       = _notificationsService_;
-      jsonEntities               = jsonEntities;
+      jsonEntities               = _jsonEntities_;
     }));
 
     function createEntities(options) {

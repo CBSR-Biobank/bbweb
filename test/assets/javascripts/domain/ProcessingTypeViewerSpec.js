@@ -19,9 +19,9 @@ define([
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_ProcessingTypeViewer_,
-                               jsonEntities) {
+                               _jsonEntities_) {
       ProcessingTypeViewer = _ProcessingTypeViewer_;
-      jsonEntities   = jsonEntities;
+      jsonEntities   = _jsonEntities_;
 
       centre = jsonEntities.centre();
     }));

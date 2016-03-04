@@ -269,7 +269,7 @@ define([
         valueType: options.valueType,
         name:      domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE()),
         options:   [],
-        required:   false
+        required:  options.required || false
       };
 
       if (options.valueType === AnnotationValueType.SELECT()) {
@@ -319,7 +319,7 @@ define([
 
     function annotation(value, annotationType) {
       var annot = {
-        annotationTypeId: annotationType.id,
+        annotationTypeId: annotationType.uniqueId,
         selectedValues:   []
       };
 
@@ -337,11 +337,9 @@ define([
       case AnnotationValueType.SELECT():
         if (value) {
           if (annotationType.maxValueCount === 1) {
-            annot.selectedValues =  [{ annotationTypeId: annotationType.id, value: value }];
+            annot.selectedValues =  [ { value: value } ];
           } else if (annotationType.maxValueCount > 1) {
-            annot.selectedValues =_.map(value, function (v) {
-              return { annotationTypeId: annotationType.id, value: v };
-            });
+            annot.selectedValues =_.map(value, function (v) { return { value: v }; });
           } else {
             throw new Error('invalid max value count for annotation: ' + annotationType.maxValueCount);
           }

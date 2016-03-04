@@ -22,11 +22,11 @@ define([
 
     beforeEach(inject(function($httpBackend,
                                _ProcessingType_,
-                               jsonEntities,
+                               _jsonEntities_,
                                extendedDomainEntities) {
-      httpBackend         = $httpBackend;
+      httpBackend    = $httpBackend;
       ProcessingType = _ProcessingType_;
-      jsonEntities        = jsonEntities;
+      jsonEntities   = _jsonEntities_;
     }));
 
     function uri(/* studyId, processingTypeId, version */) {

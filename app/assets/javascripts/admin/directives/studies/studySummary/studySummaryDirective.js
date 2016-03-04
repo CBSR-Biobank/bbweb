@@ -37,9 +37,9 @@ define(['underscore'], function(_) {
         vm = this;
 
     vm.descriptionToggleLength = 100;
-    vm.changeStatus = changeStatus;
-    vm.editName = editName;
-    vm.editDescription = editDescription;
+    vm.changeStatus            = changeStatus;
+    vm.editName                = editName;
+    vm.editDescription         = editDescription;
 
     //--
 

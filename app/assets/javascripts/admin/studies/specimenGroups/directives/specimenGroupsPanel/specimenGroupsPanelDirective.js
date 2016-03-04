@@ -102,7 +102,7 @@ define(['angular', 'underscore'], function(angular, _) {
       }
 
       domainEntityService.removeEntity(
-        specimenGroup,
+        specimenGroup.remove,
         'Remove Specimen Group',
         'Are you sure you want to remove specimen group ' + specimenGroup.name + '?',
         'Remove Failed',
