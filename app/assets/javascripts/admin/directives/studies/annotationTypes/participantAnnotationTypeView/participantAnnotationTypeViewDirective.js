@@ -32,32 +32,40 @@ define(['underscore'], function (_) {
   }
 
   ParticipantAnnotationTypeViewCtrl.$inject = [
-    'notificationsService'
+    '$q', 'notificationsService'
   ];
 
-  function ParticipantAnnotationTypeViewCtrl(notificationsService) {
+  function ParticipantAnnotationTypeViewCtrl($q, notificationsService) {
     var vm = this;
 
     vm.onUpdate = onUpdate;
 
     function onUpdate(annotationType) {
-      vm.study.updateAnnotationType(annotationType)
-        .then(postUpdate('Annotation type changed successfully.',
-                         'Change successful',
-                         1500))
+      return vm.study.updateAnnotationType(annotationType)
+        .then(postUpdate)
+        .then(notifySuccess)
         .catch(notificationsService.updateError);
     }
 
-    function postUpdate(message, title, timeout) {
-      return function (study) {
-        vm.study = study;
-        vm.annotationType = _.findWhere(vm.study.annotationTypes,
-                                        { uniqueId: vm.annotationType.uniqueId });
-        if (_.isUndefined(vm.annotationType)) {
-          throw new Error('could not update annotation type');
-        }
-        notificationsService.success(message, title, timeout);
-      };
+    function postUpdate(study) {
+      var deferred = $q.defer();
+
+      vm.study = study;
+      vm.annotationType = _.findWhere(vm.study.annotationTypes,
+                                      { uniqueId: vm.annotationType.uniqueId });
+      if (_.isUndefined(vm.annotationType)) {
+        deferred.reject('could not update annotation type');
+      } else {
+        deferred.resolve(true);
+      }
+      return deferred.promise;
+    }
+
+    function notifySuccess() {
+      return notificationsService.success(
+        'Annotation type changed successfully.',
+        'Change successful',
+        1500);
     }
 
   }

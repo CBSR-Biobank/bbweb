@@ -1,11 +1,15 @@
 /**
+ * Jasmine test suite
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-// Jasmine test suite
-//
-define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
+define(function (require) {
   'use strict';
+
+  var angular                = require('angular'),
+      mocks                  = require('angularMocks'),
+      entityUpdateSharedSpec = require('../entityUpdateSharedSpec');
 
   describe('Controller: StudySummaryTabCtrl', function() {
 
@@ -29,7 +33,8 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       testUtils.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/studySummary/studySummary.html',
         '/assets/javascripts/common/directives/truncateToggle.html',
-        '/assets/javascripts/admin/directives/statusLine/statusLine.html');
+        '/assets/javascripts/admin/directives/statusLine/statusLine.html',
+        '/assets/javascripts/common/services/modalStringInput.html');
 
       function setupController() {
         return create;
@@ -57,11 +62,13 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       var context = {};
 
       beforeEach(inject(function () {
-        context.updateFuncName = 'updateName';
-        context.controllerFuncName = 'editName';
+        context.entity               = this.Study;
+        context.updateFuncName       = 'updateName';
+        context.controllerFuncName   = 'editName';
+        context.modalServiceFuncName = 'modalTextInput';
       }));
 
-      sharedUpdateBehaviour(context);
+      entityUpdateSharedSpec(context);
 
     });
 
@@ -70,54 +77,15 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       var context = {};
 
       beforeEach(inject(function () {
-        context.updateFuncName = 'updateDescription';
-        context.controllerFuncName = 'editDescription';
+        context.entity               = this.Study;
+        context.updateFuncName       = 'updateDescription';
+        context.controllerFuncName   = 'editDescription';
+        context.modalServiceFuncName = 'modalTextAreaInput';
       }));
 
-      sharedUpdateBehaviour(context);
+      entityUpdateSharedSpec(context);
 
     });
-
-    function sharedUpdateBehaviour(context) {
-
-      describe('update functions', function () {
-
-        it('should update a field on a study', function() {
-          var newValue = this.jsonEntities.stringNext();
-
-          expect(this.Study.prototype[context.updateFuncName]).toBeFunction();
-
-          spyOn(this.modalService, 'modalTextAreaInput').and.returnValue(this.$q.when(newValue));
-          spyOn(this.Study.prototype, context.updateFuncName).and.returnValue(this.$q.when(this.study));
-
-          this.createController();
-          expect(this.controller[context.controllerFuncName]).toBeFunction();
-          this.controller[context.controllerFuncName]();
-          this.scope.$digest();
-          expect(this.Study.prototype[context.updateFuncName]).toHaveBeenCalledWith(newValue);
-        });
-
-        it('should display an error in a modal when update fails', function() {
-          var newValue = this.jsonEntities.stringNext(),
-              deferred = this.$q.defer();
-
-          expect(this.Study.prototype[context.updateFuncName]).toBeFunction();
-
-          spyOn(this.modalService, 'modalTextAreaInput').and.returnValue(this.$q.when(newValue));
-          spyOn(this.Study.prototype, context.updateFuncName).and.returnValue(deferred.promise);
-          spyOn(this.notificationsService, 'updateError');
-
-          deferred.reject('simulated error');
-
-          this.createController();
-          this.controller[context.controllerFuncName]();
-          expect(this.controller[context.controllerFuncName]).toBeFunction();
-          this.scope.$digest();
-          expect(this.notificationsService.updateError).toHaveBeenCalled();
-        });
-
-      });
-    }
 
     describe('enabling a study', function() {
       var context = {};

@@ -28,9 +28,9 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       self.scope = $rootScope.$new();
       self.scope.vm = { study: self.study };
 
-      $compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('studyAdd');
+      $compile(self.element)(self.scope);
+      self.scope.$digest();
+      self.controller = self.element.controller('studyAdd');
     }));
 
     it('should contain valid settings to update a study', function() {

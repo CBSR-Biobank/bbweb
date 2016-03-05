@@ -73,7 +73,7 @@ define(['underscore'], function(_) {
     }
 
     function editName() {
-      modalService.modalTextAreaInput('Edit name', 'Name', vm.study.name)
+      modalService.modalTextInput('Edit name', 'Name', vm.study.name)
         .then(function (name) {
           vm.study.updateName(name)
             .then(postUpdate('Name changed successfully.',

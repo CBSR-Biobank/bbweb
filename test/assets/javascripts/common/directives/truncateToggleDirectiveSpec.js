@@ -90,7 +90,8 @@ define([
 
     it('button is labelled correctly', function() {
       var buttons,
-          text = faker.lorem.paragraphs(1);
+          text = '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ' +
+          '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ';
 
       this.createScope(text, 20);
       buttons = this.element.find('button');

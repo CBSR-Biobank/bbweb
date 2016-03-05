@@ -32,32 +32,40 @@ define(['underscore'], function (_) {
   }
 
   CollectionEventAnnotationTypeViewCtrl.$inject = [
+    '$q',
     'notificationsService'
   ];
 
-  function CollectionEventAnnotationTypeViewCtrl(notificationsService) {
+  function CollectionEventAnnotationTypeViewCtrl($q, notificationsService) {
     var vm = this;
 
     vm.onUpdate = onUpdate;
 
     function onUpdate(annotationType) {
-      vm.collectionEventType.updateAnnotationType(annotationType)
-        .then(postUpdate('Annotation type changed successfully.',
-                         'Change successful',
-                         1500))
+      return vm.collectionEventType.updateAnnotationType(annotationType)
+        .then(postUpdate)
+        .then(notifySuccess)
         .catch(notificationsService.updateError);
     }
 
-    function postUpdate(message, title, timeout) {
-      return function (collectionEventType) {
-        vm.collectionEventType = collectionEventType;
-        vm.annotationType = _.findWhere(vm.collectionEventType.annotationTypes,
-                                        { uniqueId: vm.annotationType.uniqueId });
-        if (_.isUndefined(vm.annotationType)) {
-          throw new Error('could not update annotation type');
-        }
-        notificationsService.success(message, title, timeout);
-      };
+    function postUpdate(collectionEventType) {
+      var deferred = $q.defer();
+      vm.collectionEventType = collectionEventType;
+      vm.annotationType = _.findWhere(vm.collectionEventType.annotationTypes,
+                                      { uniqueId: vm.annotationType.uniqueId });
+      if (_.isUndefined(vm.annotationType)) {
+        deferred.reject('could not update annotation type');
+      } else {
+        deferred.resolve(true);
+      }
+      return deferred.promise;
+    }
+
+    function notifySuccess() {
+      return notificationsService.success(
+        'Annotation type changed successfully.',
+        'Change successful',
+        1500);
     }
 
   }

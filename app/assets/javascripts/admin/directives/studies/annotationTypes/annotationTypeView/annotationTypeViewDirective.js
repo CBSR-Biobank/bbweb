@@ -16,7 +16,6 @@ define(['underscore'], function (_) {
       restrict: 'E',
       scope: {},
       bindToController: {
-        study:          '=',
         annotationType: '=',
         returnState:    '@',
         onUpdate:       '&'
@@ -32,12 +31,14 @@ define(['underscore'], function (_) {
   AnnotationTypeViewCtrl.$inject = [
     '$state',
     'modalService',
-    'notificationsService'
+    'notificationsService',
+    'AnnotationType'
   ];
 
   function AnnotationTypeViewCtrl($state,
                                   modalService,
-                                  notificationsService) {
+                                  notificationsService,
+                                  AnnotationType) {
     var vm = this;
 
     vm.editName            = editName;
@@ -53,8 +54,8 @@ define(['underscore'], function (_) {
                                   'Name',
                                   vm.annotationType.name)
         .then(function (name) {
-          var annotationType = _.extend({}, vm.annotationType, { name: name  });
-          vm.onUpdate()(annotationType);
+          vm.annotationType.name = name;
+          vm.onUpdate()(vm.annotationType);
         });
     }
 
@@ -63,8 +64,8 @@ define(['underscore'], function (_) {
                                      'Required',
                                      vm.annotationType.required.toString())
         .then(function (required) {
-          var annotationType = _.extend({}, vm.annotationType, { required: required === 'true' });
-          vm.onUpdate()(annotationType);
+          vm.annotationType.required = (required === 'true' );
+          vm.onUpdate()(vm.annotationType);
         });
     }
 
