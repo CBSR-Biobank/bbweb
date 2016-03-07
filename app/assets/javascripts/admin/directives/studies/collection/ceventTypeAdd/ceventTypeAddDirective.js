@@ -15,7 +15,7 @@ define(['underscore'], function(_) {
       bindToController: {
         study: '='
       },
-      templateUrl : '/assets/javascripts/admin/directives/studies/ceventTypes/ceventTypeAdd/ceventTypeAdd.html',
+      templateUrl : '/assets/javascripts/admin/directives/studies/collectionTypes/ceventTypeAdd/ceventTypeAdd.html',
       controller: CeventTypeAddCtrl,
       controllerAs: 'vm'
     };

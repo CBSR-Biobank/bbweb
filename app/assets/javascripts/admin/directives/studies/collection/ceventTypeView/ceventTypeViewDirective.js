@@ -15,7 +15,7 @@ define(function () {
       bindToController: {
         ceventType: '='
       },
-      templateUrl : '/assets/javascripts/admin/directives/studies/ceventTypes/ceventTypeView/ceventTypeView.html',
+      templateUrl : '/assets/javascripts/admin/directives/studies/collection/ceventTypeView/ceventTypeView.html',
       controller: CeventTypeViewCtrl,
       controllerAs: 'vm'
     };

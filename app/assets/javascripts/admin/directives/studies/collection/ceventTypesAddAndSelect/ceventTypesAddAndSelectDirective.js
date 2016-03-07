@@ -15,7 +15,7 @@ define(function () {
       bindToController: {
         study: '='
       },
-      templateUrl : '/assets/javascripts/admin/directives/studies/ceventTypes/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html',
+      templateUrl : '/assets/javascripts/admin/directives/studies/collection/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html',
       controller: CeventTypesAddAndSelectCtrl,
       controllerAs: 'vm'
     };
