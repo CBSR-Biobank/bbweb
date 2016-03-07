@@ -68,7 +68,7 @@ define(['underscore'], function (_) {
         }
       },
       data: {
-        displayName: 'Collection Event Type'
+        displayName: 'Collection Event'
       }
     });
 
@@ -97,7 +97,7 @@ define(['underscore'], function (_) {
         }
       },
       data: {
-        displayName: 'Annotation Type'
+        displayName: 'Annotation'
       }
     });
 

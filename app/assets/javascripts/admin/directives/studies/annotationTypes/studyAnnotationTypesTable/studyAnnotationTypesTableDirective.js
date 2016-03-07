@@ -51,9 +51,6 @@ define(['angular', 'underscore'], function(angular, _) {
 
     //--
 
-    /**
-     * Order is important here.
-     */
     function annotationTypeColumns(annotationTypeName) {
       var result =  [
         { title: 'Name', field: 'name' },

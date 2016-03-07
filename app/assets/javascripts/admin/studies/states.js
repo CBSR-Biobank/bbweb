@@ -134,65 +134,14 @@ define(function () {
       },
       views: {
         'studyDetails': {
-          templateUrl: '/assets/javascripts/admin/studies/studyParticipantsTab.html',
+          template: '<study-participants-tab study="vm.study"></study-participants-tab>',
           controller: [
             'study',
             function(study) {
-              var vm = this;
-              vm.study = study;
-              // FIXME this is set to empty array for now, but will have to call the correct method in the future
-              vm.annotationTypeIdsInUse = [];
-              vm.onAnnotTypeRemove = onAnnotTypeRemove;
-
-              vm.annotationTypeDescription = 'Participant annotations allow a study to collect custom named and ' +
-                'defined pieces of data for each participant. Annotations are optional and ' +
-                'are not required to be defined.';
-
-              function onAnnotTypeRemove(annotationType) {
-                return vm.study.removeAnnotationType(annotationType);
-              }
+              this.study = study;
             }
           ],
           controllerAs: 'vm'
-        }
-      },
-      data: {
-        displayName: '{{study.name}}'
-      }
-    });
-
-    /**
-     * Study view specimen information
-     */
-    $stateProvider.state('home.admin.studies.study.specimens', {
-      url: '/specimens',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        specimenGroups: [
-          '$stateParams',
-          'SpecimenGroup',
-          function($stateParams, SpecimenGroup) {
-            return SpecimenGroup.list($stateParams.studyId);
-          }
-        ],
-        specimenGroupIdsInUse: [
-          'specimenGroupsService', 'study',
-          function(specimenGroupsService, study) {
-            return specimenGroupsService.specimenGroupIdsInUse(study.id);
-          }
-        ]
-      },
-      views: {
-        'studyDetails': {
-          templateUrl: '/assets/javascripts/admin/studies/studySpecimensTab.html',
-          controller: [
-            '$scope', 'study', 'specimenGroups', 'specimenGroupIdsInUse',
-            function($scope, study, specimenGroups, specimenGroupIdsInUse) {
-              $scope.study = study;
-              $scope.specimenGroups = specimenGroups;
-              $scope.specimenGroupIdsInUse = specimenGroupIdsInUse;
-            }
-          ]
         }
       },
       data: {

@@ -1,0 +1,55 @@
+<div class="row">
+  <div class="col-md-12">
+    <study-not-disabled-warning
+       study="vm.study">
+    </study-not-disabled-warning>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    Participant annotations allow a study to collect custom named and defined pieces of data for each
+    participant. Annotations are optional and are not required to be defined.
+
+    <p ng-if="vm.study.annotationTypes.length > 0">
+      The following annotations have been entered.
+    </p>
+  </div>
+</div>
+
+<div class="panel panel-warning" ng-if="vm.study.annotationTypes.length <= 0">
+  <div class="panel-heading">
+    No annotations have not been entered yet.
+  </div>
+</div>
+
+<div class="panel panel-default" ng-if="vm.study.annotationTypes.length > 0">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      Annotations
+      <button class="btn btn-xs btn-default pull-right"
+              title="Add annotation type"
+              ng-if="vm.modificationsAllowed"
+              ng-click="vm.add()">
+        <i class="glyphicon glyphicon-plus"></i>
+      </button>
+    </h3>
+  </div>
+  <ul class="list-group">
+    <li class="list-group-item" ng-repeat="annotationType in vm.study.annotationTypes">
+      <div class="row">
+        <div class="col-md-10">
+          <annotation-type-summary annotation-type="annotationType"></annotation-type-summary>
+        </div>
+        <div class="col-md-2">
+          <update-remove-buttons
+             ng-if="vm.modificationsAllowed"
+             on-update="vm.editAnnotationType(annotationType)"
+             on-remove="vm.removeAnnotationType(annotationType)"
+             update-button-enabled="vm.modificationsAllowed"
+             remove-button-enabled="vm.modificationsAllowed">
+          </update-remove-buttons>
+      </div>
+    </li>
+  </ul>
+</div>

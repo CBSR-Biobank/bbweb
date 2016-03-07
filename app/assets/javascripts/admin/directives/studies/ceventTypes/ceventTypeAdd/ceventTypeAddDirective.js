@@ -39,7 +39,7 @@ define(['underscore'], function(_) {
     vm.ceventType  = new CollectionEventType({ studyId: vm.study.id });
     vm.returnState = 'home.admin.studies.study.collection';
 
-    vm.title       = 'Add Collection Event Type';
+    vm.title       = 'Add Collection Event';
     vm.submit      = submit;
     vm.cancel      = cancel;
 

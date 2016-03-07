@@ -16,14 +16,7 @@ define(['underscore'], function (_) {
         study:          '=',
         annotationType: '='
       },
-      template: [
-        '<annotation-type-view',
-        '  study="vm.study"',
-        '  annotation-type="vm.annotationType"',
-        '  return-state="home.admin.studies.study.participants"',
-        '  on-update="vm.onUpdate">',
-        '</annotation-type-view>'
-      ].join(''),
+      templateUrl: '/assets/javascripts/admin/directives/studies/annotationTypes/participantAnnotationTypeView/participantAnnotationTypeView.html',
       controller: ParticipantAnnotationTypeViewCtrl,
       controllerAs: 'vm'
     };

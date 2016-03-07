@@ -1,23 +1,23 @@
-<div class="panel panel-warning" ng-if="vm.study.annotationTypes.length <= 0">
+<div class="panel panel-warning" ng-if="vm.annotationTypes.length <= 0">
   <div class="panel-heading">
-    Annotation have not been defined for this study yet.
+    No annotations have not been entered yet.
   </div>
 </div>
-<div ng-if="vm.study.annotationTypes.length > 0">
+<div ng-if="vm.annotationTypes.length > 0">
   <p>The following annotation are defined:</p>
   <table class="table table-condensed table-hover"
          st-table="vm.annotationTypes"
-         st-safe-src="vm.study.annotationTypes">
+         st-safe-src="vm.annotationTypes">
     <thead>
       <tr>
         <th ng-repeat="column in vm.columns" st-sort="{{column.field}}">
           {{column.title}}
         </th>
-        <th ng-if="vm.study.isDisabled()"><!-- heading for buttons: blank for now --></th>
+        <th ng-if="vm.modificationsAllowd"><!-- heading for buttons: blank for now --></th>
       </tr>
     </thead>
     <tbody>
-      <tr ng-repeat="annotationType in vm.study.annotationTypes">
+      <tr ng-repeat="annotationType in vm.annotationTypes">
         <td ng-repeat="column in vm.columns" sortable="column.field">
 
           <span ng-if="column.field === 'name'"
