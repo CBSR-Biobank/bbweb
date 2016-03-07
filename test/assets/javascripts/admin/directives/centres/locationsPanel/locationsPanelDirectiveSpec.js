@@ -25,7 +25,7 @@ define([
       testUtils.addCustomMatchers();
 
       testUtils.putHtmlTemplates(
-        '/assets/javascripts/admin/centres/directives/locationsPanel/locationsPanel.html',
+        '/assets/javascripts/admin/directives/centres/locationsPanel/locationsPanel.html',
         '/assets/javascripts/common/directives/panelButtons.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html');
 

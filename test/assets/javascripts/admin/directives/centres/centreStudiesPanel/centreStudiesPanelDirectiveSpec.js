@@ -24,7 +24,7 @@ define([
       testUtils.addCustomMatchers();
 
       testUtils.putHtmlTemplates(
-        '/assets/javascripts/admin/centres/directives/centreStudiesPanel/centreStudiesPanel.html');
+        '/assets/javascripts/admin/directives/centres/centreStudiesPanel/centreStudiesPanel.html');
     }));
 
     function setupEntities(injector) {

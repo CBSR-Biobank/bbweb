@@ -16,7 +16,7 @@ define(['angular'], function(angular) {
         centre: '=',
         onRemove: '&'
       },
-      templateUrl: '/assets/javascripts/admin/centres/directives/locationsPanel/locationsPanel.html',
+      templateUrl: '/assets/javascripts/admin/directives/centres/locationsPanel/locationsPanel.html',
       controller: LocationsPanelCtrl,
       controllerAs: 'vm'
     };

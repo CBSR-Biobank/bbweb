@@ -17,7 +17,7 @@ define(['angular', 'underscore'], function(angular, _) {
         centreStudies: '=',
         studyNames:    '='
       },
-      templateUrl: '/assets/javascripts/admin/centres/directives/centreStudiesPanel/centreStudiesPanel.html',
+      templateUrl: '/assets/javascripts/admin/directives/centres/centreStudiesPanel/centreStudiesPanel.html',
       controller: CentreStudiesPanelCtrl,
       controllerAs: 'vm'
     };
