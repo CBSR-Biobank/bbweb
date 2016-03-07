@@ -19,11 +19,6 @@ define(function (require) {
   module.controller('CentresCtrl',          require('./CentresCtrl'));
   module.controller('LocationEditCtrl',     require('./LocationEditCtrl'));
 
-  module.directive('centreStudiesPanel',
-                   require('./directives/centreStudiesPanel/centreStudiesPanelDirective'));
-  module.directive('locationsPanel',
-                   require('./directives/locationsPanel/locationsPanelDirective'));
-
   module.config(require('./states'));
 
   return {

@@ -11,6 +11,7 @@ define(function (require) {
       centres = require('./centres/main'),
       studies = require('./studies/main'),
       users = require('./users/main'),
+      directivesCentres = require('./directives/centres/main'),
       directivesStudies = require('./directives/studies/main'),
       services = require('./services/main');
 
@@ -18,6 +19,7 @@ define(function (require) {
     centres.name,
     studies.name,
     users.name,
+    directivesCentres.name,
     directivesStudies.name,
     services.name,
     'biobank.common',
