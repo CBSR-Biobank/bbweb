@@ -13,14 +13,10 @@ define(function () {
       restrict: 'E',
       scope: {},
       bindToController: {
+        study:               '=',
         collectionEventType: '='
       },
-      template : [
-        '<annotation-type-add',
-        '  on-submit="vm.onSubmit"',
-        '  on-cancel="vm.onCancel()"',
-        '</annotation-type-add>',
-      ].join(''),
+      templateUrl: '/assets/javascripts/admin/directives/studies/annotationTypes/collectionEventAnnotationTypeAdd/collectionEventAnnotationTypeAdd.html',
       controller: CollectionEventAnnotationTypeAddCtrl,
       controllerAs: 'vm'
     };
@@ -32,7 +28,7 @@ define(function () {
     'annotationTypeAddService'
   ];
 
-  var returnState = 'home.admin.studies.study.collection.view';
+  var returnState = 'home.admin.studies.study.collection.ceventType';
 
   function CollectionEventAnnotationTypeAddCtrl(annotationTypeAddService) {
     var vm = this;

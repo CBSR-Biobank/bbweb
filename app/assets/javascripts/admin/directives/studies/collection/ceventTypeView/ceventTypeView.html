@@ -26,7 +26,7 @@
           {{vm.ceventType.name}}
         </div>
         <div class="col-md-2">
-          <button class="btn btn-xs btn-default pull-right"
+          <button class="btn btn-xs btn-primary pull-right"
                   title="Edit name"
                   ng-click="vm.editName()">
             <i class="glyphicon glyphicon-edit"></i>
@@ -58,7 +58,7 @@
         <div class="col-md-8" ng-if="vm.ceventType.recurring">Yes</div>
         <div class="col-md-8" ng-if="!vm.ceventType.recurring">No</div>
         <div class="col-md-2">
-          <button class="btn btn-xs btn-default pull-right"
+          <button class="btn btn-xs btn-primary pull-right"
                   title="Edit recurring"
                   ng-click="vm.editRecurring()">
             <i class="glyphicon glyphicon-edit"></i>
@@ -66,20 +66,43 @@
         </div>
       </div>
     </li>
-    <li class="list-group-item" ng-repeat="annotType in vm.ceventType.annotationTypes">
+    <li class="list-group-item" ng-repeat="specimenSpec in vm.ceventType.specimenSpecs">
+      <div class="row">
+        <div class="col-md-2">
+          <strong>Specimen:</strong>
+        </div>
+        <div class="col-md-8">
+          <collection-specimen-spec-summary
+             specimen-spec="specimenSpec">
+          </collection-specimen-spec-summary>
+        </div>
+        <div class="col-md-2">
+          <update-remove-buttons
+             ng-if="vm.modificationsAllowed"
+             on-update="vm.editSpecimenSpec(specimenSpec)"
+             on-remove="vm.removeSpecimenSpec(specimenSpec)"
+             update-button-enabled="vm.modificationsAllowed"
+             remove-button-enabled="vm.modificationsAllowed">
+          </update-remove-buttons>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item" ng-repeat="annotationType in vm.ceventType.annotationTypes">
       <div class="row">
         <div class="col-md-2">
           <strong>Annotation:</strong>
         </div>
         <div class="col-md-8">
-          <annotation-type-summary annotation-type="annotType"></annotation-type-summary>
+          <annotation-type-summary annotation-type="annotationType"></annotation-type-summary>
         </div>
         <div class="col-md-2">
-          <button class="btn btn-xs btn-default pull-right"
-                  title="View annotation"
-                  ng-click="vm.editAnnotationType(annotType)">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
+          <update-remove-buttons
+             ng-if="vm.modificationsAllowed"
+             on-update="vm.editAnnotationType(annotationType)"
+             on-remove="vm.removeAnnotationType(annotationType)"
+             update-button-enabled="vm.modificationsAllowed"
+             remove-button-enabled="vm.modificationsAllowed">
+          </update-remove-buttons>
         </div>
       </div>
     </li>

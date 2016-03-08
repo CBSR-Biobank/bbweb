@@ -1,20 +1,22 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 define(function () {
   'use strict';
 
+  var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
+
   /**
-   * A directive to be used in form input that only allows positive integer or float values.
+   * Restricts input to a postiive floating point number.
    */
-  function validAmount() {
-    var FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
+  function posititveFloatDirective() {
     var directive = {
       restrict: 'A',
-      require: 'ngModel',
-      link: link
+      require:  'ngModel',
+      link:     link
     };
+
     return directive;
 
     function link(scope, elm, attrs, ctrl) {
@@ -22,16 +24,15 @@ define(function () {
         if (FLOAT_REGEXP.test(viewValue)) {
           var floatValue = parseFloat(viewValue);
           if (floatValue > 0) {
-            ctrl.$setValidity('validAmount', true);
+            ctrl.$setValidity('positiveFloat', true);
             return parseFloat(viewValue.replace(',', '.'));
           }
         }
 
-        ctrl.$setValidity('validAmount', false);
+        ctrl.$setValidity('positiveFloat', false);
         return undefined;
       });
-    }
-  }
+    }  }
 
-  return validAmount;
+  return posititveFloatDirective;
 });

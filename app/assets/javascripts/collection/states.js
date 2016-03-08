@@ -11,9 +11,9 @@ define(['underscore'], function(_) {
 
   function config($urlRouterProvider, $stateProvider, authorizationProvider) {
 
-    resolveStudyCounts.$inject = ['studiesService'];
-    function resolveStudyCounts(studiesService) {
-      return studiesService.getStudyCounts();
+    resolveStudyCounts.$inject = ['StudyCounts'];
+    function resolveStudyCounts(StudyCounts) {
+      return StudyCounts.get();
     }
 
     resolveStudy.$inject = ['$stateParams', 'Study'];

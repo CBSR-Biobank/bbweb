@@ -79,6 +79,7 @@ define(['moment', 'underscore', 'tv4'], function(moment, _, tv4) {
 
     Annotation.create = function (obj) {
       if (!Annotation.validate(obj)) {
+        console.error('invalid object to create from: ' + tv4.error);
         throw new Error('invalid object to create from: ' + tv4.error);
       }
       return new Annotation(obj);

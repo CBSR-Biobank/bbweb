@@ -69,14 +69,17 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
      */
     Centre.create = function (obj) {
       if (!tv4.validate(obj, schema)) {
+        console.error('invalid object from server: ' + tv4.error);
         throw new Error('invalid object from server: ' + tv4.error);
       }
 
       if (!validStudyIds(obj.studyIds)) {
+        console.error('invalid object from server: bad study ids');
         throw new Error('invalid object from server: bad study ids');
       }
 
       if (!validLocations(obj.locations)) {
+        console.error('invalid object from server: bad locations');
         throw new Error('invalid object from server: bad locations');
       }
 

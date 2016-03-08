@@ -28,8 +28,6 @@ define(function (require) {
   module.directive('studyView',               require('./studyView/studyViewDirective'));
   module.directive('studyNotDisabledWarning',
                    require('./studyNotDisabledWarning/studyNotDisabledWarningDirective'));
-  module.directive('validAmount',          require('./validAmount/validAmountDirective'));
-  module.directive('validCount',           require('./validCount/validCountDirective'));
 
   return {
     name: name,

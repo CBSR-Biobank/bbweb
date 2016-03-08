@@ -13,7 +13,6 @@ import akka.actor.ActorSystem
 import play.api.Logger
 import org.joda.time.DateTime
 import scalaz.Scalaz._
-import scalaz.Validation.FlatMap._
 
 /**
  * Provides initial data to test with.
@@ -116,12 +115,6 @@ object TestData {
       ("0386e23157394b13b5c53993f0ad0a56", "iGenoMed", "iGenoMed")
     )
 
-  val sgIds = Seq("289561b5e6934bebb8c4702ecb6799e1",
-                  "83f46b59cff24a688f832994fc0b0ca9",
-                  "1a833e5ef5a146018d6e00e2600aa39c",
-                  "6a3685e622a64f0db94a97c1be3686ff",
-                  "97d61897c4eb48a986be425ecd91b421")
-
   val cetIds = Seq("6f5de670a4844e24a8dcff35b346f868",
                    "659d4150925147e1864f581854c36b89",
                    "2f40c7d5deda41dfbd2c29a7eaa14b00",
@@ -184,18 +177,16 @@ object TestData {
  * Provides initial data to test with. Ideally these methods should only be called for developemnt builds.
  */
 @Singleton
-class TestData @Inject() (
-  val actorSystem:                   ActorSystem,
-  val passwordHasher:                PasswordHasher,
-  val collectionEventTypeRepository: CollectionEventTypeRepository,
-  val processingTypeRepository:      ProcessingTypeRepository,
-  val specimenGroupRepository:       SpecimenGroupRepository,
-  val specimenLinkTypeRepository:    SpecimenLinkTypeRepository,
-  val studyRepository:               StudyRepository,
-  val participantRepository:         ParticipantRepository,
-  val userRepository:                UserRepository,
-  val centreRepository:              CentreRepository
-) {
+class TestData @Inject() (val actorSystem:                   ActorSystem,
+                          val passwordHasher:                PasswordHasher,
+                          val collectionEventTypeRepository: CollectionEventTypeRepository,
+                          val processingTypeRepository:      ProcessingTypeRepository,
+                          val specimenGroupRepository:       SpecimenGroupRepository,
+                          val specimenLinkTypeRepository:    SpecimenLinkTypeRepository,
+                          val studyRepository:               StudyRepository,
+                          val participantRepository:         ParticipantRepository,
+                          val userRepository:                UserRepository,
+                          val centreRepository:              CentreRepository) {
   import TestData._
 
   val log = LoggerFactory.getLogger(this.getClass)
@@ -240,132 +231,115 @@ class TestData @Inject() (
         }
 
       addCollectionEvents
-      addAnnotationTypes
-
-      specimenGroupRepository.getValues.foreach { sg =>
-        studyRepository.getDisabled(sg.studyId).fold(
-          err => Logger.error(s"disabled study not found: $err"),
-          study => {
-            study.enable.fold(
-              err => Logger.error(err.list.toList.mkString(",")),
-              study => {
-                studyRepository.put(study)
-                Logger.info(s"study ${study.name} enabled")
-              }
-            )
-          }
-        )
-      }
     }
   }
 
   def addCollectionEvents() = {
     Logger.debug("addCollectionEvents")
 
-    studyRepository.getValues.take(cetIds.size).zip(cetIds).foreach { case (study, cetId) =>
-      for {
-        spec  <- {
-          CollectionSpecimenSpec.create(
-            name                        = study.name + " CET SSpec",
-            description                 = None,
-            units                       = "mL",
-            anatomicalSourceType        = AnatomicalSourceType.Blood,
-            preservationType            = PreservationType.FrozenSpecimen,
-            preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
-            specimenType                = SpecimenType.Rna,
-            maxCount                    = 1,
-            amount                      = Some(0.1))
-        }
-        annotType <- {
-          AnnotationType.create(name          = "Text annotation",
-                                description   = None,
-                                valueType     = AnnotationValueType.Text,
-                                maxValueCount = None,
-                                options       = Seq.empty,
-                                required      = true)
-        }
-      } yield {
-        val cet = CollectionEventType(studyId            = study.id,
-                                      id                 = CollectionEventTypeId(cetId),
-                                      version            = 0L,
-                                      timeAdded          = DateTime.now,
-                                      timeModified       = None,
-                                      name               = study.name + " CET",
-                                      description        = None,
-                                      recurring          = true,
-                                      specimenSpecs      = Set(spec),
-                                      annotationTypes    = Set(annotType))
+    studyRepository.getValues.find { s => s.name == "BBPSP"}.map { bbpsp =>
+      val cet = CollectionEventType(studyId            = bbpsp.id,
+                                    id                 = CollectionEventTypeId(cetIds(0)),
+                                    version            = 0L,
+                                    timeAdded          = DateTime.now,
+                                    timeModified       = None,
+                                    name               = "Collection Event ",
+                                    description        = None,
+                                    recurring          = true,
+                                    specimenSpecs      = getBbpspSpecimenSpecs,
+                                    annotationTypes    = getBbpspAnnotationTypes)
         collectionEventTypeRepository.put(cet)
-        ()
-      }
     }
+    ()
   }
 
-  def addAnnotationTypes() = {
-    Logger.debug("addAnnotationTypes")
+  def getBbpspSpecimenSpecs() = {
+    Set(CollectionSpecimenSpec(
+          uniqueId                    = "8fd12c7f-c98b-4bb5-b649-607a9846335e",
+          name                        = "10 mL Lavender top EDTA tube",
+          description                 = None,
+          units                       = "mL",
+          anatomicalSourceType        = AnatomicalSourceType.Blood,
+          preservationType            = PreservationType.FrozenSpecimen,
+          preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
+          specimenType                = SpecimenType.Rna,
+          maxCount                    = 1,
+          amount                      = Some(10)),
+        CollectionSpecimenSpec(
+          uniqueId                    = "ba8d9831-9ec1-42a1-9f5d-9af3fc276dce",
+          name                        = "10 mL Orange top PAXgene tube",
+          description                 = None,
+          units                       = "mL",
+          anatomicalSourceType        = AnatomicalSourceType.Blood,
+          preservationType            = PreservationType.FrozenSpecimen,
+          preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
+          specimenType                = SpecimenType.Paxgene,
+          maxCount                    = 1,
+          amount                      = Some(10)),
+        CollectionSpecimenSpec(
+          uniqueId                    = "37c13d86-b143-4312-840f-8d750d52a77c",
+          name                        = "3mL Lavender top EDTA tube",
+          description                 = None,
+          units                       = "mL",
+          anatomicalSourceType        = AnatomicalSourceType.Blood,
+          preservationType            = PreservationType.FrozenSpecimen,
+          preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
+          specimenType                = SpecimenType.Paxgene,
+          maxCount                    = 1,
+          amount                      = Some(3)),
+        CollectionSpecimenSpec(
+          uniqueId                    = "ee4a13bb-f50b-4cb2-9508-480adc4561aa",
+          name                        = "4ml lavender top EDTA tube",
+          description                 = None,
+          units                       = "mL",
+          anatomicalSourceType        = AnatomicalSourceType.Blood,
+          preservationType            = PreservationType.FrozenSpecimen,
+          preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
+          specimenType                = SpecimenType.Paxgene,
+          maxCount                    = 1,
+          amount                      = Some(4)),
+        CollectionSpecimenSpec(
+          uniqueId                    = "8397e2fa-3abf-459a-8176-17ae6b61ecc9",
+          name                        = "9ml CPDA yellow top tube",
+          description                 = None,
+          units                       = "mL",
+          anatomicalSourceType        = AnatomicalSourceType.Blood,
+          preservationType            = PreservationType.FrozenSpecimen,
+          preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
+          specimenType                = SpecimenType.CdpaPlasma,
+          maxCount                    = 1,
+          amount                      = Some(9)),
+        CollectionSpecimenSpec(
+          uniqueId                    = "f3ba1081-6096-40af-bab9-66dc770135e4",
+          name                        = "Urine cup",
+          description                 = None,
+          units                       = "mL",
+          anatomicalSourceType        = AnatomicalSourceType.Blood,
+          preservationType            = PreservationType.FrozenSpecimen,
+          preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
+          specimenType                = SpecimenType.CdpaPlasma,
+          maxCount                    = 1,
+          amount                      = Some(10))
+    )
+  }
 
-    val studyNames = List("BBPSP")
-
-    studyNames.foreach { studyName =>
-      studyRepository.getValues.find(s => s.name == studyName) match {
-        case None =>
-          Logger.error(s"addAnnotationTypes: study with name not found: $studyName")
-        case Some(study)  =>
-          val annotTypes = Set(AnnotationType(
-                                 uniqueId      = "f53c5dca-d34f-11e5-ab30-625662870761",
-                                 name          = "Text annotation",
-                                 description   = None,
-                                 valueType     = AnnotationValueType.Text,
-                                 maxValueCount = None,
-                                 options       = Seq.empty,
-                                 required      = true),
-                               AnnotationType(
-                                 uniqueId      = "f53c616c-d34f-11e5-ab30-625662870761",
-                                 name          = "Number annotation",
-                                 description   = None,
-                                 valueType     = AnnotationValueType.Number,
-                                 maxValueCount = None,
-                                 options       = Seq.empty,
-                                 required      = true),
-                               AnnotationType(
-                                 uniqueId      = "f53c6360-d34f-11e5-ab30-625662870761",
-                                 name          = "Number annotation 2",
-                                 description   = None,
-                                 valueType     = AnnotationValueType.Number,
-                                 maxValueCount = None,
-                                 options       = Seq.empty,
-                                 required      = true),
-                               AnnotationType(
-                                 uniqueId      = "f53c6766-d34f-11e5-ab30-625662870761",
-                                 name          = "DateTime annotation",
-                                 description   = None,
-                                 valueType     = AnnotationValueType.DateTime,
-                                 maxValueCount = None,
-                                 options       = Seq.empty,
-                                 required      = true),
-                               AnnotationType(
-                                 uniqueId      = "f53c690a-d34f-11e5-ab30-625662870761",
-                                 name          = "Select single annotation",
-                                 description   = None,
-                                 valueType     = AnnotationValueType.Select,
-                                 maxValueCount = Some(1),
-                                 options       = Seq("option1", "option2"),
-                                 required      = true),
-                               AnnotationType(
-                                 uniqueId      = "f53c6a9a-d34f-11e5-ab30-625662870761",
-                                 name          = "Select multiple annotation",
-                                 description   = None,
-                                 valueType     = AnnotationValueType.Select,
-                                 maxValueCount = Some(2),
-                                 options       = Seq("option1", "option2", "option3"),
-                                 required      = true))
-          studyRepository.getDisabled(study.id).fold (
-            err => s"could not get disabled study: ${study.name}",
-            s => studyRepository.put(s.copy(annotationTypes = annotTypes))
-          )
-      }
-    }
-
+  def getBbpspAnnotationTypes() = {
+    Set(AnnotationType(
+          uniqueId      = "f53c5dca-d34f-11e5-ab30-625662870761",
+          name          = "Phlebotomist",
+          description   = None,
+          valueType     = AnnotationValueType.Text,
+          maxValueCount = None,
+          options       = Seq.empty,
+          required      = true),
+        AnnotationType(
+          uniqueId      = "f53c6a9a-d34f-11e5-ab30-625662870761",
+          name          = "Consent",
+          description   = None,
+          valueType     = AnnotationValueType.Select,
+          maxValueCount = Some(2),
+          options       = Seq("Surveillance", "Genetic Predisposition", "Previous Samples", "Genetic Mutation"),
+          required      = true))
   }
 
   def addMultipleUsers() = {

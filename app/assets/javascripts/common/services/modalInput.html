@@ -1,0 +1,184 @@
+<div class="modal-header">
+  <button type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-hidden="true"
+          ng-click="modal.close()">&times;</button>
+  <h3 class="modal-title">{{modal.title}}</h3>
+</div>
+<div class="modal-body">
+
+  <form class="form-horizontal" name="form" ng-switch="modal.type" novalidate>
+
+    <div class="form-group" ng-switch-when="text">
+      <label for="value" class="col-md-3 control-label">{{modal.label}}:</label>
+      <div class="col-md-9">
+        <input
+           name="value"
+           type="text"
+           class="form-control"
+           ng-model="modal.value"
+           ng-minlength="2"
+           focus-me="true"
+           required />
+      </div>
+      <div class="col-md-offset-3 col-md-10">
+        <p class="help-block" ng-show="form.value.$error.minlength || form.value.$error.required">
+          Value is too short.
+        </p>
+      </div>
+    </div>
+
+    <div class="form-group" ng-switch-when="required-natural-number">
+      <label for="value" class="col-md-3 control-label">{{modal.label}}:</label>
+      <div class="col-md-9">
+        <input
+           name="value"
+           type="number"
+           class="form-control"
+           ng-model="modal.value"
+           ng-minlength="2"
+           focus-me="true"
+           natural-number
+           required />
+      </div>
+      <div class="col-md-offset-3 col-md-10">
+        <p class="help-block" ng-show="form.value.$error.naturalNumber || form.value.$error.required">
+          Value must be a positive number greater than zero
+        </p>
+      </div>
+    </div>
+
+    <div class="form-group" ng-switch-when="required-positive-float">
+      <label for="value" class="col-md-3 control-label">{{modal.label}}:</label>
+      <div class="col-md-9">
+        <input
+           name="value"
+           type="number"
+           class="form-control"
+           ng-model="modal.value"
+           ng-minlength="2"
+           focus-me="true"
+           positive-float
+           required />
+      </div>
+      <div class="col-md-offset-3 col-md-10">
+        <p class="help-block" ng-show="form.value.$error.positiveFloat || form.value.$error.required">
+          Value should be a positive floating point number
+        </p>
+      </div>
+    </div>
+
+    <div class="form-group" ng-switch-when="required-textarea">
+      <label for="value" class="col-md-3 control-label">{{modal.label}}:</label>
+      <div class="col-md-9">
+        <textarea
+           cols="40"
+           rows="10"
+           name="value"
+           class="form-control"
+           ng-model="modal.value"
+           focus-me="true"
+           required />
+      </div>
+      <div class="col-md-offset-3 col-md-10">
+        <p class="help-block" ng-show="form.value.$error.required">Value is required.</p>
+      </div>
+    </div>
+
+    <div class="form-group" ng-switch-when="textarea">
+      <label for="value" class="col-md-3 control-label">{{modal.label}}:</label>
+      <div class="col-md-9">
+        <textarea
+           cols="40"
+           rows="10"
+           name="value"
+           class="form-control"
+           ng-model="modal.value"
+           focus-me="true"/>
+      </div>
+    </div>
+
+    <div class="form-group" ng-switch-when="email">
+      <label for="email" class="col-md-3 control-label">{{modal.label}}:</label>
+      <div class="col-md-9">
+        <input
+           name="value"
+           type="email"
+           class="form-control"
+           ng-model="modal.value"
+           focus-me="true"
+           required />
+      </div>
+    </div>
+
+    <div class="form-group" ng-switch-when="url">
+      <label for="url" class="col-md-3 control-label">{{modal.label}}:</label>
+      <div class="col-md-9">
+        <input
+           name="value"
+           type="url"
+           class="form-control"
+           ng-model="modal.value"
+           focus-me="true"
+           required />
+      </div>
+    </div>
+
+    <div class="form-group" ng-switch-when="comma-delimited">
+      <label for="value" class="col-md-3 control-label">{{modal.label}}:</label>
+      <div class="col-md-9">
+        <input
+           name="value"
+           type="text"
+           class="form-control"
+           ng-model="modal.value"
+           ng-minlength="2"
+           focus-me="true"
+           required />
+      </div>
+      <div class="col-md-offset-3 col-md-9">
+        <p class="help-block">
+          Use commas to separate options.
+        </p>
+      </div>
+    </div>
+
+    <div class="form-group" ng-switch-when="boolean">
+      <label for="bool" class="col-md-2 control-label">{{modal.label}}:</label>
+      <div class="col-md-10">
+        <input name="bool" type="radio" value="true" ng-model="modal.value" />Yes
+        <input name="bool" type="radio" value="false" ng-model="modal.value" />No
+      </div>
+    </div>
+
+    <div class="form-group" ng-switch-when="required-select">
+      <label for="bool" class="col-md-2 control-label">{{modal.label}}:</label>
+      <div class="col-md-10">
+        <select class="form-control"
+                name="value"
+                ng-model="modal.value"
+                ng-options="option for option in modal.options"
+                required>
+          <option value="">-- make a selection --</option>
+        </select>
+      </div>
+      <div class="col-md-offset-2 col-md-10">
+        <p ng-show="form.value.$invalid && !form.value.$pristine"
+           class="help-block">
+          A selection is required.</p>
+      </div>
+    </div>
+
+  </form>
+
+</div>
+<div class="modal-footer">
+  <button class="btn" ng-click="modal.close()">Cancel</button>
+  <button class="btn btn-primary"
+          ng-click="modal.ok()"
+          ng-disabled="form.$invalid">OK</button>
+</div>
+<div class="row">
+  <div class="col-xs-12"><pre>form: {{form | json}}</pre></div>
+</div>

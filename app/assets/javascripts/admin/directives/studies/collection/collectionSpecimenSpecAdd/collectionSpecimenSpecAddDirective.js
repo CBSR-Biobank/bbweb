@@ -8,42 +8,73 @@ define(function () {
   /**
    *
    */
-  function collectionEventAnnotationTypeAddDirective() {
+  function collectionSpecimenSpecAddDirective() {
     var directive = {
       restrict: 'E',
       scope: {},
       bindToController: {
+        study:               '=',
         collectionEventType: '='
       },
-      templateUrl : '',
-      controller: CollectionEventAnnotationTypeAddCtrl,
+      templateUrl : '/assets/javascripts/admin/directives/studies/collection/collectionSpecimenSpecAdd/collectionSpecimenSpecAdd.html',
+      controller: CollectionSpecimenSpecAddCtrl,
       controllerAs: 'vm'
     };
 
     return directive;
   }
 
-  CollectionEventAnnotationTypeAddCtrl.$inject = [
-    'annotationTypeAddService'
+  CollectionSpecimenSpecAddCtrl.$inject = [
+    '$state',
+    'domainEntityService',
+    'notificationsService',
+    'AnatomicalSourceType',
+    'PreservationType',
+    'PreservationTemperatureType',
+    'SpecimenType'
   ];
 
-  var returnState = 'home.admin.studies.study.collection.view';
+  var returnState = 'home.admin.studies.study.collection.ceventType';
 
-  function CollectionEventAnnotationTypeAddCtrl(annotationTypeAddService) {
+  function CollectionSpecimenSpecAddCtrl($state,
+                                         domainEntityService,
+                                         notificationsService,
+                                         AnatomicalSourceType,
+                                         PreservationType,
+                                         PreservationTemperatureType,
+                                         SpecimenType) {
     var vm = this;
 
-    vm.onSubmit        = onSubmit;
-    vm.onAddsuccessful = annotationTypeAddService.onAddSuccessful(returnState);
-    vm.onCancel        = annotationTypeAddService.onCancel(returnState);
+    vm.anatomicalSourceTypes = AnatomicalSourceType.values();
+    vm.preservTypes          = PreservationType.values();
+    vm.preservTempTypes      = PreservationTemperatureType.values();
+    vm.specimenTypes         = SpecimenType.values();
+
+    vm.submit = submit;
+    vm.cancel = cancel;
 
     //--
 
-    function onSubmit(annotationType) {
-      vm.collectionEventType.addAnnotationType(annotationType)
-        .then(vm.onAddsuccessful).catch(annotationTypeAddService.addFailed);
+    function submit(specimenSpec) {
+      vm.collectionEventType.addSpecimenSpec(specimenSpec)
+        .then(onAddSuccessful)
+        .catch(onAddFailed);
+
+      function onAddSuccessful() {
+        notificationsService.submitSuccess();
+        $state.go(returnState, {}, { reload: true });
+      }
+
+      function onAddFailed(error) {
+        return domainEntityService.updateErrorModal(error, 'study');
+      }
+    }
+
+    function cancel() {
+      $state.go(returnState);
     }
   }
 
-  return collectionEventAnnotationTypeAddDirective;
+  return collectionSpecimenSpecAddDirective;
 
 });

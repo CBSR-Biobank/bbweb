@@ -17,7 +17,7 @@ define(['underscore'], function (_) {
 
     $urlRouterProvider.otherwise('/');
 
-    $stateProvider.state('home.admin.studies.study.collection.view', {
+    $stateProvider.state('home.admin.studies.study.collection.ceventType', {
       url: '/cetype/{ceventTypeId}',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
@@ -51,7 +51,7 @@ define(['underscore'], function (_) {
      * Collection Event Type Add
      */
     $stateProvider.state('home.admin.studies.study.collection.ceventTypeAdd', {
-      url: '/cetypes/add',
+      url: '/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser
       },
@@ -75,8 +75,8 @@ define(['underscore'], function (_) {
     /**
      * Collection Event Annotation Type Add
      */
-    $stateProvider.state('home.admin.studies.study.collection.view.annotationTypeAdd', {
-      url: '/cetype/annottype/add',
+    $stateProvider.state('home.admin.studies.study.collection.ceventType.annotationTypeAdd', {
+      url: '/annottype/add',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser
       },
@@ -84,12 +84,15 @@ define(['underscore'], function (_) {
         'main@': {
           template: [
             '<collection-event-annotation-type-add',
+            '  study="vm.study"',
             '  collection-event-type="vm.ceventType">',
             '</collection-event-annotation-type-add>'
           ].join(''),
           controller: [
+            'study',
             'ceventType',
-            function (ceventType) {
+            function (study, ceventType) {
+              this.study      = study;
               this.ceventType = ceventType;
             }
           ],
@@ -101,8 +104,8 @@ define(['underscore'], function (_) {
       }
     });
 
-    $stateProvider.state('home.admin.studies.study.collection.view.annotationTypeView', {
-      url: '/annottype/{annotationTypeId}',
+    $stateProvider.state('home.admin.studies.study.collection.ceventType.annotationTypeView', {
+      url: '/annottype/view/{annotationTypeId}',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         annotationType: [
@@ -122,14 +125,17 @@ define(['underscore'], function (_) {
         'main@': {
           template: [
             '<collection-event-annotation-type-view',
+            '  study="vm.study"',
             '  collection-event-type="vm.ceventType"',
             '  annotation-type="vm.annotationType">',
             '</collection-event-annotation-type-view>'
           ].join(''),
           controller: [
+            'study',
             'ceventType',
             'annotationType',
-            function (ceventType, annotationType) {
+            function (study, ceventType, annotationType) {
+              this.study = study;
               this.ceventType = ceventType;
               this.annotationType = annotationType;
             }
@@ -139,6 +145,85 @@ define(['underscore'], function (_) {
       },
       data: {
         displayName: 'Annotation {{annotationType.name}}'
+      }
+    });
+
+    /**
+     * Collection Event Specimen Spec Add
+     */
+    $stateProvider.state('home.admin.studies.study.collection.ceventType.specimenSpecAdd', {
+      url: '/spcspec/add',
+      resolve: {
+        user: authorizationProvider.requireAuthenticatedUser
+      },
+      views: {
+        'main@': {
+          template: [
+            '<collection-specimen-spec-add',
+            '  study="vm.study"',
+            '  collection-event-type="vm.ceventType">',
+            '</collection-specimen-spec-add>'
+          ].join(''),
+          controller: [
+            'study',
+            'ceventType',
+            function (study, ceventType) {
+              this.study = study;
+              this.ceventType = ceventType;
+            }
+          ],
+          controllerAs: 'vm'
+        }
+      },
+      data: {
+        displayName: 'Specimen'
+      }
+    });
+
+    /**
+     * Collection Event Specimen Spec Add
+     */
+    $stateProvider.state('home.admin.studies.study.collection.ceventType.specimenSpecView', {
+      url: '/spcspec/view/{specimenSpecId}',
+      resolve: {
+        user: authorizationProvider.requireAuthenticatedUser,
+        specimenSpec: [
+          'ceventType',
+          '$stateParams',
+          function (ceventType, $stateParams) {
+            var specimenSpec = _.findWhere(ceventType.specimenSpecs,
+                                           { uniqueId: $stateParams.specimenSpecId });
+            if (_.isUndefined(specimenSpec)) {
+              throw new Error('could not find specimen spec: ' + $stateParams.specimenSpecId);
+            }
+            return specimenSpec;
+          }
+        ]
+      },
+      views: {
+        'main@': {
+          template: [
+            '<collection-specimen-spec-view',
+            '  study="vm.study"',
+            '  collection-event-type="vm.ceventType"',
+            '  specimen-spec="vm.specimenSpec">',
+            '</collection-specimen-spec-view>'
+          ].join(''),
+          controller: [
+            'study',
+            'ceventType',
+            'specimenSpec',
+            function (study, ceventType, specimenSpec) {
+              this.study = study;
+              this.ceventType = ceventType;
+              this.specimenSpec = specimenSpec;
+            }
+          ],
+          controllerAs: 'vm'
+        }
+      },
+      data: {
+        displayName: 'Specimen Spec {{specimenSpec.name}}'
       }
     });
 

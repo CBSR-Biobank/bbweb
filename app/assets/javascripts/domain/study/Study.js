@@ -76,10 +76,12 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
      */
     Study.create = function (obj) {
       if (!tv4.validate(obj, schema)) {
+        console.error('invalid object from server: ' + tv4.error);
         throw new Error('invalid object from server: ' + tv4.error);
       }
 
       if (!AnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
+        console.error('invalid object from server: bad annotation type');
         throw new Error('invalid object from server: bad annotation type');
       }
 
@@ -154,8 +156,10 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
       var deferred = $q.defer();
 
       if (!tv4.validate(obj, schema)) {
+        console.error('invalid object from server: ' + tv4.error);
         deferred.reject('invalid object from server: ' + tv4.error);
       } else if (!AnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
+        console.error('invalid annotation types from server: ' + tv4.error);
         deferred.reject('invalid annotation types from server: ' + tv4.error);
       } else {
         deferred.resolve(new Study(obj));

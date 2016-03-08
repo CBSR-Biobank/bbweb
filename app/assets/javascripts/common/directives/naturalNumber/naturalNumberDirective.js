@@ -1,19 +1,22 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 define(function () {
   'use strict';
 
+  var INTEGER_REGEXP = /^-?\d+$/;
+
   /**
-   *
+   * Restricts input to a positive integer greater than zero.
    */
-  function validCount() {
-    var INTEGER_REGEXP = /^\-?\d+$/;
+  function naturalNumberDirective() {
     var directive = {
+      restrict: 'A',
       require: 'ngModel',
       link: link
     };
+
     return directive;
 
     function link(scope, element, attrs, ctrl) {
@@ -22,18 +25,18 @@ define(function () {
           var intValue = parseInt(viewValue, 10);
           if (intValue > 0) {
             // it is valid
-            ctrl.$setValidity('validCount', true);
+            ctrl.$setValidity('naturalNumber', true);
             return viewValue;
           }
         }
 
         // it is invalid, return undefined (no model update)
-        ctrl.$setValidity('validCount', false);
+        ctrl.$setValidity('naturalNumber', false);
         return undefined;
       });
 
     }
   }
 
-  return validCount;
+  return naturalNumberDirective;
 });

@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function () {
+define(['underscore'], function (_) {
   'use strict';
 
   /**
@@ -23,17 +23,34 @@ define(function () {
     return directive;
   }
 
-  CeventTypeViewCtrl.$inject = [ '$state', 'modalService', 'notificationsService' ];
+  CeventTypeViewCtrl.$inject = [
+    '$state',
+    'modalService',
+    'domainEntityService',
+    'notificationsService',
+    'studyAnnotationTypeUtils'
+  ];
 
-  function CeventTypeViewCtrl($state, modalService, notificationsService) {
+  function CeventTypeViewCtrl($state,
+                              modalService,
+                              domainEntityService,
+                              notificationsService,
+                              studyAnnotationTypeUtils) {
     var vm = this;
 
-    vm.editName          = editName;
-    vm.editDescription   = editDescription;
-    vm.editRecurring     = editRecurring;
-    vm.editAnnotationType = editAnnotationType;
-    vm.addAnnotationType = addAnnotationType;
-    vm.addSpecimenSpec   = addSpecimenSpec;
+    // FIXME: this should be initialized to the correct value
+    vm.modificationsAllowed = true;
+
+    vm.editName             = editName;
+    vm.editDescription      = editDescription;
+    vm.editRecurring        = editRecurring;
+    vm.editSpecimenSpec     = editSpecimenSpec;
+    vm.editAnnotationType   = editAnnotationType;
+    vm.removeAnnotationType = removeAnnotationType;
+    vm.addAnnotationType    = addAnnotationType;
+    vm.removeSpecimenSpec   = removeSpecimenSpec;
+    vm.addSpecimenSpec      = addSpecimenSpec;
+    vm.addSpecimenSpec      = addSpecimenSpec;
 
     //--
 
@@ -82,16 +99,54 @@ define(function () {
     }
 
     function addAnnotationType() {
-      $state.go('home.admin.studies.study.collection.view.annotationTypeAdd');
+      $state.go('home.admin.studies.study.collection.ceventType.annotationTypeAdd');
     }
 
     function addSpecimenSpec() {
-      $state.go('home.admin.studies.study.collection.view.specimenSpecAdd');
+      $state.go('home.admin.studies.study.collection.ceventType.specimenSpecAdd');
+    }
+
+    function editSpecimenSpec(specimenSpec) {
+      $state.go('home.admin.studies.study.collection.ceventType.specimenSpecView',
+                { specimenSpecId: specimenSpec.uniqueId });
+    }
+
+    function removeSpecimenSpec(specimenSpec) {
+      if (!vm.modificationsAllowed) {
+        throw new Error('modifications not allowed');
+      }
+
+      return domainEntityService.removeEntity(
+        removePromiseFunc,
+        'Remove specimen',
+        'Are you sure you want to remove specimen ' + specimenSpec.name + '?',
+        'Remove failed',
+        'Annotation type ' + specimenSpec.name + ' cannot be removed');
+
+      function removePromiseFunc() {
+        return vm.ceventType.removeAnnotationType(specimenSpec);
+      }
     }
 
     function editAnnotationType(annotType) {
-      $state.go('home.admin.studies.study.collection.view.annotationTypeView',
+      $state.go('home.admin.studies.study.collection.ceventType.annotationTypeView',
                 { annotationTypeId: annotType.uniqueId });
+    }
+
+    function removeAnnotationType(annotationType) {
+      if (_.contains(vm.annotationTypeIdsInUse, annotationType.uniqueId)) {
+        studyAnnotationTypeUtils.removeInUseModal(annotationType, vm.annotationTypeName);
+      } else {
+        if (!vm.modificationsAllowed) {
+          throw new Error('modifications not allowed');
+        }
+
+        studyAnnotationTypeUtils.remove(callback, annotationType);
+      }
+
+      function callback() {
+        return vm.ceventType.removeAnnotationType(annotationType);
+      }
     }
 
   }

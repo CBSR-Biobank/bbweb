@@ -15,12 +15,7 @@ define(function () {
       bindToController: {
         study: '='
       },
-      template : [
-        '<annotation-type-add',
-        '  on-submit="vm.onSubmit"',
-        '  on-cancel="vm.onCancel()"',
-        '</annotation-type-add>',
-      ].join(''),
+      templateUrl : '/assets/javascripts/admin/directives/studies/annotationTypes/participantAnnotationTypeAdd/participantAnnotationTypeAdd.html',
       controller: ParticipantAnnotationTypeAddCtrl,
       controllerAs: 'vm'
     };

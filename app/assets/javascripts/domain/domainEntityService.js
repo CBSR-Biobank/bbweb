@@ -32,7 +32,11 @@ define(['underscore'], function(_) {
         actionButtonText: 'OK'
       };
 
-      if (error.data.message instanceof String) {
+      if (error.data.message) {
+        console.error(error.data.message);
+      }
+
+      if (typeof error.data.message === 'string') {
         if (error.data.message.indexOf('expected version doesn\'t match current version') > -1) {
           /* concurrent change error */
           modalDefaults.templateUrl = '/assets/javascripts/common/modalConcurrencyError.html';
@@ -44,7 +48,6 @@ define(['underscore'], function(_) {
         }
       } else {
         // most likely a programming error
-        console.log('Error:', error.data.message.toString);
         modalOptions.headerHtml = 'Cannot submit this change';
         modalOptions.bodyHtml = 'Error: ' + JSON.stringify(error.data.message);
       }

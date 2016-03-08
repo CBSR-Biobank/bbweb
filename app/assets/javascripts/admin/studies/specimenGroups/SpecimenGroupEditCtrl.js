@@ -31,7 +31,7 @@ define(['underscore'], function(_) {
                                  specimenGroup) {
     var vm = this,
         possibleReturnStateNames = [
-          'home.admin.studies.study.collection.view',
+          'home.admin.studies.study.collection.ceventType',
           'home.admin.studies.study.processing'
         ],
         returnState;

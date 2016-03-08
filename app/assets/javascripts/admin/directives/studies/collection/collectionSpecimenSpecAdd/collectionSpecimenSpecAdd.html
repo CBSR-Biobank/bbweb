@@ -1,4 +1,181 @@
-<div class="row">
-  <div class="col-md-12">
-  </div>
+<div class="page-header">
+  <h1>{{vm.study.name}} <small>Add Collection Specimen</small></h1>
 </div>
+<form class="form-horizontal"
+      name="specForm"
+      novalidate>
+
+  <!-- NAME -->
+  <div class="form-group" ng-class="{ 'has-error' : specForm.name.$invalid && !specForm.name.$pristine }">
+    <label for="name" class="col-md-2 control-label">Name</label>
+    <div class="col-md-10">
+      <input name="name"
+             type="text"
+             class="form-control"
+             ng-model="vm.specimenSpec.name"
+             ng-minlength="2"
+             placeholder="A short name for the specimen group"
+             focus-me="true"
+             required />
+    </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p class="help-block" ng-show="specForm.name.$error.minlength">Name is too short.</p>
+    </div>
+  </div>
+
+  <!-- DESCRIPTION -->
+  <div class="form-group">
+    <label for="description" class="col-md-2 control-label">Description</label>
+    <div class="col-md-10">
+      <textarea name="description"
+                class="form-control"
+                rows="10"
+                ng-model="vm.specimenSpec.description"
+                placeholder="A description of the specimen group (optional)" />
+    </div>
+  </div>
+
+  <!-- ANATOMICAL SOURCE -->
+  <div class="form-group">
+    <label for="anatomicalSourceType" class="col-md-2 control-label">Anatomical Source</label>
+    <div class="col-md-10">
+      <select class="form-control"
+              name="anatomicalSourceType"
+              ng-model="vm.specimenSpec.anatomicalSourceType"
+              ng-options="source for source in vm.anatomicalSourceTypes"
+              required>
+        <option value="">-- make a selection --</option>
+      </select>
+    </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p ng-show="specForm.anatomicalSourceType.$invalid && !specForm.anatomicalSourceType.$pristine"
+         class="help-block">
+        Anatomical source is required.</p>
+    </div>
+  </div>
+
+  <!-- PRESERVATION TYPE -->
+  <div class="form-group">
+    <label for="perservationType" class="col-md-2 control-label">Preservation Type</label>
+    <div class="col-md-10">
+      <select class="form-control"
+              name="perservationType"
+              ng-model="vm.specimenSpec.preservationType"
+              ng-options="preserv for preserv in vm.preservTypes"
+              required>
+        <option value="">-- make a selection --</option>
+      </select>
+    </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p ng-show="specForm.perservationType.$invalid && !specForm.perservationType.$pristine"
+         class="help-block">
+        Preservation type is required.</p>
+    </div>
+  </div>
+
+  <!-- PRESERVATION TEMPERATURE -->
+  <div class="form-group">
+    <label for="perservationTempType" class="col-md-2 control-label">Preservation Temperature</label>
+    <div class="col-md-10">
+      <select class="form-control"
+              name="perservationTempType"
+              ng-model="vm.specimenSpec.preservationTemperatureType"
+              ng-options="temp for temp in vm.preservTempTypes"
+              required>
+        <option value="">-- make a selection --</option>
+      </select>
+    </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p ng-show="specForm.perservationTempType.$invalid && !specForm.perservationTempType.$pristine"
+         class="help-block">
+        Preservation temperature is required.</p>
+    </div>
+  </div>
+
+  <!-- SPECIMEN TYPE -->
+  <div class="form-group">
+    <label for="specimenType" class="col-md-2 control-label">Specimen Type</label>
+    <div class="col-md-10">
+      <select class="form-control"
+              name="specimenType"
+              ng-model="vm.specimenSpec.specimenType"
+              ng-options="type for type in vm.specimenTypes"
+              required>
+        <option value="">-- make a selection --</option>
+      </select>
+    </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p ng-show="specForm.specimenType.$invalid && !specForm.specimenType.$pristine"
+         class="help-block">
+        Specimen type is required.</p>
+    </div>
+  </div>
+
+  <!-- UNITS -->
+  <div class="form-group">
+    <label for="units" class="col-md-2 control-label">Units</label>
+    <div class="col-md-10">
+      <input name="units"
+             type="text"
+             class="form-control"
+             ng-model="vm.specimenSpec.units"
+             placeholder="the units the specimens are measured in (eg. mL, cm, etc.)"
+             required/>
+    </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p ng-show="specForm.units.$invalid && !specForm.units.$pristine"
+         class="help-block">
+        Units are required.</p>
+    </div>
+  </div>
+
+  <!-- AMOUNT -->
+  <div class="form-group">
+    <label for="amount" class="col-md-2 control-label">Amount</label>
+    <div class="col-md-10">
+      <input name="amount"
+             type="number"
+             class="form-control"
+             ng-model="vm.specimenSpec.amount"
+             placeholder="the amount"
+             natural-number
+             required/>
+    </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p class="help-block"
+         ng-show="specForm.amount.$error.naturalNumber && !sgSubForm.amount.$pristine">
+        Amount should be a positive floating point number
+      </p>
+    </div>
+  </div>
+
+  <!-- MAX COUNT -->
+  <div class="form-group">
+    <label for="maxCount" class="col-md-2 control-label">Count</label>
+    <div class="col-md-10">
+      <input name="maxCount"
+             type="number"
+             class="form-control"
+             ng-model="vm.specimenSpec.maxCount"
+             placeholder="maximum count"
+             positive-float
+             required/>
+    </div>
+    <div class="col-md-offset-2 col-md-10">
+      <p class="help-block"
+         ng-show="specForm.maxCount.$error.positiveFloat && !specForm.maxCount.$pristine">
+        Count should be a positive number greater than zero
+      </p>
+    </div>
+  </div>
+
+  <!-- BUTTONS  -->
+  <div class="form-group">
+    <div class="col-md-offset-2 col-md-10">
+      <button class="btn btn-primary"
+              ng-disabled="specForm.$invalid"
+              ng-click="vm.submit(vm.specimenSpec)">Submit</button>
+      <button type="button" class="btn" ng-click="vm.cancel()">Cancel</button>
+    </div>
+  </div>
+</form>

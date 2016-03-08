@@ -94,10 +94,12 @@ define(['underscore', 'tv4'], function(_, tv4) {
      */
     CollectionEvent.create = function (obj, collectionEventType) {
       if (!tv4.validate(obj, schema)) {
+        console.error('invalid object from server: ' + tv4.error);
         throw new Error('invalid object from server: ' + tv4.error);
       }
 
       if (!Annotation.validAnnotations(obj.annotations)) {
+        console.error('invalid object from server: bad annotations');
         throw new Error('invalid object from server: bad annotations');
       }
 
@@ -128,8 +130,10 @@ define(['underscore', 'tv4'], function(_, tv4) {
       var deferred = $q.defer();
 
       if (!tv4.validate(obj, schema)) {
+        console.error('invalid object from server: ' + tv4.error);
         deferred.reject('invalid object from server: ' + tv4.error);
       } else if (!Annotation.validAnnotations(obj.annotationTypes)) {
+        console.error('invalid annotation types from server: ' + tv4.error);
         deferred.reject('invalid annotation types from server: ' + tv4.error);
       } else {
         deferred.resolve(new CollectionEvent(obj));

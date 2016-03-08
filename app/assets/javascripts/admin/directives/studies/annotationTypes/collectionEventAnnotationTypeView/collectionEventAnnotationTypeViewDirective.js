@@ -13,17 +13,11 @@ define(['underscore'], function (_) {
       restrict: 'E',
       scope: {},
       bindToController: {
+        study:               '=',
         collectionEventType: '=',
         annotationType:      '='
       },
-      template: [
-        '<annotation-type-view',
-        '  study="vm.study"',
-        '  annotation-type="vm.annotationType"',
-        '  return-state="home.admin.studies.study.collection.view"',
-        '  on-update="vm.onUpdate">',
-        '</annotation-type-view>'
-      ].join(''),
+      templateUrl: '/assets/javascripts/admin/directives/studies/annotationTypes/collectionEventAnnotationTypeView/collectionEventAnnotationTypeView.html',
       controller: CollectionEventAnnotationTypeViewCtrl,
       controllerAs: 'vm'
     };

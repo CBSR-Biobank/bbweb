@@ -58,6 +58,7 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
 
     AnnotationType.create = function (obj) {
       if (!tv4.validate(obj, schema)) {
+        console.error('invalid object from server: ' + tv4.error);
         throw new Error('invalid object from server: ' + tv4.error);
       }
       return new AnnotationType(obj);

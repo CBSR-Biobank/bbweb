@@ -44,7 +44,7 @@ define(['underscore'], function (_) {
     });
 
     $stateProvider.state('home.admin.studies.study.participants.annotationTypeView', {
-      url: '/annottype/{annotationTypeId}',
+      url: '/annottype/view/{annotationTypeId}',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         annotationType: [

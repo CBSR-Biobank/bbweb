@@ -25,6 +25,9 @@ define(function (require) {
   module.directive('pageSelect',              require('./directives/pageSelectDirective'));
   module.directive('pagedItemsList',          require('./directives/pagedItemsList/pagedItemsListDirective'));
 
+  module.directive('positiveFloat',           require('./directives/positiveFloat/positiveFloatDirective'));
+  module.directive('naturalNumber',           require('./directives/naturalNumber/naturalNumberDirective'));
+
   module.filter('localTime',                  require('./filters/localTimeFilter'));
   module.filter('nl2br',                      require('./filters/nl2brFilter'));
   module.filter('timeago',                    require('./filters/timeagoFilter'));

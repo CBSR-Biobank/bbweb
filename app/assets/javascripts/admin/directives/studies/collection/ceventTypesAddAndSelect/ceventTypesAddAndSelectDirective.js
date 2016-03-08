@@ -51,7 +51,7 @@ define(function () {
     }
 
     function select(ceventType) {
-      $state.go('home.admin.studies.study.collection.view', { ceventTypeId: ceventType.id });
+      $state.go('home.admin.studies.study.collection.ceventType', { ceventTypeId: ceventType.id });
     }
 
     function getRecurringLabel(ceventType) {

@@ -33,7 +33,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
         'preservationTemperatureType': { 'type': 'string' },
         'specimenType':                { 'type': 'string' },
         'maxCount':                    { 'type': 'integer' },
-        'amount':                      { 'type': 'float' }
+        'amount':                      { 'type': 'number' }
       },
       'required': [
         'uniqueId',
@@ -77,6 +77,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
      */
     CollectionSpecimenSpec.create = function (obj) {
       if (!tv4.validate(obj, schema)) {
+        console.error('invalid object from server: ' + tv4.error);
         throw new Error('invalid object from server: ' + tv4.error);
       }
       return new CollectionSpecimenSpec(obj);

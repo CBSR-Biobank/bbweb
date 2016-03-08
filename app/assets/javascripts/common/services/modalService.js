@@ -25,16 +25,20 @@ define(['angular'], function(angular) {
                        };
 
     var service = {
-      showModal:                showModal,
-      show:                     show,
-      modalOk:                  modalOk,
-      modalTextInput:           modalTextInput,
-      modalTextAreaInput:       modalTextAreaInput,
-      modalEmailInput:          modalEmailInput,
-      modalUrlInput:            modalUrlInput,
-      modalBooleanInput:        modalBooleanInput,
-      modalCommaDelimitedInput: modalCommaDelimitedInput,
-      passwordUpdateModal:      passwordUpdateModal
+      showModal:                  showModal,
+      show:                       show,
+      modalOk:                    modalOk,
+      modalTextInput:             modalTextInput,
+      modalTextAreaInput:         modalTextAreaInput,
+      modalRequiredTextAreaInput: modalRequiredTextAreaInput,
+      modalEmailInput:            modalEmailInput,
+      modalUrlInput:              modalUrlInput,
+      modalBooleanInput:          modalBooleanInput,
+      modalCommaDelimitedInput:   modalCommaDelimitedInput,
+      modalRequiredSelect:        modalRequiredSelect,
+      modalRequiredNaturalNumber: modalRequiredNaturalNumber,
+      modalRequiredPositiveFloat: modalRequiredPositiveFloat,
+      passwordUpdateModal:        passwordUpdateModal
     };
 
     return service;
@@ -89,19 +93,19 @@ define(['angular'], function(angular) {
     /**
      * Displays a modal asking user to enter a string.
      */
-    function modalStringInput(type,
-                              title,
-                              label,
-                              defaultValue) {
+    function modalInput(type, title, label, defaultValue, options) {
 
-      controller.$inject = ['$scope', '$uibModalInstance', 'defaultValue'];
+      controller.$inject = ['$scope', '$uibModalInstance', 'defaultValue', 'options'];
 
       return $uibModal.open({
-        templateUrl: '/assets/javascripts/common/services/modalStringInput.html',
+        templateUrl: '/assets/javascripts/common/services/modalInput.html',
         controller: controller,
         resolve: {
           defaultValue: function () {
             return defaultValue;
+          },
+          options: function () {
+            return options;
           }
         },
         backdrop: true,
@@ -111,12 +115,13 @@ define(['angular'], function(angular) {
 
       //--
 
-      function controller ($scope, $uibModalInstance, defaultValue) {
+      function controller ($scope, $uibModalInstance, defaultValue, options) {
         $scope.modal = {
-          value: defaultValue,
-          type: type,
-          title: title,
-          label: label
+          value:   defaultValue,
+          type:    type,
+          title:   title,
+          label:   label,
+          options: options
         };
 
         $scope.modal.ok = function () {
@@ -129,27 +134,43 @@ define(['angular'], function(angular) {
     }
 
     function modalTextInput(title, label, defaultValue) {
-      return modalStringInput('text', title, label, defaultValue);
+      return modalInput('text', title, label, defaultValue);
+    }
+
+    function modalRequiredNaturalNumber(title, label, defaultValue) {
+      return modalInput('required-natural-number', title, label, defaultValue);
+    }
+
+    function modalRequiredPositiveFloat(title, label, defaultValue) {
+      return modalInput('required-positive-float', title, label, defaultValue);
     }
 
     function modalTextAreaInput(title, label, defaultValue) {
-      return modalStringInput('textarea', title, label, defaultValue);
+      return modalInput('textarea', title, label, defaultValue);
+    }
+
+    function modalRequiredTextAreaInput(title, label, defaultValue) {
+      return modalInput('required-textarea', title, label, defaultValue);
     }
 
     function modalEmailInput(title, label, defaultValue) {
-      return modalStringInput('email', title, label, defaultValue);
+      return modalInput('email', title, label, defaultValue);
     }
 
     function modalUrlInput(title, label, defaultValue) {
-      return modalStringInput('url', title, label, defaultValue);
+      return modalInput('url', title, label, defaultValue);
     }
 
     function modalBooleanInput(title, label, defaultValue) {
-      return modalStringInput('boolean', title, label, defaultValue);
+      return modalInput('boolean', title, label, defaultValue);
     }
 
     function modalCommaDelimitedInput(title, label, defaultValue) {
-      return modalStringInput('comma-delimited', title, label, defaultValue);
+      return modalInput('comma-delimited', title, label, defaultValue);
+    }
+
+    function modalRequiredSelect(title, label, defaultValue, options) {
+      return modalInput('required-select', title, label, defaultValue, options);
     }
 
     /**

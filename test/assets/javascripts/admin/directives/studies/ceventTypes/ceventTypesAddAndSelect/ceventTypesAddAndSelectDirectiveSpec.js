@@ -50,9 +50,9 @@ define([
           self.scope = $rootScope.$new();
           self.scope.vm = { study: self.study };
 
-          $compile(this.element)(this.scope);
+          $compile(self.element)(self.scope);
           self.scope.$digest();
-          self.controller = this.element.controller('ceventTypesAddAndSelect');
+          self.controller = self.element.controller('ceventTypesAddAndSelect');
         }
       }
     }));

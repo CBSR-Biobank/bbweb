@@ -1,0 +1,170 @@
+<div class="page-header">
+  <h1>{{vm.study.name}} <small>Collection Specimen Spec</small></h1>
+</div>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">{{vm.specimenSpec.name}}</h3>
+  </div>
+  <ul class="list-group">
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong>Name:</strong>
+        </div>
+        <div class="col-md-6">
+          {{vm.specimenSpec.name}}
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-xs btn-primary pull-right"
+                  title="Edit name"
+                  ng-click="vm.editName()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong>Description:</strong>
+        </div>
+        <div class="col-md-9">
+          <truncate-toggle
+             text="vm.specimenSpec.description"
+             toggle-length="60"
+             text-empty-warning="Description not entered yet."
+             allow-edit="true"
+             on-edit="vm.editDescription()">
+          </truncate-toggle>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong>Anatomical source:</strong>
+        </div>
+        <div class="col-md-6">
+          {{vm.specimenSpec.anatomicalSourceType}}
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-xs btn-primary pull-right"
+                  title="Edit required"
+                  ng-click="vm.editAnatomicalSource()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong>Preservation type:</strong>
+        </div>
+        <div class="col-md-6">
+          {{vm.specimenSpec.preservationType}}
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-xs btn-primary pull-right"
+                  title="Edit required"
+                  ng-click="vm.editPreservationType()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong>Preservation temperature:</strong>
+        </div>
+        <div class="col-md-6">
+          {{vm.specimenSpec.preservationTemperatureType}}
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-xs btn-primary pull-right"
+                  title="Edit required"
+                  ng-click="vm.editPreservationTemperature()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong>Specimen type:</strong>
+        </div>
+        <div class="col-md-6">
+          {{vm.specimenSpec.specimenType}}
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-xs btn-primary pull-right"
+                  title="Edit required"
+                  ng-click="vm.editSpecimenType()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong>Units:</strong>
+        </div>
+        <div class="col-md-6">
+          {{vm.specimenSpec.units}}
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-xs btn-primary pull-right"
+                  title="Edit required"
+                  ng-click="vm.editUnits()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong>Amount:</strong>
+        </div>
+        <div class="col-md-6">
+          {{vm.specimenSpec.amount}}
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-xs btn-primary pull-right"
+                  title="Edit required"
+                  ng-click="vm.editAmount()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong>Max count:</strong>
+        </div>
+        <div class="col-md-6">
+          {{vm.specimenSpec.maxCount}}
+        </div>
+        <div class="col-md-3">
+          <button class="btn btn-xs btn-primary pull-right"
+                  title="Edit required"
+                  ng-click="vm.editMaxCount()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+<div class="row">
+  <div class="col-md-1">
+    <button class="btn btn btn-primary"
+            title="Back"
+            ng-click="vm.back()">Back
+    </button>
+  </div>
+</div>

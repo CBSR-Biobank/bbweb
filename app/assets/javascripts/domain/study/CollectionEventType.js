@@ -85,14 +85,17 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
 
     CollectionEventType.create = function (obj) {
       if (!tv4.validate(obj, schema)) {
+        console.error('invalid collection event types from server: ' + tv4.error);
         throw new Error('invalid collection event types from server: ' + tv4.error);
       }
 
       if (!CollectionSpecimenSpecs.validSpecimenSpecs(obj.specimenSpecs)) {
+        console.error('invalid specimen specs from server: ' + tv4.error);
         throw new Error('invalid specimen specs from server: ' + tv4.error);
       }
 
       if (!AnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
+        console.error('invalid annotation types from server: ' + tv4.error);
         throw new Error('invalid annotation types from server: ' + tv4.error);
       }
 
@@ -228,8 +231,11 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     };
 
     CollectionEventType.prototype.removeAnnotationType = function (annotationType) {
-      var url = sprintf.sprintf('%s/%d/%s',
-                                uri('annottype', this.id), this.version, annotationType.uniqueId);
+      var url = sprintf.sprintf('%s/%s/%d/%s',
+                                uri('annottype', this.studyId),
+                                this.id,
+                                this.version,
+                                annotationType.uniqueId);
 
       return AnnotationTypes.removeAnnotationType.call(this, annotationType, url);
     };
