@@ -3,12 +3,12 @@ package org.biobank.domain.study
 import org.biobank.domain.DomainSpec
 import org.biobank.fixture.NameGenerator
 
-import javax.inject.{Inject => javaxInject}
+import javax.inject.{Inject}
 import org.slf4j.LoggerFactory
 import com.github.nscala_time.time.Imports._
 import scalaz.Scalaz._
 
-class ProcessingTypeSpec @javaxInject() (
+class ProcessingTypeSpec @Inject() (
   val processingTypeRepository: ProcessingTypeRepository)
     extends DomainSpec {
   import org.biobank.TestUtils._
@@ -27,7 +27,7 @@ class ProcessingTypeSpec @javaxInject() (
       val enabled = true
 
       val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -1L, name, description, enabled)
+        disabledStudy.id, processingTypeId, 0L, name, description, enabled)
       validation mustSucceed { processingType =>
         processingType mustBe a [ProcessingType]
         processingType must have (
@@ -78,7 +78,7 @@ class ProcessingTypeSpec @javaxInject() (
       val enabled = true
 
       val validation = ProcessingType.create(
-        studyId, processingTypeId, -1L, name, description, enabled)
+        studyId, processingTypeId, 0L, name, description, enabled)
       validation mustFail "IdRequired"
     }
 
@@ -91,7 +91,7 @@ class ProcessingTypeSpec @javaxInject() (
       val enabled = true
 
       val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -1L, name, description, enabled)
+        disabledStudy.id, processingTypeId, 0L, name, description, enabled)
       validation mustFail "IdRequired"
     }
 
@@ -115,12 +115,12 @@ class ProcessingTypeSpec @javaxInject() (
       val enabled = true
 
       val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -1L, name, description, enabled)
+        disabledStudy.id, processingTypeId, 0L, name, description, enabled)
       validation mustFail "NameRequired"
 
       name = ""
       val validation2 = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -1L, name, description, enabled)
+        disabledStudy.id, processingTypeId, 0L, name, description, enabled)
       validation2 mustFail "NameRequired"
     }
 
@@ -132,12 +132,12 @@ class ProcessingTypeSpec @javaxInject() (
       val enabled = true
 
       val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -1L, name, description, enabled)
+        disabledStudy.id, processingTypeId, 0L, name, description, enabled)
       validation mustFail "InvalidDescription"
 
       description = Some("")
       val validation2 = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -1L, name, description, enabled)
+        disabledStudy.id, processingTypeId, 0L, name, description, enabled)
       validation2 mustFail "InvalidDescription"
     }
 

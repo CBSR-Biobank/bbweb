@@ -6,13 +6,14 @@ import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 
-import javax.inject.{Inject => javaxInject}
+import javax.inject.{Inject, Singleton}
 import play.api.{ Environment, Logger }
 
-class SpecimenLinkTypeController @javaxInject() (val env:            Environment,
-                                                 val authToken:      AuthToken,
-                                                 val usersService:   UsersService,
-                                                 val studiesService: StudiesService)
+@Singleton
+class SpecimenLinkTypeController @Inject() (val env:            Environment,
+                                            val authToken:      AuthToken,
+                                            val usersService:   UsersService,
+                                            val studiesService: StudiesService)
     extends CommandController
     with JsonController {
 

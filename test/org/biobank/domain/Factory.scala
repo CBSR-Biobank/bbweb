@@ -201,6 +201,10 @@ class Factory {
     annotationType
   }
 
+  def createAnnotationType(valueType: AnnotationValueType): AnnotationType = {
+    createAnnotationType(valueType, None, Seq.empty)
+  }
+
   def createAnnotationType(): AnnotationType = {
     createAnnotationType(AnnotationValueType.Text, None, Seq.empty)
   }
@@ -280,10 +284,10 @@ class Factory {
 
   def createAnnotation(annotationType: AnnotationType): Annotation = {
     val (stringValue, numberValue, selectedValues) = createAnnotationValues(annotationType)
-    val annot = Annotation(nameGenerator.next[Annotation],
-                           stringValue      = stringValue,
-                           numberValue      = numberValue,
-                           selectedValues   = selectedValues)
+    val annot = Annotation(annotationTypeId = defaultAnnotationType.uniqueId,
+                           stringValue            = stringValue,
+                           numberValue            = numberValue,
+                           selectedValues         = selectedValues)
     domainObjects = domainObjects + (classOf[Annotation] -> annot)
     annot
   }

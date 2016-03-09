@@ -74,7 +74,7 @@ class UserSpec extends DomainSpec {
 
     "not be created with an empty id" in {
       val v = RegisteredUser.create(id        = UserId(""),
-                                    version   = -1L,
+                                    version   = 0L,
                                     name      = nameGenerator.next[User],
                                     email     = nameGenerator.nextEmail[User],
                                     password  = nameGenerator.next[User],
@@ -96,7 +96,7 @@ class UserSpec extends DomainSpec {
 
     "not be created with an empty name" in {
       val v = RegisteredUser.create(id        = UserId(nameGenerator.next[User]),
-                                    version   = -1L,
+                                    version   = 0L,
                                     name      = "",
                                     email     = nameGenerator.nextEmail[User],
                                     password  = nameGenerator.next[User],
@@ -107,7 +107,7 @@ class UserSpec extends DomainSpec {
 
     "not be created with an empty email" in {
       val v = RegisteredUser.create(id        = UserId(nameGenerator.next[User]),
-                                    version   = -1L,
+                                    version   = 0L,
                                     name      = nameGenerator.next[User],
                                     email     = "",
                                     password  = nameGenerator.next[User],
@@ -118,7 +118,7 @@ class UserSpec extends DomainSpec {
 
     "not be created with an invalid email" in {
       val v = RegisteredUser.create(id        = UserId(nameGenerator.next[User]),
-                                    version   = -1L,
+                                    version   = 0L,
                                     name      = nameGenerator.next[User],
                                     email     = "abcdef",
                                     password  = nameGenerator.next[User],
@@ -129,7 +129,7 @@ class UserSpec extends DomainSpec {
 
     "not be created with an empty password" in {
       val v = RegisteredUser.create(id        = UserId(nameGenerator.next[User]),
-                                    version   = -1L,
+                                    version   = 0L,
                                     name      = nameGenerator.next[User],
                                     email     = nameGenerator.nextEmail[User],
                                     password  = "",
@@ -140,7 +140,7 @@ class UserSpec extends DomainSpec {
 
     "not be created with an empty salt option" in {
       val v = RegisteredUser.create(id        = UserId(nameGenerator.next[User]),
-                                    version   = -1L,
+                                    version   = 0L,
                                     name      = nameGenerator.next[User],
                                     email     = nameGenerator.nextEmail[User],
                                     password  = nameGenerator.next[User],
@@ -151,7 +151,7 @@ class UserSpec extends DomainSpec {
 
     "not be created with an invalid avatar url" in {
       val v = RegisteredUser.create(id        = UserId(nameGenerator.next[User]),
-                                    version   = -1L,
+                                    version   = 0L,
                                     name      = nameGenerator.next[User],
                                     email     = nameGenerator.nextEmail[User],
                                     password  = nameGenerator.next[User],

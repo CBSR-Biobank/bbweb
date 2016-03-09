@@ -6,13 +6,15 @@ import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import org.biobank.service.participants._
 
-import javax.inject.{Inject => javaxInject}
+import javax.inject.{Inject, Singleton}
 import play.api.{ Environment, Logger }
+import play.api.libs.json._
 
-class ParticipantsController @javaxInject() (val env:            Environment,
-                                             val authToken:      AuthToken,
-                                             val usersService:   UsersService,
-                                             val participantsService: ParticipantsService)
+@Singleton
+class ParticipantsController @Inject() (val env:            Environment,
+                                        val authToken:      AuthToken,
+                                        val usersService:   UsersService,
+                                        val participantsService: ParticipantsService)
     extends CommandController
     with JsonController {
 
@@ -28,16 +30,29 @@ class ParticipantsController @javaxInject() (val env:            Environment,
       domainValidationReply(participantsService.getByUniqueId(studyId, uniqueId))
     }
 
-  def addParticipant() =
-    commandAction { cmd: AddParticipantCmd =>
-      val future = participantsService.add(cmd)
-      domainValidationReply(future)
+  def addParticipant(studyId: String) =
+    commandAction(Json.obj("studyId" -> studyId)) { cmd : AddParticipantCmd => processCommand(cmd) }
+
+  def updateUniqueId(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd: UpdateParticipantUniqueIdCmd => processCommand(cmd) }
+
+  def updateAnnotation(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd: UpdateParticipantAnnotationCmd => processCommand(cmd) }
+
+  def removeAnnotation(participantId:      String,
+                       annotTypeId:   String,
+                       ver:           Long) =
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
+      val cmd = RemoveParticipantAnnotationCmd(userId           = Some(userId.id),
+                                               id               = participantId,
+                                               expectedVersion  = ver,
+                                               annotationTypeId = annotTypeId)
+      processCommand(cmd)
     }
 
-  def updateParticipant() =
-    commandAction { cmd: UpdateParticipantCmd =>
-      val future = participantsService.update(cmd)
-      domainValidationReply(future)
-    }
+  private def processCommand(cmd: ParticipantCommand) = {
+    val future = participantsService.processCommand(cmd)
+    domainValidationReply(future)
+  }
 
 }

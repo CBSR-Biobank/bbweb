@@ -1,29 +1,35 @@
 package org.biobank.controllers.participants
 
-import org.biobank.fixture._
-import org.biobank.domain.{ AnnotationType,  AnnotationValueType, JsonHelper }
-import org.biobank.domain.study._
-import org.biobank.domain.participants._
-import org.biobank.controllers._
-import org.biobank.fixture.ControllerFixture
-
-import play.api.test.Helpers._
-import play.api.libs.json._
-import org.joda.time.DateTime
 import com.github.nscala_time.time.Imports._
+import org.biobank.controllers._
+import org.biobank.domain.participants._
+import org.biobank.domain.study._
+import org.biobank.domain.{ Annotation, AnnotationType, AnnotationValueType, DomainValidation }
+import org.biobank.infrastructure.JsonUtils._
+import org.joda.time.DateTime
+import play.api.libs.json._
+import play.api.test.Helpers._
+import scalaz.Validation.FlatMap._
 
 /**
  * Tests the REST API for [[CollectionEvents]].
  */
-class CollectionEventsControllerSpec extends ControllerFixture with JsonHelper {
+class CollectionEventsControllerSpec
+    extends StudyAnnotationsControllerSharedSpec[CollectionEvent] {
+
   import org.biobank.TestUtils._
-  //import org.biobank.AnnotationTestUtils._
+  import org.biobank.AnnotationTestUtils._
 
   def listUri(participantId: ParticipantId): String =
-    s"/participants/cevents/${participantId.id}/list"
+    s"/participants/cevents/list/${participantId.id}"
+
+  def uri(): String = "/participants/cevents"
+
+  def uri(collectionEvent: CollectionEvent): String =
+    uri + s"/${collectionEvent.id}"
 
   def uri(participantId: ParticipantId): String =
-    s"/participants/cevents/${participantId.id}"
+    uri + s"/${participantId.id}"
 
   def uri(participantId: ParticipantId, cevent: CollectionEvent): String =
     uri(participantId) + s"/${cevent.id.id}"
@@ -44,17 +50,46 @@ class CollectionEventsControllerSpec extends ControllerFixture with JsonHelper {
     uri(participant.id) + s"?ceventId=${cevent.id.id}"
 
   def uriWithVisitNumber(participant: Participant, cevent: CollectionEvent): String =
-    uri(participant.id) + s"/visitNumber/${cevent.visitNumber}"
+    s"/participants/cevents/visitNumber/${participant.id.id}/${cevent.visitNumber}"
+
+  def updateUri(cevent: CollectionEvent, path: String): String =
+    s"/participants/cevents/$path/${cevent.id.id}"
+
+  protected def createEntity(annotationTypes: Set[AnnotationType],
+                             annotations:     Set[Annotation]): CollectionEvent = {
+    val (study, participant, ceventType) = createEntities
+
+    collectionEventTypeRepository.put(ceventType.copy(annotationTypes = annotationTypes))
+    val cevent = factory.createCollectionEvent.copy(annotations = annotations)
+    collectionEventRepository.put(cevent)
+    cevent
+  }
+
+  protected def entityFromRepository(id: String): DomainValidation[CollectionEvent] = {
+    collectionEventRepository.getByKey(CollectionEventId(id))
+  }
+
+  protected def entityName(): String = "collection event"
+
+  protected def updateUri(cevent: CollectionEvent): String = updateUri(cevent, "annot")
+
+  protected def getStudy(cevent: CollectionEvent): DomainValidation[EnabledStudy] = {
+    for {
+      participant <- participantRepository.getByKey(cevent.participantId)
+      study       <- studyRepository.getEnabled(participant.studyId)
+    } yield study
+  }
+
 
   /** Converts a collectionEvent into an Add command.
    */
-  def collectionEventToAddCmd(collectionEvent: CollectionEvent) = {
+  def collectionEventToAddJson(collectionEvent: CollectionEvent,
+                               annotations: List[Annotation] = List.empty) = {
     Json.obj(
-      "participantId"         -> collectionEvent.participantId.id,
       "collectionEventTypeId" -> collectionEvent.collectionEventTypeId,
       "timeCompleted"         -> collectionEvent.timeCompleted,
       "visitNumber"           -> collectionEvent.visitNumber,
-      "annotations"           -> collectionEvent.annotations
+      "annotations"           -> annotations.map(annotationToJson(_))
     )
   }
 
@@ -64,15 +99,6 @@ class CollectionEventsControllerSpec extends ControllerFixture with JsonHelper {
       val jsonId = CollectionEventId((jsonObj \ "id").as[String])
       compareObj(jsonObj, ceventsMap(jsonId))
     }
-  }
-
-  /** Converts a collectionEvent into an Update command.
-   */
-  def collectionEventToUpdateCmd(collectionEvent: CollectionEvent) = {
-    collectionEventToAddCmd(collectionEvent) ++ Json.obj(
-      "id"              -> collectionEvent.id.id,
-      "expectedVersion" -> Some(collectionEvent.version)
-    )
   }
 
   def createCollectionEventAnnotationType() = {
@@ -112,16 +138,22 @@ class CollectionEventsControllerSpec extends ControllerFixture with JsonHelper {
         factory.createAnnotation))).toMap
   }
 
-  def createEntities(fn: (Study, Participant, CollectionEventType) => Unit): Unit = {
+  def createEntities(): (EnabledStudy, Participant, CollectionEventType) = {
     var study = factory.createEnabledStudy
     studyRepository.put(study)
 
-    val ceventType = factory.createCollectionEventType.copy(annotationTypes = Set.empty)
+    val ceventType = factory.createCollectionEventType.copy(studyId = study.id,
+                                                            annotationTypes = Set.empty)
     collectionEventTypeRepository.put(ceventType)
 
     val participant = factory.createParticipant.copy(studyId = study.id)
     participantRepository.put(participant)
 
+    (study, participant, ceventType)
+  }
+
+  def createEntities(fn: (EnabledStudy, Participant, CollectionEventType) => Unit): Unit = {
+    val (study, participant, ceventType) = createEntities
     fn(study, participant, ceventType)
     ()
   }
@@ -131,26 +163,65 @@ class CollectionEventsControllerSpec extends ControllerFixture with JsonHelper {
 
     studyRepository.put(study)
 
-    val cmdJson = collectionEventToAddCmd(cevent);
+    val cmdJson = collectionEventToAddJson(cevent);
     val json = makeRequest(POST, uri(cevent.participantId), BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] must include ("error")
     (json \ "message").as[String] must include ("is not enabled")
   }
 
-  def updateOnNonEnabledStudy(study: Study, cevent: CollectionEvent) = {
+  def updateOnNonEnabledStudy(study:       Study,
+                              participant: Participant,
+                              ceventType:  CollectionEventType,
+                              path:        String,
+                              jsonField:   JsObject) {
     study must not be an [EnabledStudy]
 
     studyRepository.put(study)
+
+    val cevent = factory.createCollectionEvent.copy(participantId = participant.id,
+                                                    collectionEventTypeId = ceventType.id)
     collectionEventRepository.put(cevent)
 
-    val cevent2 = factory.createCollectionEvent.copy(id            = cevent.id,
-                                                     participantId = cevent.participantId)
-    val cmdJson = collectionEventToUpdateCmd(cevent2);
-    val json = makeRequest(PUT, uri(cevent2.participantId, cevent2), BAD_REQUEST, cmdJson)
+    val reqJson = jsonField ++ Json.obj("expectedVersion" -> cevent.version)
+
+    val json = makeRequest(POST, updateUri(cevent, path), BAD_REQUEST, reqJson)
 
     (json \ "status").as[String] must include ("error")
     (json \ "message").as[String] must include ("is not enabled")
+  }
+
+  def updateWithInvalidVersion(participant: Participant,
+                               ceventType:  CollectionEventType,
+                               path:        String,
+                               jsonField:   JsObject) {
+    val cevent = factory.createCollectionEvent.copy(participantId = participant.id,
+                                                    collectionEventTypeId = ceventType.id)
+    collectionEventRepository.put(cevent)
+
+    val reqJson = jsonField ++ Json.obj("expectedVersion" -> (cevent.version + 1))
+
+    val json = makeRequest(POST, updateUri(cevent, path), BAD_REQUEST, reqJson)
+
+    (json \ "status").as[String] must include ("error")
+
+    (json \ "message").as[String] must include regex (".*expected version doesn't match current version.*")
+  }
+
+  def updateOnInvalidCevent(participant: Participant,
+                            ceventType:  CollectionEventType,
+                            path:        String,
+                            jsonField:   JsObject) {
+    val cevent = factory.createCollectionEvent.copy(participantId = participant.id,
+                                                    collectionEventTypeId = ceventType.id)
+
+    val reqJson = jsonField ++ Json.obj("expectedVersion" -> cevent.version)
+
+    val json = makeRequest(POST, updateUri(cevent, path), NOT_FOUND, reqJson)
+
+    (json \ "status").as[String] must include ("error")
+
+    (json \ "message").as[String] must include ("collection event does not exist")
   }
 
   def removeOnNonEnabledStudy(study: Study, cevent: CollectionEvent) = {
@@ -165,9 +236,9 @@ class CollectionEventsControllerSpec extends ControllerFixture with JsonHelper {
     (json \ "message").as[String] must include ("is not enabled")
   }
 
-  "Participant REST API" when {
+  "Collection Event REST API" when {
 
-    "GET /participants/cevents/{participantId}?ceventId={ceventId}" must {
+    "GET /participants/cevents/:ceventId" must {
 
       "get a single collection event for a participant" in {
         createEntities { (study, participant, ceventType) =>
@@ -179,35 +250,26 @@ class CollectionEventsControllerSpec extends ControllerFixture with JsonHelper {
 
           val ceventToGet = cevents(0)
 
-          val json = makeRequest(GET, uriWithQuery(participant, ceventToGet))
+          val json = makeRequest(GET, uri(ceventToGet))
           (json \ "status").as[String] must include ("success")
           val jsonObj = (json \ "data").as[JsObject]
           compareObj(jsonObj, ceventToGet)
         }
       }
 
-      "fail for invalid participant id when querying for a single collection event id" in {
-        val participant = factory.createParticipant
-        val cevent = factory.createCollectionEvent
-
-        val json = makeRequest(GET, uriWithQuery(participant, cevent), NOT_FOUND)
-        (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("invalid participant id")
-      }
-
-      "fail when querying for a single collection event id" in {
+      "fail when querying for a single collection event ID and ID is invalid" in {
         createEntities { (study, participant, ceventType) =>
           val cevent = factory.createCollectionEvent
 
-          val json = makeRequest(GET, uriWithQuery(participant, cevent), NOT_FOUND)
+          val json = makeRequest(GET, uri(cevent), BAD_REQUEST)
           (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("collection event does not exist")
+          (json \ "message").as[String] must include ("collection event id is invalid")
         }
       }
 
     }
 
-    "GET /participants/cevents/{participantId}/list" must {
+    "GET /participants/cevents/list/{participantId}" must {
 
       "list none" in {
         createEntities { (study, participant, ceventType) =>
@@ -380,7 +442,13 @@ class CollectionEventsControllerSpec extends ControllerFixture with JsonHelper {
 
       "fail when using an invalid query parameters" in {
         createEntities { (study, participant, ceventType) =>
-          PagedResultsSpec(this).failWithInvalidParams(listUri(participant.id))
+          val uri = listUri(participant.id)
+
+          PagedResultsSpec(this).failWithNegativePageNumber(uri)
+          PagedResultsSpec(this).failWithInvalidPageNumber(uri)
+          PagedResultsSpec(this).failWithNegativePageSize(uri)
+          PagedResultsSpec(this).failWithInvalidPageSize(uri, 100);
+          PagedResultsSpec(this).failWithInvalidSort(uri)
         }
       }
 
@@ -395,7 +463,7 @@ class CollectionEventsControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "GET /participants/cevents/{participantId}/visitNumber/{vn}" must {
+    "GET /participants/cevents/visitNumber/:participantId/:vn" must {
 
       "get a collection event by visit number" in {
         createEntities { (study, participant, ceventType) =>
@@ -436,87 +504,99 @@ class CollectionEventsControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    "POST /participants/cevents/{participantId}" must {
+    "POST /participants/cevents/:participantId" must {
 
-      "add a collection event with no annotation in" in {
+      "add a collection event with no annotations" in {
         createEntities { (study, participant, ceventType) =>
           val cevent = factory.createCollectionEvent
           cevent.annotations must have size 0
 
-          val json = makeRequest(POST, uri(participant), json = collectionEventToAddCmd(cevent))
+          val json = makeRequest(POST, uri(participant), collectionEventToAddJson(cevent))
           (json \ "status").as[String] must include ("success")
 
           val id = (json \ "data" \ "id").as[String]
 
-          collectionEventRepository.getByKey(CollectionEventId(id)) mustSucceed { ce =>
-            ce must have (
+          collectionEventRepository.getByKey(CollectionEventId(id)) mustSucceed { repoCe =>
+            compareObj((json \ "data").as[JsObject], repoCe)
+
+            repoCe must have (
               'participantId          (cevent.participantId),
               'collectionEventTypeId  (cevent.collectionEventTypeId),
               'version                (0),
-              'visitNumber            (cevent.visitNumber),
-              'annotations            (cevent.annotations)
+              'visitNumber            (cevent.visitNumber)
             )
 
-            (ce.timeCompleted to cevent.timeCompleted).millis must be < TimeCoparisonMillis
-            checkTimeStamps(cevent, ce.timeAdded, None)
+            repoCe.annotations must have size 0
+            (repoCe.timeCompleted to cevent.timeCompleted).millis must be < TimeCoparisonMillis
+            checkTimeStamps(repoCe, DateTime.now, None)
           }
         }
       }
 
+      "fail when adding and visit number is already used" in {
+        createEntities { (study, participant, ceventType) =>
+          val cevent = factory.createCollectionEvent
+
+          collectionEventRepository.put(cevent)
+
+          val json = makeRequest(POST,
+                                 uri(participant),
+                                 FORBIDDEN,
+                                 collectionEventToAddJson(cevent))
+
+          (json \ "status").as[String] must include ("error")
+
+          (json \ "message").as[String] must include ("a collection event with this visit number already exists")
+        }
+      }
+
       "add a collection event with annotation types" in {
-        fail("needs implmenentaton")
-      //   createEntities { (study, participant, ceventType) =>
-      //     val annotTypes = createAnnotationsAndTypes
-      //     val annotations = annotTypes.values.toSet
+        createEntities { (study, participant, ceventType) =>
+          val annotTypes = createAnnotationsAndTypes
+          val annotations = annotTypes.values.toList
 
-      //     annotTypes.keys.foreach { annotType =>
-      //       annotationTypeRepository.put(annotType.copy(studyId = study.id))
-      //     }
+          collectionEventTypeRepository.put(
+            ceventType.copy(annotationTypes = annotTypes.keys.toSet))
 
-      //     val annotationTypeData = annotTypes.keys.map { annotType =>
-      //       CollectionEventTypeAnnotationTypeData(annotType.id.id, false)
-      //     }.toList
+          val cevent = factory.createCollectionEvent
+          val json = makeRequest(POST,
+                                 uri(participant),
+                                 collectionEventToAddJson(cevent, annotations))
 
-      //     // update the collection event type with annotation type data
-      //     collectionEventTypeRepository.put(
-      //       ceventType.copy(annotationTypeData = annotationTypeData))
+          (json \ "status").as[String] must include ("success")
 
-      //     val cevent = factory.createCollectionEvent.copy(annotations = annotTypes.values.toSet)
-      //     val json = makeRequest(POST, uri(participant), json = collectionEventToAddCmd(cevent))
-      //     (json \ "status").as[String] must include ("success")
+          (json \ "data" \ "annotations").as[List[JsObject]] must have size annotTypes.size
+          val jsonAnnotations = (json \ "data" \ "annotations").as[List[JsObject]]
+          jsonAnnotations must have size annotations.size
 
-      //     (json \ "data" \ "annotations").as[List[JsObject]] must have size annotTypes.size
-      //     val jsonAnnotations = (json \ "data" \ "annotations").as[List[JsObject]]
-      //     jsonAnnotations must have size annotations.size
+          jsonAnnotations.foreach { jsonAnnotation =>
+            val jsonAnnotationTypeId = (jsonAnnotation \ "annotationTypeId").as[String]
+            val annotation = annotations.find( x =>
+              x.annotationTypeId == jsonAnnotationTypeId)
+            annotation mustBe defined
+            compareAnnotation(jsonAnnotation, annotation.value)
+          }
+        }
+      }
 
-      //     jsonAnnotations.foreach { jsonAnnotation =>
-      //       val jsonAnnotationTypeId = (jsonAnnotation \ "annotationTypeId").as[String]
-      //       val annotation = annotations.find( x =>
-      //         x.annotationTypeId.id == jsonAnnotationTypeId)
-      //       annotation mustBe defined
-      //       compareAnnotation(jsonAnnotation, annotation.value)
-      //     }
-      //   }
-      // }
+      "fail when adding and participant and collection event type not in same study" in {
+        createEntities { (study, participant, ceventType) =>
+          var otherStudy = factory.createDisabledStudy
+          val otherCeventType = factory.createCollectionEventType.copy(studyId = otherStudy.id)
 
-      // "fail when adding collection event for a different study than participant's" in {
-      //   createEntities { (study, participant, ceventType) =>
-      //     var otherStudy = factory.createDisabledStudy
-      //     val otherCeventType = factory.createCollectionEventType.copy(studyId = otherStudy.id)
+          studyRepository.put(otherStudy)
+          collectionEventTypeRepository.put(otherCeventType)
 
-      //     studyRepository.put(otherStudy)
-      //     collectionEventTypeRepository.put(otherCeventType)
+          val cevent = factory.createCollectionEvent
+          val json = makeRequest(method         = POST,
+                                 path           = uri(participant),
+                                 expectedStatus = BAD_REQUEST,
+                                 json           = collectionEventToAddJson(cevent))
+          (json \ "status").as[String] must include ("error")
 
-      //     val cevent = factory.createCollectionEvent
-      //     val json = makeRequest(method         = POST,
-      //                            path           = uri(participant),
-      //                            expectedStatus = BAD_REQUEST,
-      //                            json           = collectionEventToAddCmd(cevent))
-      //     (json \ "status").as[String] must include ("error")
-
-      //     (json \ "message").as[String] must include (
-      //       "participant and collection event type not in the same study")
-      //   }
+          (json \ "message").as[String] must include (
+            "participant and collection event type not in the same study")
+        }
       }
 
       "fail when adding collection event with duplicate visit number" in {
@@ -528,7 +608,7 @@ class CollectionEventsControllerSpec extends ControllerFixture with JsonHelper {
           val json = makeRequest(method         = POST,
                                  path           = uri(participant),
                                  expectedStatus = FORBIDDEN,
-                                 json           = collectionEventToAddCmd(cevent2))
+                                 json           = collectionEventToAddJson(cevent2))
           (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("a collection event with this visit number already exists")
         }
@@ -536,7 +616,7 @@ class CollectionEventsControllerSpec extends ControllerFixture with JsonHelper {
 
       "fail when missing a required annotation type" in {
         createEntities { (study, participant, ceventType) =>
-          val annotType = factory.createAnnotationType
+          val annotType = factory.createAnnotationType.copy(required = true)
 
           collectionEventTypeRepository.put(
             ceventType.copy(annotationTypes = Set(annotType)))
@@ -545,93 +625,70 @@ class CollectionEventsControllerSpec extends ControllerFixture with JsonHelper {
           val json = makeRequest(method         = POST,
                                  path           = uri(participant),
                                  expectedStatus = BAD_REQUEST,
-                                 json           = collectionEventToAddCmd(cevent))
+                                 json           = collectionEventToAddJson(cevent))
           (json \ "status").as[String] must include ("error")
           (json \ "message").as[String] must include ("missing required annotation type(s)")
         }
       }
 
       "fail when using annotations and collection event type has no annotations" in {
-        fail("is this test required?")
-        // createEntities { (study, participant, ceventType) =>
-        //   val annotation = factory.createAnnotation.copy(
-        //     annotationTypeId = AnnotationTypeId(nameGenerator.next[Annotation]))
+        createEntities { (study, participant, ceventType) =>
+          val annotation = factory.createAnnotation
+            .copy(annotationTypeId = nameGenerator.next[Annotation])
 
-        //   val cevent = factory.createCollectionEvent.copy(annotations = Set(annotation))
-        //   val json = makeRequest(method         = POST,
-        //                          path           = uri(participant),
-        //                          expectedStatus = BAD_REQUEST,
-        //                          json           = collectionEventToAddCmd(cevent))
-        //   (json \ "status").as[String] must include ("error")
-        //   (json \ "message").as[String] must include ("collection event type has no annotation type data")
-        // }
+          val cevent = factory.createCollectionEvent
+          val json = makeRequest(method         = POST,
+                                 path           = uri(participant),
+                                 expectedStatus = BAD_REQUEST,
+                                 json           = collectionEventToAddJson(cevent, List(annotation)))
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include ("no annotation types")
+        }
       }
 
       "fail for an annotation with an invalid annotation type id" in {
-        fail("needs to be re written")
-        // createEntities { (study, participant, ceventType) =>
-        //   val annotType = factory.createAnnotationType
-        //   annotationTypeRepository.put(annotType)
-
-        //   // update the collection event type with annotation type data
-        //   collectionEventTypeRepository.put(
-        //     ceventType.copy(
-        //       annotationTypeData = List(CollectionEventTypeAnnotationTypeData(annotType.id.id, false))))
-
-        //   val annotation = factory.createAnnotation.copy(
-        //     annotationTypeId = AnnotationTypeId(nameGenerator.next[Annotation]))
-
-        //   val cevent = factory.createCollectionEvent.copy(annotations = Set(annotation))
-        //   val json = makeRequest(method         = POST,
-        //                          path           = uri(participant),
-        //                          expectedStatus = BAD_REQUEST,
-        //                          json           = collectionEventToAddCmd(cevent))
-        //   (json \ "status").as[String] must include ("error")
-        //   (json \ "message").as[String] must include (
-        //     "annotation type(s) do not belong to collection event type")
-        // }
-      }
-
-      "fail for more than one annotation with the same annotation type" in {
-        fail("needs to be re written")
-        // createEntities { (study, participant, ceventType) =>
-        //   val annotType = factory.createAnnotationType(
-        //     AnnotationValueType.Text, 0, Seq.empty)
-        //   annotationTypeRepository.put(annotType)
-
-        //   // update the collection event type with annotation type data
-        //   collectionEventTypeRepository.put(
-        //     ceventType.copy(
-        //       annotationTypeData = List(CollectionEventTypeAnnotationTypeData(annotType.id.id, false))))
-
-        //   val annotation = factory.createAnnotation
-        //   annotation.stringValue mustBe defined
-        //   val annotations = Set(annotation,
-        //                         annotation.copy(stringValue = Some(nameGenerator.next[Annotation])))
-
-        //   val cevent = factory.createCollectionEvent.copy(annotations = annotations)
-        //   val json = makeRequest(method         = POST,
-        //                          path           = uri(participant),
-        //                          expectedStatus = BAD_REQUEST,
-        //                          json           = collectionEventToAddCmd(cevent))
-        //   (json \ "status").as[String] must include ("error")
-        //   (json \ "message").as[String] must include ("duplicate annotation types in annotations")
-        // }
-      }
-
-      "fail when adding and participant IDs do not match" in {
         createEntities { (study, participant, ceventType) =>
-          val cevent = factory.createCollectionEvent
+          val annotType = factory.createAnnotationType
 
-          var participant2 = factory.createParticipant.copy(studyId = study.id)
-          participantRepository.put(participant2)
+          // update the collection event type with annotation type data
+          collectionEventTypeRepository.put(ceventType.copy(annotationTypes = Set(annotType)))
+
+          val annotation = factory.createAnnotation.copy(
+            annotationTypeId = nameGenerator.next[Annotation])
+
+          val cevent = factory.createCollectionEvent
+          val json = makeRequest(POST,
+                                 uri(participant),
+                                 BAD_REQUEST,
+                                 collectionEventToAddJson(cevent, List(annotation)))
+          (json \ "status").as[String] must include ("error")
+          (json \ "message").as[String] must include (
+            "annotation(s) do not belong to annotation types")
+        }
+      }
+
+      "fail for more than one annotation with the same annotation type ID" in {
+        createEntities { (study, participant, ceventType) =>
+          val annotType = factory.createAnnotationType
+
+          // update the collection event type with annotation type data
+          collectionEventTypeRepository.put(ceventType.copy(annotationTypes = Set(annotType)))
+
+          val annotation = factory.createAnnotation
+          annotation.stringValue mustBe defined
+
+          val cevent = factory.createCollectionEvent
+          val annotations = List(annotation,
+                                 annotation.copy(stringValue = Some(nameGenerator.next[Annotation])))
 
           val json = makeRequest(method         = POST,
-                                 path           = uri(participant2),
+                                 path           = uri(participant),
                                  expectedStatus = BAD_REQUEST,
-                                 json           = collectionEventToAddCmd(cevent))
+                                 json           = collectionEventToAddJson(cevent, annotations))
+
           (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("participant id mismatch")
+
+          (json \ "message").as[String] must include ("duplicate annotations")
         }
       }
 
@@ -650,277 +707,209 @@ class CollectionEventsControllerSpec extends ControllerFixture with JsonHelper {
           addOnNonEnabledStudy(retiredStudy, cevent)
         }
       }
+
     }
 
-    "PUT /participants/cevents/{participantId}/{id}" must {
+    "POST /participants/cevents/visitNumber/:ceventId" must {
 
-      "update a collection event with no annotation types" in {
+      "update the visit number on a collection event" in {
         createEntities { (study, participant, ceventType) =>
-          val cevent = factory.createCollectionEvent.copy(version = 0)
-          cevent.annotations must have size 0
+          val cevent = factory.createCollectionEvent
+          val newVisitNumber = cevent.visitNumber + 1
+
           collectionEventRepository.put(cevent)
+          cevent.annotations must have size 0
 
-          val cevent2 = factory.createCollectionEvent.copy(id      = cevent.id,
-                                                           version = cevent.version)
-          cevent2.annotations must have size 0
+          val json = makeRequest(POST,
+                                 updateUri(cevent, "visitNumber"),
+                                 Json.obj("expectedVersion" -> Some(cevent.version),
+                                          "visitNumber"     -> newVisitNumber))
 
-          val json = makeRequest(PUT, uri(participant, cevent2),
-                                 json = collectionEventToUpdateCmd(cevent))
           (json \ "status").as[String] must include ("success")
 
-          collectionEventRepository.getByKey(cevent2.id) mustSucceed { ce =>
-            ce must have (
-              'id                     (cevent2.id),
-              'participantId          (cevent2.participantId),
-              'collectionEventTypeId  (cevent2.collectionEventTypeId),
-              'version                (cevent2.version + 1),
-              'visitNumber            (cevent2.visitNumber),
-              'annotations            (cevent2.annotations)
+          collectionEventRepository.getByKey(cevent.id) mustSucceed { repoCe =>
+            repoCe must have (
+              'id                     (cevent.id),
+              'participantId          (cevent.participantId),
+              'collectionEventTypeId  (cevent.collectionEventTypeId),
+              'version                (cevent.version + 1),
+              'visitNumber            (newVisitNumber),
+              'annotations            (cevent.annotations)
             )
 
-            (ce.timeCompleted to cevent2.timeCompleted).millis must be < TimeCoparisonMillis
-            checkTimeStamps(ce, cevent.timeAdded, DateTime.now)
+            (repoCe.timeCompleted to cevent.timeCompleted).millis must be < TimeCoparisonMillis
+            checkTimeStamps(repoCe, cevent.timeAdded, DateTime.now)
           }
         }
       }
 
-      "update a collection event with annotation types" in {
-        fail("needs to be re written")
-        // createEntities { (study, participant, ceventType) =>
-        //   val annotTypes = createAnnotationsAndTypes
-
-        //   annotTypes.keys.foreach { annotType =>
-        //     annotationTypeRepository.put(annotType.copy(studyId = study.id))
-        //   }
-
-        //   val annotationTypeData = annotTypes.keys.map { annotType =>
-        //     CollectionEventTypeAnnotationTypeData(annotType.id.id, false)
-        //   }.toList
-
-        //   // update the collection event type with annotation type data
-        //   collectionEventTypeRepository.put(
-        //     ceventType.copy(annotationTypeData = annotationTypeData))
-
-        //   val cevent = factory.createCollectionEvent.copy(annotations = annotTypes.values.toSet)
-        //   collectionEventRepository.put(cevent)
-
-        //   val newAnnotations = annotTypes.keys.map { annotationType =>
-        //     val (stringValue, numberValue, selectedValues) =
-        //       factory.createAnnotationValues(annotationType)
-        //     Annotation(annotationTypeId = annotationType.id,
-        //                               stringValue      = stringValue,
-        //                               numberValue      = numberValue,
-        //                               selectedValues   = selectedValues)
-        //   }.toSet
-
-        //   val cevent2 = cevent.copy(version     = 0,
-        //                             annotations = newAnnotations)
-        //   val json = makeRequest(PUT, uri(participant, cevent2),
-        //                          json = collectionEventToUpdateCmd(cevent2))
-        //   (json \ "status").as[String] must include ("success")
-
-        //   val jsonAnnotations = (json \ "data" \ "annotations").as[List[JsObject]]
-        //   jsonAnnotations must have size newAnnotations.size
-
-        //   jsonAnnotations.foreach { jsonAnnotation =>
-        //     val jsonAnnotationTypeId = (jsonAnnotation \ "annotationTypeId").as[String]
-        //     val newAnnotation = newAnnotations.find( x =>
-        //       x.annotationTypeId.id == jsonAnnotationTypeId)
-        //     newAnnotation mustBe defined
-        //     compareAnnotation(jsonAnnotation, newAnnotation.value)
-        //   }
-        // }
-      }
-
-      "update a collection event to remove an annotation" in {
-        fail("needs to be re written")
-        // createEntities { (study, participant, ceventType) =>
-
-        //   val annotType = factory.createAnnotationType.copy(studyId = study.id)
-        //   annotationTypeRepository.put(annotType)
-
-        //   val annotation = factory.createAnnotation
-        //   annotation.annotationTypeId mustBe annotType.id
-
-        //   // update the collection event type with annotation type data
-        //   val ceventType2 = ceventType.copy(annotationTypeData = List(
-        //                       CollectionEventTypeAnnotationTypeData(annotType.id.id, false)))
-        //   collectionEventTypeRepository.put(ceventType2)
-
-        //   val cevent = factory.createCollectionEvent.copy(annotations = Set(annotation))
-        //   collectionEventRepository.put(cevent)
-
-        //   val cevent2 = cevent.copy(annotations = Set.empty)
-        //   val json = makeRequest(PUT, uri(participant, cevent2),
-        //                          json = collectionEventToUpdateCmd(cevent2))
-        //   (json \ "status").as[String] must include ("success")
-        //   (json \ "data" \ "annotations").as[List[JsObject]] must have size 0
-        // }
-      }
-
-      "fail when missing a required annotation" in {
-        fail("needs to be re written")
-        // createEntities { (study, participant, ceventType) =>
-
-        //   val annotType = factory.createAnnotationType.copy(studyId = study.id)
-        //   annotationTypeRepository.put(annotType)
-
-        //   val annotation = factory.createAnnotation
-        //   annotation.annotationTypeId mustBe annotType.id
-
-        //   // update the collection event type with annotation type data
-        //   val ceventType2 = ceventType.copy(annotationTypeData = List(
-        //                       CollectionEventTypeAnnotationTypeData(annotType.id.id, true)))
-        //   collectionEventTypeRepository.put(ceventType2)
-
-        //   val cevent = factory.createCollectionEvent.copy(annotations = Set(annotation))
-        //   collectionEventRepository.put(cevent)
-
-        //   val cevent2 = cevent.copy(annotations = Set.empty)
-        //   val json = makeRequest(PUT, uri(participant, cevent2), BAD_REQUEST,
-        //                          json = collectionEventToUpdateCmd(cevent2))
-        //   (json \ "status").as[String] must include ("error")
-        //   (json \ "message").as[String] must be ("missing required annotation type(s)")
-        // }
-      }
-
-      "fail when updating collection event to a different study than participant's" in {
+      "fail when updating visit number to one already used" in {
         createEntities { (study, participant, ceventType) =>
-          val cevent1 = factory.createCollectionEvent
-          collectionEventRepository.put(cevent1)
+          val cevents = (1 to 2).map { visitNumber =>
+              val cevent = factory.createCollectionEvent.copy(visitNumber = visitNumber)
+              collectionEventRepository.put(cevent)
+              cevent
+            }
 
-          var otherStudy = factory.createDisabledStudy
-          val otherCeventType = factory.createCollectionEventType.copy(studyId = otherStudy.id)
+          val ceventToUpdate = cevents(0)
+          val duplicateVisitNumber = cevents(1).visitNumber
 
-          studyRepository.put(otherStudy)
-          collectionEventTypeRepository.put(otherCeventType)
-
-          val cevent2 = factory.createCollectionEvent.copy(id = cevent1.id)
-
-          val json = makeRequest(method         = PUT,
-                                 path           = uri(participant, cevent2),
-                                 expectedStatus = BAD_REQUEST,
-                                 json           = collectionEventToUpdateCmd(cevent2))
+          val json = makeRequest(POST,
+                                 updateUri(ceventToUpdate, "visitNumber"),
+                                 FORBIDDEN,
+                                 Json.obj("expectedVersion" -> Some(ceventToUpdate.version),
+                                          "visitNumber"     -> duplicateVisitNumber))
 
           (json \ "status").as[String] must include ("error")
 
-          log.info(s"--> " + (json \ "message"))
-
-          (json \ "message").as[String] must include (
-            "participant and collection event type not in the same study")
+          (json \ "message").as[String] must include ("a collection event with this visit number already exists")
         }
       }
 
-      "fail for an invalid annotation type" in {
-        fail("needs to be re written")
-        // createEntities { (study, participant, ceventType) =>
+      "not update a collection event's visit number on a non enabled study" in {
+        createEntities { (study, participant, ceventType) =>
+          val newTimeCompleted = 2
 
-        //   val annotType = factory.createAnnotationType.copy(studyId = study.id)
-        //   annotationTypeRepository.put(annotType)
+          study.disable mustSucceed { disabledStudy =>
+            updateOnNonEnabledStudy(disabledStudy,
+                                    participant,
+                                    ceventType,
+                                    "visitNumber",
+                                    Json.obj("visitNumber" -> newTimeCompleted))
 
-        //   val annotation = factory.createAnnotation
-        //   annotation.annotationTypeId mustBe annotType.id
-
-        //   // update the collection event type with annotation type data
-        //   val ceventType2 = ceventType.copy(annotationTypeData = List(
-        //                       CollectionEventTypeAnnotationTypeData(annotType.id.id, false)))
-        //   collectionEventTypeRepository.put(ceventType2)
-
-        //   val cevent = factory.createCollectionEvent.copy(annotations = Set(annotation))
-        //   collectionEventRepository.put(cevent)
-
-        //   val cevent2 = cevent.copy(
-        //     annotations = Set(annotation.copy(annotationTypeId =
-        //                                         AnnotationTypeId(nameGenerator.next[String]))))
-
-        //   val json = makeRequest(PUT, uri(participant, cevent2), BAD_REQUEST,
-        //                          json = collectionEventToUpdateCmd(cevent2))
-        //   (json \ "status").as[String] must include ("error")
-        //   (json \ "message").as[String] must include (
-        //     "annotation type(s) do not belong to collection event type")
-        // }
+            disabledStudy.retire mustSucceed { retiredStudy =>
+              updateOnNonEnabledStudy(retiredStudy,
+                                      participant,
+                                      ceventType,
+                                      "visitNumber",
+                                      Json.obj("visitNumber" -> newTimeCompleted))
+            }
+          }
+        }
       }
 
-      "fail for more than one annotation with the same annotation type ID" in {
-        fail("needs to be re written")
-        // createEntities { (study, participant, ceventType) =>
-
-        //   val annotType = factory.createAnnotationType.copy(studyId = study.id)
-        //   annotationTypeRepository.put(annotType)
-
-        //   val annotation = factory.createAnnotation
-        //   annotation.annotationTypeId mustBe annotType.id
-
-        //   // update the collection event type with annotation type data
-        //   val ceventType2 = ceventType.copy(annotationTypeData = List(
-        //                       CollectionEventTypeAnnotationTypeData(annotType.id.id, false)))
-        //   collectionEventTypeRepository.put(ceventType2)
-
-        //   val cevent = factory.createCollectionEvent.copy(annotations = Set(annotation))
-        //   collectionEventRepository.put(cevent)
-
-        //   val newBadAnnotations = (1 to 2).map { x =>
-        //     val (stringValue, numberValue, selectedValues) =
-        //       factory.createAnnotationValues(annotType)
-        //     Annotation(annotationTypeId = annotType.id,
-        //                               stringValue      = stringValue,
-        //                               numberValue      = numberValue,
-        //                               selectedValues   = selectedValues)
-        //   }.toSet
-
-        //   val cevent2 = cevent.copy(annotations = newBSadAnnotations)
-
-        //   val json = makeRequest(PUT, uri(participant, cevent2), BAD_REQUEST,
-        //                          json = collectionEventToUpdateCmd(cevent2))
-        //   (json \ "status").as[String] must include ("error")
-        //   (json \ "message").as[String] must include (
-        //     "duplicate annotation types in annotations")
-        // }
+      "fail when updating visit number and collection event ID is invalid" in {
+        createEntities { (study, participant, ceventType) =>
+          updateOnInvalidCevent(participant,
+                                ceventType,
+                                "visitNumber",
+                                Json.obj("visitNumber" -> 1))
+          }
       }
 
-      "fail when updating and participant IDs do not match" in {
+      "fail when updating visit number with an invalid version" in {
+        createEntities { (study, participant, ceventType) =>
+          updateWithInvalidVersion(participant,
+                                   ceventType,
+                                   "visitNumber",
+                                   Json.obj("visitNumber" -> 1))
+        }
+      }
+
+    }
+
+    "POST /participants/cevents/timeCompleted/:ceventId" must {
+
+      "update the time completed on a collection event" in {
         createEntities { (study, participant, ceventType) =>
           val cevent = factory.createCollectionEvent
+          val newTimeCompleted = cevent.timeCompleted - 2.months
+
           collectionEventRepository.put(cevent)
+          cevent.annotations must have size 0
 
-           val participant2 = factory.createParticipant
+          val json = makeRequest(POST,
+                                 updateUri(cevent, "timeCompleted"),
+                                 Json.obj("expectedVersion" -> Some(cevent.version),
+                                          "timeCompleted"     -> newTimeCompleted))
 
-          val json = makeRequest(PUT, uri(participant2, cevent), BAD_REQUEST,
-                                 json = collectionEventToUpdateCmd(cevent))
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("participant id mismatch")
+          (json \ "status").as[String] must include ("success")
+
+          collectionEventRepository.getByKey(cevent.id) mustSucceed { repoCe =>
+            repoCe must have (
+              'id                     (cevent.id),
+              'participantId          (cevent.participantId),
+              'collectionEventTypeId  (cevent.collectionEventTypeId),
+              'version                (cevent.version + 1),
+              'visitNumber            (cevent.visitNumber),
+              'annotations            (cevent.annotations)
+            )
+
+            (repoCe.timeCompleted to newTimeCompleted).millis must be < TimeCoparisonMillis
+            checkTimeStamps(repoCe, cevent.timeAdded, DateTime.now)
+          }
         }
       }
 
-      "fail when updating and collection event IDs do not match" in {
+      "not update a collection event's time completed on a non enabled study" in {
         createEntities { (study, participant, ceventType) =>
-          val cevent = factory.createCollectionEvent
-          collectionEventRepository.put(cevent)
+          val newTimeCompleted = DateTime.now - 2.months
 
-           val cevent2 = factory.createCollectionEvent
+          study.disable mustSucceed { disabledStudy =>
+            updateOnNonEnabledStudy(disabledStudy,
+                                    participant,
+                                    ceventType,
+                                    "timeCompleted",
+                                    Json.obj("timeCompleted" -> newTimeCompleted))
 
-          val json = makeRequest(PUT, uri(participant, cevent2), BAD_REQUEST,
-                                 json = collectionEventToUpdateCmd(cevent))
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("collection event id mismatch")
+            disabledStudy.retire mustSucceed { retiredStudy =>
+              updateOnNonEnabledStudy(retiredStudy,
+                                      participant,
+                                      ceventType,
+                                      "timeCompleted",
+                                      Json.obj("timeCompleted" -> newTimeCompleted))
+            }
+          }
         }
       }
 
-      "not update a collection event on an disabled study" in {
+      "fail when updating time completed and collection event ID is invalid" in {
         createEntities { (study, participant, ceventType) =>
-          val disabledStudy = factory.createDisabledStudy.copy(id = study.id)
-          val cevent = factory.createCollectionEvent
-          updateOnNonEnabledStudy(disabledStudy, cevent)
+          updateOnInvalidCevent(participant,
+                                ceventType,
+                                "timeCompleted",
+                                Json.obj("timeCompleted" -> 1))
+          }
+      }
+
+      "fail when updating time completed with an invalid version" in {
+        createEntities { (study, participant, ceventType) =>
+          updateWithInvalidVersion(participant,
+                                   ceventType,
+                                   "timeCompleted",
+                                   Json.obj("timeCompleted" -> 1))
         }
       }
 
-      "not update a collection event on an retired study" in {
+    }
+
+    "POST /participants/cevents/annot/:ceventId" must {
+
+      annotationTypeUpdateSharedBehaviour
+
+      annotationTypeUpdateWithStudySharedBehaviour
+
+      "fail when adding annotation and collection event ID is invalid" in {
         createEntities { (study, participant, ceventType) =>
-          val retiredStudy = factory.createRetiredStudy.copy(id = study.id)
-          val cevent = factory.createCollectionEvent
-          updateOnNonEnabledStudy(retiredStudy, cevent)
+
+          val annotationType = factory.createAnnotationType
+          val annotation = factory.createAnnotation
+          val annotJson = Json.obj("annotation" -> annotationToJson(annotation))
+
+          collectionEventTypeRepository.put(ceventType.copy(annotationTypes = Set(annotationType)))
+
+          updateOnInvalidCevent(participant,
+                                ceventType,
+                                "annot",
+                                annotJson)
         }
       }
+
+    }
+
+    "DELETE /participants/cevents/annot/:ceventId/:annotTypeId/:ver" must {
+
+      annotationTypeRemoveSharedBehaviour
 
     }
 

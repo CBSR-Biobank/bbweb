@@ -4,18 +4,20 @@ import org.biobank.domain.participants.CollectionEvent
 import org.biobank.controllers._
 import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
-import org.biobank.service.participants.ParticipantsService
+import org.biobank.service.participants.CollectionEventsService
 
-import javax.inject.{Inject => javaxInject}
+import javax.inject.{Inject, Singleton}
+import play.api.libs.json._
 import play.api.{ Environment, Logger }
 import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
-class CollectionEventsController @javaxInject() (val env:            Environment,
-                                                 val authToken:      AuthToken,
-                                                 val usersService:   UsersService,
-                                                 val participantsService: ParticipantsService)
+@Singleton
+class CollectionEventsController @Inject() (val env:          Environment,
+                                            val authToken:    AuthToken,
+                                            val usersService: UsersService,
+                                            val service:      CollectionEventsService)
     extends CommandController
     with JsonController {
 
@@ -23,9 +25,9 @@ class CollectionEventsController @javaxInject() (val env:            Environment
 
   private val PageSizeMax = 10
 
-  def get(participantId: String, ceventId: String) =
+  def get(ceventId: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      domainValidationReply(participantsService.getCollectionEvent(participantId, ceventId))
+      domainValidationReply(service.get(ceventId))
     }
 
   def list(participantId: String,
@@ -43,43 +45,67 @@ class CollectionEventsController @javaxInject() (val env:            Environment
         sortWith    <- (if (sortField == "visitNumber") (CollectionEvent.compareByVisitNumber _)
                         else (CollectionEvent.compareByTimeCompleted _)).success
         sortOrder   <- pagedQuery.getSortOrder
-        cevents     <- participantsService.getCollectionEvents(participantId, sortWith, sortOrder)
+        cevents     <- service.list(participantId, sortWith, sortOrder)
         page        <- pagedQuery.getPage(PageSizeMax, cevents.size)
         pageSize    <- pagedQuery.getPageSize(PageSizeMax)
         results     <- PagedResults.create(cevents, page, pageSize)
       } yield results
 
       validation.fold(
-        err => BadRequest(err.list.toList.mkString),
+        err     => BadRequest(err.list.toList.mkString),
         results =>  Ok(results)
       )
     }
 
-  def getByVisitNumber(participantId: String, vn: Int) =
+  def getByVisitNumber(participantId: String, visitNumber: Int) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      domainValidationReply(participantsService.getCollectionEventByVisitNumber(participantId, vn))
+      domainValidationReply(service.getByVisitNumber(participantId, visitNumber))
     }
 
-  def addCollectionEvent() =
-    commandAction { cmd: AddCollectionEventCmd =>
-      val future = participantsService.addCollectionEvent(cmd)
-      domainValidationReply(future)
+  def add(participantId: String) =
+    commandAction(Json.obj("participantId" -> participantId)) { cmd: AddCollectionEventCmd =>
+      processCommand(cmd)
     }
 
-  def updateCollectionEvent() =
-    commandAction { cmd: UpdateCollectionEventCmd =>
-      val future = participantsService.updateCollectionEvent(cmd)
-      domainValidationReply(future)
+  def updateVisitNumber(ceventId: String) =
+    commandAction(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventVisitNumberCmd =>
+      processCommand(cmd)
     }
 
-  def removeCollectionEvent(participantId: String, id: String, ver: Long) =
+  def updateTimeCompleted(ceventId: String) =
+    commandAction(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventTimeCompletedCmd =>
+      processCommand(cmd)
+    }
+
+  def updateAnnotation(ceventId: String) =
+    commandAction(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventAnnotationCmd =>
+      processCommand(cmd)
+    }
+
+  def removeAnnotation(ceventId:      String,
+                       annotTypeId:   String,
+                       ver:           Long) =
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
+      val cmd = RemoveCollectionEventAnnotationCmd(userId           = Some(userId.id),
+                                                   id               = ceventId,
+                                                   expectedVersion  = ver,
+                                                   annotationTypeId = annotTypeId)
+      processCommand(cmd)
+    }
+
+  def remove(participantId: String, ceventId: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveCollectionEventCmd(userId          = Some(userId.id),
-                                         id              = id,
+                                         id              = ceventId,
                                          participantId   = participantId,
                                          expectedVersion = ver)
-      val future = participantsService.removeCollectionEvent(cmd)
+      val future = service.processRemoveCommand(cmd)
       domainValidationReply(future)
     }
+
+  private def processCommand(cmd: ParticipantCommand) = {
+    val future = service.processCommand(cmd)
+    domainValidationReply(future)
+  }
 
 }

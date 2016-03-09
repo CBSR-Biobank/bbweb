@@ -140,7 +140,7 @@ object StorageContainerType extends ContainerValidations {
     (validateId(id) |@|
       validateId(centreId, CentreIdRequired) |@|
       validateId(schemaId, ContainerSchemaIdInvalid) |@|
-      validateAndIncrementVersion(version) |@|
+      validateVersion(version) |@|
       validateString(name, NameMinLength, InvalidName) |@|
        validateNonEmptyOption(description, InvalidDescription)) {
       case (_, _, _, _, _, _) => StorageContainerType(id,
@@ -189,7 +189,7 @@ object SpecimenContainerType extends ContainerValidations {
     (validateId(id) |@|
        validateId(centreId, CentreIdRequired) |@|
        validateId(schemaId, ContainerSchemaIdInvalid) |@|
-       validateAndIncrementVersion(version) |@|
+       validateVersion(version) |@|
        validateString(name, NameMinLength, InvalidName) |@|
        validateNonEmptyOption(description, InvalidDescription)) {
       case (_, _, _, _, _, _) => SpecimenContainerType(id,

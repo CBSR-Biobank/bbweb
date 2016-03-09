@@ -22,6 +22,4 @@ trait ParticipantValidations {
 
   case object PositionInvalid extends ValidationKey
 
-  case object VisitNumberInvalid extends ValidationKey
-
 }

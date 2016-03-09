@@ -2,6 +2,7 @@ package org.biobank.domain
 
 import play.api.libs.json._
 import play.api.libs.json.Reads._
+import org.slf4j.LoggerFactory
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -9,28 +10,43 @@ import scalaz.Validation.FlatMap._
  * This is a value type.
  *
  */
-case class Annotation(annotationTypeUniqueId: String,
-                      stringValue:            Option[String],
-                      numberValue:            Option[String], // FIXME: should we use java.lang.Number
-                      selectedValues:         Set[String])
+case class Annotation(annotationTypeId: String,
+                      stringValue:      Option[String],
+                      numberValue:      Option[String], // FIXME: should we use java.lang.Number
+                      selectedValues:   Set[String]) {
+
+  override def equals(that: Any): Boolean = {
+    that match {
+      case that: Annotation => this.annotationTypeId.equalsIgnoreCase(that.annotationTypeId)
+      case _ => false
+    }
+  }
+
+  override def hashCode:Int = {
+    annotationTypeId.toUpperCase.hashCode
+  }
+
+}
 
 object Annotation {
   import org.biobank.domain.CommonValidations._
+
+  val log = LoggerFactory.getLogger(this.getClass)
 
   case object AnnotationTypeUniqueIdRequired extends ValidationKey
 
   implicit val annotationFormat = Json.format[Annotation]
 
-  def create(annotationTypeUniqueId: String,
+  def create(annotationTypeId: String,
              stringValue:            Option[String],
              numberValue:            Option[String],
              selectedValues:         Set[String])
       : DomainValidation[Annotation] = {
-    validate(annotationTypeUniqueId, stringValue, numberValue, selectedValues)
-      .map { _ => Annotation(annotationTypeUniqueId, stringValue, numberValue, selectedValues) }
+    validate(annotationTypeId, stringValue, numberValue, selectedValues)
+      .map { _ => Annotation(annotationTypeId, stringValue, numberValue, selectedValues) }
   }
 
-  def validate(annotationTypeUniqueId: String,
+  def validate(annotationTypeId: String,
                stringValue:            Option[String],
                numberValue:            Option[String],
                selectedValues:         Set[String])
@@ -56,7 +72,7 @@ object Annotation {
       }
     }
 
-    (validateString(annotationTypeUniqueId, AnnotationTypeUniqueIdRequired) |@|
+    (validateString(annotationTypeId, AnnotationTypeUniqueIdRequired) |@|
        validateNonEmptyOption(stringValue, NonEmptyStringOption) |@|
        validateNumberStringOption(numberValue) |@|
        selectedValues.toList.traverseU(validateAnnotationOption) |@|
@@ -66,7 +82,7 @@ object Annotation {
   }
 
   def validate(annotation: Annotation): DomainValidation[Boolean] = {
-    validate(annotation.annotationTypeUniqueId,
+    validate(annotation.annotationTypeId,
              annotation.stringValue,
              annotation.numberValue,
              annotation.selectedValues)
@@ -82,57 +98,50 @@ object Annotation {
    * A DomainError is the result if these conditions fail.
    */
   def validateAnnotations(annotationTypes: Set[AnnotationType],
-                          annotations:     Set[Annotation])
+                          annotations:     List[Annotation])
       : DomainValidation[Boolean]= {
-    if (annotationTypes.isEmpty && annotations.isEmpty) {
+
+    val requiredAnnotTypeIds = annotationTypes
+      .filter(annotationType => annotationType.required)
+      .map(annotationType => annotationType.uniqueId)
+      .toSet
+
+    if (!requiredAnnotTypeIds.isEmpty && annotations.isEmpty) {
+      DomainError("missing required annotation type(s)").failureNel
+    } else if (annotations.isEmpty && annotationTypes.isEmpty) {
       true.success
     } else {
-      val annotTypeUniqueIdsAsSet = annotations.map(v => v.annotationTypeUniqueId).toSet
+      val annotTypeIdsFromAnnotationsAsSet = annotations.map(v => v.annotationTypeId).toSet
+
       for {
         hasAnnotationTypes <- {
-          if (annotationTypes.isEmpty) {
-            DomainError("no annotation types").failureNel
-          } else {
-            true.success
-          }
+          if (annotationTypes.isEmpty) DomainError("no annotation types").failureNel
+          else true.success
         }
         noDuplicates <- {
-          val annotAnnotTypeIdsAsList = annotations.map(v => v.annotationTypeUniqueId).toList
-
-          if (annotTypeUniqueIdsAsSet.size != annotAnnotTypeIdsAsList.size) {
-            DomainError("duplicate annotation types in annotations").failureNel
+          if (annotTypeIdsFromAnnotationsAsSet.size != annotations.size) {
+            DomainError("duplicate annotations").failureNel
           } else {
             true.success
           }
         }
         haveRequired <- {
-          val requiredAnnotTypeIds = annotationTypes
-            .filter(annotationType => annotationType.required)
-            .map(annotationType => annotationType.uniqueId)
-            .toSet
-
-          if (requiredAnnotTypeIds.intersect(annotTypeUniqueIdsAsSet).size != requiredAnnotTypeIds.size) {
+          if (requiredAnnotTypeIds.intersect(annotTypeIdsFromAnnotationsAsSet).size
+                != requiredAnnotTypeIds.size) {
             DomainError("missing required annotation type(s)").failureNel
           } else {
             true.success
           }
         }
         allBelong <- {
-          if (annotTypeUniqueIdsAsSet.isEmpty) {
-            // no annotations present
+          val annotTypeIds = annotationTypes.map(at => at.uniqueId).toSet
+          val notBelonging = annotTypeIdsFromAnnotationsAsSet.diff(annotTypeIds)
+
+          if (notBelonging.isEmpty) {
             true.success
           } else {
-            val annotTypeIds = annotationTypes
-              .map(annotationTypes => annotationTypes.uniqueId)
-              .toSet
-
-            val notBelonging = annotTypeIds.diff(annotTypeUniqueIdsAsSet)
-            if (notBelonging.isEmpty) {
-              true.success
-            } else {
-              DomainError("annotation(s) do not belong to annotation types: "
-                + notBelonging.mkString(", ")).failureNel
-            }
+            DomainError("annotation(s) do not belong to annotation types: "
+                          + notBelonging.mkString(", ")).failureNel
           }
         }
       } yield allBelong

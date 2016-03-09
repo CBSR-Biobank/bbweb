@@ -94,7 +94,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
     //   newItem <- SpecimenLinkType.create(
     //     processingTypeId      = processingTypeId,
     //     id                    = id,
-    //     version               = -1L,
+    //     version               = 0L,
     //     expectedInputChange   = cmd.expectedInputChange,
     //     expectedOutputChange  = cmd.expectedOutputChange,
     //     inputCount            = cmd.inputCount,

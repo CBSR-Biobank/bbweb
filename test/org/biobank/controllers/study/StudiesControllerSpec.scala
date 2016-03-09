@@ -808,7 +808,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     "POST /studies/unretire/:id" must {
 
-      "111 unretire a study" in {
+      "unretire a study" in {
         val study = factory.createRetiredStudy
         studyRepository.put(study)
 

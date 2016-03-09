@@ -6,7 +6,7 @@ import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 
-import javax.inject.{Inject => javaxInject, Singleton}
+import javax.inject.{Inject, Singleton}
 import play.api.{Environment, Logger}
 import play.api.cache.CacheApi
 import play.api.libs.concurrent.Execution.Implicits._
@@ -21,11 +21,11 @@ import Scalaz._
 import scalaz.Validation.FlatMap._
 
 @Singleton
-class UsersController @javaxInject() (val env:            Environment,
-                                      val cacheApi:       CacheApi,
-                                      val authToken:      AuthToken,
-                                      val usersService:   UsersService,
-                                      val studiesService: StudiesService)
+class UsersController @Inject() (val env:            Environment,
+                                 val cacheApi:       CacheApi,
+                                 val authToken:      AuthToken,
+                                 val usersService:   UsersService,
+                                 val studiesService: StudiesService)
     extends CommandController
     with JsonController {
 

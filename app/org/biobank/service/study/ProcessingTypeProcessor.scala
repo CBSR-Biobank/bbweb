@@ -86,7 +86,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
       nameValid <- nameAvailable(cmd.name, studyId)
       newItem   <- ProcessingType.create(studyId,
                                          id,
-                                         -1L,
+                                         0L,
                                          cmd.name,
                                          cmd.description,
                                          cmd.enabled)

@@ -4,7 +4,6 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-
 # Home page
 GET     /                                      org.biobank.controllers.Application.index
 
@@ -61,18 +60,23 @@ POST    /studies/retire/:id                     org.biobank.controllers.study.St
 POST    /studies/unretire/:id                   org.biobank.controllers.study.StudiesController.unretire(id)
 
 # collection events - order matters: this section must be before participants
-GET     /participants/cevents/list/:participantId             org.biobank.controllers.participants.CollectionEventsController.list(participantId, sort: String ?= "visitNumber", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
-GET     /participants/cevents/visitNumber/:participantId/:vn  org.biobank.controllers.participants.CollectionEventsController.getByVisitNumber(participantId, vn: Int)
-GET     /participants/cevents/:participantId                  org.biobank.controllers.participants.CollectionEventsController.get(participantId, ceventId: String)
-POST    /participants/cevents                                 org.biobank.controllers.participants.CollectionEventsController.addCollectionEvent
-PUT     /participants/cevents                                 org.biobank.controllers.participants.CollectionEventsController.updateCollectionEvent
-DELETE  /participants/cevents/:participantId/:id/:ver         org.biobank.controllers.participants.CollectionEventsController.removeCollectionEvent(participantId, id, ver: Long)
+GET     /participants/cevents/list/:participantId               org.biobank.controllers.participants.CollectionEventsController.list(participantId, sort: String ?= "visitNumber", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
+GET     /participants/cevents/visitNumber/:participantId/:vn    org.biobank.controllers.participants.CollectionEventsController.getByVisitNumber(participantId, vn: Int)
+GET     /participants/cevents/:ceventId                         org.biobank.controllers.participants.CollectionEventsController.get(ceventId)
+POST    /participants/cevents/:participantId                    org.biobank.controllers.participants.CollectionEventsController.add(participantId)
+POST    /participants/cevents/visitNumber/:ceventId             org.biobank.controllers.participants.CollectionEventsController.updateVisitNumber(ceventId)
+POST    /participants/cevents/timeCompleted/:ceventId           org.biobank.controllers.participants.CollectionEventsController.updateTimeCompleted(ceventId)
+POST    /participants/cevents/annot/:ceventId                   org.biobank.controllers.participants.CollectionEventsController.updateAnnotation(ceventId)
+DELETE  /participants/cevents/annot/:ceventId/:annotTypeId/:ver org.biobank.controllers.participants.CollectionEventsController.removeAnnotation(ceventId, annotTypeId, ver: Long)
+DELETE  /participants/cevents/:participantId/:ceventId/:ver     org.biobank.controllers.participants.CollectionEventsController.remove(participantId, ceventId, ver: Long)
 
 # participants
-GET     /participants/uniqueId/:studyId/:id     org.biobank.controllers.participants.ParticipantsController.getByUniqueId(studyId, id: String)
-GET     /participants/:studyId/:id              org.biobank.controllers.participants.ParticipantsController.get(studyId, id: String)
-POST    /participants                           org.biobank.controllers.participants.ParticipantsController.addParticipant
-PUT     /participants                           org.biobank.controllers.participants.ParticipantsController.updateParticipant
+GET     /participants/uniqueId/:studyId/:id       org.biobank.controllers.participants.ParticipantsController.getByUniqueId(studyId, id)
+GET     /participants/:studyId/:id                org.biobank.controllers.participants.ParticipantsController.get(studyId, id)
+POST    /participants/:studyId                    org.biobank.controllers.participants.ParticipantsController.addParticipant(studyId)
+POST    /participants/uniqueId/:id                org.biobank.controllers.participants.ParticipantsController.updateUniqueId(id)
+POST    /participants/annot/:id                   org.biobank.controllers.participants.ParticipantsController.updateAnnotation( id)
+DELETE  /participants/annot/:id/:annotTypeId/:ver org.biobank.controllers.participants.ParticipantsController.removeAnnotation(id, annotTypeId, ver: Long)
 
 # centre location
 POST    /centres/locations/:centreId                   org.biobank.controllers.centres.CentresController.addLocation(centreId)

@@ -74,7 +74,7 @@ object ProcessingType {
       : DomainValidation[ProcessingType] = {
     (validateId(studyId) |@|
        validateId(id) |@|
-       validateAndIncrementVersion(version) |@|
+       validateVersion(version) |@|
        validateString(name, NameRequired) |@|
        validateNonEmptyOption(description, InvalidDescription) ) {
       case (_, _, _, _, _) => ProcessingType(studyId,

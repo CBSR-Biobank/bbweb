@@ -7,7 +7,7 @@ import org.biobank.service.centres.CentresService
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.domain.centre.Centre
 
-import javax.inject.{Inject => javaxInject, Singleton}
+import javax.inject.{Inject, Singleton}
 import play.api.{ Environment, Logger }
 import play.api.libs.json._
 import scala.language.reflectiveCalls
@@ -18,10 +18,10 @@ import scalaz.Validation.FlatMap._
   *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
   */
 @Singleton
-class CentresController @javaxInject() (val env:            Environment,
-                                        val authToken:      AuthToken,
-                                        val usersService:   UsersService,
-                                        val centresService: CentresService)
+class CentresController @Inject() (val env:            Environment,
+                                   val authToken:      AuthToken,
+                                   val usersService:   UsersService,
+                                   val centresService: CentresService)
     extends CommandController
     with JsonController {
 

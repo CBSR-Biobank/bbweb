@@ -70,7 +70,7 @@ object ContainerSchema extends ContainerSchemaValidations {
              shared:      Boolean)
       : DomainValidation[ContainerSchema] = {
     (validateId(id) |@|
-       validateAndIncrementVersion(version) |@|
+       validateVersion(version) |@|
        validateString(name, NameMinLength, InvalidName) |@|
        validateNonEmptyOption(description, InvalidDescription)) {
       case (_, _, _, _) => ContainerSchema(id, version, DateTime.now, None, name, description, shared)

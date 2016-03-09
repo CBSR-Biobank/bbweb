@@ -26,29 +26,4 @@ object Utils {
       : Future[DomainValidation[Boolean]] =
     future map { validation => validation map { event => true } }
 
-
-  def convertAnnotationsToEvent(annotations: List[org.biobank.domain.Annotation])
-      : Seq[org.biobank.infrastructure.event.CommonEvents.Annotation] = {
-    annotations.map { annot =>
-      org.biobank.infrastructure.event.CommonEvents.Annotation(
-        annotationTypeUniqueId = Some(annot.annotationTypeUniqueId),
-        stringValue            = annot.stringValue,
-        numberValue            = annot.numberValue,
-        selectedValues         = annot.selectedValues.toSeq
-      )
-    }
-  }
-
-  def convertAnnotationsFromEvent(
-    annotations: Seq[org.biobank.infrastructure.event.CommonEvents.Annotation])
-      : Set[org.biobank.domain.Annotation] = {
-    annotations.map { eventAnnot =>
-      org.biobank.domain.Annotation(
-        annotationTypeUniqueId = eventAnnot.getAnnotationTypeUniqueId,
-        stringValue            = eventAnnot.stringValue,
-        numberValue            = eventAnnot.numberValue,
-        selectedValues         = eventAnnot.selectedValues.toSet
-      )
-    } toSet
-  }
 }

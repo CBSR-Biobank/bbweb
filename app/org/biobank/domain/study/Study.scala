@@ -129,9 +129,9 @@ case class DisabledStudy(id:                         StudyId,
   }
 
   /** removes a participant annotation type from this study. */
-  def removeParticipantAnnotationType(annotationTypeUniqueId: String)
+  def removeParticipantAnnotationType(annotationTypeId: String)
       : DomainValidation[DisabledStudy] = {
-    checkRemoveAnnotationType(annotationTypeUniqueId).map { annotationType =>
+    checkRemoveAnnotationType(annotationTypeId).map { annotationType =>
       val newAnnotationTypes = annotationTypes - annotationType
       copy(annotationTypes = newAnnotationTypes,
            version         = version + 1,
@@ -181,7 +181,7 @@ object DisabledStudy extends StudyValidations with AnnotationTypeValidations {
              annotationTypes: Set[AnnotationType])
       : DomainValidation[DisabledStudy] = {
     (validateId(id) |@|
-       validateAndIncrementVersion(version) |@|
+       validateVersion(version) |@|
        validateString(name, NameMinLength, InvalidName) |@|
        validateNonEmptyOption(description, InvalidDescription) |@|
        annotationTypes.toList.traverseU(validate)) {

@@ -42,6 +42,26 @@ object EventUtils {
     )
   }
 
+  def annotationToEvent(annotation: org.biobank.domain.Annotation)
+      : org.biobank.infrastructure.event.CommonEvents.Annotation = {
+    org.biobank.infrastructure.event.CommonEvents.Annotation().update(
+      _.annotationTypeId    := annotation.annotationTypeId,
+      _.optionalStringValue := annotation.stringValue,
+      _.optionalNumberValue := annotation.numberValue,
+      _.selectedValues      := annotation.selectedValues.toSeq
+    )
+  }
+
+  def annotationFromEvent(event: org.biobank.infrastructure.event.CommonEvents.Annotation)
+      : org.biobank.domain.Annotation = {
+    org.biobank.domain.Annotation(
+      annotationTypeId = event.getAnnotationTypeId,
+      stringValue      = event.stringValue,
+      numberValue      = event.numberValue,
+      selectedValues   = event.selectedValues.toSet
+    )
+  }
+
   def specimenSpecToEvent(specimenSpec: CollectionSpecimenSpec): CollectionEventTypeEvent.SpecimenSpec = {
     CollectionEventTypeEvent.SpecimenSpec().update(
       _.uniqueId                    := specimenSpec.uniqueId,

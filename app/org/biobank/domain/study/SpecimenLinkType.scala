@@ -176,7 +176,7 @@ object SpecimenLinkType extends SpecimenLinkTypeValidations {
     //             (validatePositiveNumber(inputCount, InvalidPositiveNumber) <*>
     //               (validatePositiveNumber(expectedOutputChange, InvalidPositiveNumber) <*>
     //                 (validatePositiveNumber(expectedInputChange, InvalidPositiveNumber) <*>
-    //                   (validateAndIncrementVersion(version) <*>
+    //                   (validateVersion(version) <*>
     //                     (validateId(id, IdRequired) <*>
     //                        (validateId(processingTypeId, ProcessingTypeIdRequired) map (
     //                           SpecimenLinkType.apply _).curried)

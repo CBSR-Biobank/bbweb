@@ -14,7 +14,7 @@ trait AnnotationTypeSetSharedSpec[T <: ConcurrencySafeEntity[_]]
 
   protected def addAnnotationType(entity: T, annotationType: AnnotationType): DomainValidation[T]
 
-  protected def removeAnnotationType(entity: T, annotationTypeUniqueId: String): DomainValidation[T]
+  protected def removeAnnotationType(entity: T, annotationTypeId: String): DomainValidation[T]
 
   def annotationTypeSetSharedBehaviour() = {
 

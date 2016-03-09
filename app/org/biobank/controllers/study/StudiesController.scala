@@ -15,7 +15,7 @@ import org.biobank.service._
 import org.biobank.service.study.StudiesService
 import org.biobank.controllers.PagedResults._
 
-import javax.inject.{Inject => javaxInject}
+import javax.inject.{Inject, Singleton}
 import play.api.{ Environment, Logger }
 import play.api.mvc._
 import play.api.libs.json._
@@ -26,10 +26,11 @@ import scalaz.Validation.FlatMap._
 /**
  *
  */
-class StudiesController @javaxInject() (val env:            Environment,
-                                        val authToken:      AuthToken,
-                                        val usersService:   UsersService,
-                                        val studiesService: StudiesService)
+@Singleton
+class StudiesController @Inject() (val env:            Environment,
+                                   val authToken:      AuthToken,
+                                   val usersService:   UsersService,
+                                   val studiesService: StudiesService)
     extends CommandController
     with JsonController {
 

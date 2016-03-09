@@ -1,16 +1,17 @@
 package org.biobank.service.participants
 
-import org.biobank.service.Processor
-import org.biobank.infrastructure.command.ParticipantCommands._
-import org.biobank.infrastructure.event.ParticipantEvents._
-import org.biobank.domain.DomainValidation
-import org.biobank.domain.centre.CentreRepository
-import org.biobank.domain.study.{ SpecimenGroupId, SpecimenGroupRepository }
-import org.biobank.domain.participants._
-
-import javax.inject.{Inject => javaxInject}
 import akka.actor._
 import akka.persistence.SnapshotOffer
+import javax.inject.{Inject, Singleton}
+import org.biobank.domain.DomainValidation
+import org.biobank.domain.centre.CentreRepository
+import org.biobank.domain.participants._
+import org.biobank.domain.study.{ SpecimenGroupId, SpecimenGroupRepository }
+import org.biobank.infrastructure.command.ParticipantCommands._
+import org.biobank.infrastructure.event.SpecimenEvents._
+import org.biobank.service.Processor
+import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -23,17 +24,17 @@ object SpecimensProcessor {
 /**
  * Responsible for handing collection event commands to add, update and remove.
  */
-class SpecimensProcessor @javaxInject() (
-  val specimenRepository:        SpecimenRepository,
-  val specimenGroupRepository:   SpecimenGroupRepository,
-  val collectionEventRepository: CollectionEventRepository,
-  val centreRepository:          CentreRepository) //,
-  //val containerRepository:       ContainerRepository)
+@Singleton
+class SpecimensProcessor @Inject() (val specimenRepository:        SpecimenRepository,
+                                    val specimenGroupRepository:   SpecimenGroupRepository,
+                                    val collectionEventRepository: CollectionEventRepository,
+                                    val centreRepository:          CentreRepository)
+//,
+//val containerRepository:       ContainerRepository)
     extends Processor {
 
-  import ParticipantEvent.EventType
+  import SpecimenEvent.EventType
   import org.biobank.infrastructure.event.EventUtils._
-  import org.biobank.infrastructure.event.ParticipantEventsUtil._
 
   override def persistenceId = "specimens-processor-id"
 
@@ -44,13 +45,13 @@ class SpecimensProcessor @javaxInject() (
    * processed to recreate the current state of the aggregate.
    */
   val receiveRecover: Receive = {
-    case event: ParticipantEvent => event.eventType match {
-      case et: EventType.SpecimenAdded              => applySpecimenAddedEvent(event)
-      case et: EventType.SpecimenMoved              => applySpecimenMovedEvent(event)
-      case et: EventType.SpecimenPosisitionAssigned => applySpecimenPositionAssignedEvent(event)
-      case et: EventType.SpecimenAmountRemoved      => applySpecimenAmountRemovedEvent(event)
-      case et: EventType.SpecimenUsableUpdated      => applySpecimenUsableUpdatedEvent(event)
-      case et: EventType.SpecimenRemoved            => applySpecimenRemovedEvent(event)
+    case event: SpecimenEvent => event.eventType match {
+      case et: EventType.Added              => applyAddedEvent(event)
+      case et: EventType.Moved              => applyMovedEvent(event)
+      case et: EventType.PosisitionAssigned => applyPositionAssignedEvent(event)
+      case et: EventType.AmountRemoved      => applyAmountRemovedEvent(event)
+      case et: EventType.UsableUpdated      => applyUsableUpdatedEvent(event)
+      case et: EventType.Removed            => applyRemovedEvent(event)
 
       case event => log.error(s"event not handled: $event")
     }
@@ -91,23 +92,20 @@ class SpecimensProcessor @javaxInject() (
       specimenGroup   <- specimenGroupRepository.getByKey(SpecimenGroupId(cmd.specimenGroupId))
       location        <- centreRepository.getByLocationId(cmd.locationId)
       originLocation  <- centreRepository.getByLocationId(cmd.originLocationId)
-      //---
-      event           <- createEvent(collectionEvent.participantId, cmd).withSpecimenAdded(
-        SpecimenAddedEvent(
-          specimenId        = Some(specimenId.id),
-          specimenGroupId   = Some(cmd.specimenGroupId),
-          collectionEventId = Some(cmd.collectionEventId),
-          originLocationId  = Some(cmd.originLocationId),
-          locationId        = Some(cmd.locationId),
-          containerId       = cmd.containerId,
-          positionId        = cmd.positionId,
-          timeCreated       = Some(ISODateTimeFormatter.print(cmd.timeCreated)),
-          amount            = Some(cmd.amount.toString),
-          usable            = Some(cmd.usable))).success
+    } yield SpecimenEvent(specimenId.id).update(
+        _.optionalUserId            := cmd.userId,
+        _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.added.specimenSpecId      := cmd.specimenGroupId,
+        _.added.collectionEventId   := cmd.collectionEventId,
+        _.added.originLocationId    := cmd.originLocationId,
+        _.added.locationId          := cmd.locationId,
+        _.added.optionalContainerId := cmd.containerId,
+        _.added.optionalPositionId  := cmd.positionId,
+        _.added.timeCreated         := ISODateTimeFormatter.print(cmd.timeCreated),
+        _.added.amount              := cmd.amount.toString,
+        _.added.usable              := cmd.usable)
 
-    } yield event
-
-    process(v) { applySpecimenAddedEvent(_) }
+    process(v) { applyAddedEvent(_) }
   }
 
   private def processMoveSpecimenCmd(cmd: MoveSpecimenCmd): Unit = {
@@ -131,14 +129,14 @@ class SpecimensProcessor @javaxInject() (
     //   createEvent(participant, cmd).withSpecimenRemoved(
     //     SpecimenRemovedEvent(Some(cevent.id.id))).success
     // }
-    // process(v) { applySpecimenRemovedEvent(_) }
+    // process(v) { applyRemovedEvent(_) }
     ???
   }
 
   def update
     (cmd: SpecimenModifyCommand)
-    (fn: (CollectionEvent, Specimen) => DomainValidation[ParticipantEvent])
-      : DomainValidation[ParticipantEvent] = {
+    (fn: (CollectionEvent, Specimen) => DomainValidation[SpecimenEvent])
+      : DomainValidation[SpecimenEvent] = {
     val specimenId = SpecimenId(cmd.id)
     val collectionEventId = CollectionEventId(cmd.collectionEventId)
 
@@ -150,39 +148,52 @@ class SpecimensProcessor @javaxInject() (
     } yield event
   }
 
-  private def applySpecimenAddedEvent(event: ParticipantEvent): Unit = {
+  private def applyAddedEvent(event: SpecimenEvent): Unit = {
     ???
   }
 
-  private def applySpecimenMovedEvent(event: ParticipantEvent): Unit = {
-    ???
-  }
-
-  private def applySpecimenPositionAssignedEvent(event: ParticipantEvent): Unit = {
-    ???
-  }
-
-  private def applySpecimenAmountRemovedEvent(event: ParticipantEvent): Unit = {
-    ???
-  }
-
-  private def applySpecimenUsableUpdatedEvent(event: ParticipantEvent): Unit = {
-    ???
-  }
-
-  private def applySpecimenRemovedEvent(event: ParticipantEvent): Unit = {
-    if (event.eventType.isSpecimenRemoved) {
-      specimenRepository.getByKey(
-        SpecimenId(event.getSpecimenRemoved.getSpecimenId))
-      .fold(
-        err => log.error(s"removing collection event from event failed: $err"),
-        sg => {
-          specimenRepository.remove(sg)
-          ()
+  private def onValidEventAndVersion(event:        SpecimenEvent,
+                                     eventType:    Boolean,
+                                     eventVersion: Long)
+                                    (fn: Specimen => Unit): Unit = {
+    if (!eventType) {
+      log.error(s"invalid event type: $event")
+    } else {
+      specimenRepository.getByKey(SpecimenId(event.id)).fold(
+        err => log.error(s"specimen from event does not exist: $err"),
+        spc => {
+          if (spc.version != eventVersion) {
+            log.error(s"event version check failed: specimen version: ${spc.version}, event: $event")
+          } else {
+            fn(spc)
+          }
         }
       )
-    } else {
-      log.error(s"applySpecimenRemovedEvent: invalid event type: $event")
+    }
+  }
+
+  private def applyMovedEvent(event: SpecimenEvent): Unit = {
+    ???
+  }
+
+  private def applyPositionAssignedEvent(event: SpecimenEvent): Unit = {
+    ???
+  }
+
+  private def applyAmountRemovedEvent(event: SpecimenEvent): Unit = {
+    ???
+  }
+
+  private def applyUsableUpdatedEvent(event: SpecimenEvent): Unit = {
+    ???
+  }
+
+  private def applyRemovedEvent(event: SpecimenEvent): Unit = {
+    onValidEventAndVersion(event,
+                           event.eventType.isRemoved,
+                           event.getRemoved.getVersion) { specimen =>
+      specimenRepository.remove(specimen)
+      ()
     }
   }
 

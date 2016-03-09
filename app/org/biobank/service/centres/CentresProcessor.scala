@@ -19,7 +19,7 @@ import akka.actor._
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import javax.inject.{Inject => javaxInject}
+import javax.inject.{Inject}
 
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -30,9 +30,9 @@ object CentresProcessor {
 
 }
 
-class CentresProcessor @javaxInject() (val centreRepository: CentreRepository,
-                                       val studyRepository:  StudyRepository,
-                                       val testData:         TestData)
+class CentresProcessor @Inject() (val centreRepository: CentreRepository,
+                                  val studyRepository:  StudyRepository,
+                                  val testData:         TestData)
     extends Processor {
   import CentreEvent.EventType
 
@@ -92,7 +92,7 @@ class CentresProcessor @javaxInject() (val centreRepository: CentreRepository,
 
     val event = for {
         nameAvailable <- nameAvailable(cmd.name)
-        newCentre <- DisabledCentre.create(centreId, -1L, cmd.name, cmd.description, Set.empty, Set.empty)
+        newCentre <- DisabledCentre.create(centreId, 0L, cmd.name, cmd.description, Set.empty, Set.empty)
       } yield createCentreEvent(newCentre.id, cmd).update(
         _.added.name                := cmd.name,
         _.added.optionalDescription := cmd.description
@@ -267,7 +267,7 @@ class CentresProcessor @javaxInject() (val centreRepository: CentreRepository,
     } else {
       val addedEvent = event.getAdded
       DisabledCentre.create(id           = CentreId(event.id),
-                            version      = -1L,
+                            version      = 0L,
                             name         = addedEvent.getName,
                             description  = addedEvent.description,
                             studyIds     = Set.empty,

@@ -31,21 +31,18 @@ class AuthTokenImpl @Inject() (val env: Environment,
                                val cacheApi: CacheApi)
     extends AuthToken {
 
-  val TokenExpirationSeconds =
-    if (env.mode == play.api.Mode.Prod) {
-      15.minutes
-    } else {
-      60.minutes
-    }
+  val tokenExpirationSeconds =
+    if (env.mode == play.api.Mode.Prod) { 15.minutes }
+    else { 60.minutes }
 
   /**
-   *  Generates a new token for userId with an expiration of TokenExpirationSeconds.
+   *  Generates a new token for userId with an expiration of tokenExpirationSeconds.
    *
    *  TODO: Should token be derived from salt? not sure if required if server only runs HTTPS.
    */
   def newToken(userId: UserId): String = {
     val token = java.util.UUID.randomUUID.toString.replaceAll("-","")
-    cacheApi.set(token, userId, TokenExpirationSeconds)
+    cacheApi.set(token, userId, tokenExpirationSeconds)
     token
   }
 
@@ -56,7 +53,7 @@ class AuthTokenImpl @Inject() (val env: Environment,
     val maybeUserId = cacheApi.get[UserId](token)
       .map(_.success)
       .getOrElse(DomainError("invalid token").failureNel)
-    maybeUserId map { userId => cacheApi.set(token, userId, TokenExpirationSeconds) }
+    maybeUserId map { userId => cacheApi.set(token, userId, tokenExpirationSeconds) }
     maybeUserId
   }
 

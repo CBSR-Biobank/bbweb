@@ -6,7 +6,7 @@ trait HasAnnotationTypes extends AnnotationTypeValidations {
 
   val annotationTypes: Set[AnnotationType]
 
-  /** adds a participant annotation type to this study. */
+  /** adds an annotation type. */
   protected def checkAddAnnotationType(annotationType: AnnotationType)
       : DomainValidation[Boolean] = {
     (validate(annotationType) |@| nameNotUsed(annotationType)) {
@@ -14,12 +14,12 @@ trait HasAnnotationTypes extends AnnotationTypeValidations {
     }
   }
 
-  /** removes a participant annotation type from this study. */
-  protected def checkRemoveAnnotationType(annotationTypeUniqueId: String)
+  /** removes an annotation type. */
+  protected def checkRemoveAnnotationType(annotationTypeId: String)
       : DomainValidation[AnnotationType] = {
     annotationTypes
-      .find { x => x.uniqueId == annotationTypeUniqueId }
-      .toSuccess(s"annotation type does not exist: $annotationTypeUniqueId")
+      .find { x => x.uniqueId == annotationTypeId }
+      .toSuccess(s"annotation type does not exist: $annotationTypeId")
       .toValidationNel
   }
 

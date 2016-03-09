@@ -90,7 +90,7 @@ case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers 
     (json \ "message").as[String] must include ("page size exceeds maximum")
   }
 
-  def failWithInvalidSortfail(uri: String) = {
+  def failWithInvalidSort(uri: String) = {
     val json = fakeApp.makeRequest(GET, uri + "?sort=xyz", BAD_REQUEST)
     (json \ "status").as[String] must include ("error")
     (json \ "message").as[String] must include ("invalid sort field")
@@ -102,7 +102,7 @@ case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers 
     failWithInvalidPageNumber(uri)
     failWithNegativePageSize(uri)
     failWithInvalidPageSize(uri, invalidPageSize);
-    failWithInvalidSortfail(uri)
+    failWithInvalidSort(uri)
   }
 
   private def uriWithParams(baseUri: String, queryParams: Map[String, String]) = {

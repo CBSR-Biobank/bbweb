@@ -3,11 +3,11 @@ package org.biobank.domain.participants
 import org.biobank.domain.{
   Annotation,
   ConcurrencySafeEntity,
-  DomainValidation
+  DomainValidation,
+  HasAnnotations
 }
 import org.biobank.domain.study._
 import org.biobank.infrastructure.JsonUtils._
-
 import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
@@ -27,16 +27,35 @@ case class Participant(id:           ParticipantId,
                        uniqueId:     String,
                        annotations:  Set[Annotation])
     extends ConcurrencySafeEntity[ParticipantId]
-    with HasStudyId {
+    with HasStudyId
+    with ParticipantValidations
+    with HasAnnotations[Participant] {
+  import org.biobank.domain.CommonValidations._
 
-  def update(uniqueId: String, annotations: Set[Annotation])
-      : DomainValidation[Participant] = {
-    val v = Participant.create(this.studyId,
-                               this.id,
-                               this.version,
-                               uniqueId,
-                               annotations)
-    v.map(_.copy(timeModified = Some(DateTime.now)))
+  def withUniqueId(uniqueId: String): DomainValidation[Participant] = {
+    validateString(uniqueId, UniqueIdRequired).map { _ =>
+      copy(uniqueId     = uniqueId,
+           version      = version + 1,
+           timeModified = Some(DateTime.now))
+    }
+  }
+
+  def withAnnotation(annotation: Annotation): DomainValidation[Participant] = {
+    Annotation.validate(annotation).map { _ =>
+      val newAnnotations = annotations - annotation + annotation
+      copy(annotations  = newAnnotations,
+           version      = version + 1,
+           timeModified = Some(DateTime.now))
+    }
+  }
+
+  def withoutAnnotation(annotationTypeId: String): DomainValidation[Participant] = {
+    checkRemoveAnnotation(annotationTypeId).map { annotation =>
+      val newAnnotations = annotations - annotation
+      copy(annotations  = newAnnotations,
+           version      = version + 1,
+           timeModified = Some(DateTime.now))
+    }
   }
 
   override def toString: String =
@@ -63,7 +82,7 @@ object Participant extends ParticipantValidations {
       : DomainValidation[Participant] = {
 
     def validateAnnotation(annotation: Annotation): DomainValidation[Annotation] = {
-      Annotation.create(annotation.annotationTypeUniqueId,
+      Annotation.create(annotation.annotationTypeId,
                         annotation.stringValue,
                         annotation.numberValue,
                         annotation.selectedValues)
@@ -71,7 +90,7 @@ object Participant extends ParticipantValidations {
 
     (validateId(id) |@|
        validateId(studyId) |@|
-       validateAndIncrementVersion(version) |@|
+       validateVersion(version) |@|
        validateString(uniqueId, UniqueIdRequired) |@|
        annotations.toList.traverseU(Annotation.validate)) {
       case (_, _, _, _, _) =>

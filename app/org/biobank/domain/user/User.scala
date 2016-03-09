@@ -167,7 +167,7 @@ object RegisteredUser extends UserValidations {
              avatarUrl: Option[String]): DomainValidation[RegisteredUser] = {
 
     (validateId(id) |@|
-       validateAndIncrementVersion(version) |@|
+       validateVersion(version) |@|
        validateString(name, NameMinLength, InvalidName) |@|
        validateEmail(email) |@|
        validateString(password, PasswordRequired) |@|

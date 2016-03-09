@@ -2,95 +2,37 @@ package org.biobank.infrastructure.event;
 
 import "CommonEvents.proto";
 
-message ParticipantAddedEvent {
-   optional string studyId         = 1;
-   optional string uniqueId        = 2;
-   repeated Annotation annotations = 3;
-}
-
-message ParticipantUpdatedEvent {
-   optional string studyId         = 1;
-   optional int64 version          = 2;
-   optional string uniqueId        = 3;
-   repeated Annotation annotations = 4;
-
-}
-
-message CollectionEventAddedEvent {
-   optional string collectionEventId     = 1;
-   optional string collectionEventTypeId = 2;
-   optional string timeCompleted         = 3;
-   optional int32  visitNumber           = 4;
-   repeated Annotation annotations       = 5;
-}
-
-message CollectionEventUpdatedEvent {
-   optional string collectionEventId     = 1;
-   optional string collectionEventTypeId = 2;
-   optional int64  version               = 3;
-   optional string timeCompleted         = 4;
-   optional int32  visitNumber           = 5;
-   repeated Annotation annotations       = 6;
-}
-
-message CollectionEventRemovedEvent {
-   optional string collectionEventId     = 1;
-}
-
-message SpecimenAddedEvent {
-   optional string specimenId         = 1;
-   optional string specimenGroupId    = 2;
-   optional string collectionEventId  = 3;
-   optional string originLocationId   = 4;
-   optional string locationId         = 5;
-   optional string containerId        = 6;
-   optional string positionId         = 7;
-   optional string timeCreated        = 8;
-   optional string amount             = 9;
-   optional bool   usable             = 10;
-}
-
-message SpecimenMovedEvent {
-   optional string specimenId         = 1;
-   optional string locationId         = 2;
-}
-
-message SpecimenPositionAssignedEvent {
-   optional string specimenId         = 1;
-   optional string positionId         = 9;
-}
-
-// TODO: check if this is needed
-message SpecimenAmountRemovedEvent {
-   optional string specimenId         = 1;
-   optional double amountRemoved      = 2;
-}
-
-message SpecimenUsableUpdatedEvent {
-   optional string specimenId         = 1;
-   repeated bool   usable             = 2;
-}
-
-message SpecimenRemovedEvent {
-   optional string specimenId     = 1;
-}
-
 message ParticipantEvent {
+
+   message Added {
+      optional string     studyId     = 1;
+      optional string     uniqueId    = 2;
+      repeated Annotation annotations = 3;
+   }
+
+   message UniqueIdUpdated {
+      optional int64  version         = 1;
+      optional string uniqueId        = 2;
+   }
+
+   message AnnotationUpdated {
+      optional int64      version     = 1;
+      optional Annotation annotation  = 2;
+   }
+
+   message AnnotationRemoved {
+      optional int64  version          = 1;
+      optional string annotationTypeId = 2;
+   }
+
    required string id     = 1; // the participant id
    optional string userId = 2;
    optional string time   = 3;
 
    oneof event_type {
-     ParticipantAddedEvent         participantAdded           = 4;
-     ParticipantUpdatedEvent       participantUpdated         = 5;
-     CollectionEventAddedEvent     collectionEventAdded       = 6;
-     CollectionEventUpdatedEvent   collectionEventUpdated     = 7;
-     CollectionEventRemovedEvent   collectionEventRemoved     = 8;
-     SpecimenAddedEvent            specimenAdded              = 9;
-     SpecimenMovedEvent            specimenMoved              = 10;
-     SpecimenPositionAssignedEvent specimenPosisitionAssigned = 11;
-     SpecimenAmountRemovedEvent    specimenAmountRemoved      = 12;
-     SpecimenUsableUpdatedEvent    specimenUsableUpdated      = 13;
-     SpecimenRemovedEvent          specimenRemoved            = 14;
+      Added             added             = 4;
+      UniqueIdUpdated   uniqueIdUpdated   = 5;
+      AnnotationUpdated annotationUpdated = 6;
+      AnnotationRemoved annotationRemoved = 7;
    }
 }

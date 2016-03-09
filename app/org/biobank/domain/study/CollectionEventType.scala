@@ -96,9 +96,9 @@ case class CollectionEventType(studyId:            StudyId,
     }
   }
 
-  def removeAnnotationType(annotationTypeUniqueId: String)
+  def removeAnnotationType(annotationTypeId: String)
       : DomainValidation[CollectionEventType] = {
-    checkRemoveAnnotationType(annotationTypeUniqueId).map { annotationType =>
+    checkRemoveAnnotationType(annotationTypeId).map { annotationType =>
       val newAnnotationTypes = annotationTypes - annotationType
       copy(annotationTypes = newAnnotationTypes,
            version         = version + 1,
@@ -173,7 +173,7 @@ object CollectionEventType extends CollectionEventTypeValidations {
       : DomainValidation[CollectionEventType] = {
     (validateId(studyId, StudyIdRequired) |@|
        validateId(id) |@|
-       validateAndIncrementVersion(version) |@|
+       validateVersion(version) |@|
        validateString(name, NameRequired) |@|
        validateNonEmptyOption(description, InvalidDescription) |@|
        specimenSpecs.toList.traverseU(CollectionSpecimenSpec.validate) |@|

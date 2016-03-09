@@ -97,7 +97,8 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
 
     val event = for {
       emailAvailable <- emailAvailable(cmd.email)
-      user <- RegisteredUser.create(newUserId, -1L,
+      user <- RegisteredUser.create(newUserId,
+                                    0L,
                                     cmd.name,
                                     cmd.email,
                                     encryptedPwd,

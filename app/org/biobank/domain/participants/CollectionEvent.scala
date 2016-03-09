@@ -3,14 +3,21 @@ package org.biobank.domain.participants
 import org.biobank.domain.{
   Annotation,
   ConcurrencySafeEntity,
-  DomainValidation
+  HasAnnotations,
+  DomainValidation,
+  ValidationKey
 }
 import org.biobank.domain.study._
 import org.biobank.infrastructure.JsonUtils._
-
 import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
+
+trait CollectionEventValidations extends ParticipantValidations {
+
+  case object VisitNumberInvalid extends ValidationKey
+
+}
 
 /**
  * A collection event is used to record a visit by a [[Participant]] to a [[centre.Centre]] (e.g. a clinic). A
@@ -30,22 +37,41 @@ case class CollectionEvent(id:                    CollectionEventId,
                            annotations:           Set[Annotation])
     extends ConcurrencySafeEntity[CollectionEventId]
     with HasParticipantId
-    with ParticipantValidations {
+    with CollectionEventValidations
+    with HasAnnotations[CollectionEvent] {
   import org.biobank.domain.CommonValidations._
 
   def withVisitNumber(visitNumber: Int): DomainValidation[CollectionEvent] = {
-    validateMinimum(visitNumber, 1, VisitNumberInvalid) fold (
-      err    => err.failure,
-      cevent => copy(version = version + 1, visitNumber = visitNumber).success
-    )
+    validateMinimum(visitNumber, 1, VisitNumberInvalid).map { _ =>
+      copy(visitNumber  = visitNumber,
+           version      = version + 1,
+           timeModified = Some(DateTime.now))
+    }
   }
 
-  def withTimeCompleted(timeCompleted: DateTime): DomainValidation[CollectionEvent] =
-    copy(version = version + 1, timeCompleted = timeCompleted).success
+  def withTimeCompleted(timeCompleted: DateTime): DomainValidation[CollectionEvent] = {
+    copy(timeCompleted = timeCompleted,
+         version         = version + 1,
+         timeModified    = Some(DateTime.now)).success
+  }
 
-  def withAnnotations(annotations: Set[Annotation])
-      : DomainValidation[CollectionEvent] =
-    copy(version = version + 1, annotations = annotations).success
+  def withAnnotation(annotation: Annotation): DomainValidation[CollectionEvent] = {
+    Annotation.validate(annotation).map { _ =>
+      val newAnnotations = annotations - annotation + annotation
+      copy(annotations  = newAnnotations,
+           version      = version + 1,
+           timeModified = Some(DateTime.now))
+    }
+  }
+
+  def withoutAnnotation(annotationTypeId: String): DomainValidation[CollectionEvent] = {
+    checkRemoveAnnotation(annotationTypeId).map { annotation =>
+      val newAnnotations = annotations - annotation
+      copy(annotations  = newAnnotations,
+           version      = version + 1,
+           timeModified = Some(DateTime.now))
+    }
+  }
 
   override def toString: String =
     s"""|CollectionEvent:{
@@ -62,7 +88,8 @@ case class CollectionEvent(id:                    CollectionEventId,
 
 }
 
-object CollectionEvent extends ParticipantValidations {
+object CollectionEvent
+    extends CollectionEventValidations {
   import org.biobank.domain.CommonValidations._
 
   def create(id:                    CollectionEventId,
@@ -76,7 +103,7 @@ object CollectionEvent extends ParticipantValidations {
     (validateId(id) |@|
        validateId(participantId, ParticipantIdRequired) |@|
        validateId(collectionEventTypeId, CollectionEventTypeIdRequired) |@|
-       validateAndIncrementVersion(version) |@|
+       validateVersion(version) |@|
        validateMinimum(visitNumber, 1, VisitNumberInvalid)) {
       case (_, _, _, _, _) => CollectionEvent(id,
                                               participantId,

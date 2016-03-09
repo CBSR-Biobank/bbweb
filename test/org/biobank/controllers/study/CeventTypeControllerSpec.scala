@@ -68,12 +68,11 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
   def updateWithInvalidVersion(path: String, jsonField: JsObject) {
     createEntities { (study, cet) =>
-      val cmdJson = jsonField ++ Json.obj("id"              -> cet.id.id,
+      val reqJson = jsonField ++ Json.obj("id"              -> cet.id.id,
                                           "studyId"         -> study.id,
-                                          "id"              -> cet.id.id,
                                           "expectedVersion" -> (cet.version + 1))
 
-      val json = makeRequest(POST, uri(cet, path), BAD_REQUEST, cmdJson)
+      val json = makeRequest(POST, uri(cet, path), BAD_REQUEST, reqJson)
 
       (json \ "status").as[String] must include ("error")
 
@@ -87,12 +86,11 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
     val cet = factory.createCollectionEventType
 
-    val cmdJson = jsonField ++ Json.obj("id"              -> cet.id.id,
+    val reqJson = jsonField ++ Json.obj("id"              -> cet.id.id,
                                         "studyId"         -> study.id,
-                                        "id"              -> cet.id.id,
                                         "expectedVersion" -> cet.version)
 
-    val json = makeRequest(POST, uri(cet, path), NOT_FOUND, cmdJson)
+    val json = makeRequest(POST, uri(cet, path), NOT_FOUND, reqJson)
 
     (json \ "status").as[String] must include ("error")
 
@@ -100,6 +98,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
   }
 
   def updateOnNonDisabledStudy(study: Study, path: String, jsonField: JsObject) {
+    study must not be an [DisabledStudy]
     studyRepository.put(study)
 
     val cet = factory.createCollectionEventType.copy(
@@ -108,11 +107,11 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
         annotationTypes = Set(factory.createAnnotationType))
     collectionEventTypeRepository.put(cet)
 
-    val cmdJson = jsonField ++ Json.obj("studyId"         -> study.id.id,
+    val reqJson = jsonField ++ Json.obj("studyId"         -> study.id.id,
                                         "id"              -> cet.id.id,
                                         "expectedVersion" -> cet.version)
 
-    val json = makeRequest(POST, uri(cet, path), BAD_REQUEST, cmdJson)
+    val json = makeRequest(POST, uri(cet, path), BAD_REQUEST, reqJson)
 
     (json \ "status").as[String] must include ("error")
 
@@ -230,7 +229,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.put(study)
 
         val cet = factory.createCollectionEventType
-        val json = makeRequest(POST, uri(study), json = cetToAddCmd(cet))
+        val json = makeRequest(POST, uri(study), cetToAddCmd(cet))
 
         (json \ "status").as[String] must include ("success")
 
@@ -292,7 +291,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy
         val cet = factory.createCollectionEventType
 
-        val json = makeRequest(POST, uri(study), NOT_FOUND, json = cetToAddCmd(cet))
+        val json = makeRequest(POST, uri(study), NOT_FOUND, cetToAddCmd(cet))
 
         (json \ "status").as[String] must include ("error")
 
@@ -375,7 +374,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "allow a updating collection event types on two different studies to same name" in {
+      "allow updating to the same name on collection event types of two different studies" in {
         val studyCetTuples = (1 to 2).map { _ =>
             val study = factory.createDisabledStudy
             studyRepository.put(study)
@@ -416,7 +415,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "111 not update a name to one already used by another collection event type in the same study" in {
+      "fail when updating name to one already used by another collection event type in the same study" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -454,7 +453,6 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
       "fail when updating name and collection event type ID is invalid" in {
         updateOnInvalidCeventType("name", Json.obj("name" -> nameGenerator.next[CollectionEventType]))
-
       }
 
       "fail when updating name with an invalid version" in {
@@ -584,13 +582,13 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
         createEntities { (study, cet) =>
           val annotType = factory.createAnnotationType
 
-          val cmdJson = Json.obj(
+          val reqJson = Json.obj(
               "id"              -> cet.id.id,
               "studyId"         -> cet.studyId.id,
               "expectedVersion" -> Some(cet.version)) ++
             annotationTypeToJsonNoId(annotType)
 
-          val json = makeRequest(POST, uri(cet, "annottype"), json = cmdJson)
+          val json = makeRequest(POST, uri(cet, "annottype"), reqJson)
 
           (json \ "status").as[String] must include ("success")
 
@@ -782,13 +780,12 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
         createEntities { (study, cet) =>
           val spec = factory.createCollectionSpecimenSpec
 
-          val cmdJson = Json.obj("id"                          -> cet.id.id,
+          val reqJson = Json.obj("id"                          -> cet.id.id,
                                  "studyId"                     -> cet.studyId.id,
                                  "expectedVersion"             -> Some(cet.version)) ++
             collectionSpecimenSpecToJsonNoId(spec)
 
-
-          val json = makeRequest(POST, uri(cet, "spcspec"), json = cmdJson)
+          val json = makeRequest(POST, uri(cet, "spcspec"), reqJson)
 
           (json \ "status").as[String] must include ("success")
 

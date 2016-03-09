@@ -100,9 +100,9 @@ abstract class ControllerFixture
       .withCookies(Cookie("XSRF-TOKEN", token))
 
     if (json != JsNull) {
-      log.info(s"request: $method, $path,\n${Json.prettyPrint(json)}")
+      log.debug(s"request: $method, $path,\n${Json.prettyPrint(json)}")
     } else {
-      log.info(s"request: $method, $path")
+      log.debug(s"request: $method, $path")
     }
 
     route(app, fakeRequest).fold {
@@ -112,12 +112,12 @@ abstract class ControllerFixture
         case `expectedStatus` =>
           val jsonResult = contentAsJson(result)
           contentType(result) mustBe Some("application/json")
-          log.info(s"reply: status: $result,\nresult: ${Json.prettyPrint(jsonResult)}")
+          log.debug(s"reply: status: $result,\nresult: ${Json.prettyPrint(jsonResult)}")
           jsonResult
         case _ =>
           contentType(result) match {
-            case Some("application/json") => log.info("reply: " + Json.prettyPrint(contentAsJson(result)))
-            case _ => log.info("reply: " + contentAsString(result))
+            case Some("application/json") => log.debug("reply: " + Json.prettyPrint(contentAsJson(result)))
+            case _ => log.debug("reply: " + contentAsString(result))
           }
           fail(s"bad HTTP status: status: $result, expected: $expectedStatus")
       }

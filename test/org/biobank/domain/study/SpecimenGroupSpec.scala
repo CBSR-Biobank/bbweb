@@ -20,7 +20,7 @@ class SpecimenGroupSpec extends DomainSpec {
     "be created" in {
       val studyId = StudyId(nameGenerator.next[SpecimenGroup])
       val id = SpecimenGroupId(nameGenerator.next[SpecimenGroup])
-      val version = -1L
+      val version = 0L
       val name = nameGenerator.next[SpecimenGroup]
       val description = some(nameGenerator.next[SpecimenGroup])
       val units = nameGenerator.next[SpecimenGroup]
@@ -93,7 +93,7 @@ class SpecimenGroupSpec extends DomainSpec {
     "not be created with an empty study id" in {
       val studyId = StudyId("")
       val id = SpecimenGroupId(nameGenerator.next[SpecimenGroup])
-      val version = -1L
+      val version = 0L
       val name = nameGenerator.next[SpecimenGroup]
       val description = some(nameGenerator.next[SpecimenGroup])
       val units = nameGenerator.next[SpecimenGroup]
@@ -113,7 +113,7 @@ class SpecimenGroupSpec extends DomainSpec {
     "not be created with an empty id" in {
       val studyId = StudyId(nameGenerator.next[SpecimenGroup])
       val id = SpecimenGroupId("")
-      val version = -1L
+      val version = 0L
       val name = nameGenerator.next[SpecimenGroup]
       val description = some(nameGenerator.next[SpecimenGroup])
       val units = nameGenerator.next[SpecimenGroup]
@@ -151,7 +151,7 @@ class SpecimenGroupSpec extends DomainSpec {
     "not be created with an null or empty name" in {
       val studyId = StudyId(nameGenerator.next[SpecimenGroup])
       val id = SpecimenGroupId(nameGenerator.next[SpecimenGroup])
-      val version = -1L
+      val version = 0L
       var name: String = null
       val description = some(nameGenerator.next[SpecimenGroup])
       val units = nameGenerator.next[SpecimenGroup]
@@ -179,7 +179,7 @@ class SpecimenGroupSpec extends DomainSpec {
     "not be created with an empty description option" in {
       val studyId = StudyId(nameGenerator.next[SpecimenGroup])
       val id = SpecimenGroupId(nameGenerator.next[SpecimenGroup])
-      val version = -1L
+      val version = 0L
       val name = nameGenerator.next[SpecimenGroup]
       var description: Option[String] = Some(null)
       val units = nameGenerator.next[SpecimenGroup]
@@ -206,7 +206,7 @@ class SpecimenGroupSpec extends DomainSpec {
     "not be created with null or empty units" in {
       val studyId = StudyId(nameGenerator.next[SpecimenGroup])
       val id = SpecimenGroupId(nameGenerator.next[SpecimenGroup])
-      val version = -1L
+      val version = 0L
       val name = nameGenerator.next[SpecimenGroup]
       val description = some(nameGenerator.next[SpecimenGroup])
       val units = ""

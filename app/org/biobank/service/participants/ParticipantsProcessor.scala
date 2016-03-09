@@ -1,18 +1,19 @@
 package org.biobank.service.participants
 
-import org.biobank.service.{ Processor, Utils }
-import org.biobank.infrastructure.command.ParticipantCommands._
-import org.biobank.infrastructure.event.ParticipantEvents._
+import akka.actor._
+import akka.persistence.SnapshotOffer
+import javax.inject.{Inject, Named}
 import org.biobank.domain.{
   Annotation,
   DomainValidation,
-  DomainError }
-import org.biobank.domain.study._
+  DomainError
+}
 import org.biobank.domain.participants._
-
-import javax.inject.{Inject => javaxInject, Named}
-import akka.actor._
-import akka.persistence.SnapshotOffer
+import org.biobank.domain.study._
+import org.biobank.infrastructure.command.ParticipantCommands._
+import org.biobank.infrastructure.event.ParticipantEvents._
+import org.biobank.service.Processor
+import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -26,17 +27,15 @@ object ParticipantsProcessor {
 /**
  *
  */
-class ParticipantsProcessor @javaxInject() (
-  @Named("collectionEvents") val collectionEventsProcessor: ActorRef,
-  @Named("specimens")        val specimensProcessor: ActorRef,
-
-  val participantRepository:    ParticipantRepository,
-  val collectionEventRepository: CollectionEventRepository,
-  val studyRepository:          StudyRepository)
+class ParticipantsProcessor @Inject() (
+  @Named("specimens") val specimensProcessor: ActorRef,
+  val participantRepository:                  ParticipantRepository,
+  val collectionEventRepository:              CollectionEventRepository,
+  val studyRepository:                        StudyRepository)
     extends Processor {
 
   import ParticipantEvent.EventType
-  import org.biobank.infrastructure.event.ParticipantEventsUtil._
+  import org.biobank.infrastructure.event.EventUtils._
 
   override def persistenceId = "participant-processor-id"
 
@@ -48,8 +47,10 @@ class ParticipantsProcessor @javaxInject() (
    */
   val receiveRecover: Receive = {
     case event: ParticipantEvent => event.eventType match {
-      case et: EventType.ParticipantAdded   => applyParticipantAddedEvent(event)
-      case et: EventType.ParticipantUpdated => applyParticipantUpdatedEvent(event)
+      case et: EventType.Added             => applyAddedEvent(event)
+      case et: EventType.UniqueIdUpdated   => applyUniqueIdUpdatedEvent(event)
+      case et: EventType.AnnotationUpdated => applyAnnotationUpdatedEvent(event)
+      case et: EventType.AnnotationRemoved => applyAnnotationRemovedEvent(event)
 
       case event => log.error(s"event not handled: $event")
     }
@@ -63,42 +64,16 @@ class ParticipantsProcessor @javaxInject() (
    * back to the user. Each valid command generates one or more events and is journaled.
    */
   val receiveCommand: Receive = {
-    case cmd: AddParticipantCmd      => processAddParticipantCmd(cmd)
-    case cmd: UpdateParticipantCmd   => processUpdateParticipantCmd(cmd)
-    case cmd: ParticipantCommand     => validateAndForward(cmd)
+    case cmd: AddParticipantCmd              => processAddCmd(cmd)
+    case cmd: UpdateParticipantUniqueIdCmd   => processUpdateUniqueIdCmd(cmd)
+    case cmd: UpdateParticipantAnnotationCmd => processUpdateAnnotationCmd(cmd)
+    case cmd: RemoveParticipantAnnotationCmd => processRemoveAnnotationCmd(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(participantRepository.getValues.toSet))
       stash()
 
     case cmd => log.error(s"ParticipantsProcessor: message not handled: $cmd")
-  }
-
-  private def validateAndForward(cmd: ParticipantCommand): Unit = {
-    val cmdValidation: DomainValidation[(ParticipantId, ActorRef)] = cmd match {
-      case cmd: CollectionEventCommand =>
-        (ParticipantId(cmd.participantId), collectionEventsProcessor).success
-
-      case cmd: SpecimenCommand =>
-        collectionEventRepository.getByKey(CollectionEventId(cmd.collectionEventId)) map { cevent =>
-          (cevent.participantId, specimensProcessor)
-        }
-
-      case cmd =>
-        DomainError(s"ParticipantsProcessor: participant message not handled: $cmd").failureNel
-    }
-
-    val studyValidation = for {
-      tuple       <- cmdValidation
-      (participantId, subProcessor) = tuple
-      participant <- participantRepository.getByKey(participantId)
-      study       <- studyRepository.getEnabled(participant.studyId)
-    } yield subProcessor
-
-    studyValidation.fold(
-      err          => context.sender ! studyValidation,
-      subProcessor => subProcessor forward cmd
-    )
   }
 
   val ErrMsgUniqueIdExists = "participant with unique ID already exists"
@@ -130,7 +105,7 @@ class ParticipantsProcessor @javaxInject() (
     }
   }
 
-private def processAddParticipantCmd(cmd: AddParticipantCmd): Unit = {
+  private def processAddCmd(cmd: AddParticipantCmd): Unit = {
     val studyId = StudyId(cmd.studyId)
     val participantId = participantRepository.nextIdentity
 
@@ -142,90 +117,171 @@ private def processAddParticipantCmd(cmd: AddParticipantCmd): Unit = {
       study             <- studyRepository.getEnabled(studyId)
       uniqueIdAvailable <- uniqueIdAvailable(cmd.uniqueId)
       annotTypes        <- Annotation.validateAnnotations(study.annotationTypes,
-                                                          cmd.annotations.toSet)
-      newParticip       <- Participant.create(studyId,
+                                                          cmd.annotations)
+      newParticipant    <- Participant.create(studyId,
                                               participantId,
-                                              -1L,
+                                              0L,
                                               cmd.uniqueId,
                                               cmd.annotations.toSet)
-      event             <- createEvent(newParticip, cmd).withParticipantAdded(
-        ParticipantAddedEvent(
-          studyId       = Some(newParticip.studyId.id),
-          uniqueId      = Some(cmd.uniqueId),
-          annotations   = Utils.convertAnnotationsToEvent(cmd.annotations))).success
-    } yield event
+    } yield ParticipantEvent(newParticipant.id.id).update(
+        _.optionalUserId    := cmd.userId,
+        _.time              := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.added.studyId     := newParticipant.studyId.id,
+        _.added.uniqueId    := cmd.uniqueId,
+        _.added.annotations := cmd.annotations.map { annotationToEvent(_) })
 
-    process(event) { applyParticipantAddedEvent(_) }
+    process(event) { applyAddedEvent(_) }
   }
 
-  private def processUpdateParticipantCmd(cmd: UpdateParticipantCmd): Unit = {
-    val studyId = StudyId(cmd.studyId)
+  private def update(cmd: ParticipantModifyCommand)
+                    (fn: (Study, Participant) => DomainValidation[ParticipantEvent])
+      : DomainValidation[ParticipantEvent] = {
     val participantId = ParticipantId(cmd.id)
-    var annotationsSet = cmd.annotations.toSet
 
-    val event = for {
-      study             <- studyRepository.getEnabled(studyId)
-      uniqueIdAvailable <- uniqueIdAvailable(cmd.uniqueId, participantId)
-      annotTypes        <- Annotation.validateAnnotations(study.annotationTypes, annotationsSet)
-      particip          <- participantRepository.getByKey(participantId)
-      newParticip       <- Participant.create(studyId,
-                                              participantId,
-                                              particip.version,
-                                              cmd.uniqueId,
-                                              annotationsSet)
-      event             <- createEvent(newParticip, cmd).withParticipantUpdated(
-        ParticipantUpdatedEvent(
-          studyId       = Some(newParticip.studyId.id),
-          version       = Some(newParticip.version),
-          uniqueId      = Some(cmd.uniqueId),
-          annotations   = Utils.convertAnnotationsToEvent(cmd.annotations))).success
+    for {
+      participant <- {
+        participantRepository.getByKey(participantId).leftMap(_ =>
+          DomainError(s"participant id not found: ${cmd.id}")).toValidationNel
+      }
+      enabledStudy <- studyRepository.getEnabled(participant.studyId)
+      validVersion <- participant.requireVersion(cmd.expectedVersion)
+      event        <- fn(enabledStudy, participant)
     } yield event
-
-    process(event){ applyParticipantUpdatedEvent(_) }
   }
 
-  private def applyParticipantAddedEvent(event: ParticipantEvent) = {
-    log.debug(s"applyParticipantAddedEvent: event: $event")
+  private def processUpdateUniqueIdCmd(cmd: UpdateParticipantUniqueIdCmd): Unit = {
+    val v = update(cmd) { (study, participant) =>
+        for {
+          uniqueIdAvailable  <- uniqueIdAvailable(cmd.uniqueId, participant.id)
+          updatedParticipant <- participant.withUniqueId(cmd.uniqueId)
+        } yield ParticipantEvent(updatedParticipant.id.id).update(
+          _.optionalUserId           := cmd.userId,
+          _.time                     := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.uniqueIdUpdated.version  := cmd.expectedVersion,
+          _.uniqueIdUpdated.uniqueId := cmd.uniqueId)
+      }
 
-    if (event.eventType.isParticipantAdded) {
-      val addedEvent = event.getParticipantAdded
+    process(v){ applyUniqueIdUpdatedEvent(_) }
+  }
 
-      participantRepository.put(
-        Participant(id           = ParticipantId(event.id),
-                    studyId      = StudyId(addedEvent.getStudyId),
-                    version      = 0L,
-                    timeAdded    = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
-                    timeModified = None,
-                    uniqueId     = addedEvent.getUniqueId,
-                    annotations  = Utils.convertAnnotationsFromEvent(addedEvent.annotations)))
-      ()
-    } else {
+  private def processUpdateAnnotationCmd(cmd: UpdateParticipantAnnotationCmd): Unit = {
+    val v = update(cmd) { (study, participant) =>
+        for {
+          validAnnotation    <- Annotation.validateAnnotations(study.annotationTypes,
+                                                               List(cmd.annotation))
+          updatedParticipant <- participant.withAnnotation(cmd.annotation)
+        } yield ParticipantEvent(updatedParticipant.id.id).update(
+          _.optionalUserId               := cmd.userId,
+          _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.annotationUpdated.version    := cmd.expectedVersion,
+          _.annotationUpdated.annotation := annotationToEvent(cmd.annotation))
+      }
+
+    process(v) { applyAnnotationUpdatedEvent(_) }
+  }
+
+  private def processRemoveAnnotationCmd(cmd: RemoveParticipantAnnotationCmd): Unit = {
+    val v = update(cmd) { (study, participant) =>
+        for {
+          annotType <- {
+            study.annotationTypes
+              .find { x => x.uniqueId == cmd.annotationTypeId }
+              .toSuccess(s"annotation type with ID does not exist: ${cmd.annotationTypeId}")
+              .toValidationNel
+          }
+          notRequired <- {
+            if (annotType.required) DomainError(s"annotation is required").failureNel
+            else true.success
+          }
+          updatedParticipant <- participant.withoutAnnotation(cmd.annotationTypeId)
+        } yield ParticipantEvent(updatedParticipant.id.id).update(
+          _.optionalUserId                     := cmd.userId,
+          _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.annotationRemoved.version          := cmd.expectedVersion,
+          _.annotationRemoved.annotationTypeId := cmd.annotationTypeId)
+      }
+
+    process(v) { applyAnnotationRemovedEvent(_) }
+  }
+
+  private def applyAddedEvent(event: ParticipantEvent) = {
+    if (!event.eventType.isAdded) {
       log.error(s"invalid event type: $event")
-    }
-  }
+    } else {
+      val addedEvent = event.getAdded
 
-  private def applyParticipantUpdatedEvent(event: ParticipantEvent) = {
-    log.debug(s"applyParticipantUpdatedEvent: event/$event")
-
-    if (event.eventType.isParticipantUpdated) {
-      val updatedEvent = event.getParticipantUpdated
-
-      val participantId = ParticipantId(event.id)
-      val studyId = StudyId(updatedEvent.getStudyId)
-
-      participantRepository.withId(studyId, participantId).fold(
-        err => log.error(s"updating participant from event failed: $err"),
+      Participant.create(studyId      = StudyId(addedEvent.getStudyId),
+                         id           = ParticipantId(event.id),
+                         version      = 0L,
+                         uniqueId     = addedEvent.getUniqueId,
+                         annotations  = addedEvent.annotations.map { annotationFromEvent(_) }.toSet
+      ).fold(
+        err => log.error(s"could not add collection event from event: $err, $event"),
         p => {
-          participantRepository.put(
-            p.copy(version      = updatedEvent.getVersion,
-                   uniqueId     = updatedEvent.getUniqueId,
-                   timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
-                   annotations  = Utils.convertAnnotationsFromEvent(updatedEvent.annotations)))
+          participantRepository.put(p)
           ()
         }
       )
-    } else {
+    }
+  }
+
+  def onValidEventAndVersion(event:        ParticipantEvent,
+                             eventType:    Boolean,
+                             eventVersion: Long)
+                            (fn: Participant => Unit): Unit = {
+    if (!eventType) {
       log.error(s"invalid event type: $event")
+    } else {
+      participantRepository.getByKey(ParticipantId(event.id)).fold(
+        err => log.error(s"participant from event does not exist: $err"),
+        participant => {
+          if (participant.version != eventVersion) {
+            log.error(s"event version check failed: participant version: ${participant.version}, event: $event")
+          } else {
+            fn(participant)
+          }
+        }
+      )
+    }
+  }
+
+  private def storeUpdated(participant: Participant, time: String): Unit = {
+    participantRepository.put(
+      participant.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(time))))
+    ()
+  }
+
+  private def applyUniqueIdUpdatedEvent(event: ParticipantEvent) = {
+    onValidEventAndVersion(event,
+                           event.eventType.isUniqueIdUpdated,
+                           event.getUniqueIdUpdated.getVersion) { participant =>
+      participant.withUniqueId(event.getUniqueIdUpdated.getUniqueId).fold(
+        err => log.error(s"updating participant from event failed: $err"),
+        p => storeUpdated(p, event.getTime)
+      )
+    }
+  }
+
+  private def applyAnnotationUpdatedEvent(event: ParticipantEvent) = {
+    onValidEventAndVersion(event,
+                           event.eventType.isAnnotationUpdated,
+                           event.getAnnotationUpdated.getVersion) { participant =>
+      val updatedEvent = event.getAnnotationUpdated
+      participant.withAnnotation(annotationFromEvent(updatedEvent.getAnnotation)).fold(
+        err => log.error(s"updating participant from event failed: $err"),
+        p => storeUpdated(p, event.getTime)
+      )
+    }
+  }
+
+  private def applyAnnotationRemovedEvent(event: ParticipantEvent) = {
+    onValidEventAndVersion(event,
+                           event.eventType.isAnnotationRemoved,
+                           event.getAnnotationRemoved.getVersion) { participant =>
+      participant.withoutAnnotation(event.getAnnotationRemoved.getAnnotationTypeId).fold(
+        err => log.error(s"removing annotation from collection event failed: $err"),
+        p => storeUpdated(p, event.getTime)
+      )
     }
   }
 

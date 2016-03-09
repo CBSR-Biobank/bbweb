@@ -15,7 +15,7 @@ import scala.concurrent.duration._
 import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext.Implicits.global
 import akka.util.Timeout
-import javax.inject.{Inject => javaxInject, Named}
+import javax.inject.{Inject, Named}
 import com.google.inject.ImplementedBy
 
 import scalaz.Scalaz._
@@ -46,9 +46,9 @@ trait CentresService {
  * @param centreProcessor
  *
  */
-class CentresServiceImpl @javaxInject() (@Named("centresProcessor") val processor: ActorRef,
-                                         val centreRepository:          CentreRepository,
-                                         val studyRepository:           StudyRepository)
+class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: ActorRef,
+                                    val centreRepository:          CentreRepository,
+                                    val studyRepository:           StudyRepository)
     extends CentresService {
 
   val log = LoggerFactory.getLogger(this.getClass)

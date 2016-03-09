@@ -70,7 +70,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       snapshot.collectionEventTypes.foreach { ceType =>
         collectionEventTypeRepository.put(ceType) }
 
-    case RecoveryCompleted => log.info("recovery completed")
+    case RecoveryCompleted => log.debug("recovery completed")
 
     case msg => log.error(s"message not handled: $msg")
 
@@ -108,7 +108,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
         nameValid <- nameAvailable(cmd.name, studyId)
         newItem <- CollectionEventType.create(studyId,
                                               id,
-                                              -1L,
+                                              0L,
                                               cmd.name,
                                               cmd.description,
                                               cmd.recurring,

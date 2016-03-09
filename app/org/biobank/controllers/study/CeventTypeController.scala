@@ -6,15 +6,15 @@ import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 
-import javax.inject.{Inject => javaxInject, Singleton}
+import javax.inject.{Inject, Singleton}
 import play.api.{ Environment, Logger }
 import play.api.libs.json._
 
 @Singleton
-class CeventTypeController @javaxInject() (val env:            Environment,
-                                           val authToken:      AuthToken,
-                                           val usersService:   UsersService,
-                                           val studiesService: StudiesService)
+class CeventTypeController @Inject() (val env:            Environment,
+                                      val authToken:      AuthToken,
+                                      val usersService:   UsersService,
+                                      val studiesService: StudiesService)
     extends CommandController
     with JsonController {
 

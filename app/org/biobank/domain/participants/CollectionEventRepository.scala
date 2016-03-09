@@ -25,7 +25,7 @@ class CollectionEventRepositoryImpl
     extends ReadWriteRepositoryRefImpl[CollectionEventId, CollectionEvent](v => v.id)
     with CollectionEventRepository {
 
-  override val NotFoundError = "collection event with id not found:"
+  override val NotFoundError = "collection event does not exist:"
 
   def nextIdentity: CollectionEventId = new CollectionEventId(nextIdentityAsString)
 

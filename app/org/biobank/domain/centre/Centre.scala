@@ -195,7 +195,7 @@ object DisabledCentre extends CentreValidations {
     def validateStudyId(studyId: StudyId) = validateId(studyId, InvalidStudyId)
 
     (validateId(id) |@|
-       validateAndIncrementVersion(version) |@|
+       validateVersion(version) |@|
        validateString(name, NameMinLength, InvalidName) |@|
        validateNonEmptyOption(description, InvalidDescription) |@|
        studyIds.toList.traverseU(validateStudyId) |@|

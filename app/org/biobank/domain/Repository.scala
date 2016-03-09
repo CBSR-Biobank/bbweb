@@ -48,11 +48,7 @@ abstract class ReadRepositoryRefImpl[K, A](keyGetter: (A) => K) extends ReadRepo
   def isEmpty: Boolean = getMap.isEmpty
 
   def getByKey(key: K): DomainValidation[A] = {
-    getMap.get(key).fold {
-      DomainError(s"$NotFoundError $key").failureNel[A]
-    } { value =>
-      value.successNel
-    }
+    getMap.get(key).toSuccessNel(DomainError(s"$NotFoundError $key"))
   }
 
   def getValues: Iterable[A] = getMap.values

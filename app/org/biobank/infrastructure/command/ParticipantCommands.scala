@@ -24,19 +24,28 @@ object ParticipantCommands {
                                annotations: List[Annotation])
       extends ParticipantCommand
 
-  case class UpdateParticipantCmd(userId:    Option[String],
-                                  studyId:         String,
-                                  id:              String,
-                                  expectedVersion: Long,
-                                  uniqueId:        String,
-                                  annotations:     List[Annotation])
+  case class UpdateParticipantUniqueIdCmd(userId:          Option[String],
+                                          id:              String,
+                                          expectedVersion: Long,
+                                          uniqueId:        String)
+      extends ParticipantModifyCommand
+
+  case class UpdateParticipantAnnotationCmd(userId:          Option[String],
+                                            id:              String,
+                                            expectedVersion: Long,
+                                            annotation:      Annotation)
+      extends ParticipantModifyCommand
+
+  case class RemoveParticipantAnnotationCmd(userId:           Option[String],
+                                            id:               String,
+                                            expectedVersion:  Long,
+                                            annotationTypeId: String)
       extends ParticipantModifyCommand
 
   //--
 
   trait CollectionEventCommand
       extends ParticipantCommand
-      with HasParticipantIdentity
 
   trait CollectionEventModifyCommand
       extends CollectionEventCommand
@@ -51,14 +60,28 @@ object ParticipantCommands {
                                    annotations:           List[Annotation])
       extends CollectionEventCommand
 
-  case class UpdateCollectionEventCmd(userId:                Option[String],
-                                      id:                    String,
-                                      participantId:         String,
-                                      collectionEventTypeId: String,
-                                      expectedVersion:       Long,
-                                      timeCompleted:         DateTime,
-                                      visitNumber:           Int,
-                                      annotations:           List[Annotation])
+  case class UpdateCollectionEventVisitNumberCmd(userId:          Option[String],
+                                                 id:              String,
+                                                 expectedVersion: Long,
+                                                 visitNumber:     Int)
+      extends CollectionEventModifyCommand
+
+  case class UpdateCollectionEventTimeCompletedCmd(userId:          Option[String],
+                                                   id:              String,
+                                                   expectedVersion: Long,
+                                                   timeCompleted:   DateTime)
+      extends CollectionEventModifyCommand
+
+  case class UpdateCollectionEventAnnotationCmd(userId:          Option[String],
+                                                id:              String,
+                                                expectedVersion: Long,
+                                                annotation:      Annotation)
+      extends CollectionEventModifyCommand
+
+  case class RemoveCollectionEventAnnotationCmd(userId:           Option[String],
+                                                id:               String,
+                                                expectedVersion:  Long,
+                                                annotationTypeId: String)
       extends CollectionEventModifyCommand
 
   case class RemoveCollectionEventCmd(userId:          Option[String],
@@ -127,10 +150,16 @@ object ParticipantCommands {
                                usable:            Boolean)
       extends SpecimenModifyCommand
 
-  implicit val addParticipantCmdReads         = Json.reads[AddParticipantCmd]
-  implicit val updateParticipantCmdReads      = Json.reads[UpdateParticipantCmd]
-  implicit val addCollectionEventCmdReads     = Json.reads[AddCollectionEventCmd]
-  implicit val updateCollectionEventCmdReads  = Json.reads[UpdateCollectionEventCmd]
+  implicit val addParticipantCmdReads              = Json.reads[AddParticipantCmd]
+  implicit val updateParticipantUniqueIdCmdReads   = Json.reads[UpdateParticipantUniqueIdCmd]
+  implicit val updateParticipantAnnotationCmdReads = Json.reads[UpdateParticipantAnnotationCmd]
+  implicit val removeParticipantAnnotationCmdReads = Json.reads[RemoveParticipantAnnotationCmd]
+  implicit val addCollectionEventCmdReads          = Json.reads[AddCollectionEventCmd]
+
+  implicit val updateCollectionEventVisitNumberCmdReads   = Json.reads[UpdateCollectionEventVisitNumberCmd]
+  implicit val updateCollectionEventTimeCompletedCmdReads = Json.reads[UpdateCollectionEventTimeCompletedCmd]
+  implicit val updateCollectionEventAnnotationCmdReads    = Json.reads[UpdateCollectionEventAnnotationCmd]
+
   implicit val removeCollectionEventCmdReads  = Json.reads[RemoveCollectionEventCmd]
   implicit val addSpecimenCmdReads            = Json.reads[AddSpecimenCmd]
   implicit val moveSpecimenCmdReads           = Json.reads[MoveSpecimenCmd]

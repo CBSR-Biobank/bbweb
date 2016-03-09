@@ -156,7 +156,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
 
     val v = (nameAvailable(cmd.name) |@|
-               DisabledStudy.create(studyId, -1L, cmd.name, cmd.description, Set.empty)) {
+               DisabledStudy.create(studyId, 0L, cmd.name, cmd.description, Set.empty)) {
         case (_, study) =>
           StudyEvent2(study.id.id).update(
             _.optionalUserId            := cmd.userId,
@@ -408,7 +408,7 @@ class StudiesProcessor @javax.inject.Inject() (
       val addedEvent = event.getAdded
 
       DisabledStudy.create(id                         = StudyId(event.id),
-                           version                    = -1L,
+                           version                    = 0L,
                            name                       = addedEvent.getName,
                            description                = addedEvent.description,
                            annotationTypes = Set.empty

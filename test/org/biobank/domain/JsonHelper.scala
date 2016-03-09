@@ -158,7 +158,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
   }
 
   def compareAnnotation(json: JsValue, annotation: Annotation): Unit = {
-    (json \ "annotationTypeUniqueId").as[String] mustBe (annotation.annotationTypeUniqueId)
+    (json \ "annotationTypeId").as[String] mustBe (annotation.annotationTypeId)
     (json \ "stringValue").asOpt[String] mustBe (annotation.stringValue)
     (json \ "numberValue").asOpt[String] mustBe (annotation.numberValue)
 
@@ -177,16 +177,16 @@ trait JsonHelper extends MustMatchers with OptionValues {
     (json \ "annotations").as[List[JsObject]] must have size participant.annotations.size
 
     (json \ "annotations").as[List[JsObject]].foreach { jsAnnotation =>
-      val annotationTypeUniqueId = (jsAnnotation \ "annotationTypeUniqueId").as[String]
+      val annotationTypeId = (jsAnnotation \ "annotationTypeId").as[String]
       val participantAnnotationMaybe = participant.annotations.find { a  =>
-        a.annotationTypeUniqueId == annotationTypeUniqueId
+        a.annotationTypeId == annotationTypeId
       }
 
       participantAnnotationMaybe match {
         case Some(participantAnnotation) =>
           compareAnnotation(jsAnnotation, participantAnnotation)
         case None =>
-          fail(s"annotation with annotationTypeId not found on participant: $annotationTypeUniqueId")
+          fail(s"annotation with annotationTypeId not found on participant: $annotationTypeId")
       }
     }
   }

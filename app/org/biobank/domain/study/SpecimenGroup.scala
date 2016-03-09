@@ -116,7 +116,7 @@ object SpecimenGroup extends SpecimenGroupValidations {
     * Performs validation on fields.
     *
     * @param version the previous version number for the specimen group. If the specimen group is
-    * new then this value should be -1L.
+    * new then this value should be 0L.
     */
   def create(studyId:                     StudyId,
              id:                          SpecimenGroupId,
@@ -131,7 +131,7 @@ object SpecimenGroup extends SpecimenGroupValidations {
       : DomainValidation[SpecimenGroup] =  {
     (validateId(studyId) |@|
        validateId(id) |@|
-       validateAndIncrementVersion(version) |@|
+       validateVersion(version) |@|
        validateString(name, NameRequired) |@|
        validateNonEmptyOption(description, InvalidDescription) |@|
        validateString(units, UnitsRequired)) {

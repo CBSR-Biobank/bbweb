@@ -1,0 +1,54 @@
+package org.biobank.infrastructure.event;
+
+message SpecimenEvent {
+
+   message Added {
+      optional string specimenSpecId     = 1;
+      optional string collectionEventId  = 2;
+      optional string originLocationId   = 3;
+      optional string locationId         = 4;
+      optional string containerId        = 5;
+      optional string positionId         = 6;
+      optional string timeCreated        = 7;
+      optional string amount             = 8;
+      optional bool   usable             = 9;
+   }
+
+   message Moved {
+      optional int64  version            = 1;
+      optional string locationId         = 2;
+   }
+
+   message PositionAssigned {
+      optional int64  version            = 1;
+      optional string positionId         = 2;
+   }
+
+   // TODO: check if this is needed
+   message AmountRemoved {
+      optional int64  version            = 1;
+      optional double amountRemoved      = 2;
+   }
+
+   message UsableUpdated {
+      optional int64  version            = 1;
+      repeated bool   usable             = 2;
+   }
+
+   message Removed {
+      optional int64  version            = 1;
+   }
+
+   required string id     = 1;
+   optional string userId = 2;
+   optional string time   = 3;
+
+   oneof event_type {
+      Added            added              = 4;
+      Moved            moved              = 5;
+      PositionAssigned posisitionAssigned = 6;
+      AmountRemoved    amountRemoved      = 7;
+      UsableUpdated    usableUpdated      = 8;
+      Removed          removed            = 9;
+   }
+}

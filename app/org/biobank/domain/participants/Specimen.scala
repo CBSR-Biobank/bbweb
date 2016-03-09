@@ -158,7 +158,7 @@ object UsableSpecimen extends ParticipantValidations with StudyValidations {
       : DomainValidation[UsableSpecimen] = {
     (validateId(id) |@|
        validateId(specimenGroupId, InvalidSpecimenGroupId) |@|
-       validateAndIncrementVersion(version) |@|
+       validateVersion(version) |@|
        validateString(originLocationId, OriginLocationIdInvalid) |@|
        validateString(locationId, LocationIdInvalid) |@|
        validateId(containerId, ContainerIdInvalid) |@|

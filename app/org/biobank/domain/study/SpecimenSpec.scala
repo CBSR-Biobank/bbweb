@@ -89,7 +89,7 @@ trait SpecimenSpecValidations {
     * Performs validation on fields.
     *
     * @param version the previous version number for the specimen group. If the specimen group is
-    * new then this value should be -1L.
+    * new then this value should be 0L.
     */
   def validate(name:                        String,
                description:                 Option[String],

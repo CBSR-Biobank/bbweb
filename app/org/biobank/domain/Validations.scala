@@ -110,8 +110,8 @@ object CommonValidations {
     }
   }
 
-  def validateAndIncrementVersion(v: Long): DomainValidation[Long] =
-    if (v < -1) InvalidVersion.failureNel else (v + 1).success
+  def validateVersion(v: Long): DomainValidation[Long] =
+    if (v < -1) InvalidVersion.failureNel else v.success
 
   def validateId[T <: IdentifiedValueObject[String]](
     id: T, err: ValidationKey): DomainValidation[T] = {
