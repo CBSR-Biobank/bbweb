@@ -3,7 +3,6 @@
     <strong>
         {{annotationType.name}}</a>
     </strong>
-    <p>{{annotationType.description | truncate:100}}</p>
   </div>
 </div>
 <div class="row">
@@ -12,5 +11,10 @@
   </div>
   <div class="col-md-9">
     <small class="text-info">Type: <strong>{{ annotationType.getType() }}</strong></small>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <p>{{annotationType.description | truncate:100}}</p>
   </div>
 </div>

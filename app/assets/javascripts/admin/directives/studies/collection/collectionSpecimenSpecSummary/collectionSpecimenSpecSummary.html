@@ -3,7 +3,6 @@
     <strong>
         {{specimenSpec.name}}</a>
     </strong>
-    <p>{{specimenSpec.description | truncate:100}}</p>
   </div>
 </div>
 <div class="row">
@@ -25,5 +24,10 @@
   </div>
   <div class="col-md-6">
     <small class="text-info">Max Count: <strong>{{ specimenSpec.maxCount }}</strong></small>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <p>{{specimenSpec.description | truncate:100}}</p>
   </div>
 </div>
