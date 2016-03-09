@@ -8,10 +8,6 @@ import org.biobank.domain.study._
 
 import play.api.test.Helpers._
 import play.api.libs.json._
-import org.scalatest.Tag
-import org.slf4j.LoggerFactory
-import org.joda.time.DateTime
-import play.api.Play.current
 
 class SpecimenLinkTypeControllerSpec extends ControllerFixture with JsonHelper {
 

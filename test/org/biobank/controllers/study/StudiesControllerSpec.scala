@@ -3,15 +3,12 @@ package org.biobank.controllers.study
 import org.biobank.controllers._
 import org.biobank.dto._
 import org.biobank.domain.study._
-import org.biobank.domain.AnnotationValueType
 import org.biobank.domain.JsonHelper
 import org.biobank.fixture.ControllerFixture
 
 import org.joda.time.DateTime
 import play.api.test.Helpers._
 import play.api.libs.json._
-import org.scalatest.Tag
-import org.slf4j.LoggerFactory
 
 /**
  * Tests the REST API for [[Study]].

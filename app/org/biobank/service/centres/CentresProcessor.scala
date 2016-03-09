@@ -11,17 +11,14 @@ import org.biobank.domain.{
   DomainError,
   Location
 }
-import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
 import org.biobank.TestData
 
 import akka.actor._
-import akka.pattern.ask
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import org.slf4j.LoggerFactory
 import javax.inject.{Inject => javaxInject}
 
 import scalaz.Scalaz._

@@ -3,7 +3,6 @@ package org.biobank.domain.containers
 import org.biobank.domain._
 
 import play.api.libs.json._
-import org.joda.time.DateTime
 import scalaz.Scalaz._
 
 trait ContainerSchemaPositionValidations {

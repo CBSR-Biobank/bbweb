@@ -3,7 +3,6 @@ package org.biobank.domain.study
 import org.biobank.domain._
 
 import com.google.inject.ImplementedBy
-import org.slf4j.LoggerFactory
 
 import javax.inject.Singleton
 import scalaz._

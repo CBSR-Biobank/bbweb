@@ -2,26 +2,19 @@ package org.biobank.fixture
 
 import org.biobank.Global
 import org.biobank.domain._
-import org.biobank.domain.user.{ UserRepository, UserRepositoryImpl }
+import org.biobank.domain.user.UserRepository
 import org.biobank.domain.centre._
 import org.biobank.domain.study._
 import org.biobank.domain.participants._
-import org.biobank.service.{
-  PasswordHasher,
-  PasswordHasherImpl
-}
+import org.biobank.service.PasswordHasher
 
 import play.api.inject.guice.GuiceApplicationBuilder
 import org.scalatest._
+import play.api.mvc._
 import org.scalatestplus.play._
-import play.api.Play
 import play.api.libs.json._
-import play.mvc.Http.RequestBuilder
-import play.api.test.FakeApplication
-import play.api.test.FakeHeaders
+import play.api.test._
 import play.api.test.Helpers._
-import akka.actor.ActorSystem
-import scala.concurrent.Future
 import org.slf4j.LoggerFactory
 import com.typesafe.scalalogging._
 
@@ -77,34 +70,22 @@ abstract class ControllerFixture
   val factory = new Factory
 
   /**
-   * tests will not work with EhCache, need alternate implementation for EhCachePlugin
-   *
-   * See FixedEhCachePlugin.
-    */
-  implicit override def newAppForTest(testData: TestData): FakeApplication = {
-    val fakeApp = FakeApplication(additionalConfiguration = Map("ehcacheplugin" -> "disabled"))
-    initializeAkkaPersitence
-    fakeApp
-  }
-
-  private def initializeAkkaPersitence(): Unit = {
-    // ensure the database is empty
-  }
+   * tests will not work with EhCache, need alternate implementation for EhCachePlugin.
+   */
+  implicit override def newAppForTest(testData: TestData) =
+    new GuiceApplicationBuilder().configure(Map("ehcacheplugin" -> "disabled")).build()
 
   def doLogin(email: String = Global.DefaultUserEmail, password: String = "testuser") = {
     // Log in with test user
     val request = Json.obj("email" -> email, "password" -> password)
-    val builder = new RequestBuilder().method(POST).uri("/login").bodyJson(request)
-    val result = Future.successful(play.test.Helpers.route(builder).toScala)
-    val resultStatus = status(result)
-
-    resultStatus match {
-      case OK =>
-        val jsonResult = contentAsJson(result)
-        adminToken = (jsonResult \ "data").as[String]
+    route(app, FakeRequest(POST, "/login").withJsonBody(request)).fold {
+        cancel("login failed")
+    } { result =>
+        status(result) mustBe (OK)
+        contentType(result) mustBe Some("application/json")
+        val json = Json.parse(contentAsString(result))
+        adminToken = (json \ "data").as[String]
         adminToken
-      case _ =>
-        cancel(s"login failed: status: $resultStatus")
     }
   }
 
@@ -113,12 +94,10 @@ abstract class ControllerFixture
                   expectedStatus: Int,
                   json:           JsValue,
                   token:          String): JsValue = {
-    val builder = new RequestBuilder()
-      .method(method)
-      .uri(path)
-      .bodyJson(json)
-      .header("X-XSRF-TOKEN", token)
-      .cookie(new play.mvc.Http.Cookie("XSRF-TOKEN", token, 10, "", "", true, true))
+    var fakeRequest = FakeRequest(method, path)
+      .withJsonBody(json)
+      .withHeaders("X-XSRF-TOKEN" -> token)
+      .withCookies(Cookie("XSRF-TOKEN", token))
 
     if (json != JsNull) {
       log.info(s"request: $method, $path,\n${Json.prettyPrint(json)}")
@@ -126,21 +105,22 @@ abstract class ControllerFixture
       log.info(s"request: $method, $path")
     }
 
-    val result = Future.successful(play.test.Helpers.route(builder).toScala)
-    val resultStatus = status(result)
-
-    resultStatus match {
-      case `expectedStatus` =>
-        val jsonResult = contentAsJson(result)
-        contentType(result) mustBe Some("application/json")
-        log.info(s"reply: status: $resultStatus,\nresult: ${Json.prettyPrint(jsonResult)}")
-        jsonResult
-      case _ =>
-        contentType(result) match {
-          case Some("application/json") => log.info("reply: " + Json.prettyPrint(contentAsJson(result)))
-          case _ => log.info("reply: " + contentAsString(result))
-        }
-        fail(s"bad HTTP status: status: $resultStatus, expected: $expectedStatus")
+    route(app, fakeRequest).fold {
+      fail("HTTP request returned NONE")
+    } { result =>
+      status(result) match {
+        case `expectedStatus` =>
+          val jsonResult = contentAsJson(result)
+          contentType(result) mustBe Some("application/json")
+          log.info(s"reply: status: $result,\nresult: ${Json.prettyPrint(jsonResult)}")
+          jsonResult
+        case _ =>
+          contentType(result) match {
+            case Some("application/json") => log.info("reply: " + Json.prettyPrint(contentAsJson(result)))
+            case _ => log.info("reply: " + contentAsString(result))
+          }
+          fail(s"bad HTTP status: status: $result, expected: $expectedStatus")
+      }
     }
   }
 

@@ -3,7 +3,6 @@ package org.biobank.domain.user
 import org.biobank.domain.DomainSpec
 import org.biobank.fixture.NameGenerator
 
-import org.scalatest.Tag
 import com.github.nscala_time.time.Imports._
 import org.slf4j.LoggerFactory
 

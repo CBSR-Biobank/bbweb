@@ -8,12 +8,11 @@ import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 
-import akka.actor.{ ActorSystem, ActorRef }
+import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.util.Timeout
 import javax.inject._
 import com.google.inject.ImplementedBy
-import org.joda.time.DateTime
 import org.slf4j.LoggerFactory
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future

@@ -2,19 +2,19 @@ package org.biobank.service
 
 import javax.inject.{ Inject, Singleton }
 import play.api.libs.mailer._
-import play.api.Play.current
-import play.Play
-import play.api.Logger
+import play.api.{ Configuration, Environment, Logger }
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits._
 
 @Singleton
-class EmailService @Inject() (mailerClient: MailerClient) {
+class EmailService @Inject() (env: Environment,
+                              configuration: Configuration,
+                              mailerClient: MailerClient) {
 
   def passwordResetEmail(recipient: String, password: String) = {
     val async: Future[Unit] = Future {
-      val adminEmail = Play.application.configuration.getString("admin.email")
-      val to = if (Play.isProd) {
+        val adminEmail = configuration.getString("admin.email").getOrElse("cbsrbiobank@gmail.com")
+      val to = if (env.mode == play.api.Mode.Prod) {
         recipient
       } else {
         adminEmail

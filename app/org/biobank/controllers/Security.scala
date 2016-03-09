@@ -6,20 +6,19 @@ import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 
 import scala.concurrent.Future
-import play.api.Play
-import play.api.Mode
-import play.api.Logger
+import play.api.{ Environment, Logger, Mode }
 import play.api.mvc._
 import play.api.libs.json._
-import play.api.Play.current
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 /**
   * Security actions that should be used by all controllers that need to protect their actions.
   * Can be composed to fine-tune access control.
-  */
+ */
 trait Security { self: Controller =>
+
+  val env: Environment
 
   val AuthTokenCookieKey = "XSRF-TOKEN"
   val AuthTokenHeader = "X-XSRF-TOKEN"
@@ -65,7 +64,7 @@ trait Security { self: Controller =>
 
   private def getAuthInfo(token: String)
       : DomainValidation[AuthenticationInfo] = {
-    if ((Play.current.mode == Mode.Test) && (token == TestAuthToken)) {
+    if ((env.mode == Mode.Test) && (token == TestAuthToken)) {
       // when running in TEST mode, always allow the action if the token is the test token
       AuthenticationInfo(token, org.biobank.Global.DefaultUserId).successNel
     } else {

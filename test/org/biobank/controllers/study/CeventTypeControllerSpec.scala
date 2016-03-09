@@ -1,18 +1,14 @@
 package org.biobank.controllers.study
 
 import org.biobank.fixture._
-import org.biobank.domain.{ AnnotationType, AnnotationValueType }
-import org.biobank.domain.study.{ CollectionEventType, Study, SpecimenGroup }
+import org.biobank.domain.study.{ CollectionEventType, Study }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.study._
 
 import play.api.test.Helpers._
 import play.api.libs.json._
-import org.scalatest.Tag
-import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
-import play.api.Play.current
 
 class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
   import org.biobank.TestUtils._

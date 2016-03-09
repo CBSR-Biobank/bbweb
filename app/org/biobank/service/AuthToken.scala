@@ -3,12 +3,12 @@ package org.biobank.service
 import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.domain.user.UserId
 
+import javax.inject.{ Inject, Singleton }
 import com.google.inject.ImplementedBy
-import play.api.Play.current
-import play.api.cache.Cache
-
-import scalaz._
-import Scalaz._
+import play.api.cache.CacheApi
+import play.api.Environment
+import scala.concurrent.duration._
+import scalaz.Scalaz._
 
 /**
  *  Manages tokens used to authenticate logged in users.
@@ -16,19 +16,26 @@ import Scalaz._
 @ImplementedBy(classOf[AuthTokenImpl])
 trait AuthToken {
 
+  val env: Environment
+
+  val cacheApi: CacheApi
+
   def newToken(userId: UserId): String
 
   def getUserId(token: String): DomainValidation[UserId]
 
 }
 
-class AuthTokenImpl extends AuthToken {
+@Singleton
+class AuthTokenImpl @Inject() (val env: Environment,
+                               val cacheApi: CacheApi)
+    extends AuthToken {
 
   val TokenExpirationSeconds =
-    if (play.api.Play.current.mode == play.api.Mode.Prod) {
-      60 * 15
+    if (env.mode == play.api.Mode.Prod) {
+      15.minutes
     } else {
-      60 * 60
+      60.minutes
     }
 
   /**
@@ -38,7 +45,7 @@ class AuthTokenImpl extends AuthToken {
    */
   def newToken(userId: UserId): String = {
     val token = java.util.UUID.randomUUID.toString.replaceAll("-","")
-    Cache.set(token, userId, TokenExpirationSeconds)
+    cacheApi.set(token, userId, TokenExpirationSeconds)
     token
   }
 
@@ -46,10 +53,10 @@ class AuthTokenImpl extends AuthToken {
    *  If token is valid then the timeout is re-assigned on the cache.
    */
   def getUserId(token: String): DomainValidation[UserId] = {
-    val maybeUserId = Cache.getAs[UserId](token)
+    val maybeUserId = cacheApi.get[UserId](token)
       .map(_.success)
       .getOrElse(DomainError("invalid token").failureNel)
-    maybeUserId map { userId => Cache.set(token, userId, TokenExpirationSeconds) }
+    maybeUserId map { userId => cacheApi.set(token, userId, TokenExpirationSeconds) }
     maybeUserId
   }
 

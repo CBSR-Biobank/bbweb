@@ -6,14 +6,11 @@ import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 
-import javax.inject.{Inject => javaxInject, Singleton}
-import scala.concurrent.Future
-import scala.language.postfixOps
-import play.api.Logger
-import play.api.Play.current
-import scala.language.reflectiveCalls
+import javax.inject.{Inject => javaxInject}
+import play.api.{ Environment, Logger }
 
-class ProcessingTypeController @javaxInject() (val authToken:      AuthToken,
+class ProcessingTypeController @javaxInject() (val env:            Environment,
+                                               val authToken:      AuthToken,
                                                val usersService:   UsersService,
                                                val studiesService: StudiesService)
     extends CommandController

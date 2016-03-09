@@ -7,14 +7,12 @@ import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 
 import javax.inject.{Inject => javaxInject, Singleton}
-import scala.concurrent.Future
-import scala.language.postfixOps
-import play.api.Logger
+import play.api.{ Environment, Logger }
 import play.api.libs.json._
-import scala.language.reflectiveCalls
 
 @Singleton
-class CeventTypeController @javaxInject() (val authToken:      AuthToken,
+class CeventTypeController @javaxInject() (val env:            Environment,
+                                           val authToken:      AuthToken,
                                            val usersService:   UsersService,
                                            val studiesService: StudiesService)
     extends CommandController

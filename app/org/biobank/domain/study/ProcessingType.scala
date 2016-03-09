@@ -2,7 +2,6 @@ package org.biobank.domain.study
 
 import org.biobank.domain.{
   ConcurrencySafeEntity,
-  DomainError,
   DomainValidation,
   HasUniqueName,
   HasDescriptionOption

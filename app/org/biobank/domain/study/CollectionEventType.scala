@@ -1,8 +1,5 @@
 package org.biobank.domain.study
 
-import org.biobank.infrastructure.{
-  CollectionEventTypeSpecimenGroupData,
-  CollectionEventTypeAnnotationTypeData}
 import org.biobank.domain.{
   AnnotationType,
   ConcurrencySafeEntity,

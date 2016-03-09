@@ -9,11 +9,8 @@ import org.biobank.TestData
 
 import akka.actor._
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
-import com.trueaccord.scalapb.GeneratedMessage
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import org.slf4j.LoggerFactory
-import scala.concurrent.Future
 
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._

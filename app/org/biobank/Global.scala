@@ -2,21 +2,22 @@ package org.biobank
 
 import org.biobank.domain.user._
 
-import play.api.GlobalSettings
-import play.api.mvc.WithFilters
+import javax.inject._
+import akka.stream.Materializer
 import play.filters.gzip.GzipFilter
-import play.api.libs.concurrent.Akka
-import play.api.Logger
-import play.api.Mode
+import play.api.{Configuration}
 import java.io.File
-import org.joda.time.DateTime
-import com.google.inject.{Guice, AbstractModule}
-import play.api.libs.concurrent.AkkaGuiceSupport
 
 /**
  * This is a trait so that it can be used by tests also.
  */
-trait Global extends GlobalSettings {
+@Singleton
+class Global @Inject()(implicit val mat: Materializer,
+                       configuration: Configuration) {
+
+  new GzipFilter(shouldGzip = (request, response) => {
+                     response.body.contentType.exists(_.startsWith("text/html"))
+                   })
 
   /**
    * Controllers must be resolved through the application context. There is a special method of GlobalSettings
@@ -24,25 +25,11 @@ trait Global extends GlobalSettings {
    */
   //override def getControllerInstance[A](controllerClass: Class[A]): A = injector.getInstance(controllerClass)
 
-  /**
-   *
-   */
-  override def onStart(app: play.api.Application) {
-    super.onStart(app)
+  checkEmailConfig
+  createSqlDdlScripts
 
-    checkEmailConfig(app)
-    createSqlDdlScripts
-
-    Logger.debug(s"Play started")
-  }
-
-  override def onStop(app: play.api.Application) {
-    super.onStop(app)
-    Logger.info(s"Play stopped")
-  }
-
-  def checkEmailConfig(app: play.api.Application) = {
-    app.configuration.getString("play.mailer.host").getOrElse(
+  def checkEmailConfig() = {
+    configuration.getString("play.mailer.host").getOrElse(
       throw new RuntimeException("smtp server information needs to be set in email.conf"))
   }
 
@@ -84,18 +71,10 @@ trait Global extends GlobalSettings {
 
 }
 
+object Global {
 
-object Global
-    extends WithFilters(
-  new GzipFilter(shouldGzip = (request, response) => {
-                   val contentType = response.headers.get("Content-Type")
-                   contentType.exists(_.startsWith("text/html")) || request.path.endsWith("jsroutes.js")
-                 }))
-    with Global {
+  val DefaultUserEmail = "admin@admin.com"
 
-    val DefaultUserEmail = "admin@admin.com"
-
-    val DefaultUserId = UserId(DefaultUserEmail)
+  val DefaultUserId = UserId(DefaultUserEmail)
 
 }
-

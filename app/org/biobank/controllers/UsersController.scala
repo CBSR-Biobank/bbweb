@@ -7,9 +7,8 @@ import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
 
 import javax.inject.{Inject => javaxInject, Singleton}
-import play.api.Logger
-import play.api.Play.current
-import play.api.cache.Cache
+import play.api.{Environment, Logger}
+import play.api.cache.CacheApi
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
@@ -22,7 +21,9 @@ import Scalaz._
 import scalaz.Validation.FlatMap._
 
 @Singleton
-class UsersController @javaxInject() (val authToken:      AuthToken,
+class UsersController @javaxInject() (val env:            Environment,
+                                      val cacheApi:       CacheApi,
+                                      val authToken:      AuthToken,
                                       val usersService:   UsersService,
                                       val studiesService: StudiesService)
     extends CommandController
@@ -93,7 +94,7 @@ class UsersController @javaxInject() (val authToken:      AuthToken,
     * X-XSRF-TOKEN in HTTP header.
     */
   def logout() = AuthAction(parse.empty) { (token, userId, request) =>
-    Cache.remove(token)
+    cacheApi.remove(token)
     Ok("user has been logged out")
       .discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
       .withNewSession

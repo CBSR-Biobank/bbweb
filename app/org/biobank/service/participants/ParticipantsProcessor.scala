@@ -3,24 +3,16 @@ package org.biobank.service.participants
 import org.biobank.service.{ Processor, Utils }
 import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.infrastructure.event.ParticipantEvents._
-import org.biobank.infrastructure.event.CommonEvents. {
-  Annotation => EventAnnotation
-}
 import org.biobank.domain.{
   Annotation,
-  AnnotationType,
   DomainValidation,
   DomainError }
-import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 import org.biobank.domain.participants._
 
 import javax.inject.{Inject => javaxInject, Named}
 import akka.actor._
-import akka.pattern.ask
-import org.slf4j.LoggerFactory
 import akka.persistence.SnapshotOffer
-import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._

@@ -6,15 +6,11 @@ import org.biobank.domain.study._
 import org.biobank.domain.participants._
 import org.biobank.controllers._
 import org.biobank.fixture.ControllerFixture
-import org.biobank.infrastructure.CollectionEventTypeAnnotationTypeData
 
 import play.api.test.Helpers._
 import play.api.libs.json._
-import org.scalatest.Tag
 import org.joda.time.DateTime
 import com.github.nscala_time.time.Imports._
-import org.scalatest.matchers.Matcher
-import org.scalatest.matchers.MatchResult
 
 /**
  * Tests the REST API for [[CollectionEvents]].

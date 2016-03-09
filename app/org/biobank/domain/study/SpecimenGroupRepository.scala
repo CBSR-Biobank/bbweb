@@ -4,7 +4,6 @@ import org.biobank.domain._
 
 import javax.inject.Singleton
 import com.google.inject.ImplementedBy
-import org.slf4j.LoggerFactory
 import scalaz._
 import Scalaz._
 

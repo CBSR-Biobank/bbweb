@@ -1,5 +1,7 @@
 <configuration>
 
+  <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel" />
+
   <!-- sends logs to logback-beagle -->
   <consolePlugin />
 

@@ -7,12 +7,8 @@ import org.biobank.domain.study._
 import org.biobank.domain.participants._
 import org.biobank.domain.centre._
 import org.biobank.domain.containers._
-import org.biobank.infrastructure.{
-  SpecimenLinkTypeAnnotationTypeData
-}
 import org.biobank.domain.AnnotationValueType._
 import org.slf4j.LoggerFactory
-import scala.reflect.ClassTag
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import scalaz.Scalaz._

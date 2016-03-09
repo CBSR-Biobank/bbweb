@@ -15,11 +15,10 @@ import org.biobank.service._
 import org.biobank.service.study.StudiesService
 import org.biobank.controllers.PagedResults._
 
-import javax.inject.{Inject => javaxInject, Singleton}
-import play.api.Logger
+import javax.inject.{Inject => javaxInject}
+import play.api.{ Environment, Logger }
 import play.api.mvc._
 import play.api.libs.json._
-import scala.concurrent.Future
 import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -27,7 +26,8 @@ import scalaz.Validation.FlatMap._
 /**
  *
  */
-class StudiesController @javaxInject() (val authToken:      AuthToken,
+class StudiesController @javaxInject() (val env:            Environment,
+                                        val authToken:      AuthToken,
                                         val usersService:   UsersService,
                                         val studiesService: StudiesService)
     extends CommandController

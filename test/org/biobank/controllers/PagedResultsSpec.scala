@@ -4,7 +4,6 @@ import org.biobank.fixture.BbwebFakeApplication
 
 import play.api.libs.json._
 import play.api.test.Helpers._
-import play.api.test.FakeApplication
 import org.scalatest._
 
 /**

@@ -32,8 +32,8 @@ define(['underscore', 'tv4'], function(_, tv4) {
         'preservationType':            { 'type': 'string' },
         'preservationTemperatureType': { 'type': 'string' },
         'specimenType':                { 'type': 'string' },
-        'maxCount':                    { 'type': 'integer' },
-        'amount':                      { 'type': 'number' }
+        'maxCount':                    { 'type': 'integer', 'minimum': 1 },
+        'amount':                      { 'type': 'number', 'minimum': 1 }
       },
       'required': [
         'uniqueId',

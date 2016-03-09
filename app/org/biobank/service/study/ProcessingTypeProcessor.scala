@@ -1,23 +1,18 @@
 package org.biobank.service.study
 
 import org.biobank.domain._
-import org.biobank.domain.user.UserId
 import org.biobank.domain.study.{
-  Study,
   StudyId,
   ProcessingType,
   ProcessingTypeId,
-  ProcessingTypeRepository,
-  SpecimenGroupId
+  ProcessingTypeRepository
 }
-import org.slf4j.LoggerFactory
 import org.biobank.service.Processor
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 
 import akka.actor._
 import akka.persistence.SnapshotOffer
-import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._

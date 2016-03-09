@@ -2,17 +2,13 @@ package org.biobank.controllers
 
 import org.biobank.domain.centre._
 import org.biobank.domain.Location
-import org.biobank.domain.study.{ Study, StudyRepository }
+import org.biobank.domain.study.Study
 import org.biobank.domain.JsonHelper
 import org.biobank.fixture.ControllerFixture
 
 import org.joda.time.DateTime
 import play.api.test.Helpers._
 import play.api.libs.json._
-import org.slf4j.LoggerFactory
-import play.api.Play.current
-import play.api.test.FakeApplication
-import org.scalatest.Tag
 
 /**
   * Tests the REST API for [[Centre]]s.

@@ -11,20 +11,13 @@ import org.biobank.service._
 
 import akka.actor.ActorRef
 import akka.actor._
-import akka.pattern.AskSupport
 import akka.util.Timeout
 import javax.inject.{ Inject, Named }
 import org.scalatest._
-import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time._
-import org.slf4j.LoggerFactory
-import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import scala.concurrent.Await
-import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.language.postfixOps
 
 /**
  * Test fixture to make it easier to write specifications.

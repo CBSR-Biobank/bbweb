@@ -1,10 +1,9 @@
 package org.biobank.service.participants
 
-import org.biobank.infrastructure.{ SortOrder, AscendingOrder, DescendingOrder }
+import org.biobank.infrastructure.{ SortOrder, AscendingOrder }
 import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.infrastructure.event.ParticipantEvents._
 import org.biobank.domain._
-import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 import org.biobank.domain.participants._
 

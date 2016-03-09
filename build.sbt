@@ -14,7 +14,7 @@ lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
   .settings(libraryDependencies ~= (_.map(excludeSpecs2)))
 
-scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.7")
+scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.8")
 
 scalacOptions in ThisBuild ++= Seq(
   "-target:jvm-1.8",
@@ -71,12 +71,12 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   cache,
   filters,
-  ( "com.typesafe.akka"         %% "akka-persistence"                   % "2.4.1" % "compile" ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
-  "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.1",
-  "com.typesafe.akka"           %% "akka-remote"                         % "2.4.1"             % "compile",
-  "com.typesafe.akka"           %% "akka-slf4j"                          % "2.4.1"             % "compile",
+  ( "com.typesafe.akka"         %% "akka-persistence"                   % "2.4.2" % "compile" ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
+  "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.2",
+  "com.typesafe.akka"           %% "akka-remote"                         % "2.4.2"             % "compile",
+  "com.typesafe.akka"           %% "akka-slf4j"                          % "2.4.2"             % "compile",
   "org.scala-stm"               %% "scala-stm"                           % "0.7"               % "compile",
-  "org.scalaz"                  %% "scalaz-core"                         % "7.2.0"             % "compile",
+  "org.scalaz"                  %% "scalaz-core"                         % "7.2.1"             % "compile",
   "org.iq80.leveldb"            % "leveldb"                              % "0.7",
   "org.fusesource.leveldbjni"   % "leveldbjni-all"                       % "1.8",
   "com.github.t3hnar"           %% "scala-bcrypt"                        % "2.5",
@@ -87,25 +87,25 @@ libraryDependencies ++= Seq(
   // WebJars dependencies
   "org.webjars"               %  "requirejs"                           % "2.1.22",
   "org.webjars"               %  "underscorejs"                        % "1.8.3",
-  "org.webjars"               %  "jquery"                              % "2.2.0",
+  "org.webjars"               %  "jquery"                              % "2.2.1",
   ( "org.webjars"             %  "bootstrap"                           % "3.3.6"  ).excludeAll(ExclusionRule(organization="org.webjars")),
   ( "org.webjars"             %  "angularjs"                           % "1.4.9"  ).exclude("org.webjars", "jquery"),
-  ( "org.webjars"             %  "angular-ui-bootstrap"                % "1.1.1-1" ).exclude("org.webjars", "angularjs"),
-  ( "org.webjars"             %  "angular-ui-router"                   % "0.2.17" ).exclude("org.webjars", "angularjs"),
-  "org.webjars"               % "smart-table"                          % "2.1.3-1",
+  ( "org.webjars"             %  "angular-ui-bootstrap"                % "1.2.1" ).exclude("org.webjars", "angularjs"),
+  ( "org.webjars"             %  "angular-ui-router"                   % "0.2.18" ).exclude("org.webjars", "angularjs"),
+  "org.webjars"               %  "smart-table"                          % "2.1.3-1",
   ( "org.webjars"             %  "toastr"                              % "2.1.1"  ).exclude("org.webjars", "jquery"),
   ( "org.webjars"             %  "angular-sanitize"                    % "1.3.11" ).exclude("org.webjars", "angularjs"),
-  "org.webjars"               %  "momentjs"                            % "2.11.1",
+  "org.webjars"               %  "momentjs"                            % "2.12.0",
   "org.webjars"               %  "sprintf.js"                          % "1.0.0",
   "org.webjars"               %  "tv4"                                 % "1.0.17-1",
   "org.webjars.bower"         % "angular-utils-ui-breadcrumbs"         % "0.2.1",
   // Testing
-  "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "1.2.5"              % "test",
-  "com.typesafe.akka"         %% "akka-testkit"                        % "2.4.1"              % "test",
-  "com.github.nscala-time"    %% "nscala-time"                         % "2.8.0"              % "test",
+  "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "1.2.8"              % "test",
+  "com.typesafe.akka"         %% "akka-testkit"                        % "2.4.2"              % "test",
+  "com.github.nscala-time"    %% "nscala-time"                         % "2.10.0"             % "test",
   "org.scalatestplus"         %% "play"                                % "1.4.0"              % "test",
   "org.pegdown"               %  "pegdown"                             % "1.6.0"              % "test",
-  "org.codehaus.janino"       %  "janino"                              % "2.6.1"              % "test"
+  "org.codehaus.janino"       %  "janino"                              % "2.7.8"              % "test"
 )
 
 routesGenerator := InjectedRoutesGenerator

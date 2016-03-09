@@ -7,13 +7,13 @@ import org.biobank.service.users.UsersService
 import org.biobank.service.participants.ParticipantsService
 
 import javax.inject.{Inject => javaxInject}
-import play.api.Logger
-import scala.concurrent.Future
+import play.api.{ Environment, Logger }
 import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
-class CollectionEventsController @javaxInject() (val authToken:      AuthToken,
+class CollectionEventsController @javaxInject() (val env:            Environment,
+                                                 val authToken:      AuthToken,
                                                  val usersService:   UsersService,
                                                  val participantsService: ParticipantsService)
     extends CommandController

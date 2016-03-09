@@ -6,8 +6,7 @@ import org.biobank.domain.user._
 import org.biobank.domain.study._
 import org.biobank.domain.participants.{
   CollectionEvent,
-  Participant,
-  Specimen
+  Participant
 }
 import org.biobank.domain.centre._
 import org.biobank.infrastructure._
@@ -15,8 +14,6 @@ import org.biobank.infrastructure._
 import play.api.libs.json._
 import com.github.nscala_time.time.Imports._
 import org.scalatest._
-import org.slf4j.LoggerFactory
-import org.joda.time.format.DateTimeFormat
 import com.typesafe.scalalogging._
 
 trait JsonHelper extends MustMatchers with OptionValues {

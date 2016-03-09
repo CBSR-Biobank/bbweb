@@ -2,7 +2,6 @@ package org.biobank.controllers
 
 import org.biobank.service.users.UsersService
 import org.biobank.domain.DomainValidation
-import org.biobank.domain.user.UserId
 import org.biobank.service.AuthToken
 import org.biobank.infrastructure.command.Commands._
 

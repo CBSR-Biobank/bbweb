@@ -1,12 +1,9 @@
 package org.biobank.service
 
 import org.biobank.domain._
-import org.biobank.domain.user.UserId
 
 import akka.actor.ActorLogging
-import org.slf4j.Logger
 import akka.persistence.PersistentActor
-import org.joda.time.DateTime
 import com.trueaccord.scalapb.GeneratedMessage
 import scalaz.Scalaz._
 

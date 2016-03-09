@@ -10,7 +10,6 @@ import org.biobank.domain.{
   DomainValidation,
   DomainError
 }
-import org.biobank.domain.user.UserId
 import org.biobank.domain.study._
 
 import akka.util.Timeout

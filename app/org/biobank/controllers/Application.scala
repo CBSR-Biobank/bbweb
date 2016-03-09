@@ -1,7 +1,6 @@
 package org.biobank.controllers
 
 import org.biobank.dto._
-import org.biobank.domain.user.UserId
 import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
@@ -9,16 +8,16 @@ import org.biobank.service.centres.CentresService
 //import org.biobank.query.StudyPersistenceQuery
 
 import javax.inject._
+import play.api.Environment
 import play.api.mvc._
-import play.api.Play.current
-import scala.concurrent.Future
 import scala.language.reflectiveCalls
 
 /**
   * Controller for the main page, and also the about and contact us pages.
  */
 @Singleton
-class Application @Inject() (val authToken:             AuthToken,
+class Application @Inject() (val env:                   Environment,
+                             val authToken:             AuthToken,
                              val usersService:          UsersService,
                              val studiesService:        StudiesService,
                              val centresService:        CentresService

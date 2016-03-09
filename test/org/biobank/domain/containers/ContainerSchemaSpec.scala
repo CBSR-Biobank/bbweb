@@ -1,13 +1,11 @@
 package org.biobank.domain.containerType
 
 import org.biobank.domain.containers._
-import org.biobank.domain.centre.CentreId
 import org.biobank.domain.DomainSpec
 import org.biobank.fixture.NameGenerator
 
 import org.slf4j.LoggerFactory
 import com.github.nscala_time.time.Imports._
-import org.scalatest.Tag
 import scalaz.Scalaz._
 
 class ContainerSchemaSpec extends DomainSpec {

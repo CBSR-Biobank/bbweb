@@ -5,8 +5,7 @@ import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
 import org.biobank.domain.{ DomainValidation, DomainError }
-import org.biobank.domain.user.UserId
-import org.biobank.domain.study.{ Study, StudyId, StudyRepository }
+import org.biobank.domain.study.StudyRepository
 import org.biobank.domain.centre._
 
 import akka.actor._

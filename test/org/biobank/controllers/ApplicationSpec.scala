@@ -1,33 +1,22 @@
 package org.biobank.controllers
 
 import org.biobank.fixture.ControllerFixture
-import org.biobank.domain.user.UserRepository
-import org.biobank.domain.study.StudyRepository
-import org.biobank.domain.centre.CentreRepository
-import org.biobank.Global
 
-import org.scalatest.Tag
-import org.slf4j.LoggerFactory
-import play.api.Play.current
 import play.api.libs.json._
+import play.api.test._
 import play.api.test.Helpers._
-import play.mvc.Http.RequestBuilder
-import scala.concurrent.Future
 
 class ApplicationSpec extends ControllerFixture {
 
   "Application" must {
 
     "send 404 on a bad request" in {
-      val request = new RequestBuilder().method("GET").uri("/xyz")
-      val result = Future.successful(play.test.Helpers.route(request).toScala)
-      status(result) mustEqual NOT_FOUND
+      val result = route(app, FakeRequest(GET, "/xyz")).get
+      status(result) mustEqual Some(NOT_FOUND)
     }
 
     "return results for index" in {
-      val request = new RequestBuilder().method("GET").uri("/")
-      val result = Future.successful(play.test.Helpers.route(request).toScala)
-
+      val result = route(app, FakeRequest(GET, "/")).get
       status(result) mustBe (OK)
       contentType(result) mustBe (Some("text/html"))
     }

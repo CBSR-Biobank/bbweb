@@ -1,20 +1,16 @@
 package org.biobank.service.users
 
-import org.biobank.service.PasswordHasher
 import org.biobank.fixture._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.domain._
 import org.biobank.domain.user._
 
-import javax.inject.{Inject => javaxInject, Named}
-import akka.actor.{ ActorSystem, Actor, Props }
 import akka.pattern._
 import org.joda.time.DateTime
-import org.scalatest.Tag
 import org.slf4j.LoggerFactory
 import scalaz.Scalaz._
-import akka.testkit.{ TestActors, TestKit, ImplicitSender }
+import akka.testkit.TestKit
 
 class UsersProcessorSpec extends TestFixture {
 

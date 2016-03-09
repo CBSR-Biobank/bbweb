@@ -1,19 +1,13 @@
 package org.biobank.controllers
 
-import org.biobank.Global
 import org.biobank.domain.user._
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper
-import org.biobank.service.PasswordHasher
 
-import org.joda.time.DateTime
-import org.scalatest.Tag
-import org.slf4j.LoggerFactory
-import play.api.Play.current
 import play.api.libs.json._
 import play.api.mvc.Cookie
-import play.api.test.Helpers._
 import play.api.test._
+import play.api.test.Helpers._
 
 /**
  * Tests the REST API for [[User]].
@@ -640,7 +634,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val badToken = nameGenerator.next[String]
 
         // this request is valid since user is logged in
-        val resp = route(FakeRequest(GET, uri)
+        val resp = route(app, FakeRequest(GET, uri)
           .withHeaders("X-XSRF-TOKEN" -> badToken)
           .withCookies(Cookie("XSRF-TOKEN", badToken)))
         resp must not be (None)
@@ -662,7 +656,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val badToken = nameGenerator.next[String]
 
         // this request is valid since user is logged in
-        val resp = route(FakeRequest(GET, uri)
+        val resp = route(app, FakeRequest(GET, uri)
           .withHeaders("X-XSRF-TOKEN" -> validToken)
           .withCookies(Cookie("XSRF-TOKEN", badToken)))
         resp must not be (None)
@@ -694,7 +688,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
         //log.info(s"makeRequest: request: $fakeRequest")
 
-        val resp = route(fakeRequest)
+        val resp = route(app, fakeRequest)
         resp must not be (None)
         resp.map { result =>
           // log.info(s"makeRequest: status: ${status(result)}, result: ${contentAsString(result)}")
@@ -708,7 +702,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "not allow requests missing XSRF-TOKEN cookie" in {
-        val resp = route(FakeRequest(GET, uri))
+        val resp = route(app, FakeRequest(GET, uri))
         resp must not be (None)
         resp.map { result =>
           status(result) mustBe (UNAUTHORIZED)
@@ -725,7 +719,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val user = createActiveUserInRepository(plainPassword)
         val token = doLogin(user.email, plainPassword)
 
-        val resp = route(FakeRequest(GET, uri).withCookies(Cookie("XSRF-TOKEN", token)))
+        val resp = route(app, FakeRequest(GET, uri).withCookies(Cookie("XSRF-TOKEN", token)))
         resp must not be (None)
         resp.map { result =>
           status(result) mustBe (UNAUTHORIZED)

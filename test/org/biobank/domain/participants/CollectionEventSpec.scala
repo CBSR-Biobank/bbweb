@@ -6,7 +6,6 @@ import org.biobank.domain.study._
 
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
-import org.scalatest.Tag
 
 class CollectionEventSpec extends DomainSpec {
   import org.biobank.TestUtils._

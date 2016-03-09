@@ -1,22 +1,16 @@
 package org.biobank.service.study
 
 import org.biobank.domain._
-import org.biobank.domain.user.UserId
 import org.biobank.domain.study.{
-  Study,
   StudyId,
   CollectionEventType,
   CollectionEventTypeId,
   CollectionEventTypeRepository,
   CollectionSpecimenSpec
 }
-import org.slf4j.LoggerFactory
 import org.biobank.service.Processor
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.EventUtils
-import org.biobank.infrastructure.event.CommonEvents. {
-  AnnotationType => EventAnnotationType
-}
 import akka.actor._
 import akka.persistence.{ SnapshotOffer, RecoveryCompleted }
 import org.joda.time.DateTime

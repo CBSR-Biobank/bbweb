@@ -2,8 +2,6 @@ package org.biobank.domain.user
 
 import org.biobank.domain.{ DomainValidation, DomainError, ReadWriteRepository, ReadWriteRepositoryRefImpl }
 
-import org.slf4j.LoggerFactory
-
 import javax.inject.Singleton
 import com.google.inject.ImplementedBy
 import scalaz.Scalaz._

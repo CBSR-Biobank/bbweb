@@ -1,7 +1,6 @@
 package org.biobank.domain.containers
 
 import org.biobank.domain._
-import org.biobank.domain.study.StudyId
 import org.joda.time.DateTime
 
 import play.api.libs.json._

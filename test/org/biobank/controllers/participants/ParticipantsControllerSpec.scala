@@ -9,8 +9,6 @@ import org.biobank.fixture.ControllerFixture
 
 import play.api.test.Helpers._
 import play.api.libs.json._
-import org.scalatest.Tag
-import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 
 /**

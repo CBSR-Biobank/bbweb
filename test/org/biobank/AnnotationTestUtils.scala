@@ -1,14 +1,8 @@
 package org.biobank
 
-import org.biobank.domain.{
-  Annotation,
-  AnnotationValueType
-}
+import org.biobank.domain.Annotation
 
 import play.api.libs.json._
-import org.scalatest.Tag
-import org.slf4j.LoggerFactory
-import org.joda.time.DateTime
 
 /**
  * This code is supposed to be independent of the application code, so Json objects are created from scratch.
