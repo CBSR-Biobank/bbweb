@@ -38,7 +38,7 @@ object PagedResults {
       if ((offset > 0) && (offset >= items.size)) {
         DomainError(s"invalid page requested: ${page}").failureNel
       } else {
-        log.info(s"PagedResults.create: page:$page, pageSize: $pageSize, offset: $offset")
+        log.debug(s"PagedResults.create: page:$page, pageSize: $pageSize, offset: $offset")
         PagedResults(
           items    = items.drop(offset).take(pageSize),
           page     = page,

@@ -1,11 +1,11 @@
 package org.biobank.domain.study
 
+import org.biobank.ValidationKey
 import org.biobank.domain.{
   ConcurrencySafeEntity,
   DomainValidation,
   HasUniqueName,
-  HasDescriptionOption,
-  ValidationKey
+  HasDescriptionOption
 }
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
@@ -84,7 +84,7 @@ case class SpecimenGroup(studyId:                     StudyId,
       : DomainValidation[SpecimenGroup] =  {
     val v = SpecimenGroup.create(this.studyId,
                                  this.id,
-                                 this.version,
+                                 this.version + 1,
                                  name,
                                  description,
                                  units,

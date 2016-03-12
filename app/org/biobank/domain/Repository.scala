@@ -38,17 +38,16 @@ trait ReadWriteRepository[K, A] extends ReadRepository[K, A] {
   * A read-only wrapper around an STM Ref of a Map.
   */
 abstract class ReadRepositoryRefImpl[K, A](keyGetter: (A) => K) extends ReadRepository[K, A] {
+  import org.biobank.CommonValidations._
 
   protected val internalMap: Ref[Map[K, A]] = Ref(Map.empty[K, A])
 
   protected def getMap = internalMap.single.get
 
-  protected val NotFoundError = s"${this.getClass.getSimpleName}: value for key not found:"
-
   def isEmpty: Boolean = getMap.isEmpty
 
   def getByKey(key: K): DomainValidation[A] = {
-    getMap.get(key).toSuccessNel(DomainError(s"$NotFoundError $key"))
+    getMap.get(key).toSuccessNel(IdNotFound(s"$key").toString)
   }
 
   def getValues: Iterable[A] = getMap.values

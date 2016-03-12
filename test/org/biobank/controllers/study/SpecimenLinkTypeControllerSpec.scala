@@ -11,7 +11,7 @@ import play.api.libs.json._
 
 class SpecimenLinkTypeControllerSpec extends ControllerFixture with JsonHelper {
 
-  def uri(procType: ProcessingType): String = s"/studies/${procType.id.id}/sltypes"
+  def uri(procType: ProcessingType): String = s"/studies/proctypes/sltypes/${procType.id.id}"
 
   def uri(procType: ProcessingType, slType: SpecimenLinkType): String =
     uri(procType) + s"/${slType.id.id}"
@@ -180,7 +180,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include ("invalid processing type id")
       }
 
-      "fail for an invalid study ID when using an specimen link type id" in {
+      "fail for an invalid procesing type ID when using an specimen link type id" in {
         val procType = factory.createProcessingType
         val slType = factory.createSpecimenLinkType
 

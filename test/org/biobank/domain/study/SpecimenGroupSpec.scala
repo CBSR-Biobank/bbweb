@@ -41,7 +41,7 @@ class SpecimenGroupSpec extends DomainSpec {
           'version                       (0L),
           'name                          (name),
           'description                   (description),
-        'units                         (units),
+          'units                         (units),
           'anatomicalSourceType          (anatomicalSourceType),
           'preservationType              (preservationType),
           'preservationTemperatureType   (preservationTemperatureType),
@@ -64,10 +64,14 @@ class SpecimenGroupSpec extends DomainSpec {
       val preservationTemperatureType = PreservationTemperatureType.RoomTemperature
       val specimenType = SpecimenType.Plasma
 
-      val v = specimenGroup.update(
-        name, description, units, anatomicalSourceType, preservationType, preservationTemperatureType,
-        specimenType)
-      v mustSucceed { updatedSg =>
+      specimenGroup.update(name,
+                           description,
+                           units,
+                           anatomicalSourceType,
+                           preservationType,
+                           preservationTemperatureType,
+                           specimenType
+      ).mustSucceed { updatedSg =>
         updatedSg must have (
           'studyId                     (specimenGroup.studyId),
           'id                          (specimenGroup.id),

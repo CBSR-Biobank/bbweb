@@ -1,18 +1,18 @@
 package org.biobank.service.users
 
-import org.biobank.service._
-import org.biobank.dto._
-import org.biobank.domain._
-import org.biobank.domain.user._
-import org.biobank.infrastructure._
-import org.biobank.infrastructure.command.UserCommands._
-import org.biobank.infrastructure.event.UserEvents._
-
 import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.util.Timeout
-import javax.inject._
 import com.google.inject.ImplementedBy
+import javax.inject._
+import org.biobank.ValidationKey
+import org.biobank.domain._
+import org.biobank.domain.user._
+import org.biobank.dto._
+import org.biobank.infrastructure._
+import org.biobank.infrastructure.command.UserCommands._
+import org.biobank.infrastructure.event.UserEvents._
+import org.biobank.service._
 import org.slf4j.LoggerFactory
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
@@ -74,6 +74,9 @@ class UsersServiceImpl @javax.inject.Inject() (
   val userRepository: UserRepository,
   val passwordHasher: PasswordHasher)
     extends UsersService {
+  import org.biobank.CommonValidations._
+
+  case object InvalidPassword extends ValidationKey
 
   val Log = LoggerFactory.getLogger(this.getClass)
 
@@ -126,7 +129,7 @@ class UsersServiceImpl @javax.inject.Inject() (
       case "LockedUser" =>
         usersFilteredByEmail.collect { case u: LockedUser => u }.success
       case _ =>
-        DomainError(s"invalid user status: $status").failureNel
+        InvalidStatus(status).failureNel
     }
 
     usersFilteredByStatus.map { users =>
@@ -141,10 +144,8 @@ class UsersServiceImpl @javax.inject.Inject() (
   }
 
   def getUser(id: String): DomainValidation[User] = {
-    userRepository.getByKey(UserId(id)).fold(
-      err => DomainError(s"user with id does not exist: $id").failureNel,
-      user => user.success
-    )
+    userRepository.getByKey(UserId(id))
+      .leftMap(_ => IdNotFound(s"user with id does not exist: $id").nel)
   }
 
   def getByEmail(email: String): DomainValidation[User] = {
@@ -158,7 +159,7 @@ class UsersServiceImpl @javax.inject.Inject() (
         if (passwordHasher.valid(user.password, user.salt, enteredPwd)) {
           user.success
         } else {
-          DomainError("invalid password").failureNel
+          InvalidPassword.failureNel
         }
       }
       notLocked <- UserHelper.isUserNotLocked(user)

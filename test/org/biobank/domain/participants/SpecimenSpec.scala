@@ -25,7 +25,7 @@ class SpecimenSpec extends DomainSpec {
         val v = UsableSpecimen.create(
                 id               = specimen.id,
                 specimenGroupId  = specimen.specimenGroupId,
-                version          = -1,
+                version          = 0,
                 timeCreated      = DateTime.now,
                 originLocationId = specimen.originLocationId,
                 locationId       = specimen.locationId,
@@ -58,7 +58,7 @@ class SpecimenSpec extends DomainSpec {
         val v = UsableSpecimen.create(
                 id               = SpecimenId(""),
                 specimenGroupId  = SpecimenGroupId(nameGenerator.next[SpecimenGroupId]),
-                version          = -1,
+                version          = 0,
                 timeCreated      = DateTime.now,
                 originLocationId = nameGenerator.next[Location],
                 locationId       = nameGenerator.next[Location],
@@ -72,7 +72,7 @@ class SpecimenSpec extends DomainSpec {
         val v = UsableSpecimen.create(
                 id               = SpecimenId(nameGenerator.next[SpecimenId]),
                 specimenGroupId  = SpecimenGroupId(""),
-                version          = -1,
+                version          = 0,
                 timeCreated      = DateTime.now,
                 originLocationId = nameGenerator.next[Location],
                 locationId       = nameGenerator.next[Location],
@@ -100,9 +100,9 @@ class SpecimenSpec extends DomainSpec {
         val v = UsableSpecimen.create(
                 id               = SpecimenId(nameGenerator.next[SpecimenId]),
                 specimenGroupId  = SpecimenGroupId(nameGenerator.next[SpecimenGroupId]),
-                version          = -1,
+                version          = 0,
                 timeCreated      = DateTime.now,
-                originLocationId = nameGenerator.next[Location],
+                originLocationId = "",
                 locationId       = nameGenerator.next[Location],
                 containerId      = None,
                 positionId       = None,
@@ -114,10 +114,10 @@ class SpecimenSpec extends DomainSpec {
         val v = UsableSpecimen.create(
                 id               = SpecimenId(nameGenerator.next[SpecimenId]),
                 specimenGroupId  = SpecimenGroupId(nameGenerator.next[SpecimenGroupId]),
-                version          = -1,
+                version          = 0,
                 timeCreated      = DateTime.now,
                 originLocationId = nameGenerator.next[Location],
-                locationId       = nameGenerator.next[Location],
+                locationId       = "",
                 containerId      = None,
                 positionId       = None,
                 amount           = BigDecimal(1.01))
@@ -128,7 +128,7 @@ class SpecimenSpec extends DomainSpec {
         val v = UsableSpecimen.create(
                 id               = SpecimenId(nameGenerator.next[SpecimenId]),
                 specimenGroupId  = SpecimenGroupId(nameGenerator.next[SpecimenGroupId]),
-                version          = -1,
+                version          = 0,
                 timeCreated      = DateTime.now,
                 originLocationId = nameGenerator.next[Location],
                 locationId       = nameGenerator.next[Location],
@@ -142,7 +142,7 @@ class SpecimenSpec extends DomainSpec {
         val v = UsableSpecimen.create(
                 id               = SpecimenId(nameGenerator.next[SpecimenId]),
                 specimenGroupId  = SpecimenGroupId(nameGenerator.next[SpecimenGroupId]),
-                version          = -1,
+                version          = 0,
                 timeCreated      = DateTime.now,
                 originLocationId = nameGenerator.next[Location],
                 locationId       = nameGenerator.next[Location],
@@ -156,7 +156,7 @@ class SpecimenSpec extends DomainSpec {
         val v = UsableSpecimen.create(
                 id               = SpecimenId(nameGenerator.next[SpecimenId]),
                 specimenGroupId  = SpecimenGroupId(nameGenerator.next[SpecimenGroupId]),
-                version          = -1,
+                version          = 0,
                 timeCreated      = DateTime.now,
                 originLocationId = nameGenerator.next[Location],
                 locationId       = nameGenerator.next[Location],

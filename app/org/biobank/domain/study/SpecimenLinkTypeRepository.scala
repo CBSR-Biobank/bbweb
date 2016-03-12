@@ -23,8 +23,6 @@ class SpecimenLinkTypeRepositoryImpl
     extends ReadWriteRepositoryRefImpl[SpecimenLinkTypeId, SpecimenLinkType](v => v.id)
     with SpecimenLinkTypeRepository {
 
-  override val NotFoundError = "specimen link type with id not found:"
-
   def nextIdentity: SpecimenLinkTypeId = new SpecimenLinkTypeId(nextIdentityAsString)
 
   def withId(

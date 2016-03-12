@@ -12,7 +12,7 @@ class ApplicationSpec extends ControllerFixture {
 
     "send 404 on a bad request" in {
       val result = route(app, FakeRequest(GET, "/xyz")).get
-      status(result) mustEqual Some(NOT_FOUND)
+      status(result) mustEqual NOT_FOUND
     }
 
     "return results for index" in {

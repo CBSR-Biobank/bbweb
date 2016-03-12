@@ -145,11 +145,6 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
       createFrom(study) mustFail ("InvalidVersion",  "InvalidName")
     }
 
-    "not be enabled without prior configuration" in {
-      val study = factory.createDisabledStudy
-      study.enable mustFail "no collection event types"
-    }
-
   }
 
   override def createEntity(): DisabledStudy = {

@@ -1,10 +1,10 @@
 package org.biobank.domain.study
 
+import org.biobank.ValidationKey
 import org.biobank.domain.{
   ConcurrencySafeEntity,
   DomainError,
-  DomainValidation,
-  ValidationKey
+  DomainValidation
 }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.JsonUtils._

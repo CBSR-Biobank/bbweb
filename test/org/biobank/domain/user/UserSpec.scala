@@ -24,7 +24,7 @@ class UserSpec extends DomainSpec {
     "be created" in {
       val user = factory.createRegisteredUser
       val v = RegisteredUser.create(id        = user.id,
-                                    version   = -1,
+                                    version   = 0L,
                                     name      = user.name,
                                     email     = user.email,
                                     password  = user.password,

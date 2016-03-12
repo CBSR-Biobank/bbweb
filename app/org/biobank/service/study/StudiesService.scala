@@ -70,7 +70,7 @@ trait StudiesService {
 
   def processingTypesForStudy(studyId: String): DomainValidation[Set[ProcessingType]]
 
-  def specimenLinkTypeWithId(studyId: String, specimenLinkTypeId: String)
+  def specimenLinkTypeWithId(processingTypeId: String, specimenLinkTypeId: String)
       : DomainValidation[SpecimenLinkType]
 
   def specimenLinkTypesForProcessingType(processingTypeId: String)

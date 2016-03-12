@@ -1,11 +1,11 @@
 package org.biobank.domain.participants
 
+import org.biobank.ValidationKey
 import org.biobank.domain.{
   Annotation,
   ConcurrencySafeEntity,
   HasAnnotations,
-  DomainValidation,
-  ValidationKey
+  DomainValidation
 }
 import org.biobank.domain.study._
 import org.biobank.infrastructure.JsonUtils._

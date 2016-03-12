@@ -1,5 +1,6 @@
 package org.biobank.domain
 
+import org.biobank.ValidationKey
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import org.slf4j.LoggerFactory
@@ -33,14 +34,14 @@ object Annotation {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  case object AnnotationTypeUniqueIdRequired extends ValidationKey
+  case object AnnotationTypeIdRequired extends ValidationKey
 
   implicit val annotationFormat = Json.format[Annotation]
 
   def create(annotationTypeId: String,
-             stringValue:            Option[String],
-             numberValue:            Option[String],
-             selectedValues:         Set[String])
+             stringValue:      Option[String],
+             numberValue:      Option[String],
+             selectedValues:   Set[String])
       : DomainValidation[Annotation] = {
     validate(annotationTypeId, stringValue, numberValue, selectedValues)
       .map { _ => Annotation(annotationTypeId, stringValue, numberValue, selectedValues) }
@@ -72,7 +73,7 @@ object Annotation {
       }
     }
 
-    (validateString(annotationTypeId, AnnotationTypeUniqueIdRequired) |@|
+    (validateString(annotationTypeId, AnnotationTypeIdRequired) |@|
        validateNonEmptyOption(stringValue, NonEmptyStringOption) |@|
        validateNumberStringOption(numberValue) |@|
        selectedValues.toList.traverseU(validateAnnotationOption) |@|

@@ -196,8 +196,10 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy
 
         val json = makeRequest(GET, uri(study), NOT_FOUND)
-                              (json \ "status").as[String] must include ("error")
-                                                                        (json \ "message").as[String] must include ("study with id not found")
+
+        (json \ "status").as[String] must include ("error")
+
+        (json \ "message").as[String] must include ("study with id not found")
       }
 
       "fail for an invalid study ID when using a collection event type id" in {
@@ -205,8 +207,10 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
         val cet = factory.createCollectionEventType
 
         val json = makeRequest(GET, uriWithQuery(study, cet), NOT_FOUND)
-                              (json \ "status").as[String] must include ("error")
-                                                                        (json \ "message").as[String] must include ("study with id not found")
+
+        (json \ "status").as[String] must include ("error")
+
+        (json \ "message").as[String] must include ("study with id not found")
       }
 
       "fail for an invalid collection event type id" in {
@@ -323,7 +327,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
           (json \ "status").as[String] must include ("success")
 
-          collectionEventTypeRepository.getByKey(cet.id) mustFail "collection event type with id not found.*"
+          collectionEventTypeRepository.getByKey(cet.id) mustFail "collection event type does not exist.*"
         }
       }
 

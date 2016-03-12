@@ -1,5 +1,6 @@
 package org.biobank.domain.centre
 
+import org.biobank.ValidationKey
 import org.biobank.domain._
 import org.biobank.domain.study.StudyId
 import org.biobank.infrastructure.JsonUtils._
@@ -74,6 +75,7 @@ object Centre {
 }
 
 trait CentreValidations {
+
   val NameMinLength = 2
 
   case object InvalidName extends ValidationKey

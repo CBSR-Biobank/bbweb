@@ -1,5 +1,6 @@
 package org.biobank.domain
 
+import org.biobank.ValidationKey
 import org.biobank.domain.AnnotationValueType._
 
 import play.api.libs.json._

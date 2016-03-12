@@ -1,22 +1,24 @@
 package org.biobank.fixture
 
-import org.biobank.Global
-import org.biobank.domain._
-import org.biobank.domain.user.UserRepository
-import org.biobank.domain.centre._
-import org.biobank.domain.study._
-import org.biobank.domain.participants._
-import org.biobank.service.PasswordHasher
-
-import play.api.inject.guice.GuiceApplicationBuilder
-import org.scalatest._
-import play.api.mvc._
-import org.scalatestplus.play._
-import play.api.libs.json._
-import play.api.test._
-import play.api.test.Helpers._
-import org.slf4j.LoggerFactory
 import com.typesafe.scalalogging._
+import org.biobank.Global
+import org.biobank.controllers.FixedEhCache
+import org.biobank.domain._
+import org.biobank.domain.centre._
+import org.biobank.domain.participants._
+import org.biobank.domain.study._
+import org.biobank.domain.user.UserRepository
+import org.biobank.service.PasswordHasher
+import org.scalatest._
+import org.scalatestplus.play._
+import org.slf4j.LoggerFactory
+import play.api.cache.{ CacheApi /* , EhCacheModule */ }
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json._
+import play.api.mvc._
+import play.api.test.Helpers._
+import play.api.test._
 
 trait BbwebFakeApplication {
 
@@ -43,16 +45,17 @@ trait BbwebFakeApplication {
 
 }
 
-
 /**
-  * This trait allows a test suite to run tests on a Play Framework fake application.
-  *
-  * It uses the [[https://github.com/ddevore/akka-persistence-mongo/ Mongo Journal for Akka Persistence]] to
-  * make it easier to drop all items in the database prior to running a test in a test suite.
-  */
+ * This trait allows a test suite to run tests on a Play Framework fake application.
+ *
+ * It uses the [[https://github.com/ddevore/akka-persistence-mongo/ Mongo Journal for Akka Persistence]] to
+ * make it easier to drop all items in the database prior to running a test in a test suite.
+ */
 abstract class ControllerFixture
     extends PlaySpec
     with OneServerPerTest
+    with OneBrowserPerTest
+    with HtmlUnitFactory
     with BeforeAndAfterEach
     with MustMatchers
     with OptionValues
@@ -72,11 +75,13 @@ abstract class ControllerFixture
   /**
    * tests will not work with EhCache, need alternate implementation for EhCachePlugin.
    */
-  implicit override def newAppForTest(testData: TestData) =
-    new GuiceApplicationBuilder().configure(Map("ehcacheplugin" -> "disabled")).build()
+  override def newAppForTest(testData: TestData) =
+    new GuiceApplicationBuilder()
+      //.disable[EhCacheModule]
+      .overrides(bind[CacheApi].to[FixedEhCache])
+      .build()
 
   def doLogin(email: String = Global.DefaultUserEmail, password: String = "testuser") = {
-    // Log in with test user
     val request = Json.obj("email" -> email, "password" -> password)
     route(app, FakeRequest(POST, "/login").withJsonBody(request)).fold {
         cancel("login failed")
@@ -114,12 +119,12 @@ abstract class ControllerFixture
           contentType(result) mustBe Some("application/json")
           log.debug(s"reply: status: $result,\nresult: ${Json.prettyPrint(jsonResult)}")
           jsonResult
-        case _ =>
+        case code =>
           contentType(result) match {
             case Some("application/json") => log.debug("reply: " + Json.prettyPrint(contentAsJson(result)))
             case _ => log.debug("reply: " + contentAsString(result))
           }
-          fail(s"bad HTTP status: status: $result, expected: $expectedStatus")
+          fail(s"bad HTTP status: status: $code, expected: $expectedStatus")
       }
     }
   }

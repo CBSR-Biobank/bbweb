@@ -32,8 +32,6 @@ class UserRepositoryImpl
     extends ReadWriteRepositoryRefImpl[UserId, User](v => v.id)
     with UserRepository {
 
-  override val NotFoundError = "user with id not found:"
-
   def nextIdentity: UserId = new UserId(nextIdentityAsString)
 
   def allUsers(): Set[User] = getValues.toSet

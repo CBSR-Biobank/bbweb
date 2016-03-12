@@ -1,6 +1,6 @@
 package org.biobank.domain.participants
 
-import org.biobank.domain.ValidationKey
+import org.biobank.ValidationKey
 
 trait ParticipantValidations {
 

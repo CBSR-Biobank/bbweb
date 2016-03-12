@@ -1,38 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-  <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel" />
-
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <!-- Play 2.4.x bug: during startup, Play _always_ (even in test) resets
-         logger configuration. But it shows a warning if we try to specify
-         a log file. https://github.com/playframework/playframework/issues/4574
-    -->
-    <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
-      <evaluator>
-        <expression>event.getMessage().contains("Logger configuration in conf files is deprecated and has no effect.")</expression>
-      </evaluator>
-      <onMatch>DENY</onMatch>
-    </filter>
     <!-- encoders are assigned the type
          ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
     <encoder>
-      <!-- pattern>%d{HH:mm:ss.SSS} %-5level %c{1}:%L - %msg%n</pattern -->
       <pattern>%date{HH:mm:ss.SSS} %-5level %C{36}.%M\(%line\) | %X{akkaSource} | %msg%n</pattern>
       <immediateFlush>true</immediateFlush>
     </encoder>
   </appender>
 
-  <logger name="application" level="INFO" />
-  <logger name="play" level="DEBUG" />
-
+  <logger name="com" level="INFO" />
+  <logger name="net" level="INFO" />
+  <logger name="io.netty" level="INFO" />
+  <logger name="play" level="INFO" />
   <logger name="akka.event.slf4j" level="WARN" />
-  <logger name="play.api.libs.concurrent" level="WARN" />
-  <logger name="org.biobank.controllers" level="INFO" />
+
+  <logger name="org.biobank" level="INFO" />
   <logger name="org.biobank.domain" level="INFO" />
   <logger name="org.biobank.service" level="INFO" />
-  <logger name="org.biobank.controllers" level="INFO" />
 
-  <root level="INFO">
+  <logger name="org.biobank.fixture" level="DEBUG" />
+  <logger name="application" level="INFO" />
+  <logger name="play.api.libs.mailer.MockMailer" level="WARN" />
+
+  <root level="DEBUG">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>

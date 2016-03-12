@@ -1,12 +1,12 @@
 package org.biobank.controllers.study
 
+import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service.AuthToken
-import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
-
-import javax.inject.{Inject, Singleton}
+import org.biobank.service.users.UsersService
+import play.api.libs.json._
 import play.api.{ Environment, Logger }
 
 @Singleton
@@ -29,14 +29,14 @@ class SpecimenLinkTypeController @Inject() (val env:            Environment,
       }
     }
 
-  def addSpecimenLinkType() =
-    commandAction { cmd: AddSpecimenLinkTypeCmd =>
+  def addSpecimenLinkType(procTypeId: String) =
+    commandAction(Json.obj("processingTypeId" -> procTypeId)) { cmd: AddSpecimenLinkTypeCmd =>
       val future = studiesService.processCommand(cmd)
       domainValidationReply(future)
     }
 
-  def updateSpecimenLinkType() =
-    commandAction { cmd: UpdateSpecimenLinkTypeCmd =>
+  def updateSpecimenLinkType(procTypeId: String, id: String) =
+    commandAction(Json.obj("processingTypeId" -> procTypeId, "id" -> id)) { cmd: UpdateSpecimenLinkTypeCmd =>
       val future = studiesService.processCommand(cmd)
       domainValidationReply(future)
     }

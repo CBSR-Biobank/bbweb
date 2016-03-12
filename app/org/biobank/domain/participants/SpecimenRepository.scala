@@ -14,8 +14,6 @@ class SpecimenRepositoryImpl
     extends ReadWriteRepositoryRefImpl[SpecimenId, Specimen](v => v.id)
     with SpecimenRepository {
 
-  override val NotFoundError = "speicmen with id not found:"
-
   def nextIdentity: SpecimenId = new SpecimenId(nextIdentityAsString)
 
 }

@@ -1,5 +1,6 @@
 package org.biobank.domain.containers
 
+import org.biobank.ValidationKey
 import org.biobank.domain._
 
 import play.api.libs.json._

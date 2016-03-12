@@ -25,7 +25,7 @@ class CollectionEventSpec extends DomainSpec {
           id                     = cevent.id,
           participantId          = cevent.participantId,
           collectionEventTypeId  = cevent.collectionEventTypeId,
-          version                = -1,
+          version                = 0,
           timeCompleted          = cevent.timeCompleted,
           visitNumber            = cevent.visitNumber,
           annotations            = cevent.annotations
@@ -85,7 +85,7 @@ class CollectionEventSpec extends DomainSpec {
           visitNumber            = 1,
           annotations            = Set(factory.createAnnotation)
         )
-        v mustFail "CollectinEventTypeIdRequired"
+        v mustFail "CollectionEventTypeIdRequired"
       }
 
       "an invalid visit number is used" in {

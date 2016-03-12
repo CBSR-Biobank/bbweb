@@ -22,10 +22,7 @@ class CentreRepositoryImpl
     extends ReadWriteRepositoryRefImpl[CentreId, Centre](v => v.id)
     with CentreRepository {
 
-  override val NotFoundError = "centre with id not found:"
-
   def nextIdentity: CentreId = new CentreId(nextIdentityAsString)
-
 
   def getDisabled(id: CentreId): DomainValidation[DisabledCentre] = {
     getByKey(id).fold(

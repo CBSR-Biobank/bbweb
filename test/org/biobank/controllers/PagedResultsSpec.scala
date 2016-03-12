@@ -1,6 +1,6 @@
 package org.biobank.controllers
 
-import org.biobank.fixture.BbwebFakeApplication
+import org.biobank.fixture._
 
 import play.api.libs.json._
 import play.api.test.Helpers._
@@ -10,6 +10,8 @@ import org.scalatest._
  * Common code for REST APIs that uses paged results.
  */
 case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers {
+
+  val nameGenerator = new NameGenerator(this.getClass)
 
   def emptyResults(uri: String): Unit = {
     val json = fakeApp.makeRequest(GET, uri)
@@ -60,9 +62,11 @@ case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers 
   }
 
   def failWithInvalidStatus(uri: String) = {
-    val json = fakeApp.makeRequest(GET, uri + "?status=xxx", BAD_REQUEST)
+    val json = fakeApp.makeRequest(GET, uri + "?status=" + nameGenerator.next[String], BAD_REQUEST)
+
     (json \ "status").as[String] must include ("error")
-    (json \ "message").as[String] must include regex ("invalid.*status")
+
+    (json \ "message").as[String] must include ("InvalidStatus")
   }
 
   def failWithNegativePageNumber(uri: String) = {

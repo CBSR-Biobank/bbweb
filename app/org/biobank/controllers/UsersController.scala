@@ -1,24 +1,22 @@
 package org.biobank.controllers
 
+import javax.inject.{Inject, Singleton}
 import org.biobank.domain.user._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.service.AuthToken
-import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
-
-import javax.inject.{Inject, Singleton}
-import play.api.{Environment, Logger}
+import org.biobank.service.users.UsersService
 import play.api.cache.CacheApi
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.mvc._
+import play.api.{Environment, Logger}
 import scala.concurrent.Future
 import scala.language.reflectiveCalls
-
-import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
+import scalaz._
 
 @Singleton
 class UsersController @Inject() (val env:            Environment,
@@ -56,12 +54,13 @@ class UsersController @Inject() (val env:            Environment,
       loginCredentials => {
         usersService.validatePassword(loginCredentials.email, loginCredentials.password).fold(
           err => {
-            Logger.debug(s"login: error: $err")
             val errStr = err.list.toList.mkString(", ")
             // FIXME: what if user attempts multiple failed logins? lock the account after 3 attempts?
             // how long to lock the account?
-            if (errStr.contains("not found") || errStr.contains("invalid password")) {
-              Forbidden("invalid email or password")
+            if (errStr.contains("InvalidPassword")) {
+              Forbidden(errStr)
+            } else if (errStr.contains("not found")) {
+              Forbidden("invalid email")
             } else if (errStr.contains("not active") || errStr.contains("is locked")) {
               Forbidden(err.list.toList.mkString(", "))
             } else {
@@ -69,8 +68,8 @@ class UsersController @Inject() (val env:            Environment,
             }
           },
           user => {
-            Logger.debug(s"user logged in: ${user.email}")
             val token = authToken.newToken(user.id)
+            Logger.debug(s"user logged in: ${user.email}, token: $token")
             Ok(token).withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
           }
         )
@@ -198,27 +197,32 @@ class UsersController @Inject() (val env:            Environment,
     )
   }
 
-  def updateName() =  commandAction { cmd: UpdateUserNameCmd =>
-    val future = usersService.updateName(cmd)
-    domainValidationReply(future)
-  }
+  def updateName(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd: UpdateUserNameCmd =>
+      val future = usersService.updateName(cmd)
+      domainValidationReply(future)
+    }
 
-  def updateEmail() =  commandAction { cmd: UpdateUserEmailCmd =>
+  def updateEmail(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd: UpdateUserEmailCmd =>
     val future = usersService.updateEmail(cmd)
     domainValidationReply(future)
   }
 
-  def updatePassword() =  commandAction { cmd: UpdateUserPasswordCmd =>
+  def updatePassword(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd: UpdateUserPasswordCmd =>
     val future = usersService.updatePassword(cmd)
     domainValidationReply(future)
   }
 
-  def updateAvatarUrl() =  commandAction { cmd: UpdateUserAvatarUrlCmd =>
+  def updateAvatarUrl(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd: UpdateUserAvatarUrlCmd =>
     val future = usersService.updateAvatarUrl(cmd)
     domainValidationReply(future)
   }
 
-  def activateUser() =  commandAction { cmd: ActivateUserCmd =>
+  def activateUser(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd: ActivateUserCmd =>
       if (cmd.id != id) {
         Future.successful(BadRequest("user id mismatch"))
       } else {
@@ -227,7 +231,8 @@ class UsersController @Inject() (val env:            Environment,
       }
   }
 
-  def lockUser() =  commandAction { cmd: LockUserCmd =>
+  def lockUser(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd: LockUserCmd =>
       if (cmd.id != id) {
         Future.successful(BadRequest("user id mismatch"))
       } else {
@@ -236,7 +241,8 @@ class UsersController @Inject() (val env:            Environment,
       }
   }
 
-  def unlockUser() =  commandAction { cmd: UnlockUserCmd =>
+  def unlockUser(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd: UnlockUserCmd =>
       if (cmd.id != id) {
         Future.successful(BadRequest("user id mismatch"))
       } else {

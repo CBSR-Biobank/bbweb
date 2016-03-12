@@ -23,8 +23,6 @@ class ProcessingTypeRepositoryImpl
     extends ReadWriteRepositoryRefImpl[ProcessingTypeId, ProcessingType](v => v.id)
     with ProcessingTypeRepository {
 
-  override val NotFoundError = "processing type with id not found:"
-
   def nextIdentity: ProcessingTypeId = new ProcessingTypeId(nextIdentityAsString)
 
   def withId(

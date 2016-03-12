@@ -1,17 +1,8 @@
 package org.biobank.domain
 
+import org.biobank.ValidationKey
 import scala.util.control.Exception._
-import scalaz._
 import scalaz.Scalaz._
-
-/**
-  * Trait for validation errors
-  */
-trait ValidationKey {
-  def failureNel = this.toString.failureNel
-  def nel        = NonEmptyList(this.toString)
-  def failure    = this.toString.failure
-}
 
 object CommonValidations {
 
@@ -111,13 +102,10 @@ object CommonValidations {
   }
 
   def validateVersion(v: Long): DomainValidation[Long] =
-    if (v < -1) InvalidVersion.failureNel else v.success
+    if (v < 0) InvalidVersion.failureNel else v.success
 
-  def validateId[T <: IdentifiedValueObject[String]](
-    id: T, err: ValidationKey): DomainValidation[T] = {
-    validateString(id.id, err).fold(
-      err => err.failure,
-      idString => id.success)
+  def validateId[T <: IdentifiedValueObject[String]](id: T, err: ValidationKey): DomainValidation[T] = {
+    validateString(id.id, err).map(_ => id)
   }
 
   def validateId[T <: IdentifiedValueObject[String]](maybeId: Option[T], err: ValidationKey)
@@ -125,10 +113,7 @@ object CommonValidations {
     maybeId.fold {
       none[T].successNel[String]
     } { id =>
-      validateId(id, err).fold(
-        err => err.failure[Option[T]],
-        id => some(id).success
-      )
+      validateId(id, err).map(_ => some(id))
     }
   }
 

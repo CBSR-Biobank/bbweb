@@ -20,7 +20,7 @@ class ContainerSchemaSpec extends DomainSpec {
     "be created" in {
       val containerType = factory.createContainerSchema
       val v = ContainerSchema.create(id          = containerType.id,
-                                     version     = -1,
+                                     version     = 0L,
                                      name        = containerType.name,
                                      description = containerType.description,
                                      shared      = containerType.shared)
@@ -79,7 +79,7 @@ class ContainerSchemaSpec extends DomainSpec {
     "not be created with an empty id" in {
       val v = ContainerSchema.create(
         id          = ContainerSchemaId(""),
-        version     = -1,
+        version     = 0L,
         name        = nameGenerator.next[ContainerType],
         description = Some(nameGenerator.next[ContainerType]),
         shared      = true)
@@ -101,7 +101,7 @@ class ContainerSchemaSpec extends DomainSpec {
     "not be created with an null or empty name" in {
       var v = ContainerSchema.create(
         id          = ContainerSchemaId(nameGenerator.next[ContainerType]),
-        version     = -1,
+        version     = 0L,
         name        = null,
         description = Some(nameGenerator.next[ContainerType]),
         shared      = true)
@@ -110,7 +110,7 @@ class ContainerSchemaSpec extends DomainSpec {
 
       v = ContainerSchema.create(
         id          = ContainerSchemaId(nameGenerator.next[ContainerType]),
-        version     = -1,
+        version     = 0L,
         name        = "",
         description = Some(nameGenerator.next[ContainerType]),
         shared      = true)
@@ -121,7 +121,7 @@ class ContainerSchemaSpec extends DomainSpec {
     "not be created with an empty description option" in {
       var v = ContainerSchema.create(
         id          = ContainerSchemaId(nameGenerator.next[ContainerType]),
-        version     = -1,
+        version     = 0L,
         name        = nameGenerator.next[ContainerType],
         description = Some(null),
         shared      = true)
@@ -130,7 +130,7 @@ class ContainerSchemaSpec extends DomainSpec {
 
       v = ContainerSchema.create(
         id          = ContainerSchemaId(nameGenerator.next[ContainerType]),
-        version     = -1,
+        version     = 0L,
         name        = nameGenerator.next[ContainerType],
         description = Some(""),
         shared      = true)

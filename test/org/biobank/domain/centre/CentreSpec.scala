@@ -19,7 +19,7 @@ class CentreSpec extends DomainSpec {
     "be created" in {
       val centre = factory.createDisabledCentre
       DisabledCentre.create(id          = centre.id,
-                            version     = -1,
+                            version     = 0,
                             name        = centre.name,
                             description = centre.description,
                             studyIds    = Set.empty,

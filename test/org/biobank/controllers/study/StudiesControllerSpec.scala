@@ -111,7 +111,6 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             maybeNext = None,
             maybePrev = None)
         jsonItems must have size studies.size
-        log.info(s"--> $jsonItems")
         compareObjs(jsonItems, studies)
       }
 

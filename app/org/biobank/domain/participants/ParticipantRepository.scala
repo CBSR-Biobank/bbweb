@@ -25,8 +25,6 @@ class ParticipantRepositoryImpl
     extends ReadWriteRepositoryRefImpl[ParticipantId, Participant](v => v.id)
     with ParticipantRepository {
 
-  override val NotFoundError = "participant with id not found:"
-
   def nextIdentity: ParticipantId = new ParticipantId(nextIdentityAsString)
 
   def withId(studyId: StudyId, participantId: ParticipantId): DomainValidation[Participant] = {

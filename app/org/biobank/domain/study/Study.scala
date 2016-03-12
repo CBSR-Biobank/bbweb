@@ -1,5 +1,6 @@
 package org.biobank.domain.study
 
+import org.biobank.ValidationKey
 import org.biobank.domain._
 import org.biobank.infrastructure.JsonUtils._
 

@@ -1,12 +1,12 @@
 package org.biobank.controllers.study
 
+import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service.AuthToken
-import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
-
-import javax.inject.{Inject, Singleton}
+import org.biobank.service.users.UsersService
+import play.api.libs.json._
 import play.api.{ Environment, Logger }
 
 @Singleton
@@ -28,14 +28,14 @@ class ProcessingTypeController @Inject() (val env:            Environment,
       }
     }
 
-  def addProcessingType() =
-    commandAction { cmd: AddProcessingTypeCmd =>
+  def addProcessingType(studyId: String) =
+    commandAction(Json.obj("studyId" -> studyId)) { cmd: AddProcessingTypeCmd =>
       val future = studiesService.processCommand(cmd)
       domainValidationReply(future)
   }
 
-  def updateProcessingType() =
-    commandAction { cmd: UpdateProcessingTypeCmd =>
+  def updateProcessingType(studyId: String, id: String) =
+    commandAction(Json.obj("studyId" -> studyId, "id" -> id)) { cmd: UpdateProcessingTypeCmd =>
       val future = studiesService.processCommand(cmd)
       domainValidationReply(future)
   }

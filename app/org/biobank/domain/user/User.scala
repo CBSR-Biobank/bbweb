@@ -1,11 +1,12 @@
 package org.biobank.domain.user
 
+import org.biobank.ValidationKey
 import org.biobank.domain.{
   CommonValidations,
   ConcurrencySafeEntity,
   DomainValidation,
-  DomainError,
-  ValidationKey }
+  DomainError
+}
 import org.joda.time.DateTime
 import org.biobank.infrastructure.JsonUtils._
 
