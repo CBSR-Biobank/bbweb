@@ -34,7 +34,7 @@
 //   val specimenLinkTypeRepository: SpecimenLinkTypeRepository)
 //     extends StudyAnnotationTypeProcessor[SpecimenLinkAnnotationType] {
 //   import org.biobank.infrastructure.event.StudyEventsUtil._
-//   import StudyEvent.EventType
+//   import StudyEventOld.EventType
 
 //   override def persistenceId = "specimen-link-annotation-type-processor-id"
 
@@ -45,7 +45,7 @@
 //     * processed to recreate the current state of the aggregate.
 //     */
 //   val receiveRecover: Receive = {
-//     case event: StudyEvent => event.eventType match {
+//     case event: StudyEventOld => event.eventType match {
 //       case et: EventType.SpecimenLinkAnnotationTypeAdded =>
 //         applySpecimenLinkAnnotationTypeAddedEvent(event)
 //       case et: EventType.SpecimenLinkAnnotationTypeUpdated =>
@@ -143,8 +143,8 @@
 //     */
 //   def update
 //     (cmd: StudyAnnotationTypeModifyCommand)
-//     (fn: SpecimenLinkAnnotationType => DomainValidation[StudyEvent])
-//       : DomainValidation[StudyEvent] = {
+//     (fn: SpecimenLinkAnnotationType => DomainValidation[StudyEventOld])
+//       : DomainValidation[StudyEventOld] = {
 //     for {
 //       annotType    <- annotationTypeRepository.withId(StudyId(cmd.studyId), cmd.id)
 //       notInUse     <- checkNotInUse(annotType)
@@ -152,7 +152,7 @@
 //     } yield event
 //   }
 
-//   private def applySpecimenLinkAnnotationTypeAddedEvent(event: StudyEvent) : Unit = {
+//   private def applySpecimenLinkAnnotationTypeAddedEvent(event: StudyEventOld) : Unit = {
 //     if (event.eventType.isSpecimenLinkAnnotationTypeAdded) {
 //       val addedEvent = event.getSpecimenLinkAnnotationTypeAdded
 
@@ -172,7 +172,7 @@
 //     }
 //   }
 
-//   private def applySpecimenLinkAnnotationTypeUpdatedEvent(event: StudyEvent) : Unit = {
+//   private def applySpecimenLinkAnnotationTypeUpdatedEvent(event: StudyEventOld) : Unit = {
 //     if (event.eventType.isSpecimenLinkAnnotationTypeUpdated) {
 //       val updatedEvent = event.getSpecimenLinkAnnotationTypeUpdated
 
@@ -194,7 +194,7 @@
 //     }
 //   }
 
-//   private def applySpecimenLinkAnnotationTypeRemovedEvent(event: StudyEvent) : Unit = {
+//   private def applySpecimenLinkAnnotationTypeRemovedEvent(event: StudyEventOld) : Unit = {
 //     applyParticipantAnnotationTypeRemovedEvent(
 //       AnnotationTypeId(event.getSpecimenLinkAnnotationTypeRemoved.getAnnotationTypeId))
 //   }

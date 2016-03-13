@@ -34,7 +34,7 @@ class Application @Inject() (val env:                   Environment,
 
   def aggregateCounts = AuthAction(parse.empty) { (token, userId, request) =>
     Ok(AggregateCountsDto(
-      studiesService.getAll.size,
+      studiesService.getStudyCount,
       centresService.getAll.size,
       usersService.getAll.size
     ))

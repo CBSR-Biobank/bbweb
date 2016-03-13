@@ -5,14 +5,13 @@ import org.biobank.domain._
 import javax.inject.Singleton
 import com.google.inject.ImplementedBy
 import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 
 @ImplementedBy(classOf[ProcessingTypeRepositoryImpl])
 trait ProcessingTypeRepository extends ReadWriteRepository [ProcessingTypeId, ProcessingType] {
 
-  def withId(
-    studyId: StudyId,
-    processingTypeId: ProcessingTypeId): DomainValidation[ProcessingType]
+  def withId(studyId: StudyId,processingTypeId: ProcessingTypeId)
+      : DomainValidation[ProcessingType]
 
   def allForStudy(studyId: StudyId): Set[ProcessingType]
 
@@ -22,26 +21,30 @@ trait ProcessingTypeRepository extends ReadWriteRepository [ProcessingTypeId, Pr
 class ProcessingTypeRepositoryImpl
     extends ReadWriteRepositoryRefImpl[ProcessingTypeId, ProcessingType](v => v.id)
     with ProcessingTypeRepository {
+  import org.biobank.CommonValidations._
 
   def nextIdentity: ProcessingTypeId = new ProcessingTypeId(nextIdentityAsString)
 
-  def withId(
-    studyId: StudyId,
-    processingTypeId: ProcessingTypeId): DomainValidation[ProcessingType] = {
-    getByKey(processingTypeId).fold(
-      err =>
-      DomainError(
-        s"processing type does not exist: { studyId: $studyId, processingTypeId: $processingTypeId }")
-        .failureNel,
-      cet =>
-      if (cet.studyId == studyId) {
-        cet.success
-      } else {
-        DomainError(
-          s"study does not have processing type:{ studyId: $studyId, processingTypeId: $processingTypeId }")
-          .failureNel
+  def notFound(id: ProcessingTypeId) = IdNotFound(s"processing type id: $id")
+
+  override def getByKey(id: ProcessingTypeId): DomainValidation[ProcessingType] = {
+    getMap.get(id).toSuccessNel(notFound(id).toString)
+  }
+
+  def withId(studyId: StudyId, processingTypeId: ProcessingTypeId)
+      : DomainValidation[ProcessingType] = {
+    getByKey(processingTypeId) match  {
+      case Success(pt) => {
+        if (pt.studyId == studyId) {
+          pt.success
+        } else {
+          EntityCriteriaError(
+            s"processing type not in study:{ processingTypeId: $processingTypeId, studyId: $studyId }")
+            .failureNel
+        }
       }
-    )
+      case err => err
+    }
   }
 
   def allForStudy(studyId: StudyId): Set[ProcessingType] = {

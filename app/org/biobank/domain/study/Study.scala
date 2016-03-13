@@ -142,23 +142,23 @@ case class DisabledStudy(id:                         StudyId,
 
   /** Used to enable a study after it has been configured, or had configuration changes made on it. */
   def enable(): DomainValidation[EnabledStudy] = {
-    EnabledStudy(id                         = this.id,
-                 version                    = this.version + 1,
-                 timeAdded                  = this.timeAdded,
-                 timeModified               = Some(DateTime.now),
-                 name                       = this.name,
-                 description                = this.description,
+    EnabledStudy(id              = this.id,
+                 version         = this.version + 1,
+                 timeAdded       = this.timeAdded,
+                 timeModified    = Some(DateTime.now),
+                 name            = this.name,
+                 description     = this.description,
                  annotationTypes = this.annotationTypes).success
   }
 
   /** When a study will no longer collect specimens from participants it can be retired. */
   def retire(): DomainValidation[RetiredStudy] = {
-    RetiredStudy(id                         = this.id,
-                 version                    = this.version + 1,
-                 timeAdded                  = this.timeAdded,
-                 timeModified               = Some(DateTime.now),
-                 name                       = this.name,
-                 description                = this.description,
+    RetiredStudy(id              = this.id,
+                 version         = this.version + 1,
+                 timeAdded       = this.timeAdded,
+                 timeModified    = Some(DateTime.now),
+                 name            = this.name,
+                 description     = this.description,
                  annotationTypes = this.annotationTypes).success
   }
 

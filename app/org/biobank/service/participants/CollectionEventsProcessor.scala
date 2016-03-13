@@ -31,6 +31,7 @@ class CollectionEventsProcessor @Inject() (
   val studyRepository:               StudyRepository)
     extends Processor {
 
+  import org.biobank.CommonValidations._
   import CollectionEventEvent.EventType
   import org.biobank.infrastructure.event.EventUtils._
 
@@ -177,7 +178,7 @@ class CollectionEventsProcessor @Inject() (
               .toValidationNel
           }
           notRequired <- {
-            if (annotType.required) DomainError(s"annotation is required").failureNel
+            if (annotType.required) EntityRequried(s"annotation is required").failureNel
             else true.success
           }
           updatedCevent <- cevent.withoutAnnotation(cmd.annotationTypeId)
@@ -229,7 +230,7 @@ class CollectionEventsProcessor @Inject() (
     if (participant.studyId == collectionEventType.studyId) {
       true.success
     } else {
-      DomainError(s"participant and collection event type not in the same study").failureNel
+      EntityCriteriaError(s"participant and collection event type not in the same study").failureNel
     }
   }
 
@@ -355,7 +356,7 @@ class CollectionEventsProcessor @Inject() (
       matcher(item)
     }
     if (exists) {
-      DomainError(s"$errMsgVisitNumberExists: $visitNumber").failureNel
+      EntityCriteriaError(s"$errMsgVisitNumberExists: $visitNumber").failureNel
     } else {
       true.success
     }

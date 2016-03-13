@@ -78,7 +78,7 @@ class StudiesController @Inject() (val env:            Environment,
       )
     }
 
-  def query(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
+  def get(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
       domainValidationReply(studiesService.getStudy(id))
     }
 

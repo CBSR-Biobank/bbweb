@@ -205,8 +205,10 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         studyRepository.put(study)
 
         val json = makeRequest(GET, uriUniqueId(study, participant), BAD_REQUEST)
+
         (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("study does not have participant")
+
+        (json \ "message").as[String] must include regex ("EntityCriteriaError.*participant")
       }
 
       "must return NOT_FOUND for a participant ID that does not exist" in {
@@ -216,8 +218,10 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         var participant = factory.createParticipant
 
         val json = makeRequest(GET, uriUniqueId(study, participant), NOT_FOUND)
+
         (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("participant does not exist")
+
+        (json \ "message").as[String] must include regex ("EntityCriteriaNotFound.*participant.*unique ID")
       }
 
     }

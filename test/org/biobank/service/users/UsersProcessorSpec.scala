@@ -101,7 +101,7 @@ class UsersProcessorSpec extends TestFixture {
         event.id mustBe user.id.id
         event.eventType.isNameUpdated mustBe true
         event.getNameUpdated must have (
-          'version   (Some(user.version + 1)),
+          'version   (Some(user.version)),
           'name      (Some(newName))
         )
 
@@ -137,7 +137,7 @@ class UsersProcessorSpec extends TestFixture {
         event.id mustBe user.id.id
         event.eventType.isEmailUpdated mustBe true
         event.getEmailUpdated must have (
-          'version   (Some(user.version + 1)),
+          'version   (Some(user.version)),
           'email     (Some(newEmail))
         )
 
@@ -174,7 +174,7 @@ class UsersProcessorSpec extends TestFixture {
         event mustBe a [UserEvent]
         event.id mustBe user.id.id
         event.eventType.isPasswordUpdated mustBe true
-        event.getPasswordUpdated.version mustBe (Some(user.version + 1))
+        event.getPasswordUpdated.version mustBe (Some(user.version))
 
         // password mustBe encrypted
         event.getPasswordUpdated.password.value must not be(newPassword)
@@ -213,7 +213,7 @@ class UsersProcessorSpec extends TestFixture {
         event mustBe a [UserEvent]
         event.id mustBe user.id.id
         event.eventType.isPasswordReset mustBe true
-        event.getPasswordReset.version mustBe (Some(user.version + 1))
+        event.getPasswordReset.version mustBe (Some(user.version))
 
         // password mustBe encrypted
         event.getPasswordReset.password.value.length must be > 0
@@ -233,7 +233,7 @@ class UsersProcessorSpec extends TestFixture {
 
       val cmd = ResetUserPasswordCmd(nameGenerator.nextEmail[User])
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]].futureValue
-      v mustFailContains "user with email not found"
+      v mustFailContains "EmailNotFound.*user email not found.*"
     }
 
     "lock an activated a user" in {

@@ -42,7 +42,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
   val specimenLinkTypeRepository:           SpecimenLinkTypeRepository)
     extends Processor {
   import org.biobank.infrastructure.event.StudyEventsUtil._
-  import StudyEvent.EventType
+  import StudyEventOld.EventType
 
   override def persistenceId = "specimen-link-type-processor-id"
 
@@ -53,7 +53,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
     * processed to recreate the current state of the aggregate.
     */
   val receiveRecover: Receive = {
-    case event: StudyEvent => event.eventType match {
+    case event: StudyEventOld => event.eventType match {
       case et: EventType.SpecimenLinkTypeAdded   => applySpecimenLinkTypeAddedEvent(event)
       case et: EventType.SpecimenLinkTypeUpdated => applySpecimenLinkTypeUpdatedEvent(event)
       case et: EventType.SpecimenLinkTypeRemoved => applySpecimenLinkTypeRemovedEvent(event)
@@ -187,8 +187,8 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
 
   private def update
     (cmd: SpecimenLinkTypeModifyCommand)
-    (fn: SpecimenLinkType => DomainValidation[StudyEvent])
-      : DomainValidation[StudyEvent] = {
+    (fn: SpecimenLinkType => DomainValidation[StudyEventOld])
+      : DomainValidation[StudyEventOld] = {
     for {
       processingType <- processingTypeRepository.getByKey(ProcessingTypeId(cmd.processingTypeId))
       slt <- specimenLinkTypeRepository.withId(
@@ -199,7 +199,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
     } yield event
   }
 
-  private def applySpecimenLinkTypeAddedEvent(event: StudyEvent) : Unit = {
+  private def applySpecimenLinkTypeAddedEvent(event: StudyEventOld) : Unit = {
     ???
     // if (event.eventType.isSpecimenLinkTypeAdded) {
     //   val addedEvent = event.getSpecimenLinkTypeAdded
@@ -226,7 +226,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
     // }
   }
 
-  private def applySpecimenLinkTypeUpdatedEvent(event: StudyEvent) : Unit = {
+  private def applySpecimenLinkTypeUpdatedEvent(event: StudyEventOld) : Unit = {
     ???
     // if (event.eventType.isSpecimenLinkTypeUpdated) {
     //   val updatedEvent = event.getSpecimenLinkTypeUpdated
@@ -255,7 +255,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
     // }
   }
 
-  private def applySpecimenLinkTypeRemovedEvent(event: StudyEvent) : Unit = {
+  private def applySpecimenLinkTypeRemovedEvent(event: StudyEventOld) : Unit = {
     if (event.eventType.isSpecimenLinkTypeRemoved) {
 
       specimenLinkTypeRepository.getByKey(

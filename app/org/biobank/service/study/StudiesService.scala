@@ -1,27 +1,22 @@
  package org.biobank.service.study
 
-import org.biobank.dto._
-import org.biobank.infrastructure._
-import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.infrastructure.event.CollectionEventTypeEvents._
-import org.biobank.dto.{ CollectionDto, ProcessingDto }
-import org.biobank.domain.{
-  DomainValidation,
-  DomainError
-}
-import org.biobank.domain.study._
-
-import akka.util.Timeout
 import akka.actor._
 import akka.pattern.ask
-import scala.concurrent._
-import scala.concurrent.duration._
+import akka.util.Timeout
+import com.google.inject.ImplementedBy
+import javax.inject._
+import org.biobank.domain.study._
+import org.biobank.domain.{ DomainValidation, DomainError }
+import org.biobank.dto._
+import org.biobank.dto.{ CollectionDto, ProcessingDto }
+import org.biobank.infrastructure._
+import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.CollectionEventTypeEvents._
+import org.biobank.infrastructure.event.StudyEvents._
 import org.slf4j.LoggerFactory
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import javax.inject._
-import com.google.inject.ImplementedBy
-
+import scala.concurrent._
+import scala.concurrent.duration._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -38,7 +33,7 @@ trait StudyServiceErrorMessages {
 @ImplementedBy(classOf[StudiesServiceImpl])
 trait StudiesService {
 
-  def getAll: Seq[StudyNameDto]
+  def getStudyCount(): Int
 
   def getCountsByStatus(): StudyCountsByStatus
 
@@ -107,19 +102,14 @@ class StudiesServiceImpl @javax.inject.Inject() (
   val specimenLinkTypeRepository:           SpecimenLinkTypeRepository)
     extends StudiesService
     with StudyServiceErrorMessages {
+  import org.biobank.CommonValidations._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
   implicit val timeout: Timeout = 5.seconds
 
-  /**
-    * FIXME: use paging and sorting
-    */
-  def getAll: Seq[StudyNameDto] = {
-    val result = studyRepository.getValues.map { s =>
-      StudyNameDto(s.id.id, s.name, s.getClass.getSimpleName)
-    }
-    result.toSeq.sortWith(StudyNameDto.compareByName)
+  def getStudyCount(): Int = {
+    studyRepository.getValues.size
   }
 
   def getCountsByStatus(): StudyCountsByStatus = {
@@ -156,7 +146,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
         studiesFilteredByName.collect { case s: EnabledStudy => s }.success
       case "RetiredStudy" =>
         studiesFilteredByName.collect { case s: RetiredStudy => s }.success
-      case _ => DomainError(s"invalid study status: $status").failureNel
+      case _ => InvalidStatus(status).failureNel
     }
 
     studiesFilteredByStatus.map { studies =>
@@ -278,43 +268,39 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   private def validStudyId[T](studyId: String)(fn: Study => DomainValidation[T])
       : DomainValidation[T] = {
-    studyRepository.getByKey(StudyId(studyId)).fold(
-      err => DomainError(s"$StudyNotFound: $studyId").failureNel,
-      study => fn(study)
-    )
+    for {
+      study <- studyRepository.getByKey(StudyId(studyId))
+      result <- fn(study)
+    } yield result
   }
 
   private def validCollectionEventTypeId[T](id: String)(fn: CollectionEventType => DomainValidation[T])
       : DomainValidation[T] = {
-    collectionEventTypeRepository.getByKey(CollectionEventTypeId(id)).fold(
-      err => DomainError(s"invalid collection event type id: $id").failureNel,
-      cet => fn(cet)
-    )
+    for {
+      cet <- collectionEventTypeRepository.getByKey(CollectionEventTypeId(id))
+      result <- fn(cet)
+    } yield result
   }
 
   private def validSpecimenLinkTypeId[T](id: String)(fn: SpecimenLinkType => DomainValidation[T])
       : DomainValidation[T] = {
-    specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(id)).fold(
-      err => DomainError(s"invalid specimen link type id: $id").failureNel,
-      slt => fn(slt)
-    )
+    for {
+      slt <- specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(id))
+      result <- fn(slt)
+    } yield result
   }
 
   private def validProcessingTypeId[T](processingTypeId: String)(fn: ProcessingType => DomainValidation[T])
       : DomainValidation[T] = {
-    processingTypeRepository.getByKey(ProcessingTypeId(processingTypeId)).fold(
-      err => DomainError(s"invalid processing type id: $processingTypeId").failureNel,
-      processingType => {
-        studyRepository.getByKey(processingType.studyId).fold(
-          err => DomainError(s"$StudyNotFound: ${processingType.studyId}").failureNel,
-          study => fn(processingType)
-        )
-      }
-    )
+    for {
+      pt <- processingTypeRepository.getByKey(ProcessingTypeId(processingTypeId))
+      study <- studyRepository.getByKey(pt.studyId)
+      result <- fn(pt)
+    } yield result
   }
 
   def processCommand(cmd: StudyCommand): Future[DomainValidation[Study]] =
-    ask(processor, cmd).mapTo[DomainValidation[StudyEvent2]].map { validation =>
+    ask(processor, cmd).mapTo[DomainValidation[StudyEvent]].map { validation =>
       for {
         event <- validation
         study <- studyRepository.getByKey(StudyId(event.id))
@@ -346,7 +332,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
     }
   }
 
-  private def replyWithSpecimenGroup(future: Future[DomainValidation[StudyEvent]])
+  private def replyWithSpecimenGroup(future: Future[DomainValidation[StudyEventOld]])
       : Future[DomainValidation[SpecimenGroup]] = {
     future map { validation =>
       for {
@@ -363,24 +349,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
     }
   }
 
-  private def replyWithCollectionEventType(future: Future[DomainValidation[StudyEvent]])
-      : Future[DomainValidation[CollectionEventType]] = {
-    future map { validation =>
-      for {
-        event <- validation
-        cet <- {
-          val cetId = if (event.eventType.isCollectionEventTypeAdded) {
-            event.getCollectionEventTypeAdded.getCollectionEventTypeId
-          } else {
-            event.getCollectionEventTypeUpdated.getCollectionEventTypeId
-          }
-          collectionEventTypeRepository.getByKey(CollectionEventTypeId(cetId))
-        }
-      } yield cet
-    }
-  }
-
-  private def replyWithProcessingType(future: Future[DomainValidation[StudyEvent]])
+  private def replyWithProcessingType(future: Future[DomainValidation[StudyEventOld]])
       : Future[DomainValidation[ProcessingType]] = {
     future map { validation =>
       for {
@@ -397,7 +366,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
     }
   }
 
-  private def replyWithSpecimenLinkType(future: Future[DomainValidation[StudyEvent]])
+  private def replyWithSpecimenLinkType(future: Future[DomainValidation[StudyEventOld]])
       : Future[DomainValidation[SpecimenLinkType]] = {
     future map { validation =>
       for {

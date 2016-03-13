@@ -12,72 +12,63 @@ object UserCommands {
 
   trait UserModifyCommand extends UserCommand with HasIdentity with HasExpectedVersion
 
-  case class RegisterUserCmd(
-    userId:    Option[String],
-    name:      String,
-    email:     String,
-    password:  String,
-    avatarUrl: Option[String])
+  case class RegisterUserCmd(userId:    Option[String],
+                             name:      String,
+                             email:     String,
+                             password:  String,
+                             avatarUrl: Option[String])
       extends UserCommand
 
-  case class UpdateUserNameCmd(
-    userId:    Option[String],
-    id: String,
-    expectedVersion: Long,
-    name: String)
+  case class UpdateUserNameCmd(userId:    Option[String],
+                               id: String,
+                               expectedVersion: Long,
+                               name: String)
       extends UserModifyCommand
 
-  case class UpdateUserEmailCmd(
-    userId:    Option[String],
-    id: String,
-    expectedVersion: Long,
-    email: String)
+  case class UpdateUserEmailCmd(userId:    Option[String],
+                                id: String,
+                                expectedVersion: Long,
+                                email: String)
       extends UserModifyCommand
 
-  case class UpdateUserPasswordCmd(
-    userId:    Option[String],
-    id: String,
-    expectedVersion: Long,
-    currentPassword: String,
-    newPassword: String)
+  case class UpdateUserPasswordCmd(userId:    Option[String],
+                                   id: String,
+                                   expectedVersion: Long,
+                                   currentPassword: String,
+                                   newPassword: String)
       extends UserModifyCommand
 
-  case class UpdateUserAvatarUrlCmd(
-    userId:    Option[String],
-    id: String,
-    expectedVersion: Long,
-    avatarUrl: Option[String])
+  case class UpdateUserAvatarUrlCmd(userId:    Option[String],
+                                    id: String,
+                                    expectedVersion: Long,
+                                    avatarUrl: Option[String])
       extends UserModifyCommand
 
-  case class ActivateUserCmd(
-    userId:    Option[String],
-    id: String,
-    expectedVersion: Long)
+  case class ActivateUserCmd(userId:    Option[String],
+                             id: String,
+                             expectedVersion: Long)
       extends UserModifyCommand
 
-  case class LockUserCmd(
-    userId:    Option[String],
-    id: String,
-    expectedVersion: Long)
+  case class LockUserCmd(userId:    Option[String],
+                         id: String,
+                         expectedVersion: Long)
       extends UserModifyCommand
 
-  case class UnlockUserCmd(
-    userId:    Option[String],
-    id: String,
-    expectedVersion: Long)
+  case class UnlockUserCmd(userId:    Option[String],
+                           id: String,
+                           expectedVersion: Long)
       extends UserModifyCommand
 
-  case class ResetUserPasswordCmd(
-    userId:    Option[String],
-    id: String,
-    expectedVersion: Long,
-    email: String)
+  case class ResetUserPasswordCmd(userId:          Option[String],
+                                  id:              String,
+                                  expectedVersion: Long,
+                                  email:           String)
       extends UserModifyCommand
 
   // The id and expectedVersion fields are don't care in ResetUserPasswordCmd
   // use this object to create this command
   object ResetUserPasswordCmd {
-    def apply(email: String): ResetUserPasswordCmd = ResetUserPasswordCmd(None, "", -1, email)
+    def apply(email: String): ResetUserPasswordCmd = ResetUserPasswordCmd(None, "", 0L, email)
   }
 
   implicit val registerUserCmdReads        = Json.reads[RegisterUserCmd]

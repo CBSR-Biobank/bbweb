@@ -13,7 +13,7 @@ object StudyEventsUtil {
    * Creates an event with the userId for the user that issued the command, and the current date and time.
    */
   def createStudyEvent(id: StudyId, command: StudyCommand) =
-    StudyEvent(id     = id.id,
+    StudyEventOld(id     = id.id,
                 userId = command.userId,
                 time   = Some(ISODateTimeFormat.dateTime.print(DateTime.now)))
 

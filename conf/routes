@@ -48,7 +48,7 @@ GET     /studies/names                          org.biobank.controllers.study.St
 # studies
 GET     /studies                                org.biobank.controllers.study.StudiesController.list(filter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
 POST    /studies                                org.biobank.controllers.study.StudiesController.add
-GET     /studies/:id                            org.biobank.controllers.study.StudiesController.query(id)
+GET     /studies/:id                            org.biobank.controllers.study.StudiesController.get(id)
 POST    /studies/name/:id                       org.biobank.controllers.study.StudiesController.updateName(id)
 POST    /studies/description/:id                org.biobank.controllers.study.StudiesController.updateDescription(id)
 POST    /studies/pannottype/:id                 org.biobank.controllers.study.StudiesController.addAnnotationType(id)
@@ -104,7 +104,7 @@ DELETE  /centres/locations/:id/:ver/:uniqueId   org.biobank.controllers.centres.
 GET     /users/counts                           org.biobank.controllers.UsersController.userCounts()
 GET     /users                                  org.biobank.controllers.UsersController.list(nameFilter: String ?= "", emailFilter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
 GET     /users/:id                              org.biobank.controllers.UsersController.user(id)
-POST    /users                                  org.biobank.controllers.UsersController.registerUser()
+POST    /users                                  org.biobank.controllers.UsersController.registerUser
 POST    /users/name/:id                         org.biobank.controllers.UsersController.updateName(id)
 POST    /users/email/:id                        org.biobank.controllers.UsersController.updateEmail(id)
 POST    /users/password/:id                     org.biobank.controllers.UsersController.updatePassword(id)
@@ -116,13 +116,13 @@ POST    /users/unlock/:id                       org.biobank.controllers.UsersCon
 GET     /users/studies/:id                      org.biobank.controllers.UsersController.userStudies(id, query: Option[String], sort: Option[String], order: Option[String])
 
 # Authentication
-GET     /authenticate                           org.biobank.controllers.UsersController.authenticateUser()
-POST    /login                                  org.biobank.controllers.UsersController.login()
-POST    /logout                                 org.biobank.controllers.UsersController.logout()
-POST    /passreset                              org.biobank.controllers.UsersController.passwordReset()
+GET     /authenticate                           org.biobank.controllers.UsersController.authenticateUser
+POST    /login                                  org.biobank.controllers.UsersController.login
+POST    /logout                                 org.biobank.controllers.UsersController.logout
+POST    /passreset                              org.biobank.controllers.UsersController.passwordReset
 
 # DTOs
-GET     /counts                                 org.biobank.controllers.Application.aggregateCounts()
+GET     /counts                                 org.biobank.controllers.Application.aggregateCounts
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                           controllers.Assets.versioned(path="/public", file)

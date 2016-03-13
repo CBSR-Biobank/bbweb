@@ -32,10 +32,9 @@ trait ParticipantsService {
 @Singleton
 class ParticipantsServiceImpl @Inject() (
   @Named("participantsProcessor") val processor: ActorRef,
-
-  val studyRepository:           StudyRepository,
-  val participantRepository:     ParticipantRepository,
-  val collectionEventRepository: CollectionEventRepository)
+  val studyRepository:                           StudyRepository,
+  val participantRepository:                     ParticipantRepository,
+  val collectionEventRepository:                 CollectionEventRepository)
     extends ParticipantsService {
 
   val log = LoggerFactory.getLogger(this.getClass)

@@ -4,6 +4,7 @@ import org.biobank.domain._
 
 import javax.inject.Singleton
 import com.google.inject.ImplementedBy
+import scalaz.Scalaz._
 
 @ImplementedBy(classOf[SpecimenRepositoryImpl])
 trait SpecimenRepository
@@ -13,7 +14,14 @@ trait SpecimenRepository
 class SpecimenRepositoryImpl
     extends ReadWriteRepositoryRefImpl[SpecimenId, Specimen](v => v.id)
     with SpecimenRepository {
+  import org.biobank.CommonValidations._
 
   def nextIdentity: SpecimenId = new SpecimenId(nextIdentityAsString)
+
+  def notFound(id: SpecimenId) = IdNotFound(s"specimen id: $id")
+
+  override def getByKey(id: SpecimenId): DomainValidation[Specimen] = {
+    getMap.get(id).toSuccessNel(notFound(id).toString)
+  }
 
 }

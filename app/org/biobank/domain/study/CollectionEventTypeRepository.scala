@@ -27,24 +27,30 @@ trait CollectionEventTypeRepository
 class CollectionEventTypeRepositoryImpl
     extends ReadWriteRepositoryRefImpl[CollectionEventTypeId, CollectionEventType](v => v.id)
     with CollectionEventTypeRepository {
+  import org.biobank.CommonValidations._
 
   def nextIdentity: CollectionEventTypeId = new CollectionEventTypeId(nextIdentityAsString)
 
+  def notFound(id: CollectionEventTypeId) = IdNotFound(s"collection event type: $id")
+
+  override def getByKey(id: CollectionEventTypeId): DomainValidation[CollectionEventType] = {
+    getMap.get(id).toSuccessNel(notFound(id).toString)
+  }
+
   def withId(studyId: StudyId, ceventTypeId: CollectionEventTypeId)
       : DomainValidation[CollectionEventType] = {
-    getByKey(ceventTypeId).fold(
-      err =>
-      DomainError(
-        s"collection event type does not exist: { studyId: $studyId, ceventTypeId: $ceventTypeId }")
-        .failureNel,
-      cet => {
-        if (cet.studyId == studyId)
+    getByKey(ceventTypeId) match {
+      case Success(cet) => {
+        if (cet.studyId == studyId) {
           cet.success
-        else DomainError(
-          s"study does not have collection event type:{ studyId: $studyId, ceventTypeId: $ceventTypeId }")
-        .failureNel
+        } else {
+          EntityCriteriaError(
+            s"collection event type not in study:{ ceventTypeId: $ceventTypeId, studyId: $studyId }")
+            .failureNel
+        }
       }
-    )
+      case err => err
+    }
   }
 
   def allForStudy(studyId: StudyId): Set[CollectionEventType] = {

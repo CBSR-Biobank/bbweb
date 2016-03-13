@@ -1,26 +1,17 @@
 package org.biobank.service.centres
 
-import org.biobank.service.Processor
-import org.biobank.domain.centre._
-import org.biobank.domain.study. {
-  StudyId,
-  StudyRepository
-}
-import org.biobank.domain.{
-  DomainValidation,
-  DomainError,
-  Location
-}
-import org.biobank.infrastructure.command.CentreCommands._
-import org.biobank.infrastructure.event.CentreEvents._
-import org.biobank.TestData
-
 import akka.actor._
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
+import javax.inject.{Inject}
+import org.biobank.TestData
+import org.biobank.domain.centre._
+import org.biobank.domain.study.{StudyId, StudyRepository}
+import org.biobank.domain.{DomainValidation, Location}
+import org.biobank.infrastructure.command.CentreCommands._
+import org.biobank.infrastructure.event.CentreEvents._
+import org.biobank.service.Processor
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import javax.inject.{Inject}
-
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -34,6 +25,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                   val studyRepository:  StudyRepository,
                                   val testData:         TestData)
     extends Processor {
+  import org.biobank.CommonValidations._
   import CentreEvent.EventType
 
   override def persistenceId = "centre-processor-id"
@@ -442,13 +434,11 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
   private def updateCentre[T <: Centre](cmd: CentreModifyCommand)
                           (fn: Centre => DomainValidation[CentreEvent])
       : DomainValidation[CentreEvent] = {
-    centreRepository.getByKey(CentreId(cmd.id)).fold(
-      err => DomainError(s"centre with id does not exist: $id").failureNel,
-      centre => for {
-        validVersion  <-  centre.requireVersion(cmd.expectedVersion)
-        updatedCentre <- fn(centre)
-      } yield updatedCentre
-    )
+    for {
+      centre <- centreRepository.getByKey(CentreId(cmd.id))
+      validVersion  <-  centre.requireVersion(cmd.expectedVersion)
+      updatedCentre <- fn(centre)
+    } yield updatedCentre
   }
 
   private def updateDisabled[T <: Centre](cmd: CentreModifyCommand)
@@ -456,7 +446,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       : DomainValidation[CentreEvent] = {
     updateCentre(cmd) {
       case centre: DisabledCentre => fn(centre)
-      case centre => DomainError(s"centre is not disabled: ${cmd.id}").failureNel
+      case centre => InvalidStatus(s"centre is not disabled: ${cmd.id}").failureNel
     }
   }
 
@@ -465,7 +455,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       : DomainValidation[CentreEvent] = {
     updateCentre(cmd) {
       case centre: EnabledCentre => fn(centre)
-      case centre => DomainError(s"centre is not enabled: ${cmd.id}").failureNel
+      case centre => InvalidStatus(s"centre is not enabled: ${cmd.id}").failureNel
     }
   }
 

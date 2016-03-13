@@ -55,7 +55,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must startWith ("centre with id does not exist")
+    (json \ "message").as[String] must include regex ("IdNotFound.*centre")
   }
 
   def checkInvalidCentreId(url: String): Unit = {
@@ -111,7 +111,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val json = makeRequest(GET, uri(centre), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("invalid centre id")
+
+        (json \ "message").as[String] must include regex ("IdNotFound.*centre")
       }
     }
 
@@ -528,7 +529,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val json = makeRequest(POST, uri(centre, "enable"), NOT_FOUND, json = cmdJson)
 
         (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include regex ("centre.*does not exist")
+
+        (json \ "message").as[String] must include regex ("IdNotFound.*centre")
       }
 
     }
@@ -571,7 +573,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val json = makeRequest(POST, uri(centre, "disable"), NOT_FOUND, json = cmdJson)
 
         (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("does not exist")
+
+        (json \ "message").as[String] must include regex ("IdNotFound.*centre")
       }
 
     }
@@ -647,7 +650,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
         (jsonResponse \ "status").as[String] must include ("error")
 
-        (jsonResponse \ "message").as[String] must include regex ("centre.*does not exist")
+        (jsonResponse \ "message").as[String] must include regex ("IdNotFound.*centre")
       }
 
       "fail when adding a location on an enabled centre" in {
@@ -708,7 +711,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include regex ("centre.*does not exist")
+        (json \ "message").as[String] must include regex ("IdNotFound.*centre")
       }
 
       "fail when deleting an invalid location from a centre" in {
@@ -776,7 +779,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include ("study with id not found")
+        (json \ "message").as[String] must include regex ("IdNotFound.*study")
       }
 
       "fail when adding a study on an enabled centre" in {
@@ -830,7 +833,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include ("study with id not found")
+        (json \ "message").as[String] must include regex ("IdNotFound.*study")
       }
 
       "fail when removing a study on an enabled centre" in {

@@ -1,14 +1,13 @@
 package org.biobank.controllers.study
 
 import org.biobank.controllers._
-import org.biobank.dto._
-import org.biobank.domain.study._
 import org.biobank.domain.JsonHelper
+import org.biobank.domain.study._
+import org.biobank.dto._
 import org.biobank.fixture.ControllerFixture
-
 import org.joda.time.DateTime
-import play.api.test.Helpers._
 import play.api.libs.json._
+import play.api.test.Helpers._
 
 /**
  * Tests the REST API for [[Study]].
@@ -44,7 +43,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must startWith ("study with id not found")
+    (json \ "message").as[String] must include regex("IdNotFound.*study")
   }
 
   def checkInvalidStudyId(url: String): Unit = {
@@ -82,7 +81,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include ("study is not disabled")
+    (json \ "message").as[String] must include regex("InvalidStatus.*study not disabled")
   }
 
   "Study REST API" when {
@@ -292,7 +291,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must startWith ("study with id not found")
+        (json \ "message").as[String] must include regex("IdNotFound.study")
       }
 
     }
@@ -340,7 +339,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must startWith ("study with name already exists")
+        (json \ "message").as[String] must include regex ("EntityCriteriaError.*already exists")
       }
 
       "not add add a new study with a name less than 2 characters" in {
@@ -403,7 +402,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must startWith ("study with name already exists")
+        (json \ "message").as[String] must include regex ("EntityCriteriaError.*name already exists")
       }
 
       "fail when updating a study's name to something with less than 2 characters" in {
@@ -607,7 +606,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must startWith ("study with id not found")
+        (json \ "message").as[String] must include regex("IdNotFound.*study")
       }
 
       "fail when removing an annotation type that does not exist" in {
@@ -639,7 +638,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must startWith ("study is not disabled")
+          (json \ "message").as[String] must include regex("InvalidStatus.*study not disabled")
         }
       }
 
@@ -715,7 +714,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include ("study with id not found")
+        (json \ "message").as[String] must include regex("IdNotFound.*study")
       }
 
       "fail when enabling and study ID does not exit" in {

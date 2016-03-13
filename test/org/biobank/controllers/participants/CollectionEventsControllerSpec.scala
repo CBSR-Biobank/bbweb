@@ -221,7 +221,7 @@ class CollectionEventsControllerSpec
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include ("collection event does not exist")
+    (json \ "message").as[String] must include regex ("IdNotFound.*collection event")
   }
 
   def removeOnNonEnabledStudy(study: Study, cevent: CollectionEvent) = {

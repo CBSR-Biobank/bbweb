@@ -41,31 +41,7 @@ trait UsersService {
 
   def validatePassword(email: String, enteredPwd: String): DomainValidation[User]
 
-  def resetPassword(cmd: ResetUserPasswordCmd)
-      : Future[DomainValidation[User]]
-
-  def register(cmd: RegisterUserCmd): Future[DomainValidation[User]]
-
-  def updateName(cmd: UpdateUserNameCmd)
-      : Future[DomainValidation[User]]
-
-  def updateEmail(cmd: UpdateUserEmailCmd)
-      : Future[DomainValidation[User]]
-
-  def updatePassword(cmd: UpdateUserPasswordCmd)
-      : Future[DomainValidation[User]]
-
-  def updateAvatarUrl(cmd: UpdateUserAvatarUrlCmd)
-      : Future[DomainValidation[User]]
-
-  def activate(cmd: ActivateUserCmd)
-      : Future[DomainValidation[User]]
-
-  def lock(cmd: LockUserCmd)
-      : Future[DomainValidation[User]]
-
-  def unlock(cmd: UnlockUserCmd)
-      : Future[DomainValidation[User]]
+  def processCommand(cmd: UserCommand): Future[DomainValidation[User]]
 
 }
 
@@ -166,58 +142,12 @@ class UsersServiceImpl @javax.inject.Inject() (
     } yield user
   }
 
-  def resetPassword(cmd: ResetUserPasswordCmd)
-      : Future[DomainValidation[User]] = {
-    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
-  }
-
-  def register(cmd: RegisterUserCmd): Future[DomainValidation[User]] = {
-    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
-  }
-
-  def updateName(cmd: UpdateUserNameCmd)
-      : Future[DomainValidation[User]] = {
-    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
-  }
-
-  def updateEmail(cmd: UpdateUserEmailCmd)
-      : Future[DomainValidation[User]] = {
-    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
-  }
-
-  def updatePassword(cmd: UpdateUserPasswordCmd)
-      : Future[DomainValidation[User]] = {
-    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
-  }
-
-  def updateAvatarUrl(cmd: UpdateUserAvatarUrlCmd)
-      : Future[DomainValidation[User]] = {
-    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
-  }
-
-  def activate(cmd: ActivateUserCmd)
-      : Future[DomainValidation[User]] = {
-    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
-  }
-
-  def lock(cmd: LockUserCmd)
-      : Future[DomainValidation[User]] = {
-    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
-  }
-
-  def unlock(cmd: UnlockUserCmd)
-      : Future[DomainValidation[User]] = {
-    replyWithUser(ask(processor, cmd).mapTo[DomainValidation[UserEvent]])
-  }
-
-  private def replyWithUser(future: Future[DomainValidation[UserEvent]])
-      : Future[DomainValidation[User]] = {
-    future map { validation =>
+  def processCommand(cmd: UserCommand): Future[DomainValidation[User]] =
+    ask(processor, cmd).mapTo[DomainValidation[UserEvent]].map { validation =>
       for {
         event <- validation
-        user <- userRepository.getByKey(UserId(event.id))
+        user  <- userRepository.getByKey(UserId(event.id))
       } yield user
     }
-  }
 
 }

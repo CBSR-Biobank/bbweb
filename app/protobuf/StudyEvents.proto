@@ -2,97 +2,6 @@ package org.biobank.infrastructure.event;
 
 import "CommonEvents.proto";
 
-message StudyAddedEvent {
-   optional string name        = 1;
-   optional string description = 2;
-}
-
-message StudyNameUpdatedEvent {
-   optional int64  version     = 1;
-   optional string name        = 2;
-}
-
-message StudyDescriptionUpdatedEvent {
-   optional int64  version     = 1;
-   optional string description = 3;
-}
-
-message StudyAnnotationTypeAddedEvent {
-   optional int64          version        = 1;
-   optional AnnotationType annotationType = 2;
-}
-
-message StudyAnnotationTypeRemovedEvent {
-   optional int64  version  = 1;
-   optional string uniqueId = 2;
-}
-
-message StudyEnabledEvent {
-   optional int64  version = 1;
-}
-
-message StudyDisabledEvent {
-   optional int64  version = 1;
-}
-
-message StudyRetiredEvent {
-   optional int64  version = 1;
-}
-
-message StudyUnretiredEvent {
-   optional int64  version = 1;
-}
-
-message CollectionEventAnnotationTypeAddedEvent {
-   optional string annotationTypeId = 1;
-   optional string name             = 2;
-   optional string description      = 3;
-   optional string valueType        = 4; // a scala enum is used here
-   optional int32  maxValueCount    = 5;
-   repeated string options          = 6;
-   optional bool   required         = 7;
-}
-
-message CollectionEventAnnotationTypeUpdatedEvent {
-   optional string annotationTypeId = 1;
-   optional int64  version          = 2;
-   optional string name             = 3;
-   optional string description      = 4;
-   optional string valueType        = 5; // a scala enum is used here
-   optional int32  maxValueCount    = 6;
-   repeated string options          = 7;
-   optional bool   required         = 8;
-}
-
-message CollectionEventAnnotationTypeRemovedEvent {
-   optional string annotationTypeId = 1;
-}
-
-message ParticipantAnnotationTypeAddedEvent {
-   optional string annotationTypeId = 1;
-   optional string name             = 2;
-   optional string description      = 3;
-   optional string valueType        = 4; // a scala enum is used here
-   optional int32  maxValueCount    = 5;
-   repeated string options          = 6;
-   optional bool   required         = 7;
-}
-
-message ParticipantAnnotationTypeUpdatedEvent {
-   optional string annotationTypeId = 1;
-   optional int64  version          = 2;
-   optional string name             = 3;
-   optional string description      = 4;
-   optional string valueType        = 5; // a scala enum is used here
-   optional int32  maxValueCount    = 6;
-   repeated string options          = 7;
-   optional bool   required         = 8;
-}
-
-message ParticipantAnnotationTypeRemovedEvent {
-   optional string annotationTypeId = 1;
-}
-
 message SpecimenLinkAnnotationTypeAddedEvent {
    optional string annotationTypeId = 1;
    optional string name             = 2;
@@ -216,36 +125,15 @@ message SpecimenLinkTypeRemovedEvent {
    optional string specimenLinkTypeId = 2;
 }
 
-message StudyEvent {
+message StudyEventOld {
    required string id     = 1;
    optional string userId = 2;
    optional string time   = 3;
 
    oneof event_type {
-      StudyAddedEvent                           added                                =  4;
-      StudyNameUpdatedEvent                     nameUpdated                          =  5;
-
-      StudyDescriptionUpdatedEvent              descriptionUpdated                   =  6;
-      StudyAnnotationTypeAddedEvent             annotationTypeAdded                  =  7;
-      StudyAnnotationTypeAddedEvent             annotationTypeUpdated                =  8;
-      StudyAnnotationTypeRemovedEvent           annotationTypeRemoved                =  9;
-
-      StudyEnabledEvent                         enabled                              = 10;
-      StudyDisabledEvent                        disabled                             = 11;
-      StudyRetiredEvent                         retired                              = 12;
-      StudyUnretiredEvent                       unretired                            = 13;
-      CollectionEventAnnotationTypeAddedEvent   collectionEventAnnotationTypeAdded   = 14;
-      CollectionEventAnnotationTypeUpdatedEvent collectionEventAnnotationTypeUpdated = 15;
-      CollectionEventAnnotationTypeRemovedEvent collectionEventAnnotationTypeRemoved = 16;
-      ParticipantAnnotationTypeAddedEvent       participantAnnotationTypeAdded       = 17;
-      ParticipantAnnotationTypeUpdatedEvent     participantAnnotationTypeUpdated     = 18;
-      ParticipantAnnotationTypeRemovedEvent     participantAnnotationTypeRemoved     = 19;
       SpecimenLinkAnnotationTypeAddedEvent      specimenLinkAnnotationTypeAdded      = 20;
       SpecimenLinkAnnotationTypeUpdatedEvent    specimenLinkAnnotationTypeUpdated    = 21;
       SpecimenLinkAnnotationTypeRemovedEvent    specimenLinkAnnotationTypeRemoved    = 22;
-      CollectionEventTypeAddedEvent             collectionEventTypeAdded             = 23;
-      CollectionEventTypeUpdatedEvent           collectionEventTypeUpdated           = 24;
-      CollectionEventTypeRemovedEvent           collectionEventTypeRemoved           = 25;
       SpecimenGroupAddedEvent                   specimenGroupAdded                   = 26;
       SpecimenGroupUpdatedEvent                 specimenGroupUpdated                 = 27;
       SpecimenGroupRemovedEvent                 specimenGroupRemoved                 = 28;
@@ -258,7 +146,7 @@ message StudyEvent {
    }
 }
 
-message StudyEvent2 {
+message StudyEvent {
 
    message Added {
       optional string name        = 1;

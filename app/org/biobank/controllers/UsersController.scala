@@ -7,12 +7,10 @@ import org.biobank.service.AuthToken
 import org.biobank.service.study.StudiesService
 import org.biobank.service.users.UsersService
 import play.api.cache.CacheApi
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.{Environment, Logger}
-import scala.concurrent.Future
 import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -101,31 +99,9 @@ class UsersController @Inject() (val env:            Environment,
 
   /** Resets the user's password.
     */
-  def passwordReset() = Action.async(parse.json) { implicit request =>
-    request.body.validate[ResetUserPasswordCmd].fold(
-      errors => {
-        Future.successful(BadRequest(JsError.toJson(errors)))
-      },
-      command => {
-        val future = usersService.resetPassword(command)
-        future.map { validation =>
-          validation.fold(
-            err => {
-              val errStr = err.list.toList.mkString(", ")
-              if (errStr.contains("not found")) {
-                NotFound("email address not registered")
-              } else if (errStr.contains("not active")) {
-                Forbidden("user is not active")
-              } else {
-                BadRequest("email address not registered")
-              }
-            },
-            event => Ok("password has been reset")
-          )
-        }
-      }
-    )
-  }
+  def passwordReset() = commandAction { cmd: ResetUserPasswordCmd =>
+      processCommand(cmd)
+    }
 
   def userCounts() =
     AuthAction(parse.empty) { (token, userId, request) =>
@@ -172,91 +148,56 @@ class UsersController @Inject() (val env:            Environment,
     domainValidationReply(usersService.getUser(id))
   }
 
-  def registerUser() = Action.async(parse.json) { implicit request =>
-    request.body.validate[RegisterUserCmd].fold(
-      errors => {
-        Future.successful(BadRequest(JsError.toJson(errors)))
-      },
-      cmd => {
-        Logger.debug(s"addUser: cmd: $cmd")
-        val future = usersService.register(cmd)
-        future.map { validation =>
-          validation.fold(
-            err   => {
-              val errs = err.list.toList.mkString(", ")
-              if (errs.contains("exists")) {
-                Forbidden("already registered")
-              } else {
-                BadRequest(errs)
-              }
-            },
-            event => Ok("user registered")
-          )
-        }
-      }
-    )
+  private def processCommand(cmd: UserCommand) = {
+    val future = usersService.processCommand(cmd)
+    domainValidationReply(future)
+  }
+
+  def registerUser() = commandAction { cmd: RegisterUserCmd =>
+      processCommand(cmd)
   }
 
   def updateName(id: String) =
     commandAction(Json.obj("id" -> id)) { cmd: UpdateUserNameCmd =>
-      val future = usersService.updateName(cmd)
-      domainValidationReply(future)
+      processCommand(cmd)
     }
 
   def updateEmail(id: String) =
     commandAction(Json.obj("id" -> id)) { cmd: UpdateUserEmailCmd =>
-    val future = usersService.updateEmail(cmd)
-    domainValidationReply(future)
+      processCommand(cmd)
   }
 
   def updatePassword(id: String) =
     commandAction(Json.obj("id" -> id)) { cmd: UpdateUserPasswordCmd =>
-    val future = usersService.updatePassword(cmd)
-    domainValidationReply(future)
+      processCommand(cmd)
   }
 
   def updateAvatarUrl(id: String) =
     commandAction(Json.obj("id" -> id)) { cmd: UpdateUserAvatarUrlCmd =>
-    val future = usersService.updateAvatarUrl(cmd)
-    domainValidationReply(future)
+      processCommand(cmd)
   }
 
   def activateUser(id: String) =
     commandAction(Json.obj("id" -> id)) { cmd: ActivateUserCmd =>
-      if (cmd.id != id) {
-        Future.successful(BadRequest("user id mismatch"))
-      } else {
-        val future = usersService.activate(cmd)
-        domainValidationReply(future)
-      }
+      processCommand(cmd)
   }
 
   def lockUser(id: String) =
     commandAction(Json.obj("id" -> id)) { cmd: LockUserCmd =>
-      if (cmd.id != id) {
-        Future.successful(BadRequest("user id mismatch"))
-      } else {
-        val future = usersService.lock(cmd)
-        domainValidationReply(future)
-      }
+      processCommand(cmd)
   }
 
   def unlockUser(id: String) =
     commandAction(Json.obj("id" -> id)) { cmd: UnlockUserCmd =>
-      if (cmd.id != id) {
-        Future.successful(BadRequest("user id mismatch"))
-      } else {
-        val future = usersService.unlock(cmd)
-        domainValidationReply(future)
-      }
+      processCommand(cmd)
   }
 
   def userStudies(id: String, query: Option[String], sort: Option[String], order: Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      // FIXME this should return the only the studies this user has access to
+      // FIXME this should return only the studies this user has access to
       //
       // This this for now, but fix once user groups have been implemented
-      val studies = studiesService.getAll.toList
+      val studies = studiesService.getStudyCount
       Ok(studies)
     }
 }

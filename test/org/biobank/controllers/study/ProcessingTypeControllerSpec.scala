@@ -49,7 +49,8 @@ class ProcessingTypeControllerSpec extends ControllerFixture with JsonHelper {
       procTypeToAddCmdJson(procType))
 
     (json \ "status").as[String] must include ("error")
-      (json \ "message").as[String] must include ("is not disabled")
+
+    (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
   }
 
   def updateOnNonDisabledStudy(study: Study) {
@@ -67,7 +68,8 @@ class ProcessingTypeControllerSpec extends ControllerFixture with JsonHelper {
       procTypeToUpdateCmdJson(procType2))
 
     (json \ "status").as[String] must include ("error")
-      (json \ "message").as[String] must include ("is not disabled")
+
+    (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
   }
 
   def removeOnNonDisabledStudy(study: Study) {
@@ -82,7 +84,8 @@ class ProcessingTypeControllerSpec extends ControllerFixture with JsonHelper {
       BAD_REQUEST)
 
     (json \ "status").as[String] must include ("error")
-      (json \ "message").as[String] must include ("is not disabled")
+
+    (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
   }
 
   "Processing Type REST API" when {
@@ -146,8 +149,10 @@ class ProcessingTypeControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy
 
         val json = makeRequest(GET, uri(study), NOT_FOUND)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("study with id not found")
+
+        (json \ "status").as[String] must include ("error")
+
+        (json \ "message").as[String] must include regex ("IdNotFound.*study")
       }
 
       "fail for an invalid study ID when using an processing type id" in {
@@ -155,8 +160,10 @@ class ProcessingTypeControllerSpec extends ControllerFixture with JsonHelper {
         val procType = factory.createProcessingType
 
         val json = makeRequest(GET, uriWithQuery(study, procType), NOT_FOUND)
+
         (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("study with id not found")
+
+        (json \ "message").as[String] must include regex ("IdNotFound.*study")
       }
 
       "fail for an invalid processing type id" in {
@@ -166,8 +173,10 @@ class ProcessingTypeControllerSpec extends ControllerFixture with JsonHelper {
         val procType = factory.createProcessingType
 
         val json = makeRequest(GET, uriWithQuery(study, procType), NOT_FOUND)
-          (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("processing type does not exist")
+
+        (json \ "status").as[String] must include ("error")
+
+        (json \ "message").as[String] must include regex ("IdNotFound.*processing type")
       }
     }
 

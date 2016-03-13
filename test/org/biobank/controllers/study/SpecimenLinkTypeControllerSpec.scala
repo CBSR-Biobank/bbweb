@@ -65,7 +65,8 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture with JsonHelper {
       slTypeToAddCmdJson(slType))
 
     (json \ "status").as[String] must include ("error")
-    (json \ "message").as[String] must include ("is not disabled")
+
+    (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
   }
 
   def updateOnNonDisabledStudy(study: Study, procType: ProcessingType) = {
@@ -86,7 +87,8 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture with JsonHelper {
       slTypeToUpdateCmdJson(slType2))
 
     (json \ "status").as[String] must include ("error")
-    (json \ "message").as[String] must include ("is not disabled")
+
+    (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
   }
 
   def removeOnNonDisabledStudy(study: Study, procType: ProcessingType) = {
@@ -101,7 +103,8 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture with JsonHelper {
     val json = makeRequest(DELETE, uri(procType, slType, slType.version), BAD_REQUEST)
 
     (json \ "status").as[String] must include ("error")
-    (json \ "message").as[String] must include ("is not disabled")
+
+    (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
   }
 
   def createEntities()(fn: (Study, ProcessingType) => Unit): Unit = {
@@ -176,8 +179,10 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture with JsonHelper {
         val procType = factory.createProcessingType
 
         val json = makeRequest(GET, uri(procType), NOT_FOUND)
+
         (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("invalid processing type id")
+
+        (json \ "message").as[String] must include regex ("IdNotFound.*processing type")
       }
 
       "fail for an invalid procesing type ID when using an specimen link type id" in {
@@ -185,16 +190,20 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture with JsonHelper {
         val slType = factory.createSpecimenLinkType
 
         val json = makeRequest(GET, uriWithQuery(procType, slType), NOT_FOUND)
+
         (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("invalid processing type id")
+
+        (json \ "message").as[String] must include regex ("IdNotFound.*processing type")
       }
 
       "fail for an invalid specimen link type id" in {
         createEntities() { (study, procType) =>
           val slType = factory.createSpecimenLinkType
           val json = makeRequest(GET, uriWithQuery(procType, slType), NOT_FOUND)
+
           (json \ "status").as[String] must include ("error")
-          (json \ "message").as[String] must include ("specimen link type does not exist")
+
+          (json \ "message").as[String] must include regex ("specimen link type does not exist")
         }
       }
 
@@ -238,10 +247,11 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture with JsonHelper {
 
         val procType2 = factory.createProcessingType
 
-        val json = makeRequest(POST, uri(procType2), BAD_REQUEST, json = slTypeToAddCmdJson(slType))
+        val json = makeRequest(POST, uri(procType2), NOT_FOUND, json = slTypeToAddCmdJson(slType))
 
         (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("processing type id mismatch")
+
+        (json \ "message").as[String] must include regex ("IdNotFound.*processing type")
       }
 
     }
@@ -294,10 +304,12 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture with JsonHelper {
 
         val json = makeRequest(PUT,
                                uri(procType2, slType),
-                               BAD_REQUEST,
-                               json = slTypeToUpdateCmdJson(slType))
+                               NOT_FOUND,
+                               slTypeToUpdateCmdJson(slType))
+
         (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("processing type id mismatch")
+
+        (json \ "message").as[String] must include regex ("IdNotFound.*processing type")
       }
 
       "fail when updating and specimen link type IDs do not match" in {

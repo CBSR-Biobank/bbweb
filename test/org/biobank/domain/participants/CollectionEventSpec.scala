@@ -54,7 +54,7 @@ class CollectionEventSpec extends DomainSpec {
           id                     = CollectionEventId(""),
           participantId          = ParticipantId(nameGenerator.next[ParticipantId]),
           collectionEventTypeId  = CollectionEventTypeId(nameGenerator.next[CollectionEventTypeId]),
-          version                = -1,
+          version                = 0L,
           timeCompleted          = DateTime.now,
           visitNumber            = 1,
           annotations            = Set(factory.createAnnotation)
@@ -67,7 +67,7 @@ class CollectionEventSpec extends DomainSpec {
           id                     = CollectionEventId(nameGenerator.next[CollectionEventId]),
           participantId          = ParticipantId(""),
           collectionEventTypeId  = CollectionEventTypeId(nameGenerator.next[CollectionEventTypeId]),
-          version                = -1,
+          version                = 0L,
           timeCompleted          = DateTime.now,
           visitNumber            = 1,
           annotations            = Set(factory.createAnnotation)
@@ -80,7 +80,7 @@ class CollectionEventSpec extends DomainSpec {
           id                     = CollectionEventId(nameGenerator.next[CollectionEventId]),
           participantId          = ParticipantId(nameGenerator.next[ParticipantId]),
           collectionEventTypeId  = CollectionEventTypeId(""),
-          version                = -1,
+          version                = 0L,
           timeCompleted          = DateTime.now,
           visitNumber            = 1,
           annotations            = Set(factory.createAnnotation)
@@ -93,7 +93,7 @@ class CollectionEventSpec extends DomainSpec {
           id                     = CollectionEventId(nameGenerator.next[CollectionEventId]),
           participantId          = ParticipantId(nameGenerator.next[ParticipantId]),
           collectionEventTypeId  = CollectionEventTypeId(nameGenerator.next[CollectionEventTypeId]),
-          version                = -1,
+          version                = 0L,
           timeCompleted          = DateTime.now,
           visitNumber            = 0,
           annotations            = Set(factory.createAnnotation)

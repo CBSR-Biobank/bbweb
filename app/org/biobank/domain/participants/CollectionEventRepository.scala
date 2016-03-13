@@ -4,8 +4,8 @@ import org.biobank.domain._
 
 import javax.inject.Singleton
 import com.google.inject.ImplementedBy
-import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[CollectionEventRepositoryImpl])
 trait CollectionEventRepository
@@ -24,42 +24,50 @@ trait CollectionEventRepository
 class CollectionEventRepositoryImpl
     extends ReadWriteRepositoryRefImpl[CollectionEventId, CollectionEvent](v => v.id)
     with CollectionEventRepository {
+  import org.biobank.CommonValidations._
 
   def nextIdentity: CollectionEventId = new CollectionEventId(nextIdentityAsString)
 
+  def notFound(id: CollectionEventId) = IdNotFound(s"collection event id: $id")
+
+  override def getByKey(id: CollectionEventId): DomainValidation[CollectionEvent] = {
+    getMap.get(id).toSuccessNel(notFound(id).toString)
+  }
+
   def withId(participantId: ParticipantId, collectionEventId: CollectionEventId)
       : DomainValidation[CollectionEvent] = {
-    getByKey(collectionEventId).fold(
-      err => DomainError(
-        s"collection event does not exist: { participantId: $participantId, collectionEventId: $collectionEventId }"
-      ).failureNel,
-      collectionEvent =>
-      if (collectionEvent.participantId != participantId) {
-        DomainError(
-          s"participant does not have collection event: { participantId: $participantId, collectionEventId: $collectionEventId }"
-        ).failureNel
-      } else {
-        collectionEvent.success
+    for {
+      cevent <- getByKey(collectionEventId)
+      valid  <- {
+        if (cevent.participantId != participantId) {
+          EntityCriteriaError(
+            s"collection event invalid for participant : { participantId: $participantId, collectionEventId: $collectionEventId }"
+          ).failureNel
+        } else {
+          cevent.success
+        }
       }
-    )
+    } yield valid
   }
 
   def withVisitNumber(participantId: ParticipantId, visitNumber: Int): DomainValidation[CollectionEvent] = {
-    getValues.find(cevent => cevent.visitNumber == visitNumber) match {
-      case None =>
-        DomainError(
-          s"collection event does not exist: { participantId: $participantId, visitNumber: $visitNumber }"
-        ).failureNel
-      case Some(cevent) => {
-        if (cevent.participantId != participantId) {
+    for {
+      cevent <- {
+        getValues.find(cevent => cevent.visitNumber == visitNumber).toSuccessNel(
           DomainError(
+            s"collection event does not exist: { participantId: $participantId, visitNumber: $visitNumber }"
+          ).toString)
+      }
+      valid <- {
+        if (cevent.participantId != participantId) {
+          EntityCriteriaError(
             s"participant does not have collection event: { participantId: $participantId, visitNumber: $visitNumber }"
           ).failureNel
         } else {
           cevent.success
         }
       }
-    }
+    } yield valid
   }
 
   def allForParticipant(participantId: ParticipantId): Set[CollectionEvent] = {

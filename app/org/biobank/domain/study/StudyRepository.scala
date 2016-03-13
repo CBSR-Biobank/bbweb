@@ -4,6 +4,7 @@ import org.biobank.domain._
 
 import javax.inject.Singleton
 import com.google.inject.ImplementedBy
+import scalaz._
 import scalaz.Scalaz._
 
 @ImplementedBy(classOf[StudyRepositoryImpl])
@@ -23,39 +24,40 @@ trait StudyRepository extends ReadWriteRepository[StudyId, Study] {
 class StudyRepositoryImpl
     extends ReadWriteRepositoryRefImpl[StudyId, Study](v => v.id)
     with StudyRepository {
+  import org.biobank.CommonValidations._
 
   def nextIdentity: StudyId = new StudyId(nextIdentityAsString)
+
+  def studyNotFound(id: StudyId) = IdNotFound(s"study id: $id")
+
+  override def getByKey(id: StudyId): DomainValidation[Study] = {
+    getMap.get(id).toSuccessNel(studyNotFound(id).toString)
+  }
 
   def allStudies(): Set[Study] = getValues.toSet
 
   def getDisabled(id: StudyId): DomainValidation[DisabledStudy] = {
-    getByKey(id).fold(
-      err => DomainError(s"study with id does not exist: $id").failureNel,
-      study => study match {
-        case study: DisabledStudy => study.success
-        case study => DomainError(s"study is not disabled: $study").failureNel
-      }
-    )
+    getByKey(id) match {
+      case Success(s: DisabledStudy) => s.success
+      case Success(s) => InvalidStatus(s"study is not disabled: $id").failureNel
+      case Failure(err) => err.failure[DisabledStudy]
+    }
   }
 
   def getEnabled(id: StudyId): DomainValidation[EnabledStudy] = {
-    getByKey(id).fold(
-      err => DomainError(s"study with id does not exist: $id").failureNel,
-      study => study match {
-        case study: EnabledStudy => study.success
-        case study => DomainError(s"study is not enabled: $study").failureNel
-      }
-    )
+    getByKey(id) match {
+      case Success(s: EnabledStudy) => s.success
+      case Success(s) => InvalidStatus(s"study is not enabled: $id").failureNel
+      case Failure(err) => err.failure[EnabledStudy]
+    }
   }
 
   def getRetired(id: StudyId): DomainValidation[RetiredStudy] = {
-    getByKey(id).fold(
-      err => DomainError(s"study with id does not exist: $id").failureNel,
-      study => study match {
-        case study: RetiredStudy => study.success
-        case study => DomainError(s"study is not retired: $study").failureNel
-      }
-    )
+    getByKey(id) match {
+      case Success(s: RetiredStudy) => s.success
+      case Success(s) => InvalidStatus(s"study is not retired: $id").failureNel
+      case Failure(err) => err.failure[RetiredStudy]
+    }
   }
 
 }

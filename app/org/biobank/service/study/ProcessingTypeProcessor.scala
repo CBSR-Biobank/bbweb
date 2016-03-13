@@ -36,7 +36,7 @@ object ProcessingTypeProcessor {
 class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeRepository: ProcessingTypeRepository)
     extends Processor {
   import org.biobank.infrastructure.event.StudyEventsUtil._
-  import StudyEvent.EventType
+  import StudyEventOld.EventType
 
   override def persistenceId = "processing-type-processor-id"
 
@@ -47,7 +47,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
     * processed to recreate the current state of the aggregate.
     */
   val receiveRecover: Receive = {
-    case event: StudyEvent => event.eventType match {
+    case event: StudyEventOld => event.eventType match {
       case et: EventType.ProcessingTypeAdded   => applyProcessingTypeAddedEvent(event)
       case et: EventType.ProcessingTypeUpdated => applyProcessingTypeUpdatedEvent(event)
       case et: EventType.ProcessingTypeRemoved => applyProcessingTypeRemovedEvent(event)
@@ -128,8 +128,8 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
 
   def update
     (cmd: ProcessingTypeModifyCommand)
-    (fn: ProcessingType => DomainValidation[StudyEvent])
-      : DomainValidation[StudyEvent] = {
+    (fn: ProcessingType => DomainValidation[StudyEventOld])
+      : DomainValidation[StudyEventOld] = {
     for {
       pt           <- processingTypeRepository.withId(StudyId(cmd.studyId), ProcessingTypeId(cmd.id))
       notInUse     <- checkNotInUse(pt)
@@ -138,7 +138,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
     } yield event
   }
 
-  private def applyProcessingTypeAddedEvent(event: StudyEvent): Unit = {
+  private def applyProcessingTypeAddedEvent(event: StudyEventOld): Unit = {
     if (event.eventType.isProcessingTypeAdded) {
       val addedEvent = event.getProcessingTypeAdded
 
@@ -157,7 +157,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
     }
   }
 
-  private def applyProcessingTypeUpdatedEvent(event: StudyEvent): Unit = {
+  private def applyProcessingTypeUpdatedEvent(event: StudyEventOld): Unit = {
     if (event.eventType.isProcessingTypeUpdated) {
       val updatedEvent = event.getProcessingTypeUpdated
 
@@ -178,7 +178,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
     }
   }
 
-  private def applyProcessingTypeRemovedEvent(event: StudyEvent): Unit = {
+  private def applyProcessingTypeRemovedEvent(event: StudyEventOld): Unit = {
     if (event.eventType.isProcessingTypeRemoved) {
 
       processingTypeRepository.getByKey(

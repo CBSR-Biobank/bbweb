@@ -107,7 +107,8 @@ trait JsonController extends Controller {
       err => {
         Log.trace("*** ERROR ***: " + err.list.toList.mkString(", "))
         val errMsgs = err.list.toList.mkString(", ")
-        if ((("with id not found").r.findAllIn(errMsgs).length > 0)
+        if (("IdNotFound".r.findAllIn(errMsgs).length > 0)
+              || ("not found".r.findAllIn(errMsgs).length > 0)
               || ("does not exist".r.findAllIn(errMsgs).length > 0)
               || ("invalid.*id".r.findAllIn(errMsgs).length > 0)) {
           NotFound(errMsgs)

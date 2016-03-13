@@ -145,13 +145,14 @@ case class RegisteredUser(id:           UserId,
     ActiveUser(id           = this.id,
                version      = this.version + 1,
                timeAdded    = this.timeAdded,
-               timeModified = this.timeModified,
+               timeModified = Some(DateTime.now),
                name         = this.name,
                email        = this.email,
                password     = this.password,
                salt         = this.salt,
                avatarUrl    = this.avatarUrl).success
   }
+
 }
 
 /** Factory object. */
@@ -183,7 +184,7 @@ object RegisteredUser extends UserValidations {
 
 /** A user that has access to the system. */
 case class ActiveUser(id:           UserId,
-                      version:      Long = -1,
+                      version:      Long,
                       timeAdded:    DateTime,
                       timeModified: Option[DateTime],
                       name:         String,
@@ -196,34 +197,32 @@ case class ActiveUser(id:           UserId,
   import CommonValidations._
 
   def withName(name: String): DomainValidation[ActiveUser] = {
-    validateString(name, NameMinLength, InvalidName).fold(
-      err => err.failure,
-      n => copy(version = version + 1, name = n).success
-    )
+    validateString(name, NameMinLength, InvalidName).map( _ =>
+      copy(name         = name,
+           version      = version + 1,
+           timeModified = Some(DateTime.now)))
   }
 
   def withEmail(email: String): DomainValidation[ActiveUser] = {
-    validateEmail(email).fold(
-      err => err.failure,
-      e => copy(version = version + 1, email = e).success
-    )
+    validateEmail(email).map(_ =>
+      copy(email        = email,
+           version      = version + 1,
+           timeModified = Some(DateTime.now)))
   }
 
   def withPassword(password: String, salt: String): DomainValidation[ActiveUser] = {
-    validateString(password, PasswordRequired).fold(
-      err => err.failure,
-      pwd => copy(version      = version + 1,
-                  password     = pwd,
-                  salt         = salt).success
-    )
+    validateString(password, PasswordRequired).map(_ =>
+      copy(password     = password,
+           salt         = salt,
+           version      = version + 1,
+           timeModified = Some(DateTime.now)))
   }
 
   def withAvatarUrl(avatarUrl: Option[String]): DomainValidation[ActiveUser] = {
-    validateAvatarUrl(avatarUrl).fold(
-      err => err.failure,
-      a => copy(version = version + 1, avatarUrl = a).success
-
-    )
+    validateAvatarUrl(avatarUrl).map(_ =>
+      copy(avatarUrl = avatarUrl,
+           version = version + 1,
+           timeModified = Some(DateTime.now)))
   }
 
   /** Locks an active user. */
@@ -231,13 +230,14 @@ case class ActiveUser(id:           UserId,
     LockedUser(id           = this.id,
                version      = this.version + 1,
                timeAdded    = this.timeAdded,
-               timeModified = this.timeModified,
+               timeModified = Some(DateTime.now),
                name         = this.name,
                email        = this.email,
                password     = this.password,
                salt         = this.salt,
                avatarUrl    = this.avatarUrl).success
   }
+
 }
 
 /** A user who no longer has access to the system. */
@@ -257,7 +257,7 @@ case class LockedUser(id:           UserId,
     ActiveUser(id           = this.id,
                version      = this.version + 1,
                timeAdded    = this.timeAdded,
-               timeModified = this.timeModified,
+               timeModified = Some(DateTime.now),
                name         = this.name,
                email        = this.email,
                password     = this.password,
@@ -268,31 +268,32 @@ case class LockedUser(id:           UserId,
 }
 
 object UserHelper {
+  import org.biobank.CommonValidations._
 
   def isUserRegistered(user: User): DomainValidation[RegisteredUser] = {
     user match {
       case registeredUser: RegisteredUser => registeredUser.success
-      case _ => DomainError(s"the user is not registered").failureNel
+      case _ => InvalidStatus(s"not registered").failureNel
     }
   }
 
   def isUserActive(user: User): DomainValidation[ActiveUser] = {
     user match {
       case activeUser: ActiveUser => activeUser.success
-      case _ => DomainError(s"the user is not active").failureNel
+      case _ => InvalidStatus(s"not active").failureNel
     }
   }
 
   def isUserLocked(user: User): DomainValidation[LockedUser] = {
     user match {
       case lockedUser: LockedUser => lockedUser.success
-      case _ => DomainError(s"the user is not active").failureNel
+      case _ => InvalidStatus(s"not active").failureNel
     }
   }
 
   def isUserNotLocked(user: User): DomainValidation[User] = {
     user match {
-      case lockedUser: LockedUser => DomainError(s"the user is locked").failureNel
+      case lockedUser: LockedUser => InvalidStatus(s"user is locked").failureNel
       case _ => user.success
     }
   }

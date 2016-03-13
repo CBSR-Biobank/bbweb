@@ -1,23 +1,21 @@
 package org.biobank.service.centres
 
+import akka.actor._
+import akka.pattern.ask
+import akka.util.Timeout
+import com.google.inject.ImplementedBy
+import javax.inject.{Inject, Named}
+import org.biobank.domain.DomainValidation
+import org.biobank.domain.centre._
+import org.biobank.domain.study.StudyRepository
 import org.biobank.dto._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
-import org.biobank.domain.{ DomainValidation, DomainError }
-import org.biobank.domain.study.StudyRepository
-import org.biobank.domain.centre._
-
-import akka.actor._
-import akka.pattern.ask
-import scala.concurrent._
-import scala.concurrent.duration._
 import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext.Implicits.global
-import akka.util.Timeout
-import javax.inject.{Inject, Named}
-import com.google.inject.ImplementedBy
-
+import scala.concurrent._
+import scala.concurrent.duration._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -50,6 +48,7 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
                                     val centreRepository:          CentreRepository,
                                     val studyRepository:           StudyRepository)
     extends CentresService {
+  import org.biobank.CommonValidations._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -94,7 +93,7 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
       case "EnabledCentre" =>
         centresFilteredByName.collect { case s: EnabledCentre => s }.success
       case _ =>
-        DomainError(s"invalid centre status: $status").failureNel
+        InvalidStatus(s"centre: $status").failureNel
     }
 
     centresFilteredByStatus.map { centres =>
@@ -109,10 +108,7 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
   }
 
   def getCentre(id: String): DomainValidation[Centre] = {
-    centreRepository.getByKey(CentreId(id)).fold(
-      err => DomainError(s"invalid centre id: $id").failureNel,
-      centre => centre.success
-    )
+    centreRepository.getByKey(CentreId(id))
   }
 
   def processCommand(cmd: CentreCommand): Future[DomainValidation[Centre]] =

@@ -1,66 +1,67 @@
 package org.biobank.infrastructure.event;
 
-message UserRegisteredEvent {
-   optional string name      = 1;
-   optional string email     = 2;
-   optional string password  = 3;
-   optional string salt      = 4;
-   optional string avatarUrl = 5;
-}
-
-message UserNameUpdatedEvent {
-   optional int64 version = 1;
-   optional string name   = 2;
-}
-
-message UserEmailUpdatedEvent {
-   optional int64 version = 1;
-   optional string email  = 2;
-}
-
-message UserAvatarUrlUpdatedEvent {
-   optional int64 version    = 1;
-   optional string avatarUrl = 2;
-}
-
-message UserPasswordUpdatedEvent {
-   optional int64 version   = 1;
-   optional string password = 2;
-   optional string salt     = 3;
-}
-
-message UserPasswordResetEvent {
-   optional int64  version  = 1;
-   optional string password = 2;
-   optional string salt     = 3;
-}
-
-message UserActivatedEvent {
-   optional int64 version = 1;
-}
-
-message UserLockedEvent {
-   optional int64 version = 1;
-}
-
-message UserUnlockedEvent {
-   optional int64 version = 1;
-}
-
 message UserEvent {
+
+   message Registered {
+      optional string name      = 1;
+      optional string email     = 2;
+      optional string password  = 3;
+      optional string salt      = 4;
+      optional string avatarUrl = 5;
+   }
+
+   message NameUpdated {
+      optional int64 version = 1;
+      optional string name   = 2;
+   }
+
+   message EmailUpdated {
+      optional int64 version = 1;
+      optional string email  = 2;
+   }
+
+   message AvatarUrlUpdated {
+      optional int64 version    = 1;
+      optional string avatarUrl = 2;
+   }
+
+   message PasswordUpdated {
+      optional int64 version   = 1;
+      optional string password = 2;
+      optional string salt     = 3;
+   }
+
+   message PasswordReset {
+      optional int64  version  = 1;
+      optional string password = 2;
+      optional string salt     = 3;
+   }
+
+   message Activated {
+      optional int64 version = 1;
+   }
+
+   message Locked {
+      optional int64 version = 1;
+   }
+
+   message Unlocked {
+      optional int64 version = 1;
+   }
+
    required string id     = 1;
    optional string userId = 2;
    optional string time   = 3;
 
    oneof event_type {
-     UserRegisteredEvent       registered       = 4;
-     UserNameUpdatedEvent      nameUpdated      = 5;
-     UserEmailUpdatedEvent     emailUpdated     = 6;
-     UserAvatarUrlUpdatedEvent avatarUrlUpdated = 7;
-     UserPasswordUpdatedEvent  passwordUpdated  = 8;
-     UserPasswordResetEvent    passwordReset    = 9;
-     UserActivatedEvent        activated        = 10;
-     UserLockedEvent           locked           = 11;
-     UserUnlockedEvent         unlocked         = 12;
+      Registered       registered       = 4;
+      NameUpdated      nameUpdated      = 5;
+      EmailUpdated     emailUpdated     = 6;
+      AvatarUrlUpdated avatarUrlUpdated = 7;
+      PasswordUpdated  passwordUpdated  = 8;
+      PasswordReset    passwordReset    = 9;
+      Activated        activated        = 10;
+      Locked           locked           = 11;
+      Unlocked         unlocked         = 12;
    }
 }

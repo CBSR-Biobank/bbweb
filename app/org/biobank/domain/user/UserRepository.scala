@@ -1,11 +1,11 @@
 package org.biobank.domain.user
 
-import org.biobank.domain.{ DomainValidation, DomainError, ReadWriteRepository, ReadWriteRepositoryRefImpl }
+import org.biobank.domain.{ DomainValidation, ReadWriteRepository, ReadWriteRepositoryRefImpl }
 
 import javax.inject.Singleton
 import com.google.inject.ImplementedBy
+import scalaz._
 import scalaz.Scalaz._
-import scalaz.Validation.FlatMap._
 
 /** A repository that stores [[User]]s. */
 @ImplementedBy(classOf[UserRepositoryImpl])
@@ -31,46 +31,44 @@ trait UserRepository extends ReadWriteRepository[UserId, User] {
 class UserRepositoryImpl
     extends ReadWriteRepositoryRefImpl[UserId, User](v => v.id)
     with UserRepository {
+  import org.biobank.CommonValidations._
 
   def nextIdentity: UserId = new UserId(nextIdentityAsString)
 
+  def notFound(id: UserId) = IdNotFound(s"user id: $id")
+
   def allUsers(): Set[User] = getValues.toSet
 
-  def getRegistered(id: UserId) = {
-    for {
-      user       <- getByKey(id)
-      registered <- user match {
-        case u: RegisteredUser => u.success
-        case _ => DomainError(s"user is not registered: $id").failureNel
-      }
-    } yield registered
+  override def getByKey(id: UserId): DomainValidation[User] = {
+    getMap.get(id).toSuccessNel(notFound(id).toString)
+  }
+
+  def getRegistered(id: UserId): DomainValidation[RegisteredUser] = {
+    getByKey(id) match {
+      case Success(u: RegisteredUser) => u.success
+      case Success(u) => InvalidStatus(s"user is not registered: $id").failureNel
+      case Failure(err) => err.failure[RegisteredUser]
+    }
   }
 
   def getActive(id: UserId) = {
-    for {
-      user   <- getByKey(id)
-      active <- user match {
-        case u: ActiveUser => u.success
-        case _ => DomainError(s"user is not active: $id").failureNel
-      }
-    } yield active
+    getByKey(id) match {
+      case Success(u: ActiveUser) => u.success
+      case Success(u) => InvalidStatus(s"user is not active: $id").failureNel
+      case Failure(err) => err.failure[ActiveUser]
+    }
   }
 
   def getLocked(id: UserId) = {
-    for {
-      user   <- getByKey(id)
-      locked <- user match {
-        case u: LockedUser => u.success
-        case _ => DomainError(s"user is not locked: $id").failureNel
-      }
-    } yield locked
+    getByKey(id) match {
+      case Success(u: LockedUser) => u.success
+      case Success(u) => InvalidStatus(s"user is not active: $id").failureNel
+      case Failure(err) => err.failure[LockedUser]
+    }
   }
 
   def getByEmail(email: String): DomainValidation[User] = {
-    getValues.find(_.email == email).fold {
-      DomainError(s"user with email not found: $email: ${getValues.size}").failureNel[User]
-    } { user =>
-      user.success
-    }
+    getValues.find(_.email == email).toSuccess(
+      EmailNotFound(s"user email not found: $email").nel)
   }
 }

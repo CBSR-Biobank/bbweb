@@ -24,6 +24,20 @@ package biobank {
 
     case class InvalidStatus(msg: String) extends ValidationMsgKey
 
+    case object InvalidToken extends ValidationKey
+
+    case object InvalidPassword extends ValidationKey
+
+    case class EmailNotFound(msg: String) extends ValidationMsgKey
+
+    case class EmailNotAvailable(msg: String) extends ValidationMsgKey
+
+    case class EntityCriteriaNotFound(msg: String) extends ValidationMsgKey
+
+    case class EntityCriteriaError(msg: String) extends ValidationMsgKey
+
+    case class EntityRequried(msg: String) extends ValidationMsgKey
+
   }
 
 }

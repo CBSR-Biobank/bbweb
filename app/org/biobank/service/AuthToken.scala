@@ -1,6 +1,6 @@
 package org.biobank.service
 
-import org.biobank.domain.{ DomainValidation, DomainError }
+import org.biobank.domain.DomainValidation
 import org.biobank.domain.user.UserId
 
 import javax.inject.{ Inject, Singleton }
@@ -30,6 +30,7 @@ trait AuthToken {
 class AuthTokenImpl @Inject() (val env: Environment,
                                val cacheApi: CacheApi)
     extends AuthToken {
+  import org.biobank.CommonValidations._
 
   val tokenExpirationSeconds =
     if (env.mode == play.api.Mode.Prod) { 15.minutes }
@@ -50,11 +51,9 @@ class AuthTokenImpl @Inject() (val env: Environment,
    *  If token is valid then the timeout is re-assigned on the cache.
    */
   def getUserId(token: String): DomainValidation[UserId] = {
-    val maybeUserId = cacheApi.get[UserId](token)
-      .map(_.success)
-      .getOrElse(DomainError("invalid token").failureNel)
-    maybeUserId map { userId => cacheApi.set(token, userId, tokenExpirationSeconds) }
-    maybeUserId
+    val userId = cacheApi.get[UserId](token).toSuccessNel(InvalidToken.toString)
+    userId map { cacheApi.set(token, _, tokenExpirationSeconds) }
+    userId
   }
 
 }

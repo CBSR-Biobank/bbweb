@@ -63,7 +63,8 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
     val json = makeRequest(POST, uri(study), BAD_REQUEST, cetToAddCmd(cet))
 
     (json \ "status").as[String] must include ("error")
-                                              (json \ "message").as[String] must include ("is not disabled")
+
+    (json \ "message").as[String] must include regex("InvalidStatus.*study not disabled")
   }
 
   def updateWithInvalidVersion(path: String, jsonField: JsObject) {
@@ -94,7 +95,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include ("collection event type does not exist")
+    (json \ "message").as[String] must include regex ("IdNotFound.*collection event type")
   }
 
   def updateOnNonDisabledStudy(study: Study, path: String, jsonField: JsObject) {
@@ -115,7 +116,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include ("study is not disabled")
+    (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
   }
 
   def removeOnNonDisabledStudy(study: Study) {
@@ -130,7 +131,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include ("is not disabled")
+    (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
   }
 
   "Collection Event Type REST API" when {
@@ -199,7 +200,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include ("study with id not found")
+        (json \ "message").as[String] must include regex("IdNotFound.*study")
       }
 
       "fail for an invalid study ID when using a collection event type id" in {
@@ -210,7 +211,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include ("study with id not found")
+        (json \ "message").as[String] must include regex("IdNotFound.*study")
       }
 
       "fail for an invalid collection event type id" in {
@@ -220,8 +221,10 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
         val cet = factory.createCollectionEventType
 
         val json = makeRequest(GET, uriWithQuery(study, cet), NOT_FOUND)
-                              (json \ "status").as[String] must include ("error")
-                                                                        (json \ "message").as[String] must include ("collection event type does not exist")
+
+        (json \ "status").as[String] must include ("error")
+
+        (json \ "message").as[String] must include regex("IdNotFound.*collection event type")
       }
 
     }
@@ -299,7 +302,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include ("study with id not found")
+        (json \ "message").as[String] must include regex ("IdNotFound.*study")
       }
 
       "fail when adding a collection event type with a duplicate name to the same study" in {
@@ -327,7 +330,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
           (json \ "status").as[String] must include ("success")
 
-          collectionEventTypeRepository.getByKey(cet.id) mustFail "collection event type does not exist.*"
+          collectionEventTypeRepository.getByKey(cet.id) mustFail "IdNotFound.*collection event type.*"
         }
       }
 
@@ -721,7 +724,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must startWith ("study with id not found")
+        (json \ "message").as[String] must include regex ("IdNotFound.*study")
       }
 
       "fail when removing annotation type and collection event type ID does not exist" in {
@@ -735,7 +738,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must startWith ("collection event type does not exist")
+        (json \ "message").as[String] must include regex ("IdNotFound.*collection event type")
       }
 
       "fail when removing an annotation type that does not exist" in {
@@ -772,7 +775,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must startWith ("study is not disabled")
+          (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
         }
       }
 
@@ -917,7 +920,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must startWith ("study with id not found")
+        (json \ "message").as[String] must include regex ("IdNotFound.*study")
       }
 
       "fail when removing specimen spec and collection event type ID does not exist" in {
@@ -931,7 +934,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must startWith ("collection event type does not exist")
+        (json \ "message").as[String] must include regex ("IdNotFound.*collection event type")
       }
 
       "fail when removing an specimen spec that does not exist" in {
@@ -968,7 +971,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must startWith ("study is not disabled")
+          (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
         }
       }
 

@@ -24,40 +24,47 @@ trait ParticipantRepository
 class ParticipantRepositoryImpl
     extends ReadWriteRepositoryRefImpl[ParticipantId, Participant](v => v.id)
     with ParticipantRepository {
+  import org.biobank.CommonValidations._
 
   def nextIdentity: ParticipantId = new ParticipantId(nextIdentityAsString)
 
+  def notFound(id: ParticipantId) = IdNotFound(s"participant id: $id")
+
+  override def getByKey(id: ParticipantId): DomainValidation[Participant] = {
+    getMap.get(id).toSuccessNel(notFound(id).toString)
+  }
+
   def withId(studyId: StudyId, participantId: ParticipantId): DomainValidation[Participant] = {
     for {
-      ptcp <- getByKey(participantId)
+      participant <- getByKey(participantId)
       validPtcp <- {
-        if (ptcp.studyId != studyId) {
-          DomainError(
+        if (participant.studyId != studyId) {
+          EntityCriteriaError(
             s"study does not have participant: { studyId: $studyId, participantId: $participantId }"
           ).failureNel
         } else {
-          ptcp.success
+          participant.success
         }
       }
     } yield validPtcp
   }
 
   def withUniqueId(studyId: StudyId, uniqueId: String): DomainValidation[Participant] = {
-    getValues.find(p => p.uniqueId == uniqueId) match {
-      case None =>
-        DomainError(
-          s"participant does not exist: { studyId: $studyId, uniqueId: $uniqueId }"
-        ).failureNel
-      case Some(ptcp) => {
-        if (ptcp.studyId != studyId) {
-          DomainError(
-            s"study does not have participant: { studyId: $studyId, uniqueId: $uniqueId }"
+    for {
+      participant <- {
+        getValues.find(p => p.uniqueId == uniqueId).toSuccessNel(
+          EntityCriteriaNotFound(s"participant with unique ID does not exist: $uniqueId").toString)
+      }
+      valid <- {
+        if (participant.studyId != studyId) {
+          EntityCriteriaError(
+            s"participant not in study: { uniqueId: $uniqueId, studyId: $studyId }"
           ).failureNel
         } else {
-          ptcp.success
+          participant.success
         }
       }
-    }
+    } yield valid
   }
 
   def allForStudy(studyId: StudyId): Set[Participant] = {

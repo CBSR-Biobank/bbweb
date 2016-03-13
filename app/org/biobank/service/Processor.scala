@@ -8,6 +8,7 @@ import com.trueaccord.scalapb.GeneratedMessage
 import scalaz.Scalaz._
 
 trait Processor extends PersistentActor with ActorLogging {
+  import org.biobank.CommonValidations._
 
   /** Persists the event passed in the validation if it is successful. In either case
     * the sender is sent either the success or failure validation.
@@ -44,11 +45,8 @@ trait Processor extends PersistentActor with ActorLogging {
     val exists = repository.getValues.exists { item =>
       matcher(item)
     }
-    if (exists) {
-      DomainError(s"$errMsgPrefix: $name").failureNel
-    } else {
-      true.success
-    }
+    if (exists) EntityCriteriaError(s"$errMsgPrefix: $name").failureNel
+    else true.success
   }
 
   /** Checks that the domain objects version matches the expected one.

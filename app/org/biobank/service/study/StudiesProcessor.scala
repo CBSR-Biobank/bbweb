@@ -1,21 +1,15 @@
 package org.biobank.service.study
 
-import org.biobank.service.Processor
-import org.biobank.domain.{
-  AnnotationType,
-  AnnotationValueType,
-  DomainValidation,
-  DomainError
-}
-import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.infrastructure.event.EventUtils
-import org.biobank.domain.study._
-import org.biobank.TestData
-
-import javax.inject._
 import akka.actor._
 import akka.persistence.SnapshotOffer
+import javax.inject._
+import org.biobank.TestData
+import org.biobank.domain.study._
+import org.biobank.domain.{ AnnotationType, AnnotationValueType, DomainValidation }
+import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.EventUtils
+import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.service.Processor
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import scalaz.Scalaz._
@@ -35,17 +29,17 @@ object StudiesProcessor {
  * processed.
  */
 class StudiesProcessor @javax.inject.Inject() (
-  @Named("collectionEventType")        val collectionEventTypeProcessor:        ActorRef,
-  @Named("processingType")             val processingTypeProcessor:             ActorRef,
-  @Named("specimenLinkType")           val specimenLinkTypeProcessor:           ActorRef,
-
-  val studyRepository:               StudyRepository,
-  val processingTypeRepository:      ProcessingTypeRepository,
-  val specimenGroupRepository:       SpecimenGroupRepository,
-  val collectionEventTypeRepository: CollectionEventTypeRepository,
-  val testData:                      TestData)
+  @Named("collectionEventType") val collectionEventTypeProcessor: ActorRef,
+  @Named("processingType")      val processingTypeProcessor:      ActorRef,
+  @Named("specimenLinkType")    val specimenLinkTypeProcessor:    ActorRef,
+  val studyRepository:                                            StudyRepository,
+  val processingTypeRepository:                                   ProcessingTypeRepository,
+  val specimenGroupRepository:                                    SpecimenGroupRepository,
+  val collectionEventTypeRepository:                              CollectionEventTypeRepository,
+  val testData:                                                   TestData)
     extends Processor
     with StudyServiceErrorMessages {
+  import org.biobank.CommonValidations._
 
   override def persistenceId = "study-processor-id"
 
@@ -56,17 +50,17 @@ class StudiesProcessor @javax.inject.Inject() (
    * processed to recreate the current state of the aggregate.
    */
   val receiveRecover: Receive = {
-    case event: StudyEvent2 => event.eventType match {
-      case et: StudyEvent2.EventType.Added                 => applyStudyAddedEvent(event)
-      case et: StudyEvent2.EventType.NameUpdated           => applyStudyNameUpdatedEvent(event)
-      case et: StudyEvent2.EventType.DescriptionUpdated    => applyStudyDescriptionUpdatedEvent(event)
-      case et: StudyEvent2.EventType.AnnotationTypeAdded   => applyParticipantAnnotationTypeAddedEvent(event)
-      case et: StudyEvent2.EventType.AnnotationTypeUpdated => applyParticipantAnnotationTypeUpdatedEvent(event)
-      case et: StudyEvent2.EventType.AnnotationTypeRemoved => applyParticipantAnnotationTypeRemovedEvent(event)
-      case et: StudyEvent2.EventType.Enabled               => applyStudyEnabledEvent(event)
-      case et: StudyEvent2.EventType.Disabled              => applyStudyDisabledEvent(event)
-      case et: StudyEvent2.EventType.Retired               => applyStudyRetiredEvent(event)
-      case et: StudyEvent2.EventType.Unretired             => applyStudyUnretiredEvent(event)
+    case event: StudyEvent => event.eventType match {
+      case et: StudyEvent.EventType.Added                 => applyAddedEvent(event)
+      case et: StudyEvent.EventType.NameUpdated           => applyNameUpdatedEvent(event)
+      case et: StudyEvent.EventType.DescriptionUpdated    => applyDescriptionUpdatedEvent(event)
+      case et: StudyEvent.EventType.AnnotationTypeAdded   => applyParticipantAnnotationTypeAddedEvent(event)
+      case et: StudyEvent.EventType.AnnotationTypeUpdated => applyParticipantAnnotationTypeUpdatedEvent(event)
+      case et: StudyEvent.EventType.AnnotationTypeRemoved => applyParticipantAnnotationTypeRemovedEvent(event)
+      case et: StudyEvent.EventType.Enabled               => applyEnabledEvent(event)
+      case et: StudyEvent.EventType.Disabled              => applyDisabledEvent(event)
+      case et: StudyEvent.EventType.Retired               => applyRetiredEvent(event)
+      case et: StudyEvent.EventType.Unretired             => applyUnretiredEvent(event)
 
       case event => log.error(s"event not handled: $event")
     }
@@ -93,16 +87,16 @@ class StudiesProcessor @javax.inject.Inject() (
   val receiveCommand: Receive = {
     case cmd: StudyCommandWithStudyId                 => validateAndForward(cmd)
     case cmd: SpecimenLinkTypeCommand                 => validateAndForward(cmd)
-    case cmd: AddStudyCmd                             => processAddStudyCmd(cmd)
-    case cmd: UpdateStudyNameCmd                      => processUpdateStudyNameCmd(cmd)
-    case cmd: UpdateStudyDescriptionCmd               => processUpdateStudyDescriptionCmd(cmd)
+    case cmd: AddStudyCmd                             => processAddCmd(cmd)
+    case cmd: UpdateStudyNameCmd                      => processUpdateNameCmd(cmd)
+    case cmd: UpdateStudyDescriptionCmd               => processUpdateDescriptionCmd(cmd)
     case cmd: StudyAddParticipantAnnotationTypeCmd    => processAddAnnotationTypeCmd(cmd)
     case cmd: StudyUpdateParticipantAnnotationTypeCmd => processUpdateAnnotationTypeCmd(cmd)
     case cmd: UpdateStudyRemoveAnnotationTypeCmd      => processRemoveAnnotationTypeCmd(cmd)
-    case cmd: EnableStudyCmd                          => processEnableStudyCmd(cmd)
-    case cmd: DisableStudyCmd                         => processDisableStudyCmd(cmd)
-    case cmd: RetireStudyCmd                          => processRetireStudyCmd(cmd)
-    case cmd: UnretireStudyCmd                        => processUnretireStudyCmd(cmd)
+    case cmd: EnableStudyCmd                          => processEnableCmd(cmd)
+    case cmd: DisableStudyCmd                         => processDisableCmd(cmd)
+    case cmd: RetireStudyCmd                          => processRetireCmd(cmd)
+    case cmd: UnretireStudyCmd                        => processUnretireCmd(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(studyRepository.getValues.toSet))
@@ -115,7 +109,7 @@ class StudiesProcessor @javax.inject.Inject() (
     cmd match {
       case cmd: StudyCommandWithStudyId =>
         studyRepository.getByKey(StudyId(cmd.studyId)).fold(
-          err => context.sender ! DomainError(s"$StudyNotFound: ${cmd.studyId}").failureNel,
+          err => context.sender ! IdNotFound(s"study: ${cmd.studyId}").failureNel,
           study => study match {
             case study: DisabledStudy => {
               val childActor = cmd match {
@@ -126,7 +120,8 @@ class StudiesProcessor @javax.inject.Inject() (
                 }
               childActor forward cmd
             }
-            case study => context.sender ! DomainError(s"study is not disabled: studyId: ${study.id}").failureNel
+            case study =>
+              context.sender ! InvalidStatus(s"study not disabled: ${study.id}").failureNel
           }
         )
 
@@ -140,7 +135,8 @@ class StudiesProcessor @javax.inject.Inject() (
           err => context.sender ! err.failure,
           study => study match {
             case study: DisabledStudy => specimenLinkTypeProcessor forward cmd
-            case study => context.sender ! DomainError(s"study is not disabled: studyId: ${study.id}").failureNel
+            case study =>
+              context.sender ! InvalidStatus(s"study not disabled: ${study.id}").failureNel
           }
         )
 
@@ -148,7 +144,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  private def processAddStudyCmd(cmd: AddStudyCmd): Unit = {
+  private def processAddCmd(cmd: AddStudyCmd): Unit = {
     val studyId = studyRepository.nextIdentity
 
     if (studyRepository.getByKey(studyId).isSuccess) {
@@ -158,21 +154,21 @@ class StudiesProcessor @javax.inject.Inject() (
     val v = (nameAvailable(cmd.name) |@|
                DisabledStudy.create(studyId, 0L, cmd.name, cmd.description, Set.empty)) {
         case (_, study) =>
-          StudyEvent2(study.id.id).update(
+          StudyEvent(study.id.id).update(
             _.optionalUserId            := cmd.userId,
             _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
             _.added.name                := cmd.name,
             _.added.optionalDescription := cmd.description)
       }
 
-    process(v) { applyStudyAddedEvent(_) }
+    process(v) { applyAddedEvent(_) }
   }
 
-  private def processUpdateStudyNameCmd(cmd: UpdateStudyNameCmd): Unit = {
+  private def processUpdateNameCmd(cmd: UpdateStudyNameCmd): Unit = {
     val v = updateDisabled(cmd) { study =>
         (nameAvailable(cmd.name, StudyId(cmd.id)) |@|
            study.withName(cmd.name)) { case (_, _) =>
-            StudyEvent2(study.id.id).update(
+            StudyEvent(study.id.id).update(
               _.optionalUserId      := cmd.userId,
               _.time                := ISODateTimeFormat.dateTime.print(DateTime.now),
               _.nameUpdated.version := cmd.expectedVersion,
@@ -180,13 +176,13 @@ class StudiesProcessor @javax.inject.Inject() (
         }
       }
 
-    process(v){ applyStudyNameUpdatedEvent(_) }
+    process(v){ applyNameUpdatedEvent(_) }
   }
 
-  private def processUpdateStudyDescriptionCmd(cmd: UpdateStudyDescriptionCmd): Unit = {
+  private def processUpdateDescriptionCmd(cmd: UpdateStudyDescriptionCmd): Unit = {
     val v = updateDisabled(cmd) { study =>
         study.withDescription(cmd.description).map { _ =>
-          StudyEvent2(study.id.id).update(
+          StudyEvent(study.id.id).update(
             _.optionalUserId                         := cmd.userId,
             _.time                                   := ISODateTimeFormat.dateTime.print(DateTime.now),
             _.descriptionUpdated.version             := cmd.expectedVersion,
@@ -194,7 +190,7 @@ class StudiesProcessor @javax.inject.Inject() (
         }
       }
 
-    process(v){ applyStudyDescriptionUpdatedEvent(_) }
+    process(v){ applyDescriptionUpdatedEvent(_) }
   }
 
   private def processAddAnnotationTypeCmd(cmd: StudyAddParticipantAnnotationTypeCmd): Unit = {
@@ -210,7 +206,7 @@ class StudiesProcessor @javax.inject.Inject() (
           }
           updatedStudy <- study.withParticipantAnnotationType(annotationType)
         } yield {
-          StudyEvent2(study.id.id).update(
+          StudyEvent(study.id.id).update(
             _.optionalUserId                     := cmd.userId,
             _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
             _.annotationTypeAdded.version        := cmd.expectedVersion,
@@ -235,7 +231,7 @@ class StudiesProcessor @javax.inject.Inject() (
           }
           updatedStudy <- study.withParticipantAnnotationType(annotationType)
         } yield {
-          StudyEvent2(study.id.id).update(
+          StudyEvent(study.id.id).update(
             _.optionalUserId                       := cmd.userId,
             _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
             _.annotationTypeUpdated.version        := cmd.expectedVersion,
@@ -249,7 +245,7 @@ class StudiesProcessor @javax.inject.Inject() (
   private def processRemoveAnnotationTypeCmd(cmd: UpdateStudyRemoveAnnotationTypeCmd): Unit = {
     val v = updateDisabled(cmd) { study =>
         study.removeParticipantAnnotationType(cmd.uniqueId) map { s =>
-          StudyEvent2(study.id.id).update(
+          StudyEvent(study.id.id).update(
             _.optionalUserId                 := cmd.userId,
             _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
             _.annotationTypeRemoved.version  := cmd.expectedVersion,
@@ -259,17 +255,17 @@ class StudiesProcessor @javax.inject.Inject() (
     process(v){ applyParticipantAnnotationTypeRemovedEvent(_) }
   }
 
-  private def processEnableStudyCmd(cmd: EnableStudyCmd): Unit = {
+  private def processEnableCmd(cmd: EnableStudyCmd): Unit = {
     val v = updateDisabled(cmd) { study =>
         val collectionEventTypes = collectionEventTypeRepository.allForStudy(study.id)
 
         if (collectionEventTypes.isEmpty) {
-          DomainError("no collection event types").failureNel[StudyEvent2]
+          EntityCriteriaError("no collection event types").failureNel[StudyEvent]
         } else if (collectionEventTypes.filter { cet => cet.hasSpecimenSpecs }.isEmpty) {
-          DomainError("no collection specimen specs").failureNel[StudyEvent2]
+          EntityCriteriaError("no collection specimen specs").failureNel[StudyEvent]
         } else {
           study.enable.map { _ =>
-            StudyEvent2(study.id.id).update(
+            StudyEvent(study.id.id).update(
               _.optionalUserId  := cmd.userId,
               _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
               _.enabled.version := cmd.expectedVersion)
@@ -277,81 +273,79 @@ class StudiesProcessor @javax.inject.Inject() (
         }
       }
 
-    process(v) { applyStudyEnabledEvent(_) }
+    process(v) { applyEnabledEvent(_) }
   }
 
-  private def processDisableStudyCmd(cmd: DisableStudyCmd): Unit = {
+  private def processDisableCmd(cmd: DisableStudyCmd): Unit = {
     val v = updateEnabled(cmd) {  study =>
         study.disable map { _ =>
-          StudyEvent2(study.id.id).update(
+          StudyEvent(study.id.id).update(
             _.optionalUserId   := cmd.userId,
             _.time             := ISODateTimeFormat.dateTime.print(DateTime.now),
             _.disabled.version := cmd.expectedVersion)
         }
       }
-    process(v){ applyStudyDisabledEvent(_) }
+    process(v){ applyDisabledEvent(_) }
   }
 
-  private def processRetireStudyCmd(cmd: RetireStudyCmd): Unit = {
+  private def processRetireCmd(cmd: RetireStudyCmd): Unit = {
     val v = updateDisabled(cmd) { study =>
         study.retire map { _ =>
-          StudyEvent2(study.id.id).update(
+          StudyEvent(study.id.id).update(
             _.optionalUserId  := cmd.userId,
             _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
             _.retired.version := cmd.expectedVersion)
         }
       }
-    process(v){ applyStudyRetiredEvent(_) }
+    process(v){ applyRetiredEvent(_) }
   }
 
-  private def processUnretireStudyCmd(cmd: UnretireStudyCmd): Unit = {
+  private def processUnretireCmd(cmd: UnretireStudyCmd): Unit = {
     val v = updateRetired(cmd) { study =>
         study.unretire map { _ =>
-          StudyEvent2(study.id.id).update(
+          StudyEvent(study.id.id).update(
             _.optionalUserId    := cmd.userId,
             _.time              := ISODateTimeFormat.dateTime.print(DateTime.now),
             _.unretired.version := cmd.expectedVersion)
         }
       }
-    process(v) { applyStudyUnretiredEvent(_) }
+    process(v) { applyUnretiredEvent(_) }
   }
 
-  def updateStudy(cmd: StudyModifyCommand)(fn: Study => DomainValidation[StudyEvent2])
-      : DomainValidation[StudyEvent2] = {
-    studyRepository.getByKey(StudyId(cmd.id)).fold(
-      err => DomainError(s"$StudyNotFound: ${cmd.id}").failureNel,
-      study => for {
-        validVersion <-  study.requireVersion(cmd.expectedVersion)
-        updatedStudy <- fn(study)
-      } yield updatedStudy
-    )
+  def updateStudy(cmd: StudyModifyCommand)(fn: Study => DomainValidation[StudyEvent])
+      : DomainValidation[StudyEvent] = {
+    for {
+      study        <- studyRepository.getByKey(StudyId(cmd.id))
+      validVersion <- study.requireVersion(cmd.expectedVersion)
+      updatedStudy <- fn(study)
+    } yield updatedStudy
   }
 
-  def updateDisabled(cmd: StudyModifyCommand)(fn: DisabledStudy => DomainValidation[StudyEvent2])
-      : DomainValidation[StudyEvent2] = {
+  def updateDisabled(cmd: StudyModifyCommand)(fn: DisabledStudy => DomainValidation[StudyEvent])
+      : DomainValidation[StudyEvent] = {
     updateStudy(cmd) {
       case study: DisabledStudy => fn(study)
-      case study => s"study is not disabled: ${study.id}".failureNel
+      case study => InvalidStatus(s"study not disabled: ${study.id}").failureNel
     }
   }
 
-  def updateEnabled(cmd: StudyModifyCommand)(fn: EnabledStudy => DomainValidation[StudyEvent2])
-      : DomainValidation[StudyEvent2] = {
+  def updateEnabled(cmd: StudyModifyCommand)(fn: EnabledStudy => DomainValidation[StudyEvent])
+      : DomainValidation[StudyEvent] = {
     updateStudy(cmd) {
       case study: EnabledStudy => fn(study)
-      case study => s"study is not enabled: ${study.id}".failureNel
+      case study => InvalidStatus(s"study not enabled: ${study.id}").failureNel
     }
   }
 
-  def updateRetired(cmd: StudyModifyCommand)(fn: RetiredStudy => DomainValidation[StudyEvent2])
-      : DomainValidation[StudyEvent2] = {
+  def updateRetired(cmd: StudyModifyCommand)(fn: RetiredStudy => DomainValidation[StudyEvent])
+      : DomainValidation[StudyEvent] = {
     updateStudy(cmd) {
       case study: RetiredStudy => fn(study)
-      case study => s"study is not retired: ${study.id}".failureNel
+      case study => InvalidStatus(s"study not retired: ${study.id}").failureNel
     }
   }
 
-  def onValidEventStudyAndVersion(event: StudyEvent2,
+  def onValidEventStudyAndVersion(event: StudyEvent,
                                   eventType: Boolean,
                                   eventVersion: Long)
                                  (fn: Study => Unit): Unit = {
@@ -371,7 +365,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  def onValidEventDisabledStudyAndVersion(event: StudyEvent2,
+  def onValidEventDisabledStudyAndVersion(event: StudyEvent,
                                           eventType: Boolean,
                                           eventVersion: Long)
                                          (fn: DisabledStudy => Unit): Unit = {
@@ -381,7 +375,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  def onValidEventEnabledStudyAndVersion(event: StudyEvent2,
+  def onValidEventEnabledStudyAndVersion(event: StudyEvent,
                                          eventType: Boolean,
                                          eventVersion: Long)
                                         (fn: EnabledStudy => Unit): Unit = {
@@ -391,7 +385,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  def onValidEventRetiredStudyAndVersion(event: StudyEvent2,
+  def onValidEventRetiredStudyAndVersion(event: StudyEvent,
                                          eventType: Boolean,
                                          eventVersion: Long)
                                         (fn: RetiredStudy => Unit): Unit = {
@@ -401,7 +395,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  private def applyStudyAddedEvent(event: StudyEvent2): Unit = {
+  private def applyAddedEvent(event: StudyEvent): Unit = {
     if (!event.eventType.isAdded) {
       log.error(s"invalid event type: $event")
     } else {
@@ -423,7 +417,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  private def applyStudyNameUpdatedEvent(event: StudyEvent2) : Unit = {
+  private def applyNameUpdatedEvent(event: StudyEvent) : Unit = {
     onValidEventDisabledStudyAndVersion(event,
                                         event.eventType.isNameUpdated,
                                         event.getNameUpdated.getVersion) { study =>
@@ -440,7 +434,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  private def applyStudyDescriptionUpdatedEvent(event: StudyEvent2) : Unit = {
+  private def applyDescriptionUpdatedEvent(event: StudyEvent) : Unit = {
     onValidEventDisabledStudyAndVersion(event,
                                         event.eventType.isDescriptionUpdated,
                                         event.getDescriptionUpdated.getVersion) { study =>
@@ -457,7 +451,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  private def applyParticipantAnnotationTypeAddedEvent(event: StudyEvent2) : Unit = {
+  private def applyParticipantAnnotationTypeAddedEvent(event: StudyEvent) : Unit = {
     onValidEventDisabledStudyAndVersion(event,
                                         event.eventType.isAnnotationTypeAdded,
                                         event.getAnnotationTypeAdded.getVersion) { study =>
@@ -481,7 +475,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  private def applyParticipantAnnotationTypeUpdatedEvent(event: StudyEvent2) : Unit = {
+  private def applyParticipantAnnotationTypeUpdatedEvent(event: StudyEvent) : Unit = {
     onValidEventDisabledStudyAndVersion(event,
                                         event.eventType.isAnnotationTypeUpdated,
                                         event.getAnnotationTypeUpdated.getVersion) { study =>
@@ -505,7 +499,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  private def applyParticipantAnnotationTypeRemovedEvent(event: StudyEvent2) : Unit = {
+  private def applyParticipantAnnotationTypeRemovedEvent(event: StudyEvent) : Unit = {
     onValidEventDisabledStudyAndVersion(event,
                                         event.eventType.isAnnotationTypeRemoved,
                                         event.getAnnotationTypeRemoved.getVersion) { study =>
@@ -522,7 +516,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  private def applyStudyEnabledEvent(event: StudyEvent2) : Unit = {
+  private def applyEnabledEvent(event: StudyEvent) : Unit = {
     onValidEventDisabledStudyAndVersion(event,
                                         event.eventType.isEnabled,
                                         event.getEnabled.getVersion) { study =>
@@ -537,7 +531,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  private def applyStudyDisabledEvent(event: StudyEvent2) : Unit = {
+  private def applyDisabledEvent(event: StudyEvent) : Unit = {
     onValidEventEnabledStudyAndVersion(event,
                                        event.eventType.isDisabled,
                                        event.getDisabled.getVersion) { study =>
@@ -552,7 +546,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  private def applyStudyRetiredEvent(event: StudyEvent2) : Unit = {
+  private def applyRetiredEvent(event: StudyEvent) : Unit = {
     onValidEventDisabledStudyAndVersion(event,
                                         event.eventType.isRetired,
                                         event.getRetired.getVersion) { study =>
@@ -567,7 +561,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  private def applyStudyUnretiredEvent(event: StudyEvent2) : Unit = {
+  private def applyUnretiredEvent(event: StudyEvent) : Unit = {
     onValidEventRetiredStudyAndVersion(event,
                                        event.eventType.isUnretired,
                                        event.getUnretired.getVersion) { study =>
