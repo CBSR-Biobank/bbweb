@@ -37,6 +37,9 @@ define(['underscore'], function(_) {
       return _.isUndefined(result);
     }
 
+    /**
+     * The entity that includes this mixin needs to implement 'asyncCreate'.
+     */
     function removeAnnotationType(annotationType, url) {
       /* jshint validthis:true */
       var self = this,

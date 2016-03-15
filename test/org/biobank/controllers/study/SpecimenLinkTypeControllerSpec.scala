@@ -1,14 +1,14 @@
 package org.biobank.controllers.study
 
-import org.biobank.fixture._
-import org.biobank.domain.study.{ Study, ProcessingType, SpecimenLinkType }
-import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.study._
-
-import play.api.test.Helpers._
+import org.biobank.domain.study.{ Study, ProcessingType, SpecimenLinkType }
+import org.biobank.fixture.ControllerFixture
+import org.biobank.fixture._
 import play.api.libs.json._
+import play.api.test.Helpers._
 
+@org.scalatest.Ignore
 class SpecimenLinkTypeControllerSpec extends ControllerFixture with JsonHelper {
 
   def uri(procType: ProcessingType): String = s"/studies/proctypes/sltypes/${procType.id.id}"

@@ -31,7 +31,7 @@ define(['underscore'], function(_) {
     NumberAnnotation.prototype.getServerAnnotation = function () {
       var value;
 
-      if (!_.isNaN(this.value)) {
+      if (!_.isUndefined(this.value) && !_.isNaN(this.value)) {
         value = this.value.toString();
       } else {
         value = '';

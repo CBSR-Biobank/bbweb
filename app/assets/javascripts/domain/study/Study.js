@@ -80,6 +80,8 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
         throw new Error('invalid object from server: ' + tv4.error);
       }
 
+      obj.annotationTypes = obj.annotationTypes || {};
+
       if (!AnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
         console.error('invalid object from server: bad annotation type');
         throw new Error('invalid object from server: bad annotation type');

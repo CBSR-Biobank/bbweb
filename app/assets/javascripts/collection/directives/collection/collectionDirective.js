@@ -30,7 +30,7 @@ define(function () {
   function CollectionCtrl(Study) {
     var vm = this;
 
-    vm.haveEnabledStudies = (vm.studyCounts.enabledCount > 0);
+    vm.haveEnabledStudies = (vm.studyCounts.enabled > 0);
     vm.updateEnabledStudies = updateEnabledStudies;
     vm.getEnabledStudiesPanelHeader = getEnabledStudiesPanelHeader;
 

@@ -12,13 +12,6 @@ define([
 ], function(angular, mocks, $, _, sprintf) {
   'use strict';
 
-  /**
-   * For now these tests test the interaction between the class and the server.
-   *
-   * At the moment not sure if we need the service layer, or if the domain model objects call the rest API
-   * directly. If the service layer is kept then these tests will have to be modified and only mock the
-   * service methods in 'studiesService'.
-   */
   describe('Study', function() {
 
     var Study;

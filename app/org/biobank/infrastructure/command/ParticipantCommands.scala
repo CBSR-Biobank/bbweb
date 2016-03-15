@@ -30,10 +30,21 @@ object ParticipantCommands {
                                           uniqueId:        String)
       extends ParticipantModifyCommand
 
-  case class UpdateParticipantAnnotationCmd(userId:          Option[String],
+  case class ParticipantAddAnnotationCmd(userId:          Option[String],
+                                         id:              String,
+                                         expectedVersion: Long,
+                                         stringValue:      Option[String],
+                                         numberValue:      Option[String],
+                                         selectedValues:   Set[String])
+      extends ParticipantModifyCommand
+
+  case class ParticipantUpdateAnnotationCmd(userId:          Option[String],
                                             id:              String,
                                             expectedVersion: Long,
-                                            annotation:      Annotation)
+                                            annotationTypeId: String,
+                                            stringValue:      Option[String],
+                                            numberValue:      Option[String],
+                                            selectedValues:   Set[String])
       extends ParticipantModifyCommand
 
   case class RemoveParticipantAnnotationCmd(userId:           Option[String],

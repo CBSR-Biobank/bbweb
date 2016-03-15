@@ -36,14 +36,6 @@ define(['underscore'], function(_) {
       return Participant.getByUniqueId($stateParams.studyId, $stateParams.uniqueId);
     }
 
-    resolveAnnotationTypes.$inject = ['$stateParams', 'ParticipantAnnotationType'];
-    function resolveAnnotationTypes($stateParams, ParticipantAnnotationType) {
-      if ($stateParams.studyId) {
-        return ParticipantAnnotationType.list($stateParams.studyId);
-      }
-      throw new Error('state parameter studyId is invalid');
-    }
-
     resolveCollectionEventsPagedResult.$inject = ['CollectionEvent', 'participant'];
     function resolveCollectionEventsPagedResult(CollectionEvent, participant) {
       // returns all collection events for a participant
@@ -136,15 +128,13 @@ define(['underscore'], function(_) {
     $stateProvider.state('home.collection.study.addParticipant', {
       url: '/add/{uniqueId}',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        annotationTypes: resolveAnnotationTypes
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'main@': {
           template: [
             '<participant-add',
             '  study="vm.study"',
-            '  annotation-types="vm.annotationTypes"',
             '  unique-id="{{vm.uniqueId}}">',
             '</participant-add>'
           ].join(''),
@@ -172,7 +162,6 @@ define(['underscore'], function(_) {
       url: '/{participantId}',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        annotationTypes: resolveAnnotationTypes, // maybe load this in the controller?
         participant: resolveParticipant
       },
       views: {

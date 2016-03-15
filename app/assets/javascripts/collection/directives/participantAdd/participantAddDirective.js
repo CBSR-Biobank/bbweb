@@ -12,8 +12,7 @@ define(['underscore'], function(_) {
     var directive = {
       scope: {},
       bindToController: {
-        study: '=',
-        annotationTypes: '=',
+        study:    '=',
         uniqueId: '@'
       },
       restrict: 'E',
@@ -41,11 +40,9 @@ define(['underscore'], function(_) {
     var vm = this;
 
     vm.title       = 'Add participant';
-    vm.participant = new Participant({ uniqueId: vm.uniqueId }, vm.study, vm.annotationTypes);
+    vm.participant = new Participant({ uniqueId: vm.uniqueId }, vm.study);
     vm.submit      = submit;
     vm.cancel      = cancel;
-
-
 
     function submit(participant) {
       // convert the data from the form to data expected by REST API

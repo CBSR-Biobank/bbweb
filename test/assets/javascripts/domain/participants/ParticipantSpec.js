@@ -10,42 +10,122 @@ define([
   'underscore',
   'faker',
   'moment',
-  'biobankApp'
-], function(angular, mocks, _, faker, moment) {
+  'sprintf'
+], function(angular, mocks, _, faker, moment, sprintf) {
   'use strict';
 
-  // FIXME: fix ignored tests
-
-  xdescribe('Participant', function() {
-
-    var httpBackend,
-        Participant,
-        Study,
-        Annotation,
-        AnnotationValueType,
-        AnnotationType,
-        bbwebConfig,
-        jsonEntities,
-        testUtils;
+  fdescribe('Participant', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(extendedDomainEntities) {
-      httpBackend               = this.$injector.get('$httpBackend');
-      Participant               = this.$injector.get('Participant');
-      Study                     = this.$injector.get('Study');
-      Annotation                = this.$injector.get('Annotation');
-      AnnotationValueType       = this.$injector.get('AnnotationValueType');
-      AnnotationType            = this.$injector.get('AnnotationType');
-      bbwebConfig               = this.$injector.get('bbwebConfig');
-      jsonEntities              = this.$injector.get('jsonEntities');
-      testUtils                 = this.$injector.get('testUtils');
+      var self = this;
 
-      testUtils.addCustomMatchers();
+      self.httpBackend              = self.$injector.get('$httpBackend');
+      self.Participant              = self.$injector.get('Participant');
+      self.Study                    = self.$injector.get('Study');
+      self.Annotation               = self.$injector.get('Annotation');
+
+      self.DateTimeAnnotation       = self.$injector.get('DateTimeAnnotation');
+      self.MultipleSelectAnnotation = self.$injector.get('MultipleSelectAnnotation');
+      self.NumberAnnotation         = self.$injector.get('NumberAnnotation');
+      self.SingleSelectAnnotation   = self.$injector.get('SingleSelectAnnotation');
+      self.TextAnnotation           = self.$injector.get('TextAnnotation');
+
+      self.AnnotationValueType      = self.$injector.get('AnnotationValueType');
+      self.AnnotationType           = self.$injector.get('AnnotationType');
+      self.bbwebConfig              = self.$injector.get('bbwebConfig');
+      self.jsonEntities             = self.$injector.get('jsonEntities');
+      self.testUtils                = self.$injector.get('testUtils');
+
+      self.testUtils.addCustomMatchers();
+
+      self.getParticipantEntities = getParticipantEntities;
+      self.generateJsonAnnotationTypesAndAnnotations = generateJsonAnnotationTypesAndAnnotations;
+      self.validateAnnotationClass = validateAnnotationClass;
+      self.updateEntity = this.testUtils.updateEntity;
+      self.expectParticipant = expectParticipant;
+      self.failTest = failTest;
+
+      function getParticipantEntities(isNew) {
+        var jsonAnnotationTypes = self.jsonEntities.allAnnotationTypes(),
+            jsonStudy           = self.jsonEntities.study({ annotationTypes: jsonAnnotationTypes }),
+            study               = new self.Study(jsonStudy),
+            jsonParticipant     = self.jsonEntities.participant({ studyId: study.id }),
+            annotationTypes,
+            participant;
+
+        if (isNew) {
+          participant = new self.Participant(_.omit(jsonParticipant, 'id'), study);
+        } else {
+          participant = new self.Participant(jsonParticipant, study);
+        }
+
+        return {
+          jsonStudy:           study,
+          jsonAnnotationTypes: jsonAnnotationTypes,
+          jsonParticipant:     jsonParticipant,
+          annotationTypes:     annotationTypes,
+          participant:         participant
+        };
+      }
+
+      function generateJsonAnnotationTypesAndAnnotations() {
+        var annotationTypes = self.jsonEntities.allAnnotationTypes(),
+            study = self.jsonEntities.study({ annotationTypes: annotationTypes }),
+            annotations = _.map(annotationTypes, function (annotationType) {
+              var value = self.jsonEntities.valueForAnnotation(annotationType);
+              return self.jsonEntities.annotation({ value: value }, annotationType);
+            });
+        return {
+          study: study,
+          annotations: annotations
+        };
+      }
+
+      function validateAnnotationClass(annotationType, annotation) {
+        switch (annotationType.valueType) {
+        case self.AnnotationValueType.TEXT():
+          expect(annotation).toEqual(jasmine.any(self.TextAnnotation));
+          break;
+        case self.AnnotationValueType.DATE_TIME():
+          expect(annotation).toEqual(jasmine.any(self.DateTimeAnnotation));
+          break;
+        case self.AnnotationValueType.NUMBER():
+          expect(annotation).toEqual(jasmine.any(self.NumberAnnotation));
+          break;
+        case self.AnnotationValueType.SELECT():
+          if (annotationType.isSingleSelect()) {
+            expect(annotation).toEqual(jasmine.any(self.SingleSelectAnnotation));
+          } else {
+            expect(annotation).toEqual(jasmine.any(self.MultipleSelectAnnotation));
+          }
+          break;
+
+        default:
+          fail('invalid annotation value type: ' + annotationType.valueType);
+        }
+      }
+
+      // used by promise tests
+      function expectParticipant(entity) {
+        expect(entity).toEqual(jasmine.any(self.Participant));
+      }
+
+      // used by promise tests
+      function failTest(error) {
+        expect(error).toBeUndefined();
+      }
+
     }));
 
+    afterEach(function() {
+      this.httpBackend.verifyNoOutstandingExpectation();
+      this.httpBackend.verifyNoOutstandingRequest();
+    });
+
     it('constructor with no parameters has default values', function() {
-      var participant = new Participant();
+      var participant = new this.Participant();
 
       expect(participant.id).toBeNull();
       expect(participant.version).toBe(0);
@@ -55,295 +135,273 @@ define([
     });
 
     it('constructor with annotation parameter has valid values', function() {
-      var serverStudy = jsonEntities.study(),
-          study = new Study(serverStudy),
-          annotationData = generateAnnotationTypesAndServerAnnotations(serverStudy);
+      var self = this,
+          annotationData = this.generateJsonAnnotationTypesAndAnnotations(),
+          study = new this.Study(annotationData.study),
+          participant;
 
-      var participant = new Participant({ annotations: _.pluck(annotationData, 'serverAnnotation') },
-                                        study,
-                                        _.pluck(annotationData, 'annotationType'));
+      participant = new this.Participant({ annotations: annotationData.annotations }, study);
 
-      _.each(annotationData, function (annotationItem) {
-        var annotation = _.findWhere(participant.annotations,
-                                     { annotationTypeId: annotationItem.annotationType.id });
-        expect(annotation).toEqual(jasmine.any(Annotation));
-        annotation.compareToJsonEntity(annotationItem.serverAnnotation);
-        expect(annotation.required).toBe(annotationItem.annotationType.required);
+      expect(participant.annotations).toBeArrayOfSize(study.annotationTypes.length);
+      _.each(participant.annotations, function (annotation) {
+        var jsonAnnotation = _.findWhere(annotationData.annotations,
+                                         { annotationTypeId: annotation.annotationTypeId }),
+            annotationType = _.findWhere(study.annotationTypes,
+                                         { uniqueId: annotation.annotationTypeId });
+
+        self.validateAnnotationClass(annotationType, annotation);
+        annotation.compareToJsonEntity(jsonAnnotation);
+        expect(annotation.required).toBe(annotationType.required);
       });
     });
 
     it('constructor with study parameter has valid values', function() {
-      var study = new Study(jsonEntities.study());
-      var participant = new Participant({}, study);
+      var study = new this.Study(this.jsonEntities.study());
+      var participant = new this.Participant({}, study);
 
       expect(participant.study).toEqual(study);
       expect(participant.studyId).toBe(study.id);
     });
 
-    it('constructor with NO annotation type parameters has valid values', function() {
-      var serverStudy = jsonEntities.study(),
-          study = new Study(serverStudy),
-          annotationData = generateAnnotationTypesAndServerAnnotations(serverStudy);
+    it('constructor with NO annotation parameters has valid values', function() {
+      var self = this,
+          annotationData = this.generateJsonAnnotationTypesAndAnnotations(),
+          study = new this.Study(annotationData.study),
+          participant = new this.Participant({}, study);
 
-      var participant = new Participant({}, study, _.pluck(annotationData, 'annotationType'));
-
-      expect(participant.annotations).toBeArrayOfSize(annotationData.length);
-      _.each(annotationData, function (annotationItem) {
-        var annotation = _.findWhere(participant.annotations,
-                                     { annotationTypeId: annotationItem.annotationType.id });
-        expect(annotation).toEqual(jasmine.any(Annotation));
-        expect(annotation.required).toBe(annotationItem.annotationType.required);
+      expect(participant.annotations).toBeArrayOfSize(study.annotationTypes.length);
+      _.each(participant.annotations, function (annotation) {
+        var annotationType = _.findWhere(study.annotationTypes,
+                                         { uniqueId: annotation.annotationTypeId });
+        self.validateAnnotationClass(annotationType, annotation);
+        expect(annotation.required).toBe(annotationType.required);
       });
     });
 
     it('constructor with invalid annotation parameter throws error', function() {
-      var serverStudy = jsonEntities.study(),
-          study = new Study(serverStudy),
+      var self = this,
+          annotationType = new this.AnnotationType(
+            this.jsonEntities.annotationType({ valueType: this.AnnotationValueType.TEXT() })),
+          jsonStudy = this.jsonEntities.study({ annotationTypes: [ annotationType ]}),
+          study = new this.Study(jsonStudy),
           serverAnnotation = {};
-
-      var annotationType = new AnnotationType(
-        jsonEntities.studyAnnotationType(serverStudy, { valueType: AnnotationValueType.TEXT() }));
 
       // put an invalid value in serverAnnotation.annotationTypeId
       _.extend(
         serverAnnotation,
-        jsonEntities.annotation(jsonEntities.valueForAnnotation(annotationType), annotationType),
-        { annotationTypeId: jsonEntities.stringNext() });
+        self.jsonEntities.annotation(
+          { value: self.jsonEntities.valueForAnnotation(annotationType) },
+          annotationType),
+        { annotationTypeId: self.jsonEntities.stringNext() });
 
       expect(function () {
-        return new Participant({ annotations: [ serverAnnotation ] },
-                               study,
-                               [ annotationType ]);
+        return new self.Participant({ annotations: [ serverAnnotation ] },
+                                    study);
       }).toThrow(new Error('annotation types not found: ' + serverAnnotation.annotationTypeId));
     });
 
     it('fails when creating from a non object', function() {
-      expect(Participant.create(1))
-        .toEqual(new Error('invalid object from server: has the correct keys'));
+      var self = this;
+      expect(function () { self.Participant.create(1); }).toThrowErrorOfType('Error');
     });
 
     it('fails when creating from an object with invalid keys', function() {
-      var serverObj = {
-        tmp: 1
-      };
-      expect(Participant.create(serverObj))
-        .toEqual(new Error('invalid object from server: has the correct keys'));
+      var self = this,
+          serverObj = { tmp: 1 };
+      expect(function () { self.Participant.create(1); }).toThrowErrorOfType('Error');
     });
 
-    it('fails when creating from an object with annotation with invalid keys', function() {
-      var study = jsonEntities.study(),
-          serverParticipant = jsonEntities.participant(study);
+    it('fails when creating from an object and an annotation has invalid keys', function() {
+      var self = this,
+          study = this.jsonEntities.study(),
+          jsonParticipant = this.jsonEntities.participant({ studyId: study.id });
 
-      serverParticipant.annotations = [{ tmp: 1 }];
-      expect(Participant.create(serverParticipant))
-        .toEqual(new Error('invalid annotation object from server'));
+      jsonParticipant.annotations = [{ tmp: 1 }];
+      expect(function () { self.Participant.create(jsonParticipant); })
+        .toThrowErrorOfType('Error');
     });
 
     it('has valid values when creating from a server response', function() {
-      var study = jsonEntities.study(),
-          serverParticipant = jsonEntities.participant(study);
+      var study = this.jsonEntities.study(),
+          jsonParticipant = this.jsonEntities.participant(study);
 
       // TODO: add annotations to the server response
-      var participant = Participant.create(serverParticipant);
-      participant.compareToJsonEntity(serverParticipant);
+      var participant = this.Participant.create(jsonParticipant);
+      participant.compareToJsonEntity(jsonParticipant);
     });
 
-    it('can retrieve a single participant', function(done) {
-      var study = jsonEntities.study();
-      var participant = jsonEntities.participant({ studyId: study.id });
-      httpBackend.whenGET(uri(study.id, participant.id)).respond(serverReply(participant));
+    it('can retrieve a single participant', function() {
+      var study = this.jsonEntities.study(),
+          participant = this.jsonEntities.participant({ studyId: study.id });
 
-      Participant.get(study.id, participant.id).then(function (reply) {
-        expect(reply).toEqual(jasmine.any(Participant));
+      this.httpBackend.whenGET(uri(study.id, participant.id)).respond(serverReply(participant));
+
+      this.Participant.get(study.id, participant.id).then(function (reply) {
+        expect(reply).toEqual(jasmine.any(this.Participant));
         reply.compareToJsonEntity(participant);
-        done();
       });
-      httpBackend.flush();
+      this.httpBackend.flush();
     });
 
-    it('can retrieve a single participant by uniqueId', function(done) {
-      var study = jsonEntities.study();
-      var participant = jsonEntities.participant({ studyId: study.id });
-      httpBackend.whenGET(uri(study.id) + '/uniqueId/' + participant.uniqueId)
-        .respond(serverReply(participant));
+    it('can retrieve a single participant by uniqueId', function() {
+      var self = this,
+          study = self.jsonEntities.study(),
+          participant = self.jsonEntities.participant({ studyId: study.id });
 
-      Participant.getByUniqueId(study.id, participant.uniqueId).then(function (reply) {
-        expect(reply).toEqual(jasmine.any(Participant));
+      self.httpBackend.whenGET(
+        sprintf.sprintf('/participants/uniqueId/%s/%s', study.id, participant.uniqueId)
+      ).respond(serverReply(participant));
+
+      self.Participant.getByUniqueId(study.id, participant.uniqueId).then(function (reply) {
+        expect(reply).toEqual(jasmine.any(self.Participant));
         reply.compareToJsonEntity(participant);
-        done();
       });
-      httpBackend.flush();
+      self.httpBackend.flush();
     });
 
-    it('can add a participant', function(done) {
-      var study = jsonEntities.study();
-      var baseParticipant = jsonEntities.participant({ studyId: study.id });
-      var participant = new Participant(_.omit(baseParticipant, 'id'));
-      var cmd = addCommand(participant);
+    it('can add a participant', function() {
+      var self = this,
+          study = self.jsonEntities.study(),
+          jsonParticipant = self.jsonEntities.participant({ studyId: study.id }),
+          participant = new self.Participant(_.omit(jsonParticipant, 'id')),
+          reqJson = addJson(participant);
 
-      httpBackend.expectPOST(uri(study.id), cmd).respond(201, serverReply(baseParticipant));
+      self.httpBackend.expectPOST(uri(study.id), reqJson).respond(201, serverReply(jsonParticipant));
 
-      participant.addOrUpdate().then(function(replyParticipant) {
-        expect(replyParticipant.id).toEqual(baseParticipant.id);
-        expect(replyParticipant.version).toEqual(0);
-        expect(replyParticipant.studyId).toEqual(study.id);
-        expect(replyParticipant.uniqueId).toEqual(participant.uniqueId);
-        expect(replyParticipant.annotations).toBeArrayOfSize(participant.annotations.length);
-        done();
+      participant.add().then(function(reply) {
+        expect(reply).toEqual(jasmine.any(self.Participant));
+        expect(reply.id).toEqual(jsonParticipant.id);
+        expect(reply.version).toEqual(0);
+        expect(reply.studyId).toEqual(study.id);
+        expect(reply.uniqueId).toEqual(participant.uniqueId);
+        expect(reply.annotations).toBeArrayOfSize(participant.annotations.length);
       });
-      httpBackend.flush();
+      self.httpBackend.flush();
     });
 
-    it('can add a participant with annotations', function(done) {
-      var entities = getParticipantEntities(true), cmd;
+    it('can add a participant with annotations', function() {
+      var entities = this.getParticipantEntities(true),
+          reqJson = addJson(entities.participant);
 
-      cmd = addCommand(entities.participant);
+      this.httpBackend.expectPOST(uri(entities.jsonStudy.id), reqJson)
+        .respond(201, serverReply(entities.jsonParticipant));
 
-      httpBackend.expectPOST(uri(entities.serverStudy.id), cmd)
-        .respond(201, serverReply(entities.serverParticipant));
-
-      entities.participant.addOrUpdate().then(function(replyParticipant) {
-        expect(replyParticipant.id).toEqual(entities.serverParticipant.id);
+      entities.participant.add().then(function(replyParticipant) {
+        expect(replyParticipant.id).toEqual(entities.jsonParticipant.id);
         expect(replyParticipant.version).toEqual(0);
-        expect(replyParticipant.studyId).toEqual(entities.serverStudy.id);
+        expect(replyParticipant.studyId).toEqual(entities.jsonStudy.id);
         expect(replyParticipant.uniqueId).toEqual(entities.participant.uniqueId);
         expect(replyParticipant.annotations).toBeArrayOfSize(entities.participant.annotations.length);
-        done();
       });
-      httpBackend.flush();
+      this.httpBackend.flush();
     });
 
     it('can not add a participant with empty required annotations', function() {
-      var study,
-          serverAnnotationTypes,
-          serverParticipant;
+      var self = this,
+          jsonAnnotationTypes = self.jsonEntities.allAnnotationTypes();
 
-      study = jsonEntities.study();
-      serverAnnotationTypes = jsonEntities.allStudyAnnotationTypes(study);
-
-      _.each(serverAnnotationTypes, function (serverAnnotationType) {
-        var annotationType = new AnnotationType(serverAnnotationType),
-            participant = new Participant(_.omit(serverParticipant, 'id'), study, [ annotationType ]);
-
-        _.each(participant.annotations, function (annotation) {
-          annotation.required = true;
-          expect(annotation.getValue()).toBeFalsy();
-        });
-
-        expect(function () {
-          participant.addOrUpdate();
-        }).toThrow();
-      });
-    });
-
-    it('can update a participant', function(done) {
-      var study = jsonEntities.study();
-      var baseParticipant = jsonEntities.participant({ studyId: study.id });
-      var participant = new Participant(baseParticipant);
-      var cmd = updateCommand(participant);
-      var reply = replyParticipant(baseParticipant);
-
-      httpBackend.expectPUT(uri(study.id, participant.id), cmd).respond(201, serverReply(reply));
-
-      participant.addOrUpdate().then(function(replyParticipant) {
-        expect(replyParticipant.id).toEqual(baseParticipant.id);
-        expect(replyParticipant.version).toEqual(participant.version + 1);
-        expect(replyParticipant.studyId).toEqual(study.id);
-        expect(replyParticipant.uniqueId).toEqual(participant.uniqueId);
-        expect(replyParticipant.annotations).toBeArrayOfSize(participant.annotations.length);
-        done();
-      });
-      httpBackend.flush();
-    });
-
-    it('can update a participant with annotations', function(done) {
-      var entities = getParticipantEntities(false),
-          cmd = updateCommand(entities.participant),
-          reply = replyParticipant(entities.serverParticipant);
-
-      httpBackend.expectPUT(uri(entities.serverStudy.id, entities.participant.id), cmd)
-        .respond(201, serverReply(reply));
-
-      entities.participant.addOrUpdate().then(function(replyParticipant) {
-        expect(replyParticipant.id).toEqual(entities.serverParticipant.id);
-        expect(replyParticipant.version).toEqual(entities.participant.version + 1);
-        expect(replyParticipant.studyId).toEqual(entities.serverStudy.id);
-        expect(replyParticipant.uniqueId).toEqual(entities.participant.uniqueId);
-        expect(replyParticipant.annotations).toBeArrayOfSize(entities.participant.annotations.length);
-        done();
-      });
-      httpBackend.flush();
-    });
-
-    it('can not update a participant with empty required annotations', function() {
-      var study,
-          serverAnnotationTypes,
-          serverParticipant;
-
-      study = jsonEntities.study();
-      serverAnnotationTypes = jsonEntities.allStudyAnnotationTypes(study);
-
-      _.each(serverAnnotationTypes, function (serverAnnotationType) {
-        var annotationType = new AnnotationType(serverAnnotationType),
-            participant = new Participant(serverParticipant, study, [ annotationType ]);
+      _.each(jsonAnnotationTypes, function (serverAnnotationType) {
+        var annotationType = new self.AnnotationType(serverAnnotationType),
+            jsonStudy = self.jsonEntities.study({ annotationTypes: [ annotationType ]}),
+            study = new self.Study(jsonStudy),
+            jsonParticipant = self.jsonEntities.participant(),
+            participant = new self.Participant(_.omit(jsonParticipant, 'id'), study);
 
         _.each(participant.annotations, function (annotation) {
           annotation.required = true;
           expect(annotation.getValue()).toBeFalsy();
         });
 
-        expect(function () {
-          participant.addOrUpdate();
-        }).toThrow();
+        expect(function () { participant.add(); }).toThrowAnyError();
       });
     });
 
-    function getParticipantEntities(isNew) {
-      var study,
-          serverAnnotationTypes,
-          serverParticipant,
-          annotationTypes,
-          participant;
+    it('can update the unique ID on a participant', function() {
+      var self = this,
+          study = self.jsonEntities.study(),
+          jsonParticipant = self.jsonEntities.participant({ studyId: study.id }),
+          participant = new self.Participant(jsonParticipant);
 
-      study = jsonEntities.study();
-      serverAnnotationTypes = jsonEntities.allStudyAnnotationTypes(study);
-      serverParticipant = jsonEntities.participant({
-        studyId:         study.id,
-        annotationTypes: serverAnnotationTypes
-      });
+      self.updateEntity(participant,
+                        'updateUniqueId',
+                        participant.uniqueId,
+                        updateUri('uniqueId', participant.id),
+                        { uniqueId: participant.uniqueId },
+                        jsonParticipant,
+                        self.expectParticipant,
+                        self.failTest);
+    });
 
-      annotationTypes = _.map(serverAnnotationTypes, function (serverAnnotationType) {
-        return new AnnotationType(serverAnnotationType);
-      });
+    it('can add an annotation to a participant', function() {
+      var self = this,
+          jsonAnnotationType = self.jsonEntities.annotationType(),
+          jsonStudy = self.jsonEntities.study({ annotationTypes: [ jsonAnnotationType ]}),
+          jsonParticipant = self.jsonEntities.participant({
+            studyId: jsonStudy.id
+          }),
+          study = new self.Study(jsonStudy),
+          participant = new self.Participant(jsonParticipant, study);
 
-      if (isNew) {
-        participant = new Participant(_.omit(serverParticipant, 'id'), study, annotationTypes);
-      } else {
-        participant = new Participant(serverParticipant, study, annotationTypes);
-      }
+      self.updateEntity(participant,
+                        'addAnnotation',
+                        participant.annotations[0],
+                        updateUri('annot', participant.id),
+                        _.pick(participant.annotations[0],
+                               'stringValue',
+                               'numberValue',
+                               'selectedValues'),
+                        jsonParticipant,
+                        self.expectParticipant,
+                        self.failTest);
+    });
 
-      return {
-        serverStudy: study,
-        serverAnnotationTypes: serverAnnotationTypes,
-        serverParticipant: serverParticipant,
-        annotationTypes: annotationTypes,
-        participant: participant
-      };
-    }
+    it('can update an annotation on a participant', function() {
+      var self = this,
+          jsonAnnotationType = self.jsonEntities.annotationType(),
+          jsonStudy = self.jsonEntities.study({ annotationTypes: [ jsonAnnotationType ]}),
+          jsonParticipant = self.jsonEntities.participant({
+            studyId: jsonStudy.id,
+            annotationTypes: [ jsonAnnotationType ]
+          }),
+          study = new self.Study(jsonStudy),
+          participant = new self.Participant(jsonParticipant, study);
 
-    function generateAnnotationTypesAndServerAnnotations(serverStudy) {
-      var annotationTypes = jsonEntities.allStudyAnnotationTypes(serverStudy);
+      self.updateEntity(participant,
+                        'addAnnotation',
+                        participant.annotations[0],
+                        updateUri('annot', participant.id),
+                        _.pick(participant.annotations[0],
+                               'stringValue',
+                               'numberValue',
+                               'selectedValues'),
+                        jsonParticipant,
+                        self.expectParticipant,
+                        self.failTest);
+    });
 
-      return _.map(annotationTypes, function (annotationType) {
-        var value = jsonEntities.valueForAnnotation(annotationType);
-        var serverAnnotation = jsonEntities.annotation(value, annotationType);
+    fit('can remove an annotation on a participant', function() {
+      var self = this,
+          jsonAnnotationType = self.jsonEntities.annotationType(),
+          jsonStudy = self.jsonEntities.study({ annotationTypes: [ jsonAnnotationType ]}),
+          jsonParticipant = self.jsonEntities.participant({
+            studyId: jsonStudy.id,
+            annotationTypes: [ jsonAnnotationType ]
+          }),
+          study = new self.Study(jsonStudy),
+          participant = new self.Participant(jsonParticipant, study),
+          url;
 
-        return {
-          annotationType: new AnnotationType(annotationType),
-          serverAnnotation: serverAnnotation
-        };
-      });
-    }
+      url = sprintf.sprintf('%s/%d/%s',
+                            uri('annot', participant.id),
+                            participant.version,
+                            participant.annotations[0].annotationTypeId);
+
+      this.httpBackend.whenDELETE(url).respond(201, serverReply(true));
+      participant.removeAnnotation(participant.annotations[0])
+        .then(self.expectParticipant)
+        .catch(self.failTest);
+      this.httpBackend.flush();
+    });
 
     function annotationsForCommand(participant) {
       return _.map(participant.annotations, function (annotation) {
@@ -351,36 +409,26 @@ define([
       });
     }
 
-    function addCommand(participant) {
+    function addJson(participant) {
       return _.extend(_.pick(participant, 'studyId', 'uniqueId'),
                       { annotations: annotationsForCommand(participant) } );
-    }
-
-    function updateCommand(participant) {
-      return _.extend(_.pick(participant, 'id', 'studyId', 'uniqueId'),
-                      { annotations: annotationsForCommand(participant) },
-                      testUtils.expectedVersion(participant.version));
-    }
-
-    function replyParticipant(participant, newValues) {
-      newValues = newValues || {};
-      return new Participant(_.extend({}, participant, newValues, {version: participant.version + 1}));
     }
 
     function serverReply(event) {
       return { status: 'success', data: event };
     }
 
+
     function uri(/* studyId, participantId */) {
-      var studyId, participantId, result = '/participants',
+      var studyId,
+          participantId,
+          result = '/participants',
           args = _.toArray(arguments);
 
-      if (args.length < 1) {
-        throw new Error('study id not specified');
+      if (args.length > 0) {
+        studyId = args.shift();
+        result += '/' + studyId;
       }
-
-      studyId = args.shift();
-      result += '/' + studyId;
 
       if (args.length > 0) {
         participantId = args.shift();
@@ -388,6 +436,26 @@ define([
       }
       return result;
     }
+
+    function updateUri(/* path, participantId */) {
+      var path,
+          participantId,
+          result = uri(),
+          args = _.toArray(arguments);
+
+      if (args.length > 0) {
+        path = args.shift();
+        result += '/' + path;
+      }
+
+      if (args.length > 0) {
+        participantId = args.shift();
+        result += '/' + participantId;
+      }
+
+      return result;
+    }
+
   });
 
 });

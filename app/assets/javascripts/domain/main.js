@@ -33,6 +33,7 @@ define(function (require) {
   module.service('annotationTypeValidation',            require('./annotationTypeValidation'));
 
   module.factory('Annotation',                          require('./annotations/Annotation'));
+  module.factory('Annotations',                         require('./annotations/Annotations'));
   module.factory('DateTimeAnnotation',                  require('./annotations/DateTimeAnnotation'));
   module.factory('MultipleSelectAnnotation',            require('./annotations/MultipleSelectAnnotation'));
   module.factory('NumberAnnotation',                    require('./annotations/NumberAnnotation'));

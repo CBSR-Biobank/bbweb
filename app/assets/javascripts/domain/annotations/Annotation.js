@@ -119,7 +119,7 @@ define(['moment', 'underscore', 'tv4'], function(moment, _, tv4) {
      * For non requried annotation types, this always returns true. For required annotation types,
      * returns true if the value is not empty.
      */
-    Annotation.prototype.isValid = function () {
+    Annotation.prototype.isValueValid = function () {
       var value;
 
       if (!this.required) {

@@ -21,7 +21,9 @@ define(['underscore'], function(_) {
                                     SingleSelectAnnotation,
                                     TextAnnotation) {
 
-    var service = { create: create };
+    var service = {
+      create: create
+    };
     return service;
 
     //--
@@ -92,6 +94,7 @@ define(['underscore'], function(_) {
 
       return annotation;
     }
+
   }
 
   return annotationFactoryFactory;
