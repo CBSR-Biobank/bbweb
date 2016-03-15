@@ -22,6 +22,8 @@ class SpecimenGroupRepositoryImpl
     extends ReadWriteRepositoryRefImpl[SpecimenGroupId, SpecimenGroup](v => v.id)
     with SpecimenGroupRepository {
 
+  override val hashidsSalt = "biobank-specimen-groups"
+
   def nextIdentity: SpecimenGroupId = new SpecimenGroupId(nextIdentityAsString)
 
   def allForStudy(studyId: StudyId): Set[SpecimenGroup] = {

@@ -1,5 +1,6 @@
 package org.biobank.domain
 
+import org.hashids.Hashids
 import scala.concurrent.stm.Ref
 import scalaz.Scalaz._
 
@@ -64,7 +65,11 @@ private [domain] abstract class ReadWriteRepositoryRefImpl[K, A](keyGetter: (A) 
     extends ReadRepositoryRefImpl[K, A](keyGetter)
     with ReadWriteRepository[K, A] {
 
-  protected def nextIdentityAsString: String = java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase
+  val hashidsSalt: String
+
+  lazy val hashids: Hashids = Hashids(hashidsSalt)
+
+  protected def nextIdentityAsString: String = hashids.encode(getMap.size)
 
   def put(value: A): A = {
     internalMap.single.transform(map => map + (keyGetter(value) -> value))

@@ -1,11 +1,10 @@
 package org.biobank.domain.centre
 
-import org.biobank.domain._
-
-import javax.inject.Singleton
 import com.google.inject.ImplementedBy
-import scalaz._
+import javax.inject.Singleton
+import org.biobank.domain._
 import scalaz.Scalaz._
+import scalaz._
 
 @ImplementedBy(classOf[CentreRepositoryImpl])
 trait CentreRepository extends ReadWriteRepository[CentreId, Centre] {
@@ -23,6 +22,8 @@ class CentreRepositoryImpl
     extends ReadWriteRepositoryRefImpl[CentreId, Centre](v => v.id)
     with CentreRepository {
   import org.biobank.CommonValidations._
+
+  override val hashidsSalt = "biobank-centres"
 
   def nextIdentity: CentreId = new CentreId(nextIdentityAsString)
 

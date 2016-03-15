@@ -80,10 +80,11 @@ libraryDependencies ++= Seq(
   "org.iq80.leveldb"            % "leveldb"                              % "0.7",
   "org.fusesource.leveldbjni"   % "leveldbjni-all"                       % "1.8",
   "com.github.t3hnar"           %% "scala-bcrypt"                        % "2.5",
+  "com.github.ancane"           %% "hashids-scala"                       % "1.2",
   "com.typesafe.play"           %% "play-mailer"                         % "3.0.1",
   "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.1.0",
   // WebJars infrastructure
-  ( "org.webjars"               %% "webjars-play"                       % "2.4.0-1").exclude("org.webjars", "requirejs"),
+  ( "org.webjars"               %% "webjars-play"                        % "2.4.0-1").exclude("org.webjars", "requirejs"),
   // WebJars dependencies
   "org.webjars"               %  "requirejs"                           % "2.1.22",
   "org.webjars"               %  "underscorejs"                        % "1.8.3",

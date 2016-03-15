@@ -26,6 +26,8 @@ class CollectionEventRepositoryImpl
     with CollectionEventRepository {
   import org.biobank.CommonValidations._
 
+  override val hashidsSalt = "biobank-collection-events"
+
   def nextIdentity: CollectionEventId = new CollectionEventId(nextIdentityAsString)
 
   def notFound(id: CollectionEventId) = IdNotFound(s"collection event id: $id")

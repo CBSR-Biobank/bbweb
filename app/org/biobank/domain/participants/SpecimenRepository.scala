@@ -16,6 +16,8 @@ class SpecimenRepositoryImpl
     with SpecimenRepository {
   import org.biobank.CommonValidations._
 
+  override val hashidsSalt = "biobank-specimens"
+
   def nextIdentity: SpecimenId = new SpecimenId(nextIdentityAsString)
 
   def notFound(id: SpecimenId) = IdNotFound(s"specimen id: $id")
