@@ -5,14 +5,14 @@
 define(['underscore'], function(_) {
   'use strict';
 
-  AnnotationTypesFactory.$inject = [ 'biobankApi', 'AnnotationType' ];
+  hasAnnotationTypesFactory.$inject = [ 'biobankApi', 'AnnotationType' ];
 
   /**
    * Maintains an array of annotation types.
    *
    * This is a mixin.
    */
-  function AnnotationTypesFactory(biobankApi, AnnotationType) {
+  function hasAnnotationTypesFactory(biobankApi, AnnotationType) {
 
     var mixins = {
       validAnnotationTypes: validAnnotationTypes,
@@ -63,5 +63,5 @@ define(['underscore'], function(_) {
 
   }
 
-  return AnnotationTypesFactory;
+  return hasAnnotationTypesFactory;
 });

@@ -10,7 +10,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     'funutils',
     'ConcurrencySafeEntity',
     'biobankApi',
-    'Annotations',
+    'hasAnnotations',
     'annotationFactory'
   ];
 
@@ -21,7 +21,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                               funutils,
                               ConcurrencySafeEntity,
                               biobankApi,
-                              Annotations,
+                              hasAnnotations,
                               annotationFactory) {
 
     var schema = {
@@ -63,7 +63,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     }
 
     Participant.prototype = Object.create(ConcurrencySafeEntity.prototype);
-    _.extend(Participant.prototype, Annotations);
+    _.extend(Participant.prototype, hasAnnotations);
     Participant.prototype.constructor = Participant;
 
     /**
@@ -75,7 +75,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
         throw new Error('invalid object from server: ' + tv4.error);
       }
 
-      if (!Annotations.validAnnotations(obj.annotations)) {
+      if (!hasAnnotations.validAnnotations(obj.annotations)) {
         console.error('invalid object from server: bad annotation type');
         throw new Error('invalid object from server: bad annotation type');
       }
@@ -109,41 +109,13 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
       if (!tv4.validate(obj, schema)) {
         console.error('invalid object from server: ' + tv4.error);
         deferred.reject('invalid object from server: ' + tv4.error);
-      } else if (!Annotations.validAnnotations(obj.annotations)) {
+      } else if (!hasAnnotations.validAnnotations(obj.annotations)) {
         console.error('invalid object from server: bad annotation type');
         deferred.reject('invalid object from server: bad annotation type');
       } else {
         deferred.resolve(new Participant(obj));
       }
       return deferred.promise;
-    };
-
-    /**
-     * Converts the server side annotations to Annotation objects, which make it easier to manage them.
-     *
-     * @param {ParticipantAnnotationType} annotationTypes - the annotation types allowed for this participant.
-     */
-    Participant.prototype.setAnnotationTypes = function (annotationTypes) {
-      var self = this,
-          differentIds;
-
-      self.annotations = self.annotations || [];
-
-      // make sure the annotations ids match up with the corresponding annotation types
-      differentIds = _.difference(_.pluck(self.annotations, 'annotationTypeId'),
-                                  _.pluck(annotationTypes, 'uniqueId'));
-
-      if (differentIds.length > 0) {
-        throw new Error('annotation types not found: ' + differentIds);
-      }
-
-      self.annotations = _.map(annotationTypes, function (annotationType) {
-        var serverAnnotation = _.findWhere(self.annotations,
-                                           { annotationTypeId: annotationType.uniqueId });
-
-        // undefined is valid input
-        return annotationFactory.create(serverAnnotation, annotationType);
-      });
     };
 
     Participant.prototype.add = function () {
@@ -171,17 +143,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     };
 
     Participant.prototype.addAnnotation = function (annotation) {
-      return ConcurrencySafeEntity.prototype.update.call(
-        this,
-        uri('annot', this.id),
-        _.pick(annotation, 'stringValue', 'numberValue', 'selectedValues'));
-    };
-
-    Participant.prototype.updateAnnotation = function (annotation) {
-      return ConcurrencySafeEntity.prototype.update.call(
-        this,
-        uri('annot', this.id) + '/' + annotation.uniqueId,
-        _.pick(annotation, 'stringValue', 'numberValue', 'selectedValues'));
+      return hasAnnotations.addAnnotation.call(this, annotation, uri('annot', this.id));
     };
 
     Participant.prototype.removeAnnotation = function (annotation) {
@@ -189,7 +151,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                                 uri('annot', this.id),
                                 this.version,
                                 annotation.annotationTypeId);
-      return Annotations.removeAnnotation.call(this, annotation, url);
+      return hasAnnotations.removeAnnotation.call(this, annotation, url);
     };
 
     function uri(/* path, participantId */) {

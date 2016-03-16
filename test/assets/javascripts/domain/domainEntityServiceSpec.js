@@ -7,7 +7,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  fdescribe('Service: domainEntityService', function() {
+  describe('Service: domainEntityService', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 

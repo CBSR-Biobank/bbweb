@@ -4,24 +4,23 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'underscore',
-  'faker',
-  'moment',
-  'sprintf'
-], function(angular, mocks, _, faker, moment, sprintf) {
+define(function(require) {
   'use strict';
 
-  describe('Participant', function() {
+  var mocks   = require('angularMocks'),
+      _       = require('underscore'),
+      sprintf = require('sprintf');
+
+  fdescribe('Participant', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(entityTestSuite, extendedDomainEntities) {
+    beforeEach(inject(function(entityTestSuite,
+                               hasAnnotationsEntityTestSuite,
+                               extendedDomainEntities) {
       var self = this;
 
-      _.extend(this, entityTestSuite);
+      _.extend(this, entityTestSuite, hasAnnotationsEntityTestSuite);
 
       self.httpBackend              = self.$injector.get('$httpBackend');
       self.Participant              = self.$injector.get('Participant');
@@ -44,7 +43,6 @@ define([
 
       self.getParticipantEntities = getParticipantEntities;
       self.generateJsonAnnotationTypesAndAnnotations = generateJsonAnnotationTypesAndAnnotations;
-      self.validateAnnotationClass = validateAnnotationClass;
       self.expectParticipant = expectParticipant;
       self.failTest = failTest;
 
@@ -82,30 +80,6 @@ define([
           study: study,
           annotations: annotations
         };
-      }
-
-      function validateAnnotationClass(annotationType, annotation) {
-        switch (annotationType.valueType) {
-        case self.AnnotationValueType.TEXT():
-          expect(annotation).toEqual(jasmine.any(self.TextAnnotation));
-          break;
-        case self.AnnotationValueType.DATE_TIME():
-          expect(annotation).toEqual(jasmine.any(self.DateTimeAnnotation));
-          break;
-        case self.AnnotationValueType.NUMBER():
-          expect(annotation).toEqual(jasmine.any(self.NumberAnnotation));
-          break;
-        case self.AnnotationValueType.SELECT():
-          if (annotationType.isSingleSelect()) {
-            expect(annotation).toEqual(jasmine.any(self.SingleSelectAnnotation));
-          } else {
-            expect(annotation).toEqual(jasmine.any(self.MultipleSelectAnnotation));
-          }
-          break;
-
-        default:
-          fail('invalid annotation value type: ' + annotationType.valueType);
-        }
       }
 
       // used by promise tests
@@ -232,16 +206,17 @@ define([
     });
 
     it('can retrieve a single participant', function() {
-      var study = this.jsonEntities.study(),
-          participant = this.jsonEntities.participant({ studyId: study.id });
+      var self = this,
+          study = self.jsonEntities.study(),
+          participant = self.jsonEntities.participant({ studyId: study.id });
 
-      this.httpBackend.whenGET(uri(study.id, participant.id)).respond(serverReply(participant));
+      self.httpBackend.whenGET(uri(study.id, participant.id)).respond(serverReply(participant));
 
-      this.Participant.get(study.id, participant.id).then(function (reply) {
-        expect(reply).toEqual(jasmine.any(this.Participant));
+      self.Participant.get(study.id, participant.id).then(function (reply) {
+        expect(reply).toEqual(jasmine.any(self.Participant));
         reply.compareToJsonEntity(participant);
       });
-      this.httpBackend.flush();
+      self.httpBackend.flush();
     });
 
     it('can retrieve a single participant by uniqueId', function() {
@@ -280,7 +255,7 @@ define([
       self.httpBackend.flush();
     });
 
-    it('can add a participant with annotations', function() {
+    fit('can add a participant with annotations', function() {
       var entities = this.getParticipantEntities(true),
           reqJson = addJson(entities.participant);
 
@@ -356,52 +331,35 @@ define([
                         self.failTest);
     });
 
-    it('can update an annotation on a participant', function() {
-      var self = this,
-          jsonAnnotationType = self.jsonEntities.annotationType(),
-          jsonStudy = self.jsonEntities.study({ annotationTypes: [ jsonAnnotationType ]}),
-          jsonParticipant = self.jsonEntities.participant({
-            studyId: jsonStudy.id,
-            annotationTypes: [ jsonAnnotationType ]
-          }),
-          study = new self.Study(jsonStudy),
-          participant = new self.Participant(jsonParticipant, study);
+    describe('updates to annotations', function () {
 
-      self.updateEntity(participant,
-                        'addAnnotation',
-                        participant.annotations[0],
-                        updateUri('annot', participant.id),
-                        _.pick(participant.annotations[0],
-                               'stringValue',
-                               'numberValue',
-                               'selectedValues'),
-                        jsonParticipant,
-                        self.expectParticipant,
-                        self.failTest);
-    });
+      var context = {};
 
-    it('can remove an annotation on a participant', function() {
-      var self = this,
-          jsonAnnotationType = self.jsonEntities.annotationType(),
-          jsonStudy = self.jsonEntities.study({ annotationTypes: [ jsonAnnotationType ]}),
-          jsonParticipant = self.jsonEntities.participant({
-            studyId: jsonStudy.id,
-            annotationTypes: [ jsonAnnotationType ]
-          }),
-          study = new self.Study(jsonStudy),
-          participant = new self.Participant(jsonParticipant, study),
-          url;
+      beforeEach(inject(function () {
+        var jsonAnnotationType = this.jsonEntities.annotationType(),
+            jsonStudy = this.jsonEntities.study({ annotationTypes: [ jsonAnnotationType ]}),
+            jsonParticipant = this.jsonEntities.participant({
+              studyId: jsonStudy.id,
+              annotationTypes: [ jsonAnnotationType ]
+            }),
+            study = new this.Study(jsonStudy),
+            participant = new this.Participant(jsonParticipant, study);
 
-      url = sprintf.sprintf('%s/%d/%s',
-                            uri('annot', participant.id),
-                            participant.version,
-                            participant.annotations[0].annotationTypeId);
+        context.entityType     = this.Participant;
+        context.entity         = participant;
+        context.updateFuncName = 'addAnnotation';
+        context.removeFuncName = 'removeAnnotation';
+        context.annotation     = participant.annotations[0];
+        context.addUrl         = updateUri('annot', participant.id);
+        context.deleteUrl      = sprintf.sprintf('%s/%d/%s',
+                                                 uri('annot', participant.id),
+                                                 participant.version,
+                                                 participant.annotations[0].annotationTypeId);
+        context.response       = jsonParticipant;
+      }));
 
-      this.httpBackend.whenDELETE(url).respond(201, serverReply(true));
-      participant.removeAnnotation(participant.annotations[0])
-        .then(self.expectParticipant)
-        .catch(self.failTest);
-      this.httpBackend.flush();
+      this.annotationSetSharedSpec(context);
+
     });
 
     function annotationsForCommand(participant) {

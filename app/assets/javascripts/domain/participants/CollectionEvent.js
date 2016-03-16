@@ -12,6 +12,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
     'Annotation',
     'queryStringService',
     'biobankApi',
+    'hasAnnotations',
     'annotationFactory'
   ];
 
@@ -24,6 +25,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
                                   Annotation,
                                   queryStringService,
                                   biobankApi,
+                                  hasAnnotations,
                                   annotationFactory) {
 
     var schema = {
@@ -84,6 +86,8 @@ define(['underscore', 'tv4'], function(_, tv4) {
     }
 
     CollectionEvent.prototype = Object.create(ConcurrencySafeEntity.prototype);
+    _.extend(CollectionEvent.prototype, hasAnnotations);
+    CollectionEvent.prototype.constructor = CollectionEvent;
 
     CollectionEvent.isValid = function(obj) {
       return tv4.validate(obj, schema);
@@ -195,7 +199,11 @@ define(['underscore', 'tv4'], function(_, tv4) {
     };
 
     CollectionEvent.prototype.setCollectionEventType = function (collectionEventType) {
+      if (_.isUndefined(collectionEventType)) {
+        throw new Error('collection event type not defined');
+      }
       this.collectionEventType = collectionEventType;
+      this.setAnnotationTypes(collectionEventType.annotationTypes);
     };
 
     CollectionEvent.prototype.add = function () {

@@ -13,7 +13,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
     'ConcurrencySafeEntity',
     'StudyStatus',
     'AnnotationType',
-    'AnnotationTypes'
+    'hasAnnotationTypes'
   ];
 
   /**
@@ -26,7 +26,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
                         ConcurrencySafeEntity,
                         StudyStatus,
                         AnnotationType,
-                        AnnotationTypes) {
+                        hasAnnotationTypes) {
 
     var schema = {
       'id': 'Study',
@@ -66,7 +66,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
     }
 
     Study.prototype = Object.create(ConcurrencySafeEntity.prototype);
-    _.extend(Study.prototype, AnnotationTypes);
+    _.extend(Study.prototype, hasAnnotationTypes);
 
     Study.prototype.constructor = Study;
 
@@ -81,7 +81,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
 
       obj.annotationTypes = obj.annotationTypes || {};
 
-      if (!AnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
+      if (!hasAnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
         console.error('invalid object from server: bad annotation type');
         throw new Error('invalid object from server: bad annotation type');
       }
@@ -159,7 +159,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
       if (!tv4.validate(obj, schema)) {
         console.error('invalid object from server: ' + tv4.error);
         deferred.reject('invalid object from server: ' + tv4.error);
-      } else if (!AnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
+      } else if (!hasAnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
         console.error('invalid annotation types from server: ' + tv4.error);
         deferred.reject('invalid annotation types from server: ' + tv4.error);
       } else {
@@ -207,7 +207,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
     Study.prototype.removeAnnotationType = function (annotationType) {
       var url = sprintf.sprintf('%s/%d/%s',
                                 uri('pannottype', this.id), this.version, annotationType.uniqueId);
-      return AnnotationTypes.removeAnnotationType.call(this, annotationType, url);
+      return hasAnnotationTypes.removeAnnotationType.call(this, annotationType, url);
     };
 
     Study.prototype.disable = function () {

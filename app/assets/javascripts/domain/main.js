@@ -15,8 +15,6 @@ define(function (require) {
 
   module = angular.module('biobank.domain', []);
 
-  module.factory('AnnotationType',                      require('./AnnotationType'));
-  module.factory('AnnotationTypes',                     require('./AnnotationTypes'));
   module.factory('AnnotationTypeViewer',                require('./AnnotationTypeViewer'));
   module.factory('ConcurrencySafeEntity',               require('./ConcurrencySafeEntity'));
   module.service('domainEntityService',                 require('./domainEntityService') );
@@ -26,27 +24,29 @@ define(function (require) {
 
   module.service('AnatomicalSourceType',                require('./AnatomicalSourceType'));
   module.service('AnnotationValueType',                 require('./AnnotationValueType'));
-  module.service('AnnotationMaxValueCount',             require('./AnnotationMaxValueCount'));
   module.service('CentreStatus',                        require('./centre/CentreStatus'));
   module.service('PreservationTemperatureType',         require('./PreservationTemperatureType'));
   module.service('PreservationType',                    require('./PreservationType'));
-  module.service('annotationTypeValidation',            require('./annotationTypeValidation'));
 
   module.factory('Annotation',                          require('./annotations/Annotation'));
-  module.factory('Annotations',                         require('./annotations/Annotations'));
+  module.factory('AnnotationType',                      require('./annotations/AnnotationType'));
   module.factory('DateTimeAnnotation',                  require('./annotations/DateTimeAnnotation'));
   module.factory('MultipleSelectAnnotation',            require('./annotations/MultipleSelectAnnotation'));
   module.factory('NumberAnnotation',                    require('./annotations/NumberAnnotation'));
   module.factory('SingleSelectAnnotation',              require('./annotations/SingleSelectAnnotation'));
   module.factory('TextAnnotation',                      require('./annotations/TextAnnotation'));
-  module.service('annotationFactory',                   require('./annotations/AnnotationFactory'));
+  module.factory('hasAnnotationTypes',                  require('./annotations/hasAnnotationTypes'));
+  module.factory('hasAnnotations',                      require('./annotations/hasAnnotations'));
+  module.service('AnnotationMaxValueCount',             require('./annotations/AnnotationMaxValueCount'));
+  module.service('annotationFactory',                   require('./annotations/annotationFactory'));
+  module.service('annotationTypeValidation',            require('./annotations/annotationTypeValidation'));
 
   module.factory('Centre',                              require('./centre/Centre'));
   module.factory('CentreCounts',                        require('./centre/CentreCounts'));
 
   module.factory('CollectionEventType',                 require('./study/CollectionEventType'));
   module.factory('CollectionSpecimenSpec',              require('./study/CollectionSpecimenSpec'));
-  module.factory('CollectionSpecimenSpecs',             require('./study/CollectionSpecimenSpecs'));
+  module.factory('hasCollectionSpecimenSpecs',          require('./study/hasCollectionSpecimenSpecs'));
   module.factory('ProcessingTypeViewer',                require('./study/ProcessingTypeViewer'));
   module.factory('SpcLinkTypeViewer',                   require('./study/SpcLinkTypeViewer'));
   module.factory('SpecimenGroup',                       require('./study/SpecimenGroup'));

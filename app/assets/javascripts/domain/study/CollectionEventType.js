@@ -12,8 +12,8 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     'ConcurrencySafeEntity',
     'CollectionSpecimenSpec',
     'AnnotationType',
-    'CollectionSpecimenSpecs',
-    'AnnotationTypes'
+    'hasCollectionSpecimenSpecs',
+    'hasAnnotationTypes'
   ];
 
   /**
@@ -25,8 +25,8 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                                       ConcurrencySafeEntity,
                                       CollectionSpecimenSpec,
                                       AnnotationType,
-                                      CollectionSpecimenSpecs,
-                                      AnnotationTypes) {
+                                      hasCollectionSpecimenSpecs,
+                                      hasAnnotationTypes) {
 
     var schema = {
       'id': 'CollectionEventType',
@@ -80,7 +80,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     CollectionEventType.prototype = Object.create(ConcurrencySafeEntity.prototype);
     CollectionEventType.prototype.constructor = CollectionEventType;
 
-    _.extend(CollectionEventType.prototype, CollectionSpecimenSpecs, AnnotationTypes);
+    _.extend(CollectionEventType.prototype, hasCollectionSpecimenSpecs, hasAnnotationTypes);
 
 
     CollectionEventType.create = function (obj) {
@@ -89,12 +89,12 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
         throw new Error('invalid collection event types from server: ' + tv4.error);
       }
 
-      if (!CollectionSpecimenSpecs.validSpecimenSpecs(obj.specimenSpecs)) {
+      if (!hasCollectionSpecimenSpecs.validSpecimenSpecs(obj.specimenSpecs)) {
         console.error('invalid specimen specs from server: ' + tv4.error);
         throw new Error('invalid specimen specs from server: ' + tv4.error);
       }
 
-      if (!AnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
+      if (!hasAnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
         console.error('invalid annotation types from server: ' + tv4.error);
         throw new Error('invalid annotation types from server: ' + tv4.error);
       }
@@ -130,9 +130,9 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
 
       if (!tv4.validate(obj, schema)) {
         deferred.reject('invalid collection event types from server: ' + tv4.error);
-      } else if (!CollectionSpecimenSpecs.validSpecimenSpecs(obj.specimenSpecs)) {
+      } else if (!hasCollectionSpecimenSpecs.validSpecimenSpecs(obj.specimenSpecs)) {
         deferred.reject('invalid specimen specs from server: ' + tv4.error);
-      } else if (!AnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
+      } else if (!hasAnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
         deferred.reject('invalid annotation types from server: ' + tv4.error);
       } else {
         deferred.resolve(new CollectionEventType(obj));
@@ -237,7 +237,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                                 this.version,
                                 annotationType.uniqueId);
 
-      return AnnotationTypes.removeAnnotationType.call(this, annotationType, url);
+      return hasAnnotationTypes.removeAnnotationType.call(this, annotationType, url);
     };
 
     function uri(/* path, ceventTypeId */) {

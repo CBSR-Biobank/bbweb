@@ -263,7 +263,7 @@ define([
       this.httpBackend.flush();
     });
 
-    it('should add an annotation tye', function () {
+    it('should add an annotation type', function () {
       var jsonAnnotType = this.jsonEntities.collectionSpecimenSpec(),
           cet = new this.CollectionEventType(this.jsonCet);
       this.updateEntity.call(this,

@@ -342,9 +342,9 @@ define([
         case AnnotationValueType.SELECT():
           if (options.value !== '') {
             if (annotationType.maxValueCount === 1) {
-              annot.selectedValues =  [ { value: options.value } ];
+              annot.selectedValues =  [ options.value ];
             } else if (annotationType.maxValueCount > 1) {
-              annot.selectedValues =_.map(options.value, function (v) { return { value: v }; });
+              annot.selectedValues = options.value;
             } else {
               throw new Error('invalid max value count for annotation: ' + annotationType.maxValueCount);
             }

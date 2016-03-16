@@ -25,7 +25,7 @@ define(['underscore'], function(_) {
           return { name: opt, checked: false };
         });
         _.each(obj.selectedValues, function (sv) {
-          var value = _.findWhere(result, { name: sv.value });
+          var value = _.findWhere(result, { name: sv });
           value.checked = true;
         });
         return result;

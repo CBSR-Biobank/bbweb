@@ -5,14 +5,14 @@
 define(['underscore'], function(_) {
   'use strict';
 
-  CollectionSpecimenSpecsFactory.$inject = [ 'biobankApi', 'CollectionSpecimenSpec' ];
+  hasCollectionSpecimenSpecsFactory.$inject = [ 'biobankApi', 'CollectionSpecimenSpec' ];
 
   /**
    * Maintains an array of specimen specs.
    *
    * This is a mixin.
    */
-  function CollectionSpecimenSpecsFactory(biobankApi, CollectionSpecimenSpec) {
+  function hasCollectionSpecimenSpecsFactory(biobankApi, CollectionSpecimenSpec) {
 
     var mixins = {
       validSpecimenSpecs:    validSpecimenSpecs,
@@ -47,5 +47,5 @@ define(['underscore'], function(_) {
 
   }
 
-  return CollectionSpecimenSpecsFactory;
+  return hasCollectionSpecimenSpecsFactory;
 });

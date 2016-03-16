@@ -226,12 +226,6 @@ define(['underscore'], function(_) {
           'study',
           function(CollectionEventType, study) {
             return CollectionEventType.list(study.id);
-          }],
-        annotationTypes: [
-          'CollectionEventAnnotationType',
-          'study',
-          function(CollectionEventAnnotationType, study) {
-            return CollectionEventAnnotationType.list(study.id);
           }]
       },
       views: {

@@ -9,8 +9,7 @@ define([
   'angularMocks',
   'underscore',
   'faker',
-  'moment',
-  'biobankApp'
+  'moment'
 ], function(angular, mocks, _, faker, moment) {
   'use strict';
 

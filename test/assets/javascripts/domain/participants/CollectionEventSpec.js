@@ -9,8 +9,7 @@ define([
   'angularMocks',
   'underscore',
   'faker',
-  'moment',
-  'biobankApp'
+  'moment'
 ], function(angular, mocks, _, faker, moment) {
   'use strict';
 
@@ -20,7 +19,12 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testUtils, extendedDomainEntities) {
+    beforeEach(inject(function(entityTestSuite,
+                               hasAnnotationsEntityTestSuite,
+                               testUtils,
+                               extendedDomainEntities) {
+      _.extend(this, entityTestSuite, hasAnnotationsEntityTestSuite);
+
       this.httpBackend                   = this.$injector.get('$httpBackend');
       this.Participant                   = this.$injector.get('Participant');
       this.CollectionEventType           = this.$injector.get('CollectionEventType');
@@ -34,7 +38,7 @@ define([
       testUtils.addCustomMatchers();
 
       this.jsonStudy = this.jsonEntities.study();
-      this.cetFromServer = this.jsonEntities.collectionEventType(this.jsonStudy);
+      this.jsonCet = this.jsonEntities.collectionEventType(this.jsonStudy);
     }));
 
     afterEach(function() {
@@ -54,151 +58,139 @@ define([
     });
 
     it('constructor with annotation parameter has valid values', function() {
-      var annotationData    = generateAnnotationTypesAndJsonAnnotations(this.jsonStudy),
-          jsonAnnotations = _.pluck(annotationData, 'jsonAnnotation'),
-          annotationTypes   = _.pluck(annotationData, 'annotationType'),
-          annotationTypeDataById,
+      var self              = this,
+          annotationData    = self.jsonAnnotationData(),
+          jsonAnnotations   = _.pluck(annotationData, 'annotation'),
+          jsonAnnotationTypes   = _.pluck(annotationData, 'annotationType'),
           ceventType;
 
-      this.cetFromServer = this.jsonEntities.collectionEventType(this.jsonStudy, {
-        specimenGroups:  this.jsonStudy.specimenGroups,
-        annotationTypes: annotationTypes
-      });
+      self.jsonCet = self.jsonEntities.collectionEventType(
+        self.jsonStudy, { annotationTypes: jsonAnnotationTypes });
 
-      ceventType = this.CollectionEventType.create(this.cetFromServer);
-      annotationTypeDataById = _.indexBy(ceventType.annotationTypeData, 'annotationTypeId');
+      ceventType = self.CollectionEventType.create(self.jsonCet);
 
-      var collectionEvent = new this.CollectionEvent({ annotations: jsonAnnotations },
-                                                ceventType,
-                                                annotationTypes);
+      var collectionEvent = new self.CollectionEvent({ annotations: jsonAnnotations },
+                                                     ceventType,
+                                                     jsonAnnotationTypes);
 
 
-      _.each(annotationData, function (annotationItem) {
+      _.each(ceventType.annotationTypes, function (annotationType) {
         var annotation = _.findWhere(collectionEvent.annotations,
-                                     { annotationTypeId: annotationItem.annotationType.id });
-        expect(annotation).toEqual(jasmine.any(this.Annotation));
-        annotation.compareToJsonEntity(annotationItem.jsonAnnotation);
-        expect(annotation.required)
-          .toBe(annotationTypeDataById[annotationItem.annotationType.id].required);
+                                     { annotationTypeId: annotationType.uniqueId }),
+            jsonAnnotation = _.findWhere(jsonAnnotations,
+                                         { annotationTypeId: annotationType.uniqueId});
+        self.validateAnnotationClass(annotationType, annotation);
+        annotation.compareToJsonEntity(jsonAnnotation);
+        expect(annotation.required).toBe(annotationType.required);
       });
     });
 
-    it('constructor with NO annotation type parameters has valid values', function() {
-      var annotationData    = generateAnnotationTypesAndJsonAnnotations(this.jsonStudy),
-          annotationTypes   = _.pluck(annotationData, 'annotationType'),
-          annotationTypeDataById,
+    it('constructor with NO annotations has valid values', function() {
+      var self = this,
+          annotationData = self.jsonAnnotationData(),
+          jsonAnnotationTypes = _.pluck(annotationData, 'annotationType'),
           ceventType;
 
-      this.cetFromServer = this.jsonEntities.collectionEventType(this.jsonStudy, {
-        specimenGroups:  this.jsonStudy.specimenGroups,
-        annotationTypes: annotationTypes
-      });
+      self.jsonCet = self.jsonEntities.collectionEventType(
+        self.jsonStudy, { annotationTypes: jsonAnnotationTypes });
 
-      ceventType = this.CollectionEventType.create(this.cetFromServer);
-      annotationTypeDataById = _.indexBy(ceventType.annotationTypeData, 'annotationTypeId');
+      ceventType = self.CollectionEventType.create(self.jsonCet);
 
-      var collectionEvent = new this.CollectionEvent({ }, ceventType, annotationTypes);
+      var collectionEvent = new self.CollectionEvent({ }, ceventType, jsonAnnotationTypes);
 
       expect(collectionEvent.annotations).toBeArrayOfSize(annotationData.length);
-      _.each(annotationData, function (annotationItem) {
+      _.each(ceventType.annotationTypes, function (annotationType) {
         var annotation = _.findWhere(collectionEvent.annotations,
-                                     { annotationTypeId: annotationItem.annotationType.id });
-        expect(annotation).toEqual(jasmine.any(this.Annotation));
-        expect(annotation.required)
-          .toBe(annotationTypeDataById[annotationItem.annotationType.id].required);
+                                     { annotationTypeId: annotationType.uniqueId });
+        self.validateAnnotationClass(annotationType, annotation);
+        expect(annotation.required).toBe(annotationType.required);
       });
     });
 
     it('fails when constructing with invalid annotation parameter', function() {
-      var jsonAnnotation = {},
+      var self = this,
+          jsonAnnotation = {},
           ceventType;
 
-      var annotationType = new this.AnnotationType(
-        this.jsonEntities.studyAnnotationType(this.jsonStudy, { valueType: this.AnnotationValueType.TEXT() }));
+      var annotationType = new self.AnnotationType(self.jsonEntities.annotationType());
 
       // put an invalid value in jsonAnnotation.annotationTypeId
       _.extend(
         jsonAnnotation,
-        this.jsonEntities.annotation(this.jsonEntities.valueForAnnotation(annotationType), annotationType),
-        { annotationTypeId: this.jsonEntities.stringNext() });
+        self.jsonEntities.annotation(self.jsonEntities.valueForAnnotation(annotationType), annotationType),
+        { annotationTypeId: self.jsonEntities.stringNext() });
 
-      this.cetFromServer = this.jsonEntities.collectionEventType(this.jsonStudy,
+      self.jsonCet = self.jsonEntities.collectionEventType(self.jsonStudy,
                                                        { annotationTypes: [annotationType] });
 
-      ceventType = this.CollectionEventType.create(this.cetFromServer);
+      ceventType = self.CollectionEventType.create(self.jsonCet);
 
       expect(function () {
-        return new this.CollectionEvent({ annotations: [ jsonAnnotation ] },
-                                   ceventType,
-                                   [ annotationType ]);
-      }).toThrow(new Error('annotations with invalid annotation type IDs found: ' +
-                           jsonAnnotation.annotationTypeId));
+        return new self.CollectionEvent({ annotations: [ jsonAnnotation ] }, ceventType);
+      }).toThrowError('annotation types not found: ' + jsonAnnotation.annotationTypeId);
     });
 
     it('fails when constructing with invalid collection event type', function() {
-      var serverCollectionEvent,
+      var self = this,
+          serverCollectionEvent,
           ceventType;
 
       serverCollectionEvent =
-        _.extend(this.jsonEntities.collectionEvent(),
+        _.extend(self.jsonEntities.collectionEvent(),
                  {
-                   collectionEventTypeId: this.jsonEntities.domainEntityNameNext(
-                     this.jsonEntities.ENTITY_NAME_COLLECTION_EVENT_TYPE())
+                   collectionEventTypeId: self.jsonEntities.domainEntityNameNext(
+                     self.jsonEntities.ENTITY_NAME_COLLECTION_EVENT_TYPE())
                  });
-      ceventType = this.CollectionEventType.create(
-        this.jsonEntities.collectionEventType(this.jsonStudy));
+      ceventType = self.CollectionEventType.create(
+        self.jsonEntities.collectionEventType(self.jsonStudy));
 
       expect(function () {
-        return new this.CollectionEvent(serverCollectionEvent, ceventType);
-      }).toThrow(new Error('invalid collection event type'));
+        return new self.CollectionEvent(serverCollectionEvent, ceventType);
+      }).toThrowError('invalid collection event type');
     });
 
     it('fails when constructing a collection event with annotations and no collection event type',
        function() {
-         var jsonAnnotationTypes = this.jsonEntities.allStudyAnnotationTypes(this.jsonStudy);
+         var self = this,
+             jsonAnnotationTypes = this.jsonEntities.allAnnotationTypes();
 
          _.each(jsonAnnotationTypes, function (jsonAnnotationType) {
-           var annotationType, serverCevent;
-
-           annotationType = new this.AnnotationType(jsonAnnotationType);
-           serverCevent = _.omit(this.jsonEntities.collectionEvent(), 'id)');
+           var jsonCevent = _.omit(self.jsonEntities.collectionEvent(), 'id)');
 
            expect(function () {
-             return new this.CollectionEvent(serverCevent, undefined, [ annotationType ]);
-           }).toThrow(new Error('collection event type not defined'));
+             return new self.CollectionEvent(jsonCevent, undefined);
+           }).toThrowError('collection event type not defined');
          });
        });
 
     it('fails when creating from a non object', function() {
-      expect(this.CollectionEvent.create(1))
-        .toEqual(new Error('invalid object from server: has the correct keys'));
+      var self = this;
+
+      expect(function () {
+        return new self.CollectionEvent.create(1);
+      }).toThrowError(/invalid object from server/);
     });
 
     it('fails when creating from an object with invalid keys', function() {
-      var serverObj = { tmp: 1 };
-      expect(this.CollectionEvent.create(serverObj))
-        .toEqual(new Error('invalid object from server: has the correct keys'));
+      var self = this,
+          serverObj = { tmp: 1 };
+      expect(function () {
+        return new self.CollectionEvent.create(serverObj);
+      }).toThrowError(/invalid object from server/);
     });
 
     it('fails when creating from an object with annotation with invalid keys', function() {
-      var serverCollectionEvent,
-          annotationType,
-          ceventType;
+      var self = this,
+          jsonCevent = _.extend(this.jsonEntities.collectionEvent(),
+                                { annotations: [{ tmp: 1 }] });
 
-      serverCollectionEvent = _.extend(this.jsonEntities.collectionEvent(),
-                                       { annotations: [{ tmp: 1 }] });
-      annotationType = this.jsonEntities.studyAnnotationType(this.jsonStudy,
-                                                        { valueType: this.AnnotationValueType.TEXT() });
-      ceventType = this.CollectionEventType.create(
-        this.jsonEntities.collectionEventType(this.jsonStudy,
-                                         { annotationTypes: [annotationType] }));
-
-      expect(this.CollectionEvent.create(serverCollectionEvent))
-        .toEqual(new Error('invalid annotation object from server'));
+      expect(function () {
+        return new self.CollectionEvent.create(jsonCevent);
+      }).toThrowError(/invalid object.*bad annotations/);
     });
 
     it('has valid values when creating from a server response', function() {
-      var annotationData    = generateAnnotationTypesAndJsonAnnotations(this.jsonStudy),
+      var annotationData    = this.jsonAnnotationData(),
           annotationTypes   = _.pluck(annotationData, 'annotationType'),
           serverCollectionEvent = this.jsonEntities.collectionEvent({annotationTypes: annotationTypes});
 
@@ -355,7 +347,7 @@ define([
 
     it('setting annotation types fails when it does not belong to collection event type',
         function() {
-          var annotationData      = generateAnnotationTypesAndJsonAnnotations(this.jsonStudy),
+          var annotationData    = this.jsonAnnotationData(),
               annotationTypes     = _.pluck(annotationData, 'annotationType'),
               badAnnotationTypeId = 'bad-annotation-type-id',
               ceventType,
@@ -551,20 +543,6 @@ define([
       //   annotationTypes:       annotationTypes,
       //   collectionEvent:       collectionEvent
       // };
-    }
-
-    function generateAnnotationTypesAndJsonAnnotations(serverStudy) {
-      // var annotationTypes = this.jsonEntities.allAnnotationTypes(serverStudy);
-
-      // return _.map(annotationTypes, function (annotationType) {
-      //   var value = this.jsonEntities.valueForAnnotation(annotationType);
-      //   var jsonAnnotation = this.jsonEntities.annotation(value, annotationType);
-
-      //   return {
-      //     annotationType: new AnnotationType(annotationType),
-      //     jsonAnnotation: jsonAnnotation
-      //   };
-      // });
     }
 
     function annotationsForCommand(collectionEvent) {

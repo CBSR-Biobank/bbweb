@@ -225,7 +225,7 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
         expect(this.selectedValues).toBeEmptyArray();
       } else {
         expect(serverEntity.selectedValues).toBeArrayOfSize(1);
-        expect(this.value).toBe(_.pluck(serverEntity.selectedValues, 'value')[0]);
+        expect(this.value).toBe(serverEntity.selectedValues[0]);
       }
     };
 
