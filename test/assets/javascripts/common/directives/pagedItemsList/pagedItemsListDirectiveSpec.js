@@ -127,14 +127,16 @@ define([
 
       describe('(shared)', function () {
 
-        beforeEach(inject(function (testUtils) {
+        beforeEach(inject(function (directiveTestSuite, testUtils) {
+          _.extend(this, directiveTestSuite);
+
           this.$q                     = this.$injector.get('$q');
           this.context                = context;
           this.createController       = setupController(this);
           this.getItemsSpy            = jasmine.createSpy('getItemsSpy');
           this.getItemsWrapperDefault = createDefaultGetItemsWrapper(this);
 
-          testUtils.putHtmlTemplates(
+          this.putHtmlTemplates(
             '/assets/javascripts/common/directives/pagedItemsList/pagedItemsList.html');
 
           testUtils.addCustomMatchers();

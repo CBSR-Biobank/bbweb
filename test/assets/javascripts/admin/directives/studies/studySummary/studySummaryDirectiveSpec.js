@@ -15,8 +15,10 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, directiveTestSuite, testUtils) {
       var self = this;
+
+      _.extend(self, directiveTestSuite);
 
       self.$q                   = self.$injector.get('$q');
       self.$state               = self.$injector.get('$state');
@@ -30,11 +32,11 @@ define(function (require) {
       self.study = new self.Study(self.jsonEntities.study());
       self.createController = setupController();
 
-      testUtils.putHtmlTemplates(
+      this.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/studySummary/studySummary.html',
         '/assets/javascripts/common/directives/truncateToggle.html',
         '/assets/javascripts/admin/directives/statusLine/statusLine.html',
-        '/assets/javascripts/common/services/modalStringInput.html');
+        '/assets/javascripts/common/services/modalInput.html');
 
       function setupController() {
         return create;

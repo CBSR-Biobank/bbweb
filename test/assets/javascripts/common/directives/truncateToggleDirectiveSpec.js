@@ -18,12 +18,14 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, testUtils) {
+    beforeEach(inject(function ($rootScope, $compile, directiveTestSuite, testUtils) {
       var self = this;
 
-      this.$filter = this.$injector.get('$filter');
+      _.extend(self, directiveTestSuite);
 
-      testUtils.putHtmlTemplates(
+      self.$filter = this.$injector.get('$filter');
+
+      self.putHtmlTemplates(
         '/assets/javascripts/common/directives/truncateToggle.html');
 
       self.element = angular.element(

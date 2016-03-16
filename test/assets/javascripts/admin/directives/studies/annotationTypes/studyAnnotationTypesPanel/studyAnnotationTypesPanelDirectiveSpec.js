@@ -19,8 +19,11 @@ define([
     beforeEach(inject(function($window,
                                $compile,
                                $rootScope,
+                               directiveTestSuite,
                                testUtils) {
       var self = this;
+
+      _.extend(self, directiveTestSuite);
 
       self.Study                      = self.$injector.get('Study');
       self.SpecimenLinkAnnotationType = self.$injector.get('SpecimenLinkAnnotationType');
@@ -49,7 +52,7 @@ define([
 
       $window.localStorage.setItem(self.panelId, '');
 
-      testUtils.putHtmlTemplates(
+      self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/annotationTypes/studyAnnotationTypesPanel/studyAnnotationTypesPanel.html',
         '/assets/javascripts/admin/directives/studies/annotationTypes/studyAnnotationTypesTable/studyAnnotationTypesTable.html',
         '/assets/javascripts/common/directives/panelButtons.html',

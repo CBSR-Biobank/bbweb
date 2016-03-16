@@ -12,28 +12,15 @@ define(['faker', 'underscore'], function(faker, _) {
    */
   function testUtils($templateCache) {
     var service = {
-      updateEntity:                  updateEntity,
       uuid:                          uuid,
       randomBoolean:                 randomBoolean,
       fakeModal:                     fakeModal,
       addCustomMatchers:             addCustomMatchers,
-      putHtmlTemplates:              putHtmlTemplates,
       camelCaseToUnderscore:         camelCaseToUnderscore
     };
     return service;
 
     //-------
-
-    function updateEntity(entity, updateFuncName, updateParam, url, json, reply, thenFunc, catchFunc) {
-      /* jshint validthis: true */
-      var self = this;
-
-      _.extend(json, { expectedVersion: 0 });
-      self.httpBackend.expectPOST(url, json).respond(201, { status: 'success', data: reply });
-      expect(entity[updateFuncName]).toBeFunction();
-      entity[updateFuncName].call(entity, updateParam).then(thenFunc).catch(catchFunc);
-      self.httpBackend.flush();
-    }
 
     /**
      * Taken from fixer version 2.1.2. When karma-fixer uses the same version this
@@ -86,13 +73,6 @@ define(['faker', 'underscore'], function(faker, _) {
             }
           };
         }
-      });
-    }
-
-    function putHtmlTemplates(/* template1, template2, ... */) {
-      _.each(arguments, function (template) {
-        $templateCache.put(template,
-                           jasmine.getFixtures().getFixtureHtml_('../../../base/app' + template));
       });
     }
 

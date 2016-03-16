@@ -328,7 +328,7 @@ define([
 
       options = options || {};
 
-      if (options.value) {
+      if (!_.isUndefined(options.value)) {
         switch (annotationType.valueType) {
         case AnnotationValueType.TEXT():
         case AnnotationValueType.DATE_TIME():
@@ -340,12 +340,14 @@ define([
           break;
 
         case AnnotationValueType.SELECT():
-          if (annotationType.maxValueCount === 1) {
-            annot.selectedValues =  [ { value: options.value } ];
-          } else if (annotationType.maxValueCount > 1) {
-            annot.selectedValues =_.map(options.value, function (v) { return { value: v }; });
-          } else {
-            throw new Error('invalid max value count for annotation: ' + annotationType.maxValueCount);
+          if (options.value !== '') {
+            if (annotationType.maxValueCount === 1) {
+              annot.selectedValues =  [ { value: options.value } ];
+            } else if (annotationType.maxValueCount > 1) {
+              annot.selectedValues =_.map(options.value, function (v) { return { value: v }; });
+            } else {
+              throw new Error('invalid max value count for annotation: ' + annotationType.maxValueCount);
+            }
           }
           break;
 

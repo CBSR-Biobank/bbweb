@@ -18,8 +18,10 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       });
     }));
 
-    beforeEach(inject(function($rootScope, $compile, testUtils, $state) {
+    beforeEach(inject(function($rootScope, $compile, $state, directiveTestSuite, testUtils) {
       var self = this;
+
+      _.extend(self, directiveTestSuite);
 
       self.$window      = self.$injector.get('$window');
       self.$state       = self.$injector.get('$state');
@@ -28,7 +30,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
       self.study = new self.Study(self.jsonEntities.study());
 
-      testUtils.putHtmlTemplates(
+      self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/studyView/studyView.html');
 
       self.element = angular.element('<study-view study="vm.study"></study-view>');

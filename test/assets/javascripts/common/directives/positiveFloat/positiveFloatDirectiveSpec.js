@@ -23,7 +23,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           '  <input type="number"' +
           '         name="theNumber"' +
           '         ng-model="theNumber"' +
-          '         valid-amount' +
+          '         positive-float' +
           '         required />' +
           '</form>');
 

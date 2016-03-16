@@ -13,8 +13,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, directiveTestSuite, testUtils) {
       var self = this;
+
+      _.extend(self, directiveTestSuite);
 
       self.Study          = self.$injector.get('Study');
       self.jsonEntities   = self.$injector.get('jsonEntities');
@@ -22,7 +24,8 @@ define([
       self.study = new self.Study(self.jsonEntities.study());
       self.createController = setupController();
 
-      testUtils.putHtmlTemplates(
+      self.putHtmlTemplates(
+        '/assets/javascripts/admin/directives/studies/annotationTypes/participantAnnotationTypeAdd/participantAnnotationTypeAdd.html',
         '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeAdd/annotationTypeAdd.html');
 
       function setupController() {

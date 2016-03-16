@@ -26,7 +26,9 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testUtils, extendedDomainEntities) {
+    beforeEach(inject(function(entityTestSuite, testUtils, extendedDomainEntities) {
+      _.extend(this, entityTestSuite);
+
       bbwebConfig                   = this.$injector.get('bbwebConfig');
       Study                         = this.$injector.get('Study');
       AnnotationType                = this.$injector.get('AnnotationType');
@@ -228,11 +230,11 @@ define([
 
         it('calling isValid returns true if the annotation is not required', function() {
           _.each(getAnnotationAndTypeForAllValueTypes(), function (entities) {
-            expect(entities.annotation.isValid()).toBe(true);
+            expect(entities.annotation.isValueValid()).toBe(true);
           });
         });
 
-        it('calling isValid returns FALSE if the annotation is required and has no value', function() {
+        it('calling isValueValid returns FALSE if the annotation is required and has no value', function() {
           _.each(getAnnotationTypeOptionsForAll(), function (annotationTypeOptions) {
             var annotationType,
                 serverAnnotation,
@@ -243,12 +245,12 @@ define([
             annotationType = createAnnotationType(annotationTypeOptions);
             serverAnnotation = jsonEntities.annotation(null, annotationType);
             annotation = annotationFactory.create(serverAnnotation, annotationType, true);
-            expect(annotation.isValid()).toBe(false);
+            expect(annotation.isValueValid()).toBe(false);
           });
 
         });
 
-        it('calling isValid returns TRUE if the annotation is required and has a value', function() {
+        it('calling isValueValid returns TRUE if the annotation is required and has a value', function() {
           _.each(getAnnotationTypeOptionsForAll(), function (annotationTypeOptions) {
             var annotationType,
                 value,
@@ -259,9 +261,9 @@ define([
 
             annotationType   = createAnnotationType(annotationTypeOptions);
             value            = jsonEntities.valueForAnnotation(annotationType);
-            serverAnnotation = jsonEntities.annotation(value, annotationType);
+            serverAnnotation = jsonEntities.annotation({ value: value }, annotationType);
             annotation       = annotationFactory.create(serverAnnotation, annotationType, true);
-            expect(annotation.isValid()).toBe(true);
+            expect(annotation.isValueValid()).toBe(true);
           });
         });
 
@@ -277,7 +279,7 @@ define([
             annotationType = createAnnotationType({ valueType: valueType });
 
             value = jsonEntities.valueForAnnotation(annotationType);
-            serverAnnotation = jsonEntities.annotation(value, annotationType);
+            serverAnnotation = jsonEntities.annotation({ value: value }, annotationType);
             annotation = createAnnotation(serverAnnotation, annotationType);
 
             if (valueType === AnnotationValueType.TEXT()) {
@@ -299,7 +301,7 @@ define([
           annotationType = createAnnotationType({ valueType: AnnotationValueType.NUMBER() });
 
           value = jsonEntities.valueForAnnotation(annotationType);
-          serverAnnotation = jsonEntities.annotation(value, annotationType);
+          serverAnnotation = jsonEntities.annotation({ value: value }, annotationType);
 
           annotation = createAnnotation(serverAnnotation, annotationType);
           expect(annotation.getValue()).toEqual(parseFloat(serverAnnotation.numberValue));
@@ -316,7 +318,7 @@ define([
           });
 
           value = jsonEntities.valueForAnnotation(annotationType);
-          serverAnnotation = jsonEntities.annotation(value, annotationType);
+          serverAnnotation = jsonEntities.annotation({ value: value }, annotationType);
 
           annotation = createAnnotation(serverAnnotation, annotationType);
           expect(annotation.getValue()).toEqual(serverAnnotation.selectedValues[0].value);
@@ -333,7 +335,7 @@ define([
           });
 
           value = jsonEntities.valueForAnnotation(annotationType);
-          serverAnnotation = jsonEntities.annotation(value, annotationType);
+          serverAnnotation = jsonEntities.annotation({ value: value }, annotationType);
 
           annotation = createAnnotation(serverAnnotation, annotationType);
           multipleSelectValues = _.pluck(serverAnnotation.selectedValues, 'value');
@@ -362,7 +364,7 @@ define([
             annotationTypeOptions.required = true;
 
             annotationType = createAnnotationType(annotationTypeOptions);
-            serverAnnotation = jsonEntities.annotation('', annotationType);
+            serverAnnotation = jsonEntities.annotation({ value: '' }, annotationType);
             annotation = annotationFactory.create(serverAnnotation, annotationType, true);
             expect(annotation.getServerAnnotation()).toEqual(serverAnnotation);
           });
@@ -398,7 +400,7 @@ define([
 
           annotationType   = createAnnotationType(annotTypeOptions);
           value            = jsonEntities.valueForAnnotation(annotationType);
-          jsonAnnotation   = jsonEntities.annotation(value, annotationType);
+          jsonAnnotation   = jsonEntities.annotation({ value: value }, annotationType);
           annotation       = createAnnotation(jsonAnnotation, annotationType);
 
           return {

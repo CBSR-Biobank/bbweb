@@ -17,5 +17,8 @@ define(function (require) {
   module.service('jsonEntities',           require('../../../test/assets/javascripts/test/jsonEntities'));
   module.service('testUtils',              require('../../../test/assets/javascripts/test/testUtils'));
 
+  module.factory('entityTestSuite',    require('../../../test/assets/javascripts/test/entityTestSuite'));
+  module.factory('directiveTestSuite', require('../../../test/assets/javascripts/test/directiveTestSuite'));
+
   return module;
 });

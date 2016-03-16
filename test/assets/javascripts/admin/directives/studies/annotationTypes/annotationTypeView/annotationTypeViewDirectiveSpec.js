@@ -16,18 +16,20 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, testUtils) {
+    beforeEach(inject(function ($rootScope, $compile, directiveTestSuite, testUtils) {
       var self = this;
+
+      _.extend(self, directiveTestSuite);
 
       self.$q             = self.$injector.get('$q');
       self.Study          = self.$injector.get('Study');
       self.AnnotationType = self.$injector.get('AnnotationType');
       self.jsonEntities   = self.$injector.get('jsonEntities');
 
-      testUtils.putHtmlTemplates(
+      self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeView/annotationTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle.html',
-        '/assets/javascripts/common/services/modalStringInput.html');
+        '/assets/javascripts/common/services/modalInput.html');
 
       self.createController = setupController();
       self.returnState      = 'my-return-state';

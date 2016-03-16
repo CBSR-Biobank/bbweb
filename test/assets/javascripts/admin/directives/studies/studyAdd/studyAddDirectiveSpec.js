@@ -11,8 +11,10 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, testUtils) {
+    beforeEach(inject(function ($rootScope, $compile, directiveTestSuite, testUtils) {
       var self = this;
+
+      _.extend(self, directiveTestSuite);
 
       self.Study        = self.$injector.get('Study');
       self.jsonEntities = self.$injector.get('jsonEntities');
@@ -21,7 +23,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       self.titleContains = 'Add';
       self.returnState = 'home.admin.studies';
 
-      testUtils.putHtmlTemplates(
+      self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/studyAdd/studyAdd.html');
 
       self.element = angular.element('<study-add study="vm.study"></study-add>');

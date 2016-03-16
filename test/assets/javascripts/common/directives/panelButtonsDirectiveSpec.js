@@ -21,11 +21,13 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, testUtils) {
+    beforeEach(inject(function ($rootScope, $compile, directiveTestSuite, testUtils) {
+      _.extend(this, directiveTestSuite);
+
       rootScope = $rootScope;
       compile = $compile;
 
-      testUtils.putHtmlTemplates(
+      this.putHtmlTemplates(
         '/assets/javascripts/common/directives/panelButtons.html');
 
       element = angular.element(

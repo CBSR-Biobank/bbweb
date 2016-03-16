@@ -15,12 +15,14 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, testUtils, jsonEntities) {
+    beforeEach(inject(function ($rootScope, $compile, testUtils, jsonEntities, directiveTestSuite) {
+      _.extend(this, directiveTestSuite);
+
       this.AnnotationType      = this.$injector.get('AnnotationType');
       this.AnnotationValueType = this.$injector.get('AnnotationValueType');
       this.jsonEntities        = this.$injector.get('jsonEntities');
 
-      testUtils.putHtmlTemplates(
+      this.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeAdd/annotationTypeAdd.html');
 
       this.onSubmit = jasmine.createSpy('onSubmit');

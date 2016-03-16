@@ -19,11 +19,13 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(_jsonEntities_, testUtils) {
+    beforeEach(inject(function(_jsonEntities_, directiveTestSuite, testUtils) {
+      _.extend(this, directiveTestSuite);
+
       createController = setupController(this.$injector);
       jsonEntities = _jsonEntities_;
 
-      testUtils.putHtmlTemplates('/assets/javascripts/common/services/modalStringInput.html');
+      this.putHtmlTemplates('/assets/javascripts/common/services/modalInput.html');
     }));
 
     function setupController(injector) {

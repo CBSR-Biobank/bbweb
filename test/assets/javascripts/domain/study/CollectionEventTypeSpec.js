@@ -19,7 +19,9 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function( extendedDomainEntities) {
+    beforeEach(inject(function(entityTestSuite, extendedDomainEntities) {
+      _.extend(this, entityTestSuite);
+
       this.httpBackend         = this.$injector.get('$httpBackend');
       this.CollectionEventType = this.$injector.get('CollectionEventType');
       this.jsonEntities        = this.$injector.get('jsonEntities');
@@ -187,66 +189,66 @@ define([
 
     it('should update name', function () {
       var cet = new this.CollectionEventType(this.jsonCet);
-      this.testUtils.updateEntity.call(this,
-                                       cet,
-                                       'updateName',
-                                       cet.name,
-                                       uri('name', cet.id),
-                                       { name: cet.name, studyId: cet.studyId },
-                                       this.jsonCet,
-                                       expectCet,
-                                       failTest);
+      this.updateEntity.call(this,
+                             cet,
+                             'updateName',
+                             cet.name,
+                             uri('name', cet.id),
+                             { name: cet.name, studyId: cet.studyId },
+                             this.jsonCet,
+                             expectCet,
+                             failTest);
     });
 
     it('should update description', function () {
       var cet = new this.CollectionEventType(this.jsonCet);
 
-      this.testUtils.updateEntity.call(this,
-                                       cet,
-                                       'updateDescription',
-                                       undefined,
-                                       uri('description', cet.id),
-                                       { studyId: cet.studyId },
-                                       this.jsonCet,
-                                       expectCet,
-                                       failTest);
+      this.updateEntity.call(this,
+                             cet,
+                             'updateDescription',
+                             undefined,
+                             uri('description', cet.id),
+                             { studyId: cet.studyId },
+                             this.jsonCet,
+                             expectCet,
+                             failTest);
 
-      this.testUtils.updateEntity.call(this,
-                                       cet,
-                                       'updateDescription',
-                                       cet.description,
-                                       uri('description', cet.id),
-                                       { description: cet.description, studyId: cet.studyId },
-                                       this.jsonCet,
-                                       expectCet,
-                                       failTest);
+      this.updateEntity.call(this,
+                             cet,
+                             'updateDescription',
+                             cet.description,
+                             uri('description', cet.id),
+                             { description: cet.description, studyId: cet.studyId },
+                             this.jsonCet,
+                             expectCet,
+                             failTest);
     });
 
     it('should update recurring', function () {
       var cet = new this.CollectionEventType(this.jsonCet);
-      this.testUtils.updateEntity.call(this,
-                                       cet,
-                                       'updateRecurring',
-                                       cet.recurring,
-                                       uri('recurring', cet.id),
-                                       { recurring: cet.recurring, studyId: cet.studyId },
-                                       this.jsonCet,
-                                       expectCet,
-                                       failTest);
+      this.updateEntity.call(this,
+                             cet,
+                             'updateRecurring',
+                             cet.recurring,
+                             uri('recurring', cet.id),
+                             { recurring: cet.recurring, studyId: cet.studyId },
+                             this.jsonCet,
+                             expectCet,
+                             failTest);
     });
 
     it('should add a specimen spec', function () {
       var jsonSpec = this.jsonEntities.collectionSpecimenSpec(),
           cet = new this.CollectionEventType(this.jsonCet);
-      this.testUtils.updateEntity.call(this,
-                                       cet,
-                                       'addSpecimenSpec',
-                                       _.omit(jsonSpec, 'uniqueId'),
-                                       uri('spcspec', cet.id),
-                                       _.extend(_.omit(jsonSpec, 'uniqueId'), { studyId: cet.studyId }),
-                                       this.jsonCet,
-                                       expectCet,
-                                       failTest);
+      this.updateEntity.call(this,
+                             cet,
+                             'addSpecimenSpec',
+                             _.omit(jsonSpec, 'uniqueId'),
+                             uri('spcspec', cet.id),
+                             _.extend(_.omit(jsonSpec, 'uniqueId'), { studyId: cet.studyId }),
+                             this.jsonCet,
+                             expectCet,
+                             failTest);
     });
 
     it('should remove a specimen spec', function () {
@@ -264,23 +266,26 @@ define([
     it('should add an annotation tye', function () {
       var jsonAnnotType = this.jsonEntities.collectionSpecimenSpec(),
           cet = new this.CollectionEventType(this.jsonCet);
-      this.testUtils.updateEntity.call(this,
-                                       cet,
-                                       'addAnnotationType',
-                                       _.omit(jsonAnnotType, 'uniqueId'),
-                                       uri('annottype', cet.id),
-                                       _.extend(_.omit(jsonAnnotType, 'uniqueId'), { studyId: cet.studyId }),
-                                       this.jsonCet,
-                                       expectCet,
-                                       failTest);
+      this.updateEntity.call(this,
+                             cet,
+                             'addAnnotationType',
+                             _.omit(jsonAnnotType, 'uniqueId'),
+                             uri('annottype', cet.id),
+                             _.extend(_.omit(jsonAnnotType, 'uniqueId'), { studyId: cet.studyId }),
+                             this.jsonCet,
+                             expectCet,
+                             failTest);
     });
 
     it('should remove an annotation type', function () {
       var jsonAnnotType = this.jsonEntities.collectionSpecimenSpec(),
           jsonCet       = _.extend(this.jsonCet, { annotationTypes: [ jsonAnnotType ]}),
           cet           = new this.CollectionEventType(jsonCet),
-          url           = sprintf.sprintf('%s/%d/%s', uri('annottype', cet.id),
-                                          cet.version, jsonAnnotType.uniqueId);
+          url           = sprintf.sprintf('%s/%s/%d/%s',
+                                          uri('annottype', cet.studyId),
+                                          cet.id,
+                                          cet.version,
+                                          jsonAnnotType.uniqueId);
 
       this.httpBackend.whenDELETE(url).respond(201, serverReply(true));
       cet.removeAnnotationType(jsonAnnotType).then(expectCet).catch(failTest);
@@ -314,7 +319,7 @@ define([
             },
             {
               cet: jsonEntities.collectionEventType(jsonStudy,
-                                                         { specimenSpecs: [ badSpecimenSpec ]}),
+                                                    { specimenSpecs: [ badSpecimenSpec ]}),
               errMsg : 'invalid specimen specs from server'
             },
             {

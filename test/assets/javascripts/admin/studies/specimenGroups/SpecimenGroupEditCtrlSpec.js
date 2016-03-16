@@ -20,7 +20,7 @@ define([
       var context = {};
 
       beforeEach(inject(function () {
-        context.currentState         = 'home.admin.studies.study.collection.view';
+        context.currentState         = 'home.admin.studies.study.collection.ceventType';
         context.returnState          = context.currentState;
       }));
 

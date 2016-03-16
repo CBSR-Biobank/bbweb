@@ -17,8 +17,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, directiveTestSuite, testUtils) {
       var self = this, jsonAnnotType;
+
+      _.extend(self, directiveTestSuite);
 
       self.$q                   = self.$injector.get('$q');
       self.notificationsService = self.$injector.get('notificationsService');
@@ -36,7 +38,8 @@ define([
       self.annotationType = new self.AnnotationType(jsonAnnotType);
       self.createController = setupController();
 
-      testUtils.putHtmlTemplates(
+      self.putHtmlTemplates(
+        '/assets/javascripts/admin/directives/studies/annotationTypes/collectionEventAnnotationTypeView/collectionEventAnnotationTypeView.html',
         '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeView/annotationTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle.html');
 

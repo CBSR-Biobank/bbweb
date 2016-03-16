@@ -16,8 +16,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, directiveTestSuite, testUtils) {
       var self = this, jsonStudy, jsonCet;
+
+      _.extend(self, directiveTestSuite);
 
       self.$q                   = self.$injector.get('$q');
       self.Study                = self.$injector.get('Study');
@@ -33,10 +35,10 @@ define([
 
       spyOn(self.CollectionEventType, 'list').and.returnValue(self.$q.when([ self.collectionEventType ]));
 
-      testUtils.putHtmlTemplates(
+      self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/studyCollection/studyCollection.html',
         '/assets/javascripts/admin/directives/studies/studyNotDisabledWarning/studyNotDisabledWarning.html',
-        '/assets/javascripts/admin/directives/studies/ceventTypes/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html');
+        '/assets/javascripts/admin/directives/studies/collection/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html');
 
       function setupDirective() {
         return create;

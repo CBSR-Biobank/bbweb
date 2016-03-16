@@ -18,7 +18,9 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(extendedDomainEntities) {
+    beforeEach(inject(function(entityTestSuite, extendedDomainEntities) {
+      _.extend(this, entityTestSuite);
+
       this.httpBackend        = this.$injector.get('$httpBackend');
       this.Study              = this.$injector.get('Study');
       this.StudyStatus        = this.$injector.get('StudyStatus');
@@ -196,40 +198,40 @@ define([
       var self  = this,
           study = new self.Study(this.jsonStudy);
 
-      this.testUtils.updateEntity.call(this,
-                                       study,
-                                       'updateName',
-                                       study.name,
-                                       uri('name', study.id),
-                                       { name: study.name },
-                                       this.jsonStudy,
-                                       expectStudy,
-                                       failTest);
+      this.updateEntity.call(this,
+                             study,
+                             'updateName',
+                             study.name,
+                             uri('name', study.id),
+                             { name: study.name },
+                             this.jsonStudy,
+                             expectStudy,
+                             failTest);
     });
 
     it('can update the description on a study', function() {
       var self = this,
           study = new self.Study(this.jsonStudy);
 
-      this.testUtils.updateEntity.call(this,
-                                       study,
-                                       'updateDescription',
-                                       undefined,
-                                       uri('description', study.id),
-                                       { },
-                                       this.jsonStudy,
-                                       expectStudy,
-                                       failTest);
+      this.updateEntity.call(this,
+                             study,
+                             'updateDescription',
+                             undefined,
+                             uri('description', study.id),
+                             { },
+                             this.jsonStudy,
+                             expectStudy,
+                             failTest);
 
-      this.testUtils.updateEntity.call(this,
-                                       study,
-                                       'updateDescription',
-                                       study.description,
-                                       uri('description', study.id),
-                                       { description: study.description },
-                                       this.jsonStudy,
-                                       expectStudy,
-                                       failTest);
+      this.updateEntity.call(this,
+                             study,
+                             'updateDescription',
+                             study.description,
+                             uri('description', study.id),
+                             { description: study.description },
+                             this.jsonStudy,
+                             expectStudy,
+                             failTest);
     });
 
     it('can add an annotation type on a study', function() {
@@ -237,15 +239,15 @@ define([
           annotationType = self.jsonEntities.annotationType(),
           study          = new self.Study(this.jsonStudy);
 
-      this.testUtils.updateEntity.call(this,
-                                       study,
-                                       'addAnnotationType',
-                                       _.omit(annotationType, 'uniqueId'),
-                                       uri('pannottype', study.id),
-                                       _.omit(annotationType, 'uniqueId'),
-                                       this.jsonStudy,
-                                       expectStudy,
-                                       failTest);
+      this.updateEntity.call(this,
+                             study,
+                             'addAnnotationType',
+                             _.omit(annotationType, 'uniqueId'),
+                             uri('pannottype', study.id),
+                             _.omit(annotationType, 'uniqueId'),
+                             this.jsonStudy,
+                             expectStudy,
+                             failTest);
     });
 
     it('can remove an annotation on a study', function() {

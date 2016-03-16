@@ -194,23 +194,39 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
     };
 
     DateTimeAnnotation.prototype.compareToJsonEntity = function (serverEntity) {
-      // has to be comparetd to UTC time
-      expect(moment(this.date).local().format()).toEqual(serverEntity.stringValue);
-      expect(moment(this.time).local().format()).toEqual(serverEntity.stringValue);
+      if (_.isUndefined(serverEntity.stringValue)) {
+        expect(this.date).toBeNull();
+        expect(this.time).toBeNull();
+      } else {
+        // has to be comparetd to UTC time
+        expect(moment(this.date).local().format()).toEqual(serverEntity.stringValue);
+        expect(moment(this.time).local().format()).toEqual(serverEntity.stringValue);
+      }
     };
 
     MultipleSelectAnnotation.prototype.compareToJsonEntity = function (serverEntity) {
-      expect(this.values).toBeArrayOfSize(serverEntity.selectedValues.length);
-      expect(this.values).toContainAll(_.pluck(serverEntity.selectedValues, 'value'));
+      if (serverEntity.selectedValues.length > 0) {
+        expect(this.values).toBeArrayOfSize(serverEntity.selectedValues.length);
+        expect(this.values).toContainAll(_.pluck(serverEntity.selectedValues, 'value'));
+      }
     };
 
     NumberAnnotation.prototype.compareToJsonEntity = function (serverEntity) {
-      expect(this.value.toString()).toEqual(serverEntity.numberValue.toString());
+      if (_.isUndefined(serverEntity.numberValue)) {
+        expect(this.value).toBeUndefined();
+      } else {
+        expect(this.value.toString()).toEqual(serverEntity.numberValue.toString());
+      }
     };
 
     SingleSelectAnnotation.prototype.compareToJsonEntity = function (serverEntity) {
-      expect(serverEntity.selectedValues).toBeArrayOfSize(1);
-      expect(this.value).toBe(_.pluck(serverEntity.selectedValues, 'value')[0]);
+      if (serverEntity.selectedValues.length === 0) {
+        expect(this.value).toBeNull();
+        expect(this.selectedValues).toBeEmptyArray();
+      } else {
+        expect(serverEntity.selectedValues).toBeArrayOfSize(1);
+        expect(this.value).toBe(_.pluck(serverEntity.selectedValues, 'value')[0]);
+      }
     };
 
     TextAnnotation.prototype.compareToJsonEntity = function (serverEntity) {

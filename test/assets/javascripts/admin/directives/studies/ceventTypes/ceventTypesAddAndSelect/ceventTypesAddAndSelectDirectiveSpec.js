@@ -16,8 +16,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, directiveTestSuite, testUtils) {
       var self = this, jsonStudy, jsonCet;
+
+      _.extend(self, directiveTestSuite);
 
       self.$q                   = self.$injector.get('$q');
       self.$state               = self.$injector.get('$state');
@@ -35,8 +37,8 @@ define([
       spyOn(self.CollectionEventType, 'list').and.returnValue(self.$q.when([ self.collectionEventType ]));
       spyOn(this.$state, 'go').and.callFake(function () {});
 
-      testUtils.putHtmlTemplates(
-        '/assets/javascripts/admin/directives/studies/ceventTypes/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html');
+      self.putHtmlTemplates(
+        '/assets/javascripts/admin/directives/studies/collection/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html');
 
       function setupController() {
         return create;
@@ -73,7 +75,7 @@ define([
       this.createController();
       this.controller.select(this.collectionEventType);
       this.scope.$digest();
-      expect(this.$state.go).toHaveBeenCalledWith('home.admin.studies.study.collection.view',
+      expect(this.$state.go).toHaveBeenCalledWith('home.admin.studies.study.collection.ceventType',
                                                   { ceventTypeId: this.collectionEventType.id });
     });
 

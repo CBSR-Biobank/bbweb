@@ -63,16 +63,16 @@ define([
 
       describe('(shared)', function() {
 
-        beforeEach(inject(function($rootScope,
-                                   $compile,
-                                   testUtils) {
+        beforeEach(inject(function($rootScope, $compile, directiveTestSuite, testUtils) {
           var self = this;
+
+          _.extend(self, directiveTestSuite);
 
           self.state                    = self.$injector.get('$state');
           self.studyAnnotationTypeUtils = self.$injector.get('studyAnnotationTypeUtils');
           self.AnnotationTypeViewer     = self.$injector.get('AnnotationTypeViewer');
 
-          testUtils.putHtmlTemplates(
+          self.putHtmlTemplates(
             '/assets/javascripts/admin/directives/studies/annotationTypes/studyAnnotationTypesTable/studyAnnotationTypesTable.html',
             '/assets/javascripts/common/directives/updateRemoveButtons.html');
 

@@ -10,8 +10,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
   describe('Directive: validCount', function() {
     var scope, form;
 
-    beforeEach(mocks.module('biobankApp'));
-    beforeEach(mocks.module('biobank.test'));
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function ($rootScope, $compile) {
       var element;
@@ -23,7 +22,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           '  <input type="number"' +
           '         name="theNumber"' +
           '         ng-model="theNumber"' +
-          '         valid-count' +
+          '         natural-number' +
           '         required />' +
           '</form>');
 

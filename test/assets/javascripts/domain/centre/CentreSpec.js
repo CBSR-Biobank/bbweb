@@ -25,7 +25,9 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (extendedDomainEntities) {
+    beforeEach(inject(function (entityTestSuite, extendedDomainEntities) {
+      _.extend(this, entityTestSuite);
+
       this.httpBackend  = this.$injector.get('$httpBackend');
       this.Centre       = this.$injector.get('Centre');
       this.CentreStatus = this.$injector.get('CentreStatus');
@@ -246,15 +248,15 @@ define([
           baseCentre = self.jsonEntities.centre(),
           centre     = new self.Centre(baseCentre);
 
-      this.testUtils.updateEntity.call(this,
-                                       centre,
-                                       'updateName',
-                                       centre.name,
-                                       uri('name', centre.id),
-                                       { name: centre.name },
-                                       baseCentre,
-                                       expectCentre,
-                                       failTest);
+      this.updateEntity.call(this,
+                             centre,
+                             'updateName',
+                             centre.name,
+                             uri('name', centre.id),
+                             { name: centre.name },
+                             baseCentre,
+                             expectCentre,
+                             failTest);
     });
 
     it('can update the description on a centre', function() {
@@ -262,25 +264,25 @@ define([
           baseCentre = self.jsonEntities.centre(),
           centre     = new self.Centre(baseCentre);
 
-      this.testUtils.updateEntity.call(this,
-                                       centre,
-                                       'updateDescription',
-                                       undefined,
-                                       uri('description', centre.id),
-                                       { },
-                                       baseCentre,
-                                       expectCentre,
-                                       failTest);
+      this.updateEntity.call(this,
+                             centre,
+                             'updateDescription',
+                             undefined,
+                             uri('description', centre.id),
+                             { },
+                             baseCentre,
+                             expectCentre,
+                             failTest);
 
-      this.testUtils.updateEntity.call(this,
-                                       centre,
-                                       'updateDescription',
-                                       centre.description,
-                                       uri('description', centre.id),
-                                       { description: centre.description },
-                                       baseCentre,
-                                       expectCentre,
-                                       failTest);
+      this.updateEntity.call(this,
+                             centre,
+                             'updateDescription',
+                             centre.description,
+                             uri('description', centre.id),
+                             { description: centre.description },
+                             baseCentre,
+                             expectCentre,
+                             failTest);
     });
 
     it('can disable a centre', function() {
@@ -313,15 +315,15 @@ define([
             jsonCentre   = this.jsonEntities.centre(),
             centre       = new self.Centre(jsonCentre);
 
-        this.testUtils.updateEntity.call(this,
-                                         centre,
-                                         'addLocation',
-                                         _.omit(jsonLocation, 'uniqueId'),
-                                         uri('locations', centre.id),
-                                         _.omit(jsonLocation, 'uniqueId'),
-                                         jsonCentre,
-                                         expectCentre,
-                                         failTest);
+        this.updateEntity.call(this,
+                               centre,
+                               'addLocation',
+                               _.omit(jsonLocation, 'uniqueId'),
+                               uri('locations', centre.id),
+                               _.omit(jsonLocation, 'uniqueId'),
+                               jsonCentre,
+                               expectCentre,
+                               failTest);
       });
 
       it('throws an error when removing a location that does not exists', function() {
@@ -361,15 +363,15 @@ define([
             jsonCentre = self.jsonEntities.centre(),
             centre     = new self.Centre(jsonCentre);
 
-        this.testUtils.updateEntity.call(this,
-                                         centre,
-                                         'addStudy',
-                                         jsonStudy,
-                                         uri('studies', centre.id),
-                                         { studyId : jsonStudy.id },
-                                         jsonCentre,
-                                         expectCentre,
-                                         failTest);
+        this.updateEntity.call(this,
+                               centre,
+                               'addStudy',
+                               jsonStudy,
+                               uri('studies', centre.id),
+                               { studyId : jsonStudy.id },
+                               jsonCentre,
+                               expectCentre,
+                               failTest);
       });
 
       it('can remove a study', function() {

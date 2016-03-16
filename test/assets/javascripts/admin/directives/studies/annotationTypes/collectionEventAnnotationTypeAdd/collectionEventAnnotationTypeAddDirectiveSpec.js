@@ -1,20 +1,22 @@
 /**
  * Jasmine test suite
  */
-define([
-  'angular',
-  'angularMocks',
-  'underscore',
-  '../annotationTypeAddDirectiveSharedSpec'
-], function(angular, mocks, _, annotationTypeAddDirectiveSharedSpec) {
+define(function(require) {
   'use strict';
+
+  var angular                              = require('angular'),
+      mocks                                = require('angularMocks'),
+      _                                    = require('underscore'),
+      annotationTypeAddDirectiveSharedSpec = require('../annotationTypeAddDirectiveSharedSpec');
 
   describe('Directive: collectionEventAnnotationTypeAddDirective', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, directiveTestSuite, testUtils) {
       var self = this;
+
+      _.extend(self, directiveTestSuite);
 
       self.CollectionEventType = self.$injector.get('CollectionEventType');
       self.AnnotationType      = self.$injector.get('AnnotationType');
@@ -24,8 +26,9 @@ define([
         self.jsonEntities.collectionEventType(self.jsonEntities.study()));
       self.createController = setupController();
 
-      testUtils.putHtmlTemplates(
-        '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeAdd/annotationTypeAdd.html');
+      self.putHtmlTemplates(
+        '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeAdd/annotationTypeAdd.html',
+        '/assets/javascripts/admin/directives/studies/annotationTypes/collectionEventAnnotationTypeAdd/collectionEventAnnotationTypeAdd.html');
 
       function setupController() {
         return create;
@@ -60,7 +63,7 @@ define([
         context.controller                = this.controller;
         context.entity                    = this.CollectionEventType;
         context.addAnnotationTypeFuncName = 'addAnnotationType';
-        context.returnState               = 'home.admin.studies.study.collection.view';
+        context.returnState               = 'home.admin.studies.study.collection.ceventType';
       }));
 
       annotationTypeAddDirectiveSharedSpec(context);

@@ -28,7 +28,9 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testUtils) {
+    beforeEach(inject(function(directiveTestSuite, testUtils) {
+      _.extend(this, directiveTestSuite);
+
       annotationFactory         = this.$injector.get('annotationFactory');
       AnnotationType            = this.$injector.get('AnnotationType');
       AnnotationValueType       = this.$injector.get('AnnotationValueType');
@@ -36,7 +38,7 @@ define([
 
       createScope = setupController(this.$injector);
 
-      testUtils.putHtmlTemplates(
+      this.putHtmlTemplates(
         '/assets/javascripts/common/directives/annotationsInput/annotationsInput.html');
     }));
 

@@ -14,12 +14,14 @@ define([
 ], function(angular, mocks, _, faker, moment, sprintf) {
   'use strict';
 
-  fdescribe('Participant', function() {
+  describe('Participant', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(extendedDomainEntities) {
+    beforeEach(inject(function(entityTestSuite, extendedDomainEntities) {
       var self = this;
+
+      _.extend(this, entityTestSuite);
 
       self.httpBackend              = self.$injector.get('$httpBackend');
       self.Participant              = self.$injector.get('Participant');
@@ -43,7 +45,6 @@ define([
       self.getParticipantEntities = getParticipantEntities;
       self.generateJsonAnnotationTypesAndAnnotations = generateJsonAnnotationTypesAndAnnotations;
       self.validateAnnotationClass = validateAnnotationClass;
-      self.updateEntity = this.testUtils.updateEntity;
       self.expectParticipant = expectParticipant;
       self.failTest = failTest;
 
@@ -379,7 +380,7 @@ define([
                         self.failTest);
     });
 
-    fit('can remove an annotation on a participant', function() {
+    it('can remove an annotation on a participant', function() {
       var self = this,
           jsonAnnotationType = self.jsonEntities.annotationType(),
           jsonStudy = self.jsonEntities.study({ annotationTypes: [ jsonAnnotationType ]}),

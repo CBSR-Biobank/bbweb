@@ -16,10 +16,12 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(jsonEntities, testUtils) {
+    beforeEach(inject(function(directiveTestSuite, jsonEntities, testUtils) {
       var self = this;
 
-      testUtils.putHtmlTemplates(
+      _.extend(self, directiveTestSuite);
+
+      self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/statusLine/statusLine.html');
 
       self.createScope = setupScope();

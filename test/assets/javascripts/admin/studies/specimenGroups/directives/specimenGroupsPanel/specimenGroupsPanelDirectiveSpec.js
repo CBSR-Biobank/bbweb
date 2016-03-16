@@ -21,13 +21,15 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (testUtils) {
+    beforeEach(inject(function (directiveTestSuite, testUtils) {
+      _.extend(this, directiveTestSuite);
+
       createEntities = setupEntities(this.$injector);
       createController = setupController(this.$injector);
       testUtils.addCustomMatchers();
 
 
-      testUtils.putHtmlTemplates(
+      this.putHtmlTemplates(
         '/assets/javascripts/admin/studies/specimenGroups/directives/specimenGroupsPanel/specimenGroupsPanel.html',
         '/assets/javascripts/common/directives/panelButtons.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html');

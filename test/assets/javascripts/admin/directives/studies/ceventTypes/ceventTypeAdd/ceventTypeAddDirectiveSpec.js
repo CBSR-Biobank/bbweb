@@ -11,8 +11,10 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testUtils) {
+    beforeEach(inject(function(directiveTestSuite, testUtils) {
       var self = this;
+
+      _.extend(self, directiveTestSuite);
 
       self.Study               = self.$injector.get('Study');
       self.CollectionEventType = self.$injector.get('CollectionEventType');
@@ -21,8 +23,8 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       self.study = new self.Study(self.jsonEntities.study());
       self.createController = setupController();
 
-      testUtils.putHtmlTemplates(
-        '/assets/javascripts/admin/directives/studies/ceventTypes/ceventTypeAdd/ceventTypeAdd.html');
+      self.putHtmlTemplates(
+        '/assets/javascripts/admin/directives/studies/collection/ceventTypeAdd/ceventTypeAdd.html');
 
       //--
 

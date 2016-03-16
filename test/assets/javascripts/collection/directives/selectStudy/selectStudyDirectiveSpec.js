@@ -26,14 +26,16 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testUtils) {
+    beforeEach(inject(function(directiveTestSuite, testUtils) {
+      _.extend(this, directiveTestSuite);
+
       q            = this.$injector.get('$q');
       compile      = this.$injector.get('$compile');
       scope        = this.$injector.get('$rootScope');
       state        = this.$injector.get('$state');
       jsonEntities = this.$injector.get('jsonEntities');
 
-      testUtils.putHtmlTemplates(
+      this.putHtmlTemplates(
         '/assets/javascripts/collection/directives/selectStudy/selectStudy.html');
 
       element = generateElement(navigateStateName, navigateStateParamName);

@@ -15,8 +15,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, testUtils) {
+    beforeEach(inject(function ($rootScope, $compile, directiveTestSuite, testUtils) {
       var self = this;
+
+      _.extend(self, directiveTestSuite);
 
       self.$q                = self.$injector.get('$q');
       self.Study             = self.$injector.get('Study');
@@ -27,7 +29,7 @@ define([
 
       testUtils.addCustomMatchers();
 
-      testUtils.putHtmlTemplates(
+      this.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/studiesList/studiesList.html',
         '/assets/javascripts/common/directives/pagedItemsList/pagedItemsList.html');
 

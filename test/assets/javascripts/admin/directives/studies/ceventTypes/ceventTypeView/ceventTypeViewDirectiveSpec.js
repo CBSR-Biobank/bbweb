@@ -15,8 +15,10 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, testUtils, directiveTestSuite) {
       var self = this;
+
+      _.extend(self, directiveTestSuite);
 
       self.$q                   = self.$injector.get('$q');
       self.$state               = self.$injector.get('$state');
@@ -34,12 +36,14 @@ define(function (require) {
 
       self.createController = setupController();
 
-      testUtils.putHtmlTemplates(
-        '/assets/javascripts/admin/directives/studies/ceventTypes/ceventTypeView/ceventTypeView.html',
+      this.putHtmlTemplates(
+        '/assets/javascripts/admin/directives/studies/collection/ceventTypeView/ceventTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle.html',
         '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeSummary/annotationTypeSummary.html',
+        '/assets/javascripts/admin/directives/studies/collection/collectionSpecimenSpecSummary/collectionSpecimenSpecSummary.html',
+        '/assets/javascripts/common/directives/updateRemoveButtons.html',
         '/assets/javascripts/admin/directives/statusLine/statusLine.html',
-        '/assets/javascripts/common/services/modalStringInput.html');
+        '/assets/javascripts/common/services/modalInput.html');
 
       function setupController() {
         return create;
@@ -68,7 +72,7 @@ define(function (require) {
       this.controller.addAnnotationType();
       this.scope.$digest();
       expect(this.$state.go)
-        .toHaveBeenCalledWith('home.admin.studies.study.collection.view.annotationTypeAdd');
+        .toHaveBeenCalledWith('home.admin.studies.study.collection.ceventType.annotationTypeAdd');
     });
 
     it('calling addSpecimenSpec should change to the correct state', function() {
@@ -76,7 +80,7 @@ define(function (require) {
       this.controller.addSpecimenSpec();
       this.scope.$digest();
       expect(this.$state.go)
-        .toHaveBeenCalledWith('home.admin.studies.study.collection.view.specimenSpecAdd');
+        .toHaveBeenCalledWith('home.admin.studies.study.collection.ceventType.specimenSpecAdd');
     });
 
     it('calling editAnnotationType should change to the correct state', function() {
@@ -86,7 +90,7 @@ define(function (require) {
       this.controller.editAnnotationType(annotType);
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith(
-        'home.admin.studies.study.collection.view.annotationTypeView',
+        'home.admin.studies.study.collection.ceventType.annotationTypeView',
         { annotationTypeId: annotType.uniqueId });
     });
 
