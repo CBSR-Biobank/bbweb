@@ -2,28 +2,18 @@
   <h1>{{vm.study.name}} <small>administration </small></h1>
 </div>
 <!--
-    The 'ui-sref' attribute has to go on the 'tab' tag to have the state change when any part
+    The 'ui-sref' attribute has to go on the 'uib-tab' tag to have the state change when any part
     of the tab is clicked on, not just the link.
   -->
 <div class="row">
   <div class="col-md-12">
-    <uib-tabset>
-      <uib-tab heading="Summary"
-           ui-sref="home.admin.studies.study.summary"
-           ui-sref-opts="{reload: true}"
-           active="vm.tabSummaryActive"></uib-tab>
-      <uib-tab heading="Participants"
-           ui-sref="home.admin.studies.study.participants"
-           ui-sref-opts="{reload: true}"
-           active="vm.tabParticipantsActive"></uib-tab>
-      <uib-tab heading="Collection"
-           ui-sref="home.admin.studies.study.collection"
-           ui-sref-opts="{reload: true}"
-           active="vm.tabCollectionActive"></uib-tab>
-      <uib-tab heading="Processing"
-           ui-sref="home.admin.studies.study.processing"
-           ui-sref-opts="{reload: true}"
-           active="vm.tabProcessingActive"></uib-tab>
+    <uib-tabset active="vm.active">
+      <uib-tab index="$index"
+               ng-repeat="tab in vm.tabs track by $index"
+               heading="{{tab.heading}}"
+               ui-sref="{{tab.sref}}"
+               ui-sref-opts="{reload: false}"
+               active="tab.active"></uib-tab>
     </uib-tabset>
   </div>
 </div>

@@ -22,7 +22,7 @@ define(['underscore'], function(_) {
         if (obj.selectedValues.length === 0) {
           self.value = null;
         } else if (obj.selectedValues.length === 1) {
-          self.value = obj.selectedValues[0].value;
+          self.value = obj.selectedValues[0];
         } else {
           throw new Error('invalid value for selected values');
         }
@@ -40,7 +40,7 @@ define(['underscore'], function(_) {
           selectedValues = [];
 
       if (this.value) {
-        selectedValues.push({ value: self.value });
+        selectedValues.push(self.value);
       }
 
       return {

@@ -66,6 +66,7 @@ define(function(require) {
   app.config(exceptionConfig);
 
   debugFunc.$inject = ['$rootScope'];
+
   function debugFunc($rootScope) {
     /*jshint unused: false*/
 

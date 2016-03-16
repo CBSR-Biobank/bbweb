@@ -159,7 +159,7 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
 
       return _.reduce(options,
                       function (memo, option) {
-                        return memo && _.contains(self.options, option.value);
+                        return memo && _.contains(self.options, option);
                       },
                       true);
     };

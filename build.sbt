@@ -91,7 +91,7 @@ libraryDependencies ++= Seq(
   "org.webjars"               %  "jquery"                              % "2.2.1",
   ( "org.webjars"             %  "bootstrap"                           % "3.3.6"  ).excludeAll(ExclusionRule(organization="org.webjars")),
   ( "org.webjars"             %  "angularjs"                           % "1.4.9"  ).exclude("org.webjars", "jquery"),
-  ( "org.webjars"             %  "angular-ui-bootstrap"                % "1.2.1" ).exclude("org.webjars", "angularjs"),
+  ( "org.webjars.bower"       %  "angular-ui-bootstrap"                % "1.2.4" ).exclude("org.webjars", "angularjs"),
   ( "org.webjars"             %  "angular-ui-router"                   % "0.2.18" ).exclude("org.webjars", "angularjs"),
   "org.webjars"               %  "smart-table"                          % "2.1.3-1",
   ( "org.webjars"             %  "toastr"                              % "2.1.1"  ).exclude("org.webjars", "jquery"),

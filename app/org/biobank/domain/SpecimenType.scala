@@ -35,4 +35,5 @@ object SpecimenType extends Enumeration {
   val SourceWater               = Value("Source Water")
   val TapWater                  = Value("Tap Water")
   val TransverseColon           = Value("Transverse Colon")
+  val WholeBloodEdta            = Value("Whole Blood EDTA")
 }

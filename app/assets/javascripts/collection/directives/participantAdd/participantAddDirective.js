@@ -46,13 +46,12 @@ define(['underscore'], function(_) {
 
     function submit(participant) {
       // convert the data from the form to data expected by REST API
-      participant.addOrUpdate()
+      participant.add()
         .then(submitSuccess)
         .catch(function(error) {
-          domainEntityService.updateErrorModal(
-            error, 'participant').catch(function () {
-              $state.go('home.collection.study', { studyId: vm.study.id });
-            });
+          return domainEntityService.updateErrorModal(error, 'participant');
+        }).catch(function () {
+          $state.go('home.collection.study', { studyId: vm.study.id });
         });
     }
 

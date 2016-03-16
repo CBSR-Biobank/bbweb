@@ -59,7 +59,6 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
 
       if (study) {
         this.setStudy(study);
-        this.setAnnotationTypes(study.annotationTypes);
       }
     }
 
@@ -85,9 +84,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
 
     Participant.get = function (studyId, id) {
       return biobankApi.get(sprintf.sprintf('/participants/%s/%s', studyId, id))
-        .then(function (reply) {
-          return Participant.prototype.asyncCreate(reply);
-        });
+        .then(Participant.prototype.asyncCreate);
     };
 
     Participant.getByUniqueId = function (studyId, uniqueId) {
@@ -100,6 +97,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     Participant.prototype.setStudy = function (study) {
       this.study = study;
       this.studyId = study.id;
+      this.setAnnotationTypes(study.annotationTypes);
     };
 
     Participant.prototype.asyncCreate = function (obj) {
@@ -111,11 +109,11 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
       if (!tv4.validate(obj, schema)) {
         console.error('invalid object from server: ' + tv4.error);
         deferred.reject('invalid object from server: ' + tv4.error);
-      }
-
-      if (!Annotations.validAnnotations(obj.annotations)) {
+      } else if (!Annotations.validAnnotations(obj.annotations)) {
         console.error('invalid object from server: bad annotation type');
         deferred.reject('invalid object from server: bad annotation type');
+      } else {
+        deferred.resolve(new Participant(obj));
       }
       return deferred.promise;
     };

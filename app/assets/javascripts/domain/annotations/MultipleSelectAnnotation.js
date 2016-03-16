@@ -47,7 +47,7 @@ define(['underscore'], function(_) {
       selectedValues =  _.chain(self.values)
         .filter(function (sv) { return sv.checked; })
         .map(function (sv) {
-          return { value: sv.name };
+          return sv.name;
         })
         .value();
 

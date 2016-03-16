@@ -51,7 +51,6 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
       var defaults = {
         name:            '',
         description:     null,
-        studyIds:        [],
         annotationTypes: [],
         status:          StudyStatus.DISABLED()
       };

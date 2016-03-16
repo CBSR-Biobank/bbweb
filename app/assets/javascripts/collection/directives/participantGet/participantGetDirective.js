@@ -74,7 +74,7 @@ define(function () {
 
       modalService.showModal(modalDefaults, modalOptions)
         .then(function() {
-          $state.go('home.collection.study.addParticipant', { uniqueId: uniqueId });
+          $state.go('home.collection.study.participantAdd', { uniqueId: uniqueId });
         })
         .catch(function() {
           stateHelper.reloadAndReinit();

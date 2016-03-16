@@ -220,7 +220,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
                                            timeModified    = None,
                                            name            = name,
                                            description     = descMaybe,
-                                           annotationTypes = Set())
+                                           annotationTypes = getBbpspParticipantAnnotationTypes)
           studyRepository.put(study)
         }
 
@@ -241,7 +241,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
                                     description        = None,
                                     recurring          = true,
                                     specimenSpecs      = getBbpspSpecimenSpecs,
-                                    annotationTypes    = getBbpspAnnotationTypes)
+                                    annotationTypes    = getBbpspCeventAnnotationTypes)
         collectionEventTypeRepository.put(cet)
     }
     ()
@@ -256,9 +256,9 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
           description                 = None,
           units                       = "mL",
           anatomicalSourceType        = AnatomicalSourceType.Blood,
-          preservationType            = PreservationType.FrozenSpecimen,
-          preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
-          specimenType                = SpecimenType.Rna,
+          preservationType            = PreservationType.FreshSpecimen,
+          preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
+          specimenType                = SpecimenType.WholeBloodEdta,
           maxCount                    = 1,
           amount                      = Some(10)),
         CollectionSpecimenSpec(
@@ -267,8 +267,8 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
           description                 = None,
           units                       = "mL",
           anatomicalSourceType        = AnatomicalSourceType.Blood,
-          preservationType            = PreservationType.FrozenSpecimen,
-          preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
+          preservationType            = PreservationType.FreshSpecimen,
+          preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
           specimenType                = SpecimenType.Paxgene,
           maxCount                    = 1,
           amount                      = Some(10)),
@@ -278,9 +278,9 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
           description                 = None,
           units                       = "mL",
           anatomicalSourceType        = AnatomicalSourceType.Blood,
-          preservationType            = PreservationType.FrozenSpecimen,
-          preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
-          specimenType                = SpecimenType.Paxgene,
+          preservationType            = PreservationType.FreshSpecimen,
+          preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
+          specimenType                = SpecimenType.WholeBloodEdta,
           maxCount                    = 1,
           amount                      = Some(3)),
         CollectionSpecimenSpec(
@@ -289,9 +289,9 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
           description                 = None,
           units                       = "mL",
           anatomicalSourceType        = AnatomicalSourceType.Blood,
-          preservationType            = PreservationType.FrozenSpecimen,
-          preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
-          specimenType                = SpecimenType.Paxgene,
+          preservationType            = PreservationType.FreshSpecimen,
+          preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
+          specimenType                = SpecimenType.WholeBloodEdta,
           maxCount                    = 1,
           amount                      = Some(4)),
         CollectionSpecimenSpec(
@@ -300,9 +300,9 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
           description                 = None,
           units                       = "mL",
           anatomicalSourceType        = AnatomicalSourceType.Blood,
-          preservationType            = PreservationType.FrozenSpecimen,
-          preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
-          specimenType                = SpecimenType.CdpaPlasma,
+          preservationType            = PreservationType.FreshSpecimen,
+          preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
+          specimenType                = SpecimenType.WholeBloodEdta,
           maxCount                    = 1,
           amount                      = Some(9)),
         CollectionSpecimenSpec(
@@ -310,16 +310,37 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
           name                        = "Urine cup",
           description                 = None,
           units                       = "mL",
-          anatomicalSourceType        = AnatomicalSourceType.Blood,
-          preservationType            = PreservationType.FrozenSpecimen,
-          preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
+          anatomicalSourceType        = AnatomicalSourceType.Urine,
+          preservationType            = PreservationType.FreshSpecimen,
+          preservationTemperatureType = PreservationTemperatureType.Plus4celcius,
           specimenType                = SpecimenType.CdpaPlasma,
           maxCount                    = 1,
-          amount                      = Some(10))
+          amount                      = Some(15))
     )
   }
 
-  def getBbpspAnnotationTypes() = {
+  def getBbpspParticipantAnnotationTypes() = {
+    val hashids = Hashids("bbpsp-participant-annotation-types")
+
+    Set(AnnotationType(
+          uniqueId      = hashids.encode(1),
+          name          = "Date of birth",
+          description   = None,
+          valueType     = AnnotationValueType.DateTime,
+          maxValueCount = None,
+          options       = Seq.empty,
+          required      = true),
+        AnnotationType(
+          uniqueId      = hashids.encode(2),
+          name          = "Gender",
+          description   = None,
+          valueType     = AnnotationValueType.Select,
+          maxValueCount = Some(1),
+          options       = Seq("Female", "Male"),
+          required      = true))
+  }
+
+  def getBbpspCeventAnnotationTypes() = {
     val hashids = Hashids("bbpsp-collection-event-annotation-types")
 
     Set(AnnotationType(
@@ -337,7 +358,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
           valueType     = AnnotationValueType.Select,
           maxValueCount = Some(2),
           options       = Seq("Surveillance", "Genetic Predisposition", "Previous Samples", "Genetic Mutation"),
-          required      = true))
+          required      = false))
   }
 
   def addMultipleUsers() = {

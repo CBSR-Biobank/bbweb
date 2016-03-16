@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function () {
+define(['underscore'], function (_) {
   'use strict';
 
   /**
@@ -28,23 +28,24 @@ define(function () {
   function StudyViewCtrl($window, $state, $timeout) {
     var vm = this;
 
-    vm.tabSummaryActive      = false;
-    vm.tabParticipantsActive = false;
-    vm.tabSpecimensActive    = false;
-    vm.tabCollectionActive   = false;
-    vm.tabProcessingActive   = false;
+    vm.tabs = [
+      { heading: 'Summary',      sref: 'home.admin.studies.study.summary',      active: true },
+      { heading: 'Participants', sref: 'home.admin.studies.study.participants', active: false },
+      { heading: 'Collection',   sref: 'home.admin.studies.study.collection',   active: false },
+      { heading: 'Processing',   sref: 'home.admin.studies.study.processing',   active: false },
+    ];
 
     init();
-    activeTabUpdateFix();
 
     //--
 
     function init() {
+      activeTabUpdate();
+
       // initialize the panels to open state when viewing a new study
       if (vm.study.id !== $window.localStorage.getItem('study.panel.studyId')) {
         // this way when the user selects a new study, the panels always default to open
         $window.localStorage.setItem('study.panel.participantAnnotationTypes',     true);
-        $window.localStorage.setItem('study.panel.specimenGroups',                 true);
         $window.localStorage.setItem('study.panel.collectionEventTypes',           true);
         $window.localStorage.setItem('study.panel.collectionEventAnnotationTypes', true);
         $window.localStorage.setItem('study.panel.processingTypes',                true);
@@ -56,21 +57,13 @@ define(function () {
       }
     }
 
-    /**
-     * At the moment the active tab does not initialize properly. Seems to be a ui-boostrap bug.
-     *
-     * See http://stackoverflow.com/questions/17695629/setting-the-initial-static-tab-in-angular-bootstrap
-     */
-    function activeTabUpdateFix() {
-      $timeout(activeTabUpdate, 0);
-
-      function activeTabUpdate() {
-        vm.tabSummaryActive      = ($state.current.name.indexOf('home.admin.studies.study.summary') >= 0);
-        vm.tabParticipantsActive = ($state.current.name.indexOf('home.admin.studies.study.participants') >= 0);
-        vm.tabSpecimensActive    = ($state.current.name.indexOf('home.admin.studies.study.specimens') >= 0);
-        vm.tabCollectionActive   = ($state.current.name.indexOf('home.admin.studies.study.collection') >= 0);
-        vm.tabProcessingActive   = ($state.current.name.indexOf('home.admin.studies.study.processing') >= 0);
-      }
+    function activeTabUpdate() {
+      _.each(vm.tabs, function (tab, index) {
+        tab.active = ($state.current.name.indexOf(tab.sref) >= 0);
+        if (tab.active) {
+          vm.active = index;
+        }
+      });
 
     }
   }

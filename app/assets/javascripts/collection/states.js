@@ -21,12 +21,11 @@ define(['underscore'], function(_) {
       return Study.get($stateParams.studyId);
     }
 
-    resolveParticipant.$inject = ['$stateParams', 'Participant', 'study', 'annotationTypes'];
-    function resolveParticipant($stateParams, Participant, study, annotationTypes) {
-      return Participant.get($stateParams.studyId, $stateParams.participantId).then(
-        function (p) {
+    resolveParticipant.$inject = ['$stateParams', 'Participant', 'study'];
+    function resolveParticipant($stateParams, Participant, study) {
+      return Participant.get($stateParams.studyId, $stateParams.participantId)
+        .then(function (p) {
           p.setStudy(study);
-          p.setAnnotationTypes(annotationTypes);
           return p;
         });
     }
@@ -98,7 +97,7 @@ define(['underscore'], function(_) {
     });
 
     $stateProvider.state('home.collection.study', {
-      url: '/{studyId}',
+      url: '/study/{studyId}',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         study: resolveStudy
@@ -125,7 +124,7 @@ define(['underscore'], function(_) {
       }
     });
 
-    $stateProvider.state('home.collection.study.addParticipant', {
+    $stateProvider.state('home.collection.study.participantAdd', {
       url: '/add/{uniqueId}',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser
@@ -141,11 +140,9 @@ define(['underscore'], function(_) {
           controller: [
             '$stateParams',
             'study',
-            'annotationTypes',
-            function ($stateParams, study, annotationTypes) {
+            function ($stateParams, study) {
               var vm = this;
               vm.study = study;
-              vm.annotationTypes = annotationTypes;
               vm.uniqueId = $stateParams.uniqueId;
             }
           ],
@@ -159,7 +156,7 @@ define(['underscore'], function(_) {
 
     $stateProvider.state('home.collection.study.participant', {
       abstract: true,
-      url: '/{participantId}',
+      url: 'participant/{participantId}',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         participant: resolveParticipant
@@ -169,18 +166,15 @@ define(['underscore'], function(_) {
           template: [
             '<participant-view',
             '  study="vm.study"',
-            '  annotation-types="vm.annotationTypes"',
             '  participant="vm.participant">',
             '</participant-view>'
           ].join(''),
           controller: [
             'study',
-            'annotationTypes',
             'participant',
-            function (study, annotationTypes, participant) {
+            function (study, participant) {
               var vm = this;
               vm.study = study;
-              vm.annotationTypes = annotationTypes;
               vm.participant = participant;
             }
           ],
