@@ -153,16 +153,20 @@ class CollectionEventsProcessor @Inject() (
   private def processUpdateAnnotationCmd(cmd: UpdateCollectionEventAnnotationCmd): Unit = {
     val v = update(cmd) { (participant, collectionEventType, cevent) =>
         for {
-          updatedCevent   <- cevent.withAnnotation(cmd.annotation)
+          annotation      <- Annotation.create(cmd.annotationTypeId,
+                                               cmd.stringValue,
+                                               cmd.numberValue,
+                                               cmd.selectedValues)
+          updatedCevent   <- cevent.withAnnotation(annotation)
           validAnnotation <- Annotation.validateAnnotations(collectionEventType.annotationTypes,
-                                                            List(cmd.annotation))
+                                                            List(annotation))
         } yield CollectionEventEvent(updatedCevent.id.id).update(
           _.participantId                := participant.id.id,
           _.collectionEventTypeId        := updatedCevent.collectionEventTypeId.id,
           _.optionalUserId               := cmd.userId,
           _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
           _.annotationUpdated.version    := cmd.expectedVersion,
-          _.annotationUpdated.annotation := annotationToEvent(cmd.annotation))
+          _.annotationUpdated.annotation := annotationToEvent(annotation))
       }
 
     process(v) { applyAnnotationUpdatedEvent(_) }

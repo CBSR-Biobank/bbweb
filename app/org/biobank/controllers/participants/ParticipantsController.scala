@@ -30,20 +30,18 @@ class ParticipantsController @Inject() (val env:            Environment,
       domainValidationReply(participantsService.getByUniqueId(studyId, uniqueId))
     }
 
-  def addParticipant(studyId: String) =
+  def add(studyId: String) =
     commandAction(Json.obj("studyId" -> studyId)) { cmd : AddParticipantCmd => processCommand(cmd) }
 
   def updateUniqueId(id: String) =
     commandAction(Json.obj("id" -> id)) { cmd: UpdateParticipantUniqueIdCmd => processCommand(cmd) }
 
-  def updateAnnotation(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd: UpdateParticipantAnnotationCmd => processCommand(cmd) }
+  def addAnnotation(id: String) =
+    commandAction(Json.obj("id" -> id)) { cmd: ParticipantAddAnnotationCmd => processCommand(cmd) }
 
-  def removeAnnotation(participantId:      String,
-                       annotTypeId:   String,
-                       ver:           Long) =
+  def removeAnnotation(participantId: String, annotTypeId: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = RemoveParticipantAnnotationCmd(userId           = Some(userId.id),
+      val cmd = ParticipantRemoveAnnotationCmd(userId           = Some(userId.id),
                                                id               = participantId,
                                                expectedVersion  = ver,
                                                annotationTypeId = annotTypeId)

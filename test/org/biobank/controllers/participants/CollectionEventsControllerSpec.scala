@@ -887,21 +887,15 @@ class CollectionEventsControllerSpec
 
       annotationTypeUpdateSharedBehaviour
 
-      annotationTypeUpdateWithStudySharedBehaviour
-
       "fail when adding annotation and collection event ID is invalid" in {
         createEntities { (study, participant, ceventType) =>
 
           val annotationType = factory.createAnnotationType
           val annotation = factory.createAnnotation
-          val annotJson = Json.obj("annotation" -> annotationToJson(annotation))
 
           collectionEventTypeRepository.put(ceventType.copy(annotationTypes = Set(annotationType)))
 
-          updateOnInvalidCevent(participant,
-                                ceventType,
-                                "annot",
-                                annotJson)
+          updateOnInvalidCevent(participant, ceventType, "annot", annotationToJson(annotation))
         }
       }
 

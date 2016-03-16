@@ -7,7 +7,7 @@
 define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  describe('Service: domainEntityService', function() {
+  fdescribe('Service: domainEntityService', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -25,8 +25,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       }));
 
       it('opens a modal when error is a version mismatch error', function() {
-        /*jshint -W053 */
-        var err = { data: { message: new String('expected version doesn\'t match current version') } };
+        var err = { data: { message: 'expected version doesn\'t match current version' } };
         var domainEntityName = 'entity';
         this.domainEntityService.updateErrorModal(err, domainEntityName);
         expect(this.modalService.showModal).toHaveBeenCalledWith({
@@ -39,8 +38,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       });
 
       it('opens a modal when error is a string', function() {
-        /*jshint -W053 */
-        var err = { data: { message: new String('update error') } };
+        var err = { data: { message: 'update error' } };
         this.domainEntityService.updateErrorModal(err, 'entity');
         expect(this.modalService.showModal).toHaveBeenCalledWith({}, {
           closeButtonText: 'Cancel',

@@ -14,9 +14,9 @@ object AnnotationTestUtils {
   def annotationToJson(annotation: Annotation) = {
     Json.obj(
       "annotationTypeId" -> annotation.annotationTypeId,
-      "stringValue"            -> annotation.stringValue,
-      "numberValue"            -> annotation.numberValue,
-      "selectedValues"         -> annotation.selectedValues
+      "stringValue"      -> annotation.stringValue,
+      "numberValue"      -> annotation.numberValue,
+      "selectedValues"   -> annotation.selectedValues
     )
   }
 

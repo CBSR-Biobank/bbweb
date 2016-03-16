@@ -437,8 +437,6 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
       annotationTypeUpdateSharedBehaviour
 
-      annotationTypeUpdateWithStudySharedBehaviour
-
     }
 
     "DELETE /participants/annot/:id/:annotTypeId/:ver" must {

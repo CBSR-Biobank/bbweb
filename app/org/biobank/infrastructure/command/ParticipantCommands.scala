@@ -30,24 +30,16 @@ object ParticipantCommands {
                                           uniqueId:        String)
       extends ParticipantModifyCommand
 
-  case class ParticipantAddAnnotationCmd(userId:          Option[String],
-                                         id:              String,
-                                         expectedVersion: Long,
+  case class ParticipantAddAnnotationCmd(userId:           Option[String],
+                                         id:               String,
+                                         expectedVersion:  Long,
+                                         annotationTypeId: String,
                                          stringValue:      Option[String],
                                          numberValue:      Option[String],
                                          selectedValues:   Set[String])
       extends ParticipantModifyCommand
 
-  case class ParticipantUpdateAnnotationCmd(userId:          Option[String],
-                                            id:              String,
-                                            expectedVersion: Long,
-                                            annotationTypeId: String,
-                                            stringValue:      Option[String],
-                                            numberValue:      Option[String],
-                                            selectedValues:   Set[String])
-      extends ParticipantModifyCommand
-
-  case class RemoveParticipantAnnotationCmd(userId:           Option[String],
+  case class ParticipantRemoveAnnotationCmd(userId:           Option[String],
                                             id:               String,
                                             expectedVersion:  Long,
                                             annotationTypeId: String)
@@ -83,10 +75,13 @@ object ParticipantCommands {
                                                    timeCompleted:   DateTime)
       extends CollectionEventModifyCommand
 
-  case class UpdateCollectionEventAnnotationCmd(userId:          Option[String],
-                                                id:              String,
-                                                expectedVersion: Long,
-                                                annotation:      Annotation)
+  case class UpdateCollectionEventAnnotationCmd(userId:           Option[String],
+                                                id:               String,
+                                                expectedVersion:  Long,
+                                                annotationTypeId: String,
+                                                stringValue:      Option[String],
+                                                numberValue:      Option[String],
+                                                selectedValues:   Set[String])
       extends CollectionEventModifyCommand
 
   case class RemoveCollectionEventAnnotationCmd(userId:           Option[String],
@@ -163,8 +158,8 @@ object ParticipantCommands {
 
   implicit val addParticipantCmdReads              = Json.reads[AddParticipantCmd]
   implicit val updateParticipantUniqueIdCmdReads   = Json.reads[UpdateParticipantUniqueIdCmd]
-  implicit val updateParticipantAnnotationCmdReads = Json.reads[UpdateParticipantAnnotationCmd]
-  implicit val removeParticipantAnnotationCmdReads = Json.reads[RemoveParticipantAnnotationCmd]
+  implicit val participantAddAnnotationCmdReads    = Json.reads[ParticipantAddAnnotationCmd]
+  implicit val participantRemoveAnnotationCmdReads = Json.reads[ParticipantRemoveAnnotationCmd]
   implicit val addCollectionEventCmdReads          = Json.reads[AddCollectionEventCmd]
 
   implicit val updateCollectionEventVisitNumberCmdReads   = Json.reads[UpdateCollectionEventVisitNumberCmd]

@@ -66,16 +66,16 @@ GET     /participants/cevents/:ceventId                         org.biobank.cont
 POST    /participants/cevents/:participantId                    org.biobank.controllers.participants.CollectionEventsController.add(participantId)
 POST    /participants/cevents/visitNumber/:ceventId             org.biobank.controllers.participants.CollectionEventsController.updateVisitNumber(ceventId)
 POST    /participants/cevents/timeCompleted/:ceventId           org.biobank.controllers.participants.CollectionEventsController.updateTimeCompleted(ceventId)
-POST    /participants/cevents/annot/:ceventId                   org.biobank.controllers.participants.CollectionEventsController.updateAnnotation(ceventId)
+POST    /participants/cevents/annot/:ceventId                   org.biobank.controllers.participants.CollectionEventsController.addAnnotation(ceventId)
 DELETE  /participants/cevents/annot/:ceventId/:annotTypeId/:ver org.biobank.controllers.participants.CollectionEventsController.removeAnnotation(ceventId, annotTypeId, ver: Long)
 DELETE  /participants/cevents/:participantId/:ceventId/:ver     org.biobank.controllers.participants.CollectionEventsController.remove(participantId, ceventId, ver: Long)
 
 # participants
 GET     /participants/uniqueId/:studyId/:id       org.biobank.controllers.participants.ParticipantsController.getByUniqueId(studyId, id)
 GET     /participants/:studyId/:id                org.biobank.controllers.participants.ParticipantsController.get(studyId, id)
-POST    /participants/:studyId                    org.biobank.controllers.participants.ParticipantsController.addParticipant(studyId)
+POST    /participants/:studyId                    org.biobank.controllers.participants.ParticipantsController.add(studyId)
 POST    /participants/uniqueId/:id                org.biobank.controllers.participants.ParticipantsController.updateUniqueId(id)
-POST    /participants/annot/:id                   org.biobank.controllers.participants.ParticipantsController.updateAnnotation( id)
+POST    /participants/annot/:id                   org.biobank.controllers.participants.ParticipantsController.addAnnotation(id)
 DELETE  /participants/annot/:id/:annotTypeId/:ver org.biobank.controllers.participants.ParticipantsController.removeAnnotation(id, annotTypeId, ver: Long)
 
 # centre location

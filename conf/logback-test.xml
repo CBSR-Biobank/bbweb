@@ -25,6 +25,6 @@
   <logger name="play.api.libs.mailer.MockMailer" level="WARN" />
 
   <root level="DEBUG">
-    <appender-ref ref="INFO" />
+    <appender-ref ref="STDOUT" />
   </root>
 </configuration>

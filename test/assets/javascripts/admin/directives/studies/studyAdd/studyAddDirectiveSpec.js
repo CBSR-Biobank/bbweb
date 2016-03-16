@@ -4,7 +4,11 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
+define([
+  'angular',
+  'angularMocks',
+  'underscore'
+], function(angular, mocks, _) {
   'use strict';
 
   describe('Directive: studyAddDirective', function() {

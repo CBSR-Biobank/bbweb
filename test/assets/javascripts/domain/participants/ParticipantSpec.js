@@ -209,7 +209,7 @@ define([
     it('fails when creating from an object with invalid keys', function() {
       var self = this,
           serverObj = { tmp: 1 };
-      expect(function () { self.Participant.create(1); }).toThrowErrorOfType('Error');
+      expect(function () { self.Participant.create(serverObj); }).toThrowErrorOfType('Error');
     });
 
     it('fails when creating from an object and an annotation has invalid keys', function() {

@@ -49,7 +49,7 @@ class ParticipantsProcessor @Inject() (
     case event: ParticipantEvent => event.eventType match {
       case et: EventType.Added             => applyAddedEvent(event)
       case et: EventType.UniqueIdUpdated   => applyUniqueIdUpdatedEvent(event)
-      case et: EventType.AnnotationUpdated => applyAnnotationUpdatedEvent(event)
+      case et: EventType.AnnotationAdded   => applyAnnotationAddedEvent(event)
       case et: EventType.AnnotationRemoved => applyAnnotationRemovedEvent(event)
 
       case event => log.error(s"event not handled: $event")
@@ -66,8 +66,8 @@ class ParticipantsProcessor @Inject() (
   val receiveCommand: Receive = {
     case cmd: AddParticipantCmd              => processAddCmd(cmd)
     case cmd: UpdateParticipantUniqueIdCmd   => processUpdateUniqueIdCmd(cmd)
-    case cmd: UpdateParticipantAnnotationCmd => processUpdateAnnotationCmd(cmd)
-    case cmd: RemoveParticipantAnnotationCmd => processRemoveAnnotationCmd(cmd)
+    case cmd: ParticipantAddAnnotationCmd    => processAddAnnotationCmd(cmd)
+    case cmd: ParticipantRemoveAnnotationCmd => processRemoveAnnotationCmd(cmd)
 
     case "snap" =>
       saveSnapshot(SnapshotState(participantRepository.getValues.toSet))
@@ -164,23 +164,27 @@ class ParticipantsProcessor @Inject() (
     process(v){ applyUniqueIdUpdatedEvent(_) }
   }
 
-  private def processUpdateAnnotationCmd(cmd: UpdateParticipantAnnotationCmd): Unit = {
+  private def processAddAnnotationCmd(cmd: ParticipantAddAnnotationCmd): Unit = {
     val v = update(cmd) { (study, participant) =>
         for {
+          annotation         <- Annotation.create(cmd.annotationTypeId,
+                                                  cmd.stringValue,
+                                                  cmd.numberValue,
+                                                  cmd.selectedValues)
           validAnnotation    <- Annotation.validateAnnotations(study.annotationTypes,
-                                                               List(cmd.annotation))
-          updatedParticipant <- participant.withAnnotation(cmd.annotation)
+                                                               List(annotation))
+          updatedParticipant <- participant.withAnnotation(annotation)
         } yield ParticipantEvent(updatedParticipant.id.id).update(
-          _.optionalUserId               := cmd.userId,
-          _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.annotationUpdated.version    := cmd.expectedVersion,
-          _.annotationUpdated.annotation := annotationToEvent(cmd.annotation))
+          _.optionalUserId             := cmd.userId,
+          _.time                       := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.annotationAdded.version    := cmd.expectedVersion,
+          _.annotationAdded.annotation := annotationToEvent(annotation))
       }
 
-    process(v) { applyAnnotationUpdatedEvent(_) }
+    process(v) { applyAnnotationAddedEvent(_) }
   }
 
-  private def processRemoveAnnotationCmd(cmd: RemoveParticipantAnnotationCmd): Unit = {
+  private def processRemoveAnnotationCmd(cmd: ParticipantRemoveAnnotationCmd): Unit = {
     val v = update(cmd) { (study, participant) =>
         for {
           annotType <- {
@@ -262,12 +266,12 @@ class ParticipantsProcessor @Inject() (
     }
   }
 
-  private def applyAnnotationUpdatedEvent(event: ParticipantEvent) = {
+  private def applyAnnotationAddedEvent(event: ParticipantEvent) = {
     onValidEventAndVersion(event,
-                           event.eventType.isAnnotationUpdated,
-                           event.getAnnotationUpdated.getVersion) { participant =>
-      val updatedEvent = event.getAnnotationUpdated
-      participant.withAnnotation(annotationFromEvent(updatedEvent.getAnnotation)).fold(
+                           event.eventType.isAnnotationAdded,
+                           event.getAnnotationAdded.getVersion) { participant =>
+      val addedEvent = event.getAnnotationAdded
+      participant.withAnnotation(annotationFromEvent(addedEvent.getAnnotation)).fold(
         err => log.error(s"updating participant from event failed: $err"),
         p => storeUpdated(p, event.getTime)
       )

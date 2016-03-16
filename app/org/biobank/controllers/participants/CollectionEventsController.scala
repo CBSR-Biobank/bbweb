@@ -77,7 +77,7 @@ class CollectionEventsController @Inject() (val env:          Environment,
       processCommand(cmd)
     }
 
-  def updateAnnotation(ceventId: String) =
+  def addAnnotation(ceventId: String) =
     commandAction(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventAnnotationCmd =>
       processCommand(cmd)
     }

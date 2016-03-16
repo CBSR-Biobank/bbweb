@@ -62,8 +62,8 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
       annotTypeData.values.foreach { annotation =>
         val json = makeRequest(POST,
                                updateUri(entity),
-                               Json.obj("expectedVersion" -> entity.version,
-                                        "annotation"      -> annotationToJson(annotation)))
+                               Json.obj("expectedVersion" -> entity.version) ++
+                                 annotationToJson(annotation))
 
         (json \ "status").as[String] must include ("success")
 
@@ -93,8 +93,8 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
       val json = makeRequest(POST,
                              updateUri(entity),
                              BAD_REQUEST,
-                             Json.obj("expectedVersion" -> entity.version,
-                                      "annotation"      -> annotationToJson(annotation)))
+                               Json.obj("expectedVersion" -> entity.version) ++
+                                 annotationToJson(annotation))
 
       (json \ "status").as[String] must include ("error")
 
@@ -110,9 +110,8 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
       val json = makeRequest(POST,
                              updateUri(entity),
                              BAD_REQUEST,
-                             Json.obj(
-                               "expectedVersion" -> entity.version,
-                               "annotation"      -> annotationToJson(annotation)))
+                             Json.obj("expectedVersion" -> entity.version) ++
+                               annotationToJson(annotation))
 
       (json \ "status").as[String] must include ("error")
 
@@ -128,8 +127,8 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
       val json = makeRequest(POST,
                              updateUri(entity),
                              BAD_REQUEST,
-                             Json.obj("expectedVersion" -> (entity.version + 1),
-                                      "annotation"      -> annotationToJson(annotation)))
+                             Json.obj("expectedVersion" -> (entity.version + 1)) ++
+                               annotationToJson(annotation))
 
       (json \ "status").as[String] must include ("error")
 
@@ -172,7 +171,6 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
 
 }
 
-
 trait StudyAnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnnotations[_]]
     extends AnnotationsControllerSharedSpec[T] {
   import org.biobank.TestUtils._
@@ -180,7 +178,9 @@ trait StudyAnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with Ha
 
   protected def getStudy(entity: T): DomainValidation[EnabledStudy]
 
-  def annotationTypeUpdateWithStudySharedBehaviour() = {
+  override def annotationTypeUpdateSharedBehaviour() = {
+
+    super.annotationTypeUpdateSharedBehaviour
 
     "fail when adding an annotation on a non enabled study" in {
       val annotationType = factory.createAnnotationType
@@ -207,8 +207,8 @@ trait StudyAnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with Ha
       val json = makeRequest(POST,
                              updateUri(entity),
                              BAD_REQUEST,
-                             Json.obj("expectedVersion" -> entity.version,
-                                      "annotation"      -> annotationToJson(annotation)))
+                             Json.obj("expectedVersion" -> entity.version) ++
+                               annotationToJson(annotation))
 
       (json \ "status").as[String] must include ("error")
 
