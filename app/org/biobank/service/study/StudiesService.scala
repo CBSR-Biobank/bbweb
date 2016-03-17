@@ -12,6 +12,7 @@ import org.biobank.dto.{ CollectionDto, ProcessingDto }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.CollectionEventTypeEvents._
+import org.biobank.infrastructure.event.ProcessingTypeEvents._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.slf4j.LoggerFactory
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -19,16 +20,6 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
-
-trait StudyServiceErrorMessages {
-
-  val StudyNotFound = "study with id not found"
-
-  val StudyAlreadyExists = "study already exists"
-
-  val ErrMsgNameExists = "study with name already exists"
-
-}
 
 @ImplementedBy(classOf[StudiesServiceImpl])
 trait StudiesService {
@@ -82,6 +73,12 @@ trait StudiesService {
 
   def processRemoveCollectionEventTypeCommand(cmd: RemoveCollectionEventTypeCmd)
       : Future[DomainValidation[Boolean]]
+
+  def processProcessingTypeCommand(cmd: StudyCommand)
+      : Future[DomainValidation[ProcessingType]]
+
+  def processRemoveProcessingTypeCommand(cmd: StudyCommand)
+      : Future[DomainValidation[Boolean]]
 }
 
 /**
@@ -100,8 +97,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
   val specimenGroupRepository:              SpecimenGroupRepository,
   val collectionEventTypeRepository:        CollectionEventTypeRepository,
   val specimenLinkTypeRepository:           SpecimenLinkTypeRepository)
-    extends StudiesService
-    with StudyServiceErrorMessages {
+    extends StudiesService {
   import org.biobank.CommonValidations._
 
   val log = LoggerFactory.getLogger(this.getClass)
@@ -324,13 +320,29 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   def processRemoveCollectionEventTypeCommand(cmd: RemoveCollectionEventTypeCmd)
       : Future[DomainValidation[Boolean]] = {
-    ask(processor, cmd).mapTo[DomainValidation[CollectionEventTypeEvent]].map { validation =>
-      for {
-        event  <- validation
-        result <- true.success
-      } yield result
+    ask(processor, cmd).mapTo[DomainValidation[CollectionEventTypeEvent]]
+      .map { validation => validation.map(_ => true) }
+  }
+
+  def processProcessingTypeCommand(cmd: StudyCommand)
+      : Future[DomainValidation[ProcessingType]] = {
+    cmd match {
+      case c: RemoveProcessingTypeCmd =>
+        Future.successful(DomainError(s"invalid service call: $cmd").failureNel[ProcessingType])
+      case _ =>
+        ask(processor, cmd).mapTo[DomainValidation[ProcessingTypeEvent]].map { validation =>
+          for {
+            event  <- validation
+            result <- processingTypeRepository.getByKey(ProcessingTypeId(event.id))
+          } yield result
+        }
     }
   }
+
+  def processRemoveProcessingTypeCommand(cmd: StudyCommand)
+      : Future[DomainValidation[Boolean]] =
+    ask(processor, cmd).mapTo[DomainValidation[ProcessingTypeEvent]]
+      .map { validation => validation.map(_ => true) }
 
   private def replyWithSpecimenGroup(future: Future[DomainValidation[StudyEventOld]])
       : Future[DomainValidation[SpecimenGroup]] = {
@@ -346,23 +358,6 @@ class StudiesServiceImpl @javax.inject.Inject() (
           specimenGroupRepository.getByKey(SpecimenGroupId(specimenGroupId))
         }
       } yield sg
-    }
-  }
-
-  private def replyWithProcessingType(future: Future[DomainValidation[StudyEventOld]])
-      : Future[DomainValidation[ProcessingType]] = {
-    future map { validation =>
-      for {
-        event <- validation
-        pt <- {
-          val ptId = if (event.eventType.isProcessingTypeAdded) {
-            event.getProcessingTypeAdded.getProcessingTypeId
-          } else {
-            event.getProcessingTypeUpdated.getProcessingTypeId
-          }
-          processingTypeRepository.getByKey(ProcessingTypeId(ptId))
-        }
-      } yield pt
     }
   }
 

@@ -7,7 +7,7 @@ import org.biobank.service.AuthToken
 import org.biobank.service.study.StudiesService
 import org.biobank.service.users.UsersService
 import play.api.libs.json._
-import play.api.{ Environment, Logger }
+import play.api.Environment
 
 @Singleton
 class ProcessingTypeController @Inject() (val env:            Environment,
@@ -19,8 +19,6 @@ class ProcessingTypeController @Inject() (val env:            Environment,
 
   def get(studyId: String, procTypeId: Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      Logger.debug(s"ProcessingTypeController.get: studyId: $studyId, procTypeId: $procTypeId")
-
       procTypeId.fold {
         domainValidationReply(studiesService.processingTypesForStudy(studyId).map(_.toList))
       } { id =>
@@ -30,21 +28,24 @@ class ProcessingTypeController @Inject() (val env:            Environment,
 
   def addProcessingType(studyId: String) =
     commandAction(Json.obj("studyId" -> studyId)) { cmd: AddProcessingTypeCmd =>
-      val future = studiesService.processCommand(cmd)
-      domainValidationReply(future)
+      processCommand(cmd)
   }
 
   def updateProcessingType(studyId: String, id: String) =
     commandAction(Json.obj("studyId" -> studyId, "id" -> id)) { cmd: UpdateProcessingTypeCmd =>
-      val future = studiesService.processCommand(cmd)
-      domainValidationReply(future)
+      processCommand(cmd)
   }
 
   def removeProcessingType(studyId: String, id: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveProcessingTypeCmd(Some(userId.id), studyId, id, ver)
-      val future = studiesService.processCommand(cmd)
-      domainValidationReply(future)
+    val future = studiesService.processRemoveProcessingTypeCommand(cmd)
+    domainValidationReply(future)
     }
+
+  private def processCommand(cmd: StudyCommand) = {
+    val future = studiesService.processProcessingTypeCommand(cmd)
+    domainValidationReply(future)
+  }
 
 }

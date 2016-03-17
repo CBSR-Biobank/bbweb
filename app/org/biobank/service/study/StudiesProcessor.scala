@@ -37,8 +37,7 @@ class StudiesProcessor @javax.inject.Inject() (
   val specimenGroupRepository:                                    SpecimenGroupRepository,
   val collectionEventTypeRepository:                              CollectionEventTypeRepository,
   val testData:                                                   TestData)
-    extends Processor
-    with StudyServiceErrorMessages {
+    extends Processor {
   import org.biobank.CommonValidations._
 
   override def persistenceId = "study-processor-id"
@@ -148,7 +147,7 @@ class StudiesProcessor @javax.inject.Inject() (
     val studyId = studyRepository.nextIdentity
 
     if (studyRepository.getByKey(studyId).isSuccess) {
-      log.error(s"$StudyAlreadyExists: $studyId")
+      log.error(s"study already exists: $studyId")
     }
 
     val v = (nameAvailable(cmd.name) |@|
@@ -576,8 +575,10 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
+  val ErrMsgNameExists = "name already used"
+
   private def nameAvailable(name: String): DomainValidation[Boolean] = {
-    nameAvailableMatcher(name, studyRepository, ErrMsgNameExists){ item =>
+    nameAvailableMatcher(name, studyRepository, ErrMsgNameExists) { item =>
       item.name == name
     }
   }

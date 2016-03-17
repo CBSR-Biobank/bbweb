@@ -1,14 +1,13 @@
 package org.biobank.controllers.study
 
+import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service.AuthToken
-import org.biobank.service.users.UsersService
 import org.biobank.service.study.StudiesService
-
-import javax.inject.{Inject, Singleton}
-import play.api.{ Environment, Logger }
+import org.biobank.service.users.UsersService
 import play.api.libs.json._
+import play.api.{ Environment, Logger }
 
 @Singleton
 class CeventTypeController @Inject() (val env:            Environment,
