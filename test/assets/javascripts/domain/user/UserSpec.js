@@ -6,31 +6,43 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'biobankApp'
-], function(angular, mocks, _) {
+  'jquery'
+], function(angular, mocks, _, $) {
   'use strict';
 
   describe('User', function() {
 
-    var httpBackend, User, UserStatus, funutils, jsonEntities;
-
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($httpBackend,
-                               _User_,
-                               _UserStatus_,
-                               _funutils_,
-                               _jsonEntities_,
-                               extendedDomainEntities) {
-      httpBackend  = $httpBackend;
-      User         = _User_;
-      UserStatus   = _UserStatus_;
-      funutils     = _funutils_;
-      jsonEntities = _jsonEntities_;
+    beforeEach(inject(function(entityTestSuite, extendedDomainEntities) {
+      var self = this;
+
+      _.extend(self, entityTestSuite);
+
+      self.$httpBackend = self.$injector.get('$httpBackend');
+      self.User         = self.$injector.get('User');
+      self.UserStatus   = self.$injector.get('UserStatus');
+      self.jsonEntities = self.$injector.get('jsonEntities');
+
+      self.statusChangeShared = statusChangeShared;
+
+      //--
+
+      function statusChangeShared(user, uriPart, userMethod, newStatus) {
+        var json = { id: user.id, expectedVersion: user.version };
+        var reply = self.jsonEntities.user(user);
+
+        this.$httpBackend.expectPOST(uri(user.id) + uriPart, json).respond(201, serverReply(reply));
+
+        user[userMethod]().then(function (replyUser) {
+          expect(replyUser).toEqual(jasmine.any(self.User));
+        });
+        this.$httpBackend.flush();
+      }
     }));
 
     it('creating a user with no parameters has default values', function() {
-      var user = new User();
+      var user = new this.User();
       expect(user.id).toBeNull();
       expect(user.version).toBe(0);
       expect(user.timeAdded).toBeNull();
@@ -38,164 +50,226 @@ define([
       expect(user.name).toBeEmptyString();
       expect(user.email).toBeEmptyString();
       expect(user.avatarUrl).toBeNull();
-      expect(user.status).toBe(UserStatus.REGISTERED());
+      expect(user.status).toBe(this.UserStatus.REGISTERED());
     });
 
     it('creating a user with an object does not modify object', function() {
-      var obj = null, user = new User(obj);
+      var obj = null, user = new this.User(obj);
       expect(user).toBeObject();
       expect(obj).toBeNull();
     });
 
     it('fails when creating from object with a non object', function() {
-      var nonObj = 1;
-      expect(User.create(nonObj)).toEqual(
-        new Error('invalid object: must be a map, has the correct keys'));
+      var self = this,
+          nonObj = 1;
+      expect(function () {
+        self.User.create(nonObj);
+      }).toThrowError(/invalid object from server/);
     });
 
     it('fails when creating from object with missing required keys', function() {
-      var obj = jsonEntities.user();
-      var requiredKeys = ['id', 'name', 'email', 'status'];
+      var self = this,
+          obj = this.jsonEntities.user(),
+          requiredKeys = ['id', 'name', 'email', 'status'];
 
       _.each(requiredKeys, function (key) {
         var badObj = _.omit(obj, key);
 
-        expect(User.create(badObj)).toEqual(
-          new Error('invalid object: has the correct keys'));
+        expect(function () {
+          self.User.create(badObj);
+        }).toThrowError(/invalid object from server/);
       });
     });
 
-    it('can retrieve users', function(done) {
-      var users = [ jsonEntities.user() ];
-      httpBackend.whenGET(uri()).respond(serverReply(jsonEntities.pagedResult(users)));
+    it('should query for multiple users - name filter parameter only', function() {
+      var self = this,
+          nameFilter = 'test',
+          jsonUser = self.jsonEntities.user(),
+          reply = self.jsonEntities.pagedResult([ jsonUser ]);
 
-      User.list().then(function (pagedResult) {
-        expect(pagedResult.items).toBeArrayOfSize(users.length);
-        expect(pagedResult.items[0]).toEqual(jasmine.any(User));
-        pagedResult.items[0].compareToJsonEntity(users[0]);
-        done();
+      self.$httpBackend.whenGET(uri() + '?' + $.param({ nameFilter: nameFilter })).respond({
+        status: 'success',
+        data: reply
       });
-      httpBackend.flush();
+
+      self.User.list({nameFilter: nameFilter}).then(function(pagedResult) {
+        expect(pagedResult.items).toBeArrayOfSize(1);
+        expect(pagedResult.items[0]).toEqual(jasmine.any(self.User));
+      });
+      self.$httpBackend.flush();
+    });
+
+    it('should query for multiple users - email filter parameter only', function() {
+      var self = this,
+          emailFilter = 'test',
+          jsonUser = self.jsonEntities.user(),
+          reply = self.jsonEntities.pagedResult([ jsonUser ]);
+
+      this.$httpBackend.whenGET(uri() + '?' + $.param({emailFilter: emailFilter})).respond({
+        status: 'success',
+        data: reply
+      });
+
+     self.User.list({emailFilter: emailFilter}).then(function(pagedResult) {
+        expect(pagedResult.items).toBeArrayOfSize(1);
+        expect(pagedResult.items[0]).toEqual(jasmine.any(self.User));
+      });
+      this.$httpBackend.flush();
+    });
+
+    it('should query for multiple users - sort parameter only', function() {
+      var self = this,
+          sort = 'asc',
+          jsonUser = self.jsonEntities.user(),
+          reply = self.jsonEntities.pagedResult([ jsonUser ]);
+
+      this.$httpBackend.whenGET(uri() + '?' + $.param({sort: sort})).respond({
+        status: 'success',
+        data: reply
+      });
+
+      self.User.list({sort: sort}).then(function(pagedResult) {
+        expect(pagedResult.items).toBeArrayOfSize(1);
+        expect(pagedResult.items[0]).toEqual(jasmine.any(self.User));
+      });
+      this.$httpBackend.flush();
+    });
+
+    it('should query for multiple users', function() {
+      var self = this,
+          emailFilter = 'test',
+          sort = 'email',
+          order = 'desc',
+          jsonUser = self.jsonEntities.user(),
+          reply = self.jsonEntities.pagedResult([ jsonUser ]);
+
+      this.$httpBackend.whenGET(uri() + '?' +
+                                $.param({emailFilter: emailFilter, sort: sort, order: 'desc'}))
+        .respond({ status: 'success',
+                   data: reply
+                 });
+
+      self.User.list({emailFilter: emailFilter, sort: sort, order: order}).then(function(pagedResult) {
+        expect(pagedResult.items).toBeArrayOfSize(1);
+        expect(pagedResult.items[0]).toEqual(jasmine.any(self.User));
+      });
+      this.$httpBackend.flush();
     });
 
     it('can retrieve a single user', function(done) {
-      var user = jsonEntities.user();
-      httpBackend.whenGET(uri(user.id)).respond(serverReply(user));
+      var self = this,
+          user = this.jsonEntities.user();
 
-      User.get(user.id).then(function (reply) {
-        expect(reply).toEqual(jasmine.any(User));
+      self.$httpBackend.whenGET(uri(user.id)).respond(serverReply(user));
+
+      self.User.get(user.id).then(function (reply) {
+        expect(reply).toEqual(jasmine.any(self.User));
         reply.compareToJsonEntity(user);
         done();
       });
-      httpBackend.flush();
+      self.$httpBackend.flush();
     });
 
-    it('can register a user', function(done) {
-      var password = jsonEntities.stringNext();
-      var user = new User(_.omit(jsonEntities.user(), 'id'));
+    it('can register a user', function() {
+      var password = this.jsonEntities.stringNext();
+      var user = new this.User(_.omit(this.jsonEntities.user(), 'id'));
       var cmd = registerCommand(user, password);
 
-      httpBackend.expectPOST(uri(), cmd).respond(201, serverReply());
+      this.$httpBackend.expectPOST(uri(), cmd).respond(201, serverReply());
 
       user.register(password).then(function(reply) {
         expect(reply).toEqual({});
-        done();
       });
-      httpBackend.flush();
+      this.$httpBackend.flush();
     });
 
-    it('can update a users name', function(done) {
-      var newName = jsonEntities.stringNext();
-      var baseUser = jsonEntities.user();
-      var user = new User(baseUser);
-      var reply = replyUser(baseUser, { name: newName });
-      var cmd = updateNameCommand(user, newName);
+    it('can update a users name', function() {
+      var jsonUser = this.jsonEntities.user(),
+          user = new this.User(jsonUser);
 
-      httpBackend.expectPUT(uri(user.id) + '/name', cmd).respond(201, serverReply(reply));
-
-      user.updateName(newName).then(function(updatedUser) {
-        expect(updatedUser.id).toEqual(user.id);
-        expect(updatedUser.version).toEqual(user.version + 1);
-        expect(updatedUser.name).toEqual(newName);
-        done();
-      });
-      httpBackend.flush();
+      this.updateEntity.call(this,
+                             user,
+                             'updateName',
+                             user.name,
+                             updateUri('name', user.id),
+                             { name: user.name },
+                             jsonUser,
+                             this.expectUser,
+                             failTest);
     });
 
-    it('can update a users email', function(done) {
-      var newEmail = jsonEntities.stringNext();
-      var baseUser = jsonEntities.user();
-      var user = new User(baseUser);
-      var reply = replyUser(baseUser, { email: newEmail });
-      var cmd = updateEmailCommand(user, newEmail);
+    it('can update a users email', function() {
+      var jsonUser = this.jsonEntities.user(),
+          user = new this.User(jsonUser);
 
-      httpBackend.expectPUT(uri(user.id) + '/email', cmd).respond(201, serverReply(reply));
-
-      user.updateEmail(newEmail).then(function(updatedUser) {
-        expect(updatedUser.id).toEqual(user.id);
-        expect(updatedUser.version).toEqual(user.version + 1);
-        expect(updatedUser.email).toEqual(newEmail);
-        done();
-      });
-      httpBackend.flush();
+      this.updateEntity.call(this,
+                             user,
+                             'updateEmail',
+                             user.email,
+                             updateUri('email', user.id),
+                             { email: user.email },
+                             jsonUser,
+                             this.expectUser,
+                             failTest);
     });
 
-    it('can update a users avatar url', function(done) {
-      var newAvatarUrl = jsonEntities.stringNext();
-      var baseUser = jsonEntities.user();
-      var user = new User(baseUser);
-      var reply = replyUser(baseUser, { avatarUrl: newAvatarUrl });
-      var cmd = updateAvatarUrlCommand(user, newAvatarUrl);
+    it('can update a users avatar url', function() {
+      var newAvatarUrl = this.jsonEntities.stringNext(),
+          jsonUser = this.jsonEntities.user({ avatarUrl: newAvatarUrl }),
+          user = new this.User(jsonUser);
 
-      httpBackend.expectPUT(uri(user.id) + '/avatarurl', cmd).respond(201, serverReply(reply));
-
-      user.updateAvatarUrl(newAvatarUrl).then(function(updatedUser) {
-        expect(updatedUser.id).toEqual(user.id);
-        expect(updatedUser.version).toEqual(user.version + 1);
-        expect(updatedUser.avatarUrl).toEqual(newAvatarUrl);
-        done();
-      });
-      httpBackend.flush();
+      this.updateEntity.call(this,
+                             user,
+                             'updateAvatarUrl',
+                             user.avatarUrl,
+                             updateUri('avatarurl', user.id),
+                             { avatarUrl: user.avatarUrl },
+                             jsonUser,
+                             this.expectUser,
+                             failTest);
     });
 
-    it('can update a users password', function(done) {
-      var currentPassword = jsonEntities.stringNext();
-      var newPassword = jsonEntities.stringNext();
-      var baseUser = jsonEntities.user();
-      var user = new User(baseUser);
-      var reply = replyUser(baseUser);
-      var cmd = updatePasswordCommand(user, currentPassword, newPassword);
+    it('can update a users password', function() {
+      var currentPassword = this.jsonEntities.stringNext(),
+          newPassword = this.jsonEntities.stringNext(),
+          jsonUser = this.jsonEntities.user(),
+          user = new this.User(jsonUser);
 
-      httpBackend.expectPUT(uri(user.id) + '/password', cmd).respond(201, serverReply(reply));
-
-      user.updatePassword(currentPassword, newPassword).then(function(replyUser) {
-        expect(replyUser.id).toEqual(user.id);
-        expect(replyUser.version).toEqual(user.version + 1);
-        done();
-      });
-      httpBackend.flush();
+      this.updateEntity.call(this,
+                             user,
+                             'updatePassword',
+                             [ currentPassword, newPassword ],
+                             updateUri('password', user.id),
+                             {
+                               currentPassword: currentPassword,
+                               newPassword:     newPassword
+                             },
+                             jsonUser,
+                             this.expectUser,
+                             failTest);
     });
 
     it('can activate a registered user', function() {
-      var user = new User(jsonEntities.user());
-      statusChangeShared(user, '/activate', 'activate', UserStatus.ACTIVE());
+      var user = new this.User(this.jsonEntities.user());
+      this.statusChangeShared(user, '/activate', 'activate', this.UserStatus.ACTIVE());
     });
 
     it('can lock an active user', function() {
-      var user = new User(_.extend(jsonEntities.user(), { status: UserStatus.ACTIVE() }));
-      statusChangeShared(user, '/lock', 'lock', UserStatus.LOCKED());
+      var user = new this.User(_.extend(this.jsonEntities.user(), { status: this.UserStatus.ACTIVE() }));
+      this.statusChangeShared(user, '/lock', 'lock', this.UserStatus.LOCKED());
     });
 
     it('can unlock a locked user', function() {
-      var user = new User(_.extend(jsonEntities.user(), { status: UserStatus.LOCKED() }));
-      statusChangeShared(user, '/unlock', 'unlock', UserStatus.ACTIVE());
+      var user = new this.User(_.extend(this.jsonEntities.user(), { status: this.UserStatus.LOCKED() }));
+      this.statusChangeShared(user, '/unlock', 'unlock', this.UserStatus.ACTIVE());
     });
 
     it('fails when calling activate and the user is not registered', function() {
-      var status = [ UserStatus.ACTIVE(), UserStatus.LOCKED() ];
+      var self = this,
+          status = [ self.UserStatus.ACTIVE(), self.UserStatus.LOCKED() ];
 
       _.each(status, function () {
-        var user = new User(_.extend(jsonEntities.user(), { status: status }));
+        var user = new self.User(_.extend(self.jsonEntities.user(), { status: status }));
 
         expect(function () { user.activate(); })
           .toThrow(new Error('user status is not registered: ' + status));
@@ -203,10 +277,11 @@ define([
     });
 
     it('fails when calling lock and the user is not active', function() {
-      var status = [ UserStatus.REGISTERED(), UserStatus.LOCKED() ];
+      var self = this,
+          status = [ self.UserStatus.REGISTERED(), self.UserStatus.LOCKED() ];
 
       _.each(status, function () {
-        var user = new User(_.extend(jsonEntities.user(), { status: status }));
+        var user = new self.User(_.extend(self.jsonEntities.user(), { status: status }));
 
         expect(function () { user.lock(); })
           .toThrow(new Error('user status is not active: ' + status));
@@ -214,33 +289,38 @@ define([
     });
 
     it('fails when calling unlock and the user is not locked', function() {
-      var status = [ UserStatus.REGISTERED(), UserStatus.ACTIVE() ];
+      var self = this,
+          status = [ self.UserStatus.REGISTERED(), self.UserStatus.ACTIVE() ];
 
       _.each(status, function () {
-        var user = new User(_.extend(jsonEntities.user(), { status: status }));
+        var user = new self.User(_.extend(self.jsonEntities.user(), { status: status }));
 
         expect(function () { user.unlock(); })
           .toThrow(new Error('user status is not locked: ' + status));
       });
     });
 
-    function statusChangeShared(user, uriPart, userMethod, newStatus) {
-      var cmd = changeStatusCommand(user);
-      var reply = replyUser(user, {status: newStatus});
-
-      httpBackend.expectPOST(uri(user.id) + uriPart, cmd).respond(201, serverReply(reply));
-
-      user[userMethod]().then(function (replyUser) {
-        expect(replyUser.id).toEqual(user.id);
-        expect(replyUser.version).toEqual(user.version + 1);
-        expect(replyUser.status).toEqual(newStatus);
-      });
-      httpBackend.flush();
-    }
-
     function uri(userId) {
       var result = '/users';
       if (arguments.length > 0) {
+        result += '/' + userId;
+      }
+      return result;
+    }
+
+    function updateUri(/* path, userId */) {
+      var result = '/users',
+          args = _.toArray(arguments),
+          path,
+          userId;
+
+      if (args.length > 0) {
+        path = args.shift();
+        result += '/' + path;
+      }
+
+      if (args.length > 0) {
+        userId = args.shift();
         result += '/' + userId;
       }
       return result;
@@ -278,13 +358,9 @@ define([
       });
     }
 
-    function changeStatusCommand(user) {
-      return  { id: user.id, expectedVersion: user.version };
-    }
-
-    function replyUser(user, newValues) {
-      newValues = newValues || {};
-      return new User(_.extend({}, user, newValues, {version: user.version + 1}));
+    // used by promise tests
+    function failTest(error) {
+      expect(error).toBeUndefined();
     }
 
   });

@@ -7,11 +7,12 @@
 define(function(require) {
   'use strict';
 
-  var mocks   = require('angularMocks'),
-      _       = require('underscore'),
-      sprintf = require('sprintf');
+  var mocks                           = require('angularMocks'),
+      _                               = require('underscore'),
+      sprintf                         = require('sprintf'),
+      entityWithAnnotationsSharedSpec = require('../../test/entityWithAnnotationsSharedSpec');
 
-  fdescribe('Participant', function() {
+  describe('Participant', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -22,7 +23,8 @@ define(function(require) {
 
       _.extend(this, entityTestSuite, hasAnnotationsEntityTestSuite);
 
-      self.httpBackend              = self.$injector.get('$httpBackend');
+      self.$q                       = self.$injector.get('$q');
+      self.$httpBackend             = self.$injector.get('$httpBackend');
       self.Participant              = self.$injector.get('Participant');
       self.Study                    = self.$injector.get('Study');
       self.Annotation               = self.$injector.get('Annotation');
@@ -50,7 +52,7 @@ define(function(require) {
         var jsonAnnotationTypes = self.jsonEntities.allAnnotationTypes(),
             jsonStudy           = self.jsonEntities.study({ annotationTypes: jsonAnnotationTypes }),
             study               = new self.Study(jsonStudy),
-            jsonParticipant     = self.jsonEntities.participant({ studyId: study.id }),
+            jsonParticipant     = self.jsonEntities.participant(),
             annotationTypes,
             participant;
 
@@ -71,8 +73,8 @@ define(function(require) {
 
       function generateJsonAnnotationTypesAndAnnotations() {
         var annotationTypes = self.jsonEntities.allAnnotationTypes(),
-            study = self.jsonEntities.study({ annotationTypes: annotationTypes }),
-            annotations = _.map(annotationTypes, function (annotationType) {
+            study           = self.jsonEntities.study({ annotationTypes: annotationTypes }),
+            annotations     = _.map(annotationTypes, function (annotationType) {
               var value = self.jsonEntities.valueForAnnotation(annotationType);
               return self.jsonEntities.annotation({ value: value }, annotationType);
             });
@@ -95,8 +97,8 @@ define(function(require) {
     }));
 
     afterEach(function() {
-      this.httpBackend.verifyNoOutstandingExpectation();
-      this.httpBackend.verifyNoOutstandingRequest();
+      this.$httpBackend.verifyNoOutstandingExpectation();
+      this.$httpBackend.verifyNoOutstandingRequest();
     });
 
     it('constructor with no parameters has default values', function() {
@@ -111,11 +113,11 @@ define(function(require) {
 
     it('constructor with annotation parameter has valid values', function() {
       var self = this,
-          annotationData = this.generateJsonAnnotationTypesAndAnnotations(),
-          study = new this.Study(annotationData.study),
+          annotationData = self.generateJsonAnnotationTypesAndAnnotations(),
+          study = new self.Study(annotationData.study),
           participant;
 
-      participant = new this.Participant({ annotations: annotationData.annotations }, study);
+      participant = new self.Participant({ annotations: annotationData.annotations }, study);
 
       expect(participant.annotations).toBeArrayOfSize(study.annotationTypes.length);
       _.each(participant.annotations, function (annotation) {
@@ -177,13 +179,13 @@ define(function(require) {
 
     it('fails when creating from a non object', function() {
       var self = this;
-      expect(function () { self.Participant.create(1); }).toThrowErrorOfType('Error');
+      expect(function () { self.Participant.create(1); }).toThrowError(/invalid object from server/);
     });
 
     it('fails when creating from an object with invalid keys', function() {
       var self = this,
           serverObj = { tmp: 1 };
-      expect(function () { self.Participant.create(serverObj); }).toThrowErrorOfType('Error');
+      expect(function () { self.Participant.create(serverObj); }).toThrowError(/invalid object from server/);
     });
 
     it('fails when creating from an object and an annotation has invalid keys', function() {
@@ -193,7 +195,7 @@ define(function(require) {
 
       jsonParticipant.annotations = [{ tmp: 1 }];
       expect(function () { self.Participant.create(jsonParticipant); })
-        .toThrowErrorOfType('Error');
+        .toThrowError('invalid object from server: bad annotation type');
     });
 
     it('has valid values when creating from a server response', function() {
@@ -210,13 +212,13 @@ define(function(require) {
           study = self.jsonEntities.study(),
           participant = self.jsonEntities.participant({ studyId: study.id });
 
-      self.httpBackend.whenGET(uri(study.id, participant.id)).respond(serverReply(participant));
+      self.$httpBackend.whenGET(uri(study.id, participant.id)).respond(serverReply(participant));
 
       self.Participant.get(study.id, participant.id).then(function (reply) {
         expect(reply).toEqual(jasmine.any(self.Participant));
         reply.compareToJsonEntity(participant);
       });
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
     });
 
     it('can retrieve a single participant by uniqueId', function() {
@@ -224,7 +226,7 @@ define(function(require) {
           study = self.jsonEntities.study(),
           participant = self.jsonEntities.participant({ studyId: study.id });
 
-      self.httpBackend.whenGET(
+      self.$httpBackend.whenGET(
         sprintf.sprintf('/participants/uniqueId/%s/%s', study.id, participant.uniqueId)
       ).respond(serverReply(participant));
 
@@ -232,7 +234,7 @@ define(function(require) {
         expect(reply).toEqual(jasmine.any(self.Participant));
         reply.compareToJsonEntity(participant);
       });
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
     });
 
     it('can add a participant', function() {
@@ -242,7 +244,7 @@ define(function(require) {
           participant = new self.Participant(_.omit(jsonParticipant, 'id')),
           reqJson = addJson(participant);
 
-      self.httpBackend.expectPOST(uri(study.id), reqJson).respond(201, serverReply(jsonParticipant));
+      self.$httpBackend.expectPOST(uri(study.id), reqJson).respond(201, serverReply(jsonParticipant));
 
       participant.add().then(function(reply) {
         expect(reply).toEqual(jasmine.any(self.Participant));
@@ -252,14 +254,14 @@ define(function(require) {
         expect(reply.uniqueId).toEqual(participant.uniqueId);
         expect(reply.annotations).toBeArrayOfSize(participant.annotations.length);
       });
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
     });
 
-    fit('can add a participant with annotations', function() {
+    it('can add a participant with annotations', function() {
       var entities = this.getParticipantEntities(true),
           reqJson = addJson(entities.participant);
 
-      this.httpBackend.expectPOST(uri(entities.jsonStudy.id), reqJson)
+      this.$httpBackend.expectPOST(uri(entities.jsonStudy.id), reqJson)
         .respond(201, serverReply(entities.jsonParticipant));
 
       entities.participant.add().then(function(replyParticipant) {
@@ -269,27 +271,43 @@ define(function(require) {
         expect(replyParticipant.uniqueId).toEqual(entities.participant.uniqueId);
         expect(replyParticipant.annotations).toBeArrayOfSize(entities.participant.annotations.length);
       });
-      this.httpBackend.flush();
+      this.$httpBackend.flush();
     });
 
     it('can not add a participant with empty required annotations', function() {
       var self = this,
-          jsonAnnotationTypes = self.jsonEntities.allAnnotationTypes();
+          biobankApi = self.$injector.get('biobankApi'),
+          jsonAnnotationTypes = self.jsonEntities.allAnnotationTypes(),
+          replyParticipant = self.jsonEntities.participant();;
+
+      spyOn(biobankApi, 'post').and.returnValue(self.$q.when(replyParticipant));
 
       _.each(jsonAnnotationTypes, function (serverAnnotationType) {
         var annotationType = new self.AnnotationType(serverAnnotationType),
             jsonStudy = self.jsonEntities.study({ annotationTypes: [ annotationType ]}),
             study = new self.Study(jsonStudy),
             jsonParticipant = self.jsonEntities.participant(),
-            participant = new self.Participant(_.omit(jsonParticipant, 'id'), study);
+            participant;
+
+        jsonParticipant.annotations[0] = self.jsonEntities.annotation({value: undefined}, annotationType);
+
+        participant = new self.Participant(_.omit(jsonParticipant, 'id'), study);
 
         _.each(participant.annotations, function (annotation) {
           annotation.required = true;
           expect(annotation.getValue()).toBeFalsy();
         });
 
-        expect(function () { participant.add(); }).toThrowAnyError();
+        participant.add().then(failTest).catch(checkErrorMsg);
       });
+
+      function failTest(participant) {
+        fail('should not be called');
+      }
+
+      function checkErrorMsg(error) {
+        expect(error).toContain('required annotation has no value');
+      }
     });
 
     it('can update the unique ID on a participant', function() {
@@ -350,6 +368,7 @@ define(function(require) {
         context.updateFuncName = 'addAnnotation';
         context.removeFuncName = 'removeAnnotation';
         context.annotation     = participant.annotations[0];
+        context.$httpBackend   = this.$httpBackend;
         context.addUrl         = updateUri('annot', participant.id);
         context.deleteUrl      = sprintf.sprintf('%s/%d/%s',
                                                  uri('annot', participant.id),
@@ -358,7 +377,7 @@ define(function(require) {
         context.response       = jsonParticipant;
       }));
 
-      this.annotationSetSharedSpec(context);
+      entityWithAnnotationsSharedSpec(context);
 
     });
 

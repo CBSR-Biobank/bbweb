@@ -12,7 +12,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('ProcessingType', function() {
+  xdescribe('ProcessingType', function() {
 
     var httpBackend,
         ProcessingType,

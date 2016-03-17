@@ -27,8 +27,8 @@ define([
       this.jsonEntities        = this.$injector.get('jsonEntities');
       this.testUtils           = this.$injector.get('testUtils');
 
-      this.jsonStudy = this.jsonEntities.study();
-      this.jsonCet   = this.jsonEntities.collectionEventType(this.jsonStudy);
+      this.jsonCet   = this.jsonEntities.collectionEventType();
+      this.jsonStudy = this.jsonEntities.defaultStudy();
 
       this.testUtils.addCustomMatchers();
       CollectionEventType = this.CollectionEventType;
@@ -96,25 +96,25 @@ define([
       var self = this,
           data = getBadCollectionEventTypes(self.jsonEntities, self.jsonStudy);
 
-      _.each(data, function (item) {
+      _.each(data, function (badCet) {
         var url = sprintf.sprintf('%s/%s?cetId=%s',
                                   uri(),
                                   self.jsonStudy.id,
-                                  item.cet.id);
+                                  badCet.cet.id);
 
-        self.httpBackend.whenGET(url).respond(serverReply(item.cet));
-        CollectionEventType.get(self.jsonStudy.id, item.cet.id)
+        self.httpBackend.whenGET(url).respond(serverReply(badCet.cet));
+        CollectionEventType.get(self.jsonStudy.id, badCet.cet.id)
           .then(getFail).catch(shouldFail);
         self.httpBackend.flush();
 
-        function getFail(reply) {
-          fail('function should not be called');
-        }
-
         function shouldFail(error) {
-          expect(error).toStartWith(item.errMsg);
+          expect(error).toStartWith(badCet.errMsg);
         }
       });
+
+      function getFail(reply) {
+        fail('function should not be called');
+      }
     });
 
     it('can list collection event types', function() {
@@ -314,17 +314,15 @@ define([
           badAnnotationType = _.omit(jsonEntities.annotationType(), 'name'),
           data = [
             {
-              cet: _.omit(jsonEntities.collectionEventType(jsonStudy), 'name'),
+              cet: _.omit(jsonEntities.collectionEventType(), 'name'),
               errMsg : 'invalid collection event types from server'
             },
             {
-              cet: jsonEntities.collectionEventType(jsonStudy,
-                                                    { specimenSpecs: [ badSpecimenSpec ]}),
+              cet: jsonEntities.collectionEventType({ specimenSpecs: [ badSpecimenSpec ]}),
               errMsg : 'invalid specimen specs from server'
             },
             {
-              cet: jsonEntities.collectionEventType(jsonStudy,
-                                                    { annotationTypes: [ badAnnotationType ]}),
+              cet: jsonEntities.collectionEventType({ annotationTypes: [ badAnnotationType ]}),
               errMsg : 'invalid annotation types from server'
             }
           ];

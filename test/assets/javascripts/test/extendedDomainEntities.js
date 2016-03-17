@@ -72,7 +72,7 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
     /**
      * @param obj the JS domain entity.
      * @param entity the server side entity to compare against.
-     * @param attrs* the attributes to compare agains. May be more than one.
+     * @param attrs the attributes to compare against. May be more than one.
      */
     function validateOptional(/* obj, entity, attrs */) {
       var args = _.toArray(arguments);
@@ -83,7 +83,7 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
         if (obj[attr] !== null) {
           expect(obj[attr]).toEqual(entity[attr]);
         } else {
-          expect(entity[attr]).toBeUndefined();
+          expect(entity[attr]).toBeFalsy();
         }
       });
     }
@@ -194,7 +194,7 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
     };
 
     DateTimeAnnotation.prototype.compareToJsonEntity = function (serverEntity) {
-      if (_.isUndefined(serverEntity.stringValue)) {
+      if (_.isNull(serverEntity.stringValue)) {
         expect(this.date).toBeNull();
         expect(this.time).toBeNull();
       } else {
@@ -212,8 +212,8 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
     };
 
     NumberAnnotation.prototype.compareToJsonEntity = function (serverEntity) {
-      if (_.isUndefined(serverEntity.numberValue)) {
-        expect(this.value).toBeUndefined();
+      if (_.isNull(serverEntity.numberValue)) {
+        expect(this.value).toBeNaN();
       } else {
         expect(this.value.toString()).toEqual(serverEntity.numberValue.toString());
       }
@@ -230,7 +230,11 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
     };
 
     TextAnnotation.prototype.compareToJsonEntity = function (serverEntity) {
-      expect(this.value).toEqual(serverEntity.stringValue);
+      if (_.isNull(serverEntity.stringValue)) {
+        expect(this.value).toBeUndefined();
+      } else {
+        expect(this.value).toEqual(serverEntity.stringValue);
+      }
     };
 
     Centre.prototype.compareToJsonEntity = function (serverEntity) {

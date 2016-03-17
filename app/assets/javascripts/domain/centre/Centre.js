@@ -168,8 +168,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
 
     Centre.prototype.add = function () {
       var self = this,
-          json = { name: this.name };
-      angular.extend(json, funutils.pickOptional(self, 'description'));
+          json = { name: this.name, description: this.description };
       return biobankApi.post(uri(), json).then(function(reply) {
         return self.asyncCreate(reply);
       });

@@ -12,7 +12,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('Directive: specimenGroupsPanelDirective', function() {
+  xdescribe('Directive: specimenGroupsPanelDirective', function() {
 
     var scope,
         controller,

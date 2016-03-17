@@ -64,8 +64,19 @@ define(function(require) {
   });
 
   app.config(exceptionConfig);
+  app.config(loggingConfig);
 
   debugFunc.$inject = ['$rootScope'];
+
+  exceptionConfig.$inject = ['$provide'];
+  extendExceptionHandler.$inject = ['$delegate'];
+  loggingConfig.$inject = ['$logProvider'];
+
+  //--
+
+  function loggingConfig($logProvider) {
+    $logProvider.debugEnabled(true);
+  }
 
   function debugFunc($rootScope) {
     /*jshint unused: false*/
@@ -123,13 +134,9 @@ define(function(require) {
     /*jshint unused: true*/
   }
 
-  exceptionConfig.$inject = ['$provide'];
-
   function exceptionConfig($provide) {
     $provide.decorator('$exceptionHandler', extendExceptionHandler);
   }
-
-  extendExceptionHandler.$inject = ['$delegate'];
 
   function extendExceptionHandler($delegate) {
     return function (exception, cause) {

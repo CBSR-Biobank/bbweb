@@ -9,13 +9,12 @@ define([
   'angularMocks',
   'underscore',
   'faker',
-  'moment'
-], function(angular, mocks, _, faker, moment) {
+  'moment',
+  'sprintf'
+], function(angular, mocks, _, faker, moment, sprintf) {
   'use strict';
 
-  // FIXME: fix ignored tests
-
-  xdescribe('CollectionEvent', function() {
+  describe('CollectionEvent', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -23,31 +22,71 @@ define([
                                hasAnnotationsEntityTestSuite,
                                testUtils,
                                extendedDomainEntities) {
-      _.extend(this, entityTestSuite, hasAnnotationsEntityTestSuite);
+      var self = this;
 
-      this.httpBackend                   = this.$injector.get('$httpBackend');
-      this.Participant                   = this.$injector.get('Participant');
-      this.CollectionEventType           = this.$injector.get('CollectionEventType');
-      this.CollectionEvent               = this.$injector.get('CollectionEvent');
-      this.Annotation                    = this.$injector.get('Annotation');
-      this.AnnotationValueType           = this.$injector.get('AnnotationValueType');
-      this.AnnotationType                = this.$injector.get('AnnotationType');
-      this.jsonEntities                  = this.$injector.get('jsonEntities');
-      this.testUtils                     = this.$injector.get('testUtils');
+      _.extend(self, entityTestSuite, hasAnnotationsEntityTestSuite);
+
+      self.$httpBackend                  = self.$injector.get('$httpBackend');
+      self.Participant                   = self.$injector.get('Participant');
+      self.CollectionEventType           = self.$injector.get('CollectionEventType');
+      self.CollectionEvent               = self.$injector.get('CollectionEvent');
+      self.Annotation                    = self.$injector.get('Annotation');
+      self.AnnotationValueType           = self.$injector.get('AnnotationValueType');
+      self.AnnotationType                = self.$injector.get('AnnotationType');
+      self.jsonEntities                  = self.$injector.get('jsonEntities');
+      self.testUtils                     = self.$injector.get('testUtils');
 
       testUtils.addCustomMatchers();
 
-      this.jsonStudy = this.jsonEntities.study();
-      this.jsonCet = this.jsonEntities.collectionEventType(this.jsonStudy);
+      self.jsonStudy = self.jsonEntities.study();
+      self.jsonCet = self.jsonEntities.collectionEventType();
+
+      self.getCollectionEventEntities = getCollectionEventEntities;
+      self.expectCevent = expectCevent;
+      self.failTest = failTest;
+
+      //--
+
+      function getCollectionEventEntities(isNew) {
+        var jsonAnnotationTypes = self.jsonEntities.allAnnotationTypes(),
+            collectionEventType,
+            initServerCollectionEvent,
+            jsonCevent,
+            collectionEvent;
+
+        collectionEventType = self.CollectionEventType.create(
+          self.jsonEntities.collectionEventType({ annotationTypes: jsonAnnotationTypes }));
+
+        jsonCevent = self.jsonEntities.collectionEvent();
+        initServerCollectionEvent = isNew ? _.omit(jsonCevent, 'id'): jsonCevent;
+        collectionEvent = new self.CollectionEvent(initServerCollectionEvent, collectionEventType);
+
+        return {
+          jsonAnnotationTypes:   jsonAnnotationTypes,
+          collectionEventType:   collectionEventType,
+          collectionEvent:       collectionEvent
+        };
+      }
+
+      // used by promise tests
+      function expectCevent(entity) {
+        expect(entity).toEqual(jasmine.any(self.CollectionEvent));
+      }
+
+      // used by promise tests
+      function failTest(error) {
+        expect(error).toBeUndefined();
+      }
     }));
 
     afterEach(function() {
-      this.httpBackend.verifyNoOutstandingExpectation();
-      this.httpBackend.verifyNoOutstandingRequest();
+      this.$httpBackend.verifyNoOutstandingExpectation();
+      this.$httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('constructor with no parameters has default values', function() {
-      var collectionEvent = new this.CollectionEvent();
+    it('constructor with default parameters has default values', function() {
+      var ceventType = new this.CollectionEventType(this.jsonEntities.collectionEventType()),
+          collectionEvent = new this.CollectionEvent({}, ceventType);
 
       expect(collectionEvent.id).toBeNull();
       expect(collectionEvent.version).toBe(0);
@@ -58,16 +97,15 @@ define([
     });
 
     it('constructor with annotation parameter has valid values', function() {
-      var self              = this,
-          annotationData    = self.jsonAnnotationData(),
-          jsonAnnotations   = _.pluck(annotationData, 'annotation'),
-          jsonAnnotationTypes   = _.pluck(annotationData, 'annotationType'),
+      var self                = this,
+          annotationData      = self.jsonAnnotationData(),
+          jsonAnnotations     = _.pluck(annotationData, 'annotation'),
+          jsonAnnotationTypes = _.pluck(annotationData, 'annotationType'),
           ceventType;
 
-      self.jsonCet = self.jsonEntities.collectionEventType(
-        self.jsonStudy, { annotationTypes: jsonAnnotationTypes });
+      self.jsonCet = self.jsonEntities.collectionEventType({ annotationTypes: jsonAnnotationTypes });
 
-      ceventType = self.CollectionEventType.create(self.jsonCet);
+      ceventType = new self.CollectionEventType(self.jsonCet);
 
       var collectionEvent = new self.CollectionEvent({ annotations: jsonAnnotations },
                                                      ceventType,
@@ -91,9 +129,7 @@ define([
           jsonAnnotationTypes = _.pluck(annotationData, 'annotationType'),
           ceventType;
 
-      self.jsonCet = self.jsonEntities.collectionEventType(
-        self.jsonStudy, { annotationTypes: jsonAnnotationTypes });
-
+      self.jsonCet = self.jsonEntities.collectionEventType({ annotationTypes: jsonAnnotationTypes });
       ceventType = self.CollectionEventType.create(self.jsonCet);
 
       var collectionEvent = new self.CollectionEvent({ }, ceventType, jsonAnnotationTypes);
@@ -135,12 +171,10 @@ define([
           serverCollectionEvent,
           ceventType;
 
-      serverCollectionEvent =
-        _.extend(self.jsonEntities.collectionEvent(),
-                 {
-                   collectionEventTypeId: self.jsonEntities.domainEntityNameNext(
-                     self.jsonEntities.ENTITY_NAME_COLLECTION_EVENT_TYPE())
-                 });
+      serverCollectionEvent = self.jsonEntities.collectionEvent({
+        collectionEventTypeId: self.jsonEntities.domainEntityNameNext(
+          self.jsonEntities.ENTITY_NAME_COLLECTION_EVENT_TYPE())
+      });
       ceventType = self.CollectionEventType.create(
         self.jsonEntities.collectionEventType(self.jsonStudy));
 
@@ -148,20 +182,6 @@ define([
         return new self.CollectionEvent(serverCollectionEvent, ceventType);
       }).toThrowError('invalid collection event type');
     });
-
-    it('fails when constructing a collection event with annotations and no collection event type',
-       function() {
-         var self = this,
-             jsonAnnotationTypes = this.jsonEntities.allAnnotationTypes();
-
-         _.each(jsonAnnotationTypes, function (jsonAnnotationType) {
-           var jsonCevent = _.omit(self.jsonEntities.collectionEvent(), 'id)');
-
-           expect(function () {
-             return new self.CollectionEvent(jsonCevent, undefined);
-           }).toThrowError('collection event type not defined');
-         });
-       });
 
     it('fails when creating from a non object', function() {
       var self = this;
@@ -192,158 +212,153 @@ define([
     it('has valid values when creating from a server response', function() {
       var annotationData    = this.jsonAnnotationData(),
           annotationTypes   = _.pluck(annotationData, 'annotationType'),
-          serverCollectionEvent = this.jsonEntities.collectionEvent({annotationTypes: annotationTypes});
+          jsonCet           = this.jsonEntities.collectionEventType({annotationTypes: annotationTypes}),
+          cet               = new this.CollectionEventType(jsonCet),
+          jsonCevent        = this.jsonEntities.collectionEvent({annotationTypes: annotationTypes});
 
-      var collectionEvent = this.CollectionEvent.create(serverCollectionEvent);
-      collectionEvent.compareToJsonEntity(serverCollectionEvent);
+      var collectionEvent = this.CollectionEvent.create(jsonCevent, cet);
+      collectionEvent.compareToJsonEntity(jsonCevent);
     });
 
-    it('can retrieve a single collection event', function(done) {
-      var participant = this.jsonEntities.participant(),
-          collectionEvent = this.jsonEntities.collectionEvent({
+    it('can retrieve a single collection event', function() {
+      var self = this,
+          participant = self.jsonEntities.participant(),
+          collectionEvent = self.jsonEntities.collectionEvent({
             participantId: participant.id
           });
 
-      this.httpBackend.whenGET(uri(participant.id) + '?ceventId=' + collectionEvent.id)
+      self.$httpBackend.whenGET(uri(participant.id) + '?ceventId=' + collectionEvent.id)
         .respond(serverReply(collectionEvent));
 
-      this.CollectionEvent.get(participant.id, collectionEvent.id).then(function (reply) {
-        expect(reply).toEqual(jasmine.any(this.CollectionEvent));
+      self.CollectionEvent.get(participant.id, collectionEvent.id).then(function (reply) {
+        expect(reply).toEqual(jasmine.any(self.CollectionEvent));
         reply.compareToJsonEntity(collectionEvent);
-        done();
       });
-      this.httpBackend.flush();
+      self.$httpBackend.flush();
     });
 
     it('get fails when collection event ID not specified', function() {
-      var participant = this.jsonEntities.participant();
+      var self = this,
+          participant = self.jsonEntities.participant();
 
       expect(function () {
-        return this.CollectionEvent.get(participant.id);
+        return self.CollectionEvent.get(participant.id);
       }).toThrow(new Error('collection event id not specified'));
     });
 
-    it('can list collection events for a participant', function(done) {
-      var study = this.jsonEntities.study(),
-          participant = this.jsonEntities.participant({ studyId: study.id }),
-          ceventType = this.jsonEntities.collectionEventType(study),
+    it('can list collection events for a participant', function() {
+      var self = this,
+          ceventType = self.jsonEntities.collectionEventType(),
+          participant = self.jsonEntities.defaultParticipant(),
           collectionEvents = _.map(_.range(2), function () {
-            return this.jsonEntities.collectionEvent({
-              participantId: participant.id,
-              collectionEventTypeId: ceventType.id
-            });
+            return self.jsonEntities.collectionEvent();
           }),
-          reply = this.jsonEntities.pagedResult(collectionEvents),
+          reply = self.jsonEntities.pagedResult(collectionEvents),
           serverEntity;
 
-      this.httpBackend.whenGET(uri(participant.id) + '/list')
+      self.$httpBackend.whenGET(uri(participant.id) + '/list')
         .respond(serverReply(reply));
 
-      this.CollectionEvent.list(participant.id).then(function (pagedResult) {
+      self.CollectionEvent.list(participant.id).then(function (pagedResult) {
         expect(pagedResult.items).toBeArrayOfSize(collectionEvents.length);
 
         _.each(pagedResult.items, function(obj) {
-          expect(obj).toEqual(jasmine.any(this.CollectionEvent));
+          expect(obj).toEqual(jasmine.any(self.CollectionEvent));
           serverEntity = _.findWhere(collectionEvents, { id: obj.id });
           expect(serverEntity).toBeDefined();
           obj.compareToJsonEntity(serverEntity);
         });
-        done();
       });
-      this.httpBackend.flush();
+      self.$httpBackend.flush();
     });
 
-    it('can list collection events sorted by corresponding fields',
-       function(done) {
-         var study = this.jsonEntities.study(),
-             participant = this.jsonEntities.participant({ studyId: study.id }),
-             reply = this.jsonEntities.pagedResult([]),
-             sortFields = [ 'visitNumber', 'timeCompleted'];
+    it('can list collection events sorted by corresponding fields', function() {
+      var self = this,
+          study = self.jsonEntities.study(),
+          participant = self.jsonEntities.participant({ studyId: study.id }),
+          reply = self.jsonEntities.pagedResult([]),
+          sortFields = [ 'visitNumber', 'timeCompleted'];
 
-         _.each(sortFields, function (sortField) {
-           this.httpBackend.whenGET(uri(participant.id) + '/list?sort=' + sortField)
-             .respond(serverReply(reply));
+      _.each(sortFields, function (sortField) {
+        self.$httpBackend.whenGET(uri(participant.id) + '/list?sort=' + sortField)
+          .respond(serverReply(reply));
 
-           this.CollectionEvent.list(participant.id, { sort: sortField }).then(function (pagedResult) {
-             expect(pagedResult.items).toBeEmptyArray();
-             done();
-           });
-           this.httpBackend.flush();
-         });
-       });
-
-    it('can list collection events using a page number',
-       function(done) {
-         var study = this.jsonEntities.study(),
-             participant = this.jsonEntities.participant({ studyId: study.id }),
-             reply = this.jsonEntities.pagedResult([]),
-             pageNumber = 2;
-
-         this.httpBackend.whenGET(uri(participant.id) + '/list?page=' + pageNumber)
-           .respond(serverReply(reply));
-
-         this.CollectionEvent.list(participant.id, { page: pageNumber }).then(function (pagedResult) {
-           expect(pagedResult.items).toBeEmptyArray();
-           done();
-         });
-         this.httpBackend.flush();
-       });
-
-    it('can list collection events using a page size',
-       function(done) {
-         var study = this.jsonEntities.study(),
-             participant = this.jsonEntities.participant({ studyId: study.id }),
-             reply = this.jsonEntities.pagedResult([]),
-             pageSize = 2;
-
-         this.httpBackend.whenGET(uri(participant.id) + '/list?pageSize=' + pageSize)
-           .respond(serverReply(reply));
-
-         this.CollectionEvent.list(participant.id, { pageSize: pageSize }).then(function (pagedResult) {
-           expect(pagedResult.items).toBeEmptyArray();
-           done();
-         });
-         this.httpBackend.flush();
-       });
-
-    it('can retrieve a single collection event by visit number', function(done) {
-      var entities              = getCollectionEventEntities(true),
-          participant           = entities.participant,
-          serverCollectionEvent = entities.serverCollectionEvent;
-
-      this.httpBackend.whenGET(uri(participant.id) + '/visitNumber/' + serverCollectionEvent.visitNumber)
-        .respond(serverReply(serverCollectionEvent));
-
-      this.CollectionEvent.getByVisitNumber(participant.id,
-                                       serverCollectionEvent.visitNumber,
-                                       entities.collectionEventType,
-                                       entities.annotationTypes)
-        .then(function (reply) {
-          expect(reply).toEqual(jasmine.any(this.CollectionEvent));
-          reply.compareToJsonEntity(serverCollectionEvent);
-          done();
+        self.CollectionEvent.list(participant.id, { sort: sortField }).then(function (pagedResult) {
+          expect(pagedResult.items).toBeEmptyArray();
         });
-      this.httpBackend.flush();
+        self.$httpBackend.flush();
+      });
     });
 
-    it('can list collection events using ordering',
-       function(done) {
-         var study = this.jsonEntities.study(),
-             participant = this.jsonEntities.participant({ studyId: study.id }),
-             reply = this.jsonEntities.pagedResult([]),
-             orderingTypes = [ 'asc', 'desc'];
+    it('can list collection events using a page number', function() {
+      var self = this,
+          study = self.jsonEntities.study(),
+          participant = self.jsonEntities.participant({ studyId: study.id }),
+          reply = self.jsonEntities.pagedResult([]),
+          pageNumber = 2;
 
-         _.each(orderingTypes, function (orderingType) {
-           this.httpBackend.whenGET(uri(participant.id) + '/list?order=' + orderingType)
-             .respond(serverReply(reply));
+      self.$httpBackend.whenGET(uri(participant.id) + '/list?page=' + pageNumber)
+        .respond(serverReply(reply));
 
-           this.CollectionEvent.list(participant.id, { order: orderingType }).then(function (pagedResult) {
-             expect(pagedResult.items).toBeEmptyArray();
-             done();
-           });
-           this.httpBackend.flush();
-         });
-       });
+      self.CollectionEvent.list(participant.id, { page: pageNumber }).then(function (pagedResult) {
+        expect(pagedResult.items).toBeEmptyArray();
+      });
+      self.$httpBackend.flush();
+    });
+
+    it('can list collection events using a page size', function() {
+      var self = this,
+          study = self.jsonEntities.study(),
+          participant = self.jsonEntities.participant({ studyId: study.id }),
+          reply = self.jsonEntities.pagedResult([]),
+          pageSize = 2;
+
+      self.$httpBackend.whenGET(uri(participant.id) + '/list?pageSize=' + pageSize)
+        .respond(serverReply(reply));
+
+      self.CollectionEvent.list(participant.id, { pageSize: pageSize }).then(function (pagedResult) {
+        expect(pagedResult.items).toBeEmptyArray();
+      });
+      self.$httpBackend.flush();
+    });
+
+    it('can retrieve a single collection event by visit number', function() {
+      var self            = this,
+          entities        = self.getCollectionEventEntities(true),
+          jsonParticipant = self.jsonEntities.defaultParticipant(),
+          jsonCevent      = self.jsonEntities.defaultCollectionEvent();
+
+      self.$httpBackend.whenGET(uri(jsonParticipant.id) + '/visitNumber/' + jsonCevent.visitNumber)
+        .respond(serverReply(jsonCevent));
+
+      self.CollectionEvent.getByVisitNumber(jsonParticipant.id,
+                                            jsonCevent.visitNumber,
+                                            entities.collectionEventType,
+                                            entities.annotationTypes)
+        .then(function (reply) {
+          expect(reply).toEqual(jasmine.any(self.CollectionEvent));
+          reply.compareToJsonEntity(jsonCevent);
+        });
+      self.$httpBackend.flush();
+    });
+
+    it('can list collection events using ordering', function() {
+      var self = this,
+          study = self.jsonEntities.study(),
+          participant = self.jsonEntities.participant({ studyId: study.id }),
+          reply = self.jsonEntities.pagedResult([]),
+          orderingTypes = [ 'asc', 'desc'];
+
+      _.each(orderingTypes, function (orderingType) {
+        self.$httpBackend.whenGET(uri(participant.id) + '/list?order=' + orderingType)
+          .respond(serverReply(reply));
+
+        self.CollectionEvent.list(participant.id, { order: orderingType }).then(function (pagedResult) {
+          expect(pagedResult.items).toBeEmptyArray();
+        });
+        self.$httpBackend.flush();
+      });
+    });
 
     it('setting annotation types fails when it does not belong to collection event type',
         function() {
@@ -354,202 +369,116 @@ define([
               collectionEvent;
 
           ceventType = this.CollectionEventType.create(
-            this.jsonEntities.collectionEventType(this.jsonStudy, {
-              specimenGroups:  this.jsonStudy.specimenGroups,
+            this.jsonEntities.collectionEventType({
               annotationTypes: annotationTypes
             }));
           collectionEvent = new this.CollectionEvent({}, ceventType);
 
           // replace id with a bad one
-          annotationTypes[0].id = badAnnotationTypeId;
+          annotationTypes[0].uniqueId = badAnnotationTypeId;
           expect(function () {
             collectionEvent.setAnnotationTypes(annotationTypes);
-          }).toThrow(new Error(
-            'annotation types not belonging to collection event type found: ' +
-              badAnnotationTypeId));
+          }).toThrowError(/annotation types not found/);
         });
 
-    it('can add a collectionEvent', function(done) {
-      var participant = this.jsonEntities.participant(),
-          baseCollectionEvent = this.jsonEntities.collectionEvent({
-            participantId: participant.id
-          }),
-          collectionEvent     = new this.CollectionEvent(_.omit(baseCollectionEvent, 'id')),
-          cmd                 = addCommand(collectionEvent);
+    it('can add a collectionEvent', function() {
+      var jsonCevent      = this.jsonEntities.collectionEvent(),
+          collectionEvent = new this.CollectionEvent(_.omit(jsonCevent, 'id')),
+          cmd             = addCommand(collectionEvent);
 
-      this.httpBackend.expectPOST(uri(participant.id), cmd).respond(201, serverReply(baseCollectionEvent));
+      this.$httpBackend.expectPOST(uri(jsonCevent.participantId), cmd).respond(201, serverReply(jsonCevent));
 
-      collectionEvent.addOrUpdate().then(function(replyCollectionEvent) {
-        _.extend(collectionEvent, { id: replyCollectionEvent.id });
-        collectionEvent.compareToJsonEntity(replyCollectionEvent);
-        done();
+      collectionEvent.add().then(function(reply) {
+        _.extend(collectionEvent, { id: reply.id });
+        collectionEvent.compareToJsonEntity(reply);
       });
-      this.httpBackend.flush();
+      this.$httpBackend.flush();
     });
 
-    it('can add a collection event with annotations', function(done) {
-      var entities = getCollectionEventEntities(true),
+    it('can add a collection event with annotations', function() {
+      var entities = this.getCollectionEventEntities(true),
           cmd      = addCommand(entities.collectionEvent);
 
-      this.httpBackend.expectPOST(uri(entities.collectionEvent.participantId), cmd)
+      this.$httpBackend.expectPOST(uri(entities.collectionEvent.participantId), cmd)
         .respond(201, serverReply(entities.serverCollectionEvent));
 
-      entities.collectionEvent.addOrUpdate().then(function(replyCollectionEvent) {
-        expect(replyCollectionEvent.id).toEqual(entities.serverCollectionEvent.id);
-        expect(replyCollectionEvent.version).toEqual(0);
-        expect(replyCollectionEvent.participantId).toEqual(entities.participant.id);
-        expect(replyCollectionEvent.timeCompleted).toEqual(entities.serverCollectionEvent.timeCompleted);
-        expect(replyCollectionEvent.visitNumber).toEqual(entities.serverCollectionEvent.visitNumber);
-        expect(replyCollectionEvent.annotations)
+      entities.collectionEvent.add().then(function(reply) {
+        expect(reply.id).toEqual(entities.serverCollectionEvent.id);
+        expect(reply.version).toEqual(0);
+        expect(reply.participantId).toEqual(entities.participant.id);
+        expect(reply.timeCompleted).toEqual(entities.serverCollectionEvent.timeCompleted);
+        expect(reply.visitNumber).toEqual(entities.serverCollectionEvent.visitNumber);
+        expect(reply.annotations)
           .toBeArrayOfSize(entities.serverCollectionEvent.annotations.length);
-        done();
       });
-      this.httpBackend.flush();
+      this.$httpBackend.flush();
     });
 
     it('can not add a collection event with empty required annotations', function() {
-      var jsonAnnotationTypes = this.jsonEntities.allStudyAnnotationTypes(this.jsonStudy);
+      var self = this,
+          jsonAnnotationTypes = self.jsonEntities.allAnnotationTypes();
 
-      _.each(jsonAnnotationTypes, function (jsonAnnotationType) {
-        var annotationType, ceventType, serverCevent, collectionEvent;
+      _.each(jsonAnnotationTypes, function (jsonAnnotType) {
+        var jsonAnnotation, annotationType, ceventType, jsonCevent, collectionEvent;
 
-        annotationType = new this.AnnotationType(jsonAnnotationType);
-        ceventType = this.CollectionEventType.create(this.jsonEntities.collectionEventType(
-          this.jsonStudy, { annotationTypes: [ annotationType ] } ));
-        ceventType.annotationTypeData[0].required = true;
-        serverCevent = _.omit(this.jsonEntities.collectionEvent(), 'id)');
-        collectionEvent = new this.CollectionEvent(serverCevent, ceventType, [ annotationType ]);
+        jsonAnnotation = self.jsonEntities.annotation({ value: null,
+                                                        annotationTypeId: jsonAnnotType.uniqueId});
+
+        annotationType = new self.AnnotationType(jsonAnnotType);
+        ceventType = self.CollectionEventType.create(
+          self.jsonEntities.collectionEventType({ annotationTypes: [ annotationType ] }));
+        ceventType.annotationTypes[0].required = true;
+        jsonCevent = _.omit(self.jsonEntities.collectionEvent({ annotations: [ jsonAnnotation ]}), 'id)');
+        collectionEvent = new self.CollectionEvent(jsonCevent, ceventType);
 
         _.each(collectionEvent.annotations, function (annotation) {
           expect(annotation.getValue()).toBeFalsy();
         });
 
         expect(function () {
-          collectionEvent.addOrUpdate();
-        }).toThrow();
+          collectionEvent.add();
+        }).toThrowError(/required annotation has no value/);
       });
     });
 
-    it('can update a collectionEvent', function(done) {
-      var entities        = getCollectionEventEntities(false),
-          collectionEvent = entities.collectionEvent,
-          cmd             = updateCommand(collectionEvent),
-          reply           = replyCollectionEvent(entities.serverCollectionEvent);
+    it('can update the visit number on a collectionEvent', function() {
+      var entities = this.getCollectionEventEntities(false),
+          cevent   = entities.collectionEvent;
 
-      this.httpBackend.expectPUT(uri(collectionEvent.participantId, collectionEvent.id), cmd)
-        .respond(201, serverReply(reply));
-
-      collectionEvent.addOrUpdate().then(function(replyCollectionEvent) {
-        expect(replyCollectionEvent.id).toEqual(collectionEvent.id);
-        expect(replyCollectionEvent.version).toEqual(collectionEvent.version + 1);
-        expect(replyCollectionEvent.participantId).toEqual(collectionEvent.participantId);
-        expect(replyCollectionEvent.timeCompleted).toEqual(collectionEvent.timeCompleted);
-        expect(replyCollectionEvent.visitNumber).toEqual(collectionEvent.visitNumber);
-        expect(replyCollectionEvent.annotations)
-          .toBeArrayOfSize(collectionEvent.annotations.length);
-        expect(replyCollectionEvent.annotations)
-          .toContainAll(collectionEvent.annotations);
-        done();
-      });
-      this.httpBackend.flush();
+      this.updateEntity(cevent,
+                        'updateVisitNumber',
+                        cevent.visitNumber,
+                        updateUri('visitNumber', cevent.id),
+                        { visitNumber: cevent.visitNumber },
+                        this.jsonEntities.defaultCollectionEvent(),
+                        self.expectCevent,
+                        self.failTest);
     });
 
-    it('can not update a collectionEvent with empty required annotations', function() {
-      var entities = getCollectionEventEntities(false);
+    it('can update the time completed on a collectionEvent', function() {
+      var entities = this.getCollectionEventEntities(false),
+          cevent   = entities.collectionEvent;
 
-      _.each(entities.jsonAnnotationTypes, function (jsonAnnotationType) {
-        var annotationType,
-            collectionEvent;
-
-        entities.serverCollectionEvent.annotations =
-          _.map(entities.serverCollectionEvent.annotations,
-                function (annotation) {
-                  return {
-                    annotationTypeId: annotation.annotationTypeId,
-                    selectedValues: []
-                  };
-                });
-
-        annotationType = new this.AnnotationType(jsonAnnotationType);
-        collectionEvent = new this.CollectionEvent(entities.serverCollectionEvent,
-                                              entities.collectionEventType,
-                                              [ annotationType ]);
-
-        _.each(collectionEvent.annotations, function (annotation) {
-          annotation.required = true;
-          expect(annotation.getValue()).toBeFalsy();
-        });
-
-        expect(function () {
-          collectionEvent.addOrUpdate();
-        }).toThrow();
-      });
+      this.updateEntity(cevent,
+                        'updateTimeCompleted',
+                        cevent.timeCompleted,
+                        updateUri('timeCompleted', cevent.id),
+                        { timeCompleted: cevent.timeCompleted },
+                        this.jsonEntities.defaultCollectionEvent(),
+                        self.expectCevent,
+                        self.failTest);
     });
 
     it('should be able to remove a collection event', function() {
-      var entities = getCollectionEventEntities(false),
-          collectionEvent = entities.collectionEvent;
+      var entities = this.getCollectionEventEntities(false),
+          cevent = entities.collectionEvent,
+          url = uri(cevent.participantId, cevent.id, cevent.version);
 
-      this.httpBackend.expectDELETE(uri(collectionEvent.participantId,
-                                   collectionEvent.id,
-                                   collectionEvent.version))
-        .respond(201, serverReply(true));
+      this.$httpBackend.expectDELETE(url).respond(201, serverReply(true));
 
-      collectionEvent.remove();
-      this.httpBackend.flush();
+      cevent.remove();
+      this.$httpBackend.flush();
     });
-
-    function getCollectionEventEntities(isNew) {
-      // var study,
-      //     participant,
-      //     collectionEventType,
-      //     jsonAnnotationTypes,
-      //     serverCollectionEvent,
-      //     initServerCollectionEvent,
-      //     annotationTypes,
-      //     collectionEvent;
-
-      // study = this.jsonEntities.study();
-      // participant = this.jsonEntities.participant(study);
-      // jsonAnnotationTypes = this.jsonEntities.allStudyAnnotationTypes(study);
-      // annotationTypes = _.map(jsonAnnotationTypes, function (jsonAnnotationType) {
-      //   return new AnnotationType(jsonAnnotationType);
-      // });
-
-      // collectionEventType = CollectionEventType.create(
-      //   this.jsonEntities.collectionEventType(this.jsonStudy, {
-      //     specimenGroups:  this.jsonStudy.specimenGroups,
-      //     annotationTypes: annotationTypes
-      //   }));
-
-      // serverCollectionEvent = this.jsonEntities.collectionEvent({
-      //   participantId:         participant.id,
-      //   collectionEventTypeId: collectionEventType.id,
-      //   annotationTypes:       jsonAnnotationTypes
-      // });
-      // initServerCollectionEvent = isNew ?
-      //   _.omit(serverCollectionEvent, 'id'): serverCollectionEvent;
-
-      // collectionEvent = new this.CollectionEvent(initServerCollectionEvent,
-      //                                       collectionEventType,
-      //                                       annotationTypes);
-
-      // return {
-      //   serverStudy:           study,
-      //   participant:           participant,
-      //   collectionEventType:   collectionEventType,
-      //   jsonAnnotationTypes: jsonAnnotationTypes,
-      //   serverCollectionEvent: serverCollectionEvent,
-      //   annotationTypes:       annotationTypes,
-      //   collectionEvent:       collectionEvent
-      // };
-    }
-
-    function annotationsForCommand(collectionEvent) {
-      return _.map(collectionEvent.annotations, function (annotation) {
-        return annotation.getJsonAnnotation();
-      });
-    }
 
     var addCommandKeys = [
       'participantId',
@@ -558,22 +487,15 @@ define([
       'visitNumber'
     ];
 
-    //var updateCommandKeys = addCommandKeys.concat('id');
-
     function addCommand(collectionEvent) {
       return _.extend(_.pick(collectionEvent, addCommandKeys),
                       { annotations: annotationsForCommand(collectionEvent) } );
     }
 
-    function updateCommand(collectionEvent) {
-      // return _.extend(_.pick(collectionEvent, updateCommandKeys),
-      //                 { annotations: annotationsForCommand(collectionEvent) },
-      //                 this.testUtils.expectedVersion(collectionEvent.version));
-    }
-
-    function replyCollectionEvent(collectionEvent, newValues) {
-      // newValues = newValues || {};
-      // return new this.CollectionEvent(_.extend({}, collectionEvent, newValues, {version: collectionEvent.version + 1}));
+    function annotationsForCommand(collectionEvent) {
+      return _.map(collectionEvent.annotations, function (annotation) {
+        return annotation.getServerAnnotation();
+      });
     }
 
     function serverReply(event) {
@@ -587,12 +509,10 @@ define([
           result = '/participants/cevents',
           args = _.toArray(arguments);
 
-      if (args.length < 1) {
-        throw new Error('participant id not specified');
+      if (args.length > 0) {
+        participantId = args.shift();
+        result += '/' + participantId;
       }
-
-      participantId = args.shift();
-      result += '/' + participantId;
 
       if (args.length > 0) {
         collectionEventId = args.shift();
@@ -602,6 +522,24 @@ define([
       if (args.length > 0) {
         version = args.shift();
         result += '/' + version;
+      }
+      return result;
+    }
+
+    function updateUri(/* path, collectionEventId */) {
+      var path,
+          collectionEventId,
+          result = '/participants/cevents',
+          args = _.toArray(arguments);
+
+      if (args.length > 0) {
+        path = args.shift();
+        result += '/' + path;
+      }
+
+      if (args.length > 0) {
+        collectionEventId = args.shift();
+        result += '/' + collectionEventId;
       }
       return result;
     }

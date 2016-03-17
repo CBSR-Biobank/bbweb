@@ -82,7 +82,16 @@ define(['underscore', 'tv4'], function(_, tv4) {
         throw new Error('invalid collection event type');
       }
 
-      this.setCollectionEventType(collectionEventType);
+      // FIXME: remove this
+      // if (_.isUndefined(collectionEventType)
+      //     && obj.annotations
+      //     && (obj.annotations.length > 0)) {
+      //   throw new Error('collection event type not defined');
+      // }
+
+      if (collectionEventType) {
+        this.setCollectionEventType(collectionEventType);
+      }
     }
 
     CollectionEvent.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -199,9 +208,6 @@ define(['underscore', 'tv4'], function(_, tv4) {
     };
 
     CollectionEvent.prototype.setCollectionEventType = function (collectionEventType) {
-      if (_.isUndefined(collectionEventType)) {
-        throw new Error('collection event type not defined');
-      }
       this.collectionEventType = collectionEventType;
       this.setAnnotationTypes(collectionEventType.annotationTypes);
     };
@@ -217,7 +223,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
       // convert annotations to server side entities
       json.annotations = _.map(self.annotations, function (annotation) {
         // make sure required annotations have values
-        if (!annotation.isValid()) {
+        if (!annotation.isValueValid()) {
           throw new Error('required annotation has no value: annotationId: ' +
                           annotation.annotationType.id);
         }

@@ -226,27 +226,24 @@ define([
 
     it('can add a centre', function() {
       var self = this,
-          baseCentre = self.jsonEntities.centre(),
-          centre = new self.Centre(_.omit(baseCentre, 'id')),
+          jsonCentre = self.jsonEntities.centre(),
+          centre = new self.Centre(_.omit(jsonCentre, 'id')),
           json = _.pick(centre, 'name', 'description');
 
-      self.httpBackend.expectPOST(uri(), json).respond(201, serverReply(baseCentre));
+      self.httpBackend.expectPOST(uri(), json).respond(201, serverReply(jsonCentre));
 
       centre.add().then(checkReply).catch(failTest);
       self.httpBackend.flush();
 
       function checkReply(replyCentre) {
-        expect(replyCentre.id).toEqual(baseCentre.id);
-        expect(replyCentre.version).toEqual(0);
-        expect(replyCentre.name).toEqual(centre.name);
-        expect(replyCentre.description).toEqual(centre.description);
+        expect(replyCentre).toEqual(jasmine.any(self.Centre));
       }
     });
 
     it('can update the name on a centre', function() {
       var self       = this,
-          baseCentre = self.jsonEntities.centre(),
-          centre     = new self.Centre(baseCentre);
+          jsonCentre = self.jsonEntities.centre(),
+          centre     = new self.Centre(jsonCentre);
 
       this.updateEntity.call(this,
                              centre,
@@ -254,15 +251,15 @@ define([
                              centre.name,
                              uri('name', centre.id),
                              { name: centre.name },
-                             baseCentre,
+                             jsonCentre,
                              expectCentre,
                              failTest);
     });
 
     it('can update the description on a centre', function() {
       var self = this,
-          baseCentre = self.jsonEntities.centre(),
-          centre     = new self.Centre(baseCentre);
+          jsonCentre = self.jsonEntities.centre({ description: self.jsonEntities.stringNext() }),
+          centre     = new self.Centre(jsonCentre);
 
       this.updateEntity.call(this,
                              centre,
@@ -270,7 +267,7 @@ define([
                              undefined,
                              uri('description', centre.id),
                              { },
-                             baseCentre,
+                             jsonCentre,
                              expectCentre,
                              failTest);
 
@@ -280,7 +277,7 @@ define([
                              centre.description,
                              uri('description', centre.id),
                              { description: centre.description },
-                             baseCentre,
+                             jsonCentre,
                              expectCentre,
                              failTest);
     });

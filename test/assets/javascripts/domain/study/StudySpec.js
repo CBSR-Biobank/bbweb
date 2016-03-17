@@ -14,25 +14,30 @@ define([
 
   describe('Study', function() {
 
-    var Study;
-
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(entityTestSuite, extendedDomainEntities) {
-      _.extend(this, entityTestSuite);
+      var self = this;
 
-      this.httpBackend        = this.$injector.get('$httpBackend');
-      this.Study              = this.$injector.get('Study');
-      this.StudyStatus        = this.$injector.get('StudyStatus');
-      this.funutils           = this.$injector.get('funutils');
-      this.jsonEntities       = this.$injector.get('jsonEntities');
-      this.testUtils          = this.$injector.get('testUtils');
+      _.extend(self, entityTestSuite);
 
-      this.testUtils.addCustomMatchers();
+      self.httpBackend        = self.$injector.get('$httpBackend');
+      self.Study              = self.$injector.get('Study');
+      self.StudyStatus        = self.$injector.get('StudyStatus');
+      self.funutils           = self.$injector.get('funutils');
+      self.jsonEntities       = self.$injector.get('jsonEntities');
+      self.testUtils          = self.$injector.get('testUtils');
 
-      Study = this.Study;
+      self.testUtils.addCustomMatchers();
+      self.jsonStudy = self.jsonEntities.study();
+      self.expectStudy = expectStudy;
 
-      this.jsonStudy = this.jsonEntities.study();
+      //--
+
+      // used by promise tests
+      function expectStudy(entity) {
+        expect(entity).toEqual(jasmine.any(self.Study));
+      }
     }));
 
     afterEach(function() {
@@ -78,7 +83,7 @@ define([
     it('can retrieve a single study', function() {
       var self = this;
       self.httpBackend.whenGET(uri(this.jsonStudy.id)).respond(serverReply(this.jsonStudy));
-      self.Study.get(this.jsonStudy.id).then(expectStudy).catch(failTest);
+      self.Study.get(this.jsonStudy.id).then(self.expectStudy).catch(failTest);
       self.httpBackend.flush();
     });
 
@@ -190,7 +195,7 @@ define([
 
       self.httpBackend.expectPOST(uri(), json).respond(201, serverReply(this.jsonStudy));
 
-      study.add().then(expectStudy).catch(failTest);
+      study.add().then(self.expectStudy).catch(failTest);
       self.httpBackend.flush();
     });
 
@@ -205,7 +210,7 @@ define([
                              uri('name', study.id),
                              { name: study.name },
                              this.jsonStudy,
-                             expectStudy,
+                             self.expectStudy,
                              failTest);
     });
 
@@ -220,7 +225,7 @@ define([
                              uri('description', study.id),
                              { },
                              this.jsonStudy,
-                             expectStudy,
+                             self.expectStudy,
                              failTest);
 
       this.updateEntity.call(this,
@@ -230,7 +235,7 @@ define([
                              uri('description', study.id),
                              { description: study.description },
                              this.jsonStudy,
-                             expectStudy,
+                             self.expectStudy,
                              failTest);
     });
 
@@ -246,7 +251,7 @@ define([
                              uri('pannottype', study.id),
                              _.omit(annotationType, 'uniqueId'),
                              this.jsonStudy,
-                             expectStudy,
+                             self.expectStudy,
                              failTest);
     });
 
@@ -259,7 +264,7 @@ define([
                                            study.version, annotationType.uniqueId);
 
       self.httpBackend.whenDELETE(url).respond(201, serverReply(true));
-      study.removeAnnotationType(annotationType).then(expectStudy).catch(failTest);
+      study.removeAnnotationType(annotationType).then(self.expectStudy).catch(failTest);
       self.httpBackend.flush();
     });
 
@@ -338,11 +343,6 @@ define([
         expect(replyStudy.version).toEqual(study.version + 1);
         expect(replyStudy.status).toBe(status);
       }
-    }
-
-    // used by promise tests
-    function expectStudy(entity) {
-      expect(entity).toEqual(jasmine.any(Study));
     }
 
     // used by promise tests

@@ -12,7 +12,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('Directive: spcLinkTypesPanelDirective', function() {
+  xdescribe('Directive: spcLinkTypesPanelDirective', function() {
     var scope,
         controller,
         createEntities,

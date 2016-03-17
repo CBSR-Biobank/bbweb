@@ -44,7 +44,7 @@ define(['underscore'], function(_) {
       };
     };
 
-    NumberAnnotation.prototype.isValid = function () {
+    NumberAnnotation.prototype.isValueValid = function () {
       return !(_.isNaN(this.value) || _.isUndefined(this.value));
     };
 

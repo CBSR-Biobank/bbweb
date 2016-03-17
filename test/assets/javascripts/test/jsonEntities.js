@@ -6,7 +6,7 @@ define([
   'angular',
   'underscore',
   'faker',
-  'moment',
+  'moment'
 ], function(angular, _, faker, moment) {
   'use strict';
 
@@ -21,12 +21,11 @@ define([
     'StudyStatus',
     'CentreStatus',
     'UserStatus',
-    'bbwebConfig',
-    'testUtils'
+    'bbwebConfig'
   ];
 
   /**
-   * Generates fake domain entities as if returned by the server.
+   * Generates JSON domain entities as if returned by the server.
    *
    * This has to be an AngularJS service so that it's dependencies from the real application
    * can be injected (i.e. AnnotationValueType).
@@ -39,33 +38,57 @@ define([
                         StudyStatus,
                         CentreStatus,
                         UserStatus,
-                        bbwebConfig,
-                        testUtils) {
-    var nameCountByEntity = {};
+                        bbwebConfig) {
 
-    var service = {
-      domainEntityNameNext:              domainEntityNameNext,
-      stringNext:                        stringNext,
+    var defaultEntities = {},
+        nameCountByEntity = {},
+        entityCount = 0,
+        valueTypeCount = 0,
+        commonFieldNames = _.keys(commonFields),
+        service;
+
+    service = {
+      // domain entities
       specimenLinkType:                  specimenLinkType,
+      defaultSpecimenLinkType:           defaultSpecimenLinkType,
+
       processingType:                    processingType,
+      defaultProcessingType:             defaultProcessingType,
+
       collectionEventType:               collectionEventType,
-      collectionSpecimenSpec:            collectionSpecimenSpec,
+      defaultCollectionEventType:        defaultCollectionEventType,
+
       specimenGroup:                     specimenGroup,
-      annotationType:                    annotationType,
-      allAnnotationTypes:                allAnnotationTypes,
+      defaultSpecimenGroup:              defaultSpecimenGroup,
+
       study:                             study,
-      annotation:                        annotation,
-      valueForAnnotation:                valueForAnnotation,
+      defaultStudy:                      defaultStudy,
 
       participant:                       participant,
+      defaultParticipant:                defaultParticipant,
+
       collectionEvent:                   collectionEvent,
+      defaultCollectionEvent:            defaultCollectionEvent,
 
       centre:                            centre,
-      location:                          location,
+      defaultCentre:                     defaultCentre,
 
       user:                              user,
+      defaultUser:                       defaultUser,
 
+      // value types
+      annotationType:                    annotationType,
+      allAnnotationTypes:                allAnnotationTypes,
+      annotation:                        annotation,
+      valueForAnnotation:                valueForAnnotation,
+      collectionSpecimenSpec:            collectionSpecimenSpec,
+      location:                          location,
+
+      // utilities
+      domainEntityNameNext:              domainEntityNameNext,
+      stringNext:                        stringNext,
       pagedResult:                       pagedResult,
+
 
       ENTITY_NAME_PROCESSING_TYPE:       ENTITY_NAME_PROCESSING_TYPE,
       ENTITY_NAME_SPECIMEN_LINK_TYPE:    ENTITY_NAME_SPECIMEN_LINK_TYPE,
@@ -99,7 +122,7 @@ define([
 
     function ENTITY_NAME_USER()                  { return 'user'; }
 
-    function commonFields(obj) {
+    function commonFields() {
       return {
         version:      0,
         timeAdded:    moment(faker.date.recent(10)).format(),
@@ -116,6 +139,21 @@ define([
       return faker.address.streetAddress();
     }
 
+    function stringNext() {
+      return domainEntityNameNext();
+    }
+
+    function updateDefaultEntity(entityName, entity) {
+      defaultEntities[entityName] = entity;
+      entityCount += 1;
+    }
+
+    function defaultEntity(entityName, createFunc) {
+      if (_.isUndefined(defaultEntities[entityName])) {
+        createFunc();
+      }
+      return defaultEntities[entityName];
+    }
     /**
      * Generates a unique name for a domain entity type. If domain entity type is undefined, then a unique
      * string is generated.
@@ -134,70 +172,72 @@ define([
       return domainEntityType + '_' + nameCountByEntity[domainEntityType];
     }
 
-    function specimenLinkType(processingType, options) {
-      var slt = {
-        id: testUtils.uuid(),
-        processingTypeId: processingType.id,
+    function specimenLinkType(options) {
+      var processingType = defaultProcessingType(),
+          defaults = {
+            id:                    domainEntityNameNext(ENTITY_NAME_SPECIMEN_LINK_TYPE()),
+            processingTypeId:      processingType.id,
+            expectedInputChange:   faker.random.number({precision: 0.5}),
+            expectedOutputChange:  faker.random.number({precision: 0.5}),
+            inputGroupId:          null,
+            outputGroupId:         null,
+            inputCount:            faker.random.number(5) + 1,
+            outputCount:           faker.random.number(5) + 1,
+            inputContainerTypeId:  null,
+            outputContainerTypeId: null
+          },
+          validKeys = commonFieldNames.concat(_.keys(defaults)),
+          slt = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
 
-        expectedInputChange:   faker.random.number({precision: 0.5}),
-        expectedOutputChange:  faker.random.number({precision: 0.5}),
-        inputCount:            faker.random.number(5) + 1,
-        outputCount:           faker.random.number(5) + 1
-      };
-
-      options = options || {};
-
-      if (options.inputGroup) {
-        slt.inputGroupId = options.inputGroup.id;
-      }
-      if (options.outputGroup) {
-        slt.outputGroupId = options.outputGroup.id;
-      }
-      if (options.inputContainerType) {
-        slt.inputContainerTypeId = options.inputContainerType.id;
-      }
-      if (options.outputContainerType) {
-        slt.outputContainerTypeId = options.outputContainerType.id;
-      }
-
-      slt.annotationTypeData = [];
-
-      return _.extend(slt, commonFields());
+      updateDefaultEntity(ENTITY_NAME_SPECIMEN_LINK_TYPE(), slt);
+      return slt;
     }
 
-    function stringNext() {
-      return domainEntityNameNext();
+    function defaultSpecimenLinkType() {
+      return defaultEntity(ENTITY_NAME_SPECIMEN_LINK_TYPE(), specimenLinkType);
     }
 
-    function processingType(study) {
-      var pt =  {
-        id:          testUtils.uuid(),
-        studyId:     study.id,
-        name:        domainEntityNameNext(ENTITY_NAME_PROCESSING_TYPE()),
-        description: randomFakerLoremWord(),
-        enabled:     false
-      };
-      return _.extend(pt, commonFields());
+    function processingType(options) {
+      var study = defaultStudy(),
+          defaults = {
+            id:          domainEntityNameNext(ENTITY_NAME_PROCESSING_TYPE()),
+            studyId:     study.id,
+            name:        stringNext(),
+            description: randomFakerLoremWord(),
+            enabled:     false
+          },
+          validKeys = commonFieldNames.concat(_.keys(defaults)),
+          pt = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
+      updateDefaultEntity(ENTITY_NAME_PROCESSING_TYPE(), pt);
+      return pt;
+    }
+
+    function defaultProcessingType() {
+      return defaultEntity(ENTITY_NAME_PROCESSING_TYPE(), processingType);
     }
 
     /**
      * Returns a collection event type as returned by the server.
      */
-    function collectionEventType(study, options) {
-      var cet = {
-        id:              testUtils.uuid(),
-        studyId:         study.id,
-        name:            domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE()),
-        description:     randomFakerLoremWord(),
-        specimenSpecs:   [],
-        annotationTypes: []
-      };
+    function collectionEventType(options) {
+      var study = defaultStudy(),
+          defaults = {
+            id:              domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE()),
+            studyId:         study.id,
+            name:            stringNext(),
+            description:     randomFakerLoremWord(),
+            specimenSpecs:   [],
+            annotationTypes: [],
+            recurring:       false
+          },
+          validKeys = commonFieldNames.concat(_.keys(defaults)),
+          cet = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
+      updateDefaultEntity(ENTITY_NAME_COLLECTION_EVENT_TYPE(), cet);
+      return cet;
+    }
 
-      options = options || {};
-      cet.recurring = _.isUndefined(options.recurring) ? false : options.recurring;
-      return _.extend(cet,
-                      commonFields(),
-                      _.pick(options, 'specimenSpecs', 'annotationTypes'));
+    function defaultCollectionEventType() {
+      return defaultEntity(ENTITY_NAME_COLLECTION_EVENT_TYPE(), collectionEventType);
     }
 
     function randomAnatomicalSourceType() {
@@ -216,41 +256,153 @@ define([
       return faker.random.array_element(SpecimenType.values());
     }
 
-    function collectionSpecimenSpec(options) {
-      var spec = {
-        uniqueId:                    testUtils.uuid(),
-        name:                        domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP()),
-        description:                 randomFakerLoremWord(),
-        units:                       'mL',
-        anatomicalSourceType:        randomAnatomicalSourceType(),
-        preservationType:            randomPreservationType(),
-        preservationTemperatureType: randomPreservationTemperatureTypeType(),
-        specimenType:                randomSpecimenType(),
-        maxCount:                    1,
-        amount:                      0.5
-      };
-      options = options || {};
-      return _.extend(spec, options);
+    function specimenGroup(options) {
+      var study = defaultStudy(),
+          defaults = {
+            id:                          domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP()),
+            studyId:                     study.id,
+            name:                        stringNext(),
+            description:                 randomFakerLoremWord(),
+            units:                       'mL',
+            anatomicalSourceType:        randomAnatomicalSourceType(),
+            preservationType:            randomPreservationType(),
+            preservationTemperatureType: randomPreservationTemperatureTypeType(),
+            specimenType:                randomSpecimenType()
+          },
+          validKeys = commonFieldNames.concat(_.keys(defaults)),
+          sg = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
+      updateDefaultEntity(ENTITY_NAME_SPECIMEN_GROUP(), sg);
+      return sg;
     }
 
-    function specimenGroup(study) {
-      var sg = {
-        id:                          testUtils.uuid(),
-        studyId:                     study.id,
-        name:                        domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP()),
-        description:                 randomFakerLoremWord(),
-        units:                       'mL',
-        anatomicalSourceType:        randomAnatomicalSourceType(),
-        preservationType:            randomPreservationType(),
-        preservationTemperatureType: randomPreservationTemperatureTypeType(),
-        specimenType:                randomSpecimenType()
-      };
-      return _.extend(sg, commonFields());
+    function defaultSpecimenGroup() {
+      return defaultEntity(ENTITY_NAME_SPECIMEN_GROUP(), specimenGroup);
+    }
+
+    function study(options) {
+      var defaults =  { id:              domainEntityNameNext(ENTITY_NAME_STUDY()),
+                        name:            stringNext(),
+                        description:     randomFakerLoremWord(),
+                        annotationTypes: [],
+                        status:          StudyStatus.DISABLED()
+                      },
+          validKeys = commonFieldNames.concat(_.keys(defaults)),
+          s = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
+      updateDefaultEntity(ENTITY_NAME_STUDY(), s);
+      return s;
+    }
+
+    function defaultStudy() {
+      return defaultEntity(ENTITY_NAME_STUDY(), study);
     }
 
     /**
-     * If you need a study annotatoin type then use function 'studyAnnotationType'.
-     *
+     * If defaultStudy has annotation types, then participant will have annotations based on the study's,
+     * unless options.annotationTypes is defined.
+     */
+    function participant(options) {
+      var study = defaultStudy(),
+          defaults = {
+            id:          domainEntityNameNext(ENTITY_NAME_PARTICIPANT()),
+            studyId:     study.id,
+            uniqueId:    domainEntityNameNext(ENTITY_NAME_PARTICIPANT()),
+            annotations: []
+          },
+          validKeys = commonFieldNames.concat(_.keys(defaults)),
+          annotationTypes,
+          p;
+
+      options = options || {};
+
+      p = _.extend(defaults, commonFields(), _.pick(options, validKeys));
+
+      if (!options.annotations) {
+        // assign annotation types
+        if (options.annotationTypes) {
+          p.annotations = annotations(options.annotationTypes);
+        } else if (study.annotationTypes) {
+          p.annotations = annotations(study.annotationTypes);
+        }
+      }
+
+      updateDefaultEntity(ENTITY_NAME_PARTICIPANT(), p);
+      return p;
+    }
+
+    function defaultParticipant() {
+      return defaultEntity(ENTITY_NAME_PARTICIPANT(), participant);
+    }
+
+    function collectionEvent(options) {
+      var participant = defaultParticipant(),
+          collectionEventType = defaultCollectionEventType(),
+          defaults = {
+            id:                    domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT()),
+            participantId:         participant.id,
+            collectionEventTypeId: collectionEventType.id,
+            timeCompleted:         moment(faker.date.recent(10)).format(),
+            visitNumber:           1,
+            annotations:           []
+          },
+          validKeys = commonFieldNames.concat(_.keys(defaults)),
+          ce;
+
+      options = options || {};
+      ce = _.extend(defaults, commonFields(), _.pick(options, validKeys));
+
+      if (!options.annotations) {
+        // assign annotation types
+        if (options.annotationTypes) {
+          ce.annotations = annotations(options.annotationTypes);
+        } else if (collectionEventType.annotationTypes) {
+          ce.annotations = annotations(collectionEventType.annotationTypes);
+        }
+      }
+
+      updateDefaultEntity(ENTITY_NAME_COLLECTION_EVENT(), ce);
+      return ce;
+    }
+
+    function defaultCollectionEvent() {
+      return defaultEntity(ENTITY_NAME_COLLECTION_EVENT(), collectionEvent);
+    }
+
+    function centre(options) {
+      var defaults = { id:          domainEntityNameNext(ENTITY_NAME_CENTRE()),
+                       name:        stringNext(),
+                       description: stringNext(),
+                       status:      CentreStatus.DISABLED(),
+                       studyIds:    [],
+                       locations:   []
+                     },
+          validKeys = commonFieldNames.concat(_.keys(defaults)),
+          c = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
+      updateDefaultEntity(ENTITY_NAME_CENTRE(), c);
+      return c;
+    }
+
+    function defaultCentre() {
+      return defaultEntity(ENTITY_NAME_CENTRE(), centre);
+    }
+
+    function user(options) {
+      var defaults = { id:        domainEntityNameNext(ENTITY_NAME_USER()),
+                       name:      stringNext(),
+                       email:     stringNext(),
+                       avatarUrl: null,
+                       status:    UserStatus.REGISTERED()
+                     },
+          validKeys = commonFieldNames.concat(_.keys(defaults)),
+          u = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
+      updateDefaultEntity(ENTITY_NAME_USER(), u);
+      return u;
+    }
+
+    function defaultUser() {
+      return defaultEntity(ENTITY_NAME_USER(), user);
+    }
+
+    /**
      * @param {ValueType} option.valueType the type of annotation Type to create. Valid types are: Text,
      * Number, DateTime and Select.
      *
@@ -258,19 +410,22 @@ define([
      * multiple selection.
      */
     function annotationType(options) {
+      var defaults = { uniqueId:      domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE()),
+                       name:          stringNext(),
+                       description:   null,
+                       valueType:     AnnotationValueType.TEXT(),
+                       options:       [],
+                       maxValueCount: null,
+                       required:      false
+                     },
+          validKeys = _.keys(defaults),
+          at;
+
       options = options || {};
 
       if (!options.valueType) {
         options.valueType = AnnotationValueType.TEXT();
       }
-
-      var at = {
-        uniqueId:  testUtils.uuid(),
-        valueType: options.valueType,
-        name:      domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE()),
-        options:   [],
-        required:  options.required || false
-      };
 
       if (options.valueType === AnnotationValueType.SELECT()) {
         if (_.isUndefined(options.maxValueCount)) {
@@ -278,18 +433,14 @@ define([
         }
 
         if (_.isUndefined(options.options)) {
-          at.options = _.map(_.range(2), function() {
+          options.options = _.map(_.range(2), function() {
             return domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE());
           });
-        } else {
-          at.options = options.options;
         }
       }
 
-      if (!_.isUndefined(options.maxValueCount)) {
-        at.maxValueCount = options.maxValueCount;
-      }
-
+      at = _.extend(defaults, _.pick(options, validKeys));
+      valueTypeCount += 1;
       return at;
     }
 
@@ -305,46 +456,60 @@ define([
       return annotationTypes;
     }
 
-    function study(options) {
-      var s =  {
-        id:              testUtils.uuid(),
-        name:            domainEntityNameNext(ENTITY_NAME_STUDY()),
-        description:     randomFakerLoremWord(),
-        annotationTypes: [],
-        status:          StudyStatus.DISABLED()
-      };
-      options = options || {};
-      return _.extend(s, commonFields(), options);
+    function collectionSpecimenSpec(options) {
+      var defaults = { uniqueId:                    domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP()),
+                       name:                        stringNext(),
+                       description:                 randomFakerLoremWord(),
+                       units:                       'mL',
+                       anatomicalSourceType:        randomAnatomicalSourceType(),
+                       preservationType:            randomPreservationType(),
+                       preservationTemperatureType: randomPreservationTemperatureTypeType(),
+                       specimenType:                randomSpecimenType(),
+                       maxCount:                    1,
+                       amount:                      0.5
+                     },
+          validKeys = _.keys(defaults),
+          spec = _.extend(defaults, _.pick(options || {}, validKeys));
+      valueTypeCount += 1;
+      return spec;
     }
 
     /**
      * @param options.value The value for the annotation.
      */
     function annotation(options, annotationType) {
-      var annot = {
-        annotationTypeId: annotationType.uniqueId,
-        selectedValues:   []
-      };
+      var defaults = { annotationTypeId: null,
+                       stringValue:      null,
+                       numberValue:      null,
+                       selectedValues:   []
+                     },
+          validKeys = _.keys(defaults),
+          annotation = _.extend(defaults, _.pick(options || {}, validKeys));
 
       options = options || {};
+      annotationType = annotationType || {};
 
-      if (!_.isUndefined(options.value)) {
+      if (annotationType.uniqueId) {
+        annotation.annotationTypeId = annotationType.uniqueId;
+      }
+
+      if (!_.isUndefined(options.value) && annotationType.valueType) {
         switch (annotationType.valueType) {
         case AnnotationValueType.TEXT():
         case AnnotationValueType.DATE_TIME():
-          annot.stringValue = options.value;
+          annotation.stringValue = options.value;
           break;
 
         case AnnotationValueType.NUMBER():
-          annot.numberValue = options.value;
+          annotation.numberValue = options.value;
           break;
 
         case AnnotationValueType.SELECT():
           if (options.value !== '') {
             if (annotationType.maxValueCount === 1) {
-              annot.selectedValues =  [ options.value ];
+              annotation.selectedValues =  [ options.value ];
             } else if (annotationType.maxValueCount > 1) {
-              annot.selectedValues = options.value;
+              annotation.selectedValues = options.value;
             } else {
               throw new Error('invalid max value count for annotation: ' + annotationType.maxValueCount);
             }
@@ -352,11 +517,11 @@ define([
           break;
 
         default:
-          throw new Error('invalid value type: ' + annotationType.valueType);
+          throw new Error('invalid annotation value type: ' + annotationType.valueType);
         }
       }
 
-      return annot;
+      return annotation;
     }
 
     function valueForAnnotation(annotationType) {
@@ -391,83 +556,30 @@ define([
       throw new Error('invalid value type: ' + annotationType.valueType);
     }
 
-    function participant(options) {
-      options = options || {};
-
-      var p =  {
-        id:          testUtils.uuid(),
-        studyId:     options.studyId || null,
-        uniqueId:    domainEntityNameNext(ENTITY_NAME_PARTICIPANT())
-      };
-
-      options.annotations = options.annotations || {};
-      options.annotationTypes = options.annotationTypes || {};
-      p.annotations = _.map(options.annotationTypes, function (annotationType) {
-        return annotation({ value: valueForAnnotation(annotationType) },
-                          annotationType);
+    function annotations(annotationTypes) {
+      return _.map(annotationTypes, function (annotationType) {
+        var value = valueForAnnotation(annotationType);
+        return annotation({ value: value }, annotationType);
       });
-
-      return _.extend(p, commonFields());
-    }
-
-    function collectionEvent(options) {
-      options = options || {};
-
-      var ce =  {
-        id:                    testUtils.uuid(),
-        participantId:         options.participantId || null,
-        collectionEventTypeId: options.collectionEventTypeId || null,
-        timeCompleted:         moment(faker.date.recent(10)).format(),
-        visitNumber:           options.visitNumber || 1
-      };
-
-      options.annotationTypes = options.annotationTypes || {};
-      ce.annotations = _.map(options.annotationTypes, function (annotationType) {
-        return annotation(valueForAnnotation(annotationType), annotationType);
-      });
-
-      return _.extend(ce, commonFields());
-    }
-
-    function centre(options) {
-      var c =  {
-        id:          testUtils.uuid(),
-        name:        domainEntityNameNext(ENTITY_NAME_CENTRE()),
-        description: randomFakerLoremWord(),
-        status:      CentreStatus.DISABLED()
-      };
-      options = options || {};
-      return _.extend(c, commonFields(), options);
     }
 
     /**
      * This is a value object, so it does not have the common fields.
      */
     function location(options) {
-      var loc = {
-        uniqueId:       testUtils.uuid(),
-        name:           domainEntityNameNext(ENTITY_NAME_LOCATION()),
-        street:         faker.address.streetAddress(),
-        city:           faker.address.city(),
-        province:       faker.address.state(),
-        postalCode:     faker.address.zipCode(),
-        poBoxNumber:    randomFakerLoremWord(),
-        countryIsoCode: randomFakerLoremWord()
-      };
-      options = options || {};
-      _.extend(loc, options);
-      return loc;
-    }
-
-    function user() {
-      var u =  {
-        id:          testUtils.uuid(),
-        name:        domainEntityNameNext(ENTITY_NAME_USER()),
-        email:       faker.internet.email(),
-        avatarUrl:   faker.internet.avatar(),
-        status:      UserStatus.REGISTERED()
-      };
-      return _.extend(u, commonFields());
+      var defaults = { uniqueId:       domainEntityNameNext(ENTITY_NAME_LOCATION()),
+                       name:           stringNext(),
+                       street:         faker.address.streetAddress(),
+                       city:           faker.address.city(),
+                       province:       faker.address.state(),
+                       postalCode:     faker.address.zipCode(),
+                       poBoxNumber:    randomFakerLoremWord(),
+                       countryIsoCode: randomFakerLoremWord()
+                },
+          validKeys = _.keys(defaults),
+          at = _.extend(defaults, _.pick(options || {}, validKeys));
+      valueTypeCount += 1;
+      return at;
     }
 
     function pagedResult(entities) {

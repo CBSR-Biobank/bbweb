@@ -25,19 +25,8 @@ define(['underscore'], function(_) {
       logout:             logout,
       isAuthenticated:    isAuthenticated,
       isAdmin:            isAdmin,
-      query:              query,
-      getAllUsers:        getAllUsers,
       getUserCounts:      getUserCounts,
-      getUsers:           getUsers,
-      add:                add,
-      updateName:         updateName,
-      updateEmail:        updateEmail,
-      updatePassword:     updatePassword,
-      updateAvatarUrl:    updateAvatarUrl,
-      passwordReset:      passwordReset,
-      activate:           activate,
-      lock:               lock,
-      unlock:             unlock
+      passwordReset:      passwordReset
     };
 
     init();
@@ -125,135 +114,14 @@ define(['underscore'], function(_) {
       });
     }
 
-    function query(userId) {
-      return biobankApi.get(uri(userId));
-    }
-
-    function getAllUsers() {
-      return biobankApi.get(uri());
-    }
-
     function getUserCounts() {
       return biobankApi.get(uri() + '/counts');
-    }
-
-    /**
-     * @param {string} options.nameFilter The filter to use on user names. Default is empty string.
-     *
-     * @param {string} options.emailFilter The filter to use on user emails. Default is empty string.
-     *
-     * @param {string} options.status Returns users filtered by status. The following are valid: 'all' to
-     * return all users, 'retired' to return only retired users, 'active' to reutrn only active
-     * users, and 'locked' to return only locked users. For any other values the response is an error.
-     *
-     * @param {string} options.sortField Users can be sorted by 'name', 'email' or by 'status'. Values other
-     * than these yield an error.
-     *
-     * @param {int} options.page If the total results are longer than pageSize, then page selects which
-     * users should be returned. If an invalid value is used then the response is an error.
-     *
-     * @param {int} options.pageSize The total number of users to return per page. The maximum page size is
-     * 10. If a value larger than 10 is used then the response is an error.
-     *
-     * @param {string} options.order One of 'asc' or 'desc'. If an invalid value is used then
-     * the response is an error.
-     *
-     * @return A promise. If the promise succeeds then a paged result is returned.
-     */
-    function getUsers(options) {
-      var validKeys = [
-        'nameFilter',
-        'emailFilter',
-        'status',
-        'sort',
-        'page',
-        'pageSize',
-        'order'
-      ];
-      var url = uri();
-      var paramsStr = '';
-
-      if (arguments.length) {
-        paramsStr = queryStringService.param(options, function (value, key) {
-          return _.contains(validKeys, key);
-        });
-      }
-
-      if (paramsStr) {
-        url += paramsStr;
-      }
-
-      return biobankApi.get(url);
-    }
-
-    function add(newUser, password) {
-      var cmd = {
-        name:     newUser.name,
-        email:    newUser.email,
-        password: password
-      };
-      if (newUser.avatarUrl) {
-        cmd.avatarUrl = newUser.avatarUrl;
-      }
-      return biobankApi.post(uri(), cmd);
-    }
-
-    function updateName(user, newName) {
-      var cmd = {
-        id:              user.id,
-        expectedVersion: user.version,
-        name:            newName
-      };
-      return biobankApi.put(uri(user.id) + '/name', cmd);
-    }
-
-    function updateEmail(user, newEmail) {
-      var cmd = {
-        id:              user.id,
-        expectedVersion: user.version,
-        email:           newEmail
-      };
-      return biobankApi.put(uri(user.id) + '/email', cmd);
-    }
-
-    function updatePassword(user, currentPassword, newPassword) {
-      var cmd = {
-        id:              user.id,
-        expectedVersion: user.version,
-        currentPassword: currentPassword,
-        newPassword:     newPassword
-      };
-      return biobankApi.put(uri(user.id) + '/password', cmd);
-    }
-
-    function updateAvatarUrl(user, avatarUrl) {
-      var cmd = {
-        id:              user.id,
-        expectedVersion: user.version
-      };
-
-      if (avatarUrl) {
-        cmd.avatarUrl = avatarUrl;
-      }
-
-      return biobankApi.put(uri(user.id) + '/avatarurl', cmd);
     }
 
     function passwordReset(email) {
       return biobankApi.post('/passreset', { email: email });
     }
 
-    function activate(user) {
-      return changeStatus(user, 'activate');
-    }
-
-    function lock(user) {
-      return changeStatus(user, 'lock');
-    }
-
-    function unlock(user) {
-      return changeStatus(user, 'unlock');
-    }
   }
 
   return usersServiceFactory;

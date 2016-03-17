@@ -118,23 +118,37 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
       return deferred.promise;
     };
 
+    /**
+     * Returns a promise. If annotations are found to be invalid, then the promise is rejected. If the
+     * annotations are valid, then a request is made to the server to add the participant.
+     */
     Participant.prototype.add = function () {
       var self = this,
+          deferred = $q.defer(),
+          invalidAnnotationErrMsg = null,
           cmd = _.pick(self, 'studyId', 'uniqueId');
 
       // convert annotations to server side entities
       cmd.annotations = _.map(self.annotations, function (annotation) {
         // make sure required annotations have values
         if (!annotation.isValueValid()) {
-          throw new Error('required annotation has no value: annotationId: ' +
-                          annotation.annotationType.id);
+          invalidAnnotationErrMsg = 'required annotation has no value: annotationId: ' +
+            annotation.annotationTypeId;
         }
         return annotation.getServerAnnotation();
       });
 
-      return biobankApi.post(uri(self.studyId), cmd).then(function(reply) {
-        return self.asyncCreate(reply);
-      });
+      if (invalidAnnotationErrMsg) {
+        deferred.reject(invalidAnnotationErrMsg);
+      } else {
+        biobankApi.post(uri(self.studyId), cmd)
+          .then(self.asyncCreate)
+          .then(function (participant) {
+            deferred.resolve(participant)
+          });
+      }
+
+      return deferred.promise;
     };
 
     Participant.prototype.updateUniqueId = function (uniqueId) {

@@ -36,7 +36,8 @@ module.exports = function(config) {
     exclude: [
       'app/assets/javascripts/main.js',
       'target/web/web-modules/main/webjars/lib/angularjs/angular-*.min.js',
-      'target/web/web-modules/main/webjars/lib/angularjs/angular-scenario.js'
+      'target/web/web-modules/main/webjars/lib/angularjs/angular-scenario.js',
+      'target/web/web-modules/main/webjars/lib/**/test/*.spec.js'
     ],
 
     // preprocess matching files before serving them to the browser

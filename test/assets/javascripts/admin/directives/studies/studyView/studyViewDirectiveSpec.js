@@ -37,28 +37,34 @@ define([
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/studyView/studyView.html');
 
-      self.element = angular.element('<study-view study="vm.study"></study-view>');
-      self.scope = $rootScope.$new();
-      self.scope.vm = { study: self.study };
+      self.createController = createController;
 
-      $compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('studyView');
+      //--
+
+      function createController() {
+        self.element = angular.element('<study-view study="vm.study"></study-view>');
+        self.scope = $rootScope.$new();
+        self.scope.vm = { study: self.study };
+
+        $compile(this.element)(this.scope);
+        this.scope.$digest();
+        this.controller = this.element.controller('studyView');
+      }
     }));
 
     it('should contain a valid study', function() {
+      this.createController();
       expect(this.controller.study).toBe(this.study);
     });
 
-    it('should contain initialized panels', function() {
-      expect(this.controller.tabSummaryActive).toBe(false);
-      expect(this.controller.tabParticipantsActive).toBe(false);
-      expect(this.controller.tabSpecimensActive).toBe(false);
-      expect(this.controller.tabCollectionActive).toBe(false);
-      expect(this.controller.tabProcessingActive).toBe(false);
+    it('should contain initialized tabs', function() {
+      this.createController();
+      expect(this.controller.tabs).toBeArrayOfSize(4);
     });
 
     it('should contain initialized local storage', function() {
+      this.createController();
+
       expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.collectionEventTypes', true);
       expect(this.$window.localStorage.setItem)
@@ -68,17 +74,20 @@ define([
       expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.processingTypes', true);
       expect(this.$window.localStorage.setItem)
-        .toHaveBeenCalledWith('study.panel.specimenGroups', true);
-      expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.specimenLinkAnnotationTypes', true);
       expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.specimenLinkTypes', true);
     });
 
     it('should initialize the tab of the current state', function() {
+      var tab;
+
       this.$state.current.name = 'home.admin.studies.study.processing';
-      this.$injector.get('$timeout').flush();
-      expect(this.controller.tabProcessingActive).toBe(true);
+      this.createController();
+
+      tab = _.findWhere(this.controller.tabs, { heading: 'Processing' });
+
+      expect(tab.active).toBe(true);
     });
 
   });

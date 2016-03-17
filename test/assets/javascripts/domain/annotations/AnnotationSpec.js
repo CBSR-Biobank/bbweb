@@ -170,7 +170,7 @@ define([
              serverAnnotation = jsonEntities.annotation(value, annotationType);
              serverAnnotation.selectedValues = annotationType.options;
              expect(function () { return createAnnotation(serverAnnotation, annotationType); })
-               .toThrow(new Error('invalid selected values in object from server'));
+               .toThrow(new Error('invalid value for selected values'));
            });
 
         it('fails when creating from a non object', function() {
@@ -320,7 +320,7 @@ define([
           serverAnnotation = jsonEntities.annotation({ value: value }, annotationType);
 
           annotation = createAnnotation(serverAnnotation, annotationType);
-          expect(annotation.getValue()).toEqual(serverAnnotation.selectedValues[0].value);
+          expect(annotation.getValue()).toEqual(serverAnnotation.selectedValues[0]);
         });
 
         it('getValue returns valid results for MULTIPLE SELECT', function() {
@@ -335,22 +335,17 @@ define([
 
           value = jsonEntities.valueForAnnotation(annotationType);
           serverAnnotation = jsonEntities.annotation({ value: value }, annotationType);
-
           annotation = createAnnotation(serverAnnotation, annotationType);
-          multipleSelectValues = _.pluck(serverAnnotation.selectedValues, 'value');
 
-          expect(annotation.getValue()).toEqual(multipleSelectValues.join(', '));
+          expect(annotation.getValue()).toEqual(serverAnnotation.selectedValues.join(', '));
         });
 
         it('getServerAnnotation returns valid results for non select annotation types', function() {
           _.each(getAnnotationAndTypeForAllValueTypes(), function (entities) {
-            expect(entities.annotation.getServerAnnotation()).toEqual(entities.serverAnnotation);
-          });
-        });
-
-        it('getServerAnnotation returns valid results for non select annotation types', function() {
-          _.each(getAnnotationAndTypeForAllValueTypes(), function (entities) {
-            expect(entities.annotation.getServerAnnotation()).toEqual(entities.serverAnnotation);
+            var serverAnnot = entities.annotation.getServerAnnotation();
+            _.each(_.keys(serverAnnot), function (key) {
+              expect(serverAnnot[key]).toEqual(entities.serverAnnotation[key]);
+            });
           });
         });
 
@@ -365,7 +360,11 @@ define([
             annotationType = createAnnotationType(annotationTypeOptions);
             serverAnnotation = jsonEntities.annotation({ value: '' }, annotationType);
             annotation = annotationFactory.create(serverAnnotation, annotationType, true);
-            expect(annotation.getServerAnnotation()).toEqual(serverAnnotation);
+
+            var serverAnnot = annotation.getServerAnnotation();
+            _.each(_.keys(serverAnnot), function (key) {
+              expect(serverAnnot[key]).toEqual(serverAnnotation[key]);
+            });
           });
         });
 
