@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(function () {
+define(['underscore'], function (_) {
   'use strict';
 
   /**
@@ -36,39 +36,27 @@ define(function () {
   function ParticipantViewCtrl($window, $state, $timeout) {
     var vm = this;
 
-    vm.tabSummaryActive = false;
-    vm.tabCeventsActive = false;
+    vm.tabs = [
+      { heading: 'Summary',    sref: 'home.collection.study.participant.summary', active: false },
+      { heading: 'Collection', sref: 'home.collection.study.participant.cevents', active: false}
+    ];
 
     init();
-    activeTabUpdateFix();
 
     //--
 
     function init() {
-      // initialize the panels to open state when viewing a new study
-      if (vm.participant.id !== $window.localStorage.getItem('participant.panel.participantId')) {
-        // this way when the user selects a new study, the panels always default to open
-        $window.localStorage.setItem('participant.panel.cevents', true);
-
-        // remember the last viewed participant
-        $window.localStorage.setItem('participant.panel.participantId', vm.participant.id);
-      }
+      activeTabUpdate();
     }
 
-    /**
-     * At the moment the active tab does not initialize properly. Seems to be a ui-boostrap bug.
-     *
-     * See http://stackoverflow.com/questions/17695629/setting-the-initial-static-tab-in-angular-bootstrap
-     */
-    function activeTabUpdateFix() {
-      $timeout(activeTabUpdate, 0);
+    function activeTabUpdate() {
+      _.each(vm.tabs, function (tab, index) {
+        tab.active = ($state.current.name.indexOf(tab.sref) >= 0);
+        if (tab.active) {
+          vm.active = index;
+        }
+      });
 
-      function activeTabUpdate() {
-        vm.tabSummaryActive = ($state.current.name.startsWith('home.collection.study.participant.summary'));
-
-        // state home.collection.study.participant.cevents has sub-states, so need to use 'statrsWith'
-        vm.tabCeventsActive = ($state.current.name.startsWith('home.collection.study.participant.cevents'));
-      }
     }
 
   }

@@ -14,7 +14,7 @@ define([
 ], function(angular, mocks, _, faker, moment, sprintf) {
   'use strict';
 
-  describe('CollectionEvent', function() {
+  escribe('CollectionEvent', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -222,28 +222,29 @@ define([
 
     it('can retrieve a single collection event', function() {
       var self = this,
-          participant = self.jsonEntities.participant(),
-          collectionEvent = self.jsonEntities.collectionEvent({
-            participantId: participant.id
-          });
+          collectionEvent = self.jsonEntities.collectionEvent();
 
-      self.$httpBackend.whenGET(uri(participant.id) + '?ceventId=' + collectionEvent.id)
+      self.$httpBackend.whenGET(uri(collectionEvent.id))
         .respond(serverReply(collectionEvent));
 
-      self.CollectionEvent.get(participant.id, collectionEvent.id).then(function (reply) {
+      self.CollectionEvent.get(collectionEvent.id).then(function (reply) {
         expect(reply).toEqual(jasmine.any(self.CollectionEvent));
         reply.compareToJsonEntity(collectionEvent);
       });
       self.$httpBackend.flush();
     });
 
-    it('get fails when collection event ID not specified', function() {
+    it('get fails for and invalid collection event id', function() {
       var self = this,
-          participant = self.jsonEntities.participant();
+          collectionEventId = self.jsonEntities.stringNext();
 
-      expect(function () {
-        return self.CollectionEvent.get(participant.id);
-      }).toThrow(new Error('collection event id not specified'));
+      self.$httpBackend.whenGET(uri(collectionEventId))
+        .respond(404, { status: 'error', message: 'invalid id' });
+
+      self.CollectionEvent.get(collectionEventId)
+        .then(function (reply) { fail('should not be called'); })
+        .catch(function (err) { expect(err.data.message).toContain('invalid id'); });
+      self.$httpBackend.flush();
     });
 
     it('can list collection events for a participant', function() {
@@ -255,7 +256,7 @@ define([
           reply = self.jsonEntities.pagedResult(collectionEvents),
           serverEntity;
 
-      self.$httpBackend.whenGET(uri(participant.id) + '/list')
+      self.$httpBackend.whenGET(uriWithPath('list', participant.id))
         .respond(serverReply(reply));
 
       self.CollectionEvent.list(participant.id).then(function (pagedResult) {
@@ -279,7 +280,7 @@ define([
           sortFields = [ 'visitNumber', 'timeCompleted'];
 
       _.each(sortFields, function (sortField) {
-        self.$httpBackend.whenGET(uri(participant.id) + '/list?sort=' + sortField)
+        self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?sort=' + sortField)
           .respond(serverReply(reply));
 
         self.CollectionEvent.list(participant.id, { sort: sortField }).then(function (pagedResult) {
@@ -296,7 +297,7 @@ define([
           reply = self.jsonEntities.pagedResult([]),
           pageNumber = 2;
 
-      self.$httpBackend.whenGET(uri(participant.id) + '/list?page=' + pageNumber)
+      self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?page=' + pageNumber)
         .respond(serverReply(reply));
 
       self.CollectionEvent.list(participant.id, { page: pageNumber }).then(function (pagedResult) {
@@ -312,7 +313,7 @@ define([
           reply = self.jsonEntities.pagedResult([]),
           pageSize = 2;
 
-      self.$httpBackend.whenGET(uri(participant.id) + '/list?pageSize=' + pageSize)
+      self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?pageSize=' + pageSize)
         .respond(serverReply(reply));
 
       self.CollectionEvent.list(participant.id, { pageSize: pageSize }).then(function (pagedResult) {
@@ -349,7 +350,7 @@ define([
           orderingTypes = [ 'asc', 'desc'];
 
       _.each(orderingTypes, function (orderingType) {
-        self.$httpBackend.whenGET(uri(participant.id) + '/list?order=' + orderingType)
+        self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?order=' + orderingType)
           .respond(serverReply(reply));
 
         self.CollectionEvent.list(participant.id, { order: orderingType }).then(function (pagedResult) {
@@ -447,7 +448,7 @@ define([
       this.updateEntity(cevent,
                         'updateVisitNumber',
                         cevent.visitNumber,
-                        updateUri('visitNumber', cevent.id),
+                        uriWithPath('visitNumber', cevent.id),
                         { visitNumber: cevent.visitNumber },
                         this.jsonEntities.defaultCollectionEvent(),
                         this.expectCevent,
@@ -461,7 +462,7 @@ define([
       this.updateEntity(cevent,
                         'updateTimeCompleted',
                         cevent.timeCompleted,
-                        updateUri('timeCompleted', cevent.id),
+                        uriWithPath('timeCompleted', cevent.id),
                         { timeCompleted: cevent.timeCompleted },
                         this.jsonEntities.defaultCollectionEvent(),
                         this.expectCevent,
@@ -525,7 +526,7 @@ define([
       return result;
     }
 
-    function updateUri(/* path, collectionEventId */) {
+    function uriWithPath(/* path, collectionEventId */) {
       var path,
           collectionEventId,
           result = '/participants/cevents',

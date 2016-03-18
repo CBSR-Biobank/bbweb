@@ -42,8 +42,7 @@ define(function (){
         .catch(function(response) {
           $log.error(response);
           deferred.reject(response);
-        }
-      );
+        });
       return deferred.promise;
     }
 

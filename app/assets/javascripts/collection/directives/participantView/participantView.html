@@ -7,15 +7,12 @@
   -->
 <div class="row">
   <div class="col-md-12">
-    <uib-tabset>
-      <uib-tab heading="Summary"
-           ui-sref="home.collection.study.participant.summary"
-           ui-sref-opts="{reload: true}"
-           active="vm.tabSummaryActive"></uib-tab>
-      <uib-tab heading="Collection Events"
-           ui-sref="home.collection.study.participant.cevents"
-           ui-sref-opts="{reload: true}"
-           active="vm.tabCeventsActive"></uib-tab>
+    <uib-tabset active="vm.active">
+      <uib-tab ng-repeat="tab in vm.tabs"
+               heading="{{tab.heading}}"
+               ui-sref="{{tab.sref}}"
+               ui-sref-opts="{reload: false}"
+               active="tab.active"></uib-tab>
     </uib-tabset>
   </div>
 </div>

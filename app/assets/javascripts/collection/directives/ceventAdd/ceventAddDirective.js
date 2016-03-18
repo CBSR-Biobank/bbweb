@@ -15,8 +15,7 @@ define(['underscore'], function(_) {
       bindToController: {
         study: '=',
         participant: '=',
-        collectionEventAnnotationTypes: '=',
-        collectionEvent: '='
+        collectionEventType: '='
       },
       templateUrl : '/assets/javascripts/collection/directives/ceventAdd/ceventAdd.html',
       controller: CollectionAddCtrl,
@@ -41,15 +40,18 @@ define(['underscore'], function(_) {
                              bbwebConfig,
                              notificationsService,
                              domainEntityService,
-                             timeService) {
+                             timeService,
+                             CollectionEvent) {
     var vm = this;
+
+    vm.collectionEvent = new CollectionEvent({ participantId: vm.participant.id },
+                                             vm.collectionEventType);
 
     vm.title = 'Participant ' + vm.participant.uniqueId + ': Add collection event';
     vm.timeCompleted   = { date: null, time: null };
 
-    vm.updateCollectionEventType = updateCollectionEventType;
-    vm.submit                    = submit;
-    vm.cancel                    = cancel;
+    vm.submit = submit;
+    vm.cancel = cancel;
 
     // for date picker
     vm.opened = false;
@@ -63,18 +65,6 @@ define(['underscore'], function(_) {
 
     // --
 
-    function updateCollectionEventType() {
-      if (_.isUndefined(vm.collectionEvent.collectionEventTypeId)) {
-        return;
-      }
-      var cetype = _.findWhere(vm.collectionEventTypes, { id : vm.collectionEvent.collectionEventTypeId });
-      if (cetype) {
-        vm.collectionEvent.annotations = [];
-        vm.collectionEvent.setCollectionEventType(cetype);
-        vm.collectionEvent.setAnnotationTypes(vm.annotationTypes);
-      }
-    }
-
     function openDatePicker($event) {
       $event.preventDefault();
       $event.stopPropagation();
@@ -84,7 +74,7 @@ define(['underscore'], function(_) {
     function submit() {
       vm.collectionEvent.timeCompleted = timeService.dateAndTimeToUtcString(vm.timeCompleted.date,
                                                                             vm.timeCompleted.time);
-      vm.collectionEvent.addOrUpdate()
+      vm.collectionEvent.add()
         .then(submitSuccess)
         .catch(function(error) {
           domainEntityService.updateErrorModal(

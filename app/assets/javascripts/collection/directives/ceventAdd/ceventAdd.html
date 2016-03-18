@@ -11,7 +11,7 @@
        ng-class="{ 'has-error' : collectionEventForm.ceventTypeId.$invalid &&
                  !collectionEventForm.ceventTypeId.$pristine }">
     <label for="ceventTypeId" class="col-md-2 control-label">Event Type</label>
-    <div class="col-md-8">
+    <div class="col-md-10">
       <input ng-readonly="true"
              class="form-control"
              ng-model="vm.collectionEvent.collectionEventType.name">
@@ -24,7 +24,7 @@
                  !collectionEventForm.visitNumber.$pristine }">
 
     <label for="visitNumber" class="col-md-2 control-label">Visit number</label>
-    <div class="col-md-8">
+    <div class="col-md-10">
       <input name="visitNumber"
              type="number"
              class="form-control"
@@ -35,12 +35,14 @@
              required />
     </div>
     <div class="col-md-offset-2 col-md-10">
-      <p class="help-block" ng-show="collectionEventForm.visitNumber.$error.required &&
-                                     !collectionEventForm.visitNumber.$pristine">
+      <p class="help-block"
+         ng-show="collectionEventForm.visitNumber.$error.required &&
+                  !collectionEventForm.visitNumber.$pristine">
         Visit number is required
       </p>
-      <p class="help-block" ng-show="collectionEventForm.visitNumber.$error.min &&
-                                     !collectionEventForm.visitNumber.$pristine">
+      <p class="help-block"
+         ng-show="collectionEventForm.visitNumber.$error.min &&
+                  !collectionEventForm.visitNumber.$pristine">
         Visit number has to be a positive number
       </p>
     </div>
@@ -55,7 +57,7 @@
                  !collectionEventForm.$error.time[0].$pristine) }">
 
     <label for="timeCompleted" class="col-md-2 control-label">Time completed</label>
-    <div class="col-md-8">
+    <div class="col-md-10">
       <div class="datetimepicker-wrapper">
         <input name="timeCompletedDate"
                type="text"

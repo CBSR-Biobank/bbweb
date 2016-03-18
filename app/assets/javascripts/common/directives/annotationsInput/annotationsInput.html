@@ -8,7 +8,7 @@
          ng-class="{ 'has-error' : annotationSubForm.annotationTextValue.$invalid &&
                    !annotationSubForm.annotationTextValue.$pristine }">
       <label class="col-md-2 control-label">{{annotation.annotationType.name}}</label>
-      <div class="col-md-8">
+      <div class="col-md-10">
         <input name="annotationTextValue"
                type="text"
                class="form-control"
@@ -30,7 +30,7 @@
          ng-class="{ 'has-error' : annotationSubForm.annotationNumberValue.$invalid &&
                    !annotationSubForm.annotationNumberValue.$pristine }">
       <label class="col-md-2 control-label">{{annotation.annotationType.name}}</label>
-      <div class="col-md-8">
+      <div class="col-md-10">
         <input name="annotationNumberValue"
                type="number"
                class="form-control"
@@ -55,7 +55,7 @@
                    (annotationSubForm.$error.time[0].$invalid &&
                    !annotationSubForm.$error.time[0].$pristine) }">
       <label class="col-md-2 control-label">{{annotation.annotationType.name}}</label>
-      <div class="col-md-8">
+      <div class="col-md-10">
         <div class="datetimepicker-wrapper">
           <input name="annotationDateTimeValue"
                  type="text"
@@ -96,7 +96,7 @@
          ng-class="{ 'has-error' : annotationSubForm.annotationSelectValue.$invalid &&
                    !annotationSubForm.annotationSelectValue.$pristine }">
       <label class="col-md-2 control-label">{{annotation.annotationType.name}}</label>
-      <div class="col-md-8">
+      <div class="col-md-10">
         <select name="annotationSelectValue"
                 class="form-control"
                 ng-model="annotation.value"
@@ -121,13 +121,13 @@
          ng-class="{ 'has-error' : annotationSubForm.annotationSelectValue.$invalid &&
                    !annotationSubForm.annotationSelectValue.$pristine }">
       <label class="col-md-2 control-label">{{annotation.annotationType.name}}</label>
-      <div class="col-md-8">
+      <div class="col-md-10">
         <div ng-repeat="value in annotation.values">
           <label>
             <input type="checkbox"
                    name="annotationSelectValue"
                    ng-model="value.checked"
-                   ng-required="!annotation.someSelected()">
+                   ng-required="annotation.required">
             <span>{{value.name}}</span>
           </label>
         </div>

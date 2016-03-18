@@ -45,14 +45,12 @@ define(['underscore'], function(_) {
       'CollectionEvent',
       'participant',
       'collectionEventTypes',
-      'annotationTypes',
       '$stateParams'
     ];
 
     function resolveCollectionEvent(CollectionEvent,
                                     participant,
                                     collectionEventTypes,
-                                    annotationTypes,
                                     $stateParams) {
       var cevent,
           ceventType = _.findWhere(collectionEventTypes, { id: $stateParams.collectionEventTypeId });
@@ -60,7 +58,7 @@ define(['underscore'], function(_) {
       if (!ceventType) {
         throw new Error('could not find collection event type');
       }
-      cevent = new CollectionEvent({}, ceventType, annotationTypes);
+      cevent = new CollectionEvent({}, ceventType);
       cevent.participantId = participant.id;
       cevent.collectionEventTypeId = ceventType.id;
       return cevent;
@@ -301,21 +299,27 @@ define(['underscore'], function(_) {
             '<cevent-add',
             '  study="vm.study"',
             '  participant="vm.participant"',
-            '  collection-event-annotation-types="vm.annotationTypes"',
+            '  collection-event-type="vm.collectionEventType">',
             '  collection-event="vm.collectionEvent">',
             '</cevent-add>'
           ].join(''),
           controller: [
+            '$stateParams',
             'study',
             'participant',
-            'annotationTypes',
+            'collectionEventTypes',
             'collectionEvent',
-            function (study, participant, annotationTypes, collectionEvent) {
+            function ($stateParams, study, participant, collectionEventTypes, collectionEvent) {
               var vm = this;
               vm.study = study;
               vm.participant = participant;
-              vm.collectionEventAnnotationTypes = annotationTypes;
               vm.collectionEvent = collectionEvent;
+
+              vm.collectionEventType = _.findWhere(collectionEventTypes,
+                                                   { id: $stateParams.collectionEventTypeId});
+              if (_.isUndefined(vm.collectionEventType)) {
+                  throw new Error('could not find collection event type');
+              }
             }
           ],
           controllerAs: 'vm'
@@ -333,15 +337,11 @@ define(['underscore'], function(_) {
         collectionEvent: [
           '$stateParams',
           'CollectionEvent',
-          'participant',
           'collectionEventTypes',
-          'annotationTypes',
           function ($stateParams,
                     CollectionEvent,
-                    participant,
-                    collectionEventTypes,
-                    annotationTypes) {
-            return CollectionEvent.get(participant.id, $stateParams.collectionEventId)
+                    collectionEventTypes) {
+            return CollectionEvent.get($stateParams.collectionEventId)
               .then(function (cevent) {
                 var ceventType = _.findWhere(collectionEventTypes,
                                              { id: cevent.collectionEventTypeId });
@@ -351,7 +351,6 @@ define(['underscore'], function(_) {
                 }
 
                 cevent.setCollectionEventType(ceventType);
-                cevent.setAnnotationTypes(annotationTypes);
                 return cevent;
               });
           }
@@ -359,11 +358,7 @@ define(['underscore'], function(_) {
       },
       views: {
         'eventDetails': {
-          template: [
-            '<cevent-view',
-            '  collection-event="vm.collectionEvent">',
-            '</cevents-view>'
-          ].join(''),
+          template: '<cevent-view collection-event="vm.collectionEvent"></cevents-view>',
           controller: [
             'collectionEvent',
             function ( collectionEvent) {

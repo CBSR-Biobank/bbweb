@@ -8,8 +8,7 @@
 <div class="row">
   <div class="col-md-12">
     <uib-tabset active="vm.active">
-      <uib-tab index="$index"
-               ng-repeat="tab in vm.tabs track by $index"
+      <uib-tab ng-repeat="tab in vm.tabs"
                heading="{{tab.heading}}"
                ui-sref="{{tab.sref}}"
                ui-sref-opts="{reload: false}"

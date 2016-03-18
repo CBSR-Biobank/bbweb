@@ -82,13 +82,6 @@ define(['underscore', 'tv4'], function(_, tv4) {
         throw new Error('invalid collection event type');
       }
 
-      // FIXME: remove this
-      // if (_.isUndefined(collectionEventType)
-      //     && obj.annotations
-      //     && (obj.annotations.length > 0)) {
-      //   throw new Error('collection event type not defined');
-      // }
-
       if (collectionEventType) {
         this.setCollectionEventType(collectionEventType);
       }
@@ -128,15 +121,14 @@ define(['underscore', 'tv4'], function(_, tv4) {
      *
      * @param annotationTypes can be undefined or null.
      */
-    CollectionEvent.get = function (participantId, id, collectionEventType) {
+    CollectionEvent.get = function (id, collectionEventType) {
       if (!id) {
         throw new Error('collection event id not specified');
       }
 
-      return biobankApi.get(uri(participantId) + '?ceventId=' + id)
-        .then(function (reply) {
-          return CollectionEvent.prototype.asyncCreate(reply);
-        });
+      return biobankApi.get(uri(id)).then(function (reply) {
+        return CollectionEvent.prototype.asyncCreate(reply);
+      });
     };
 
     CollectionEvent.prototype.asyncCreate = function (obj) {
@@ -165,7 +157,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
         'pageSize',
         'order'
       ];
-      var url = uri(participantId) + '/list';
+      var url = uriWithPath('list', participantId);
       var paramsStr = '';
 
       if (arguments.length > 0) {
@@ -208,6 +200,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
     };
 
     CollectionEvent.prototype.setCollectionEventType = function (collectionEventType) {
+      this.collectionEventTypeId = collectionEventType.id;
       this.collectionEventType = collectionEventType;
       this.setAnnotationTypes(collectionEventType.annotationTypes);
     };
@@ -241,27 +234,26 @@ define(['underscore', 'tv4'], function(_, tv4) {
 
     CollectionEvent.prototype.updateVisitNumber = function (visitNumber) {
       return ConcurrencySafeEntity.prototype.update.call(
-        this, uri('visitNumber', this.id), { visitNumber: visitNumber });
+        this, uriWithPath('visitNumber', this.id), { visitNumber: visitNumber });
     };
 
     CollectionEvent.prototype.updateTimeCompleted = function (timeCompleted) {
       return ConcurrencySafeEntity.prototype.update.call(
-        this, uri('timeCompleted', this.id), { timeCompleted: timeCompleted });
+        this, uriWithPath('timeCompleted', this.id), { timeCompleted: timeCompleted });
     };
 
     function uri(/* participantId, collectionEventId, version */) {
       var participantId,
           collectionEventId,
           version,
-          result = '/participants',
+          result = '/participants/cevents',
           args = _.toArray(arguments);
 
-      if (args.length < 1) {
-        throw new Error('participant id not specified');
-      }
 
-      participantId = args.shift();
-      result += '/cevents/' + participantId;
+      if (args.length > 0) {
+        participantId = args.shift();
+        result += '/' + participantId;
+      }
 
       if (args.length > 0) {
         collectionEventId = args.shift();
@@ -273,6 +265,24 @@ define(['underscore', 'tv4'], function(_, tv4) {
         result += '/' + version;
       }
 
+      return result;
+    }
+
+    function uriWithPath(/* path, collectionEventId */) {
+      var path,
+          collectionEventId,
+          result = uri(),
+          args = _.toArray(arguments);
+
+      if (args.length > 0) {
+        path = args.shift();
+        result += '/' + path;
+      }
+
+      if (args.length > 0) {
+        collectionEventId = args.shift();
+        result += '/' + collectionEventId;
+      }
       return result;
     }
 
