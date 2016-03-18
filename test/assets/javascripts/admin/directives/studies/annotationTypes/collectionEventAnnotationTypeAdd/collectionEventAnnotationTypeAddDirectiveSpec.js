@@ -24,28 +24,24 @@ define(function(require) {
 
       self.collectionEventType = new self.CollectionEventType(
         self.jsonEntities.collectionEventType(self.jsonEntities.study()));
-      self.createController = setupController();
+      self.createController = createController;
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeAdd/annotationTypeAdd.html',
         '/assets/javascripts/admin/directives/studies/annotationTypes/collectionEventAnnotationTypeAdd/collectionEventAnnotationTypeAdd.html');
 
-      function setupController() {
-        return create;
+      function createController() {
+        self.element = angular.element([
+          '<collection-event-annotation-type-add',
+          '  collection-event-type="vm.ceventType">',
+          '</collection-event-annotation-type-add>'
+        ].join(''));
 
-        function create() {
-          self.element = angular.element([
-            '<collection-event-annotation-type-add',
-            '  collection-event-type="vm.ceventType">',
-            '</collection-event-annotation-type-add>'
-          ].join(''));
-
-          self.scope = $rootScope.$new();
-          self.scope.vm = { ceventType: self.collectionEventType };
-          $compile(self.element)(self.scope);
-          self.scope.$digest();
-          self.controller = self.element.controller('collectionEventAnnotationTypeAdd');
-        }
+        self.scope = $rootScope.$new();
+        self.scope.vm = { ceventType: self.collectionEventType };
+        $compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('collectionEventAnnotationTypeAdd');
       }
     }));
 

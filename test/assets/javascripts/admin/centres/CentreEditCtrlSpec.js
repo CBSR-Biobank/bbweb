@@ -11,11 +11,13 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function () {
+    beforeEach(inject(function ($rootScope, $controller, $state) {
       var self = this;
 
-      self.Centre       = self.$injector.get('Centre');
-      self.jsonEntities = self.$injector.get('jsonEntities');
+      self.Centre               = self.$injector.get('Centre');
+      self.jsonEntities         = self.$injector.get('jsonEntities');
+      self.notificationsService = self.$injector.get('notificationsService');
+      self.domainEntityService  = self.$injector.get('domainEntityService');
 
       self.centre = new self.Centre();
       self.returnState = {
@@ -23,32 +25,20 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
         params: {}
       };
 
-      self.createController = setupController();
+      self.createController = createController;
 
       //--
 
-      function setupController() {
-        var $rootScope           = self.$injector.get('$rootScope'),
-            $controller          = self.$injector.get('$controller'),
-            $state               = self.$injector.get('$state'),
-            notificationsService = self.$injector.get('notificationsService'),
-            domainEntityService  = self.$injector.get('domainEntityService');
-
-        return create;
-
-        //--
-
-        function create(centre) {
-          self.scope = $rootScope.$new();
-          $controller('CentreEditCtrl as vm', {
-            $scope:               self.scope,
-            $state:               $state,
-            notificationsService: notificationsService,
-            domainEntityService:  domainEntityService,
-            centre:               self.centre
-          });
-          self.scope.$digest();
-        }
+      function createController(centre) {
+        self.scope = $rootScope.$new();
+        $controller('CentreEditCtrl as vm', {
+          $scope:               self.scope,
+          $state:               $state,
+          notificationsService: self.notificationsService,
+          domainEntityService:  self.domainEntityService,
+          centre:               self.centre
+        });
+        self.scope.$digest();
       }
     }));
 

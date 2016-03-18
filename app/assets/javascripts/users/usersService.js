@@ -84,14 +84,6 @@ define(['underscore'], function(_) {
       return !!currentUser;
     }
 
-    function changeStatus(user, status) {
-      var cmd = {
-        id: user.id,
-        expectedVersion: user.version
-      };
-      return biobankApi.post(uri(user.id) + '/' + status, cmd);
-    }
-
     function login(credentials) {
       return biobankApi.post('/login', credentials)
         .then(function(reply) {

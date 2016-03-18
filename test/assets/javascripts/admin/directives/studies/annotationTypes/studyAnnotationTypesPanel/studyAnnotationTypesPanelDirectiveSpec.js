@@ -58,43 +58,39 @@ define([
         '/assets/javascripts/common/directives/panelButtons.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html');
 
-      this.createController = setupController();
+      this.createController = createController;
 
-      function setupController() {
-        return create;
+      function createController() {
+        self.element = angular.element([
+          '<uib-accordion close-others="false">',
+          '  <study-annotation-types-panel',
+          '     annotation-types="vm.annotationTypes"',
+          '     annotation-type-ids-in-use="vm.annotationTypeIdsInUse"',
+          '     annotation-type-description="' + self.annotationTypeDescription + '"',
+          '     annotation-type-name="' + self.annotationTypeName + '"',
+          '     panel-id="' + self.panelId + '"',
+          '     modifications-allowed="vm.modificationsAllowed"',
+          '     add-state-name="' + self.addStateName + '"',
+          '     view-state-name="' + self.viewStateName + '"',
+          '     on-remove="vm.onRemove">',
+          '  </study-annotation-types-panel>',
+          '</uib-accordion>'
+        ].join(''));
 
-        function create() {
-          self.element = angular.element([
-            '<uib-accordion close-others="false">',
-            '  <study-annotation-types-panel',
-            '     annotation-types="vm.annotationTypes"',
-            '     annotation-type-ids-in-use="vm.annotationTypeIdsInUse"',
-            '     annotation-type-description="' + self.annotationTypeDescription + '"',
-            '     annotation-type-name="' + self.annotationTypeName + '"',
-            '     panel-id="' + self.panelId + '"',
-            '     modifications-allowed="vm.modificationsAllowed"',
-            '     add-state-name="' + self.addStateName + '"',
-            '     view-state-name="' + self.viewStateName + '"',
-            '     on-remove="vm.onRemove">',
-            '  </study-annotation-types-panel>',
-            '</uib-accordion>'
-          ].join(''));
+        self.onRemove = jasmine.createSpy('onRemove');
 
-          self.onRemove = jasmine.createSpy('onRemove');
+        self.scope = $rootScope.$new();
+        self.scope.vm = {
+          annotationTypes:        self.annotationTypes,
+          annotationTypeIdsInUse: self.annotationTypeIdsInUse,
+          modificationsAllowed:   self.modificationsAllowed,
+          onRemove:               self.onRemove
+        };
 
-          self.scope = $rootScope.$new();
-          self.scope.vm = {
-            annotationTypes:        self.annotationTypes,
-            annotationTypeIdsInUse: self.annotationTypeIdsInUse,
-            modificationsAllowed:   self.modificationsAllowed,
-            onRemove:               self.onRemove
-          };
-
-          $compile(self.element)(self.scope);
-          self.scope.$digest();
-          self.controller = self.element.find('study-annotation-types-panel')
-            .controller('studyAnnotationTypesPanel');
-        }
+        $compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.find('study-annotation-types-panel')
+          .controller('studyAnnotationTypesPanel');
       }
     }));
 

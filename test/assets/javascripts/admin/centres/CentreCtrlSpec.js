@@ -1,9 +1,9 @@
 /**
+ * Jasmine test suite
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-// Jasmine test suite
-//
 define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
   'use strict';
 
@@ -18,43 +18,32 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       });
     }));
 
-    beforeEach(inject(function() {
+    beforeEach(inject(function($rootScope, $controller, $window, $timeout) {
       var self = this;
 
       self.$window          = self.$injector.get('$window');
       self.Centre           = self.$injector.get('Centre');
       self.jsonEntities     = self.$injector.get('jsonEntities');
 
-      self.createController = setupController();
+      self.createController = createController;
       self.centre = new self.Centre(self.jsonEntities.centre());
 
-      function setupController() {
-        var $rootScope  = self.$injector.get('$rootScope'),
-            $controller = self.$injector.get('$controller'),
-            $window     = self.$injector.get('$window'),
-            $timeout    = self.$injector.get('$timeout');
+      function createController(centre) {
+        var state = {
+          params: {centreId: centre.id},
+          current: {name: 'home.admin.centres.centre.locations'}
+        };
 
-        return create;
+        self.scope = $rootScope.$new();
 
-        //--
-
-        function create(centre) {
-          var state = {
-            params: {centreId: centre.id},
-            current: {name: 'home.admin.centres.centre.locations'}
-          };
-
-          self.scope = $rootScope.$new();
-
-          $controller('CentreCtrl as vm', {
-            $window:  $window,
-            $scope:   self.scope,
-            $state:   state,
-            $timeout: $timeout,
-            centre:   centre
-          });
-          self.scope.$digest();
-        }
+        $controller('CentreCtrl as vm', {
+          $window:  $window,
+          $scope:   self.scope,
+          $state:   state,
+          $timeout: $timeout,
+          centre:   centre
+        });
+        self.scope.$digest();
       }
     }));
 

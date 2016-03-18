@@ -19,48 +19,37 @@ define([
     beforeEach(inject(function($rootScope, $controller, testUtils) {
       var self = this;
 
-      self.$q           = this.$injector.get('$q');
-      self.CentreCounts = this.$injector.get('CentreCounts');
-      self.jsonEntities = this.$injector.get('jsonEntities');
+      self.$q           = self.$injector.get('$q');
+      self.CentreCounts = self.$injector.get('CentreCounts');
+      self.Centre       = self.$injector.get('Centre');
+      self.CentreStatus = self.$injector.get('CentreStatus');
+      self.jsonEntities = self.$injector.get('jsonEntities');
 
-      self.createController = setupController();
-      self.createCentreCounts = centreCounts;
+      self.createController = createController;
+      self.createCentreCounts = createCentreCounts;
 
       testUtils.addCustomMatchers();
 
-      function centreCounts(disabled, enabled, retired) {
-        return create;
-
-        function create() {
-          return new self.CentreCounts({
-            total:    disabled + enabled + retired,
-            disabled: disabled,
-            enabled:  enabled,
-            retired:  retired
-          });
-        }
+      function createCentreCounts(disabled, enabled, retired) {
+        return new self.CentreCounts({
+          total:    disabled + enabled + retired,
+          disabled: disabled,
+          enabled:  enabled,
+          retired:  retired
+        });
       }
 
-      function setupController() {
-        var Centre       = self.$injector.get('Centre'),
-            CentreStatus = self.$injector.get('CentreStatus');
+      function createController(centreCounts) {
+        self.scope = $rootScope.$new();
 
-        return create;
-
-        //---
-
-        function create(centreCounts) {
-          self.scope = $rootScope.$new();
-
-          $controller('CentresCtrl as vm', {
-            $scope:       self.scope,
-            Centre:       Centre,
-            CentreStatus: CentreStatus,
-            CentreCounts: self.CentreCounts
-          });
+        $controller('CentresCtrl as vm', {
+          $scope:       self.scope,
+          Centre:       self.Centre,
+          CentreStatus: self.CentreStatus,
+          CentreCounts: self.CentreCounts
+        });
 
           self.scope.$digest();
-        }
       }
     }));
 

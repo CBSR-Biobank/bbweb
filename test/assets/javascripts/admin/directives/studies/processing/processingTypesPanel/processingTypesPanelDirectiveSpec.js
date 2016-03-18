@@ -12,7 +12,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('Directive: processingTypesPanelDirective', function() {
+  xdescribe('Directive: processingTypesPanelDirective', function() {
     var scope,
         controller,
         createEntities,

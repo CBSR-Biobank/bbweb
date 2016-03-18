@@ -144,7 +144,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
         biobankApi.post(uri(self.studyId), cmd)
           .then(self.asyncCreate)
           .then(function (participant) {
-            deferred.resolve(participant)
+            deferred.resolve(participant);
           });
       }
 

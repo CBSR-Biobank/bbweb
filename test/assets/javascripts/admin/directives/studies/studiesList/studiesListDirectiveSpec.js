@@ -24,8 +24,8 @@ define([
       self.Study             = self.$injector.get('Study');
       self.StudyCounts       = self.$injector.get('StudyCounts');
       self.jsonEntities      = self.$injector.get('jsonEntities');
-      self.createStudyCounts = setupCountsCreator();
-      self.createController  = setupController();
+      self.createStudyCounts = createStudyCounts;
+      self.createController  = createController;
 
       testUtils.addCustomMatchers();
 
@@ -33,34 +33,23 @@ define([
         '/assets/javascripts/admin/directives/studies/studiesList/studiesList.html',
         '/assets/javascripts/common/directives/pagedItemsList/pagedItemsList.html');
 
+      //---
 
-      function setupCountsCreator() {
-        return create;
-
-        //--
-
-        function create(disabled, enabled, retired) {
-          return new self.StudyCounts({
-            total:    disabled + enabled + retired,
-            disabled: disabled,
-            enabled:  enabled,
-            retired:  retired
-          });
-        }
+      function createStudyCounts(disabled, enabled, retired) {
+        return new self.StudyCounts({
+          total:    disabled + enabled + retired,
+          disabled: disabled,
+          enabled:  enabled,
+          retired:  retired
+        });
       }
 
-      function setupController() {
-        return create;
-
-        //---
-
-        function create(studyCounts) {
-          self.element = angular.element('<studies-list></studies-list>');
-          self.scope = $rootScope.$new();
-          $compile(self.element)(self.scope);
-          self.scope.$digest();
-          self.controller = self.element.controller('studiesList');
-        }
+      function createController(studyCounts) {
+        self.element = angular.element('<studies-list></studies-list>');
+        self.scope = $rootScope.$new();
+        $compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('studiesList');
       }
     }));
 

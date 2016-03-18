@@ -67,7 +67,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       _.each(fields, function (field) {
         var jsonMissingField = _.omit(annotationTypeJson, field);
         expect(function () { self.AnnotationType.create(jsonMissingField); })
-          .toThrowErrorOfType('Error');
+          .toThrowError(/invalid object from server/);
       });
     });
 

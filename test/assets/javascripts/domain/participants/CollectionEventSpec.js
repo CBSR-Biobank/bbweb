@@ -248,7 +248,6 @@ define([
 
     it('can list collection events for a participant', function() {
       var self = this,
-          ceventType = self.jsonEntities.collectionEventType(),
           participant = self.jsonEntities.defaultParticipant(),
           collectionEvents = _.map(_.range(2), function () {
             return self.jsonEntities.collectionEvent();
@@ -451,8 +450,8 @@ define([
                         updateUri('visitNumber', cevent.id),
                         { visitNumber: cevent.visitNumber },
                         this.jsonEntities.defaultCollectionEvent(),
-                        self.expectCevent,
-                        self.failTest);
+                        this.expectCevent,
+                        this.failTest);
     });
 
     it('can update the time completed on a collectionEvent', function() {
@@ -465,8 +464,8 @@ define([
                         updateUri('timeCompleted', cevent.id),
                         { timeCompleted: cevent.timeCompleted },
                         this.jsonEntities.defaultCollectionEvent(),
-                        self.expectCevent,
-                        self.failTest);
+                        this.expectCevent,
+                        this.failTest);
     });
 
     it('should be able to remove a collection event', function() {

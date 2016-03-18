@@ -278,7 +278,7 @@ define(function(require) {
       var self = this,
           biobankApi = self.$injector.get('biobankApi'),
           jsonAnnotationTypes = self.jsonEntities.allAnnotationTypes(),
-          replyParticipant = self.jsonEntities.participant();;
+          replyParticipant = self.jsonEntities.participant();
 
       spyOn(biobankApi, 'post').and.returnValue(self.$q.when(replyParticipant));
 

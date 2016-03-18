@@ -80,38 +80,34 @@ define([
 
           self.modificationsAllowed = true;
           self.onRemove = jasmine.createSpy('onRemove');
-          self.createController = setupController();
+          self.createController = createController;
 
-          function setupController() {
-            return create;
+          function createController() {
+            self.element = angular.element([
+              '<study-annotation-types-table',
+              '   annotation-types="vm.annotationTypes"',
+              '   annotation-type-name="vm.annotationTypeName"',
+              '   annotation-type-ids-in-use="vm.annotationTypeIdsInUse"',
+              '   view-state-name="vm.viewStateName"',
+              '   modifications-allowed="vm.modificationsAllowed"',
+              '   on-remove="vm.onRemove"',
+              '</study-annotation-types-table>'
+            ].join(''));
 
-            function create() {
-              self.element = angular.element([
-                '<study-annotation-types-table',
-                '   annotation-types="vm.annotationTypes"',
-                '   annotation-type-name="vm.annotationTypeName"',
-                '   annotation-type-ids-in-use="vm.annotationTypeIdsInUse"',
-                '   view-state-name="vm.viewStateName"',
-                '   modifications-allowed="vm.modificationsAllowed"',
-                '   on-remove="vm.onRemove"',
-                '</study-annotation-types-table>'
-              ].join(''));
+            self.scope = $rootScope.$new();
+            self.scope.vm = {
+              study:                  self.study,
+              annotationTypes:        self.annotationTypes,
+              annotationTypeIdsInUse: context.annotationTypeIdsInUse,
+              annotationTypeName:     context.annotationTypeName,
+              modificationsAllowed:   self.modificationsAllowed,
+              viewStateName:          context.viewStateName,
+              onRemove:               self.onRemove
+            };
 
-              self.scope = $rootScope.$new();
-              self.scope.vm = {
-                study:                  self.study,
-                annotationTypes:        self.annotationTypes,
-                annotationTypeIdsInUse: context.annotationTypeIdsInUse,
-                annotationTypeName:     context.annotationTypeName,
-                modificationsAllowed:   self.modificationsAllowed,
-                viewStateName:          context.viewStateName,
-                onRemove:               self.onRemove
-              };
-
-              $compile(self.element)(self.scope);
-              self.scope.$digest();
-              self.controller = self.element.controller('studyAnnotationTypesTable');
-            }
+            $compile(self.element)(self.scope);
+            self.scope.$digest();
+            self.controller = self.element.controller('studyAnnotationTypesTable');
           }
         }));
 

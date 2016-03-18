@@ -35,7 +35,7 @@ define(function (require) {
 
       spyOn(this.$state, 'go').and.returnValue(true);
 
-      self.createController = setupController();
+      self.createController = createController;
 
       this.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/collection/ceventTypeView/ceventTypeView.html',
@@ -46,19 +46,15 @@ define(function (require) {
         '/assets/javascripts/admin/directives/statusLine/statusLine.html',
         '/assets/javascripts/common/services/modalInput.html');
 
-      function setupController() {
-        return create;
+      function createController() {
+        self.element = angular.element(
+          '<cevent-type-view cevent-type="vm.ceventType"></cevent-type-view>');
 
-        function create() {
-          self.element = angular.element(
-            '<cevent-type-view cevent-type="vm.ceventType"></cevent-type-view>');
-
-          self.scope = $rootScope.$new();
-          self.scope.vm = { ceventType: self.collectionEventType };
-          $compile(self.element)(self.scope);
-          self.scope.$digest();
-          self.controller = self.element.controller('ceventTypeView');
-        }
+        self.scope = $rootScope.$new();
+        self.scope.vm = { ceventType: self.collectionEventType };
+        $compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('ceventTypeView');
       }
 
     }));

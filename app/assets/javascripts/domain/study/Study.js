@@ -233,7 +233,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
 
     Study.prototype.unretire = function () {
       if (!this.isRetired()) {
-        throw new Error('already disabled');
+        throw new Error('not retired');
       }
       return changeState.call(this, 'unretire');
     };

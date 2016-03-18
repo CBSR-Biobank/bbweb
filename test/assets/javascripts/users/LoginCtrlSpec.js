@@ -7,86 +7,83 @@
 define([
   'angular',
   'angularMocks',
-  'underscore',
-  'biobankApp'
+  'underscore'
 ], function(angular, mocks, _) {
   'use strict';
 
   describe('Controller: LoginCtrl', function() {
-    var createController;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function() {
-      createController = setupController(this.$injector);
-    }));
+    beforeEach(inject(function($rootScope, $controller) {
+      var self = this;
 
-    function setupController(injector) {
-      var $rootScope   = injector.get('$rootScope'),
-          $controller  = injector.get('$controller'),
-          $state       = injector.get('$state'),
-          usersService = injector.get('usersService'),
-          modalService = injector.get('modalService');
+      self.$q                   = self.$injector.get('$q');
+      self.$state               = self.$injector.get('$state');
+      self.usersService         = self.$injector.get('usersService');
+      self.modalService         = self.$injector.get('modalService');
 
-      return create;
+      this.createController = createController;
+      this.badLoginAttempt = badLoginAttempt;
 
-      //--
-
-      function create() {
-        var scope = $rootScope.$new();
+      function createController() {
+        self.scope = $rootScope.$new();
 
         $controller('LoginCtrl as vm', {
-          $scope:       scope,
-          $state:       $state,
-          usersService: usersService,
-          modalService: modalService
+          $scope:       self.scope,
+          $state:       self.$state,
+          usersService: self.usersService,
+          modalService: self.modalService
         });
-        scope.$digest();
-        return scope;
+        self.scope.$digest();
       }
-    }
+
+      function badLoginAttempt(replyMessage) {
+        var deferred = self.$q.defer();
+
+        spyOn(self.modalService, 'showModal').and.returnValue(self.$q.when('OK'));
+        spyOn(self.usersService, 'isAuthenticated').and.returnValue(false);
+        spyOn(self.usersService, 'login').and.returnValue(deferred.promise);
+        spyOn(self.$state, 'go').and.callFake(function () {});
+
+        deferred.reject({ status: 'error', data: { message: replyMessage } });
+
+        self.createController();
+        self.scope.vm.login({});
+        self.scope.$digest();
+
+        expect(self.$state.go).toHaveBeenCalledWith('home.users.login', {}, { reload: true });
+        return self.modalService;
+      }
+    }));
 
     it('has valid scope', function() {
-      var scope = createController();
-      expect(scope.vm.credentials.email).toBeEmptyString();
-      expect(scope.vm.credentials.password).toBeEmptyString();
+      this.createController();
+      expect(this.scope.vm.credentials.email).toBeEmptyString();
+      expect(this.scope.vm.credentials.password).toBeEmptyString();
     });
 
     it('returns to home state if user is authenticated', function() {
-      var $state       = this.$injector.get('$state'),
-          usersService = this.$injector.get('usersService');
-
-      spyOn(usersService, 'isAuthenticated').and.callFake(function () {
-        return true;
-      });
-      spyOn($state, 'go').and.callFake(function () {});
-      createController();
-      expect($state.go).toHaveBeenCalledWith('home');
+      spyOn(this.usersService, 'isAuthenticated').and.returnValue(true);
+      spyOn(this.$state, 'go').and.callFake(function () {});
+      this.createController();
+      expect(this.$state.go).toHaveBeenCalledWith('home');
     });
 
     it('returns to home state after successful login', function() {
-      var $q           = this.$injector.get('$q'),
-          $state       = this.$injector.get('$state'),
-          usersService = this.$injector.get('usersService'),
-          scope;
-
-      spyOn(usersService, 'isAuthenticated').and.callFake(function () {
-        return false;
-      });
-
-      spyOn(usersService, 'login').and.callFake(function () {
-        return $q.when('OK');
-      });
-      spyOn($state, 'go').and.callFake(function () {});
-      scope = createController();
-      scope.vm.login({});
-      scope.$digest();
+      spyOn(this.usersService, 'isAuthenticated').and.returnValue(true);
+      spyOn(this.usersService, 'login').and.returnValue(this.$q.when('OK'));
+      spyOn(this.$state, 'go').and.callFake(function () {});
+      this.createController();
+      this.scope.vm.login({});
+      this.scope.$digest();
+      expect(this.$state.go).toHaveBeenCalledWith('home');
     });
 
     it('displays information modal on bad login attempt', function() {
       var modalService, modalServiceCallArgs;
 
-      modalService = badLoginAttempt(this.$injector, 'invalid email or password');
+      modalService = this.badLoginAttempt('invalid email or password');
       expect(modalService.showModal.calls.count()).toBe(1);
 
       modalServiceCallArgs = modalService.showModal.calls.allArgs()[0];
@@ -101,7 +98,7 @@ define([
     it('displays information modal on login attempt for an non active user', function() {
       var modalService, modalServiceCallArgs;
 
-      modalService = badLoginAttempt(this.$injector, 'the user is not active');
+      modalService = this.badLoginAttempt('the user is not active');
       expect(modalService.showModal.calls.count()).toBe(1);
 
       modalServiceCallArgs = modalService.showModal.calls.allArgs()[0];
@@ -113,7 +110,7 @@ define([
     it('displays information modal on login attempt for an locked user', function() {
       var modalService, modalServiceCallArgs;
 
-      modalService = badLoginAttempt(this.$injector, 'the user is locked');
+      modalService = this.badLoginAttempt('the user is locked');
       expect(modalService.showModal.calls.count()).toBe(1);
 
       modalServiceCallArgs = modalService.showModal.calls.allArgs()[0];
@@ -125,7 +122,7 @@ define([
     it('displays information modal on login attempt for an locked user', function() {
       var modalService, modalServiceCallArgs;
 
-      modalService = badLoginAttempt(this.$injector, 'xxxx');
+      modalService = this.badLoginAttempt('xxxx');
       expect(modalService.showModal.calls.count()).toBe(1);
 
       modalServiceCallArgs = modalService.showModal.calls.allArgs()[0];
@@ -133,36 +130,6 @@ define([
       expect(modalServiceCallArgs[1].headerHtml).toBe('Login error');
       expect(modalServiceCallArgs[1].bodyHtml).toContain('Cannot login:');
     });
-
-    function badLoginAttempt(injector, replyMessage) {
-      var $q           = injector.get('$q'),
-          modalService = injector.get('modalService'),
-          $state       = injector.get('$state'),
-          usersService = injector.get('usersService'),
-          scope;
-
-      spyOn(modalService, 'showModal').and.callFake(function () {
-        return $q.when('OK');
-      });
-      spyOn(usersService, 'isAuthenticated').and.callFake(function () {
-        return false;
-      });
-
-      spyOn(usersService, 'login').and.callFake(function () {
-        var deferred = $q.defer();
-        deferred.reject({ status: 'error', data: { message: replyMessage } });
-        return deferred.promise;
-      });
-
-      spyOn($state, 'go').and.callFake(function () {});
-
-      scope = createController();
-      scope.vm.login({});
-      scope.$digest();
-
-      expect($state.go).toHaveBeenCalledWith('home.users.login', {}, { reload: true });
-      return modalService;
-    }
 
   });
 

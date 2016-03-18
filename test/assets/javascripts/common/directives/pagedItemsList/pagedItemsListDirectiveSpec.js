@@ -14,32 +14,6 @@ define([
 
   describe('Directive: pagedItemsListDirective', function() {
 
-    function createCounts(/* disabled, enabled, retired */) {
-      var args = _.toArray(arguments),
-          result = {};
-
-      if (args.length < 1) {
-        throw new Error('disabled count not specified');
-      }
-
-      result.disabled = args.shift();
-      result.total = result.disabled;
-
-      if (args.length < 1) {
-        throw new Error('enabled count not specified');
-      }
-
-      result.enabled = args.shift();
-      result.total += result.enabled;
-
-      if (args.length > 0) {
-        result.retired = args.shift();
-        result.total += result.retired;
-      }
-
-      return result;
-    }
-
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function (jsonEntities) {
@@ -127,74 +101,72 @@ define([
 
       describe('(shared)', function () {
 
-        beforeEach(inject(function (directiveTestSuite, testUtils) {
-          _.extend(this, directiveTestSuite);
+        beforeEach(inject(function ($rootScope, $compile, directiveTestSuite, testUtils) {
+          var self = this;
 
-          this.$q                     = this.$injector.get('$q');
-          this.context                = context;
-          this.createController       = setupController(this);
-          this.getItemsSpy            = jasmine.createSpy('getItemsSpy');
-          this.getItemsWrapperDefault = createDefaultGetItemsWrapper(this);
+          _.extend(self, directiveTestSuite);
 
-          this.putHtmlTemplates(
+          self.$q                  = self.$injector.get('$q');
+          self.context             = context;
+          self.getItemsSpy         = jasmine.createSpy('getItemsSpy');
+          self.createController    = createController;
+          self.getItemsFuncDefault = getItemsFuncDefault;
+
+          self.putHtmlTemplates(
             '/assets/javascripts/common/directives/pagedItemsList/pagedItemsList.html');
 
           testUtils.addCustomMatchers();
-        }));
-
-        function setupController(userContext) {
-          var $rootScope = userContext.$injector.get('$rootScope'),
-              $compile   = userContext.$injector.get('$compile');
-
-          return create;
 
           //--
 
-          function create(getItemsWrapper) {
+          function createController(getItemsFunc) {
             var element = angular.element([
               '<paged-items-list',
               '  counts="vm.counts"',
               '  page-size="vm.pageSize"',
               '  possible-statuses="vm.possibleStatuses"',
-              '  message-no-items="' + userContext.context.messageNoItems + '"',
-              '  message-no-results="' + userContext.context.messageNoResults + '"',
+              '  message-no-items="' + context.messageNoItems + '"',
+              '  message-no-results="' + context.messageNoResults + '"',
               '  get-items="vm.getItems"',
-              '  entity-navigate-state="' + userContext.context.entityNavigateState + '"',
-              '  entity-navigate-state-param-name="' + userContext.context.entityNavigateStateParamName + '">',
+              '  entity-navigate-state="' + context.entityNavigateState + '"',
+              '  entity-navigate-state-param-name="' + context.entityNavigateStateParamName + '">',
               '</paged-items-list>'
             ].join(''));
 
-            userContext.scope = $rootScope.$new();
-            userContext.scope.vm = {
-              counts:           userContext.context.counts,
-              pageSize:         userContext.context.pageSize,
-              possibleStatuses: userContext.context.possibleStatuses,
-              getItems:         getItemsWrapper
+            self.scope = $rootScope.$new();
+            self.scope.vm = {
+              counts:           context.counts,
+              pageSize:         context.pageSize,
+              possibleStatuses: context.possibleStatuses,
+              getItems:         getItemsFunc
             };
 
-            $compile(element)(userContext.scope);
-            userContext.scope.$digest();
-            userContext.controller = element.controller('pagedItemsList');
+            $compile(element)(self.scope);
+            self.scope.$digest();
+            self.controller = element.controller('pagedItemsList');
           }
-        }
 
-        function createDefaultGetItemsWrapper(userContext) {
-          return get;
-
-          function get(options) {
-            userContext.getItemsSpy(options);
-            return userContext.$q.when({
-              items:    userContext.context.entities.slice(0, userContext.pageSize),
+          /**
+           * This is the default function that will be called by the directive to update it's contents.
+           *
+           * Passed to the directive as an external function.
+           *
+           * See createController().
+           */
+          function getItemsFuncDefault(options) {
+            self.getItemsSpy(options);
+            return self.$q.when({
+              items:    context.entities.slice(0, self.pageSize),
               page:     options.page,
-              pageSize: userContext.pageSize,
+              pageSize: self.pageSize,
               offset:   0,
-              total:    userContext.context.entities.length
+              total:    context.entities.length
             });
           }
-        }
+        }));
 
         it('has valid scope', function() {
-          this.createController(this.getItemsWrapperDefault);
+          this.createController(this.getItemsFuncDefault);
 
           expect(this.controller.counts).toBe(this.context.counts);
           expect(this.controller.possibleStatuses).toBe(this.context.possibleStatuses);
@@ -209,9 +181,9 @@ define([
         it('has a valid panel heading', function() {
           var self = this;
 
-          self.createController(self.getItemsWrapperDefault);
+          self.createController(self.getItemsFuncDefault);
 
-          _.each(self.context.possibleStatuses, function (status) {
+          _.each(context.possibleStatuses, function (status) {
             if (status.id !== 'all') {
               expect(self.controller.panelHeading).toContain(status.name);
             }
@@ -221,7 +193,7 @@ define([
         it('updates items when name filter is updated', function() {
           var nameFilterValue = 'test';
 
-          this.createController(this.getItemsWrapperDefault);
+          this.createController(this.getItemsFuncDefault);
 
           this.controller.pagerOptions.filter = nameFilterValue;
           this.controller.nameFilterUpdated();
@@ -238,7 +210,7 @@ define([
         it('updates items when name status filter is updated', function() {
           var statusFilterValue = this.context.possibleStatuses[1];
 
-          this.createController(this.getItemsWrapperDefault);
+          this.createController(this.getItemsFuncDefault);
           this.controller.pagerOptions.status = statusFilterValue;
           this.controller.statusFilterUpdated();
           this.scope.$digest();
@@ -252,7 +224,7 @@ define([
         });
 
         it('clears filters', function() {
-          this.createController(this.getItemsWrapperDefault);
+          this.createController(this.getItemsFuncDefault);
           this.controller.pagerOptions.filter = 'test';
           this.controller.pagerOptions.status = this.context.possibleStatuses[1];
           this.controller.clearFilters();
@@ -264,7 +236,7 @@ define([
         it('updates items when name sort field is updated', function() {
           var sortFieldValue;
 
-          this.createController(this.getItemsWrapperDefault);
+          this.createController(this.getItemsFuncDefault);
           sortFieldValue = this.controller.sortFields[1];
           this.controller.sortFieldSelected(sortFieldValue);
           this.scope.$digest();
@@ -280,7 +252,7 @@ define([
         it('updates items when name page number is changed', function() {
           var page = 2;
 
-          this.createController(this.getItemsWrapperDefault);
+          this.createController(this.getItemsFuncDefault);
           this.controller.pagerOptions.page = page;
           this.controller.pageChanged();
           this.scope.$digest();
@@ -304,7 +276,7 @@ define([
             return self.$q.when({
               items:    [],
               page:     options.page,
-              pageSize: self.context.pageSize,
+              pageSize: context.pageSize,
               offset:   0,
               total:    0
             });
@@ -320,11 +292,11 @@ define([
           function getItemsWrapper(options) {
             self.getItemsSpy(options);
             return self.$q.when({
-              items:    self.context.entities.slice(0, self.context.pageSize),
+              items:    context.entities.slice(0, context.pageSize),
               page:     options.page,
-              pageSize: self.context.pageSize,
+              pageSize: context.pageSize,
               offset:   0,
-              total:    self.context.entities.length + 1
+              total:    context.entities.length + 1
             });
           }
         });
@@ -333,12 +305,38 @@ define([
           this.context.counts = _.mapObject(this.context.counts, function (val) {
             return 0;
           });
-          this.createController(this.getItemsWrapperDefault);
+          this.createController(this.getItemsFuncDefault);
           expect(this.controller.displayState).toBe(0); // NO_ENTITIES
         });
 
       });
 
+    }
+
+    function createCounts(/* disabled, enabled, retired */) {
+      var args = _.toArray(arguments),
+          result = {};
+
+      if (args.length < 1) {
+        throw new Error('disabled count not specified');
+      }
+
+      result.disabled = args.shift();
+      result.total = result.disabled;
+
+      if (args.length < 1) {
+        throw new Error('enabled count not specified');
+      }
+
+      result.enabled = args.shift();
+      result.total += result.enabled;
+
+      if (args.length > 0) {
+        result.retired = args.shift();
+        result.total += result.retired;
+      }
+
+      return result;
     }
 
   });

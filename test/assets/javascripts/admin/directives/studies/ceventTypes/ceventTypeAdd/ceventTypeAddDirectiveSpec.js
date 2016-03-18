@@ -11,7 +11,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(directiveTestSuite, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, directiveTestSuite, testUtils) {
       var self = this;
 
       _.extend(self, directiveTestSuite);
@@ -21,35 +21,26 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       self.jsonEntities        = self.$injector.get('jsonEntities');
 
       self.study = new self.Study(self.jsonEntities.study());
-      self.createController = setupController();
+      self.createController = createController;
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/collection/ceventTypeAdd/ceventTypeAdd.html');
 
       //--
 
-      function setupController(injector) {
-        var $rootScope = self.$injector.get('$rootScope'),
-            $compile   = self.$injector.get('$compile');
+      function createController(study) {
+        self.element = angular.element([
+          '<cevent-type-add',
+          '  study="vm.study">',
+          '<cevent-type-add>'
+        ].join(''));
 
-        return create;
+        self.scope = $rootScope.$new();
+        self.scope.vm = { study: study };
 
-        //--
-
-        function create(study) {
-          self.element = angular.element([
-            '<cevent-type-add',
-            '  study="vm.study">',
-            '<cevent-type-add>'
-          ].join(''));
-
-          self.scope = $rootScope.$new();
-          self.scope.vm = { study: study };
-
-          $compile(self.element)(self.scope);
-          self.scope.$digest();
-          self.controller = self.element.controller('ceventTypeAdd');
-        }
+        $compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('ceventTypeAdd');
       }
 
     }));

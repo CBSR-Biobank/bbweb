@@ -8,133 +8,101 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  'faker',
-  'biobankApp'
+  'faker'
 ], function(angular, mocks, _, faker) {
   'use strict';
 
   describe('Controller: ForgotPasswordCtrl', function() {
-    var createController;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function() {
-      createController = setupController(this.$injector);
-    }));
+    beforeEach(inject(function($rootScope, $controller) {
+      var self = this;
 
-    function setupController(injector) {
-      var $rootScope   = injector.get('$rootScope'),
-          $controller  = injector.get('$controller'),
-          $state       = injector.get('$state'),
-          usersService = injector.get('usersService'),
-          modalService = injector.get('modalService');
+      self.$q                   = self.$injector.get('$q');
+      self.$state               = self.$injector.get('$state');
+      self.usersService         = self.$injector.get('usersService');
+      self.modalService         = self.$injector.get('modalService');
+      self.notificationsService = self.$injector.get('notificationsService');
 
-      return create;
+      self.createController = createController;
 
-      //--
-
-      function create() {
-        var scope = $rootScope.$new();
+      function createController() {
+        self.scope = $rootScope.$new();
 
         $controller('ForgotPasswordCtrl as vm', {
-          $scope: scope,
-          $state:       $state,
-          usersService: usersService,
-          modalService: modalService
+          $scope:       self.scope,
+          $state:       self.$state,
+          usersService: self.usersService,
+          modalService: self.modalService
         });
-        scope.$digest();
-        return scope;
+        self.scope.$digest();
       }
-    }
+    }));
 
     it('has valid scope', function() {
-      var scope = createController();
-      expect(scope.vm.email).toBe('');
+      this.createController();
+      expect(this.scope.vm.email).toBe('');
     });
 
     it('goes to correct state on submit', function() {
-      var $q           = this.$injector.get('$q'),
-          $state       = this.$injector.get('$state'),
-          usersService = this.$injector.get('usersService'),
-          scope        = createController(),
-          email        = faker.internet.email();
+      var email        = faker.internet.email();
 
-      spyOn(usersService, 'passwordReset').and.callFake(function () {
-        return $q.when('OK');
-      });
-      spyOn($state, 'go').and.callFake(function () {});
+      spyOn(this.usersService, 'passwordReset').and.returnValue(this.$q.when('OK'));
+      spyOn(this.$state, 'go').and.callFake(function () {});
 
-      scope.vm.submit(email);
-      scope.$digest();
-      expect($state.go).toHaveBeenCalledWith('home.users.forgot.passwordSent',
-                                             { email: email });
+      this.createController();
+      this.scope.vm.submit(email);
+      this.scope.$digest();
+      expect(this.$state.go).toHaveBeenCalledWith('home.users.forgot.passwordSent',
+                                                  { email: email });
     });
 
     it('goes to correct state if email is not registered', function() {
-      var $q           = this.$injector.get('$q'),
-          $state       = this.$injector.get('$state'),
-          usersService = this.$injector.get('usersService'),
-          scope        = createController(),
-          email        = faker.internet.email();
+      var deferred = this.$q.defer(),
+          email    = faker.internet.email();
 
-      spyOn(usersService, 'passwordReset').and.callFake(function () {
-        var deferred = $q.defer();
-        deferred.reject({ status: 'error', message: 'email address not registered'});
-        return deferred.promise;
-      });
-      spyOn($state, 'go').and.callFake(function () {});
+      spyOn(this.usersService, 'passwordReset').and.returnValue(deferred.promise);
+      spyOn(this.$state, 'go').and.callFake(function () {});
 
-      scope.vm.submit(email);
-      scope.$digest();
-      expect($state.go).toHaveBeenCalledWith('home.users.forgot.emailNotFound');
+      this.createController();
+      this.scope.vm.submit(email);
+      deferred.reject({ status: 'error', message: 'email address not registered'});
+      this.scope.$digest();
+      expect(this.$state.go).toHaveBeenCalledWith('home.users.forgot.emailNotFound');
     });
 
     it('displays information in modal on password reset failure and user presses OK', function() {
-      var $q           = this.$injector.get('$q'),
-          $state       = this.$injector.get('$state'),
-          usersService = this.$injector.get('usersService'),
-          modalService = this.$injector.get('modalService'),
-          scope        = createController(),
+      var deferred = this.$q.defer(),
           email        = faker.internet.email();
 
-      spyOn(usersService, 'passwordReset').and.callFake(function () {
-        var deferred = $q.defer();
-        deferred.reject({ status: 'error', message: 'xxxx'});
-        return deferred.promise;
-      });
-      spyOn(modalService, 'modalOk').and.callFake(function () {
-        return $q.when('OK');
-      });
-      spyOn($state, 'go').and.callFake(function () {});
+      spyOn(this.usersService, 'passwordReset').and.returnValue(deferred.promise);
+      spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
+      spyOn(this.$state, 'go').and.callFake(function () {});
 
-      scope.vm.submit(email);
-      scope.$digest();
-      expect($state.go).toHaveBeenCalledWith('home');
+      this.createController();
+      this.scope.vm.submit(email);
+      deferred.reject({ status: 'error', message: 'xxxx'});
+      this.scope.$digest();
+      expect(this.$state.go).toHaveBeenCalledWith('home');
     });
 
     it('displays information in modal on password reset failure and user closes window', function() {
-      var $q           = this.$injector.get('$q'),
-          $state       = this.$injector.get('$state'),
-          usersService = this.$injector.get('usersService'),
-          modalService = this.$injector.get('modalService'),
-          scope        = createController(),
-          email        = faker.internet.email();
+      var userServiceDeferred = this.$q.defer(),
+          modalDeferred       = this.$q.defer(),
+          email               = faker.internet.email();
 
-      spyOn(usersService, 'passwordReset').and.callFake(function () {
-        var deferred = $q.defer();
-        deferred.reject({ status: 'error', message: 'xxxx'});
-        return deferred.promise;
-      });
-      spyOn(modalService, 'modalOk').and.callFake(function () {
-        var deferred = $q.defer();
-        deferred.reject();
-        return deferred.promise;
-      });
-      spyOn($state, 'go').and.callFake(function () {});
+      spyOn(this.usersService, 'passwordReset').and.returnValue(userServiceDeferred.promise);
+      spyOn(this.modalService, 'modalOk').and.returnValue(modalDeferred.promise);
+      spyOn(this.$state, 'go').and.callFake(function () {});
 
-      scope.vm.submit(email);
-      scope.$digest();
-      expect($state.go).toHaveBeenCalledWith('home');
+      userServiceDeferred.reject({ status: 'error', message: 'xxxx'});
+      modalDeferred.reject('Cancel');
+
+      this.createController();
+      this.scope.vm.submit(email);
+      this.scope.$digest();
+      expect(this.$state.go).toHaveBeenCalledWith('home');
     });
 
   });

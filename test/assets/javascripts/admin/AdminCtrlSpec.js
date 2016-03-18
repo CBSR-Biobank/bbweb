@@ -20,22 +20,18 @@ define([
 
       self.$q               = self.$injector.get('$q');
       self.adminService     = self.$injector.get('adminService');
-      self.createController = setupController();
+      self.createController = createController;
 
-      function setupController() {
-        return create;
+      //----
 
-        //--
+      function createController() {
+        self.scope = $rootScope.$new();
 
-        function create(counts) {
-          self.scope = $rootScope.$new();
-
-          $controller('AdminCtrl as vm', {
-            $scope:       self.scope,
-            adminService: self.adminService
-          });
-          self.scope.$digest();
-        }
+        $controller('AdminCtrl as vm', {
+          $scope:       self.scope,
+          adminService: self.adminService
+        });
+        self.scope.$digest();
       }
     }));
 

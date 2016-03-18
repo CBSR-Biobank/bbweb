@@ -32,33 +32,29 @@ define([
       self.study = new self.Study(_.extend(self.jsonEntities.study(),
                                            { annotationTypes: [ jsonAnnotType ]}));
       self.annotationType = new self.AnnotationType(jsonAnnotType);
-      self.createController = setupController();
+      self.createController = createController;
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/annotationTypes/participantAnnotationTypeView/participantAnnotationTypeView.html',
         '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeView/annotationTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle.html');
 
-      function setupController() {
-        return create;
+      function createController() {
+        self.element = angular.element([
+          '<participant-annotation-type-view',
+          '  study="vm.study"',
+          '  annotation-type="vm.annotationType"',
+          '</participant-annotation-type-view>'
+        ].join(''));
 
-        function create() {
-          self.element = angular.element([
-            '<participant-annotation-type-view',
-            '  study="vm.study"',
-            '  annotation-type="vm.annotationType"',
-            '</participant-annotation-type-view>'
-          ].join(''));
-
-          self.scope = $rootScope.$new();
-          self.scope.vm = {
-            study:          self.study,
-            annotationType: self.annotationType
-          };
-          $compile(self.element)(self.scope);
-          self.scope.$digest();
-          self.controller = self.element.controller('participantAnnotationTypeView');
-        }
+        self.scope = $rootScope.$new();
+        self.scope.vm = {
+          study:          self.study,
+          annotationType: self.annotationType
+        };
+        $compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('participantAnnotationTypeView');
       }
     }));
 

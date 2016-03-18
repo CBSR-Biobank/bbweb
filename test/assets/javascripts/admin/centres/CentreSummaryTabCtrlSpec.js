@@ -11,7 +11,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(modalService) {
+    beforeEach(inject(function($rootScope, $controller, $filter, modalService) {
       var self = this;
 
       self.$q           = self.$injector.get('$q');
@@ -25,28 +25,18 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
         return self.$q.when('modalResult');
       });
 
-      self.createController = setupController();
+      self.createController = createController;
 
       //--
 
-      function setupController() {
-        var $rootScope  = self.$injector.get('$rootScope'),
-            $controller = self.$injector.get('$controller'),
-            $filter     = self.$injector.get('$filter');
-
-        return create;
-
-        //--
-
-        function create(centre) {
-          self.scope = $rootScope.$new();
-          $controller('CentreSummaryTabCtrl as vm', {
-            $scope:  self.scope,
-            $filter: $filter,
-            centre:  centre
-          });
-          self.scope.$digest();
-        }
+      function createController(centre) {
+        self.scope = $rootScope.$new();
+        $controller('CentreSummaryTabCtrl as vm', {
+          $scope:  self.scope,
+          $filter: $filter,
+          centre:  centre
+        });
+        self.scope.$digest();
       }
     }));
 

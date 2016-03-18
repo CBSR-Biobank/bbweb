@@ -46,9 +46,9 @@ define([
         self.scope = $rootScope.$new();
         self.scope.vm = { study: self.study };
 
-        $compile(this.element)(this.scope);
-        this.scope.$digest();
-        this.controller = this.element.controller('studyView');
+        $compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('studyView');
       }
     }));
 

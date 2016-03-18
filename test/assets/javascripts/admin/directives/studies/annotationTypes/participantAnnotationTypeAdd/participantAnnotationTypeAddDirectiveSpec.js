@@ -22,28 +22,26 @@ define([
       self.jsonEntities   = self.$injector.get('jsonEntities');
 
       self.study = new self.Study(self.jsonEntities.study());
-      self.createController = setupController();
+      self.createController = createController;
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/annotationTypes/participantAnnotationTypeAdd/participantAnnotationTypeAdd.html',
         '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeAdd/annotationTypeAdd.html');
 
-      function setupController() {
-        return create;
+      //---
 
-        function create() {
-          self.element = angular.element([
-            '<participant-annotation-type-add',
-            '  study="vm.study"',
-            '</participant-annotation-type-add>'
-          ].join(''));
+      function createController() {
+        self.element = angular.element([
+          '<participant-annotation-type-add',
+          '  study="vm.study"',
+          '</participant-annotation-type-add>'
+        ].join(''));
 
-          self.scope = $rootScope.$new();
-          self.scope.vm = { study: self.study };
-          $compile(self.element)(self.scope);
-          self.scope.$digest();
-          self.controller = self.element.controller('participantAnnotationTypeAdd');
-        }
+        self.scope = $rootScope.$new();
+        self.scope.vm = { study: self.study };
+        $compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('participantAnnotationTypeAdd');
       }
     }));
 

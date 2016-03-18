@@ -36,33 +36,29 @@ define([
                                               self.jsonCet,
                                               { annotationTypes: [ jsonAnnotType] }));
       self.annotationType = new self.AnnotationType(jsonAnnotType);
-      self.createController = setupController();
+      self.createController = createController;
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/annotationTypes/collectionEventAnnotationTypeView/collectionEventAnnotationTypeView.html',
         '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeView/annotationTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle.html');
 
-      function setupController() {
-        return create;
+      function createController() {
+        self.element = angular.element([
+          '<collection-event-annotation-type-view',
+          '  collection-event-type="vm.collectionEventType"',
+          '  annotation-type="vm.annotationType"',
+          '</collection-event-annotation-type-view>'
+        ].join(''));
 
-        function create() {
-          self.element = angular.element([
-            '<collection-event-annotation-type-view',
-            '  collection-event-type="vm.collectionEventType"',
-            '  annotation-type="vm.annotationType"',
-            '</collection-event-annotation-type-view>'
-          ].join(''));
-
-          self.scope = $rootScope.$new();
-          self.scope.vm = {
-            collectionEventType: self.collectionEventType,
-            annotationType:      self.annotationType
-          };
-          $compile(self.element)(self.scope);
-          self.scope.$digest();
-          self.controller = self.element.controller('collectionEventAnnotationTypeView');
-        }
+        self.scope = $rootScope.$new();
+        self.scope.vm = {
+          collectionEventType: self.collectionEventType,
+          annotationType:      self.annotationType
+        };
+        $compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('collectionEventAnnotationTypeView');
       }
     }));
 

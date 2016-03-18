@@ -13,109 +13,80 @@ define([
   'use strict';
 
   describe('Controller: RegisterUserCtrl', function() {
-    var createController;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function() {
-      createController = setupController(this.$injector);
-    }));
+    beforeEach(inject(function($rootScope, $controller, $state) {
+      var self = this;
 
-    function setupController(injector) {
-      var $rootScope           = injector.get('$rootScope'),
-          $controller          = injector.get('$controller'),
-          $state               = injector.get('$state'),
-          User                 = injector.get('User'),
-          notificationsService = injector.get('notificationsService');
+      self.$q                   = self.$injector.get('$q');
+      self.$state               = this.$injector.get('$state');
+      self.User                 = self.$injector.get('User');
+      self.notificationsService = self.$injector.get('notificationsService');
 
-      return create;
+      self.createController = createController;
 
-      //--
-
-      function create() {
-        var scope = $rootScope.$new();
+      function createController(injector) {
+        self.scope = $rootScope.$new();
 
         $controller('RegisterUserCtrl as vm', {
-          $scope:               scope,
+          $scope:               self.scope,
           $state:               $state,
-          User:                 User,
-          notificationsService: notificationsService
+          User:                 self.User,
+          notificationsService: self.notificationsService
         });
-        scope.$digest();
-        return scope;
+        self.scope.$digest();
       }
-    }
+    }));
 
     it('has valid scope', function() {
-      var User  = this.$injector.get('User'),
-          scope = createController();
+      var User  = this.$injector.get('User');
 
-      expect(scope.vm.user).toEqual(new User());
-      expect(scope.vm.password).toBeEmptyString();
-      expect(scope.vm.confirmPassword).toBeEmptyString();
+      this.createController();
+      expect(this.scope.vm.user).toEqual(new User());
+      expect(this.scope.vm.password).toBeEmptyString();
+      expect(this.scope.vm.confirmPassword).toBeEmptyString();
     });
 
     it('displays login page after successful registration', function() {
-      var $q     = this.$injector.get('$q'),
-          $state = this.$injector.get('$state'),
-          User   = this.$injector.get('User'),
-          scope;
-
-      spyOn(User.prototype, 'register').and.callFake(function () {
-        return $q.when('ok');
-      });
-      spyOn($state, 'go').and.callFake(function () {});
-      scope = createController();
-      scope.vm.submit({});
-      scope.$digest();
-      expect($state.go).toHaveBeenCalledWith('home.users.login');
+      spyOn(this.User.prototype, 'register').and.returnValue(this.$q.when('ok'));
+      spyOn(this.$state, 'go').and.callFake(function () {});
+      this.createController();
+      this.scope.vm.submit({});
+      this.scope.$digest();
+      expect(this.$state.go).toHaveBeenCalledWith('home.users.login');
     });
 
     it('displays a notification after registering an already registered email address', function() {
-      var $q                   = this.$injector.get('$q'),
-          User                 = this.$injector.get('User'),
-          notificationsService = this.$injector.get('notificationsService'),
-          scope;
+      var deferred = this.$q.defer();
 
-      spyOn(User.prototype, 'register').and.callFake(function () {
-        var deferred = $q.defer();
-        deferred.reject({ status: 403, data: { message: 'already registered' } });
-        return deferred.promise;
-      });
-      spyOn(notificationsService, 'error').and.callFake(function () {});
-      scope = createController();
-      scope.vm.submit({});
-      scope.$digest();
-      expect(notificationsService.error).toHaveBeenCalled();
+      spyOn(this.User.prototype, 'register').and.returnValue(deferred.promise);
+      spyOn(this.notificationsService, 'error').and.returnValue(this.$q.when('ok'));
+      this.createController();
+      this.scope.vm.submit({});
+      deferred.reject({ status: 403, data: { message: 'already registered' } });
+      this.scope.$digest();
+      expect(this.notificationsService.error).toHaveBeenCalled();
     });
 
     it('displays a notification after registration failure', function() {
-      var $q                   = this.$injector.get('$q'),
-          User                 = this.$injector.get('User'),
-          notificationsService = this.$injector.get('notificationsService'),
-          scope;
+      var deferred = this.$q.defer();
 
-      spyOn(User.prototype, 'register').and.callFake(function () {
-        var deferred = $q.defer();
-        deferred.reject({ status: 401, data: { message: 'xxx' } });
-        return deferred.promise;
-      });
-      spyOn(notificationsService, 'error').and.callFake(function () {});
-      scope = createController();
-      scope.vm.submit({});
-      scope.$digest();
-      expect(notificationsService.error).toHaveBeenCalled();
+      spyOn(this.User.prototype, 'register').and.returnValue(deferred.promise);
+      spyOn(this.notificationsService, 'error').and.callFake(function () {});
+      this.createController();
+      this.scope.vm.submit({});
+      deferred.reject({ status: 401, data: { message: 'xxx' } });
+      this.scope.$digest();
+      expect(this.notificationsService.error).toHaveBeenCalled();
     });
 
     it('goes to home state when cancel button is pressed', function() {
-      var $state = this.$injector.get('$state'),
-          scope;
-
-      spyOn($state, 'go').and.callFake(function () {});
-      scope = createController();
-      scope.vm.cancel();
-      scope.$digest();
-      expect($state.go).toHaveBeenCalledWith('home');
+      spyOn(this.$state, 'go').and.callFake(function () {});
+      this.createController();
+      this.scope.vm.cancel();
+      this.scope.$digest();
+      expect(this.$state.go).toHaveBeenCalledWith('home');
     });
 
   });

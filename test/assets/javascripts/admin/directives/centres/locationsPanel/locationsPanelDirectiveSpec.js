@@ -16,14 +16,17 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($q, directiveTestSuite, testUtils) {
+    beforeEach(inject(function($q, $rootScope, $compile, directiveTestSuite, testUtils) {
       var self = this;
 
       _.extend(self, directiveTestSuite);
 
-      self.jsonEntities = self.$injector.get('jsonEntities');
-      self.createEntities = setupEntities();
-      self.createController = setupController();
+      self.Centre           = self.$injector.get('Centre');
+      self.Location         = self.$injector.get('Location');
+      self.jsonEntities     = self.$injector.get('jsonEntities');
+      self.createEntities   = createEntities;
+      self.createController = createController;
+
       testUtils.addCustomMatchers();
 
       self.putHtmlTemplates(
@@ -33,52 +36,34 @@ define([
 
       self.onRemove = jasmine.createSpy('onRemove').and.returnValue($q.when(true));
 
-      function setupEntities() {
-        var Centre = self.$injector.get('Centre'),
-            Location = self.$injector.get('Location');
+      function createEntities() {
+        var entities = {};
 
-        return create;
-
-        //---
-
-        function create() {
-          var entities = {};
-
-          entities.centre = new Centre(self.jsonEntities.centre());
-          entities.locations = _.map(_.range(3), function () {
-            return new Location(self.jsonEntities.location());
-          });
-          return entities;
-        }
+        entities.centre = new self.Centre(self.jsonEntities.centre());
+        entities.locations = _.map(_.range(3), function () {
+          return new self.Location(self.jsonEntities.location());
+        });
+        return entities;
       }
 
-      function setupController() {
-        var $rootScope = self.$injector.get('$rootScope'),
-            $compile   = self.$injector.get('$compile');
+      function createController(centre) {
+        var element = angular.element([
+          '<uib-accordion close-others="false">',
+          '  <locations-panel ',
+          '    centre="vm.centre"',
+          '    on-remove="vm.onRemove">',
+          '  </locations-panel>',
+          '</uib-accordion>'
+        ].join(''));
 
-        return create;
-
-        //--
-
-        function create(centre) {
-          var element = angular.element([
-            '<uib-accordion close-others="false">',
-            '  <locations-panel ',
-            '    centre="vm.centre"',
-            '    on-remove="vm.onRemove">',
-            '  </locations-panel>',
-            '</uib-accordion>'
-          ].join(''));
-
-          self.scope = $rootScope.$new();
-          self.scope.vm = {
-            centre: centre,
-            onRemove: self.onRemove
-          };
-          $compile(element)(self.scope);
-          self.scope.$digest();
-          self.controller = element.find('locations-panel').controller('locationsPanel');
-        }
+        self.scope = $rootScope.$new();
+        self.scope.vm = {
+          centre: centre,
+          onRemove: self.onRemove
+        };
+        $compile(element)(self.scope);
+        self.scope.$digest();
+        self.controller = element.find('locations-panel').controller('locationsPanel');
       }
     }));
 

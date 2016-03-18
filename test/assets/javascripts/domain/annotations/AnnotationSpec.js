@@ -181,7 +181,7 @@ define([
             required:      true
           });
           expect(function () { annotationFactory.create(1, annotationType); })
-            .toThrowErrorOfType('Error');
+            .toThrowError(/invalid object from server/);
         });
 
         it('fails when creating from server response with bad selections', function() {
@@ -197,7 +197,7 @@ define([
                 selectedValues: { tmp: 1 }
           };
           expect(function () { annotationFactory.create(jsonAnnotation, annotationType); })
-            .toThrowErrorOfType('Error');
+            .toThrowError(/invalid object from server/);
         });
 
         it('has valid values when created from server response', function() {
@@ -324,7 +324,7 @@ define([
         });
 
         it('getValue returns valid results for MULTIPLE SELECT', function() {
-          var annotationType, annotation, serverAnnotation, value, multipleSelectValues;
+          var annotationType, annotation, serverAnnotation, value;
 
           annotationType = createAnnotationType({
             valueType:     AnnotationValueType.SELECT(),

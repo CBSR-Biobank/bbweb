@@ -62,21 +62,24 @@ define([
       var self = this,
           badStudyJson = _.omit(self.jsonEntities.centre(), 'name');
 
-      expect(function () { self.Centre.create(badStudyJson); }).toThrowErrorOfType('Error');
+      expect(function () { self.Centre.create(badStudyJson); })
+        .toThrowError(/invalid object from server/);
     });
 
     it('fails when creating from a bad study ID', function() {
       var self = this,
           badCentreJson = self.jsonEntities.centre({ studyIds: [ null, '' ] });
 
-      expect(function () { self.Centre.create(badCentreJson); }).toThrowErrorOfType('Error');
+      expect(function () { self.Centre.create(badCentreJson); })
+        .toThrowError(/invalid object from server/);
     });
 
     it('fails when creating from a bad location', function() {
       var self = this,
           badCentreJson = self.jsonEntities.centre({ locations: [ 1 ] });
 
-      expect(function () { self.Centre.create(badCentreJson); }).toThrowErrorOfType('Error');
+      expect(function () { self.Centre.create(badCentreJson); })
+        .toThrowError(/invalid object from server/);
     });
 
     it('status predicates return valid results', function() {
@@ -290,7 +293,7 @@ define([
     it('throws an error when disabling a centre and it is already disabled', function() {
       var centre = new this.Centre(this.jsonEntities.centre({ status: this.CentreStatus.DISABLED() }));
       expect(function () { centre.disable(); })
-        .toThrowErrorOfType('Error');
+        .toThrowError('already disabled');
     });
 
     it('can enable a centre', function() {
@@ -301,7 +304,7 @@ define([
     it('throws an error when enabling a centre and it is already enabled', function() {
       var centre = new this.Centre(this.jsonEntities.centre({ status: this.CentreStatus.ENABLED() }));
       expect(function () { centre.enable(); })
-        .toThrowErrorOfType('Error');
+        .toThrowError('already enabled');
     });
 
     describe('locations', function () {
@@ -327,7 +330,8 @@ define([
         var self = this,
             centre = new self.Centre();
 
-        expect(function () { centre.removeLocation(new self.Location()); }).toThrowErrorOfType('Error');
+        expect(function () { centre.removeLocation(new self.Location()); })
+          .toThrowError(/location does not exist/);
       });
 
       it('can remove a location', function() {

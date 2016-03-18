@@ -309,7 +309,6 @@ define([
             annotations: []
           },
           validKeys = commonFieldNames.concat(_.keys(defaults)),
-          annotationTypes,
           p;
 
       options = options || {};

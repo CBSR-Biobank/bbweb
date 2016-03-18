@@ -16,13 +16,15 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($state) {
+    beforeEach(inject(function ($rootScope, $controller, $state) {
       var self = this;
 
-      self.$state       = self.$injector.get('$state');
-      self.Centre       = self.$injector.get('Centre');
-      self.Location     = self.$injector.get('Location');
-      self.jsonEntities = self.$injector.get('jsonEntities');
+      self.$state               = self.$injector.get('$state');
+      self.Centre               = self.$injector.get('Centre');
+      self.Location             = self.$injector.get('Location');
+      self.jsonEntities         = self.$injector.get('jsonEntities');
+      self.domainEntityService  = self.$injector.get('domainEntityService');
+      self.notificationsService = self.$injector.get('notificationsService');
 
       self.centre = new self.Centre(self.jsonEntities.centre());
       self.location = new self.Location();
@@ -36,33 +38,22 @@ define([
         params: {}
       };
 
-      self.createController = setupController();
+      self.createController = createController;
 
       //--
 
-      function setupController() {
-        var $rootScope           = self.$injector.get('$rootScope'),
-            $controller          = self.$injector.get('$controller'),
-            domainEntityService  = self.$injector.get('domainEntityService'),
-            notificationsService = self.$injector.get('notificationsService');
+      function createController(location) {
+        self.scope = $rootScope.$new();
 
-        return create;
-
-        //--
-
-        function create(location) {
-          self.scope = $rootScope.$new();
-
-          $controller('LocationEditCtrl as vm', {
-            $scope:               self.scope,
-            $state:               $state,
-            Location:             self.Location,
-            domainEntityService:  domainEntityService,
-            notificationsService: notificationsService,
-            centre:               self.centre
-          });
-          self.scope.$digest();
-        }
+        $controller('LocationEditCtrl as vm', {
+          $scope:               self.scope,
+          $state:               $state,
+          Location:             self.Location,
+          domainEntityService:  self.domainEntityService,
+          notificationsService: self.notificationsService,
+          centre:               self.centre
+        });
+        self.scope.$digest();
       }
 
     }));

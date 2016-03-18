@@ -12,7 +12,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('Controller: SpcLinkTypeEditCtrl', function() {
+  xdescribe('Controller: SpcLinkTypeEditCtrl', function() {
     var createEntities,
         createController,
         SpecimenLinkType,

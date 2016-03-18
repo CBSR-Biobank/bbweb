@@ -32,7 +32,7 @@ define([
 
       self.study = new self.Study(jsonStudy);
       self.collectionEventType = new self.CollectionEventType(jsonCet);
-      self.createController = setupController();
+      self.createController = createController;
 
       spyOn(self.CollectionEventType, 'list').and.returnValue(self.$q.when([ self.collectionEventType ]));
       spyOn(this.$state, 'go').and.callFake(function () {});
@@ -40,22 +40,18 @@ define([
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/collection/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html');
 
-      function setupController() {
-        return create;
+      function createController() {
+        self.element = angular.element([
+          '<cevent-types-add-and-select',
+          '   study="vm.study">',
+          '</cevent-types-add-and-select>'
+        ].join(''));
+        self.scope = $rootScope.$new();
+        self.scope.vm = { study: self.study };
 
-        function create() {
-          self.element = angular.element([
-            '<cevent-types-add-and-select',
-            '   study="vm.study">',
-            '</cevent-types-add-and-select>'
-          ].join(''));
-          self.scope = $rootScope.$new();
-          self.scope.vm = { study: self.study };
-
-          $compile(self.element)(self.scope);
-          self.scope.$digest();
-          self.controller = self.element.controller('ceventTypesAddAndSelect');
-        }
+        $compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('ceventTypesAddAndSelect');
       }
     }));
 

@@ -31,7 +31,7 @@ define(function (require) {
       spyOn(self.modalService, 'showModal').and.returnValue(self.$q.when(true));
 
       self.study = new self.Study(self.jsonEntities.study());
-      self.createController = setupController();
+      self.createController = createController;
 
       this.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/studySummary/studySummary.html',
@@ -39,18 +39,14 @@ define(function (require) {
         '/assets/javascripts/admin/directives/statusLine/statusLine.html',
         '/assets/javascripts/common/services/modalInput.html');
 
-      function setupController() {
-        return create;
+      function createController() {
+        self.element = angular.element('<study-summary study="vm.study"></study-summary>');
+        self.scope = $rootScope.$new();
+        self.scope.vm = { study: self.study };
 
-        function create() {
-          self.element = angular.element('<study-summary study="vm.study"></study-summary>');
-          self.scope = $rootScope.$new();
-          self.scope.vm = { study: self.study };
-
-          $compile(self.element)(self.scope);
-          self.scope.$digest();
-          self.controller = self.element.controller('studySummary');
-        }
+        $compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('studySummary');
       }
     }));
 

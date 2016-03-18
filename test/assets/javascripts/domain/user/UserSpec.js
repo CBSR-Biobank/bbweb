@@ -32,12 +32,12 @@ define([
         var json = { id: user.id, expectedVersion: user.version };
         var reply = self.jsonEntities.user(user);
 
-        this.$httpBackend.expectPOST(uri(user.id) + uriPart, json).respond(201, serverReply(reply));
+        self.$httpBackend.expectPOST(uri(user.id) + uriPart, json).respond(201, serverReply(reply));
 
         user[userMethod]().then(function (replyUser) {
           expect(replyUser).toEqual(jasmine.any(self.User));
         });
-        this.$httpBackend.flush();
+        self.$httpBackend.flush();
       }
     }));
 
@@ -333,29 +333,6 @@ define([
 
     function registerCommand(user, password) {
       return _.extend(_.pick(user, 'name', 'email', 'avatarUrl'), { password: password || '' });
-    }
-
-    function updateCommand(user) {
-      return  { id: user.id, expectedVersion: user.version };
-    }
-
-    function updateNameCommand(user, newName) {
-      return _.extend(updateCommand(user), { name: newName});
-    }
-
-    function updateEmailCommand(user, newEmail) {
-      return _.extend(updateCommand(user), { email: newEmail });
-    }
-
-    function updateAvatarUrlCommand(user, newAvatarUrl) {
-      return _.extend(updateCommand(user), { avatarUrl: newAvatarUrl });
-    }
-
-    function updatePasswordCommand(user, currentPassword, newPassword) {
-      return _.extend(updateCommand(user), {
-        currentPassword: currentPassword,
-        newPassword:     newPassword
-      });
     }
 
     // used by promise tests

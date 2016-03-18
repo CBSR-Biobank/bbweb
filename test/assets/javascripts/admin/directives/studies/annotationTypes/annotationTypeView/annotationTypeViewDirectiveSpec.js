@@ -31,37 +31,33 @@ define([
         '/assets/javascripts/common/directives/truncateToggle.html',
         '/assets/javascripts/common/services/modalInput.html');
 
-      self.createController = setupController();
+      self.createController = createController;
       self.returnState      = 'my-return-state';
       self.study            = new self.Study(self.jsonEntities.study());
       self.annotationType   = new self.AnnotationType(self.jsonEntities.annotationType());
       self.onUpdate         = jasmine.createSpy('onUpdate').and.returnValue(self.$q.when(self.study));
 
-      function setupController() {
-        return create;
+      function createController() {
+        self.element = angular.element([
+          '<annotation-type-view ',
+          '  study="vm.study"',
+          '  annotation-type="vm.annotationType"',
+          '  return-state="' + self.returnState  + '"',
+          '  on-update="vm.onUpdate"',
+          '</annotation-type-view>',
+        ].join(''));
 
-        function create() {
-          self.element = angular.element([
-            '<annotation-type-view ',
-            '  study="vm.study"',
-            '  annotation-type="vm.annotationType"',
-            '  return-state="' + self.returnState  + '"',
-            '  on-update="vm.onUpdate"',
-            '</annotation-type-view>',
-          ].join(''));
+        self.scope = $rootScope.$new();
+        self.scope.vm = {
+          study:          self.study,
+          annotationType: self.annotationType,
+          returnState:    self.returnState,
+          onUpdate:       self.onUpdate
+        };
 
-          self.scope = $rootScope.$new();
-          self.scope.vm = {
-            study:          self.study,
-            annotationType: self.annotationType,
-            returnState:    self.returnState,
-            onUpdate:       self.onUpdate
-          };
-
-          $compile(self.element)(self.scope);
-          self.scope.$digest();
-          self.controller = self.element.controller('annotationTypeView');
-        }
+        $compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('annotationTypeView');
       }
     }));
 

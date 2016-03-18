@@ -61,13 +61,15 @@ define([
       var self = this,
           badStudyJson = _.omit(self.jsonEntities.study(), 'name');
 
-      expect(function () { self.Study.create(badStudyJson); }).toThrowErrorOfType('Error');
+      expect(function () { self.Study.create(badStudyJson); })
+        .toThrowError(/invalid object from server/);
     });
 
     it('fails when creating from a non object for an annotation type', function() {
       var self = this,
           badStudyJson = self.jsonEntities.study({ annotationTypes: [ 1 ]});
-      expect(function () { self.Study.create(badStudyJson); }).toThrowErrorOfType('Error');
+      expect(function () { self.Study.create(badStudyJson); })
+        .toThrowError(/invalid object from server/);
     });
 
     it('status predicates return valid results', function() {
@@ -276,7 +278,7 @@ define([
     it('throws an error when disabling a study and it is already disabled', function() {
       var study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.DISABLED() }));
       expect(function () { study.disable(); })
-        .toThrowErrorOfType('Error');
+        .toThrowError('already disabled');
     });
 
     it('can enable a study', function() {
@@ -287,7 +289,7 @@ define([
     it('throws an error when enabling a study and it is already enabled', function() {
       var study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.ENABLED() }));
       expect(function () { study.enable(); })
-        .toThrowErrorOfType('Error');
+        .toThrowError('already enabled');
     });
 
     it('can retire a study', function() {
@@ -298,7 +300,7 @@ define([
     it('throws an error when retiring a study and it is already retired', function() {
       var study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.RETIRED() }));
       expect(function () { study.retire(); })
-        .toThrowErrorOfType('Error');
+        .toThrowError('already retired');
     });
 
     it('can unretire a study', function() {
@@ -309,11 +311,11 @@ define([
     it('throws an error when unretiring a study and it is not retired', function() {
       var study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.DISABLED() }));
       expect(function () { study.unretire(); })
-        .toThrowErrorOfType('Error');
+        .toThrowError('not retired');
 
       study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.ENABLED() }));
       expect(function () { study.unretire(); })
-        .toThrowErrorOfType('Error');
+        .toThrowError('not retired');
     });
 
     function replyStudy(study, newValues) {

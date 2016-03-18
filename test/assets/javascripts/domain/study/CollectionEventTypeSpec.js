@@ -53,7 +53,7 @@ define([
     it('fails when creating from an invalid json object', function() {
       var badJsonCet = _.omit(this.jsonEntities.collectionEventType(this.jsonStudy), 'name');
       expect(function () { CollectionEventType.create(badJsonCet); })
-        .toThrowErrorOfType('Error');
+        .toThrowError(/invalid collection event types from server/);
     });
 
     it('fails when creating from a bad json specimen spec', function() {
@@ -62,7 +62,7 @@ define([
                                 { specimenSpecs: [ jsonSpec ] });
 
       expect(function () { CollectionEventType.create(badJsonCet); })
-        .toThrowErrorOfType('Error');
+        .toThrowError(/invalid specimen specs from server/);
     });
 
     it('fails when creating from bad json annotation type data', function() {
@@ -71,7 +71,7 @@ define([
                                 { annotationTypes: [ jsonAnnotType ] });
 
       expect(function () { CollectionEventType.create(badJsonCet); })
-        .toThrowErrorOfType('Error');
+        .toThrowError(/invalid annotation types from server/);
     });
 
     it('has valid values when creating from server response', function() {
