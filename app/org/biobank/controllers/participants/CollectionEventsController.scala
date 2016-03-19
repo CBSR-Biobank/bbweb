@@ -1,12 +1,12 @@
 package org.biobank.controllers.participants
 
-import org.biobank.domain.participants.CollectionEvent
-import org.biobank.controllers._
-import org.biobank.service.AuthToken
-import org.biobank.service.users.UsersService
-import org.biobank.service.participants.CollectionEventsService
-
 import javax.inject.{Inject, Singleton}
+import org.biobank.controllers._
+import org.biobank.domain.participants.CollectionEvent
+import org.biobank.infrastructure.command.CollectionEventCommands._
+import org.biobank.service.AuthToken
+import org.biobank.service.participants.CollectionEventsService
+import org.biobank.service.users.UsersService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
 import scala.language.reflectiveCalls
@@ -20,8 +20,6 @@ class CollectionEventsController @Inject() (val env:          Environment,
                                             val service:      CollectionEventsService)
     extends CommandController
     with JsonController {
-
-  import org.biobank.infrastructure.command.ParticipantCommands._
 
   private val PageSizeMax = 10
 
@@ -103,7 +101,7 @@ class CollectionEventsController @Inject() (val env:          Environment,
       domainValidationReply(future)
     }
 
-  private def processCommand(cmd: ParticipantCommand) = {
+  private def processCommand(cmd: CollectionEventCommand) = {
     val future = service.processCommand(cmd)
     domainValidationReply(future)
   }

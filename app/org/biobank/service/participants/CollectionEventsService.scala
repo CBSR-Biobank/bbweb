@@ -1,7 +1,7 @@
 package org.biobank.service.participants
 
 import org.biobank.infrastructure.{ SortOrder, AscendingOrder }
-import org.biobank.infrastructure.command.ParticipantCommands._
+import org.biobank.infrastructure.command.CollectionEventCommands._
 import org.biobank.infrastructure.event.CollectionEventEvents._
 import org.biobank.domain._
 import org.biobank.domain.study._
@@ -31,9 +31,9 @@ trait CollectionEventsService {
 
   def getByVisitNumber(participantId: String, visitNumber: Int): DomainValidation[CollectionEvent]
 
-  def processCommand(cmd: ParticipantCommand): Future[DomainValidation[CollectionEvent]]
+  def processCommand(cmd: CollectionEventCommand): Future[DomainValidation[CollectionEvent]]
 
-  def processRemoveCommand(cmd: ParticipantCommand): Future[DomainValidation[Boolean]]
+  def processRemoveCommand(cmd: CollectionEventCommand): Future[DomainValidation[Boolean]]
 
 }
 
@@ -91,7 +91,7 @@ class CollectionEventsServiceImpl @Inject() (
     )
   }
 
-  def processCommand(cmd: ParticipantCommand): Future[DomainValidation[CollectionEvent]] =
+  def processCommand(cmd: CollectionEventCommand): Future[DomainValidation[CollectionEvent]] =
     ask(processor, cmd).mapTo[DomainValidation[CollectionEventEvent]].map { validation =>
       for {
         event  <- validation
@@ -99,7 +99,7 @@ class CollectionEventsServiceImpl @Inject() (
       } yield cevent
     }
 
-  def processRemoveCommand(cmd: ParticipantCommand): Future[DomainValidation[Boolean]] =
+  def processRemoveCommand(cmd: CollectionEventCommand): Future[DomainValidation[Boolean]] =
     ask(processor, cmd).mapTo[DomainValidation[CollectionEventEvent]].map { validation =>
       for {
         event  <- validation

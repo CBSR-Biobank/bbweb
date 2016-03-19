@@ -6,7 +6,7 @@ import javax.inject.Inject
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
 import org.biobank.domain.{ Annotation, DomainValidation, DomainError }
-import org.biobank.infrastructure.command.ParticipantCommands._
+import org.biobank.infrastructure.command.CollectionEventCommands._
 import org.biobank.infrastructure.event.CollectionEventEvents._
 import org.biobank.infrastructure.event.CommonEvents._
 import org.biobank.service.Processor
