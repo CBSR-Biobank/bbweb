@@ -1,5 +1,8 @@
 package org.biobank.domain
 
+import play.api.libs.json._
+import org.biobank.infrastructure.EnumUtils._
+
 /** A standardized set of classifications that describe what a [[Specimen]] is.
   */
 object SpecimenType extends Enumeration {
@@ -36,4 +39,6 @@ object SpecimenType extends Enumeration {
   val TapWater                  = Value("Tap Water")
   val TransverseColon           = Value("Transverse Colon")
   val WholeBloodEdta            = Value("Whole Blood EDTA")
+
+  implicit val specimenTypeReads: Format[SpecimenType] = enumFormat(SpecimenType)
 }

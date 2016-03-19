@@ -9,6 +9,7 @@ import org.biobank.domain.{ AnnotationType, AnnotationValueType, DomainValidatio
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.EventUtils
 import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.service.Processor
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat

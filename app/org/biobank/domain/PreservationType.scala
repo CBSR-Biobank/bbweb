@@ -1,5 +1,8 @@
 package org.biobank.domain
 
+import play.api.libs.json._
+import org.biobank.infrastructure.EnumUtils._
+
 /** Describes how a [[Specimen]] should be preserved/stored by describing a preservation method. Also see
   * [[PreservationTemperatureType]]).
   */
@@ -10,6 +13,8 @@ object PreservationType extends Enumeration {
   val RnaLater       = Value("RNA Later")
   val FreshSpecimen  = Value("Fresh Specimen")
   val Slide          = Value("Slide")
+
+  implicit val preservationTypeReads: Format[PreservationType] = enumFormat(PreservationType)
 }
 
 /** Describes how a [[Specimen]] should be preserved/stored by describing temperature requirements (degrees
@@ -24,4 +29,7 @@ object PreservationTemperatureType extends Enumeration {
   val Minus80celcius  = Value("-80 C")
   val Minus180celcius = Value("-180 C")
   val RoomTemperature = Value("Room Temperature")
+
+  implicit val preservatioTempTypeReads: Format[PreservationTemperatureType] =
+    enumFormat(PreservationTemperatureType)
 }

@@ -93,7 +93,8 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
     val json = makeRequest(POST, uri(study), BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] must include ("error")
-    (json \ "message").as[String] must include ("is not enabled")
+
+    (json \ "message").as[String] must include regex("InvalidStatus.*study not enabled")
   }
 
   def updateOnNonEnabledStudy(study:       Study,
@@ -114,7 +115,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include ("is not enabled")
+    (json \ "message").as[String] must include regex("InvalidStatus.*study not enabled")
   }
 
   /**

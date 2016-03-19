@@ -5,8 +5,8 @@ import org.biobank.domain._
 import com.google.inject.ImplementedBy
 
 import javax.inject.Singleton
-import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[CollectionEventTypeRepositoryImpl])
 trait CollectionEventTypeRepository
@@ -41,8 +41,9 @@ class CollectionEventTypeRepositoryImpl
 
   def withId(studyId: StudyId, ceventTypeId: CollectionEventTypeId)
       : DomainValidation[CollectionEventType] = {
-    getByKey(ceventTypeId) match {
-      case Success(cet) => {
+    for {
+      cet          <- getByKey(ceventTypeId)
+      validStudyId <- {
         if (cet.studyId == studyId) {
           cet.success
         } else {
@@ -51,8 +52,7 @@ class CollectionEventTypeRepositoryImpl
             .failureNel
         }
       }
-      case err => err
-    }
+    } yield cet
   }
 
   def allForStudy(studyId: StudyId): Set[CollectionEventType] = {

@@ -11,6 +11,7 @@ import org.biobank.dto._
 import org.biobank.dto.{ CollectionDto, ProcessingDto }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.infrastructure.event.CollectionEventTypeEvents._
 import org.biobank.infrastructure.event.ProcessingTypeEvents._
 import org.biobank.infrastructure.event.StudyEvents._
@@ -68,7 +69,7 @@ trait StudiesService {
 
   def processCommand(cmd: StudyCommand): Future[DomainValidation[Study]]
 
-  def processCollectionEventTypeCommand(cmd: StudyCommand)
+  def processCollectionEventTypeCommand(cmd: CollectionEventTypeCommand)
       : Future[DomainValidation[CollectionEventType]]
 
   def processRemoveCollectionEventTypeCommand(cmd: RemoveCollectionEventTypeCmd)
@@ -91,12 +92,13 @@ trait StudiesService {
   *
  */
 class StudiesServiceImpl @javax.inject.Inject() (
-  @Named("studiesProcessor") val processor: ActorRef,
-  val studyRepository:                      StudyRepository,
-  val processingTypeRepository:             ProcessingTypeRepository,
-  val specimenGroupRepository:              SpecimenGroupRepository,
-  val collectionEventTypeRepository:        CollectionEventTypeRepository,
-  val specimenLinkTypeRepository:           SpecimenLinkTypeRepository)
+  @Named("studiesProcessor") val studyProcessor:         ActorRef,
+  @Named("collectionEventType") val ceventTypeProcessor: ActorRef,
+  val studyRepository:                                   StudyRepository,
+  val processingTypeRepository:                          ProcessingTypeRepository,
+  val specimenGroupRepository:                           SpecimenGroupRepository,
+  val collectionEventTypeRepository:                     CollectionEventTypeRepository,
+  val specimenLinkTypeRepository:                        SpecimenLinkTypeRepository)
     extends StudiesService {
   import org.biobank.CommonValidations._
 
@@ -296,32 +298,44 @@ class StudiesServiceImpl @javax.inject.Inject() (
   }
 
   def processCommand(cmd: StudyCommand): Future[DomainValidation[Study]] =
-    ask(processor, cmd).mapTo[DomainValidation[StudyEvent]].map { validation =>
+    ask(studyProcessor, cmd).mapTo[DomainValidation[StudyEvent]].map { validation =>
       for {
         event <- validation
         study <- studyRepository.getByKey(StudyId(event.id))
       } yield study
     }
 
-  def processCollectionEventTypeCommand(cmd: StudyCommand)
+  def processCollectionEventTypeCommand(cmd: CollectionEventTypeCommand)
       : Future[DomainValidation[CollectionEventType]] = {
     cmd match {
       case c: RemoveCollectionEventTypeCmd =>
         Future.successful(DomainError(s"invalid service call: $cmd").failureNel[CollectionEventType])
-      case _ =>
-        ask(processor, cmd).mapTo[DomainValidation[CollectionEventTypeEvent]].map { validation =>
-          for {
-            event  <- validation
-            result <- collectionEventTypeRepository.getByKey(CollectionEventTypeId(event.id))
-          } yield result
-        }
+      case _ => {
+        studyRepository.getDisabled(StudyId(cmd.studyId)).fold(
+          err => Future.successful(err.failure),
+          study => {
+            ask(ceventTypeProcessor, cmd).mapTo[DomainValidation[CollectionEventTypeEvent]]
+              .map { validation =>
+              for {
+                event  <- validation
+                result <- collectionEventTypeRepository.getByKey(CollectionEventTypeId(event.id))
+              } yield result
+            }
+          }
+        )
+      }
     }
   }
 
   def processRemoveCollectionEventTypeCommand(cmd: RemoveCollectionEventTypeCmd)
       : Future[DomainValidation[Boolean]] = {
-    ask(processor, cmd).mapTo[DomainValidation[CollectionEventTypeEvent]]
-      .map { validation => validation.map(_ => true) }
+    studyRepository.getDisabled(StudyId(cmd.studyId)).fold(
+      err => Future.successful(err.failure),
+      study => {
+        ask(ceventTypeProcessor, cmd).mapTo[DomainValidation[CollectionEventTypeEvent]]
+          .map { validation => validation.map(_ => true) }
+      }
+    )
   }
 
   def processProcessingTypeCommand(cmd: StudyCommand)
@@ -330,7 +344,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
       case c: RemoveProcessingTypeCmd =>
         Future.successful(DomainError(s"invalid service call: $cmd").failureNel[ProcessingType])
       case _ =>
-        ask(processor, cmd).mapTo[DomainValidation[ProcessingTypeEvent]].map { validation =>
+        ask(studyProcessor, cmd).mapTo[DomainValidation[ProcessingTypeEvent]].map { validation =>
           for {
             event  <- validation
             result <- processingTypeRepository.getByKey(ProcessingTypeId(event.id))
@@ -341,7 +355,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   def processRemoveProcessingTypeCommand(cmd: StudyCommand)
       : Future[DomainValidation[Boolean]] =
-    ask(processor, cmd).mapTo[DomainValidation[ProcessingTypeEvent]]
+    ask(studyProcessor, cmd).mapTo[DomainValidation[ProcessingTypeEvent]]
       .map { validation => validation.map(_ => true) }
 
   private def replyWithSpecimenGroup(future: Future[DomainValidation[StudyEventOld]])

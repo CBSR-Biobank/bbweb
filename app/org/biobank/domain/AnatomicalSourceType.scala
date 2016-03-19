@@ -1,5 +1,8 @@
 package org.biobank.domain
 
+import play.api.libs.json._
+import org.biobank.infrastructure.EnumUtils._
+
 /**
   * A standardized set of regions from a [[org.biobank.domain.participant.Participant]] where a [[Specimen]]
   * is collected from.
@@ -23,4 +26,7 @@ object AnatomicalSourceType extends Enumeration {
   val Stool           = Value("Stool")
   val ToeNails        = Value("Toe Nails")
   val Urine           = Value("Urine")
+
+  implicit val anatomicalSourceTypeFormat: Format[AnatomicalSourceType] =
+    enumFormat(org.biobank.domain.AnatomicalSourceType)
 }

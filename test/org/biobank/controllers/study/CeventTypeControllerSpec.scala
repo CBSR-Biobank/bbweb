@@ -123,6 +123,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
     studyRepository.put(study)
 
     val cet = factory.createCollectionEventType.copy(
+        studyId         = study.id,
         specimenSpecs   = Set(factory.createCollectionSpecimenSpec),
         annotationTypes = Set(factory.createAnnotationType))
     collectionEventTypeRepository.put(cet)
@@ -231,7 +232,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
 
     "POST /studies/cetypes/:studyId" must {
 
-      "add a collection event type" in {
+      "111 add a collection event type" in {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 

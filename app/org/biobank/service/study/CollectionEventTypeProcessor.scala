@@ -9,7 +9,7 @@ import org.biobank.domain.study.{
   CollectionSpecimenSpec
 }
 import org.biobank.service.Processor
-import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.infrastructure.event.EventUtils
 import akka.actor._
 import akka.persistence.{ SnapshotOffer, RecoveryCompleted }

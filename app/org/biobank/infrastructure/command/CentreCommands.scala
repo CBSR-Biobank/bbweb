@@ -1,6 +1,5 @@
 package org.biobank.infrastructure.command
 
-import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.Commands._
 
 import play.api.libs.json._

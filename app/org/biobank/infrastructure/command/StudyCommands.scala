@@ -1,19 +1,12 @@
 package org.biobank.infrastructure.command
 
-import org.biobank.infrastructure._
-import org.biobank.domain.AnatomicalSourceType._
-import org.biobank.domain.PreservationType._
-import org.biobank.domain.PreservationTemperatureType._
-import org.biobank.domain.SpecimenType._
 import org.biobank.domain.AnnotationValueType._
-import org.biobank.infrastructure.EnumUtils._
-
-import Commands._
-
-import play.api.libs.json._
+import org.biobank.infrastructure._
 import play.api.libs.json.Reads._
+import play.api.libs.json._
 
 object StudyCommands {
+  import org.biobank.infrastructure.command.Commands._
 
   // study commands
   trait StudyCommand extends Command
@@ -46,26 +39,26 @@ object StudyCommands {
       extends StudyModifyCommand
 
   case class StudyAddParticipantAnnotationTypeCmd(userId:          Option[String],
-                                             id:              String,
-                                             expectedVersion: Long,
-                                             name:            String,
-                                             description:     Option[String],
-                                             valueType:       AnnotationValueType,
-                                             maxValueCount:   Option[Int],
-                                             options:         Seq[String],
-                                             required:        Boolean)
+                                                  id:              String,
+                                                  expectedVersion: Long,
+                                                  name:            String,
+                                                  description:     Option[String],
+                                                  valueType:       AnnotationValueType,
+                                                  maxValueCount:   Option[Int],
+                                                  options:         Seq[String],
+                                                  required:        Boolean)
       extends StudyModifyCommand
 
   case class StudyUpdateParticipantAnnotationTypeCmd(userId:          Option[String],
-                                                id:              String,
-                                                uniqueId:        String,
-                                                expectedVersion: Long,
-                                                name:            String,
-                                                description:     Option[String],
-                                                valueType:       AnnotationValueType,
-                                                maxValueCount:   Option[Int],
-                                                options:         Seq[String],
-                                                required:        Boolean)
+                                                     id:              String,
+                                                     uniqueId:        String,
+                                                     expectedVersion: Long,
+                                                     name:            String,
+                                                     description:     Option[String],
+                                                     valueType:       AnnotationValueType,
+                                                     maxValueCount:   Option[Int],
+                                                     options:         Seq[String],
+                                                     required:        Boolean)
       extends StudyModifyCommand
 
   case class UpdateStudyRemoveAnnotationTypeCmd(userId:          Option[String],
@@ -94,128 +87,6 @@ object StudyCommands {
                               expectedVersion: Long)
       extends StudyModifyCommand
 
-// collection event type commands
-  trait CollectionEventTypeCommand extends StudyCommandWithStudyId
-
-  trait CollectionEventTypeModifyCommand
-      extends CollectionEventTypeCommand
-      with HasIdentity
-      with HasExpectedVersion
-
-  case class AddCollectionEventTypeCmd(
-    userId:             Option[String],
-    studyId:            String,
-    name:               String,
-    description:        Option[String],
-    recurring:          Boolean)
-      extends CollectionEventTypeCommand
-
-  case class UpdateCollectionEventTypeNameCmd(
-    userId:    Option[String],
-    studyId:            String,
-    id:                 String,
-    expectedVersion:    Long,
-    name:               String)
-      extends CollectionEventTypeModifyCommand
-
-  case class UpdateCollectionEventTypeDescriptionCmd(
-    userId:    Option[String],
-    studyId:            String,
-    id:                 String,
-    expectedVersion:    Long,
-    description:        Option[String])
-      extends CollectionEventTypeModifyCommand
-
-  case class UpdateCollectionEventTypeRecurringCmd(
-    userId:    Option[String],
-    studyId:            String,
-    id:                 String,
-    expectedVersion:    Long,
-    recurring:          Boolean)
-      extends CollectionEventTypeModifyCommand
-
-  case class RemoveCollectionEventTypeCmd(
-    userId:    Option[String],
-    studyId:         String,
-    id:              String,
-    expectedVersion: Long)
-      extends CollectionEventTypeModifyCommand
-
-  case class CollectionEventTypeAddAnnotationTypeCmd(
-    userId:                Option[String],
-    studyId:               String,
-    id:                    String,
-    expectedVersion:       Long,
-    name:                  String,
-    description:           Option[String],
-    valueType:             AnnotationValueType,
-    maxValueCount:         Option[Int] = None,
-    options:               Seq[String],
-    required:              Boolean)
-      extends CollectionEventTypeModifyCommand
-
-  case class CollectionEventTypeUpdateAnnotationTypeCmd(
-    userId:                Option[String],
-    studyId:               String,
-    id:                    String,
-    expectedVersion:       Long,
-    uniqueId:              String,
-    name:                  String,
-    description:           Option[String],
-    valueType:             AnnotationValueType,
-    maxValueCount:         Option[Int] = None,
-    options:               Seq[String],
-    required:              Boolean)
-      extends CollectionEventTypeModifyCommand
-
-  case class RemoveCollectionEventTypeAnnotationTypeCmd(
-    userId:                Option[String],
-    studyId:               String,
-    id:                    String,
-    expectedVersion:       Long,
-    uniqueId:              String)
-      extends CollectionEventTypeModifyCommand
-
-  case class AddCollectionSpecimenSpecCmd(
-    userId:                      Option[String],
-    studyId:                     String,
-    id:                          String,
-    expectedVersion:             Long,
-    name:                        String,
-    description:                 Option[String],
-    units:                       String,
-    anatomicalSourceType:        AnatomicalSourceType,
-    preservationType:            PreservationType,
-    preservationTemperatureType: PreservationTemperatureType,
-    specimenType:                SpecimenType,
-    maxCount:                    Int,
-    amount:                      Option[BigDecimal])
-      extends CollectionEventTypeModifyCommand
-
-  case class UpdateCollectionSpecimenSpecCmd(
-    userId:                      Option[String],
-    studyId:                     String,
-    id:                          String,
-    expectedVersion:             Long,
-    uniqueId:                    String,
-    name:                        String,
-    description:                 Option[String],
-    units:                       String,
-    anatomicalSourceType:        AnatomicalSourceType,
-    preservationType:            PreservationType,
-    preservationTemperatureType: PreservationTemperatureType,
-    specimenType:                SpecimenType,
-    maxCount:                    Int,
-    amount:                      Option[BigDecimal])
-      extends CollectionEventTypeModifyCommand
-
-  case class RemoveCollectionSpecimenSpecCmd(
-    userId:                Option[String],
-    studyId:               String,
-    id:                    String,
-    expectedVersion:       Long,
-    uniqueId:              String)
-      extends CollectionEventTypeModifyCommand
 
   // study annotation type commands
   trait StudyAnnotationTypeCommand extends StudyCommandWithStudyId
@@ -339,21 +210,6 @@ object StudyCommands {
 
   //--
 
-  implicit val annotationValueTypeFormat: Format[AnnotationValueType] =
-    enumFormat(org.biobank.domain.AnnotationValueType)
-
-  implicit val anatomicalSourceTypeFormat: Format[AnatomicalSourceType] =
-    enumFormat(org.biobank.domain.AnatomicalSourceType)
-
-  implicit val specimenTypeReads: Format[SpecimenType] =
-    enumFormat(org.biobank.domain.SpecimenType)
-
-  implicit val preservationTypeReads: Format[PreservationType] =
-    enumFormat(org.biobank.domain.PreservationType)
-
-  implicit val preservatioTempTypeReads: Format[PreservationTemperatureType] =
-    enumFormat(org.biobank.domain.PreservationTemperatureType)
-
   implicit val addStudyCmdReads = Json.reads[AddStudyCmd]
   implicit val updateStudyNameCmdReads = Json.reads[UpdateStudyNameCmd]
   implicit val updateStudyDescriptionCmdReads = Json.reads[UpdateStudyDescriptionCmd]
@@ -364,19 +220,6 @@ object StudyCommands {
   implicit val disableStudyCmdReads = Json.reads[DisableStudyCmd]
   implicit val retireStudyCmdReads = Json.reads[RetireStudyCmd]
   implicit val unretireStudyCmdReads = Json.reads[UnretireStudyCmd]
-
-  implicit val addCollectionEventTypeCmdReads = Json.reads[AddCollectionEventTypeCmd]
-  implicit val removeCollectionEventTypeCmdReads = Json.reads[RemoveCollectionEventTypeCmd]
-  implicit val updateCollectionEventTypeNameCmdReads = Json.reads[UpdateCollectionEventTypeNameCmd]
-  implicit val updateCollectionEventTypeDescriptionCmdReads = Json.reads[UpdateCollectionEventTypeDescriptionCmd]
-  implicit val updateCollectionEventTypeRecurringCmdReads = Json.reads[UpdateCollectionEventTypeRecurringCmd]
-  implicit val collectionEventTypeAddAnnotationTypeCmdReads = Json.reads[CollectionEventTypeAddAnnotationTypeCmd]
-
-  implicit val collectionEventTypeUpdateAnnotationTypeCmdReads = Json.reads[CollectionEventTypeUpdateAnnotationTypeCmd]
-  implicit val removeCollectionEventAnnotationTypeCmdReads = Json.reads[RemoveCollectionEventTypeAnnotationTypeCmd]
-  implicit val addCollectionSpecimenSpecCmdReads = Json.reads[AddCollectionSpecimenSpecCmd]
-  implicit val updateCollectionSpecimenSpecCmdReads = Json.reads[UpdateCollectionSpecimenSpecCmd]
-  implicit val removeCollectionSpecimenSpecCmdReads = Json.reads[RemoveCollectionSpecimenSpecCmd]
 
   implicit val addProcessingTypeCmdReads = Json.reads[AddProcessingTypeCmd]
   implicit val updateProcessingTypeCmdReads = Json.reads[UpdateProcessingTypeCmd]

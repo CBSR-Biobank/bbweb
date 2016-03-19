@@ -12,7 +12,6 @@ import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
 import org.biobank.infrastructure.JsonUtils._
-import org.biobank.infrastructure.command.StudyCommands._
 import org.joda.time.DateTime
 
 import play.api.libs.json._

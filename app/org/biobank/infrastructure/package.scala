@@ -24,65 +24,6 @@ package infrastructure {
     }
   }
 
-
-  trait HasIdentity {
-
-    /** A command that includes the ID of the object it references. */
-    val id: String
-
-  }
-
-  trait HasStudyIdentity {
-
-    /** A command that includes the study ID that it is related to. */
-    val studyId: String
-
-  }
-
-  trait HasCollectionEventTypeIdentity {
-
-    /** A command that includes the collection event type ID that it is related to. */
-    val collectionEventTypeId: String
-
-  }
-
-  trait HasParticipantIdentity {
-
-    /** A command that includes the participant ID that it is related to. */
-    val participantId: String
-
-  }
-
-  trait HasCollectionEventIdentity {
-
-    /** A command that includes the participant ID that it is related to. */
-    val collectionEventId: String
-
-  }
-
-  trait HasSpecimenIdentity {
-
-    /** A command that includes the specimen ID that it is related to. */
-    val specimenId: String
-
-  }
-
-  trait HasCentreIdentity {
-
-    /** A command that includes the centre ID that it is related to. */
-    val centreId: String
-
-  }
-
-  trait HasProcessingTypeIdentity {
-
-    /** An command that includes the processing type ID that it is related to. */
-    val processingTypeId: String
-
-  }
-
-
-
   /** Used to define annotation types associate annotation types to objects that use them.
     *
     */
@@ -96,46 +37,9 @@ package infrastructure {
     val required: Boolean
   }
 
-  /** Used to define annotation types to be used by a [[org.biobank.domain.study.CollectionEventType]]. */
-  case class CollectionEventTypeAnnotationTypeData(annotationTypeId: String, required: Boolean)
-      extends AnnotationTypeData
-
   /** Used to define annotation types to be used by a [[org.biobank.domain.study.SpecimenLinkType]]. */
   case class SpecimenLinkTypeAnnotationTypeData(annotationTypeId: String, required: Boolean)
       extends AnnotationTypeData
-
-  /** Used to define which types of specimens (i.e. which [[org.biobank.domain.study.SpecimenGroup]]s) need to
-    * be collected with this type of collection event. A single specimen group can be used in multiple
-    * collection event types.
-    *
-    * @param specimenGroupId The ID associated with the [[org.biobank.domain.study.SpecimenGroup]].
-    *
-    * @param name A copy of the name of the corresponding specimen group. Read only.
-    *
-    * @param maxCount The number of specimens required to be collected.
-    *
-    * @param amount The amount of substance that is expected in each collected specimen, or None
-    *        if there is no default amount. The unit on the amount is defined in the SpecimenGroup.
-    *
-    * @param units A copy of the units field from the specimen group. Read only.
-    *
-    */
-  case class CollectionEventTypeSpecimenGroupData(
-    specimenGroupId: String,
-    maxCount: Int,
-    amount: Option[BigDecimal])
-
-  object CollectionEventTypeAnnotationTypeData {
-
-    implicit val annotationTypeDataFormat = Json.format[CollectionEventTypeAnnotationTypeData]
-
-  }
-
-  object CollectionEventTypeSpecimenGroupData {
-
-    implicit val specimenGroupDataFormat = Json.format[CollectionEventTypeSpecimenGroupData]
-
-  }
 
   object SpecimenLinkTypeAnnotationTypeData {
 

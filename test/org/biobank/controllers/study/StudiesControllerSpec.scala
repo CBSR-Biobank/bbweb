@@ -332,14 +332,13 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
         val json = makeRequest(POST,
                                "/studies",
-                               FORBIDDEN,
-                               Json.obj(
-                                 "name"        -> study.name,
-                                 "description" -> study.description))
+                               BAD_REQUEST,
+                               Json.obj("name"        -> study.name,
+                                        "description" -> study.description))
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include regex ("EntityCriteriaError.*already exists")
+        (json \ "message").as[String] must include regex ("EntityCriteriaError.*name already used")
       }
 
       "not add add a new study with a name less than 2 characters" in {
@@ -395,14 +394,14 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
         val json = makeRequest(POST,
                                uri(studies(0), "name"),
-                               FORBIDDEN,
+                               BAD_REQUEST,
                                Json.obj(
                                  "expectedVersion" -> Some(studies(0).version),
                                  "name"            -> studies(1).name))
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include regex ("EntityCriteriaError.*name already exists")
+        (json \ "message").as[String] must include regex ("EntityCriteriaError.*name already used")
       }
 
       "fail when updating a study's name to something with less than 2 characters" in {

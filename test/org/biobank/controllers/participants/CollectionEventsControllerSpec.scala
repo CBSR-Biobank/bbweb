@@ -14,8 +14,7 @@ import scalaz.Validation.FlatMap._
 /**
  * Tests the REST API for [[CollectionEvents]].
  */
-class CollectionEventsControllerSpec
-    extends StudyAnnotationsControllerSharedSpec[CollectionEvent] {
+class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpec[CollectionEvent] {
 
   import org.biobank.TestUtils._
   import org.biobank.AnnotationTestUtils._
@@ -167,7 +166,7 @@ class CollectionEventsControllerSpec
     val json = makeRequest(POST, uri(cevent.participantId), BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] must include ("error")
-    (json \ "message").as[String] must include ("is not enabled")
+    (json \ "message").as[String] must include regex ("InvalidStatus.*study not enabled")
   }
 
   def updateOnNonEnabledStudy(study:       Study,
@@ -188,7 +187,8 @@ class CollectionEventsControllerSpec
     val json = makeRequest(POST, updateUri(cevent, path), BAD_REQUEST, reqJson)
 
     (json \ "status").as[String] must include ("error")
-    (json \ "message").as[String] must include ("is not enabled")
+
+    (json \ "message").as[String] must include regex("InvalidStatus.*study not enabled")
   }
 
   def updateWithInvalidVersion(participant: Participant,
@@ -233,7 +233,8 @@ class CollectionEventsControllerSpec
     val json = makeRequest(DELETE, uri(cevent.participantId, cevent, cevent.version), BAD_REQUEST)
 
     (json \ "status").as[String] must include ("error")
-    (json \ "message").as[String] must include ("is not enabled")
+
+    (json \ "message").as[String] must include regex("InvalidStatus.*study not enabled")
   }
 
   "Collection Event REST API" when {

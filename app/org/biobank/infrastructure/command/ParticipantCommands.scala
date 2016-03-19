@@ -1,6 +1,5 @@
 package org.biobank.infrastructure.command
 
-import org.biobank.infrastructure._
 import org.biobank.domain.Annotation
 import org.biobank.infrastructure.JsonUtils._
 

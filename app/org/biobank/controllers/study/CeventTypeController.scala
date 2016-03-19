@@ -2,7 +2,7 @@ package org.biobank.controllers.study
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
-import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.service.AuthToken
 import org.biobank.service.study.StudiesService
 import org.biobank.service.users.UsersService
@@ -89,7 +89,7 @@ class CeventTypeController @Inject() (val env:            Environment,
       processCommand(cmd)
   }
 
-  private def processCommand(cmd: StudyCommand) = {
+  private def processCommand(cmd: CollectionEventTypeCommand) = {
     val future = studiesService.processCollectionEventTypeCommand(cmd)
     domainValidationReply(future)
   }

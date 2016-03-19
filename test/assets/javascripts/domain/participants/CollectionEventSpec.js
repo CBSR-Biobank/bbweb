@@ -14,7 +14,7 @@ define([
 ], function(angular, mocks, _, faker, moment, sprintf) {
   'use strict';
 
-  escribe('CollectionEvent', function() {
+  describe('CollectionEvent', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
