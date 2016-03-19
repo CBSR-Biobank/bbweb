@@ -7,7 +7,7 @@ import org.biobank.domain.DomainValidation
 import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.participants._
 import org.biobank.domain.study.{ SpecimenGroupId, SpecimenGroupRepository }
-import org.biobank.infrastructure.command.ParticipantCommands._
+import org.biobank.infrastructure.command.SpecimenCommands._
 import org.biobank.infrastructure.event.SpecimenEvents._
 import org.biobank.service.Processor
 import org.joda.time.DateTime
