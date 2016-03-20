@@ -19,7 +19,8 @@ define(function (require) {
 
   module.controller('FooterCtrl', require('./FooterCtrl'));
   module.controller('HeaderCtrl', require('./HeaderCtrl'));
-  module.controller('HomeCtrl',   require('./HomeCtrl'));
+
+  module.directive('home',   require('./directives/home/homeDirective'));
 
   return {
     name: name,

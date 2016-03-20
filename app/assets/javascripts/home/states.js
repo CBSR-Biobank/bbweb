@@ -9,7 +9,7 @@ define(['angular'], function(angular) {
 
   config.$inject = ['$urlRouterProvider', '$stateProvider'];
 
-  function config($urlRouterProvider, $stateProvider) {
+  function config($urlRouterProvider, $stateProvider, authorizationProvider) {
 
     $urlRouterProvider.otherwise('/index');
 
@@ -18,8 +18,10 @@ define(['angular'], function(angular) {
         url: '/',
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/home/home.html',
-            controller: 'HomeCtrl as vm'
+            template: '<home user="vm.user"></home>',
+            controller: [function () {
+            }],
+            controllerAs: 'vm'
           }
         },
         data: {
