@@ -17,10 +17,9 @@ define(function (require) {
 
   module.config(require('./states'));
 
-  module.controller('FooterCtrl', require('./FooterCtrl'));
-  module.controller('HeaderCtrl', require('./HeaderCtrl'));
-
-  module.directive('home',   require('./directives/home/homeDirective'));
+  module.directive('biobankFooter', require('./directives/biobankFooter/biobankFooterDirective'));
+  module.directive('biobankHeader', require('./directives/biobankHeader/biobankHeaderDirective'));
+  module.directive('home',            require('./directives/home/homeDirective'));
 
   return {
     name: name,

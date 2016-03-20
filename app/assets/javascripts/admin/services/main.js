@@ -16,7 +16,9 @@ define(function (require) {
     studyAnnotationTypes.name
   ]);
 
-return {
+  module.service('adminService', require('./adminService'));
+
+  return {
     name: name,
     module: module
   };
