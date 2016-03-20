@@ -5,9 +5,11 @@
   <div class="panel-heading">
     <h3 class="panel-title">Profile
       <span class="btn-group pull-right">
-        <button class="btn btn-xs btn-default" ng-click="vm.updatePassword()">
-          <i class="glyphicon glyphicon-cog"></i>
+        <button class="btn btn-xs btn-primary"
+                ng-click="vm.updatePassword()"
+                title="Update password">
           Update password
+          <i class="glyphicon glyphicon-edit"></i>
         </button>
       </span>
     </h3>
@@ -19,11 +21,10 @@
         <div class="col-md-2"><strong>Name</strong></div>
         <div class="col-md-8">{{vm.user.name}}</div>
         <div class="col-md-2">
-          <button class="btn btn-xs btn-default pull-right"
+          <button class="btn btn-xs btn-primary pull-right"
                   title="Update name"
                   ng-click="vm.updateName()">
-            <i class="glyphicon glyphicon-cog"></i>
-            Update
+            <i class="glyphicon glyphicon-edit"></i>
           </button>
         </div>
       </div>
@@ -33,11 +34,10 @@
         <div class="col-md-2"><strong>Email</strong></div>
         <div class="col-md-8">{{vm.user.email}}</div>
         <div class="col-md-2">
-          <button class="btn btn-xs btn-default pull-right"
+          <button class="btn btn-xs btn-primary pull-right"
                   title="Update email"
                   ng-click="vm.updateEmail()">
-            <i class="glyphicon glyphicon-cog"></i>
-            Update
+            <i class="glyphicon glyphicon-edit"></i>
           </button>
         </div>
       </div>
@@ -52,20 +52,12 @@
           None
         </div>
         <div class="col-md-3">
-          <div class="btn-group pull-right">
-            <button class="btn btn-xs btn-default"
-                    title="Update avatar URL"
-                    ng-click="vm.updateAvatarUrl()">
-              <i class="glyphicon glyphicon-cog"></i>
-              Update
-            </button>
-            <button class="btn btn-xs btn-default"
-                    title="Remove avatar URL"
-                    ng-click="vm.removeAvatarUrl()">
-              <i class="glyphicon glyphicon-remove"></i>
-              Remove
-            </button>
-          </div>
+          <update-remove-buttons
+             on-update="vm.updateAvatarUrl()"
+             on-remove="vm.removeAvatarUrl()"
+             update-button-enabled="'true'"
+             remove-button-enabled="vm.allowRemoveAvatarUrl">
+          </update-remove-buttons>
         </div>
       </div>
     </li>

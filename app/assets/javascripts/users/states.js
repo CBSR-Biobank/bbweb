@@ -75,8 +75,14 @@ define(function () {
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/users/userProfile.html',
-          controller: 'UserProfileCtrl as vm'
+          template: '<user-profile user="vm.user"></user-profile>',
+          controller: [
+            'user',
+            function (user) {
+              this.user = user;
+            }
+          ],
+          controllerAs: 'vm'
         }
       },
       data: {

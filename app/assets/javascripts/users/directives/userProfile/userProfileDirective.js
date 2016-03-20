@@ -1,15 +1,32 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 define(function () {
   'use strict';
 
+  /**
+   * Allows user to change his / her details, including updating password.
+   */
+  function userProfileDirective() {
+    var directive = {
+      restrict: 'E',
+      scope: {},
+      bindToController: {
+        user: '='
+      },
+      templateUrl : '/assets/javascripts/users/directives/userProfile/userProfile.html',
+      controller: UserProfileCtrl,
+      controllerAs: 'vm'
+    };
+
+    return directive;
+  }
+
   UserProfileCtrl.$inject = [
     'modalService',
     'notificationsService',
-    'User',
-    'user'
+    'User'
   ];
 
   /**
@@ -17,11 +34,13 @@ define(function () {
    */
   function UserProfileCtrl(modalService,
                            notificationsService,
-                           User,
-                           user) {
+                           User) {
     var vm = this;
 
-    vm.user            = new User(user);
+    vm.user            = new User(vm.user);
+
+    vm.allowRemoveAvatarUrl = (vm.user.avatarUrl !== null);
+
     vm.updateName      = updateName;
     vm.updateEmail     = updateEmail;
     vm.updatePassword  = updatePassword;
@@ -39,16 +58,16 @@ define(function () {
     function postUpdate(message, title, timeout) {
       return function (user) {
         vm.user = user;
+        vm.allowRemoveAvatarUrl = (vm.user.avatarUrl !== null);
         notificationsService.success(message, title, timeout);
       };
     }
 
     function updateName() {
       var name = vm.user.name;
-      modalService.modalTextInput(
-        'Update user name',
-        'Name',
-        name
+      modalService.modalTextInput('Update user name',
+                                  'Name',
+                                  name
       ).then(function (name) {
         vm.user.updateName(name)
           .then(postUpdate('User name updated successfully.',
@@ -59,10 +78,9 @@ define(function () {
     }
 
     function updateEmail() {
-      modalService.modalEmailInput(
-        'Update user email',
-        'Email',
-        vm.user.email
+      modalService.modalEmailInput('Update user email',
+                                   'Email',
+                                   vm.user.email
       ).then(function (email) {
         vm.user.updateEmail(email)
           .then(postUpdate('Email updated successfully.',
@@ -73,10 +91,9 @@ define(function () {
     }
 
     function updateAvatarUrl() {
-      modalService.modalUrlInput(
-        'Update avatar URL',
-        'Avatar URL',
-        vm.user.avatarUrl
+      modalService.modalUrlInput('Update avatar URL',
+                                 'Avatar URL',
+                                 vm.user.avatarUrl
       ).then(function (avatarUrl) {
         vm.user.updateAvatarUrl(avatarUrl)
           .then(postUpdate('Avatar URL updated successfully.',
@@ -124,5 +141,5 @@ define(function () {
     }
   }
 
-  return UserProfileCtrl;
+  return userProfileDirective;
 });

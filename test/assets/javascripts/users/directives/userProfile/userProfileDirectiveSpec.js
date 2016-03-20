@@ -7,17 +7,15 @@
 define([
   'angular',
   'angularMocks',
-  'underscore',
-  'biobankApp'
+  'underscore'
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('Controller: UserProfileCtrl', function() {
-    var ctrlMethods = ['updateName', 'updateEmail', 'updateAvatarUrl'];
+  describe('Directive: userProfileDirective', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $controller, directiveTestSuite, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, directiveTestSuite, testUtils) {
       var self = this;
 
       _.extend(self, directiveTestSuite);
@@ -31,23 +29,23 @@ define([
 
       self.createController = createController;
       self.updateUserCommon = updateUserCommon;
+      self.ctrlMethods = ['updateName', 'updateEmail', 'updateAvatarUrl'];
 
-      self.putHtmlTemplates('/assets/javascripts/common/services/modalInput.html');
+      self.putHtmlTemplates(
+        '/assets/javascripts/users/directives/userProfile/userProfile.html',
+        '/assets/javascripts/common/directives/updateRemoveButtons.html',
+        '/assets/javascripts/common/services/modalInput.html');
 
       //--
 
       function createController(user) {
+        self.element = angular.element('<user-profile user="vm.user"></user-profile>');
         self.scope = $rootScope.$new();
+        self.scope.vm = { user: user};
 
-        $controller('UserProfileCtrl as vm', {
-          $scope:               self.scope,
-          $uibModal:            self.$uibModal,
-          modalService:         self.modalService,
-          notificationsService: self.notificationsService,
-          User:                 self.User,
-          user:                 user
-        });
+        $compile(self.element)(self.scope);
         self.scope.$digest();
+        self.controller = self.element.controller('userProfile');
       }
 
       function updateUserCommon(fakeUserUpdate, expectClause) {
@@ -56,10 +54,10 @@ define([
         spyOn(self.modalService, 'modalTextInput').and.returnValue(self.$q.when('OK'));
         self.createController(user);
 
-        _.each(ctrlMethods, function (ctrlMethod) {
+        _.each(self.ctrlMethods, function (ctrlMethod) {
           spyOn(self.User.prototype, ctrlMethod).and.returnValue(fakeUserUpdate());
 
-          self.scope.vm[ctrlMethod]();
+          self.controller[ctrlMethod]();
           self.scope.$digest();
           expectClause();
         });
@@ -114,7 +112,7 @@ define([
       spyOn(this.notificationsService, 'success').and.callFake(function () {});
 
       this.createController(user);
-      this.scope.vm.removeAvatarUrl();
+      this.controller.removeAvatarUrl();
       this.scope.$digest();
       expect(this.notificationsService.success).toHaveBeenCalled();
     });
@@ -130,7 +128,7 @@ define([
       deferred.reject({ data: { message: 'xxx' } });
 
       this.createController(user);
-      this.scope.vm.removeAvatarUrl();
+      this.controller.removeAvatarUrl();
       this.scope.$digest();
       expect(this.notificationsService.error).toHaveBeenCalled();
     });
@@ -144,7 +142,7 @@ define([
       spyOn(this.notificationsService, 'success').and.callFake(function () {});
 
       this.createController(user);
-      this.scope.vm.updatePassword();
+      this.controller.updatePassword();
       this.scope.$digest();
       expect(this.notificationsService.success).toHaveBeenCalled();
     });
@@ -160,7 +158,7 @@ define([
       deferred.reject({ data: { message: 'invalid password' } });
 
       this.createController(user);
-      this.scope.vm.updatePassword();
+      this.controller.updatePassword();
       this.scope.$digest();
       expect(this.notificationsService.error).toHaveBeenCalled();
     });
@@ -176,7 +174,7 @@ define([
       deferred.reject({ data: { message: 'xxx' } });
 
       this.createController(user);
-      this.scope.vm.updatePassword();
+      this.controller.updatePassword();
       this.scope.$digest();
       expect(this.notificationsService.error).toHaveBeenCalled();
     });

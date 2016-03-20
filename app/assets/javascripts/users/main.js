@@ -20,12 +20,13 @@ define(function (require) {
   module.controller('ForgotPasswordCtrl', require('./ForgotPasswordCtrl'));
   module.controller('LoginCtrl',          require('./LoginCtrl'));
   module.controller('PasswordSentCtrl',   require('./PasswordSentCtrl'));
-  module.directive('passwordCheck',       require('./directives/passwordCheck/passwordCheckDirective'));
   module.controller('RegisterUserCtrl',   require('./RegisterUserCtrl'));
+
+  module.directive('passwordCheck',       require('./directives/passwordCheck/passwordCheckDirective'));
+  module.directive('userProfile',         require('./directives/userProfile/userProfileDirective'));
 
   module.service('usersService',          require('./usersService'));
 
-  module.controller('UserProfileCtrl',    require('./UserProfileCtrl'));
 
   return {
     name: name,
