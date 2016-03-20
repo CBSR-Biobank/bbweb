@@ -1,15 +1,9 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 define(function () {
   'use strict';
-
-  LoginCtrl.$inject = [
-    '$state',
-    'usersService',
-    'modalService',
-  ];
 
   /**
    * Used for user log in.
@@ -18,6 +12,23 @@ define(function () {
    *
    * http://timothy.userapp.io/post/63412334209/form-autocomplete-and-remember-password-with-angularjs
    */
+  function loginDirective() {
+    var directive = {
+      restrict: 'E',
+      templateUrl : '/assets/javascripts/users/directives/login/login.html',
+      controller: LoginCtrl,
+      controllerAs: 'vm'
+    };
+
+    return directive;
+  }
+
+  LoginCtrl.$inject = [
+    '$state',
+    'usersService',
+    'modalService',
+  ];
+
   function LoginCtrl($state, usersService, modalService) {
     var vm = this;
 
@@ -94,5 +105,5 @@ define(function () {
     }
   }
 
-  return LoginCtrl;
+  return loginDirective;
 });

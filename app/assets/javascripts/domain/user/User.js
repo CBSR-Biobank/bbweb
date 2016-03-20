@@ -57,6 +57,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
     }
 
     User.prototype = Object.create(ConcurrencySafeEntity.prototype);
+    User.prototype.constructor = User;
 
     /**
      * Used by promise code, so it must return an error rather than throw one.

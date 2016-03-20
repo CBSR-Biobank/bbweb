@@ -27,8 +27,7 @@ define(function () {
       url: '^/login',
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/users/login.html',
-          controller: 'LoginCtrl as vm'
+          template: '<login></login>',
         }
       }
     });
