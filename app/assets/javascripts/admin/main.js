@@ -28,8 +28,7 @@ define(function (require) {
   ]);
 
   module.config(require('./states'));
-  module.controller('AdminCtrl', require('./AdminCtrl'));
-  module.service('adminService', require('./adminService'));
+  module.directive('biobankAdmin', require('./directives/biobankAdmin/biobankAdminDirective'));
   module.directive('statusLine', require('./directives/statusLine/statusLineDirective'));
 
   return {

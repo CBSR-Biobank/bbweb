@@ -19,14 +19,13 @@ define(function () {
 
     $stateProvider.state('home.admin', {
       url: 'admin',
-      views: {
-        'main@': {
-          templateUrl: '/assets/javascripts/admin/adminDetails.html',
-          controller: 'AdminCtrl as vm'
-        }
-      },
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser
+      },
+      views: {
+        'main@': {
+          template: '<biobank-admin></biobank-admin>'
+        }
       },
       data: {
         displayName: 'Administration'
