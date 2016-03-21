@@ -48,8 +48,14 @@ define(function () {
       url: '^/passwordSent/{email}',
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/users/passwordSent.html',
-          controller: 'PasswordSentCtrl as vm'
+          template: '<password-sent email="vm.email"></password-sent>',
+          controller: [
+            '$stateParams',
+            function ($stateParams) {
+              this.email = $stateParams.email;
+            }
+          ],
+          controllerAst: 'vm'
         }
       }
     });
