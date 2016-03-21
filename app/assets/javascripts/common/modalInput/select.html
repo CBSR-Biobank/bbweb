@@ -1,0 +1,17 @@
+<div class="form-group">
+  <label for="bool" class="col-md-2 control-label">{{vm.label}}:</label>
+  <div class="col-md-10">
+    <select class="form-control"
+            name="value"
+            ng-model="vm.value"
+            ng-options="option for option in vm.options.selectOptions"
+            ng-required="vm.options.required">
+      <option value="">-- make a selection --</option>
+    </select>
+  </div>
+  <div class="col-md-offset-2 col-md-10">
+    <p ng-show="vm.options.required && form.value.$invalid && !form.value.$pristine"
+       class="help-block">
+      A selection is required.</p>
+  </div>
+</div>

@@ -25,14 +25,14 @@ define(['underscore'], function (_) {
 
   CeventTypeViewCtrl.$inject = [
     '$state',
-    'modalService',
+    'modalInput',
     'domainEntityService',
     'notificationsService',
     'studyAnnotationTypeUtils'
   ];
 
   function CeventTypeViewCtrl($state,
-                              modalService,
+                              modalInput,
                               domainEntityService,
                               notificationsService,
                               studyAnnotationTypeUtils) {
@@ -64,9 +64,10 @@ define(['underscore'], function (_) {
     }
 
     function editName() {
-      modalService.modalTextInput('Edit Event Type name',
-                                  'Name',
-                                  vm.ceventType.name)
+      modalInput.text('Edit Event Type name',
+                      'Name',
+                      vm.ceventType.name,
+                      { required: true, minLength: 2 })
         .then(function (name) {
           vm.ceventType.updateName(name)
             .then(postUpdate('Name changed successfully.', 'Change successful', 1500))
@@ -75,9 +76,9 @@ define(['underscore'], function (_) {
     }
 
     function editDescription() {
-      modalService.modalTextAreaInput('Edit Event Type description',
-                                      'Description',
-                                      vm.ceventType.description)
+      modalInput.textArea('Edit Event Type description',
+                          'Description',
+                          vm.ceventType.description)
         .then(function (description) {
           vm.ceventType.updateDescription(description)
             .then(postUpdate('Description changed successfully.',
@@ -88,9 +89,9 @@ define(['underscore'], function (_) {
     }
 
     function editRecurring() {
-      modalService.modalBooleanInput('Edit Event Type recurring',
-                                     'Recurring',
-                                     vm.ceventType.recurring.toString())
+      modalInput.boolean('Edit Event Type recurring',
+                         'Recurring',
+                         vm.ceventType.recurring.toString())
         .then(function (recurring) {
           vm.ceventType.updateRecurring(recurring === 'true')
             .then(postUpdate('Recurring changed successfully.',

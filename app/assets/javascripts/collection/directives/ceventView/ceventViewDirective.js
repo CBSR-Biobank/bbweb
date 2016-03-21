@@ -13,7 +13,8 @@ define(function () {
       restrict: 'EA',
       scope: {},
       bindToController: {
-        collectionEvent: '='
+        collectionEventTypes: '=',
+        collectionEvent:      '='
       },
       templateUrl : '/assets/javascripts/collection/directives/ceventView/ceventView.html',
       controller: CeventViewCtrl,
@@ -22,22 +23,70 @@ define(function () {
     return directive;
   }
 
-  CeventViewCtrl.$inject = ['timeService'];
+  CeventViewCtrl.$inject = [
+    'timeService',
+    'modalInput',
+    'notificationsService',
+    'annotationUpdate'
+  ];
 
   /**
    *
    */
-  function CeventViewCtrl(timeService) {
+  function CeventViewCtrl(timeService,
+                          modalInput,
+                          notificationsService,
+                          annotationUpdate) {
     var vm = this;
+
+    vm.canUpdateVisitType = (vm.collectionEventTypes.length > 1);
 
     vm.panelOpen          = true;
     vm.specimens          = [];
     vm.timeCompletedLocal = timeService.timeToDisplayString(vm.collectionEvent.timeCompleted);
 
+    vm.editVisitType      = editVisitType;
+    vm.editTimeCompleted  = editTimeCompleted;
+    vm.editAnnotation     = editAnnotation;
     vm.addSpecimen        = addSpecimen;
     vm.panelButtonClicked = panelButtonClicked;
 
     //--
+
+    function postUpdate(message, title, timeout) {
+      return function (cevent) {
+        vm.collectionEvent = cevent;
+        vm.timeCompletedLocal = timeService.timeToDisplayString(vm.collectionEvent.timeCompleted);
+        notificationsService.success(message, title, timeout);
+      };
+    }
+
+    function editVisitType() {
+      if (vm.collectionEventTypes.length <= 1) {
+        throw new Error('only a single collection event type is defined for this study');
+      }
+    }
+
+    function editTimeCompleted() {
+      modalInput.dateTime('Update time completed',
+                          'Time completed',
+                          vm.timeCompletedLocal,
+                          { required: true })
+        .then(function (timeCompleted) {
+          vm.collectionEvent.updateTimeCompleted(timeService.dateAndTimeToUtcString(
+            timeCompleted.date, timeCompleted.time))
+            .then(postUpdate('Time completed updated successfully.', 'Change successful', 1500))
+            .catch(notificationsService.updateError);
+        });
+    }
+
+    function editAnnotation(annotation) {
+      annotationUpdate.update(annotation).then(function (newAnnotation) {
+        vm.collectionEvent.addAnnotation(newAnnotation)
+          .then(postUpdate('Annotation updated successfully.', 'Change successful', 1500))
+          .catch(notificationsService.updateError);
+      });
+    }
 
     function addSpecimen() {
     }

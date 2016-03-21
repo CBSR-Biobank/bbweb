@@ -1,0 +1,21 @@
+<div class="form-group">
+  <label for="value" class="col-md-3 control-label">{{vm.label}}:</label>
+  <div class="col-md-9">
+    <input
+       name="value"
+       type="text"
+       class="form-control"
+       ng-model="vm.value"
+       ng-minlength="vm.options.minLength"
+       focus-me="true"
+       ng-required="vm.options.required" />
+  </div>
+  <div class="col-md-offset-3 col-md-9">
+    <p class="help-block" ng-show="form.value.$error.required">
+      A Value is required.
+    </p>
+    <p class="help-block" ng-show="form.value.$error.minlength">
+      A Value of minimum length {{vm.options.minLength}} is required.
+    </p>
+  </div>
+</div>

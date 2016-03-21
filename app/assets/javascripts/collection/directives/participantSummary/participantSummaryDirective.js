@@ -25,17 +25,49 @@ define(function () {
   }
 
   ParticipantSummaryCtrl.$inject = [
-    '$state'
+    'annotationUpdate',
+    'notificationsService',
+    'modalInput'
   ];
-
-  // TODO: add update buttons for each setting
 
   /**
    *
    */
-  function ParticipantSummaryCtrl($state) {
+  function ParticipantSummaryCtrl(annotationUpdate,
+                                  notificationsService,
+                                  modalInput) {
+    var vm = this;
 
+    vm.editUniqueId   = editUniqueId;
+    vm.editAnnotation = editAnnotation;
+
+    //---
+
+    function postUpdate(message, title, timeout) {
+      return function (participant) {
+        vm.participant = participant;
+        notificationsService.success(message, title, timeout);
+      };
+    }
+
+    function editUniqueId() {
+      modalInput.text('Update unique ID', 'Unique ID', vm.participant.uniqueId, { required: true })
+        .then(function (uniqueId) {
+          vm.participant.updateUniqueId(uniqueId)
+            .then(postUpdate('Unique ID updated successfully.', 'Change successful', 1500))
+            .catch(notificationsService.updateError);
+        });
+    }
+
+    function editAnnotation(annotation) {
+      annotationUpdate.update(annotation).then(function (newAnnotation) {
+        vm.participant.addAnnotation(newAnnotation)
+          .then(postUpdate('Annotation updated successfully.', 'Change successful', 1500))
+          .catch(notificationsService.updateError);
+      });
+    }
   }
+
 
   return participantSummaryDirective;
 });

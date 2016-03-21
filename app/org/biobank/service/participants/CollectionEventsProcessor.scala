@@ -157,9 +157,10 @@ class CollectionEventsProcessor @Inject() (
                                                cmd.stringValue,
                                                cmd.numberValue,
                                                cmd.selectedValues)
-          updatedCevent   <- cevent.withAnnotation(annotation)
+          allAnnotations  <- (cevent.annotations + annotation).success
           validAnnotation <- Annotation.validateAnnotations(collectionEventType.annotationTypes,
-                                                            List(annotation))
+                                                            allAnnotations.toList)
+          updatedCevent   <- cevent.withAnnotation(annotation)
         } yield CollectionEventEvent(updatedCevent.id.id).update(
           _.participantId                := participant.id.id,
           _.collectionEventTypeId        := updatedCevent.collectionEventTypeId.id,

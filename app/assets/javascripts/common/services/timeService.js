@@ -12,10 +12,10 @@ define(['moment'], function(moment) {
    */
   function timeService(bbwebConfig) {
     var service = {
-      stringToDateAndTime: stringToDateAndTime,
-      dateAndTimeToUtcString: dateAndTimeToUtcString,
+      stringToDateAndTime:        stringToDateAndTime,
+      dateAndTimeToUtcString:     dateAndTimeToUtcString,
       dateAndTimeToDisplayString: dateAndTimeToDisplayString,
-      timeToDisplayString: timeToDisplayString
+      timeToDisplayString:        timeToDisplayString
     };
     return service;
 

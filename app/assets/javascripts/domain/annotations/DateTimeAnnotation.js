@@ -27,7 +27,17 @@ define(['moment', 'underscore'], function(moment, _) {
      * Must return a string.
      */
     DateTimeAnnotation.prototype.getValue = function () {
-      return timeService.dateAndTimeToDisplayString(this.date, this.time);
+      this.value = timeService.dateAndTimeToDisplayString(this.date, this.time);
+      return this.value;
+    };
+
+    DateTimeAnnotation.prototype.setValue = function (value) {
+      if (typeof value !== 'object') {
+        throw new Error('value is not an object');
+      }
+      this.date = value.date;
+      this.time = value.time;
+      this.value = timeService.dateAndTimeToDisplayString(this.date, this.time);
     };
 
     /**

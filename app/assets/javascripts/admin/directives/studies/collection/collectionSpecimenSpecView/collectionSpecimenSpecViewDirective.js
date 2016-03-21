@@ -27,7 +27,7 @@ define(function () {
 
   CollectionSpecimenSpecViewCtrl.$inject = [
     '$state',
-    'modalService',
+    'modalInput',
     'notificationsService',
     'CollectionSpecimenSpec',
     'AnatomicalSourceType',
@@ -37,7 +37,7 @@ define(function () {
   ];
 
   function CollectionSpecimenSpecViewCtrl($state,
-                                          modalService,
+                                          modalInput,
                                           notificationsService,
                                           CollectionSpecimenSpec,
                                           AnatomicalSourceType,
@@ -73,9 +73,10 @@ define(function () {
     }
 
     function editName() {
-      modalService.modalTextInput('Specimen spec name',
-                                  'Name',
-                                  vm.specimenSpec.name)
+      modalInput.text('Specimen spec name',
+                      'Name',
+                      vm.specimenSpec.name,
+                      { required: true, minLength: 2 })
         .then(function (name) {
           vm.specimenSpec.name = name;
           return updateCollectionEventType;
@@ -83,9 +84,9 @@ define(function () {
     }
 
     function editDescription() {
-      modalService.modalTextAreaInput('Specimen spec description',
-                                      'Description',
-                                      vm.specimenSpec.description)
+      modalInput.textArea('Specimen spec description',
+                          'Description',
+                          vm.specimenSpec.description)
         .then(function (description) {
           vm.specimenSpec.description = description;
           return updateCollectionEventType;
@@ -93,10 +94,13 @@ define(function () {
     }
 
     function editAnatomicalSource() {
-      modalService.modalRequiredSelect('Specimen spec anatomical source',
-                                       'Anatomical source',
-                                       vm.specimenSpec.anatomicalSourceType,
-                                       AnatomicalSourceType.values())
+      modalInput.select('Specimen spec anatomical source',
+                        'Anatomical source',
+                        vm.specimenSpec.anatomicalSourceType,
+                        {
+                          required: true,
+                          selectOptions: AnatomicalSourceType.values()
+                        })
         .then(function (selection) {
           vm.specimenSpec.anatomicalSourceType = selection;
           return updateCollectionEventType;
@@ -104,10 +108,13 @@ define(function () {
     }
 
     function editPreservationType() {
-      modalService.modalRequiredSelect('Specimen spec preservation type',
-                                       'Preservation type',
-                                       vm.specimenSpec.preservationType,
-                                       PreservationType.values())
+      modalInput.select('Specimen spec preservation type',
+                        'Preservation type',
+                        vm.specimenSpec.preservationType,
+                        {
+                          required: true,
+                          selectOptions: PreservationType.values()
+                        })
         .then(function (selection) {
           vm.specimenSpec.preservationType = selection;
           return updateCollectionEventType;
@@ -115,10 +122,13 @@ define(function () {
     }
 
     function editPreservationTemperature() {
-      modalService.modalRequiredSelect('Specimen spec preservation temperature',
-                                       'Preservation temperature',
-                                       vm.specimenSpec.preservationTemperatureType,
-                                       PreservationTemperatureType.values())
+      modalInput.select('Specimen spec preservation temperature',
+                        'Preservation temperature',
+                        vm.specimenSpec.preservationTemperatureType,
+                        {
+                          required: true,
+                          selectOptions: PreservationTemperatureType.values()
+                        })
         .then(function (selection) {
           vm.specimenSpec.preservationTemperatureType = selection;
           return updateCollectionEventType;
@@ -126,10 +136,13 @@ define(function () {
     }
 
     function editSpecimenType() {
-      modalService.modalRequiredSelect('Specimen spec - specimen type',
-                                       'Sepcimen type',
-                                       vm.specimenSpec.specimenType,
-                                       SpecimenType.values())
+      modalInput.select('Specimen spec - specimen type',
+                        'Sepcimen type',
+                        vm.specimenSpec.specimenType,
+                        {
+                          required: true,
+                          selectOptions: SpecimenType.values()
+                        })
         .then(function (selection) {
           vm.specimenSpec.specimenType = selection;
           return updateCollectionEventType;
@@ -137,9 +150,7 @@ define(function () {
     }
 
     function editUnits() {
-      modalService.modalTextInput('Specimen spec units',
-                                  'Units',
-                                  vm.specimenSpec.units)
+      modalInput.text('Specimen spec units', 'Units', vm.specimenSpec.units, { required: true })
         .then(function (units) {
           vm.specimenSpec.units = units;
           return updateCollectionEventType;
@@ -147,9 +158,7 @@ define(function () {
     }
 
     function editAmount() {
-      modalService.modalRequiredPositiveFloat('Specimen spec amount',
-                                              'Amount',
-                                              vm.specimenSpec.amount)
+      modalInput.positiveFloat('Specimen spec amount', 'Amount', vm.specimenSpec.amount, { required: true })
         .then(function (value) {
           vm.specimenSpec.amount = value;
           return updateCollectionEventType;
@@ -157,9 +166,10 @@ define(function () {
     }
 
     function editMaxCount() {
-      modalService.modalRequiredNaturalNumber('Specimen spec max count',
-                                              'Max count',
-                                              vm.specimenSpec.maxCount)
+      modalInput.naturalNumber('Specimen spec max count',
+                               'Max count',
+                               vm.specimenSpec.maxCount,
+                               { required: true })
         .then(function (value) {
           vm.specimenSpec.maxCount = value;
           return updateCollectionEventType;

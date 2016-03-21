@@ -154,7 +154,7 @@ define(['underscore'], function(_) {
 
     $stateProvider.state('home.collection.study.participant', {
       abstract: true,
-      url: 'participant/{participantId}',
+      url: '/participant/{participantId}',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         participant: resolveParticipant
@@ -335,34 +335,45 @@ define(['underscore'], function(_) {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         collectionEvent: [
+          '$q',
           '$stateParams',
           'CollectionEvent',
           'collectionEventTypes',
-          function ($stateParams,
+          function ($q,
+                    $stateParams,
                     CollectionEvent,
                     collectionEventTypes) {
             return CollectionEvent.get($stateParams.collectionEventId)
               .then(function (cevent) {
-                var ceventType = _.findWhere(collectionEventTypes,
+                var deferred = $q.defer(),
+                    ceventType = _.findWhere(collectionEventTypes,
                                              { id: cevent.collectionEventTypeId });
 
                 if (!ceventType) {
-                  throw new Error('could not find collection event type');
+                  deferred.reject('could not find collection event type');
+                } else {
+                  cevent.setCollectionEventType(ceventType);
+                  deferred.resolve(cevent);
                 }
-
-                cevent.setCollectionEventType(ceventType);
-                return cevent;
+                return deferred.promise;
               });
           }
         ]
       },
       views: {
         'eventDetails': {
-          template: '<cevent-view collection-event="vm.collectionEvent"></cevents-view>',
+          template: [
+            '<cevent-view',
+            '  collection-event-types="vm.collectionEventTypes"',
+            '  collection-event="vm.collectionEvent">',
+            '</cevents-view>'
+          ].join(''),
           controller: [
+            'collectionEventTypes',
             'collectionEvent',
-            function ( collectionEvent) {
+            function (collectionEventTypes, collectionEvent) {
               var vm = this;
+              vm.collectionEventTypes = collectionEventTypes;
               vm.collectionEvent = collectionEvent;
             }
           ],

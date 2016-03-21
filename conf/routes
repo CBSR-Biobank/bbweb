@@ -66,6 +66,7 @@ GET     /participants/cevents/:ceventId                         org.biobank.cont
 POST    /participants/cevents/:participantId                    org.biobank.controllers.participants.CollectionEventsController.add(participantId)
 POST    /participants/cevents/visitNumber/:ceventId             org.biobank.controllers.participants.CollectionEventsController.updateVisitNumber(ceventId)
 POST    /participants/cevents/timeCompleted/:ceventId           org.biobank.controllers.participants.CollectionEventsController.updateTimeCompleted(ceventId)
+#POST    /participants/cevents/spcs/:ceventId                   org.biobank.controllers.participants.CollectionEventsController.addSpecimens(ceventId)
 POST    /participants/cevents/annot/:ceventId                   org.biobank.controllers.participants.CollectionEventsController.addAnnotation(ceventId)
 DELETE  /participants/cevents/annot/:ceventId/:annotTypeId/:ver org.biobank.controllers.participants.CollectionEventsController.removeAnnotation(ceventId, annotTypeId, ver: Long)
 DELETE  /participants/cevents/:participantId/:ceventId/:ver     org.biobank.controllers.participants.CollectionEventsController.remove(participantId, ceventId, ver: Long)

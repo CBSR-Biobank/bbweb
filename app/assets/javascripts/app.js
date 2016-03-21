@@ -13,16 +13,16 @@
 define(function(require) {
   'use strict';
 
-  var angular = require('angular'),
-      toastr = require('toastr'),
-      admin = require('admin'),
-      common = require('common'),
+  var angular    = require('angular'),
+      toastr     = require('toastr'),
+      admin      = require('admin'),
+      common     = require('common'),
       collection = require('collection'),
-      dashboard = require('dashboard'),
-      domain = require('domain'),
-      home = require('home'),
-      studies = require('studies'),
-      users = require('users'),
+      dashboard  = require('dashboard'),
+      domain     = require('domain'),
+      home       = require('home'),
+      studies    = require('studies'),
+      users      = require('users'),
       app;
 
   require('jquery');

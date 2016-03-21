@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore', 'tv4'], function(_, tv4) {
+define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
   'use strict';
 
   CollectionEventFactory.$inject = [
@@ -232,14 +232,42 @@ define(['underscore', 'tv4'], function(_, tv4) {
       return biobankApi.del(uri(this.participantId, this.id, this.version));
     };
 
-    CollectionEvent.prototype.updateVisitNumber = function (visitNumber) {
+    /**
+     * Sets the collection event type after an update.
+     */
+    CollectionEvent.prototype.update = function (path, reqJson) {
+      var self = this;
+
       return ConcurrencySafeEntity.prototype.update.call(
-        this, uriWithPath('visitNumber', this.id), { visitNumber: visitNumber });
+        this, uriWithPath(path, this.id), reqJson
+      ).then(postUpdate);
+
+      function postUpdate(updatedCevent) {
+        if (self.collectionEventType) {
+          updatedCevent.setCollectionEventType(self.collectionEventType);
+        }
+        return $q.when(updatedCevent);
+      }
+    };
+
+    CollectionEvent.prototype.updateVisitNumber = function (visitNumber) {
+      return this.update('visitNumber', { visitNumber: visitNumber });
     };
 
     CollectionEvent.prototype.updateTimeCompleted = function (timeCompleted) {
-      return ConcurrencySafeEntity.prototype.update.call(
-        this, uriWithPath('timeCompleted', this.id), { timeCompleted: timeCompleted });
+      return this.update('timeCompleted', { timeCompleted: timeCompleted });
+    };
+
+    CollectionEvent.prototype.addAnnotation = function (annotation) {
+      return this.update('annot', annotation.getServerAnnotation());
+    };
+
+    CollectionEvent.prototype.removeAnnotation = function (annotation) {
+      var url = sprintf.sprintf('%s/%d/%s',
+                                uri('annot', this.id),
+                                this.version,
+                                annotation.annotationTypeId);
+      return this.removeAnnotation.call(this, annotation, url);
     };
 
     function uri(/* participantId, collectionEventId, version */) {

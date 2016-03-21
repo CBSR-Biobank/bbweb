@@ -81,7 +81,7 @@ define(['underscore'], function (_) {
         }
       },
       data: {
-        displayName: 'Participant Annotation {{annotationType.name}}'
+        displayName: 'Participant Annotation: {{annotationType.name}}'
       }
     });
   }

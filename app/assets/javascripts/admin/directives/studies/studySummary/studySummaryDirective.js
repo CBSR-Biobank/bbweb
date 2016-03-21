@@ -26,11 +26,13 @@ define(['underscore'], function(_) {
   StudySummaryCtrl.$inject = [
     '$state',
     'modalService',
+    'modalInput',
     'notificationsService'
   ];
 
   function StudySummaryCtrl($state,
                             modalService,
+                            modalInput,
                             notificationsService) {
 
     var validStatusActions = ['disable', 'enable', 'retire', 'unretire'],
@@ -73,7 +75,13 @@ define(['underscore'], function(_) {
     }
 
     function editName() {
-      modalService.modalTextInput('Edit name', 'Name', vm.study.name)
+      modalInput.text('Edit name',
+                      'Name',
+                      vm.study.name,
+                      {
+                        required: true,
+                        minLength: 2
+                      })
         .then(function (name) {
           vm.study.updateName(name)
             .then(postUpdate('Name changed successfully.',
@@ -84,7 +92,7 @@ define(['underscore'], function(_) {
     }
 
     function editDescription() {
-      modalService.modalTextAreaInput('Edit description', 'Description', vm.study.description)
+      modalInput.textArea('Edit description', 'Description', vm.study.description)
         .then(function (description) {
           vm.study.updateDescription(description)
             .then(postUpdate('Description changed successfully.',

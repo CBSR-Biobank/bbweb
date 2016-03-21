@@ -2,9 +2,9 @@
   <!-- done with help from https://github.com/zhaber/angular-js-bootstrap-datetimepicker -->
   <div class="form-group"
        ng-class="{ 'has-error' : (dateTimeSubForm.dateValue.$invalid &&
-       !dateTimeSubForm.dateValue.$pristine) ||
-       (dateTimeSubForm.$error.time[0].$invalid &&
-       !dateTimeSubForm.$error.time[0].$pristine) }">
+                 !dateTimeSubForm.dateValue.$pristine) ||
+                 (dateTimeSubForm.$error.time[0].$invalid &&
+                 !dateTimeSubForm.$error.time[0].$pristine) }">
     <label class="col-md-2 control-label">{{vm.label}}</label>
     <div class="col-md-10">
       <div class="datetimepicker-wrapper">
@@ -27,13 +27,15 @@
       </div>
     </div>
     <div class="col-md-offset-2 col-md-10">
-      <p class="help-block" ng-show="dateTimeSubForm.dateValue.$error.date &&
+      <p class="help-block" ng-show="dateTimeSubForm.dateValue.$error.required &&
                                      !dateTimeSubForm.dateValue.$pristine">
         date is invalid
       </p>
-      <p class="help-block" ng-show="dateTimeSubForm.$error.time[0].$error.time &&
-                                     !formName.$error.time[0].$pristine">
+      <p class="help-block" ng-show="(dateTimeSubForm.$error.time[0].$error.time
+                                     || dateTimeSubForm.$error.time[0].$error.required)
+                                     && !formName.$error.time[0].$pristine">
         time is invalid
       </p>
     </div>
   </div>
+</ng-form>

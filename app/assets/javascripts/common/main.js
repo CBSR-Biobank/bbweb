@@ -9,9 +9,10 @@ define(function (require) {
 
   var angular = require('angular'),
       name = 'biobank.common',
-      module;
+      module,
+      modalInputModule = require('./modalInput/modalInputModule');
 
-  module = angular.module('biobank.common', []);
+  module = angular.module('biobank.common', [ modalInputModule.name ]);
 
   module.directive('annotationsInput',        require('./directives/annotationsInput/annotationsInputDirective'));
   module.directive('focusMe',                 require('./directives/focusMeDirective'));
@@ -34,6 +35,7 @@ define(function (require) {
   module.filter('timeago',                    require('./filters/timeagoFilter'));
   module.filter('truncate',                   require('./filters/truncateFilter'));
 
+  module.service('annotationUpdate',          require('./services/annotationUpdateService'));
   module.service('Panel',                     require('./services/Panel'));
   module.service('biobankApi',                require('./services/biobankApiService'));
   module.service('funutils',                  require('./services/funutils'));

@@ -22,6 +22,7 @@ define(['underscore'], function(_) {
     }
 
     TextAnnotation.prototype = Object.create(Annotation.prototype);
+    TextAnnotation.prototype.constructor = TextAnnotation;
 
     TextAnnotation.prototype.getValue = function () {
       return this.value;

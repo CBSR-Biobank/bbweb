@@ -232,17 +232,32 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
     Logger.debug("addCollectionEvents")
 
     studyRepository.getValues.find { s => s.name == "BBPSP"}.map { bbpsp =>
-      val cet = CollectionEventType(studyId            = bbpsp.id,
-                                    id                 = collectionEventTypeRepository.nextIdentity,
-                                    version            = 0L,
-                                    timeAdded          = DateTime.now,
-                                    timeModified       = None,
-                                    name               = "Default Event ",
-                                    description        = None,
-                                    recurring          = true,
-                                    specimenSpecs      = getBbpspSpecimenSpecs,
-                                    annotationTypes    = getBbpspCeventAnnotationTypes)
-        collectionEventTypeRepository.put(cet)
+      // Use a list since "id" is determined at the time of adding to the repository
+      val ceventTypes =
+        List(CollectionEventType(studyId            = bbpsp.id,
+                                 id                 = CollectionEventTypeId(""),
+                                 version            = 0L,
+                                 timeAdded          = DateTime.now,
+                                 timeModified       = None,
+                                 name               = "Default Event ",
+                                 description        = None,
+                                 recurring          = true,
+                                 specimenSpecs      = getBbpspSpecimenSpecs,
+                                 annotationTypes    = getBbpspCeventAnnotationTypes),
+             CollectionEventType(studyId            = bbpsp.id,
+                                 id                 = CollectionEventTypeId(""),
+                                 version            = 0L,
+                                 timeAdded          = DateTime.now,
+                                 timeModified       = None,
+                                 name               = "Second Event ",
+                                 description        = Some("Example event"),
+                                 recurring          = false,
+                                 specimenSpecs      = getBbpspSpecimenSpecs,
+                                 annotationTypes    = Set.empty))
+
+      ceventTypes.foreach { cet =>
+        collectionEventTypeRepository.put(cet.copy(id = collectionEventTypeRepository.nextIdentity))
+      }
     }
     ()
   }

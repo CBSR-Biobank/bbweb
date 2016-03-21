@@ -151,13 +151,29 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
       return deferred.promise;
     };
 
+    /**
+     * Sets the collection event type after an update.
+     */
+    Participant.prototype.update = function (path, reqJson) {
+      var self = this;
+
+      return ConcurrencySafeEntity.prototype.update.call(this, uri(path, self.id), reqJson)
+        .then(postUpdate);
+
+      function postUpdate(updatedParticipant) {
+        if (self.study) {
+          updatedParticipant.setStudy(self.study);
+        }
+        return $q.when(updatedParticipant);
+      }
+    };
+
     Participant.prototype.updateUniqueId = function (uniqueId) {
-      return ConcurrencySafeEntity.prototype.update.call(
-        this, uri('uniqueId', this.id), { uniqueId: uniqueId });
+      return this.update('uniqueId', { uniqueId: uniqueId });
     };
 
     Participant.prototype.addAnnotation = function (annotation) {
-      return hasAnnotations.addAnnotation.call(this, annotation, uri('annot', this.id));
+      return this.update('annot', annotation.getServerAnnotation());
     };
 
     Participant.prototype.removeAnnotation = function (annotation) {
@@ -165,7 +181,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                                 uri('annot', this.id),
                                 this.version,
                                 annotation.annotationTypeId);
-      return hasAnnotations.removeAnnotation.call(this, annotation, url);
+      return this.removeAnnotation.call(this, annotation, url);
     };
 
     function uri(/* path, participantId */) {

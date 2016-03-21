@@ -62,14 +62,11 @@ object Annotation {
                        numberValue:    Option[String],
                        selectedValues: Set[String])
         : DomainValidation[Boolean] = {
-      if ((stringValue.isDefined && !numberValue.isDefined && selectedValues.isEmpty)
-        || (!stringValue.isDefined && numberValue.isDefined && selectedValues.isEmpty)
-        || (!stringValue.isDefined && !numberValue.isDefined && !selectedValues.isEmpty)) {
-        true.successNel[String]
-      } else if (!stringValue.isDefined && !numberValue.isDefined && selectedValues.isEmpty) {
-        DomainError("at least one value must be assigned").failureNel[Boolean]
+      if ((selectedValues.isEmpty && stringValue.isDefined && numberValue.isDefined)
+            || (!selectedValues.isEmpty && (stringValue.isDefined || numberValue.isDefined))) {
+          DomainError("cannot have multiple values assigned").failureNel[Boolean]
       } else {
-        DomainError("cannot have multiple values assigned").failureNel[Boolean]
+        true.success
       }
     }
 
@@ -94,7 +91,7 @@ object Annotation {
    *
    *   - no more than one annotation per annotation type
    *   - that each required annotation is present
-   *   - that all annotations belong to the one annotation type.
+   *   - that all annotations belong to one annotation type.
    *
    * A DomainError is the result if these conditions fail.
    */
@@ -106,6 +103,9 @@ object Annotation {
       .filter(annotationType => annotationType.required)
       .map(annotationType => annotationType.uniqueId)
       .toSet
+
+    log.info(s"requiredAnnotTypeIds: $requiredAnnotTypeIds")
+    log.info(s"annotations: $annotations")
 
     if (!requiredAnnotTypeIds.isEmpty && annotations.isEmpty) {
       DomainError("missing required annotation type(s)").failureNel

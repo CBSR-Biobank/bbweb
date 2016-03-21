@@ -35,27 +35,33 @@ define(['underscore'], function(_) {
     MultipleSelectAnnotation.prototype = Object.create(Annotation.prototype);
 
     MultipleSelectAnnotation.prototype.getValue = function () {
-      return _.chain(this.values)
-        .filter(function (sv) { return sv.checked; })
-        .map(function (sv) { return sv.name; })
-        .value().join(', ');
+      this.displayValue = getValueAsArray(this.values).join(', ');
+      return this.displayValue;
+    };
+
+    MultipleSelectAnnotation.prototype.setValue = function (value) {
+      if (!_.isArray(value)) {
+        throw new Error('value is not an array');
+      }
+      this.values = value;
     };
 
     MultipleSelectAnnotation.prototype.getServerAnnotation = function () {
-      var self = this, selectedValues;
-
-      selectedValues =  _.chain(self.values)
-        .filter(function (sv) { return sv.checked; })
-        .map(function (sv) {
-          return sv.name;
-        })
-        .value();
-
+      var self = this;
       return {
-        annotationTypeId: this.getAnnotationTypeId(),
-        selectedValues:   selectedValues
+        annotationTypeId: self.getAnnotationTypeId(),
+        selectedValues:   getValueAsArray(self.values)
       };
     };
+
+    function getValueAsArray(values) {
+      var checked = _.matcher({ checked: true });
+
+      return _.chain(values)
+        .filter(checked)
+        .pluck('name')
+        .value();
+    }
 
     /**
      * Returns true if some of the values have the checked field set to true.

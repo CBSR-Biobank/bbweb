@@ -48,7 +48,7 @@ define(['underscore'], function(_) {
                                              vm.collectionEventType);
 
     vm.title = 'Participant ' + vm.participant.uniqueId + ': Add collection event';
-    vm.timeCompleted = { date: Date.now(), time: Date.now() };
+    vm.timeCompleted = { date: new Date(), time: new Date() };
 
     vm.submit = submit;
     vm.cancel = cancel;

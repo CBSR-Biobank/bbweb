@@ -105,6 +105,10 @@ define(['moment', 'underscore', 'tv4'], function(moment, _, tv4) {
       return this.annotationType.valueType;
     };
 
+    Annotation.prototype.setValue = function (value) {
+      this.value = value;
+    };
+
     /**
      * Returns the label to display for the annotation.
      */

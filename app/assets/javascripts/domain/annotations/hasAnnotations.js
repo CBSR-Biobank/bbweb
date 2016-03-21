@@ -35,10 +35,9 @@ define(['underscore', 'sprintf'], function (_, sprintf) {
 
     function addAnnotation(annotation, url) {
       /* jshint validthis:true */
-      return ConcurrencySafeEntity.prototype.update.call(
-        this,
-        url,
-        _.pick(annotation, 'stringValue', 'numberValue', 'selectedValues'));
+      return ConcurrencySafeEntity.prototype.update.call(this,
+                                                         url,
+                                                         annotation.getServerAnnotation());
     }
 
     /**
@@ -80,11 +79,16 @@ define(['underscore', 'sprintf'], function (_, sprintf) {
       }
 
       self.annotations = _.map(annotationTypes, function (annotationType) {
-        var serverAnnotation = _.findWhere(self.annotations,
-                                           { annotationTypeId: annotationType.uniqueId });
+        var jsonAnnotationMaybe = _.findWhere(self.annotations,
+                                     { annotationTypeId: annotationType.uniqueId });
+
+        if (jsonAnnotationMaybe instanceof Annotation) {
+          // annotation was already converted to Annotation or sub class
+          return jsonAnnotationMaybe;
+        }
 
         // undefined is valid input
-        return annotationFactory.create(serverAnnotation, annotationType);
+        return annotationFactory.create(jsonAnnotationMaybe, annotationType);
       });
     }
 

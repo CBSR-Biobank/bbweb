@@ -171,8 +171,9 @@ class ParticipantsProcessor @Inject() (
                                                   cmd.stringValue,
                                                   cmd.numberValue,
                                                   cmd.selectedValues)
+          allAnnotations     <- (participant.annotations + annotation).success
           validAnnotation    <- Annotation.validateAnnotations(study.annotationTypes,
-                                                               List(annotation))
+                                                               allAnnotations.toList)
           updatedParticipant <- participant.withAnnotation(annotation)
         } yield ParticipantEvent(updatedParticipant.id.id).update(
           _.optionalUserId             := cmd.userId,

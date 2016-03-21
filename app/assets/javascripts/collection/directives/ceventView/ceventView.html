@@ -1,4 +1,4 @@
-<div class="panel panel-default">
+<div id="panel-parent" class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">
       Visit # {{vm.collectionEvent.visitNumber}}
@@ -11,35 +11,56 @@
       </a>
     </h3>
   </div>
-  <div id="collapseCevent" class="panel-collapse collapse in">
+  <div id="collapseCevent" class="panel-collapse collapse in" aria-expanded="true">
     <ul class="list-group">
       <li class="list-group-item">
         <div class="row">
-          <div class="col-md-4">
-            <strong>Visit type:</strong>
+          <div class="col-md-3">
+            <strong>Visit type</strong>
           </div>
-          <div class="col-md-5">
+          <div class="col-md-7">
             {{vm.collectionEvent.collectionEventType.name}}
+          </div>
+          <div class="col-md-2" ng-if="vm.canUpdateVisitType">
+            <button class="btn btn-xs btn-primary pull-right"
+                    title="Update visit type"
+                    ng-click="vm.editVisitType()">
+              <i class="glyphicon glyphicon-edit"></i>
+            </button>
           </div>
         </div>
       </li>
       <li class="list-group-item">
         <div class="row">
-          <div class="col-md-4">
-            <strong>Time Completed:</strong>
+          <div class="col-md-3">
+            <strong>Time Completed</strong>
           </div>
-          <div class="col-md-5">
+          <div class="col-md-7">
             {{vm.timeCompletedLocal}}
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-xs btn-primary pull-right"
+                    title="Update time completed"
+                    ng-click="vm.editTimeCompleted()">
+              <i class="glyphicon glyphicon-edit"></i>
+            </button>
           </div>
         </div>
       </li>
       <li class="list-group-item" ng-repeat="annotation in vm.collectionEvent.annotations">
         <div class="row">
-          <div class="col-md-4">
+          <div class="col-md-3">
             <strong>{{annotation.getLabel()}}</strong>
           </div>
-          <div class="col-md-5">
+          <div class="col-md-7">
             {{annotation.getValue()}}
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-xs btn-primary pull-right"
+                    title="Update {{annotation.getLabel()}}"
+                    ng-click="vm.editAnnotation(annotation)">
+              <i class="glyphicon glyphicon-edit"></i>
+            </button>
           </div>
         </div>
       </li>

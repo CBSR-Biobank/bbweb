@@ -223,7 +223,7 @@ define(['underscore'], function (_) {
         }
       },
       data: {
-        displayName: 'Specimen Spec {{specimenSpec.name}}'
+        displayName: '{{specimenSpec.name}}'
       }
     });
 
