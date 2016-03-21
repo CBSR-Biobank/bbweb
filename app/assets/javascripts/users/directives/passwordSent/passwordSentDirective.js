@@ -32,7 +32,7 @@ define(function () {
    * State definition: states.js
    */
   function PasswordSentCtrl() {
-    var vm = this;
+    //var vm = this;
   }
 
   return passwordSentDirective;

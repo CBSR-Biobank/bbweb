@@ -13,65 +13,100 @@
           Add specimen spec
           <i class="glyphicon glyphicon-plus"></i>
         </button>
+
+        <a data-toggle="collapse"
+           href="#collapseCevent"
+           class="btn btn-xs btn-default"
+           ng-click="vm.panelButtonClicked()">
+          <i class="glyphicon"
+             ng-class="vm.panelOpen ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
+        </a>
+
       </span>
     </h3>
   </div>
+  <div id="collapseCevent" class="panel-collapse collapse in">
+    <ul class="list-group">
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-md-2">
+            <strong>Name:</strong>
+          </div>
+          <div class="col-md-8">
+            {{vm.ceventType.name}}
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-xs btn-primary pull-right"
+                    title="Edit name"
+                    ng-click="vm.editName()">
+              <i class="glyphicon glyphicon-edit"></i>
+            </button>
+          </div>
+        </div>
+      </li>
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-md-2">
+            <strong>Description:</strong>
+          </div>
+          <div class="col-md-10">
+            <truncate-toggle
+               text="vm.ceventType.description"
+               toggle-length="60"
+               text-empty-warning="Description not entered yet."
+               allow-edit="true"
+               on-edit="vm.editDescription()">
+            </truncate-toggle>
+          </div>
+        </div>
+      </li>
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-md-2">
+            <strong>Recurring:</strong>
+          </div>
+          <div class="col-md-8" ng-if="vm.ceventType.recurring">Yes</div>
+          <div class="col-md-8" ng-if="!vm.ceventType.recurring">No</div>
+          <div class="col-md-2">
+            <button class="btn btn-xs btn-primary pull-right"
+                    title="Edit recurring"
+                    ng-click="vm.editRecurring()">
+              <i class="glyphicon glyphicon-edit"></i>
+            </button>
+          </div>
+        </div>
+      </li>
+      <li class="list-group-item" ng-repeat="annotationType in vm.ceventType.annotationTypes">
+        <div class="row">
+          <div class="col-md-2">
+            <strong>Annotation:</strong>
+          </div>
+          <div class="col-md-8">
+            <annotation-type-summary annotation-type="annotationType"></annotation-type-summary>
+          </div>
+          <div class="col-md-2">
+            <update-remove-buttons
+               ng-if="vm.modificationsAllowed"
+               on-update="vm.editAnnotationType(annotationType)"
+               on-remove="vm.removeAnnotationType(annotationType)"
+               update-button-enabled="vm.modificationsAllowed"
+               remove-button-enabled="vm.modificationsAllowed">
+            </update-remove-buttons>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <status-line item="vm.ceventType"></status-line>
+  </div>
+</div>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4 class="panel-title">Specimens collected for this event</h4>
+  </div>
   <ul class="list-group">
-    <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-2">
-          <strong>Name:</strong>
-        </div>
-        <div class="col-md-8">
-          {{vm.ceventType.name}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  title="Edit name"
-                  ng-click="vm.editName()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
-        </div>
-      </div>
-    </li>
-    <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-2">
-          <strong>Description:</strong>
-        </div>
-        <div class="col-md-10">
-          <truncate-toggle
-             text="vm.ceventType.description"
-             toggle-length="60"
-             text-empty-warning="Description not entered yet."
-             allow-edit="true"
-             on-edit="vm.editDescription()">
-          </truncate-toggle>
-        </div>
-      </div>
-    </li>
-    <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-2">
-          <strong>Recurring:</strong>
-        </div>
-        <div class="col-md-8" ng-if="vm.ceventType.recurring">Yes</div>
-        <div class="col-md-8" ng-if="!vm.ceventType.recurring">No</div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  title="Edit recurring"
-                  ng-click="vm.editRecurring()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
-        </div>
-      </div>
-    </li>
     <li class="list-group-item" ng-repeat="specimenSpec in vm.ceventType.specimenSpecs">
       <div class="row">
-        <div class="col-md-2">
-          <strong>Specimen:</strong>
-        </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
           <collection-specimen-spec-summary
              specimen-spec="specimenSpec">
           </collection-specimen-spec-summary>
@@ -87,25 +122,5 @@
         </div>
       </div>
     </li>
-    <li class="list-group-item" ng-repeat="annotationType in vm.ceventType.annotationTypes">
-      <div class="row">
-        <div class="col-md-2">
-          <strong>Annotation:</strong>
-        </div>
-        <div class="col-md-8">
-          <annotation-type-summary annotation-type="annotationType"></annotation-type-summary>
-        </div>
-        <div class="col-md-2">
-          <update-remove-buttons
-             ng-if="vm.modificationsAllowed"
-             on-update="vm.editAnnotationType(annotationType)"
-             on-remove="vm.removeAnnotationType(annotationType)"
-             update-button-enabled="vm.modificationsAllowed"
-             remove-button-enabled="vm.modificationsAllowed">
-          </update-remove-buttons>
-        </div>
-      </div>
-    </li>
   </ul>
-  <status-line item="vm.ceventType"></status-line>
 </div>

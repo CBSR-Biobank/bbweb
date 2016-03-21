@@ -40,6 +40,7 @@ define(['underscore'], function (_) {
 
     // FIXME: this should be initialized to the correct value
     vm.modificationsAllowed = true;
+    vm.panelOpen            = true;
 
     vm.editName             = editName;
     vm.editDescription      = editDescription;
@@ -51,6 +52,7 @@ define(['underscore'], function (_) {
     vm.removeSpecimenSpec   = removeSpecimenSpec;
     vm.addSpecimenSpec      = addSpecimenSpec;
     vm.addSpecimenSpec      = addSpecimenSpec;
+    vm.panelButtonClicked   = panelButtonClicked;
 
     //--
 
@@ -147,6 +149,10 @@ define(['underscore'], function (_) {
       function callback() {
         return vm.ceventType.removeAnnotationType(annotationType);
       }
+    }
+
+    function panelButtonClicked() {
+      vm.panelOpen = !vm.panelOpen;
     }
 
   }
