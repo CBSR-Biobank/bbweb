@@ -30,14 +30,20 @@ define(function () {
   function CeventViewCtrl(timeService) {
     var vm = this;
 
+    vm.panelOpen          = true;
     vm.specimens          = [];
     vm.timeCompletedLocal = timeService.timeToDisplayString(vm.collectionEvent.timeCompleted);
 
     vm.addSpecimen        = addSpecimen;
+    vm.panelButtonClicked = panelButtonClicked;
 
     //--
 
     function addSpecimen() {
+    }
+
+    function panelButtonClicked() {
+      vm.panelOpen = !vm.panelOpen;
     }
 
   }

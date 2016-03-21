@@ -1,40 +1,51 @@
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">Visit # {{vm.collectionEvent.visitNumber}}</h3>
+    <h3 class="panel-title">
+      Visit # {{vm.collectionEvent.visitNumber}}
+      <a data-toggle="collapse"
+         href="#collapseCevent"
+         class="btn btn-xs btn-default pull-right"
+         ng-click="vm.panelButtonClicked()">
+        <i class="glyphicon"
+           ng-class="vm.panelOpen ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
+      </a>
+    </h3>
   </div>
-  <ul class="list-group">
-    <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-4">
-          <strong>Visit type:</strong>
+  <div id="collapseCevent" class="panel-collapse collapse in">
+    <ul class="list-group">
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-md-4">
+            <strong>Visit type:</strong>
+          </div>
+          <div class="col-md-5">
+            {{vm.collectionEvent.collectionEventType.name}}
+          </div>
         </div>
-        <div class="col-md-5">
-          {{vm.collectionEvent.collectionEventType.name}}
+      </li>
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-md-4">
+            <strong>Time Completed:</strong>
+          </div>
+          <div class="col-md-5">
+            {{vm.timeCompletedLocal}}
+          </div>
         </div>
-      </div>
-    </li>
-    <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-4">
-          <strong>Time Completed:</strong>
+      </li>
+      <li class="list-group-item" ng-repeat="annotation in vm.collectionEvent.annotations">
+        <div class="row">
+          <div class="col-md-4">
+            <strong>{{annotation.getLabel()}}</strong>
+          </div>
+          <div class="col-md-5">
+            {{annotation.getValue()}}
+          </div>
         </div>
-        <div class="col-md-5">
-          {{vm.timeCompletedLocal}}
-        </div>
-      </div>
-    </li>
-    <li class="list-group-item" ng-repeat="annotation in vm.collectionEvent.annotations">
-      <div class="row">
-        <div class="col-md-4">
-          <strong>{{annotation.getLabel()}}</strong>
-        </div>
-        <div class="col-md-5">
-          {{annotation.getValue()}}
-        </div>
-      </div>
-    </li>
-  </ul>
-  <status-line item="vm.collectionEvent"></status-line>
+      </li>
+    </ul>
+    <status-line item="vm.collectionEvent"></status-line>
+  </div>
 </div>
 
 <div class="panel panel-default">
