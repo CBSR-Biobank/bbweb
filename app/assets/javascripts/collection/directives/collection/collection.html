@@ -14,7 +14,7 @@
     <h4>Select the study you wish to work with:</h4>
   </div>
 </div>
-<div class="row" ng-if="vm.haveEnabledStudies">
+<div class="row" ng-if="vm.haveEnabledStudies" ng-cloak>
   <div class="col-md-6">
     <select-study get-header="vm.getEnabledStudiesPanelHeader"
                   get-studies="vm.updateEnabledStudies"
