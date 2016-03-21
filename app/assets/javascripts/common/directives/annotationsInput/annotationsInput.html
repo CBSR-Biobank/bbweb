@@ -127,7 +127,7 @@
             <input type="checkbox"
                    name="annotationSelectValue"
                    ng-model="value.checked"
-                   ng-required="annotation.required">
+                   ng-required="annotation.required && !annotation.someSelected()">
             <span>{{value.name}}</span>
           </label>
         </div>

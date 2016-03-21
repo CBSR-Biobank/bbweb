@@ -171,30 +171,33 @@ define([
     });
 
     // For a required SELECT MULTIPLE annotation type
-    it('selecting and unselecting an option for a SELECT MULTIPLE makes the form invalid', function() {
-      var self = this,
-          annotationType, annotation;
+    it('selecting and unselecting an option for a required SELECT MULTIPLE makes the form invalid',
+        function() {
+          var self = this,
+              annotationType, annotation;
 
-      annotationType = new self.AnnotationType(
-        self.jsonEntities.annotationType({
-          valueType:     self.AnnotationValueType.SELECT(),
-          maxValueCount: 2,
-          options:       [ 'option1', 'option2', 'option3' ],
-          required:      true
-        }));
+          annotationType = new self.AnnotationType(
+            self.jsonEntities.annotationType({
+              valueType:     self.AnnotationValueType.SELECT(),
+              maxValueCount: 2,
+              options:       [ 'option1', 'option2', 'option3' ],
+              required:      true
+            }));
 
-      annotation = self.annotationFactory.create(undefined, annotationType);
+          annotation = self.annotationFactory.create(undefined, annotationType);
 
-      self.createController([ annotation ]);
+          self.createController([ annotation ]);
 
-      // has the right number of check boxes
-      expect(self.element.find('input').length).toBe(annotationType.options.length);
+          // has the right number of check boxes
+          expect(self.element.find('input').length).toBe(annotationType.options.length);
 
-      _.each(_.range(annotationType.options.length), function (inputNum) {self.element.find('input').eq(inputNum).click();
-        expect(self.scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(true);self.element.find('input').eq(inputNum).click();
-        expect(self.scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(false);
-      });
-    });
+          _.each(_.range(annotationType.options.length), function (inputNum) {
+            self.element.find('input').eq(inputNum).click();
+            expect(self.scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(true);
+            self.element.find('input').eq(inputNum).click();
+            expect(self.scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(false);
+          });
+        });
 
   });
 
