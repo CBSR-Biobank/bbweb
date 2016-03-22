@@ -20,7 +20,7 @@ define(['underscore'], function (_) {
         returnState:    '@',
         onUpdate:       '&'
       },
-      templateUrl : '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeView/annotationTypeView.html',
+      templateUrl : '/assets/javascripts/admin/directives/annotationTypeView/annotationTypeView.html',
       controller: AnnotationTypeViewCtrl,
       controllerAs: 'vm'
     };

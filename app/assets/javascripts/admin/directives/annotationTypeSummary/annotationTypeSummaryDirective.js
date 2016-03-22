@@ -14,7 +14,7 @@ define(function () {
       scope: {
         annotationType: '='
       },
-      templateUrl : '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeSummary/annotationTypeSummary.html'
+      templateUrl : '/assets/javascripts/admin/directives/annotationTypeSummary/annotationTypeSummary.html'
     };
 
     return directive;

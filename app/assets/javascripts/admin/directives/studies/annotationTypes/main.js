@@ -13,12 +13,6 @@ define(function (require) {
 
   module = angular.module(name, ['biobank.users']);
 
-  module.directive('annotationTypeAdd',
-                   require('./annotationTypeAdd/annotationTypeAddDirective'));
-  module.directive('annotationTypeView',
-                   require('./annotationTypeView/annotationTypeViewDirective'));
-  module.directive('annotationTypeSummary',
-                   require('./annotationTypeSummary/annotationTypeSummaryDirective'));
   module.directive('collectionEventAnnotationTypeAdd',
                    require('./collectionEventAnnotationTypeAdd/collectionEventAnnotationTypeAddDirective'));
   module.directive('collectionEventAnnotationTypeView',
