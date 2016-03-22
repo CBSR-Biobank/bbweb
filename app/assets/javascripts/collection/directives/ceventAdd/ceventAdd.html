@@ -49,47 +49,12 @@
   </div>
 
   <!-- TIME COMPLETED -->
-  <!-- done with help from https://github.com/zhaber/angular-js-bootstrap-datetimepicker -->
-  <div class="form-group"
-       ng-class="{ 'has-error' : (collectionEventForm.timeCompletedDate.$invalid &&
-                   !collectionEventForm.timeCompletedDate.$pristine) ||
-                 (collectionEventForm.$error.time[0].$invalid &&
-                 !collectionEventForm.$error.time[0].$pristine) }">
-
-    <label for="timeCompleted" class="col-md-2 control-label">Time completed</label>
-    <div class="col-md-10">
-      <div class="datetimepicker-wrapper">
-        <input name="timeCompletedDate"
-               type="text"
-               class="form-control"
-               uib-datepicker-popup="{{vm.format}}"
-               is-open="vm.opened"
-               min-date="'2000-01-01'"
-               datepicker-options="vm.datePicker.options"
-               date-disabled="disabled(date, mode)"
-               close-text="Close"
-               ng-model="vm.timeCompleted.date"
-               ng-required="true"
-               ng-click="vm.datePicker.open($event)"/>
-      </div>
-      <div class="datetimepicker-wrapper" style="display:inline-block">
-        <uib-timepicker ng-model="vm.timeCompleted.time"
-                        show-meridian="true"
-                        ng-required="true">
-        </uib-timepicker>
-      </div>
-    </div>
-    <div class="col-md-offset-2 col-md-10">
-      <p class="help-block" ng-show="collectionEventForm.timeCompletedDate.$error.date &&
-                                     !collectionEventForm.timeCompletedDate.$pristine">
-        date is invalid
-      </p>
-      <p class="help-block" ng-show="collectionEventForm.$error.time[0].$error.time &&
-                                     !collectionEventForm.$error.time[0].$pristine">
-        time is invalid
-      </p>
-    </div>
-  </div>
+  <date-time
+     label="Time Completed"
+     date-value="vm.timeCompleted.date"
+     time-value="vm.timeCompleted.time"
+     required="true">
+  </date-time>
 
   <!-- ANNOTATION TYPES  -->
   <annotations-input annotations="vm.collectionEvent.annotations"></annotations-input>

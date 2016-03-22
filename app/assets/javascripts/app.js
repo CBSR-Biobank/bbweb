@@ -60,7 +60,11 @@ define(function(require) {
   app.constant('bbwebConfig', {
     dateFormat:       'YYYY-MM-DD',
     dateTimeFormat:   'YYYY-MM-DD hh:mm A',
-    datepickerFormat: 'yyyy-MM-dd'
+    datepickerFormat: {
+      year:  'yyyy',
+      month: 'MM',
+      day:   'dd'
+    }
   });
 
   app.config(exceptionConfig);

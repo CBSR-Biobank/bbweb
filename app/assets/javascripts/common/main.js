@@ -15,6 +15,7 @@ define(function (require) {
 
   module.directive('annotationsInput',        require('./directives/annotationsInput/annotationsInputDirective'));
   module.directive('focusMe',                 require('./directives/focusMeDirective'));
+  module.directive('dateTime',                require('./directives/dateTime/dateTimeDirective'));
   module.directive('infoUpdateRemoveButtons', require('./directives/infoUpdateRemoveButtonsDirective'));
   module.directive('integer',                 require('./directives/integerDirective'));
   module.directive('panelButtons',            require('./directives/panelButtonsDirective'));

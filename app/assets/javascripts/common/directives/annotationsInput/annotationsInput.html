@@ -47,47 +47,13 @@
     </div>
 
     <!-- DATE TIME -->
-    <!-- done with help from https://github.com/zhaber/angular-js-bootstrap-datetimepicker -->
-    <div class="form-group"
-         ng-switch-when="DateTime"
-         ng-class="{ 'has-error' : (annotationSubForm.annotationDateTimeValue.$invalid &&
-                   !annotationSubForm.annotationDateTimeValue.$pristine) ||
-                   (annotationSubForm.$error.time[0].$invalid &&
-                   !annotationSubForm.$error.time[0].$pristine) }">
-      <label class="col-md-2 control-label">{{annotation.annotationType.name}}</label>
-      <div class="col-md-10">
-        <div class="datetimepicker-wrapper">
-          <input name="annotationDateTimeValue"
-                 type="text"
-                 class="form-control"
-                 uib-datepicker-popup="{{vm.format}}"
-                 is-open="vm.opened"
-                 min-date="'2000-01-01'"
-                 datepicker-options="vm.datePicker.options"
-                 date-disabled="disabled(date, mode)"
-                 close-text="Close"
-                 ng-model="annotation.date"
-                 ng-required="annotation.required"
-                 ng-click="vm.datePicker.open($event)"/>
-        </div>
-        <div class="datetimepicker-wrapper" style="display:inline-block">
-          <uib-timepicker ng-model="annotation.time"
-                          show-meridian="true"
-                          ng-required="annotation.required">
-          </uib-timepicker>
-        </div>
-      </div>
-      <div class="col-md-offset-2 col-md-10">
-        <p class="help-block" ng-show="annotationSubForm.annotationDateTimeValue.$error.date &&
-                                       !annotationSubForm.annotationDateTimeValue.$pristine">
-          date is invalid
-        </p>
-        <p class="help-block" ng-show="annotationSubForm.$error.time[0].$error.time &&
-                                       !annotationSubForm.$error.time[0].$pristine">
-          time is invalid
-        </p>
-      </div>
-    </div>
+    <date-time
+       label="{{annotation.annotationType.name}}"
+       date-value="annotation.date"
+       time-value="annotation.time"
+       required="annotaiton.required"
+       ng-switch-when="DateTime">
+    </date-time>
 
     <!-- SELECT SINGLE -->
     <div class="form-group"

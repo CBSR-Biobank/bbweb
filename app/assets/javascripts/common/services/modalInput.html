@@ -170,13 +170,22 @@
       </div>
     </div>
 
+    <!-- DATE TIME -->
+    <date-time
+       label="{{modal.label}}"
+       date-value="modal.value.date"
+       time-value="modal.value.time"
+       required="modal.required"
+       ng-switch-when="date-time">
+    </date-time>
+
   </form>
 
 </div>
 <div class="modal-footer">
-  <button class="btn" ng-click="modal.close()">Cancel</button>
+  <button class="btn" ng-click="modal.closePressed()">Cancel</button>
   <button class="btn btn-primary"
-          ng-click="modal.ok()"
+          ng-click="modal.okPressed()"
           ng-disabled="form.$invalid">OK</button>
 </div>
 <div class="row">

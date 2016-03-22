@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular'], function(angular) {
+define(['angular', 'underscore'], function(angular, _) {
   'use strict';
 
   modalService.$inject = ['$uibModal'];
@@ -38,6 +38,7 @@ define(['angular'], function(angular) {
       modalRequiredSelect:        modalRequiredSelect,
       modalRequiredNaturalNumber: modalRequiredNaturalNumber,
       modalRequiredPositiveFloat: modalRequiredPositiveFloat,
+      modalDateTime:              modalDateTime,
       passwordUpdateModal:        passwordUpdateModal
     };
 
@@ -95,7 +96,14 @@ define(['angular'], function(angular) {
      */
     function modalInput(type, title, label, defaultValue, options) {
 
-      controller.$inject = ['$scope', '$uibModalInstance', 'defaultValue', 'options'];
+      controller.$inject = [
+        '$scope',
+        '$uibModalInstance',
+        'bbwebConfig',
+        'timeService',
+        'defaultValue',
+        'options'
+      ];
 
       return $uibModal.open({
         templateUrl: '/assets/javascripts/common/services/modalInput.html',
@@ -115,21 +123,33 @@ define(['angular'], function(angular) {
 
       //--
 
-      function controller ($scope, $uibModalInstance, defaultValue, options) {
+      function controller($scope,
+                          $uibModalInstance,
+                          bbwebConfig,
+                          timeService,
+                          defaultValue,
+                          options) {
         $scope.modal = {
-          value:   defaultValue,
-          type:    type,
-          title:   title,
-          label:   label,
-          options: options
+          value:        defaultValue,
+          type:         type,
+          title:        title,
+          label:        label,
+          options:      options,
+          okPressed:    okPressed,
+          closePressed: closePressed
         };
 
-        $scope.modal.ok = function () {
+        if (type === 'date-time') {
+          $scope.modal.value = timeService.stringToDateAndTime(defaultValue);
+        }
+
+        function okPressed() {
           $uibModalInstance.close($scope.modal.value);
-        };
-        $scope.modal.close = function () {
+        }
+
+        function closePressed() {
           $uibModalInstance.dismiss('cancel');
-        };
+        }
       }
     }
 
@@ -171,6 +191,10 @@ define(['angular'], function(angular) {
 
     function modalRequiredSelect(title, label, defaultValue, options) {
       return modalInput('required-select', title, label, defaultValue, options);
+    }
+
+    function modalDateTime(title, label, defaultValue) {
+      return modalInput('date-time', title, label, defaultValue);
     }
 
     /**
