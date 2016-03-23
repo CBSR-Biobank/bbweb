@@ -72,7 +72,7 @@ define(function () {
                           'Time completed',
                           vm.timeCompletedLocal,
                           { required: true })
-        .then(function (timeCompleted) {
+        .result.then(function (timeCompleted) {
           vm.collectionEvent.updateTimeCompleted(timeService.dateAndTimeToUtcString(
             timeCompleted.date, timeCompleted.time))
             .then(postUpdate('Time completed updated successfully.', 'Change successful', 1500))
@@ -81,7 +81,7 @@ define(function () {
     }
 
     function editAnnotation(annotation) {
-      annotationUpdate.update(annotation).then(function (newAnnotation) {
+      annotationUpdate.update(annotation, 'Update ' + annotation.getLabel()).then(function (newAnnotation) {
         vm.collectionEvent.addAnnotation(newAnnotation)
           .then(postUpdate('Annotation updated successfully.', 'Change successful', 1500))
           .catch(notificationsService.updateError);

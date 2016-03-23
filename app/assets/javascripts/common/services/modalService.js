@@ -25,10 +25,9 @@ define(['angular', 'underscore'], function(angular, _) {
                        };
 
     var service = {
-      showModal:                  showModal,
-      show:                       show,
-      modalOk:                    modalOk,
-      passwordUpdateModal:        passwordUpdateModal
+      showModal: showModal,
+      show:      show,
+      modalOk:   modalOk
     };
 
     return service;
@@ -78,44 +77,6 @@ define(['angular', 'underscore'], function(angular, _) {
         bodyHtml: bodyHtml
       };
       return showModal(modalDefaults, modalOptions);
-    }
-
-    /**
-     * Displays a modal asking for current password, new password, and confirm new password.
-     */
-    function passwordUpdateModal() {
-      controller.$inject = [ '$scope', '$uibModalInstance'];
-
-      return $uibModal.open({
-        templateUrl: '/assets/javascripts/common/services/passwordUpdateModal.html',
-        controller:  controller,
-        backdrop:    true,
-        keyboard:    true,
-        modalFade:   true
-      }).result;
-
-      //---
-
-      function controller($scope, $uibModalInstance) {
-        $scope.model = {
-          currentPassword: '',
-          newPassword:     '',
-          confirmPassword: '',
-          ok:              onOk,
-          close:           onClose
-        };
-
-        function onOk() {
-          $uibModalInstance.close({
-            currentPassword: $scope.model.currentPassword,
-            newPassword: $scope.model.newPassword
-          });
-        }
-
-        function onClose() {
-          $uibModalInstance.dismiss('cancel');
-        }
-      }
     }
 
   }

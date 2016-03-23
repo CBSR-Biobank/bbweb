@@ -9,12 +9,10 @@
        focus-me="true"
        ng-required="vm.options.required" />
   </div>
-  <div class="col-md-offset-3 col-md-9">
-    <p class="help-block" ng-show="form.value.$error.required">
-      An email address is required
-    </p>
-    <p class="help-block" ng-show="form.value.$error.email">
-      Email address is not valid
-    </p>
+  <div class="col-md-offset-3 col-md-9"
+       ng-messages="form.value.$error"
+       role="alert">
+    <div ng-message="required" class="help-block">An email address is required</div>
+    <div ng-message="email" class="help-block">Email address is not valid</div>
   </div>
 </div>

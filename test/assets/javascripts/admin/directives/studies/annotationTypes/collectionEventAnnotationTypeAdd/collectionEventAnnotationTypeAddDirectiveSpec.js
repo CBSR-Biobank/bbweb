@@ -7,7 +7,7 @@ define(function(require) {
   var angular                              = require('angular'),
       mocks                                = require('angularMocks'),
       _                                    = require('underscore'),
-      annotationTypeAddDirectiveSharedSpec = require('../annotationTypeAddDirectiveSharedSpec');
+      annotationTypeAddDirectiveSharedSpec = require('../../../annotationTypeAddDirectiveSharedSpec');
 
   describe('Directive: collectionEventAnnotationTypeAddDirective', function() {
 
@@ -27,8 +27,8 @@ define(function(require) {
       self.createController = createController;
 
       self.putHtmlTemplates(
-        '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeAdd/annotationTypeAdd.html',
-        '/assets/javascripts/admin/directives/studies/annotationTypes/collectionEventAnnotationTypeAdd/collectionEventAnnotationTypeAdd.html');
+        '/assets/javascripts/admin/directives/studies/annotationTypes/collectionEventAnnotationTypeAdd/collectionEventAnnotationTypeAdd.html',
+        '/assets/javascripts/admin/directives/annotationTypeAdd/annotationTypeAdd.html');
 
       function createController() {
         self.element = angular.element([

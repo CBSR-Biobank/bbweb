@@ -5,7 +5,7 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  '../annotationTypeAddDirectiveSharedSpec'
+  '../../../annotationTypeAddDirectiveSharedSpec'
 ], function(angular, mocks, _, annotationTypeAddDirectiveSharedSpec) {
   'use strict';
 
@@ -26,7 +26,7 @@ define([
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/annotationTypes/participantAnnotationTypeAdd/participantAnnotationTypeAdd.html',
-        '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeAdd/annotationTypeAdd.html');
+        '/assets/javascripts/admin/directives/annotationTypeAdd/annotationTypeAdd.html');
 
       //---
 

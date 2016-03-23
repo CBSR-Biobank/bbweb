@@ -5,6 +5,8 @@
  * Karma configuration
  */
 module.exports = function(config) {
+  'use strict';
+
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -28,7 +30,7 @@ module.exports = function(config) {
       { pattern: 'test/assets/javascripts/**/*Spec.js', included: false },
       { pattern: 'test/assets/javascripts/test/**/*.js', included: false },
 
-      'app/assets/javascripts/**/*.html',
+      { pattern: 'app/assets/javascripts/**/*.html', watched: true, included: false, served: true },
       'test/assets/javascripts/test-main.js',
     ],
 
@@ -36,8 +38,7 @@ module.exports = function(config) {
     exclude: [
       'app/assets/javascripts/main.js',
       'target/web/web-modules/main/webjars/lib/angularjs/angular-*.min.js',
-      'target/web/web-modules/main/webjars/lib/angularjs/angular-scenario.js',
-      'target/web/web-modules/main/webjars/lib/**/test/*.spec.js'
+      'target/web/web-modules/main/webjars/lib/angularjs/angular-scenario.js'
     ],
 
     // preprocess matching files before serving them to the browser

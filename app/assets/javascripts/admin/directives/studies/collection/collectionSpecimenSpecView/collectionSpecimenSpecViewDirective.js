@@ -77,7 +77,7 @@ define(function () {
                       'Name',
                       vm.specimenSpec.name,
                       { required: true, minLength: 2 })
-        .then(function (name) {
+        .result.then(function (name) {
           vm.specimenSpec.name = name;
           return updateCollectionEventType;
         });
@@ -87,7 +87,7 @@ define(function () {
       modalInput.textArea('Specimen spec description',
                           'Description',
                           vm.specimenSpec.description)
-        .then(function (description) {
+        .result.then(function (description) {
           vm.specimenSpec.description = description;
           return updateCollectionEventType;
         });
@@ -101,7 +101,7 @@ define(function () {
                           required: true,
                           selectOptions: AnatomicalSourceType.values()
                         })
-        .then(function (selection) {
+        .result.then(function (selection) {
           vm.specimenSpec.anatomicalSourceType = selection;
           return updateCollectionEventType;
         });
@@ -115,7 +115,7 @@ define(function () {
                           required: true,
                           selectOptions: PreservationType.values()
                         })
-        .then(function (selection) {
+        .result.then(function (selection) {
           vm.specimenSpec.preservationType = selection;
           return updateCollectionEventType;
         });
@@ -129,7 +129,7 @@ define(function () {
                           required: true,
                           selectOptions: PreservationTemperatureType.values()
                         })
-        .then(function (selection) {
+        .result.then(function (selection) {
           vm.specimenSpec.preservationTemperatureType = selection;
           return updateCollectionEventType;
         });
@@ -143,7 +143,7 @@ define(function () {
                           required: true,
                           selectOptions: SpecimenType.values()
                         })
-        .then(function (selection) {
+        .result.then(function (selection) {
           vm.specimenSpec.specimenType = selection;
           return updateCollectionEventType;
         });
@@ -151,26 +151,31 @@ define(function () {
 
     function editUnits() {
       modalInput.text('Specimen spec units', 'Units', vm.specimenSpec.units, { required: true })
-        .then(function (units) {
+        .result.then(function (units) {
           vm.specimenSpec.units = units;
           return updateCollectionEventType;
         });
     }
 
     function editAmount() {
-      modalInput.positiveFloat('Specimen spec amount', 'Amount', vm.specimenSpec.amount, { required: true })
-        .then(function (value) {
-          vm.specimenSpec.amount = value;
-          return updateCollectionEventType;
-        });
+      modalInput.number(
+        'Specimen spec amount',
+        'Amount',
+        vm.specimenSpec.amount,
+        { required: true, positiveFloat: true }
+      ).result.then(function (value) {
+        vm.specimenSpec.amount = value;
+        return updateCollectionEventType;
+      });
     }
 
     function editMaxCount() {
-      modalInput.naturalNumber('Specimen spec max count',
-                               'Max count',
-                               vm.specimenSpec.maxCount,
-                               { required: true })
-        .then(function (value) {
+      modalInput.number(
+        'Specimen spec max count',
+        'Max count',
+        vm.specimenSpec.maxCount,
+        { required: true, naturalNumber: true, min: 1 }
+      ).result.then(function (value) {
           vm.specimenSpec.maxCount = value;
           return updateCollectionEventType;
         });

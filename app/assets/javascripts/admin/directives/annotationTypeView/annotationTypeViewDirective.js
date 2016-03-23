@@ -53,11 +53,8 @@ define(['underscore'], function (_) {
       modalInput.text('Edit Annotation name',
                       'Name',
                       vm.annotationType.name,
-                      {
-                        required: true,
-                        minLength: 2
-                      })
-        .then(function (name) {
+                      { required: true, minLength: 2 })
+        .result.then(function (name) {
           vm.annotationType.name = name;
           vm.onUpdate()(vm.annotationType);
         });
@@ -68,7 +65,7 @@ define(['underscore'], function (_) {
                          'Required',
                          vm.annotationType.required.toString(),
                          { required: true })
-        .then(function (required) {
+        .result.then(function (required) {
           vm.annotationType.required = (required === 'true' );
           vm.onUpdate()(vm.annotationType);
         });
@@ -78,7 +75,7 @@ define(['underscore'], function (_) {
       modalInput.textArea('Edit Annotation description',
                           'Description',
                           vm.annotationType.description)
-        .then(function (description) {
+        .result.then(function (description) {
           var annotationType = _.extend({}, vm.annotationType, { description: description });
           vm.onUpdate()(annotationType);
         });
@@ -86,10 +83,13 @@ define(['underscore'], function (_) {
 
     function addSelectionOptions() {
       // FIXME: if selections are in use they cannot be modified
-      modalInput.commaDelimited('Edit Annotation Type selections',
-                                            'Add selections',
-                                            vm.annotationType.options.join(', '))
-        .then(function (selections) {
+      modalInput.selectMultiple('Edit Annotation Type selections',
+                                'Add selections',
+                                {
+                                  required: vm.annotationType.required,
+                                  selectOptions:  vm.annotationType.options
+                                })
+        .result.then(function (selections) {
           var annotationType = _.extend({}, vm.annotationType, { options: selections.split(/[ ,]+/) });
           vm.onUpdate()(annotationType);
         });

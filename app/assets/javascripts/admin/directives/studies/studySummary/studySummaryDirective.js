@@ -78,11 +78,8 @@ define(['underscore'], function(_) {
       modalInput.text('Edit name',
                       'Name',
                       vm.study.name,
-                      {
-                        required: true,
-                        minLength: 2
-                      })
-        .then(function (name) {
+                      { required: true, minLength: 2 })
+        .result.then(function (name) {
           vm.study.updateName(name)
             .then(postUpdate('Name changed successfully.',
                              'Change successful',
@@ -93,7 +90,7 @@ define(['underscore'], function(_) {
 
     function editDescription() {
       modalInput.textArea('Edit description', 'Description', vm.study.description)
-        .then(function (description) {
+        .result.then(function (description) {
           vm.study.updateDescription(description)
             .then(postUpdate('Description changed successfully.',
                              'Change successful',

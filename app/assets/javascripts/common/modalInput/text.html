@@ -10,12 +10,12 @@
        focus-me="true"
        ng-required="vm.options.required" />
   </div>
-  <div class="col-md-offset-3 col-md-9">
-    <p class="help-block" ng-show="form.value.$error.required">
-      A Value is required.
-    </p>
-    <p class="help-block" ng-show="form.value.$error.minlength">
+  <div class="col-md-offset-3 col-md-9"
+       ng-messages="form.value.$error"
+       role="alert">
+    <div ng-message="required" class="help-block">A Value is required</div>
+    <div ng-message="minlength" class="help-block">
       A Value of minimum length {{vm.options.minLength}} is required.
-    </p>
+    </div>
   </div>
 </div>

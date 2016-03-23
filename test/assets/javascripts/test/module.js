@@ -19,6 +19,7 @@ define(function (require) {
 
   module.factory('entityTestSuite',    require('../../../test/assets/javascripts/test/entityTestSuite'));
   module.factory('directiveTestSuite', require('../../../test/assets/javascripts/test/directiveTestSuite'));
+
   module.factory('hasAnnotationsEntityTestSuite',
                  require('../../../test/assets/javascripts/test/hasAnnotationsEntityTestSuite'));
 

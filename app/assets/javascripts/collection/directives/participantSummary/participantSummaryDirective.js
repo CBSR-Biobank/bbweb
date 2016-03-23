@@ -52,7 +52,7 @@ define(function () {
 
     function editUniqueId() {
       modalInput.text('Update unique ID', 'Unique ID', vm.participant.uniqueId, { required: true })
-        .then(function (uniqueId) {
+        .result.then(function (uniqueId) {
           vm.participant.updateUniqueId(uniqueId)
             .then(postUpdate('Unique ID updated successfully.', 'Change successful', 1500))
             .catch(notificationsService.updateError);

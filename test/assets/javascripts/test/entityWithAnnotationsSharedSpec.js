@@ -33,7 +33,12 @@ define(['underscore'], function (_) {
                           context.updateFuncName,
                           context.annotation,
                           context.addUrl,
-                          _.pick(context.annotation, 'stringValue', 'numberValue', 'selectedValues'),
+                          _.pick(_.pick(context.annotation,
+                                        'annotationTypeId',
+                                        'stringValue',
+                                        'numberValue',
+                                        'selectedValues'),
+                                 _.identity),
                           context.response,
                           expectEntity,
                           failTest);

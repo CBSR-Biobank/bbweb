@@ -12,8 +12,8 @@ define(['underscore'], function(_) {
    *
    * @param {string} context.controllerFuncname the name of the function on the controller to invoke.
    *
-   * @param {string} context.modalServiceFuncName the name of the modal function that is called to ask the
-   * user for input.
+   * @param {string} context.modalInputFuncName the name of the ""modalInput" service function that is called
+   * to ask the user for input.
    *
    * @param {any} context.newValue the new value to assign.
    *
@@ -27,14 +27,23 @@ define(['underscore'], function(_) {
 
     describe('update functions', function () {
 
+      beforeEach(inject(function () {
+        var self = this;
+
+        self.modalInput = self.$injector.get('modalInput');
+
+        self.deferred = self.$q.defer();
+        spyOn(self.modalInput, context.modalInputFuncName)
+          .and.returnValue({ result: self.deferred.promise });
+      }));
+
       it('context should be valid', function() {
         expect(context.entity.prototype[context.updateFuncName]).toBeFunction();
-        expect(this.modalService[context.modalServiceFuncName]).toBeFunction();
+        expect(this.modalInput[context.modalInputFuncName]).toBeFunction();
       });
 
       it('should update a field on the enitity', function() {
-        spyOn(this.modalService, context.modalServiceFuncName)
-          .and.returnValue(this.$q.when(context.newValue));
+        this.deferred.resolve(context.newValue);
         spyOn(context.entity.prototype, context.updateFuncName).and.returnValue(this.$q.when(context.entity));
 
         this.createController();
@@ -43,16 +52,16 @@ define(['underscore'], function(_) {
         this.scope.$digest();
         expect(context.entity.prototype[context.updateFuncName])
           .toHaveBeenCalledWith(context.newValue);
-        expect(this.modalService[context.modalServiceFuncName]).toHaveBeenCalled();
+        expect(this.modalInput[context.modalInputFuncName]).toHaveBeenCalled();
       });
 
       it('should display an error in a modal when update fails', function() {
         var newValue = this.jsonEntities.stringNext(),
             deferred = this.$q.defer();
 
+        this.deferred.resolve(newValue);
         expect(context.entity.prototype[context.updateFuncName]).toBeFunction();
 
-        spyOn(this.modalService, context.modalServiceFuncName).and.returnValue(this.$q.when(newValue));
         spyOn(context.entity.prototype, context.updateFuncName).and.returnValue(deferred.promise);
         spyOn(this.notificationsService, 'updateError');
 

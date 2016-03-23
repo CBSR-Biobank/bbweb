@@ -64,41 +64,44 @@ define(['underscore'], function (_) {
     }
 
     function editName() {
-      modalInput.text('Edit Event Type name',
-                      'Name',
-                      vm.ceventType.name,
-                      { required: true, minLength: 2 })
-        .then(function (name) {
-          vm.ceventType.updateName(name)
-            .then(postUpdate('Name changed successfully.', 'Change successful', 1500))
-            .catch(notificationsService.updateError);
-        });
+      modalInput.text(
+        'Edit Event Type name',
+        'Name',
+        vm.ceventType.name,
+        { required: true, minLength: 2 }
+      ).result.then(function (name) {
+        vm.ceventType.updateName(name)
+          .then(postUpdate('Name changed successfully.', 'Change successful', 1500))
+          .catch(notificationsService.updateError);
+      });
     }
 
     function editDescription() {
-      modalInput.textArea('Edit Event Type description',
-                          'Description',
-                          vm.ceventType.description)
-        .then(function (description) {
-          vm.ceventType.updateDescription(description)
-            .then(postUpdate('Description changed successfully.',
-                             'Change successful',
-                             1500))
-            .catch(notificationsService.updateError);
-        });
+      modalInput.textArea(
+        'Edit Event Type description',
+        'Description',
+        vm.ceventType.description
+      ).result.then(function (description) {
+        vm.ceventType.updateDescription(description)
+          .then(postUpdate('Description changed successfully.',
+                           'Change successful',
+                           1500))
+          .catch(notificationsService.updateError);
+      });
     }
 
     function editRecurring() {
-      modalInput.boolean('Edit Event Type recurring',
-                         'Recurring',
-                         vm.ceventType.recurring.toString())
-        .then(function (recurring) {
-          vm.ceventType.updateRecurring(recurring === 'true')
-            .then(postUpdate('Recurring changed successfully.',
-                             'Change successful',
+      modalInput.boolean(
+        'Edit Event Type recurring',
+        'Recurring',
+        vm.ceventType.recurring.toString()
+      ).result.then(function (recurring) {
+        vm.ceventType.updateRecurring(recurring === 'true')
+          .then(postUpdate('Recurring changed successfully.',
+                           'Change successful',
                              1500))
-            .catch(notificationsService.updateError);
-        });
+          .catch(notificationsService.updateError);
+      });
     }
 
     function addAnnotationType() {

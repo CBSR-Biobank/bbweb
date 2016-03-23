@@ -34,7 +34,8 @@ define([
       self.createController = createController;
 
       self.putHtmlTemplates(
-        '/assets/javascripts/common/directives/annotationsInput/annotationsInput.html');
+        '/assets/javascripts/common/directives/annotationsInput/annotationsInput.html',
+        '/assets/javascripts/common/directives/dateTime/dateTime.html');
 
       //--
 
@@ -117,7 +118,7 @@ define([
       expect(this.element.find('input').eq(0).attr('type')).toBe('text');
 
       expect(this.scope.vm.annotations[0].getValue()).toBe(dateStr);
-      expect(this.scope.form.annotationSubForm.annotationDateTimeValue.$valid).toBe(true);
+      expect(this.scope.form.annotationSubForm.dateTimeSubForm.dateValue.$valid).toBe(true);
     });
 
     it('works for a SELECT single annotation annotation', function() {

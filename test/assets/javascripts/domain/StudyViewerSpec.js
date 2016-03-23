@@ -43,8 +43,11 @@ define([
     }));
 
     it('should display valid attributes', function() {
-      var EntityViewer = this.$injector.get('EntityViewer');
-      var attributes, study, viewer;
+      var EntityViewer = this.$injector.get('EntityViewer'),
+          $filter = this.$injector.get('$filter'),
+          attributes,
+          study,
+          viewer;
 
       spyOn(EntityViewer.prototype, 'addAttribute').and.callFake(function (label, value) {
         attributes.push({label: label, value: value});
@@ -62,7 +65,7 @@ define([
           expect(attr.value).toBe(study.name);
           break;
         case 'Description':
-          expect(attr.value).toBe(study.description);
+          expect(attr.value).toBe($filter('truncate')(study.description, 60));
           break;
         case 'Status':
           expect(attr.value).toBe(study.statusLabel);

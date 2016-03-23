@@ -181,7 +181,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                                 uri('annot', this.id),
                                 this.version,
                                 annotation.annotationTypeId);
-      return this.removeAnnotation.call(this, annotation, url);
+      return hasAnnotations.removeAnnotation.call(this, annotation, url);
     };
 
     function uri(/* path, participantId */) {

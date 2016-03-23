@@ -8,19 +8,23 @@ define(function (require) {
   var angular = require('angular'),
       _ = require('underscore'),
       name = 'biobank.modalinput',
-      module,
-      modalTypes = [
+      module;
+
+  /**
+   * The functions this service provides.
+   */
+  var modalTypes = [
         'boolean',
-        'commaDelimited',
         'dateTime',
         'email',
         'number',
         'naturalNumber',
+        'password',
         'positiveFloat',
         'select',
         'selectMultiple',
         'text',
-        'textarea',
+        'textArea',
         'url'
       ];
 
@@ -61,6 +65,26 @@ define(function (require) {
 
   /**
    * Presents a modal to the user where a value for an entity can be updated.
+   *
+   * See "modalTypes" above for the valid service function names.
+   *
+   * Each modal function takes the following parameters:
+   *
+   * @param {string} title The title to display in the modal popup.
+   *
+   * @param {string} label The label for the field being modified.
+   *
+   * @param {object} defaultValue the current value for the field being modified.
+   *
+   * @param {object} options.required When true, the value is required and an error is displayed if the value
+   * is set to blank by the user.
+   *
+   * @param {object} options.minLength Used for "text" and "textArea" and specifies the minimum length that is
+   * accepted.
+   *
+   * @param {object} options.selectOptions for "select" and "selectMultiple", these are the options to be displayed.
+   *
+   * @return $uibModal returns the modal object used by ui-bootstrap.
    */
   function modalInputService($uibModal) {
     var service = {};
@@ -80,62 +104,55 @@ define(function (require) {
      * Displays a modal asking user to enter a value. The type of value depends on the "type" parameter.
      */
     function modalInput(type, title, label, defaultValue, options) {
+      var modal;
 
       ModalController.$inject = [
-        '$scope',
-        '$uibModalInstance',
         'bbwebConfig',
-        'timeService',
-        'defaultValue',
-        'options'
+        'timeService'
       ];
 
-      return $uibModal.open({
+      modal = $uibModal.open({
         templateUrl: '/assets/javascripts/common/modalInput/modalInput.html',
         controller: ModalController,
         controllerAs: 'vm',
-        resolve: {
-          defaultValue: function () { return defaultValue; },
-          options: function () {  return options; }
-        },
         backdrop: true,
         keyboard: true,
         modalFade: true
-      }).result;
+      });
+
+      return modal;
 
       //--
 
-      function ModalController($scope,
-                               $uibModalInstance,
-                               bbwebConfig,
-                               timeService,
-                               defaultValue,
-                               options) {
+      function ModalController(bbwebConfig,
+                               timeService) {
         var vm = this;
 
+        vm.defaultValue = defaultValue;
+        vm.options      = options;
         vm.type         = type;
         vm.title        = title;
         vm.label        = label;
-        vm.options      = options;
         vm.okPressed    = okPressed;
         vm.closePressed = closePressed;
 
         options = options || {};
+        vm.value = vm.defaultValue;
 
         if (type === 'dateTime') {
-          vm.value = timeService.stringToDateAndTime(defaultValue);
+          vm.value = timeService.stringToDateAndTime(vm.defaultValue);
+        } else if (type === 'password') {
+          vm.value = {};
         } else if (type === 'selectMultiple') {
           vm.value = getSelectMultipleValues();
-        } else {
-           vm.value = defaultValue;
         }
 
         function okPressed() {
-          $uibModalInstance.close(vm.value);
+          modal.close(vm.value);
         }
 
         function closePressed() {
-          $uibModalInstance.dismiss('cancel');
+          modal.dismiss('cancel');
         }
 
         function getSelectMultipleValues() {
@@ -143,12 +160,12 @@ define(function (require) {
             throw new Error('select options not provided');
           }
 
-          if (!_.isArray(defaultValue)) {
+          if (!_.isArray(vm.defaultValue)) {
             throw new Error('defaultValue is not an array');
           }
 
           return _.map(options.selectOptions, function (opt) {
-            return { name: opt, checked: _.contains(defaultValue, opt)};
+            return { name: opt, checked: _.contains(vm.defaultValue, opt)};
           });
         }
       }

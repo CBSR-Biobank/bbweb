@@ -10,16 +10,16 @@
   <form class="form-horizontal" name="form" novalidate>
 
     <modal-input-boolean         ng-switch-when="boolean"></modal-input-boolean>
-    <modal-input-comma-delimited ng-switch-when="commaDelimited"></modal-input-comma-delimited>
     <modal-input-date-time       ng-switch-when="dateTime"></modal-input-date-time>
     <modal-input-email           ng-switch-when="email"></modal-input-email>
     <modal-input-natural-number  ng-switch-when="naturalNumber"></modal-input-natural-number>
     <modal-input-number          ng-switch-when="number"></modal-input-number>
+    <modal-input-password        ng-switch-when="password"></modal-input-password>
     <modal-input-positive-float  ng-switch-when="positiveFloat"></modal-input-positive-float>
     <modal-input-select          ng-switch-when="select"></modal-input-select>
     <modal-input-select-multiple ng-switch-when="selectMultiple"></modal-input-select-multiple>
     <modal-input-text            ng-switch-when="text"></modal-input-text>
-    <modal-input-textarea        ng-switch-when="textarea"></modal-input-textarea>
+    <modal-input-text-area       ng-switch-when="textArea"></modal-input-text-area>
     <modal-input-url             ng-switch-when="url"></modal-input-url>
 
   </form>
@@ -30,10 +30,10 @@
           ng-click="vm.okPressed()"
           ng-disabled="form.$invalid">OK</button>
 </div>
+<!--
 <div class="row">
   <div class="col-xs-12"><pre>vm: {{vm | json}}</pre></div>
 </div>
-<!--
 <div class="row">
   <div class="col-xs-12"><pre>form: {{form | json}}</pre></div>
 </div>

@@ -22,7 +22,7 @@ define([
       _.extend(self, directiveTestSuite);
 
       self.putHtmlTemplates(
-        '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeSummary/annotationTypeSummary.html');
+        '/assets/javascripts/admin/directives/annotationTypeSummary/annotationTypeSummary.html');
 
       self.annotationType = new AnnotationType(jsonEntities.annotationType());
     }));

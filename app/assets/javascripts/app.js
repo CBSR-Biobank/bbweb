@@ -31,6 +31,7 @@ define(function(require) {
   require('angular-ui-router');
   require('angular-sanitize');
   require('angular-cookies');
+  require('angular-messages');
   require('smart-table');
   require('angular-utils-ui-breadcrumbs');
 
@@ -41,6 +42,7 @@ define(function(require) {
     'ui.router',
     'ngSanitize',
     'ngCookies',
+    'ngMessages',
     'smart-table',
     'angularUtils.directives.uiBreadcrumbs',
     admin.name,

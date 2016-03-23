@@ -37,7 +37,7 @@ define(function (require) {
         '/assets/javascripts/admin/directives/studies/studySummary/studySummary.html',
         '/assets/javascripts/common/directives/truncateToggle.html',
         '/assets/javascripts/admin/directives/statusLine/statusLine.html',
-        '/assets/javascripts/common/services/modalInput.html');
+        '/assets/javascripts/common/modalInput/modalInput.html');
 
       function createController() {
         self.element = angular.element('<study-summary study="vm.study"></study-summary>');
@@ -64,7 +64,7 @@ define(function (require) {
         context.entity               = this.Study;
         context.updateFuncName       = 'updateName';
         context.controllerFuncName   = 'editName';
-        context.modalServiceFuncName = 'modalTextInput';
+        context.modalInputFuncName = 'text';
       }));
 
       entityUpdateSharedSpec(context);
@@ -79,7 +79,7 @@ define(function (require) {
         context.entity               = this.Study;
         context.updateFuncName       = 'updateDescription';
         context.controllerFuncName   = 'editDescription';
-        context.modalServiceFuncName = 'modalTextAreaInput';
+        context.modalInputFuncName = 'textArea';
       }));
 
       entityUpdateSharedSpec(context);

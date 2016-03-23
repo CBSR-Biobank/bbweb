@@ -24,6 +24,7 @@ define(function () {
   }
 
   UserProfileCtrl.$inject = [
+    'modalService',
     'modalInput',
     'notificationsService',
     'User'
@@ -32,7 +33,8 @@ define(function () {
   /**
    * Displays a list of users in a table.
    */
-  function UserProfileCtrl(modalInput,
+  function UserProfileCtrl(modalService,
+                           modalInput,
                            notificationsService,
                            User) {
     var vm = this;
@@ -65,28 +67,28 @@ define(function () {
 
     function updateName() {
       var name = vm.user.name;
-      modalInput.text('Update user name',
-                      'Name',
-                      name,
-                      {
-                        required: true,
-                        minLength: 2
-                      }
-      ).then(function (name) {
+
+      modalInput.text(
+        'Update user name',
+        'Name',
+        name,
+        { required: true, minLength: 2 }
+      ).result.then(function (name) {
         vm.user.updateName(name)
           .then(postUpdate('User name updated successfully.',
-                           'Update successful',
+                             'Update successful',
                            1500))
           .catch(updateError);
       });
     }
 
     function updateEmail() {
-      modalInput.email('Update user email',
-                       'Email',
-                       vm.user.email,
-                      { required: true }
-      ).then(function (email) {
+      modalInput.email(
+        'Update user email',
+        'Email',
+        vm.user.email,
+        { required: true }
+      ).result.then(function (email) {
         vm.user.updateEmail(email)
           .then(postUpdate('Email updated successfully.',
                            'Update successful',
@@ -99,7 +101,7 @@ define(function () {
       modalInput.url('Update avatar URL',
                      'Avatar URL',
                      vm.user.avatarUrl
-      ).then(function (avatarUrl) {
+      ).result.then(function (avatarUrl) {
         vm.user.updateAvatarUrl(avatarUrl)
           .then(postUpdate('Avatar URL updated successfully.',
                            'Update successful',
@@ -117,7 +119,7 @@ define(function () {
         actionButtonText : 'OK'
       };
 
-      modalInput.showModal(modalDefaults, modalOptions)
+      modalService.showModal(modalDefaults, modalOptions)
         .then(function() {
           vm.user.updateAvatarUrl(null)
             .then(postUpdate('Avatar URL remove successfully.',
@@ -128,7 +130,7 @@ define(function () {
     }
 
     function updatePassword() {
-      modalInput.passwordUpdateModal().then(function (result) {
+      modalInput.password().result.then(function (result) {
         vm.user.updatePassword(result.currentPassword, result.newPassword)
           .then(postUpdate('Your password was updated successfully.',
                            'Update successful',

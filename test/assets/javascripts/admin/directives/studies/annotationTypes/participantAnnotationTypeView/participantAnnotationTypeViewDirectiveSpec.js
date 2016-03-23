@@ -8,7 +8,7 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  '../annotationTypeViewDirectiveSharedSpec',
+  '../../../annotationTypeViewDirectiveSharedSpec',
   'biobankApp'
 ], function(angular, mocks, _, annotationTypeViewDirectiveSharedSpec) {
   'use strict';
@@ -36,8 +36,9 @@ define([
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/annotationTypes/participantAnnotationTypeView/participantAnnotationTypeView.html',
-        '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeView/annotationTypeView.html',
-        '/assets/javascripts/common/directives/truncateToggle.html');
+        '/assets/javascripts/admin/directives/annotationTypeView/annotationTypeView.html',
+        '/assets/javascripts/common/directives/truncateToggle.html',
+        '/assets/javascripts/common/directives/dateTime/dateTime.html');
 
       function createController() {
         self.element = angular.element([

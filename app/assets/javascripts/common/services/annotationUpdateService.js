@@ -40,7 +40,7 @@ define(['underscore'], function (_) {
                                    annotation.annotationType.name,
                                    annotation.stringValue,
                                    { required: annotation.required }
-        ).then(assignNewValue);
+        ).result.then(assignNewValue);
       } else if (annotation instanceof MultipleSelectAnnotation) {
         return modalInput.selectMultiple(title,
                                          annotation.annotationType.name,
@@ -49,13 +49,13 @@ define(['underscore'], function (_) {
                                            required: annotation.required,
                                            selectOptions: annotation.annotationType.options
                                          })
-          .then(assignNewValue);
+          .result.then(assignNewValue);
       } else if (annotation instanceof NumberAnnotation) {
         return modalInput.number(title,
                                  annotation.annotationType.name,
                                  annotation.numberValue,
                                  { required: annotation.required }
-        ).then(assignNewValue);
+        ).result.then(assignNewValue);
       } else if (annotation instanceof SingleSelectAnnotation) {
         return modalInput.select(title,
                                  annotation.annotationType.name,
@@ -64,13 +64,13 @@ define(['underscore'], function (_) {
                                    required: annotation.required,
                                    selectOptions: annotation.annotationType.options
                                  }
-        ).then(assignNewValue);
+        ).result.then(assignNewValue);
       } else if (annotation instanceof TextAnnotation) {
         return modalInput.text(title,
                                annotation.annotationType.name,
                                annotation.stringValue,
                                { required: annotation.required }
-        ).then(assignNewValue);
+        ).result.then(assignNewValue);
       } else {
         throw new Error('invalid annotation type: ' + annotation);
       }

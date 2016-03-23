@@ -130,15 +130,6 @@ define([
       };
     }
 
-    /**
-     * Alternate way to generate a random word.
-     *
-     * Due to a bug in faker's Helpers.shuffle, faker.lorem.words() sometimes returns undefined.
-     */
-    function randomFakerLoremWord() {
-      return faker.address.streetAddress();
-    }
-
     function stringNext() {
       return domainEntityNameNext();
     }
@@ -162,14 +153,7 @@ define([
      */
     function domainEntityNameNext(domainEntityType) {
       domainEntityType = domainEntityType || 'string';
-
-      if (_.isUndefined(nameCountByEntity[domainEntityType])) {
-        nameCountByEntity[domainEntityType] = 0;
-      } else {
-        nameCountByEntity[domainEntityType]++;
-      }
-
-      return domainEntityType + '_' + nameCountByEntity[domainEntityType];
+      return _.uniqueId(domainEntityType + '_');
     }
 
     function specimenLinkType(options) {
@@ -203,7 +187,7 @@ define([
             id:          domainEntityNameNext(ENTITY_NAME_PROCESSING_TYPE()),
             studyId:     study.id,
             name:        stringNext(),
-            description: randomFakerLoremWord(),
+            description: faker.lorem.sentences(4),
             enabled:     false
           },
           validKeys = commonFieldNames.concat(_.keys(defaults)),
@@ -225,7 +209,7 @@ define([
             id:              domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE()),
             studyId:         study.id,
             name:            stringNext(),
-            description:     randomFakerLoremWord(),
+            description:     faker.lorem.sentences(4),
             specimenSpecs:   [],
             annotationTypes: [],
             recurring:       false
@@ -262,7 +246,7 @@ define([
             id:                          domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP()),
             studyId:                     study.id,
             name:                        stringNext(),
-            description:                 randomFakerLoremWord(),
+            description:                 faker.lorem.sentences(4),
             units:                       'mL',
             anatomicalSourceType:        randomAnatomicalSourceType(),
             preservationType:            randomPreservationType(),
@@ -282,7 +266,7 @@ define([
     function study(options) {
       var defaults =  { id:              domainEntityNameNext(ENTITY_NAME_STUDY()),
                         name:            stringNext(),
-                        description:     randomFakerLoremWord(),
+                        description:     faker.lorem.sentences(4),
                         annotationTypes: [],
                         status:          StudyStatus.DISABLED()
                       },
@@ -458,7 +442,7 @@ define([
     function collectionSpecimenSpec(options) {
       var defaults = { uniqueId:                    domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP()),
                        name:                        stringNext(),
-                       description:                 randomFakerLoremWord(),
+                       description:                 faker.lorem.sentences(4),
                        units:                       'mL',
                        anatomicalSourceType:        randomAnatomicalSourceType(),
                        preservationType:            randomPreservationType(),
@@ -572,8 +556,8 @@ define([
                        city:           faker.address.city(),
                        province:       faker.address.state(),
                        postalCode:     faker.address.zipCode(),
-                       poBoxNumber:    randomFakerLoremWord(),
-                       countryIsoCode: randomFakerLoremWord()
+                       poBoxNumber:    faker.address.zipCode(),
+                       countryIsoCode: faker.address.country()
                 },
           validKeys = _.keys(defaults),
           at = _.extend(defaults, _.pick(options || {}, validKeys));

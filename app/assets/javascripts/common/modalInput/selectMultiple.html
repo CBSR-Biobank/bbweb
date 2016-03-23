@@ -1,5 +1,5 @@
 <div class="form-group">
-  <label for="bool" class="col-md-2 control-label">{{vm.label}}:</label>
+  <label for="selectValue" class="col-md-2 control-label">{{vm.label}}:</label>
   <div class="col-md-10">
     <div ng-repeat="value in vm.value">
       <label>
@@ -7,7 +7,7 @@
                name="selectValue"
                ng-model="value.checked"
                ng-required="vm.options.required">
-        <span>{{value.name}}</span>
+        {{value.name}}
       </label>
     </div>
   </div>

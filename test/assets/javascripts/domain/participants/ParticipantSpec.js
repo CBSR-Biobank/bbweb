@@ -326,29 +326,6 @@ define(function(require) {
                         self.failTest);
     });
 
-    it('can add an annotation to a participant', function() {
-      var self = this,
-          jsonAnnotationType = self.jsonEntities.annotationType(),
-          jsonStudy = self.jsonEntities.study({ annotationTypes: [ jsonAnnotationType ]}),
-          jsonParticipant = self.jsonEntities.participant({
-            studyId: jsonStudy.id
-          }),
-          study = new self.Study(jsonStudy),
-          participant = new self.Participant(jsonParticipant, study);
-
-      self.updateEntity(participant,
-                        'addAnnotation',
-                        participant.annotations[0],
-                        updateUri('annot', participant.id),
-                        _.pick(participant.annotations[0],
-                               'stringValue',
-                               'numberValue',
-                               'selectedValues'),
-                        jsonParticipant,
-                        self.expectParticipant,
-                        self.failTest);
-    });
-
     describe('updates to annotations', function () {
 
       var context = {};

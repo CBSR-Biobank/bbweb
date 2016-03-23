@@ -5,8 +5,8 @@
 (function(window, require) {
   'use strict';
 
-  var allTestFiles = [];
-  var TEST_REGEXP = /(spec|test)\.js$/i;
+  var allTestFiles = [],
+      TEST_REGEXP = /(spec|test)\.js$/i;
 
   var pathToModule = function(path) {
     var module = '../../../' + path.replace(/^\/base\//, '').replace(/\.js$/, '');
@@ -20,6 +20,7 @@
     if (TEST_REGEXP.test(file)) {
       // Normalize paths to RequireJS module names.
       path = pathToModule(file);
+      //console.log(file);
       allTestFiles.push(path);
     }
   });
@@ -49,6 +50,7 @@
       'underscore':                   '../../../target/web/web-modules/main/webjars/lib/underscorejs/underscore',
       'angular':                      '../../../target/web/web-modules/main/webjars/lib/angularjs/angular',
       'angularMocks':                 '../../../target/web/web-modules/main/webjars/lib/angularjs/angular-mocks',
+      'angular-messages':             '../../../target/web/web-modules/main/webjars/lib/angularjs/angular-messages',
       'angular-cookies':              '../../../target/web/web-modules/main/webjars/lib/angularjs/angular-cookies',
       'angular-sanitize':             '../../../target/web/web-modules/main/webjars/lib/angular-sanitize/angular-sanitize',
       'angular-ui-router':            '../../../target/web/web-modules/main/webjars/lib/angular-ui-router/angular-ui-router',
@@ -68,6 +70,7 @@
         exports: 'angular.mock'
       },
       'angular-cookies':              ['angular'],
+      'angular-messages':             ['angular'],
       'angular-sanitize':             ['angular'],
       'angular-ui-router':            ['angular'],
       'bootstrap':                    ['jquery'],
@@ -85,7 +88,7 @@
   });
 
   require.onError = function (err) {
-    console.log('requireJS error', err.requireType);
+    console.log('requireJS error', err.requireType. err);
     if (err.requireType === 'timeout') {
       console.log('modules: ' + err.requireModules);
     }

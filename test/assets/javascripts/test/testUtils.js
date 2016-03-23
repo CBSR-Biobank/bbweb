@@ -5,12 +5,12 @@
 define(['faker', 'underscore'], function(faker, _) {
   'use strict';
 
-  testUtils.$inject = ['$templateCache'];
+  //testUtils.$inject = [];
 
   /**
    * Description
    */
-  function testUtils($templateCache) {
+  function testUtils() {
     var service = {
       uuid:                          uuid,
       randomBoolean:                 randomBoolean,
@@ -51,13 +51,13 @@ define(['faker', 'underscore'], function(faker, _) {
             this.cancelCallback = cancelCallback;
           }
         },
-        close: function( item ) {
+        close: function(item) {
           //The user clicked OK on the modal dialog, call the stored confirm callback with the selected item
-          this.result.confirmCallBack( item );
+          this.result.confirmCallBack(item);
         },
-        dismiss: function( type ) {
+        dismiss: function(type) {
           //The user clicked cancel on the modal dialog, call the stored cancel callback
-          this.result.cancelCallback( type );
+          this.result.cancelCallback(type);
         }
       };
     }

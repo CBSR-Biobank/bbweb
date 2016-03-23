@@ -25,7 +25,6 @@ define(function (require) {
       self.$state               = self.$injector.get('$state');
       self.CollectionEventType  = self.$injector.get('CollectionEventType');
       self.AnnotationType       = self.$injector.get('AnnotationType');
-      self.modalService         = self.$injector.get('modalService');
       self.notificationsService = self.$injector.get('notificationsService');
       self.jsonEntities         = self.$injector.get('jsonEntities');
 
@@ -40,11 +39,11 @@ define(function (require) {
       this.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/collection/ceventTypeView/ceventTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle.html',
-        '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeSummary/annotationTypeSummary.html',
+        '/assets/javascripts/admin/directives/annotationTypeSummary/annotationTypeSummary.html',
         '/assets/javascripts/admin/directives/studies/collection/collectionSpecimenSpecSummary/collectionSpecimenSpecSummary.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html',
         '/assets/javascripts/admin/directives/statusLine/statusLine.html',
-        '/assets/javascripts/common/services/modalInput.html');
+        '/assets/javascripts/common/modalInput/modalInput.html');
 
       function createController() {
         self.element = angular.element(
@@ -96,11 +95,11 @@ define(function (require) {
       var context = {};
 
       beforeEach(inject(function () {
-        context.entity               = this.CollectionEventType;
-        context.updateFuncName       = 'updateName';
-        context.controllerFuncName   = 'editName';
-        context.modalServiceFuncName = 'modalTextInput';
-        context.newValue             = this.jsonEntities.stringNext();
+        context.entity             = this.CollectionEventType;
+        context.updateFuncName     = 'updateName';
+        context.controllerFuncName = 'editName';
+        context.modalInputFuncName = 'text';
+        context.newValue           = this.jsonEntities.stringNext();
       }));
 
       entityUpdateSharedSpec(context);
@@ -112,11 +111,11 @@ define(function (require) {
       var context = {};
 
       beforeEach(inject(function () {
-        context.entity               = this.CollectionEventType;
-        context.updateFuncName       = 'updateDescription';
-        context.controllerFuncName   = 'editDescription';
-        context.modalServiceFuncName = 'modalTextAreaInput';
-        context.newValue             = this.jsonEntities.stringNext();
+        context.entity             = this.CollectionEventType;
+        context.updateFuncName     = 'updateDescription';
+        context.controllerFuncName = 'editDescription';
+        context.modalInputFuncName = 'textArea';
+        context.newValue           = this.jsonEntities.stringNext();
       }));
 
       entityUpdateSharedSpec(context);
@@ -131,7 +130,7 @@ define(function (require) {
         context.entity               = this.CollectionEventType;
         context.updateFuncName       = 'updateRecurring';
         context.controllerFuncName   = 'editRecurring';
-        context.modalServiceFuncName = 'modalBooleanInput';
+        context.modalInputFuncName = 'boolean';
         context.newValue             = false;
       }));
 

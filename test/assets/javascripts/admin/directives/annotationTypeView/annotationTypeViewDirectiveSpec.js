@@ -27,9 +27,9 @@ define([
       self.jsonEntities   = self.$injector.get('jsonEntities');
 
       self.putHtmlTemplates(
-        '/assets/javascripts/admin/directives/studies/annotationTypes/annotationTypeView/annotationTypeView.html',
+        '/assets/javascripts/admin/directives/annotationTypeView/annotationTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle.html',
-        '/assets/javascripts/common/services/modalInput.html');
+        '/assets/javascripts/common/modalInput/modalInput.html');
 
       self.createController = createController;
       self.returnState      = 'my-return-state';
@@ -86,7 +86,7 @@ define([
 
       beforeEach(inject(function () {
         context.controllerFuncName = 'editName';
-        context.modalServiceFuncName = 'modalTextInput';
+        context.modalInputFuncName = 'text';
       }));
 
       sharedUpdateBehaviour(context);
@@ -100,7 +100,7 @@ define([
 
       beforeEach(inject(function () {
         context.controllerFuncName = 'editRequired';
-        context.modalServiceFuncName = 'modalBooleanInput';
+        context.modalInputFuncName = 'boolean';
       }));
 
       sharedUpdateBehaviour(context);
@@ -113,7 +113,7 @@ define([
 
       beforeEach(inject(function () {
         context.controllerFuncName = 'editDescription';
-        context.modalServiceFuncName = 'modalTextAreaInput';
+        context.modalInputFuncName = 'textArea';
       }));
 
       sharedUpdateBehaviour(context);
@@ -126,7 +126,7 @@ define([
 
       beforeEach(inject(function () {
         context.controllerFuncName = 'addSelectionOptions';
-        context.modalServiceFuncName = 'modalCommaDelimitedInput';
+        context.modalInputFuncName = 'selectMultiple';
       }));
 
       sharedUpdateBehaviour(context);
@@ -136,18 +136,18 @@ define([
     function sharedUpdateBehaviour(context) {
 
       beforeEach(inject(function () {
-        var self = this;
-
-        self.modalService         = self.$injector.get('modalService');
-        self.notificationsService = self.$injector.get('notificationsService');
+        this.modalInput           = this.$injector.get('modalInput');
+        this.notificationsService = this.$injector.get('notificationsService');
       }));
 
       describe('(shared) update functions', function () {
 
-        it('should update a field on a study', function() {
-          var newValue = this.jsonEntities.stringNext();
+        it('should update a field', function() {
+          var newValue = this.jsonEntities.stringNext(),
+              deferred = this.$q.defer();
 
-          spyOn(this.modalService, context.modalServiceFuncName).and.returnValue(this.$q.when(newValue));
+          spyOn(this.modalInput, context.modalInputFuncName).and.returnValue({ result: deferred.promise });
+          deferred.resolve(newValue);
 
           this.createController();
           expect(this.controller[context.controllerFuncName]).toBeFunction();
