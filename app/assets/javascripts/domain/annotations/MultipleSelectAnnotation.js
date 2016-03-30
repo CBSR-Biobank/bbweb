@@ -19,6 +19,7 @@ define(['underscore'], function(_) {
       Annotation.call(this, obj, annotationType);
 
       self.values = initializeMultipleSelect();
+      self.valueType = 'MultipleSelect';
 
       function initializeMultipleSelect() {
         var result = _.map(annotationType.options, function (opt) {

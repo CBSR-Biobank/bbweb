@@ -47,6 +47,7 @@
       'faker':                        '../../../node_modules/karma-faker/node_modules/faker/build/build/faker',
       'moment':                       '../../../target/web/web-modules/main/webjars/lib/momentjs/moment',
       'toastr':                       '../../../target/web/web-modules/main/webjars/lib/toastr/toastr',
+      'lodash':                       '../../../target/web/web-modules/main/webjars/lib/lodash/lodash',
       'underscore':                   '../../../target/web/web-modules/main/webjars/lib/underscorejs/underscore',
       'angular':                      '../../../target/web/web-modules/main/webjars/lib/angularjs/angular',
       'angularMocks':                 '../../../target/web/web-modules/main/webjars/lib/angularjs/angular-mocks',

@@ -18,6 +18,8 @@ define(['underscore'], function(_) {
       obj = obj || {};
       Annotation.call(this, obj, annotationType);
 
+      self.valueType = 'SingleSelect';
+
       if (!_.isUndefined(obj.selectedValues)) {
         if (obj.selectedValues.length === 0) {
           self.value = null;

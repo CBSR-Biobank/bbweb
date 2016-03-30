@@ -16,7 +16,7 @@ define([
   /**
    *
    */
-  describe('Directive: annotationsInput', function() {
+  describe('annotationsInputModule', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -34,7 +34,12 @@ define([
       self.createController = createController;
 
       self.putHtmlTemplates(
-        '/assets/javascripts/common/directives/annotationsInput/annotationsInput.html',
+        '/assets/javascripts/common/annotationsInput/annotationsInput.html',
+        '/assets/javascripts/common/annotationsInput/dateTimeAnnotation.html',
+        '/assets/javascripts/common/annotationsInput/multipleSelectAnnotation.html',
+        '/assets/javascripts/common/annotationsInput/numberAnnotation.html',
+        '/assets/javascripts/common/annotationsInput/singleSelectAnnotation.html',
+        '/assets/javascripts/common/annotationsInput/textAnnotation.html',
         '/assets/javascripts/common/directives/dateTime/dateTime.html');
 
       //--

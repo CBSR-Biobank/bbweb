@@ -10,11 +10,11 @@ define(function (require) {
   var angular = require('angular'),
       name = 'biobank.common',
       module,
+      annotationsInputModule = require('./annotationsInput/annotationsInputModule'),
       modalInputModule = require('./modalInput/modalInputModule');
 
-  module = angular.module('biobank.common', [ modalInputModule.name ]);
+  module = angular.module('biobank.common', [ modalInputModule.name, annotationsInputModule.name ]);
 
-  module.directive('annotationsInput',        require('./directives/annotationsInput/annotationsInputDirective'));
   module.directive('focusMe',                 require('./directives/focusMeDirective'));
   module.directive('dateTime',                require('./directives/dateTime/dateTimeDirective'));
   module.directive('infoUpdateRemoveButtons', require('./directives/infoUpdateRemoveButtonsDirective'));

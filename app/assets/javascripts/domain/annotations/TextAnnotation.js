@@ -19,6 +19,7 @@ define(['underscore'], function(_) {
       if (obj.stringValue) {
         this.value = obj.stringValue;
       }
+      this.valueType = 'Text';
     }
 
     TextAnnotation.prototype = Object.create(Annotation.prototype);

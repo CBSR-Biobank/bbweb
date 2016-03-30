@@ -14,7 +14,7 @@ define([
 ], function(angular, mocks, _, moment, faker, sprintf) {
   'use strict';
 
-  describe('modalInputService', function() {
+  describe('modalInputModule', function() {
 
     beforeEach(mocks.module('ngAnimateMock', 'biobankApp', 'biobank.test'));
 

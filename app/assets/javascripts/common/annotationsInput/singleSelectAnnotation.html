@@ -1,0 +1,22 @@
+<div class="form-group"
+     ng-if="annotation.annotationType.maxValueCount == 1"
+     ng-class="{ 'has-error' : annotationSubForm.annotationSelectValue.$invalid &&
+               !annotationSubForm.annotationSelectValue.$pristine }">
+  <label class="col-md-2 control-label">{{annotation.annotationType.name}}</label>
+  <div class="col-md-10">
+    <select name="annotationSelectValue"
+            class="form-control"
+            ng-model="annotation.value"
+            ng-options="option for option in annotation.annotationType.options"
+            ng-required="annotation.required">
+      <option value="">-- make a selection --</option>
+    </select>
+  </div>
+  <div class="col-md-offset-2 col-md-10">
+    <p class="help-block"
+       ng-show="annotationSubForm.annotationSelectValue.$error.required &&
+                !annotationSubForm.annotationSelectValue.$pristine">
+      Please make a selection
+    </p>
+  </div>
+</div>

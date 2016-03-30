@@ -1,0 +1,12 @@
+<ng-form name="annotationSubForm"
+         ng-repeat="annotation in vm.annotations">
+  <div ng-switch on="annotation.valueType">
+
+    <text-annotation            ng-switch-when="Text"></text-annotation>
+    <number-annotation          ng-switch-when="Number"></number-annotation>
+    <date-time-annotation       ng-switch-when="DateTime"></date-time-annotation>
+    <single-select-annotation   ng-switch-when="SingleSelect"></single-select-annotation>
+    <multiple-select-annotation ng-switch-when="MultipleSelect"></multiple-select-annotation>
+
+  </div>
+</ng-form>

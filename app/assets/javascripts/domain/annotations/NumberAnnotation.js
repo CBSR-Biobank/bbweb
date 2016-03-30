@@ -20,6 +20,8 @@ define(['underscore'], function(_) {
       if (!_.isUndefined(obj.numberValue)) {
         this.value = parseFloat(obj.numberValue);
       }
+
+      this.valueType = 'Number';
     }
 
     NumberAnnotation.prototype = Object.create(Annotation.prototype);

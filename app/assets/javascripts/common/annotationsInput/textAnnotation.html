@@ -1,0 +1,19 @@
+<div class="form-group"
+     ng-class="{ 'has-error' : annotationSubForm.annotationTextValue.$invalid &&
+               !annotationSubForm.annotationTextValue.$pristine }">
+  <label class="col-md-2 control-label">{{annotation.annotationType.name}}</label>
+  <div class="col-md-10">
+    <input name="annotationTextValue"
+           type="text"
+           class="form-control"
+           ng-model="annotation.value"
+           ng-required="annotation.required"/>
+  </div>
+  <div class="col-md-offset-2 col-md-10">
+    <p class="help-block"
+       ng-show="annotationSubForm.annotationTextValue.$error.required &&
+                !annotationSubForm.annotationTextValue.$pristine">
+      Please enter a value
+    </p>
+  </div>
+</div>

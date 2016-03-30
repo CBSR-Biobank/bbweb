@@ -19,7 +19,8 @@ define(['moment', 'underscore'], function(moment, _) {
       Annotation.call(this, obj, annotationType);
 
       _.extend(self, timeService.stringToDateAndTime(obj.stringValue));
-    }
+      self.valueType = 'DateTime';
+  }
 
     DateTimeAnnotation.prototype = Object.create(Annotation.prototype);
 
