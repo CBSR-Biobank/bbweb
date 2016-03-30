@@ -6,7 +6,7 @@ define(function (require) {
   'use strict';
 
   var angular = require('angular'),
-      _ = require('underscore'),
+      _ = require('lodash'),
       name = 'biobank.modalinput',
       module;
 
@@ -41,7 +41,7 @@ define(function (require) {
    */
   function init() {
     _.each(modalTypes, function (type) {
-      var name = 'modalInput' + capitalize(type);
+      var name = 'modalInput' + _.upperFirst(type);
       var directive = modalInputDirectiveGenerator(type);
       module.directive(name, directive);
     });
@@ -55,10 +55,6 @@ define(function (require) {
       };
       return directive;
     };
-  }
-
-  function capitalize(string) {
-    return string.charAt(0).toUpperCase() + string.substring(1);
   }
 
   modalInputService.$inject = ['$uibModal'];
@@ -165,7 +161,7 @@ define(function (require) {
           }
 
           return _.map(options.selectOptions, function (opt) {
-            return { name: opt, checked: _.contains(vm.defaultValue, opt)};
+            return { name: opt, checked: _.includes(vm.defaultValue, opt)};
           });
         }
       }

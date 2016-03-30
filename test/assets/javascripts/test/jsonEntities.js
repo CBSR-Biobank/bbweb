@@ -41,7 +41,6 @@ define([
                         bbwebConfig) {
 
     var defaultEntities = {},
-        nameCountByEntity = {},
         entityCount = 0,
         valueTypeCount = 0,
         commonFieldNames = _.keys(commonFields),

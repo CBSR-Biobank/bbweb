@@ -65,7 +65,6 @@ define(function (require) {
   }
 
   function AnnotationsInputCtrl(bbwebConfig) {
-    var vm = this;
   }
 
   return {
