@@ -81,11 +81,12 @@ define(function () {
     }
 
     function editAnnotation(annotation) {
-      annotationUpdate.update(annotation, 'Update ' + annotation.getLabel()).then(function (newAnnotation) {
-        vm.collectionEvent.addAnnotation(newAnnotation)
-          .then(postUpdate('Annotation updated successfully.', 'Change successful', 1500))
-          .catch(notificationsService.updateError);
-      });
+      annotationUpdate.update(annotation, 'Update ' + annotation.getLabel())
+        .then(function (newAnnotation) {
+          vm.collectionEvent.addAnnotation(newAnnotation)
+            .then(postUpdate('Annotation updated successfully.', 'Change successful', 1500))
+            .catch(notificationsService.updateError);
+        });
     }
 
     function addSpecimen() {

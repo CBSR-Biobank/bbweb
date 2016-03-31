@@ -14,7 +14,6 @@ define(['underscore'], function (_) {
       scope: {},
       bindToController: {
         study: '=',
-        annotationTypes: '=',
         participant: '='
       },
       templateUrl : '/assets/javascripts/collection/directives/participantView/participantView.html',
@@ -46,10 +45,6 @@ define(['underscore'], function (_) {
     //--
 
     function init() {
-      activeTabUpdate();
-    }
-
-    function activeTabUpdate() {
       _.each(vm.tabs, function (tab, index) {
         tab.active = ($state.current.name.indexOf(tab.sref) >= 0);
         if (tab.active) {

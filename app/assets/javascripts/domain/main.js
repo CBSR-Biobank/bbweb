@@ -61,7 +61,6 @@ define(function (require) {
   module.service('ProcessingType',                      require('./study/ProcessingType'));
   module.service('SpecimenType',                        require('./study/SpecimenType'));
   module.service('StudyStatus',                         require('./study/StudyStatus'));
-  module.service('participantAnnotationTypeValidation', require('./study/participantAnnotationTypeValidation'));
   module.service('studyAnnotationTypeValidation',       require('./study/studyAnnotationTypeValidation'));
 
   module.factory('Participant',                         require('./participants/Participant'));

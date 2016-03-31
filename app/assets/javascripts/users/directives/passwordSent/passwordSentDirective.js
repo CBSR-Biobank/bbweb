@@ -27,9 +27,6 @@ define(function () {
 
   /**
    * Tells the user that his new password was sent via email.
-   *
-   * Template file: passwordSent.html
-   * State definition: states.js
    */
   function PasswordSentCtrl() {
     //var vm = this;

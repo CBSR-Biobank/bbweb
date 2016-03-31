@@ -44,7 +44,7 @@ define(function () {
       case RETIRED():
         return 'Retired';
       }
-      return new Error('invalid status for study' + status);
+      throw new Error('invalid status for study: ' + status);
     }
   }
 

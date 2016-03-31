@@ -81,79 +81,98 @@ define([
       });
     });
 
-    it('should query for multiple users - name filter parameter only', function() {
-      var self = this,
-          nameFilter = 'test',
-          jsonUser = self.jsonEntities.user(),
-          reply = self.jsonEntities.pagedResult([ jsonUser ]);
+    describe('when listing multiple users', function() {
 
-      self.$httpBackend.whenGET(uri() + '?' + $.param({ nameFilter: nameFilter })).respond({
-        status: 'success',
-        data: reply
+      it('can list using name filter parameter only', function() {
+        var self = this,
+            nameFilter = 'test',
+            jsonUser = self.jsonEntities.user(),
+            reply = self.jsonEntities.pagedResult([ jsonUser ]);
+
+        self.$httpBackend.whenGET(uri() + '?' + $.param({ nameFilter: nameFilter })).respond({
+          status: 'success',
+          data: reply
+        });
+
+        self.User.list({nameFilter: nameFilter}).then(function(pagedResult) {
+          expect(pagedResult.items).toBeArrayOfSize(1);
+          expect(pagedResult.items[0]).toEqual(jasmine.any(self.User));
+        });
+        self.$httpBackend.flush();
       });
 
-      self.User.list({nameFilter: nameFilter}).then(function(pagedResult) {
-        expect(pagedResult.items).toBeArrayOfSize(1);
-        expect(pagedResult.items[0]).toEqual(jasmine.any(self.User));
-      });
-      self.$httpBackend.flush();
-    });
+      it('can list using email filter parameter only', function() {
+        var self = this,
+            emailFilter = 'test',
+            jsonUser = self.jsonEntities.user(),
+            reply = self.jsonEntities.pagedResult([ jsonUser ]);
 
-    it('should query for multiple users - email filter parameter only', function() {
-      var self = this,
-          emailFilter = 'test',
-          jsonUser = self.jsonEntities.user(),
-          reply = self.jsonEntities.pagedResult([ jsonUser ]);
+        this.$httpBackend.whenGET(uri() + '?' + $.param({emailFilter: emailFilter})).respond({
+          status: 'success',
+          data: reply
+        });
 
-      this.$httpBackend.whenGET(uri() + '?' + $.param({emailFilter: emailFilter})).respond({
-        status: 'success',
-        data: reply
-      });
-
-     self.User.list({emailFilter: emailFilter}).then(function(pagedResult) {
-        expect(pagedResult.items).toBeArrayOfSize(1);
-        expect(pagedResult.items[0]).toEqual(jasmine.any(self.User));
-      });
-      this.$httpBackend.flush();
-    });
-
-    it('should query for multiple users - sort parameter only', function() {
-      var self = this,
-          sort = 'asc',
-          jsonUser = self.jsonEntities.user(),
-          reply = self.jsonEntities.pagedResult([ jsonUser ]);
-
-      this.$httpBackend.whenGET(uri() + '?' + $.param({sort: sort})).respond({
-        status: 'success',
-        data: reply
+        self.User.list({emailFilter: emailFilter}).then(function(pagedResult) {
+          expect(pagedResult.items).toBeArrayOfSize(1);
+          expect(pagedResult.items[0]).toEqual(jasmine.any(self.User));
+        });
+        this.$httpBackend.flush();
       });
 
-      self.User.list({sort: sort}).then(function(pagedResult) {
-        expect(pagedResult.items).toBeArrayOfSize(1);
-        expect(pagedResult.items[0]).toEqual(jasmine.any(self.User));
+      it('can list using sort parameter only', function() {
+        var self = this,
+            sort = 'asc',
+            jsonUser = self.jsonEntities.user(),
+            reply = self.jsonEntities.pagedResult([ jsonUser ]);
+
+        this.$httpBackend.whenGET(uri() + '?' + $.param({sort: sort})).respond({
+          status: 'success',
+          data: reply
+        });
+
+        self.User.list({sort: sort}).then(function(pagedResult) {
+          expect(pagedResult.items).toBeArrayOfSize(1);
+          expect(pagedResult.items[0]).toEqual(jasmine.any(self.User));
+        });
+        this.$httpBackend.flush();
       });
-      this.$httpBackend.flush();
-    });
 
-    it('should query for multiple users', function() {
-      var self = this,
-          emailFilter = 'test',
-          sort = 'email',
-          order = 'desc',
-          jsonUser = self.jsonEntities.user(),
-          reply = self.jsonEntities.pagedResult([ jsonUser ]);
+      it('should query for multiple users', function() {
+        var self = this,
+            emailFilter = 'test',
+            sort = 'email',
+            order = 'desc',
+            jsonUser = self.jsonEntities.user(),
+            reply = self.jsonEntities.pagedResult([ jsonUser ]);
 
-      this.$httpBackend.whenGET(uri() + '?' +
-                                $.param({emailFilter: emailFilter, sort: sort, order: 'desc'}))
-        .respond({ status: 'success',
-                   data: reply
-                 });
+        this.$httpBackend.whenGET(
+          uri() + '?' + $.param({emailFilter: emailFilter, sort: sort, order: 'desc'}))
+          .respond({ status: 'success', data: reply });
 
-      self.User.list({emailFilter: emailFilter, sort: sort, order: order}).then(function(pagedResult) {
-        expect(pagedResult.items).toBeArrayOfSize(1);
-        expect(pagedResult.items[0]).toEqual(jasmine.any(self.User));
+        self.User.list({emailFilter: emailFilter, sort: sort, order: order}).then(function(pagedResult) {
+          expect(pagedResult.items).toBeArrayOfSize(1);
+          expect(pagedResult.items[0]).toEqual(jasmine.any(self.User));
+        });
+        this.$httpBackend.flush();
       });
-      this.$httpBackend.flush();
+
+      it('should handle an invalid response', function() {
+        var reply = this.jsonEntities.pagedResult([ { 'a': 1 } ]);
+
+        this.$httpBackend.whenGET(uri()).respond({ status: 'success', data: reply });
+
+        this.User.list().then(testFail).catch(checkError);
+        this.$httpBackend.flush();
+
+        function testFail() {
+          fail('should not be called');
+        }
+
+        function checkError(error) {
+          expect(error).toContain('invalid users from server');
+        }
+      });
+
     });
 
     it('can retrieve a single user', function(done) {
@@ -266,9 +285,9 @@ define([
 
     it('fails when calling activate and the user is not registered', function() {
       var self = this,
-          status = [ self.UserStatus.ACTIVE(), self.UserStatus.LOCKED() ];
+          statuses = [ self.UserStatus.ACTIVE(), self.UserStatus.LOCKED() ];
 
-      _.each(status, function () {
+      _.each(statuses, function (status) {
         var user = new self.User(_.extend(self.jsonEntities.user(), { status: status }));
 
         expect(function () { user.activate(); })
@@ -278,9 +297,9 @@ define([
 
     it('fails when calling lock and the user is not active', function() {
       var self = this,
-          status = [ self.UserStatus.REGISTERED(), self.UserStatus.LOCKED() ];
+          statuses = [ self.UserStatus.REGISTERED(), self.UserStatus.LOCKED() ];
 
-      _.each(status, function () {
+      _.each(statuses, function (status) {
         var user = new self.User(_.extend(self.jsonEntities.user(), { status: status }));
 
         expect(function () { user.lock(); })
@@ -290,13 +309,25 @@ define([
 
     it('fails when calling unlock and the user is not locked', function() {
       var self = this,
-          status = [ self.UserStatus.REGISTERED(), self.UserStatus.ACTIVE() ];
+          statuses = [ self.UserStatus.REGISTERED(), self.UserStatus.ACTIVE() ];
 
-      _.each(status, function () {
+      _.each(statuses, function (status) {
         var user = new self.User(_.extend(self.jsonEntities.user(), { status: status }));
 
         expect(function () { user.unlock(); })
           .toThrow(new Error('user status is not locked: ' + status));
+      });
+    });
+
+    it('status predicates are valid valid', function() {
+      var self = this;
+      _.each(self.UserStatus.values(), function (status) {
+        var jsonUser = self.jsonEntities.user({ status: status }),
+            user     = new self.User(jsonUser);
+
+        expect(user.isRegistered()).toBe(status === self.UserStatus.REGISTERED());
+        expect(user.isActive()).toBe(status === self.UserStatus.ACTIVE());
+        expect(user.isLocked()).toBe(status === self.UserStatus.LOCKED());
       });
     });
 

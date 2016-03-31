@@ -57,19 +57,29 @@ define([
       expect(study.status).toBe(this.StudyStatus.DISABLED());
     });
 
-    it('fails when creating from an invalid object', function() {
-      var self = this,
-          badStudyJson = _.omit(self.jsonEntities.study(), 'name');
+    describe('when creating', function() {
 
-      expect(function () { self.Study.create(badStudyJson); })
-        .toThrowError(/invalid object from server/);
-    });
+      it('can create from with empty annotation types', function() {
+        var jsonStudy = _.omit(this.jsonEntities.study(), 'annotationTypes'),
+            study = this.Study.create(jsonStudy);
+        expect(study).toEqual(jasmine.any(this.Study));
+      });
 
-    it('fails when creating from a non object for an annotation type', function() {
-      var self = this,
-          badStudyJson = self.jsonEntities.study({ annotationTypes: [ 1 ]});
-      expect(function () { self.Study.create(badStudyJson); })
-        .toThrowError(/invalid object from server/);
+      it('fails when creating from an invalid object', function() {
+        var self = this,
+            badStudyJson = _.omit(self.jsonEntities.study(), 'name');
+
+        expect(function () { self.Study.create(badStudyJson); })
+          .toThrowError(/invalid object from server/);
+      });
+
+      it('fails when creating from a non object for an annotation type', function() {
+        var self = this,
+            badStudyJson = self.jsonEntities.study({ annotationTypes: [ 1 ]});
+        expect(function () { self.Study.create(badStudyJson); })
+          .toThrowError(/invalid object from server/);
+      });
+
     });
 
     it('status predicates return valid results', function() {
@@ -241,33 +251,51 @@ define([
                              failTest);
     });
 
-    it('can add an annotation type on a study', function() {
-      var self = this,
-          annotationType = self.jsonEntities.annotationType(),
-          study          = new self.Study(this.jsonStudy);
+    describe('for annotation types', function() {
 
-      this.updateEntity.call(this,
-                             study,
-                             'addAnnotationType',
-                             _.omit(annotationType, 'uniqueId'),
-                             uri('pannottype', study.id),
-                             _.omit(annotationType, 'uniqueId'),
-                             this.jsonStudy,
-                             self.expectStudy,
-                             failTest);
-    });
+      beforeEach(function() {
+        this.annotationType = this.jsonEntities.annotationType();
+        this.jsonStudy      = this.jsonEntities.study({ annotationTypes: [ this.annotationType ] });
+        this.study          = new this.Study(this.jsonStudy);
+      });
 
-    it('can remove an annotation on a study', function() {
-      var self = this,
-          annotationType = self.jsonEntities.annotationType(),
-          baseStudy      = self.jsonEntities.study({ annotationTypes: [ annotationType ] }),
-          study          = new self.Study(baseStudy),
-          url            = sprintf.sprintf('%s/%d/%s', uri('pannottype', study.id),
-                                           study.version, annotationType.uniqueId);
+      it('can add an annotation type on a study', function() {
+        this.updateEntity.call(this,
+                               this.study,
+                               'addAnnotationType',
+                               _.omit(this.annotationType, 'uniqueId'),
+                               uri('pannottype', this.study.id),
+                               _.omit(this.annotationType, 'uniqueId'),
+                               this.jsonStudy,
+                               this.expectStudy,
+                               failTest);
+      });
 
-      self.httpBackend.whenDELETE(url).respond(201, serverReply(true));
-      study.removeAnnotationType(annotationType).then(self.expectStudy).catch(failTest);
-      self.httpBackend.flush();
+      it('can update an annotation type on a study', function() {
+        this.updateEntity.call(this,
+                               this.study,
+                               'updateAnnotationType',
+                               this.annotationType,
+                               sprintf.sprintf('%s/%s',
+                                               uri('pannottype', this.study.id),
+                                               this.annotationType.uniqueId),
+                               this.annotationType,
+                               this.jsonStudy,
+                               this.expectStudy,
+                               failTest);
+      });
+
+      it('can remove an annotation on a study', function() {
+        var url = sprintf.sprintf('%s/%d/%s',
+                                  uri('pannottype', this.study.id),
+                                  this.study.version,
+                                  this.annotationType.uniqueId);
+
+        this.httpBackend.whenDELETE(url).respond(201, serverReply(true));
+        this.study.removeAnnotationType(this.annotationType).then(this.expectStudy).catch(failTest);
+        this.httpBackend.flush();
+      });
+
     });
 
     it('can disable a study', function() {

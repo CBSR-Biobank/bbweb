@@ -7,6 +7,8 @@
 module.exports = function(config) {
   'use strict';
 
+  var path = require("path");
+
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -18,14 +20,14 @@ module.exports = function(config) {
       'jasmine-jquery',
       'jasmine',
       'jasmine-matchers',
-      'requirejs',
-      'faker'
+      'requirejs'
     ],
 
     // list of files / patterns to load in the browser
     files: [
       { pattern: 'target/web/web-modules/main/webjars/lib/angularjs/angular.js', included: false },
       { pattern: 'target/web/web-modules/main/webjars/lib/**/*.js', included: false },
+      { pattern: 'node_modules/faker/build/build/*.js', included: false },
       { pattern: 'app/assets/javascripts/**/*.js', included: false },
       { pattern: 'test/assets/javascripts/**/*Spec.js', included: false },
       { pattern: 'test/assets/javascripts/test/**/*.js', included: false },
@@ -92,6 +94,13 @@ module.exports = function(config) {
       'PhantomJS'
       // 'ChromeExtra'
     ],
+
+    customLaunchers: {
+      Chrome_with_debugging: {
+        base: 'Chrome',
+        chromeDataDir: path.resolve(__dirname, '.chrome')
+      }
+    },
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits

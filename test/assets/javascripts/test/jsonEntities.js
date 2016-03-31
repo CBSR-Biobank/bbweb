@@ -224,19 +224,19 @@ define([
     }
 
     function randomAnatomicalSourceType() {
-      return faker.random.array_element(AnatomicalSourceType.values());
+      return faker.random.arrayElement(AnatomicalSourceType.values());
     }
 
     function randomPreservationType() {
-      return faker.random.array_element(PreservationType.values());
+      return faker.random.arrayElement(PreservationType.values());
     }
 
     function randomPreservationTemperatureTypeType() {
-      return faker.random.array_element(PreservationTemperatureType.values());
+      return faker.random.arrayElement(PreservationTemperatureType.values());
     }
 
     function randomSpecimenType() {
-      return faker.random.array_element(SpecimenType.values());
+      return faker.random.arrayElement(SpecimenType.values());
     }
 
     function specimenGroup(options) {
@@ -569,7 +569,7 @@ define([
         items:    entities,
         page:     1,
         offset:   0,
-        total:    20,
+        total:    entities.length,
         pageSize: 5,
         next:     2,
         maxPages: 4

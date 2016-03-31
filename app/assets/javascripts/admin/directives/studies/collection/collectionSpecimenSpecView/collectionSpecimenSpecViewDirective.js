@@ -65,11 +65,20 @@ define(function () {
 
     //--
 
+    function notifySuccess() {
+      return notificationsService.success(
+        'Annotation type changed successfully.',
+        'Change successful',
+        1500);
+    }
+
     function updateCollectionEventType() {
-      vm.collectionEventType.updateSpecimenSpec(vm.specimenSpec)
+      return vm.collectionEventType.updateSpecimenSpec(vm.specimenSpec)
         .then(function (collectionEventType) {
           vm.collectionEventType = collectionEventType;
-        });
+        })
+        .then(notifySuccess)
+        .catch(notificationsService.updateError);
     }
 
     function editName() {
@@ -79,7 +88,7 @@ define(function () {
                       { required: true, minLength: 2 })
         .result.then(function (name) {
           vm.specimenSpec.name = name;
-          return updateCollectionEventType;
+          return updateCollectionEventType();
         });
     }
 
@@ -89,7 +98,7 @@ define(function () {
                           vm.specimenSpec.description)
         .result.then(function (description) {
           vm.specimenSpec.description = description;
-          return updateCollectionEventType;
+          return updateCollectionEventType();
         });
     }
 
@@ -103,7 +112,7 @@ define(function () {
                         })
         .result.then(function (selection) {
           vm.specimenSpec.anatomicalSourceType = selection;
-          return updateCollectionEventType;
+          return updateCollectionEventType();
         });
     }
 
@@ -117,7 +126,7 @@ define(function () {
                         })
         .result.then(function (selection) {
           vm.specimenSpec.preservationType = selection;
-          return updateCollectionEventType;
+          return updateCollectionEventType();
         });
     }
 
@@ -131,7 +140,7 @@ define(function () {
                         })
         .result.then(function (selection) {
           vm.specimenSpec.preservationTemperatureType = selection;
-          return updateCollectionEventType;
+          return updateCollectionEventType();
         });
     }
 
@@ -145,7 +154,7 @@ define(function () {
                         })
         .result.then(function (selection) {
           vm.specimenSpec.specimenType = selection;
-          return updateCollectionEventType;
+          return updateCollectionEventType();
         });
     }
 
@@ -153,31 +162,31 @@ define(function () {
       modalInput.text('Specimen spec units', 'Units', vm.specimenSpec.units, { required: true })
         .result.then(function (units) {
           vm.specimenSpec.units = units;
-          return updateCollectionEventType;
+          return updateCollectionEventType();
         });
     }
 
     function editAmount() {
-      modalInput.number(
+      modalInput.positiveFloat(
         'Specimen spec amount',
         'Amount',
         vm.specimenSpec.amount,
         { required: true, positiveFloat: true }
       ).result.then(function (value) {
         vm.specimenSpec.amount = value;
-        return updateCollectionEventType;
+          return updateCollectionEventType();
       });
     }
 
     function editMaxCount() {
-      modalInput.number(
+      modalInput.naturalNumber(
         'Specimen spec max count',
         'Max count',
         vm.specimenSpec.maxCount,
         { required: true, naturalNumber: true, min: 1 }
       ).result.then(function (value) {
           vm.specimenSpec.maxCount = value;
-          return updateCollectionEventType;
+          return updateCollectionEventType();
         });
     }
 

@@ -69,22 +69,111 @@ define([
       expect(this.$state.go).toHaveBeenCalledWith('home');
     });
 
-    it('displays a modal on invalid login attempt', function () {
-      var deferred = this.$q.defer();
+    describe('for badly formatted login error message', function() {
 
-      spyOn(this.usersService, 'login').and.returnValue(deferred.promise);
-      spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
-      spyOn(this.$state, 'go').and.returnValue(true);
-      deferred.reject({});
+      var context = {};
 
-      this.createController();
-      this.controller.login({ email: 'test@test.com', password: 'secret-password' });
-      this.scope.$digest();
+      beforeEach(function() {
+        context.loginError = {};
+      });
 
-      expect(this.modalService.showModal).toHaveBeenCalled();
-      expect(this.$state.go).toHaveBeenCalledWith('home.users.login', {}, { reload: true });
+      invalidLoginAttemptShared(context);
+
+    });
+
+    describe('for invalid login attempt invalid password or email', function() {
+
+      var context = {};
+
+      beforeEach(function() {
+        context.loginError = { data: { message: 'invalid email or password'} };
+      });
+
+      invalidLoginAttemptShared(context);
+
+    });
+
+    describe('user not active login attempt', function() {
+
+      var context = {};
+
+      beforeEach(function() {
+        context.loginError = { data: { message: 'the user is not active'} };
+      });
+
+      invalidLoginAttemptShared(context);
+
+    });
+
+    describe('user is locked login attempt', function() {
+
+      var context = {};
+
+      beforeEach(function() {
+        context.loginError = { data: { message: 'the user is locked'} };
+      });
+
+      invalidLoginAttemptShared(context);
+
+    });
+
+    describe('other error message with data.message field', function() {
+
+      var context = {};
+
+      beforeEach(function() {
+        context.loginError = { data: { message: 'xxxx'} };
+      });
+
+      invalidLoginAttemptShared(context);
+
     });
 
   });
+
+  function invalidLoginAttemptShared(context) {
+
+    describe('for invalid login attempt', function() {
+
+      beforeEach(function() {
+        spyOn(this.$state, 'go').and.returnValue(true);
+      });
+
+
+      it('for invalid email or password and OK', function () {
+        var deferred = this.$q.defer();
+
+        deferred.reject(context.loginError);
+        spyOn(this.usersService, 'login').and.returnValue(deferred.promise);
+        spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+
+        this.createController();
+        this.controller.login({ email: 'test@test.com', password: 'secret-password' });
+        this.scope.$digest();
+
+        expect(this.modalService.showModal).toHaveBeenCalled();
+        expect(this.$state.go).toHaveBeenCalledWith('home.users.login', {}, { reload: true });
+      });
+
+      it('for invalid email or password and cancel pressed', function () {
+        var loginDeferred = this.$q.defer(),
+            modalDeferred = this.$q.defer();
+
+        loginDeferred.reject(context.loginError);
+        modalDeferred.reject('Cancel');
+
+        spyOn(this.usersService, 'login').and.returnValue(loginDeferred.promise);
+        spyOn(this.modalService, 'showModal').and.returnValue(modalDeferred.promise);
+
+        this.createController();
+        this.controller.login({ email: 'test@test.com', password: 'secret-password' });
+        this.scope.$digest();
+
+        expect(this.modalService.showModal).toHaveBeenCalled();
+        expect(this.$state.go).toHaveBeenCalledWith('home');
+      });
+
+    });
+  }
 
 });

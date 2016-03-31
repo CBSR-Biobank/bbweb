@@ -7,6 +7,8 @@ define(function () {
 
   /**
    * Description
+   *
+   * The studyCounts object has the following fields: disabled, enabled, and retired.
    */
   function collectionDirective() {
     var directive = {

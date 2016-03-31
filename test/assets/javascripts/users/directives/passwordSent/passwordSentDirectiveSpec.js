@@ -14,6 +14,23 @@ define([
 
   describe('passwordSentDirective', function() {
 
+    function createDirective(test) {
+      var element, scope;
+
+      element = angular.element('<password-sent email="vm.email"></password-sent>');
+      scope = test.$rootScope.$new();
+      scope.vm = { email: test.email };
+
+      test.$compile(element)(scope);
+      scope.$digest();
+
+      return {
+        element:    element,
+        scope:      scope,
+        controller: element.controller('passwordSent')
+      };
+    }
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function($rootScope, $compile, directiveTestSuite) {
@@ -21,29 +38,18 @@ define([
 
       _.extend(self, directiveTestSuite);
 
+      self.$rootScope          = self.$injector.get('$rootScope');
+      self.$compile            = self.$injector.get('$compile');
+
       self.putHtmlTemplates(
         '/assets/javascripts/users/directives/passwordSent/passwordSent.html');
 
-      self.createController = createController;
-
-      ///--
-
-      function createController(email) {
-        self.element = angular.element('<password-sent email="vm.email"></password-sent>');
-        self.scope = $rootScope.$new();
-        self.scope.vm = { email:email };
-
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('passwordSent');
-      }
+      self.email = faker.internet.email();
     }));
 
     it('has valid scope', function() {
-      var email = faker.internet.email();
-
-      this.createController(email);
-      expect(this.scope.vm.email).toEqual(email);
+      var directive = createDirective(this);
+      expect(directive.controller.email).toEqual(this.email);
     });
 
   });

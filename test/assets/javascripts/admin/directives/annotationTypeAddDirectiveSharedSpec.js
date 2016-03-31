@@ -30,7 +30,7 @@ define([
         this.AnnotationType = this.$injector.get('AnnotationType');
         this.jsonEntities   = this.$injector.get('jsonEntities');
 
-        spyOn(this.$state, 'go').and.callFake(function () {});
+        spyOn(this.$state, 'go').and.returnValue('ok');
       }));
 
       it('should change to correct state on submit', function() {

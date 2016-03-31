@@ -55,26 +55,18 @@ define(['underscore'], function(_) {
         });
     }
 
-    function gotoState(state) {
-      $state.go(state.name, state.params, state.options);
-    }
-
     function submitSuccess(reply) {
       // the reply contains the id assigned to this new participant, therefore, the state data can be
       // updated
       notificationsService.submitSuccess();
-      gotoState({
-        name: 'home.collection.study.participant.summary',
-        params: {
-          studyId: vm.study.id,
-          participantId: reply.id
-        },
-        options: { reload: true }
-      });
+      $state.go(
+        'home.collection.study.participant.summary',
+        { studyId: vm.study.id, participantId: reply.id },
+        { reload: true });
     }
 
     function cancel() {
-      gotoState({ name: 'home.collection.study', params: { studyId: vm.study.id } });
+      $state.go('home.collection.study', { studyId: vm.study.id });
     }
   }
 

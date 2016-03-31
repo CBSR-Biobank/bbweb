@@ -32,7 +32,7 @@ define([
         this.jsonEntities = this.$injector.get('jsonEntities');
       }));
 
-      it('on update should update the invoke method on entity', function() {
+      it('on update should invoke the update method on entity', function() {
         spyOn(context.entity.prototype, context.updateAnnotationTypeFuncName)
           .and.returnValue(this.$q.when(context.parentObject));
         spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));

@@ -18,13 +18,13 @@ define(function (require) {
   module.provider('authorization',        require('./authorizationService'));
 
   module.controller('ForgotPasswordCtrl', require('./ForgotPasswordCtrl'));
-  module.directive('passwordCheck',       require('./directives/passwordCheck/passwordCheckDirective'));
   module.controller('RegisterUserCtrl',   require('./RegisterUserCtrl'));
 
-  module.directive('login',                 require('./directives/login/loginDirective'));
-  module.directive('passwordCheck',         require('./directives/passwordCheck/passwordCheckDirective'));
-  module.directive('userProfile',           require('./directives/userProfile/userProfileDirective'));
-  module.directive('passwordSentDirective', require('./directives/passwordSent/passwordSentDirective'));
+  module.directive('login',         require('./directives/login/loginDirective'));
+  module.directive('passwordCheck', require('./directives/passwordCheck/passwordCheckDirective'));
+  module.directive('userProfile',   require('./directives/userProfile/userProfileDirective'));
+  module.directive('passwordSent',  require('./directives/passwordSent/passwordSentDirective'));
+  module.directive('passwordCheck', require('./directives/passwordCheck/passwordCheckDirective'));
 
   module.service('usersService',          require('./usersService'));
 

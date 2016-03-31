@@ -65,9 +65,10 @@ define(['underscore'], function(_) {
     function setCollectionEventType(cevents) {
       _.map(cevents, function (cevent) {
         var ceventType = _.findWhere(vm.collectionEventTypes, { id: cevent.collectionEventTypeId });
-        if (ceventType) {
-          cevent.setCollectionEventType(ceventType);
+        if (_.isUndefined(ceventType)) {
+          throw new Error('collection event type ID not found: ' + cevent.collectionEventTypeId);
         }
+        cevent.setCollectionEventType(ceventType);
       });
       return cevents;
     }

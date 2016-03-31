@@ -237,59 +237,109 @@ define([
                              failTest);
     });
 
-    it('should add a specimen spec', function () {
-      var jsonSpec = this.jsonEntities.collectionSpecimenSpec(),
-          cet = new this.CollectionEventType(this.jsonCet);
-      this.updateEntity.call(this,
-                             cet,
-                             'addSpecimenSpec',
-                             _.omit(jsonSpec, 'uniqueId'),
-                             uri('spcspec', cet.id),
-                             _.extend(_.omit(jsonSpec, 'uniqueId'), { studyId: cet.studyId }),
-                             this.jsonCet,
-                             expectCet,
-                             failTest);
+    describe('for specimen specs', function() {
+
+      beforeEach(function() {
+        this.jsonSpec = this.jsonEntities.collectionSpecimenSpec();
+        this.jsonCet  = this.jsonEntities.collectionEventType({ specimenSpecs: [ this.jsonSpec ]});
+        this.cet      = new this.CollectionEventType(this.jsonCet);
+      });
+
+      it('should add a specimen spec', function () {
+        this.updateEntity.call(this,
+                               this.cet,
+                               'addSpecimenSpec',
+                               _.omit(this.jsonSpec, 'uniqueId'),
+                               uri('spcspec', this.cet.id),
+                               _.extend(_.omit(this.jsonSpec, 'uniqueId'), { studyId: this.cet.studyId }),
+                               this.jsonCet,
+                               expectCet,
+                               failTest);
+      });
+
+      it('should update a specimen spec', function () {
+        this.updateEntity.call(this,
+                               this.cet,
+                               'updateSpecimenSpec',
+                               this.jsonSpec,
+                               sprintf.sprintf('%s/%s',
+                                               uri('spcspec', this.cet.id),
+                                               this.jsonSpec.uniqueId),
+                               _.extend(this.jsonSpec, { studyId: this.cet.studyId }),
+                               this.jsonCet,
+                               expectCet,
+                               failTest);
+      });
+
+      it('should remove a specimen spec', function () {
+        var url = sprintf.sprintf('%s/%d/%s',
+                                  uri('spcspec',this.cet.id),
+                                  this.cet.version,
+                                  this.jsonSpec.uniqueId);
+
+        this.httpBackend.whenDELETE(url).respond(201, serverReply(true));
+        this.cet.removeSpecimenSpec(this.jsonSpec).then(expectCet).catch(failTest);
+        this.httpBackend.flush();
+      });
+
+      it('throws an error when attempting to remove an invalid specimen spec', function () {
+        var self = this;
+
+        self.cet.specimenSpecs = [];
+        expect(function () {
+          self.cet.removeSpecimenSpec(self.jsonSpec).then(expectCet).catch(failTest);
+        }).toThrowError(/specimen spec with ID not present/);
+      });
+
     });
 
-    it('should remove a specimen spec', function () {
-      var jsonSpec = this.jsonEntities.collectionSpecimenSpec(),
-          jsonCet  = _.extend(this.jsonCet, { specimenSpecs: [ jsonSpec ]}),
-          cet      = new this.CollectionEventType(jsonCet),
-          url      = sprintf.sprintf('%s/%d/%s', uri('spcspec', cet.id),
-                                     cet.version, jsonSpec.uniqueId);
+    describe('for annotation types', function() {
 
-      this.httpBackend.whenDELETE(url).respond(201, serverReply(true));
-      cet.removeSpecimenSpec(jsonSpec).then(expectCet).catch(failTest);
-      this.httpBackend.flush();
-    });
+      beforeEach(function() {
+        this.jsonAnnotType = this.jsonEntities.annotationType();
+        this.jsonCet       = this.jsonEntities.collectionEventType({ annotationTypes: [ this.jsonAnnotType ]});
+        this.cet           = new this.CollectionEventType(this.jsonCet);
+      });
 
-    it('should add an annotation type', function () {
-      var jsonAnnotType = this.jsonEntities.collectionSpecimenSpec(),
-          cet = new this.CollectionEventType(this.jsonCet);
-      this.updateEntity.call(this,
-                             cet,
-                             'addAnnotationType',
-                             _.omit(jsonAnnotType, 'uniqueId'),
-                             uri('annottype', cet.id),
-                             _.extend(_.omit(jsonAnnotType, 'uniqueId'), { studyId: cet.studyId }),
-                             this.jsonCet,
-                             expectCet,
-                             failTest);
-    });
+      it('should add an annotation type', function () {
+        this.updateEntity.call(this,
+                               this.cet,
+                               'addAnnotationType',
+                               _.omit(this.jsonAnnotType, 'uniqueId'),
+                               uri('annottype', this.cet.id),
+                               _.extend(_.omit(this.jsonAnnotType, 'uniqueId'),
+                                        { studyId: this.cet.studyId }),
+                               this.jsonCet,
+                               expectCet,
+                               failTest);
+      });
 
-    it('should remove an annotation type', function () {
-      var jsonAnnotType = this.jsonEntities.collectionSpecimenSpec(),
-          jsonCet       = _.extend(this.jsonCet, { annotationTypes: [ jsonAnnotType ]}),
-          cet           = new this.CollectionEventType(jsonCet),
-          url           = sprintf.sprintf('%s/%s/%d/%s',
-                                          uri('annottype', cet.studyId),
-                                          cet.id,
-                                          cet.version,
-                                          jsonAnnotType.uniqueId);
+      it('should update an annotation type', function () {
+        this.updateEntity.call(this,
+                               this.cet,
+                               'updateAnnotationType',
+                               this.jsonAnnotType,
+                               sprintf.sprintf('%s/%s',
+                                               uri('annottype', this.cet.id),
+                                               this.jsonAnnotType.uniqueId),
+                               _.extend(this.jsonAnnotType, { studyId: this.cet.studyId }),
+                               this.jsonCet,
+                               expectCet,
+                               failTest);
+      });
 
-      this.httpBackend.whenDELETE(url).respond(201, serverReply(true));
-      cet.removeAnnotationType(jsonAnnotType).then(expectCet).catch(failTest);
-      this.httpBackend.flush();
+      it('should remove an annotation type', function () {
+        var url = sprintf.sprintf('%s/%s/%d/%s',
+                                  uri('annottype', this.cet.studyId),
+                                  this.cet.id,
+                                  this.cet.version,
+                                  this.jsonAnnotType.uniqueId);
+
+        this.httpBackend.whenDELETE(url).respond(201, serverReply(true));
+        this.cet.removeAnnotationType(this.jsonAnnotType).then(expectCet).catch(failTest);
+        this.httpBackend.flush();
+      });
+
     });
 
     // used by promise tests

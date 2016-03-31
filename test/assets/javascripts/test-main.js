@@ -44,7 +44,7 @@
     paths: {
       'jquery':                       '../../../target/web/web-modules/main/webjars/lib/jquery/jquery',
       'bootstrap':                    '../../../target/web/web-modules/main/webjars/lib/bootstrap/js/bootstrap',
-      'faker':                        '../../../node_modules/karma-faker/node_modules/faker/build/build/faker',
+      'faker':                        '../../../node_modules/faker/build/build/faker',
       'moment':                       '../../../target/web/web-modules/main/webjars/lib/momentjs/moment',
       'toastr':                       '../../../target/web/web-modules/main/webjars/lib/toastr/toastr',
       'lodash':                       '../../../target/web/web-modules/main/webjars/lib/lodash/lodash',

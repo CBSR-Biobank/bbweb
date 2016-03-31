@@ -188,7 +188,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
       return ConcurrencySafeEntity.prototype.update.call(
         this,
         uri('spcspec', this.id) + '/' + specimenSpec.uniqueId,
-        _.extend({ studyId: this.studyId }, _.omit(specimenSpec, 'uniqueId')));
+        _.extend({ studyId: this.studyId }, specimenSpec));
     };
 
     CollectionEventType.prototype.removeSpecimenSpec = function (specimenSpec) {
@@ -227,7 +227,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
       return ConcurrencySafeEntity.prototype.update.call(
         this,
         uri('annottype', this.id) + '/' + annotationType.uniqueId,
-        _.extend({ studyId: this.studyId }, _.omit(annotationType, 'uniqueId')));
+        _.extend({ studyId: this.studyId }, annotationType));
     };
 
     CollectionEventType.prototype.removeAnnotationType = function (annotationType) {

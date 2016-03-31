@@ -21,16 +21,18 @@ define(function (require) {
 
       _.extend(self, directiveTestSuite);
 
-      self.$q                   = self.$injector.get('$q');
-      self.$state               = self.$injector.get('$state');
-      self.CollectionEventType  = self.$injector.get('CollectionEventType');
-      self.AnnotationType       = self.$injector.get('AnnotationType');
-      self.notificationsService = self.$injector.get('notificationsService');
-      self.jsonEntities         = self.$injector.get('jsonEntities');
+      self.$q                     = self.$injector.get('$q');
+      self.$state                 = self.$injector.get('$state');
+      self.CollectionEventType    = self.$injector.get('CollectionEventType');
+      self.CollectionSpecimenSpec = self.$injector.get('CollectionSpecimenSpec');
+      self.AnnotationType         = self.$injector.get('AnnotationType');
+      self.notificationsService   = self.$injector.get('notificationsService');
+      self.domainEntityService    = self.$injector.get('domainEntityService');
+      self.jsonEntities           = self.$injector.get('jsonEntities');
 
-      self.jsonStudy           = this.jsonEntities.study();
-      self.jsonCet             = self.jsonEntities.collectionEventType(self.jsonStudy);
-      self.collectionEventType = new self.CollectionEventType(self.jsonCet);
+      self.jsonStudy              = this.jsonEntities.study();
+      self.jsonCet                = self.jsonEntities.collectionEventType(self.jsonStudy);
+      self.collectionEventType    = new self.CollectionEventType(self.jsonCet);
 
       spyOn(this.$state, 'go').and.returnValue(true);
 
@@ -136,6 +138,118 @@ define(function (require) {
 
       entityUpdateSharedSpec(context);
 
+    });
+
+    it('editing a specimen spec changes to correct state', function() {
+      var specimenSpec = new this.CollectionSpecimenSpec(this.jsonEntities.collectionSpecimenSpec());
+
+      this.createController();
+      this.controller.editSpecimenSpec(specimenSpec);
+      this.scope.$digest();
+      expect(this.$state.go).toHaveBeenCalledWith(
+        'home.admin.studies.study.collection.ceventType.specimenSpecView',
+        { specimenSpecId: specimenSpec.uniqueId });
+    });
+
+    describe('removing a specimen spec', function() {
+
+      it('can be removed when in valid state', function() {
+        var modalService = this.$injector.get('modalService'),
+            jsonSpecimenSpec = this.jsonEntities.collectionSpecimenSpec(),
+            jsonCeventType = new this.jsonEntities.collectionEventType({ specimenSpecs: [ jsonSpecimenSpec ]}),
+            ceventType = new this.CollectionEventType(jsonCeventType);
+
+        spyOn(modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+        spyOn(this.domainEntityService, 'removeEntity').and.callThrough();
+        spyOn(this.CollectionEventType.prototype, 'removeSpecimenSpec')
+          .and.returnValue(this.$q.when(ceventType));
+
+        this.createController();
+        this.controller.modificationsAllowed = true;
+        this.controller.removeSpecimenSpec(ceventType.specimenSpecs[0]);
+        this.scope.$digest();
+
+        expect(this.domainEntityService.removeEntity).toHaveBeenCalled();
+        expect(this.CollectionEventType.prototype.removeSpecimenSpec).toHaveBeenCalled();
+      });
+
+      it('throws an error if modifications are not allowed', function() {
+        var self = this,
+            specimenSpec = new self.CollectionSpecimenSpec(self.jsonEntities.collectionSpecimenSpec());
+
+        spyOn(self.domainEntityService, 'removeEntity').and.returnValue(self.$q.when('OK'));
+
+        self.createController();
+        self.controller.modificationsAllowed = false;
+
+        expect(function () {
+          self.controller.removeSpecimenSpec(specimenSpec);
+        }).toThrowError('modifications not allowed');
+      });
+
+    });
+
+    describe('removing an annotation type', function() {
+
+      it('can be removed when in valid state', function() {
+        var modalService = this.$injector.get('modalService'),
+            jsonAnnotType = this.jsonEntities.annotationType(),
+            jsonCeventType = new this.jsonEntities.collectionEventType({ annotationTypes: [ jsonAnnotType ]}),
+            ceventType = new this.CollectionEventType(jsonCeventType);
+
+        spyOn(modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+        spyOn(this.CollectionEventType.prototype, 'removeAnnotationType')
+          .and.returnValue(this.$q.when(ceventType));
+
+        this.createController();
+        this.controller.annotationTypeIdsInUse = [];
+        this.controller.removeAnnotationType(ceventType.annotationTypes[0]);
+        this.scope.$digest();
+
+        expect(modalService.showModal).toHaveBeenCalled();
+        expect(this.CollectionEventType.prototype.removeAnnotationType).toHaveBeenCalled();
+      });
+
+      it('throws an error if modifications are not allowed', function() {
+        var annotationType = new this.AnnotationType(this.jsonEntities.annotationType()),
+            studyAnnotationTypeUtils = this.$injector.get('studyAnnotationTypeUtils');
+
+        spyOn(studyAnnotationTypeUtils, 'removeInUseModal').and.returnValue(this.$q.when('OK'));
+        spyOn(this.CollectionEventType.prototype, 'removeAnnotationType').and.callThrough();
+
+        this.createController();
+        this.controller.annotationTypeIdsInUse = [ annotationType.uniqueId ];
+        this.controller.removeAnnotationType(annotationType);
+
+        expect(studyAnnotationTypeUtils.removeInUseModal).toHaveBeenCalled();
+        expect(this.CollectionEventType.prototype.removeAnnotationType).not.toHaveBeenCalled();
+      });
+
+      it('throws an error if modifications are not allowed', function() {
+        var self = this,
+            annotationType = new this.AnnotationType(this.jsonEntities.annotationType());
+
+        spyOn(self.domainEntityService, 'removeEntity').and.returnValue(self.$q.when('OK'));
+
+        self.createController();
+        self.controller.modificationsAllowed = false;
+
+        expect(function () {
+          self.controller.removeAnnotationType(annotationType);
+        }).toThrowError('modifications not allowed');
+      });
+
+    });
+
+    it('updates state when panel button is clicked', function() {
+      var panelState;
+
+      this.createController();
+      panelState = this.controller.panelOpen;
+      this.controller.panelButtonClicked();
+      this.scope.$digest();
+
+      expect(this.controller.panelOpen).not.toEqual(panelState);
     });
 
   });

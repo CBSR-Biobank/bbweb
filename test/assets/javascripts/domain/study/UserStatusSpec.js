@@ -20,6 +20,8 @@ define([
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function (UserStatus) {
+      this.UserStatus = UserStatus;
+
       context.enumerationClass = UserStatus;
       context.valueMap = [
         [ 'ActiveUser',     'ACTIVE' ],
@@ -27,6 +29,14 @@ define([
         [ 'LockedUser',     'LOCKED' ]
       ];
     }));
+
+    it('throws error when getting label for invalid status', function() {
+      var self = this;
+
+      expect(function () {
+        self.UserStatus.label('xxx');
+      }).toThrowError(/invalid status for user/);
+    });
 
     enumSharedSpec(context);
   });

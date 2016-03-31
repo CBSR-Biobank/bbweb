@@ -595,7 +595,7 @@ define([
     describe('select modal', function() {
 
       beforeEach(function () {
-        this.options = _.map(_.range(3), function () { return faker.lorem.words(1)[0]; });
+        this.options = _.map(_.range(3), function () { return faker.lorem.word(); });
         this.defaultValue = this.options[0];
       });
 
@@ -655,7 +655,7 @@ define([
     describe('select multiple modal', function() {
 
       beforeEach(function () {
-        this.options = _.map(_.range(3), function () { return faker.lorem.words(1)[0]; });
+        this.options = _.map(_.range(3), function () { return faker.random.word(); });
         this.defaultValue = [ this.options[0] ];
       });
 

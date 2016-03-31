@@ -24,6 +24,7 @@ define(function () {
   }
 
   ParticipantGetCtrl.$inject = [
+    '$q',
     '$state',
     'stateHelper',
     'modalService',
@@ -33,7 +34,8 @@ define(function () {
   /**
    *
    */
-  function ParticipantGetCtrl($state,
+  function ParticipantGetCtrl($q,
+                              $state,
                               stateHelper,
                               modalService,
                               Participant) {
@@ -45,22 +47,19 @@ define(function () {
     //--
 
     function uniqueIdChanged() {
-      if (vm.uniqueId.length <= 0) {
-        // dont do anything if user has not entered any text
-        return;
+      if (vm.uniqueId.length > 0) {
+        Participant.getByUniqueId(vm.study.id, vm.uniqueId)
+          .then(function (participant) {
+            $state.go('home.collection.study.participant.summary', { participantId: participant.id });
+          })
+          .catch(function (error) {
+            if (error.status === 404) {
+              createParticipantModal(vm.uniqueId);
+            } else {
+              console.error('could not get participant by uniqueId: ', JSON.stringify(error));
+            }
+          });
       }
-
-      Participant.getByUniqueId(vm.study.id, vm.uniqueId)
-        .then(function (participant) {
-          $state.go('home.collection.study.participant.summary', { participantId: participant.id });
-        })
-        .catch(function (error) {
-          if (error.status === 404) {
-            createParticipantModal(vm.uniqueId);
-          } else {
-            throw new Error('ParticipantGetCtrl:' + JSON.stringify(error));
-          }
-        });
     }
 
     function createParticipantModal(uniqueId) {

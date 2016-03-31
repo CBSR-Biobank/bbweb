@@ -61,8 +61,8 @@ define(['underscore'], function(_) {
       vm.collectionEvent.add()
         .then(submitSuccess)
         .catch(function(error) {
-          domainEntityService.updateErrorModal(
-            error, 'collectionEvent').catch(function () {
+          domainEntityService.updateErrorModal(error, 'collectionEvent')
+            .catch(function () {
               $state.go('home.collection.study.participant', { participantId: vm.participant.id });
             });
         });

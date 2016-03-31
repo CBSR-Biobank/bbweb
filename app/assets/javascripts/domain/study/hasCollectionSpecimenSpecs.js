@@ -15,8 +15,7 @@ define(['underscore'], function(_) {
   function hasCollectionSpecimenSpecsFactory(biobankApi, CollectionSpecimenSpec) {
 
     var mixins = {
-      validSpecimenSpecs:    validSpecimenSpecs,
-      canRemoveSpecimenSpec: canRemoveSpecimenSpec
+      validSpecimenSpecs:    validSpecimenSpecs
     };
 
     return mixins;
@@ -36,14 +35,6 @@ define(['underscore'], function(_) {
 
       return _.isUndefined(result);
     }
-
-    function canRemoveSpecimenSpec(specimenSpec) {
-       /* jshint validthis:true */
-     var self = this,
-          found = _.findWhere(self.specimenSpecs,  { uniqueId: specimenSpec.uniqueId });
-      return !_.isUndefined(found);
-    }
-
 
   }
 

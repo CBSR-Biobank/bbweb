@@ -39,7 +39,7 @@ define(function () {
       case ENABLED():
         return 'Enabled';
       }
-      return new Error('invalid status for centre' + status);
+      throw new Error('invalid status for centre' + status);
     }
   }
 

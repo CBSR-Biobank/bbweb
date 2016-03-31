@@ -15,8 +15,7 @@ define(function () {
       bindToController: {
         study: '=',
         participant: '=',
-        collectionEventTypes: '=',
-        annotationTypes: '='
+        collectionEventTypes: '='
       },
       templateUrl : '/assets/javascripts/collection/directives/ceventGetType/ceventGetType.html',
       controller: CeventGetTypeCtrl,

@@ -33,11 +33,13 @@ define(['moment', 'underscore'], function(moment, _) {
     };
 
     DateTimeAnnotation.prototype.setValue = function (value) {
-      if (typeof value !== 'object') {
-        throw new Error('value is not an object');
+      if (typeof value === 'object') {
+        this.date = value.date;
+        this.time = value.time;
+      } else if (typeof value === 'string') {
+        this.date = new Date(value);
+        this.time = new Date(value);
       }
-      this.date = value.date;
-      this.time = value.time;
       this.value = timeService.dateAndTimeToDisplayString(this.date, this.time);
     };
 

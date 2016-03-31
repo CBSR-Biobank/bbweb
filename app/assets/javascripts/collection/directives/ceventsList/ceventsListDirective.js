@@ -24,14 +24,12 @@ define(['underscore'], function(_) {
     return directive;
   }
 
-  CeventsListCtrl.$inject = [
-    '$state'
-  ];
+  //CeventsListCtrl.$inject = [];
 
   /**
    *
    */
-  function CeventsListCtrl($state) {
+  function CeventsListCtrl() {
     var vm = this;
 
     if (vm.collectionEventTypes.length <= 0) {

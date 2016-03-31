@@ -71,7 +71,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
     Study.prototype.constructor = Study;
 
     /**
-     * Used by promise code, so it must return an error rather than throw one.
+     * Use Study.prototype.asyncCreate to create a study from async code.
      */
     Study.create = function (obj) {
       if (!tv4.validate(obj, schema)) {
@@ -201,7 +201,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
       return ConcurrencySafeEntity.prototype.update.call(
         this,
         uri('pannottype', this.id) + '/' + annotationType.uniqueId,
-        _.omit(annotationType, 'uniqueId'));
+        annotationType);
     };
 
     Study.prototype.removeAnnotationType = function (annotationType) {

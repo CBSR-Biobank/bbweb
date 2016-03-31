@@ -46,7 +46,7 @@ define(['underscore'], function (_) {
 
     function removeAnnotationType(annotationType) {
       if (_.contains(vm.annotationTypeIdsInUse, annotationType.uniqueId)) {
-        studyAnnotationTypeUtils.removeInUseModal(annotationType, vm.annotationTypeName);
+        studyAnnotationTypeUtils.removeInUseModal(annotationType, 'ParticipantAnnotationType');
       } else {
         if (!vm.modificationsAllowed) {
           throw new Error('modifications not allowed');

@@ -30,6 +30,7 @@ define(['underscore'], function(_) {
       beforeEach(inject(function () {
         var self = this;
 
+        self.$q         = self.$injector.get('$q');
         self.modalInput = self.$injector.get('modalInput');
 
         self.deferred = self.$q.defer();

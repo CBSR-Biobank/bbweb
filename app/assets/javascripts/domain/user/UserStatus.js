@@ -44,7 +44,7 @@ define(function () {
       case LOCKED():
         return 'Locked';
       }
-      return new Error('invalid status for user' + status);
+      throw new Error('invalid status for user: ' + status);
     }
   }
 
