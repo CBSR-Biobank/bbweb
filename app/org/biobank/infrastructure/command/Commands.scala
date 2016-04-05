@@ -2,7 +2,13 @@ package org.biobank.infrastructure.command
 
 object Commands {
 
-  trait Command {
+  trait Command
+
+  trait HasUserId {
+    val userId: String
+  }
+
+  trait HasOptionalUserId {
     val userId: Option[String]
   }
 

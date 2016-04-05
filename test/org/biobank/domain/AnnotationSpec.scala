@@ -82,14 +82,6 @@ class AnnotationSpec extends DomainSpec {
       v mustFail "AnnotationTypeIdRequired"
     }
 
-    "when no values are assigned" in {
-      val v = Annotation.create(annotationTypeId = nameGenerator.next[String],
-                                stringValue      = None,
-                                numberValue      = None,
-                                selectedValues   = Set.empty)
-      v mustFail "at least one value must be assigned"
-    }
-
     "string value is empty" in {
       val v = Annotation.create(annotationTypeId = nameGenerator.next[String],
                                 stringValue      = Some(""),

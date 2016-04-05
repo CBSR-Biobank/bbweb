@@ -54,8 +54,8 @@ class CollectionEventsServiceImpl @Inject() (
   }
 
   def list(participantId: String,
-           sortFunc: (CollectionEvent, CollectionEvent) => Boolean,
-           order:    SortOrder)
+           sortFunc:      (CollectionEvent, CollectionEvent) => Boolean,
+           order:         SortOrder)
       : DomainValidation[Seq[CollectionEvent]] = {
     validParticipantId(participantId) { participant =>
       val result = collectionEventRepository
@@ -80,15 +80,11 @@ class CollectionEventsServiceImpl @Inject() (
 
   private def validParticipantId[T](participantId: String)(fn: Participant => DomainValidation[T])
       : DomainValidation[T] = {
-    participantRepository.getByKey(ParticipantId(participantId)).fold(
-      err => DomainError(s"invalid participant id: $participantId").failureNel,
-      participant => {
-        studyRepository.getByKey(participant.studyId).fold(
-          err => DomainError(s"invalid study id: ${participant.studyId}").failureNel,
-          study => fn(participant)
-        )
-      }
-    )
+    for {
+      participant <- participantRepository.getByKey(ParticipantId(participantId))
+      study       <- studyRepository.getByKey(participant.studyId)
+      result      <- fn(participant)
+    } yield result
   }
 
   def processCommand(cmd: CollectionEventCommand): Future[DomainValidation[CollectionEvent]] =

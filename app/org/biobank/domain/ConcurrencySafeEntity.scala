@@ -9,6 +9,7 @@ import scalaz.Scalaz._
   * This is a layer supertype.
   */
 trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
+  import org.biobank.CommonValidations._
 
   /** The current version of the object. Used for optimistic concurrency versioning. */
   val version: Long
@@ -23,11 +24,11 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
   val timeModified: Option[DateTime]
 
   protected def invalidVersion(expected: Long) =
-    DomainError(
-    s"${this.getClass.getSimpleName}: expected version doesn't match current version: id: $id, version: $version, expectedVersion: $expected")
+    InvalidVersion(s"${this.getClass.getSimpleName}: expected version doesn't match current version: id: $id, version: $version, expectedVersion: $expected")
 
   def requireVersion(expectedVersion: Long): DomainValidation[Boolean] = {
-    if (this.version != expectedVersion) invalidVersion(expectedVersion).failureNel else true.success
+    if (this.version != expectedVersion) invalidVersion(expectedVersion).failureNel
+    else true.success
   }
 
 }

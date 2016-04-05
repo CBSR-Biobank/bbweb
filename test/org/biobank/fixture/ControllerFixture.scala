@@ -77,7 +77,6 @@ abstract class ControllerFixture
    */
   override def newAppForTest(testData: TestData) =
     new GuiceApplicationBuilder()
-      //.disable[EhCacheModule]
       .overrides(bind[CacheApi].to[FixedEhCache])
       .build()
 
@@ -166,9 +165,10 @@ abstract class ControllerFixture
   def participantRepository                    = app.injector.instanceOf[ParticipantRepository]
   def collectionEventRepository                = app.injector.instanceOf[CollectionEventRepository]
   def ceventSpecimenRepository                 = app.injector.instanceOf[CeventSpecimenRepository]
+  def specimenRepository                       = app.injector.instanceOf[SpecimenRepository]
 
   def userRepository = app.injector.instanceOf[UserRepository]
 
-  def centreRepository          = app.injector.instanceOf[CentreRepository]
+  def centreRepository = app.injector.instanceOf[CentreRepository]
 
 }

@@ -41,7 +41,7 @@ class ParticipantsController @Inject() (val env:            Environment,
 
   def removeAnnotation(participantId: String, annotTypeId: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = ParticipantRemoveAnnotationCmd(userId           = Some(userId.id),
+      val cmd = ParticipantRemoveAnnotationCmd(userId           = userId.id,
                                                id               = participantId,
                                                expectedVersion  = ver,
                                                annotationTypeId = annotTypeId)

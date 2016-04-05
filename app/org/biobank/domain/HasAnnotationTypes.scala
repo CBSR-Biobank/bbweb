@@ -19,8 +19,7 @@ trait HasAnnotationTypes extends AnnotationTypeValidations {
       : DomainValidation[AnnotationType] = {
     annotationTypes
       .find { x => x.uniqueId == annotationTypeId }
-      .toSuccess(s"annotation type does not exist: $annotationTypeId")
-      .toValidationNel
+      .toSuccessNel(s"annotation type does not exist: $annotationTypeId")
   }
 
   protected def nameNotUsed(annotationType: AnnotationType): DomainValidation[Boolean] = {

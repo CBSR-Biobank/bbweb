@@ -20,6 +20,8 @@ package biobank {
 
   object CommonValidations {
 
+    case class InvalidVersion(msg: String) extends ValidationMsgKey
+
     case class IdNotFound(msg: String) extends ValidationMsgKey
 
     case class InvalidStatus(msg: String) extends ValidationMsgKey

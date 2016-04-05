@@ -9,68 +9,69 @@ import org.joda.time.DateTime
 
 object SpecimenCommands {
 
-  trait SpecimenCommand
-      extends HasCollectionEventIdentity
+  trait SpecimenCommand extends Command with HasUserId with HasCollectionEventIdentity
 
   trait SpecimenModifyCommand
       extends SpecimenCommand
-      with HasIdentity
       with HasExpectedVersion
 
-  case class AddSpecimenCmd(userId:            Option[String],
-                            id:                String,
-                            specimenGroupId:   String,
-                            collectionEventId: String,
-                            timeCreated:       DateTime,
-                            originLocationId:  String,
-                            locationId:        String,
-                            containerId:       Option[String],
-                            positionId:        Option[String],
-                            amount:            BigDecimal,
-                            usable:            Boolean)
+  case class SpecimenData(specimenSpecId: String,
+                          specimenId:      String,
+                          timeCreated:     DateTime,
+                          locationId:      String,
+                          amount:          BigDecimal)
+
+  case class AddSpecimensCmd(userId:            String,
+                             collectionEventId: String,
+                             specimenData:      List[SpecimenData])
       extends SpecimenCommand
 
 
-  case class MoveSpecimenCmd(userId:            Option[String],
-                             id:                String,
-                             collectionEventId: String,
-                             expectedVersion:   Long,
-                             locationId:        String)
+  case class MoveSpecimensCmd(userId:            String,
+                              collectionEventId: String,
+                              expectedVersion:   Long,
+                              locationId:        String,
+                              specimenData:      Set[SpecimenData])
       extends SpecimenModifyCommand
 
-  case class AssignSpecimenPositionCmd(userId:            Option[String],
+  case class SpecimenAssignPositionCmd(userId:            String,
                                        id:                String,
                                        collectionEventId: String,
                                        expectedVersion:   Long,
                                        positionId:        Option[String])
       extends SpecimenModifyCommand
+      with HasIdentity
 
-  case class RemoveSpecimenAmountCmd(userId:            Option[String],
+  case class SpecimenRemoveAmountCmd(userId:            String,
                                      id:                String,
                                      collectionEventId: String,
                                      expectedVersion:   Long,
                                      amount:            BigDecimal)
       extends SpecimenModifyCommand
+      with HasIdentity
 
-  case class UpdateSpecimenUsableCmd(userId:            Option[String],
+  case class SpecimenUpdateUsableCmd(userId:            String,
                                      id:                String,
                                      collectionEventId: String,
                                      expectedVersion:   Long,
                                      usable:            Boolean)
       extends SpecimenModifyCommand
+      with HasIdentity
 
-  case class RemoveSpecimenCmd(userId:            Option[String],
+  case class RemoveSpecimenCmd(userId:            String,
                                id:                String,
                                collectionEventId: String,
                                expectedVersion:   Long,
                                usable:            Boolean)
       extends SpecimenModifyCommand
+      with HasIdentity
 
-  implicit val addSpecimenCmdReads            = Json.reads[AddSpecimenCmd]
-  implicit val moveSpecimenCmdReads           = Json.reads[MoveSpecimenCmd]
-  implicit val assignSpecimenPositionCmdReads = Json.reads[AssignSpecimenPositionCmd]
-  implicit val removeSpecimenAmountCmdReads   = Json.reads[RemoveSpecimenAmountCmd]
-  implicit val updateSpecimenUsableCmdReads   = Json.reads[UpdateSpecimenUsableCmd]
+  implicit val specimenDataReads              = Json.reads[SpecimenData]
+  implicit val addSpecimensCmdReads           = Json.reads[AddSpecimensCmd]
+  implicit val moveSpecimensCmdReads          = Json.reads[MoveSpecimensCmd]
+  implicit val specimenAssignPositionCmdReads = Json.reads[SpecimenAssignPositionCmd]
+  implicit val specimenRemoveAmountCmdReads   = Json.reads[SpecimenRemoveAmountCmd]
+  implicit val specimenUpdateUsableCmdReads   = Json.reads[SpecimenUpdateUsableCmd]
   implicit val removeSpecimenCmdReads         = Json.reads[RemoveSpecimenCmd]
 
 }

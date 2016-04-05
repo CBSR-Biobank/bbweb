@@ -132,10 +132,10 @@ class Factory {
   }
 
   def createCollectionSpecimenSpec(): CollectionSpecimenSpec = {
-    val specimenGroup = CollectionSpecimenSpec(
-        uniqueId                    = nameGenerator.next[SpecimenGroup],
-        name                        = nameGenerator.next[SpecimenGroup],
-        description                 = Some(nameGenerator.next[SpecimenGroup]),
+    val specimenSpec = CollectionSpecimenSpec(
+        uniqueId                    = nameGenerator.next[CollectionSpecimenSpec],
+        name                        = nameGenerator.next[CollectionSpecimenSpec],
+        description                 = Some(nameGenerator.next[CollectionSpecimenSpec]),
         units                       = nameGenerator.next[String],
         anatomicalSourceType        = AnatomicalSourceType.Blood,
         preservationType            = PreservationType.FreshSpecimen,
@@ -143,8 +143,8 @@ class Factory {
         specimenType                = SpecimenType.FilteredUrine,
         maxCount                    = 1,
         amount                      = Some(BigDecimal(0.5)))
-    domainObjects = domainObjects + (classOf[SpecimenGroup] -> specimenGroup)
-    specimenGroup
+    domainObjects = domainObjects + (classOf[CollectionSpecimenSpec] -> specimenSpec)
+    specimenSpec
   }
 
   def createCollectionEventType(): CollectionEventType = {
@@ -314,13 +314,34 @@ class Factory {
     cevent
   }
 
-  def createUsableSpecimen(): Specimen = {
-    val specimenGroup = defaultSpecimenGroup
+  def createUsableSpecimen(): UsableSpecimen = {
+    val specimenSpec = defaultCollectionSpecimenSpec
     val location = defaultLocation
 
     val specimen = UsableSpecimen(
         id               = SpecimenId(nameGenerator.next[Specimen]),
-        specimenGroupId  = specimenGroup.id,
+        specimenSpecId   = specimenSpec.uniqueId,
+        version          = 0,
+        timeAdded        = DateTime.now,
+        timeModified     = None,
+        originLocationId = location.uniqueId,
+        locationId       = location.uniqueId,
+        containerId      = None,
+        positionId       = None,
+        timeCreated      = DateTime.now,
+        amount           = BigDecimal(1.0)
+      )
+    domainObjects = domainObjects + (classOf[Specimen] -> specimen)
+    specimen
+  }
+
+  def createUnusableSpecimen(): UnusableSpecimen = {
+    val specimenSpec = defaultCollectionSpecimenSpec
+    val location = defaultLocation
+
+    val specimen = UnusableSpecimen(
+        id               = SpecimenId(nameGenerator.next[Specimen]),
+        specimenSpecId   = specimenSpec.uniqueId,
         version          = 0,
         timeAdded        = DateTime.now,
         timeModified     = None,
@@ -448,6 +469,10 @@ class Factory {
 
   def defaultCollectionEventType: CollectionEventType = {
     defaultObject(classOf[CollectionEventType], createCollectionEventType)
+  }
+
+  def defaultCollectionSpecimenSpec: CollectionSpecimenSpec = {
+    defaultObject(classOf[CollectionSpecimenSpec], createCollectionSpecimenSpec)
   }
 
   def defaultAnnotationType: AnnotationType = {

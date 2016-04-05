@@ -1,9 +1,11 @@
 package org.biobank.infrastructure.event
 
+import org.biobank.infrastructure.command.SpecimenCommands.SpecimenData
 import org.biobank.infrastructure.event.CommonEvents. {
   AnnotationType => EventAnnotationType
 }
 import org.biobank.infrastructure.event.CollectionEventTypeEvents._
+import org.biobank.infrastructure.event.SpecimenEvents._
 import org.biobank.domain.{
   AnnotationType,
   AnnotationValueType,
@@ -89,6 +91,16 @@ object EventUtils {
       specimenType                = SpecimenType.withName(event.getSpecimenType),
       maxCount                    = event.getMaxCount,
       amount                      = event.amount.map(BigDecimal(_))
+    )
+  }
+
+  def specimenDataToEvent(specimenData: SpecimenData): SpecimenEvent.Added.SpecimenData = {
+    SpecimenEvent.Added.SpecimenData().update(
+      _.specimenSpecId := specimenData.specimenSpecId,
+      _.specimenId     := specimenData.specimenId,
+      _.timeCreated    := ISODateTimeFormatter.print(specimenData.timeCreated),
+      _.locationId     := specimenData.locationId,
+      _.amount         := specimenData.amount.doubleValue
     )
   }
 

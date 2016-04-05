@@ -6,7 +6,8 @@ import org.biobank.domain.user._
 import org.biobank.domain.study._
 import org.biobank.domain.participants.{
   CollectionEvent,
-  Participant
+  Participant,
+  Specimen
 }
 import org.biobank.domain.centre._
 import org.biobank.infrastructure._
@@ -198,6 +199,26 @@ trait JsonHelper extends MustMatchers with OptionValues {
     (json \ "visitNumber").as[Int]              mustBe (collectionEvent.visitNumber)
 
     ((json \ "timeCompleted").as[DateTime] to collectionEvent.timeCompleted).millis must be < 1000L
+  }
+
+  def compareObj(json: JsValue, specimen: Specimen) = {
+    compareEntity(json, specimen)
+
+    (json \ "specimenSpecId").as[String]   mustBe (specimen.specimenSpecId)
+
+    (json \ "originLocationId").as[String] mustBe (specimen.originLocationId)
+
+    (json \ "locationId").as[String]       mustBe (specimen.locationId)
+
+    (json \ "containerId").asOpt[String]   mustBe (specimen.containerId)
+
+    (json \ "positionId").asOpt[String]    mustBe (specimen.positionId)
+
+    (json \ "amount").as[BigDecimal]       mustBe (specimen.amount)
+
+    (json \ "status").as[String]           mustBe (specimen.getClass.getSimpleName)
+
+    ((json \ "timeCreated").as[DateTime] to specimen.timeCreated).millis must be < 1000L
   }
 
   def compareObj(json: JsValue, centre: Centre) = {

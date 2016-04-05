@@ -2,6 +2,69 @@ package org.biobank.infrastructure.event;
 
 import "CommonEvents.proto";
 
+message StudyEvent {
+
+   message Added {
+      optional string name        = 1;
+      optional string description = 2;
+   }
+
+   message NameUpdated {
+      optional int64  version     = 1;
+      optional string name        = 2;
+   }
+
+   message DescriptionUpdated {
+      optional int64  version     = 1;
+      optional string description = 3;
+   }
+
+   message Enabled {
+      optional int64  version = 1;
+   }
+
+   message Disabled {
+      optional int64  version = 1;
+   }
+
+   message Retired {
+      optional int64  version = 1;
+   }
+
+   message Unretired {
+      optional int64  version = 1;
+   }
+
+   message StudyAnnotationTypeAdded {
+      optional int64          version        = 1;
+      optional AnnotationType annotationType = 2;
+   }
+
+   message StudyAnnotationTypeUpdated {
+      optional int64          version        = 1;
+      optional AnnotationType annotationType = 2;
+   }
+
+   required string id     = 1;
+   optional string userId = 2;
+   optional string time   = 3;
+
+   oneof event_type {
+      Added                    added                 = 4;
+      NameUpdated              nameUpdated           = 5;
+      DescriptionUpdated       descriptionUpdated    = 6;
+      Enabled                  enabled               = 7;
+      Disabled                 disabled              = 8;
+      Retired                  retired               = 9;
+      Unretired                unretired             = 10;
+      StudyAnnotationTypeAdded annotationTypeAdded   = 11;
+      StudyAnnotationTypeAdded annotationTypeUpdated = 12;
+      AnnotationTypeRemoved    annotationTypeRemoved = 13;
+   }
+}
+
+//-------------------------------------
+
 message SpecimenLinkAnnotationTypeAddedEvent {
    optional string annotationTypeId = 1;
    optional string name             = 2;
@@ -143,66 +206,5 @@ message StudyEventOld {
       SpecimenLinkTypeAddedEvent                specimenLinkTypeAdded                = 32;
       SpecimenLinkTypeUpdatedEvent              specimenLinkTypeUpdated              = 33;
       SpecimenLinkTypeRemovedEvent              specimenLinkTypeRemoved              = 34;
-   }
-}
-
-message StudyEvent {
-
-   message Added {
-      optional string name        = 1;
-      optional string description = 2;
-   }
-
-   message NameUpdated {
-      optional int64  version     = 1;
-      optional string name        = 2;
-   }
-
-   message DescriptionUpdated {
-      optional int64  version     = 1;
-      optional string description = 3;
-   }
-
-   message Enabled {
-      optional int64  version = 1;
-   }
-
-   message Disabled {
-      optional int64  version = 1;
-   }
-
-   message Retired {
-      optional int64  version = 1;
-   }
-
-   message Unretired {
-      optional int64  version = 1;
-   }
-
-   message StudyAnnotationTypeAdded {
-      optional int64          version        = 1;
-      optional AnnotationType annotationType = 2;
-   }
-
-   message StudyAnnotationTypeUpdated {
-      optional int64          version        = 1;
-      optional AnnotationType annotationType = 2;
-   }
-
-   required string id     = 1;
-   optional string userId = 2;
-   optional string time   = 3;
-
-   oneof event_type {
-      Added                    added                 = 4;
-      NameUpdated              nameUpdated           = 5;
-      DescriptionUpdated       descriptionUpdated    = 6;
-      Enabled                  enabled               = 7;
-      Disabled                 disabled              = 8;
-      Retired                  retired               = 9;
-      Unretired                unretired             = 10;
-      StudyAnnotationTypeAdded annotationTypeAdded   = 11;
-      StudyAnnotationTypeAdded annotationTypeUpdated = 12;
-      AnnotationTypeRemoved    annotationTypeRemoved = 13;
    }
 }

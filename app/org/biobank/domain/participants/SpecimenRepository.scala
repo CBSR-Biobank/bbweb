@@ -8,7 +8,11 @@ import scalaz.Scalaz._
 
 @ImplementedBy(classOf[SpecimenRepositoryImpl])
 trait SpecimenRepository
-    extends ReadWriteRepository [SpecimenId, Specimen]
+    extends ReadWriteRepository [SpecimenId, Specimen] {
+
+  def getForSpecimenSpec(specimenSpecId: String): Set[Specimen]
+
+}
 
 @Singleton
 class SpecimenRepositoryImpl
@@ -24,6 +28,10 @@ class SpecimenRepositoryImpl
 
   override def getByKey(id: SpecimenId): DomainValidation[Specimen] = {
     getMap.get(id).toSuccessNel(notFound(id).toString)
+  }
+
+  def getForSpecimenSpec(specimenSpecId: String): Set[Specimen] = {
+    ???
   }
 
 }

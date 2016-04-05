@@ -16,7 +16,7 @@ lazy val root = (project in file("."))
 
 scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.8")
 
-scalacOptions in ThisBuild ++= Seq(
+scalacOptions in Compile ++= Seq(
   "-target:jvm-1.8",
   "-encoding", "UTF-8",
   "deprecation",        // warning and location for usages of deprecated APIs
@@ -112,6 +112,8 @@ libraryDependencies ++= Seq(
 routesGenerator := InjectedRoutesGenerator
 
 JsEngineKeys.engineType := JsEngineKeys.EngineType.Node
+
+EclipseKeys.withSource := true
 
 //net.virtualvoid.sbt.graph.Plugin.graphSettings
 

@@ -12,7 +12,7 @@ import com.google.inject.ImplementedBy
 import scalaz.Scalaz._
 
 /**
- * This repository maintains the relationship between a single centre and its multiple locations.
+ *
  */
 @ImplementedBy(classOf[CeventSpecimenRepositoryImpl])
 trait CeventSpecimenRepository extends ReadWriteRepository[SpecimenId, CeventSpecimen] {

@@ -71,7 +71,7 @@ class CentresController @Inject() (val env:            Environment,
 
   def removeStudy(centreId: String, ver: Long, studyId: String) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      processCommand(RemoveStudyFromCentreCmd(Some(userId.id), centreId, ver, studyId))
+      processCommand(RemoveStudyFromCentreCmd(userId.id, centreId, ver, studyId))
     }
 
   def addLocation(id: String) =
@@ -79,7 +79,7 @@ class CentresController @Inject() (val env:            Environment,
 
   def removeLocation(centreId: String, ver: Long, locationId: String) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      processCommand(RemoveCentreLocationCmd(Some(userId.id), centreId, ver, locationId))
+      processCommand(RemoveCentreLocationCmd(userId.id, centreId, ver, locationId))
     }
 
   def enable(id: String) =

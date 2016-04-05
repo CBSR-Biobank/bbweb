@@ -2,7 +2,7 @@ package org.biobank.service.participants
 
 import akka.actor._
 import akka.persistence.SnapshotOffer
-import javax.inject.{Inject, Named}
+import javax.inject.Inject
 import org.biobank.domain.{
   Annotation,
   DomainValidation,
@@ -27,11 +27,9 @@ object ParticipantsProcessor {
 /**
  *
  */
-class ParticipantsProcessor @Inject() (
-  @Named("specimens") val specimensProcessor: ActorRef,
-  val participantRepository:                  ParticipantRepository,
-  val collectionEventRepository:              CollectionEventRepository,
-  val studyRepository:                        StudyRepository)
+class ParticipantsProcessor @Inject() (val participantRepository:     ParticipantRepository,
+                                       val collectionEventRepository: CollectionEventRepository,
+                                       val studyRepository:           StudyRepository)
     extends Processor {
 
   import ParticipantEvent.EventType
@@ -124,7 +122,7 @@ class ParticipantsProcessor @Inject() (
                                               cmd.uniqueId,
                                               cmd.annotations.toSet)
     } yield ParticipantEvent(newParticipant.id.id).update(
-        _.optionalUserId    := cmd.userId,
+        _.userId            := cmd.userId,
         _.time              := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.added.studyId     := newParticipant.studyId.id,
         _.added.uniqueId    := cmd.uniqueId,
@@ -155,7 +153,7 @@ class ParticipantsProcessor @Inject() (
           uniqueIdAvailable  <- uniqueIdAvailable(cmd.uniqueId, participant.id)
           updatedParticipant <- participant.withUniqueId(cmd.uniqueId)
         } yield ParticipantEvent(updatedParticipant.id.id).update(
-          _.optionalUserId           := cmd.userId,
+          _.userId                   := cmd.userId,
           _.time                     := ISODateTimeFormat.dateTime.print(DateTime.now),
           _.uniqueIdUpdated.version  := cmd.expectedVersion,
           _.uniqueIdUpdated.uniqueId := cmd.uniqueId)
@@ -176,7 +174,7 @@ class ParticipantsProcessor @Inject() (
                                                                allAnnotations.toList)
           updatedParticipant <- participant.withAnnotation(annotation)
         } yield ParticipantEvent(updatedParticipant.id.id).update(
-          _.optionalUserId             := cmd.userId,
+          _.userId                     := cmd.userId,
           _.time                       := ISODateTimeFormat.dateTime.print(DateTime.now),
           _.annotationAdded.version    := cmd.expectedVersion,
           _.annotationAdded.annotation := annotationToEvent(annotation))
@@ -191,8 +189,7 @@ class ParticipantsProcessor @Inject() (
           annotType <- {
             study.annotationTypes
               .find { x => x.uniqueId == cmd.annotationTypeId }
-              .toSuccess(s"annotation type with ID does not exist: ${cmd.annotationTypeId}")
-              .toValidationNel
+              .toSuccessNel(s"annotation type with ID does not exist: ${cmd.annotationTypeId}")
           }
           notRequired <- {
             if (annotType.required) DomainError(s"annotation is required").failureNel
@@ -200,7 +197,7 @@ class ParticipantsProcessor @Inject() (
           }
           updatedParticipant <- participant.withoutAnnotation(cmd.annotationTypeId)
         } yield ParticipantEvent(updatedParticipant.id.id).update(
-          _.optionalUserId                     := cmd.userId,
+          _.userId                             := cmd.userId,
           _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
           _.annotationRemoved.version          := cmd.expectedVersion,
           _.annotationRemoved.annotationTypeId := cmd.annotationTypeId)

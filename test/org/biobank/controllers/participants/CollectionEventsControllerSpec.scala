@@ -79,7 +79,6 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
     } yield study
   }
 
-
   /** Converts a collectionEvent into an Add command.
    */
   def collectionEventToAddJson(collectionEvent: CollectionEvent,
@@ -166,6 +165,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
     val json = makeRequest(POST, uri(cevent.participantId), BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] must include ("error")
+
     (json \ "message").as[String] must include regex ("InvalidStatus.*study not enabled")
   }
 
@@ -244,15 +244,17 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
       "get a single collection event for a participant" in {
         createEntities { (study, participant, ceventType) =>
           val cevents = (0 until 2).map { x =>
-            val cevent = factory.createCollectionEvent
-            collectionEventRepository.put(cevent)
-            cevent
-          }
+              val cevent = factory.createCollectionEvent
+              collectionEventRepository.put(cevent)
+              cevent
+            }
 
           val ceventToGet = cevents(0)
 
           val json = makeRequest(GET, uri(ceventToGet))
+
           (json \ "status").as[String] must include ("success")
+
           val jsonObj = (json \ "data").as[JsObject]
           compareObj(jsonObj, ceventToGet)
         }
@@ -263,7 +265,9 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           val cevent = factory.createCollectionEvent
 
           val json = makeRequest(GET, uri(cevent), BAD_REQUEST)
+
           (json \ "status").as[String] must include ("error")
+
           (json \ "message").as[String] must include ("collection event id is invalid")
         }
       }
@@ -284,11 +288,11 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           collectionEventRepository.put(cevent)
 
           val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri = listUri(participant.id),
-            offset = 0,
-            total = 1,
-            maybeNext = None,
-            maybePrev = None)
+              uri = listUri(participant.id),
+              offset = 0,
+              total = 1,
+              maybeNext = None,
+              maybePrev = None)
           jsonItems must have size 1
           //log.info(s"--> $jsonItems")
           compareObjs(jsonItems, List(cevent))
@@ -298,28 +302,28 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
       "get all collection events for a participant" in {
         createEntities { (study, participant, ceventType) =>
           val participants = (0 until 2).map { x =>
-            val participant = factory.createParticipant.copy(studyId = study.id)
-            participantRepository.put(participant)
-            participant
-          }
+              val participant = factory.createParticipant.copy(studyId = study.id)
+              participantRepository.put(participant)
+              participant
+            }
 
           val cevents = participants.map { participant =>
-            (participant.id -> (0 until 2).map { x =>
-               val cevent = factory.createCollectionEvent.copy(participantId = participant.id)
-               collectionEventRepository.put(cevent)
-               cevent
-             })
-          }.toMap
+              (participant.id -> (0 until 2).map { x =>
+                 val cevent = factory.createCollectionEvent.copy(participantId = participant.id)
+                 collectionEventRepository.put(cevent)
+                 cevent
+               })
+            }.toMap
 
           participants.foreach { participant =>
             val participantCevents = cevents(participant.id).toList
 
             val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-              uri       = listUri(participant.id),
-              offset    = 0,
-              total     = cevents.size,
-              maybeNext = None,
-              maybePrev = None)
+                uri       = listUri(participant.id),
+                offset    = 0,
+                total     = cevents.size,
+                maybeNext = None,
+                maybePrev = None)
             jsonItems must have size cevents.size
             //log.info(s"--> $jsonItems")
             compareObjs(jsonItems, participantCevents)
@@ -459,7 +463,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include ("invalid participant id")
+        (json \ "message").as[String] must include regex ("IdNotFound.*participant id")
       }
 
     }
@@ -469,10 +473,10 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
       "get a collection event by visit number" in {
         createEntities { (study, participant, ceventType) =>
           val cevents = (1 to 2).map { visitNumber =>
-            val cevent = factory.createCollectionEvent.copy(visitNumber = visitNumber)
-            collectionEventRepository.put(cevent)
-            cevent
-          }
+              val cevent = factory.createCollectionEvent.copy(visitNumber = visitNumber)
+              collectionEventRepository.put(cevent)
+              cevent
+            }
 
           val ceventToGet = cevents(0)
           val json = makeRequest(GET, uriWithVisitNumber(participant, ceventToGet))
@@ -490,8 +494,10 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         studyRepository.put(factory.defaultEnabledStudy)
 
         val json = makeRequest(GET, uriWithVisitNumber(participant, cevent), NOT_FOUND)
+
         (json \ "status").as[String] must include ("error")
-        (json \ "message").as[String] must include ("invalid participant id")
+
+        (json \ "message").as[String] must include regex ("IdNotFound.*participant id")
       }
 
       "fail when querying for a collection event with a visit number" in {
@@ -499,7 +505,9 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           val cevent = factory.createCollectionEvent
 
           val json = makeRequest(GET, uriWithVisitNumber(participant, cevent), NOT_FOUND)
+
           (json \ "status").as[String] must include ("error")
+
           (json \ "message").as[String] must include ("collection event does not exist")
         }
       }
@@ -513,6 +521,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           cevent.annotations must have size 0
 
           val json = makeRequest(POST, uri(participant), collectionEventToAddJson(cevent))
+
           (json \ "status").as[String] must include ("success")
 
           val id = (json \ "data" \ "id").as[String]
@@ -528,7 +537,9 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
             )
 
             repoCe.annotations must have size 0
+
             (repoCe.timeCompleted to cevent.timeCompleted).millis must be < TimeCoparisonMillis
+
             checkTimeStamps(repoCe, DateTime.now, None)
           }
         }
@@ -573,7 +584,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           jsonAnnotations.foreach { jsonAnnotation =>
             val jsonAnnotationTypeId = (jsonAnnotation \ "annotationTypeId").as[String]
             val annotation = annotations.find( x =>
-              x.annotationTypeId == jsonAnnotationTypeId)
+                x.annotationTypeId == jsonAnnotationTypeId)
             annotation mustBe defined
             compareAnnotation(jsonAnnotation, annotation.value)
           }
@@ -593,6 +604,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
                                  path           = uri(participant),
                                  expectedStatus = BAD_REQUEST,
                                  json           = collectionEventToAddJson(cevent))
+
           (json \ "status").as[String] must include ("error")
 
           (json \ "message").as[String] must include (
@@ -610,7 +622,9 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
                                  path           = uri(participant),
                                  expectedStatus = FORBIDDEN,
                                  json           = collectionEventToAddJson(cevent2))
+
           (json \ "status").as[String] must include ("error")
+
           (json \ "message").as[String] must include ("a collection event with this visit number already exists")
         }
       }
@@ -627,7 +641,9 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
                                  path           = uri(participant),
                                  expectedStatus = BAD_REQUEST,
                                  json           = collectionEventToAddJson(cevent))
+
           (json \ "status").as[String] must include ("error")
+
           (json \ "message").as[String] must include ("missing required annotation type(s)")
         }
       }
@@ -642,7 +658,9 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
                                  path           = uri(participant),
                                  expectedStatus = BAD_REQUEST,
                                  json           = collectionEventToAddJson(cevent, List(annotation)))
+
           (json \ "status").as[String] must include ("error")
+
           (json \ "message").as[String] must include ("no annotation types")
         }
       }
@@ -655,14 +673,16 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           collectionEventTypeRepository.put(ceventType.copy(annotationTypes = Set(annotType)))
 
           val annotation = factory.createAnnotation.copy(
-            annotationTypeId = nameGenerator.next[Annotation])
+              annotationTypeId = nameGenerator.next[Annotation])
 
           val cevent = factory.createCollectionEvent
           val json = makeRequest(POST,
                                  uri(participant),
                                  BAD_REQUEST,
                                  collectionEventToAddJson(cevent, List(annotation)))
+
           (json \ "status").as[String] must include ("error")
+
           (json \ "message").as[String] must include (
             "annotation(s) do not belong to annotation types")
         }
@@ -795,7 +815,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
                                 ceventType,
                                 "visitNumber",
                                 Json.obj("visitNumber" -> 1))
-          }
+        }
       }
 
       "fail when updating visit number with an invalid version" in {
@@ -870,7 +890,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
                                 ceventType,
                                 "timeCompleted",
                                 Json.obj("timeCompleted" -> 1))
-          }
+        }
       }
 
       "fail when updating time completed with an invalid version" in {
@@ -916,6 +936,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           collectionEventRepository.put(cevent)
 
           val json = makeRequest(DELETE, uri(participant, cevent, cevent.version))
+
           (json \ "status").as[String] must include ("success")
         }
       }

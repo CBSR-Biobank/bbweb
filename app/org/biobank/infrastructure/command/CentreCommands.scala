@@ -7,43 +7,43 @@ import play.api.libs.json.Reads._
 
 object CentreCommands {
 
-  trait CentreCommand extends Command
+  trait CentreCommand extends Command with HasUserId
 
   trait CentreModifyCommand extends CentreCommand with HasIdentity with HasExpectedVersion
 
   trait CentreCommandWithCentreId extends CentreCommand with HasCentreIdentity
 
   case class AddCentreCmd(
-    userId:      Option[String],
+    userId:      String,
     name:        String,
     description: Option[String] = None)
       extends CentreCommand
 
   case class UpdateCentreNameCmd(
-    userId:          Option[String],
+    userId:          String,
     id:              String,
     expectedVersion: Long,
     name:            String)
       extends CentreModifyCommand
 
   case class UpdateCentreDescriptionCmd(
-    userId:          Option[String],
+    userId:          String,
     id:              String,
     expectedVersion: Long,
     description:     Option[String])
       extends CentreModifyCommand
 
-  case class EnableCentreCmd(userId:          Option[String],
+  case class EnableCentreCmd(userId:          String,
                              id:              String,
                              expectedVersion: Long)
       extends CentreModifyCommand
 
-  case class DisableCentreCmd(userId:          Option[String],
+  case class DisableCentreCmd(userId:          String,
                               id:              String,
                               expectedVersion: Long)
       extends CentreModifyCommand
 
-  case class AddCentreLocationCmd(userId:          Option[String],
+  case class AddCentreLocationCmd(userId:          String,
                                   id:              String,
                                   expectedVersion: Long,
                                   name:            String,
@@ -55,7 +55,7 @@ object CentreCommands {
                                   countryIsoCode:  String)
       extends CentreModifyCommand
 
-  case class RemoveCentreLocationCmd(userId:          Option[String],
+  case class RemoveCentreLocationCmd(userId:          String,
                                      id:              String,
                                      expectedVersion: Long,
                                      locationId:      String)
@@ -63,13 +63,13 @@ object CentreCommands {
 
   trait CentreStudyCmd extends CentreCommandWithCentreId
 
-  case class AddStudyToCentreCmd(userId:          Option[String],
+  case class AddStudyToCentreCmd(userId:          String,
                                  id:              String,
                                  expectedVersion: Long,
                                  studyId:         String)
       extends CentreModifyCommand
 
-  case class RemoveStudyFromCentreCmd(userId:          Option[String],
+  case class RemoveStudyFromCentreCmd(userId:          String,
                                       id:              String,
                                       expectedVersion: Long,
                                       studyId:         String)

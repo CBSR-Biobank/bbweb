@@ -15,8 +15,7 @@ trait HasAnnotations[T <: ConcurrencySafeEntity[_]] {
       : DomainValidation[Annotation] = {
     annotations
       .find { x => x.annotationTypeId == annotationTypeId }
-      .toSuccess(s"annotation does not exist: $annotationTypeId")
-      .toValidationNel
+      .toSuccessNel(s"annotation does not exist: $annotationTypeId")
   }
 
 }

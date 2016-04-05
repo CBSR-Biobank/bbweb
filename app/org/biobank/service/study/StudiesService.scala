@@ -29,10 +29,10 @@ trait StudiesService {
 
   def getCountsByStatus(): StudyCountsByStatus
 
-  def getStudies[T <: Study](filter:   String,
-                             status:   String,
-                             sortFunc: (Study, Study) => Boolean,
-                             order:    SortOrder)
+  def getStudies(filter:   String,
+                 status:   String,
+                 sortFunc: (Study, Study) => Boolean,
+                 order:    SortOrder)
       : DomainValidation[Seq[Study]]
 
   def getStudyNames(filter: String, order: SortOrder): Seq[StudyNameDto]
@@ -121,10 +121,10 @@ class StudiesServiceImpl @javax.inject.Inject() (
     )
   }
 
-  def getStudies[T <: Study](filter:   String,
-                             status:   String,
-                             sortFunc: (Study, Study) => Boolean,
-                             order:    SortOrder)
+  def getStudies(filter:   String,
+                 status:   String,
+                 sortFunc: (Study, Study) => Boolean,
+                 order:    SortOrder)
       : DomainValidation[Seq[Study]] = {
     val allStudies = studyRepository.getValues
 

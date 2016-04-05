@@ -85,7 +85,9 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     val event = for {
         nameAvailable <- nameAvailable(cmd.name)
         newCentre <- DisabledCentre.create(centreId, 0L, cmd.name, cmd.description, Set.empty, Set.empty)
-      } yield createCentreEvent(newCentre.id, cmd).update(
+      } yield CentreEvent(newCentre.id.id).update(
+        _.userId                    := cmd.userId,
+        _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.added.name                := cmd.name,
         _.added.optionalDescription := cmd.description
       )
@@ -98,7 +100,9 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
         for {
           nameAvailable <- nameAvailable(cmd.name, centre.id)
           centre        <- centre.withName(cmd.name)
-        } yield createCentreEvent(centre.id, cmd).update(
+        } yield CentreEvent(centre.id.id).update(
+          _.userId              := cmd.userId,
+          _.time                := ISODateTimeFormat.dateTime.print(DateTime.now),
           _.nameUpdated.version := cmd.expectedVersion,
           _.nameUpdated.name    := cmd.name
         )
@@ -110,7 +114,9 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
   private def processUpdateCentreDescriptionCmd(cmd: UpdateCentreDescriptionCmd): Unit = {
     val v = updateDisabled(cmd) { centre =>
         centre.withDescription(cmd.description).map { _ =>
-          createCentreEvent(centre .id, cmd).update(
+          CentreEvent(centre.id.id).update(
+            _.userId                                 := cmd.userId,
+            _.time                                   := ISODateTimeFormat.dateTime.print(DateTime.now),
             _.descriptionUpdated.version             := cmd.expectedVersion,
             _.descriptionUpdated.optionalDescription := cmd.description
           )
@@ -123,7 +129,10 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
   private def processEnableCentreCmd(cmd: EnableCentreCmd): Unit = {
     val v = updateDisabled(cmd) { centre =>
         centre.enable.map { _ =>
-          createCentreEvent(centre.id, cmd).update(_.enabled.version := cmd.expectedVersion)
+          CentreEvent(centre.id.id).update(
+            _.userId          := cmd.userId,
+            _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
+            _.enabled.version := cmd.expectedVersion)
         }
       }
 
@@ -133,7 +142,10 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
   private def processDisableCentreCmd(cmd: DisableCentreCmd): Unit = {
     val v = updateEnabled(cmd) { centre =>
         centre.disable.map { _ =>
-          createCentreEvent(centre.id, cmd).update(_.disabled.version := cmd.expectedVersion)
+          CentreEvent(centre.id.id).update(
+            _.userId           := cmd.userId,
+            _.time             := ISODateTimeFormat.dateTime.print(DateTime.now),
+            _.disabled.version := cmd.expectedVersion)
         }
       }
 
@@ -152,16 +164,18 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                             cmd.postalCode, cmd.poBoxNumber, cmd.countryIsoCode)
           }
           updatedCentre <- centre.withLocation(location)
-        } yield createCentreEvent(centre.id, cmd)
-          .update(_.locationAdded.version                      := cmd.expectedVersion,
-                  _.locationAdded.location.locationId          := location.uniqueId,
-                  _.locationAdded.location.name                := cmd.name,
-                  _.locationAdded.location.street              := cmd.street,
-                  _.locationAdded.location.city                := cmd.city,
-                  _.locationAdded.location.province            := cmd.province,
-                  _.locationAdded.location.postalCode          := cmd.postalCode,
-                  _.locationAdded.location.optionalPoBoxNumber := cmd.poBoxNumber,
-                  _.locationAdded.location.countryIsoCode      := cmd.countryIsoCode)
+        } yield CentreEvent(centre.id.id).update(
+          _.userId                                     := cmd.userId,
+          _.time                                       := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.locationAdded.version                      := cmd.expectedVersion,
+          _.locationAdded.location.locationId          := location.uniqueId,
+          _.locationAdded.location.name                := cmd.name,
+          _.locationAdded.location.street              := cmd.street,
+          _.locationAdded.location.city                := cmd.city,
+          _.locationAdded.location.province            := cmd.province,
+          _.locationAdded.location.postalCode          := cmd.postalCode,
+          _.locationAdded.location.optionalPoBoxNumber := cmd.poBoxNumber,
+          _.locationAdded.location.countryIsoCode      := cmd.countryIsoCode)
       }
 
     process (event) { applyCentreLocationAddedEvent(_) }
@@ -173,7 +187,9 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
   private def processRemoveCentreLocationCmd(cmd: RemoveCentreLocationCmd): Unit = {
     val event = updateDisabled(cmd) { centre =>
         centre.removeLocation(cmd.locationId) map { _ =>
-          createCentreEvent(centre.id, cmd).update(
+          CentreEvent(centre.id.id).update(
+            _.userId                     := cmd.userId,
+            _.time                       := ISODateTimeFormat.dateTime.print(DateTime.now),
             _.locationRemoved.version    := cmd.expectedVersion,
             _.locationRemoved.locationId := cmd.locationId)
         }
@@ -188,7 +204,9 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
   private def processAddStudyToCmd(cmd: AddStudyToCentreCmd): Unit = {
     val event = updateDisabled(cmd) { centre =>
         studyRepository.getByKey(StudyId(cmd.studyId)).map { _ =>
-          createCentreEvent(centre.id, cmd).update(
+          CentreEvent(centre.id.id).update(
+            _.userId             := cmd.userId,
+            _.time               := ISODateTimeFormat.dateTime.print(DateTime.now),
             _.studyAdded.version := cmd.expectedVersion,
             _.studyAdded.studyId := cmd.studyId)
         }
@@ -205,7 +223,9 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
         for {
           studyExists <- studyRepository.getByKey(StudyId(cmd.studyId))
           canRemove   <- centre.removeStudyId(StudyId(cmd.studyId))
-        } yield createCentreEvent(centre.id, cmd).update(
+        } yield CentreEvent(centre.id.id).update(
+          _.userId               := cmd.userId,
+          _.time                 := ISODateTimeFormat.dateTime.print(DateTime.now),
           _.studyRemoved.version := cmd.expectedVersion,
           _.studyRemoved.studyId := cmd.studyId)
       }
@@ -459,13 +479,13 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     }
   }
 
-  /**
-   * Creates an event with the userId for the user that issued the command, and the current date and time.
-   */
-  private def createCentreEvent(id: CentreId, command: CentreCommand) =
-    CentreEvent(id     = id.id,
-                userId = command.userId,
-                time   = Some(ISODateTimeFormat.dateTime.print(DateTime.now)))
+  // /**
+  //  * Creates an event with the userId for the user that issued the command, and the current date and time.
+  //  */
+  // private def createCentreEvent(id: CentreId, command: CentreCommand) =
+  //   CentreEvent(id     = id.id,
+  //               userId = command.userId,
+  //               time   = Some(ISODateTimeFormat.dateTime.print(DateTime.now)))
 
   testData.addMultipleCentres
 }

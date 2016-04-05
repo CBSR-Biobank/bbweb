@@ -9,7 +9,7 @@ object StudyCommands {
   import org.biobank.infrastructure.command.Commands._
 
   // study commands
-  trait StudyCommand extends Command
+  trait StudyCommand extends Command with HasOptionalUserId
 
   trait StudyModifyCommand extends StudyCommand with HasIdentity with HasExpectedVersion
 

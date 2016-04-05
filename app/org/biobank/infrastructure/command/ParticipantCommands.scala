@@ -6,26 +6,26 @@ import play.api.libs.json._
 
 object ParticipantCommands {
 
-  trait ParticipantCommand extends Command
+  trait ParticipantCommand extends Command with HasUserId
 
   trait ParticipantModifyCommand
       extends ParticipantCommand
       with HasIdentity
       with HasExpectedVersion
 
-  case class AddParticipantCmd(userId:      Option[String],
+  case class AddParticipantCmd(userId:      String,
                                studyId:     String,
                                uniqueId:    String,
                                annotations: List[Annotation])
       extends ParticipantCommand
 
-  case class UpdateParticipantUniqueIdCmd(userId:          Option[String],
+  case class UpdateParticipantUniqueIdCmd(userId:          String,
                                           id:              String,
                                           expectedVersion: Long,
                                           uniqueId:        String)
       extends ParticipantModifyCommand
 
-  case class ParticipantAddAnnotationCmd(userId:           Option[String],
+  case class ParticipantAddAnnotationCmd(userId:           String,
                                          id:               String,
                                          expectedVersion:  Long,
                                          annotationTypeId: String,
@@ -34,7 +34,7 @@ object ParticipantCommands {
                                          selectedValues:   Set[String])
       extends ParticipantModifyCommand
 
-  case class ParticipantRemoveAnnotationCmd(userId:           Option[String],
+  case class ParticipantRemoveAnnotationCmd(userId:           String,
                                             id:               String,
                                             expectedVersion:  Long,
                                             annotationTypeId: String)

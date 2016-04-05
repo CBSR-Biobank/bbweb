@@ -87,6 +87,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
   "Study REST API" when {
 
     "GET /studies" must {
+
       "list none" in {
         PagedResultsSpec(this).emptyResults(uri)
       }

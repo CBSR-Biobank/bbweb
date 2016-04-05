@@ -10,14 +10,14 @@ import org.joda.time.DateTime
 
 object CollectionEventCommands {
 
-  trait CollectionEventCommand extends Command
+  trait CollectionEventCommand extends Command with HasUserId
 
   trait CollectionEventModifyCommand
       extends CollectionEventCommand
       with HasIdentity
       with HasExpectedVersion
 
-  case class AddCollectionEventCmd(userId:                Option[String],
+  case class AddCollectionEventCmd(userId:                String,
                                    participantId:         String,
                                    collectionEventTypeId: String,
                                    timeCompleted:         DateTime,
@@ -25,19 +25,19 @@ object CollectionEventCommands {
                                    annotations:           List[Annotation])
       extends CollectionEventCommand
 
-  case class UpdateCollectionEventVisitNumberCmd(userId:          Option[String],
+  case class UpdateCollectionEventVisitNumberCmd(userId:          String,
                                                  id:              String,
-                                                 expectedVersion: Long,
+                                    expectedVersion: Long,
                                                  visitNumber:     Int)
       extends CollectionEventModifyCommand
 
-  case class UpdateCollectionEventTimeCompletedCmd(userId:          Option[String],
+  case class UpdateCollectionEventTimeCompletedCmd(userId:          String,
                                                    id:              String,
                                                    expectedVersion: Long,
                                                    timeCompleted:   DateTime)
       extends CollectionEventModifyCommand
 
-  case class UpdateCollectionEventAnnotationCmd(userId:           Option[String],
+  case class UpdateCollectionEventAnnotationCmd(userId:           String,
                                                 id:               String,
                                                 expectedVersion:  Long,
                                                 annotationTypeId: String,
@@ -46,13 +46,13 @@ object CollectionEventCommands {
                                                 selectedValues:   Set[String])
       extends CollectionEventModifyCommand
 
-  case class RemoveCollectionEventAnnotationCmd(userId:           Option[String],
+  case class RemoveCollectionEventAnnotationCmd(userId:           String,
                                                 id:               String,
                                                 expectedVersion:  Long,
                                                 annotationTypeId: String)
       extends CollectionEventModifyCommand
 
-  case class RemoveCollectionEventCmd(userId:          Option[String],
+  case class RemoveCollectionEventCmd(userId:          String,
                                       id:              String,
                                       participantId:   String,
                                       expectedVersion: Long)

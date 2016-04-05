@@ -35,7 +35,7 @@ class CollectionEventsController @Inject() (val env:          Environment,
            order:         String) =
     AuthAction(parse.empty) { (token, userId, request) =>
 
-      Logger.debug(s"CollectionEventsController:list: participantId/participantId, sort/$sort, page/$page, pageSize/$pageSize, order/$order")
+      Logger.debug(s"CollectionEventsController:list: participantId/$participantId, sort/$sort, page/$page, pageSize/$pageSize, order/$order")
 
       val pagedQuery = PagedQuery(sort, page, pageSize, order)
       val validation = for {
@@ -84,16 +84,21 @@ class CollectionEventsController @Inject() (val env:          Environment,
                        annotTypeId:   String,
                        ver:           Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = RemoveCollectionEventAnnotationCmd(userId           = Some(userId.id),
+      val cmd = RemoveCollectionEventAnnotationCmd(userId           = userId.id,
                                                    id               = ceventId,
                                                    expectedVersion  = ver,
                                                    annotationTypeId = annotTypeId)
       processCommand(cmd)
     }
 
+  def addSpecimens(ceventId: String) =
+    commandAction(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventTimeCompletedCmd =>
+      processCommand(cmd)
+    }
+
   def remove(participantId: String, ceventId: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = RemoveCollectionEventCmd(userId          = Some(userId.id),
+      val cmd = RemoveCollectionEventCmd(userId          = userId.id,
                                          id              = ceventId,
                                          participantId   = participantId,
                                          expectedVersion = ver)
