@@ -13,6 +13,7 @@ define(['underscore'], function (_) {
       restrict: 'E',
       scope: {},
       bindToController: {
+        study:      '=',
         ceventType: '='
       },
       templateUrl : '/assets/javascripts/admin/directives/studies/collection/ceventTypeView/ceventTypeView.html',
@@ -38,9 +39,8 @@ define(['underscore'], function (_) {
                               studyAnnotationTypeUtils) {
     var vm = this;
 
-    // FIXME: this should be initialized to the correct value
-    vm.modificationsAllowed = true;
-    vm.panelOpen            = true;
+    vm.isPanelCollapsed     = false;
+    vm.modificationsAllowed = vm.study.isDisabled();
 
     vm.editName             = editName;
     vm.editDescription      = editDescription;
@@ -156,7 +156,7 @@ define(['underscore'], function (_) {
     }
 
     function panelButtonClicked() {
-      vm.panelOpen = !vm.panelOpen;
+      vm.isPanelCollapsed = !vm.isPanelCollapsed;
     }
 
   }

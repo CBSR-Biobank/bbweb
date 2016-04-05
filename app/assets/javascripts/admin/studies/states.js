@@ -184,23 +184,15 @@ define(function () {
     $stateProvider.state('home.admin.studies.study.processing', {
       url: '/processing',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        processingDto: [
-          '$stateParams',
-          'ProcessingDto',
-          function ($stateParams, ProcessingDto) {
-            return ProcessingDto.get($stateParams.studyId);
-          }
-        ]
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'studyDetails': {
           templateUrl: '/assets/javascripts/admin/studies/studyProcessingTab.html',
           controller: [
-            '$scope', 'study', 'processingDto',
-            function($scope, study, processingDto) {
+            '$scope', 'study',
+            function($scope, study) {
               $scope.study = study;
-              $scope.processingDto = processingDto;
               $scope.annotationTypeDescription = 'Specimen link annotations allow a study to collect custom named and '+
                 'defined pieces of data when processing specimens. Annotations are optional and ' +
                 'are not required to be defined.';

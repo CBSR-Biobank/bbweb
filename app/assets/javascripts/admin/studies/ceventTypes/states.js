@@ -32,10 +32,12 @@ define(['underscore'], function (_) {
       },
       views: {
         'ceventTypeDetails': {
-          template: '<cevent-type-view cevent-type="vm.ceventType"></cevent-type-view>',
+          template: '<cevent-type-view study="vm.study" cevent-type="vm.ceventType"></cevent-type-view>',
           controller: [
+            'study',
             'ceventType',
-            function (ceventType) {
+            function (study, ceventType) {
+              this.study = study;
               this.ceventType = ceventType;
             }
           ],

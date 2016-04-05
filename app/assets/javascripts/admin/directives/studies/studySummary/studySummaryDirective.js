@@ -60,10 +60,11 @@ define(['underscore'], function(_) {
       modalOptions.bodyHtml += statusAction + ' study ' + vm.study.name + '?';
 
       modalService.showModal({}, modalOptions).then(function () {
-        vm.study[statusAction]().then(function (study) {
-          vm.study = study;
-          notificationsService.success('The study\'s status has been updated.', null, 2000);
-        });
+        return vm.study[statusAction]();
+      }).then(function (study) {
+        vm.study = study;
+        notificationsService.success('The study\'s status has been updated.', null, 2000);
+        console.log('----------> here');
       });
     }
 

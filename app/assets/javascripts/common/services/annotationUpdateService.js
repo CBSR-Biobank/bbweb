@@ -35,6 +35,8 @@ define(['underscore'], function (_) {
     //-------
 
     function update(annotation, title) {
+      title = title || 'Update ' + annotation.annotationType.name;
+
       if (annotation instanceof DateTimeAnnotation) {
         return modalInput.dateTime(title,
                                    annotation.annotationType.name,
