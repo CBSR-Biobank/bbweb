@@ -8,25 +8,26 @@ define(['underscore', 'tv4'], function(_, tv4) {
   CollectionSpecimenSpecFactory.$inject = [
     'funutils',
     'validationService',
-    'biobankApi',
-    'ConcurrencySafeEntity'
+    'biobankApi'
   ];
 
   /**
    *
    */
   function CollectionSpecimenSpecFactory(funutils,
-                                validationService,
-                                biobankApi,
-                                ConcurrencySafeEntity) {
+                                         validationService,
+                                         biobankApi) {
 
+    /**
+     * Used for validation.
+     */
     var schema = {
       'id': 'CollectionSpecimenSpec',
       'type': 'object',
       'properties': {
         'uniqueId':                    { 'type': 'string' },
         'name':                        { 'type': 'string' },
-        'description':                 { 'type': 'string' },
+        'description':                 { 'type': [ 'string', 'null' ] },
         'units':                       { 'type': 'string' },
         'anatomicalSourceType':        { 'type': 'string' },
         'preservationType':            { 'type': 'string' },
@@ -48,26 +49,94 @@ define(['underscore', 'tv4'], function(_, tv4) {
       ]
     };
 
+
+    /**
+     * @classdesc Creates a new CollectionSpecimenSpec.
+     * @class
+     * @memberOf domain.studies
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     */
     function CollectionSpecimenSpec(obj) {
-      var self = this,
-          defaults = {
-            uniqueId:                    null,
-            name:                        '',
-            description:                 null,
-            units:                       '',
-            anatomicalSourceType:        '',
-            preservationType:            '',
-            preservationTemperatureType: '',
-            specimenType:                '',
-            maxCount:                    null,
-            amount:                      null
-          };
+      /**
+       * The unique ID that identifies an object of this type.
+       * @name domain.studies.CollectionSpecimenSpec#uniqueId
+       *
+       * @type string
+       */
+      this.uniqueId = null;
+
+      /**
+       * A short identifying name.
+       * @name domain.studies.CollectionSpecimenSpec#name
+       * @type string
+       */
+      this.name = '';
+
+      /**
+       * A description that can provide additional details on the name.
+       *
+       * @name domain.studies.CollectionSpecimenSpec#description
+       * @type {?string}
+       * @see domain.studies.CollectionSpecimenSpec#name
+       */
+      this.description = null;
+
+      /**
+       * Specifies how the specimen amount is measured (e.g. volume, weight, length, etc.).
+       * @name domain.studies.CollectionSpecimenSpec#units
+       * @type {string}
+       */
+      this.units = '';
+
+      /**
+       * @name domain.studies.CollectionSpecimenSpec#anatomicalSourceType
+       * @type {domain.AnatomicalSourceType}
+       */
+      this.anatomicalSourceType = '';
+
+      /**
+       * @name domain.studies.CollectionSpecimenSpec#preservationType
+       * @type {domain.PreservationType}
+       */
+      this.preservationType = '';
+
+      /**
+       * @name domain.studies.CollectionSpecimenSpec#preservationTemperatureType
+       * @type {domain.PreservationTemperatureType}
+       */
+      this.preservationTemperatureType = '';
+
+      /**
+       * @name domain.studies.CollectionSpecimenSpec#specimenType
+       * @type {domain.SpecimenType}
+       */
+      this.specimenType = '';
+
+      /**
+       * The amount per specimen, measured in units, to be collected.
+       * @name domain.studies.CollectionSpecimenSpec#amount
+       * @type {number}
+       * @see domain.studies.CollectionSpecimenSpec#units
+       */
+      this.units = null;
+
+      /**
+       * The number of specimens to be collected.
+       * @name domain.studies.CollectionSpecimenSpec#maxCount
+       * @type {number}
+       * @see domain.studies.CollectionSpecimenSpec.units
+       */
+      this.maxCount = null;
 
       obj = obj || {};
-      ConcurrencySafeEntity.call(self, obj);
-      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
+      _.extend(this, obj);
     }
 
+    /**
+     * @private
+     */
     CollectionSpecimenSpec.isValid = function(obj) {
       return tv4.validate(obj, schema);
     };

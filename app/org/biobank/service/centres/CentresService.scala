@@ -24,6 +24,8 @@ trait CentresService {
 
   def getAll: Set[Centre]
 
+  def centreLocations(): Set[CentreLocation]
+
   def getCentres[T <: Centre]
     (filter: String, status: String, sortFunc: (Centre, Centre) => Boolean, order: SortOrder)
       : DomainValidation[Seq[Centre]]
@@ -61,6 +63,14 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
    */
   def getAll: Set[Centre] = {
     centreRepository.getValues.toSet
+  }
+
+  def centreLocations(): Set[CentreLocation] = {
+    centreRepository.getValues.flatMap { centre =>
+      centre.locations.map { location =>
+        CentreLocation(centre.id.id, location.uniqueId, centre.name, location.name)
+      }
+    }.toSet
   }
 
   def getCountsByStatus(): CentreCountsByStatus = {

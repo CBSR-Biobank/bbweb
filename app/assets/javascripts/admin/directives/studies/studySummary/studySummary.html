@@ -13,7 +13,7 @@
                 ng-click="vm.changeStatus('disable')"
                 title="Disable"
                 ng-if="vm.study.isEnabled()">
-          <i class="glyphicon glyphicon-remove-sign"></i>
+          <i class="glyphicon glyphicon-cog"></i>
         </button>
 
         <button class="btn btn-xs btn-danger"
@@ -64,6 +64,14 @@
              allow-edit="true"
              on-edit="vm.editDescription()">
           </truncate-toggle>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item"
+        ng-if="!vm.hasCollectionEventTypes">
+      <div class="panel panel-warning">
+        <div class="panel-heading">
+          Study cannot be enabled until at least one collection event has been added.
         </div>
       </div>
     </li>

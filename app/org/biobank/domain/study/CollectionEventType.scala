@@ -141,6 +141,10 @@ case class CollectionEventType(studyId:            StudyId,
     ! specimenSpecs.isEmpty
   }
 
+  def specimenSpec(uniqueId: String): DomainValidation[CollectionSpecimenSpec] = {
+    specimenSpecs.find(_.uniqueId == uniqueId).toSuccessNel("specimen spec not found")
+  }
+
   override def toString: String =
     s"""|CollectionEventType:{
         |  studyId:           $studyId,

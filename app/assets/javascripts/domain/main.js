@@ -64,6 +64,7 @@ define(function (require) {
 
   module.factory('Participant',                         require('./participants/Participant'));
   module.factory('CollectionEvent',                     require('./participants/CollectionEvent'));
+  module.factory('Specimen',                            require('./participants/Specimen'));
 
   module.factory('User',                                require('./user/User'));
   module.factory('UserViewer',                          require('./user/UserViewer'));

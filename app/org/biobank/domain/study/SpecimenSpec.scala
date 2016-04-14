@@ -31,9 +31,9 @@ trait SpecimenSpec extends HasUniqueName with HasDescriptionOption {
   /** A short identifying name that is unique to the study. */
   val name: String
 
-  /** Specifies how the specimen amount is measured (e.g. volume, weight, length, etc.). */
   val description: Option[String]
 
+  /** Specifies how the specimen amount is measured (e.g. volume, weight, length, etc.). */
   val units: String
 
   /** See [[AnatomicalSourceType]]. */

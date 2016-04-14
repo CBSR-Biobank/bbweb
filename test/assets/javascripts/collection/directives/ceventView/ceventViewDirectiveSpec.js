@@ -13,49 +13,23 @@ define(function(require) {
       faker                           = require('faker'),
       annotationUpdateSharedBehaviour = require('../../../common/annotationUpdateSharedBehaviourSpec');
 
-  function createDirective(test) {
-    var element,
-        scope = test.$rootScope.$new();
-
-    element = angular.element([
-      '<cevent-view',
-      '  collection-event-types="vm.collectionEventTypes"',
-      '  collection-event="vm.collectionEvent">',
-      '</cevent-view>'
-    ].join(''));
-
-    scope.vm = {
-      collectionEventTypes: test.collectionEventTypes,
-      collectionEvent:      test.collectionEvent
-    };
-    test.$compile(element)(scope);
-    scope.$digest();
-
-    return {
-      element:    element,
-      scope:      scope,
-      controller: element.controller('ceventView')
-    };
-  }
-
-  describe('ceventViewDirectiveSpec', function() {
+  describe('directive: ceventViewDirective', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(templateMixin) {
+    beforeEach(inject(function($rootScope, $compile, templateMixin) {
       var self = this;
 
       _.extend(self, templateMixin);
 
       self.$q                  = self.$injector.get('$q');
-      self.$rootScope          = self.$injector.get('$rootScope');
-      self.$compile            = self.$injector.get('$compile');
       self.$state              = self.$injector.get('$state');
       self.Participant         = self.$injector.get('Participant');
       self.CollectionEvent     = self.$injector.get('CollectionEvent');
       self.CollectionEventType = self.$injector.get('CollectionEventType');
       self.AnnotationValueType = self.$injector.get('AnnotationValueType');
-      self.factory        = self.$injector.get('factory');
+      self.Specimen            = self.$injector.get('Specimen');
+      self.factory             = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/ceventView/ceventView.html',
@@ -70,7 +44,10 @@ define(function(require) {
       self.pagedResult          = self.factory.pagedResult([ self.collectionEvent ]);
       self.collectionEventTypes = [ new self.CollectionEventType(self.jsonCeventType) ];
 
+      spyOn(self.Specimen, 'list').and.returnValue(self.$q.when(self.factory.pagedResult([])));
+
       self.collectionEventWithAnnotation = collectionEventWithAnnotation;
+      self.createDirective = createDirective;
 
       //---
 
@@ -93,33 +70,56 @@ define(function(require) {
         collectionEventType = new self.CollectionEventType(jsonCeventType);
         return new self.CollectionEvent(jsonCevent, collectionEventType);
       }
+
+      function createDirective(collectionEventTypes, collectionEvent) {
+
+        collectionEventTypes = collectionEventTypes || self.collectionEventTypes;
+        collectionEvent = collectionEvent || self.collectionEvent;
+
+        self.element = angular.element([
+          '<cevent-view',
+          '  collection-event-types="vm.collectionEventTypes"',
+          '  collection-event="vm.collectionEvent">',
+          '</cevent-view>'
+        ].join(''));
+
+        self.scope = $rootScope.$new();
+        self.scope.vm = {
+          collectionEventTypes: collectionEventTypes,
+          collectionEvent:      collectionEvent
+        };
+        $compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('ceventView');
+      }
+
     }));
 
     it('has valid scope', function() {
-      var directive = createDirective(this);
+      this.createDirective();
 
-      expect(directive.controller.collectionEventTypes).toBe(this.collectionEventTypes);
-      expect(directive.controller.collectionEvent).toBe(this.collectionEvent);
-      expect(directive.controller.panelOpen).toBeTrue();
-      expect(directive.controller.timeCompletedLocal).toBeDefined();
+      expect(this.controller.collectionEventTypes).toBe(this.collectionEventTypes);
+      expect(this.controller.collectionEvent).toBe(this.collectionEvent);
+      expect(this.controller.panelOpen).toBeTrue();
+      expect(this.controller.timeCompletedLocal).toBeDefined();
 
-      expect(directive.controller.editVisitType).toBeFunction();
-      expect(directive.controller.editTimeCompleted).toBeFunction();
-      expect(directive.controller.editAnnotation).toBeFunction();
-      expect(directive.controller.addSpecimen).toBeFunction();
-      expect(directive.controller.panelButtonClicked).toBeFunction();
+      expect(this.controller.editVisitType).toBeFunction();
+      expect(this.controller.editTimeCompleted).toBeFunction();
+      expect(this.controller.editAnnotation).toBeFunction();
+      expect(this.controller.addSpecimens).toBeFunction();
+      expect(this.controller.panelButtonClicked).toBeFunction();
     });
 
     it('panel can be closed and opened', function() {
-      var directive = createDirective(this);
+      this.createDirective();
 
-      directive.controller.panelButtonClicked();
-      directive.scope.$digest();
-      expect(directive.controller.panelOpen).toBeFalse();
+      this.controller.panelButtonClicked();
+      this.scope.$digest();
+      expect(this.controller.panelOpen).toBeFalse();
 
-      directive.controller.panelButtonClicked();
-      directive.scope.$digest();
-      expect(directive.controller.panelOpen).toBeTrue();
+      this.controller.panelButtonClicked();
+      this.scope.$digest();
+      expect(this.controller.panelOpen).toBeTrue();
     });
 
     describe('updates to time completed', function () {
@@ -149,7 +149,6 @@ define(function(require) {
         context.modalInputFuncName       = 'text';
         context.entity                   = this.CollectionEvent;
         context.entityUpdateFuncName     = 'addAnnotation';
-        context.createDirective          = createDirective;
         context.annotation               = collectionEvent.annotations[0];
         context.newValue                 = faker.random.word();
       }));
@@ -170,7 +169,6 @@ define(function(require) {
         context.modalInputFuncName       = 'dateTime';
         context.entity                   = this.CollectionEvent;
         context.entityUpdateFuncName     = 'addAnnotation';
-        context.createDirective          = createDirective;
         context.annotation               = collectionEvent.annotations[0];
         context.newValue                 = { date: newValue, time: newValue };
       }));
@@ -190,7 +188,6 @@ define(function(require) {
         context.modalInputFuncName       = 'number';
         context.entity                   = this.CollectionEvent;
         context.entityUpdateFuncName     = 'addAnnotation';
-        context.createDirective          = createDirective;
         context.annotation               = collectionEvent.annotations[0];
         context.newValue                 = 10;
       }));
@@ -210,7 +207,6 @@ define(function(require) {
         context.modalInputFuncName       = 'number';
         context.entity                   = this.CollectionEvent;
         context.entityUpdateFuncName     = 'addAnnotation';
-        context.createDirective          = createDirective;
         context.annotation               = collectionEvent.annotations[0];
         context.newValue                 = 1;
       }));
@@ -231,7 +227,6 @@ define(function(require) {
         context.modalInputFuncName       = 'select';
         context.entity                   = this.CollectionEvent;
         context.entityUpdateFuncName     = 'addAnnotation';
-        context.createDirective          = createDirective;
         context.annotation               = collectionEvent.annotations[0];
         context.newValue                 = collectionEvent.annotations[0].annotationType.options[0];
       }));
@@ -252,7 +247,6 @@ define(function(require) {
         context.modalInputFuncName       = 'selectMultiple';
         context.entity                   = this.CollectionEvent;
         context.entityUpdateFuncName     = 'addAnnotation';
-        context.createDirective          = createDirective;
         context.annotation               = collectionEvent.annotations[0];
         context.newValue                 = collectionEvent.annotations[0].annotationType.options;
       }));
@@ -275,8 +269,7 @@ define(function(require) {
 
 
       it('on update should invoke the update method on entity', function() {
-        var directive,
-            deferred = this.$q.defer();
+        var deferred = this.$q.defer();
 
         deferred.resolve(context.newValue);
 
@@ -286,17 +279,16 @@ define(function(require) {
           .and.returnValue(this.$q.when(context.collectionEvent));
         spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
-        directive = createDirective(this);
-        directive.controller[context.controllerUpdateFuncName]();
-        directive.scope.$digest();
+        this.createDirective();
+        this.controller[context.controllerUpdateFuncName]();
+        this.scope.$digest();
 
         expect(this.CollectionEvent.prototype[context.ceventUpdateFuncName]).toHaveBeenCalled();
         expect(this.notificationsService.success).toHaveBeenCalled();
       });
 
       it('error message should be displayed when update fails', function() {
-        var directive,
-            modalDeferred = this.$q.defer(),
+        var modalDeferred = this.$q.defer(),
             updateDeferred = this.$q.defer();
 
         modalDeferred.resolve(context.newValue);
@@ -308,9 +300,9 @@ define(function(require) {
           .and.returnValue(updateDeferred.promise);
         spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-        directive = createDirective(this);
-        directive.controller[context.controllerUpdateFuncName]();
-        directive.scope.$digest();
+        this.createDirective();
+        this.controller[context.controllerUpdateFuncName]();
+        this.scope.$digest();
 
         expect(this.notificationsService.updateError).toHaveBeenCalled();
       });

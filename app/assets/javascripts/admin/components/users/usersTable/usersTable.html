@@ -29,25 +29,25 @@
   </thead>
   <tbody ng-show="!vm.tableDataLoading">
     <tr ng-repeat="user in vm.users">
-      <td class="col-md-3">
+      <td>
         <span ng-click="vm.userInformation(user)">
           <a href>{{user.email}}</a>
         </span>
       </td>
-      <td class="col-md-3">
+      <td>
         {{user.name}}
       </td>
-      <td class="col-md-2">
+      <td>
         <a href uib-tooltip="{{user.timeAdded | localTime}}">
           {{user.timeAdded | timeago}}
         </a>
       </td>
-      <td class="col-md-2">
+      <td>
         <span class="badge">{{user.statusLabel}}</span>
       </td>
 
       <!-- BUTTONS -->
-      <td class="col-md-1" data-title="'Action'">
+      <td>
         <div class="btn-group">
           <button class="btn btn-xs btn-success"
                   ng-click="vm.activate(user)"
@@ -77,7 +77,7 @@
   </tbody>
   <tbody ng-show="vm.tableDataLoading">
     <tr>
-      <td colspan="4" class="text-center">Loading ... </td>
+      <td colspan="5" class="text-center">Loading ... </td>
     </tr>
   </tbody>
   <tfoot>

@@ -33,7 +33,7 @@ package domain {
 
   trait HasDescription {
 
-    /** An description that can provide additional details on the name. */
+    /** A description that can provide additional details on the name. */
     val description: String
 
   }

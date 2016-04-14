@@ -13,6 +13,17 @@ define([
 
   /**
    * Used for directives that update annotations on a domain entity.
+   *
+   * The test case needs the following members:
+   *
+   *   - this.createDirective(): a function that creates the directive. This function can also
+   *     create the members listed below.
+   *
+   *   - this.element: the element that contains the directive.
+   *
+   *   - this.scope: the scope passed to the directive.
+   *
+   *   - this.controller: the controller associated with the directive.
    */
   function annotationUpdateSharedBehaviour(context) {
 
@@ -24,8 +35,7 @@ define([
       }));
 
       it('on update should invoke the update method on entity', function() {
-        var directive,
-            modalInputDeferred = this.$q.defer();
+        var modalInputDeferred = this.$q.defer();
 
         modalInputDeferred.resolve(context.newValue);
 
@@ -35,17 +45,16 @@ define([
           .and.returnValue(this.$q.when(context.entity));
         spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
-        directive = context.createDirective(this);
-        directive.controller[context.controllerUpdateFuncName](context.annotation);
-        directive.scope.$digest();
+        this.createDirective();
+        this.controller[context.controllerUpdateFuncName](context.annotation);
+        this.scope.$digest();
 
         expect(context.entity.prototype[context.entityUpdateFuncName]).toHaveBeenCalled();
         expect(this.notificationsService.success).toHaveBeenCalled();
       });
 
       it('error message should be displayed when update fails', function() {
-        var directive,
-            modalDeferred = this.$q.defer(),
+        var modalDeferred = this.$q.defer(),
             updateDeferred = this.$q.defer();
 
         modalDeferred.resolve(context.newValue);
@@ -57,9 +66,9 @@ define([
           .and.returnValue(updateDeferred.promise);
         spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-        directive = context.createDirective(this);
-        directive.controller[context.controllerUpdateFuncName](context.annotation);
-        directive.scope.$digest();
+        this.createDirective();
+        this.controller[context.controllerUpdateFuncName](context.annotation);
+        this.scope.$digest();
 
         expect(this.notificationsService.updateError).toHaveBeenCalled();
       });

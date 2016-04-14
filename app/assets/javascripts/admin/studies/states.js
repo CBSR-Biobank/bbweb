@@ -159,11 +159,7 @@ define(function () {
       },
       views: {
         'studyDetails': {
-          template: [
-            '<study-collection',
-            '  study="vm.study"',
-            '</study-collection>',
-          ].join(''),
+          template: '<study-collection study="vm.study"></study-collection>',
           controller: [
             'study',
             function(study) {

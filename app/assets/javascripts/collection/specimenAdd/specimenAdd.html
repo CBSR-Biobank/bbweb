@@ -1,0 +1,145 @@
+<div class="modal-header">
+  <h3 class="modal-title">Add specimen</h3>
+</div>
+<div class="modal-body">
+  <form class="form-horizontal" name="form" novalidate>
+
+    <!-- SPECIMEN SPEC "-->
+    <div class="form-group row"
+         ng-class="{ 'has-error' : form.specimenSpec.$invalid && !form.specimenSpec.$pristine }">
+      <label class="col-md-3 control-label">Specimen type</label>
+      <div class="col-md-9">
+        <select class="form-control"
+                id="specimenSpec"
+                name="specimenSpec"
+                ng-model="vm.selectedSpecimenSpec"
+                ng-options="specimenSpec as specimenSpec.name for specimenSpec in vm.specimenSpecs"
+                ng-change="vm.specimenSpecChanged()"
+                focus-me="true"
+                required>
+          <option value="">-- make a selection --</option>
+        </select>
+      </div>
+      <div class="col-sm-offset-3 col-sm-9">
+        <p class="help-block" ng-show="form.specimenSpec.$error.required &&
+                                       !form.specimenSpec.$pristine">
+          A specimen type must be selected
+        </p>
+      </div>
+    </div>
+
+    <!-- UNVENTORY ID -->
+    <div class="form-group row"
+         ng-class="{ 'has-error' : form.inventoryId.$invalid && !form.inventoryId.$pristine }">
+      <label for="inventoryId" class="col-md-3 control-label">Inventory ID</label>
+      <div class="col-md-9">
+        <input name="inventoryId"
+               type="text"
+               class="form-control"
+               ng-model="vm.inventoryId"
+               ng-minlength="6"
+               required/>
+      </div>
+      <div class="col-md-offset-3 col-md-9">
+        <p class="help-block" ng-show="form.inventoryId.$error.minlength">
+          Inventory ID is too short.
+        </p>
+      </div>
+    </div>
+
+    <!-- AMOUNT -->
+    <div class="form-group row"
+         ng-class="{ 'has-error' : form.amount.$invalid && !form.amount.$pristine,
+                   'has-warning' : !vm.usingDefaultAmount }">
+      <label for="amount" class="col-md-3 control-label">Amount</label>
+      <div class="col-md-9">
+        <div class="input-group">
+          <input name="amount"
+                 type="number"
+                 class="form-control"
+                 ng-model="vm.amount"
+                 positive-float/>
+          <span class="input-group-addon" ng-if="vm.selectedSpecimenSpec")>
+            {{vm.selectedSpecimenSpec.units}}
+          </span>
+        </div>
+      </div>
+      <div class="col-md-offset-3 col-md-9">
+        <p class="help-block" ng-show="form.amount.$error.positiveFloat || form.amount.$error.required">
+          Value should be a positive floating point number
+        </p>
+        <p class="help-block" ng-show="!vm.usingDefaultAmount">
+          Amount is different than the default ({{vm.defaultAmount}} {{vm.units}})
+        </p>
+      </div>
+    </div>
+
+    <!-- TIME COLECTED -->
+    <div class="form-group row"
+         ng-class="{ 'has-error' : form.date.$invalid && !form.date.$pristine }">
+      <label class="col-md-3 control-label">Time collected</label>
+      <div class="col-md-9">
+        <div class="input-group">
+          <input name="date"
+                 type="text"
+                 class="form-control"
+                 datetime-picker="{{vm.datetimePickerFormat}}"
+                 timepicker-options="vm.timepickerOptions"
+                 ng-model="vm.timeCollected"
+                 is-open="vm.calendarOpen"
+                 ng-disabled="vm.useDefault"
+                 ng-required="true" />
+          <span class="input-group-btn">
+            <button type="button"
+                    class="btn btn-default"
+                    ng-click="vm.openCalendar($event)"
+                    ng-disabled="vm.useDefault">
+              <i class="glyphicon glyphicon-calendar"></i>
+            </button>
+          </span>
+        </div>
+      </div>
+      <div class="col-md-offset-3 col-md-9">
+        <p class="help-block" ng-show="form.date.$error.datetime && !form.date.$pristine">
+          date and / or time are invalid
+        </p>
+      </div>
+    </div>
+
+    <!-- CENTRE LOCATIONS "-->
+    <div class="form-group row"
+         ng-class="{ 'has-error' : form.centre.$invalid && !form.centre.$pristine }">
+      <label class="col-md-3 control-label">Collection centre</label>
+      <div class="col-md-9">
+        <select class="form-control"
+                name="centre"
+                ng-model="vm.selectedLocationId"
+                ng-options="locInfo.locationId as locInfo.name for locInfo in vm.centreLocations"
+                required>
+          <option value="">-- make a selection --</option>
+        </select>
+      </div>
+      <div class="col-sm-offset-3 col-sm-9">
+        <p class="help-block" ng-show="specimenForm.centre.$error.required &&
+                                       !specimenForm.centre.$pristine">
+          A centre must be selected
+        </p>
+      </div>
+    </div>
+
+  </form>
+</div>
+<div class="modal-footer">
+  <button class="btn" ng-click="vm.closePressed()">Cancel</button>
+  <button class="btn btn-primary"
+          ng-click="vm.okPressed()"
+          ng-disabled="form.$invalid">OK</button>
+  <button class="btn btn-primary"
+          ng-click="vm.nextPressed()"
+          ng-disabled="form.$invalid">Next</button>
+</div>
+<!--
+<div class="row">
+  <div class="col-xs-12"><pre>Specimen specs: {{vm.specimenSpecs | json}}</pre></div>
+</div>
+-->

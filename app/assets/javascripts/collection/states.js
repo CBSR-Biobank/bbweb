@@ -16,6 +16,11 @@ define(['underscore'], function(_) {
       return StudyCounts.get();
     }
 
+    resolveCentreCounts.$inject = ['CentreCounts'];
+    function resolveCentreCounts(CentreCounts) {
+      return CentreCounts.get();
+    }
+
     resolveStudy.$inject = ['$stateParams', 'Study'];
     function resolveStudy($stateParams, Study) {
       return Study.get($stateParams.studyId);
@@ -70,20 +75,18 @@ define(['underscore'], function(_) {
       url: '^/collection',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
-        studyCounts: resolveStudyCounts
+        studyCounts: resolveStudyCounts,
+        centreCounts: resolveCentreCounts
       },
       views: {
         'main@': {
-          template: [
-            '<collection',
-            '  study-counts="vm.studyCounts">',
-            '</collection>'
-          ].join(''),
+          template: '<collection study-counts="vm.studyCounts" centre-counts="vm.centreCounts"></collection>',
           controller: [
             'studyCounts',
-            function (studyCounts) {
-              var vm = this;
-              vm.studyCounts = studyCounts;
+            'centreCounts',
+            function (studyCounts, centreCounts) {
+              this.studyCounts = studyCounts;
+              this.centreCounts = centreCounts;
             }
           ],
           controllerAs: 'vm'

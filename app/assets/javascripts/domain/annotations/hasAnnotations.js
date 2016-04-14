@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['underscore', 'sprintf'], function (_, sprintf) {
+define(['underscore'], function (_) {
   'use strict';
 
   hasAnnotationsFactory.$inject = [

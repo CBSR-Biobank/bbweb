@@ -6,8 +6,8 @@ define(function (require) {
   'use strict';
 
   var angular = require('angular'),
-      _ = require('lodash'),
-      name = 'biobank.modalinput',
+      _       = require('lodash'),
+      name    = 'biobank.modalinput',
       module;
 
   /**

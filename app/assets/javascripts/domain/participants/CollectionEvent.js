@@ -26,6 +26,11 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                                   hasAnnotations,
                                   annotationFactory) {
 
+    /**
+     * Used to validate the fields of a plain object that contains default fields.
+     *
+     * @see  CollectionEvent.create() and CollectionEvent.asyncCreate.
+     */
     var schema = {
       'id': 'CollectionEvent',
       'type': 'object',
@@ -52,14 +57,18 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     };
 
     /**
-     * To convert server side annotations to Annotation class call setAnnotationTypes().
+     * Creates a new CollectionEvent.
+     * @class
+     * @memberOf domain.participants
      *
-     * @param {object} obj.annotations - server response for annotation.
+     * @description To convert server side annotations to Annotation objects call
+     * [setCollectionEventType]{@link domain.participant.CollectionEvent#setCollectionEventType}.
      *
-     * @param {CollectionEventType} collectionEventType
+     * @param {object} [obj = {}] - The JSON object to create this CollectionEvent from. This object usually
+     * comes from the server.
      *
-     * @param {CollectionEventAnnotationType} annotationTypes. If both collectionEventType and annotationTypes
-     * are passed to the constructor, the annotations will be converted to Annotation objects.
+     * @param {domain.study.CollectionEventType} [collectionEventType] - The CollectionEventType that
+     * describes this object.
      */
     function CollectionEvent(obj, collectionEventType) {
       var defaults = {
@@ -94,7 +103,14 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     };
 
     /**
-     * Used by promise code, so it must return an error rather than throw one.
+     * Creates a CollectionEvent, but first it validates <code>obj</code> to ensure that it has a valid
+     * schema.
+     *
+     * @param {object} [obj = {}] - The JSON object to create this CollectionEvent from. This object usually
+     * comes from the server.
+     *
+     * @param {biobank.domain.CollectionEventType} [collectionEventType] - The CollectionEventType that
+     * describes this object.
      */
     CollectionEvent.create = function (obj, collectionEventType) {
       if (!tv4.validate(obj, schema)) {
@@ -111,13 +127,12 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     };
 
     /**
-     * @param participantId the ID of the participant this collection event belongs to.
+     * Retrieves a CollectionEvent from the server.
      *
-     * @param id the collection event's ID.
+     * @param {string} id - the collection event's ID.
      *
-     * @param collectionEventType can be undefined or null.
-     *
-     * @param annotationTypes can be undefined or null.
+     * @param {biobank.domain.CollectionEventType} [collectionEventType] - The CollectionEventType that
+     * describes this object.
      */
     CollectionEvent.get = function (id, collectionEventType) {
       if (!id) {
@@ -190,6 +205,9 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
         });
     };
 
+    /**
+     * Assigns a CollectionEventType and converts annotations to Annotation objects.
+     */
     CollectionEvent.prototype.setCollectionEventType = function (collectionEventType) {
       this.collectionEventTypeId = collectionEventType.id;
       this.collectionEventType = collectionEventType;

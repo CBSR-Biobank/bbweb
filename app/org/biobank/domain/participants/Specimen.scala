@@ -28,7 +28,7 @@ sealed trait Specimen
   /** The inventory ID assigned to this specimen. */
   val inventoryId: String
 
-  /** The [[SpecimenGroup]] this specimen belongs to, defined by the study it belongs to. */
+  /** The [[CollectionSpecimenSpec]] this specimen belongs to, defined by the study it belongs to. */
   val specimenSpecId: String
 
   /** The [[Centre]] where this specimen was created. */

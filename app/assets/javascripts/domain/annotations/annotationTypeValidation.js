@@ -5,14 +5,12 @@
 define(function () {
   'use strict';
 
-  annotationTypeValidation.$inject = [
-    'validationService'
-  ];
+  //annotationTypeValidation.$inject = [];
 
   /**
    *
    */
-  function annotationTypeValidation(validationService) {
+  function annotationTypeValidation() {
     var requiredKeys = ['name', 'valueType', 'options'];
     var service = {};
 

@@ -14,28 +14,7 @@ define([
 
   describe('collectionDirective', function() {
 
-    function createDirective(test) {
-      var element,
-          scope = test.$rootScope.$new();
-
-      element = angular.element([
-        '<collection',
-        '  study-counts="vm.counts">',
-        '</collection>'
-      ].join(''));
-
-      scope.vm = { counts: test.counts };
-      test.$compile(element)(scope);
-      scope.$digest();
-
-      return {
-        element:    element,
-        scope:      scope,
-        controller: element.controller('collection')
-      };
-    }
-
-    function getCounts() {
+    function getStudyCounts() {
       return {
         disabled: faker.random.number(),
         enabled: faker.random.number(),
@@ -43,16 +22,21 @@ define([
       };
     }
 
+    function getCentreCounts() {
+      return {
+        disabled: faker.random.number(),
+        enabled: faker.random.number()
+      };
+    }
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(templateMixin) {
+    beforeEach(inject(function($rootScope, $compile, templateMixin) {
       var self = this;
 
       _.extend(self, templateMixin);
 
       self.$q                  = self.$injector.get('$q');
-      self.$rootScope          = self.$injector.get('$rootScope');
-      self.$compile            = self.$injector.get('$compile');
       self.Study               = self.$injector.get('Study');
       self.factory        = self.$injector.get('factory');
 
@@ -60,19 +44,46 @@ define([
         '/assets/javascripts/collection/directives/collection/collection.html',
         '/assets/javascripts/collection/directives/selectStudy/selectStudy.html');
 
-      self.counts = getCounts();
+      self.createDirective = createDirective;
+
+      //--
+
+      function createDirective(studyCounts, centreCounts) {
+        studyCounts = studyCounts || getStudyCounts();
+        centreCounts = centreCounts || getCentreCounts();
+
+        self.element = angular.element([
+          '<collection',
+          '  study-counts="vm.studyCounts"',
+          '  centre-counts="vm.centreCounts">',
+          '</collection>'
+        ].join(''));
+
+        self.scope = $rootScope.$new();
+        self.scope.vm = {
+          studyCounts: studyCounts,
+          centreCounts: centreCounts
+        };
+        $compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('collection');
+      }
+
     }));
 
     it('has valid scope', function() {
-      var directive;
+      var studyCounts = getStudyCounts(),
+          centreCounts = getCentreCounts();
 
       spyOn(this.Study, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([])));
 
-      directive = createDirective(this);
-      expect(directive.controller.studyCounts).toBe(this.counts);
-
-      expect(directive.controller.updateEnabledStudies).toBeFunction();
-      expect(directive.controller.getEnabledStudiesPanelHeader).toBeFunction();
+      this.createDirective(studyCounts, centreCounts);
+      expect(this.controller.studyCounts).toBe(studyCounts);
+      expect(this.controller.centreCounts).toBe(centreCounts);
+      expect(this.controller.haveEnabledStudies).toBe(studyCounts.enabled > 0);
+      expect(this.controller.haveEnabledCentres).toBe(centreCounts.enabled > 0);
+      expect(this.controller.updateEnabledStudies).toBeFunction();
+      expect(this.controller.getEnabledStudiesPanelHeader).toBeFunction();
     });
 
   });

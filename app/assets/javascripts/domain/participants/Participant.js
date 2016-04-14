@@ -10,8 +10,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     'funutils',
     'ConcurrencySafeEntity',
     'biobankApi',
-    'hasAnnotations',
-    'annotationFactory'
+    'hasAnnotations'
   ];
 
   /**
@@ -21,8 +20,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                               funutils,
                               ConcurrencySafeEntity,
                               biobankApi,
-                              hasAnnotations,
-                              annotationFactory) {
+                              hasAnnotations) {
 
     var schema = {
       'id': 'Participant',

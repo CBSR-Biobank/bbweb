@@ -9,9 +9,13 @@ define(function (require) {
 
   var angular = require('angular'),
       name = 'biobank.collection',
+      specimenAddModule = require('./specimenAdd/specimenAddModule'),
       module;
 
-  module = angular.module(name, [ 'biobank.users' ]);
+  module = angular.module(name, [
+    'biobank.users',
+    specimenAddModule.name
+  ]);
 
   module.config(require('./states'));
 
@@ -30,6 +34,8 @@ define(function (require) {
   module.directive('ceventsAddAndSelect',
                    require('./directives/ceventsAddAndSelect/ceventsAddAndSelectDirective'));
   module.directive('ceventsList',         require('./directives/ceventsList/ceventsListDirective'));
+
+  module.component('specimenSummary',     require('./components/specimenSummary/specimenSummaryComponent'));
 
   return {
     name: name,

@@ -37,7 +37,7 @@ define(['moment', 'underscore'], function(moment, _) {
       if (_.isNull(this.value)) {
         return null;
       }
-      return timeService.timeToDisplayString(this.value);
+      return timeService.dateToDisplayString(this.value);
     };
 
     DateTimeAnnotation.prototype.setValue = function (value) {

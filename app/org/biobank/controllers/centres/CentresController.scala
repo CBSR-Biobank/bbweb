@@ -57,12 +57,15 @@ class CentresController @Inject() (val env:            Environment,
 
   def listNames(filter: String, order: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
-
       SortOrder.fromString(order).fold(
         err => BadRequest(err.list.toList.mkString),
         so  => Ok(centresService.getCentreNames(filter, so))
       )
     }
+
+  def locations() = AuthAction(parse.empty) { (token, userId, request) =>
+      Ok(centresService.centreLocations)
+  }
 
   def query(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
     domainValidationReply(centresService.getCentre(id))

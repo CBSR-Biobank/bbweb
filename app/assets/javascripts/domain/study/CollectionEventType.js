@@ -47,6 +47,8 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
 
     /**
      * Creates a collection event type object with helper methods.
+     * @class
+     * @memberOf domain.studies
      *
      * @param {Object} collectionEventType the collection event type JSON returned by the server.
      *

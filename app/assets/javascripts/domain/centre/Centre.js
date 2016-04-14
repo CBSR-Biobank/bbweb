@@ -194,7 +194,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
     /**
      * Returns the names for all centres.
      *
-     * @returns {Promise} A promise that wraps Array.<domain.centres.CentreDto>.
+     * @returns {Array.<domain.centres.CentreDto>} The name of all the centres.
      */
     Centre.allNames = function () {
       return biobankApi.get('/centres/names');
@@ -428,6 +428,9 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
       });
     };
 
+    /**
+     * @returns {boolean} True if the centre has at least one location.
+     */
     Centre.prototype.hasLocations = function () {
       return this.locations.length > 0;
     };

@@ -7,10 +7,10 @@
 
   <!-- UNIQUE ID -->
   <div class="form-group"
-       ng-class="{ 'has-error' : participantForm.name.$invalid && !participantForm.name.$pristine }">
-    <label for="name" class="col-md-2 form-control-label">Unique ID</label>
+       ng-class="{ 'has-error' : participantForm.uniqueId.$invalid && !participantForm.uniqueId.$pristine }">
+    <label for="uniqueId" class="col-md-2 form-control-label">Unique ID</label>
     <div class="col-md-8">
-      <input name="name"
+      <input name="uniqueId"
              type="text"
              class="form-control"
              ng-model="vm.participant.uniqueId"
@@ -20,7 +20,7 @@
              required/>
     </div>
     <div class="col-md-offset-2 col-md-10">
-      <p class="help-block" ng-show="participantForm.name.$error.minlength">Unique ID is too short.</p>
+      <p class="help-block" ng-show="participantForm.uniqueId.$error.minlength">Unique ID is too short.</p>
     </div>
   </div>
 

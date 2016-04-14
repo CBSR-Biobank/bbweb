@@ -9,12 +9,20 @@
     </div>
   </div>
 </div>
-<div class="row" ng-if="vm.haveEnabledStudies">
+<div class="row" ng-if="!vm.haveEnabledCentres">
+  <div class="col-md-12">
+    <div class="alert alert-warning" role="alert">
+      <p><span class="glyphicon glyphicon-warning-sign"></span>
+        No centres are enabled. Cannot process any specimens yet.</p>
+    </div>
+  </div>
+</div>
+<div class="row" ng-if="vm.isCollectionAllowed">
   <div class="col-md-12">
     <h4>Select the study you wish to work with:</h4>
   </div>
 </div>
-<div class="row" ng-if="vm.haveEnabledStudies" ng-cloak>
+<div class="row" ng-if="vm.isCollectionAllowed" ng-cloak>
   <div class="col-md-6">
     <select-study get-header="vm.getEnabledStudiesPanelHeader"
                   get-studies="vm.updateEnabledStudies"

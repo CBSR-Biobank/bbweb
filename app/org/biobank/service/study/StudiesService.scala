@@ -8,7 +8,7 @@ import javax.inject._
 import org.biobank.domain.study._
 import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.dto._
-import org.biobank.dto.{ CollectionDto, ProcessingDto }
+import org.biobank.dto.{ ProcessingDto }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
@@ -62,8 +62,6 @@ trait StudiesService {
 
   def specimenLinkTypesForProcessingType(processingTypeId: String)
       : DomainValidation[Set[SpecimenLinkType]]
-
-  def getCollectionDto(studyId: String): DomainValidation[CollectionDto]
 
   def getProcessingDto(studyId: String): DomainValidation[ProcessingDto]
 
@@ -254,10 +252,6 @@ class StudiesServiceImpl @javax.inject.Inject() (
     validProcessingTypeId(processingTypeId) { processingType =>
       specimenLinkTypeRepository.allForProcessingType(processingType.id).success
     }
-  }
-
-  def getCollectionDto(studyId: String): DomainValidation[CollectionDto] = {
-    "deprectated: annot type refactor".failureNel
   }
 
   def getProcessingDto(studyId: String): DomainValidation[ProcessingDto] = {

@@ -1,5 +1,6 @@
 /**
- * Module for common functionality.
+ * Angular module for common functionality.
+ * @namespace common
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)

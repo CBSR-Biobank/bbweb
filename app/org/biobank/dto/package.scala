@@ -1,5 +1,7 @@
 package org.biobank
 
+import org.biobank.infrastructure.JsonUtils._
+import org.joda.time.DateTime
 import play.api.libs.json._
 
 package dto {
@@ -18,6 +20,14 @@ package dto {
     def compareByName(a: NameDto, b: NameDto) = (a.name compareToIgnoreCase b.name) < 0
 
     implicit val studyNameDtoWriter = Json.writes[NameDto]
+  }
+
+  case class CentreLocation(centreId: String, locationId: String, centreName: String, locationName: String)
+
+  object CentreLocation {
+
+    implicit val centreLocationWriter = Json.writes[CentreLocation]
+
   }
 
   case class StudyCountsByStatus(total: Long, disabledCount: Long, enabledCount: Long, retiredCount: Long)
@@ -41,12 +51,28 @@ package dto {
     implicit val userCountsByStatusWriter = Json.writes[UserCountsByStatus]
   }
 
-  case class CollectionDto(
-    collectionEventTypes: List[org.biobank.domain.study.CollectionEventType],
-    specimenGroups:       List[org.biobank.domain.study.SpecimenGroup])
+  case class SpecimenDto(id:                 String,
+                         inventoryId:        String,
+                         specimenSpecId:     String,
+                         specimenSpecName:   String,
+                         version:            Long,
+                         timeAdded:          DateTime,
+                         timeModified:       Option[DateTime],
+                         originLocationId:   String,
+                         originLocationName: String,
+                         locationId:         String,
+                         locationName:       String,
+                         containerId:        Option[String],
+                         positionId:         Option[String],
+                         timeCreated:        DateTime,
+                         amount:             BigDecimal,
+                         units:              String,
+                         status:             String)
 
-  object CollectionDto {
-    implicit val collectionDtoWriter = Json.writes[CollectionDto]
+  object SpecimenDto {
+
+    implicit val specimenDtoWriter = Json.writes[SpecimenDto]
+
   }
 
   case class ProcessingDto(

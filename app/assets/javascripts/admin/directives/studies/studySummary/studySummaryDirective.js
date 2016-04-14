@@ -27,13 +27,15 @@ define(['underscore'], function(_) {
     '$state',
     'modalService',
     'modalInput',
-    'notificationsService'
+    'notificationsService',
+    'CollectionEventType'
   ];
 
   function StudySummaryCtrl($state,
                             modalService,
                             modalInput,
-                            notificationsService) {
+                            notificationsService,
+                            CollectionEventType) {
 
     var validStatusActions = ['disable', 'enable', 'retire', 'unretire'],
         vm = this;
@@ -43,7 +45,16 @@ define(['underscore'], function(_) {
     vm.editName                = editName;
     vm.editDescription         = editDescription;
 
+    init();
+
     //--
+
+    function init() {
+      CollectionEventType.list(vm.study.id).then(function (list) {
+        vm.collectionEventTypes = list;
+        vm.hasCollectionEventTypes = (vm.collectionEventTypes.length > 0);
+      });
+    }
 
     function changeStatus(statusAction) {
       var modalOptions = {

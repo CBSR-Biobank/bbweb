@@ -4,7 +4,7 @@ import play.api.libs.json._
 import org.biobank.infrastructure.EnumUtils._
 
 /** Describes how a [[Specimen]] should be preserved/stored by describing a preservation method. Also see
-  * [[PreservationTemperatureType]]).
+  * [[PreservationTemperatureType]].
   */
 object PreservationType extends Enumeration {
   type PreservationType = Value

@@ -11,10 +11,13 @@ define(function () {
     return localTimeFilter;
 
     /**
+     * @class common.localTimeFilter
+     * @memberof common
      *
+     * @description An Angular filter that displays a <code>Date</code> object as a local time.
      */
     function localTimeFilter(time) {
-      return timeService.timeToDisplayString(time);
+      return timeService.dateToDisplayString(time);
     }
 
   }

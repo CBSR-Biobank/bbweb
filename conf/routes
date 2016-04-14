@@ -72,6 +72,7 @@ DELETE  /participants/cevents/:participantId/:ceventId/:ver     org.biobank.cont
 
 GET     /participants/cevents/spcs/:ceventId                    org.biobank.controllers.participants.SpecimensController.list(ceventId, status: String ?= "all", sort: String ?= "inventoryId", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
 POST    /participants/cevents/spcs/:ceventId                    org.biobank.controllers.participants.SpecimensController.addSpecimens(ceventId)
+DELETE  /participants/cevents/spcs/:ceventId/:spcId/:ver        org.biobank.controllers.participants.SpecimensController.removeSpecimen(ceventId, spcId, ver: Long)
 
 # participants
 GET     /participants/uniqueId/:studyId/:id       org.biobank.controllers.participants.ParticipantsController.getByUniqueId(studyId, id)
@@ -90,6 +91,10 @@ DELETE  /centres/locations/:centreId/:ver/:locationId  org.biobank.controllers.c
 POST    /centres/studies/:centreId               org.biobank.controllers.centres.CentresController.addStudy(centreId)
 DELETE  /centres/studies/:centreId/:ver/:studyId org.biobank.controllers.centres.CentresController.removeStudy(centreId, ver: Long, studyId)
 
+# Centre DTOs
+GET     /centres/names                          org.biobank.controllers.centres.CentresController.listNames(filter: String ?= "", order: String ?= "asc")
+GET     /centres/locations                      org.biobank.controllers.centres.CentresController.locations()
+
 # centres
 GET     /centres/counts                         org.biobank.controllers.centres.CentresController.centreCounts()
 GET     /centres/:id                            org.biobank.controllers.centres.CentresController.query(id)
@@ -103,9 +108,6 @@ POST    /centres/enable/:id                     org.biobank.controllers.centres.
 POST    /centres/disable/:id                    org.biobank.controllers.centres.CentresController.disable(id)
 DELETE  /centres/studies/:id/:ver/:studyId      org.biobank.controllers.centres.CentresController.removeStudy(id, ver: Long, studyId)
 DELETE  /centres/locations/:id/:ver/:uniqueId   org.biobank.controllers.centres.CentresController.removeLocation(id, ver: Long, uniqueId)
-
-# Study DTOs
-GET     /centres/names                          org.biobank.controllers.study.StudiesController.listNames(filter: String ?= "", order: String ?= "asc")
 
 # Users
 GET     /users/counts                           org.biobank.controllers.UsersController.userCounts()

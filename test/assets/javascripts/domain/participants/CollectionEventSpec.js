@@ -344,8 +344,7 @@ define([
 
     it('can list collection events using ordering', function() {
       var self = this,
-          study = self.factory.study(),
-          participant = self.factory.participant({ studyId: study.id }),
+          participant = self.factory.participant(),
           reply = self.factory.pagedResult([]),
           orderingTypes = [ 'asc', 'desc'];
 
@@ -362,7 +361,7 @@ define([
 
     it('setting annotation types fails when it does not belong to collection event type',
         function() {
-          var annotationData    = this.jsonAnnotationData(),
+          var annotationData      = this.jsonAnnotationData(),
               annotationTypes     = _.pluck(annotationData, 'annotationType'),
               badAnnotationTypeId = 'bad-annotation-type-id',
               ceventType,
@@ -384,9 +383,9 @@ define([
     it('can add a collectionEvent', function() {
       var jsonCevent      = this.factory.collectionEvent(),
           collectionEvent = new this.CollectionEvent(_.omit(jsonCevent, 'id')),
-          cmd             = addCommand(collectionEvent);
+          json            = addJson(collectionEvent);
 
-      this.$httpBackend.expectPOST(uri(jsonCevent.participantId), cmd).respond(201, serverReply(jsonCevent));
+      this.$httpBackend.expectPOST(uri(jsonCevent.participantId), json).respond(201, serverReply(jsonCevent));
 
       collectionEvent.add().then(function(reply) {
         _.extend(collectionEvent, { id: reply.id });
@@ -397,7 +396,7 @@ define([
 
     it('can add a collection event with annotations', function() {
       var entities = this.getCollectionEventEntities(true),
-          cmd      = addCommand(entities.collectionEvent);
+          cmd      = addJson(entities.collectionEvent);
 
       this.$httpBackend.expectPOST(uri(entities.collectionEvent.participantId), cmd)
         .respond(201, serverReply(entities.serverCollectionEvent));
@@ -480,19 +479,19 @@ define([
       this.$httpBackend.flush();
     });
 
-    var addCommandKeys = [
+    var addJsonKeys = [
       'participantId',
       'collectionEventTypeId',
       'timeCompleted',
       'visitNumber'
     ];
 
-    function addCommand(collectionEvent) {
-      return _.extend(_.pick(collectionEvent, addCommandKeys),
-                      { annotations: annotationsForCommand(collectionEvent) } );
+    function addJson(collectionEvent) {
+      return _.extend(_.pick(collectionEvent, addJsonKeys),
+                      { annotations: annotationsForJson(collectionEvent) } );
     }
 
-    function annotationsForCommand(collectionEvent) {
+    function annotationsForJson(collectionEvent) {
       return _.map(collectionEvent.annotations, function (annotation) {
         return annotation.getServerAnnotation();
       });

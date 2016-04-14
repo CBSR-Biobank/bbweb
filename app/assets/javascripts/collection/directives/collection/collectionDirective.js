@@ -15,7 +15,8 @@ define(function () {
       restrict: 'E',
       scope: {},
       bindToController: {
-        studyCounts: '='
+        studyCounts: '=',
+        centreCounts: '='
       },
       templateUrl : '/assets/javascripts/collection/directives/collection/collection.html',
       controller: CollectionCtrl,
@@ -33,6 +34,8 @@ define(function () {
     var vm = this;
 
     vm.haveEnabledStudies = (vm.studyCounts.enabled > 0);
+    vm.haveEnabledCentres = (vm.centreCounts.enabled > 0);
+    vm.isCollectionAllowed = vm.haveEnabledStudies && vm.haveEnabledCentres;
     vm.updateEnabledStudies = updateEnabledStudies;
     vm.getEnabledStudiesPanelHeader = getEnabledStudiesPanelHeader;
 

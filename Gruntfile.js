@@ -34,7 +34,8 @@ module.exports = function(grunt) {
           reporters: ['dots', 'coverage']
         },
         preprocessors: {
-          'app/assets/javascripts/**/*.js': 'coverage'
+          // exclude ui-router files for now, unclear on how to write tests for these
+          'app/assets/javascripts/**/!(states).js': 'coverage'
         },
         coverageReporter: {
           type: 'html',

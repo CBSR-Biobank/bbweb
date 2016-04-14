@@ -32,6 +32,12 @@ sealed trait Centre
 
   val locations: Set[Location]
 
+  def locationName(locationId: String): DomainValidation[String] = {
+    locations.find(_.uniqueId == locationId)
+      .toSuccessNel(s"invalid location id: $locationId")
+      .map(loc => s"${this.name}: ${loc.name}")
+  }
+
   override def toString =
     s"""|${this.getClass.getSimpleName}: {
         |  id:           $id,

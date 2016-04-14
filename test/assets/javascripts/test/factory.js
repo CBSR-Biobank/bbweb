@@ -4,7 +4,7 @@
  */
 define([
   'angular',
-  'underscore',
+  'lodash',
   'faker',
   'moment'
 ], function(angular, _, faker, moment) {
@@ -69,6 +69,9 @@ define([
       collectionEvent:                   collectionEvent,
       defaultCollectionEvent:            defaultCollectionEvent,
 
+      specimen:                          specimen,
+      defaultSpecimen:                   defaultSpecimen,
+
       centre:                            centre,
       defaultCentre:                     defaultCentre,
 
@@ -82,6 +85,7 @@ define([
       valueForAnnotation:                valueForAnnotation,
       collectionSpecimenSpec:            collectionSpecimenSpec,
       location:                          location,
+      centreLocations:                   centreLocations,
 
       // utilities
       domainEntityNameNext:              domainEntityNameNext,
@@ -115,6 +119,7 @@ define([
 
     function ENTITY_NAME_PARTICIPANT()           { return 'participant'; }
     function ENTITY_NAME_COLLECTION_EVENT()      { return 'collectionEvent'; }
+    function ENTITY_NAME_SPECIMEN()              { return 'specimen'; }
 
     function ENTITY_NAME_CENTRE()                { return 'centre'; }
     function ENTITY_NAME_LOCATION()              { return 'location'; }
@@ -349,6 +354,42 @@ define([
       return defaultEntity(ENTITY_NAME_COLLECTION_EVENT(), collectionEvent);
     }
 
+    function specimen(options, specimenSpec) {
+      var collectionEventType = defaultCollectionEventType(),
+          centre = defaultCentre(),
+          defaults = {
+            id:                  domainEntityNameNext(ENTITY_NAME_SPECIMEN()),
+            inventoryId:         domainEntityNameNext(ENTITY_NAME_SPECIMEN()),
+            specimenSpecId:      null,
+            originLocationId:    null,
+            locationId:          null,
+            timeCreated:         moment(faker.date.recent(10)).format(),
+            amount:              1,
+            status:              'UsableSpecimen'
+          },
+          validKeys = commonFieldNames.concat(_.keys(defaults)),
+          spc;
+
+      options = options || {};
+
+      if (collectionEventType.specimenSpecs && (collectionEventType.specimenSpecs.length > 0)) {
+        defaults.specimenSpecId = collectionEventType.specimenSpecs[0].uniqueId;
+      }
+
+      if (centre.locations && (centre.locations.length > 0)) {
+        defaults.originLocationId = centre.locations[0].uniqueId;
+        defaults.locationId = defaults.originLocationId;
+      }
+
+      spc = _.extend(defaults, commonFields(), _.pick(options, validKeys));
+      updateDefaultEntity(ENTITY_NAME_SPECIMEN(), spc);
+      return spc;
+    }
+
+    function defaultSpecimen() {
+      return defaultEntity(ENTITY_NAME_SPECIMEN(), specimen);
+    }
+
     function centre(options) {
       var defaults = { id:          domainEntityNameNext(ENTITY_NAME_CENTRE()),
                        name:        stringNext(),
@@ -562,6 +603,19 @@ define([
           at = _.extend(defaults, _.pick(options || {}, validKeys));
       valueTypeCount += 1;
       return at;
+    }
+
+    function centreLocations(centres) {
+      return _.flatMap(centres, function (centre) {
+        return _.map(centre.locations, function (location) {
+          return {
+            centreId:     centre.id,
+            locationId:   location.uniqueId,
+            centreName:   centre.name,
+            locationName: location.name
+          };
+        });
+      });
     }
 
     function pagedResult(entities) {

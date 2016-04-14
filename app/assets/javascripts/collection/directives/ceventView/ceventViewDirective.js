@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function () {
+define(function (require) {
   'use strict';
 
   /**
@@ -24,6 +24,11 @@ define(function () {
   }
 
   CeventViewCtrl.$inject = [
+    '$q',
+    '$state',
+    'Centre',
+    'Specimen',
+    'specimenAddModal',
     'timeService',
     'modalInput',
     'notificationsService',
@@ -33,30 +38,39 @@ define(function () {
   /**
    *
    */
-  function CeventViewCtrl(timeService,
+  function CeventViewCtrl($q,
+                          $state,
+                          Centre,
+                          Specimen,
+                          specimenAddModal,
+                          timeService,
                           modalInput,
                           notificationsService,
                           annotationUpdate) {
     var vm = this;
 
+    vm.specimens       = [];
+    vm.centreLocations = [];
+    vm.tableController = undefined;
     vm.canUpdateVisitType = (vm.collectionEventTypes.length > 1);
 
     vm.panelOpen          = true;
-    vm.specimens          = [];
-    vm.timeCompletedLocal = timeService.timeToDisplayString(vm.collectionEvent.timeCompleted);
+    vm.timeCompletedLocal = timeService.dateToDisplayString(vm.collectionEvent.timeCompleted);
 
     vm.editVisitType      = editVisitType;
     vm.editTimeCompleted  = editTimeCompleted;
     vm.editAnnotation     = editAnnotation;
-    vm.addSpecimen        = addSpecimen;
+    vm.addSpecimens       = addSpecimens;
     vm.panelButtonClicked = panelButtonClicked;
+    vm.getTableData       = getTableData;
+    vm.removeSpecimen     = removeSpecimen;
 
     //--
 
     function postUpdate(message, title, timeout) {
       return function (cevent) {
         vm.collectionEvent = cevent;
-        vm.timeCompletedLocal = timeService.timeToDisplayString(vm.collectionEvent.timeCompleted);
+        vm.timeCompletedLocal = timeService.dateToDisplayString(vm.collectionEvent.timeCompleted);
         notificationsService.success(message, title, timeout);
       };
     }
@@ -73,8 +87,7 @@ define(function () {
                           vm.timeCompletedLocal,
                           { required: true })
         .result.then(function (timeCompleted) {
-          vm.collectionEvent.updateTimeCompleted(timeService.dateAndTimeToUtcString(
-            timeCompleted.date, timeCompleted.time))
+          vm.collectionEvent.updateTimeCompleted(timeService.dateToUtcString(timeCompleted))
             .then(postUpdate('Time completed updated successfully.', 'Change successful', 1500))
             .catch(notificationsService.updateError);
         });
@@ -89,11 +102,63 @@ define(function () {
         });
     }
 
-    function addSpecimen() {
+    function addSpecimens() {
+      var defer = $q.defer();
+
+      if (vm.centreLocations.length <= 0) {
+        Centre.allLocations().then(function (centreLocations) {
+          vm.centreLocations = centreLocations;
+          defer.resolve();
+        });
+      } else {
+        defer.resolve();
+      }
+
+      defer.promise
+        .then(function () {
+          return specimenAddModal.open(vm.centreLocations,
+                                  vm.collectionEvent.collectionEventType.specimenSpecs).result;
+        })
+        .then(function (specimens) {
+          return Specimen.add(vm.collectionEvent.id, specimens);
+        })
+        .then(reloadTableData);
     }
 
     function panelButtonClicked() {
       vm.panelOpen = !vm.panelOpen;
+    }
+
+    function getTableData(tableState, controller) {
+      var pagination    = tableState.pagination,
+          sortPredicate = tableState.sort.predicate || 'inventoryId',
+          sortOrder     = tableState.sort.reverse || false,
+          options = {
+            sort:     sortPredicate,
+            page:     1 + (pagination.start / vm.pageSize),
+            pageSize: vm.pageSize,
+            order:    sortOrder ? 'desc' : 'asc'
+          };
+
+      if (!vm.tableController && controller) {
+        vm.tableController = controller;
+      }
+
+      vm.tableDataLoading = true;
+
+      Specimen.list(vm.collectionEvent.id, options).then(function (paginatedUsers) {
+        vm.specimens = paginatedUsers.items;
+        tableState.pagination.numberOfPages = paginatedUsers.maxPages;
+        vm.tableDataLoading = false;
+      });
+    }
+
+    function reloadTableData() {
+      getTableData(vm.tableController.tableState());
+    }
+
+    function removeSpecimen(specimen) {
+      specimen.remove().then(reloadTableData);
     }
 
   }

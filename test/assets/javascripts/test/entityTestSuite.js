@@ -7,10 +7,13 @@ define(['underscore'], function (_) {
 
   entityTestSuiteFactory.$inject = ['$httpBackend'];
 
-  /**
-   * A mixin for test suites for domain entities.
-   */
   function entityTestSuiteFactory($httpBackend) {
+
+    /**
+     * A mixin for domain entity test suites.
+     *
+     * @mixin entityTestSuite
+     */
     var mixin = {
       updateEntity: updateEntity
     };
@@ -20,22 +23,29 @@ define(['underscore'], function (_) {
     //--
 
     /**
-     * @param {object} entity the entity to be updated.
+     * @method
+     * @memberof entityTestSuite
+     * @instance
      *
-     * @param {string} updateFuncName
+     * Used to test updating an attribute on an entity.
      *
-     * @param {array, object} updateParams the parameters to pass to the update function. If this is not an
-     * array, it will be converted to a single item array.
+     * @param {Object} entity - An instance of the entity to be updated.
      *
-     * @param {string} url the URL on the server where the request will be POSTed to.
+     * @param {string} updateFuncName - The name of the update function on the entity to be tested.
      *
-     * @param {string} json the JSON to pass along with the POST request.
+     * @param {(string[]|Object)} updateParams - the parameters to pass to the update function. If this is not an
+     * string array, it will be converted to a single item array.
      *
-     * @param {object} reply the mocked reply from the server.
+     * @param {string} url - the URL on the server where the request will be POSTed to.
      *
-     * @param {function} thenFunc the success function to be called if the update call on the entity is successfull.
+     * @param {string} json - the JSON to pass along with the POST request.
      *
-     * @param {function} catchFunc the fail function to be called if the update call on the entity fails.
+     * @param {object} reply - The mocked reply from the server.
+     *
+     * @param {function(Object)} thenFunc the success function to be called if the update to the entity is
+     * successfull.
+     *
+     * @param {function(string)} catchFunc the fail function to be called if the update to the entity fails.
      */
     function updateEntity(entity, updateFuncName, updateParams, url, json, reply, thenFunc, catchFunc) {
       /* jshint validthis: true */

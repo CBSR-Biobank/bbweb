@@ -26,7 +26,7 @@ define(['angular'], function (angular) {
       var deferred = $q.defer();
 
       config = config || {};
-      config = angular.extend(config, { method: method, url: url });
+      angular.extend(config, { method: method, url: url });
 
       $http(config)
         .then(function(response) {

@@ -13,43 +13,16 @@ define(function(require) {
       faker                           = require('faker'),
       annotationUpdateSharedBehaviour = require('../../../common/annotationUpdateSharedBehaviourSpec');
 
-  function createDirective(test) {
-    var element,
-        scope = test.$rootScope.$new();
-
-    element = angular.element([
-      '<participant-summary',
-      '  study="vm.study"',
-      '  participant="vm.participant">',
-      '</participant-summary>'
-    ].join(''));
-
-    scope.vm = {
-      study:       test.study,
-      participant: test.participant
-    };
-    test.$compile(element)(scope);
-    scope.$digest();
-
-    return {
-      element:    element,
-      scope:      scope,
-      controller: element.controller('participantSummary')
-    };
-  }
-
   describe('participantSummaryDirective', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(templateMixin) {
+    beforeEach(inject(function($rootScope, $compile, templateMixin) {
       var self = this;
 
       _.extend(self, templateMixin);
 
       self.$q                  = self.$injector.get('$q');
-      self.$rootScope          = self.$injector.get('$rootScope');
-      self.$compile            = self.$injector.get('$compile');
       self.$state              = self.$injector.get('$state');
       self.Study               = self.$injector.get('Study');
       self.Participant         = self.$injector.get('Participant');
@@ -67,6 +40,7 @@ define(function(require) {
       self.study       = new self.Study(self.jsonStudy);
 
       self.participantWithAnnotation = participantWithAnnotation;
+      self.createDirective = createDirective;
 
       //---
 
@@ -91,16 +65,37 @@ define(function(require) {
 
         return new self.Participant(jsonParticipant, study);
       }
+
+      function createDirective(study, participant) {
+        study = study || self.study;
+        participant = participant || self.participant;
+
+        self.element = angular.element([
+          '<participant-summary',
+          '  study="vm.study"',
+          '  participant="vm.participant">',
+          '</participant-summary>'
+        ].join(''));
+
+        self.scope = $rootScope.$new();
+        self.scope.vm = {
+          study:       study,
+          participant: participant
+        };
+        $compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('participantSummary');
+      }
     }));
 
     it('has valid scope', function() {
-      var directive = createDirective(this);
+      this.createDirective(this.study, this.participant);
 
-      expect(directive.controller.study).toBe(this.study);
-      expect(directive.controller.participant).toBe(this.participant);
+      expect(this.controller.study).toBe(this.study);
+      expect(this.controller.participant).toBe(this.participant);
 
-      expect(directive.controller.editUniqueId).toBeFunction();
-      expect(directive.controller.editAnnotation).toBeFunction();
+      expect(this.controller.editUniqueId).toBeFunction();
+      expect(this.controller.editAnnotation).toBeFunction();
     });
 
     describe('updates to time completed', function () {
@@ -130,7 +125,6 @@ define(function(require) {
         context.modalInputFuncName       = 'text';
         context.entity                   = this.Participant;
         context.entityUpdateFuncName     = 'addAnnotation';
-        context.createDirective          = createDirective;
         context.annotation               = participant.annotations[0];
         context.newValue                 = faker.random.word();
       }));
@@ -150,7 +144,6 @@ define(function(require) {
         context.modalInputFuncName       = 'dateTime';
         context.entity                   = this.Participant;
         context.entityUpdateFuncName     = 'addAnnotation';
-        context.createDirective          = createDirective;
         context.annotation               = participant.annotations[0];
         context.newValue                 = faker.date.recent(10);
       }));
@@ -170,7 +163,6 @@ define(function(require) {
         context.modalInputFuncName       = 'number';
         context.entity                   = this.Participant;
         context.entityUpdateFuncName     = 'addAnnotation';
-        context.createDirective          = createDirective;
         context.annotation               = participant.annotations[0];
         context.newValue                 = 10;
       }));
@@ -190,7 +182,6 @@ define(function(require) {
         context.modalInputFuncName       = 'select';
         context.entity                   = this.Participant;
         context.entityUpdateFuncName     = 'addAnnotation';
-        context.createDirective          = createDirective;
         context.annotation               = participant.annotations[0];
         context.newValue                 = participant.annotations[0].annotationType.options[0];
       }));
@@ -210,7 +201,6 @@ define(function(require) {
         context.modalInputFuncName       = 'selectMultiple';
         context.entity                   = this.Participant;
         context.entityUpdateFuncName     = 'addAnnotation';
-        context.createDirective          = createDirective;
         context.annotation               = participant.annotations[0];
         context.newValue                 = participant.annotations[0].annotationType.options;
       }));
@@ -233,8 +223,7 @@ define(function(require) {
 
 
       it('on update should invoke the update method on entity', function() {
-        var directive,
-            deferred = this.$q.defer();
+        var deferred = this.$q.defer();
 
         deferred.resolve(context.newValue);
 
@@ -244,17 +233,16 @@ define(function(require) {
           .and.returnValue(this.$q.when(context.participant));
         spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
-        directive = createDirective(this);
-        directive.controller[context.controllerUpdateFuncName]();
-        directive.scope.$digest();
+        this.createDirective();
+        this.controller[context.controllerUpdateFuncName]();
+        this.scope.$digest();
 
         expect(this.Participant.prototype[context.participantUpdateFuncName]).toHaveBeenCalled();
         expect(this.notificationsService.success).toHaveBeenCalled();
       });
 
       it('error message should be displayed when update fails', function() {
-        var directive,
-            modalDeferred = this.$q.defer(),
+        var modalDeferred = this.$q.defer(),
             updateDeferred = this.$q.defer();
 
         modalDeferred.resolve(context.newValue);
@@ -266,9 +254,9 @@ define(function(require) {
           .and.returnValue(updateDeferred.promise);
         spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-        directive = createDirective(this);
-        directive.controller[context.controllerUpdateFuncName]();
-        directive.scope.$digest();
+        this.createDirective();
+        this.controller[context.controllerUpdateFuncName]();
+        this.scope.$digest();
 
         expect(this.notificationsService.updateError).toHaveBeenCalled();
       });

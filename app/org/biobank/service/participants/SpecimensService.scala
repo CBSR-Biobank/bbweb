@@ -1,21 +1,22 @@
 package org.biobank.service.participants
 
-import org.biobank.infrastructure.{ SortOrder, AscendingOrder }
+import akka.actor._
+import akka.pattern.ask
+import akka.util.Timeout
+import com.google.inject.ImplementedBy
+import javax.inject.{Inject, Named}
+import org.biobank.domain._
+import org.biobank.domain.participants._
+import org.biobank.domain.study._
+import org.biobank.domain.centre.CentreRepository
+import org.biobank.dto.SpecimenDto
 import org.biobank.infrastructure.command.SpecimenCommands._
 import org.biobank.infrastructure.event.SpecimenEvents._
-import org.biobank.domain._
-import org.biobank.domain.study._
-import org.biobank.domain.participants._
-
-import javax.inject.{Inject, Named}
-import com.google.inject.ImplementedBy
-import akka.actor._
-import akka.util.Timeout
-import akka.pattern.ask
-import scala.concurrent._
-import scala.concurrent.duration._
+import org.biobank.infrastructure.{ SortOrder, AscendingOrder }
 import org.slf4j.LoggerFactory
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import scala.concurrent._
+import scala.concurrent.duration._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -27,7 +28,7 @@ trait SpecimensService {
   def list(collectionEventId: String,
            sortFunc:          (Specimen, Specimen) => Boolean,
            order:             SortOrder)
-      : DomainValidation[Seq[Specimen]]
+      : DomainValidation[Seq[SpecimenDto]]
 
   def processAddCommand(cmd: SpecimenCommand): Future[DomainValidation[CollectionEvent]]
 
@@ -39,11 +40,11 @@ class SpecimensServiceImpl @Inject() (
   @Named("specimensProcessor") val processor: ActorRef,
   val studyRepository:                        StudyRepository,
   val collectionEventRepository:              CollectionEventRepository,
+  val collectionEventTypeRepository:          CollectionEventTypeRepository,
   val ceventSpecimenRepository:               CeventSpecimenRepository,
-  val specimenRepository:                     SpecimenRepository)
+  val specimenRepository:                     SpecimenRepository,
+  val centreRepository:                       CentreRepository)
     extends SpecimensService {
-
-  //import org.biobank.CommonValidations._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -57,21 +58,51 @@ class SpecimensServiceImpl @Inject() (
   def list(collectionEventId: String,
            sortFunc:          (Specimen, Specimen) => Boolean,
            order:             SortOrder)
-      : DomainValidation[Seq[Specimen]] = {
-    validCevent(collectionEventId) { cevent =>
-      ceventSpecimenRepository.withCeventId(cevent.id)
-        .map { x => specimenRepository.getByKey(x.specimenId) }
+      : DomainValidation[Seq[SpecimenDto]] = {
+
+    def convertToDto(ceventTypeId: CollectionEventTypeId, specimen: Specimen)
+        : DomainValidation[SpecimenDto] = {
+      for {
+        ceventType         <- collectionEventTypeRepository.getByKey(ceventTypeId)
+        specimenSpec       <- ceventType.specimenSpec(specimen.specimenSpecId)
+        originCentre       <- centreRepository.getByLocationId(specimen.originLocationId)
+        originLocationName <- originCentre.locationName(specimen.originLocationId)
+        centre             <- centreRepository.getByLocationId(specimen.locationId)
+        centreLocationName <- centre.locationName(specimen.locationId)
+      } yield SpecimenDto(id                 = specimen.id.id,
+                          inventoryId        = specimen.inventoryId,
+                          specimenSpecId     = specimen.specimenSpecId,
+                          specimenSpecName   = specimenSpec.name,
+                          version            = specimen.version,
+                          timeAdded          = specimen.timeAdded,
+                          timeModified       = specimen.timeModified,
+                          originLocationId   = specimen.originLocationId,
+                          originLocationName = originLocationName,
+                          locationId         = specimen.locationId,
+                          locationName       = centreLocationName,
+                          containerId        = specimen.containerId.map(_.id),
+                          positionId         = specimen.positionId.map(_.id),
+                          timeCreated        = specimen.timeCreated,
+                          amount             = specimen.amount,
+                          units              = specimenSpec.units,
+                          status             = specimen.getClass.getSimpleName)
+    }
+
+    def getSpecimens(ceventId: CollectionEventId): DomainValidation[List[Specimen]] = {
+      ceventSpecimenRepository.withCeventId(ceventId)
+        .map { cs => specimenRepository.getByKey(cs.specimenId) }
         .toList
         .sequenceU
         .map { list => {
-                var result = list.toSeq
-                result.sortWith(sortFunc)
-                if (order == AscendingOrder) {
-                  result
-                } else {
-                  result.reverse
-                }
+                val result = list.sortWith(sortFunc)
+                if (order == AscendingOrder) result else result.reverse
               }
+        }
+    }
+
+    validCevent(collectionEventId) { cevent =>
+      getSpecimens(cevent.id).flatMap { specimens =>
+        specimens.map { s => convertToDto(cevent.collectionEventTypeId, s) }.sequenceU
       }
     }
   }

@@ -12,22 +12,27 @@ define(function (require) {
       _                      = require('underscore'),
       entityUpdateSharedSpec = require('../../../../test/entityUpdateSharedSpec');
 
-  describe('Controller: StudySummaryTabCtrl', function() {
+  describe('Directive: studySummaryDirective', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function($rootScope, $compile, templateMixin, testUtils) {
-      var self = this;
+      var self = this,
+          ceventType;
 
       _.extend(self, templateMixin);
 
       self.$q                   = self.$injector.get('$q');
       self.$state               = self.$injector.get('$state');
       self.Study                = self.$injector.get('Study');
+      self.CollectionEventType  = self.$injector.get('CollectionEventType');
       self.modalService         = self.$injector.get('modalService');
       self.notificationsService = self.$injector.get('notificationsService');
       self.factory         = self.$injector.get('factory');
 
+      ceventType = new self.CollectionEventType(self.factory.collectionEventType());
+
+      spyOn(self.CollectionEventType, 'list').and.returnValue(self.$q.when([ ceventType ]));
       spyOn(self.modalService, 'showModal').and.returnValue(self.$q.when(true));
 
       self.study = new self.Study(self.factory.study());
@@ -54,6 +59,15 @@ define(function (require) {
       this.createController();
       expect(this.controller.study).toBe(this.study);
       expect(this.controller.descriptionToggleLength).toBeDefined();
+      expect(this.controller.collectionEventTypes).toBeArrayOfSize(1);
+      expect(this.controller.hasCollectionEventTypes).toBeTrue();
+    });
+
+    it('should have valid settings when study has no collection event types', function() {
+      this.CollectionEventType.list = jasmine.createSpy().and.returnValue(this.$q.when([ ]));
+      this.createController();
+      expect(this.controller.collectionEventTypes).toBeEmptyArray();
+      expect(this.controller.hasCollectionEventTypes).toBeFalse();
     });
 
     describe('updates to name', function () {

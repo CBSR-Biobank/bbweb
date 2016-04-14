@@ -161,7 +161,7 @@ define(function (require) {
       it('can be removed when in valid state', function() {
         var modalService = this.$injector.get('modalService'),
             jsonSpecimenSpec = this.factory.collectionSpecimenSpec(),
-            jsonCeventType = new this.factory.collectionEventType({ specimenSpecs: [ jsonSpecimenSpec ]}),
+            jsonCeventType = this.factory.collectionEventType({ specimenSpecs: [ jsonSpecimenSpec ]}),
             ceventType = new this.CollectionEventType(jsonCeventType);
 
         spyOn(modalService, 'showModal').and.returnValue(this.$q.when('OK'));
@@ -199,7 +199,7 @@ define(function (require) {
       it('can be removed when in valid state', function() {
         var modalService = this.$injector.get('modalService'),
             jsonAnnotType = this.factory.annotationType(),
-            jsonCeventType = new this.factory.collectionEventType({ annotationTypes: [ jsonAnnotType ]}),
+            jsonCeventType = this.factory.collectionEventType({ annotationTypes: [ jsonAnnotType ]}),
             ceventType = new this.CollectionEventType(jsonCeventType);
 
         spyOn(modalService, 'showModal').and.returnValue(this.$q.when('OK'));

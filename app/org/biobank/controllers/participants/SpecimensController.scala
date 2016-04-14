@@ -23,7 +23,7 @@ class SpecimensController @Inject() (val env:          Environment,
 
   private val PageSizeMax = 10
 
-  var sortFunc = Map("inventoryId" -> Specimen.compareByInventoryId _,
+  val sortFunc = Map("inventoryId" -> Specimen.compareByInventoryId _,
                      "timeCreated" -> Specimen.compareByTimeCreated _,
                      "status"      -> Specimen.compareByStatus _)
 
