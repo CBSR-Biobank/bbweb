@@ -23,6 +23,7 @@ define(function (require) {
 
       self.$q                     = self.$injector.get('$q');
       self.$state                 = self.$injector.get('$state');
+      self.Study                  = self.$injector.get('Study');
       self.CollectionEventType    = self.$injector.get('CollectionEventType');
       self.CollectionSpecimenSpec = self.$injector.get('CollectionSpecimenSpec');
       self.AnnotationType         = self.$injector.get('AnnotationType');
@@ -32,6 +33,7 @@ define(function (require) {
 
       self.jsonStudy              = this.jsonEntities.study();
       self.jsonCet                = self.jsonEntities.collectionEventType(self.jsonStudy);
+      self.study                  = new self.Study(self.jsonStudy);
       self.collectionEventType    = new self.CollectionEventType(self.jsonCet);
 
       spyOn(this.$state, 'go').and.returnValue(true);
@@ -49,10 +51,13 @@ define(function (require) {
 
       function createController() {
         self.element = angular.element(
-          '<cevent-type-view cevent-type="vm.ceventType"></cevent-type-view>');
+          '<cevent-type-view study="vm.study" cevent-type="vm.ceventType"></cevent-type-view>');
 
         self.scope = $rootScope.$new();
-        self.scope.vm = { ceventType: self.collectionEventType };
+        self.scope.vm = {
+          study: self.study,
+          ceventType: self.collectionEventType
+        };
         $compile(self.element)(self.scope);
         self.scope.$digest();
         self.controller = self.element.controller('ceventTypeView');
@@ -245,11 +250,11 @@ define(function (require) {
       var panelState;
 
       this.createController();
-      panelState = this.controller.panelOpen;
+      panelState = this.controller.isPanelCollapsed;
       this.controller.panelButtonClicked();
       this.scope.$digest();
 
-      expect(this.controller.panelOpen).not.toEqual(panelState);
+      expect(this.controller.isPanelCollapsed).not.toEqual(panelState);
     });
 
   });

@@ -11,8 +11,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
     'biobankApi',
     'ConcurrencySafeEntity',
     'CentreStatus',
-    'Location',
-    'queryStringService'
+    'Location'
   ];
 
   /**  *
@@ -22,8 +21,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
                          biobankApi,
                          ConcurrencySafeEntity,
                          CentreStatus,
-                         Location,
-                         queryStringService) {
+                         Location) {
 
     var schema = {
       'id': 'Centre',
@@ -108,28 +106,21 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
      * @return A promise. If the promise succeeds then a paged result is returned.
      */
     Centre.list = function (options) {
-      var validKeys = [
-        'filter',
-        'status',
-        'sort',
-        'page',
-        'pageSize',
-        'order'
-      ];
-      var url = uri();
-      var paramsStr = '';
+      var url = uri(),
+          params,
+          validKeys = [
+            'filter',
+            'status',
+            'sort',
+            'page',
+            'pageSize',
+            'order'
+          ];
 
       options = options || {};
+      params = _.pick(options, validKeys);
 
-      paramsStr = queryStringService.param(options, function (value, key) {
-        return _.contains(validKeys, key);
-      });
-
-      if (paramsStr.length) {
-        url += paramsStr;
-      }
-
-      return biobankApi.get(url).then(function(reply) {
+      return biobankApi.get(url, params).then(function(reply) {
         var deferred = $q.defer();
         try {
           // reply is a paged result

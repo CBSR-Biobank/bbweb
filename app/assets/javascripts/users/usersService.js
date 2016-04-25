@@ -5,7 +5,7 @@
 define(['underscore'], function(_) {
   'use strict';
 
-  usersServiceFactory.$inject = ['$q', '$cookies', '$log', 'biobankApi', 'queryStringService'];
+  usersServiceFactory.$inject = ['$q', '$cookies', '$log', 'biobankApi'];
 
   /**
    * Communicates with the server to get user related information and perform user related commands.
@@ -13,8 +13,7 @@ define(['underscore'], function(_) {
   function usersServiceFactory($q,
                                $cookies,
                                $log,
-                               biobankApi,
-                               queryStringService) {
+                               biobankApi) {
     var currentUser = null;
     var token = $cookies['XSRF-TOKEN'];
 

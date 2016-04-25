@@ -10,7 +10,6 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     'funutils',
     'ConcurrencySafeEntity',
     'Annotation',
-    'queryStringService',
     'biobankApi',
     'hasAnnotations',
     'annotationFactory'
@@ -23,7 +22,6 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                                   funutils,
                                   ConcurrencySafeEntity,
                                   Annotation,
-                                  queryStringService,
                                   biobankApi,
                                   hasAnnotations,
                                   annotationFactory) {
@@ -151,26 +149,19 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      * @eturn a paged result.
      */
     CollectionEvent.list = function (participantId, options) {
-      var validKeys = [
-        'sort',
-        'page',
-        'pageSize',
-        'order'
-      ];
-      var url = uriWithPath('list', participantId);
-      var paramsStr = '';
+      var url = uriWithPath('list', participantId),
+          params,
+          validKeys = [
+            'sort',
+            'page',
+            'pageSize',
+            'order'
+          ];
 
-      if (arguments.length > 0) {
-        paramsStr = queryStringService.param(options, function (value, key) {
-          return _.contains(validKeys, key);
-        });
-      }
+      options = options || {};
+      params = _.pick(options, validKeys);
 
-      if (paramsStr) {
-        url += paramsStr;
-      }
-
-      return biobankApi.get(url).then(function(reply) {
+      return biobankApi.get(url, params).then(function(reply) {
         // reply is a paged result
         var deferred = $q.defer();
         try {

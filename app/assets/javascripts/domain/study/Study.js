@@ -9,7 +9,6 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
     '$q',
     'funutils',
     'biobankApi',
-    'queryStringService',
     'ConcurrencySafeEntity',
     'StudyStatus',
     'AnnotationType',
@@ -22,7 +21,6 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
   function StudyFactory($q,
                         funutils,
                         biobankApi,
-                        queryStringService,
                         ConcurrencySafeEntity,
                         StudyStatus,
                         AnnotationType,
@@ -111,28 +109,21 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
      * @return A promise. If the promise succeeds then a paged result is returned.
      */
     Study.list = function (options) {
-      var validKeys = [
-        'filter',
-        'status',
-        'sort',
-        'page',
-        'pageSize',
-        'order'
-      ];
-      var url = uri();
-      var paramsStr = '';
+      var url = uri(),
+          params,
+          validKeys = [
+            'filter',
+            'status',
+            'sort',
+            'page',
+            'pageSize',
+            'order'
+          ];
 
       options = options || {};
+      params = _.extend({}, _.pick(options, validKeys));
 
-      paramsStr = queryStringService.param(options, function (value, key) {
-        return _.contains(validKeys, key);
-      });
-
-      if (paramsStr) {
-        url += paramsStr;
-      }
-
-      return biobankApi.get(url).then(function(reply) {
+      return biobankApi.get(url, params).then(function(reply) {
         // reply is a paged result
         var deferred = $q.defer();
         try {

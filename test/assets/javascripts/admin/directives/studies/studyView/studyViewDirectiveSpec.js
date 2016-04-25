@@ -66,14 +66,6 @@ define([
       this.createController();
 
       expect(this.$window.localStorage.setItem)
-        .toHaveBeenCalledWith('study.panel.collectionEventTypes', true);
-      expect(this.$window.localStorage.setItem)
-        .toHaveBeenCalledWith('study.panel.participantAnnotationTypes', true);
-      expect(this.$window.localStorage.setItem)
-        .toHaveBeenCalledWith('study.panel.participantAnnotationTypes', true);
-      expect(this.$window.localStorage.setItem)
-        .toHaveBeenCalledWith('study.panel.processingTypes', true);
-      expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.specimenLinkAnnotationTypes', true);
       expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.specimenLinkTypes', true);

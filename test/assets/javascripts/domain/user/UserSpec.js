@@ -138,15 +138,15 @@ define([
       });
 
       it('should query for multiple users', function() {
-        var self = this,
+        var self        = this,
             emailFilter = 'test',
-            sort = 'email',
-            order = 'desc',
-            jsonUser = self.jsonEntities.user(),
-            reply = self.jsonEntities.pagedResult([ jsonUser ]);
+            sort        = 'email',
+            order       = 'desc',
+            jsonUser    = self.jsonEntities.user(),
+            reply       = self.jsonEntities.pagedResult([ jsonUser ]);
 
         this.$httpBackend.whenGET(
-          uri() + '?' + $.param({emailFilter: emailFilter, sort: sort, order: 'desc'}))
+          uri() + '?' + $.param({emailFilter: emailFilter, order: 'desc', sort: sort}))
           .respond({ status: 'success', data: reply });
 
         self.User.list({emailFilter: emailFilter, sort: sort, order: order}).then(function(pagedResult) {

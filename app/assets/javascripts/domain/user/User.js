@@ -11,8 +11,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
     'biobankApi',
     'ConcurrencySafeEntity',
     'UserStatus',
-    'usersService',
-    'queryStringService'
+    'usersService'
   ];
 
   /**
@@ -23,8 +22,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
                        biobankApi,
                        ConcurrencySafeEntity,
                        UserStatus,
-                       usersService,
-                       queryStringService) {
+                       usersService) {
 
     var schema = {
       'id': 'User',
@@ -107,21 +105,14 @@ define(['underscore', 'tv4'], function(_, tv4) {
                         'order'
                       ],
           url = uri(),
-          paramsStr = '';
+          params;
 
       options = options || {};
+      params = _.pick(options, validKeys);
 
-      if (arguments.length) {
-        paramsStr = queryStringService.param(options, function (value, key) {
-          return _.contains(validKeys, key);
-        });
-      }
+      console.log(params);
 
-      if (paramsStr) {
-        url += paramsStr;
-      }
-
-      return biobankApi.get(url).then(function(reply) {
+      return biobankApi.get(url, params).then(function(reply) {
         // reply is a paged result
         var deferred = $q.defer();
         try {

@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(function (){
+define(['angular'], function (angular) {
   'use strict';
 
   biobankApiService.$inject = ['$http', '$q', '$log'];
@@ -22,13 +22,11 @@ define(function (){
 
     //-------------
 
-    function call(method, url, data) {
+    function call(method, url, config) {
       var deferred = $q.defer();
-      var config = { method: method, url: url };
 
-      if (data && ((method === 'POST') || (method === 'PUT'))) {
-        config.data = data;
-      }
+      config = config || {};
+      config = angular.extend(config, { method: method, url: url });
 
       $http(config)
         .then(function(response) {
@@ -46,16 +44,16 @@ define(function (){
       return deferred.promise;
     }
 
-    function get(url) {
-      return call('GET', url);
+    function get(url, params) {
+      return call('GET', url, { params: params });
     }
 
-    function post(url, cmd) {
-      return call('POST', url, cmd);
+    function post(url, data) {
+      return call('POST', url, { data: data });
     }
 
-    function put(url, cmd) {
-      return call('PUT', url, cmd);
+    function put(url, data) {
+      return call('PUT', url, { data: data });
     }
 
     function del(url) {

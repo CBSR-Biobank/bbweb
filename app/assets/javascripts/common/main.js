@@ -41,7 +41,6 @@ define(function (require) {
   module.service('funutils',                  require('./services/funutils'));
   module.service('modalService',              require('./services/modalService'));
   module.service('notificationsService',      require('./services/notificationsService'));
-  module.service('queryStringService',        require('./services/queryStringService'));
   module.service('stateHelper',               require('./services/stateHelperService'));
   module.service('timeService',               require('./services/timeService'));
   module.service('validationService',         require('./services/validationService'));
