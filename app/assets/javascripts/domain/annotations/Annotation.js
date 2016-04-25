@@ -42,7 +42,7 @@ define(['moment', 'underscore', 'tv4'], function(moment, _, tv4) {
         self.annotationTypeId = annotationType.uniqueId;
         self.annotationType = annotationType;
 
-        if (!_.contains(AnnotationValueType.values(), annotationType.valueType)) {
+        if (!_.contains(_.values(AnnotationValueType), annotationType.valueType)) {
           throw new Error('value type is invalid: ' + annotationType.valueType);
         }
 
@@ -52,7 +52,7 @@ define(['moment', 'underscore', 'tv4'], function(moment, _, tv4) {
 
         self.required = annotationType.required;
 
-        if (annotationType.valueType === AnnotationValueType.SELECT()) {
+        if (annotationType.valueType === AnnotationValueType.SELECT) {
           if (!annotationType.isMultipleSelect() && !annotationType.isSingleSelect()) {
             throw new Error('invalid value for max count');
           }

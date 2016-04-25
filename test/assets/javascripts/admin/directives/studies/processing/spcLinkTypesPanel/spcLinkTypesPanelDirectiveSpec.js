@@ -71,7 +71,7 @@ define([
 
         if (options.studyHasAnnotationTypes) {
           entities.annotationTypes = _.map(
-            AnnotationValueType.values(),
+            _.values(AnnotationValueType),
             function(valueType) {
               return new SpecimenLinkAnnotationType(
                 jsonEntities.annotationType({ valueType: valueType }));
@@ -207,7 +207,7 @@ define([
     it('cannot update a specimen link type if study is not disabled', function() {
       var StudyStatus = this.$injector.get('StudyStatus'),
           entities    = createEntities(),
-          statuses    = [StudyStatus.ENABLED(), StudyStatus.RETIRED()];
+          statuses    = [StudyStatus.ENABLED, StudyStatus.RETIRED];
 
       createController(entities);
       _.each(statuses, function (status) {
@@ -237,7 +237,7 @@ define([
     it('cannot remove a specimen link type if study is not disabled', function() {
       var StudyStatus = this.$injector.get('StudyStatus'),
           entities    = createEntities(),
-          statuses    = [StudyStatus.ENABLED(), StudyStatus.RETIRED()];
+          statuses    = [StudyStatus.ENABLED, StudyStatus.RETIRED];
 
       scope = createController(entities);
       _.each(statuses, function (status) {

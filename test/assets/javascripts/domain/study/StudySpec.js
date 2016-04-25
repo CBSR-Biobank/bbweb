@@ -54,7 +54,7 @@ define([
       expect(study.timeModified).toBeNull();
       expect(study.name).toBeEmptyString();
       expect(study.description).toBeNull();
-      expect(study.status).toBe(this.StudyStatus.DISABLED());
+      expect(study.status).toBe(this.StudyStatus.DISABLED);
     });
 
     describe('when creating', function() {
@@ -84,11 +84,11 @@ define([
 
     it('status predicates return valid results', function() {
       var self = this;
-      _.each(self.StudyStatus.values(), function(status) {
+      _.each(_.values(self.StudyStatus), function(status) {
         var study = new self.Study(self.jsonEntities.study({ status: status }));
-        expect(study.isDisabled()).toBe(status === self.StudyStatus.DISABLED());
-        expect(study.isEnabled()).toBe(status === self.StudyStatus.ENABLED());
-        expect(study.isRetired()).toBe(status === self.StudyStatus.RETIRED());
+        expect(study.isDisabled()).toBe(status === self.StudyStatus.DISABLED);
+        expect(study.isEnabled()).toBe(status === self.StudyStatus.ENABLED);
+        expect(study.isRetired()).toBe(status === self.StudyStatus.RETIRED);
       });
     });
 
@@ -299,49 +299,49 @@ define([
     });
 
     it('can disable a study', function() {
-      var jsonStudy = this.jsonEntities.study({ status: this.StudyStatus.ENABLED() });
-      changeStatusShared.call(this, jsonStudy, 'disable', this.StudyStatus.DISABLED());
+      var jsonStudy = this.jsonEntities.study({ status: this.StudyStatus.ENABLED });
+      changeStatusShared.call(this, jsonStudy, 'disable', this.StudyStatus.DISABLED);
     });
 
     it('throws an error when disabling a study and it is already disabled', function() {
-      var study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.DISABLED() }));
+      var study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.DISABLED }));
       expect(function () { study.disable(); })
         .toThrowError('already disabled');
     });
 
     it('can enable a study', function() {
-      var jsonStudy = this.jsonEntities.study({ status: this.StudyStatus.DISABLED() });
-      changeStatusShared.call(this, jsonStudy, 'enable', this.StudyStatus.ENABLED());
+      var jsonStudy = this.jsonEntities.study({ status: this.StudyStatus.DISABLED });
+      changeStatusShared.call(this, jsonStudy, 'enable', this.StudyStatus.ENABLED);
     });
 
     it('throws an error when enabling a study and it is already enabled', function() {
-      var study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.ENABLED() }));
+      var study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.ENABLED }));
       expect(function () { study.enable(); })
         .toThrowError('already enabled');
     });
 
     it('can retire a study', function() {
-      var jsonStudy = this.jsonEntities.study({ status: this.StudyStatus.DISABLED() });
-      changeStatusShared.call(this, jsonStudy, 'retire', this.StudyStatus.RETIRED());
+      var jsonStudy = this.jsonEntities.study({ status: this.StudyStatus.DISABLED });
+      changeStatusShared.call(this, jsonStudy, 'retire', this.StudyStatus.RETIRED);
     });
 
     it('throws an error when retiring a study and it is already retired', function() {
-      var study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.RETIRED() }));
+      var study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.RETIRED }));
       expect(function () { study.retire(); })
         .toThrowError('already retired');
     });
 
     it('can unretire a study', function() {
-      var jsonStudy = this.jsonEntities.study({ status: this.StudyStatus.RETIRED() });
-      changeStatusShared.call(this, jsonStudy, 'unretire', this.StudyStatus.DISABLED());
+      var jsonStudy = this.jsonEntities.study({ status: this.StudyStatus.RETIRED });
+      changeStatusShared.call(this, jsonStudy, 'unretire', this.StudyStatus.DISABLED);
     });
 
     it('throws an error when unretiring a study and it is not retired', function() {
-      var study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.DISABLED() }));
+      var study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.DISABLED }));
       expect(function () { study.unretire(); })
         .toThrowError('not retired');
 
-      study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.ENABLED() }));
+      study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.ENABLED }));
       expect(function () { study.unretire(); })
         .toThrowError('not retired');
     });

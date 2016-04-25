@@ -9,6 +9,7 @@ define(['underscore', 'moment'], function(_, moment) {
     'modalService',
     'User',
     'UserStatus',
+    'userStatusLabel',
     'UserViewer',
     'userCounts',
     'bbwebConfig'
@@ -20,6 +21,7 @@ define(['underscore', 'moment'], function(_, moment) {
   function UsersTableCtrl(modalService,
                           User,
                           UserStatus,
+                          userStatusLabel,
                           UserViewer,
                           userCounts,
                           bbwebConfig) {
@@ -45,8 +47,8 @@ define(['underscore', 'moment'], function(_, moment) {
 
     function getPossibleStatuses() {
       return [{ id: 'all', title: 'All' }].concat(
-        _.map(UserStatus.values(), function(status) {
-          return { id: status, title: UserStatus.label(status) };
+        _.map(_.values(UserStatus), function(status) {
+          return { id: status, title: userStatusLabel.statusToLabel(status) };
         }));
     }
 

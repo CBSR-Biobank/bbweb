@@ -19,6 +19,7 @@
     "grunt-contrib-jshint": "^1.0.0",
     "grunt-contrib-uglify": "~1.0.0",
     "grunt-contrib-watch": "~1.0.0",
+    "grunt-jsdoc": "^1.1.0",
     "grunt-karma": "^0.12.1",
     "grunt-ng-annotate": "^2.0.1",
     "grunt-open": "~0.2.3",

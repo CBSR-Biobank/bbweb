@@ -45,7 +45,7 @@ define([
           return jsonEntities.specimenGroup(entities.study);
         });
         entities.specimenLinkAnnotationTypes = _.map(
-          AnnotationValueType.values(),
+          _.values(AnnotationValueType),
           function (valueType) {
             return jsonEntities.studyAnnotationType(entities.study, {
               valueType: valueType

@@ -22,11 +22,12 @@ define(function (require) {
   module.factory('Location',                            require('./Location'));
   module.factory('LocationViewer',                      require('./LocationViewer'));
 
-  module.service('AnatomicalSourceType',                require('./AnatomicalSourceType'));
-  module.service('AnnotationValueType',                 require('./AnnotationValueType'));
-  module.service('CentreStatus',                        require('./centre/CentreStatus'));
-  module.service('PreservationTemperatureType',         require('./PreservationTemperatureType'));
-  module.service('PreservationType',                    require('./PreservationType'));
+  module.constant('AnatomicalSourceType',               require('./AnatomicalSourceType'));
+  module.constant('PreservationType',                   require('./PreservationType'));
+  module.constant('PreservationTemperatureType',        require('./PreservationTemperatureType'));
+
+  module.constant('AnnotationValueType',                require('./AnnotationValueType'));
+  module.constant('SpecimenType',                       require('./study/SpecimenType'));
 
   module.factory('Annotation',                          require('./annotations/Annotation'));
   module.factory('AnnotationType',                      require('./annotations/AnnotationType'));
@@ -59,8 +60,6 @@ define(function (require) {
   module.factory('StudyViewer',                         require('./study/StudyViewer'));
   module.service('ProcessingDto',                       require('./study/ProcessingDto'));
   module.service('ProcessingType',                      require('./study/ProcessingType'));
-  module.service('SpecimenType',                        require('./study/SpecimenType'));
-  module.service('StudyStatus',                         require('./study/StudyStatus'));
   module.service('studyAnnotationTypeValidation',       require('./study/studyAnnotationTypeValidation'));
 
   module.factory('Participant',                         require('./participants/Participant'));
@@ -69,7 +68,10 @@ define(function (require) {
   module.factory('User',                                require('./user/User'));
   module.factory('UserViewer',                          require('./user/UserViewer'));
   module.service('UserCounts',                          require('./user/UserCounts'));
-  module.service('UserStatus',                          require('./user/UserStatus'));
+
+  module.constant('UserStatus',                         require('./user/UserStatus'));
+  module.constant('StudyStatus',                        require('./study/StudyStatus'));
+  module.constant('CentreStatus',                       require('./centre/CentreStatus'));
 
   return {
     name: name,

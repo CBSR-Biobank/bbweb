@@ -55,13 +55,13 @@ define([
       this.createController();
       expect(this.controller.annotationType).toEqual(jasmine.any(this.AnnotationType));
       expect(this.controller.title).toBe('Add Annotation Type');
-      expect(this.controller.valueTypes).toEqual(this.AnnotationValueType.values());
+      expect(this.controller.valueTypes).toEqual(_.values(this.AnnotationValueType));
     });
 
     it('maxValueCountRequired is valid', function() {
       this.createController();
 
-      this.controller.annotationType.valueType = this.AnnotationValueType.SELECT();
+      this.controller.annotationType.valueType = this.AnnotationValueType.SELECT;
 
       this.controller.annotationType.maxValueCount = 0;
       expect(this.controller.maxValueCountRequired()).toBe(true);

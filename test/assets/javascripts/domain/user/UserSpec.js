@@ -50,7 +50,7 @@ define([
       expect(user.name).toBeEmptyString();
       expect(user.email).toBeEmptyString();
       expect(user.avatarUrl).toBeNull();
-      expect(user.status).toBe(this.UserStatus.REGISTERED());
+      expect(user.status).toBe(this.UserStatus.REGISTERED);
     });
 
     it('creating a user with an object does not modify object', function() {
@@ -270,22 +270,22 @@ define([
 
     it('can activate a registered user', function() {
       var user = new this.User(this.jsonEntities.user());
-      this.statusChangeShared(user, '/activate', 'activate', this.UserStatus.ACTIVE());
+      this.statusChangeShared(user, '/activate', 'activate', this.UserStatus.ACTIVE);
     });
 
     it('can lock an active user', function() {
-      var user = new this.User(_.extend(this.jsonEntities.user(), { status: this.UserStatus.ACTIVE() }));
-      this.statusChangeShared(user, '/lock', 'lock', this.UserStatus.LOCKED());
+      var user = new this.User(_.extend(this.jsonEntities.user(), { status: this.UserStatus.ACTIVE }));
+      this.statusChangeShared(user, '/lock', 'lock', this.UserStatus.LOCKED);
     });
 
     it('can unlock a locked user', function() {
-      var user = new this.User(_.extend(this.jsonEntities.user(), { status: this.UserStatus.LOCKED() }));
-      this.statusChangeShared(user, '/unlock', 'unlock', this.UserStatus.ACTIVE());
+      var user = new this.User(_.extend(this.jsonEntities.user(), { status: this.UserStatus.LOCKED }));
+      this.statusChangeShared(user, '/unlock', 'unlock', this.UserStatus.ACTIVE);
     });
 
     it('fails when calling activate and the user is not registered', function() {
       var self = this,
-          statuses = [ self.UserStatus.ACTIVE(), self.UserStatus.LOCKED() ];
+          statuses = [ self.UserStatus.ACTIVE, self.UserStatus.LOCKED ];
 
       _.each(statuses, function (status) {
         var user = new self.User(_.extend(self.jsonEntities.user(), { status: status }));
@@ -297,19 +297,19 @@ define([
 
     it('fails when calling lock and the user is not active', function() {
       var self = this,
-          statuses = [ self.UserStatus.REGISTERED(), self.UserStatus.LOCKED() ];
+          statuses = [ self.UserStatus.REGISTERED, self.UserStatus.LOCKED ];
 
       _.each(statuses, function (status) {
         var user = new self.User(_.extend(self.jsonEntities.user(), { status: status }));
 
         expect(function () { user.lock(); })
-          .toThrow(new Error('user status is not active: ' + status));
+          .toThrowError(/user status is not active/);
       });
     });
 
     it('fails when calling unlock and the user is not locked', function() {
       var self = this,
-          statuses = [ self.UserStatus.REGISTERED(), self.UserStatus.ACTIVE() ];
+          statuses = [ self.UserStatus.REGISTERED, self.UserStatus.ACTIVE ];
 
       _.each(statuses, function (status) {
         var user = new self.User(_.extend(self.jsonEntities.user(), { status: status }));
@@ -321,13 +321,13 @@ define([
 
     it('status predicates are valid valid', function() {
       var self = this;
-      _.each(self.UserStatus.values(), function (status) {
+      _.each(_.values(self.UserStatus), function (status) {
         var jsonUser = self.jsonEntities.user({ status: status }),
             user     = new self.User(jsonUser);
 
-        expect(user.isRegistered()).toBe(status === self.UserStatus.REGISTERED());
-        expect(user.isActive()).toBe(status === self.UserStatus.ACTIVE());
-        expect(user.isLocked()).toBe(status === self.UserStatus.LOCKED());
+        expect(user.isRegistered()).toBe(status === self.UserStatus.REGISTERED);
+        expect(user.isActive()).toBe(status === self.UserStatus.ACTIVE);
+        expect(user.isLocked()).toBe(status === self.UserStatus.LOCKED);
       });
     });
 

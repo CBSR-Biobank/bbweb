@@ -7,38 +7,17 @@
 define([
   'angular',
   'angularMocks',
-  'underscore',
-  '../enumSharedSpec',
-  'biobankApp'
-], function(angular, mocks, _, enumSharedSpec) {
+  'underscore'
+], function(angular, mocks, _) {
   'use strict';
 
   describe('UserStatus', function() {
 
-    var context = {};
-
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (UserStatus) {
-      this.UserStatus = UserStatus;
-
-      context.enumerationClass = UserStatus;
-      context.valueMap = [
-        [ 'ActiveUser',     'ACTIVE' ],
-        [ 'RegisteredUser', 'REGISTERED' ],
-        [ 'LockedUser',     'LOCKED' ]
-      ];
+    it('should have values', inject(function (UserStatus) {
+      expect(_.keys(UserStatus)).not.toBeEmptyArray();
     }));
-
-    it('throws error when getting label for invalid status', function() {
-      var self = this;
-
-      expect(function () {
-        self.UserStatus.label('xxx');
-      }).toThrowError(/invalid status for user/);
-    });
-
-    enumSharedSpec(context);
   });
 
 });

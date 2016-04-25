@@ -224,19 +224,19 @@ define([
     }
 
     function randomAnatomicalSourceType() {
-      return faker.random.arrayElement(AnatomicalSourceType.values());
+      return faker.random.arrayElement(_.values(AnatomicalSourceType));
     }
 
     function randomPreservationType() {
-      return faker.random.arrayElement(PreservationType.values());
+      return faker.random.arrayElement(_.values(PreservationType));
     }
 
     function randomPreservationTemperatureTypeType() {
-      return faker.random.arrayElement(PreservationTemperatureType.values());
+      return faker.random.arrayElement(_.values(PreservationTemperatureType));
     }
 
     function randomSpecimenType() {
-      return faker.random.arrayElement(SpecimenType.values());
+      return faker.random.arrayElement(_.values(SpecimenType));
     }
 
     function specimenGroup(options) {
@@ -267,7 +267,7 @@ define([
                         name:            stringNext(),
                         description:     faker.lorem.sentences(4),
                         annotationTypes: [],
-                        status:          StudyStatus.DISABLED()
+                        status:          StudyStatus.DISABLED
                       },
           validKeys = commonFieldNames.concat(_.keys(defaults)),
           s = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
@@ -353,7 +353,7 @@ define([
       var defaults = { id:          domainEntityNameNext(ENTITY_NAME_CENTRE()),
                        name:        stringNext(),
                        description: stringNext(),
-                       status:      CentreStatus.DISABLED(),
+                       status:      CentreStatus.DISABLED,
                        studyIds:    [],
                        locations:   []
                      },
@@ -372,7 +372,7 @@ define([
                        name:      stringNext(),
                        email:     stringNext(),
                        avatarUrl: null,
-                       status:    UserStatus.REGISTERED()
+                       status:    UserStatus.REGISTERED
                      },
           validKeys = commonFieldNames.concat(_.keys(defaults)),
           u = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
@@ -395,7 +395,7 @@ define([
       var defaults = { uniqueId:      domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE()),
                        name:          stringNext(),
                        description:   null,
-                       valueType:     AnnotationValueType.TEXT(),
+                       valueType:     AnnotationValueType.TEXT,
                        options:       [],
                        maxValueCount: null,
                        required:      false
@@ -406,10 +406,10 @@ define([
       options = options || {};
 
       if (!options.valueType) {
-        options.valueType = AnnotationValueType.TEXT();
+        options.valueType = AnnotationValueType.TEXT;
       }
 
-      if (options.valueType === AnnotationValueType.SELECT()) {
+      if (options.valueType === AnnotationValueType.SELECT) {
         if (_.isUndefined(options.maxValueCount)) {
           options.maxValueCount = 1;
         }
@@ -427,11 +427,11 @@ define([
     }
 
     function allAnnotationTypes() {
-      var annotationTypes = _.map(AnnotationValueType.values(), function (valueType) {
+      var annotationTypes = _.map(_.values(AnnotationValueType), function (valueType) {
         return annotationType({ valueType: valueType });
       });
       annotationTypes.push(annotationType({
-        valueType:     AnnotationValueType.SELECT(),
+        valueType:     AnnotationValueType.SELECT,
         maxValueCount: 2,
         options:       [ 'opt1', 'opt2', 'opt3' ]
       }));
@@ -477,16 +477,16 @@ define([
 
       if (!_.isUndefined(options.value) && annotationType.valueType) {
         switch (annotationType.valueType) {
-        case AnnotationValueType.TEXT():
-        case AnnotationValueType.DATE_TIME():
+        case AnnotationValueType.TEXT:
+        case AnnotationValueType.DATE_TIME:
           annotation.stringValue = options.value;
           break;
 
-        case AnnotationValueType.NUMBER():
+        case AnnotationValueType.NUMBER:
           annotation.numberValue = options.value;
           break;
 
-        case AnnotationValueType.SELECT():
+        case AnnotationValueType.SELECT:
           if (options.value !== '') {
             if (annotationType.maxValueCount === 1) {
               annotation.selectedValues =  [ options.value ];
@@ -509,13 +509,13 @@ define([
     function valueForAnnotation(annotationType) {
       switch (annotationType.valueType) {
 
-      case AnnotationValueType.TEXT():
+      case AnnotationValueType.TEXT:
         return stringNext();
 
-      case AnnotationValueType.NUMBER():
+      case AnnotationValueType.NUMBER:
         return faker.random.number({precision: 0.05}).toString();
 
-      case AnnotationValueType.DATE_TIME():
+      case AnnotationValueType.DATE_TIME:
         // has to be in UTC format, with no seconds or milliseconds
         return moment(faker.date.past(1))
           .set({
@@ -525,7 +525,7 @@ define([
           .local()
           .format();
 
-      case AnnotationValueType.SELECT():
+      case AnnotationValueType.SELECT:
         if (annotationType.maxValueCount === 1) {
           return annotationType.options[0];
         } else if (annotationType.maxValueCount === 2) {

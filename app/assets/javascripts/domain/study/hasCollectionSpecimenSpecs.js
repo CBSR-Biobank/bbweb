@@ -30,7 +30,7 @@ define(['underscore'], function(_) {
         return true;
       }
       result = _.find(specimenSpecs, function (annotType) {
-        return !CollectionSpecimenSpec.valid(annotType);
+        return !CollectionSpecimenSpec.isValid(annotType);
       });
 
       return _.isUndefined(result);

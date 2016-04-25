@@ -56,7 +56,8 @@ define([
     it('scope is valid on startup', function() {
       var self = this,
           CentreStatus = self.$injector.get('CentreStatus'),
-          allStatuses = CentreStatus.values(),
+          centreStatusLabel = self.$injector.get('centreStatusLabel'),
+          allStatuses = _.values(CentreStatus),
           counts = self.createCentreCounts(1, 2, 3);
 
       spyOn(self.CentreCounts, 'get').and.callFake(function () {
@@ -69,7 +70,10 @@ define([
       expect(self.scope.vm.pageSize).toBeDefined();
 
       _.each(allStatuses, function(status) {
-        expect(self.scope.vm.possibleStatuses).toContain({ id: status, label: CentreStatus.label(status)});
+        expect(self.scope.vm.possibleStatuses).toContain({
+          id: status,
+          label: centreStatusLabel.statusToLabel(status)
+        });
       });
       expect(self.scope.vm.possibleStatuses).toContain({ id: 'all', label: 'All'});
     });

@@ -5,41 +5,22 @@
 define(function () {
   'use strict';
 
-  //PreservationTemperatureType.$inject = [];
-
   /**
+   * Describes how a {@link domain.participants.Specimen Specimen} should be preserved/stored by describing
+   * temperature requirements (degrees Celsius), as well as a preservation method (see {@link
+   * domain.PreservationType PreservationType}).
    *
+   * @enum {string}
+   * @memberOf domain
+   * @see domain.PreservationType
    */
-  function PreservationTemperatureType() {
-    var ALL_VALUES = [
-      PLUS_4_CELCIUS(),
-      MINUS_20_CELCIUS(),
-      MINUS_80_CELCIUS(),
-      MINUS_180_CELCIUS(),
-      ROOM_TEMPERATURE()
-    ];
-
-    var service = {
-      PLUS_4_CELCIUS:    PLUS_4_CELCIUS,
-      MINUS_20_CELCIUS:  MINUS_20_CELCIUS,
-      MINUS_80_CELCIUS:  MINUS_80_CELCIUS,
-      MINUS_180_CELCIUS: MINUS_180_CELCIUS,
-      ROOM_TEMPERATURE:  ROOM_TEMPERATURE,
-      values:            values
-    };
-    return service;
-
-    //-------
-
-    function PLUS_4_CELCIUS()    { return '4 C'; }
-    function MINUS_20_CELCIUS()  { return '-20 C'; }
-    function MINUS_80_CELCIUS()  { return '-80 C'; }
-    function MINUS_180_CELCIUS() { return '-180 C'; }
-    function ROOM_TEMPERATURE()  { return 'Room Temperature'; }
-
-    function values()            { return ALL_VALUES; }
-
-  }
+  var PreservationTemperatureType = {
+    PLUS_4_CELCIUS:    '4 C',
+    MINUS_20_CELCIUS:  '-20 C',
+    MINUS_80_CELCIUS:  '-80 C',
+    MINUS_180_CELCIUS: '-180 C',
+    ROOM_TEMPERATURE:  'Room Temperature'
+  };
 
   return PreservationTemperatureType;
 });

@@ -65,19 +65,19 @@ define(['underscore'], function(_) {
 
       switch (annotationType.valueType) {
 
-      case AnnotationValueType.TEXT():
+      case AnnotationValueType.TEXT:
         annotation = new TextAnnotation(obj, annotationType);
         break;
 
-      case AnnotationValueType.NUMBER():
+      case AnnotationValueType.NUMBER:
         annotation = new NumberAnnotation(obj, annotationType);
         break;
 
-      case AnnotationValueType.DATE_TIME():
+      case AnnotationValueType.DATE_TIME:
         annotation = new DateTimeAnnotation(obj, annotationType);
         break;
 
-      case AnnotationValueType.SELECT():
+      case AnnotationValueType.SELECT:
         if (annotationType.isSingleSelect()) {
           annotation = new SingleSelectAnnotation(obj, annotationType);
         } else if (annotationType.isMultipleSelect()) {

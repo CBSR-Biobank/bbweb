@@ -28,7 +28,7 @@ define([
       self.jsonEntities         = self.$injector.get('jsonEntities');
 
       self.annotationTypes = _.map(
-        self.AnnotationValueType.values(),
+        _.values(self.AnnotationValueType),
         function(valueType) {
           return new self.AnnotationType(
             self.jsonEntities.annotationType(self.study, { valueType: valueType }));

@@ -124,7 +124,7 @@ define(function(require) {
       var context = {};
 
       beforeEach(inject(function () {
-        var participant = this.participantWithAnnotation(this.AnnotationValueType.TEXT());
+        var participant = this.participantWithAnnotation(this.AnnotationValueType.TEXT);
 
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'text';
@@ -144,7 +144,7 @@ define(function(require) {
       var context = {};
 
       beforeEach(inject(function () {
-        var participant = this.participantWithAnnotation(this.AnnotationValueType.DATE_TIME());
+        var participant = this.participantWithAnnotation(this.AnnotationValueType.DATE_TIME);
 
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'dateTime';
@@ -164,7 +164,7 @@ define(function(require) {
       var context = {};
 
       beforeEach(inject(function () {
-        var participant = this.participantWithAnnotation(this.AnnotationValueType.NUMBER());
+        var participant = this.participantWithAnnotation(this.AnnotationValueType.NUMBER);
 
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'number';
@@ -184,7 +184,7 @@ define(function(require) {
       var context = {};
 
       beforeEach(inject(function () {
-        var participant = this.participantWithAnnotation(this.AnnotationValueType.SELECT(), 1);
+        var participant = this.participantWithAnnotation(this.AnnotationValueType.SELECT, 1);
 
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'select';
@@ -204,7 +204,7 @@ define(function(require) {
       var context = {};
 
       beforeEach(inject(function () {
-        var participant = this.participantWithAnnotation(this.AnnotationValueType.SELECT(), 2);
+        var participant = this.participantWithAnnotation(this.AnnotationValueType.SELECT, 2);
 
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'selectMultiple';

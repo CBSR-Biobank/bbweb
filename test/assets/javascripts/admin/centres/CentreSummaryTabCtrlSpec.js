@@ -55,8 +55,8 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
         self.createController(self.centre);
 
         spyOn(self.Centre.prototype, status).and.callFake(function () {
-          centre.status = (centre.status === self.CentreStatus.ENABLED()) ?
-            self.CentreStatus.DISABLED() : self.CentreStatus.ENABLED();
+          centre.status = (centre.status === self.CentreStatus.ENABLED) ?
+            self.CentreStatus.DISABLED : self.CentreStatus.ENABLED;
           return self.$q.when(centre);
         });
 
@@ -67,12 +67,12 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       }
 
       it('should enable a centre', function() {
-        checkStatusChange.call(this, this.centre, 'enable', this.CentreStatus.ENABLED());
+        checkStatusChange.call(this, this.centre, 'enable', this.CentreStatus.ENABLED);
       });
 
       it('should disable a centre', function() {
-        this.centre.status = this.CentreStatus.ENABLED();
-        checkStatusChange.call(this, this.centre, 'disable', this.CentreStatus.DISABLED());
+        this.centre.status = this.CentreStatus.ENABLED;
+        checkStatusChange.call(this, this.centre, 'disable', this.CentreStatus.DISABLED);
       });
 
     });

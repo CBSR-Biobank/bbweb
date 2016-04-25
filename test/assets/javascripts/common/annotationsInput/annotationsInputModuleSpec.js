@@ -72,7 +72,7 @@ define([
 
     it('works for a TEXT annotation', function() {
       var annotationValue = this.jsonEntities.stringNext(),
-          annotations = [ this.createAnnotation(this.AnnotationValueType.TEXT()) ];
+          annotations = [ this.createAnnotation(this.AnnotationValueType.TEXT) ];
 
       this.createController(annotations);
       expect(this.element.find('input').length).toBe(1);
@@ -84,7 +84,7 @@ define([
 
     it('works for a NUMBER annotation and a valid number', function() {
       var annotationValue = 111.01,
-          annotations = [ this.createAnnotation(this.AnnotationValueType.NUMBER()) ];
+          annotations = [ this.createAnnotation(this.AnnotationValueType.NUMBER) ];
 
       this.createController(annotations);
       expect(this.element.find('input').length).toBe(1);
@@ -96,7 +96,7 @@ define([
 
     it('validation fails for a NUMBER annotation and an invalid number', function() {
       var annotationValue = this.jsonEntities.stringNext(),
-          annotations = [ this.createAnnotation(this.AnnotationValueType.NUMBER()) ];
+          annotations = [ this.createAnnotation(this.AnnotationValueType.NUMBER) ];
 
       this.createController(annotations);
       expect(this.element.find('input').length).toBe(1);
@@ -113,7 +113,7 @@ define([
     it('works for a DATE_TIME annotation and a valid number', function() {
       var timeService = this.$injector.get('timeService'),
           dateStr = '2010-01-10 12:00 PM',
-          annotation = this.createAnnotation(this.AnnotationValueType.DATE_TIME()),
+          annotation = this.createAnnotation(this.AnnotationValueType.DATE_TIME),
           annotations = [ annotation ];
 
       _.extend(annotation, timeService.stringToDateAndTime(dateStr));
@@ -132,7 +132,7 @@ define([
 
       annotationType = new self.AnnotationType(
         self.jsonEntities.annotationType({
-          valueType:     self.AnnotationValueType.SELECT(),
+          valueType:     self.AnnotationValueType.SELECT,
           maxValueCount: 1,
           options:       [ 'option1', 'option2' ],
           required:      true
@@ -159,7 +159,7 @@ define([
 
       annotationType = new this.AnnotationType(
         this.jsonEntities.annotationType({
-          valueType: this.AnnotationValueType.SELECT(),
+          valueType: this.AnnotationValueType.SELECT,
           maxValueCount: 2,
           options: [ 'option1', 'option2', 'option3' ],
           required: true }));
@@ -184,7 +184,7 @@ define([
 
           annotationType = new self.AnnotationType(
             self.jsonEntities.annotationType({
-              valueType:     self.AnnotationValueType.SELECT(),
+              valueType:     self.AnnotationValueType.SELECT,
               maxValueCount: 2,
               options:       [ 'option1', 'option2', 'option3' ],
               required:      true

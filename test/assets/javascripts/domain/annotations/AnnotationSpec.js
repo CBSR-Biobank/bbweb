@@ -127,7 +127,7 @@ define([
         it('fails when creating with required parameter omitted', function() {
           var annotationType;
 
-          annotationType = createAnnotationType({ valueType: AnnotationValueType.TEXT() });
+          annotationType = createAnnotationType({ valueType: AnnotationValueType.TEXT });
 
           expect(function () { return annotationFactory.create(undefined, annotationType); })
             .not.toThrow(new Error('required not assigned'));
@@ -143,7 +143,7 @@ define([
 
         it('creation fails if max value count is invalid', function() {
           var annotationType = createAnnotationType({
-            valueType: AnnotationValueType.SELECT()
+            valueType: AnnotationValueType.SELECT
           });
           annotationType.maxValueCount = 0;
           expect(function () { return createAnnotation(undefined, annotationType); })
@@ -161,7 +161,7 @@ define([
                  value;
 
              annotationType = createAnnotationType({
-               valueType:     AnnotationValueType.SELECT(),
+               valueType:     AnnotationValueType.SELECT,
                maxValueCount: 1,
                options:       [ 'option1', 'option2', 'option3' ],
                required:      true
@@ -175,7 +175,7 @@ define([
 
         it('fails when creating from a non object', function() {
           var annotationType = createAnnotationType({
-            valueType:     AnnotationValueType.SELECT(),
+            valueType:     AnnotationValueType.SELECT,
             maxValueCount: 1,
             options:       [ 'option1', 'option2', 'option3' ],
             required:      true
@@ -187,7 +187,7 @@ define([
         it('fails when creating from server response with bad selections', function() {
           var annotationType = createAnnotationType(
             {
-              valueType:     AnnotationValueType.SELECT(),
+              valueType:     AnnotationValueType.SELECT,
               maxValueCount: 1,
               options:       [ 'option1', 'option2', 'option3' ],
               required:      true
@@ -271,7 +271,7 @@ define([
               annotation,
               serverAnnotation,
               value,
-              valueTypes = [ AnnotationValueType.TEXT(), AnnotationValueType.DATE_TIME() ],
+              valueTypes = [ AnnotationValueType.TEXT, AnnotationValueType.DATE_TIME ],
               timeStr;
 
           _.each(valueTypes, function (valueType) {
@@ -281,7 +281,7 @@ define([
             serverAnnotation = jsonEntities.annotation({ value: value }, annotationType);
             annotation = createAnnotation(serverAnnotation, annotationType);
 
-            if (valueType === AnnotationValueType.TEXT()) {
+            if (valueType === AnnotationValueType.TEXT) {
               expect(annotation.getValue()).toEqual(serverAnnotation.stringValue);
             } else {
               timeStr = moment(serverAnnotation.stringValue).local().format(bbwebConfig.dateTimeFormat);
@@ -297,7 +297,7 @@ define([
               serverAnnotation,
               value;
 
-          annotationType = createAnnotationType({ valueType: AnnotationValueType.NUMBER() });
+          annotationType = createAnnotationType({ valueType: AnnotationValueType.NUMBER });
 
           value = jsonEntities.valueForAnnotation(annotationType);
           serverAnnotation = jsonEntities.annotation({ value: value }, annotationType);
@@ -310,7 +310,7 @@ define([
           var annotationType, annotation, serverAnnotation, value;
 
           annotationType = createAnnotationType({
-            valueType:     AnnotationValueType.SELECT(),
+            valueType:     AnnotationValueType.SELECT,
             maxValueCount: 1,
             options:       [ 'option1', 'option2' ],
             required:      true
@@ -327,7 +327,7 @@ define([
           var annotationType, annotation, serverAnnotation, value;
 
           annotationType = createAnnotationType({
-            valueType:     AnnotationValueType.SELECT(),
+            valueType:     AnnotationValueType.SELECT,
             maxValueCount: 2,
             options:       [ 'option1', 'option2', 'option3' ],
             required:      true
@@ -372,7 +372,7 @@ define([
           var annotationType, annotation;
 
           annotationType = createAnnotationType({
-            valueType:     AnnotationValueType.SELECT(),
+            valueType:     AnnotationValueType.SELECT,
             maxValueCount: 2,
             options:       [ 'option1', 'option2' ],
             required:      true
@@ -412,11 +412,11 @@ define([
          * Creates annotation type options to create an annotation of each type of object.
          */
         function getAnnotationTypeOptionsForAll() {
-          var result = _.map(AnnotationValueType.values(), function (valueType) {
+          var result = _.map(_.values(AnnotationValueType), function (valueType) {
             return { valueType: valueType };
           });
           result.push({
-            valueType: AnnotationValueType.SELECT(),
+            valueType: AnnotationValueType.SELECT,
             maxValueCount: 2,
             options: [ 'opt1', 'opt2', 'opt3' ]
           });

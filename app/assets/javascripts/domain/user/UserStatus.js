@@ -5,48 +5,17 @@
 define(function () {
   'use strict';
 
-  //UserStatus.$inject = [];
-
   /**
+   * The statuses a {@link domain.users.User User} can have.
    *
+   * @enum {string}
+   * @memberOf domain.users
    */
-  function UserStatus() {
-    var ALL_VALUES = [
-      REGISTERED(),
-      ACTIVE(),
-      LOCKED(),
-    ];
-
-    var service = {
-      REGISTERED: REGISTERED,
-      ACTIVE:     ACTIVE,
-      LOCKED:     LOCKED,
-
-      values:    values,
-      label:    label
-    };
-    return service;
-
-    //-------
-
-    function REGISTERED() { return 'RegisteredUser'; }
-    function ACTIVE()     { return 'ActiveUser'; }
-    function LOCKED()     { return 'LockedUser'; }
-
-    function values()    { return ALL_VALUES; }
-
-    function label(status) {
-      switch (status) {
-      case REGISTERED():
-        return 'Registered';
-      case ACTIVE():
-        return 'Active';
-      case LOCKED():
-        return 'Locked';
-      }
-      throw new Error('invalid status for user: ' + status);
-    }
-  }
+  var UserStatus = {
+    REGISTERED: 'RegisteredUser',
+    ACTIVE:     'ActiveUser',
+    LOCKED:     'LockedUser'
+  };
 
   return UserStatus;
 });

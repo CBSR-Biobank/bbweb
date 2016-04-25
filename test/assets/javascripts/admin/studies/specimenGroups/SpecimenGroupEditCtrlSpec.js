@@ -137,10 +137,10 @@ define([
           function checkInitialScope(userContext, entities) {
             expect(userContext.scope.vm.study).toBe(entities.study);
             expect(userContext.scope.vm.specimenGroup).toBe(entities.specimenGroup);
-            expect(userContext.scope.vm.anatomicalSourceTypes ).toBe(userContext.AnatomicalSourceType.values());
-            expect(userContext.scope.vm.preservTypes).toBe(userContext.PreservationType.values());
-            expect(userContext.scope.vm.preservTempTypes).toBe(userContext.PreservationTemperatureType.values());
-            expect(userContext.scope.vm.specimenTypes).toBe(userContext.SpecimenType.values());
+            expect(userContext.scope.vm.anatomicalSourceTypes ).toBeDefined();
+            expect(userContext.scope.vm.preservTypes).toBeDefined();
+            expect(userContext.scope.vm.preservTempTypes).toBeDefined();
+            expect(userContext.scope.vm.specimenTypes).toBeDefined();
           }
 
         });

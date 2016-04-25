@@ -49,7 +49,7 @@ define([
           return jsonEntities.specimenGroup(study);
         });
         annotationTypes = _.map(
-          AnnotationValueType.values(),
+          _.values(AnnotationValueType),
           function(valueType) {
             return new AnnotationType({ valueType: valueType });
           });

@@ -143,7 +143,7 @@ define(function(require) {
       var context = {};
 
       beforeEach(inject(function () {
-        var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.TEXT());
+        var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.TEXT);
 
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'text';
@@ -163,7 +163,7 @@ define(function(require) {
       var context = {};
 
       beforeEach(inject(function () {
-        var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.DATE_TIME()),
+        var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.DATE_TIME),
             newValue = faker.date.recent(10);
 
         context.controllerUpdateFuncName = 'editAnnotation';
@@ -184,7 +184,7 @@ define(function(require) {
       var context = {};
 
       beforeEach(inject(function () {
-        var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.NUMBER());
+        var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.NUMBER);
 
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'number';
@@ -204,7 +204,7 @@ define(function(require) {
       var context = {};
 
       beforeEach(inject(function () {
-        var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.NUMBER());
+        var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.NUMBER);
 
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'number';
@@ -225,7 +225,7 @@ define(function(require) {
 
       beforeEach(inject(function () {
         var collectionEvent = this.collectionEventWithAnnotation(
-          this.AnnotationValueType.SELECT(), 1);
+          this.AnnotationValueType.SELECT, 1);
 
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'select';
@@ -246,7 +246,7 @@ define(function(require) {
 
       beforeEach(inject(function () {
         var collectionEvent = this.collectionEventWithAnnotation(
-          this.AnnotationValueType.SELECT(), 2);
+          this.AnnotationValueType.SELECT, 2);
 
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'selectMultiple';

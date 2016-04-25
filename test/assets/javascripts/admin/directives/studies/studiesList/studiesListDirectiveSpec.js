@@ -54,10 +54,11 @@ define([
     }));
 
     it('scope is valid on startup', function() {
-      var self        = this,
-          StudyStatus = this.$injector.get('StudyStatus'),
-          allStatuses = StudyStatus.values(),
-          counts      = this.createStudyCounts(1, 2, 3);
+      var self             = this,
+          StudyStatus      = this.$injector.get('StudyStatus'),
+          studyStatusLabel = this.$injector.get('studyStatusLabel'),
+          allStatuses      = _.values(StudyStatus),
+          counts           = this.createStudyCounts(1, 2, 3);
 
       spyOn(self.StudyCounts, 'get').and.callFake(function () {
         return self.$q.when(counts);
@@ -74,7 +75,7 @@ define([
 
       _.each(allStatuses, function(status) {
         expect(self.controller.possibleStatuses)
-          .toContain({ id: status, label: StudyStatus.label(status)});
+          .toContain({ id: status, label: studyStatusLabel.statusToLabel(status)});
       });
       expect(self.controller.possibleStatuses).toContain({ id: 'all', label: 'All'});
     });

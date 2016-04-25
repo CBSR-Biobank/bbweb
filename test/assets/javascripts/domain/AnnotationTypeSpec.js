@@ -21,7 +21,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     it('invalid objects are reported', function () {
       var self = this,
           annotationTypeJson = self.jsonEntities.annotationType({
-            valueType: self.AnnotationValueType.SELECT(),
+            valueType: self.AnnotationValueType.SELECT,
             options: []
           });
 
@@ -47,7 +47,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     it('can be created from valid JSON', function () {
       var self = this,
           annotationTypeJson = self.jsonEntities.annotationType({
-            valueType: self.AnnotationValueType.SELECT(),
+            valueType: self.AnnotationValueType.SELECT,
             options: ['opt1', 'opt2']
           }),
           annotationType = self.AnnotationType.create(annotationTypeJson);
@@ -58,7 +58,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     it('create fails for invalid JSON', function () {
       var self = this,
           annotationTypeJson = self.jsonEntities.annotationType({
-            valueType: self.AnnotationValueType.SELECT(),
+            valueType: self.AnnotationValueType.SELECT,
             options: []
           });
 
@@ -74,14 +74,14 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     it('valueType predicates return valid results', function() {
       var self = this;
 
-      _.each(self.AnnotationValueType.values(), function (valueType) {
+      _.each(_.values(self.AnnotationValueType), function (valueType) {
         var annotationType = new self.AnnotationType(
           self.jsonEntities.annotationType({ valueType: valueType }));
 
-        expect(annotationType.isValueTypeText()).toBe(valueType === self.AnnotationValueType.TEXT());
-        expect(annotationType.isValueTypeNumber()).toBe(valueType === self.AnnotationValueType.NUMBER());
-        expect(annotationType.isValueTypeDateTime()).toBe(valueType === self.AnnotationValueType.DATE_TIME());
-        expect(annotationType.isValueTypeSelect()).toBe(valueType === self.AnnotationValueType.SELECT());
+        expect(annotationType.isValueTypeText()).toBe(valueType === self.AnnotationValueType.TEXT);
+        expect(annotationType.isValueTypeNumber()).toBe(valueType === self.AnnotationValueType.NUMBER);
+        expect(annotationType.isValueTypeDateTime()).toBe(valueType === self.AnnotationValueType.DATE_TIME);
+        expect(annotationType.isValueTypeSelect()).toBe(valueType === self.AnnotationValueType.SELECT);
       });
     });
 
@@ -91,7 +91,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       _.each(_.range(4), function (maxValueCount) {
         var annotationType = new self.AnnotationType(
           self.jsonEntities.annotationType({
-            valueType: self.AnnotationValueType.SELECT(),
+            valueType: self.AnnotationValueType.SELECT,
             maxValueCount: maxValueCount
           }));
 
@@ -106,7 +106,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       _.each(_.range(4), function (maxValueCount) {
         var annotationType = new self.AnnotationType(
           self.jsonEntities.annotationType({
-            valueType: self.AnnotationValueType.SELECT(),
+            valueType: self.AnnotationValueType.SELECT,
             maxValueCount: maxValueCount
           }));
 
@@ -121,7 +121,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       _.each(_.range(4), function (maxValueCount) {
         annotationType = new self.AnnotationType(
           self.jsonEntities.annotationType({
-            valueType: self.AnnotationValueType.SELECT(),
+            valueType: self.AnnotationValueType.SELECT,
             maxValueCount: maxValueCount
           }));
 
@@ -133,7 +133,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       _.each(_.range(4), function (maxValueCount) {
         annotationType = new self.AnnotationType(
           self.jsonEntities.annotationType({
-            valueType: self.AnnotationValueType.TEXT(),
+            valueType: self.AnnotationValueType.TEXT,
             maxValueCount: maxValueCount
           }));
 
@@ -144,8 +144,8 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     it('addOption throws an error if value type is not SELECT', function() {
       var self = this,
-          valueTypesNoSelect = _.reject(self.AnnotationValueType.values(), function (valueType) {
-            return valueType === self.AnnotationValueType.SELECT();
+          valueTypesNoSelect = _.reject(_.values(self.AnnotationValueType), function (valueType) {
+            return valueType === self.AnnotationValueType.SELECT;
           });
 
       _.each(valueTypesNoSelect, function (valueType) {
@@ -161,7 +161,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       var self = this,
           annotationType = new self.AnnotationType(
             self.jsonEntities.annotationType({
-              valueType: self.AnnotationValueType.SELECT(),
+              valueType: self.AnnotationValueType.SELECT,
               options: []
             }));
       expect(annotationType.options).toBeArrayOfSize(0);
@@ -174,7 +174,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       var self = this,
           annotationType = new self.AnnotationType(
             self.jsonEntities.annotationType({
-              valueType: self.AnnotationValueType.SELECT(),
+              valueType: self.AnnotationValueType.SELECT,
               options: []
             }));
 
@@ -187,7 +187,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           options = ['option1', 'option2'],
           annotationType = new self.AnnotationType(
             self.jsonEntities.annotationType({
-              valueType: self.AnnotationValueType.SELECT(),
+              valueType: self.AnnotationValueType.SELECT,
               options: options
             }));
       expect(annotationType.options).toBeArrayOfSize(options.length);

@@ -5,43 +5,16 @@
 define(function () {
   'use strict';
 
-  //CentreStatus.$inject = [];
-
   /**
+   * The statuses a {@link domain.centres.Centre Centre} can have.
    *
+   * @enum {string}
+   * @memberOf domain.centres
    */
-  function CentreStatus() {
-    var ALL_VALUES = [
-      DISABLED(),
-      ENABLED()
-    ];
-
-    var service = {
-      DISABLED: DISABLED,
-      ENABLED:  ENABLED,
-
-      values:   values,
-      label:    label
-    };
-    return service;
-
-    //-------
-
-    function DISABLED() { return 'DisabledCentre'; }
-    function ENABLED()  { return 'EnabledCentre'; }
-
-    function values()    { return ALL_VALUES; }
-
-    function label(status) {
-      switch (status) {
-      case DISABLED():
-        return 'Disabled';
-      case ENABLED():
-        return 'Enabled';
-      }
-      throw new Error('invalid status for centre' + status);
-    }
-  }
+  var CentreStatus = {
+    DISABLED: 'DisabledCentre',
+    ENABLED:  'EnabledCentre'
+  };
 
   return CentreStatus;
 });

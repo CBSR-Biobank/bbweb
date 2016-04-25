@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function () {
+define(['underscore'], function (_) {
   'use strict';
 
   /**
@@ -108,7 +108,7 @@ define(function () {
                         vm.specimenSpec.anatomicalSourceType,
                         {
                           required: true,
-                          selectOptions: AnatomicalSourceType.values()
+                          selectOptions: _.values(AnatomicalSourceType)
                         })
         .result.then(function (selection) {
           vm.specimenSpec.anatomicalSourceType = selection;
@@ -122,7 +122,7 @@ define(function () {
                         vm.specimenSpec.preservationType,
                         {
                           required: true,
-                          selectOptions: PreservationType.values()
+                          selectOptions: _.values(PreservationType)
                         })
         .result.then(function (selection) {
           vm.specimenSpec.preservationType = selection;
@@ -136,7 +136,7 @@ define(function () {
                         vm.specimenSpec.preservationTemperatureType,
                         {
                           required: true,
-                          selectOptions: PreservationTemperatureType.values()
+                          selectOptions: _.values(PreservationTemperatureType)
                         })
         .result.then(function (selection) {
           vm.specimenSpec.preservationTemperatureType = selection;
@@ -150,7 +150,7 @@ define(function () {
                         vm.specimenSpec.specimenType,
                         {
                           required: true,
-                          selectOptions: SpecimenType.values()
+                          selectOptions: _.values(SpecimenType)
                         })
         .result.then(function (selection) {
           vm.specimenSpec.specimenType = selection;

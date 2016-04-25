@@ -68,7 +68,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
       _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
     }
 
-    CollectionSpecimenSpec.valid = function(obj) {
+    CollectionSpecimenSpec.isValid = function(obj) {
       return tv4.validate(obj, schema);
     };
 

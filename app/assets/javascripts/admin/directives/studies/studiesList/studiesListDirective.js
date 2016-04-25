@@ -24,6 +24,7 @@ define(['underscore'], function(_) {
   StudiesListCtrl.$inject = [
     'Study',
     'StudyStatus',
+    'studyStatusLabel',
     'StudyCounts'
   ];
 
@@ -31,7 +32,7 @@ define(['underscore'], function(_) {
    * Displays a list of studies with each in its own mini-panel.
    *
    */
-  function StudiesListCtrl(Study, StudyStatus, StudyCounts) {
+  function StudiesListCtrl(Study, StudyStatus, studyStatusLabel, StudyCounts) {
     var vm = this;
 
     vm.studyCounts      = {};
@@ -39,8 +40,8 @@ define(['underscore'], function(_) {
     vm.updateStudies    = Study.list;
     vm.possibleStatuses = [ { id: 'all', label: 'All' } ];
 
-    _.each(StudyStatus.values(), function (status) {
-      vm.possibleStatuses.push({id: status, label: StudyStatus.label(status)});
+    _.each(_.values(StudyStatus), function (status) {
+      vm.possibleStatuses.push({id: status, label: studyStatusLabel.statusToLabel(status)});
     });
 
     init();

@@ -8,6 +8,18 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
 
+    jsdoc : {
+      dist : {
+        src: ['app/assets/javascripts/**/*.js', 'app/assets/javascripts/**/*.jsdoc'],
+        jsdoc: '/usr/bin/jsdoc',
+        options: {
+          destination: 'documentation/js',
+          nocolor: true,
+          configure: './jsdoc.json'
+        }
+      }
+    },
+
     karma: {
       options: {
         configFile: 'karma.conf.js',
@@ -90,6 +102,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-karma');
   grunt.loadNpmTasks('grunt-ngdocs');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-jsdoc');
 
   // grunt.registerTask('test', 'Run tests on singleRun karma server', function () {
   //   if (grunt.option('coverage')) {
@@ -101,6 +114,6 @@ module.exports = function(grunt) {
   //   grunt.task.run('karma:unit');
   // });
 
-  grunt.registerTask('default', ['karma:unit']);
+  grunt.registerTask('default', ['karma:unit', 'jsdoc']);
 
 };

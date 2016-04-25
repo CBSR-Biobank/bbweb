@@ -26,8 +26,9 @@ define(function (require) {
   module.directive('passwordSent',  require('./directives/passwordSent/passwordSentDirective'));
   module.directive('passwordCheck', require('./directives/passwordCheck/passwordCheckDirective'));
 
-  module.service('usersService',          require('./usersService'));
+  module.service('usersService',    require('./usersService'));
 
+  module.service('userStatusLabel', require('./services/userStatusLabelService'));
 
   return {
     name: name,

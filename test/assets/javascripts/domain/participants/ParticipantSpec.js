@@ -158,7 +158,7 @@ define(function(require) {
     it('constructor with invalid annotation parameter throws error', function() {
       var self = this,
           annotationType = new this.AnnotationType(
-            this.jsonEntities.annotationType({ valueType: this.AnnotationValueType.TEXT() })),
+            this.jsonEntities.annotationType({ valueType: this.AnnotationValueType.TEXT })),
           jsonStudy = this.jsonEntities.study({ annotationTypes: [ annotationType ]}),
           study = new this.Study(jsonStudy),
           serverAnnotation = {};

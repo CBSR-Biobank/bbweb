@@ -64,7 +64,6 @@ define(['underscore'], function(_) {
       }).then(function (study) {
         vm.study = study;
         notificationsService.success('The study\'s status has been updated.', null, 2000);
-        console.log('----------> here');
       });
     }
 

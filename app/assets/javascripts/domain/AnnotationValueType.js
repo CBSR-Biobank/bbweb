@@ -5,38 +5,25 @@
 define(function () {
   'use strict';
 
-  //annotationValueType.$inject = [];
-
   /**
+   * The types allowed for an {@link domain.annotations.AnnotationType AnnotationType}'s valueType.
    *
+   * @enum {string}
+   * @memberOf domain
    */
-  function AnnotationValueType() {
-    var ALL_VALUES = [
-      TEXT(),
-      NUMBER(),
-      DATE_TIME(),
-      SELECT()
-    ];
+  var AnnotationValueType = {
+    /** The annotation contains a text value. */
+    TEXT:      'Text',
 
-    var service = {
-      TEXT:      TEXT,
-      NUMBER:    NUMBER,
-      DATE_TIME: DATE_TIME,
-      SELECT:    SELECT,
-      values:    values
-    };
-    return service;
+    /** The annotation contains a number value (whole, floating point, etc). */
+    NUMBER:    'Number',
 
-    //-------
+    /** The annotation contains a date and time value. */
+    DATE_TIME: 'DateTime',
 
-    function TEXT()      { return 'Text'; }
-    function NUMBER()    { return 'Number'; }
-    function DATE_TIME() { return 'DateTime'; }
-    function SELECT()    { return 'Select'; }
-
-    function values()    { return ALL_VALUES; }
-
-  }
+    /** The annotation contains a predefined set of value(s) to select from. */
+    SELECT:    'Select'
+  };
 
   return AnnotationValueType;
 });

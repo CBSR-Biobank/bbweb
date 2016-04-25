@@ -207,19 +207,19 @@ define(['underscore'], function(_) {
 
       it('values assigned correctly when value type is changed', function() {
         var annotationType = createAnnotationTypeFn(createServerAnnotationTypeFn());
-        annotationType.valueType = AnnotationValueType.TEXT();
+        annotationType.valueType = AnnotationValueType.TEXT;
         annotationType.valueTypeChanged();
         expect(annotationType.maxValueCount).toBe(null);
         expect(annotationType.options).toBeArrayOfSize(0);
 
-        annotationType.valueType = AnnotationValueType.SELECT();
+        annotationType.valueType = AnnotationValueType.SELECT;
         annotationType.maxValueCount = AnnotationMaxValueCount.SELECT_SINGLE();
         annotationType.valueTypeChanged();
         expect(annotationType.maxValueCount).toBe(AnnotationMaxValueCount.SELECT_SINGLE());
         expect(annotationType.options).toBeArrayOfSize(0);
 
         annotationType.options.push('test');
-        annotationType.valueType = AnnotationValueType.NUMBER();
+        annotationType.valueType = AnnotationValueType.NUMBER;
         annotationType.valueTypeChanged();
         expect(annotationType.maxValueCount).toBe(null);
         expect(annotationType.options).toBeArrayOfSize(0);
@@ -312,4 +312,3 @@ define(['underscore'], function(_) {
   return studyAnnotationTypeSharedSpec;
 
 });
-

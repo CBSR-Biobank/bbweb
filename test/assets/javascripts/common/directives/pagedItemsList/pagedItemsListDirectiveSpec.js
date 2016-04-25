@@ -23,7 +23,7 @@ define([
     describe('Centres', function () {
       var context = {};
 
-      beforeEach(inject(function ($q, Centre, CentreStatus) {
+      beforeEach(inject(function ($q, Centre, CentreStatus, centreStatusLabel) {
         var self = this,
             disabledCentres,
             enabledCentres;
@@ -33,7 +33,7 @@ define([
         });
         enabledCentres = _.map(_.range(3), function() {
           var centre = new self.jsonEntities.centre();
-          centre.status = CentreStatus.ENABLED();
+          centre.status = CentreStatus.ENABLED;
           return centre;
         });
 
@@ -47,8 +47,8 @@ define([
         context.entityNavigateStateParamName = 'centreId';
 
         context.possibleStatuses = [{ id: 'all', name: 'all' }].concat(
-          _.map(CentreStatus.values(), function (status) {
-            return { id: status, name: CentreStatus.label(status) };
+          _.map(_.values(CentreStatus), function (status) {
+            return { id: status, name: centreStatusLabel.statusToLabel(status) };
           }));
       }));
 
@@ -58,7 +58,7 @@ define([
     describe('Studies', function () {
       var context = {};
 
-      beforeEach(inject(function ($q, Study, StudyStatus) {
+      beforeEach(inject(function ($q, Study, StudyStatus, studyStatusLabel) {
         var self = this,
             disabledStudies,
             enabledStudies,
@@ -69,12 +69,12 @@ define([
         });
         enabledStudies = _.map(_.range(3), function() {
           var study = new self.jsonEntities.study();
-          study.status = StudyStatus.ENABLED();
+          study.status = StudyStatus.ENABLED;
           return study;
         });
         retiredStudies = _.map(_.range(3), function() {
           var study = new self.jsonEntities.study();
-          study.status = StudyStatus.RETIRED();
+          study.status = StudyStatus.RETIRED;
           return study;
         });
 
@@ -89,8 +89,8 @@ define([
         context.entityNavigateStateParamName = 'studyId';
 
         context.possibleStatuses = [{ id: 'all', name: 'all' }].concat(
-          _.map(StudyStatus.values(), function (status) {
-            return { id: status, name: StudyStatus.label(status) };
+          _.map(_.values(StudyStatus), function (status) {
+            return { id: status, name: studyStatusLabel.statusToLabel(status) };
           }));
       }));
 

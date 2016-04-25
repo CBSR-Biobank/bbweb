@@ -11,6 +11,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
     'biobankApi',
     'ConcurrencySafeEntity',
     'StudyStatus',
+    'studyStatusLabel',
     'AnnotationType',
     'hasAnnotationTypes'
   ];
@@ -23,6 +24,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
                         biobankApi,
                         ConcurrencySafeEntity,
                         StudyStatus,
+                        studyStatusLabel,
                         AnnotationType,
                         hasAnnotationTypes) {
 
@@ -50,13 +52,13 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
         name:            '',
         description:     null,
         annotationTypes: [],
-        status:          StudyStatus.DISABLED()
+        status:          StudyStatus.DISABLED
       };
 
       obj = obj || {};
       ConcurrencySafeEntity.call(this, obj);
       _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
-      this.statusLabel = StudyStatus.label(this.status);
+      this.statusLabel = studyStatusLabel.statusToLabel(this.status);
 
       this.annotationTypes = _.map(this.annotationTypes, function (annotationType) {
         return new AnnotationType(annotationType);
@@ -230,15 +232,15 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
     };
 
     Study.prototype.isDisabled = function () {
-      return (this.status === StudyStatus.DISABLED());
+      return (this.status === StudyStatus.DISABLED);
     };
 
     Study.prototype.isEnabled = function () {
-      return (this.status === StudyStatus.ENABLED());
+      return (this.status === StudyStatus.ENABLED);
     };
 
     Study.prototype.isRetired = function () {
-      return (this.status === StudyStatus.RETIRED());
+      return (this.status === StudyStatus.RETIRED);
     };
 
     function changeState(state) {

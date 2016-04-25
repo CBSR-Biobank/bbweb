@@ -28,11 +28,11 @@ define([
       this.study = new this.Study(this.jsonEntities.study());
 
       this.annotatationTypeOptions = [
-        { valueType: this.AnnotationValueType.TEXT()      },
-        { valueType: this.AnnotationValueType.NUMBER()    },
-        { valueType: this.AnnotationValueType.DATE_TIME() },
-        { valueType: this.AnnotationValueType.SELECT(),   maxValueCount: 1 },
-        { valueType: this.AnnotationValueType.SELECT(),   maxValueCount: 2 }
+        { valueType: this.AnnotationValueType.TEXT      },
+        { valueType: this.AnnotationValueType.NUMBER    },
+        { valueType: this.AnnotationValueType.DATE_TIME },
+        { valueType: this.AnnotationValueType.SELECT,   maxValueCount: 1 },
+        { valueType: this.AnnotationValueType.SELECT,   maxValueCount: 2 }
       ];
     }));
 
@@ -55,7 +55,7 @@ define([
       var self = this,
           annotationType = new this.AnnotationType(
             self.jsonEntities.annotationType({
-              valueType: self.AnnotationValueType.SELECT(),
+              valueType: self.AnnotationValueType.SELECT,
               options: []
             }));
 
@@ -105,7 +105,7 @@ define([
             break;
 
           case 'Selections Allowed':
-            if (annotationType.valueType === self.AnnotationValueType.SELECT()) {
+            if (annotationType.valueType === self.AnnotationValueType.SELECT) {
               expect(attr.value).toBe(annotationType.maxValueCount === 1 ? 'Single' : 'Multiple');
             } else {
               jasmine.getEnv().fail('not a select annotation type' + annotationType.valueType);
@@ -113,7 +113,7 @@ define([
             break;
 
           case 'Selections':
-            if (annotationType.valueType === self.AnnotationValueType.SELECT()) {
+            if (annotationType.valueType === self.AnnotationValueType.SELECT) {
               expect(attr.value).toBe(annotationType.options.join(', '));
             } else {
               jasmine.getEnv().fail('not a select annotation type' + annotationType.valueType);

@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(function () {
+define(['underscore'], function (_) {
   'use strict';
 
   /**
@@ -38,7 +38,7 @@ define(function () {
 
     vm.annotationType        = new AnnotationType();
     vm.title                 = 'Add Annotation Type';
-    vm.valueTypes            = AnnotationValueType.values();
+    vm.valueTypes            = _.values(AnnotationValueType);
 
     vm.valueTypeChange       = valueTypeChange;
     vm.maxValueCountRequired = maxValueCountRequired;

@@ -7,30 +7,18 @@
 define([
   'angular',
   'angularMocks',
-  './enumSharedSpec',
-  'biobankApp'
-], function(angular, mocks, enumSharedSpec) {
+  'underscore'
+], function(angular, mocks, _) {
   'use strict';
 
   describe('PreservationTemperatureType', function() {
 
-    var context = {},
-        valueMap = [
-          [ '4 C',                 'PLUS_4_CELCIUS'    ],
-          [ '-20 C',               'MINUS_20_CELCIUS'  ],
-          [ '-80 C',               'MINUS_80_CELCIUS'  ],
-          [ '-180 C',              'MINUS_180_CELCIUS' ],
-          [ 'Room Temperature',    'ROOM_TEMPERATURE'  ]
-        ];
-
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (PreservationTemperatureType) {
-      context.enumerationClass = PreservationTemperatureType;
-      context.valueMap = valueMap;
+    it('should have values', inject(function (PreservationTemperatureType) {
+      expect(_.keys(PreservationTemperatureType)).not.toBeEmptyArray();
     }));
 
-    enumSharedSpec(context);
   });
 
 });

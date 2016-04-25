@@ -11,6 +11,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
     'biobankApi',
     'ConcurrencySafeEntity',
     'CentreStatus',
+    'centreStatusLabel',
     'Location'
   ];
 
@@ -21,6 +22,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
                          biobankApi,
                          ConcurrencySafeEntity,
                          CentreStatus,
+                         centreStatusLabel,
                          Location) {
 
     var schema = {
@@ -47,7 +49,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
       var defaults = {
         name:        '',
         description: null,
-        status:      CentreStatus.DISABLED(),
+        status:      CentreStatus.DISABLED,
         studyIds:    [],
         locations:   []
       };
@@ -55,7 +57,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
       ConcurrencySafeEntity.call(this, obj);
       obj =  obj || {};
       _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
-      this.statusLabel = CentreStatus.label(this.status);
+      this.statusLabel = centreStatusLabel.statusToLabel(this.status);
     }
 
     Centre.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -224,11 +226,11 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
     };
 
     Centre.prototype.isDisabled = function () {
-      return this.status === CentreStatus.DISABLED();
+      return this.status === CentreStatus.DISABLED;
     };
 
     Centre.prototype.isEnabled = function () {
-      return this.status === CentreStatus.ENABLED();
+      return this.status === CentreStatus.ENABLED;
     };
 
     Centre.prototype.disable = function () {

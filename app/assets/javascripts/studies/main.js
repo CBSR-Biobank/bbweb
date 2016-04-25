@@ -18,5 +18,7 @@ define(function (require) {
   module.service('specimenGroupsService',             require('./specimenGroupsService'));
   module.service('spcLinkAnnotationTypesService',     require('./spcLinkAnnotationTypesService'));
 
+  module.service('studyStatusLabel', require('./services/studyStatusLabelService'));
+
   return module;
 });

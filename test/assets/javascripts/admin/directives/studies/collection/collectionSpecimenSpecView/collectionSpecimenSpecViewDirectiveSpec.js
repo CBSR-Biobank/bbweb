@@ -142,7 +142,7 @@ define(function (require) {
         context.controllerUpdateFuncName = 'editAnatomicalSource';
         context.modalInputFuncName       = 'select';
         context.ceventType               = this.collectionEventType;
-        context.newValue                 = this.AnatomicalSourceType.BLOOD();
+        context.newValue                 = this.AnatomicalSourceType.BLOOD;
       }));
 
       sharedBehaviour(context);
@@ -159,7 +159,7 @@ define(function (require) {
         context.controllerUpdateFuncName = 'editPreservationType';
         context.modalInputFuncName       = 'select';
         context.ceventType               = this.collectionEventType;
-        context.newValue                 = this.PreservationType.FRESH_SPECIMEN();
+        context.newValue                 = this.PreservationType.FRESH_SPECIMEN;
       }));
 
       sharedBehaviour(context);
@@ -176,7 +176,7 @@ define(function (require) {
         context.controllerUpdateFuncName = 'editPreservationTemperature';
         context.modalInputFuncName       = 'select';
         context.ceventType               = this.collectionEventType;
-        context.newValue                 = this.PreservationTemperatureType.ROOM_TEMPERATURE();
+        context.newValue                 = this.PreservationTemperatureType.ROOM_TEMPERATURE;
       }));
 
       sharedBehaviour(context);
@@ -193,7 +193,7 @@ define(function (require) {
         context.controllerUpdateFuncName = 'editSpecimenType';
         context.modalInputFuncName       = 'select';
         context.ceventType               = this.collectionEventType;
-        context.newValue                 = this.SpecimenType.BUFFY_COAT();
+        context.newValue                 = this.SpecimenType.BUFFY_COAT;
       }));
 
       sharedBehaviour(context);

@@ -67,13 +67,13 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
     // returns a string that can be displayed to the user
     AnnotationType.prototype.getType = function () {
       switch (this.valueType) {
-      case AnnotationValueType.TEXT():
-        return AnnotationValueType.TEXT();
-      case AnnotationValueType.NUMBER():
-        return AnnotationValueType.NUMBER();
-      case AnnotationValueType.DATE_TIME():
-        return AnnotationValueType.DATE_TIME();
-      case AnnotationValueType.SELECT():
+      case AnnotationValueType.TEXT:
+        return AnnotationValueType.TEXT;
+      case AnnotationValueType.NUMBER:
+        return AnnotationValueType.NUMBER;
+      case AnnotationValueType.DATE_TIME:
+        return AnnotationValueType.DATE_TIME;
+      case AnnotationValueType.SELECT:
         if (this.isSingleSelect()) {
           return 'Single Select';
         }
@@ -83,28 +83,28 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
     };
 
     AnnotationType.prototype.isValueTypeText = function () {
-      return (this.valueType === AnnotationValueType.TEXT());
+      return (this.valueType === AnnotationValueType.TEXT);
     };
 
     AnnotationType.prototype.isValueTypeNumber = function () {
-      return (this.valueType === AnnotationValueType.NUMBER());
+      return (this.valueType === AnnotationValueType.NUMBER);
     };
 
     AnnotationType.prototype.isValueTypeDateTime = function () {
-      return (this.valueType === AnnotationValueType.DATE_TIME());
+      return (this.valueType === AnnotationValueType.DATE_TIME);
     };
 
     AnnotationType.prototype.isValueTypeSelect = function () {
-      return (this.valueType === AnnotationValueType.SELECT());
+      return (this.valueType === AnnotationValueType.SELECT);
     };
 
     AnnotationType.prototype.isSingleSelect = function () {
-      return (this.valueType === AnnotationValueType.SELECT()) &&
+      return (this.valueType === AnnotationValueType.SELECT) &&
         (this.maxValueCount === AnnotationMaxValueCount.SELECT_SINGLE());
     };
 
     AnnotationType.prototype.isMultipleSelect = function () {
-      return (this.valueType === AnnotationValueType.SELECT()) &&
+      return (this.valueType === AnnotationValueType.SELECT) &&
         (this.maxValueCount === AnnotationMaxValueCount.SELECT_MULTIPLE());
     };
 

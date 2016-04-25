@@ -8,29 +8,17 @@ define([
   'angular',
   'angularMocks',
   'underscore',
-  './enumSharedSpec',
-  'biobankApp'
-], function(angular, mocks, _, enumSharedSpec) {
+], function(angular, mocks, _) {
   'use strict';
 
   describe('AnnotationValueType', function() {
 
-    var context = {},
-        values = [
-          'Text', 'Number', 'DateTime', 'Select'
-        ];
-
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (testUtils, AnnotationValueType) {
-
-      context.enumerationClass = AnnotationValueType;
-      context.valueMap = _.map(values, function (value) {
-        return [ value, testUtils.camelCaseToUnderscore(value)];
-      });
+    it('should have values', inject(function (AnnotationValueType) {
+      expect(_.keys(AnnotationValueType)).not.toBeEmptyArray();
     }));
 
-    enumSharedSpec(context);
   });
 
 });

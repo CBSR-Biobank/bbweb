@@ -11,7 +11,8 @@ define(['underscore', 'tv4'], function(_, tv4) {
     'biobankApi',
     'ConcurrencySafeEntity',
     'UserStatus',
-    'usersService'
+    'usersService',
+    'userStatusLabel'
   ];
 
   /**
@@ -22,7 +23,8 @@ define(['underscore', 'tv4'], function(_, tv4) {
                        biobankApi,
                        ConcurrencySafeEntity,
                        UserStatus,
-                       usersService) {
+                       usersService,
+                       userStatusLabel) {
 
     var schema = {
       'id': 'User',
@@ -45,13 +47,13 @@ define(['underscore', 'tv4'], function(_, tv4) {
         name:      '',
         email:     '',
         avatarUrl: null,
-        status:    UserStatus.REGISTERED()
+        status:    UserStatus.REGISTERED
       };
 
       ConcurrencySafeEntity.call(this, obj);
       obj = obj || {};
       _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
-      this.statusLabel = UserStatus.label(this.status);
+      this.statusLabel = userStatusLabel.statusToLabel(this.status);
     }
 
     User.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -178,7 +180,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
     User.prototype.activate = function () {
       var self = this;
 
-      if (self.status !== UserStatus.REGISTERED()) {
+      if (self.status !== UserStatus.REGISTERED) {
         throw new Error('user status is not registered: ' + self.status);
       }
 
@@ -188,7 +190,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
     User.prototype.lock = function () {
       var self = this;
 
-      if (self.status !== UserStatus.ACTIVE()) {
+      if (self.status !== UserStatus.ACTIVE) {
         throw new Error('user status is not active: ' + self.status);
       }
 
@@ -198,7 +200,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
     User.prototype.unlock = function () {
       var self = this;
 
-      if (self.status !== UserStatus.LOCKED()) {
+      if (self.status !== UserStatus.LOCKED) {
         throw new Error('user status is not locked: ' + self.status);
       }
 
@@ -206,15 +208,15 @@ define(['underscore', 'tv4'], function(_, tv4) {
     };
 
     User.prototype.isRegistered = function () {
-      return (this.status === UserStatus.REGISTERED());
+      return (this.status === UserStatus.REGISTERED);
     };
 
     User.prototype.isActive = function () {
-      return (this.status === UserStatus.ACTIVE());
+      return (this.status === UserStatus.ACTIVE);
     };
 
     User.prototype.isLocked = function () {
-      return (this.status === UserStatus.LOCKED());
+      return (this.status === UserStatus.LOCKED);
     };
 
     function changeStatus(user, status) {

@@ -55,7 +55,7 @@ define([
       expect(centre.description).toBeNull();
       expect(centre.locations).toBeEmptyArray();
       expect(centre.studyIds).toBeEmptyArray();
-      expect(centre.status).toBe(this.CentreStatus.DISABLED());
+      expect(centre.status).toBe(this.CentreStatus.DISABLED);
     });
 
     it('fails when creating from a non object', function() {
@@ -84,10 +84,10 @@ define([
 
     it('status predicates return valid results', function() {
       var self = this;
-      _.each(self.CentreStatus.values(), function(status) {
+      _.each(_.values(self.CentreStatus), function(status) {
         var centre = new self.Centre(self.jsonEntities.centre({ status: status }));
-        expect(centre.isDisabled()).toBe(status === self.CentreStatus.DISABLED());
-        expect(centre.isEnabled()).toBe(status === self.CentreStatus.ENABLED());
+        expect(centre.isDisabled()).toBe(status === self.CentreStatus.DISABLED);
+        expect(centre.isEnabled()).toBe(status === self.CentreStatus.ENABLED);
       });
     });
 
@@ -286,23 +286,23 @@ define([
     });
 
     it('can disable a centre', function() {
-      var jsonCentre = this.jsonEntities.centre({ status: this.CentreStatus.ENABLED() });
-      changeStatusShared.call(this, jsonCentre, 'disable', this.CentreStatus.DISABLED());
+      var jsonCentre = this.jsonEntities.centre({ status: this.CentreStatus.ENABLED });
+      changeStatusShared.call(this, jsonCentre, 'disable', this.CentreStatus.DISABLED);
     });
 
     it('throws an error when disabling a centre and it is already disabled', function() {
-      var centre = new this.Centre(this.jsonEntities.centre({ status: this.CentreStatus.DISABLED() }));
+      var centre = new this.Centre(this.jsonEntities.centre({ status: this.CentreStatus.DISABLED }));
       expect(function () { centre.disable(); })
         .toThrowError('already disabled');
     });
 
     it('can enable a centre', function() {
-      var jsonCentre = this.jsonEntities.centre({ status: this.CentreStatus.DISABLED() });
-      changeStatusShared.call(this, jsonCentre, 'enable', this.CentreStatus.ENABLED());
+      var jsonCentre = this.jsonEntities.centre({ status: this.CentreStatus.DISABLED });
+      changeStatusShared.call(this, jsonCentre, 'enable', this.CentreStatus.ENABLED);
     });
 
     it('throws an error when enabling a centre and it is already enabled', function() {
-      var centre = new this.Centre(this.jsonEntities.centre({ status: this.CentreStatus.ENABLED() }));
+      var centre = new this.Centre(this.jsonEntities.centre({ status: this.CentreStatus.ENABLED }));
       expect(function () { centre.enable(); })
         .toThrowError('already enabled');
     });

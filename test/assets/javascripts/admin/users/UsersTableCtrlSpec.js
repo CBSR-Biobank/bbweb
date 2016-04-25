@@ -21,6 +21,7 @@ define([
         User,
         UserCounts,
         UserStatus,
+        userStatusLabel,
         UserViewer,
         jsonEntities;
 
@@ -33,17 +34,19 @@ define([
                                _User_,
                                _UserCounts_,
                                _UserStatus_,
+                               _userStatusLabel_,
                                _UserViewer_,
                                _jsonEntities_) {
-      q            = $q;
-      rootScope    = $rootScope;
-      controller   = $controller;
-      modalService = _modalService_;
-      User         = _User_;
-      UserCounts   = _UserCounts_;
-      UserStatus   = _UserStatus_;
-      UserViewer   = _UserViewer_;
-      jsonEntities = _jsonEntities_;
+      q               = $q;
+      rootScope       = $rootScope;
+      controller      = $controller;
+      modalService    = _modalService_;
+      User            = _User_;
+      UserCounts      = _UserCounts_;
+      UserStatus      = _UserStatus_;
+      userStatusLabel = _userStatusLabel_;
+      UserViewer      = _UserViewer_;
+      jsonEntities    = _jsonEntities_;
     }));
 
     function createUserCounts(registered, active, locked) {
@@ -72,7 +75,7 @@ define([
     }
 
     it('scope is valid on startup', function() {
-      var allStatuses = UserStatus.values(),
+      var allStatuses = _.values(UserStatus),
           counts = createUserCounts(1, 2, 3),
           scope = createController(counts);
 
@@ -81,7 +84,10 @@ define([
       expect(scope.vm.status).toEqual('all');
 
       _.each(allStatuses, function(status) {
-        expect(scope.vm.possibleStatuses).toContain({ id: status, title: UserStatus.label(status) });
+        expect(scope.vm.possibleStatuses).toContain({
+          id: status,
+          title: userStatusLabel.statusToLabel(status)
+        });
       });
       expect(scope.vm.possibleStatuses).toContain({ id: 'all', title: 'All'});
     });

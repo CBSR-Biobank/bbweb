@@ -57,16 +57,16 @@ define(['underscore'], function (_) {
      */
     function validateAnnotationClass(annotationType, annotation) {
       switch (annotationType.valueType) {
-      case AnnotationValueType.TEXT():
+      case AnnotationValueType.TEXT:
         expect(annotation).toEqual(jasmine.any(TextAnnotation));
         break;
-      case AnnotationValueType.DATE_TIME():
+      case AnnotationValueType.DATE_TIME:
         expect(annotation).toEqual(jasmine.any(DateTimeAnnotation));
         break;
-      case AnnotationValueType.NUMBER():
+      case AnnotationValueType.NUMBER:
         expect(annotation).toEqual(jasmine.any(NumberAnnotation));
         break;
-      case AnnotationValueType.SELECT():
+      case AnnotationValueType.SELECT:
         if (annotationType.isSingleSelect()) {
           expect(annotation).toEqual(jasmine.any(SingleSelectAnnotation));
         } else {

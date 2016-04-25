@@ -1,0 +1,24 @@
+/**
+ * Augments objects returned by the server with additional methods.
+ * @namespace domain
+ */
+
+/**
+ * Domain entities related to users.
+ * @namespace domain.users
+ */
+
+/**
+ * Domain entities related to studies.
+ * @namespace domain.studies
+ */
+
+/**
+ * Domain entities related to participants.
+ * @namespace domain.participants
+ */
+
+/**
+ * Domain entities related to centres.
+ * @namespace domain.centres
+ */

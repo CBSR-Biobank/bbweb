@@ -41,10 +41,10 @@ define(['underscore'], function(_) {
     vm.title                 = (specimenGroup.isNew() ? 'Add' : 'Update') + ' Specimen Group';
     vm.study                 = study;
     vm.specimenGroup         = specimenGroup;
-    vm.anatomicalSourceTypes = AnatomicalSourceType.values();
-    vm.preservTypes          = PreservationType.values();
-    vm.preservTempTypes      = PreservationTemperatureType.values();
-    vm.specimenTypes         = SpecimenType.values();
+    vm.anatomicalSourceTypes = _.values(AnatomicalSourceType);
+    vm.preservTypes          = _.values(PreservationType);
+    vm.preservTempTypes      = _.values(PreservationTemperatureType);
+    vm.specimenTypes         = _.values(SpecimenType);
 
     vm.submit = submit;
     vm.cancel = cancel;
