@@ -12,9 +12,10 @@
               novalidate>
 
           <!-- EMAIL -->
-          <div class="form-group">
+          <div class="form-group"
+               ng-class="{ 'has-error' : forgotForm.email.$invalid && !forgotForm.email.$pristine }">
             <label for="email" class="control-label">
-              Enter the email address you registered with:
+              Enter the email address you registered to Biobank with:
             </label>
             <input name="email"
                    type="email"
@@ -22,6 +23,10 @@
                    ng-model="vm.email"
                    placeholder="Email"
                    required/>
+            <p class="help-block"
+               ng-show="forgotForm.email.$invalid && !forgotForm.email.$pristine">
+              Valid email address is required.
+            </p>
           </div>
 
           <!-- BUTTONS  -->

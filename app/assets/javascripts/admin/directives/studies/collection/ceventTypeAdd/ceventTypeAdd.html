@@ -1,10 +1,12 @@
 <div class="page-header">
   <h1>{{vm.study.name}} <small>{{vm.title}}</small></h1>
 </div>
+
 <form class="form-horizontal" name="cetForm" novalidate>
 
   <!-- NAME -->
-  <div class="form-group" ng-class="{ 'has-error' : cetForm.name.$invalid && !cetForm.name.$pristine }">
+  <div class="form-group"
+       ng-class="{ 'has-error' : cetForm.name.$invalid && !cetForm.name.$pristine }">
     <label for="name" class="col-md-2 control-label">Name</label>
     <div class="col-md-10">
       <input name="name"

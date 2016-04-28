@@ -6,7 +6,8 @@
       novalidate>
 
   <!-- NAME -->
-  <div class="form-group" ng-class="{ 'has-error' : specForm.name.$invalid && !specForm.name.$pristine }">
+  <div class="form-group"
+       ng-class="{ 'has-error' : specForm.name.$invalid && !specForm.name.$pristine }">
     <label for="name" class="col-md-2 control-label">Name</label>
     <div class="col-md-10">
       <input name="name"
@@ -19,7 +20,12 @@
              required />
     </div>
     <div class="col-md-offset-2 col-md-10">
-      <p class="help-block" ng-show="specForm.name.$error.minlength">Name is too short.</p>
+      <p class="help-block" ng-show="specForm.name.$error.minlength">
+        Name is too short.
+      </p>
+      <p class="help-block"
+         ng-show="specForm.name.$invalid && !specForm.name.$error.minlength && !specForm.name.$pristine">
+        A name is required.</p>
     </div>
   </div>
 
@@ -36,7 +42,9 @@
   </div>
 
   <!-- ANATOMICAL SOURCE -->
-  <div class="form-group">
+  <div class="form-group"
+       ng-class="{ 'has-error' : specForm.anatomicalSourceType.$invalid &&
+                 !specForm.anatomicalSourceType.$pristine }">
     <label for="anatomicalSourceType" class="col-md-2 control-label">Anatomical Source</label>
     <div class="col-md-10">
       <select class="form-control"
@@ -48,14 +56,16 @@
       </select>
     </div>
     <div class="col-md-offset-2 col-md-10">
-      <p ng-show="specForm.anatomicalSourceType.$invalid && !specForm.anatomicalSourceType.$pristine"
-         class="help-block">
+      <p class="help-block"
+         ng-show="specForm.anatomicalSourceType.$invalid && !specForm.anatomicalSourceType.$pristine">
         Anatomical source is required.</p>
     </div>
   </div>
 
   <!-- PRESERVATION TYPE -->
-  <div class="form-group">
+  <div class="form-group"
+       ng-class="{ 'has-error' : specForm.perservationType.$invalid &&
+                 !specForm.perservationType.$pristine }">
     <label for="perservationType" class="col-md-2 control-label">Preservation Type</label>
     <div class="col-md-10">
       <select class="form-control"
@@ -74,11 +84,13 @@
   </div>
 
   <!-- PRESERVATION TEMPERATURE -->
-  <div class="form-group">
-    <label for="perservationTempType" class="col-md-2 control-label">Preservation Temperature</label>
+  <div class="form-group"
+       ng-class="{ 'has-error' : specForm.perservationTemperature.$invalid &&
+                 !specForm.perservationTemperature.$pristine }">
+    <label for="perservationTemperature" class="col-md-2 control-label">Preservation Temperature</label>
     <div class="col-md-10">
       <select class="form-control"
-              name="perservationTempType"
+              name="perservationTemperature"
               ng-model="vm.specimenSpec.preservationTemperatureType"
               ng-options="temp for temp in vm.preservTempTypes"
               required>
@@ -86,14 +98,15 @@
       </select>
     </div>
     <div class="col-md-offset-2 col-md-10">
-      <p ng-show="specForm.perservationTempType.$invalid && !specForm.perservationTempType.$pristine"
+      <p ng-show="specForm.perservationTemperature.$invalid && !specForm.perservationTemperature.$pristine"
          class="help-block">
         Preservation temperature is required.</p>
     </div>
   </div>
 
   <!-- SPECIMEN TYPE -->
-  <div class="form-group">
+  <div class="form-group"
+       ng-class="{ 'has-error' : specForm.specimenType.$invalid && !specForm.specimenType.$pristine }">
     <label for="specimenType" class="col-md-2 control-label">Specimen Type</label>
     <div class="col-md-10">
       <select class="form-control"
@@ -112,7 +125,8 @@
   </div>
 
   <!-- UNITS -->
-  <div class="form-group">
+  <div class="form-group"
+       ng-class="{ 'has-error' : specForm.units.$invalid && !specForm.units.$pristine }">
     <label for="units" class="col-md-2 control-label">Units</label>
     <div class="col-md-10">
       <input name="units"
@@ -130,7 +144,8 @@
   </div>
 
   <!-- AMOUNT -->
-  <div class="form-group">
+  <div class="form-group"
+       ng-class="{ 'has-error' : specForm.amount.$invalid && !specForm.amount.$pristine }">
     <label for="amount" class="col-md-2 control-label">Amount</label>
     <div class="col-md-10">
       <input name="amount"
@@ -150,7 +165,8 @@
   </div>
 
   <!-- MAX COUNT -->
-  <div class="form-group">
+  <div class="form-group"
+       ng-class="{ 'has-error' : specForm.maxCount.$invalid && !specForm.maxCount.$pristine }">
     <label for="maxCount" class="col-md-2 control-label">Count</label>
     <div class="col-md-10">
       <input name="maxCount"

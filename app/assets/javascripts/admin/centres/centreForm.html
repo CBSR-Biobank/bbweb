@@ -5,7 +5,8 @@
       novalidate>
 
   <!-- NAME -->
-  <div class="form-group">
+  <div class="form-group"
+       ng-class="{ 'has-error' : centreForm.name.$invalid && !centreForm.name.$pristine }">
     <label for="name" class="col-md-2 control-label">Name</label>
     <div class="col-md-10">
       <input
@@ -20,6 +21,12 @@
     </div>
     <div class="col-md-offset-2 col-md-10">
       <p class="help-block" ng-show="centreForm.name.$error.minlength">Name is too short.</p>
+      <p class="help-block"
+         ng-show="centreForm.name.$invalid &&
+                  !centreForm.name.$pristine &&
+                  !centreForm.name.$error.minlength">
+        A name is requried.
+      </p>
     </div>
   </div>
 

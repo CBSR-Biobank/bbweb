@@ -126,10 +126,7 @@ define(function () {
     $stateProvider.state('home.admin.centres.centre.locations', {
       url: '/locations',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        locations: ['centre', function(centre) {
-          return centre.getLocations();
-        }]
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'centreDetails': {
@@ -179,13 +176,7 @@ define(function () {
     $stateProvider.state('home.admin.centres.centre.locationUpdate', {
       url: '/location/update/:locationId',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        centre: [
-          '$stateParams', 'centre',
-          function($stateParams, centre) {
-            return centre.getLocation($stateParams.locationId);
-          }
-        ]
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'main@': {

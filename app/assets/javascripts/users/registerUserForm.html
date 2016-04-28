@@ -2,11 +2,12 @@
   <h1>Register as a user</h1>
 </div>
 <form class="form-horizontal"
-      name="userRegForm"
+      name="registrationForm"
       novalidate>
 
   <!-- NAME -->
-  <div class="form-group">
+  <div class="form-group"
+       ng-class="{ 'has-error' : registrationForm.name.$invalid && !registrationForm.name.$pristine }">
     <label for="name" class="col-md-3 control-label">Name</label>
     <div class="col-md-7">
       <input name="name"
@@ -19,12 +20,19 @@
              required/>
     </div>
     <div class="col-md-offset-3 col-md-7">
-      <p class="help-block" ng-show="userRegForm.name.$error.minlength">Name is too short.</p>
+      <p class="help-block" ng-show="registrationForm.name.$error.minlength">Name is too short.</p>
+      <p class="help-block"
+         ng-show="registrationForm.name.$invalid &&
+                  !registrationForm.name.$pristine &&
+                  !registrationForm.name.$error.minlength">
+        A name is requried.
+      </p>
     </div>
   </div>
 
   <!-- NAME -->
-  <div class="form-group">
+  <div class="form-group"
+       ng-class="{ 'has-error' : registrationForm.email.$invalid && !registrationForm.email.$pristine }">
     <label for="email" class="col-md-3 control-label">Email address</label>
     <div class="col-md-7">
       <input
@@ -36,14 +44,15 @@
          required/>
     </div>
     <div class="col-md-offset-3 col-md-7">
-      <p ng-show="userRegForm.email.$invalid && !userRegForm.email.$pristine"
+      <p ng-show="registrationForm.email.$invalid && !registrationForm.email.$pristine"
          class="help-block">
         Valid email address is required.</p>
     </div>
   </div>
 
   <!-- PASSWORD -->
-  <div class="form-group">
+  <div class="form-group"
+       ng-class="{ 'has-error' : registrationForm.password.$invalid && !registrationForm.password.$pristine }">
     <label for="password" class="col-md-3 control-label">Password</label>
     <div class="col-md-7">
       <input
@@ -56,14 +65,16 @@
          required />
     </div>
     <div class="col-md-offset-3 col-md-7">
-      <p class="help-block" ng-show="userRegForm.password.$error.minlength">
+      <p class="help-block" ng-show="registrationForm.password.$error.minlength">
         Password too short. It should be minimum 8 characters.
       </p>
     </div>
   </div>
 
   <!-- CONFIRM PASSWORD -->
-  <div class="form-group">
+  <div class="form-group"
+       ng-class="{ 'has-error' : registrationForm.confirmPassword.$invalid &&
+                 !registrationForm.confirmPassword.$pristine }">
     <label for="password" class="col-md-3 control-label">Confirm password</label>
     <div class="col-md-7">
       <input
@@ -76,7 +87,7 @@
          ng-required />
     </div>
     <div class="col-md-offset-3 col-md-7">
-      <p ng-show="userRegForm.confirmPassword.$error.passwordmatch"
+      <p ng-show="registrationForm.confirmPassword.$error.passwordmatch"
          class="help-block">
         Passwords do not match</p>
     </div>

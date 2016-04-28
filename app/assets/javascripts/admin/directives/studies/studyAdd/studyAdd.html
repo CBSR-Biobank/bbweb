@@ -7,7 +7,8 @@
       novalidate>
 
   <!-- NAME -->
-  <div class="form-group">
+  <div class="form-group"
+       ng-class="{ 'has-error' : studyForm.name.$invalid && !studyForm.name.$pristine }">
     <label for="name" class="col-md-2 control-label">Name</label>
     <div class="col-md-10">
       <input

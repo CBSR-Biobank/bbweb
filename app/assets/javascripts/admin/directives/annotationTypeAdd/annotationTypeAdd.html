@@ -3,7 +3,8 @@
       novalidate>
 
   <!-- NAME -->
-  <div class="form-group">
+  <div class="form-group"
+       ng-class="{ 'has-error' : annotationTypeForm.name.$invalid && !annotationTypeForm.name.$pristine }">
     <label for="name" class="col-md-2 control-label">Name</label>
     <div class="col-md-10">
       <input name="name"
