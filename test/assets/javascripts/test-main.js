@@ -60,6 +60,7 @@
       'ui-bootstrap':                 '../../../target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/ui-bootstrap-tpls',
       'sprintf':                      '../../../target/web/web-modules/main/webjars/lib/sprintf.js/sprintf.min',
       'tv4':                          '../../../target/web/web-modules/main/webjars/lib/tv4/tv4',
+      'bootstrap-ui-datetime-picker': '../../../target/web/web-modules/main/webjars/lib/bootstrap-ui-datetime-picker/dist/datetime-picker',
       'biobankTest':                  '../../../test/assets/javascripts/test/module',
       'biobankApp':                   'app'
     },
@@ -74,10 +75,11 @@
       'angular-messages':             ['angular'],
       'angular-sanitize':             ['angular'],
       'angular-ui-router':            ['angular'],
+      'angular-utils-ui-breadcrumbs': ['angular'],
       'bootstrap':                    ['jquery'],
       'smart-table':                  ['angular'],
       'ui-bootstrap':                 ['angular'],
-      'angular-utils-ui-breadcrumbs': ['angular'],
+      'bootstrap-ui-datetime-picker': ['angular'],
       'biobankApp':                   { exports: 'biobankApp' }
     },
 

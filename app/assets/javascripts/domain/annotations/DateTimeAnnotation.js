@@ -15,12 +15,18 @@ define(['moment', 'underscore'], function(moment, _) {
     function DateTimeAnnotation(obj, annotationType) {
       var self = this;
 
+
       obj = obj || {};
+      if (obj.stringValue) {
+        this.value = new Date(obj.stringValue);
+      } else {
+        this.value = null;
+      }
+
       Annotation.call(this, obj, annotationType);
 
-      _.extend(self, timeService.stringToDateAndTime(obj.stringValue));
       self.valueType = 'DateTime';
-  }
+    }
 
     DateTimeAnnotation.prototype = Object.create(Annotation.prototype);
 
@@ -28,30 +34,27 @@ define(['moment', 'underscore'], function(moment, _) {
      * Must return a string.
      */
     DateTimeAnnotation.prototype.getValue = function () {
-      this.value = timeService.dateAndTimeToDisplayString(this.date, this.time);
-      return this.value;
+      if (_.isNull(this.value)) {
+        return null;
+      }
+      return timeService.timeToDisplayString(this.value);
     };
 
     DateTimeAnnotation.prototype.setValue = function (value) {
-      if (typeof value === 'object') {
-        this.date = value.date;
-        this.time = value.time;
-      } else if (typeof value === 'string') {
-        this.date = new Date(value);
-        this.time = new Date(value);
+      if (typeof value === 'string') {
+        this.value = new Date(value);
+      } else {
+        this.value = value;
       }
-      this.value = timeService.dateAndTimeToDisplayString(this.date, this.time);
     };
 
     /**
-     * date part is kept in this.date and time in this.time,
      *
-     * they must be combined
      */
     DateTimeAnnotation.prototype.getServerAnnotation = function () {
       return {
         annotationTypeId: this.getAnnotationTypeId(),
-        stringValue:      timeService.dateAndTimeToUtcString(this.date, this.time),
+        stringValue:      timeService.dateToUtcString(this.value),
         selectedValues:   []
       };
     };

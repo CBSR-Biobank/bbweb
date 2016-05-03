@@ -179,8 +179,7 @@ define([
         '/assets/javascripts/common/modalInput/selectMultiple.html',
         '/assets/javascripts/common/modalInput/textArea.html',
         '/assets/javascripts/common/modalInput/text.html',
-        '/assets/javascripts/common/modalInput/url.html',
-        '/assets/javascripts/common/directives/dateTime/dateTime.html');
+        '/assets/javascripts/common/modalInput/url.html');
 
       this.open = open;
       this.modalElement = modalElement;
@@ -295,12 +294,11 @@ define([
 
         expect(modalInfo.element).toHaveTitle(this.title);
         expect(modalInfo.element).toHaveLabelStartWith(this.label);
-        expect(modalInfo.element).toHaveInputs(4);
+        expect(modalInfo.element).toHaveInputs(1);
         expect(modalInfo.element).toHaveValuesInControllerScope({ options: undefined });
 
-        expect(modalInfo.element.scope().vm.value).toBeObject();
-        expect(modalInfo.element.scope().vm.value.date.getTime()).toEqual(this.date.getTime());
-        expect(modalInfo.element.scope().vm.value.time.getTime()).toEqual(this.date.getTime());
+        expect(modalInfo.element.scope().vm.value).toBeString();
+        expect(new Date(modalInfo.element.scope().vm.value)).toEqual(this.date);
 
         this.dismiss(modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);

@@ -59,8 +59,7 @@ define([
         '/assets/javascripts/common/annotationsInput/multipleSelectAnnotation.html',
         '/assets/javascripts/common/annotationsInput/numberAnnotation.html',
         '/assets/javascripts/common/annotationsInput/singleSelectAnnotation.html',
-        '/assets/javascripts/common/annotationsInput/textAnnotation.html',
-        '/assets/javascripts/common/directives/dateTime/dateTime.html');
+        '/assets/javascripts/common/annotationsInput/textAnnotation.html');
 
       self.jsonParticipant = self.jsonEntities.participant();
       self.jsonStudy       = self.jsonEntities.defaultStudy();

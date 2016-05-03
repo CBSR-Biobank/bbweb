@@ -131,16 +131,19 @@ define(function (require) {
         vm.label        = label;
         vm.okPressed    = okPressed;
         vm.closePressed = closePressed;
+        vm.openCalendar = openCalendar;
 
         options = options || {};
         vm.value = vm.defaultValue;
 
-        if (type === 'dateTime') {
-          vm.value = timeService.stringToDateAndTime(vm.defaultValue);
-        } else if (type === 'password') {
+        if (type === 'password') {
           vm.value = {};
         } else if (type === 'selectMultiple') {
           vm.value = getSelectMultipleValues();
+        } else if (type === 'dateTime') {
+          vm.open = false;
+          vm.value = new Date(vm.defaultValue);
+          vm.datetimePickerFormat = bbwebConfig.datepickerFormat;
         }
 
         function okPressed() {
@@ -163,6 +166,10 @@ define(function (require) {
           return _.map(options.selectOptions, function (opt) {
             return { name: opt, checked: _.includes(vm.defaultValue, opt)};
           });
+        }
+
+        function openCalendar(e) {
+          vm.open = true;
         }
       }
     }

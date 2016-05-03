@@ -195,12 +195,10 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
 
     DateTimeAnnotation.prototype.compareToJsonEntity = function (serverEntity) {
       if (_.isNull(serverEntity.stringValue)) {
-        expect(this.date).toBeNull();
-        expect(this.time).toBeNull();
+        expect(this.value).toBeNull();
       } else {
         // has to be comparetd to UTC time
-        expect(moment(this.date).local().format()).toEqual(serverEntity.stringValue);
-        expect(moment(this.time).local().format()).toEqual(serverEntity.stringValue);
+        expect(moment(this.value).local().format()).toEqual(serverEntity.stringValue);
       }
     };
 

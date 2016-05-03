@@ -48,16 +48,18 @@ define(['underscore'], function(_) {
                                              vm.collectionEventType);
 
     vm.title = 'Participant ' + vm.participant.uniqueId + ': Add collection event';
-    vm.timeCompleted = { date: new Date(), time: new Date() };
+    vm.timeCompleted = new Date();
+    vm.open = false;
+    vm.datetimePickerFormat = bbwebConfig.datepickerFormat;
 
     vm.submit = submit;
     vm.cancel = cancel;
+    vm.openCalendar = openCalendar;
 
     // --
 
     function submit() {
-      vm.collectionEvent.timeCompleted = timeService.dateAndTimeToUtcString(vm.timeCompleted.date,
-                                                                            vm.timeCompleted.time);
+      vm.collectionEvent.timeCompleted = vm.timeCompleted;
       vm.collectionEvent.add()
         .then(submitSuccess)
         .catch(function(error) {
@@ -75,6 +77,10 @@ define(['underscore'], function(_) {
 
     function cancel() {
       $state.go('home.collection.study.participant.cevents');
+    }
+
+    function openCalendar(e) {
+      vm.open = true;
     }
   }
 

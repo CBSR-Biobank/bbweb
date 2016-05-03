@@ -65,6 +65,17 @@ define(function (require) {
   }
 
   function AnnotationsInputCtrl(bbwebConfig) {
+    var vm = this;
+
+    vm.open = false;
+    vm.openCalendar = openCalendar;
+    vm.datetimePickerFormat = bbwebConfig.datepickerFormat;
+
+    //--
+
+    function openCalendar(e) {
+      vm.open = true;
+    }
   }
 
   return {

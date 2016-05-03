@@ -47,8 +47,7 @@ define(function (require) {
         '/assets/javascripts/common/modalInput/selectMultiple.html',
         '/assets/javascripts/common/modalInput/textArea.html',
         '/assets/javascripts/common/modalInput/text.html',
-        '/assets/javascripts/common/modalInput/url.html',
-        '/assets/javascripts/common/directives/dateTime/dateTime.html');
+        '/assets/javascripts/common/modalInput/url.html');
 
       //--
 

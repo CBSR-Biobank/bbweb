@@ -60,7 +60,6 @@ define([
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/ceventAdd/ceventAdd.html',
-        '/assets/javascripts/common/directives/dateTime/dateTime.html',
         '/assets/javascripts/common/annotationsInput/annotationsInput.html',
         '/assets/javascripts/common/annotationsInput/textAnnotation.html',
         '/assets/javascripts/common/annotationsInput/numberAnnotation.html',

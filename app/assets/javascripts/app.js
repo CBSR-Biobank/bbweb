@@ -35,6 +35,7 @@ define(function(require) {
   require('angular-messages');
   require('smart-table');
   require('angular-utils-ui-breadcrumbs');
+  require('bootstrap-ui-datetime-picker');
 
   // We must already declare most dependencies here (except for common), or the submodules' routes
   // will not be resolved
@@ -46,6 +47,7 @@ define(function(require) {
     'ngMessages',
     'smart-table',
     'angularUtils.directives.uiBreadcrumbs',
+    'ui.bootstrap.datetimepicker',
     admin.name,
     centres.name,
     common.name,
@@ -64,11 +66,7 @@ define(function(require) {
   app.constant('bbwebConfig', {
     dateFormat:       'YYYY-MM-DD',
     dateTimeFormat:   'YYYY-MM-DD hh:mm A',
-    datepickerFormat: {
-      year:  'yyyy',
-      month: 'MM',
-      day:   'dd'
-    }
+    datepickerFormat: 'yyyy-MM-dd hh:mm a'
   });
 
   app.config(exceptionConfig);

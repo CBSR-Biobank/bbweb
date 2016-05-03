@@ -13,6 +13,8 @@ define(['moment'], function(moment) {
   function timeService(bbwebConfig) {
     var service = {
       stringToDateAndTime:        stringToDateAndTime,
+      dateToLocal:                dateToLocal,
+      dateToUtcString:            dateToUtcString,
       dateAndTimeToUtcString:     dateAndTimeToUtcString,
       dateAndTimeToDisplayString: dateAndTimeToDisplayString,
       timeToDisplayString:        timeToDisplayString
@@ -28,6 +30,20 @@ define(['moment'], function(moment) {
         return { date: date, time: date };
       }
       return { date: null, time: null };
+    }
+
+    function dateToLocal(date) {
+      var datetime;
+
+      if (!date) {
+        throw new Error('date is invalid');
+      } else {
+        datetime = moment(date).set({
+          'millisecond': 0,
+          'second':      0
+        });
+        return datetime.local();
+      }
     }
 
     function dateAndTimeToLocal(date, time) {
@@ -47,6 +63,13 @@ define(['moment'], function(moment) {
         });
         return datetime.local();
       }
+    }
+
+    function dateToUtcString(date, time) {
+      if (!date) {
+        return '';
+      }
+      return dateToLocal(date).format();
     }
 
     /**

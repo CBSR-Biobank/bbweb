@@ -39,8 +39,7 @@ define([
         '/assets/javascripts/common/annotationsInput/multipleSelectAnnotation.html',
         '/assets/javascripts/common/annotationsInput/numberAnnotation.html',
         '/assets/javascripts/common/annotationsInput/singleSelectAnnotation.html',
-        '/assets/javascripts/common/annotationsInput/textAnnotation.html',
-        '/assets/javascripts/common/directives/dateTime/dateTime.html');
+        '/assets/javascripts/common/annotationsInput/textAnnotation.html');
 
       //--
 
@@ -102,28 +101,23 @@ define([
       expect(this.element.find('input').length).toBe(1);
       expect(this.element.find('input').eq(0).attr('type')).toBe('number');
       this.scope.form.annotationSubForm.annotationNumberValue.$setViewValue(annotationValue);
-      expect(this.scope.vm.annotations[0].numberValue).toBe(null);
+      expect(this.scope.vm.annotations[0].value).toBeUndefined();
       expect(this.scope.form.annotationSubForm.annotationNumberValue.$valid).toBe(false);
     });
 
-    /**
-     * TODO: This test could be more thorough with regard to testing the time picker. Not sure how to do that
-     * yet.
-     */
-    it('works for a DATE_TIME annotation and a valid number', function() {
-      var timeService = this.$injector.get('timeService'),
-          dateStr = '2010-01-10 12:00 PM',
+    it('works for a DATE_TIME annotation and a valid date', function() {
+      var dateStr = '2010-01-10 12:00 PM',
           annotation = this.createAnnotation(this.AnnotationValueType.DATE_TIME),
           annotations = [ annotation ];
 
-      _.extend(annotation, timeService.stringToDateAndTime(dateStr));
-
       this.createController(annotations);
-      expect(this.element.find('input').length).toBe(4); // 3 others are for time picker
+      expect(this.element.find('input').length).toBe(1);
       expect(this.element.find('input').eq(0).attr('type')).toBe('text');
 
+      this.scope.form.annotationSubForm.dateTimeSubForm.date.$setViewValue(dateStr);
+
       expect(this.scope.vm.annotations[0].getValue()).toBe(dateStr);
-      expect(this.scope.form.annotationSubForm.dateTimeSubForm.dateValue.$valid).toBe(true);
+      expect(this.scope.form.annotationSubForm.dateTimeSubForm.$valid).toBe(true);
     });
 
     it('works for a SELECT single annotation annotation', function() {
