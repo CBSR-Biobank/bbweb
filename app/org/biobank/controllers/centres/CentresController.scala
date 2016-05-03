@@ -5,6 +5,7 @@ import org.biobank.service._
 import org.biobank.service.users.UsersService
 import org.biobank.service.centres.CentresService
 import org.biobank.infrastructure.command.CentreCommands._
+import org.biobank.infrastructure.SortOrder
 import org.biobank.domain.centre.Centre
 
 import javax.inject.{Inject, Singleton}
@@ -51,6 +52,15 @@ class CentresController @Inject() (val env:            Environment,
       validation.fold(
         err => BadRequest(err.list.toList.mkString),
         results =>  Ok(results)
+      )
+    }
+
+  def listNames(filter: String, order: String) =
+    AuthAction(parse.empty) { (token, userId, request) =>
+
+      SortOrder.fromString(order).fold(
+        err => BadRequest(err.list.toList.mkString),
+        so  => Ok(centresService.getCentreNames(filter, so))
       )
     }
 

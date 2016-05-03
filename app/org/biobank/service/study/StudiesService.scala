@@ -35,7 +35,7 @@ trait StudiesService {
                  order:    SortOrder)
       : DomainValidation[Seq[Study]]
 
-  def getStudyNames(filter: String, order: SortOrder): Seq[StudyNameDto]
+  def getStudyNames(filter: String, order: SortOrder): Seq[NameDto]
 
   def getStudy(id: String): DomainValidation[Study]
 
@@ -158,7 +158,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
     }
   }
 
-  def getStudyNames(filter: String, order: SortOrder): Seq[StudyNameDto] = {
+  def getStudyNames(filter: String, order: SortOrder): Seq[NameDto] = {
     val studies = studyRepository.getValues
 
     val filteredStudies = if (filter.isEmpty) {
@@ -169,8 +169,8 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
     val orderedStudies = filteredStudies.toSeq
     val result = orderedStudies.map { s =>
-      StudyNameDto(s.id.id, s.name, s.getClass.getSimpleName)
-    } sortWith(StudyNameDto.compareByName)
+      NameDto(s.id.id, s.name, s.getClass.getSimpleName)
+    } sortWith(NameDto.compareByName)
 
     if (order == AscendingOrder) {
       result

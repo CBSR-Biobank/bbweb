@@ -23,8 +23,8 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
   def uri(study: Study, path: String): String = uri(path) + s"/${study.id.id}"
 
-  def compareStudyNameDto(json: JsValue, study: Study) {
-    compareObj(json, StudyNameDto(study.id.id, study.name, study.getClass.getSimpleName))
+  def compareNameDto(json: JsValue, study: Study) {
+    compareObj(json, NameDto(study.id.id, study.name, study.getClass.getSimpleName))
   }
 
   def compareObjs(jsonList: List[JsObject], studies: List[Study]) = {
@@ -951,8 +951,8 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size studies.size
 
-        compareStudyNameDto(jsonList(0), study1)
-        compareStudyNameDto(jsonList(1), study2)
+        compareNameDto(jsonList(0), study1)
+        compareNameDto(jsonList(1), study2)
       }
 
       "list single study when using a filter" in {
@@ -968,7 +968,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
 
-        compareStudyNameDto(jsonList(0), study1)
+        compareNameDto(jsonList(0), study1)
       }
 
       "list nothing when using an invalid filter" in {

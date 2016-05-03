@@ -61,12 +61,12 @@ trait JsonHelper extends MustMatchers with OptionValues {
     }
   }
 
-  def compareObj(json: JsValue, study: StudyNameDto) = {
-    (json \ "id").as[String] mustBe (study.id)
+  def compareObj(json: JsValue, nameDto: NameDto) = {
+    (json \ "id").as[String] mustBe (nameDto.id)
 
-    (json \ "name").as[String] mustBe (study.name)
+    (json \ "name").as[String] mustBe (nameDto.name)
 
-    (json \ "status").as[String] mustBe (study.status)
+    (json \ "status").as[String] mustBe (nameDto.status)
   }
 
   def compareObj(json: JsValue, specimenGroup: SpecimenGroup) = {
