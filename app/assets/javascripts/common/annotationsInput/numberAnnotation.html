@@ -1,7 +1,7 @@
 <div class="form-group"
      ng-class="{ 'has-error' : annotationSubForm.annotationNumberValue.$invalid &&
                !annotationSubForm.annotationNumberValue.$pristine }">
-  <label class="col-md-2 control-label">{{annotation.annotationType.name}}</label>
+  <label class="col-md-2 form-control-label">{{annotation.annotationType.name}}</label>
   <div class="col-md-10">
     <input name="annotationNumberValue"
            type="number"

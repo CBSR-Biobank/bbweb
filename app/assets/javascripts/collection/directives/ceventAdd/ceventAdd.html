@@ -7,8 +7,8 @@
       novalidate>
 
   <!-- COLLECTION EVENT TYPE: read only -->
-  <div class="form-group">
-    <label for="ceventTypeId" class="col-md-2 control-label">Event Type</label>
+  <div class="form-group row">
+    <label for="ceventTypeId" class="col-md-2 form-control-label">Event Type</label>
     <div class="col-md-10">
       <input ng-readonly="true"
              class="form-control"
@@ -17,11 +17,11 @@
   </div>
 
   <!-- VISIT NUMBER -->
-  <div class="form-group"
+  <div class="form-group row"
        ng-class="{ 'has-error' : collectionEventForm.visitNumber.$invalid &&
                  !collectionEventForm.visitNumber.$pristine }">
 
-    <label for="visitNumber" class="col-md-2 control-label">Visit number</label>
+    <label for="visitNumber" class="col-md-2 form-control-label">Visit number</label>
     <div class="col-md-10">
       <input name="visitNumber"
              type="number"
@@ -47,10 +47,10 @@
   </div>
 
   <!-- TIME COMPLETED -->
-  <div class="form-group"
+  <div class="form-group row"
        ng-class="{ 'has-error' : collectionEventForm.timeCompleted.$invalid &&
                  !collectionEventForm.timeCompleted.$pristine }">
-    <label class="col-sm-2 control-label">Time completed</label>
+    <label class="col-sm-2 form-control-label">Time completed</label>
     <div class="col-sm-10">
       <p class="input-group">
         <input name="timeCompleted"
@@ -87,7 +87,7 @@
 <annotations-input annotations="vm.collectionEvent.annotations"></annotations-input>
 
 <!-- BUTTONS  -->
-<div class="form-group">
+<div class="form-group row">
   <div class="col-md-offset-2 col-md-10">
     <button class="btn btn-primary"
             ng-disabled="collectionEventForm.$invalid"

@@ -7,7 +7,7 @@
 
   <!-- PROCESSING TYPE -->
   <div class="form-group">
-    <label for="procTypeId" class="col-md-3 control-label">Processing Type</label>
+    <label for="procTypeId" class="col-md-3 form-control-label">Processing Type</label>
     <div class="col-md-9">
       <select class="form-control"
               name="procTypeId"
@@ -28,7 +28,7 @@
 
   <!-- INPUT SPECIMEN GROUP -->
   <div class="form-group">
-    <label for="inputGroupId" class="col-md-3 control-label">Input Specimen Group</label>
+    <label for="inputGroupId" class="col-md-3 form-control-label">Input Specimen Group</label>
     <div class="col-md-9">
       <select class="form-control"
               name="inputGroupId"
@@ -48,7 +48,7 @@
 
   <!-- INPUT COUNT -->
   <div class="form-group">
-    <label for="inputCount" class="col-md-3 control-label">Input count</label>
+    <label for="inputCount" class="col-md-3 form-control-label">Input count</label>
     <div class="col-md-2">
       <input type="number"
              min="1"
@@ -69,7 +69,7 @@
 
   <!-- EXPECTED INPUT CHANGE -->
   <div class="form-group">
-    <label for="expectedInputChange" class="col-md-3 control-label">Expected Input change</label>
+    <label for="expectedInputChange" class="col-md-3 form-control-label">Expected Input change</label>
     <div class="col-md-2">
       <input type="number"
              min="0"
@@ -93,7 +93,7 @@
 
   <!-- INPUT CONTAINER TYPE -->
   <div class="form-group">
-    <label for="inputContainertypeId" class="col-md-3 control-label">Input Container Type</label>
+    <label for="inputContainertypeId" class="col-md-3 form-control-label">Input Container Type</label>
     <div class="col-md-9">
       <select class="form-control"
               name="inputContainertypeId"
@@ -106,7 +106,7 @@
 
   <!-- OUTPUT SPECIMEN GROUP -->
   <div class="form-group">
-    <label for="outputGroupId" class="col-md-3 control-label">Output Specimen Group</label>
+    <label for="outputGroupId" class="col-md-3 form-control-label">Output Specimen Group</label>
     <div class="col-md-9">
       <select class="form-control"
               name="outputGroupId"
@@ -126,7 +126,7 @@
 
   <!-- OUTPUT COUNT -->
   <div class="form-group">
-    <label for="outputCount" class="col-md-3 control-label">Output count</label>
+    <label for="outputCount" class="col-md-3 form-control-label">Output count</label>
     <div class="col-md-2">
       <input type="number"
              min="1"
@@ -146,7 +146,7 @@
 
   <!-- EXPECTED OUTPUT CHANGE -->
   <div class="form-group">
-    <label for="expectedOutputChange" class="col-md-3 control-label">Expected Output change</label>
+    <label for="expectedOutputChange" class="col-md-3 form-control-label">Expected Output change</label>
     <div class="col-md-2">
       <input type="number"
              min="0"
@@ -170,7 +170,7 @@
 
   <!-- OUTPUT CONTAINER TYPE -->
   <div class="form-group">
-    <label for="outputContainertypeId" class="col-md-3 control-label">Output Container Type</label>
+    <label for="outputContainertypeId" class="col-md-3 form-control-label">Output Container Type</label>
     <div class="col-md-9">
       <select class="form-control"
               name="outputContainertypeId"
@@ -184,7 +184,7 @@
   <!-- ANNOTATION TYPE DATA -->
   <div class="form-group" ng-repeat="atData in vm.specimenLinkType.annotationTypeData track by $index">
     <ng-form name="atSubForm">
-      <label class="col-md-3 control-label">Annotation Type {{$index + 1}}</label>
+      <label class="col-md-3 form-control-label">Annotation Type {{$index + 1}}</label>
       <div class="col-md-4">
         <select class="form-control"
                 name="annotationTypeName"

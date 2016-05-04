@@ -5,7 +5,7 @@
   <!-- NAME -->
   <div class="form-group"
        ng-class="{ 'has-error' : annotationTypeForm.name.$invalid && !annotationTypeForm.name.$pristine }">
-    <label for="name" class="col-md-2 control-label">Name</label>
+    <label for="name" class="col-md-2 form-control-label">Name</label>
     <div class="col-md-10">
       <input name="name"
              type="text"
@@ -23,7 +23,7 @@
 
   <!-- DESCRIPTION -->
   <div class="form-group">
-    <label for="description" class="col-md-2 control-label">Description</label>
+    <label for="description" class="col-md-2 form-control-label">Description</label>
     <div class="col-md-10">
       <textarea name="description"
                 class="form-control"
@@ -35,7 +35,7 @@
 
   <!-- REQUIRED -->
   <div class="form-group">
-    <label for="required" class="col-md-2 control-label">Required</label>
+    <label for="required" class="col-md-2 form-control-label">Required</label>
     <div class="col-md-10">
       <input name="required"
              type="checkbox"
@@ -45,7 +45,7 @@
 
   <!--VALUE TYPE  -->
   <div class="form-group">
-    <label for="valueType" class="col-md-2 control-label">Value Type</label>
+    <label for="valueType" class="col-md-2 form-control-label">Value Type</label>
     <div class="col-md-10">
       <select class="form-control"
               name="valueType"
@@ -65,7 +65,7 @@
 
   <!-- SELECTIONS -->
   <div class="form-group" ng-if="vm.annotationType.valueType === 'Select'">
-    <label for="maxValueCount" class="col-md-2 control-label">Selections</label>
+    <label for="maxValueCount" class="col-md-2 form-control-label">Selections</label>
     <div class="col-md-5">
       <input name="maxValueCount"
              type="radio"
@@ -93,7 +93,7 @@
        ng-if="vm.annotationType.valueType === 'Select'"
        ng-repeat="opt in vm.annotationType.options track by $index">
     <ng-form name="subForm">
-      <label class="col-md-2 control-label">Selection Option {{$index + 1}}</label>
+      <label class="col-md-2 form-control-label">Selection Option {{$index + 1}}</label>
       <div class="col-md-8">
         <input type="text"
                name="option"
