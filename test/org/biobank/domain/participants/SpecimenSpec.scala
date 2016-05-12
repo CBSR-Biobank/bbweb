@@ -23,6 +23,7 @@ class SpecimenSpec extends DomainSpec {
 
         val v = UsableSpecimen.create(
                 id               = specimen.id,
+                inventoryId      = specimen.inventoryId,
                 specimenSpecId   = specimen.specimenSpecId,
                 version          = 0,
                 timeCreated      = DateTime.now,
@@ -35,7 +36,8 @@ class SpecimenSpec extends DomainSpec {
         v mustSucceed { spc =>
           spc must have (
             'id              (specimen.id),
-            'specimenSpecId (specimen.specimenSpecId),
+            'inventoryId     (specimen.inventoryId),
+            'specimenSpecId  (specimen.specimenSpecId),
             'version         (0),
             'originLocationId(specimen.originLocationId),
             'locationId      (specimen.locationId),
@@ -56,6 +58,7 @@ class SpecimenSpec extends DomainSpec {
       "an empty id is used" in {
         val v = UsableSpecimen.create(
                 id               = SpecimenId(""),
+                inventoryId      = nameGenerator.next[Specimen],
                 specimenSpecId   = nameGenerator.next[SpecimenSpec],
                 version          = 0,
                 timeCreated      = DateTime.now,
@@ -67,9 +70,25 @@ class SpecimenSpec extends DomainSpec {
         v mustFail "IdRequired"
       }
 
+      "an empty inventory id is used" in {
+        val v = UsableSpecimen.create(
+                id               = SpecimenId(nameGenerator.next[SpecimenId]),
+                inventoryId      = "",
+                specimenSpecId   = nameGenerator.next[SpecimenSpec],
+                version          = 0,
+                timeCreated      = DateTime.now,
+                originLocationId = nameGenerator.next[Location],
+                locationId       = nameGenerator.next[Location],
+                containerId      = None,
+                positionId       = None,
+                amount           = BigDecimal(1.01))
+        v mustFail "InventoryIdInvalid"
+      }
+
       "an empty specimen spec id is used" in {
         val v = UsableSpecimen.create(
                 id               = SpecimenId(nameGenerator.next[SpecimenId]),
+                inventoryId      = nameGenerator.next[Specimen],
                 specimenSpecId   = "",
                 version          = 0,
                 timeCreated      = DateTime.now,
@@ -84,6 +103,7 @@ class SpecimenSpec extends DomainSpec {
       "an invalid version number is used" in {
         val v = UsableSpecimen.create(
                 id               = SpecimenId(nameGenerator.next[SpecimenId]),
+                inventoryId      = nameGenerator.next[Specimen],
                 specimenSpecId   = nameGenerator.next[SpecimenSpec],
                 version          = -2,
                 timeCreated      = DateTime.now,
@@ -98,6 +118,7 @@ class SpecimenSpec extends DomainSpec {
       "an empty origin location id is used" in {
         val v = UsableSpecimen.create(
                 id               = SpecimenId(nameGenerator.next[SpecimenId]),
+                inventoryId      = nameGenerator.next[Specimen],
                 specimenSpecId   = nameGenerator.next[SpecimenSpec],
                 version          = 0,
                 timeCreated      = DateTime.now,
@@ -112,6 +133,7 @@ class SpecimenSpec extends DomainSpec {
       "an empty location id is used" in {
         val v = UsableSpecimen.create(
                 id               = SpecimenId(nameGenerator.next[SpecimenId]),
+                inventoryId      = nameGenerator.next[Specimen],
                 specimenSpecId   = nameGenerator.next[SpecimenSpec],
                 version          = 0,
                 timeCreated      = DateTime.now,
@@ -126,6 +148,7 @@ class SpecimenSpec extends DomainSpec {
       "an empty container id is used" in {
         val v = UsableSpecimen.create(
                 id               = SpecimenId(nameGenerator.next[SpecimenId]),
+                inventoryId      = nameGenerator.next[Specimen],
                 specimenSpecId   = nameGenerator.next[SpecimenSpec],
                 version          = 0,
                 timeCreated      = DateTime.now,
@@ -140,6 +163,7 @@ class SpecimenSpec extends DomainSpec {
       "an empty position id is used" in {
         val v = UsableSpecimen.create(
                 id               = SpecimenId(nameGenerator.next[SpecimenId]),
+                inventoryId      = nameGenerator.next[Specimen],
                 specimenSpecId   = nameGenerator.next[SpecimenSpec],
                 version          = 0,
                 timeCreated      = DateTime.now,
@@ -154,6 +178,7 @@ class SpecimenSpec extends DomainSpec {
       "an negative amount is used" in {
         val v = UsableSpecimen.create(
                 id               = SpecimenId(nameGenerator.next[SpecimenId]),
+                inventoryId      = nameGenerator.next[Specimen],
                 specimenSpecId   = nameGenerator.next[SpecimenSpec],
                 version          = 0,
                 timeCreated      = DateTime.now,

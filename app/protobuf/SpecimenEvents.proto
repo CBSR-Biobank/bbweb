@@ -4,16 +4,18 @@ message SpecimenEvent {
 
    message Added {
 
-      message SpecimenData {
-         optional string specimenSpecId = 1;
-         optional string specimenId     = 2;
-         optional string timeCreated    = 3;
-         optional string locationId     = 4;
-         optional double amount         = 5;
+      message SpecimenInfo {
+         optional string id             = 1;
+         optional string inventoryId    = 2;
+         optional string specimenSpecId = 3;
+         optional string specimenId     = 4;
+         optional string timeCreated    = 5;
+         optional string locationId     = 6;
+         optional double amount         = 7;
       }
 
       optional string       collectionEventId = 1;
-      repeated SpecimenData specimenData      = 2;
+      repeated SpecimenInfo specimenData      = 2;
    }
 
    message Moved {

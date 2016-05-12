@@ -10,7 +10,9 @@ import scalaz.Scalaz._
 trait SpecimenRepository
     extends ReadWriteRepository [SpecimenId, Specimen] {
 
-  def getForSpecimenSpec(specimenSpecId: String): Set[Specimen]
+  def nextIdentities(count: Int): List[SpecimenId]
+
+  def getForInventoryId(inventoryId: String): DomainValidation[Specimen]
 
 }
 
@@ -24,14 +26,20 @@ class SpecimenRepositoryImpl
 
   def nextIdentity: SpecimenId = new SpecimenId(nextIdentityAsString)
 
+  def nextIdentities(count: Int): List[SpecimenId] = {
+    val size = getMap.size
+    (1 to count).map { index => SpecimenId(hashids.encode(size + index)) }.toList
+  }
+
   def notFound(id: SpecimenId) = IdNotFound(s"specimen id: $id")
 
   override def getByKey(id: SpecimenId): DomainValidation[Specimen] = {
     getMap.get(id).toSuccessNel(notFound(id).toString)
   }
 
-  def getForSpecimenSpec(specimenSpecId: String): Set[Specimen] = {
-    ???
+  def getForInventoryId(inventoryId: String): DomainValidation[Specimen] = {
+    getValues.find(s => s.inventoryId == inventoryId)
+      .toSuccessNel(EntityCriteriaError(s"specimen with inventory ID not found").toString)
   }
 
 }

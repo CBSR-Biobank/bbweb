@@ -320,6 +320,7 @@ class Factory {
 
     val specimen = UsableSpecimen(
         id               = SpecimenId(nameGenerator.next[Specimen]),
+        inventoryId      = nameGenerator.next[Specimen],
         specimenSpecId   = specimenSpec.uniqueId,
         version          = 0,
         timeAdded        = DateTime.now,
@@ -341,6 +342,7 @@ class Factory {
 
     val specimen = UnusableSpecimen(
         id               = SpecimenId(nameGenerator.next[Specimen]),
+        inventoryId      = nameGenerator.next[Specimen],
         specimenSpecId   = specimenSpec.uniqueId,
         version          = 0,
         timeAdded        = DateTime.now,

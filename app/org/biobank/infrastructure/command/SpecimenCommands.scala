@@ -15,15 +15,15 @@ object SpecimenCommands {
       extends SpecimenCommand
       with HasExpectedVersion
 
-  case class SpecimenData(specimenSpecId: String,
-                          specimenId:      String,
-                          timeCreated:     DateTime,
-                          locationId:      String,
-                          amount:          BigDecimal)
+  case class SpecimenInfo(inventoryId:    String,
+                          specimenSpecId: String,
+                          timeCreated:    DateTime,
+                          locationId:     String,
+                          amount:         BigDecimal)
 
   case class AddSpecimensCmd(userId:            String,
                              collectionEventId: String,
-                             specimenData:      List[SpecimenData])
+                             specimenData:      List[SpecimenInfo])
       extends SpecimenCommand
 
 
@@ -31,7 +31,7 @@ object SpecimenCommands {
                               collectionEventId: String,
                               expectedVersion:   Long,
                               locationId:        String,
-                              specimenData:      Set[SpecimenData])
+                              specimenData:      Set[SpecimenInfo])
       extends SpecimenModifyCommand
 
   case class SpecimenAssignPositionCmd(userId:            String,
@@ -66,7 +66,7 @@ object SpecimenCommands {
       extends SpecimenModifyCommand
       with HasIdentity
 
-  implicit val specimenDataReads              = Json.reads[SpecimenData]
+  implicit val specimenInfoReads              = Json.reads[SpecimenInfo]
   implicit val addSpecimensCmdReads           = Json.reads[AddSpecimensCmd]
   implicit val moveSpecimensCmdReads          = Json.reads[MoveSpecimensCmd]
   implicit val specimenAssignPositionCmdReads = Json.reads[SpecimenAssignPositionCmd]

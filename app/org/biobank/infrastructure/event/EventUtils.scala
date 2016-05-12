@@ -1,6 +1,6 @@
 package org.biobank.infrastructure.event
 
-import org.biobank.infrastructure.command.SpecimenCommands.SpecimenData
+import org.biobank.infrastructure.command.SpecimenCommands.SpecimenInfo
 import org.biobank.infrastructure.event.CommonEvents. {
   AnnotationType => EventAnnotationType
 }
@@ -15,6 +15,7 @@ import org.biobank.domain.{
   SpecimenType
 }
 import org.biobank.domain.study.CollectionSpecimenSpec
+import org.biobank.domain.participants.SpecimenId
 import org.joda.time._
 import org.joda.time.format.ISODateTimeFormat
 
@@ -94,13 +95,14 @@ object EventUtils {
     )
   }
 
-  def specimenDataToEvent(specimenData: SpecimenData): SpecimenEvent.Added.SpecimenData = {
-    SpecimenEvent.Added.SpecimenData().update(
-      _.specimenSpecId := specimenData.specimenSpecId,
-      _.specimenId     := specimenData.specimenId,
-      _.timeCreated    := ISODateTimeFormatter.print(specimenData.timeCreated),
-      _.locationId     := specimenData.locationId,
-      _.amount         := specimenData.amount.doubleValue
+  def specimenInfoToEvent(id: SpecimenId, specimenInfo: SpecimenInfo): SpecimenEvent.Added.SpecimenInfo = {
+    SpecimenEvent.Added.SpecimenInfo().update(
+      _.id             := id.id,
+      _.inventoryId    := specimenInfo.inventoryId,
+      _.specimenSpecId := specimenInfo.specimenSpecId,
+      _.timeCreated    := ISODateTimeFormatter.print(specimenInfo.timeCreated),
+      _.locationId     := specimenInfo.locationId,
+      _.amount         := specimenInfo.amount.doubleValue
     )
   }
 

@@ -70,8 +70,8 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
       "specimenData" ->
         specimens.map { specimen =>
           Json.obj(
+            "inventoryId"    -> specimen.inventoryId,
             "specimenSpecId" -> specimen.specimenSpecId,
-            "specimenId"     -> specimen.id,
             "timeCreated"    -> specimen.timeCreated,
             "locationId"     -> specimen.locationId,
             "amount"         -> specimen.amount)
@@ -124,7 +124,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
           List("asc", "desc").foreach{ ordering =>
             val jsonItems = PagedResultsSpec(this).multipleItemsResult(
                 uri         = uri(cevent),
-                queryParams = Map("sort" -> "id", "order" -> ordering),
+                queryParams = Map("sort" -> "inventoryId", "order" -> ordering),
                 offset      = 0,
                 total       = specimens.size,
                 maybeNext   = None,
@@ -213,7 +213,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
           List("asc", "desc").foreach{ ordering =>
             val jsonItem = PagedResultsSpec(this).singleItemResult(
                 uri         = uri(cevent),
-                queryParams = Map("sort" -> "id", "pageSize" -> "1"),
+                queryParams = Map("sort" -> "inventoryId", "pageSize" -> "1"),
                 offset      = 0,
                 total       = specimens.size,
                 maybeNext   = Some(2))
@@ -235,7 +235,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
           List("asc", "desc").foreach{ ordering =>
             val jsonItem = PagedResultsSpec(this).singleItemResult(
                 uri         = uri(cevent),
-                queryParams = Map("sort" -> "id", "page" -> "2", "pageSize" -> "1"),
+                queryParams = Map("sort" -> "inventoryId", "page" -> "2", "pageSize" -> "1"),
                 offset      = 1,
                 total       = specimens.size,
                 maybeNext   = None,
@@ -290,7 +290,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
             log.info(s"specimen: ${repoSpecimens.head}")
 
             repoSpecimen must have (
-              'id                (specimen.id),
+              'inventoryId       (specimen.inventoryId),
               'specimenSpecId    (specimen.specimenSpecId),
               'version           (specimen.version),
               'originLocationId  (specimen.originLocationId),
@@ -301,7 +301,6 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
             )
 
             (repoSpecimen.timeCreated to specimen.timeCreated).millis must be < TimeCoparisonMillis
-
             checkTimeStamps(repoSpecimen, DateTime.now, None)
           }
         }

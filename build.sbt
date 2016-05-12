@@ -71,7 +71,7 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   cache,
   filters,
-  ( "com.typesafe.akka"         %% "akka-persistence"                   % "2.4.2" % "compile" ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
+  ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.4.2" % "compile" ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
   "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.2",
   "com.typesafe.akka"           %% "akka-remote"                         % "2.4.2"             % "compile",
   "com.typesafe.akka"           %% "akka-slf4j"                          % "2.4.2"             % "compile",
@@ -102,7 +102,8 @@ libraryDependencies ++= Seq(
   "org.webjars"                 %  "tv4"                                 % "1.0.17-1",
   "org.webjars.bower"           %  "angular-utils-ui-breadcrumbs"        % "0.2.1",
   "org.webjars.bower"           %  "bootstrap-ui-datetime-picker"        % "2.3.1",
-  // Testing"com.github.dnvriend"         %% "akka-persistence-inmemory"             % "1.2.8"              % "test",
+  // Testing
+  "com.github.dnvriend"         %% "akka-persistence-inmemory"           % "1.2.8"              % "test",
   "com.typesafe.akka"           %% "akka-testkit"                        % "2.4.2"              % "test",
   "com.github.nscala-time"      %% "nscala-time"                         % "2.10.0"             % "test",
   "org.scalatestplus"           %% "play"                                % "1.4.0"              % "test",

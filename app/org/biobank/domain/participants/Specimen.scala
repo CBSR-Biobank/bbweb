@@ -25,6 +25,9 @@ import scalaz.Scalaz._
 sealed trait Specimen
     extends ConcurrencySafeEntity[SpecimenId] {
 
+  /** The inventory ID assigned to this specimen. */
+  val inventoryId: String
+
   /** The [[SpecimenGroup]] this specimen belongs to, defined by the study it belongs to. */
   val specimenSpecId: String
 
@@ -52,8 +55,9 @@ sealed trait Specimen
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {
-        |  specimenSpecId:   $specimenSpecId
         |  id:               $id
+        |  inventoryId:      $inventoryId
+        |  specimenSpecId:   $specimenSpecId
         |  version:          $version
         |  timeAdded:        $timeAdded
         |  timeModified:     $timeModified
@@ -72,6 +76,7 @@ object Specimen {
   implicit val specimenWrites = new Writes[Specimen] {
       def writes(specimen: Specimen) = Json.obj(
           "id"               -> specimen.id,
+          "inventoryId"      -> specimen.inventoryId,
           "specimenSpecId"   -> specimen.specimenSpecId,
           "originLocationId" -> specimen.originLocationId,
           "locationId"       -> specimen.locationId,
@@ -89,6 +94,9 @@ object Specimen {
   def compareById(a: Specimen, b: Specimen) =
     (a.id.id compareTo b.id.id) < 0
 
+  def compareByInventoryId(a: Specimen, b: Specimen) =
+    (a.inventoryId compareTo b.inventoryId) < 0
+
   def compareByTimeCreated(a: Specimen, b: Specimen) =
     (a.timeCreated compareTo b.timeCreated) < 0
 
@@ -97,10 +105,19 @@ object Specimen {
 
 }
 
+trait SpecimenValidations {
+
+  case object InventoryIdInvalid extends ValidationKey
+
+  case object SpecimenSpecIdInvalid extends ValidationKey
+
+}
+
 /**
  * A usable specimen is a specimen that can be used for processing.
  */
 case class UsableSpecimen(id:               SpecimenId,
+                          inventoryId:      String,
                           specimenSpecId:   String,
                           version:          Long,
                           timeAdded:        DateTime,
@@ -112,35 +129,39 @@ case class UsableSpecimen(id:               SpecimenId,
                           timeCreated:      DateTime,
                           amount:           BigDecimal)
     extends Specimen
+    with SpecimenValidations
     with ParticipantValidations
     with StudyValidations {
 
   import org.biobank.domain.CommonValidations._
 
+  def withInventoryId(inventoryId: String): DomainValidation[Specimen] = {
+    validateString(inventoryId, InventoryIdInvalid).map { s =>
+      copy(version = version + 1, amount = amount)
+    }
+  }
+
   def withAmount(amount: BigDecimal): DomainValidation[Specimen] = {
-    validatePositiveNumber(amount, AmountInvalid) fold (
-      err => err.failure,
-      s   => copy(version = version + 1, amount = amount).success
-    )
+    validatePositiveNumber(amount, AmountInvalid).map { s =>
+      copy(version = version + 1, amount = amount)
+    }
   }
 
   def withLocation(locationId: String): DomainValidation[Specimen] = {
-    validateString(locationId, LocationIdInvalid) fold (
-      err => err.failure,
-      s   => copy(version = version + 1, locationId = locationId).success
-    )
+    validateString(locationId, LocationIdInvalid).map { s =>
+      copy(version = version + 1, locationId = locationId)
+    }
   }
 
-  def withPosition(positionId: ContainerSchemaPositionId)
-      : DomainValidation[Specimen] = {
-    validateId(positionId, PositionInvalid) fold (
-      err => err.failure,
-      s   => copy(version = version + 1, positionId = Some(positionId)).success
-    )
+  def withPosition(positionId: ContainerSchemaPositionId): DomainValidation[Specimen] = {
+    validateId(positionId, PositionInvalid).map { s =>
+      copy(version = version + 1, positionId = Some(positionId))
+    }
   }
 
   def makeUnusable(): DomainValidation[UnusableSpecimen] = {
     UnusableSpecimen(id               = this.id,
+                     inventoryId      = this.inventoryId,
                      specimenSpecId   = this.specimenSpecId,
                      version          = this.version + 1,
                      timeAdded        = this.timeAdded,
@@ -154,12 +175,14 @@ case class UsableSpecimen(id:               SpecimenId,
   }
 }
 
-object UsableSpecimen extends ParticipantValidations with StudyValidations {
+object UsableSpecimen
+    extends SpecimenValidations
+    with ParticipantValidations
+    with StudyValidations {
   import org.biobank.domain.CommonValidations._
 
-  case object SpecimenSpecIdInvalid extends ValidationKey
-
   def create(id:               SpecimenId,
+             inventoryId:      String,
              specimenSpecId:   String,
              version:          Long,
              originLocationId: String,
@@ -170,6 +193,7 @@ object UsableSpecimen extends ParticipantValidations with StudyValidations {
              amount:           BigDecimal)
       : DomainValidation[UsableSpecimen] = {
     validate(id,
+             inventoryId,
              specimenSpecId,
              version,
              originLocationId,
@@ -179,6 +203,7 @@ object UsableSpecimen extends ParticipantValidations with StudyValidations {
              timeCreated,
              amount)
       .map(_ => UsableSpecimen(id,
+                               inventoryId,
                                specimenSpecId,
                                version,
                                DateTime.now,
@@ -192,6 +217,7 @@ object UsableSpecimen extends ParticipantValidations with StudyValidations {
   }
 
   def validate(id:               SpecimenId,
+               inventoryId:      String,
                specimenSpecId:   String,
                version:          Long,
                originLocationId: String,
@@ -202,6 +228,7 @@ object UsableSpecimen extends ParticipantValidations with StudyValidations {
                amount:           BigDecimal)
       : DomainValidation[Boolean] = {
     (validateId(id) |@|
+       validateString(inventoryId, InventoryIdInvalid) |@|
        validateString(specimenSpecId, SpecimenSpecIdInvalid) |@|
        validateVersion(version) |@|
        validateString(originLocationId, OriginLocationIdInvalid) |@|
@@ -209,7 +236,7 @@ object UsableSpecimen extends ParticipantValidations with StudyValidations {
        validateId(containerId, ContainerIdInvalid) |@|
        validateId(positionId, PositionInvalid) |@|
        validatePositiveNumber(amount, AmountInvalid)) {
-      case (_, _, _, _, _, _, _, _) => true
+      case (_, _, _, _, _, _, _, _, _) => true
     }
   }
 
@@ -221,6 +248,7 @@ object UsableSpecimen extends ParticipantValidations with StudyValidations {
  * It may be that the total amount of the spcimen has already been used in processing.
  */
 case class UnusableSpecimen(id:               SpecimenId,
+                            inventoryId:      String,
                             specimenSpecId:   String,
                             version:          Long,
                             timeAdded:        DateTime,
@@ -235,6 +263,7 @@ case class UnusableSpecimen(id:               SpecimenId,
 
   def makeUsable(): DomainValidation[UsableSpecimen] = {
     UsableSpecimen(id               = this.id,
+                   inventoryId      = this.inventoryId,
                    specimenSpecId   = this.specimenSpecId,
                    version          = this.version + 1,
                    timeAdded        = this.timeAdded,

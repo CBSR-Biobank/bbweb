@@ -83,33 +83,36 @@ class SpecimensProcessor @Inject() (val specimenRepository:            SpecimenR
   }
 
   private def processAddCmd(cmd: AddSpecimensCmd): Unit = {
-    val specimenId = specimenRepository.nextIdentity
-
-    if (specimenRepository.getByKey(specimenId).isSuccess) {
-      log.error(s"processAddCmd: collection event with id already exsits: $specimenId")
-    }
-
     var v = for {
         collectionEvent <- collectionEventRepository.getByKey(CollectionEventId(cmd.collectionEventId))
         ceventType      <- collectionEventTypeRepository.getByKey(collectionEvent.collectionEventTypeId)
-        specIdsValid    <- validateSpecimenData(cmd.specimenData, ceventType)
-      } yield SpecimenEvent(cmd.userId).update(
-        _.time                    := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.added.collectionEventId := collectionEvent.id.id,
-        _.added.specimenData      := cmd.specimenData.map { specimenDataToEvent(_) })
+        specIdsValid    <- validateSpecimenInfo(cmd.specimenData, ceventType)
+        invIdsValid     <- validateInventoryId(cmd.specimenData)
+      } yield {
+        val identities = specimenRepository.nextIdentities(cmd.specimenData.length)
+
+        SpecimenEvent(cmd.userId).update(
+          _.time                    := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.added.collectionEventId := collectionEvent.id.id,
+          _.added.specimenData      := (cmd.specimenData zip identities).map {
+              case (specimenInfo, specimenId) =>
+                if (specimenRepository.getByKey(specimenId).isSuccess) {
+                  log.error(s"processAddCmd: collection event with id already exsits: $specimenId")
+                }
+
+                specimenInfoToEvent(specimenId, specimenInfo)
+            })
+        }
 
     process(v) { applyAddedEvent(_) }
   }
 
-  private def validateSpecimenData(specimenData: List[SpecimenData], ceventType: CollectionEventType)
+  private def validateSpecimenInfo(specimenData: List[SpecimenInfo], ceventType: CollectionEventType)
       : DomainValidation[Boolean] = {
 
     val cmdSpecIds    = specimenData.map(s => s.specimenSpecId).toSet
     val ceventSpecIds = ceventType.specimenSpecs.map(s => s.uniqueId).toSet
     val notBelonging  = cmdSpecIds.diff(ceventSpecIds)
-
-    log.info(s"cmdSpecIds: $cmdSpecIds")
-    log.info(s"ceventSpecIds: $ceventSpecIds")
 
     if (notBelonging.isEmpty) {
       true.success
@@ -117,6 +120,19 @@ class SpecimensProcessor @Inject() (val specimenRepository:            SpecimenR
       EntityCriteriaError("specimen specs do not belong to collection event type: "
                             + notBelonging.mkString(", ")).failureNel
     }
+  }
+
+  /**
+   * Returns success if none of the inventory IDs are found in the repository.
+   *
+   */
+  private def validateInventoryId(specimenData: List[SpecimenInfo]): DomainValidation[Boolean] = {
+    specimenData.map { info =>
+        specimenRepository.getForInventoryId(info.inventoryId) fold (
+          err => true.success,
+          spc => s"specimen ID already in use: ${info.inventoryId}".failureNel[Boolean]
+        )
+      }.sequenceU.map { x => true }
   }
 
   private def processMoveCmd(cmd: MoveSpecimensCmd): Unit = {
@@ -145,19 +161,22 @@ class SpecimensProcessor @Inject() (val specimenRepository:            SpecimenR
   }
 
   private def applyAddedEvent(event: SpecimenEvent): Unit = {
+    log.info(s"---------> event: $event")
+
     val v = for {
         validEventType <- validEventType(event.eventType.isAdded)
         specimens      <- {
-          event.getAdded.specimenData.toList.traverseU { data =>
-            UsableSpecimen.create(id               = SpecimenId(data.getSpecimenId),
-                                  specimenSpecId   = data.getSpecimenSpecId,
+          event.getAdded.specimenData.toList.traverseU { info =>
+            UsableSpecimen.create(id               = SpecimenId(info.getId),
+                                  inventoryId      = info.getInventoryId,
+                                  specimenSpecId   = info.getSpecimenSpecId,
                                   version          = 0L,
-                                  originLocationId = data.getLocationId,
-                                  locationId       = data.getLocationId,
+                                  originLocationId = info.getLocationId,
+                                  locationId       = info.getLocationId,
                                   containerId      = None,
                                   positionId       = None,
-                                  timeCreated      = ISODateTimeParser.parseDateTime(data.getTimeCreated),
-                                  amount           = BigDecimal(data.getAmount))
+                                  timeCreated      = ISODateTimeParser.parseDateTime(info.getTimeCreated),
+                                  amount           = BigDecimal(info.getAmount))
           }
         }
       } yield specimens
@@ -223,7 +242,7 @@ class SpecimensProcessor @Inject() (val specimenRepository:            SpecimenR
 
   private def logIfError[T](event: SpecimenEvent, validation: DomainValidation[T]) =
       validation.leftMap { err =>
-        log.error(s"event: $event: ${err.list.toList.mkString}")
+        log.error(s"*** ERROR ***: ${err.list.toList.mkString}, event: $event: ")
       }
 
 }
