@@ -4,10 +4,14 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
+define([
+  'angular',
+  'angularMocks',
+  'underscore',
+], function(angular, mocks, _) {
   'use strict';
 
-  describe('Controller: CentreCtrl', function() {
+  describe('Directive: centreViewDirective', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test', function($provide) {
       $provide.value('$window', {
@@ -18,32 +22,32 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       });
     }));
 
-    beforeEach(inject(function($rootScope, $controller, $window, $timeout) {
+    beforeEach(inject(function($rootScope, $compile, $timeout, directiveTestSuite) {
       var self = this;
 
+      _.extend(self, directiveTestSuite);
+
       self.$window          = self.$injector.get('$window');
+      self.$state       = self.$injector.get('$state');
       self.Centre           = self.$injector.get('Centre');
       self.jsonEntities     = self.$injector.get('jsonEntities');
 
-      self.createController = createController;
       self.centre = new self.Centre(self.jsonEntities.centre());
 
+      self.putHtmlTemplates(
+        '/assets/javascripts/admin/directives/centres/centreView/centreView.html');
+      self.createController = createController;
+
+      //---
+
       function createController(centre) {
-        var state = {
-          params: {centreId: centre.id},
-          current: {name: 'home.admin.centres.centre.locations'}
-        };
-
+        self.element = angular.element('<centre-view centre="vm.centre"></centre-view>');
         self.scope = $rootScope.$new();
+        self.scope.vm = { centre: self.centre };
 
-        $controller('CentreCtrl as vm', {
-          $window:  $window,
-          $scope:   self.scope,
-          $state:   state,
-          $timeout: $timeout,
-          centre:   centre
-        });
+        $compile(self.element)(self.scope);
         self.scope.$digest();
+        self.controller = self.element.controller('centreView');
       }
     }));
 
@@ -54,9 +58,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
     it('should contain initialized panels', function() {
       this.createController(this.centre);
-      expect(this.scope.vm.tabSummaryActive).toBe(false);
-      expect(this.scope.vm.tabLocationsActive).toBe(false);
-      expect(this.scope.vm.tabStudiesActive).toBe(false);
+      expect(this.controller.tabs).toBeArrayOfSize(3);
     });
 
     it('should contain initialized local storage', function() {
@@ -66,11 +68,13 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
     });
 
     it('should initialize the tab of the current state', function() {
-      var $timeout = this.$injector.get('$timeout');
+      var tab;
 
+      this.$state.current.name = 'home.admin.centres.centre.studies';
       this.createController(this.centre);
-      $timeout.flush();
-      expect(this.scope.vm.tabLocationsActive).toBe(true);
+
+      tab = _.findWhere(this.controller.tabs, { heading: 'Studies' });
+      expect(tab.active).toBe(true);
     });
 
   });

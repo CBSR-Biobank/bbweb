@@ -13,7 +13,6 @@ define(function (require) {
 
   module = angular.module(name, ['biobank.users']);
 
-  module.controller('CentreCtrl',           require('./CentreCtrl'));
   module.controller('CentreEditCtrl',       require('./CentreEditCtrl'));
   module.controller('CentreSummaryTabCtrl', require('./CentreSummaryTabCtrl'));
   module.controller('CentresCtrl',          require('./CentresCtrl'));

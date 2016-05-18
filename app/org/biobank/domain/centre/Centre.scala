@@ -165,14 +165,18 @@ case class DisabledCentre(id:           CentreId,
 
   /** Used to enable a centre after it has been configured, or had configuration changes made on it. */
   def enable(): DomainValidation[EnabledCentre] = {
-    EnabledCentre(id           = this.id,
-                  version      = this.version + 1,
-                  timeAdded    = this.timeAdded,
-                  timeModified = this.timeModified,
-                  name         = this.name,
-                  description  = this.description,
-                  studyIds     = this.studyIds,
-                  locations    = this.locations).success
+    if (this.locations.size > 0) {
+      EnabledCentre(id           = this.id,
+                    version      = this.version + 1,
+                    timeAdded    = this.timeAdded,
+                    timeModified = this.timeModified,
+                    name         = this.name,
+                    description  = this.description,
+                    studyIds     = this.studyIds,
+                    locations    = this.locations).success
+    } else {
+      DomainError("centre does not have any locations").failureNel
+    }
   }
 }
 

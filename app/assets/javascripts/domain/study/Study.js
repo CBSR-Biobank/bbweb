@@ -17,7 +17,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
   ];
 
   /**
-   *
+   * Angular factory for Studies.
    */
   function StudyFactory($q,
                         funutils,
@@ -28,6 +28,9 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
                         AnnotationType,
                         hasAnnotationTypes) {
 
+    /**
+     * Used for validating plain objects.
+     */
     var schema = {
       'id': 'Study',
       'type': 'object',
@@ -45,19 +48,58 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
     };
 
     /**
+     * Use this contructor to create new Specimens to be persited on the server. Use
+     * [create()]{@link domain.studies.Study.create} or [asyncCreate()]{@link
+     * domain.studies.Study.asyncCreate} to create objects returned by the server.
      *
+     * @class
+     * @memberOf domain.studies
+     * @extends domain.ConcurrencySafeEntity
+     *
+     * @classdesc A Study represents a collection of participants and specimens collected for a particular research
+     * study.
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
      */
     function Study(obj) {
-      var defaults = {
-        name:            '',
-        description:     null,
-        annotationTypes: [],
-        status:          StudyStatus.DISABLED
-      };
+
+      /**
+       * A short identifying name that is unique.
+       *
+       * @name domain.studies.Study#name
+       * @type {string}
+       */
+      this.name = '';
+
+      /**
+       * A description that can provide additional details on the name.
+       *
+       * @name domain.studies.Study#description
+       * @type {string}
+       * @default null
+       */
+      this.description = null;
+
+      /**
+       * The annotation types associated with participants of this study.
+       *
+       * @name domain.studies.Study#annotationTypes
+       * @type {Array<domain.AnnotationType>}
+       */
+      this.annotationTypes = [];
+
+      /**
+       * The status can be one of: enabled, disabled, or retired.
+       *
+       * @name domain.studies.Study#status
+       * @type {domain.studies.StudyStatus}
+       */
+      this.status = StudyStatus.DISABLED;
 
       obj = obj || {};
       ConcurrencySafeEntity.call(this, obj);
-      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
+      _.extend(this, obj);
       this.statusLabel = studyStatusLabel.statusToLabel(this.status);
 
       this.annotationTypes = _.map(this.annotationTypes, function (annotationType) {
@@ -71,7 +113,15 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
     Study.prototype.constructor = Study;
 
     /**
-     * Use Study.prototype.asyncCreate to create a study from async code.
+     * Creates a Study, but first it validates <code>obj</code> to ensure that it has a valid schema.
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @returns {Study} A study created from the given object.
+     *
+     * @see [asyncCreate()]{@link domain.studies.Study.asyncCreate} when you need to create
+     * a specimen within asynchronous code.
      */
     Study.create = function (obj) {
       if (!tv4.validate(obj, schema)) {
@@ -90,23 +140,58 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
     };
 
     /**
-     * @param {string} options.filter The filter to use on study names. Default is empty string.
+     * Creates a Study from a server reply but first validates that it has a valid schema.
      *
-     * @param {string} options.status Returns studies filtered by status. The following are valid: 'all' to
-     * return all studies, 'disabled' to return only disabled studies, 'enabled' to reutrn only enable
-     * studies, and 'retired' to return only retired studies. For any other values the response is an error.
+     * <p>Meant to be called from within promise code.</p>
      *
-     * @param {string} options.sortField Studies can be sorted by 'name' or by 'status'. Values other than
-     * these two yield an error.
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
      *
-     * @param {int} options.page If the total results are longer than pageSize, then page selects which
+     * @returns {Promise<domain.studies.Study>} A study wrapped in a promise.
+     *
+     * @see [create()]{@link domain.studies.Study.create} when not creating a Study within asynchronous code.
+     */
+    Study.asyncCreate = function (obj) {
+      var deferred = $q.defer();
+
+      if (!tv4.validate(obj, schema)) {
+        console.error('invalid object from server: ' + tv4.error);
+        deferred.reject('invalid object from server: ' + tv4.error);
+      } else if (!hasAnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
+        console.error('invalid annotation types from server: ' + tv4.error);
+        deferred.reject('invalid annotation types from server: ' + tv4.error);
+      } else {
+        deferred.resolve(new Study(obj));
+      }
+
+      return deferred.promise;
+    };
+
+    /**
+     * Used to list studies.
+     *
+     * <p>A paged API is used to list specimens. See below for more details.</p>
+     *
+     * @param {object} options - The options to use to list studies.
+     *
+     * @param {string} [options.filter] The filter to use on study names.
+     *
+     * @param {string} [options.status=all] Returns studies filtered by status. The following are valid:
+     * <code>all</code> to return all studies, <code>disabled</code> to only return disabled studies,
+     * <code>enabled</code> to only return enabled studies, and <code>retired</code> to only return retired
+     * studies. For any other values the response is an error.
+     *
+     * @param {string} [options.sortField=name] Studies can be sorted by <code>name</code> or by
+     * <code>status</code>. Values other than these two yield an error.
+     *
+     * @param {int} [options.page=1] If the total results are longer than pageSize, then page selects which
      * studies should be returned. If an invalid value is used then the response is an error.
      *
-     * @param {int} options.pageSize The total number of studies to return per page. The maximum page size is
+     * @param {int} [options.pageSize=10] The total number of studies to return per page. The maximum page size is
      * 10. If a value larger than 10 is used then the response is an error.
      *
-     * @param {string} options.order One of 'asc' or 'desc'. If an invalid value is used then
-     * the response is an error.
+     * @param {string} [options.order=asc] - The order to list studies by. One of: <code>asc</code> for
+     * ascending order, or <code>desc</code> for descending order.
      *
      * @return A promise. If the promise succeeds then a paged result is returned.
      */
@@ -140,42 +225,75 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
       });
     };
 
+    /**
+     * @typedef domain.studies.StudyNameDto
+     * @type object
+     * @property {String} id - the study's identity
+     * @property {String} name - the study's name
+     * @property {String} status - the study's status
+     */
+
+    /**
+     * Returns the names of all the studies in the system.
+     *
+     * @returns {Promise<Array<domain.studies.StudyNameDto>>} The names of the studies in the system.
+     */
+    Study.names = function () {
+      return biobankApi.get('/studies/names');
+    };
+
+    /**
+     * Retrieves a Study from the server.
+     *
+     * @param {string} id the ID of the study to retrieve.
+     *
+     * @returns {Promise<domain.studies.Study>} The study within a promise.
+     */
     Study.get = function (id) {
       return biobankApi.get(uri(id)).then(function(reply) {
-        return Study.prototype.asyncCreate(reply);
+        return Study.asyncCreate(reply);
       });
     };
 
-    Study.prototype.asyncCreate = function (obj) {
-      var deferred = $q.defer();
-
-      if (!tv4.validate(obj, schema)) {
-        console.error('invalid object from server: ' + tv4.error);
-        deferred.reject('invalid object from server: ' + tv4.error);
-      } else if (!hasAnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
-        console.error('invalid annotation types from server: ' + tv4.error);
-        deferred.reject('invalid annotation types from server: ' + tv4.error);
-      } else {
-        deferred.resolve(new Study(obj));
-      }
-
-      return deferred.promise;
-    };
-
+    /**
+     * Adds a study.
+     *
+     * @return {Promise<domain.studies.Study>} A promise containing the study that was created.
+     */
     Study.prototype.add = function () {
       var self = this,
           json = { name: this.name };
       angular.extend(json, funutils.pickOptional(self, 'description'));
       return biobankApi.post(uri(), json).then(function(reply) {
-        return self.asyncCreate(reply);
+        return Study.asyncCreate(reply);
       });
     };
 
+    Study.prototype.asyncCreate = function (obj) {
+      return Study.asyncCreate(obj);
+    };
+
+
+    /**
+     * Updates the Study's name.
+     *
+     * @param {String} name - The new name to give this study.
+     *
+     * @returns {Promise<domain.studies.Study>} A promise containing the study with the new name.
+     */
     Study.prototype.updateName = function (name) {
       return ConcurrencySafeEntity.prototype.update.call(
         this, uri('name', this.id), { name: name });
     };
 
+    /**
+     * Updates the Study's description.
+     *
+     * @param {String} description - The new description to give this study. When description is
+     * <code>falsy</code>, the description will be cleared.
+     *
+     * @returns {Promise<domain.studies.Study>} A promise containing the study with the new description.
+     */
     Study.prototype.updateDescription = function (description) {
       return ConcurrencySafeEntity.prototype.update.call(
         this,
@@ -183,6 +301,13 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
         description ? { description: description } : {});
     };
 
+    /**
+     * Adds an annotation type to be used on participants of this study.
+     *
+     * @param {domain.AnnotationType} annotationType - the annotation type to add to this study.
+     *
+     * @returns {Promise<domain.studies.Study>} A promise containing the study with the new annotation type.
+     */
     Study.prototype.addAnnotationType = function (annotationType) {
       return ConcurrencySafeEntity.prototype.update.call(
         this,
@@ -190,6 +315,13 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
         _.omit(annotationType, 'uniqueId'));
     };
 
+    /**
+     * Updates an existing annotation type for a participant.
+     *
+     * @param {domain.AnnotationType} annotationType - the annotation type with the new values.
+     *
+     * @returns {Promise<domain.studies.Study>} A promise containing the study with the updated annotation type.
+     */
     Study.prototype.updateAnnotationType = function (annotationType) {
       return ConcurrencySafeEntity.prototype.update.call(
         this,
@@ -197,12 +329,26 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
         annotationType);
     };
 
+    /**
+     * Removes an existing annotation type for a participant.
+     *
+     * @param {domain.AnnotationType} annotationType - the annotation type to remove.
+     *
+     * @returns {Promise<domain.studies.Study>} A promise containing the study with the removed annotation type.
+     */
     Study.prototype.removeAnnotationType = function (annotationType) {
       var url = sprintf.sprintf('%s/%d/%s',
                                 uri('pannottype', this.id), this.version, annotationType.uniqueId);
       return hasAnnotationTypes.removeAnnotationType.call(this, annotationType, url);
     };
 
+    /**
+     * Disables a study.
+     *
+     * @throws An error if the study is already disabled.
+     *
+     * @returns {Promise<domain.studies.Study>} A promise containing the study with the new status.
+     */
     Study.prototype.disable = function () {
       if (this.isDisabled()) {
         throw new Error('already disabled');
@@ -210,6 +356,13 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
       return changeState.call(this, 'disable');
     };
 
+    /**
+     * Enables a study.
+     *
+     * @throws An error if the study is already enabled.
+     *
+     * @returns {Promise<domain.studies.Study>} A promise containing the study with the new status.
+     */
     Study.prototype.enable = function () {
       if (this.isEnabled()) {
         throw new Error('already enabled');
@@ -217,6 +370,13 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
       return changeState.call(this, 'enable');
     };
 
+    /**
+     * Retires a study.
+     *
+     * @throws An error if the study is already retired.
+     *
+     * @returns {Promise<domain.studies.Study>} A promise containing the study with the new status.
+     */
     Study.prototype.retire = function () {
       if (this.isRetired()) {
         throw new Error('already retired');
@@ -224,6 +384,13 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
       return changeState.call(this, 'retire');
     };
 
+    /**
+     * Unretires a study. The study will be in <code>disabled</code> state after it is unretired.
+     *
+     * @throws An error if the study is not retired.
+     *
+     * @returns {Promise<domain.studies.Study>} A promise containing the study with the new status.
+     */
     Study.prototype.unretire = function () {
       if (!this.isRetired()) {
         throw new Error('not retired');
@@ -231,14 +398,29 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
       return changeState.call(this, 'unretire');
     };
 
+    /**
+     * Used to query the study's current status.
+     *
+     * @returns {boolean} <code>true</code> if the study is in <code>disabled</code> state.
+     */
     Study.prototype.isDisabled = function () {
       return (this.status === StudyStatus.DISABLED);
     };
 
+    /**
+     * Used to query the study's current status.
+     *
+     * @returns {boolean} <code>true</code> if the study is in <code>enabled</code> state.
+     */
     Study.prototype.isEnabled = function () {
       return (this.status === StudyStatus.ENABLED);
     };
 
+    /**
+     * Used to query the study's current status.
+     *
+     * @returns {boolean} <code>true</code> if the study is in <code>retired</code> state.
+     */
     Study.prototype.isRetired = function () {
       return (this.status === StudyStatus.RETIRED);
     };
@@ -249,7 +431,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
           json = { expectedVersion: self.version };
 
       return biobankApi.post(uri(state, self.id), json).then(function (reply) {
-        return self.asyncCreate(reply);
+        return Study.asyncCreate(reply);
       });
     }
 
@@ -277,7 +459,3 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
 
   return StudyFactory;
 });
-
-/* Local Variables:  */
-/* mode: js          */
-/* End:              */

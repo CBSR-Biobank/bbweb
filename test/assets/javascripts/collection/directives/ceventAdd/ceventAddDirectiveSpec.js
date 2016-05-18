@@ -87,9 +87,7 @@ define([
 
       expect(directive.controller.collectionEvent).toBeDefined();
       expect(directive.controller.title).toBeDefined();
-      expect(directive.controller.timeCompleted).toBeObject();
-      expect(directive.controller.timeCompleted.date).toBeDate();
-      expect(directive.controller.timeCompleted.time).toBeDate();
+      expect(directive.controller.timeCompleted).toBeDate();
 
       expect(directive.controller.submit).toBeFunction();
       expect(directive.controller.cancel).toBeFunction();

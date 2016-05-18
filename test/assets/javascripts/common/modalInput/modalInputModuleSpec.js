@@ -297,7 +297,7 @@ define([
         expect(modalInfo.element).toHaveInputs(1);
         expect(modalInfo.element).toHaveValuesInControllerScope({ options: undefined });
 
-        expect(modalInfo.element.scope().vm.value).toBeString();
+        expect(modalInfo.element.scope().vm.value).toBeDate();
         expect(new Date(modalInfo.element.scope().vm.value)).toEqual(this.date);
 
         this.dismiss(modalInfo.modal, 'closed in test');

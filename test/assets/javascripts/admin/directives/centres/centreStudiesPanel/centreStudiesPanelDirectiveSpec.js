@@ -21,16 +21,19 @@ define([
 
       _.extend(self, directiveTestSuite);
 
-      self.$q           = self.$injector.get('$q');
-      self.Centre       = self.$injector.get('Centre');
-      self.Study        = self.$injector.get('Study');
-      self.EntityViewer = this.$injector.get('EntityViewer');
-      self.modalService = this.$injector.get('modalService');
-      self.jsonEntities = self.$injector.get('jsonEntities');
+      self.$q               = self.$injector.get('$q');
+      self.Centre           = self.$injector.get('Centre');
+      self.Study            = self.$injector.get('Study');
+      self.EntityViewer     = this.$injector.get('EntityViewer');
+      self.modalService     = this.$injector.get('modalService');
+      self.studyStatusLabel = self.$injector.get('studyStatusLabel');
+      self.jsonEntities     = self.$injector.get('jsonEntities');
 
       self.createEntities = createEntities;
       self.createController = createController;
-      this.studyOnSelectCommon = studyOnSelectCommon;
+      self.studyOnSelectCommon = studyOnSelectCommon;
+      self.studyNameDto = studyNameDto;
+      self.studyNames = studyNames;
 
       testUtils.addCustomMatchers();
 
@@ -66,7 +69,7 @@ define([
         self.scope.vm = {
           centre:        entities.centre,
           centreStudies: _.map(entities.studies.slice(0, 2), function (study) { return study.id; }),
-          studyNames:    studyNames(entities.studies)
+          studyNames:    self.studyNames(entities.studies)
         };
 
         $compile(element)(self.scope);
@@ -76,6 +79,21 @@ define([
 
       function studyOnSelectCommon(entities) {
         spyOn(entities.centre, 'addStudy').and.returnValue(self.$q.when(entities.centre));
+      }
+
+      function studyNameDto(study) {
+        return {
+          id:          study.id,
+          name:        study.name,
+          status:      study.status,
+          statusLabel: self.studyStatusLabel.statusToLabel(study.status)
+        };
+      }
+
+      function studyNames(studies) {
+        return _.map(studies, function (study) {
+          return self.studyNameDto(study);
+        });
       }
     }));
 
@@ -87,8 +105,8 @@ define([
 
       expect(self.controller.centre).toBe(entities.centre);
       expect(self.controller.studyNames.length).toBe(entities.studies.length);
-      expect(self.controller.studyNames).toContainAll(studyNames(entities.studies));
-      expect(self.controller.tableStudies).toBeDefined();
+      expect(self.controller.studyNames).toContainAll(self.studyNames(entities.studies));
+      expect(self.controller.studyCollection).toBeDefined();
 
       _.each(entities.studies, function (study) {
         expect(self.controller.studyNamesById[study.id].id).toBe(study.id);
@@ -107,10 +125,10 @@ define([
 
       expect(self.controller.centre).toBe(entities.centre);
       expect(self.controller.studyNames.length).toBe(entities.studies.length);
-      expect(self.controller.studyNames).toContainAll(studyNames(entities.studies));
+      expect(self.controller.studyNames).toContainAll(self.studyNames(entities.studies));
 
       _.each(entities.studies, function (study) {
-        expect(self.controller.tableStudies).toContain(studyNameDto(linkedStudy));
+        expect(self.controller.studyCollection).toContain(self.studyNameDto(linkedStudy));
 
         expect(self.controller.studyNamesById[study.id].id).toBe(study.id);
         expect(self.controller.studyNamesById[study.id].name).toBe(study.name);
@@ -127,11 +145,11 @@ define([
 
       this.createController(entities);
       this.studyOnSelectCommon(entities);
-      numStudiesBeforeAdd = this.controller.tableStudies.length;
+      numStudiesBeforeAdd = this.controller.studyCollection.length;
       this.controller.onSelect(studyToAdd);
       this.scope.$digest();
-      expect(this.controller.tableStudies).toContain(studyNameDto(studyToAdd));
-      expect(this.controller.tableStudies.length).toBe(numStudiesBeforeAdd + 1);
+      expect(this.controller.studyCollection).toContain(this.studyNameDto(studyToAdd));
+      expect(this.controller.studyCollection.length).toBe(numStudiesBeforeAdd + 1);
     });
 
     it('does not add an exiting study when selected', function() {
@@ -143,11 +161,11 @@ define([
 
       this.createController(entities);
       this.studyOnSelectCommon(entities);
-      numStudiesBeforeAdd = this.controller.tableStudies.length;
+      numStudiesBeforeAdd = this.controller.studyCollection.length;
       this.controller.onSelect(studyToAdd);
       this.scope.$digest();
-      expect(this.controller.tableStudies).toContain(studyNameDto(studyToAdd));
-      expect(this.controller.tableStudies.length).toBe(numStudiesBeforeAdd);
+      expect(this.controller.studyCollection).toContain(this.studyNameDto(studyToAdd));
+      expect(this.controller.studyCollection.length).toBe(numStudiesBeforeAdd + 1);
     });
 
     it('study viewer is displayed', function() {
@@ -173,7 +191,7 @@ define([
       this.createController(entities);
       this.controller.remove(studyToRemove.id);
       this.scope.$digest();
-      expect(this.controller.tableStudies).not.toContain(studyNameDto(studyToRemove));
+      expect(this.controller.studyCollection).not.toContain(this.studyNameDto(studyToRemove));
     });
 
     it('displays remove failed information modal if remove fails', function() {
@@ -190,16 +208,6 @@ define([
       this.scope.$digest();
       expect(this.modalService.showModal.calls.count()).toBe(2);
     });
-
-    function studyNameDto(study) {
-      return { id: study.id, name: study.name, status: study.status };
-    }
-
-    function studyNames(studies) {
-      return _.map(studies, function (study) {
-        return studyNameDto(study);
-      });
-    }
 
   });
 

@@ -1,6 +1,6 @@
 <uib-accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
   <uib-accordion-heading>
-    This centre is linked to these studies
+    This centre participates in these studies
     <div class="btn-group pull-right">
       <button class="btn btn-xs btn-default"
               ng-click="vm.panelToggle()"
@@ -10,14 +10,15 @@
       </button>
     </div>
   </uib-accordion-heading>
-  <div class="panel panel-warning" ng-if="vm.centre.studyIds.length <= 0">
+  <div class="panel panel-warning" ng-if="vm.studyCollection.length <= 0">
     <div class="panel-heading">
-      No studies have been added yet.
+      This centre is not participating in any studies.
     </div>
   </div>
-  <table ng-show="vm.centre.studyIds.length > 0"
+  <table st-table="vm.tableStudies"
+         st-safe-src="vm.studyCollection"
          class="table table-hover table-condensed"
-         st-table="vm.tableStudies">
+         ng-if="vm.studyCollection.length > 0">
     <thead>
       <th st-sort="name">Name</th>
       <th st-sort="status">Status</th>
@@ -31,9 +32,7 @@
             <a href>{{study.name}}</a>
           </span>
         </td>
-        <td>
-          {{study.statusLabel}}
-        </td>
+        <td>{{study.statusLabel}}</td>
         <td>
           <!-- FIXME studies should only be removed if no centre is not storing specimens  -->
           <div class="btn-group pull-right">

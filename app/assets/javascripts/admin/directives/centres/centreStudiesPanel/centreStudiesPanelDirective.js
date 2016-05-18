@@ -13,9 +13,8 @@ define(['angular', 'underscore'], function(angular, _) {
       restrict: 'EA',
       scope: {},
       bindToController: {
-        centre:        '=',
-        centreStudies: '=',
-        studyNames:    '='
+        centre:     '=',
+        studyNames: '='
       },
       templateUrl: '/assets/javascripts/admin/directives/centres/centreStudiesPanel/centreStudiesPanel.html',
       controller: CentreStudiesPanelCtrl,
@@ -30,7 +29,8 @@ define(['angular', 'underscore'], function(angular, _) {
     'Panel',
     'Study',
     'StudyViewer',
-    'modalService'
+    'modalService',
+    'studyStatusLabel'
   ];
 
   /**
@@ -40,7 +40,8 @@ define(['angular', 'underscore'], function(angular, _) {
                                   Panel,
                                   Study,
                                   StudyViewer,
-                                  modalService) {
+                                  modalService,
+                                 studyStatusLabel) {
 
     var vm = this;
 
@@ -48,6 +49,7 @@ define(['angular', 'underscore'], function(angular, _) {
 
     vm.studyNamesById = [];
     vm.tableStudies   = [];
+    vm.studyCollection = [];
 
     vm.remove         = remove;
     vm.information    = information;
@@ -55,8 +57,6 @@ define(['angular', 'underscore'], function(angular, _) {
 
     vm.selected = undefined;
     vm.onSelect = onSelect;
-
-    vm.centre.studyIds = _.union(vm.centre.studyIds, vm.centreStudies);
 
     init();
 
@@ -69,15 +69,20 @@ define(['angular', 'underscore'], function(angular, _) {
       vm.studyNamesById = _.indexBy(vm.studyNames, 'id');
 
       _.each(vm.centre.studyIds, function (studyId) {
-        vm.tableStudies.push(vm.studyNamesById[studyId]);
+        var study = vm.studyNamesById[studyId];
+        study.statusLabel = studyStatusLabel.statusToLabel(study.status);
+        vm.studyCollection.push(study);
       });
     }
 
     function onSelect(item) {
       // add the study only if it's not there
       if(_.indexOf(vm.centre.studyIds, item.id) < 0) {
-        vm.centre.addStudy(item).then(function () {
-          vm.tableStudies.push(vm.studyNamesById[item.id]);
+        vm.centre.addStudy(item).then(function (centre) {
+          var study = vm.studyNamesById[item.id];
+          study.statusLabel = studyStatusLabel.statusToLabel(study.status);
+          vm.centre = centre;
+          vm.studyCollection.push(study);
         });
       }
       vm.selected = undefined;
@@ -101,7 +106,7 @@ define(['angular', 'underscore'], function(angular, _) {
       modalService.showModal({}, modalOptions).then(function () {
         return vm.centre.removeStudy({id: studyId})
           .then(function () {
-            vm.tableStudies = _.without(vm.tableStudies, vm.studyNamesById[studyId]);
+            vm.studyCollection = _.without(vm.studyCollection, vm.studyNamesById[studyId]);
           })
           .catch(removeFailed);
       });

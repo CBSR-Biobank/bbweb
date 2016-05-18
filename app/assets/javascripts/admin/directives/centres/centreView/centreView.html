@@ -1,0 +1,20 @@
+<div class="page-header">
+  <h1>{{vm.centre.name}} <small>Centre administration </small></h1>
+</div>
+<!--
+    The 'ui-sref' attribute has to go on the 'tab' tag to have the state change when any part
+    of the tab is clicked on, not just the link.
+  -->
+<div class="row">
+  <div class="col-md-12">
+    <uib-tabset active="vm.active">
+      <uib-tab ng-repeat="tab in vm.tabs"
+               heading="{{tab.heading}}"
+               ui-sref="{{tab.sref}}"
+               active="tab.active"></uib-tab>
+    </uib-tabset>
+  </div>
+</div>
+<div class="row">
+  <div ui-view="centreDetails" style="margin-top: 10px;"></div>
+</div>

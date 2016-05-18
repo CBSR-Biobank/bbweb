@@ -71,8 +71,14 @@ define(function () {
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/centres/centreView.html',
-          controller: 'CentreCtrl as vm'
+          template: '<centre-view centre="vm.centre"></centre-view>',
+          controller: [
+            'centre',
+            function (centre) {
+              this.centre = centre;
+            }
+          ],
+          controllerAs: 'vm'
         }
       },
       data: {
@@ -197,11 +203,8 @@ define(function () {
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser,
         centre: resolveCentre,
-        centreStudies: ['centre', function(centre) {
-          return centre.getStudyIds();
-        }],
-        studyNames: ['studiesService', function(studiesService) {
-          return studiesService.getStudyNames();
+        studyNames: ['Study', function(Study) {
+          return Study.names();
         }]
       },
       views: {
@@ -216,12 +219,11 @@ define(function () {
             '</uib-accordion>'
           ].join(''),
           controller: [
-            'centre', 'centreStudies', 'studyNames',
-            function(centre, centreStudies, studyNames) {
+            'centre', 'studyNames',
+            function(centre, studyNames) {
               var vm = this;
-              vm.centre        = centre;
-              vm.centreStudies = centreStudies;
-              vm.studyNames    = studyNames;
+              vm.centre     = centre;
+              vm.studyNames = studyNames;
             }
           ],
           controllerAs: 'vm'

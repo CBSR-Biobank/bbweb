@@ -61,7 +61,6 @@ define(['underscore'], function (_) {
           vm.active = index;
         }
       });
-
     }
   }
 

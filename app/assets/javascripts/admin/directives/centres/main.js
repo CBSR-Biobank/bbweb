@@ -13,10 +13,9 @@ define(function (require) {
 
   module = angular.module(name, ['biobank.users']);
 
-  module.directive('centreStudiesPanel',
-                   require('./centreStudiesPanel/centreStudiesPanelDirective'));
-  module.directive('locationsPanel',
-                   require('./locationsPanel/locationsPanelDirective'));
+  module.directive('centreView',         require('./centreView/centreViewDirective'));
+  module.directive('centreStudiesPanel', require('./centreStudiesPanel/centreStudiesPanelDirective'));
+  module.directive('locationsPanel',     require('./locationsPanel/locationsPanelDirective'));
 
   return {
     name: name,
