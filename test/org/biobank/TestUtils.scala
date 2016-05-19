@@ -99,9 +99,10 @@ object TestUtils extends MustMatchers with OptionValues {
     def mustFail(expectedMessages: String*): Unit = {
       validation.fold(
         err => {
-          err.list.toList must have size expectedMessages.size
+          val errList = err.list.toList
+          errList must have size expectedMessages.size
           expectedMessages.foreach { em =>
-            err.list.toList must containItemMatchingRegex (em)
+            errList must containItemMatchingRegex (em)
           }
         },
         event => fail(s"validation must have failed: $validation")

@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular'], function(angular) {
+define(['underscore'], function(_) {
   'use strict';
 
   /**
@@ -13,8 +13,7 @@ define(['angular'], function(angular) {
       restrict: 'E',
       scope: {},
       bindToController: {
-        centre: '=',
-        onRemove: '&'
+        centre: '='
       },
       templateUrl: '/assets/javascripts/admin/directives/centres/locationsPanel/locationsPanel.html',
       controller: LocationsPanelCtrl,
@@ -28,7 +27,6 @@ define(['angular'], function(angular) {
     '$scope',
     '$state',
     'LocationViewer',
-    'Panel',
     'domainEntityService'
   ];
 
@@ -38,44 +36,36 @@ define(['angular'], function(angular) {
   function LocationsPanelCtrl($scope,
                               $state,
                               LocationViewer,
-                              Panel,
                               domainEntityService) {
     var vm = this;
 
-    var panel = new Panel('centre.panel.locations', 'home.admin.centres.centre.locationAdd');
+    vm.add    = add;
+    vm.view   = view;
+    vm.remove = remove;
 
-    vm.update               = update;
-    vm.remove               = remove;
-    vm.add                  = add;
-    vm.information          = information;
-    vm.panelOpen            = panel.getPanelOpenState();
-    vm.modificationsAllowed = true; // not dependant on centre's state
-
-    $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
-                  angular.bind(panel, panel.watchPanelOpenChangeFunc));
+    //---
 
     function add() {
-      return panel.add();
+      // reload resolves in case centre's version has changed
+      $state.go('home.admin.centres.centre.locations.locationAdd', {}, { reload: true });
     }
 
-    function information(location) {
-      return new LocationViewer(location);
-    }
-
-    function update(location) {
-      $state.go('home.admin.centres.centre.locationUpdate', { locationId: location.id });
+    function view(location) {
+      $state.go('home.admin.centres.centre.locations.locationView', { uniqueId: location.uniqueId });
     }
 
     function remove(location) {
       domainEntityService.removeEntity(
-        callback,
+        doRemove,
         'Remove Location',
         'Are you sure you want to remove location ' + location.name + '?',
         'Remove Failed',
         'Location ' + location.name + ' cannot be removed: ');
 
-      function callback() {
-        return vm.onRemove()(location);
+      function doRemove() {
+        return vm.centre.removeLocation(location).then(function (centre) {
+          vm.centre = centre;
+        });
       }
     }
 

@@ -43,7 +43,7 @@ define([
       function createController(centre) {
         self.element = angular.element('<centre-view centre="vm.centre"></centre-view>');
         self.scope = $rootScope.$new();
-        self.scope.vm = { centre: self.centre };
+        self.scope.vm = { centre: centre };
 
         $compile(self.element)(self.scope);
         self.scope.$digest();

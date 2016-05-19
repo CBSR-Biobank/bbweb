@@ -12,12 +12,14 @@ define([
 ], function(angular, _, mocks) {
   'use strict';
 
-  describe('Controller: CentresCtrl', function() {
+  describe('Directive: centresListDirective', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $controller, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, directiveTestSuite, testUtils) {
       var self = this;
+
+      _.extend(self, directiveTestSuite);
 
       self.$q           = self.$injector.get('$q');
       self.CentreCounts = self.$injector.get('CentreCounts');
@@ -28,7 +30,15 @@ define([
       self.createController = createController;
       self.createCentreCounts = createCentreCounts;
 
+      spyOn(self.Centre, 'list').and.callFake(function () {
+        return self.$q.when(self.jsonEntities.pagedResult([]));
+      });
+
       testUtils.addCustomMatchers();
+
+      self.putHtmlTemplates(
+        '/assets/javascripts/admin/directives/centres/centresList/centresList.html',
+        '/assets/javascripts/common/directives/pagedItemsList/pagedItemsList.html');
 
       function createCentreCounts(disabled, enabled, retired) {
         return new self.CentreCounts({
@@ -40,16 +50,11 @@ define([
       }
 
       function createController(centreCounts) {
+        self.element = angular.element('<centres-list></centres-list>');
         self.scope = $rootScope.$new();
-
-        $controller('CentresCtrl as vm', {
-          $scope:       self.scope,
-          Centre:       self.Centre,
-          CentreStatus: self.CentreStatus,
-          CentreCounts: self.CentreCounts
-        });
-
-          self.scope.$digest();
+        $compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('centresList');
       }
     }));
 
@@ -66,16 +71,16 @@ define([
 
       self.createController(counts);
 
-      expect(self.scope.vm.centreCounts).toEqual(counts);
-      expect(self.scope.vm.pageSize).toBeDefined();
+      expect(self.controller.centreCounts).toEqual(counts);
+      expect(self.controller.pageSize).toBeDefined();
 
       _.each(allStatuses, function(status) {
-        expect(self.scope.vm.possibleStatuses).toContain({
+        expect(self.controller.possibleStatuses).toContain({
           id: status,
           label: centreStatusLabel.statusToLabel(status)
         });
       });
-      expect(self.scope.vm.possibleStatuses).toContain({ id: 'all', label: 'All'});
+      expect(self.controller.possibleStatuses).toContain({ id: 'all', label: 'All'});
     });
 
     it('updateCentres retrieves new list of centres', function() {
@@ -88,10 +93,8 @@ define([
         return self.$q.when(counts);
       });
 
-      spyOn(Centre, 'list').and.callFake(function () {});
-
       self.createController(counts);
-      self.scope.vm.updateCentres(listOptions);
+      self.controller.updateCentres(listOptions);
       self.scope.$digest();
 
       expect(Centre.list).toHaveBeenCalledWith(listOptions);

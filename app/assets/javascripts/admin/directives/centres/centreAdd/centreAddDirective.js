@@ -1,33 +1,48 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 define(['underscore'], function(_) {
   'use strict';
 
-  CentreEditCtrl.$inject = [
-    '$state',
-    'domainEntityService',
-    'notificationsService',
-    'centre',
-  ];
-
   /**
    *
    */
-  function CentreEditCtrl($state,
+  function centreAddDirective() {
+    var directive = {
+      restrict: 'E',
+      scope: {},
+      bindToController: {
+        centre: '='
+      },
+      templateUrl : '/assets/javascripts/admin/directives/centres/centreAdd/centreAdd.html',
+      controller: CentreAddCtrl,
+      controllerAs: 'vm'
+    };
+
+    return directive;
+  }
+
+  CentreAddCtrl.$inject = [
+    '$state',
+    'domainEntityService',
+    'notificationsService'
+  ];
+
+  function CentreAddCtrl($state,
                           domainEntityService,
                           notificationsService,
                           centre) {
     var vm = this;
 
-    vm.title =  'Add study';
-    vm.centre = centre;
+    vm.title =  'Add centre';
     vm.submit = submit;
     vm.cancel = cancel;
-    vm.returnState = {options: { reload: true } };
-    vm.returnState.name = 'home.admin.centres';
-    vm.returnState.params = { };
+    vm.returnState = {
+      name: 'home.admin.centres',
+      params: { },
+      options: { reload: true }
+    };
 
     //---
 
@@ -55,5 +70,5 @@ define(['underscore'], function(_) {
     }
   }
 
-  return CentreEditCtrl;
+  return centreAddDirective;
 });

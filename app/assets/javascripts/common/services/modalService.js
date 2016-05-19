@@ -25,9 +25,10 @@ define(['angular', 'underscore'], function(angular, _) {
                        };
 
     var service = {
-      showModal: showModal,
-      show:      show,
-      modalOk:   modalOk
+      showModal:     showModal,
+      show:          show,
+      modalOk:       modalOk,
+      modalOkCancel: modalOkCancel
     };
 
     return service;
@@ -77,6 +78,15 @@ define(['angular', 'underscore'], function(angular, _) {
         bodyHtml: bodyHtml
       };
       return showModal(modalDefaults, modalOptions);
+    }
+
+    function modalOkCancel(headerHtml, bodyHtml) {
+      var modalOptions = {
+        closeButtonText: 'Cancel',
+        headerHtml: headerHtml,
+        bodyHtml: bodyHtml
+      };
+      return showModal({}, modalOptions);
     }
 
   }

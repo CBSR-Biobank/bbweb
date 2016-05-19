@@ -4,20 +4,29 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
+define([
+  'angular',
+  'angularMocks',
+  'underscore'
+], function(angular, mocks, _) {
   'use strict';
 
-  describe('Controller: CentreEditCtrl', function() {
+  describe('Directive: eAddDirective()', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $controller, $state) {
+    beforeEach(inject(function ($rootScope, $compile, $state, directiveTestSuite) {
       var self = this;
+
+      _.extend(self, directiveTestSuite);
 
       self.Centre               = self.$injector.get('Centre');
       self.jsonEntities         = self.$injector.get('jsonEntities');
       self.notificationsService = self.$injector.get('notificationsService');
       self.domainEntityService  = self.$injector.get('domainEntityService');
+
+      self.putHtmlTemplates(
+        '/assets/javascripts/admin/directives/centres/centreAdd/centreAdd.html');
 
       self.centre = new self.Centre();
       self.returnState = {
@@ -30,23 +39,20 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
       //--
 
       function createController(centre) {
+        self.element = angular.element('<centre-add centre="vm.centre"></centre-add>');
         self.scope = $rootScope.$new();
-        $controller('CentreEditCtrl as vm', {
-          $scope:               self.scope,
-          $state:               $state,
-          notificationsService: self.notificationsService,
-          domainEntityService:  self.domainEntityService,
-          centre:               self.centre
-        });
+        self.scope.vm = { centre: centre };
+        $compile(self.element)(self.scope);
         self.scope.$digest();
+        self.controller = self.element.controller('centreAdd');
       }
     }));
 
     it('scope should be valid', function() {
       this.createController(this.centre);
       expect(this.scope.vm.centre).toEqual(this.centre);
-      expect(this.scope.vm.returnState.name).toBe(this.returnState.name);
-      expect(this.scope.vm.returnState.params).toEqual(this.returnState.params);
+      expect(this.controller.returnState.name).toBe(this.returnState.name);
+      expect(this.controller.returnState.params).toEqual(this.returnState.params);
     });
 
     it('should return to valid state on cancel', function() {
@@ -54,7 +60,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
 
       this.createController(this.centre);
       spyOn($state, 'go').and.callFake(function () {} );
-      this.scope.vm.cancel();
+      this.controller.cancel();
       expect($state.go).toHaveBeenCalledWith(this.returnState.name,
                                              this.returnState.params,
                                              { reload: false });
@@ -72,7 +78,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
         return deferred.promise;
       });
 
-      this.scope.vm.submit(this.centre);
+      this.controller.submit(this.centre);
       this.scope.$digest();
       expect(domainEntityService.updateErrorModal).toHaveBeenCalledWith('err', 'centre');
     });
@@ -89,7 +95,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
         return $q.when('test');
       });
 
-      this.scope.vm.submit(this.centre);
+      this.controller.submit(this.centre);
       this.scope.$digest();
       expect($state.go).toHaveBeenCalledWith(this.returnState.name,
                                              this.returnState.params,

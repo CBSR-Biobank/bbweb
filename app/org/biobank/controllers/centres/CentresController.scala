@@ -87,6 +87,12 @@ class CentresController @Inject() (val env:            Environment,
   def addLocation(id: String) =
     commandAction(Json.obj("id" -> id)) { cmd : AddCentreLocationCmd => processCommand(cmd) }
 
+  def updateLocation(id: String, locationId: String) =
+    commandAction(Json.obj("id"         -> id,
+                           "locationId" -> locationId)) { cmd : UpdateCentreLocationCmd =>
+      processCommand(cmd)
+    }
+
   def removeLocation(centreId: String, ver: Long, locationId: String) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
       processCommand(RemoveCentreLocationCmd(userId.id, centreId, ver, locationId))

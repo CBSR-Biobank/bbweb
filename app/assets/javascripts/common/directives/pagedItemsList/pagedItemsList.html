@@ -64,10 +64,7 @@
     <li class="list-group-item" ng-repeat="entity in vm.pagedResult.items">
       <div class="row">
         <div class="col-md-12">
-          <!-- FIXME replace this with a controller call -->
-          <i class="glyphicon glyphicon-cog" ng-if="entity.isDisabled()"></i>
-          <i class="glyphicon glyphicon-ok-circle" ng-if="entity.isEnabled()"></i>
-          <i class="glyphicon glyphicon-remove-sign" ng-if="entity.isRetired()"></i>
+          <i class="glyphicon glyphicon-cog" ng-class="entity.icon"></i>
           <strong><a ui-sref="{{vm.entityNavigateState}}( { {{vm.entityNavigateStateParamName}}: entity.id} )">
               {{entity.name}}</a>
           </strong>

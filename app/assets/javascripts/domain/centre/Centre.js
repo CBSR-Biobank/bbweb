@@ -130,7 +130,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
      *
      * @throws Throws an error if <code>obj</code> does not have the required properties.
      *
-     * @returns {Specimen} A new centre.
+     * @returns {domain.centres.Centre} A new centre.
      *
      * @see [asyncCreate()]{@link domain.centres.Centre.asyncCreate} when you need to create
      * a centre within asynchronous code.
@@ -155,16 +155,16 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
     };
 
     /**
-     * Creates a Specimen from a server reply but first validates that it has a valid schema.
+     * Creates a Centre from a server reply but first validates that it has a valid schema.
      *
      * <p>Meant to be called from within promise code.</p>
      *
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
      *
-     * @returns {Promise} A new specimen wrapped in a promise.
+     * @returns {Promise} A new centre wrapped in a promise.
      *
-     * @see [create()]{@link domain.participants.Specimen.create} when not creating a Specimen within
+     * @see [create()]{@link domain.centres.Centre.create} when not creating a Centre within
      * asynchronous code.
      */
     Centre.asyncCreate = function (obj) {
@@ -192,11 +192,30 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
      */
 
     /**
-     * Returns the names of all the centres.
+     * Returns the names for all centres.
      *
-     * @returns {Array.<domain.centres.CentreDto>} The name of all the centres.
+     * @returns {Promise} A promise that wraps Array.<domain.centres.CentreDto>.
      */
     Centre.allNames = function () {
+      return biobankApi.get('/centres/names');
+    };
+
+    /**
+     * @typedef domain.centres.CentreLocationDto
+     * @type object
+     * @property {string} centreId - the ID that identifies the centre.
+     * @property {string} locationId - the ID that identifies the location.
+     * @property {string} centreName - the centre's name.
+     * @property {string} locationName - the location's name.
+     */
+
+    /**
+     * Returns all locations for all centres.
+     *
+     * @returns {Promise<Array<domain.centres.CentreLocationDto>>} A promise.
+     */
+    Centre.allLocations = function () {
+      return biobankApi.get('/centres/locations');
     };
 
     /**
@@ -270,6 +289,17 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
     };
 
     /**
+     * Creates a Centre from a server reply but first validates that it has a valid schema.
+     *
+     * <p>A wrapper for {@link domian.centres.Centre#asyncCreate}.</p>
+     *
+     * @see domain.ConcurrencySafeEntity.update
+     */
+    Centre.prototype.asyncCreate = function (obj) {
+      return Centre.asyncCreate(obj);
+    };
+
+    /**
      * Adds a centre to the system.
      *
      * @returns {Promise} The added centre wrapped in a promise.
@@ -289,7 +319,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
      * @returns {Promise} A copy of this centre, but with the new name.
      */
     Centre.prototype.updateName = function (name) {
-      return update.call(this, 'name', { name: name });
+      return this.update.call(this, uri('name', this.id), { name: name });
     };
 
     /**
@@ -301,10 +331,11 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
      * @returns {Promise} A copy of this centre, but with the new description.
      */
     Centre.prototype.updateDescription = function (description) {
+      var url = uri('description', this.id);
       if (description) {
-        return update.call(this, 'description', { description: description });
+        return this.update.call(this, url, { description: description });
       }
-      return update.call(this, 'description');
+      return this.update.call(this, url);
     };
 
     /**
@@ -316,7 +347,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
      * @returns {Promise} A copy of this centre, but with the study added to it.
      */
     Centre.prototype.addStudy = function (study) {
-      return update.call(this, 'studies', { studyId: study.id });
+      return this.update.call(this, uri('studies', this.id), { studyId: study.id });
     };
 
     /**
@@ -348,18 +379,31 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
     /**
      * Adds a location to this centre.
      *
-     * @param {domain.Location} location - The location to remove from this centre.
+     * @param {domain.Location} location - The location to add.
      *
      * @returns {Promise} A copy of this centre, but with the location added to it.
      */
     Centre.prototype.addLocation = function (location) {
-      return update.call(this, 'locations', _.omit(location, 'uniqueId'));
+      return this.update.call(this, uri('locations', this.id), _.omit(location, 'uniqueId'));
+    };
+
+    /**
+     * Updates an existing location on this centre.
+     *
+     * @param {domain.Location} location - The location to update.
+     *
+     * @returns {Promise} A copy of this centre, but with the updated location.
+     */
+    Centre.prototype.updateLocation = function (location) {
+      return this.update.call(this,
+                              uri('locations', this.id) + '/' + location.uniqueId,
+                              location);
     };
 
     /**
      * Removes a location from this centre.
      *
-     * @param {domain.Location} location - The location to add to this centre.
+     * @param {domain.Location} location - The location to remove.
      *
      * @returns {Promise} A copy of this centre, but with the removed from it.
      */
@@ -382,6 +426,10 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
             })
           }));
       });
+    };
+
+    Centre.prototype.hasLocations = function () {
+      return this.locations.length > 0;
     };
 
     /**
@@ -429,20 +477,6 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
     function changeState(centre, status) {
       var json = { expectedVersion: centre.version };
       return biobankApi.post(uri(status, centre.id), json).then(function (reply) {
-        return Centre.asyncCreate(reply);
-      });
-    }
-
-    function update(path, additionalJson) {
-      /* jshint validthis:true */
-      var self = this,
-          json = { expectedVersion: self.version };
-
-      if (additionalJson) {
-        // in the case of description, the value could be undefined
-        _.extend(json, additionalJson);
-      }
-      return biobankApi.post(uri(path, self.id), json).then(function(reply) {
         return Centre.asyncCreate(reply);
       });
     }

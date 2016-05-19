@@ -1,20 +1,17 @@
-<uib-accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
-  <uib-accordion-heading>
-    This centre participates in these studies
-    <div class="btn-group pull-right">
-      <button class="btn btn-xs btn-default"
-              ng-click="vm.panelToggle()"
-              title="expand / collapse">
-        <i class="glyphicon"
-           ng-class="vm.panelOpen ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
-      </button>
-    </div>
-  </uib-accordion-heading>
-  <div class="panel panel-warning" ng-if="vm.studyCollection.length <= 0">
-    <div class="panel-heading">
-      This centre is not participating in any studies.
-    </div>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">This centre participates in these studies</h3>
   </div>
+  <ul class="list-group" ng-if="vm.studyCollection.length <= 0">
+    <li class="list-group-item">
+      <div class="panel panel-warning">
+        <div class="panel-heading">
+          This centre is not participating in any studies.
+        </div>
+      </div>
+    </li>
+  </ul>
+
   <table st-table="vm.tableStudies"
          st-safe-src="vm.studyCollection"
          class="table table-hover table-condensed"
@@ -48,13 +45,17 @@
     </tbody>
   </table>
 
-  <div class="input-group" style="margin-top: 10px;">
-    <span class="input-group-addon">Add Study <i class="glyphicon glyphicon-plus"></i></span>
-    <input type="text"
-           ng-model="vm.selected"
-           uib-typeahead="study.name for study in vm.studyNames | filter:$viewValue | limitTo:8"
-           typeahead-on-select="vm.onSelect($item)"
-           placeholder="enter a study's name or partial name"
-           class="form-control">
-  </div>
-</uib-accordion-group>
+  <ul class="list-group" ng-if="vm.centre.isDisabled()">
+    <li class="list-group-item">
+      <div class="input-group" style="margin-top: 10px;">
+        <span class="input-group-addon">Add Study <i class="glyphicon glyphicon-plus"></i></span>
+        <input type="text"
+               ng-model="vm.selected"
+               uib-typeahead="study.name for study in vm.studyNames | filter:$viewValue | limitTo:8"
+               typeahead-on-select="vm.onSelect($item)"
+               placeholder="enter a study's name or partial name"
+               class="form-control">
+      </div>
+    </li>
+  </ul>
+</div>

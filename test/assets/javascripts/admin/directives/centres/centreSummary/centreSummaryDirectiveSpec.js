@@ -4,15 +4,21 @@
  */
 // Jasmine test suite
 //
-define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
+define([
+  'angular',
+  'angularMocks',
+  'underscore'
+], function(angular, mocks, _) {
   'use strict';
 
-  describe('Controller: CentreSummaryTabCtrl', function() {
+  describe('Directive: centreSummaryDirective', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $controller, $filter, modalService) {
+    beforeEach(inject(function($rootScope, $compile, modalService, directiveTestSuite) {
       var self = this;
+
+      _.extend(self, directiveTestSuite);
 
       self.$q           = self.$injector.get('$q');
       self.Centre       = self.$injector.get('Centre');
@@ -25,25 +31,29 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
         return self.$q.when('modalResult');
       });
 
+      self.putHtmlTemplates(
+        '/assets/javascripts/admin/directives/centres/centreSummary/centreSummary.html',
+        '/assets/javascripts/common/directives/truncateToggle.html',
+        '/assets/javascripts/admin/directives/statusLine/statusLine.html');
+
       self.createController = createController;
 
       //--
 
       function createController(centre) {
+        self.element = angular.element('<centre-summary centre="vm.centre"></centre-summary>');
         self.scope = $rootScope.$new();
-        $controller('CentreSummaryTabCtrl as vm', {
-          $scope:  self.scope,
-          $filter: $filter,
-          centre:  centre
-        });
+        self.scope.vm = { centre: self.centre };
+        $compile(self.element)(self.scope);
         self.scope.$digest();
+        self.controller = self.element.controller('centreSummary');
       }
     }));
 
     it('should contain valid settings to display the centre summary', function() {
       this.createController(this.centre);
       expect(this.scope.vm.centre).toBe(this.centre);
-      expect(this.scope.vm.descriptionToggleLength).toBeDefined();
+      expect(this.controller.descriptionToggleLength).toBeDefined();
     });
 
     describe('change centre status', function() {
@@ -60,7 +70,7 @@ define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
           return self.$q.when(centre);
         });
 
-        self.scope.vm.changeStatus(status);
+        self.controller.changeStatus(status);
         self.scope.$digest();
         expect(self.Centre.prototype[status]).toHaveBeenCalled();
         expect(self.scope.vm.centre.status).toBe(newStatus);

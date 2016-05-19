@@ -10,7 +10,7 @@ define(function (require) {
   var angular                = require('angular'),
       mocks                  = require('angularMocks'),
       _                      = require('underscore'),
-      entityUpdateSharedSpec = require('../entityUpdateSharedSpec');
+      entityUpdateSharedSpec = require('../../../../test/entityUpdateSharedSpec');
 
   describe('Controller: StudySummaryTabCtrl', function() {
 

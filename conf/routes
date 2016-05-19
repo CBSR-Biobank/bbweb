@@ -83,6 +83,7 @@ DELETE  /participants/annot/:id/:annotTypeId/:ver org.biobank.controllers.partic
 
 # centre location
 POST    /centres/locations/:centreId                   org.biobank.controllers.centres.CentresController.addLocation(centreId)
+POST    /centres/locations/:centreId/:locationId       org.biobank.controllers.centres.CentresController.updateLocation(centreId, locationId)
 DELETE  /centres/locations/:centreId/:ver/:locationId  org.biobank.controllers.centres.CentresController.removeLocation(centreId, ver: Long, locationId)
 
 # centre to study link

@@ -24,10 +24,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
   def uri(centre: Centre, path: String): String = uri(path) + s"/${centre.id.id}"
 
-
-  def jsonAddCentreLocationCmd(centre: Centre, location: Location): JsObject = {
+  def centreLocationToJson(centre: Centre, location: Location): JsObject = {
     Json.obj(
-      "id"              -> centre.id,
       "expectedVersion" -> centre.version,
       "name"            -> location.name,
       "street"          -> location.street,
@@ -36,6 +34,10 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       "postalCode"      -> location.postalCode,
       "poBoxNumber"     -> location.poBoxNumber,
       "countryIsoCode"  -> location.countryIsoCode)
+  }
+
+  def centreLocationToUpdateJson(centre: Centre, location: Location): JsObject = {
+    centreLocationToJson(centre, location) ++ Json.obj("locationId" -> location.uniqueId)
   }
 
   def compareObjs(jsonList: List[JsObject], centres: List[Centre]) = {
@@ -80,16 +82,31 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
     updateWithInvalidVersion(url, Json.obj())
   }
 
-  def updateEnabledCentre(centre: EnabledCentre, path: String, jsonField: JsObject): Unit = {
+  def updateEnabledCentre(centre:    EnabledCentre,
+                          path:      String,
+                          jsonField: JsObject,
+                          urlExtra:  String = ""): Unit = {
+    val url = uri(centre, path) + urlExtra
     centreRepository.put(centre)
 
     var cmdJson = Json.obj("expectedVersion" -> Some(centre.version)) ++ jsonField
 
-    val json = makeRequest(POST, uri(centre, path), BAD_REQUEST, cmdJson)
+    val json = makeRequest(POST, url, BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include ("centre is not disabled")
+  }
+
+  def validateJsonLocation(jsonObj: JsObject, location: Location): Unit = {
+    (jsonObj \ "uniqueId").as[String]       must not be empty
+    (jsonObj \ "name").as[String]           mustBe (location.name)
+    (jsonObj \ "street").as[String]         mustBe (location.street)
+    (jsonObj \ "city").as[String]           mustBe (location.city)
+    (jsonObj \ "province").as[String]       mustBe (location.province)
+    (jsonObj \ "postalCode").as[String]     mustBe (location.postalCode)
+    (jsonObj \ "poBoxNumber").asOpt[String] mustBe (location.poBoxNumber)
+    (jsonObj \ "countryIsoCode").as[String] mustBe (location.countryIsoCode)
   }
 
   "Centre REST API" when {
@@ -494,8 +511,9 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     "POST /centres/enable/:id" must {
 
-      "enable a centre" in {
-        val centre = factory.createDisabledCentre
+      "enable a centre with at least one location" in {
+        val location = factory.createLocation
+        val centre = factory.createDisabledCentre.copy(locations = Set(location))
         centreRepository.put(centre)
 
         val cmdJson = Json.obj("expectedVersion" -> Some(centre.version))
@@ -520,6 +538,18 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
           repoCentre.locations must have size centre.locations.size
           checkTimeStamps(repoCentre, centre.timeAdded, DateTime.now)
         }
+      }
+
+      "not enable a centre without locations" in {
+        val centre = factory.createDisabledCentre
+        centreRepository.put(centre)
+
+        val cmdJson = Json.obj("expectedVersion" -> Some(centre.version))
+        val json = makeRequest(POST, uri(centre, "enable"), BAD_REQUEST, cmdJson)
+
+        (json \ "status").as[String] must include ("error")
+
+        (json \ "message").as[String] must include regex ("EntityCriteriaError.*not have locations")
       }
 
       "not enable an invalid centre" in {
@@ -579,7 +609,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "POST /centres/location/:id" must {
+    "POST /centres/locations/:id" must {
 
       def compareLocationsIgnoringId(loc1: Location, loc2: Location) = {
         loc1 must have (
@@ -593,17 +623,6 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         )
       }
 
-      def validateJsonLocation(jsonObj: JsObject, location: Location): Unit = {
-        (jsonObj \ "uniqueId").as[String]       must not be empty
-        (jsonObj \ "name").as[String]           mustBe (location.name)
-        (jsonObj \ "street").as[String]         mustBe (location.street)
-        (jsonObj \ "city").as[String]           mustBe (location.city)
-        (jsonObj \ "province").as[String]       mustBe (location.province)
-        (jsonObj \ "postalCode").as[String]     mustBe (location.postalCode)
-        (jsonObj \ "countryIsoCode").as[String] mustBe (location.countryIsoCode)
-        (jsonObj \ "poBoxNumber").asOpt[String] mustBe (location.poBoxNumber)
-      }
-
       "add a location to a disabled centre" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
@@ -611,7 +630,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val location = factory.createLocation
         val json = makeRequest(POST,
                                uri(centre, "locations"),
-                               jsonAddCentreLocationCmd(centre, location))
+                               centreLocationToJson(centre, location))
 
         (json \ "status").as[String] must include ("success")
 
@@ -635,8 +654,21 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
             )
 
           repoCentre.studyIds must have size centre.studyIds.size
-          repoCentre.locations must have size (centre.locations.size + 1)
+          repoCentre.locations must have size (1)
           checkTimeStamps(repoCentre, centre.timeAdded, DateTime.now)
+
+          val repoLocation = repoCentre.locations.head
+
+          repoLocation.uniqueId.length must be > 0
+          repoLocation must have (
+            'name           (location.name),
+            'street         (location.street),
+            'city           (location.city),
+            'province       (location.province),
+            'postalCode     (location.postalCode),
+            'poBoxNumber    (location.poBoxNumber),
+            'countryIsoCode (location.countryIsoCode)
+          )
         }
       }
 
@@ -646,7 +678,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val jsonResponse = makeRequest(POST,
                                        uri(centre, "locations"),
                                        NOT_FOUND,
-                                       jsonAddCentreLocationCmd(centre, location))
+                                       centreLocationToJson(centre, location))
 
         (jsonResponse \ "status").as[String] must include ("error")
 
@@ -656,9 +688,84 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       "fail when adding a location on an enabled centre" in {
         val centre = factory.createEnabledCentre
         val location = factory.createLocation
-        updateEnabledCentre(centre, "locations", jsonAddCentreLocationCmd(centre, location))
+        updateEnabledCentre(centre, "locations", centreLocationToJson(centre, location))
       }
     }
+
+    "POST /centres/locations/:id/:locationId" must {
+
+      "update a location on a disabled centre" in {
+        val location = factory.createLocation
+        val centre = factory.createDisabledCentre.copy(locations = Set(location))
+        centreRepository.put(centre)
+
+        val locationWithNewName = location.copy(name = nameGenerator.next[String])
+
+        val json = makeRequest(POST,
+                               uri(centre, "locations") + s"/${location.uniqueId}",
+                               centreLocationToUpdateJson(centre, locationWithNewName))
+
+        (json \ "status").as[String] must include ("success")
+
+        val jsonLocations = (json \ "data" \ "locations").as[List[JsObject]]
+        jsonLocations must have length 1
+        validateJsonLocation(jsonLocations(0), locationWithNewName)
+
+        val replyCentreId = CentreId((json \ "data" \ "id").as[String])
+
+        val jsonId = (json \ "data" \ "id").as[String]
+        jsonId must be (centre.id.id)
+
+        centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
+          compareObj((json \ "data").as[JsObject], repoCentre)
+
+          repoCentre must have (
+            'id          (centre.id),
+            'version     (centre.version + 1),
+            'name        (centre.name),
+            'description (centre.description)
+            )
+
+          repoCentre.studyIds must have size centre.studyIds.size
+          repoCentre.locations must have size (centre.locations.size)
+          checkTimeStamps(repoCentre, centre.timeAdded, DateTime.now)
+
+          repoCentre.locations.head must have (
+            'uniqueId       (locationWithNewName.uniqueId),
+            'name           (locationWithNewName.name),
+            'street         (locationWithNewName.street),
+            'city           (locationWithNewName.city),
+            'province       (locationWithNewName.province),
+            'postalCode     (locationWithNewName.postalCode),
+            'poBoxNumber    (locationWithNewName.poBoxNumber),
+            'countryIsoCode (locationWithNewName.countryIsoCode)
+          )
+        }
+      }
+
+      "fail on attempt to update a location on an invalid centre" in {
+        val location = factory.createLocation
+        val centre = factory.createEnabledCentre.copy(locations = Set(location))
+        val jsonResponse = makeRequest(POST,
+                                       uri(centre, "locations") + s"/${location.uniqueId}",
+                                       NOT_FOUND,
+                                       centreLocationToUpdateJson(centre, location))
+
+        (jsonResponse \ "status").as[String] must include ("error")
+
+        (jsonResponse \ "message").as[String] must include regex ("IdNotFound.*centre")
+      }
+
+      "fail when updating a location on an enabled centre" in {
+        val location = factory.createLocation
+        val centre = factory.createEnabledCentre.copy(locations = Set(location))
+        updateEnabledCentre(centre,
+                            "locations",
+                            centreLocationToUpdateJson(centre, location),
+                            s"/${location.uniqueId}")
+      }
+    }
+
 
     "DELETE /centres/locations/:id/:ver/:uniqueId" must {
 

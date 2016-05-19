@@ -1,52 +1,63 @@
-<uib-accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
-  <uib-accordion-heading>
-    Locations
-    <panel-buttons on-add="vm.add()"
-                   add-button-title="add location"
-                   add-button-enabled="vm.modificationsAllowed"
-                   panel-open="vm.panelOpen">
-    </panel-buttons>
-  </uib-accordion-heading>
-  <p>
-    The addresses of all the locations for this centre.
-  </p>
-  <div class="panel panel-warning" ng-if="vm.centre.locations.length <= 0">
-    <div class="panel-heading">
-      No locations have been entered yet.
-    </div>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      Locations
+      <button class="btn btn-xs btn-primary pull-right"
+              title="Add location"
+              ng-if="vm.centre.isDisabled()"
+              ng-click="vm.add()">
+        <i class="glyphicon glyphicon-plus"></i>
+      </button>
+    </h3>
   </div>
-  <table ng-show="vm.centre.locations.length > 0"
-         class="table table-hover table-condensed"
-         st-table="vm.centre.locations">
-    <thead>
-      <th st-sort="name">Name</th>
-      <th st-sort="street">Street</th>
-      <th st-sort="city">City</th>
-      <th></th>
-    </thead>
 
-    <tbody>
-      <tr ng-repeat="location in vm.centre.locations">
-        <td>
-          <span ng-click="vm.information(location)">
-            <a href>{{location.name}}</a>
+  <ul class="list-group">
+
+    <li class="list-group-item" ng-if="!vm.centre.hasLocations()">
+      <div class="panel panel-warning">
+        <div class="panel-heading">
+          Locations have not been added.
+        </div>
+      </div>
+    </li>
+
+    <li class="list-group-item" ng-repeat="location in vm.centre.locations">
+      <div class="row">
+        <div class="col-md-10">
+          <strong>
+            <a ui-sref="home.admin.centres.centre.locations.locationView({ uniqueId: location.uniqueId })">
+              {{location.name}}
+            </a>
+          </strong>
+        </div>
+        <div class="col-md-2">
+          <span class="btn-group pull-right">
+            <button class="btn btn-xs btn-primary"
+                    title="Edit location"
+                    ng-if="vm.centre.isDisabled()"
+                    ng-click="vm.view(location)">
+              <i class="glyphicon glyphicon-edit"></i>
+            </button>
+            <button class="btn btn-xs btn-warning"
+                    title="Remove location"
+                    ng-if="vm.centre.isDisabled()"
+                    ng-click="vm.remove(location)">
+              <i class="glyphicon glyphicon-minus"></i>
+            </button>
           </span>
-        </td>
-        <td>
-          {{location.street | truncate:40}}
-        </td>
-        <td>
-          {{location.city}}
-        </td>
-        <td ng-if="vm.modificationsAllowed">
-          <update-remove-buttons
-             on-update="vm.update(location)"
-             on-remove="vm.remove(location)"
-             update-button-enabled="vm.modificationsAllowed"
-             remove-button-enabled="vm.modificationsAllowed">
-          </update-remove-buttons>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</uib-accordion-group>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-offset-1 col-md-11">
+          <small>
+            <strong>
+              {{location.street}}<br>
+              {{location.city}}, {{location.province}}, {{location.postalCode}}<br>
+              {{location.poBoxNumber}}, {{location.countryIsoCode}}
+            </strong>
+          </small>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>

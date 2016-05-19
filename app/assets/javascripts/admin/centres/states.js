@@ -4,7 +4,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(function () {
+define(['underscore'], function (_) {
   'use strict';
 
   centreStates.$inject = ['$urlRouterProvider', '$stateProvider', 'authorizationProvider'];
@@ -28,8 +28,7 @@ define(function () {
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/centres/centres.html',
-          controller: 'CentresCtrl as vm'
+          template: '<centres-list></centres-list>'
         }
       },
       data: {
@@ -87,38 +86,23 @@ define(function () {
     });
 
     /**
-     * Centre add
-     */
-    $stateProvider.state('home.admin.centres.centre.update', {
-      url: '/add',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        centre: resolveCentre
-      },
-      views: {
-        'main@': {
-          templateUrl: '/assets/javascripts/admin/centres/centreForm.html',
-          controller: 'CentreEditCtrl as vm'
-        }
-      },
-      data: {
-        displayName: 'Add centre'
-      }
-    });
-
-    /**
      * Centre view summary information
      */
     $stateProvider.state('home.admin.centres.centre.summary', {
       url: '/summary',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        centre: resolveCentre
+        user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'centreDetails': {
-          templateUrl: '/assets/javascripts/admin/centres/centreSummaryTab.html',
-          controller: 'CentreSummaryTabCtrl as vm'
+          template: '<centre-summary centre="vm.centre"></centre-summary>',
+          controller: [
+            'centre',
+            function (centre) {
+              this.centre = centre;
+            }
+          ],
+          controllerAs: 'vm'
         }
       },
       data: {
@@ -136,12 +120,7 @@ define(function () {
       },
       views: {
         'centreDetails': {
-          template: [
-            '<uib-accordion close-others="false">',
-            '  <locations-panel centre="vm.centre">',
-            '  </locations-panel>',
-            '</uib-accordion>'
-          ].join(''),
+          template: '<locations-panel centre="vm.centre"></locations-panel>',
           controller: [
             'centre',
             function(centre) {
@@ -159,39 +138,59 @@ define(function () {
     /**
      * Used to add a centre location.
      */
-    $stateProvider.state('home.admin.centres.centre.locationAdd', {
+    $stateProvider.state('home.admin.centres.centre.locations.locationAdd', {
       url: '/location/add',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
-        centre: resolveCentre
-      },
-      views: {
-        'main@': {
-          templateUrl: '/assets/javascripts/admin/centres/locationForm.html',
-          controller: 'LocationEditCtrl as vm'
-        }
-      },
-      data: {
-        displayName: 'Specimen Group'
-      }
-    });
-
-    /**
-     * Used to update a centre location.
-     */
-    $stateProvider.state('home.admin.centres.centre.locationUpdate', {
-      url: '/location/update/:locationId',
       resolve: {
         user: authorizationProvider.requireAuthenticatedUser
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/centres/locationForm.html',
-          controller: 'LocationEditCtrl as vm'
+          template: '<centre-location-add centre="vm.centre"></centre-location-add>',
+          controller: [
+            'centre',
+            function (centre) {
+              this.centre = centre;
+            }
+          ],
+          controllerAs: 'vm'
         }
       },
       data: {
-        displayName: 'Specimen Group'
+        displayName: 'Add location'
+      }
+    });
+
+    /**
+     * Used to add a centre location.
+     */
+    $stateProvider.state('home.admin.centres.centre.locations.locationView', {
+      url: '/location/view/:uniqueId',
+      resolve: {
+        user: authorizationProvider.requireAuthenticatedUser,
+        location: [
+          '$stateParams',
+          'centre',
+          function ($stateParams, centre) {
+            return _.findWhere(centre.locations, { uniqueId: $stateParams.uniqueId });
+          }
+        ]
+      },
+      views: {
+        'main@': {
+          template: '<centre-location-view centre="vm.centre" location="vm.location"></centre-location-view>',
+          controller: [
+            'centre',
+            'location',
+            function (centre, location) {
+              this.centre = centre;
+              this.location = location;
+            }
+          ],
+          controllerAs: 'vm'
+        }
+      },
+      data: {
+        displayName: 'Location: {{location.name}}'
       }
     });
 
@@ -210,13 +209,11 @@ define(function () {
       views: {
         'centreDetails': {
           template: [
-            '<uib-accordion close-others="false">',
-            '  <centre-studies-panel',
-            '    centre="vm.centre" ',
-            '    centre-studies="vm.centreStudies" ',
-            '    study-names="vm.studyNames"> ',
-            '    </centre-studies-panel>',
-            '</uib-accordion>'
+            '<centre-studies-panel',
+            '  centre="vm.centre" ',
+            '  centre-studies="vm.centreStudies" ',
+            '  study-names="vm.studyNames"> ',
+            '</centre-studies-panel>'
           ].join(''),
           controller: [
             'centre', 'studyNames',

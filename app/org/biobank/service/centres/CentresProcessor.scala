@@ -36,15 +36,16 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
 
   val receiveRecover: Receive = {
     case event: CentreEvent => event.eventType match {
-        case et: EventType.Added              => applyCentreAddedEvent(event)
-        case et: EventType.NameUpdated        => applyCentreNameUpdatedEvent(event)
-        case et: EventType.DescriptionUpdated => applyCentreDescriptionUpdatedEvent(event)
-        case et: EventType.Enabled            => applyCentreEnabledEvent(event)
-        case et: EventType.Disabled           => applyCentreDisabledEvent(event)
-        case et: EventType.LocationAdded      => applyCentreLocationAddedEvent(event)
-        case et: EventType.LocationRemoved    => applyCentreLocationRemovedEvent(event)
-        case et: EventType.StudyAdded         => applyCentreStudyAddedEvent(event)
-        case et: EventType.StudyRemoved       => applyCentreRemovedFromStudyEvent(event)
+        case et: EventType.Added              => applyAddedEvent(event)
+        case et: EventType.NameUpdated        => applyNameUpdatedEvent(event)
+        case et: EventType.DescriptionUpdated => applyDescriptionUpdatedEvent(event)
+        case et: EventType.Enabled            => applyEnabledEvent(event)
+        case et: EventType.Disabled           => applyDisabledEvent(event)
+        case et: EventType.LocationAdded      => applyLocationAddedEvent(event)
+        case et: EventType.LocationUpdated    => applyLocationUpdatedEvent(event)
+        case et: EventType.LocationRemoved    => applyLocationRemovedEvent(event)
+        case et: EventType.StudyAdded         => applyStudyAddedEvent(event)
+        case et: EventType.StudyRemoved       => applyRemovedFromStudyEvent(event)
 
         case et => log.error(s"event not handled: $event")
       }
@@ -63,8 +64,9 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     case cmd: UpdateCentreDescriptionCmd => processUpdateCentreDescriptionCmd(cmd)
     case cmd: EnableCentreCmd            => processEnableCentreCmd(cmd)
     case cmd: DisableCentreCmd           => processDisableCentreCmd(cmd)
-    case cmd: AddCentreLocationCmd       => processAddCentreLocationCmd(cmd)
-    case cmd: RemoveCentreLocationCmd    => processRemoveCentreLocationCmd(cmd)
+    case cmd: AddCentreLocationCmd       => processAddLocationCmd(cmd)
+    case cmd: UpdateCentreLocationCmd    => processUpdateLocationCmd(cmd)
+    case cmd: RemoveCentreLocationCmd    => processRemoveLocationCmd(cmd)
     case cmd: AddStudyToCentreCmd        => processAddStudyToCmd(cmd)
     case cmd: RemoveStudyFromCentreCmd   => processRemoveStudyCmd(cmd)
 
@@ -92,7 +94,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
         _.added.optionalDescription := cmd.description
       )
 
-    process (event) { applyCentreAddedEvent(_) }
+    process (event) { applyAddedEvent(_) }
   }
 
   private def processUpdateCentreNameCmd(cmd: UpdateCentreNameCmd): Unit = {
@@ -108,7 +110,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
         )
       }
 
-    process (v) { applyCentreNameUpdatedEvent(_) }
+    process (v) { applyNameUpdatedEvent(_) }
   }
 
   private def processUpdateCentreDescriptionCmd(cmd: UpdateCentreDescriptionCmd): Unit = {
@@ -123,7 +125,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
         }
       }
 
-    process (v) { applyCentreDescriptionUpdatedEvent(_) }
+    process (v) { applyDescriptionUpdatedEvent(_) }
   }
 
   private def processEnableCentreCmd(cmd: EnableCentreCmd): Unit = {
@@ -136,7 +138,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
         }
       }
 
-    process (v) { applyCentreEnabledEvent(_) }
+    process (v) { applyEnabledEvent(_) }
   }
 
   private def processDisableCentreCmd(cmd: DisableCentreCmd): Unit = {
@@ -149,13 +151,13 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
         }
       }
 
-    process (v) { applyCentreDisabledEvent(_) }
+    process (v) { applyDisabledEvent(_) }
   }
 
   /**
    * FIXME: Locations should be added regardless of the centre's status.
    */
-  private def processAddCentreLocationCmd(cmd: AddCentreLocationCmd): Unit = {
+  private def processAddLocationCmd(cmd: AddCentreLocationCmd): Unit = {
     val event = updateDisabled(cmd) { centre =>
         for {
           location <- {
@@ -178,13 +180,48 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
           _.locationAdded.location.countryIsoCode      := cmd.countryIsoCode)
       }
 
-    process (event) { applyCentreLocationAddedEvent(_) }
+    process (event) { applyLocationAddedEvent(_) }
+  }
+
+  /**
+   * FIXME: Locations should be added regardless of the centre's status.
+   */
+  private def processUpdateLocationCmd(cmd: UpdateCentreLocationCmd): Unit = {
+    val event = updateDisabled(cmd) { centre =>
+        for {
+          location <- {
+            // need to call Location.create so that a new uniqueId is generated
+            Location(uniqueId       = cmd.locationId,
+                     name           = cmd.name,
+                     street         = cmd.street,
+                     city           = cmd.city,
+                     province       = cmd.province,
+                     postalCode     = cmd.postalCode,
+                     poBoxNumber    = cmd.poBoxNumber,
+                     countryIsoCode = cmd.countryIsoCode).success
+          }
+          updatedCentre <- centre.withLocation(location)
+        } yield CentreEvent(centre.id.id).update(
+          _.userId                                       := cmd.userId,
+          _.time                                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.locationUpdated.version                      := cmd.expectedVersion,
+          _.locationUpdated.location.locationId          := cmd.locationId,
+          _.locationUpdated.location.name                := cmd.name,
+          _.locationUpdated.location.street              := cmd.street,
+          _.locationUpdated.location.city                := cmd.city,
+          _.locationUpdated.location.province            := cmd.province,
+          _.locationUpdated.location.postalCode          := cmd.postalCode,
+          _.locationUpdated.location.optionalPoBoxNumber := cmd.poBoxNumber,
+          _.locationUpdated.location.countryIsoCode      := cmd.countryIsoCode)
+      }
+
+    process (event) { applyLocationUpdatedEvent(_) }
   }
 
   /**
    * Locations can be removed regardless of the centre's status.
    */
-  private def processRemoveCentreLocationCmd(cmd: RemoveCentreLocationCmd): Unit = {
+  private def processRemoveLocationCmd(cmd: RemoveCentreLocationCmd): Unit = {
     val event = updateDisabled(cmd) { centre =>
         centre.removeLocation(cmd.locationId) map { _ =>
           CentreEvent(centre.id.id).update(
@@ -195,7 +232,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
         }
       }
 
-    process (event) { applyCentreLocationRemovedEvent(_) }
+    process (event) { applyLocationRemovedEvent(_) }
   }
 
   /**
@@ -212,7 +249,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
         }
       }
 
-    process (event) { applyCentreStudyAddedEvent(_) }
+    process (event) { applyStudyAddedEvent(_) }
   }
 
   /**
@@ -230,7 +267,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
           _.studyRemoved.studyId := cmd.studyId)
       }
 
-    process (event) { applyCentreRemovedFromStudyEvent(_) }
+    process (event) { applyRemovedFromStudyEvent(_) }
   }
 
   def onValidEventCentreAndVersion(event: CentreEvent,
@@ -273,7 +310,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     }
   }
 
-  private def applyCentreAddedEvent(event: CentreEvent): Unit = {
+  private def applyAddedEvent(event: CentreEvent): Unit = {
     if (!event.eventType.isAdded) {
       log.error(s"invalid event type: $event")
     } else {
@@ -295,7 +332,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     }
   }
 
-  private def applyCentreNameUpdatedEvent(event: CentreEvent): Unit = {
+  private def applyNameUpdatedEvent(event: CentreEvent): Unit = {
     onValidEventDisabledCentreAndVersion(event,
                                          event.eventType.isNameUpdated,
                                          event.getNameUpdated.getVersion) { centre =>
@@ -312,7 +349,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     }
   }
 
-  private def applyCentreDescriptionUpdatedEvent(event: CentreEvent): Unit = {
+  private def applyDescriptionUpdatedEvent(event: CentreEvent): Unit = {
     onValidEventDisabledCentreAndVersion(event,
                                          event.eventType.isDescriptionUpdated,
                                          event.getDescriptionUpdated.getVersion) { centre =>
@@ -329,7 +366,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     }
   }
 
-  private def applyCentreEnabledEvent(event: CentreEvent): Unit = {
+  private def applyEnabledEvent(event: CentreEvent): Unit = {
     onValidEventDisabledCentreAndVersion(event,
                                          event.eventType.isEnabled,
                                          event.getEnabled.getVersion) { centre =>
@@ -346,7 +383,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     }
   }
 
-  private def applyCentreDisabledEvent(event: CentreEvent): Unit = {
+  private def applyDisabledEvent(event: CentreEvent): Unit = {
     onValidEventEnabledCentreAndVersion(event,
                                         event.eventType.isDisabled,
                                         event.getDisabled.getVersion) { centre =>
@@ -362,7 +399,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     }
   }
 
-  private def applyCentreLocationAddedEvent(event: CentreEvent): Unit = {
+  private def applyLocationAddedEvent(event: CentreEvent): Unit = {
     onValidEventDisabledCentreAndVersion(event,
                                          event.eventType.isLocationAdded,
                                          event.getLocationAdded.getVersion) { centre =>
@@ -387,7 +424,32 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     }
   }
 
-  private def applyCentreLocationRemovedEvent(event: CentreEvent): Unit = {
+  private def applyLocationUpdatedEvent(event: CentreEvent): Unit = {
+    onValidEventDisabledCentreAndVersion(event,
+                                         event.eventType.isLocationUpdated,
+                                         event.getLocationUpdated.getVersion) { centre =>
+      val locationUpdatedEvent = event.getLocationUpdated
+
+      centre.withLocation(Location(uniqueId       = locationUpdatedEvent.getLocation.getLocationId,
+                                   name           = locationUpdatedEvent.getLocation.getName,
+                                   street         = locationUpdatedEvent.getLocation.getStreet,
+                                   city           = locationUpdatedEvent.getLocation.getCity,
+                                   province       = locationUpdatedEvent.getLocation.getProvince,
+                                   postalCode     = locationUpdatedEvent.getLocation.getPostalCode,
+                                   poBoxNumber    = locationUpdatedEvent.getLocation.poBoxNumber,
+                                   countryIsoCode = locationUpdatedEvent.getLocation.getCountryIsoCode)
+      ).fold(
+        err => log.error(s"adding location from event failed: $err"),
+        c => {
+          centreRepository.put(
+            c.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
+          ()
+        }
+      )
+    }
+  }
+
+  private def applyLocationRemovedEvent(event: CentreEvent): Unit = {
     onValidEventDisabledCentreAndVersion(event,
                                          event.eventType.isLocationRemoved,
                                          event.getLocationRemoved.getVersion) { centre =>
@@ -405,7 +467,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     }
   }
 
-  private def applyCentreStudyAddedEvent(event: CentreEvent): Unit = {
+  private def applyStudyAddedEvent(event: CentreEvent): Unit = {
     onValidEventDisabledCentreAndVersion(event,
                                          event.eventType.isStudyAdded,
                                          event.getStudyAdded.getVersion) { centre =>
@@ -422,7 +484,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     }
   }
 
-  private def applyCentreRemovedFromStudyEvent(event: CentreEvent): Unit = {
+  private def applyRemovedFromStudyEvent(event: CentreEvent): Unit = {
     onValidEventDisabledCentreAndVersion(event,
                                          event.eventType.isStudyRemoved,
                                          event.getStudyRemoved.getVersion) { centre =>
@@ -478,14 +540,6 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       case centre => InvalidStatus(s"centre is not enabled: ${cmd.id}").failureNel
     }
   }
-
-  // /**
-  //  * Creates an event with the userId for the user that issued the command, and the current date and time.
-  //  */
-  // private def createCentreEvent(id: CentreId, command: CentreCommand) =
-  //   CentreEvent(id     = id.id,
-  //               userId = command.userId,
-  //               time   = Some(ISODateTimeFormat.dateTime.print(DateTime.now)))
 
   testData.addMultipleCentres
 }

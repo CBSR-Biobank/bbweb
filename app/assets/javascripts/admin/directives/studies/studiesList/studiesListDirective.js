@@ -38,6 +38,8 @@ define(['underscore'], function(_) {
     vm.studyCounts      = {};
     vm.pageSize         = 5;
     vm.updateStudies    = Study.list;
+    vm.getStudyIcon     = getStudyIcon;
+
     vm.possibleStatuses = [ { id: 'all', label: 'All' } ];
 
     _.each(_.values(StudyStatus), function (status) {
@@ -52,6 +54,15 @@ define(['underscore'], function(_) {
       StudyCounts.get().then(function (counts) {
         vm.studyCounts = counts;
       });
+    }
+
+    function getStudyIcon(study) {
+      if (study.isDisabled()) {
+        return 'glyphicon-cog';
+      } else if (study.isEnabled()) {
+        return 'glyphicon-ok-circle';
+      }
+      return 'glyphicon-remove-sign';
     }
   }
 

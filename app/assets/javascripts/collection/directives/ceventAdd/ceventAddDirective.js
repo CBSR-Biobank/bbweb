@@ -59,7 +59,7 @@ define(['underscore'], function(_) {
     // --
 
     function submit() {
-      vm.collectionEvent.timeCompleted = vm.timeCompleted;
+      vm.collectionEvent.timeCompleted = timeService.dateToUtcString(vm.timeCompleted);
       vm.collectionEvent.add()
         .then(submitSuccess)
         .catch(function(error) {

@@ -12,12 +12,14 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('Controller: LocationEditCtrl', function() {
+  describe('Directive: centreLocationAddDirective', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $controller, $state) {
+    beforeEach(inject(function ($rootScope, $compile, $state, directiveTestSuite) {
       var self = this;
+
+      _.extend(self, directiveTestSuite);
 
       self.$state               = self.$injector.get('$state');
       self.Centre               = self.$injector.get('Centre');
@@ -27,57 +29,48 @@ define([
       self.notificationsService = self.$injector.get('notificationsService');
 
       self.centre = new self.Centre(self.jsonEntities.centre());
-      self.location = new self.Location();
+      self.location = new self.Location(self.jsonEntities.location());
 
-      self.currentState = {
-        current: { name: 'home.admin.centres.centre.locationAdd'}
-      };
+      self.putHtmlTemplates(
+        '/assets/javascripts/admin/directives/centres/centreLocationAdd/centreLocationAdd.html',
+        '/assets/javascripts/admin/directives/locationAdd/locationAdd.html');
 
-      self.returnState = {
-        name: 'home.admin.centres.centre.locations',
-        params: {}
-      };
-
+      self.returnStateName = 'home.admin.centres.centre.locations';
       self.createController = createController;
 
       //--
 
-      function createController(location) {
+      function createController(centre) {
+        self.element = angular.element(
+          '<centre-location-add centre="vm.centre"></centre-location-add>');
         self.scope = $rootScope.$new();
-
-        $controller('LocationEditCtrl as vm', {
-          $scope:               self.scope,
-          $state:               $state,
-          Location:             self.Location,
-          domainEntityService:  self.domainEntityService,
-          notificationsService: self.notificationsService,
-          centre:               self.centre
-        });
+        self.scope.vm = { centre: centre };
+        $compile(self.element)(self.scope);
         self.scope.$digest();
+        self.controller = self.element.controller('centreLocationAdd');
       }
 
     }));
 
     it('scope should be valid', function() {
-      this.createController(this.location);
-      expect(this.scope.vm.centre).toBe(this.centre);
-      expect(this.scope.vm.location).toEqual(this.location);
+      this.createController(this.centre);
+      expect(this.controller.centre).toBe(this.centre);
+      expect(this.controller.submit).toBeFunction();
+      expect(this.controller.cancel).toBeFunction();
     });
 
     it('should return to valid state on cancel', function() {
-      this.createController(this.location);
+      this.createController(this.centre);
       spyOn(this.$state, 'go').and.callFake(function () {} );
-      this.scope.vm.cancel();
-      expect(this.$state.go).toHaveBeenCalledWith(this.returnState.name,
-                                                  this.returnState.params,
-                                                  { reload: false });
+      this.controller.cancel();
+      expect(this.$state.go).toHaveBeenCalledWith(this.returnStateName);
     });
 
     it('should display failure information on invalid submit', function() {
       var $q                  = this.$injector.get('$q'),
           domainEntityService = this.$injector.get('domainEntityService');
 
-      this.createController(this.location);
+      this.createController(this.centre);
 
       spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
       spyOn(this.Centre.prototype, 'addLocation').and.callFake(function () {
@@ -86,7 +79,7 @@ define([
         return deferred.promise;
       });
 
-      this.scope.vm.submit(this.location);
+      this.controller.submit(this.location);
       this.scope.$digest();
       expect(domainEntityService.updateErrorModal)
         .toHaveBeenCalledWith('err', 'location');
@@ -96,17 +89,15 @@ define([
     it('should return to valid state on submit', function() {
       var $q = this.$injector.get('$q');
 
-      this.createController(this.location);
+      this.createController(this.centre);
       spyOn(this.$state, 'go').and.callFake(function () {} );
       spyOn(this.Centre.prototype, 'addLocation').and.callFake(function () {
         return $q.when('test');
       });
 
-      this.scope.vm.submit(this.location);
+      this.controller.submit(this.location);
       this.scope.$digest();
-      expect(this.$state.go).toHaveBeenCalledWith(this.returnState.name,
-                                                  this.returnState.params,
-                                                  { reload: true });
+      expect(this.$state.go).toHaveBeenCalledWith(this.returnStateName, {}, { reload: true });
     });
 
   });

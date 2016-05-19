@@ -100,6 +100,7 @@ case class DisabledCentre(id:           CentreId,
                           studyIds:     Set[StudyId],
                           locations:    Set[Location])
     extends Centre with CentreValidations {
+  import org.biobank.CommonValidations._
   import org.biobank.domain.CommonValidations._
 
   /** Used to change the name. */
@@ -165,7 +166,9 @@ case class DisabledCentre(id:           CentreId,
 
   /** Used to enable a centre after it has been configured, or had configuration changes made on it. */
   def enable(): DomainValidation[EnabledCentre] = {
-    if (this.locations.size > 0) {
+    if (this.locations.size <= 0) {
+      EntityCriteriaError("centre does not have locations").failureNel
+    } else {
       EnabledCentre(id           = this.id,
                     version      = this.version + 1,
                     timeAdded    = this.timeAdded,
@@ -174,8 +177,6 @@ case class DisabledCentre(id:           CentreId,
                     description  = this.description,
                     studyIds     = this.studyIds,
                     locations    = this.locations).success
-    } else {
-      DomainError("centre does not have any locations").failureNel
     }
   }
 }

@@ -48,7 +48,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
     };
 
     /**
-     * Use this contructor to create new Specimens to be persited on the server. Use
+     * Use this contructor to create new Study to be persited on the server. Use
      * [create()]{@link domain.studies.Study.create} or [asyncCreate()]{@link
      * domain.studies.Study.asyncCreate} to create objects returned by the server.
      *
@@ -121,7 +121,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
      * @returns {Study} A study created from the given object.
      *
      * @see [asyncCreate()]{@link domain.studies.Study.asyncCreate} when you need to create
-     * a specimen within asynchronous code.
+     * a study within asynchronous code.
      */
     Study.create = function (obj) {
       if (!tv4.validate(obj, schema)) {
@@ -170,7 +170,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
     /**
      * Used to list studies.
      *
-     * <p>A paged API is used to list specimens. See below for more details.</p>
+     * <p>A paged API is used to list studies. See below for more details.</p>
      *
      * @param {object} options - The options to use to list studies.
      *
@@ -269,6 +269,13 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
       });
     };
 
+    /**
+     * Creates a Study from a server reply but first validates that it has a valid schema.
+     *
+     * <p>A wrapper for {@link domian.studies.Study#asyncCreate}.</p>
+     *
+     * @see domain.ConcurrencySafeEntity.update
+     */
     Study.prototype.asyncCreate = function (obj) {
       return Study.asyncCreate(obj);
     };
@@ -282,8 +289,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
      * @returns {Promise<domain.studies.Study>} A promise containing the study with the new name.
      */
     Study.prototype.updateName = function (name) {
-      return ConcurrencySafeEntity.prototype.update.call(
-        this, uri('name', this.id), { name: name });
+      return this.update.call(this, uri('name', this.id), { name: name });
     };
 
     /**
@@ -295,10 +301,9 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
      * @returns {Promise<domain.studies.Study>} A promise containing the study with the new description.
      */
     Study.prototype.updateDescription = function (description) {
-      return ConcurrencySafeEntity.prototype.update.call(
-        this,
-        uri('description', this.id),
-        description ? { description: description } : {});
+      return this.update.call(this,
+                              uri('description', this.id),
+                              description ? { description: description } : {});
     };
 
     /**
@@ -309,10 +314,9 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
      * @returns {Promise<domain.studies.Study>} A promise containing the study with the new annotation type.
      */
     Study.prototype.addAnnotationType = function (annotationType) {
-      return ConcurrencySafeEntity.prototype.update.call(
-        this,
-        uri('pannottype', this.id),
-        _.omit(annotationType, 'uniqueId'));
+      return this.update.call(this,
+                              uri('pannottype', this.id),
+                              _.omit(annotationType, 'uniqueId'));
     };
 
     /**
@@ -323,10 +327,9 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
      * @returns {Promise<domain.studies.Study>} A promise containing the study with the updated annotation type.
      */
     Study.prototype.updateAnnotationType = function (annotationType) {
-      return ConcurrencySafeEntity.prototype.update.call(
-        this,
-        uri('pannottype', this.id) + '/' + annotationType.uniqueId,
-        annotationType);
+      return this.update.call(this,
+                              uri('pannottype', this.id) + '/' + annotationType.uniqueId,
+                              annotationType);
     };
 
     /**

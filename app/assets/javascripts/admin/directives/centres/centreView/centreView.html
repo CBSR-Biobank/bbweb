@@ -11,6 +11,7 @@
       <uib-tab ng-repeat="tab in vm.tabs"
                heading="{{tab.heading}}"
                ui-sref="{{tab.sref}}"
+               ui-sref-opts="{reload: true}"
                active="tab.active"></uib-tab>
     </uib-tabset>
   </div>

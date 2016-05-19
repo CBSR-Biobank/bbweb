@@ -41,7 +41,7 @@ define(['angular', 'underscore'], function(angular, _) {
                                   Study,
                                   StudyViewer,
                                   modalService,
-                                 studyStatusLabel) {
+                                  studyStatusLabel) {
 
     var vm = this;
 
@@ -76,16 +76,24 @@ define(['angular', 'underscore'], function(angular, _) {
     }
 
     function onSelect(item) {
+      if (!vm.centre.isDisabled()) {
+        console.error('Should not be allowed to add studies to centre if centre is not disabled');
+        throw new Error('An application error occurred, please contact your administrator.');
+      }
+
       // add the study only if it's not there
       if(_.indexOf(vm.centre.studyIds, item.id) < 0) {
-        vm.centre.addStudy(item).then(function (centre) {
-          var study = vm.studyNamesById[item.id];
-          study.statusLabel = studyStatusLabel.statusToLabel(study.status);
-          vm.centre = centre;
-          vm.studyCollection.push(study);
-        });
+        vm.centre.addStudy(item).then(addSuccessful);
       }
       vm.selected = undefined;
+
+      function addSuccessful(centre) {
+        var study = vm.studyNamesById[item.id];
+        study.statusLabel = studyStatusLabel.statusToLabel(study.status);
+        vm.centre = centre;
+        vm.studyCollection.push(study);
+      }
+
     }
 
     function information(studyId) {

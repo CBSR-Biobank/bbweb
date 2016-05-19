@@ -19,6 +19,7 @@ define(['underscore'], function(_) {
         messageNoItems:               '@',
         messageNoResults:             '@',
         getItems:                     '&',
+        getItemIcon:                  '&',
         entityNavigateState:          '@',
         entityNavigateStateParamName: '@'
       },
@@ -108,6 +109,10 @@ define(['underscore'], function(_) {
     function updateItems() {
       vm.getItems()(vm.pagerOptions).then(function (pagedResult) {
         vm.pagedResult = pagedResult;
+        vm.pagedResult.items = _.map(vm.pagedResult.items, function (entity) {
+          entity.icon = vm.getItemIcon()(entity);
+          return entity;
+        });
         vm.displayState = displayState();
       });
     }

@@ -32,6 +32,7 @@ define(function (require) {
   module.directive('annotationTypeAdd',     require('./directives/annotationTypeAdd/annotationTypeAddDirective'));
   module.directive('annotationTypeView',    require('./directives/annotationTypeView/annotationTypeViewDirective'));
   module.directive('annotationTypeSummary', require('./directives/annotationTypeSummary/annotationTypeSummaryDirective'));
+  module.directive('locationAdd',           require('./directives/locationAdd/locationAddDirective'));
   module.directive('biobankAdmin',          require('./directives/biobankAdmin/biobankAdminDirective'));
   module.directive('statusLine',            require('./directives/statusLine/statusLineDirective'));
 

@@ -21,11 +21,14 @@ define([
 
       _.extend(self, directiveTestSuite);
 
-      self.Centre           = self.$injector.get('Centre');
-      self.Location         = self.$injector.get('Location');
-      self.jsonEntities     = self.$injector.get('jsonEntities');
-      self.createEntities   = createEntities;
-      self.createController = createController;
+      self.$q                  = this.$injector.get('$q');
+      self.Centre              = self.$injector.get('Centre');
+      self.Location            = self.$injector.get('Location');
+      self.modalService        = self.$injector.get('modalService');
+      self.domainEntityService = self.$injector.get('domainEntityService');
+      self.jsonEntities        = self.$injector.get('jsonEntities');
+      self.createEntities      = createEntities;
+      self.createController    = createController;
 
       testUtils.addCustomMatchers();
 
@@ -33,8 +36,6 @@ define([
         '/assets/javascripts/admin/directives/centres/locationsPanel/locationsPanel.html',
         '/assets/javascripts/common/directives/panelButtons.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html');
-
-      self.onRemove = jasmine.createSpy('onRemove').and.returnValue($q.when(true));
 
       function createEntities() {
         var entities = {};
@@ -51,16 +52,12 @@ define([
           '<uib-accordion close-others="false">',
           '  <locations-panel ',
           '    centre="vm.centre"',
-          '    on-remove="vm.onRemove">',
           '  </locations-panel>',
           '</uib-accordion>'
         ].join(''));
 
         self.scope = $rootScope.$new();
-        self.scope.vm = {
-          centre: centre,
-          onRemove: self.onRemove
-        };
+        self.scope.vm = { centre: centre };
         $compile(element)(self.scope);
         self.scope.$digest();
         self.controller = element.find('locations-panel').controller('locationsPanel');
@@ -81,75 +78,42 @@ define([
       spyOn($state, 'go').and.callFake(function () {});
       this.controller.add();
       this.scope.$digest();
-      expect($state.go).toHaveBeenCalledWith('home.admin.centres.centre.locationAdd');
-    });
-
-    it('can view location information', function() {
-      var EntityViewer = this.$injector.get('EntityViewer'),
-          entities = this.createEntities(),
-          locationToView = entities.locations[0];
-
-      entities.centre.locations.push(locationToView);
-      this.createController(entities.centre);
-
-      spyOn(EntityViewer.prototype, 'showModal').and.callFake(function () {});
-      this.controller.information(locationToView);
-      this.scope.$digest();
-      expect(EntityViewer.prototype.showModal).toHaveBeenCalled();
-    });
-
-    it('can update a location', function() {
-      var $state = this.$injector.get('$state'),
-          entities = this.createEntities(),
-          locationToUpdate = entities.locations[0];
-
-      entities.centre.locations.push(locationToUpdate);
-      this.createController(entities.centre);
-
-      spyOn($state, 'go').and.callFake(function () {});
-      this.controller.update(locationToUpdate);
-      this.scope.$digest();
-      expect($state.go).toHaveBeenCalledWith('home.admin.centres.centre.locationUpdate',
-                                             { locationId: locationToUpdate.id});
+      expect($state.go).toHaveBeenCalledWith(
+        'home.admin.centres.centre.locations.locationAdd',
+        {},
+        { reload: true });
     });
 
     it('can remove a location', function() {
-      var $q                  = this.$injector.get('$q'),
-          modalService        = this.$injector.get('modalService'),
-          entities            = this.createEntities(),
+      var entities            = this.createEntities(),
           locationToRemove    = entities.locations[0];
 
       entities.centre.locations.push(locationToRemove);
       this.createController(entities.centre);
 
-      spyOn(modalService, 'showModal').and.callFake(function () {
-        return $q.when('OK');
-      });
+      spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+      spyOn(this.Centre.prototype, 'removeLocation').and.returnValue(this.$q.when(entities.centre));
+
       this.controller.remove(locationToRemove);
       this.scope.$digest();
-      expect(this.onRemove).toHaveBeenCalled();
+      expect(this.Centre.prototype.removeLocation).toHaveBeenCalled();
     });
 
     it('displays information modal when removal of a location fails', function() {
-      var $q                  = this.$injector.get('$q'),
-          modalService        = this.$injector.get('modalService'),
-          entities            = this.createEntities(),
-          locationToRemove    = entities.locations[0];
+      var entities            = this.createEntities(),
+          locationToRemove    = entities.locations[0],
+          deferred            = this.$q.defer();
 
+      deferred.reject('simulated remove error');
       entities.centre.locations.push(locationToRemove);
 
-      spyOn(modalService, 'showModal').and.callFake(function () {
-        return $q.when('OK');
-      });
-      this.onRemove = jasmine.createSpy('onRemove').and.callFake(function () {
-        var deferred = $q.defer();
-        deferred.reject('error');
-        return deferred.promise;
-      });
+      spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+      spyOn(this.Centre.prototype, 'removeLocation').and.returnValue(deferred.promise);
+
       this.createController(entities.centre);
       this.controller.remove(locationToRemove);
       this.scope.$digest();
-      expect(modalService.showModal.calls.count()).toBe(2);
+      expect(this.modalService.showModal.calls.count()).toBe(2);
     });
 
   });

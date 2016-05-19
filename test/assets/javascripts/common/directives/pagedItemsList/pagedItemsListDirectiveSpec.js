@@ -119,7 +119,7 @@ define([
 
           //--
 
-          function createController(getItemsFunc) {
+          function createController(getItemsFunc, getItemIconFunc) {
             var element = angular.element([
               '<paged-items-list',
               '  counts="vm.counts"',
@@ -128,17 +128,22 @@ define([
               '  message-no-items="' + context.messageNoItems + '"',
               '  message-no-results="' + context.messageNoResults + '"',
               '  get-items="vm.getItems"',
+              '  get-item-icon="vm.getItemIcon"',
               '  entity-navigate-state="' + context.entityNavigateState + '"',
               '  entity-navigate-state-param-name="' + context.entityNavigateStateParamName + '">',
               '</paged-items-list>'
             ].join(''));
+
+            getItemsFunc = getItemsFunc || getItemsFuncDefault;
+            getItemIconFunc = getItemIconFunc || function (entity) { return ''; };
 
             self.scope = $rootScope.$new();
             self.scope.vm = {
               counts:           context.counts,
               pageSize:         context.pageSize,
               possibleStatuses: context.possibleStatuses,
-              getItems:         getItemsFunc
+              getItems:         getItemsFunc,
+              getItemIcon:      getItemIconFunc
             };
 
             $compile(element)(self.scope);
@@ -166,7 +171,7 @@ define([
         }));
 
         it('has valid scope', function() {
-          this.createController(this.getItemsFuncDefault);
+          this.createController();
 
           expect(this.controller.counts).toBe(this.context.counts);
           expect(this.controller.possibleStatuses).toBe(this.context.possibleStatuses);
@@ -193,7 +198,7 @@ define([
         it('updates items when name filter is updated', function() {
           var nameFilterValue = 'test';
 
-          this.createController(this.getItemsFuncDefault);
+          this.createController();
 
           this.controller.pagerOptions.filter = nameFilterValue;
           this.controller.nameFilterUpdated();
@@ -210,7 +215,7 @@ define([
         it('updates items when name status filter is updated', function() {
           var statusFilterValue = this.context.possibleStatuses[1];
 
-          this.createController(this.getItemsFuncDefault);
+          this.createController();
           this.controller.pagerOptions.status = statusFilterValue;
           this.controller.statusFilterUpdated();
           this.scope.$digest();
@@ -224,7 +229,7 @@ define([
         });
 
         it('clears filters', function() {
-          this.createController(this.getItemsFuncDefault);
+          this.createController();
           this.controller.pagerOptions.filter = 'test';
           this.controller.pagerOptions.status = this.context.possibleStatuses[1];
           this.controller.clearFilters();
@@ -236,7 +241,7 @@ define([
         it('updates items when name sort field is updated', function() {
           var sortFieldValue;
 
-          this.createController(this.getItemsFuncDefault);
+          this.createController();
           sortFieldValue = this.controller.sortFields[1];
           this.controller.sortFieldSelected(sortFieldValue);
           this.scope.$digest();
@@ -252,7 +257,7 @@ define([
         it('updates items when name page number is changed', function() {
           var page = 2;
 
-          this.createController(this.getItemsFuncDefault);
+          this.createController();
           this.controller.pagerOptions.page = page;
           this.controller.pageChanged();
           this.scope.$digest();
@@ -305,7 +310,7 @@ define([
           this.context.counts = _.mapObject(this.context.counts, function (val) {
             return 0;
           });
-          this.createController(this.getItemsFuncDefault);
+          this.createController();
           expect(this.controller.displayState).toBe(0); // NO_ENTITIES
         });
 

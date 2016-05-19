@@ -326,6 +326,23 @@ define([
                                failTest);
       });
 
+      it('updates a location', function() {
+        var self         = this,
+            jsonLocation = this.jsonEntities.location(),
+            jsonCentre   = this.jsonEntities.centre(),
+            centre       = new self.Centre(jsonCentre);
+
+        this.updateEntity.call(this,
+                               centre,
+                               'updateLocation',
+                               jsonLocation,
+                               uri('locations', centre.id) + '/' + jsonLocation.uniqueId,
+                               jsonLocation,
+                               jsonCentre,
+                               expectCentre,
+                               failTest);
+      });
+
       it('throws an error when removing a location that does not exists', function() {
         var self = this,
             centre = new self.Centre();

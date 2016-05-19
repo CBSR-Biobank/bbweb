@@ -1,0 +1,69 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      {{vm.centre.name}}
+      <span class="btn-group pull-right">
+        <button class="btn btn-xs btn-success"
+                title="Enable"
+                ng-disabled="!vm.centre.hasLocations()"
+                ng-if="vm.centre.isDisabled()"
+                ng-click="vm.changeStatus('enable')">
+          <i class="glyphicon glyphicon-ok-circle"></i>
+        </button>
+
+        <button class="btn btn-xs btn-danger"
+                ng-click="vm.changeStatus('disable')"
+                title="Disable"
+                ng-if="vm.centre.isEnabled()">
+          <i class="glyphicon glyphicon-cog"></i>
+        </button>
+
+      </span>
+    </h3>
+  </div>
+  <ul class="list-group">
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-2">
+          <strong>Name:</strong>
+        </div>
+        <div class="col-md-8">
+          {{vm.centre.name}}
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-xs btn-primary pull-right"
+                  title="Edit name"
+                  ng-if="vm.centre.isDisabled()"
+                  ng-click="vm.editName()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-2">
+          <strong>Description:</strong>
+        </div>
+        <div class="col-md-10">
+          <truncate-toggle
+             text="vm.centre.description"
+             toggle-length="vm.descriptionToggleLength"
+             text-empty-warning="Description not entered yet."
+             allow-edit="vm.centre.isDisabled()"
+             on-edit="vm.editDescription()">
+          </truncate-toggle>
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item"
+        ng-if="!vm.centre.hasLocations()">
+      <div class="panel panel-warning">
+        <div class="panel-heading">
+          Centre cannot be enabled until at least one location is added.
+        </div>
+      </div>
+    </li>
+  </ul>
+  <status-line item="vm.centre"></status-line>
+</div>
