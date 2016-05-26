@@ -16,10 +16,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($q, $rootScope, $compile, directiveTestSuite, testUtils) {
+    beforeEach(inject(function($q, $rootScope, $compile, templateMixin, testUtils) {
       var self = this;
 
-      _.extend(self, directiveTestSuite);
+      _.extend(self, templateMixin);
 
       self.$q                  = this.$injector.get('$q');
       self.Centre              = self.$injector.get('Centre');
@@ -48,19 +48,12 @@ define([
       }
 
       function createController(centre) {
-        var element = angular.element([
-          '<uib-accordion close-others="false">',
-          '  <locations-panel ',
-          '    centre="vm.centre"',
-          '  </locations-panel>',
-          '</uib-accordion>'
-        ].join(''));
-
+        var element = angular.element('<locations-panel centre="vm.centre"></locations-panel>');
         self.scope = $rootScope.$new();
         self.scope.vm = { centre: centre };
         $compile(element)(self.scope);
         self.scope.$digest();
-        self.controller = element.find('locations-panel').controller('locationsPanel');
+        self.controller = element.controller('locationsPanel');
       }
     }));
 

@@ -63,10 +63,10 @@ define([
 
       describe('(shared)', function() {
 
-        beforeEach(inject(function($rootScope, $compile, directiveTestSuite, testUtils) {
+        beforeEach(inject(function($rootScope, $compile, templateMixin, testUtils) {
           var self = this;
 
-          _.extend(self, directiveTestSuite);
+          _.extend(self, templateMixin);
 
           self.state                    = self.$injector.get('$state');
           self.studyAnnotationTypeUtils = self.$injector.get('studyAnnotationTypeUtils');

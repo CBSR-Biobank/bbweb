@@ -16,10 +16,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(directiveTestSuite, jsonEntities, testUtils) {
+    beforeEach(inject(function(templateMixin, jsonEntities, testUtils) {
       var self = this;
 
-      _.extend(self, directiveTestSuite);
+      _.extend(self, templateMixin);
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/statusLine/statusLine.html');

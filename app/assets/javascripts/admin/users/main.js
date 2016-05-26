@@ -14,7 +14,6 @@ define(function (require) {
   module = angular.module(name, [ 'biobank.studies' ]);
 
   module.config(require('./states'));
-  module.controller('UsersTableCtrl', require('./UsersTableCtrl'));
 
   return {
     name: name,

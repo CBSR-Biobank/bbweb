@@ -18,10 +18,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, directiveTestSuite, testUtils) {
+    beforeEach(inject(function ($rootScope, $compile, templateMixin, testUtils) {
       var self = this;
 
-      _.extend(self, directiveTestSuite);
+      _.extend(self, templateMixin);
 
       self.$filter = this.$injector.get('$filter');
 

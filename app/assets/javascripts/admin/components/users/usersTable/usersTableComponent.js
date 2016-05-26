@@ -1,35 +1,44 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['underscore', 'moment'], function(_, moment) {
+define(['underscore'], function(_) {
   'use strict';
 
-  UsersTableCtrl.$inject = [
-    'modalService',
+  var component = {
+    templateUrl : '/assets/javascripts/admin/components/users/usersTable/usersTable.html',
+    controller: UsersTableController,
+    controllerAs: 'vm',
+    bindings: {
+      userCounts: '<'
+    }
+  };
+
+  UsersTableController.$inject = [
+    'bbwebConfig',
     'User',
+    'UserCounts',
     'UserStatus',
-    'userStatusLabel',
     'UserViewer',
-    'userCounts',
-    'bbwebConfig'
+    'userStatusLabel',
+    'modalService'
   ];
 
   /**
-   * Displays a list of users in a table.
+   *
    */
-  function UsersTableCtrl(modalService,
-                          User,
-                          UserStatus,
-                          userStatusLabel,
-                          UserViewer,
-                          userCounts,
-                          bbwebConfig) {
+  function UsersTableController(bbwebConfig,
+                                User,
+                                UserCounts,
+                                UserStatus,
+                                UserViewer,
+                                userStatusLabel,
+                                modalService) {
     var vm = this;
 
     vm.users               = [];
-    vm.haveUsers           = (userCounts.total > 0);
     vm.possibleStatuses    = getPossibleStatuses();
+    vm.status              = 'all';
     vm.getTableData        = getTableData;
     vm.tableDataLoading    = true;
     vm.pageSize            = 10;
@@ -38,15 +47,11 @@ define(['underscore', 'moment'], function(_, moment) {
     vm.activate            = activate;
     vm.lock                = lock;
     vm.unlock              = unlock;
-    vm.getTimeAddedLocal   = getTimeAddedLocal;
 
-    // used by the status filter box shown in the table
-    vm.status              = vm.possibleStatuses[0].id;
-
-    // --
+    //--
 
     function getPossibleStatuses() {
-      return [{ id: 'all', title: 'All' }].concat(
+      return [ { id: 'all', title: 'All' } ].concat(
         _.map(_.values(UserStatus), function(status) {
           return { id: status, title: userStatusLabel.statusToLabel(status) };
         }));
@@ -78,25 +83,24 @@ define(['underscore', 'moment'], function(_, moment) {
     }
 
     function changeStatus(user, method, status) {
-      var modalOptions = {
-        closeButtonText: 'Cancel',
-        actionButtonText: 'OK'
-      };
+      var index = vm.users.indexOf(user),
+          modalOptions = {
+            closeButtonText: 'Cancel',
+            actionButtonText: 'OK',
+            headerHtml: 'Change user status',
+            bodyHtml: 'Please confirm that you want to ' + status + ' user "' + user.name + '"?'
+          };
 
-      modalOptions.headerHtml = 'Change user status';
-      modalOptions.bodyHtml = 'Please confirm that you want to ' + status + ' user "' +
-        user.name + '"?';
-
-      modalService.showModal({}, modalOptions).then(function () {
-        user[method]().then(function() {
-          var index = vm.users.indexOf(user);
-          if (index !== -1) {
-            User.get(user.id).then(function (reloadedUser) {
-              vm.users[index] = reloadedUser;
-            });
+      modalService.showModal({}, modalOptions)
+        .then(function () { return user[method](); })
+        .then(function() { return User.get(user.id); })
+        .then(function (updatedUser) {
+          if (index < 0) {
+            console.error('cannot not update user');
+            return;
           }
+          vm.users[index] = updatedUser;
         });
-      });
     }
 
     function activate(user) {
@@ -115,10 +119,7 @@ define(['underscore', 'moment'], function(_, moment) {
       return new UserViewer(user);
     }
 
-    function getTimeAddedLocal(user) {
-      return moment(user.timeAdded).format(bbwebConfig.dateTimeFormat);
-    }
   }
 
-  return UsersTableCtrl;
+  return component;
 });

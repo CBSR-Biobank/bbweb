@@ -11,10 +11,10 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, directiveTestSuite, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, templateMixin, testUtils) {
       var self = this;
 
-      _.extend(self, directiveTestSuite);
+      _.extend(self, templateMixin);
 
       self.Study               = self.$injector.get('Study');
       self.CollectionEventType = self.$injector.get('CollectionEventType');

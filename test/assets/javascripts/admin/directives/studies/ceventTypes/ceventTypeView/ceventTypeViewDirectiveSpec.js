@@ -16,10 +16,10 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, testUtils, directiveTestSuite) {
+    beforeEach(inject(function($rootScope, $compile, testUtils, templateMixin) {
       var self = this;
 
-      _.extend(self, directiveTestSuite);
+      _.extend(self, templateMixin);
 
       self.$q                     = self.$injector.get('$q');
       self.$state                 = self.$injector.get('$state');

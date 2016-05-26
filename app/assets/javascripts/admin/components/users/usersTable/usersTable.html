@@ -1,0 +1,92 @@
+<table st-table="vm.users"
+       st-pipe="vm.getTableData"
+       class="table table-hover table-striped">
+  <thead>
+    <tr>
+      <th st-sort="email">Email</th>
+      <th st-sort="name">Name</th>
+      <th>Added</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+    <tr>
+      <th>
+        <input st-search="email" placeholder="search for email" class="input-sm form-control" type="search"/>
+      </th>
+      <th>
+        <input st-search="name" placeholder="search for name" class="input-sm form-control" type="search"/>
+      </th>
+      <th></th>
+      <th>
+        <select class="form-control input-sm"
+                st-search="status"
+                name="status"
+                ng-model="vm.status"
+                ng-options="status.id as status.title for status in vm.possibleStatuses">
+        </select>
+      </th>
+    </tr>
+  </thead>
+  <tbody ng-show="!vm.tableDataLoading">
+    <tr ng-repeat="user in vm.users">
+      <td class="col-md-3">
+        <span ng-click="vm.userInformation(user)">
+          <a href>{{user.email}}</a>
+        </span>
+      </td>
+      <td class="col-md-3">
+        {{user.name}}
+      </td>
+      <td class="col-md-2">
+        <a href uib-tooltip="{{user.timeAdded | localTime}}">
+          {{user.timeAdded | timeago}}
+        </a>
+      </td>
+      <td class="col-md-2">
+        <span class="badge">{{user.statusLabel}}</span>
+      </td>
+
+      <!-- BUTTONS -->
+      <td class="col-md-1" data-title="'Action'">
+        <div class="btn-group">
+          <button class="btn btn-xs btn-success"
+                  ng-click="vm.activate(user)"
+                  data-toggle="tooltip"
+                  title="Activate user"
+                  ng-if="user.isRegistered()">
+            <i class="glyphicon glyphicon-check"></i>
+          </button>
+          <button class="btn btn-xs btn-warning"
+                  ng-click="vm.lock(user)"
+                  data-toggle="tooltip"
+                  title="Lock user"
+                  ng-if="user.isActive()">
+            <i class="glyphicon glyphicon-lock"></i>
+          </button>
+          <button class="btn btn-xs btn-danger"
+                  ng-click="vm.unlock(user)"
+                  data-toggle="tooltip"
+                  title="Unlock user"
+                  ng-if="user.isLocked()">
+            <i class="glyphicon glyphicon-plus"></i>
+          </button>
+        </div>
+      </td>
+
+    </tr>
+  </tbody>
+  <tbody ng-show="vm.tableDataLoading">
+    <tr>
+      <td colspan="4" class="text-center">Loading ... </td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="5" class="text-center">
+        <div st-items-by-page="vm.pageSize"
+             st-pagination=""
+             st-template="/assets/javascripts/common/directives/pagination.html"></div>
+      </td>
+    </tr>
+  </tfoot>
+</table>

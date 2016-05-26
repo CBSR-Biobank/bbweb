@@ -29,8 +29,7 @@ define(function () {
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/users/usersTable.html',
-          controller: 'UsersTableCtrl as vm'
+          template: '<user-admin></user-admin>'
         }
       },
       data: {

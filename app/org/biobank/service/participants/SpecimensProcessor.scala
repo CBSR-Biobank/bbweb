@@ -161,7 +161,6 @@ class SpecimensProcessor @Inject() (val specimenRepository:            SpecimenR
   }
 
   private def applyAddedEvent(event: SpecimenEvent): Unit = {
-    log.info(s"---------> event: $event")
 
     val v = for {
         validEventType <- validEventType(event.eventType.isAdded)

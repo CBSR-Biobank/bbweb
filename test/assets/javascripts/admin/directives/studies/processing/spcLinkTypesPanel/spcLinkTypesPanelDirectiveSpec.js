@@ -21,8 +21,8 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (directiveTestSuite, testUtils) {
-      _.extend(this, directiveTestSuite);
+    beforeEach(inject(function (templateMixin, testUtils) {
+      _.extend(this, templateMixin);
 
       jsonEntities = this.$injector.get('jsonEntities');
 

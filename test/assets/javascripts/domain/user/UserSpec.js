@@ -28,11 +28,12 @@ define([
 
       //--
 
-      function statusChangeShared(user, uriPart, userMethod, newStatus) {
+      function statusChangeShared(user, statusChangePath, userMethod, newStatus) {
         var json = { id: user.id, expectedVersion: user.version };
         var reply = self.jsonEntities.user(user);
 
-        self.$httpBackend.expectPOST(uri(user.id) + uriPart, json).respond(201, serverReply(reply));
+        self.$httpBackend.expectPOST(updateUri(statusChangePath, user.id), json)
+          .respond(201, serverReply(reply));
 
         user[userMethod]().then(function (replyUser) {
           expect(replyUser).toEqual(jasmine.any(self.User));
@@ -270,17 +271,17 @@ define([
 
     it('can activate a registered user', function() {
       var user = new this.User(this.jsonEntities.user());
-      this.statusChangeShared(user, '/activate', 'activate', this.UserStatus.ACTIVE);
+      this.statusChangeShared(user, 'activate', 'activate', this.UserStatus.ACTIVE);
     });
 
     it('can lock an active user', function() {
       var user = new this.User(_.extend(this.jsonEntities.user(), { status: this.UserStatus.ACTIVE }));
-      this.statusChangeShared(user, '/lock', 'lock', this.UserStatus.LOCKED);
+      this.statusChangeShared(user, 'lock', 'lock', this.UserStatus.LOCKED);
     });
 
     it('can unlock a locked user', function() {
       var user = new this.User(_.extend(this.jsonEntities.user(), { status: this.UserStatus.LOCKED }));
-      this.statusChangeShared(user, '/unlock', 'unlock', this.UserStatus.ACTIVE);
+      this.statusChangeShared(user, 'unlock', 'unlock', this.UserStatus.ACTIVE);
     });
 
     it('fails when calling activate and the user is not registered', function() {

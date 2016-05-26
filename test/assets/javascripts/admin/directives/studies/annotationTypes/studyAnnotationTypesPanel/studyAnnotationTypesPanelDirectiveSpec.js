@@ -19,11 +19,11 @@ define([
     beforeEach(inject(function($window,
                                $compile,
                                $rootScope,
-                               directiveTestSuite,
+                               templateMixin,
                                testUtils) {
       var self = this;
 
-      _.extend(self, directiveTestSuite);
+      _.extend(self, templateMixin);
 
       self.Study                      = self.$injector.get('Study');
       self.SpecimenLinkAnnotationType = self.$injector.get('SpecimenLinkAnnotationType');

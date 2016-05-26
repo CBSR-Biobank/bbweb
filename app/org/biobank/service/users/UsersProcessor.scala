@@ -380,11 +380,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
                                      event.getNameUpdated.getVersion) { user =>
       user.withName(event.getNameUpdated.getName).fold(
         err => log.error(s"could not update user from event: $event"),
-        u => {
-          userRepository.put(
-            u.copy(timeAdded = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)))
-          ()
-        }
+        u => storeUpdated(u, event.getTime)
       )
     }
   }
@@ -395,11 +391,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
                                      event.getEmailUpdated.getVersion) { user =>
       user.withEmail(event.getEmailUpdated.getEmail).fold(
         err => log.error(s"could not update user from event: $event"),
-        u => {
-          userRepository.put(
-            u.copy(timeAdded = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)))
-          ()
-        }
+        u => storeUpdated(u, event.getTime)
       )
     }
   }
@@ -412,11 +404,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
 
       user.withPassword(updatedEvent.getPassword, updatedEvent.getSalt).fold(
         err => log.error(s"could not update user from event: $event"),
-        u => {
-          userRepository.put(
-            u.copy(timeAdded = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)))
-          ()
-        }
+        u => storeUpdated(u, event.getTime)
       )
     }
   }
@@ -427,11 +415,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
                                      event.getAvatarUrlUpdated.getVersion) { user =>
       user.withAvatarUrl(event.getAvatarUrlUpdated.avatarUrl).fold(
         err => log.error(s"could not update user from event: $event"),
-        u => {
-          userRepository.put(
-            u.copy(timeAdded = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)))
-          ()
-        }
+        u => storeUpdated(u, event.getTime)
       )
     }
   }
@@ -444,11 +428,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
 
       user.withPassword(updatedEvent.getPassword, updatedEvent.getSalt).fold(
         err => log.error(s"could not update user from event: $event"),
-        u => {
-          userRepository.put(
-            u.copy(timeAdded = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)))
-          ()
-        }
+        u => storeUpdated(u, event.getTime)
       )
     }
   }
@@ -459,11 +439,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
                                      event.getLocked.getVersion) { user =>
       user.lock.fold(
         err => log.error(s"could not lock user from event: $event"),
-        u => {
-          userRepository.put(
-            u.copy(timeAdded = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)))
-          ()
-        }
+        u => storeUpdated(u, event.getTime)
       )
     }
   }
@@ -474,13 +450,24 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
                                      event.getUnlocked.getVersion) { user =>
       user.unlock.fold(
         err => log.error(s"could not unlock user from event: $event"),
-        u => {
-          userRepository.put(
-            u.copy(timeAdded = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)))
-          ()
-        }
+        u => storeUpdated(u, event.getTime)
       )
     }
+  }
+
+  /**
+   * This can be improved once
+   *
+   */
+  private def storeUpdated(user: User, time: String): Unit = {
+    val timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(time))
+    val updatedUser = user match {
+        case u: ActiveUser     => u.copy(timeModified = timeModified)
+        case u: RegisteredUser => u.copy(timeModified = timeModified)
+        case u: LockedUser     => u.copy(timeModified = timeModified)
+    }
+    userRepository.put(updatedUser)
+    ()
   }
 
   /**

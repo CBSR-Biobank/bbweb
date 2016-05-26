@@ -15,10 +15,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, testUtils, jsonEntities, directiveTestSuite) {
+    beforeEach(inject(function ($rootScope, $compile, testUtils, jsonEntities, templateMixin) {
       var self = this;
 
-      _.extend(self, directiveTestSuite);
+      _.extend(self, templateMixin);
 
       self.AnnotationType      = self.$injector.get('AnnotationType');
       self.AnnotationValueType = self.$injector.get('AnnotationValueType');

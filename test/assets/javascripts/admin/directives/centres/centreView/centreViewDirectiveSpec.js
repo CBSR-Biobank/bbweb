@@ -22,10 +22,10 @@ define([
       });
     }));
 
-    beforeEach(inject(function($rootScope, $compile, $timeout, directiveTestSuite) {
+    beforeEach(inject(function($rootScope, $compile, $timeout, templateMixin) {
       var self = this;
 
-      _.extend(self, directiveTestSuite);
+      _.extend(self, templateMixin);
 
       self.$window          = self.$injector.get('$window');
       self.$state       = self.$injector.get('$state');

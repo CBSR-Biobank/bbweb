@@ -1,9 +1,9 @@
 package org.biobank.controllers
 
+import com.github.nscala_time.time.Imports._
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.user._
 import org.biobank.fixture.ControllerFixture
-import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.mvc.Cookie
 import play.api.test.Helpers._
@@ -363,8 +363,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val user = factory.createActiveUser
         userRepository.put(user)
 
-        val reqJson = Json.obj("id"              -> user.id.id,
-                               "expectedVersion" -> Some(user.version),
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
                                "name"            -> "a")
         val json = makeRequest(POST, updateUri(user, "name"), BAD_REQUEST, json = reqJson)
 
@@ -376,25 +375,41 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
     "POST /users/email/:id" must {
 
       "update a user's email" in {
-        val user = factory.createActiveUser
+        val user = factory.createActiveUser.copy(timeAdded = DateTime.lastMonth)
         userRepository.put(user)
 
-        val reqJson = Json.obj("id" -> user.id.id,
-                               "expectedVersion" -> Some(user.version),
-                               "email" -> user.email)
+        val newEmail = nameGenerator.nextEmail[User]
+
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
+                               "email"           -> newEmail)
         val json = makeRequest(POST, updateUri(user, "email"), json = reqJson)
 
         (json \ "status").as[String] must be ("success")
+
         (json \ "data" \ "version").as[Int] must be(user.version + 1)
-        (json \ "data" \ "email").as[String] must be(user.email)
+
+        (json \ "data" \ "email").as[String] must be(newEmail)
+
+        userRepository.getByKey(user.id) mustSucceed { repoUser =>
+          compareObj((json \ "data").as[JsObject], repoUser)
+
+          repoUser must have (
+            'id          (user.id),
+            'version     (user.version + 1),
+            'name        (user.name),
+            'email       (newEmail),
+            'avatarUrl   (user.avatarUrl)
+          )
+
+          checkTimeStamps(repoUser, user.timeAdded, DateTime.now)
+        }
       }
 
       "not update a user's email with an invalid email address" in {
         val user = factory.createActiveUser
         userRepository.put(user)
 
-        val reqJson = Json.obj("id" -> user.id.id,
-                               "expectedVersion" -> Some(user.version),
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
                                "email" -> "abcdef")
         val json = makeRequest(POST, updateUri(user, "email"), BAD_REQUEST, json = reqJson)
 
@@ -411,11 +426,12 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val newPassword = nameGenerator.next[User]
         val salt = passwordHasher.generateSalt
         val encryptedPassword = passwordHasher.encrypt(plainPassword, salt)
-        val user = factory.createActiveUser.copy(password = encryptedPassword, salt = salt)
+        val user = factory.createActiveUser.copy(password  = encryptedPassword,
+                                                 salt      = salt,
+                                                 timeAdded = DateTime.lastMonth)
         userRepository.put(user)
 
-        val reqJson = Json.obj("id"              -> user.id.id,
-                               "expectedVersion" -> Some(user.version),
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
                                "currentPassword" -> plainPassword,
                                "newPassword"     -> newPassword)
         val json = makeRequest(POST, updateUri(user, "password"), json = reqJson)
@@ -423,14 +439,27 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must be ("success")
         (json \ "data" \ "id").as[String] must be (user.id.id)
         (json \ "data" \ "version").as[Long] must be (user.version + 1)
+
+        userRepository.getByKey(user.id) mustSucceed { repoUser =>
+          compareObj((json \ "data").as[JsObject], repoUser)
+
+          repoUser must have (
+            'id          (user.id),
+            'version     (user.version + 1),
+            'name        (user.name),
+            'email       (user.email),
+            'avatarUrl   (user.avatarUrl)
+          )
+
+          checkTimeStamps(repoUser, user.timeAdded, DateTime.now)
+        }
       }
 
       "not update a user's password with an empty current password" in {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
 
-        val reqJson = Json.obj("id"              -> user.id.id,
-                               "expectedVersion" -> Some(user.version),
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
                                "currentPassword" -> "",
                                "newPassword"     -> "abcdef")
         val json = makeRequest(POST, updateUri(user, "password"), BAD_REQUEST, json = reqJson)
@@ -442,8 +471,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
 
-        val reqJson = Json.obj("id" -> user.id.id,
-                               "expectedVersion" -> Some(user.version),
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
                                "currentPassword" -> "abcdef",
                                "newPassword" -> "")
         val json = makeRequest(POST, updateUri(user, "password"), BAD_REQUEST, json = reqJson)
@@ -455,25 +483,39 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
     "POST /users/avatarurl/:id" must {
 
       "update a user's avatar URL" in {
-        val user = factory.createActiveUser
+        val user = factory.createActiveUser.copy(timeAdded = DateTime.lastMonth)
         userRepository.put(user)
 
-        val reqJson = Json.obj("id" -> user.id.id,
-                               "expectedVersion" -> Some(user.version),
-                               "avatarUrl" -> user.avatarUrl)
+        val newAvatarUrl = nameGenerator.nextUrl[User]
+
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
+                               "avatarUrl" -> newAvatarUrl)
         val json = makeRequest(POST, updateUri(user, "avatarurl"), json = reqJson)
 
         (json \ "status").as[String] must be ("success")
         (json \ "data" \ "version").as[Int] must be(user.version + 1)
-        (json \ "data" \ "avatarUrl").asOpt[String] must be(user.avatarUrl)
+        (json \ "data" \ "avatarUrl").as[String] must be(newAvatarUrl)
+
+        userRepository.getByKey(user.id) mustSucceed { repoUser =>
+          compareObj((json \ "data").as[JsObject], repoUser)
+
+          repoUser must have (
+            'id          (user.id),
+            'version     (user.version + 1),
+            'name        (user.name),
+            'email       (user.email),
+            'avatarUrl   (Some(newAvatarUrl))
+          )
+
+          checkTimeStamps(repoUser, user.timeAdded, DateTime.now)
+        }
       }
 
       "remove a user's avatar URL" in {
         val user = factory.createActiveUser
         userRepository.put(user)
 
-        val reqJson = Json.obj("id" -> user.id.id,
-                               "expectedVersion" -> Some(user.version))
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version))
         val json = makeRequest(POST, updateUri(user, "avatarurl"), json = reqJson)
 
         (json \ "status").as[String] must be ("success")
@@ -485,8 +527,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val user = factory.createActiveUser
         userRepository.put(user)
 
-        val reqJson = Json.obj("id" -> user.id.id,
-                               "expectedVersion" -> Some(user.version),
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
                                "avatarUrl" -> "abcdef")
         val json = makeRequest(POST, updateUri(user, "avatarurl"), BAD_REQUEST, json = reqJson)
 
@@ -498,8 +539,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val user = factory.createActiveUser
         userRepository.put(user)
 
-        val reqJson = Json.obj("id" -> user.id.id,
-                               "expectedVersion" -> Some(user.version),
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
                                "avatarUrl" -> "")
         val json = makeRequest(POST, updateUri(user, "avatarurl"), BAD_REQUEST, json = reqJson)
 
@@ -663,8 +703,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val validToken = doLogin(user.email, plainPassword)
         val badToken = nameGenerator.next[String]
 
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
-                               "id" -> user.id.id)
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version))
 
         // this request is valid since user is logged in
         var fakeRequest = FakeRequest(POST, updateUri(user, "lock"))

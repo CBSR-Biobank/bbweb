@@ -18,10 +18,10 @@ define([
 
     beforeEach(mocks.module('ngAnimateMock', 'biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(directiveTestSuite) {
+    beforeEach(inject(function(templateMixin) {
       var self = this;
 
-      _.extend(self, directiveTestSuite);
+      _.extend(self, templateMixin);
 
       self.$rootScope   = self.$injector.get('$rootScope');
       self.$animate     = self.$injector.get('$animate');

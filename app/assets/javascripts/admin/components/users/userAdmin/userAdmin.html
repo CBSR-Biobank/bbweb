@@ -1,0 +1,26 @@
+<div class="page-header">
+  <h1>User administration</h1>
+</div>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Users</h3>
+  </div>
+
+  <ul class="list-group">
+    <li class="list-group-item" ng-if="! vm.haveUsers">
+      <div class="panel panel-warning">
+        <div class="panel-heading">
+          No users have been added yet.
+        </div>
+      </div>
+    </li>
+
+    <li class="list-group-item" ng-if="vm.haveUsers">
+      The following users are present:
+    </li>
+  </ul>
+
+  <users-table ng-if="vm.haveUsers"
+               user-counts="vm.userCounts">
+  </users-table>
+</div>

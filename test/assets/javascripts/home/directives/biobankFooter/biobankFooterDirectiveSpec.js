@@ -30,13 +30,13 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(directiveTestSuite) {
+    beforeEach(inject(function(templateMixin) {
       var self = this;
 
       self.$rootScope = self.$injector.get('$rootScope');
       self.$compile   = self.$injector.get('$compile');
 
-      _.extend(self, directiveTestSuite);
+      _.extend(self, templateMixin);
     }));
 
     it('has valid scope', function() {

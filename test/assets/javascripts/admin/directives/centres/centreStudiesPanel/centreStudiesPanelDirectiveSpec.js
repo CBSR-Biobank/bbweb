@@ -16,10 +16,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, directiveTestSuite, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, templateMixin, testUtils) {
       var self = this;
 
-      _.extend(self, directiveTestSuite);
+      _.extend(self, templateMixin);
 
       self.$q               = self.$injector.get('$q');
       self.Centre           = self.$injector.get('Centre');
@@ -53,13 +53,11 @@ define([
 
       function createController(entities) {
         var element = angular.element([
-          '<uib-accordion close-others="false">',
-          '  <centre-studies-panel',
-          '    centre="vm.centre" ',
-          '    centre-studies="vm.centreStudies" ',
-          '    study-names="vm.studyNames"> ',
-          '  </centre-studies-panel>',
-          '</uib-accordion>'
+          '<centre-studies-panel',
+          '  centre="vm.centre" ',
+          '  centre-studies="vm.centreStudies" ',
+          '  study-names="vm.studyNames"> ',
+          '</centre-studies-panel>'
         ].join(''));
 
         // must have at least 2 studies in entities.studies
@@ -74,7 +72,7 @@ define([
 
         $compile(element)(self.scope);
         self.scope.$digest();
-        self.controller = element.find('centre-studies-panel').controller('centreStudiesPanel');
+        self.controller = element.controller('centreStudiesPanel');
       }
 
       function studyOnSelectCommon(entities) {

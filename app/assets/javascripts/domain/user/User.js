@@ -112,8 +112,6 @@ define(['underscore', 'tv4'], function(_, tv4) {
       options = options || {};
       params = _.pick(options, validKeys);
 
-      console.log(params);
-
       return biobankApi.get(url, params).then(function(reply) {
         // reply is a paged result
         var deferred = $q.defer();
@@ -224,7 +222,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
         id:              user.id,
         expectedVersion: user.version
       };
-      return biobankApi.post(uri(user.id) + '/' + status, json)
+      return biobankApi.post(updateUri(status, user.id), json)
         .then(User.prototype.asyncCreate);
     }
 
