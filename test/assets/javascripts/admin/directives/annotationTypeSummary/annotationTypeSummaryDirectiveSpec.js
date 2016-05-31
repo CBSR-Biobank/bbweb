@@ -16,7 +16,7 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (templateMixin, testUtils, jsonEntities, AnnotationType) {
+    beforeEach(inject(function (templateMixin, testUtils, factory, AnnotationType) {
       var self = this;
 
       _.extend(self, templateMixin);
@@ -24,7 +24,7 @@ define([
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/annotationTypeSummary/annotationTypeSummary.html');
 
-      self.annotationType = new AnnotationType(jsonEntities.annotationType());
+      self.annotationType = new AnnotationType(factory.annotationType());
     }));
 
     it('can be created', inject(function ($rootScope, $compile) {

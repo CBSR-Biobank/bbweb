@@ -54,13 +54,13 @@ define([
       self.Study                  = self.$injector.get('Study');
       self.CollectionEventType    = self.$injector.get('CollectionEventType');
       self.CollectionSpecimenSpec = self.$injector.get('CollectionSpecimenSpec');
-      self.jsonEntities           = self.$injector.get('jsonEntities');
+      self.factory           = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/collection/collectionSpecimenSpecAdd/collectionSpecimenSpecAdd.html');
 
-      self.jsonCevenType       = self.jsonEntities.collectionEventType();
-      self.jsonStudy           = self.jsonEntities.defaultStudy();
+      self.jsonCevenType       = self.factory.collectionEventType();
+      self.jsonStudy           = self.factory.defaultStudy();
       self.collectionEventType = new self.CollectionEventType(self.jsonCevenType);
       self.study               = new self.Study(self.jsonStudy);
 
@@ -85,7 +85,7 @@ define([
     describe('on submit', function() {
 
       beforeEach(function() {
-        this.jsonSpec     = this.jsonEntities.collectionSpecimenSpec();
+        this.jsonSpec     = this.factory.collectionSpecimenSpec();
         this.specimenSpec = new this.CollectionSpecimenSpec(this.jsonSpec);
       });
 

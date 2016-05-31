@@ -26,10 +26,10 @@ define([
       self.notificationsService = self.$injector.get('notificationsService');
       self.Study                = self.$injector.get('Study');
       self.AnnotationType       = self.$injector.get('AnnotationType');
-      self.jsonEntities         = self.$injector.get('jsonEntities');
+      self.factory         = self.$injector.get('factory');
 
-      jsonAnnotType = self.jsonEntities.annotationType();
-      self.study = new self.Study(_.extend(self.jsonEntities.study(),
+      jsonAnnotType = self.factory.annotationType();
+      self.study = new self.Study(_.extend(self.factory.study(),
                                            { annotationTypes: [ jsonAnnotType ]}));
       self.annotationType = new self.AnnotationType(jsonAnnotType);
       self.createController = createController;

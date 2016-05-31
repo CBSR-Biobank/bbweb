@@ -26,7 +26,7 @@ define([
       self.Location            = self.$injector.get('Location');
       self.modalService        = self.$injector.get('modalService');
       self.domainEntityService = self.$injector.get('domainEntityService');
-      self.jsonEntities        = self.$injector.get('jsonEntities');
+      self.factory        = self.$injector.get('factory');
       self.createEntities      = createEntities;
       self.createController    = createController;
 
@@ -40,9 +40,9 @@ define([
       function createEntities() {
         var entities = {};
 
-        entities.centre = new self.Centre(self.jsonEntities.centre());
+        entities.centre = new self.Centre(self.factory.centre());
         entities.locations = _.map(_.range(3), function () {
-          return new self.Location(self.jsonEntities.location());
+          return new self.Location(self.factory.location());
         });
         return entities;
       }

@@ -30,9 +30,9 @@ define([
       self.$window      = self.$injector.get('$window');
       self.$state       = self.$injector.get('$state');
       self.Study        = self.$injector.get('Study');
-      self.jsonEntities = self.$injector.get('jsonEntities');
+      self.factory = self.$injector.get('factory');
 
-      self.study = new self.Study(self.jsonEntities.study());
+      self.study = new self.Study(self.factory.study());
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/studyView/studyView.html');

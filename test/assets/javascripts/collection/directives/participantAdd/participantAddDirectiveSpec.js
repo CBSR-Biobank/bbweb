@@ -50,7 +50,7 @@ define([
       self.notifiactionsService = self.$injector.get('notificationsService');
       self.Study                = self.$injector.get('Study');
       self.Participant          = self.$injector.get('Participant');
-      self.jsonEntities         = self.$injector.get('jsonEntities');
+      self.factory         = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/participantAdd/participantAdd.html',
@@ -61,8 +61,8 @@ define([
         '/assets/javascripts/common/annotationsInput/singleSelectAnnotation.html',
         '/assets/javascripts/common/annotationsInput/textAnnotation.html');
 
-      self.jsonParticipant = self.jsonEntities.participant();
-      self.jsonStudy       = self.jsonEntities.defaultStudy();
+      self.jsonParticipant = self.factory.participant();
+      self.jsonStudy       = self.factory.defaultStudy();
       self.study           = new self.Study(self.jsonStudy);
       self.uniqueId        = self.jsonParticipant.uniqueId;
 

@@ -29,10 +29,10 @@ define(function (require) {
       self.AnnotationType         = self.$injector.get('AnnotationType');
       self.notificationsService   = self.$injector.get('notificationsService');
       self.domainEntityService    = self.$injector.get('domainEntityService');
-      self.jsonEntities           = self.$injector.get('jsonEntities');
+      self.factory           = self.$injector.get('factory');
 
-      self.jsonStudy              = this.jsonEntities.study();
-      self.jsonCet                = self.jsonEntities.collectionEventType(self.jsonStudy);
+      self.jsonStudy              = this.factory.study();
+      self.jsonCet                = self.factory.collectionEventType(self.jsonStudy);
       self.study                  = new self.Study(self.jsonStudy);
       self.collectionEventType    = new self.CollectionEventType(self.jsonCet);
 
@@ -87,7 +87,7 @@ define(function (require) {
     });
 
     it('calling editAnnotationType should change to the correct state', function() {
-      var annotType = new this.AnnotationType(this.jsonEntities.annotationType());
+      var annotType = new this.AnnotationType(this.factory.annotationType());
 
       this.createController();
       this.controller.editAnnotationType(annotType);
@@ -106,7 +106,7 @@ define(function (require) {
         context.updateFuncName     = 'updateName';
         context.controllerFuncName = 'editName';
         context.modalInputFuncName = 'text';
-        context.newValue           = this.jsonEntities.stringNext();
+        context.newValue           = this.factory.stringNext();
       }));
 
       entityUpdateSharedSpec(context);
@@ -122,7 +122,7 @@ define(function (require) {
         context.updateFuncName     = 'updateDescription';
         context.controllerFuncName = 'editDescription';
         context.modalInputFuncName = 'textArea';
-        context.newValue           = this.jsonEntities.stringNext();
+        context.newValue           = this.factory.stringNext();
       }));
 
       entityUpdateSharedSpec(context);
@@ -146,7 +146,7 @@ define(function (require) {
     });
 
     it('editing a specimen spec changes to correct state', function() {
-      var specimenSpec = new this.CollectionSpecimenSpec(this.jsonEntities.collectionSpecimenSpec());
+      var specimenSpec = new this.CollectionSpecimenSpec(this.factory.collectionSpecimenSpec());
 
       this.createController();
       this.controller.editSpecimenSpec(specimenSpec);
@@ -160,8 +160,8 @@ define(function (require) {
 
       it('can be removed when in valid state', function() {
         var modalService = this.$injector.get('modalService'),
-            jsonSpecimenSpec = this.jsonEntities.collectionSpecimenSpec(),
-            jsonCeventType = new this.jsonEntities.collectionEventType({ specimenSpecs: [ jsonSpecimenSpec ]}),
+            jsonSpecimenSpec = this.factory.collectionSpecimenSpec(),
+            jsonCeventType = new this.factory.collectionEventType({ specimenSpecs: [ jsonSpecimenSpec ]}),
             ceventType = new this.CollectionEventType(jsonCeventType);
 
         spyOn(modalService, 'showModal').and.returnValue(this.$q.when('OK'));
@@ -180,7 +180,7 @@ define(function (require) {
 
       it('throws an error if modifications are not allowed', function() {
         var self = this,
-            specimenSpec = new self.CollectionSpecimenSpec(self.jsonEntities.collectionSpecimenSpec());
+            specimenSpec = new self.CollectionSpecimenSpec(self.factory.collectionSpecimenSpec());
 
         spyOn(self.domainEntityService, 'removeEntity').and.returnValue(self.$q.when('OK'));
 
@@ -198,8 +198,8 @@ define(function (require) {
 
       it('can be removed when in valid state', function() {
         var modalService = this.$injector.get('modalService'),
-            jsonAnnotType = this.jsonEntities.annotationType(),
-            jsonCeventType = new this.jsonEntities.collectionEventType({ annotationTypes: [ jsonAnnotType ]}),
+            jsonAnnotType = this.factory.annotationType(),
+            jsonCeventType = new this.factory.collectionEventType({ annotationTypes: [ jsonAnnotType ]}),
             ceventType = new this.CollectionEventType(jsonCeventType);
 
         spyOn(modalService, 'showModal').and.returnValue(this.$q.when('OK'));
@@ -216,7 +216,7 @@ define(function (require) {
       });
 
       it('throws an error if modifications are not allowed', function() {
-        var annotationType = new this.AnnotationType(this.jsonEntities.annotationType()),
+        var annotationType = new this.AnnotationType(this.factory.annotationType()),
             studyAnnotationTypeUtils = this.$injector.get('studyAnnotationTypeUtils');
 
         spyOn(studyAnnotationTypeUtils, 'removeInUseModal').and.returnValue(this.$q.when('OK'));
@@ -232,7 +232,7 @@ define(function (require) {
 
       it('throws an error if modifications are not allowed', function() {
         var self = this,
-            annotationType = new this.AnnotationType(this.jsonEntities.annotationType());
+            annotationType = new this.AnnotationType(this.factory.annotationType());
 
         spyOn(self.domainEntityService, 'removeEntity').and.returnValue(self.$q.when('OK'));
 

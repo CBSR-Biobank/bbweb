@@ -17,7 +17,7 @@ define([
     var httpBackend,
         funutils,
         SpecimenLinkType,
-        jsonEntities;
+        factory;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -25,7 +25,7 @@ define([
       httpBackend      = this.$injector.get('$httpBackend');
       funutils         = this.$injector.get('funutils');
       SpecimenLinkType = this.$injector.get('SpecimenLinkType');
-      jsonEntities     = this.$injector.get('jsonEntities');
+      factory     = this.$injector.get('factory');
       testUtils.addCustomMatchers();
     }));
 
@@ -36,15 +36,15 @@ define([
           annotationTypes,
           sltFromServer;
 
-      study          = jsonEntities.study();
-      processingType = jsonEntities.processingType(study);
-      sltFromServer  = jsonEntities.specimenLinkType(processingType);
+      study          = factory.study();
+      processingType = factory.processingType(study);
+      sltFromServer  = factory.specimenLinkType(processingType);
 
       specimenGroups = _.map(_.range(2), function() {
-        return jsonEntities.specimenGroup(study);
+        return factory.specimenGroup(study);
       });
       annotationTypes = _.map(_.range(2), function() {
-        return jsonEntities.annotationType(study);
+        return factory.annotationType(study);
       });
 
       return {
@@ -62,7 +62,7 @@ define([
     function entitiesWithLinkedSpecimenLinkType() {
       var entities = createEntities(), slt;
 
-      entities.sltFromServer = jsonEntities.specimenLinkType(
+      entities.sltFromServer = factory.specimenLinkType(
         entities.processingType, {
           inputGroup: entities.specimenGroups[0],
           outputGroup: entities.specimenGroups[1],
@@ -97,7 +97,7 @@ define([
     it('fails when creating from bad annotation type data', function() {
       var entities = createEntities();
 
-      entities.sltFromServer = jsonEntities.specimenLinkType(
+      entities.sltFromServer = factory.specimenLinkType(
         entities.processingType, {
           inputGroup: entities.specimenGroups[0],
           outputGroup: entities.specimenGroups[1]
@@ -147,7 +147,7 @@ define([
     it('can add a specimen link type', function() {
       var entities = createEntities(), slt, cmd;
 
-      entities.sltFromServer = jsonEntities.specimenLinkType(
+      entities.sltFromServer = factory.specimenLinkType(
         entities.processingType, {
           inputGroup: entities.specimenGroups[0],
           outputGroup: entities.specimenGroups[1],
@@ -169,7 +169,7 @@ define([
     it('can update a specimen link type without annotation types', function() {
       var entities = createEntities(), slt;
 
-      entities.sltFromServer = jsonEntities.specimenLinkType(
+      entities.sltFromServer = factory.specimenLinkType(
         entities.processingType, {
           inputGroup: entities.specimenGroups[0],
           outputGroup: entities.specimenGroups[1]
@@ -230,7 +230,7 @@ define([
     it('allAnnotationTypeDataIds returns valid results', function() {
       var entities = createEntities(), slt, ids;
 
-      entities.sltFromServer = jsonEntities.specimenLinkType(
+      entities.sltFromServer = factory.specimenLinkType(
         entities.processingType, {
           inputGroup: entities.specimenGroups[0],
           outputGroup: entities.specimenGroups[1],

@@ -15,14 +15,14 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, testUtils, jsonEntities, templateMixin) {
+    beforeEach(inject(function ($rootScope, $compile, testUtils, factory, templateMixin) {
       var self = this;
 
       _.extend(self, templateMixin);
 
       self.AnnotationType      = self.$injector.get('AnnotationType');
       self.AnnotationValueType = self.$injector.get('AnnotationValueType');
-      self.jsonEntities        = self.$injector.get('jsonEntities');
+      self.factory        = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/annotationTypeAdd/annotationTypeAdd.html');
@@ -150,7 +150,7 @@ define([
     it('should invoke submit function', function() {
       this.createController();
 
-      var annotType = new this.AnnotationType(this.jsonEntities.annotationType());
+      var annotType = new this.AnnotationType(this.factory.annotationType());
       this.controller.submit(annotType);
       expect(this.onSubmit).toHaveBeenCalledWith(annotType);
     });

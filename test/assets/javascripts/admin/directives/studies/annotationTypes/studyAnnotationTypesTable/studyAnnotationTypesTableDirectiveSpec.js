@@ -25,13 +25,13 @@ define([
       self.AnnotationType       = self.$injector.get('AnnotationType');
       self.AnnotationValueType  = self.$injector.get('AnnotationValueType');
       self.AnnotationTypeViewer = self.$injector.get('AnnotationTypeViewer');
-      self.jsonEntities         = self.$injector.get('jsonEntities');
+      self.factory         = self.$injector.get('factory');
 
       self.annotationTypes = _.map(
         _.values(self.AnnotationValueType),
         function(valueType) {
           return new self.AnnotationType(
-            self.jsonEntities.annotationType(self.study, { valueType: valueType }));
+            self.factory.annotationType(self.study, { valueType: valueType }));
         });
     }));
 

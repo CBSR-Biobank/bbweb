@@ -25,7 +25,7 @@ define(function (require) {
       self.Study                  = self.$injector.get('Study');
       self.CollectionEventType    = self.$injector.get('CollectionEventType');
       self.CollectionSpecimenSpec = self.$injector.get('CollectionSpecimenSpec');
-      self.jsonEntities           = self.$injector.get('jsonEntities');
+      self.factory           = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/collection/collectionSpecimenSpecView/collectionSpecimenSpecView.html',
@@ -33,11 +33,11 @@ define(function (require) {
 
       self.createController = createController;
 
-      self.jsonSpecimenSpec    = self.jsonEntities.collectionSpecimenSpec();
-      self.jsonCeventType      = self.jsonEntities.collectionEventType({
+      self.jsonSpecimenSpec    = self.factory.collectionSpecimenSpec();
+      self.jsonCeventType      = self.factory.collectionEventType({
         specimenSpecs: [ self.jsonSpecimenSpec ]
       });
-      self.jsonStudy           = self.jsonEntities.defaultStudy;
+      self.jsonStudy           = self.factory.defaultStudy;
 
       self.study               = new self.Study(self.jsonStudy);
       self.collectionEventType = new self.CollectionEventType(self.jsonCeventType);

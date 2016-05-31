@@ -59,7 +59,7 @@ define([
         function setupEntities(userContext) {
           var Study         = userContext.$injector.get('Study'),
               SpecimenGroup = userContext.$injector.get('SpecimenGroup'),
-              jsonEntities  = userContext.$injector.get('jsonEntities');
+              factory  = userContext.$injector.get('factory');
 
           return create;
 
@@ -67,13 +67,13 @@ define([
 
           function create(options) {
             var specimenGroup,
-                study = new Study(jsonEntities.study());
+                study = new Study(factory.study());
 
             options = options || {};
             if (options.noSgId) {
-              specimenGroup = new SpecimenGroup(_.omit(jsonEntities.processingType(study), 'id'));
+              specimenGroup = new SpecimenGroup(_.omit(factory.processingType(study), 'id'));
             } else {
-              specimenGroup = new SpecimenGroup(jsonEntities.processingType(study));
+              specimenGroup = new SpecimenGroup(factory.processingType(study));
             }
 
             return {

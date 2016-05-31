@@ -34,7 +34,7 @@ define([
       this.Location     = this.$injector.get('Location');
       this.funutils     = this.$injector.get('funutils');
       this.testUtils    = this.$injector.get('testUtils');
-      this.jsonEntities = this.$injector.get('jsonEntities');
+      this.factory = this.$injector.get('factory');
 
       Centre = this.Centre;
     }));
@@ -60,7 +60,7 @@ define([
 
     it('fails when creating from a non object', function() {
       var self = this,
-          badStudyJson = _.omit(self.jsonEntities.centre(), 'name');
+          badStudyJson = _.omit(self.factory.centre(), 'name');
 
       expect(function () { self.Centre.create(badStudyJson); })
         .toThrowError(/invalid object from server/);
@@ -68,7 +68,7 @@ define([
 
     it('fails when creating from a bad study ID', function() {
       var self = this,
-          badCentreJson = self.jsonEntities.centre({ studyIds: [ null, '' ] });
+          badCentreJson = self.factory.centre({ studyIds: [ null, '' ] });
 
       expect(function () { self.Centre.create(badCentreJson); })
         .toThrowError(/invalid object from server/);
@@ -76,7 +76,7 @@ define([
 
     it('fails when creating from a bad location', function() {
       var self = this,
-          badCentreJson = self.jsonEntities.centre({ locations: [ 1 ] });
+          badCentreJson = self.factory.centre({ locations: [ 1 ] });
 
       expect(function () { self.Centre.create(badCentreJson); })
         .toThrowError(/invalid object from server/);
@@ -85,14 +85,14 @@ define([
     it('status predicates return valid results', function() {
       var self = this;
       _.each(_.values(self.CentreStatus), function(status) {
-        var centre = new self.Centre(self.jsonEntities.centre({ status: status }));
+        var centre = new self.Centre(self.factory.centre({ status: status }));
         expect(centre.isDisabled()).toBe(status === self.CentreStatus.DISABLED);
         expect(centre.isEnabled()).toBe(status === self.CentreStatus.ENABLED);
       });
     });
 
     it('can retrieve a single centre', function() {
-      var self = this, centre = self.jsonEntities.centre();
+      var self = this, centre = self.factory.centre();
 
       self.httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
@@ -107,7 +107,7 @@ define([
 
     it('fails when getting a centre and it has a bad format', function() {
       var self = this,
-          centre = _.omit(self.jsonEntities.centre(), 'name');
+          centre = _.omit(self.factory.centre(), 'name');
       self.httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
       self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
@@ -124,7 +124,7 @@ define([
 
     it('fails when getting a centre and it has a bad study ID', function() {
       var self = this,
-          centre = self.jsonEntities.centre({ studyIds: [ '' ]});
+          centre = self.factory.centre({ studyIds: [ '' ]});
 
       self.httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
@@ -142,8 +142,8 @@ define([
 
     it('fails when getting a centre and it has a bad location', function() {
       var self = this,
-          location = _.omit(self.jsonEntities.location(), 'name'),
-          centre = self.jsonEntities.centre({ locations: [ location ]});
+          location = _.omit(self.factory.location(), 'name'),
+          centre = self.factory.centre({ locations: [ location ]});
 
       self.httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
@@ -161,8 +161,8 @@ define([
 
     it('can retrieve centres', function() {
       var self = this,
-          centres = [ self.jsonEntities.centre() ],
-          reply = self.jsonEntities.pagedResult(centres);
+          centres = [ self.factory.centre() ],
+          reply = self.factory.pagedResult(centres);
 
       self.httpBackend.whenGET(uri()).respond(serverReply(reply));
 
@@ -190,8 +190,8 @@ define([
           ];
 
       _.each(optionList, function (options) {
-        var centres = [ self.jsonEntities.centre() ],
-            reply   = self.jsonEntities.pagedResult(centres),
+        var centres = [ self.factory.centre() ],
+            reply   = self.factory.pagedResult(centres),
             url     = sprintf.sprintf('%s?%s', uri(), $.param(options, true));
 
         self.httpBackend.whenGET(url).respond(serverReply(reply));
@@ -210,8 +210,8 @@ define([
 
     it('fails when list returns an invalid centre', function() {
       var self = this,
-          centres = [ _.omit(self.jsonEntities.centre(), 'name') ],
-          reply = self.jsonEntities.pagedResult(centres);
+          centres = [ _.omit(self.factory.centre(), 'name') ],
+          reply = self.factory.pagedResult(centres);
 
       self.httpBackend.whenGET(uri()).respond(serverReply(reply));
 
@@ -229,7 +229,7 @@ define([
 
     it('can add a centre', function() {
       var self = this,
-          jsonCentre = self.jsonEntities.centre(),
+          jsonCentre = self.factory.centre(),
           centre = new self.Centre(_.omit(jsonCentre, 'id')),
           json = _.pick(centre, 'name', 'description');
 
@@ -245,7 +245,7 @@ define([
 
     it('can update the name on a centre', function() {
       var self       = this,
-          jsonCentre = self.jsonEntities.centre(),
+          jsonCentre = self.factory.centre(),
           centre     = new self.Centre(jsonCentre);
 
       this.updateEntity.call(this,
@@ -261,7 +261,7 @@ define([
 
     it('can update the description on a centre', function() {
       var self = this,
-          jsonCentre = self.jsonEntities.centre({ description: self.jsonEntities.stringNext() }),
+          jsonCentre = self.factory.centre({ description: self.factory.stringNext() }),
           centre     = new self.Centre(jsonCentre);
 
       this.updateEntity.call(this,
@@ -286,23 +286,23 @@ define([
     });
 
     it('can disable a centre', function() {
-      var jsonCentre = this.jsonEntities.centre({ status: this.CentreStatus.ENABLED });
+      var jsonCentre = this.factory.centre({ status: this.CentreStatus.ENABLED });
       changeStatusShared.call(this, jsonCentre, 'disable', this.CentreStatus.DISABLED);
     });
 
     it('throws an error when disabling a centre and it is already disabled', function() {
-      var centre = new this.Centre(this.jsonEntities.centre({ status: this.CentreStatus.DISABLED }));
+      var centre = new this.Centre(this.factory.centre({ status: this.CentreStatus.DISABLED }));
       expect(function () { centre.disable(); })
         .toThrowError('already disabled');
     });
 
     it('can enable a centre', function() {
-      var jsonCentre = this.jsonEntities.centre({ status: this.CentreStatus.DISABLED });
+      var jsonCentre = this.factory.centre({ status: this.CentreStatus.DISABLED });
       changeStatusShared.call(this, jsonCentre, 'enable', this.CentreStatus.ENABLED);
     });
 
     it('throws an error when enabling a centre and it is already enabled', function() {
-      var centre = new this.Centre(this.jsonEntities.centre({ status: this.CentreStatus.ENABLED }));
+      var centre = new this.Centre(this.factory.centre({ status: this.CentreStatus.ENABLED }));
       expect(function () { centre.enable(); })
         .toThrowError('already enabled');
     });
@@ -311,8 +311,8 @@ define([
 
       it('adds a location', function() {
         var self         = this,
-            jsonLocation = this.jsonEntities.location(),
-            jsonCentre   = this.jsonEntities.centre(),
+            jsonLocation = this.factory.location(),
+            jsonCentre   = this.factory.centre(),
             centre       = new self.Centre(jsonCentre);
 
         this.updateEntity.call(this,
@@ -328,8 +328,8 @@ define([
 
       it('updates a location', function() {
         var self         = this,
-            jsonLocation = this.jsonEntities.location(),
-            jsonCentre   = this.jsonEntities.centre(),
+            jsonLocation = this.factory.location(),
+            jsonCentre   = this.factory.centre(),
             centre       = new self.Centre(jsonCentre);
 
         this.updateEntity.call(this,
@@ -353,8 +353,8 @@ define([
 
       it('can remove a location', function() {
         var self         = this,
-            jsonLocation = new self.Location(self.jsonEntities.location()),
-            jsonCentre   = self.jsonEntities.centre({ locations: [ jsonLocation ]}),
+            jsonLocation = new self.Location(self.factory.location()),
+            jsonCentre   = self.factory.centre({ locations: [ jsonLocation ]}),
             centre       = new self.Centre(jsonCentre),
             url          = sprintf.sprintf('%s/%d/%s',
                                            uri('locations', centre.id),
@@ -377,8 +377,8 @@ define([
 
       it('can add a study', function() {
         var self       = this,
-            jsonStudy  = self.jsonEntities.study(),
-            jsonCentre = self.jsonEntities.centre(),
+            jsonStudy  = self.factory.study(),
+            jsonCentre = self.factory.centre(),
             centre     = new self.Centre(jsonCentre);
 
         this.updateEntity.call(this,
@@ -394,8 +394,8 @@ define([
 
       it('can remove a study', function() {
         var self       = this,
-            jsonStudy  = self.jsonEntities.study(),
-            jsonCentre = self.jsonEntities.centre({ studyIds: [ jsonStudy.id ]}),
+            jsonStudy  = self.factory.study(),
+            jsonCentre = self.factory.centre({ studyIds: [ jsonStudy.id ]}),
             centre     = new self.Centre(jsonCentre),
             url        = sprintf.sprintf('%s/%d/%s',
                                          uri('studies', centre.id),
@@ -414,8 +414,8 @@ define([
 
       it('should not remove a study that does not exist', function() {
         var self = this,
-            study = self.jsonEntities.study(),
-            centre = new self.Centre(self.jsonEntities.centre());
+            study = self.factory.study(),
+            centre = new self.Centre(self.factory.centre());
 
         expect(function () {
           centre.removeStudy(study);

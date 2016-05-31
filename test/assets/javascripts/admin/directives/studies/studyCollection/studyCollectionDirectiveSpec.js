@@ -24,10 +24,10 @@ define([
       self.$q                   = self.$injector.get('$q');
       self.Study                = self.$injector.get('Study');
       self.CollectionEventType  = self.$injector.get('CollectionEventType');
-      self.jsonEntities         = self.$injector.get('jsonEntities');
+      self.factory         = self.$injector.get('factory');
 
-      jsonStudy = self.jsonEntities.study();
-      jsonCet   = self.jsonEntities.collectionEventType(jsonStudy);
+      jsonStudy = self.factory.study();
+      jsonCet   = self.factory.collectionEventType(jsonStudy);
 
       self.study = new self.Study(jsonStudy);
       self.collectionEventType = new self.CollectionEventType(jsonCet);

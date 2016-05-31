@@ -20,10 +20,10 @@ define(function(require) {
 
       self.CollectionEventType = self.$injector.get('CollectionEventType');
       self.AnnotationType      = self.$injector.get('AnnotationType');
-      self.jsonEntities        = self.$injector.get('jsonEntities');
+      self.factory        = self.$injector.get('factory');
 
       self.collectionEventType = new self.CollectionEventType(
-        self.jsonEntities.collectionEventType(self.jsonEntities.study()));
+        self.factory.collectionEventType(self.factory.study()));
       self.createController = createController;
 
       self.putHtmlTemplates(

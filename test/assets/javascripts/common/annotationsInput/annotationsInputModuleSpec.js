@@ -28,7 +28,7 @@ define([
       self.annotationFactory   = self.$injector.get('annotationFactory');
       self.AnnotationType      = self.$injector.get('AnnotationType');
       self.AnnotationValueType = self.$injector.get('AnnotationValueType');
-      self.jsonEntities        = self.$injector.get('jsonEntities');
+      self.factory        = self.$injector.get('factory');
 
       self.createAnnotation = createAnnotation;
       self.createController = createController;
@@ -47,7 +47,7 @@ define([
         return self.annotationFactory.create(
           undefined,
           new self.AnnotationType(
-            self.jsonEntities.annotationType({ valueType: valueType, required: true })
+            self.factory.annotationType({ valueType: valueType, required: true })
           ));
       }
 
@@ -70,7 +70,7 @@ define([
     }));
 
     it('works for a TEXT annotation', function() {
-      var annotationValue = this.jsonEntities.stringNext(),
+      var annotationValue = this.factory.stringNext(),
           annotations = [ this.createAnnotation(this.AnnotationValueType.TEXT) ];
 
       this.createController(annotations);
@@ -94,7 +94,7 @@ define([
     });
 
     it('validation fails for a NUMBER annotation and an invalid number', function() {
-      var annotationValue = this.jsonEntities.stringNext(),
+      var annotationValue = this.factory.stringNext(),
           annotations = [ this.createAnnotation(this.AnnotationValueType.NUMBER) ];
 
       this.createController(annotations);
@@ -125,7 +125,7 @@ define([
           annotationType, annotations;
 
       annotationType = new self.AnnotationType(
-        self.jsonEntities.annotationType({
+        self.factory.annotationType({
           valueType:     self.AnnotationValueType.SELECT,
           maxValueCount: 1,
           options:       [ 'option1', 'option2' ],
@@ -152,7 +152,7 @@ define([
       var annotationType, annotation;
 
       annotationType = new this.AnnotationType(
-        this.jsonEntities.annotationType({
+        this.factory.annotationType({
           valueType: this.AnnotationValueType.SELECT,
           maxValueCount: 2,
           options: [ 'option1', 'option2', 'option3' ],
@@ -177,7 +177,7 @@ define([
               annotationType, annotation;
 
           annotationType = new self.AnnotationType(
-            self.jsonEntities.annotationType({
+            self.factory.annotationType({
               valueType:     self.AnnotationValueType.SELECT,
               maxValueCount: 2,
               options:       [ 'option1', 'option2', 'option3' ],

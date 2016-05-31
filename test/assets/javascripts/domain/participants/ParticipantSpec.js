@@ -38,7 +38,7 @@ define(function(require) {
       self.AnnotationValueType      = self.$injector.get('AnnotationValueType');
       self.AnnotationType           = self.$injector.get('AnnotationType');
       self.bbwebConfig              = self.$injector.get('bbwebConfig');
-      self.jsonEntities             = self.$injector.get('jsonEntities');
+      self.factory             = self.$injector.get('factory');
       self.testUtils                = self.$injector.get('testUtils');
 
       self.testUtils.addCustomMatchers();
@@ -49,10 +49,10 @@ define(function(require) {
       self.failTest = failTest;
 
       function getParticipantEntities(isNew) {
-        var jsonAnnotationTypes = self.jsonEntities.allAnnotationTypes(),
-            jsonStudy           = self.jsonEntities.study({ annotationTypes: jsonAnnotationTypes }),
+        var jsonAnnotationTypes = self.factory.allAnnotationTypes(),
+            jsonStudy           = self.factory.study({ annotationTypes: jsonAnnotationTypes }),
             study               = new self.Study(jsonStudy),
-            jsonParticipant     = self.jsonEntities.participant(),
+            jsonParticipant     = self.factory.participant(),
             annotationTypes,
             participant;
 
@@ -72,11 +72,11 @@ define(function(require) {
       }
 
       function generateJsonAnnotationTypesAndAnnotations() {
-        var annotationTypes = self.jsonEntities.allAnnotationTypes(),
-            study           = self.jsonEntities.study({ annotationTypes: annotationTypes }),
+        var annotationTypes = self.factory.allAnnotationTypes(),
+            study           = self.factory.study({ annotationTypes: annotationTypes }),
             annotations     = _.map(annotationTypes, function (annotationType) {
-              var value = self.jsonEntities.valueForAnnotation(annotationType);
-              return self.jsonEntities.annotation({ value: value }, annotationType);
+              var value = self.factory.valueForAnnotation(annotationType);
+              return self.factory.annotation({ value: value }, annotationType);
             });
         return {
           study: study,
@@ -133,7 +133,7 @@ define(function(require) {
     });
 
     it('constructor with study parameter has valid values', function() {
-      var study = new this.Study(this.jsonEntities.study());
+      var study = new this.Study(this.factory.study());
       var participant = new this.Participant({}, study);
 
       expect(participant.study).toEqual(study);
@@ -158,18 +158,18 @@ define(function(require) {
     it('constructor with invalid annotation parameter throws error', function() {
       var self = this,
           annotationType = new this.AnnotationType(
-            this.jsonEntities.annotationType({ valueType: this.AnnotationValueType.TEXT })),
-          jsonStudy = this.jsonEntities.study({ annotationTypes: [ annotationType ]}),
+            this.factory.annotationType({ valueType: this.AnnotationValueType.TEXT })),
+          jsonStudy = this.factory.study({ annotationTypes: [ annotationType ]}),
           study = new this.Study(jsonStudy),
           serverAnnotation = {};
 
       // put an invalid value in serverAnnotation.annotationTypeId
       _.extend(
         serverAnnotation,
-        self.jsonEntities.annotation(
-          { value: self.jsonEntities.valueForAnnotation(annotationType) },
+        self.factory.annotation(
+          { value: self.factory.valueForAnnotation(annotationType) },
           annotationType),
-        { annotationTypeId: self.jsonEntities.stringNext() });
+        { annotationTypeId: self.factory.stringNext() });
 
       expect(function () {
         return new self.Participant({ annotations: [ serverAnnotation ] },
@@ -190,8 +190,8 @@ define(function(require) {
 
     it('fails when creating from an object and an annotation has invalid keys', function() {
       var self = this,
-          study = this.jsonEntities.study(),
-          jsonParticipant = this.jsonEntities.participant({ studyId: study.id });
+          study = this.factory.study(),
+          jsonParticipant = this.factory.participant({ studyId: study.id });
 
       jsonParticipant.annotations = [{ tmp: 1 }];
       expect(function () { self.Participant.create(jsonParticipant); })
@@ -199,8 +199,8 @@ define(function(require) {
     });
 
     it('has valid values when creating from a server response', function() {
-      var study = this.jsonEntities.study(),
-          jsonParticipant = this.jsonEntities.participant(study);
+      var study = this.factory.study(),
+          jsonParticipant = this.factory.participant(study);
 
       // TODO: add annotations to the server response
       var participant = this.Participant.create(jsonParticipant);
@@ -209,8 +209,8 @@ define(function(require) {
 
     it('can retrieve a single participant', function() {
       var self = this,
-          study = self.jsonEntities.study(),
-          participant = self.jsonEntities.participant({ studyId: study.id });
+          study = self.factory.study(),
+          participant = self.factory.participant({ studyId: study.id });
 
       self.$httpBackend.whenGET(uri(study.id, participant.id)).respond(serverReply(participant));
 
@@ -223,8 +223,8 @@ define(function(require) {
 
     it('can retrieve a single participant by uniqueId', function() {
       var self = this,
-          study = self.jsonEntities.study(),
-          participant = self.jsonEntities.participant({ studyId: study.id });
+          study = self.factory.study(),
+          participant = self.factory.participant({ studyId: study.id });
 
       self.$httpBackend.whenGET(
         sprintf.sprintf('/participants/uniqueId/%s/%s', study.id, participant.uniqueId)
@@ -239,8 +239,8 @@ define(function(require) {
 
     it('can add a participant', function() {
       var self = this,
-          study = self.jsonEntities.study(),
-          jsonParticipant = self.jsonEntities.participant({ studyId: study.id }),
+          study = self.factory.study(),
+          jsonParticipant = self.factory.participant({ studyId: study.id }),
           participant = new self.Participant(_.omit(jsonParticipant, 'id')),
           reqJson = addJson(participant);
 
@@ -277,19 +277,19 @@ define(function(require) {
     it('can not add a participant with empty required annotations', function() {
       var self = this,
           biobankApi = self.$injector.get('biobankApi'),
-          jsonAnnotationTypes = self.jsonEntities.allAnnotationTypes(),
-          replyParticipant = self.jsonEntities.participant();
+          jsonAnnotationTypes = self.factory.allAnnotationTypes(),
+          replyParticipant = self.factory.participant();
 
       spyOn(biobankApi, 'post').and.returnValue(self.$q.when(replyParticipant));
 
       _.each(jsonAnnotationTypes, function (serverAnnotationType) {
         var annotationType = new self.AnnotationType(serverAnnotationType),
-            jsonStudy = self.jsonEntities.study({ annotationTypes: [ annotationType ]}),
+            jsonStudy = self.factory.study({ annotationTypes: [ annotationType ]}),
             study = new self.Study(jsonStudy),
-            jsonParticipant = self.jsonEntities.participant(),
+            jsonParticipant = self.factory.participant(),
             participant;
 
-        jsonParticipant.annotations[0] = self.jsonEntities.annotation({value: undefined}, annotationType);
+        jsonParticipant.annotations[0] = self.factory.annotation({value: undefined}, annotationType);
 
         participant = new self.Participant(_.omit(jsonParticipant, 'id'), study);
 
@@ -312,8 +312,8 @@ define(function(require) {
 
     it('can update the unique ID on a participant', function() {
       var self = this,
-          study = self.jsonEntities.study(),
-          jsonParticipant = self.jsonEntities.participant({ studyId: study.id }),
+          study = self.factory.study(),
+          jsonParticipant = self.factory.participant({ studyId: study.id }),
           participant = new self.Participant(jsonParticipant);
 
       self.updateEntity(participant,
@@ -331,9 +331,9 @@ define(function(require) {
       var context = {};
 
       beforeEach(inject(function () {
-        var jsonAnnotationType = this.jsonEntities.annotationType(),
-            jsonStudy = this.jsonEntities.study({ annotationTypes: [ jsonAnnotationType ]}),
-            jsonParticipant = this.jsonEntities.participant({
+        var jsonAnnotationType = this.factory.annotationType(),
+            jsonStudy = this.factory.study({ annotationTypes: [ jsonAnnotationType ]}),
+            jsonParticipant = this.factory.participant({
               studyId: jsonStudy.id,
               annotationTypes: [ jsonAnnotationType ]
             }),

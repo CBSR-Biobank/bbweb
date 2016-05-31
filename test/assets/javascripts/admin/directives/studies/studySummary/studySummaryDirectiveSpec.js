@@ -26,11 +26,11 @@ define(function (require) {
       self.Study                = self.$injector.get('Study');
       self.modalService         = self.$injector.get('modalService');
       self.notificationsService = self.$injector.get('notificationsService');
-      self.jsonEntities         = self.$injector.get('jsonEntities');
+      self.factory         = self.$injector.get('factory');
 
       spyOn(self.modalService, 'showModal').and.returnValue(self.$q.when(true));
 
-      self.study = new self.Study(self.jsonEntities.study());
+      self.study = new self.Study(self.factory.study());
       self.createController = createController;
 
       this.putHtmlTemplates(

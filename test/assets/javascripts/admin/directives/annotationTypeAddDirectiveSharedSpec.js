@@ -28,14 +28,14 @@ define([
       beforeEach(inject(function() {
         this.$state         = this.$injector.get('$state');
         this.AnnotationType = this.$injector.get('AnnotationType');
-        this.jsonEntities   = this.$injector.get('jsonEntities');
+        this.factory   = this.$injector.get('factory');
 
         spyOn(this.$state, 'go').and.returnValue('ok');
       }));
 
       it('should change to correct state on submit', function() {
         var $q        = this.$injector.get('$q'),
-            annotType = new this.AnnotationType(this.jsonEntities.annotationType());
+            annotType = new this.AnnotationType(this.factory.annotationType());
 
         spyOn(context.entity.prototype, context.addAnnotationTypeFuncName)
           .and.returnValue($q.when(this.study));

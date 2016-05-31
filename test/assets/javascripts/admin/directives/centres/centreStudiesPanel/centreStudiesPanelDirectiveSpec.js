@@ -27,7 +27,7 @@ define([
       self.EntityViewer     = this.$injector.get('EntityViewer');
       self.modalService     = this.$injector.get('modalService');
       self.studyStatusLabel = self.$injector.get('studyStatusLabel');
-      self.jsonEntities     = self.$injector.get('jsonEntities');
+      self.factory     = self.$injector.get('factory');
 
       self.createEntities = createEntities;
       self.createController = createController;
@@ -44,9 +44,9 @@ define([
 
       function createEntities() {
         var entities = {};
-        entities.centre = new self.Centre(self.jsonEntities.centre());
+        entities.centre = new self.Centre(self.factory.centre());
         entities.studies = _.map(_.range(3), function () {
-          return new self.Study(self.jsonEntities.study());
+          return new self.Study(self.factory.study());
         });
         return entities;
       }

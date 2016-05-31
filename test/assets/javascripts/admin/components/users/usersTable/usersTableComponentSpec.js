@@ -25,7 +25,7 @@ define([
       self.UserStatus      = self.$injector.get('UserStatus');
       self.userStatusLabel = self.$injector.get('userStatusLabel');
       self.UserViewer      = self.$injector.get('UserViewer');
-      self.jsonEntities    = self.$injector.get('jsonEntities');
+      self.factory    = self.$injector.get('factory');
 
       self.createUserCounts = createUserCounts;
       self.createController = createController;
@@ -70,10 +70,10 @@ define([
       var self          = this,
           counts        = self.createUserCounts(1, 2, 3),
           statusFnNames = ['activate', 'lock', 'unlock'],
-          user          = self.User.create(self.jsonEntities.user());
+          user          = self.User.create(self.factory.user());
 
       spyOn(self.User, 'get').and.returnValue(self.$q.when(user));
-      spyOn(self.User, 'list').and.returnValue(self.$q.when(self.jsonEntities.pagedResult([ user ])));
+      spyOn(self.User, 'list').and.returnValue(self.$q.when(self.factory.pagedResult([ user ])));
       spyOn(self.modalService, 'showModal').and.returnValue(self.$q.when('--dont-care--'));
 
       self.createController(counts);
@@ -93,10 +93,10 @@ define([
     it('can view user information', function() {
       var EntityViewer = this.$injector.get('EntityViewer'),
           counts       = this.createUserCounts(1, 2, 3),
-          user         = this.User.create(this.jsonEntities.user());
+          user         = this.User.create(this.factory.user());
 
       spyOn(EntityViewer.prototype, 'showModal').and.returnValue(null);
-      spyOn(this.User, 'list').and.returnValue(this.$q.when(this.jsonEntities.pagedResult([ user ])));
+      spyOn(this.User, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([ user ])));
 
       this.createController(counts);
       this.controller.getTableData({ pagination: { start: 0 }, search: {}, sort: {} });

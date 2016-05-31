@@ -21,7 +21,7 @@ define([
       _.extend(self, templateMixin);
 
       self.Study        = self.$injector.get('Study');
-      self.jsonEntities = self.$injector.get('jsonEntities');
+      self.factory = self.$injector.get('factory');
 
       self.study = new this.Study();
       self.titleContains = 'Add';

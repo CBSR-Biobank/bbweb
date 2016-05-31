@@ -21,7 +21,7 @@ define(function (require) {
       _.extend(self, templateMixin);
 
       self.$q                   = this.$injector.get('$q');
-      self.jsonEntities         = this.$injector.get('jsonEntities');
+      self.factory         = this.$injector.get('factory');
       self.$uibModal            = this.$injector.get('$uibModal');
       self.modalService         = this.$injector.get('modalService');
       self.modalInput           = this.$injector.get('modalInput');
@@ -62,7 +62,7 @@ define(function (require) {
       }
 
       function updateUserCommon(fakeUserUpdate, expectClause) {
-        var user = self.jsonEntities.user(),
+        var user = self.factory.user(),
             deferred = self.$q.defer();
 
         deferred.resolve('OK');
@@ -81,7 +81,7 @@ define(function (require) {
     }));
 
     it('should have valid scope', function() {
-      var user = this.jsonEntities.user();
+      var user = this.factory.user();
 
       this.createController(user);
       expect(this.scope.vm.user).toEqual(new this.User(user));
@@ -120,7 +120,7 @@ define(function (require) {
     });
 
     it('can remove a users avatar', function() {
-      var user = this.jsonEntities.user();
+      var user = this.factory.user();
 
       spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
       spyOn(this.User.prototype, 'updateAvatarUrl').and.returnValue(this.$q.when(new this.User()));
@@ -134,7 +134,7 @@ define(function (require) {
 
     it('should display a notification error when removing avatar URL fails', function() {
       var deferred = this.$q.defer(),
-          user = this.jsonEntities.user();
+          user = this.factory.user();
 
       spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
       spyOn(this.User.prototype, 'updateAvatarUrl').and.returnValue(deferred.promise);
@@ -150,7 +150,7 @@ define(function (require) {
 
     it('can update users password', function() {
       var deferred = this.$q.defer(),
-          user = this.jsonEntities.user();
+          user = this.factory.user();
 
       deferred.resolve({ currentPassword: 'xx', newPassword: 'xx' });
       spyOn(this.modalInput, 'password').and.returnValue({ result: deferred.promise });
@@ -166,7 +166,7 @@ define(function (require) {
     it('should display a notification error when current password is invalid', function() {
       var passwordDeferred = this.$q.defer(),
           deferred = this.$q.defer(),
-          user = this.jsonEntities.user();
+          user = this.factory.user();
 
       spyOn(this.modalInput, 'password').and.returnValue({ result: passwordDeferred.promise });
       spyOn(this.User.prototype, 'updatePassword').and.returnValue(deferred.promise);
@@ -183,7 +183,7 @@ define(function (require) {
     it('should display a notification error when updating password fails', function() {
       var passwordDeferred = this.$q.defer(),
           deferred = this.$q.defer(),
-          user = this.jsonEntities.user();
+          user = this.factory.user();
 
       spyOn(this.modalInput, 'password').and.returnValue({ result: passwordDeferred.promise });
       spyOn(this.User.prototype, 'updatePassword').and.returnValue(deferred.promise);

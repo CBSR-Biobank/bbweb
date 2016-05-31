@@ -16,7 +16,7 @@ define([
     var createEntities,
         createController,
         SpecimenLinkType,
-        jsonEntities;
+        factory;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -24,7 +24,7 @@ define([
       createEntities   = setupEntities(this.$injector);
       createController = setupController(this.$injector);
       SpecimenLinkType = this.$injector.get('SpecimenLinkType');
-      jsonEntities     = this.$injector.get('jsonEntities');
+      factory     = this.$injector.get('factory');
       testUtils.addCustomMatchers();
     }));
 
@@ -43,10 +43,10 @@ define([
 
         options = options || {};
 
-        study = jsonEntities.study();
-        processingType = jsonEntities.processingType(study);
+        study = factory.study();
+        processingType = factory.processingType(study);
         specimenGroups = _.map(_.range(2), function () {
-          return jsonEntities.specimenGroup(study);
+          return factory.specimenGroup(study);
         });
         annotationTypes = _.map(
           _.values(AnnotationValueType),
@@ -54,7 +54,7 @@ define([
             return new AnnotationType({ valueType: valueType });
           });
 
-        serverSlt = jsonEntities.specimenLinkType(processingType, {
+        serverSlt = factory.specimenLinkType(processingType, {
           inputGroup: specimenGroups[0],
           outputGroup: specimenGroups[1],
           annotationTypes: annotationTypes
@@ -154,7 +154,7 @@ define([
           scope = createController(entities);
 
       spyOn(entities.specimenLinkType, 'addOrUpdate').and.callFake(function () {
-        return q.when(jsonEntities.specimenLinkType(entities.processingType, {
+        return q.when(factory.specimenLinkType(entities.processingType, {
           inputGroup: entities.specimenGroups[0],
           outputGroup: entities.specimenGroups[1],
           annotationTypes: entities.annotationTypes
@@ -204,7 +204,7 @@ define([
       var entities = createEntities(), scope;
 
      entities.specimenLinkType = new SpecimenLinkType(
-        jsonEntities.specimenLinkType(entities.processingType, {
+        factory.specimenLinkType(entities.processingType, {
           inputGroup: entities.specimenGroups[0],
           outputGroup: entities.specimenGroups[1]
         }));
@@ -220,7 +220,7 @@ define([
       var entities = createEntities(), scope;
 
       entities.specimenLinkType = new SpecimenLinkType(
-        jsonEntities.specimenLinkType(entities.processingType, {
+        factory.specimenLinkType(entities.processingType, {
           inputGroup: entities.specimenGroups[0],
           outputGroup: entities.specimenGroups[1]
         }));
@@ -239,7 +239,7 @@ define([
       var entities = createEntities(), scope;
 
      entities.specimenLinkType = new SpecimenLinkType(
-        jsonEntities.specimenLinkType(entities.processingType, {
+        factory.specimenLinkType(entities.processingType, {
           inputGroup: entities.specimenGroups[0],
           outputGroup: entities.specimenGroups[1]
         }));
@@ -256,7 +256,7 @@ define([
     it('getSpecimenGroupUnits returns valid results', function() {
       var entities = createEntities(),
           scope = createController(entities),
-          badSgId = jsonEntities.stringNext();
+          badSgId = factory.stringNext();
 
       expect(function () {
         scope.vm.getSpecimenGroupUnits(badSgId);

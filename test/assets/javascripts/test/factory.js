@@ -12,7 +12,7 @@ define([
 
   /*jshint camelcase: false */
 
-  jsonEntities.$inject = [
+  factory.$inject = [
     'AnnotationValueType',
     'AnatomicalSourceType',
     'PreservationTemperatureType',
@@ -30,15 +30,15 @@ define([
    * This has to be an AngularJS service so that it's dependencies from the real application
    * can be injected (i.e. AnnotationValueType).
    */
-  function jsonEntities(AnnotationValueType,
-                        AnatomicalSourceType,
-                        PreservationTemperatureType,
-                        PreservationType,
-                        SpecimenType,
-                        StudyStatus,
-                        CentreStatus,
-                        UserStatus,
-                        bbwebConfig) {
+  function factory(AnnotationValueType,
+                   AnatomicalSourceType,
+                   PreservationTemperatureType,
+                   PreservationType,
+                   SpecimenType,
+                   StudyStatus,
+                   CentreStatus,
+                   UserStatus,
+                   bbwebConfig) {
 
     var defaultEntities = {},
         entityCount = 0,
@@ -557,7 +557,7 @@ define([
                        postalCode:     faker.address.zipCode(),
                        poBoxNumber:    faker.address.zipCode(),
                        countryIsoCode: faker.address.country()
-                },
+                     },
           validKeys = _.keys(defaults),
           at = _.extend(defaults, _.pick(options || {}, validKeys));
       valueTypeCount += 1;
@@ -579,5 +579,5 @@ define([
 
   /*jshint camelcase: true */
 
-  return jsonEntities;
+  return factory;
 });

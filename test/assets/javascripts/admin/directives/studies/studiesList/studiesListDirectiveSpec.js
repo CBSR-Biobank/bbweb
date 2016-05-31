@@ -23,7 +23,7 @@ define([
       self.$q                = self.$injector.get('$q');
       self.Study             = self.$injector.get('Study');
       self.StudyCounts       = self.$injector.get('StudyCounts');
-      self.jsonEntities      = self.$injector.get('jsonEntities');
+      self.factory      = self.$injector.get('factory');
       self.createStudyCounts = createStudyCounts;
       self.createController  = createController;
 
@@ -65,7 +65,7 @@ define([
       });
 
       spyOn(self.Study, 'list').and.callFake(function () {
-        return self.$q.when(self.jsonEntities.pagedResult([]));
+        return self.$q.when(self.factory.pagedResult([]));
       });
 
       self.createController();
@@ -90,7 +90,7 @@ define([
       });
 
       spyOn(self.Study, 'list').and.callFake(function () {
-        return self.$q.when(self.jsonEntities.pagedResult([]));
+        return self.$q.when(self.factory.pagedResult([]));
       });
 
       self.createController(counts);

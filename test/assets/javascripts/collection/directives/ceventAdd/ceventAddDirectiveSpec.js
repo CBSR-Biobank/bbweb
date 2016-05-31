@@ -56,7 +56,7 @@ define([
       self.Participant         = self.$injector.get('Participant');
       self.CollectionEvent     = self.$injector.get('CollectionEvent');
       self.CollectionEventType = self.$injector.get('CollectionEventType');
-      self.jsonEntities        = self.$injector.get('jsonEntities');
+      self.factory        = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/ceventAdd/ceventAdd.html',
@@ -67,10 +67,10 @@ define([
         '/assets/javascripts/common/annotationsInput/singleSelectAnnotation.html',
         '/assets/javascripts/common/annotationsInput/multipleSelectAnnotation.html');
 
-      self.jsonCevent      = self.jsonEntities.collectionEvent();
-      self.jsonCeventType  = self.jsonEntities.defaultCollectionEventType();
-      self.jsonParticipant = self.jsonEntities.defaultParticipant();
-      self.jsonStudy       = self.jsonEntities.defaultStudy();
+      self.jsonCevent      = self.factory.collectionEvent();
+      self.jsonCeventType  = self.factory.defaultCollectionEventType();
+      self.jsonParticipant = self.factory.defaultParticipant();
+      self.jsonStudy       = self.factory.defaultStudy();
 
       self.study               = new self.Study(self.jsonStudy);
       self.participant         = new self.Participant(self.jsonParticipant);

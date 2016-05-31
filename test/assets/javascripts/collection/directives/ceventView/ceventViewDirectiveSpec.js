@@ -55,19 +55,19 @@ define(function(require) {
       self.CollectionEvent     = self.$injector.get('CollectionEvent');
       self.CollectionEventType = self.$injector.get('CollectionEventType');
       self.AnnotationValueType = self.$injector.get('AnnotationValueType');
-      self.jsonEntities        = self.$injector.get('jsonEntities');
+      self.factory        = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/ceventView/ceventView.html',
         '/assets/javascripts/admin/directives/statusLine/statusLine.html');
 
-      self.jsonCevent      = self.jsonEntities.collectionEvent();
-      self.jsonParticipant = self.jsonEntities.defaultParticipant();
-      self.jsonCeventType  = self.jsonEntities.defaultCollectionEventType();
+      self.jsonCevent      = self.factory.collectionEvent();
+      self.jsonParticipant = self.factory.defaultParticipant();
+      self.jsonCeventType  = self.factory.defaultCollectionEventType();
 
       self.participant          = new self.Participant(self.jsonParticipant);
       self.collectionEvent      = new self.CollectionEvent(self.jsonCevent);
-      self.pagedResult          = self.jsonEntities.pagedResult([ self.collectionEvent ]);
+      self.pagedResult          = self.factory.pagedResult([ self.collectionEvent ]);
       self.collectionEventTypes = [ new self.CollectionEventType(self.jsonCeventType) ];
 
       self.collectionEventWithAnnotation = collectionEventWithAnnotation;
@@ -84,12 +84,12 @@ define(function(require) {
 
         maxValueCount = maxValueCount || 0;
 
-        jsonAnnotationType = self.jsonEntities.annotationType({ valueType: valueType,
+        jsonAnnotationType = self.factory.annotationType({ valueType: valueType,
                                                                 maxValueCount: maxValueCount });
-        value              = self.jsonEntities.valueForAnnotation(jsonAnnotationType);
-        jsonAnnotation     = self.jsonEntities.annotation({ value: value }, jsonAnnotationType);
-        jsonCeventType     = self.jsonEntities.collectionEventType({ annotationTypes: [ jsonAnnotationType ]});
-        jsonCevent         = self.jsonEntities.collectionEvent({ annotations: [ jsonAnnotation ]});
+        value              = self.factory.valueForAnnotation(jsonAnnotationType);
+        jsonAnnotation     = self.factory.annotation({ value: value }, jsonAnnotationType);
+        jsonCeventType     = self.factory.collectionEventType({ annotationTypes: [ jsonAnnotationType ]});
+        jsonCevent         = self.factory.collectionEvent({ annotations: [ jsonAnnotation ]});
         collectionEventType = new self.CollectionEventType(jsonCeventType);
         return new self.CollectionEvent(jsonCevent, collectionEventType);
       }

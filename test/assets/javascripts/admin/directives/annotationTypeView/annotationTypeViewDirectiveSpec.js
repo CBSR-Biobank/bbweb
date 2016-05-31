@@ -24,7 +24,7 @@ define([
       self.$q             = self.$injector.get('$q');
       self.Study          = self.$injector.get('Study');
       self.AnnotationType = self.$injector.get('AnnotationType');
-      self.jsonEntities   = self.$injector.get('jsonEntities');
+      self.factory   = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/annotationTypeView/annotationTypeView.html',
@@ -33,8 +33,8 @@ define([
 
       self.createController = createController;
       self.returnState      = 'my-return-state';
-      self.study            = new self.Study(self.jsonEntities.study());
-      self.annotationType   = new self.AnnotationType(self.jsonEntities.annotationType());
+      self.study            = new self.Study(self.factory.study());
+      self.annotationType   = new self.AnnotationType(self.factory.annotationType());
       self.onUpdate         = jasmine.createSpy('onUpdate').and.returnValue(self.$q.when(self.study));
 
       function createController() {
@@ -143,7 +143,7 @@ define([
       describe('(shared) update functions', function () {
 
         it('should update a field', function() {
-          var newValue = this.jsonEntities.stringNext(),
+          var newValue = this.factory.stringNext(),
               deferred = this.$q.defer();
 
           spyOn(this.modalInput, context.modalInputFuncName).and.returnValue({ result: deferred.promise });

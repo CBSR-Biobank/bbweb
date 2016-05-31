@@ -24,7 +24,7 @@ define([
       self.$state       = self.$injector.get('$state');
       self.User         = self.$injector.get('User');
       self.usersService = self.$injector.get('usersService');
-      self.jsonEntities = self.$injector.get('jsonEntities');
+      self.factory = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/home/directives/biobankHeader/biobankHeader.html',
@@ -51,7 +51,7 @@ define([
     });
 
     it('update user on login', function() {
-      var jsonUser = this.jsonEntities.user();
+      var jsonUser = this.factory.user();
 
       this.createController();
       expect(this.controller.user).toBeNull();

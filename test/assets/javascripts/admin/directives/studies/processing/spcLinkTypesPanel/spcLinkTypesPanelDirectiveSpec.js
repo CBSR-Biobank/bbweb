@@ -17,14 +17,14 @@ define([
         controller,
         createEntities,
         createController,
-        jsonEntities;
+        factory;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function (templateMixin, testUtils) {
       _.extend(this, templateMixin);
 
-      jsonEntities = this.$injector.get('jsonEntities');
+      factory = this.$injector.get('factory');
 
       createEntities = setupEntities(this.$injector);
       createController = setupController(this.$injector);
@@ -42,7 +42,7 @@ define([
           SpecimenLinkAnnotationType = injector.get('SpecimenLinkAnnotationType'),
           AnnotationValueType        = injector.get('AnnotationValueType'),
           SpecimenLinkType           = injector.get('SpecimenLinkType'),
-          jsonEntities               = injector.get('jsonEntities');
+          factory               = injector.get('factory');
 
       return create;
 
@@ -56,14 +56,14 @@ define([
           studyHasAnnotationTypes: true
         };
 
-        entities.study = new Study(jsonEntities.study());
+        entities.study = new Study(factory.study());
         entities.processingTypes = _.map(_.range(2), function () {
-          return new ProcessingType(jsonEntities.processingType(entities.study));
+          return new ProcessingType(factory.processingType(entities.study));
         });
 
         if (options.studyHasSpecimenGroups) {
           entities.specimenGroups = _.map(_.range(2), function () {
-            return jsonEntities.specimenGroup(entities.study);
+            return factory.specimenGroup(entities.study);
           });
         } else {
           entities.specimenGroups = [];
@@ -74,7 +74,7 @@ define([
             _.values(AnnotationValueType),
             function(valueType) {
               return new SpecimenLinkAnnotationType(
-                jsonEntities.annotationType({ valueType: valueType }));
+                factory.annotationType({ valueType: valueType }));
             });
           entities.annotationTypeIdsInUse = [entities.annotationTypes[0]];
         } else {
@@ -82,7 +82,7 @@ define([
         }
 
         entities.specimenLinkTypes = _.map(_.range(2), function () {
-          var slt = new SpecimenLinkType(jsonEntities.processingType(entities.study));
+          var slt = new SpecimenLinkType(factory.processingType(entities.study));
           if (options.studyHasSpecimenGroups) {
             slt.studySpecimenGroups(entities.specimenGroups);
           }

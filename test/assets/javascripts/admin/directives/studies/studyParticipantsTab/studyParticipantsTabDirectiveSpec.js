@@ -51,7 +51,7 @@ define([
       self.modalService        = self.$injector.get('modalService');
       self.Study               = self.$injector.get('Study');
       self.AnnotationType      = self.$injector.get('AnnotationType');
-      self.jsonEntities        = self.$injector.get('jsonEntities');
+      self.factory        = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/studies/studyParticipantsTab/studyParticipantsTab.html',
@@ -59,7 +59,7 @@ define([
         '/assets/javascripts/admin/directives/annotationTypeSummary/annotationTypeSummary.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html');
 
-      self.jsonStudy = self.jsonEntities.study();
+      self.jsonStudy = self.factory.study();
       self.study     = new self.Study(self.jsonStudy);
 
       spyOn(this.$state, 'go').and.returnValue('ok');
@@ -88,7 +88,7 @@ define([
     describe('for annotation types', function() {
 
       beforeEach(function() {
-        this.annotationType = new this.AnnotationType(this.jsonEntities.annotationType());
+        this.annotationType = new this.AnnotationType(this.factory.annotationType());
       });
 
       it('invoking editAnnotationType changes state', function() {

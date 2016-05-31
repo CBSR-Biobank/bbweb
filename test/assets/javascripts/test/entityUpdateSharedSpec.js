@@ -57,7 +57,7 @@ define(['underscore'], function(_) {
       });
 
       it('should display an error in a modal when update fails', function() {
-        var newValue = this.jsonEntities.stringNext(),
+        var newValue = this.factory.stringNext(),
             deferred = this.$q.defer();
 
         this.deferred.resolve(newValue);

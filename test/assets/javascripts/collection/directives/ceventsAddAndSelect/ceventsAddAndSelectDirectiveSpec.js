@@ -27,18 +27,18 @@ define([
       self.Participant         = self.$injector.get('Participant');
       self.CollectionEvent     = self.$injector.get('CollectionEvent');
       self.CollectionEventType = self.$injector.get('CollectionEventType');
-      self.jsonEntities        = self.$injector.get('jsonEntities');
+      self.factory        = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/ceventsAddAndSelect/ceventsAddAndSelect.html');
 
-      this.jsonCevent      = this.jsonEntities.collectionEvent();
-      this.jsonParticipant = this.jsonEntities.defaultParticipant();
-      this.jsonCeventType  = this.jsonEntities.defaultCollectionEventType();
+      this.jsonCevent      = this.factory.collectionEvent();
+      this.jsonParticipant = this.factory.defaultParticipant();
+      this.jsonCeventType  = this.factory.defaultCollectionEventType();
 
       this.participant          = new this.Participant(this.jsonParticipant);
       this.collectionEvent      = new this.CollectionEvent(this.jsonCevent);
-      this.pagedResult          = this.jsonEntities.pagedResult([ this.collectionEvent ]);
+      this.pagedResult          = this.factory.pagedResult([ this.collectionEvent ]);
       this.collectionEventTypes = [ new this.CollectionEventType(this.jsonCeventType) ];
     }));
 
@@ -89,7 +89,7 @@ define([
       it('throws an exception when collection event does not match any collection event types', function() {
         var self = this;
 
-        this.collectionEvent.collectionEventTypeId = self.jsonEntities.stringNext();
+        this.collectionEvent.collectionEventTypeId = self.factory.stringNext();
 
         expect(function () { createController(self); })
           .toThrowError(/collection event type ID not found/);
@@ -98,7 +98,7 @@ define([
     });
 
     it('has valid display state when there are no collection events', function() {
-      this.pagedResult = this.jsonEntities.pagedResult([]);
+      this.pagedResult = this.factory.pagedResult([]);
       createController(this);
       expect(this.controller.displayState).toBe(this.controller.displayStates.NO_RESULTS);
     });
@@ -138,7 +138,7 @@ define([
         var self = this;
 
         self.collectionEventTypes = _.map(_.range(2), function () {
-          var jsonCeventType  = self.jsonEntities.defaultCollectionEventType();
+          var jsonCeventType  = self.factory.defaultCollectionEventType();
           return new self.CollectionEventType(jsonCeventType);
         });
 

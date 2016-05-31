@@ -26,11 +26,11 @@ define([
       self.notificationsService = self.$injector.get('notificationsService');
       self.CollectionEventType  = self.$injector.get('CollectionEventType');
       self.AnnotationType       = self.$injector.get('AnnotationType');
-      self.jsonEntities         = self.$injector.get('jsonEntities');
+      self.factory         = self.$injector.get('factory');
 
-      jsonAnnotType = self.jsonEntities.annotationType();
-      self.jsonStudy     = this.jsonEntities.study();
-      self.jsonCet       = self.jsonEntities.collectionEventType(self.jsonStudy);
+      jsonAnnotType = self.factory.annotationType();
+      self.jsonStudy     = this.factory.study();
+      self.jsonCet       = self.factory.collectionEventType(self.jsonStudy);
       self.collectionEventType =
         new self.CollectionEventType(_.extend({},
                                               self.jsonCet,

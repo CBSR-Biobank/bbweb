@@ -16,17 +16,17 @@ define([
 
     var httpBackend,
         ProcessingType,
-        jsonEntities;
+        factory;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function($httpBackend,
                                _ProcessingType_,
-                               _jsonEntities_,
+                               _factory_,
                                extendedDomainEntities) {
       httpBackend    = $httpBackend;
       ProcessingType = _ProcessingType_;
-      jsonEntities   = _jsonEntities_;
+      factory   = _factory_;
     }));
 
     function uri(/* studyId, processingTypeId, version */) {
@@ -51,8 +51,8 @@ define([
     }
 
     function createEntities(options) {
-      var study = jsonEntities.study(),
-          serverPt = jsonEntities.processingType(study),
+      var study = factory.study(),
+          serverPt = factory.processingType(study),
           processingType;
 
       options = options || {};

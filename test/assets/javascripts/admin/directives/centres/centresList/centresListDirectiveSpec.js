@@ -25,13 +25,13 @@ define([
       self.CentreCounts = self.$injector.get('CentreCounts');
       self.Centre       = self.$injector.get('Centre');
       self.CentreStatus = self.$injector.get('CentreStatus');
-      self.jsonEntities = self.$injector.get('jsonEntities');
+      self.factory = self.$injector.get('factory');
 
       self.createController = createController;
       self.createCentreCounts = createCentreCounts;
 
       spyOn(self.Centre, 'list').and.callFake(function () {
-        return self.$q.when(self.jsonEntities.pagedResult([]));
+        return self.$q.when(self.factory.pagedResult([]));
       });
 
       testUtils.addCustomMatchers();

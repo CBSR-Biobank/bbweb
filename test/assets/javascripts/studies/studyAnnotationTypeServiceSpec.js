@@ -27,18 +27,18 @@ define([
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function ($httpBackend,
-                                jsonEntities,
+                                factory,
                                 extendedDomainEntities,
                                 CollectionEventAnnotationType,
                                 ceventAnnotationTypesService) {
       context.httpBackend            = $httpBackend;
       context.annotationTypeType     = CollectionEventAnnotationType;
       context.studyAnnotationTypesService = ceventAnnotationTypesService;
-      context.study                  = jsonEntities.study();
+      context.study                  = factory.study();
       context.annotationTypeUriPart       = 'ceannottypes';
 
-      //context.serverAnnotationType = jsonEntities.studyAnnotationType(context.study, { required: false });
-      context.serverAnnotationType = jsonEntities.studyAnnotationType(context.study);
+      //context.serverAnnotationType = factory.studyAnnotationType(context.study, { required: false });
+      context.serverAnnotationType = factory.studyAnnotationType(context.study);
     }));
 
     sharedBehaviourForStudyAnnotationTypes(context);
@@ -54,18 +54,18 @@ define([
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function ($httpBackend,
-                                jsonEntities,
+                                factory,
                                 extendedDomainEntities,
                                 SpecimenLinkAnnotationType,
                                 spcLinkAnnotationTypesService) {
       context.httpBackend            = $httpBackend;
       context.annotationTypeType     = SpecimenLinkAnnotationType;
       context.studyAnnotationTypesService = spcLinkAnnotationTypesService;
-      context.study                  = jsonEntities.study();
+      context.study                  = factory.study();
       context.annotationTypeUriPart       = 'slannottypes';
 
-      //context.serverAnnotationType = jsonEntities.studyAnnotationType(context.study, { required: false });
-      context.serverAnnotationType = jsonEntities.studyAnnotationType(context.study);
+      //context.serverAnnotationType = factory.studyAnnotationType(context.study, { required: false });
+      context.serverAnnotationType = factory.studyAnnotationType(context.study);
     }));
 
     sharedBehaviourForStudyAnnotationTypes(context);
@@ -81,17 +81,17 @@ define([
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function ($httpBackend,
-                                jsonEntities,
+                                factory,
                                 extendedDomainEntities,
                                 ParticipantAnnotationType,
                                 participantAnnotationTypesService) {
       context.httpBackend            = $httpBackend;
       context.annotationTypeType     = ParticipantAnnotationType;
       context.studyAnnotationTypesService = participantAnnotationTypesService;
-      context.study                  = jsonEntities.study();
+      context.study                  = factory.study();
       context.annotationTypeUriPart       = 'pannottypes';
 
-      context.serverAnnotationType = jsonEntities.studyAnnotationType(context.study, { required: true });
+      context.serverAnnotationType = factory.studyAnnotationType(context.study, { required: true });
     }));
 
     sharedBehaviourForStudyAnnotationTypes(context);

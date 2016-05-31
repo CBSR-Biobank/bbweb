@@ -14,18 +14,18 @@ define([
 
   describe('StudyViewer', function() {
 
-    var StudyViewer, Study, jsonEntities, centre;
+    var StudyViewer, Study, factory, centre;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_StudyViewer_,
                                _Study_,
-                               _jsonEntities_) {
+                               _factory_) {
       StudyViewer    = _StudyViewer_;
       Study          = _Study_;
-      jsonEntities   = _jsonEntities_;
+      factory   = _factory_;
 
-      centre = jsonEntities.centre();
+      centre = factory.centre();
     }));
 
     it('should open a modal when created', inject(function (testUtils) {
@@ -36,7 +36,7 @@ define([
       });
 
       // jshint unused:false
-      var study = jsonEntities.study();
+      var study = factory.study();
       var viewer = new StudyViewer(study);
 
       expect(modal.open).toHaveBeenCalled();
@@ -54,7 +54,7 @@ define([
       });
 
       attributes = [];
-      study = jsonEntities.study();
+      study = factory.study();
       viewer = new StudyViewer(study);
 
       expect(attributes).toBeArrayOfSize(3);

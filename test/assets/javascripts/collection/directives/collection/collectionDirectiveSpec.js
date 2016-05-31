@@ -54,7 +54,7 @@ define([
       self.$rootScope          = self.$injector.get('$rootScope');
       self.$compile            = self.$injector.get('$compile');
       self.Study               = self.$injector.get('Study');
-      self.jsonEntities        = self.$injector.get('jsonEntities');
+      self.factory        = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/collection/collection.html',
@@ -66,7 +66,7 @@ define([
     it('has valid scope', function() {
       var directive;
 
-      spyOn(this.Study, 'list').and.returnValue(this.$q.when(this.jsonEntities.pagedResult([])));
+      spyOn(this.Study, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([])));
 
       directive = createDirective(this);
       expect(directive.controller.studyCounts).toBe(this.counts);

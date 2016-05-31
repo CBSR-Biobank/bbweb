@@ -14,18 +14,18 @@ define([
 
   describe('LocationViewer', function() {
 
-    var LocationViewer, Location, jsonEntities, centre;
+    var LocationViewer, Location, factory, centre;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_LocationViewer_,
                                _Location_,
-                               _jsonEntities_) {
+                               _factory_) {
       LocationViewer = _LocationViewer_;
       Location       = _Location_;
-      jsonEntities   = _jsonEntities_;
+      factory   = _factory_;
 
-      centre = jsonEntities.centre();
+      centre = factory.centre();
     }));
 
     it('should open a modal when created', inject(function(testUtils) {
@@ -34,7 +34,7 @@ define([
       spyOn(modal, 'open').and.callFake(function () { return testUtils.fakeModal(); });
 
       // jshint unused:false
-      var location = jsonEntities.location();
+      var location = factory.location();
       var viewer = new LocationViewer(centre, location);
 
       expect(modal.open).toHaveBeenCalled();
@@ -49,7 +49,7 @@ define([
       });
 
       attributes = [];
-      location = jsonEntities.location();
+      location = factory.location();
       viewer = new LocationViewer(location);
 
       expect(attributes).toBeArrayOfSize(7);

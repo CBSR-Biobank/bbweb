@@ -38,7 +38,7 @@ define([
     function setupEntities(injector) {
       var Study         = injector.get('Study'),
           SpecimenGroup = injector.get('SpecimenGroup'),
-          jsonEntities  = injector.get('jsonEntities');
+          factory  = injector.get('factory');
 
       return create;
 
@@ -47,9 +47,9 @@ define([
       function create() {
         var entities = {};
 
-        entities.study = new Study(jsonEntities.study());
+        entities.study = new Study(factory.study());
         entities.specimenGroups = _.map(_.range(2), function () {
-          return new SpecimenGroup(jsonEntities.processingType(entities.study));
+          return new SpecimenGroup(factory.processingType(entities.study));
         });
         entities.specimenGroupIdsInUse = [ entities.specimenGroups[0].id ];
 

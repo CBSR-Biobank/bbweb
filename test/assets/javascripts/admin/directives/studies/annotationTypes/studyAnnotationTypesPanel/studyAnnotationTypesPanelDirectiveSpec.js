@@ -29,7 +29,7 @@ define([
       self.SpecimenLinkAnnotationType = self.$injector.get('SpecimenLinkAnnotationType');
       self.AnnotationType             = self.$injector.get('AnnotationType');
       self.AnnotationValueType        = self.$injector.get('AnnotationValueType');
-      self.jsonEntities               = self.$injector.get('jsonEntities');
+      self.factory               = self.$injector.get('factory');
       self.Panel                      = self.$injector.get('Panel');
       self.$state                     = self.$injector.get('$state');
 
@@ -37,7 +37,7 @@ define([
         _.values(self.AnnotationValueType),
         function(valueType) {
           return new self.AnnotationType(
-            self.jsonEntities.annotationType({ valueType: valueType }));
+            self.factory.annotationType({ valueType: valueType }));
         });
       self.annotationTypeIdsInUse    = [ self.annotationTypes[0].uniqueId ] ;
       self.annotationTypeName        = 'ParticipantAnnotationType';

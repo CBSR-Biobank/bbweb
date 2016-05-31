@@ -13,7 +13,7 @@ define(['underscore'], function (_) {
     'NumberAnnotation',
     'SingleSelectAnnotation',
     'MultipleSelectAnnotation',
-    'jsonEntities'
+    'factory'
   ];
 
   /**
@@ -26,7 +26,7 @@ define(['underscore'], function (_) {
                                          NumberAnnotation,
                                          SingleSelectAnnotation,
                                          MultipleSelectAnnotation,
-                                         jsonEntities) {
+                                         factory) {
     var mixin = {
       jsonAnnotationData: jsonAnnotationData,
       validateAnnotationClass: validateAnnotationClass
@@ -37,11 +37,11 @@ define(['underscore'], function (_) {
     //--
 
     function jsonAnnotationData(serverStudy) {
-      var annotationTypes = jsonEntities.allAnnotationTypes();
+      var annotationTypes = factory.allAnnotationTypes();
 
       return _.map(annotationTypes, function (annotationType) {
-        var value = jsonEntities.valueForAnnotation(annotationType);
-        var annotation = jsonEntities.annotation(value, annotationType);
+        var value = factory.valueForAnnotation(annotationType);
+        var annotation = factory.annotation(value, annotationType);
 
         return {
           annotationType: annotationType,

@@ -23,11 +23,11 @@ define([
       self.$state               = self.$injector.get('$state');
       self.Centre               = self.$injector.get('Centre');
       self.Location             = self.$injector.get('Location');
-      self.jsonEntities         = self.$injector.get('jsonEntities');
+      self.factory         = self.$injector.get('factory');
       self.domainEntityService  = self.$injector.get('domainEntityService');
       self.notificationsService = self.$injector.get('notificationsService');
 
-      self.centre = new self.Centre(self.jsonEntities.centre());
+      self.centre = new self.Centre(self.factory.centre());
       self.location = new self.Location();
 
       self.currentState = {

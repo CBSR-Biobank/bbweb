@@ -19,9 +19,9 @@ define([
       _.extend(self, templateMixin);
 
       self.Study          = self.$injector.get('Study');
-      self.jsonEntities   = self.$injector.get('jsonEntities');
+      self.factory   = self.$injector.get('factory');
 
-      self.study = new self.Study(self.jsonEntities.study());
+      self.study = new self.Study(self.factory.study());
       self.createController = createController;
 
       self.putHtmlTemplates(

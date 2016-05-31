@@ -21,7 +21,7 @@ define([
       _.extend(self, templateMixin);
 
       self.Centre               = self.$injector.get('Centre');
-      self.jsonEntities         = self.$injector.get('jsonEntities');
+      self.factory         = self.$injector.get('factory');
       self.notificationsService = self.$injector.get('notificationsService');
       self.domainEntityService  = self.$injector.get('domainEntityService');
 

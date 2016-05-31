@@ -53,13 +53,13 @@ define([
       self.modalService        = self.$injector.get('modalService');
       self.Study               = self.$injector.get('Study');
       self.Participant         = self.$injector.get('Participant');
-      self.jsonEntities        = self.$injector.get('jsonEntities');
+      self.factory        = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/participantView/participantView.html');
 
-      self.jsonParticipant = self.jsonEntities.participant();
-      self.jsonStudy       = self.jsonEntities.defaultStudy();
+      self.jsonParticipant = self.factory.participant();
+      self.jsonStudy       = self.factory.defaultStudy();
       self.participant     = new self.Participant(self.jsonParticipant);
       self.study           = new self.Study(self.jsonStudy);
 

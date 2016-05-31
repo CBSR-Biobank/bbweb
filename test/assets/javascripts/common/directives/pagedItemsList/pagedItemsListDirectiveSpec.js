@@ -16,8 +16,8 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (jsonEntities) {
-      this.jsonEntities = jsonEntities;
+    beforeEach(inject(function (factory) {
+      this.factory = factory;
     }));
 
     describe('Centres', function () {
@@ -29,10 +29,10 @@ define([
             enabledCentres;
 
         disabledCentres = _.map(_.range(2), function() {
-          return new self.jsonEntities.centre();
+          return new self.factory.centre();
         });
         enabledCentres = _.map(_.range(3), function() {
-          var centre = new self.jsonEntities.centre();
+          var centre = new self.factory.centre();
           centre.status = CentreStatus.ENABLED;
           return centre;
         });
@@ -65,15 +65,15 @@ define([
             retiredStudies;
 
         disabledStudies = _.map(_.range(2), function() {
-          return new self.jsonEntities.study();
+          return new self.factory.study();
         });
         enabledStudies = _.map(_.range(3), function() {
-          var study = new self.jsonEntities.study();
+          var study = new self.factory.study();
           study.status = StudyStatus.ENABLED;
           return study;
         });
         retiredStudies = _.map(_.range(3), function() {
-          var study = new self.jsonEntities.study();
+          var study = new self.factory.study();
           study.status = StudyStatus.RETIRED;
           return study;
         });

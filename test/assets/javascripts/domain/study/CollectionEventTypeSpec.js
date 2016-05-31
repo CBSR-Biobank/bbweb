@@ -24,11 +24,11 @@ define([
 
       this.httpBackend         = this.$injector.get('$httpBackend');
       this.CollectionEventType = this.$injector.get('CollectionEventType');
-      this.jsonEntities        = this.$injector.get('jsonEntities');
+      this.factory        = this.$injector.get('factory');
       this.testUtils           = this.$injector.get('testUtils');
 
-      this.jsonCet   = this.jsonEntities.collectionEventType();
-      this.jsonStudy = this.jsonEntities.defaultStudy();
+      this.jsonCet   = this.factory.collectionEventType();
+      this.jsonStudy = this.factory.defaultStudy();
 
       this.testUtils.addCustomMatchers();
       CollectionEventType = this.CollectionEventType;
@@ -51,14 +51,14 @@ define([
     });
 
     it('fails when creating from an invalid json object', function() {
-      var badJsonCet = _.omit(this.jsonEntities.collectionEventType(this.jsonStudy), 'name');
+      var badJsonCet = _.omit(this.factory.collectionEventType(this.jsonStudy), 'name');
       expect(function () { CollectionEventType.create(badJsonCet); })
         .toThrowError(/invalid collection event types from server/);
     });
 
     it('fails when creating from a bad json specimen spec', function() {
-      var jsonSpec = _.omit(this.jsonEntities.collectionSpecimenSpec(), 'name'),
-          badJsonCet = _.extend(this.jsonEntities.collectionEventType(this.jsonStudy),
+      var jsonSpec = _.omit(this.factory.collectionSpecimenSpec(), 'name'),
+          badJsonCet = _.extend(this.factory.collectionEventType(this.jsonStudy),
                                 { specimenSpecs: [ jsonSpec ] });
 
       expect(function () { CollectionEventType.create(badJsonCet); })
@@ -66,8 +66,8 @@ define([
     });
 
     it('fails when creating from bad json annotation type data', function() {
-      var jsonAnnotType = _.omit(this.jsonEntities.annotationType(), 'name'),
-          badJsonCet = _.extend(this.jsonEntities.collectionEventType(this.jsonStudy),
+      var jsonAnnotType = _.omit(this.factory.annotationType(), 'name'),
+          badJsonCet = _.extend(this.factory.collectionEventType(this.jsonStudy),
                                 { annotationTypes: [ jsonAnnotType ] });
 
       expect(function () { CollectionEventType.create(badJsonCet); })
@@ -75,7 +75,7 @@ define([
     });
 
     it('has valid values when creating from server response', function() {
-      var jsonCet = this.jsonEntities.collectionEventType(this.jsonStudy),
+      var jsonCet = this.factory.collectionEventType(this.jsonStudy),
           ceventType = CollectionEventType.create(jsonCet);
       ceventType.compareToJsonEntity(jsonCet);
     });
@@ -94,7 +94,7 @@ define([
 
     it('fails when getting a collection event type and it has a bad format', function() {
       var self = this,
-          data = getBadCollectionEventTypes(self.jsonEntities, self.jsonStudy);
+          data = getBadCollectionEventTypes(self.factory, self.jsonStudy);
 
       _.each(data, function (badCet) {
         var url = sprintf.sprintf('%s/%s?cetId=%s',
@@ -135,7 +135,7 @@ define([
       // assigns result of self.httpBackend.whenGET() to variable so that the response
       // can be changed inside the loop
       var self = this,
-          data = getBadCollectionEventTypes(self.jsonEntities, self.jsonStudy),
+          data = getBadCollectionEventTypes(self.factory, self.jsonStudy),
           url = sprintf.sprintf('%s/%s', uri(), self.jsonStudy.id),
           reqHandler = self.httpBackend.whenGET(url);
 
@@ -240,8 +240,8 @@ define([
     describe('for specimen specs', function() {
 
       beforeEach(function() {
-        this.jsonSpec = this.jsonEntities.collectionSpecimenSpec();
-        this.jsonCet  = this.jsonEntities.collectionEventType({ specimenSpecs: [ this.jsonSpec ]});
+        this.jsonSpec = this.factory.collectionSpecimenSpec();
+        this.jsonCet  = this.factory.collectionEventType({ specimenSpecs: [ this.jsonSpec ]});
         this.cet      = new this.CollectionEventType(this.jsonCet);
       });
 
@@ -296,8 +296,8 @@ define([
     describe('for annotation types', function() {
 
       beforeEach(function() {
-        this.jsonAnnotType = this.jsonEntities.annotationType();
-        this.jsonCet       = this.jsonEntities.collectionEventType({ annotationTypes: [ this.jsonAnnotType ]});
+        this.jsonAnnotType = this.factory.annotationType();
+        this.jsonCet       = this.factory.collectionEventType({ annotationTypes: [ this.jsonAnnotType ]});
         this.cet           = new this.CollectionEventType(this.jsonCet);
       });
 
@@ -359,20 +359,20 @@ define([
     /**
      * Returns 3 collection event types, each one with a different missing field.
      */
-    function getBadCollectionEventTypes(jsonEntities, jsonStudy) {
-      var badSpecimenSpec   = _.omit(jsonEntities.collectionSpecimenSpec(), 'name'),
-          badAnnotationType = _.omit(jsonEntities.annotationType(), 'name'),
+    function getBadCollectionEventTypes(factory, jsonStudy) {
+      var badSpecimenSpec   = _.omit(factory.collectionSpecimenSpec(), 'name'),
+          badAnnotationType = _.omit(factory.annotationType(), 'name'),
           data = [
             {
-              cet: _.omit(jsonEntities.collectionEventType(), 'name'),
+              cet: _.omit(factory.collectionEventType(), 'name'),
               errMsg : 'invalid collection event types from server'
             },
             {
-              cet: jsonEntities.collectionEventType({ specimenSpecs: [ badSpecimenSpec ]}),
+              cet: factory.collectionEventType({ specimenSpecs: [ badSpecimenSpec ]}),
               errMsg : 'invalid specimen specs from server'
             },
             {
-              cet: jsonEntities.collectionEventType({ annotationTypes: [ badAnnotationType ]}),
+              cet: factory.collectionEventType({ annotationTypes: [ badAnnotationType ]}),
               errMsg : 'invalid annotation types from server'
             }
           ];

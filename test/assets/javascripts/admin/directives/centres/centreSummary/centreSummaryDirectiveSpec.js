@@ -1,16 +1,15 @@
 /**
- * Jasmine test suite
- *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
+// Jasmine test suite
+//
+define([
+  'angular',
+  'angularMocks',
+  'underscore'
+], function(angular, mocks, _) {
   'use strict';
-
-  var angular                = require('angular'),
-      mocks                  = require('angularMocks'),
-      _                      = require('underscore'),
-      entityUpdateSharedSpec = require('../../../../test/entityUpdateSharedSpec');
 
   describe('Directive: centreSummaryDirective', function() {
 
@@ -25,9 +24,9 @@ define(function (require) {
       self.Centre               = self.$injector.get('Centre');
       self.CentreStatus         = self.$injector.get('CentreStatus');
       self.notificationsService = self.$injector.get('notificationsService');
-      self.factory              = self.$injector.get('jsonEntities');
+      self.factory              = self.$injector.get('factory');
 
-      self.centre = new self.Centre(self.jsonEntities.centre());
+      self.centre = new self.Centre(self.factory.centre());
 
       spyOn(modalService, 'showModal').and.callFake(function () {
         return self.$q.when('modalResult');
@@ -60,97 +59,35 @@ define(function (require) {
 
     describe('change centre status', function() {
 
-      describe('should enable a centre', function() {
-        var context = {};
-
-        beforeEach(inject(function () {
-          context.centre = this.centre;
-          context.status = 'enable';
-          context.newStatus = this.CentreStatus.ENABLED;
-        }));
-
-        statusChangeSharedBehaviour(context);
-      });
-
-      describe('should disable a centre', function() {
-        var context = {};
-
-        beforeEach(function () {
-          this.centre.status = this.CentreStatus.ENABLED;
-          context.centre = this.centre;
-          context.status = 'disable';
-          context.newStatus = this.CentreStatus.DISABLED;
-        });
-
-        statusChangeSharedBehaviour(context);
-      });
-
-      it('should throw an error when attempting to change status to invalid state', function() {
+      function checkStatusChange(centre, status, newStatus) {
+        /* jshint validthis: true */
         var self = this;
 
         self.createController(self.centre);
-        expect(function () {
-          self.controller.changeStatus(self.factory.stringNext());
-        }).toThrowError(/invalid status:/);
+
+        spyOn(self.Centre.prototype, status).and.callFake(function () {
+          centre.status = (centre.status === self.CentreStatus.ENABLED) ?
+            self.CentreStatus.DISABLED : self.CentreStatus.ENABLED;
+          return self.$q.when(centre);
+        });
+
+        self.controller.changeStatus(status);
+        self.scope.$digest();
+        expect(self.Centre.prototype[status]).toHaveBeenCalled();
+        expect(self.scope.vm.centre.status).toBe(newStatus);
+      }
+
+      it('should enable a centre', function() {
+        checkStatusChange.call(this, this.centre, 'enable', this.CentreStatus.ENABLED);
       });
 
-    });
-
-    describe('updates to name', function () {
-
-      var context = {};
-
-      beforeEach(inject(function () {
-        context.entity             = this.Centre;
-        context.updateFuncName     = 'updateName';
-        context.controllerFuncName = 'editName';
-        context.modalInputFuncName = 'text';
-      }));
-
-      entityUpdateSharedSpec(context);
-
-    });
-
-    describe('updates to description', function () {
-
-      var context = {};
-
-      beforeEach(inject(function () {
-        context.entity             = this.Centre;
-        context.updateFuncName     = 'updateDescription';
-        context.controllerFuncName = 'editDescription';
-        context.modalInputFuncName = 'textArea';
-      }));
-
-      entityUpdateSharedSpec(context);
+      it('should disable a centre', function() {
+        this.centre.status = this.CentreStatus.ENABLED;
+        checkStatusChange.call(this, this.centre, 'disable', this.CentreStatus.DISABLED);
+      });
 
     });
 
   });
-
-
-  function statusChangeSharedBehaviour(context) {
-
-    describe('(shared) centre status', function() {
-
-      it('status is changed', function() {
-        var self = this;
-
-        self.createController(context.centre);
-
-        spyOn(self.Centre.prototype, context.status).and.callFake(function () {
-          context.centre.status = (context.centre.status === self.CentreStatus.ENABLED) ?
-            self.CentreStatus.DISABLED : self.CentreStatus.ENABLED;
-          return self.$q.when(context.centre);
-        });
-
-        self.controller.changeStatus(context.status);
-        self.scope.$digest();
-        expect(self.Centre.prototype[context.status]).toHaveBeenCalled();
-        expect(self.scope.vm.centre.status).toBe(context.newStatus);
-      });
-    });
-
-  }
 
 });

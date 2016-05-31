@@ -22,10 +22,10 @@ define([
       this.AnnotationType       = this.$injector.get('AnnotationType');
       this.AnnotationValueType  = this.$injector.get('AnnotationValueType');
       this.AnnotationTypeViewer = this.$injector.get('AnnotationTypeViewer');
-      this.jsonEntities         = this.$injector.get('jsonEntities');
+      this.factory         = this.$injector.get('factory');
       this.testUtils            = this.$injector.get('testUtils');
 
-      this.study = new this.Study(this.jsonEntities.study());
+      this.study = new this.Study(this.factory.study());
 
       this.annotatationTypeOptions = [
         { valueType: this.AnnotationValueType.TEXT      },
@@ -44,7 +44,7 @@ define([
 
       _.each(this.annotatationTypeOptions, function (options) {
         // jshint unused:false
-        var annotationType = new self.AnnotationType(self.jsonEntities.annotationType(options)),
+        var annotationType = new self.AnnotationType(self.factory.annotationType(options)),
             viewer = new self.AnnotationTypeViewer(annotationType);
         count++;
         expect(self.modal.open.calls.count()).toBe(count);
@@ -54,7 +54,7 @@ define([
     it('should throw an error when created when it has no options', function() {
       var self = this,
           annotationType = new this.AnnotationType(
-            self.jsonEntities.annotationType({
+            self.factory.annotationType({
               valueType: self.AnnotationValueType.SELECT,
               options: []
             }));
@@ -77,7 +77,7 @@ define([
 
         attributes = [];
 
-        annotationType = new self.AnnotationType(self.jsonEntities.annotationType(options));
+        annotationType = new self.AnnotationType(self.factory.annotationType(options));
         viewer = new self.AnnotationTypeViewer(annotationType);
 
         if (annotationType.isValueTypeSelect()) {

@@ -14,16 +14,16 @@ define([
 
   describe('ProcessingTypeViewer', function() {
 
-    var ProcessingTypeViewer, jsonEntities, centre;
+    var ProcessingTypeViewer, factory, centre;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_ProcessingTypeViewer_,
-                               _jsonEntities_) {
+                               _factory_) {
       ProcessingTypeViewer = _ProcessingTypeViewer_;
-      jsonEntities   = _jsonEntities_;
+      factory   = _factory_;
 
-      centre = jsonEntities.centre();
+      centre = factory.centre();
     }));
 
     it('should open a modal when created', inject(function (testUtils) {
@@ -35,8 +35,8 @@ define([
       });
 
       // jshint unused:false
-      study = jsonEntities.study();
-      processingType = jsonEntities.processingType(study);
+      study = factory.study();
+      processingType = factory.processingType(study);
       viewer = new ProcessingTypeViewer(processingType);
 
       expect(modal.open).toHaveBeenCalled();
@@ -50,11 +50,11 @@ define([
         attributes.push({label: label, value: value});
       });
 
-      study = jsonEntities.study();
+      study = factory.study();
 
       _.each([true, false], function (enabled) {
         attributes = [];
-        processingType = jsonEntities.processingType(study);
+        processingType = factory.processingType(study);
         processingType.enabled = enabled;
         viewer = new ProcessingTypeViewer(processingType);
 

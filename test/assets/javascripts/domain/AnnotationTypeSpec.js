@@ -15,12 +15,12 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       this.AnnotationType           = this.$injector.get('AnnotationType');
       this.AnnotationValueType      = this.$injector.get('AnnotationValueType');
       this.AnnotationMaxValueCount  = this.$injector.get('AnnotationMaxValueCount');
-      this.jsonEntities             = this.$injector.get('jsonEntities');
+      this.factory             = this.$injector.get('factory');
     }));
 
     it('invalid objects are reported', function () {
       var self = this,
-          annotationTypeJson = self.jsonEntities.annotationType({
+          annotationTypeJson = self.factory.annotationType({
             valueType: self.AnnotationValueType.SELECT,
             options: []
           });
@@ -46,7 +46,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     it('can be created from valid JSON', function () {
       var self = this,
-          annotationTypeJson = self.jsonEntities.annotationType({
+          annotationTypeJson = self.factory.annotationType({
             valueType: self.AnnotationValueType.SELECT,
             options: ['opt1', 'opt2']
           }),
@@ -57,7 +57,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     it('create fails for invalid JSON', function () {
       var self = this,
-          annotationTypeJson = self.jsonEntities.annotationType({
+          annotationTypeJson = self.factory.annotationType({
             valueType: self.AnnotationValueType.SELECT,
             options: []
           });
@@ -76,7 +76,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
       _.each(_.values(self.AnnotationValueType), function (valueType) {
         var annotationType = new self.AnnotationType(
-          self.jsonEntities.annotationType({ valueType: valueType }));
+          self.factory.annotationType({ valueType: valueType }));
 
         expect(annotationType.isValueTypeText()).toBe(valueType === self.AnnotationValueType.TEXT);
         expect(annotationType.isValueTypeNumber()).toBe(valueType === self.AnnotationValueType.NUMBER);
@@ -90,7 +90,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
       _.each(_.range(4), function (maxValueCount) {
         var annotationType = new self.AnnotationType(
-          self.jsonEntities.annotationType({
+          self.factory.annotationType({
             valueType: self.AnnotationValueType.SELECT,
             maxValueCount: maxValueCount
           }));
@@ -105,7 +105,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
       _.each(_.range(4), function (maxValueCount) {
         var annotationType = new self.AnnotationType(
-          self.jsonEntities.annotationType({
+          self.factory.annotationType({
             valueType: self.AnnotationValueType.SELECT,
             maxValueCount: maxValueCount
           }));
@@ -120,7 +120,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
       _.each(_.range(4), function (maxValueCount) {
         annotationType = new self.AnnotationType(
-          self.jsonEntities.annotationType({
+          self.factory.annotationType({
             valueType: self.AnnotationValueType.SELECT,
             maxValueCount: maxValueCount
           }));
@@ -132,7 +132,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
       _.each(_.range(4), function (maxValueCount) {
         annotationType = new self.AnnotationType(
-          self.jsonEntities.annotationType({
+          self.factory.annotationType({
             valueType: self.AnnotationValueType.TEXT,
             maxValueCount: maxValueCount
           }));
@@ -150,7 +150,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
       _.each(valueTypesNoSelect, function (valueType) {
         var annotationType = new self.AnnotationType(
-          self.jsonEntities.annotationType({ valueType: valueType }));
+          self.factory.annotationType({ valueType: valueType }));
 
         expect(function () { annotationType.addOption(); })
           .toThrow(new Error('value type is not select: ' + valueType));
@@ -160,7 +160,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     it('addOption adds an item to the options array', function() {
       var self = this,
           annotationType = new self.AnnotationType(
-            self.jsonEntities.annotationType({
+            self.factory.annotationType({
               valueType: self.AnnotationValueType.SELECT,
               options: []
             }));
@@ -173,7 +173,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
     it('removeOption throws an error if options array is empty', function() {
       var self = this,
           annotationType = new self.AnnotationType(
-            self.jsonEntities.annotationType({
+            self.factory.annotationType({
               valueType: self.AnnotationValueType.SELECT,
               options: []
             }));
@@ -186,7 +186,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       var self = this,
           options = ['option1', 'option2'],
           annotationType = new self.AnnotationType(
-            self.jsonEntities.annotationType({
+            self.factory.annotationType({
               valueType: self.AnnotationValueType.SELECT,
               options: options
             }));

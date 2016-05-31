@@ -16,7 +16,7 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(templateMixin, jsonEntities, testUtils) {
+    beforeEach(inject(function(templateMixin, factory, testUtils) {
       var self = this;
 
       _.extend(self, templateMixin);
@@ -25,7 +25,7 @@ define([
         '/assets/javascripts/admin/directives/statusLine/statusLine.html');
 
       self.createScope = setupScope();
-      self.jsonEntities = self.$injector.get('jsonEntities');
+      self.factory = self.$injector.get('factory');
 
       //--
 
@@ -50,7 +50,7 @@ define([
     it('has the correct number of table cells', function() {
       var Centre = this.$injector.get('Centre'),
           $filter = this.$injector.get('$filter'),
-          centre = new Centre(this.jsonEntities.centre()),
+          centre = new Centre(this.factory.centre()),
           cells;
 
       this.createScope(centre);
@@ -68,7 +68,7 @@ define([
     it('displays correct value if timeModified has a value', function() {
       var Centre = this.$injector.get('Centre'),
           $filter = this.$injector.get('$filter'),
-          centre = new Centre(this.jsonEntities.centre()),
+          centre = new Centre(this.factory.centre()),
           cells;
 
       this.createScope(centre);
@@ -80,7 +80,7 @@ define([
 
     it('displays correct value if timeModified is undefined', function() {
       var Centre = this.$injector.get('Centre'),
-          centre = new Centre(this.jsonEntities.centre()),
+          centre = new Centre(this.factory.centre()),
           cells;
 
       centre.timeModified = undefined;

@@ -33,13 +33,13 @@ define([
       self.Annotation                    = self.$injector.get('Annotation');
       self.AnnotationValueType           = self.$injector.get('AnnotationValueType');
       self.AnnotationType                = self.$injector.get('AnnotationType');
-      self.jsonEntities                  = self.$injector.get('jsonEntities');
+      self.factory                  = self.$injector.get('factory');
       self.testUtils                     = self.$injector.get('testUtils');
 
       testUtils.addCustomMatchers();
 
-      self.jsonStudy = self.jsonEntities.study();
-      self.jsonCet = self.jsonEntities.collectionEventType();
+      self.jsonStudy = self.factory.study();
+      self.jsonCet = self.factory.collectionEventType();
 
       self.getCollectionEventEntities = getCollectionEventEntities;
       self.expectCevent = expectCevent;
@@ -48,16 +48,16 @@ define([
       //--
 
       function getCollectionEventEntities(isNew) {
-        var jsonAnnotationTypes = self.jsonEntities.allAnnotationTypes(),
+        var jsonAnnotationTypes = self.factory.allAnnotationTypes(),
             collectionEventType,
             initServerCollectionEvent,
             jsonCevent,
             collectionEvent;
 
         collectionEventType = self.CollectionEventType.create(
-          self.jsonEntities.collectionEventType({ annotationTypes: jsonAnnotationTypes }));
+          self.factory.collectionEventType({ annotationTypes: jsonAnnotationTypes }));
 
-        jsonCevent = self.jsonEntities.collectionEvent();
+        jsonCevent = self.factory.collectionEvent();
         initServerCollectionEvent = isNew ? _.omit(jsonCevent, 'id'): jsonCevent;
         collectionEvent = new self.CollectionEvent(initServerCollectionEvent, collectionEventType);
 
@@ -85,7 +85,7 @@ define([
     });
 
     it('constructor with default parameters has default values', function() {
-      var ceventType = new this.CollectionEventType(this.jsonEntities.collectionEventType()),
+      var ceventType = new this.CollectionEventType(this.factory.collectionEventType()),
           collectionEvent = new this.CollectionEvent({}, ceventType);
 
       expect(collectionEvent.id).toBeNull();
@@ -103,7 +103,7 @@ define([
           jsonAnnotationTypes = _.pluck(annotationData, 'annotationType'),
           ceventType;
 
-      self.jsonCet = self.jsonEntities.collectionEventType({ annotationTypes: jsonAnnotationTypes });
+      self.jsonCet = self.factory.collectionEventType({ annotationTypes: jsonAnnotationTypes });
 
       ceventType = new self.CollectionEventType(self.jsonCet);
 
@@ -129,7 +129,7 @@ define([
           jsonAnnotationTypes = _.pluck(annotationData, 'annotationType'),
           ceventType;
 
-      self.jsonCet = self.jsonEntities.collectionEventType({ annotationTypes: jsonAnnotationTypes });
+      self.jsonCet = self.factory.collectionEventType({ annotationTypes: jsonAnnotationTypes });
       ceventType = self.CollectionEventType.create(self.jsonCet);
 
       var collectionEvent = new self.CollectionEvent({ }, ceventType, jsonAnnotationTypes);
@@ -148,15 +148,15 @@ define([
           jsonAnnotation = {},
           ceventType;
 
-      var annotationType = new self.AnnotationType(self.jsonEntities.annotationType());
+      var annotationType = new self.AnnotationType(self.factory.annotationType());
 
       // put an invalid value in jsonAnnotation.annotationTypeId
       _.extend(
         jsonAnnotation,
-        self.jsonEntities.annotation(self.jsonEntities.valueForAnnotation(annotationType), annotationType),
-        { annotationTypeId: self.jsonEntities.stringNext() });
+        self.factory.annotation(self.factory.valueForAnnotation(annotationType), annotationType),
+        { annotationTypeId: self.factory.stringNext() });
 
-      self.jsonCet = self.jsonEntities.collectionEventType(self.jsonStudy,
+      self.jsonCet = self.factory.collectionEventType(self.jsonStudy,
                                                        { annotationTypes: [annotationType] });
 
       ceventType = self.CollectionEventType.create(self.jsonCet);
@@ -171,12 +171,12 @@ define([
           serverCollectionEvent,
           ceventType;
 
-      serverCollectionEvent = self.jsonEntities.collectionEvent({
-        collectionEventTypeId: self.jsonEntities.domainEntityNameNext(
-          self.jsonEntities.ENTITY_NAME_COLLECTION_EVENT_TYPE())
+      serverCollectionEvent = self.factory.collectionEvent({
+        collectionEventTypeId: self.factory.domainEntityNameNext(
+          self.factory.ENTITY_NAME_COLLECTION_EVENT_TYPE())
       });
       ceventType = self.CollectionEventType.create(
-        self.jsonEntities.collectionEventType(self.jsonStudy));
+        self.factory.collectionEventType(self.jsonStudy));
 
       expect(function () {
         return new self.CollectionEvent(serverCollectionEvent, ceventType);
@@ -201,7 +201,7 @@ define([
 
     it('fails when creating from an object with annotation with invalid keys', function() {
       var self = this,
-          jsonCevent = _.extend(this.jsonEntities.collectionEvent(),
+          jsonCevent = _.extend(this.factory.collectionEvent(),
                                 { annotations: [{ tmp: 1 }] });
 
       expect(function () {
@@ -212,9 +212,9 @@ define([
     it('has valid values when creating from a server response', function() {
       var annotationData    = this.jsonAnnotationData(),
           annotationTypes   = _.pluck(annotationData, 'annotationType'),
-          jsonCet           = this.jsonEntities.collectionEventType({annotationTypes: annotationTypes}),
+          jsonCet           = this.factory.collectionEventType({annotationTypes: annotationTypes}),
           cet               = new this.CollectionEventType(jsonCet),
-          jsonCevent        = this.jsonEntities.collectionEvent({annotationTypes: annotationTypes});
+          jsonCevent        = this.factory.collectionEvent({annotationTypes: annotationTypes});
 
       var collectionEvent = this.CollectionEvent.create(jsonCevent, cet);
       collectionEvent.compareToJsonEntity(jsonCevent);
@@ -222,7 +222,7 @@ define([
 
     it('can retrieve a single collection event', function() {
       var self = this,
-          collectionEvent = self.jsonEntities.collectionEvent();
+          collectionEvent = self.factory.collectionEvent();
 
       self.$httpBackend.whenGET(uri(collectionEvent.id))
         .respond(serverReply(collectionEvent));
@@ -236,7 +236,7 @@ define([
 
     it('get fails for and invalid collection event id', function() {
       var self = this,
-          collectionEventId = self.jsonEntities.stringNext();
+          collectionEventId = self.factory.stringNext();
 
       self.$httpBackend.whenGET(uri(collectionEventId))
         .respond(404, { status: 'error', message: 'invalid id' });
@@ -249,11 +249,11 @@ define([
 
     it('can list collection events for a participant', function() {
       var self = this,
-          participant = self.jsonEntities.defaultParticipant(),
+          participant = self.factory.defaultParticipant(),
           collectionEvents = _.map(_.range(2), function () {
-            return self.jsonEntities.collectionEvent();
+            return self.factory.collectionEvent();
           }),
-          reply = self.jsonEntities.pagedResult(collectionEvents),
+          reply = self.factory.pagedResult(collectionEvents),
           serverEntity;
 
       self.$httpBackend.whenGET(uriWithPath('list', participant.id))
@@ -274,9 +274,9 @@ define([
 
     it('can list collection events sorted by corresponding fields', function() {
       var self = this,
-          study = self.jsonEntities.study(),
-          participant = self.jsonEntities.participant({ studyId: study.id }),
-          reply = self.jsonEntities.pagedResult([]),
+          study = self.factory.study(),
+          participant = self.factory.participant({ studyId: study.id }),
+          reply = self.factory.pagedResult([]),
           sortFields = [ 'visitNumber', 'timeCompleted'];
 
       _.each(sortFields, function (sortField) {
@@ -292,9 +292,9 @@ define([
 
     it('can list collection events using a page number', function() {
       var self = this,
-          study = self.jsonEntities.study(),
-          participant = self.jsonEntities.participant({ studyId: study.id }),
-          reply = self.jsonEntities.pagedResult([]),
+          study = self.factory.study(),
+          participant = self.factory.participant({ studyId: study.id }),
+          reply = self.factory.pagedResult([]),
           pageNumber = 2;
 
       self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?page=' + pageNumber)
@@ -308,9 +308,9 @@ define([
 
     it('can list collection events using a page size', function() {
       var self = this,
-          study = self.jsonEntities.study(),
-          participant = self.jsonEntities.participant({ studyId: study.id }),
-          reply = self.jsonEntities.pagedResult([]),
+          study = self.factory.study(),
+          participant = self.factory.participant({ studyId: study.id }),
+          reply = self.factory.pagedResult([]),
           pageSize = 2;
 
       self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?pageSize=' + pageSize)
@@ -325,8 +325,8 @@ define([
     it('can retrieve a single collection event by visit number', function() {
       var self            = this,
           entities        = self.getCollectionEventEntities(true),
-          jsonParticipant = self.jsonEntities.defaultParticipant(),
-          jsonCevent      = self.jsonEntities.defaultCollectionEvent();
+          jsonParticipant = self.factory.defaultParticipant(),
+          jsonCevent      = self.factory.defaultCollectionEvent();
 
       self.$httpBackend.whenGET(uri(jsonParticipant.id) + '/visitNumber/' + jsonCevent.visitNumber)
         .respond(serverReply(jsonCevent));
@@ -344,9 +344,9 @@ define([
 
     it('can list collection events using ordering', function() {
       var self = this,
-          study = self.jsonEntities.study(),
-          participant = self.jsonEntities.participant({ studyId: study.id }),
-          reply = self.jsonEntities.pagedResult([]),
+          study = self.factory.study(),
+          participant = self.factory.participant({ studyId: study.id }),
+          reply = self.factory.pagedResult([]),
           orderingTypes = [ 'asc', 'desc'];
 
       _.each(orderingTypes, function (orderingType) {
@@ -369,7 +369,7 @@ define([
               collectionEvent;
 
           ceventType = this.CollectionEventType.create(
-            this.jsonEntities.collectionEventType({
+            this.factory.collectionEventType({
               annotationTypes: annotationTypes
             }));
           collectionEvent = new this.CollectionEvent({}, ceventType);
@@ -382,7 +382,7 @@ define([
         });
 
     it('can add a collectionEvent', function() {
-      var jsonCevent      = this.jsonEntities.collectionEvent(),
+      var jsonCevent      = this.factory.collectionEvent(),
           collectionEvent = new this.CollectionEvent(_.omit(jsonCevent, 'id')),
           cmd             = addCommand(collectionEvent);
 
@@ -416,19 +416,19 @@ define([
 
     it('can not add a collection event with empty required annotations', function() {
       var self = this,
-          jsonAnnotationTypes = self.jsonEntities.allAnnotationTypes();
+          jsonAnnotationTypes = self.factory.allAnnotationTypes();
 
       _.each(jsonAnnotationTypes, function (jsonAnnotType) {
         var jsonAnnotation, annotationType, ceventType, jsonCevent, collectionEvent;
 
-        jsonAnnotation = self.jsonEntities.annotation({ value: null,
+        jsonAnnotation = self.factory.annotation({ value: null,
                                                         annotationTypeId: jsonAnnotType.uniqueId});
 
         annotationType = new self.AnnotationType(jsonAnnotType);
         ceventType = self.CollectionEventType.create(
-          self.jsonEntities.collectionEventType({ annotationTypes: [ annotationType ] }));
+          self.factory.collectionEventType({ annotationTypes: [ annotationType ] }));
         ceventType.annotationTypes[0].required = true;
-        jsonCevent = _.omit(self.jsonEntities.collectionEvent({ annotations: [ jsonAnnotation ]}), 'id)');
+        jsonCevent = _.omit(self.factory.collectionEvent({ annotations: [ jsonAnnotation ]}), 'id)');
         collectionEvent = new self.CollectionEvent(jsonCevent, ceventType);
 
         _.each(collectionEvent.annotations, function (annotation) {
@@ -450,7 +450,7 @@ define([
                         cevent.visitNumber,
                         uriWithPath('visitNumber', cevent.id),
                         { visitNumber: cevent.visitNumber },
-                        this.jsonEntities.defaultCollectionEvent(),
+                        this.factory.defaultCollectionEvent(),
                         this.expectCevent,
                         this.failTest);
     });
@@ -464,7 +464,7 @@ define([
                         cevent.timeCompleted,
                         uriWithPath('timeCompleted', cevent.id),
                         { timeCompleted: cevent.timeCompleted },
-                        this.jsonEntities.defaultCollectionEvent(),
+                        this.factory.defaultCollectionEvent(),
                         this.expectCevent,
                         this.failTest);
     });

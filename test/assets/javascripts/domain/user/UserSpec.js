@@ -22,7 +22,7 @@ define([
       self.$httpBackend = self.$injector.get('$httpBackend');
       self.User         = self.$injector.get('User');
       self.UserStatus   = self.$injector.get('UserStatus');
-      self.jsonEntities = self.$injector.get('jsonEntities');
+      self.factory = self.$injector.get('factory');
 
       self.statusChangeShared = statusChangeShared;
 
@@ -30,7 +30,7 @@ define([
 
       function statusChangeShared(user, statusChangePath, userMethod, newStatus) {
         var json = { id: user.id, expectedVersion: user.version };
-        var reply = self.jsonEntities.user(user);
+        var reply = self.factory.user(user);
 
         self.$httpBackend.expectPOST(updateUri(statusChangePath, user.id), json)
           .respond(201, serverReply(reply));
@@ -70,7 +70,7 @@ define([
 
     it('fails when creating from object with missing required keys', function() {
       var self = this,
-          obj = this.jsonEntities.user(),
+          obj = this.factory.user(),
           requiredKeys = ['id', 'name', 'email', 'status'];
 
       _.each(requiredKeys, function (key) {
@@ -87,8 +87,8 @@ define([
       it('can list using name filter parameter only', function() {
         var self = this,
             nameFilter = 'test',
-            jsonUser = self.jsonEntities.user(),
-            reply = self.jsonEntities.pagedResult([ jsonUser ]);
+            jsonUser = self.factory.user(),
+            reply = self.factory.pagedResult([ jsonUser ]);
 
         self.$httpBackend.whenGET(uri() + '?' + $.param({ nameFilter: nameFilter })).respond({
           status: 'success',
@@ -105,8 +105,8 @@ define([
       it('can list using email filter parameter only', function() {
         var self = this,
             emailFilter = 'test',
-            jsonUser = self.jsonEntities.user(),
-            reply = self.jsonEntities.pagedResult([ jsonUser ]);
+            jsonUser = self.factory.user(),
+            reply = self.factory.pagedResult([ jsonUser ]);
 
         this.$httpBackend.whenGET(uri() + '?' + $.param({emailFilter: emailFilter})).respond({
           status: 'success',
@@ -123,8 +123,8 @@ define([
       it('can list using sort parameter only', function() {
         var self = this,
             sort = 'asc',
-            jsonUser = self.jsonEntities.user(),
-            reply = self.jsonEntities.pagedResult([ jsonUser ]);
+            jsonUser = self.factory.user(),
+            reply = self.factory.pagedResult([ jsonUser ]);
 
         this.$httpBackend.whenGET(uri() + '?' + $.param({sort: sort})).respond({
           status: 'success',
@@ -143,8 +143,8 @@ define([
             emailFilter = 'test',
             sort        = 'email',
             order       = 'desc',
-            jsonUser    = self.jsonEntities.user(),
-            reply       = self.jsonEntities.pagedResult([ jsonUser ]);
+            jsonUser    = self.factory.user(),
+            reply       = self.factory.pagedResult([ jsonUser ]);
 
         this.$httpBackend.whenGET(
           uri() + '?' + $.param({emailFilter: emailFilter, order: 'desc', sort: sort}))
@@ -158,7 +158,7 @@ define([
       });
 
       it('should handle an invalid response', function() {
-        var reply = this.jsonEntities.pagedResult([ { 'a': 1 } ]);
+        var reply = this.factory.pagedResult([ { 'a': 1 } ]);
 
         this.$httpBackend.whenGET(uri()).respond({ status: 'success', data: reply });
 
@@ -178,7 +178,7 @@ define([
 
     it('can retrieve a single user', function(done) {
       var self = this,
-          user = this.jsonEntities.user();
+          user = this.factory.user();
 
       self.$httpBackend.whenGET(uri(user.id)).respond(serverReply(user));
 
@@ -191,8 +191,8 @@ define([
     });
 
     it('can register a user', function() {
-      var password = this.jsonEntities.stringNext();
-      var user = new this.User(_.omit(this.jsonEntities.user(), 'id'));
+      var password = this.factory.stringNext();
+      var user = new this.User(_.omit(this.factory.user(), 'id'));
       var cmd = registerCommand(user, password);
 
       this.$httpBackend.expectPOST(uri(), cmd).respond(201, serverReply());
@@ -204,7 +204,7 @@ define([
     });
 
     it('can update a users name', function() {
-      var jsonUser = this.jsonEntities.user(),
+      var jsonUser = this.factory.user(),
           user = new this.User(jsonUser);
 
       this.updateEntity.call(this,
@@ -219,7 +219,7 @@ define([
     });
 
     it('can update a users email', function() {
-      var jsonUser = this.jsonEntities.user(),
+      var jsonUser = this.factory.user(),
           user = new this.User(jsonUser);
 
       this.updateEntity.call(this,
@@ -234,8 +234,8 @@ define([
     });
 
     it('can update a users avatar url', function() {
-      var newAvatarUrl = this.jsonEntities.stringNext(),
-          jsonUser = this.jsonEntities.user({ avatarUrl: newAvatarUrl }),
+      var newAvatarUrl = this.factory.stringNext(),
+          jsonUser = this.factory.user({ avatarUrl: newAvatarUrl }),
           user = new this.User(jsonUser);
 
       this.updateEntity.call(this,
@@ -250,9 +250,9 @@ define([
     });
 
     it('can update a users password', function() {
-      var currentPassword = this.jsonEntities.stringNext(),
-          newPassword = this.jsonEntities.stringNext(),
-          jsonUser = this.jsonEntities.user(),
+      var currentPassword = this.factory.stringNext(),
+          newPassword = this.factory.stringNext(),
+          jsonUser = this.factory.user(),
           user = new this.User(jsonUser);
 
       this.updateEntity.call(this,
@@ -270,17 +270,17 @@ define([
     });
 
     it('can activate a registered user', function() {
-      var user = new this.User(this.jsonEntities.user());
+      var user = new this.User(this.factory.user());
       this.statusChangeShared(user, 'activate', 'activate', this.UserStatus.ACTIVE);
     });
 
     it('can lock an active user', function() {
-      var user = new this.User(_.extend(this.jsonEntities.user(), { status: this.UserStatus.ACTIVE }));
+      var user = new this.User(_.extend(this.factory.user(), { status: this.UserStatus.ACTIVE }));
       this.statusChangeShared(user, 'lock', 'lock', this.UserStatus.LOCKED);
     });
 
     it('can unlock a locked user', function() {
-      var user = new this.User(_.extend(this.jsonEntities.user(), { status: this.UserStatus.LOCKED }));
+      var user = new this.User(_.extend(this.factory.user(), { status: this.UserStatus.LOCKED }));
       this.statusChangeShared(user, 'unlock', 'unlock', this.UserStatus.ACTIVE);
     });
 
@@ -289,7 +289,7 @@ define([
           statuses = [ self.UserStatus.ACTIVE, self.UserStatus.LOCKED ];
 
       _.each(statuses, function (status) {
-        var user = new self.User(_.extend(self.jsonEntities.user(), { status: status }));
+        var user = new self.User(_.extend(self.factory.user(), { status: status }));
 
         expect(function () { user.activate(); })
           .toThrow(new Error('user status is not registered: ' + status));
@@ -301,7 +301,7 @@ define([
           statuses = [ self.UserStatus.REGISTERED, self.UserStatus.LOCKED ];
 
       _.each(statuses, function (status) {
-        var user = new self.User(_.extend(self.jsonEntities.user(), { status: status }));
+        var user = new self.User(_.extend(self.factory.user(), { status: status }));
 
         expect(function () { user.lock(); })
           .toThrowError(/user status is not active/);
@@ -313,7 +313,7 @@ define([
           statuses = [ self.UserStatus.REGISTERED, self.UserStatus.ACTIVE ];
 
       _.each(statuses, function (status) {
-        var user = new self.User(_.extend(self.jsonEntities.user(), { status: status }));
+        var user = new self.User(_.extend(self.factory.user(), { status: status }));
 
         expect(function () { user.unlock(); })
           .toThrow(new Error('user status is not locked: ' + status));
@@ -323,7 +323,7 @@ define([
     it('status predicates are valid valid', function() {
       var self = this;
       _.each(_.values(self.UserStatus), function (status) {
-        var jsonUser = self.jsonEntities.user({ status: status }),
+        var jsonUser = self.factory.user({ status: status }),
             user     = new self.User(jsonUser);
 
         expect(user.isRegistered()).toBe(status === self.UserStatus.REGISTERED);

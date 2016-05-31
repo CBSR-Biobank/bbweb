@@ -25,11 +25,11 @@ define([
       self.Study              = self.$injector.get('Study');
       self.StudyStatus        = self.$injector.get('StudyStatus');
       self.funutils           = self.$injector.get('funutils');
-      self.jsonEntities       = self.$injector.get('jsonEntities');
+      self.factory       = self.$injector.get('factory');
       self.testUtils          = self.$injector.get('testUtils');
 
       self.testUtils.addCustomMatchers();
-      self.jsonStudy = self.jsonEntities.study();
+      self.jsonStudy = self.factory.study();
       self.expectStudy = expectStudy;
 
       //--
@@ -60,14 +60,14 @@ define([
     describe('when creating', function() {
 
       it('can create from with empty annotation types', function() {
-        var jsonStudy = _.omit(this.jsonEntities.study(), 'annotationTypes'),
+        var jsonStudy = _.omit(this.factory.study(), 'annotationTypes'),
             study = this.Study.create(jsonStudy);
         expect(study).toEqual(jasmine.any(this.Study));
       });
 
       it('fails when creating from an invalid object', function() {
         var self = this,
-            badStudyJson = _.omit(self.jsonEntities.study(), 'name');
+            badStudyJson = _.omit(self.factory.study(), 'name');
 
         expect(function () { self.Study.create(badStudyJson); })
           .toThrowError(/invalid object from server/);
@@ -75,7 +75,7 @@ define([
 
       it('fails when creating from a non object for an annotation type', function() {
         var self = this,
-            badStudyJson = self.jsonEntities.study({ annotationTypes: [ 1 ]});
+            badStudyJson = self.factory.study({ annotationTypes: [ 1 ]});
         expect(function () { self.Study.create(badStudyJson); })
           .toThrowError(/invalid object from server/);
       });
@@ -85,7 +85,7 @@ define([
     it('status predicates return valid results', function() {
       var self = this;
       _.each(_.values(self.StudyStatus), function(status) {
-        var study = new self.Study(self.jsonEntities.study({ status: status }));
+        var study = new self.Study(self.factory.study({ status: status }));
         expect(study.isDisabled()).toBe(status === self.StudyStatus.DISABLED);
         expect(study.isEnabled()).toBe(status === self.StudyStatus.ENABLED);
         expect(study.isRetired()).toBe(status === self.StudyStatus.RETIRED);
@@ -118,8 +118,8 @@ define([
 
     it('fails when getting a study and it has a bad annotation type', function() {
       var self = this,
-          annotationType = _.omit(self.jsonEntities.annotationType(), 'name'),
-          study = self.jsonEntities.study({ annotationTypes: [ annotationType ]});
+          annotationType = _.omit(self.factory.annotationType(), 'name'),
+          study = self.factory.study({ annotationTypes: [ annotationType ]});
 
       self.httpBackend.whenGET(uri(study.id)).respond(serverReply(study));
 
@@ -137,8 +137,8 @@ define([
 
     it('can retrieve studies', function() {
       var self = this,
-          studies = [ self.jsonEntities.study({ annotationTypes: [] }) ],
-          reply = self.jsonEntities.pagedResult(studies);
+          studies = [ self.factory.study({ annotationTypes: [] }) ],
+          reply = self.factory.pagedResult(studies);
 
       self.httpBackend.whenGET(uri()).respond(serverReply(reply));
 
@@ -165,7 +165,7 @@ define([
 
       _.each(optionList, function (options) {
         var studies = [ self.jsonStudy ],
-            reply   = self.jsonEntities.pagedResult(studies),
+            reply   = self.factory.pagedResult(studies),
             url     = sprintf.sprintf('%s?%s', uri(), $.param(options, true));
 
         self.httpBackend.whenGET(url).respond(serverReply(reply));
@@ -185,7 +185,7 @@ define([
     it('fails when list returns an invalid study', function() {
       var self = this,
           studies = [ _.omit(self.jsonStudy, 'name') ],
-          reply = self.jsonEntities.pagedResult(studies);
+          reply = self.factory.pagedResult(studies);
 
       self.httpBackend.whenGET(uri()).respond(serverReply(reply));
       self.Study.list().then(listFail).catch(shouldFail);
@@ -254,8 +254,8 @@ define([
     describe('for annotation types', function() {
 
       beforeEach(function() {
-        this.annotationType = this.jsonEntities.annotationType();
-        this.jsonStudy      = this.jsonEntities.study({ annotationTypes: [ this.annotationType ] });
+        this.annotationType = this.factory.annotationType();
+        this.jsonStudy      = this.factory.study({ annotationTypes: [ this.annotationType ] });
         this.study          = new this.Study(this.jsonStudy);
       });
 
@@ -299,49 +299,49 @@ define([
     });
 
     it('can disable a study', function() {
-      var jsonStudy = this.jsonEntities.study({ status: this.StudyStatus.ENABLED });
+      var jsonStudy = this.factory.study({ status: this.StudyStatus.ENABLED });
       changeStatusShared.call(this, jsonStudy, 'disable', this.StudyStatus.DISABLED);
     });
 
     it('throws an error when disabling a study and it is already disabled', function() {
-      var study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.DISABLED }));
+      var study = new this.Study(this.factory.study({ status: this.StudyStatus.DISABLED }));
       expect(function () { study.disable(); })
         .toThrowError('already disabled');
     });
 
     it('can enable a study', function() {
-      var jsonStudy = this.jsonEntities.study({ status: this.StudyStatus.DISABLED });
+      var jsonStudy = this.factory.study({ status: this.StudyStatus.DISABLED });
       changeStatusShared.call(this, jsonStudy, 'enable', this.StudyStatus.ENABLED);
     });
 
     it('throws an error when enabling a study and it is already enabled', function() {
-      var study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.ENABLED }));
+      var study = new this.Study(this.factory.study({ status: this.StudyStatus.ENABLED }));
       expect(function () { study.enable(); })
         .toThrowError('already enabled');
     });
 
     it('can retire a study', function() {
-      var jsonStudy = this.jsonEntities.study({ status: this.StudyStatus.DISABLED });
+      var jsonStudy = this.factory.study({ status: this.StudyStatus.DISABLED });
       changeStatusShared.call(this, jsonStudy, 'retire', this.StudyStatus.RETIRED);
     });
 
     it('throws an error when retiring a study and it is already retired', function() {
-      var study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.RETIRED }));
+      var study = new this.Study(this.factory.study({ status: this.StudyStatus.RETIRED }));
       expect(function () { study.retire(); })
         .toThrowError('already retired');
     });
 
     it('can unretire a study', function() {
-      var jsonStudy = this.jsonEntities.study({ status: this.StudyStatus.RETIRED });
+      var jsonStudy = this.factory.study({ status: this.StudyStatus.RETIRED });
       changeStatusShared.call(this, jsonStudy, 'unretire', this.StudyStatus.DISABLED);
     });
 
     it('throws an error when unretiring a study and it is not retired', function() {
-      var study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.DISABLED }));
+      var study = new this.Study(this.factory.study({ status: this.StudyStatus.DISABLED }));
       expect(function () { study.unretire(); })
         .toThrowError('not retired');
 
-      study = new this.Study(this.jsonEntities.study({ status: this.StudyStatus.ENABLED }));
+      study = new this.Study(this.factory.study({ status: this.StudyStatus.ENABLED }));
       expect(function () { study.unretire(); })
         .toThrowError('not retired');
     });

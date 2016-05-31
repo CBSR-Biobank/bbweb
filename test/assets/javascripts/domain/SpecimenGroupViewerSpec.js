@@ -14,16 +14,16 @@ define([
 
   describe('SpecimenGroupViewer', function() {
 
-    var SpecimenGroupViewer, jsonEntities, centre;
+    var SpecimenGroupViewer, factory, centre;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_SpecimenGroupViewer_,
-                               _jsonEntities_) {
+                               _factory_) {
       SpecimenGroupViewer = _SpecimenGroupViewer_;
-      jsonEntities   = _jsonEntities_;
+      factory   = _factory_;
 
-      centre = jsonEntities.centre();
+      centre = factory.centre();
     }));
 
     it('should open a modal when created', inject(function (testUtils) {
@@ -38,8 +38,8 @@ define([
       });
 
       // jshint unused:false
-      study = jsonEntities.study();
-      specimenGroup = jsonEntities.specimenGroup(study);
+      study = factory.study();
+      specimenGroup = factory.specimenGroup(study);
       viewer = new SpecimenGroupViewer(specimenGroup);
 
       expect(modal.open).toHaveBeenCalled();
@@ -54,8 +54,8 @@ define([
       });
 
       attributes = [];
-      study = jsonEntities.study();
-      specimenGroup = jsonEntities.specimenGroup(study);
+      study = factory.study();
+      specimenGroup = factory.specimenGroup(study);
       viewer = new SpecimenGroupViewer(specimenGroup);
 
       expect(attributes).toBeArrayOfSize(7);

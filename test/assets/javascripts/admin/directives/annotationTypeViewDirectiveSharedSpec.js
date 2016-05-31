@@ -29,7 +29,7 @@ define([
 
       beforeEach(inject(function() {
         this.AnnotationType = this.$injector.get('AnnotationType');
-        this.jsonEntities = this.$injector.get('jsonEntities');
+        this.factory = this.$injector.get('factory');
       }));
 
       it('on update should invoke the update method on entity', function() {

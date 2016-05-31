@@ -30,9 +30,9 @@ define([
       self.$window          = self.$injector.get('$window');
       self.$state       = self.$injector.get('$state');
       self.Centre           = self.$injector.get('Centre');
-      self.jsonEntities     = self.$injector.get('jsonEntities');
+      self.factory     = self.$injector.get('factory');
 
-      self.centre = new self.Centre(self.jsonEntities.centre());
+      self.centre = new self.Centre(self.factory.centre());
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/centres/centreView/centreView.html');

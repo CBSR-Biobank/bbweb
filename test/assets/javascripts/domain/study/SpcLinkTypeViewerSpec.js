@@ -14,18 +14,18 @@ define([
 
   xdescribe('SpcLinkTypeViewer', function() {
 
-    var SpcLinkTypeViewer, SpecimenLinkType, jsonEntities, centre;
+    var SpcLinkTypeViewer, SpecimenLinkType, factory, centre;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(_SpcLinkTypeViewer_,
                                _SpecimenLinkType_,
-                               jsonEntities) {
+                               factory) {
       SpcLinkTypeViewer = _SpcLinkTypeViewer_;
       SpecimenLinkType       = _SpecimenLinkType_;
-      jsonEntities   = jsonEntities;
+      factory   = factory;
 
-      centre = jsonEntities.centre();
+      centre = factory.centre();
     }));
 
     function createEntities() {
@@ -36,17 +36,17 @@ define([
           baseSpcLinkType,
           slt;
 
-      study = jsonEntities.study();
-      processingType = jsonEntities.processingType(study);
+      study = factory.study();
+      processingType = factory.processingType(study);
       specimenGroups = [
-        jsonEntities.specimenGroup(study),
-        jsonEntities.specimenGroup(study),
+        factory.specimenGroup(study),
+        factory.specimenGroup(study),
       ];
       annotationTypes = [
-        jsonEntities.studyAnnotationType(study),
-        jsonEntities.studyAnnotationType(study)
+        factory.studyAnnotationType(study),
+        factory.studyAnnotationType(study)
       ];
-      baseSpcLinkType = jsonEntities.specimenLinkType(processingType, {
+      baseSpcLinkType = factory.specimenLinkType(processingType, {
         inputGroup: specimenGroups[0],
         outputGroup: specimenGroups[1],
         annotationTypes: annotationTypes

@@ -54,14 +54,14 @@ define(function(require) {
       self.Study               = self.$injector.get('Study');
       self.Participant         = self.$injector.get('Participant');
       self.AnnotationValueType = self.$injector.get('AnnotationValueType');
-      self.jsonEntities        = self.$injector.get('jsonEntities');
+      self.factory        = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/participantSummary/participantSummary.html',
         '/assets/javascripts/admin/directives/statusLine/statusLine.html');
 
-      self.jsonParticipant = self.jsonEntities.participant();
-      self.jsonStudy       = self.jsonEntities.defaultStudy();
+      self.jsonParticipant = self.factory.participant();
+      self.jsonStudy       = self.factory.defaultStudy();
 
       self.participant = new self.Participant(self.jsonParticipant);
       self.study       = new self.Study(self.jsonStudy);
@@ -80,12 +80,12 @@ define(function(require) {
 
         maxValueCount = maxValueCount || 0;
 
-        jsonAnnotationType = self.jsonEntities.annotationType({ valueType: valueType,
+        jsonAnnotationType = self.factory.annotationType({ valueType: valueType,
                                                                 maxValueCount: maxValueCount });
-        value              = self.jsonEntities.valueForAnnotation(jsonAnnotationType);
-        jsonAnnotation     = self.jsonEntities.annotation({ value: value }, jsonAnnotationType);
-        jsonStudy          = self.jsonEntities.study({ annotationTypes: [ jsonAnnotationType ]});
-        jsonParticipant    = self.jsonEntities.participant({ annotations: [ jsonAnnotation ]});
+        value              = self.factory.valueForAnnotation(jsonAnnotationType);
+        jsonAnnotation     = self.factory.annotation({ value: value }, jsonAnnotationType);
+        jsonStudy          = self.factory.study({ annotationTypes: [ jsonAnnotationType ]});
+        jsonParticipant    = self.factory.participant({ annotations: [ jsonAnnotation ]});
 
         study = new self.Study(jsonStudy);
 

@@ -27,7 +27,7 @@ define([
       self.$animate     = self.$injector.get('$animate');
       self.$document    = self.$injector.get('$document');
       self.modalInput   = self.$injector.get('modalInput');
-      self.jsonEntities = self.$injector.get('jsonEntities');
+      self.factory = self.$injector.get('factory');
 
       jasmine.addMatchers({
         toHaveModalsOpen: function(util, customEqualityTesters) {
@@ -190,8 +190,8 @@ define([
 
       function open(modalInputFunc, defaultValue, title, label, options) {
         var modal, modalElement;
-        title = title || self.jsonEntities.stringNext();
-        label = label || self.jsonEntities.stringNext();
+        title = title || self.factory.stringNext();
+        label = label || self.factory.stringNext();
         modal = modalInputFunc(title, label, defaultValue, options);
         self.$rootScope.$digest();
 
@@ -227,8 +227,8 @@ define([
     }));
 
     beforeEach(function () {
-      this.title = this.jsonEntities.stringNext();
-      this.label = this.jsonEntities.stringNext();
+      this.title = this.factory.stringNext();
+      this.label = this.factory.stringNext();
     });
 
 
@@ -732,7 +732,7 @@ define([
     describe('text modal', function() {
 
       beforeEach(function () {
-        this.defaultValue = this.jsonEntities.stringNext();
+        this.defaultValue = this.factory.stringNext();
       });
 
       it('has valid elements and scope', function() {
@@ -881,7 +881,7 @@ define([
 
       it('modal should be closed when OK button is pressed', function() {
         var modalInfo = this.open(this.modalInput.text,
-                                  this.jsonEntities.stringNext(),
+                                  this.factory.stringNext(),
                                   this.title,
                                   this.label);
 
@@ -899,7 +899,7 @@ define([
 
       it('modal should be closed when Cancel button is pressed', function() {
         var modalInfo = this.open(this.modalInput.text,
-                                  this.jsonEntities.stringNext(),
+                                  this.factory.stringNext(),
                                   this.title,
                                   this.label);
 

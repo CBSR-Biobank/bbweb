@@ -18,9 +18,9 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
       self.Study               = self.$injector.get('Study');
       self.CollectionEventType = self.$injector.get('CollectionEventType');
-      self.jsonEntities        = self.$injector.get('jsonEntities');
+      self.factory        = self.$injector.get('factory');
 
-      self.study = new self.Study(self.jsonEntities.study());
+      self.study = new self.Study(self.factory.study());
       self.createController = createController;
 
       self.putHtmlTemplates(
@@ -56,7 +56,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           $state               = this.$injector.get('$state'),
           ceventType;
 
-      ceventType = new this.CollectionEventType(this.jsonEntities.collectionEventType(this.study));
+      ceventType = new this.CollectionEventType(this.factory.collectionEventType(this.study));
       this.createController(this.study);
 
       spyOn(this.CollectionEventType.prototype, 'add').and.callFake(function () {
@@ -78,7 +78,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           domainEntityService = this.$injector.get('domainEntityService'),
           ceventType;
 
-      ceventType = new this.CollectionEventType(this.jsonEntities.collectionEventType(this.study));
+      ceventType = new this.CollectionEventType(this.factory.collectionEventType(this.study));
       this.createController(this.study);
 
       spyOn(this.CollectionEventType.prototype, 'add').and.callFake(function () {

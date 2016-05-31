@@ -54,16 +54,16 @@ define([
       self.Study               = self.$injector.get('Study');
       self.Participant         = self.$injector.get('Participant');
       self.CollectionEventType = self.$injector.get('CollectionEventType');
-      self.jsonEntities        = self.$injector.get('jsonEntities');
+      self.factory        = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/ceventGetType/ceventGetType.html');
 
       self.jsonCeventTypes = _.map(_.range(2), function () {
-        return self.jsonEntities.collectionEventType();
+        return self.factory.collectionEventType();
       });
-      self.jsonParticipant = self.jsonEntities.participant();
-      self.jsonStudy       = self.jsonEntities.defaultStudy();
+      self.jsonParticipant = self.factory.participant();
+      self.jsonStudy       = self.factory.defaultStudy();
 
       self.collectionEventTypes = _.map(self.jsonCeventTypes, function (jsonCeventType){
         return new self.CollectionEventType(jsonCeventType);

@@ -13,22 +13,22 @@ define(function (require) {
       faker                         = require('faker'),
       locationUpdateSharedBehaviour = require('../../../../test/locationUpdateSharedBehaviourSpec');
 
-  fdescribe('Directive: centreLocationViewDirective', function() {
+  describe('Directive: centreLocationViewDirective', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, $state, directiveTestSuite) {
+    beforeEach(inject(function ($rootScope, $compile, $state, templateMixin) {
       var self = this;
 
-      _.extend(self, directiveTestSuite);
+      _.extend(self, templateMixin);
 
       self.$state               = self.$injector.get('$state');
       self.Centre               = self.$injector.get('Centre');
       self.Location             = self.$injector.get('Location');
-      self.jsonEntities         = self.$injector.get('jsonEntities');
+      self.factory         = self.$injector.get('factory');
 
-      self.location = new self.Location(self.jsonEntities.location());
-      self.centre = new self.Centre(self.jsonEntities.centre({ locations: [ self.location ]}));
+      self.location = new self.Location(self.factory.location());
+      self.centre = new self.Centre(self.factory.centre({ locations: [ self.location ]}));
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/centres/centreLocationView/centreLocationView.html');

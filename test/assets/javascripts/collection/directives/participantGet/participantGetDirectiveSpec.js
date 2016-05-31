@@ -28,13 +28,13 @@ define([
       self.modalService = self.$injector.get('modalService');
       self.Study        = self.$injector.get('Study');
       self.Participant  = self.$injector.get('Participant');
-      self.jsonEntities = self.$injector.get('jsonEntities');
+      self.factory = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/participantGet/participantGet.html');
 
-      this.jsonParticipant = this.jsonEntities.participant();
-      this.jsonStudy       = this.jsonEntities.defaultStudy();
+      this.jsonParticipant = this.factory.participant();
+      this.jsonStudy       = this.factory.defaultStudy();
       this.participant     = new this.Participant(this.jsonParticipant);
       this.study           = new this.Study(this.jsonStudy);
 
@@ -87,7 +87,7 @@ define([
         spyOn(this.$state, 'go').and.returnValue('ok');
 
         directive = createDirective(this);
-        directive.controller.uniqueId = this.jsonEntities.stringNext();
+        directive.controller.uniqueId = this.factory.stringNext();
         directive.controller.uniqueIdChanged();
         directive.scope.$digest();
 
@@ -98,7 +98,7 @@ define([
 
       it('with an invalid participant ID opens a modal', function() {
         var directive,
-            uniqueId = this.jsonEntities.stringNext(),
+            uniqueId = this.factory.stringNext(),
             deferred = this.$q.defer();
 
         deferred.reject({ status: 404 });
@@ -119,7 +119,7 @@ define([
 
       it('with an invalid participant ID opens a modal and cancel is pressed', function() {
         var directive,
-            uniqueId = this.jsonEntities.stringNext(),
+            uniqueId = this.factory.stringNext(),
             participantDeferred = this.$q.defer(),
             modalDeferred = this.$q.defer();
 
@@ -147,7 +147,7 @@ define([
         spyOn(console, 'error').and.callThrough();
 
         directive = createDirective(this);
-        directive.controller.uniqueId = this.jsonEntities.stringNext();
+        directive.controller.uniqueId = this.factory.stringNext();
         directive.controller.uniqueIdChanged();
         directive.scope.$digest();
 
