@@ -53,6 +53,7 @@ package dto {
 
   case class SpecimenDto(id:                 String,
                          inventoryId:        String,
+                         collectionEventId:  String,
                          specimenSpecId:     String,
                          specimenSpecName:   String,
                          version:            Long,

@@ -63,11 +63,12 @@ define(function(require) {
   //
   app.run(debugFunc);
 
-  app.constant('bbwebConfig', {
-    dateFormat:       'YYYY-MM-DD',
-    dateTimeFormat:   'YYYY-MM-DD hh:mm A',
-    datepickerFormat: 'yyyy-MM-dd hh:mm a'
-  });
+  app.constant('bbwebConfig',
+               {
+                 dateFormat:       'YYYY-MM-DD',
+                 dateTimeFormat:   'YYYY-MM-DD HH:mm',
+                 datepickerFormat: 'yyyy-MM-dd HH:mm'
+               });
 
   app.config(exceptionConfig);
   app.config(loggingConfig);

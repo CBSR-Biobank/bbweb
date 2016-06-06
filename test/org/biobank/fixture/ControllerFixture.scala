@@ -7,6 +7,7 @@ import org.biobank.domain._
 import org.biobank.domain.centre._
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
+import org.biobank.domain.processing._
 import org.biobank.domain.user.UserRepository
 import org.biobank.service.PasswordHasher
 import org.scalatest._
@@ -166,6 +167,7 @@ abstract class ControllerFixture
   def collectionEventRepository                = app.injector.instanceOf[CollectionEventRepository]
   def ceventSpecimenRepository                 = app.injector.instanceOf[CeventSpecimenRepository]
   def specimenRepository                       = app.injector.instanceOf[SpecimenRepository]
+  def processingEventInputSpecimenRepository   = app.injector.instanceOf[ProcessingEventInputSpecimenRepository]
 
   def userRepository = app.injector.instanceOf[UserRepository]
 

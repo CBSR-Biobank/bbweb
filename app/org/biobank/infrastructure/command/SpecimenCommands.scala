@@ -13,6 +13,7 @@ object SpecimenCommands {
 
   trait SpecimenModifyCommand
       extends SpecimenCommand
+      with HasIdentity
       with HasExpectedVersion
 
   case class SpecimenInfo(inventoryId:    String,
@@ -32,7 +33,7 @@ object SpecimenCommands {
                               expectedVersion:   Long,
                               locationId:        String,
                               specimenData:      Set[SpecimenInfo])
-      extends SpecimenModifyCommand
+      extends SpecimenCommand
 
   case class SpecimenAssignPositionCmd(userId:            String,
                                        id:                String,
@@ -61,8 +62,7 @@ object SpecimenCommands {
   case class RemoveSpecimenCmd(userId:            String,
                                id:                String,
                                collectionEventId: String,
-                               expectedVersion:   Long,
-                               usable:            Boolean)
+                               expectedVersion:   Long)
       extends SpecimenModifyCommand
       with HasIdentity
 

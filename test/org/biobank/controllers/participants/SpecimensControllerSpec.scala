@@ -2,9 +2,15 @@ package org.biobank.controllers.participants
 
 import com.github.nscala_time.time.Imports._
 import org.biobank.controllers._
+import org.biobank.domain.centre._
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
 import org.biobank.domain.JsonHelper
+import org.biobank.domain.processing.{
+  ProcessingEventId,
+  ProcessingEventInputSpecimen,
+  ProcessingEventInputSpecimenId
+}
 import org.biobank.fixture.ControllerFixture
 import play.api.libs.json._
 import play.api.test.Helpers._
@@ -19,7 +25,17 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
   def uri(collectionEvent: CollectionEvent): String =
     uri + s"/${collectionEvent.id}"
 
-  def createEntities(): (EnabledStudy, Participant, CollectionEventType, CollectionEvent) = {
+  def uri(cevent: CollectionEvent, specimen: Specimen, version: Long): String =
+    uri(cevent) + s"/${specimen.id.id}/$version"
+
+  def createEntities(): (EnabledCentre,
+                         EnabledStudy,
+                         Participant,
+                         CollectionEventType,
+                         CollectionEvent) = {
+    val centre = factory.createEnabledCentre.copy(locations = Set(factory.createLocation))
+    centreRepository.put(centre)
+
     var study = factory.createEnabledStudy
     studyRepository.put(study)
 
@@ -36,12 +52,16 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
     val cevent = factory.createCollectionEvent
     collectionEventRepository.put(cevent)
 
-    (study, participant, ceventType, cevent)
+    (centre, study, participant, ceventType, cevent)
   }
 
-  def createEntities(fn: (EnabledStudy, Participant, CollectionEventType, CollectionEvent) => Unit): Unit = {
-    val (study, participant, ceventType, cevent) = createEntities
-    fn(study, participant, ceventType, cevent)
+  def createEntities(fn: (EnabledCentre,
+                          EnabledStudy,
+                          Participant,
+                          CollectionEventType,
+                          CollectionEvent) => Unit): Unit = {
+    val (centre, study, participant, ceventType, cevent) = createEntities
+    fn(centre, study, participant, ceventType, cevent)
     ()
   }
 
@@ -52,16 +72,17 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
     }
   }
 
-  def createEntitiesAndSpecimens(fn: (EnabledStudy,
+  def createEntitiesAndSpecimens(fn: (EnabledCentre,
+                                      EnabledStudy,
                                       Participant,
                                       CollectionEventType,
                                       CollectionEvent,
                                       List[Specimen]) => Unit): Unit = {
-    val (study, participant, ceventType, cevent) = createEntities
+    val (centre, study, participant, ceventType, cevent) = createEntities
 
     val specimens = (1 to 2).map { _ => factory.createUsableSpecimen }.toList
     storeSpecimens(cevent, specimens)
-    fn(study, participant, ceventType, cevent, specimens)
+    fn(centre, study, participant, ceventType, cevent, specimens)
     ()
   }
 
@@ -92,13 +113,13 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
     "GET /participants/cevents/spcs/:ceventId" must {
 
       "list none" in {
-        createEntities { (study, participant, ceventType, cevent) =>
+        createEntities { (centre, study, participant, ceventType, cevent) =>
           PagedResultsSpec(this).emptyResults(uri(cevent))
         }
       }
 
       "lists all specimens for a collection event" in {
-        createEntitiesAndSpecimens { (study, participant, ceventType, cevent, specimens) =>
+        createEntitiesAndSpecimens { (centre, study, participant, ceventType, cevent, specimens) =>
 
           val jsonItems = PagedResultsSpec(this).multipleItemsResult(
               uri = uri(cevent),
@@ -113,7 +134,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "list specimens sorted by id" in {
-        createEntities { (study, participant, ceventType, cevent) =>
+        createEntities { (centre, study, participant, ceventType, cevent) =>
 
           val specimens = List("id1", "id2").map { id =>
                factory.createUsableSpecimen.copy(id = SpecimenId(id))
@@ -143,7 +164,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "list specimens sorted by time created" in {
-        createEntities { (study, participant, ceventType, cevent) =>
+        createEntities { (centre, study, participant, ceventType, cevent) =>
 
           val specimens = List(1, 2).map { hour =>
                factory.createUsableSpecimen.copy(timeCreated = DateTime.now.hour(hour))
@@ -173,7 +194,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "list specimens sorted by status" in {
-        createEntities { (study, participant, ceventType, cevent) =>
+        createEntities { (centre, study, participant, ceventType, cevent) =>
 
           val specimens: List[Specimen] = List(factory.createUsableSpecimen,
                                                factory.createUnusableSpecimen)
@@ -202,7 +223,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "list the first specimen in a paged query" in {
-        createEntities { (study, participant, ceventType, cevent) =>
+        createEntities { (centre, study, participant, ceventType, cevent) =>
 
           val specimens = List("id1", "id2").map { id =>
                factory.createUsableSpecimen.copy(id = SpecimenId(id))
@@ -224,7 +245,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "list the last specimen in a paged query" in {
-        createEntities { (study, participant, ceventType, cevent) =>
+        createEntities { (centre, study, participant, ceventType, cevent) =>
 
           val specimens = List("id1", "id2").map { id =>
                factory.createUsableSpecimen.copy(id = SpecimenId(id))
@@ -247,7 +268,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "fail when using an invalid query parameters" in {
-        createEntities { (study, participant, ceventType, cevent) =>
+        createEntities { (centre, study, participant, ceventType, cevent) =>
           val url = uri(cevent)
 
           PagedResultsSpec(this).failWithNegativePageNumber(url)
@@ -272,7 +293,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
     "POST /participants/cevents/spcs/:ceventId" must {
 
       "add a specimen to a collection event" in {
-        createEntities { (study, participant, ceventType, cevent) =>
+        createEntities { (centre, study, participant, ceventType, cevent) =>
           val specimen = factory.createUsableSpecimen
           val json = makeRequest(POST, uri(cevent), specimensToAddJson(List(specimen)))
 
@@ -307,7 +328,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "add more than one specimen to a collection event" in {
-        createEntities { (study, participant, ceventType, cevent) =>
+        createEntities { (centre, study, participant, ceventType, cevent) =>
 
           val specimens = (1 to 2).map { _ => factory.createUsableSpecimen }.toList
 
@@ -321,6 +342,38 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
 
           val repoSpecimens = ceventSpecimenRepository.withCeventId(cevent.id)
           repoSpecimens must have size specimens.size
+        }
+      }
+    }
+
+    "DELETE  /participants/cevents/spcs/:ceventId/:spcId/:ver" must {
+
+      "111 remove a specimen from a collection event" in {
+        createEntities { (centre, study, participant, ceventType, cevent) =>
+          val specimen = factory.createUsableSpecimen
+          specimenRepository.put(specimen)
+
+          val json = makeRequest(DELETE, uri(cevent, specimen, specimen.version))
+
+          (json \ "status").as[String] must include ("success")
+        }
+      }
+
+      "111 not remove a specimen which has been processed" in {
+        createEntities { (centre, study, participant, ceventType, cevent) =>
+          val specimen = factory.createUsableSpecimen
+          specimenRepository.put(specimen)
+
+          val peis = ProcessingEventInputSpecimen(ProcessingEventInputSpecimenId("abc"),
+                                                  ProcessingEventId("def"),
+                                                  specimen.id)
+          processingEventInputSpecimenRepository.put(peis)
+
+          val json = makeRequest(DELETE, uri(cevent, specimen, specimen.version), BAD_REQUEST)
+
+          (json \ "status").as[String] must include ("error")
+
+          (json \ "message").as[String] must include regex("specimen has child specimens.*")
         }
       }
     }

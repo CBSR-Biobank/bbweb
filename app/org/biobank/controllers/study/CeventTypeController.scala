@@ -68,7 +68,7 @@ class CeventTypeController @Inject() (val env:            Environment,
           expectedVersion       = ver,
           uniqueId              = uniqueId)
       processCommand(cmd)
-  }
+    }
 
   def addSpecimenSpec(id: String) =
     commandAction(Json.obj("id" -> id)) {

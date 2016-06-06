@@ -47,8 +47,9 @@ message SpecimenEvent {
    }
 
    message Removed {
-      optional int64  version    = 1;
-      optional string specimenId = 2;
+      optional int64  version           = 1;
+      optional string specimenId        = 2;
+      optional string collectionEventId = 3;
    }
 
    required string userId = 1;

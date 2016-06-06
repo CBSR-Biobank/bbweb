@@ -56,7 +56,18 @@ class SpecimensController @Inject() (val env:          Environment,
 
   def addSpecimens(ceventId: String) =
     commandAction(Json.obj("collectionEventId" -> ceventId)) { cmd: AddSpecimensCmd =>
-      val future = service.processAddCommand(cmd)
+      val future = service.processCommand(cmd)
+      domainValidationReply(future)
+    }
+
+  def removeSpecimen(ceventId: String, spcId: String, ver: Long) =
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
+      val cmd = RemoveSpecimenCmd(
+          userId                = userId.id,
+          id                    = spcId,
+          collectionEventId     = ceventId,
+          expectedVersion       = ver)
+      val future = service.processRemoveCommand(cmd)
       domainValidationReply(future)
     }
 

@@ -3,7 +3,7 @@ package org.biobank.service.participants
 import akka.actor._
 import akka.persistence.SnapshotOffer
 import javax.inject.{Inject, Singleton}
-import org.biobank.domain.DomainValidation
+import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.domain.participants._
 import org.biobank.domain.study.{CollectionEventType, CollectionEventTypeRepository}
 import org.biobank.infrastructure.command.SpecimenCommands._
@@ -11,6 +11,7 @@ import org.biobank.infrastructure.event.SpecimenEvents._
 import org.biobank.service.Processor
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
+import org.biobank.domain.processing.ProcessingEventInputSpecimenRepository
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -24,10 +25,12 @@ object SpecimensProcessor {
  * Responsible for handing collection event commands to add, update and remove.
  */
 @Singleton
-class SpecimensProcessor @Inject() (val specimenRepository:            SpecimenRepository,
-                                    val collectionEventRepository:     CollectionEventRepository,
-                                    val collectionEventTypeRepository: CollectionEventTypeRepository,
-                                    val ceventSpecimenRepository:      CeventSpecimenRepository)
+class SpecimensProcessor @Inject() (
+  val specimenRepository:                     SpecimenRepository,
+  val collectionEventRepository:              CollectionEventRepository,
+  val collectionEventTypeRepository:          CollectionEventTypeRepository,
+  val ceventSpecimenRepository:               CeventSpecimenRepository,
+  val processingEventInputSpecimenRepository: ProcessingEventInputSpecimenRepository)
 // FIXME add container repository when implemented
 //val containerRepository:       ContainerRepository)
     extends Processor {
@@ -97,7 +100,7 @@ class SpecimensProcessor @Inject() (val specimenRepository:            SpecimenR
           _.added.specimenData      := (cmd.specimenData zip identities).map {
               case (specimenInfo, specimenId) =>
                 if (specimenRepository.getByKey(specimenId).isSuccess) {
-                  log.error(s"processAddCmd: collection event with id already exsits: $specimenId")
+                  log.error(s"processAddCmd: specimen with id already exsits: $specimenId")
                 }
 
                 specimenInfoToEvent(specimenId, specimenInfo)
@@ -105,34 +108,6 @@ class SpecimensProcessor @Inject() (val specimenRepository:            SpecimenR
         }
 
     process(v) { applyAddedEvent(_) }
-  }
-
-  private def validateSpecimenInfo(specimenData: List[SpecimenInfo], ceventType: CollectionEventType)
-      : DomainValidation[Boolean] = {
-
-    val cmdSpecIds    = specimenData.map(s => s.specimenSpecId).toSet
-    val ceventSpecIds = ceventType.specimenSpecs.map(s => s.uniqueId).toSet
-    val notBelonging  = cmdSpecIds.diff(ceventSpecIds)
-
-    if (notBelonging.isEmpty) {
-      true.success
-    } else {
-      EntityCriteriaError("specimen specs do not belong to collection event type: "
-                            + notBelonging.mkString(", ")).failureNel
-    }
-  }
-
-  /**
-   * Returns success if none of the inventory IDs are found in the repository.
-   *
-   */
-  private def validateInventoryId(specimenData: List[SpecimenInfo]): DomainValidation[Boolean] = {
-    specimenData.map { info =>
-        specimenRepository.getForInventoryId(info.inventoryId) fold (
-          err => true.success,
-          spc => s"specimen ID already in use: ${info.inventoryId}".failureNel[Boolean]
-        )
-      }.sequenceU.map { x => true }
   }
 
   private def processMoveCmd(cmd: MoveSpecimensCmd): Unit = {
@@ -152,16 +127,23 @@ class SpecimensProcessor @Inject() (val specimenRepository:            SpecimenR
   }
 
   private def processRemoveCmd(cmd: RemoveSpecimenCmd): Unit = {
-    // val v = update(cmd) { (participant, cevent) =>
-    //   createEvent(participant, cmd).withSpecimenRemoved(
-    //     SpecimenRemovedEvent(Some(cevent.id.id))).success
-    // }
-    // process(v) { applyRemovedEvent(_) }
-    ???
+    val v = update(cmd) { (cevent, specimen) =>
+        for {
+          collectionEvent <- collectionEventRepository.getByKey(CollectionEventId(cmd.collectionEventId))
+          specimen <- specimenRepository.getByKey(SpecimenId(cmd.id))
+          hasChildren <- specimenHasNoChildren(specimen)
+        } yield {
+          SpecimenEvent(cmd.userId).update(
+            _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
+            _.removed.version           := specimen.version,
+            _.removed.specimenId        := specimen.id.id,
+            _.removed.collectionEventId := collectionEvent.id.id)
+        }
+      }
+    process(v) { applyRemovedEvent(_) }
   }
 
   private def applyAddedEvent(event: SpecimenEvent): Unit = {
-
     val v = for {
         validEventType <- validEventType(event.eventType.isAdded)
         specimens      <- {
@@ -209,30 +191,61 @@ class SpecimensProcessor @Inject() (val specimenRepository:            SpecimenR
 
   private def applyRemovedEvent(event: SpecimenEvent): Unit = {
     val v = for {
-        validEventType <- validEventType(event.eventType.isRemoved)
-        specimen       <- specimenRepository.getByKey(SpecimenId(event.getRemoved.getSpecimenId))
-        validVersion   <- specimen.requireVersion(event.getRemoved.getVersion)
-      } yield specimen
+        validEventType  <- validEventType(event.eventType.isRemoved)
+        specimen        <- specimenRepository.getByKey(SpecimenId(event.getRemoved.getSpecimenId))
+        validVersion    <- specimen.requireVersion(event.getRemoved.getVersion)
+        collectionEvent <- collectionEventRepository.getByKey(CollectionEventId(event.getRemoved.getCollectionEventId))
+      } yield (collectionEvent, specimen)
 
     logIfError(event, v)
 
-    v.map(specimenRepository.remove(_))
+    v.map { case (collectionEvent, specimen) =>
+      ceventSpecimenRepository.remove(CeventSpecimen(collectionEvent.id, specimen.id))
+      specimenRepository.remove(specimen)
+    }
     ()
+  }
+
+  private def validateSpecimenInfo(specimenData: List[SpecimenInfo], ceventType: CollectionEventType)
+      : DomainValidation[Boolean] = {
+
+    val cmdSpecIds    = specimenData.map(s => s.specimenSpecId).toSet
+    val ceventSpecIds = ceventType.specimenSpecs.map(s => s.uniqueId).toSet
+    val notBelonging  = cmdSpecIds.diff(ceventSpecIds)
+
+    if (notBelonging.isEmpty) {
+      true.success
+    } else {
+      EntityCriteriaError("specimen specs do not belong to collection event type: "
+                            + notBelonging.mkString(", ")).failureNel
+    }
+  }
+
+  /**
+   * Returns success if none of the inventory IDs are found in the repository.
+   *
+   */
+  private def validateInventoryId(specimenData: List[SpecimenInfo]): DomainValidation[Boolean] = {
+    specimenData.map { info =>
+        specimenRepository.getForInventoryId(info.inventoryId) fold (
+          err => true.success,
+          spc => s"specimen ID already in use: ${info.inventoryId}".failureNel[Boolean]
+        )
+      }.sequenceU.map { x => true }
   }
 
   def update(cmd: SpecimenModifyCommand)
             (fn: (CollectionEvent, Specimen) => DomainValidation[SpecimenEvent])
       : DomainValidation[SpecimenEvent] = {
-    ???
-    // val specimenId = SpecimenId(cmd.id)
-    // val collectionEventId = CollectionEventId(cmd.collectionEventId)
+    val specimenId = SpecimenId(cmd.id)
+    val collectionEventId = CollectionEventId(cmd.collectionEventId)
 
-    // for {
-    //   specimen     <- specimenRepository.getByKey(specimenId)
-    //   cevent       <- collectionEventRepository.getByKey(collectionEventId)
-    //   validVersion <- cevent.requireVersion(cmd.expectedVersion)
-    //   event        <- fn(cevent, specimen)
-    // } yield event
+    for {
+      specimen     <- specimenRepository.getByKey(specimenId)
+      cevent       <- collectionEventRepository.getByKey(collectionEventId)
+      validVersion <- cevent.requireVersion(cmd.expectedVersion)
+      event        <- fn(cevent, specimen)
+    } yield event
   }
 
   private def validEventType(eventType: Boolean): DomainValidation[Boolean] =
@@ -240,8 +253,15 @@ class SpecimensProcessor @Inject() (val specimenRepository:            SpecimenR
     else s"invalid event type".failureNel
 
   private def logIfError[T](event: SpecimenEvent, validation: DomainValidation[T]) =
-      validation.leftMap { err =>
-        log.error(s"*** ERROR ***: ${err.list.toList.mkString}, event: $event: ")
-      }
+    validation.leftMap { err =>
+      log.error(s"*** ERROR ***: ${err.list.toList.mkString}, event: $event: ")
+    }
+
+  private def specimenHasNoChildren(specimen: Specimen): DomainValidation[Boolean] = {
+    val children = processingEventInputSpecimenRepository.withSpecimenId(specimen.id)
+    if (children.isEmpty) true.success
+    else DomainError(s"specimen has child specimens: ${specimen.id}").failureNel
+  }
+
 
 }

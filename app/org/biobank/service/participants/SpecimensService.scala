@@ -30,7 +30,7 @@ trait SpecimensService {
            order:             SortOrder)
       : DomainValidation[Seq[SpecimenDto]]
 
-  def processAddCommand(cmd: SpecimenCommand): Future[DomainValidation[CollectionEvent]]
+  def processCommand(cmd: SpecimenCommand): Future[DomainValidation[CollectionEvent]]
 
   def processRemoveCommand(cmd: SpecimenCommand): Future[DomainValidation[Boolean]]
 
@@ -71,6 +71,7 @@ class SpecimensServiceImpl @Inject() (
         centreLocationName <- centre.locationName(specimen.locationId)
       } yield SpecimenDto(id                 = specimen.id.id,
                           inventoryId        = specimen.inventoryId,
+                          collectionEventId  = collectionEventId,
                           specimenSpecId     = specimen.specimenSpecId,
                           specimenSpecName   = specimenSpec.name,
                           version            = specimen.version,
@@ -107,7 +108,7 @@ class SpecimensServiceImpl @Inject() (
     }
   }
 
-  def processAddCommand(cmd: SpecimenCommand): Future[DomainValidation[CollectionEvent]] =
+  def processCommand(cmd: SpecimenCommand): Future[DomainValidation[CollectionEvent]] =
     ask(processor, cmd).mapTo[DomainValidation[SpecimenEvent]].map { validation =>
       for {
         event  <- validation
