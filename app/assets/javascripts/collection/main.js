@@ -35,7 +35,7 @@ define(function (require) {
                    require('./directives/ceventsAddAndSelect/ceventsAddAndSelectDirective'));
   module.directive('ceventsList',         require('./directives/ceventsList/ceventsListDirective'));
 
-  module.component('specimenSummary',     require('./components/specimenSummary/specimenSummaryComponent'));
+  module.component('ceventSpecimensView',     require('./components/ceventSpecimensView/ceventSpecimensViewComponent'));
 
   return {
     name: name,

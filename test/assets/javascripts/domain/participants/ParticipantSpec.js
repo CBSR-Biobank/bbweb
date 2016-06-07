@@ -38,7 +38,7 @@ define(function(require) {
       self.AnnotationValueType      = self.$injector.get('AnnotationValueType');
       self.AnnotationType           = self.$injector.get('AnnotationType');
       self.bbwebConfig              = self.$injector.get('bbwebConfig');
-      self.factory             = self.$injector.get('factory');
+      self.factory                  = self.$injector.get('factory');
       self.testUtils                = self.$injector.get('testUtils');
 
       self.testUtils.addCustomMatchers();

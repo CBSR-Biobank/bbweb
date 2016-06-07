@@ -127,7 +127,7 @@ define(['underscore'], function (_) {
         'Remove specimen',
         'Are you sure you want to remove specimen ' + specimenSpec.name + '?',
         'Remove failed',
-        'Annotation type ' + specimenSpec.name + ' cannot be removed');
+        'Specimen' + specimenSpec.name + ' cannot be removed');
 
       function removePromiseFunc() {
         return vm.ceventType.removeSpecimenSpec(specimenSpec);

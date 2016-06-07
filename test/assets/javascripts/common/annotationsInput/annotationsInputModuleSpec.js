@@ -106,7 +106,7 @@ define([
     });
 
     it('works for a DATE_TIME annotation and a valid date', function() {
-      var dateStr = '2010-01-10 12:00 PM',
+      var dateStr = '2010-01-10 00:00',
           annotation = this.createAnnotation(this.AnnotationValueType.DATE_TIME),
           annotations = [ annotation ];
 

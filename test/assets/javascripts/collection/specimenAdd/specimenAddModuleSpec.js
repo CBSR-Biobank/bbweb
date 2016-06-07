@@ -12,7 +12,7 @@ define([
 ], function(angular, mocks, _, faker) {
   'use strict';
 
-  fdescribe('Module: specimenAddModal', function() {
+  describe('Module: specimenAddModal', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 

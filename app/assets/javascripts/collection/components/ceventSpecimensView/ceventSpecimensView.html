@@ -1,0 +1,69 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Specimens
+      <span class="btn-group pull-right">
+        <button class="btn btn-xs btn-default"
+                title="add specimens"
+                ng-click="vm.addSpecimens()">
+          <i class="glyphicon glyphicon-plus"></i>
+        </button>
+      </span>
+    </h3>
+  </div>
+
+  <ul class="list-group" ng-if="vm.specimens.length <= 0">
+    <li class="list-group-item">
+      <div class="panel panel-warning">
+        <div class="panel-heading">
+          No specimens collected yet.
+        </div>
+      </div>
+    </li>
+  </ul>
+
+  <table st-table="vm.specimens"
+         st-pipe="vm.getTableData"
+         class="table table-striped table-condensed">
+    <thead>
+      <tr>
+        <th st-sort="inventoryId" st-sort-default="true">Inventory ID</th>
+        <th>Amount</th>
+        <th>Type</th>
+        <th st-sort="timeCreated">Time created</th>
+        <th>Location</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody ng-if="!vm.tableDataLoading">
+      <tr ng-repeat="specimen in vm.specimens">
+        <td>{{specimen.inventoryId}}</td>
+        <td>{{specimen.amount}} {{specimen.units}}</td>
+        <td>{{specimen.specimenSpecName}}</td>
+        <td>{{specimen.timeCreated| localTime}}</td>
+        <td>{{specimen.locationName}}</td>
+        <td>
+          <button class="btn btn-xs btn-warning"
+                  ng-click="vm.removeSpecimen(specimen)"
+                  title="Remove specimen">
+            <i class="glyphicon glyphicon-remove"></i>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+    <tbody ng-if="vm.tableDataLoading">
+      <tr>
+        <td colspan="5" class="text-center">Loading ... </td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="5" class="text-center">
+          <div st-items-by-page="vm.pageSize"
+               st-pagination=""
+               st-template="/assets/javascripts/common/directives/pagination.html"></div>
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+
+</div>

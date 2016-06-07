@@ -24,11 +24,6 @@ define(function (require) {
   }
 
   CeventViewCtrl.$inject = [
-    '$q',
-    '$state',
-    'Centre',
-    'Specimen',
-    'specimenAddModal',
     'timeService',
     'modalInput',
     'notificationsService',
@@ -38,32 +33,20 @@ define(function (require) {
   /**
    *
    */
-  function CeventViewCtrl($q,
-                          $state,
-                          Centre,
-                          Specimen,
-                          specimenAddModal,
-                          timeService,
+  function CeventViewCtrl(timeService,
                           modalInput,
                           notificationsService,
                           annotationUpdate) {
     var vm = this;
 
-    vm.specimens       = [];
-    vm.centreLocations = [];
-    vm.tableController = undefined;
     vm.canUpdateVisitType = (vm.collectionEventTypes.length > 1);
-
-    vm.panelOpen          = true;
     vm.timeCompletedLocal = timeService.dateToDisplayString(vm.collectionEvent.timeCompleted);
+    vm.panelOpen          = true;
 
     vm.editVisitType      = editVisitType;
     vm.editTimeCompleted  = editTimeCompleted;
     vm.editAnnotation     = editAnnotation;
-    vm.addSpecimens       = addSpecimens;
     vm.panelButtonClicked = panelButtonClicked;
-    vm.getTableData       = getTableData;
-    vm.removeSpecimen     = removeSpecimen;
 
     //--
 
@@ -102,63 +85,8 @@ define(function (require) {
         });
     }
 
-    function addSpecimens() {
-      var defer = $q.defer();
-
-      if (vm.centreLocations.length <= 0) {
-        Centre.allLocations().then(function (centreLocations) {
-          vm.centreLocations = centreLocations;
-          defer.resolve();
-        });
-      } else {
-        defer.resolve();
-      }
-
-      defer.promise
-        .then(function () {
-          return specimenAddModal.open(vm.centreLocations,
-                                  vm.collectionEvent.collectionEventType.specimenSpecs).result;
-        })
-        .then(function (specimens) {
-          return Specimen.add(vm.collectionEvent.id, specimens);
-        })
-        .then(reloadTableData);
-    }
-
     function panelButtonClicked() {
       vm.panelOpen = !vm.panelOpen;
-    }
-
-    function getTableData(tableState, controller) {
-      var pagination    = tableState.pagination,
-          sortPredicate = tableState.sort.predicate || 'inventoryId',
-          sortOrder     = tableState.sort.reverse || false,
-          options = {
-            sort:     sortPredicate,
-            page:     1 + (pagination.start / vm.pageSize),
-            pageSize: vm.pageSize,
-            order:    sortOrder ? 'desc' : 'asc'
-          };
-
-      if (!vm.tableController && controller) {
-        vm.tableController = controller;
-      }
-
-      vm.tableDataLoading = true;
-
-      Specimen.list(vm.collectionEvent.id, options).then(function (paginatedUsers) {
-        vm.specimens = paginatedUsers.items;
-        tableState.pagination.numberOfPages = paginatedUsers.maxPages;
-        vm.tableDataLoading = false;
-      });
-    }
-
-    function reloadTableData() {
-      getTableData(vm.tableController.tableState());
-    }
-
-    function removeSpecimen(specimen) {
-      specimen.remove().then(reloadTableData);
     }
 
   }

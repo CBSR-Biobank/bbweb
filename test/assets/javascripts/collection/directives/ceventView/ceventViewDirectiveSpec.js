@@ -28,12 +28,13 @@ define(function(require) {
       self.CollectionEvent     = self.$injector.get('CollectionEvent');
       self.CollectionEventType = self.$injector.get('CollectionEventType');
       self.AnnotationValueType = self.$injector.get('AnnotationValueType');
-      self.Specimen            = self.$injector.get('Specimen');
       self.factory             = self.$injector.get('factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/ceventView/ceventView.html',
-        '/assets/javascripts/admin/directives/statusLine/statusLine.html');
+        '/assets/javascripts/collection/components/ceventSpecimensView/ceventSpecimensView.html',
+        '/assets/javascripts/admin/directives/statusLine/statusLine.html',
+        '/assets/javascripts/common/directives/pagination.html');
 
       self.jsonCevent      = self.factory.collectionEvent();
       self.jsonParticipant = self.factory.defaultParticipant();
@@ -43,8 +44,6 @@ define(function(require) {
       self.collectionEvent      = new self.CollectionEvent(self.jsonCevent);
       self.pagedResult          = self.factory.pagedResult([ self.collectionEvent ]);
       self.collectionEventTypes = [ new self.CollectionEventType(self.jsonCeventType) ];
-
-      spyOn(self.Specimen, 'list').and.returnValue(self.$q.when(self.factory.pagedResult([])));
 
       self.collectionEventWithAnnotation = collectionEventWithAnnotation;
       self.createDirective = createDirective;
@@ -106,7 +105,6 @@ define(function(require) {
       expect(this.controller.editVisitType).toBeFunction();
       expect(this.controller.editTimeCompleted).toBeFunction();
       expect(this.controller.editAnnotation).toBeFunction();
-      expect(this.controller.addSpecimens).toBeFunction();
       expect(this.controller.panelButtonClicked).toBeFunction();
     });
 
