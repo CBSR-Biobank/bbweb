@@ -2,13 +2,20 @@
   <div class="panel-heading">
     <h3 class="panel-title">
       Visit # {{vm.collectionEvent.visitNumber}}
-      <a data-toggle="collapse"
-         href="#collapseCevent"
-         class="btn btn-xs btn-default pull-right"
-         ng-click="vm.panelButtonClicked()">
-        <i class="glyphicon"
-           ng-class="vm.panelOpen ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
-      </a>
+      <span class="pull-right">
+        <button class="btn btn-xs btn-warning"
+                title="remove"
+                ng-click="vm.remove()">
+          Remove <i class="glyphicon glyphicon-remove"></i>
+        </button>
+        <a data-toggle="collapse"
+           href="#collapseCevent"
+           class="btn btn-xs btn-default"
+           ng-click="vm.panelButtonClicked()">
+          <i class="glyphicon"
+             ng-class="vm.panelOpen ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
+        </a>
+      </span>
     </h3>
   </div>
   <div id="collapseCevent" class="panel-collapse collapse in" aria-expanded="true">

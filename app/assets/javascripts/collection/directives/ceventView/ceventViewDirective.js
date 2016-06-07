@@ -24,8 +24,12 @@ define(function (require) {
   }
 
   CeventViewCtrl.$inject = [
+    '$state',
+    'Specimen',
     'timeService',
+    'modalService',
     'modalInput',
+    'domainEntityService',
     'notificationsService',
     'annotationUpdate'
   ];
@@ -33,8 +37,12 @@ define(function (require) {
   /**
    *
    */
-  function CeventViewCtrl(timeService,
+  function CeventViewCtrl($state,
+                          Specimen,
+                          timeService,
+                          modalService,
                           modalInput,
+                          domainEntityService,
                           notificationsService,
                           annotationUpdate) {
     var vm = this;
@@ -47,6 +55,7 @@ define(function (require) {
     vm.editTimeCompleted  = editTimeCompleted;
     vm.editAnnotation     = editAnnotation;
     vm.panelButtonClicked = panelButtonClicked;
+    vm.remove             = remove;
 
     //--
 
@@ -87,6 +96,30 @@ define(function (require) {
 
     function panelButtonClicked() {
       vm.panelOpen = !vm.panelOpen;
+    }
+
+    function remove() {
+      Specimen.list(vm.collectionEvent.id).then(function (paginatedUsers) {
+        if (paginatedUsers.items.length > 0) {
+          modalService.modalOk(
+            'Cannot remove collection event',
+            'This collection event has specimens. Please remove the specimens first.');
+        } else {
+          domainEntityService.removeEntity(
+            promiseFn,
+            'Remove specimen',
+            'Are you sure you want to remove collection event with visit # <strong>' + vm.collectionEvent.visitNumber + '</strong>?',
+            'Remove failed',
+            'Collection event with visit number ' + vm.collectionEvent.visitNumber + ' cannot be removed');
+        }
+
+        function promiseFn() {
+          return vm.collectionEvent.remove().then(function () {
+            notificationsService.success('Collection event removed');
+            $state.go('home.collection.study.participant.cevents', {}, { reload: true });
+          });
+        }
+      });
     }
 
   }

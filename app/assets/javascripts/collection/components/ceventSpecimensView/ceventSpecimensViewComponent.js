@@ -19,7 +19,8 @@ define(function () {
     'Centre',
     'Specimen',
     'specimenAddModal',
-    'domainEntityService'
+    'domainEntityService',
+    'notificationsService'
   ];
 
   /**
@@ -29,7 +30,8 @@ define(function () {
                                          Centre,
                                          Specimen,
                                          specimenAddModal,
-                                         domainEntityService) {
+                                         domainEntityService,
+                                         notificationsService) {
     var vm = this;
 
     vm.specimens       = [];
@@ -62,7 +64,10 @@ define(function () {
         .then(function (specimens) {
           return Specimen.add(vm.collectionEvent.id, specimens);
         })
-        .then(reloadTableData);
+        .then(function () {
+          notificationsService.success('Specimen added');
+          reloadTableData();
+        });
     }
 
     function getTableData(tableState, controller) {
@@ -97,12 +102,15 @@ define(function () {
       domainEntityService.removeEntity(
         promiseFn,
         'Remove specimen',
-        'Are you sure you want to remove specimen with inventory ID <strong>' + specimen.inventoryId + '<strong>?',
+        'Are you sure you want to remove specimen with inventory ID <strong>' + specimen.inventoryId + '</strong>?',
         'Remove failed',
         'Specimen with ID ' + specimen.inventoryId + ' cannot be removed');
 
       function promiseFn() {
-        return specimen.remove().then(reloadTableData);
+        return specimen.remove().then(function () {
+          notificationsService.success('Specimen removed');
+          reloadTableData();
+        });
       }
     }
 

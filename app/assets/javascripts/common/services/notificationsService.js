@@ -26,10 +26,10 @@ define(['toastr'], function(toastr) {
       toastr.success('Your changes were saved.');
     }
 
-    function success(message, title, _timeout) {
+    function success(message, title, timeout) {
       var options = {
         closeButton: true,
-        timeOut:  _timeout || 0,
+        timeOut:  timeout || 1500,
         extendedTimeOut: 0,
         positionClass: 'toast-bottom-right'
       };

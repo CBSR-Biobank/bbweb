@@ -11,16 +11,6 @@
     </h3>
   </div>
 
-  <ul class="list-group" ng-if="vm.specimens.length <= 0">
-    <li class="list-group-item">
-      <div class="panel panel-warning">
-        <div class="panel-heading">
-          No specimens collected yet.
-        </div>
-      </div>
-    </li>
-  </ul>
-
   <table st-table="vm.specimens"
          st-pipe="vm.getTableData"
          class="table table-striped table-condensed">
@@ -34,7 +24,7 @@
         <th>Action</th>
       </tr>
     </thead>
-    <tbody ng-if="!vm.tableDataLoading">
+    <tbody ng-if="!vm.tableDataLoading && (vm.specimens.length > 0)">
       <tr ng-repeat="specimen in vm.specimens">
         <td>{{specimen.inventoryId}}</td>
         <td>{{specimen.amount}} {{specimen.units}}</td>
@@ -55,12 +45,24 @@
         <td colspan="5" class="text-center">Loading ... </td>
       </tr>
     </tbody>
+    <tbody ng-if="!vm.tableDataLoading && (vm.specimens.length <= 0)">
+      <tr>
+        <td colspan="6">
+          <div class="panel panel-warning">
+            <div class="panel-heading">
+              No specimens collected yet.
+            </div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
     <tfoot>
       <tr>
-        <td colspan="5" class="text-center">
+        <td colspan="6" class="text-center">
           <div st-items-by-page="vm.pageSize"
                st-pagination=""
-               st-template="/assets/javascripts/common/directives/pagination.html"></div>
+               st-template="/assets/javascripts/common/directives/pagination.html">
+          </div>
         </td>
       </tr>
     </tfoot>
