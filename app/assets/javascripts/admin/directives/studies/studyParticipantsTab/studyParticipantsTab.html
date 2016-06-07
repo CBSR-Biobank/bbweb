@@ -12,7 +12,6 @@
     participant. Annotations are optional and are not required to be defined.
 
     <p ng-if="vm.study.annotationTypes.length > 0">
-      The following annotations have been entered.
     </p>
   </div>
 </div>
@@ -35,6 +34,9 @@
     </h3>
   </div>
   <ul class="list-group">
+    <li class="list-group-item" ng-if="vm.study.annotationTypes.length > 0">
+      The following annotations have been entered.
+    </li>
     <li class="list-group-item" ng-repeat="annotationType in vm.study.annotationTypes">
       <div class="row">
         <div class="col-md-10">
@@ -44,8 +46,8 @@
           <update-remove-buttons
              on-update="vm.editAnnotationType(annotationType)"
              on-remove="vm.removeAnnotationType(annotationType)"
-             update-button-enabled="true"
-             remove-button-enabled="vm.modificationsAllowed">
+             update-button-enabled="vm.study.isDisabled()"
+             remove-button-enabled="vm.study.isDisabled()">
           </update-remove-buttons>
         </div>
       </div>

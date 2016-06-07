@@ -14,7 +14,8 @@
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
                   title="Edit name"
-                  ng-click="vm.editName()">
+                  ng-click="vm.editName()"
+                  ng-if="vm.study.isDisabled()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
         </div>
@@ -31,7 +32,8 @@
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
                   title="Edit required"
-                  ng-click="vm.editRequired()">
+                  ng-click="vm.editRequired()"
+                  ng-if="vm.study.isDisabled()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
         </div>
@@ -47,7 +49,7 @@
              text="vm.annotationType.description"
              toggle-length="60"
              text-empty-warning="Description not entered yet."
-             allow-edit="true"
+             allow-edit="vm.study.isDisabled()"
              on-edit="vm.editDescription()">
           </truncate-toggle>
         </div>

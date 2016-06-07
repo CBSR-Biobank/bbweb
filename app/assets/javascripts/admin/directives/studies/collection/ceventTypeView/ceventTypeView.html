@@ -2,10 +2,17 @@
   <div class="panel-heading"><h3 class="panel-title">
       {{vm.ceventType.name}}
       <span class="pull-right">
+        <button class="btn btn-xs btn-warning"
+                title="Remove collection event"
+                ng-click="vm.removeCeventType()"
+                ng-if="vm.study.isDisabled()">
+          Remove <i class="glyphicon glyphicon-remove"></i>
+        </button>
         <button class="btn btn-xs btn-primary"
-                ng-click="vm.addAnnotationType()">
-          Add annotation
-          <i class="glyphicon glyphicon-plus"></i>
+                title="Add an annotation to this collection event"
+                ng-click="vm.addAnnotationType()"
+                ng-if="vm.study.isDisabled()">
+          Add annotation <i class="glyphicon glyphicon-plus"></i>
         </button>
         <button type="button"
                 class="btn btn-xs btn-default"
@@ -29,7 +36,8 @@
           <div class="col-md-2">
             <button class="btn btn-xs btn-primary pull-right"
                     title="Edit name"
-                    ng-click="vm.editName()">
+                    ng-click="vm.editName()"
+                    ng-if="vm.study.isDisabled()">
               <i class="glyphicon glyphicon-edit"></i>
             </button>
           </div>
@@ -45,7 +53,7 @@
                text="vm.ceventType.description"
                toggle-length="60"
                text-empty-warning="Description not entered yet."
-               allow-edit="true"
+               allow-edit="vm.study.isDisabled()"
                on-edit="vm.editDescription()">
             </truncate-toggle>
           </div>
@@ -61,7 +69,8 @@
           <div class="col-md-2">
             <button class="btn btn-xs btn-primary pull-right"
                     title="Edit recurring"
-                    ng-click="vm.editRecurring()">
+                    ng-click="vm.editRecurring()"
+                    ng-if="vm.study.isDisabled()">
               <i class="glyphicon glyphicon-edit"></i>
             </button>
           </div>
@@ -79,8 +88,8 @@
             <update-remove-buttons
                on-update="vm.editAnnotationType(annotationType)"
                on-remove="vm.removeAnnotationType(annotationType)"
-               update-button-enabled="true"
-               remove-button-enabled="vm.modificationsAllowed">
+               update-button-enabled="vm.study.isDisabled()"
+               remove-button-enabled="vm.study.isDisabled()">
             </update-remove-buttons>
           </div>
         </div>
@@ -95,7 +104,9 @@
       Specimens collected for this event
       <span class="pull-right">
         <button class="btn btn-xs btn-primary"
-                ng-click="vm.addSpecimenSpec()">
+                title="Add a specimen to this collection event"
+                ng-click="vm.addSpecimenSpec()"
+                ng-if="vm.study.isDisabled()">
           Add specimen
           <i class="glyphicon glyphicon-plus"></i>
         </button>
@@ -103,7 +114,15 @@
     </h4>
   </div>
   <ul class="list-group">
-    <li class="list-group-item" ng-repeat="specimenSpec in vm.ceventType.specimenSpecs">
+    <li class="list-group-item" ng-if="vm.ceventType.specimenSpecs.length <= 0">
+      <div class="panel panel-warning">
+        <div class="panel-heading">
+          No specimens defined yet.
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item"
+        ng-repeat="specimenSpec in vm.ceventType.specimenSpecs">
       <div class="row">
         <div class="col-md-10">
           <collection-specimen-spec-summary
@@ -114,8 +133,8 @@
           <update-remove-buttons
              on-update="vm.editSpecimenSpec(specimenSpec)"
              on-remove="vm.removeSpecimenSpec(specimenSpec)"
-             update-button-enabled="true"
-             remove-button-enabled="vm.modificationsAllowed">
+             update-button-enabled="vm.study.isDisabled()"
+             remove-button-enabled="vm.study.isDisabled()">
           </update-remove-buttons>
         </div>
       </div>

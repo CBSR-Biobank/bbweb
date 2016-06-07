@@ -1,7 +1,7 @@
 package org.biobank.domain.participants
 
 import org.biobank.domain._
-
+import org.biobank.domain.study.CollectionEventTypeId
 import javax.inject.Singleton
 import com.google.inject.ImplementedBy
 import scalaz.Scalaz._
@@ -13,6 +13,8 @@ trait CollectionEventRepository
 
   def withId(participantId: ParticipantId, collectionEventId: CollectionEventId)
       : DomainValidation[CollectionEvent]
+
+  def collectionEventTypeInUse(collectionEventTypeId: CollectionEventTypeId): Boolean
 
   def withVisitNumber(participantId: ParticipantId, visitNumber: Int): DomainValidation[CollectionEvent]
 
@@ -50,6 +52,13 @@ class CollectionEventRepositoryImpl
         }
       }
     } yield valid
+  }
+
+  def collectionEventTypeInUse(collectionEventTypeId: CollectionEventTypeId): Boolean = {
+    getValues.find { event => event.collectionEventTypeId == collectionEventTypeId } match {
+      case Some(cevent) => true
+      case _ => false
+    }
   }
 
   def withVisitNumber(participantId: ParticipantId, visitNumber: Int): DomainValidation[CollectionEvent] = {

@@ -242,6 +242,10 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
       return hasAnnotationTypes.removeAnnotationType.call(this, annotationType, url);
     };
 
+    CollectionEventType.prototype.inUse = function () {
+      return biobankApi.get(uri() + '/inuse/' + this.id);
+    };
+
     function uri(/* path, ceventTypeId */) {
       var args = _.toArray(arguments),
           result = '/studies/cetypes',

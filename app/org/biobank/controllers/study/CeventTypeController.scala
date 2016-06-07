@@ -87,7 +87,12 @@ class CeventTypeController @Inject() (val env:            Environment,
           expectedVersion       = ver,
           uniqueId              = uniqueId)
       processCommand(cmd)
-  }
+    }
+
+  def inUse(id: String) =
+    AuthAction(parse.empty) { (token, userId, request) =>
+      domainValidationReply(studiesService.collectionEventTypeInUse(id))
+    }
 
   private def processCommand(cmd: CollectionEventTypeCommand) = {
     val future = studiesService.processCollectionEventTypeCommand(cmd)

@@ -26,6 +26,7 @@ define(['underscore'], function (_) {
 
   CeventTypeViewCtrl.$inject = [
     '$state',
+    'modalService',
     'modalInput',
     'domainEntityService',
     'notificationsService',
@@ -33,6 +34,7 @@ define(['underscore'], function (_) {
   ];
 
   function CeventTypeViewCtrl($state,
+                              modalService,
                               modalInput,
                               domainEntityService,
                               notificationsService,
@@ -53,6 +55,7 @@ define(['underscore'], function (_) {
     vm.addSpecimenSpec      = addSpecimenSpec;
     vm.addSpecimenSpec      = addSpecimenSpec;
     vm.panelButtonClicked   = panelButtonClicked;
+    vm.removeCeventType     = removeCeventType;
 
     //--
 
@@ -159,6 +162,32 @@ define(['underscore'], function (_) {
       vm.isPanelCollapsed = !vm.isPanelCollapsed;
     }
 
+    function removeCeventType() {
+      vm.ceventType.inUse().then(function (inUse) {
+        if (inUse) {
+          modalService.modalOk(
+            'Collection event in use',
+            'This collection event cannot be removed since one or more participants are using it. ' +
+              'If you still want to remove it, the participants using it have to be modified ' +
+              'to no longer use it.');
+        } else {
+          domainEntityService.removeEntity(
+            promiseFn,
+            'Remove collection event',
+            'Are you sure you want to remove collection event with name <strong>' +
+              vm.ceventType.name + '</strong>?',
+            'Remove failed',
+            'Collection event with name ' + vm.ceventType.name + ' cannot be removed');
+        }
+
+        function promiseFn() {
+          return vm.ceventType.remove().then(function () {
+            notificationsService.success('Collection event removed');
+            $state.go('home.admin.studies.study.collection', {}, { reload: true });
+          });
+        }
+      });
+    }
   }
 
   return ceventTypeViewDirective;

@@ -6,6 +6,7 @@ import akka.util.Timeout
 import com.google.inject.ImplementedBy
 import javax.inject._
 import org.biobank.domain.study._
+import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.dto._
 import org.biobank.dto.{ ProcessingDto }
@@ -46,9 +47,11 @@ trait StudiesService {
 
   def specimenGroupsInUse(studyId: String): DomainValidation[Set[SpecimenGroupId]]
 
-  def collectionEventTypeWithId(studyId: String,
-                                collectionEventTypeId: String)
+  def collectionEventTypeWithId(studyId: String, collectionEventTypeId: String)
       : DomainValidation[CollectionEventType]
+
+  def collectionEventTypeInUse(collectionEventTypeId: String)
+      : DomainValidation[Boolean]
 
   def collectionEventTypesForStudy(studyId: String): DomainValidation[Set[CollectionEventType]]
 
@@ -96,6 +99,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
   val processingTypeRepository:                          ProcessingTypeRepository,
   val specimenGroupRepository:                           SpecimenGroupRepository,
   val collectionEventTypeRepository:                     CollectionEventTypeRepository,
+  val collectionEventRepository:                         CollectionEventRepository,
   val specimenLinkTypeRepository:                        SpecimenLinkTypeRepository)
     extends StudiesService {
   import org.biobank.CommonValidations._
@@ -216,6 +220,13 @@ class StudiesServiceImpl @javax.inject.Inject() (
       : DomainValidation[CollectionEventType] = {
     validStudyId(studyId) { study =>
       collectionEventTypeRepository.withId(study.id, CollectionEventTypeId(collectionEventTypeId))
+    }
+  }
+
+  def collectionEventTypeInUse(collectionEventTypeId: String): DomainValidation[Boolean] = {
+    val id = CollectionEventTypeId(collectionEventTypeId)
+    collectionEventTypeRepository.getByKey(id).map { ceventType =>
+      collectionEventRepository.collectionEventTypeInUse(id)
     }
   }
 

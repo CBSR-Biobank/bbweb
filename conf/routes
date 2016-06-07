@@ -20,6 +20,7 @@ GET     /studies/sgvaluetypes                  org.biobank.controllers.study.Stu
 GET     /studies/cetypes/:studyId                              org.biobank.controllers.study.CeventTypeController.get(studyId, cetId: Option[String])
 POST    /studies/cetypes/:studyId                              org.biobank.controllers.study.CeventTypeController.add(studyId)
 DELETE  /studies/cetypes/:studyId/:id/:ver                     org.biobank.controllers.study.CeventTypeController.remove(studyId, id, ver: Long)
+GET     /studies/cetypes/inuse/:id                             org.biobank.controllers.study.CeventTypeController.inUse(id)
 POST    /studies/cetypes/name/:id                              org.biobank.controllers.study.CeventTypeController.updateName(id)
 POST    /studies/cetypes/description/:id                       org.biobank.controllers.study.CeventTypeController.updateDescription(id)
 POST    /studies/cetypes/recurring/:id                         org.biobank.controllers.study.CeventTypeController.updateRecurring(id)

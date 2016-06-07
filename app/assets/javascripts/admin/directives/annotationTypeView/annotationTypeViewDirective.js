@@ -16,6 +16,7 @@ define(['underscore'], function (_) {
       restrict: 'E',
       scope: {},
       bindToController: {
+        study:          '=',
         annotationType: '=',
         returnState:    '@',
         onUpdate:       '&'
