@@ -14,8 +14,8 @@ define(['underscore'], function(_) {
                                $cookies,
                                $log,
                                biobankApi) {
-    var currentUser = null;
-    var token = $cookies['XSRF-TOKEN'];
+    var currentUser,
+        token = $cookies.get('XSRF-TOKEN');
 
     var service = {
       getCurrentUser:     getCurrentUser,
@@ -35,20 +35,20 @@ define(['underscore'], function(_) {
 
     /* If the token is assigned, check that the token is still valid on the server */
     function init() {
-      if (token) {
-        biobankApi.get('/authenticate')
-          .then(function(user) {
-            currentUser = user;
-            $log.info('Welcome back, ' + currentUser.name);
-          })
-          .catch(function() {
-            /* the token is no longer valid */
-            $log.info('Token no longer valid, please log in.');
-            token = undefined;
-            delete $cookies['XSRF-TOKEN'];
-            return $q.reject('Token invalid');
-          });
-      }
+      if (!token) { return; }
+
+      biobankApi.get('/authenticate')
+        .then(function(user) {
+          currentUser = user;
+          $log.info('Welcome back, ' + currentUser.name);
+        })
+        .catch(function() {
+          /* the token is no longer valid */
+          $log.info('Token no longer valid, please log in.');
+          token = undefined;
+          delete $cookies['XSRF-TOKEN'];
+          return $q.reject('Token invalid');
+        });
     }
 
     function uri(userId) {
@@ -62,12 +62,12 @@ define(['underscore'], function(_) {
     function requestCurrentUser() {
       if (isAuthenticated()) {
         return $q.when(currentUser);
-      } else {
-        return biobankApi.get('/authenticate').then(function(user) {
-          currentUser = user;
-          return currentUser;
-        });
       }
+
+      return biobankApi.get('/authenticate').then(function(user) {
+        currentUser = user;
+        return currentUser;
+      });
     }
 
     function getCurrentUser() {
@@ -79,7 +79,8 @@ define(['underscore'], function(_) {
     }
 
     function isAdmin() {
-      // FIXME this needs to be implemented once completed on the server, for now just return true if logged in
+      // FIXME this needs to be implemented once completed on the server, for now just return true if logged
+      // in
       return !!currentUser;
     }
 

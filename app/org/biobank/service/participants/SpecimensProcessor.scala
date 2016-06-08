@@ -220,7 +220,7 @@ class SpecimensProcessor @Inject() (
    */
   private def validateInventoryId(specimenData: List[SpecimenInfo]): DomainValidation[Boolean] = {
     specimenData.map { info =>
-        specimenRepository.getForInventoryId(info.inventoryId) fold (
+        specimenRepository.getByInventoryId(info.inventoryId) fold (
           err => true.success,
           spc => s"specimen ID already in use: ${info.inventoryId}".failureNel[Boolean]
         )

@@ -232,6 +232,23 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     };
 
     /**
+     * Retrieves a Specimen with the given inventory ID from the server.
+     *
+     * @param {string} inventoryId the inventory ID for the specimen.
+     *
+     * @returns {Promise} The specimen within a promise.
+     */
+    Specimen.getByInventoryId = function (inventoryId) {
+      if (!inventoryId) {
+        throw new Error('specimen inventory id not specified');
+      }
+
+      return biobankApi.get(uri() + '/invid/' + inventoryId).then(function (reply) {
+        return Specimen.asyncCreate(reply);
+      });
+    };
+
+    /**
      * Used to list the specimens contained in a [CollectionEvent]{@link domain.CollectionEvent}.
      *
      * <p>A paged API is used to list specimens. See below for more details.</p>
@@ -413,7 +430,6 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
       var ceventId,
           result = '/participants/cevents/spcs',
           args = _.toArray(arguments);
-
 
       if (args.length > 0) {
         ceventId = args.shift();

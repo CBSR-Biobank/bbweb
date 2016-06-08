@@ -24,8 +24,17 @@ define(function () {
   function HomeCtrl($rootScope, usersService) {
     var vm = this;
 
-    vm.userIsAuthenticated = usersService.isAuthenticated();
+    vm.userIsAuthenticated = false;
     $rootScope.pageTitle = 'Biobank';
+    init();
+
+    //--
+
+    function init() {
+      usersService.requestCurrentUser().then(function () {
+        vm.userIsAuthenticated = true;
+      });
+    }
   }
 
   return homeDirective;

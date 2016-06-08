@@ -102,6 +102,7 @@ define(function (require) {
     vm.closePressed = closePressed;
     vm.openCalendar = openCalendar;
     vm.specimenSpecChanged = specimenSpecChanged;
+    vm.inventoryIdUpdated = inventoryIdUpdated;
 
     $scope.$watch('vm.amount', function () {
       vm.usingDefaultAmount = (_.isUndefined(vm.defaultAmount) || (vm.amount === vm.defaultAmount));
@@ -193,6 +194,28 @@ define(function (require) {
       vm.amount        = vm.selectedSpecimenSpec.amount;
       vm.defaultAmount = vm.selectedSpecimenSpec.amount;
       vm.units         = vm.selectedSpecimenSpec.units;
+    }
+
+    function inventoryIdUpdated() {
+      var alreadyEntered;
+
+      if (!vm.inventoryId) {
+        $scope.form.inventoryId.$setValidity('inventoryIdEntered', true);
+        $scope.form.inventoryId.$setValidity('inventoryIdTaken', true);
+        return;
+      }
+
+      alreadyEntered = _.findWhere(vm.specimens, { inventoryId: vm.inventoryId });
+
+      $scope.form.inventoryId.$setValidity('inventoryIdEntered', !alreadyEntered);
+
+      if (!alreadyEntered) {
+        $scope.form.inventoryId.$setValidity('inventoryIdTaken', true);
+        Specimen.getByInventoryId(vm.inventoryId)
+          .then(function (specimen) {
+            $scope.form.inventoryId.$setValidity('inventoryIdTaken', false);
+          });
+      }
     }
 
   }

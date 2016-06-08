@@ -25,6 +25,8 @@ trait SpecimensService {
 
   def get(specimenId: String): DomainValidation[Specimen]
 
+  def getByInventoryId(inventoryId: String): DomainValidation[Specimen]
+
   def list(collectionEventId: String,
            sortFunc:          (Specimen, Specimen) => Boolean,
            order:             SortOrder)
@@ -52,9 +54,13 @@ class SpecimensServiceImpl @Inject() (
 
   def get(specimenId: String): DomainValidation[Specimen] = {
     specimenRepository.getByKey(SpecimenId(specimenId)).leftMap(_ =>
-      DomainError(s"collection event id is invalid: $specimenId")).toValidationNel
+      DomainError(s"specimen id is invalid: $specimenId")).toValidationNel
   }
 
+  def getByInventoryId(inventoryId: String): DomainValidation[Specimen] = {
+    specimenRepository.getByInventoryId(inventoryId).leftMap(_ =>
+      DomainError(s"specimen inventory id is invalid: $inventoryId")).toValidationNel
+  }
   def list(collectionEventId: String,
            sortFunc:          (Specimen, Specimen) => Boolean,
            order:             SortOrder)

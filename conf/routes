@@ -71,6 +71,9 @@ POST    /participants/cevents/annot/:ceventId                   org.biobank.cont
 DELETE  /participants/cevents/annot/:ceventId/:annotTypeId/:ver org.biobank.controllers.participants.CollectionEventsController.removeAnnotation(ceventId, annotTypeId, ver: Long)
 DELETE  /participants/cevents/:participantId/:ceventId/:ver     org.biobank.controllers.participants.CollectionEventsController.remove(participantId, ceventId, ver: Long)
 
+# specimens
+GET     /participants/cevents/spcs/get/:spcId                   org.biobank.controllers.participants.SpecimensController.get(spcId)
+GET     /participants/cevents/spcs/invid/:invId                 org.biobank.controllers.participants.SpecimensController.getByInventoryId(invId)
 GET     /participants/cevents/spcs/:ceventId                    org.biobank.controllers.participants.SpecimensController.list(ceventId, status: String ?= "all", sort: String ?= "inventoryId", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
 POST    /participants/cevents/spcs/:ceventId                    org.biobank.controllers.participants.SpecimensController.addSpecimens(ceventId)
 DELETE  /participants/cevents/spcs/:ceventId/:spcId/:ver        org.biobank.controllers.participants.SpecimensController.removeSpecimen(ceventId, spcId, ver: Long)

@@ -27,6 +27,19 @@ class SpecimensController @Inject() (val env:          Environment,
                      "timeCreated" -> Specimen.compareByTimeCreated _,
                      "status"      -> Specimen.compareByStatus _)
 
+  /**
+   * Returns the specimen with the given ID.
+   */
+  def get(id: String) =
+    AuthAction(parse.empty) { (token, userId, request) =>
+      domainValidationReply(service.get(id))
+    }
+
+  def getByInventoryId(invId: String) =
+    AuthAction(parse.empty) { (token, userId, request) =>
+      domainValidationReply(service.getByInventoryId(invId))
+    }
+
   def list(ceventId: String,
            status:   String,
            sort:     String,

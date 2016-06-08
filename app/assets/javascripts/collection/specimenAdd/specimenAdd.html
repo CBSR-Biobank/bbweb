@@ -36,13 +36,24 @@
         <input name="inventoryId"
                type="text"
                class="form-control"
-               ng-model="vm.inventoryId"
                ng-minlength="6"
+               ng-model="vm.inventoryId"
+               ng-model-options="{ debounce: 500 }"
+               ng-change="vm.inventoryIdUpdated()"
                required/>
       </div>
       <div class="col-md-offset-3 col-md-9">
+        <p class="help-block" ng-show="form.inventoryId.$error.required && !form.inventoryId.$pristine">
+          Inventory ID is required.
+        </p>
         <p class="help-block" ng-show="form.inventoryId.$error.minlength">
           Inventory ID is too short.
+        </p>
+        <p class="help-block" ng-show="form.inventoryId.$error.inventoryIdTaken">
+          A specimen already exists with this inventory ID.
+        </p>
+        <p class="help-block" ng-show="form.inventoryId.$error.inventoryIdEntered">
+          You have already entered this inventory ID.
         </p>
       </div>
     </div>
@@ -121,7 +132,7 @@
       </div>
       <div class="col-sm-offset-3 col-sm-9">
         <p class="help-block" ng-show="specimenForm.centre.$error.required &&
-                                       !specimenForm.centre.$pristine">
+           !specimenForm.centre.$pristine">
           A centre must be selected
         </p>
       </div>
@@ -140,6 +151,6 @@
 </div>
 <!--
 <div class="row">
-  <div class="col-xs-12"><pre>Specimen specs: {{vm.specimenSpecs | json}}</pre></div>
+  <div class="col-xs-12"><pre>form: {{form | json}}</pre></div>
 </div>
 -->

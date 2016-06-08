@@ -10,7 +10,7 @@ import scalaz.Scalaz._
 trait SpecimenRepository
     extends ReadWriteRepository [SpecimenId, Specimen] {
 
-  def getForInventoryId(inventoryId: String): DomainValidation[Specimen]
+  def getByInventoryId(inventoryId: String): DomainValidation[Specimen]
 
 }
 
@@ -31,7 +31,7 @@ class SpecimenRepositoryImpl
     getMap.get(id).toSuccessNel(notFound(id).toString)
   }
 
-  def getForInventoryId(inventoryId: String): DomainValidation[Specimen] = {
+  def getByInventoryId(inventoryId: String): DomainValidation[Specimen] = {
     getValues.find(s => s.inventoryId == inventoryId)
       .toSuccessNel(inventoryIdCriteriaError(inventoryId))
   }
