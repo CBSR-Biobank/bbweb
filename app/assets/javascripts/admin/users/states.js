@@ -5,11 +5,9 @@
 define(function () {
   'use strict';
 
-  config.$inject = [
-    '$urlRouterProvider', '$stateProvider', 'authorizationProvider'
-  ];
+  config.$inject = ['$urlRouterProvider', '$stateProvider'];
 
-  function config($urlRouterProvider, $stateProvider, authorizationProvider) {
+  function config($urlRouterProvider, $stateProvider) {
 
     $urlRouterProvider.otherwise('/');
 
@@ -24,7 +22,6 @@ define(function () {
     $stateProvider.state('home.admin.users', {
       url: '/users',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         userCounts: resolveUserCounts
       },
       views: {
@@ -36,6 +33,7 @@ define(function () {
         displayName: 'Users'
       }
     });
+
   }
 
   return config;

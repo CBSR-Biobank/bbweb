@@ -7,11 +7,10 @@ define(['underscore'], function (_) {
 
   config.$inject = [
     '$urlRouterProvider',
-    '$stateProvider',
-    'authorizationProvider'
+    '$stateProvider'
   ];
 
-  function config($urlRouterProvider, $stateProvider, authorizationProvider) {
+  function config($urlRouterProvider, $stateProvider) {
     $urlRouterProvider.otherwise('/');
 
     /**
@@ -19,9 +18,6 @@ define(['underscore'], function (_) {
      */
     $stateProvider.state('home.admin.studies.study.participants.annotationTypeAdd', {
       url: '/annottype/add',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'main@': {
           template: [
@@ -46,7 +42,6 @@ define(['underscore'], function (_) {
     $stateProvider.state('home.admin.studies.study.participants.annotationTypeView', {
       url: '/annottype/view/{annotationTypeId}',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         annotationType: [
           'study',
           '$stateParams',

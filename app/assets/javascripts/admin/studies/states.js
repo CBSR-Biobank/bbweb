@@ -9,11 +9,10 @@ define(function () {
 
   config.$inject = [
     '$urlRouterProvider',
-    '$stateProvider',
-    'authorizationProvider'
+    '$stateProvider'
   ];
 
-  function config($urlRouterProvider, $stateProvider, authorizationProvider ) {
+  function config($urlRouterProvider, $stateProvider) {
 
     resolveStudy.$inject = ['$stateParams', 'Study'];
     function resolveStudy($stateParams, Study) {
@@ -31,9 +30,6 @@ define(function () {
      */
     $stateProvider.state('home.admin.studies', {
       url: '/studies',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'main@': {
           template: '<studies-list></studies-list>'
@@ -50,7 +46,6 @@ define(function () {
     $stateProvider.state('home.admin.studies.add', {
       url: '/add',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         study: ['Study', function(Study) {
           return new Study();
         }]
@@ -79,7 +74,6 @@ define(function () {
       abstract: true,
       url: '/{studyId}',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         study: resolveStudy
       },
       views: {
@@ -104,9 +98,6 @@ define(function () {
      */
     $stateProvider.state('home.admin.studies.study.summary', {
       url: '/summary',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'studyDetails': {
           template: '<study-summary study="vm.study"></study-summary>',
@@ -129,9 +120,6 @@ define(function () {
      */
     $stateProvider.state('home.admin.studies.study.participants', {
       url: '/participants',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'studyDetails': {
           template: '<study-participants-tab study="vm.study"></study-participants-tab>',
@@ -154,9 +142,6 @@ define(function () {
      */
     $stateProvider.state('home.admin.studies.study.collection', {
       url: '/collection',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'studyDetails': {
           template: '<study-collection study="vm.study"></study-collection>',
@@ -179,9 +164,6 @@ define(function () {
      */
     $stateProvider.state('home.admin.studies.study.processing', {
       url: '/processing',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'studyDetails': {
           templateUrl: '/assets/javascripts/admin/studies/studyProcessingTab.html',

@@ -3,131 +3,131 @@
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
 // Jasmine test suite
-define(['angular', 'angularMocks', 'jquery', 'underscore', 'biobankApp'], function(angular, mocks, $, _) {
+define([
+  'angular',
+  'angularMocks',
+  'underscore'
+], function(angular, mocks, _) {
   'use strict';
 
-  describe('Service: userService', function() {
+  fdescribe('Service: userService', function() {
 
-    var usersService;
-    var fakeToken = 'fake-token';
-    var userNoId = {
-      version:      1,
-      timeAdded:    '2014-10-20T09:58:43-0600',
-      name:         'testuser',
-      email:        'testuser@test.com',
-      avatarUrl:    'http://www.avatarsdb.com/avatars/duck_walking.gif',
-      status:       'Active'
-    };
-    var user = angular.extend({id: 'dummy-id'}, userNoId);
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    function uri(userId) {
-      var result = '/users';
-      if (arguments.length >= 1) {
-        result += '/' + userId;
-      }
-      return result;
-    }
+    beforeEach(inject(function (serverReplyMixin) {
+      _.extend(this, serverReplyMixin);
 
-    beforeEach(mocks.module('biobankApp'));
+      this.$q           = this.$injector.get('$q');
+      this.$httpBackend = this.$injector.get('$httpBackend');
+      this.$cookies     = this.$injector.get('$cookies');
+      this.biobankApi   = this.$injector.get('biobankApi');
+      this.factory      = this.$injector.get('factory');
+
+      this.user = this.factory.user();
+    }));
+
+    afterEach(function() {
+      this.$httpBackend.verifyNoOutstandingExpectation();
+      this.$httpBackend.verifyNoOutstandingRequest();
+    });
 
     describe('service initialization', function () {
-
-      var authenticateDeferred;
-
-      beforeEach(inject(function ($cookies, $q, biobankApi) {
-        $cookies['XSRF-TOKEN'] = fakeToken;
-
-        spyOn(biobankApi, 'get').and.callFake(function () {
-          authenticateDeferred = $q.defer();
-          return authenticateDeferred.promise;
-        });
-      }));
 
       /**
        * usersService needs to be injected to the test so that the initialization code is executed
        * when the test starts.
        */
-      it('should allow a user to re-connect', inject(function($rootScope, usersService) {
-        authenticateDeferred.resolve(user);
-        $rootScope.$digest();
-        expect(usersService.getCurrentUser()).toEqual(user);
-      }));
+      it('should allow a user to re-connect', function() {
+        var usersService;
 
-      it('should not allow a user to re-connect', inject(function($rootScope, usersService) {
-        authenticateDeferred.reject();
-        $rootScope.$digest();
-        expect(usersService.getCurrentUser()).toBeNull();
-      }));
+        this.$cookies.put('XSRF-TOKEN', this.factory.stringNext());
+        this.$httpBackend.expectGET('/authenticate').respond(this.reply(this.user));
+
+        usersService = this.$injector.get('usersService');
+        this.$httpBackend.flush();
+        expect(usersService.getCurrentUser()).toEqual(this.user);
+      });
+
+      it('should not allow a user to re-connect when authentication fails', function() {
+        var usersService;
+
+        // 401 cause the http interceptor to intercept the request.
+        //
+        // the interceptor displays a modal to the user stating the session expired
+        // this must be disabled for this test
+        this.$injector.get('modalService').modalOk = jasmine.createSpy().and.returnValue(this.$q.when('OK'));
+
+        this.$cookies.put('XSRF-TOKEN', this.factory.stringNext());
+        this.$httpBackend.expectGET('/authenticate').respond(401, this.errorReply('simulated auth failure'));
+
+        usersService = this.$injector.get('usersService');
+        this.$httpBackend.flush();
+        expect(usersService.getCurrentUser()).toBeUndefined();
+      });
     });
 
     describe('service functions', function () {
 
-      var httpBackend;
-
-      function doLogin() {
-        var credentials = {
-          email: 'test@test.com',
-          password: 'test'
-        };
-        httpBackend.expectPOST('/login', credentials).respond(201, fakeToken);
-
-        httpBackend.whenGET('/authenticate').respond({
-          status: 'success',
-          data: [user]
-        });
-
-        usersService.login(credentials).then(function(data) {
-          expect(_.isEqual(data, user));
-        });
-        httpBackend.flush();
-      }
-
-      beforeEach(inject(function (_usersService_, $httpBackend) {
-        usersService = _usersService_;
-        httpBackend = $httpBackend;
-      }));
-
-      afterEach(function() {
-        httpBackend.verifyNoOutstandingExpectation();
-        httpBackend.verifyNoOutstandingRequest();
+      beforeEach(function() {
+        this.usersService = this.$injector.get('usersService');
       });
 
-      it('should allow a user to login', function () {
-        doLogin();
+      it('should return the user that is logged in after a session timeout', function() {
+        var self = this;
+
+        this.$httpBackend.expectGET('/authenticate').respond(this.reply(this.user));
+        self.usersService.sessionTimeout();
+        self.usersService.requestCurrentUser().then(function (reply) {
+          expect(reply).toEqual(self.user);
+        });
+        this.$httpBackend.flush();
+      });
+
+      describe('logging in', function() {
+
+        var doLogin = function (token, user) {
+          var credentials = {
+            email: 'test@test.com',
+            password: 'test'
+          };
+          this.$httpBackend.expectPOST('/login', credentials).respond(201, token);
+          this.$httpBackend.whenGET('/authenticate').respond(this.reply(this.user));
+
+          this.usersService.login(credentials).then(function(reply) {
+            expect(_.isEqual(reply, user));
+          });
+          this.$httpBackend.flush();
+        };
+
+        it('should allow a user to login', function () {
+          var token = this.factory.stringNext;
+          doLogin.call(this, token, this.user);
+        });
+
+        it('should return the user that is logged in', function() {
+          var self = this,
+              token = this.factory.stringNext;
+
+          doLogin.call(self, token, self.user);
+          self.usersService.requestCurrentUser().then(function (reply) {
+            expect(reply).toEqual(self.user);
+          });
+        });
+
       });
 
       it('show allow a user to logout', function() {
-        httpBackend.expectPOST('/logout').respond(201, 'success');
-        usersService.logout();
-        httpBackend.flush();
-      });
-
-      it('should return the user that is logged in', function() {
-        doLogin();
-        expect(_.isEqual(usersService.requestCurrentUser(), user));
-      });
-
-      it('calling getUserCount has valid URL', function() {
-        httpBackend.whenGET(uri() + '/counts').respond({
-          status: 'success',
-          data: [user]
-        });
-
-        usersService.getUserCounts().then(function(data) {
-          expect(data.length).toEqual(1);
-          expect(_.isEqual(user, data[0]));
-        });
-
-        httpBackend.flush();
+        this.$httpBackend.expectPOST('/logout').respond(this.reply('success'));
+        this.usersService.logout();
+        this.$httpBackend.flush();
       });
 
       it('should allow changing a password', function() {
-        var postResult = {status: 'success', data: 'success'};
-        httpBackend.expectPOST('/passreset', {email: user.email}).respond(201, postResult);
-        usersService.passwordReset(user.email).then(function(data) {
-          expect(data).toBe('success');
+        this.$httpBackend.expectPOST('/passreset', {email: this.user.email}).respond(this.reply('success'));
+        this.usersService.passwordReset(this.user.email).then(function(reply) {
+          expect(reply).toBe('success');
         });
-        httpBackend.flush();
+        this.$httpBackend.flush();
       });
 
     });

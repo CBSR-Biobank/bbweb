@@ -7,17 +7,14 @@
 define(function () {
   'use strict';
 
-  config.$inject = ['$urlRouterProvider', '$stateProvider', 'authorizationProvider'];
+  config.$inject = ['$urlRouterProvider', '$stateProvider'];
 
-  function config($urlRouterProvider, $stateProvider, authorizationProvider) {
+  function config($urlRouterProvider, $stateProvider) {
 
     $urlRouterProvider.otherwise('/');
 
     $stateProvider.state('home.dashboard', {
       url: '^/dashboard',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'main@': {
           templateUrl: '/assets/javascripts/dashboard/dashboard.html',
@@ -31,9 +28,6 @@ define(function () {
 
     $stateProvider.state('home.dashboard.admin', {
       url: '^/admin',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'main@': {
           templateUrl: '/assets/javascripts/dashboard/dashboard.html',

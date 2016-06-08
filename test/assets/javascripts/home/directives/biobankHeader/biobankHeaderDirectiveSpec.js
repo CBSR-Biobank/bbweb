@@ -46,7 +46,7 @@ define([
 
     it('should have valid scope', function() {
       this.createController();
-      expect(this.controller.user).toBeNull();
+      this.scope.$digest();
       expect(this.controller.logout).toBeFunction();
     });
 
@@ -54,7 +54,7 @@ define([
       var jsonUser = this.factory.user();
 
       this.createController();
-      expect(this.controller.user).toBeNull();
+      expect(this.controller.user).toBeUndefined();
 
       spyOn(this.usersService, 'getCurrentUser').and.returnValue(jsonUser);
       this.scope.$digest();

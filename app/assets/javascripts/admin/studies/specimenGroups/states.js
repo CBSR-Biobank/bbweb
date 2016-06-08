@@ -7,11 +7,10 @@ define(function () {
 
   config.$inject = [
     '$urlRouterProvider',
-    '$stateProvider',
-    'authorizationProvider'
+    '$stateProvider'
   ];
 
-  function config($urlRouterProvider, $stateProvider, authorizationProvider ) {
+  function config($urlRouterProvider, $stateProvider) {
     // FIXME does this need to be in each state definition file?
     $urlRouterProvider.otherwise('/');
 
@@ -21,7 +20,6 @@ define(function () {
     $stateProvider.state('home.admin.studies.study.specimens.groupAdd', {
       url: '/spcgroup/add',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         specimenGroup: [
           '$stateParams',
           'SpecimenGroup',
@@ -48,7 +46,6 @@ define(function () {
     $stateProvider.state('home.admin.studies.study.specimens.groupUpdate', {
       url: '/spcgroup/update/{specimenGroupId}',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         specimenGroup: [
           '$stateParams',
           'SpecimenGroup',

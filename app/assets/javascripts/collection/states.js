@@ -7,9 +7,9 @@
 define(['underscore'], function(_) {
   'use strict';
 
-  config.$inject = ['$urlRouterProvider', '$stateProvider', 'authorizationProvider'];
+  config.$inject = ['$urlRouterProvider', '$stateProvider'];
 
-  function config($urlRouterProvider, $stateProvider, authorizationProvider) {
+  function config($urlRouterProvider, $stateProvider) {
 
     resolveStudyCounts.$inject = ['StudyCounts'];
     function resolveStudyCounts(StudyCounts) {
@@ -74,7 +74,6 @@ define(['underscore'], function(_) {
     $stateProvider.state('home.collection', {
       url: '^/collection',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         studyCounts: resolveStudyCounts,
         centreCounts: resolveCentreCounts
       },
@@ -100,7 +99,6 @@ define(['underscore'], function(_) {
     $stateProvider.state('home.collection.study', {
       url: '/study/{studyId}',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         study: resolveStudy
       },
       views: {
@@ -127,9 +125,6 @@ define(['underscore'], function(_) {
 
     $stateProvider.state('home.collection.study.participantAdd', {
       url: '/add/{uniqueId}',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'main@': {
           template: [
@@ -159,7 +154,6 @@ define(['underscore'], function(_) {
       abstract: true,
       url: '/participant/{participantId}',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         participant: resolveParticipant
       },
       views: {
@@ -189,9 +183,6 @@ define(['underscore'], function(_) {
 
     $stateProvider.state('home.collection.study.participant.summary', {
       url: '/summary',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'participantDetails': {
           template: [
@@ -220,7 +211,6 @@ define(['underscore'], function(_) {
     $stateProvider.state('home.collection.study.participant.cevents', {
       url: '/cevents',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         collectionEventsPagedResult: resolveCollectionEventsPagedResult,
         collectionEventTypes: [
           'CollectionEventType',
@@ -259,9 +249,6 @@ define(['underscore'], function(_) {
 
     $stateProvider.state('home.collection.study.participant.cevents.add', {
       url: '/cevent/add',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'main@': {
           template: [
@@ -293,7 +280,6 @@ define(['underscore'], function(_) {
     $stateProvider.state('home.collection.study.participant.cevents.add.details', {
       url: '/{collectionEventTypeId}',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         collectionEvent: resolveCollectionEvent
       },
       views: {
@@ -336,7 +322,6 @@ define(['underscore'], function(_) {
     $stateProvider.state('home.collection.study.participant.cevents.details', {
       url: '/{collectionEventId}',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         collectionEvent: [
           '$q',
           '$stateParams',

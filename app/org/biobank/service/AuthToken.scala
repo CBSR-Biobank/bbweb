@@ -27,23 +27,23 @@ trait AuthToken {
 }
 
 @Singleton
-class AuthTokenImpl @Inject() (val env: Environment,
-                               val cacheApi: CacheApi)
+class AuthTokenImpl @Inject() (val env: Environment, val cacheApi: CacheApi)
     extends AuthToken {
   import org.biobank.CommonValidations._
 
-  val tokenExpirationSeconds =
-    if (env.mode == play.api.Mode.Prod) { 15.minutes }
-    else { 60.minutes }
+  val tokenExpirationTime =
+    if (env.mode == play.api.Mode.Prod) 15.minutes
+    else 60.minutes
+    //else 5.seconds
 
   /**
-   *  Generates a new token for userId with an expiration of tokenExpirationSeconds.
+   *  Generates a new token for userId with an expiration of tokenExpirationTime.
    *
    *  TODO: Should token be derived from salt? not sure if required if server only runs HTTPS.
    */
   def newToken(userId: UserId): String = {
     val token = java.util.UUID.randomUUID.toString.replaceAll("-","")
-    cacheApi.set(token, userId, tokenExpirationSeconds)
+    cacheApi.set(token, userId, tokenExpirationTime)
     token
   }
 
@@ -52,7 +52,7 @@ class AuthTokenImpl @Inject() (val env: Environment,
    */
   def getUserId(token: String): DomainValidation[UserId] = {
     val userId = cacheApi.get[UserId](token).toSuccessNel(InvalidToken.toString)
-    userId map { cacheApi.set(token, _, tokenExpirationSeconds) }
+    userId map { cacheApi.set(token, _, tokenExpirationTime) }
     userId
   }
 

@@ -9,10 +9,18 @@
   requirejs.config({
     baseUrl: '/assets/javascripts',
 
-    // Packages = top-level folders; loads a contained file named 'main.js'
+    // Packages = top-level directories; loads a contained file named 'main.js'
     packages: [
       'common',
       'admin',
+      {
+        name: 'admin.directives.centres',
+        location: 'admin/directives/centres'
+      },
+      {
+        name: 'admin.directives.studies',
+        location: 'admin/directives/studies'
+      },
       'centres',
       'collection',
       'dashboard',

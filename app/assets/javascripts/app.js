@@ -62,28 +62,21 @@ define(function(require) {
   // For debugging
   //
   app.run(debugFunc);
-
   app.constant('bbwebConfig',
                {
                  dateFormat:       'YYYY-MM-DD',
                  dateTimeFormat:   'YYYY-MM-DD HH:mm',
                  datepickerFormat: 'yyyy-MM-dd HH:mm'
                });
-
   app.config(exceptionConfig);
   app.config(loggingConfig);
+  app.config(httpInterceptorConfig);
 
-  debugFunc.$inject = ['$rootScope'];
-
-  exceptionConfig.$inject = ['$provide'];
   extendExceptionHandler.$inject = ['$delegate'];
-  loggingConfig.$inject = ['$logProvider'];
 
   //--
 
-  function loggingConfig($logProvider) {
-    $logProvider.debugEnabled(true);
-  }
+  debugFunc.$inject = ['$rootScope'];
 
   function debugFunc($rootScope) {
     /*jshint unused: false*/
@@ -141,6 +134,8 @@ define(function(require) {
     /*jshint unused: true*/
   }
 
+  exceptionConfig.$inject = ['$provide'];
+
   function exceptionConfig($provide) {
     $provide.decorator('$exceptionHandler', extendExceptionHandler);
   }
@@ -164,6 +159,42 @@ define(function(require) {
         'Exception',
         { positionClass: 'toast-bottom-right' });
     };
+  }
+
+  loggingConfig.$inject = ['$logProvider'];
+
+  function loggingConfig($logProvider) {
+    $logProvider.debugEnabled(true);
+  }
+
+  httpInterceptorConfig.$inject = ['$httpProvider'];
+
+  function httpInterceptorConfig($httpProvider) {
+
+    $httpProvider.interceptors.push(httpInterceptor);
+
+    //---
+
+    httpInterceptor.$inject = ['$q', '$timeout', '$injector'];
+
+    function httpInterceptor($q, $timeout, $injector) {
+      return { 'responseError': responseError };
+
+      //--
+
+      function responseError(rejection) {
+        if (rejection.status === 401) {
+          $injector.get('usersService').sessionTimeout();
+          $injector.get('modalService').modalOk(
+            'Session timeout',
+            'Your session timed out. Please log in again.'
+          ).then(function () {
+            $injector.get('$state').go('home.users.login');
+          });
+        }
+        return $q.reject(rejection);
+      }
+    }
   }
 
   return app;

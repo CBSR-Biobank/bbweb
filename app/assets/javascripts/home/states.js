@@ -9,7 +9,7 @@ define(['angular'], function(angular) {
 
   config.$inject = ['$urlRouterProvider', '$stateProvider'];
 
-  function config($urlRouterProvider, $stateProvider, authorizationProvider) {
+  function config($urlRouterProvider, $stateProvider) {
 
     $urlRouterProvider.otherwise('/index');
 

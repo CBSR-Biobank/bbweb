@@ -7,9 +7,9 @@
 define(function () {
   'use strict';
 
-  config.$inject = ['$urlRouterProvider', '$stateProvider', 'authorizationProvider'];
+  config.$inject = ['$urlRouterProvider', '$stateProvider'];
 
-  function config($urlRouterProvider, $stateProvider, authorizationProvider ) {
+  function config($urlRouterProvider, $stateProvider ) {
 
     $urlRouterProvider.otherwise('/');
 
@@ -27,7 +27,7 @@ define(function () {
       url: '^/login',
       views: {
         'main@': {
-          template: '<login></login>',
+          template: '<login></login>'
         }
       }
     });
@@ -75,9 +75,6 @@ define(function () {
      */
     $stateProvider.state('home.users.profile', {
       url: '^/profile',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'main@': {
           template: '<user-profile user="vm.user"></user-profile>',

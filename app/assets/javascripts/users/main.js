@@ -15,8 +15,6 @@ define(function (require) {
 
   module.config(require('./states'));
 
-  module.provider('authorization',        require('./authorizationService'));
-
   module.controller('ForgotPasswordCtrl', require('./ForgotPasswordCtrl'));
   module.controller('RegisterUserCtrl',   require('./RegisterUserCtrl'));
 

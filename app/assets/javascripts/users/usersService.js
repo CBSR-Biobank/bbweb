@@ -14,8 +14,7 @@ define(['underscore'], function(_) {
                                $cookies,
                                $log,
                                biobankApi) {
-    var currentUser,
-        token = $cookies.get('XSRF-TOKEN');
+    var currentUser;
 
     var service = {
       getCurrentUser:     getCurrentUser,
@@ -23,8 +22,7 @@ define(['underscore'], function(_) {
       login:              login,
       logout:             logout,
       isAuthenticated:    isAuthenticated,
-      isAdmin:            isAdmin,
-      getUserCounts:      getUserCounts,
+      sessionTimeout:     sessionTimeout,
       passwordReset:      passwordReset
     };
 
@@ -35,6 +33,8 @@ define(['underscore'], function(_) {
 
     /* If the token is assigned, check that the token is still valid on the server */
     function init() {
+      var token = $cookies.get('XSRF-TOKEN');
+
       if (!token) { return; }
 
       biobankApi.get('/authenticate')
@@ -45,18 +45,9 @@ define(['underscore'], function(_) {
         .catch(function() {
           /* the token is no longer valid */
           $log.info('Token no longer valid, please log in.');
-          token = undefined;
-          delete $cookies['XSRF-TOKEN'];
+          $cookies.remove('XSRF-TOKEN');
           return $q.reject('Token invalid');
         });
-    }
-
-    function uri(userId) {
-      var result = '/users';
-      if (arguments.length > 0) {
-        result += '/' + userId;
-      }
-      return result;
     }
 
     function requestCurrentUser() {
@@ -78,16 +69,9 @@ define(['underscore'], function(_) {
       return !!currentUser;
     }
 
-    function isAdmin() {
-      // FIXME this needs to be implemented once completed on the server, for now just return true if logged
-      // in
-      return !!currentUser;
-    }
-
     function login(credentials) {
       return biobankApi.post('/login', credentials)
         .then(function(reply) {
-          token = reply;
           return biobankApi.get('/authenticate');
         })
         .then(function(user) {
@@ -100,14 +84,14 @@ define(['underscore'], function(_) {
     function logout() {
       return biobankApi.post('/logout').then(function() {
         $log.info('Good bye');
-        delete $cookies['XSRF-TOKEN'];
-        token = undefined;
+        $cookies.remove('XSRF-TOKEN');
         currentUser = undefined;
       });
     }
 
-    function getUserCounts() {
-      return biobankApi.get(uri() + '/counts');
+    function sessionTimeout() {
+      $cookies.remove('XSRF-TOKEN');
+      currentUser = undefined;
     }
 
     function passwordReset(email) {

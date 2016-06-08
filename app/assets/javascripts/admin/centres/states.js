@@ -7,9 +7,9 @@
 define(['underscore'], function (_) {
   'use strict';
 
-  centreStates.$inject = ['$urlRouterProvider', '$stateProvider', 'authorizationProvider'];
+  centreStates.$inject = ['$urlRouterProvider', '$stateProvider'];
 
-  function centreStates($urlRouterProvider, $stateProvider, authorizationProvider ) {
+  function centreStates($urlRouterProvider, $stateProvider, usersService ) {
 
     resolveCentre.$inject = ['$stateParams', 'Centre'];
     function resolveCentre($stateParams, Centre) {
@@ -23,9 +23,6 @@ define(['underscore'], function (_) {
      */
     $stateProvider.state('home.admin.centres', {
       url: '/centres',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'main@': {
           template: '<centres-list></centres-list>'
@@ -42,7 +39,6 @@ define(['underscore'], function (_) {
     $stateProvider.state('home.admin.centres.add', {
       url: '/add',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         centre: ['Centre', function(Centre) {
           return new Centre();
         }]
@@ -65,7 +61,6 @@ define(['underscore'], function (_) {
       abstract: true,
       url: '/{centreId}',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         centre: resolveCentre
       },
       views: {
@@ -90,9 +85,6 @@ define(['underscore'], function (_) {
      */
     $stateProvider.state('home.admin.centres.centre.summary', {
       url: '/summary',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'centreDetails': {
           template: '<centre-summary centre="vm.centre"></centre-summary>',
@@ -115,9 +107,6 @@ define(['underscore'], function (_) {
      */
     $stateProvider.state('home.admin.centres.centre.locations', {
       url: '/locations',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'centreDetails': {
           template: '<locations-panel centre="vm.centre"></locations-panel>',
@@ -140,9 +129,6 @@ define(['underscore'], function (_) {
      */
     $stateProvider.state('home.admin.centres.centre.locations.locationAdd', {
       url: '/location/add',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'main@': {
           template: '<centre-location-add centre="vm.centre"></centre-location-add>',
@@ -166,7 +152,6 @@ define(['underscore'], function (_) {
     $stateProvider.state('home.admin.centres.centre.locations.locationView', {
       url: '/location/view/:uniqueId',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         location: [
           '$stateParams',
           'centre',
@@ -200,7 +185,6 @@ define(['underscore'], function (_) {
     $stateProvider.state('home.admin.centres.centre.studies', {
       url: '/studies',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         centre: resolveCentre,
         studyNames: ['Study', function(Study) {
           return Study.names();

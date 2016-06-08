@@ -9,19 +9,15 @@ define(function () {
 
   config.$inject = [
     '$urlRouterProvider',
-    '$stateProvider',
-    'authorizationProvider'
+    '$stateProvider'
   ];
 
-  function config($urlRouterProvider, $stateProvider, authorizationProvider ) {
+  function config($urlRouterProvider, $stateProvider) {
 
     $urlRouterProvider.otherwise('/');
 
     $stateProvider.state('home.admin', {
       url: 'admin',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'main@': {
           template: '<biobank-admin></biobank-admin>'

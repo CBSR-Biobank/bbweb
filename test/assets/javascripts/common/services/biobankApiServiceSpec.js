@@ -4,135 +4,130 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
+define([
+  'angular',
+  'angularMocks',
+  'underscore',
+  'biobankApp'
+], function(angular, mocks, _) {
   'use strict';
 
   describe('biobankApi service', function() {
 
-    var httpBackend, biobankApi;
-
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($httpBackend, _biobankApi_) {
-      httpBackend = $httpBackend;
-      biobankApi  = _biobankApi_;
+    beforeEach(inject(function(serverReplyMixin) {
+      _.extend(this, serverReplyMixin);
+
+      this.$q           = this.$injector.get('$q');
+      this.$httpBackend = this.$injector.get('$httpBackend');
+      this.biobankApi   = this.$injector.get('biobankApi');
     }));
 
-    it('GET method success path works', function(done) {
+    afterEach(function() {
+      this.$httpBackend.verifyNoOutstandingExpectation();
+      this.$httpBackend.verifyNoOutstandingRequest();
+    });
+
+    it('GET method success path works', function() {
+      var url = '/test',
+          event = { test: 'test' };
+
+      this.$httpBackend.whenGET(url).respond(this.reply(event));
+
+      this.biobankApi.get(url).then(function(reply) {
+        expect(reply).toEqual(event);
+      });
+      this.$httpBackend.flush();
+    });
+
+    it('GET method failure path works', function() {
+      var url = '/test';
+      var errmsg = 'test';
+
+      this.$httpBackend.whenGET(url).respond(400, this.errorReply(errmsg));
+
+      this.biobankApi.get(url).catch(function(err) {
+        expect(err.data.message).toEqual(errmsg);
+      });
+      this.$httpBackend.flush();
+    });
+
+    it('POST method success path works', function() {
+      var url = '/test';
+      var json = { cmd: 'cmd' };
+      var event = { event: 'event' };
+
+      this.$httpBackend.expectPOST(url, json).respond(this.reply(event));
+
+      this.biobankApi.post(url, json).then(function(reply) {
+        expect(reply).toEqual(event);
+      });
+      this.$httpBackend.flush();
+    });
+
+    it('POST method error path works', function() {
+      var url = '/test';
+      var json = { cmd: 'cmd' };
+      var errmsg = 'test';
+
+      this.$httpBackend.expectPOST(url, json).respond(400, this.errorReply(errmsg));
+
+      this.biobankApi.post(url, json).catch(function(err) {
+        expect(err.data.message).toEqual(errmsg);
+      });
+      this.$httpBackend.flush();
+    });
+
+    it('PUT method success path works', function() {
+      var url = '/test';
+      var json = { cmd: 'cmd' };
+      var event = { event: 'event' };
+
+      this.$httpBackend.expectPUT(url, json).respond(this.reply(event));
+
+      this.biobankApi.put(url, json).then(function(reply) {
+        expect(reply).toEqual(event);
+      });
+      this.$httpBackend.flush();
+    });
+
+    it('PUT method error path works', function() {
+      var url = '/test';
+      var cmd = { cmd: 'cmd' };
+      var errmsg = 'test';
+
+      this.$httpBackend.expectPUT(url, cmd).respond(400, this.errorReply(errmsg));
+
+      this.biobankApi.put(url, cmd).catch(function(err) {
+        expect(err.data.message).toEqual(errmsg);
+      });
+      this.$httpBackend.flush();
+    });
+
+    it('DELETE method success path works', function() {
       var url = '/test';
       var event = { test: 'test' };
 
-      httpBackend.whenGET(url).respond(201, serverReply(event));
+      this.$httpBackend.whenDELETE(url).respond(this.reply(event));
 
-      biobankApi.get(url).then(function(reply) {
-        expect(reply).toEqual(event);
-        done();
-      });
-      httpBackend.flush();
-    });
-
-    it('GET method failure path works', function(done) {
-      var url = '/test';
-      var errmsg = 'test';
-
-      httpBackend.whenGET(url).respond(401, serverErrReply(errmsg));
-
-      biobankApi.get(url).catch(function(err) {
-        expect(err.data.message).toEqual(errmsg);
-        done();
-      });
-      httpBackend.flush();
-    });
-
-    it('POST method success path works', function(done) {
-      var url = '/test';
-      var cmd = { cmd: 'cmd' };
-      var event = { event: 'event' };
-
-      httpBackend.expectPOST(url, cmd).respond(201, serverReply(event));
-
-      biobankApi.post(url, cmd).then(function(reply) {
-        expect(reply).toEqual(event);
-        done();
-      });
-      httpBackend.flush();
-    });
-
-    it('POST method error path works', function(done) {
-      var url = '/test';
-      var cmd = { cmd: 'cmd' };
-      var errmsg = 'test';
-
-      httpBackend.expectPOST(url, cmd).respond(401, serverErrReply(errmsg));
-
-      biobankApi.post(url, cmd).catch(function(err) {
-        expect(err.data.message).toEqual(errmsg);
-        done();
-      });
-      httpBackend.flush();
-    });
-
-    it('PUT method success path works', function(done) {
-      var url = '/test';
-      var cmd = { cmd: 'cmd' };
-      var event = { event: 'event' };
-
-      httpBackend.expectPUT(url, cmd).respond(201, serverReply(event));
-
-      biobankApi.put(url, cmd).then(function(reply) {
-        expect(reply).toEqual(event);
-        done();
-      });
-      httpBackend.flush();
-    });
-
-    it('PUT method error path works', function(done) {
-      var url = '/test';
-      var cmd = { cmd: 'cmd' };
-      var errmsg = 'test';
-
-      httpBackend.expectPUT(url, cmd).respond(401, serverErrReply(errmsg));
-
-      biobankApi.put(url, cmd).catch(function(err) {
-        expect(err.data.message).toEqual(errmsg);
-        done();
-      });
-      httpBackend.flush();
-    });
-
-    it('DELETE method success path works', function(done) {
-      var url = '/test';
-      var event = { test: 'test' };
-
-      httpBackend.whenDELETE(url).respond(201, serverReply(event));
-
-      biobankApi.del(url).then(function(reply) {
+      this.biobankApi.del(url).then(function(reply) {
         expect(reply.data).toEqual(event);
-        done();
       });
-      httpBackend.flush();
+      this.$httpBackend.flush();
     });
 
-    it('DELETE method failure path works', function(done) {
+    it('DELETE method failure path works', function() {
       var url = '/test';
       var errmsg = 'test';
 
-      httpBackend.whenDELETE(url).respond(401, serverErrReply(errmsg));
+      this.$httpBackend.whenDELETE(url).respond(400, this.errorReply(errmsg));
 
-      biobankApi.del(url).catch(function(err) {
+      this.biobankApi.del(url).catch(function(err) {
         expect(err.data.message).toEqual(errmsg);
-        done();
       });
-      httpBackend.flush();
+      this.$httpBackend.flush();
     });
-
-    function serverErrReply(message) {
-      return { status: 'error', message: message };
-    }
-
-    function serverReply(event) {
-      return { status: 'error', data: event };
-    }
 
   });
 

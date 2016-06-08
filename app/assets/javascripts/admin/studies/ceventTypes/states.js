@@ -7,20 +7,16 @@ define(['underscore'], function (_) {
 
   config.$inject = [
     '$urlRouterProvider',
-    '$stateProvider',
-    'authorizationProvider'
+    '$stateProvider'
   ];
 
-  function config($urlRouterProvider,
-                  $stateProvider,
-                  authorizationProvider) {
+  function config($urlRouterProvider, $stateProvider) {
 
     $urlRouterProvider.otherwise('/');
 
     $stateProvider.state('home.admin.studies.study.collection.ceventType', {
       url: '/cetype/{ceventTypeId}',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         ceventType: [
           '$stateParams',
           'study',
@@ -54,9 +50,6 @@ define(['underscore'], function (_) {
      */
     $stateProvider.state('home.admin.studies.study.collection.ceventTypeAdd', {
       url: '/add',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'main@': {
           template: '<cevent-type-add study="vm.study"></cevent-type-add>',
@@ -79,9 +72,6 @@ define(['underscore'], function (_) {
      */
     $stateProvider.state('home.admin.studies.study.collection.ceventType.annotationTypeAdd', {
       url: '/annottype/add',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'main@': {
           template: [
@@ -109,7 +99,6 @@ define(['underscore'], function (_) {
     $stateProvider.state('home.admin.studies.study.collection.ceventType.annotationTypeView', {
       url: '/annottype/view/{annotationTypeId}',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         annotationType: [
           'ceventType',
           '$stateParams',
@@ -155,9 +144,6 @@ define(['underscore'], function (_) {
      */
     $stateProvider.state('home.admin.studies.study.collection.ceventType.specimenSpecAdd', {
       url: '/spcspec/add',
-      resolve: {
-        user: authorizationProvider.requireAuthenticatedUser
-      },
       views: {
         'main@': {
           template: [
@@ -188,7 +174,6 @@ define(['underscore'], function (_) {
     $stateProvider.state('home.admin.studies.study.collection.ceventType.specimenSpecView', {
       url: '/spcspec/view/{specimenSpecId}',
       resolve: {
-        user: authorizationProvider.requireAuthenticatedUser,
         specimenSpec: [
           'ceventType',
           '$stateParams',

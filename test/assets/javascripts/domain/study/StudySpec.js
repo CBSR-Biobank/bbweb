@@ -16,17 +16,18 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(entityTestSuite, extendedDomainEntities) {
+    beforeEach(inject(function(entityTestSuite,
+                               extendedDomainEntities) {
       var self = this;
 
       _.extend(self, entityTestSuite);
 
-      self.httpBackend        = self.$injector.get('$httpBackend');
-      self.Study              = self.$injector.get('Study');
-      self.StudyStatus        = self.$injector.get('StudyStatus');
-      self.funutils           = self.$injector.get('funutils');
-      self.factory       = self.$injector.get('factory');
-      self.testUtils          = self.$injector.get('testUtils');
+      self.httpBackend = self.$injector.get('$httpBackend');
+      self.Study       = self.$injector.get('Study');
+      self.StudyStatus = self.$injector.get('StudyStatus');
+      self.funutils    = self.$injector.get('funutils');
+      self.factory     = self.$injector.get('factory');
+      self.testUtils   = self.$injector.get('testUtils');
 
       self.testUtils.addCustomMatchers();
       self.jsonStudy = self.factory.study();
