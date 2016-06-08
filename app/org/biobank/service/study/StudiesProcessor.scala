@@ -145,21 +145,17 @@ class StudiesProcessor @javax.inject.Inject() (
   }
 
   private def processAddCmd(cmd: AddStudyCmd): Unit = {
-    val studyId = studyRepository.nextIdentity
-
-    if (studyRepository.getByKey(studyId).isSuccess) {
-      log.error(s"study already exists: $studyId")
+    val v = for {
+      name  <- nameAvailable(cmd.name)
+      id    <- validNewIdentity(studyRepository.nextIdentity, studyRepository)
+      study <- DisabledStudy.create(id, 0L, cmd.name, cmd.description, Set.empty)
+    } yield {
+      StudyEvent(study.id.id).update(
+        _.optionalUserId            := cmd.userId,
+        _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.added.name                := cmd.name,
+        _.added.optionalDescription := cmd.description)
     }
-
-    val v = (nameAvailable(cmd.name) |@|
-               DisabledStudy.create(studyId, 0L, cmd.name, cmd.description, Set.empty)) {
-        case (_, study) =>
-          StudyEvent(study.id.id).update(
-            _.optionalUserId            := cmd.userId,
-            _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
-            _.added.name                := cmd.name,
-            _.added.optionalDescription := cmd.description)
-      }
 
     process(v) { applyAddedEvent(_) }
   }

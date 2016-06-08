@@ -23,8 +23,6 @@ class CentreRepositoryImpl
     with CentreRepository {
   import org.biobank.CommonValidations._
 
-  override val hashidsSalt = "biobank-centres"
-
   def nextIdentity: CentreId = new CentreId(nextIdentityAsString)
 
   def notFound(id: CentreId) = IdNotFound(s"centre id: $id")

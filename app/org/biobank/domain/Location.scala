@@ -59,7 +59,7 @@ object Location {
              countryIsoCode: String) = {
     validate(name, street, city, province, postalCode, poBoxNumber,countryIsoCode).map { _ =>
       val uniqueId = java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase
-      Location(uniqueId, name, street, city, province, postalCode, poBoxNumber,countryIsoCode)
+      Location(uniqueId, name, street, city, province, postalCode, poBoxNumber, countryIsoCode)
     }
   }
 

@@ -80,17 +80,12 @@ class CollectionEventsProcessor @Inject() (
   }
 
   private def processAddCmd(cmd: AddCollectionEventCmd): Unit = {
-    val collectionEventId = collectionEventRepository.nextIdentity
-
-    if (collectionEventRepository.getByKey(collectionEventId).isSuccess) {
-      log.error(s"processAddCollectionEventCmd: collection event with id already exsits: $collectionEventId")
-    }
-
     val participantId = ParticipantId(cmd.participantId)
     val collectionEventTypeId = CollectionEventTypeId(cmd.collectionEventTypeId)
     var annotationsSet = cmd.annotations.toSet
 
     val event = for {
+      collectionEventId    <- validNewIdentity(collectionEventRepository.nextIdentity, collectionEventRepository)
       participant          <- participantRepository.getByKey(participantId)
       collectionEventType  <- collectionEventTypeRepository.getByKey(collectionEventTypeId)
       studyIdMatching      <- studyIdsMatch(participant, collectionEventType)

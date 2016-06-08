@@ -27,8 +27,6 @@ class ProcessingEventInputSpecimenRepositoryImpl
     with ProcessingEventInputSpecimenRepository {
   import org.biobank.CommonValidations._
 
-  override val hashidsSalt = "biobank-processing-event-input-specimens"
-
   def nextIdentity: ProcessingEventInputSpecimenId = new ProcessingEventInputSpecimenId(nextIdentityAsString)
 
   private def processingEventIdCriteriaError(processingEventId: ProcessingEventId) =

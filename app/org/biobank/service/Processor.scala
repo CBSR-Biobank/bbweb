@@ -35,6 +35,15 @@ trait Processor extends PersistentActor with ActorLogging {
     )
   }
 
+  protected def validNewIdentity[I <: IdentifiedValueObject[_], R <: ReadWriteRepository[I,_]](
+    id: I, repository: R): DomainValidation[I] = {
+    if (repository.getByKey(id).isSuccess) {
+      DomainError(s"could not generate a unique ID: $id").failureNel
+    } else {
+      id.success
+    }
+  }
+
   /**
    * Searches the repository for a matching item.
    */

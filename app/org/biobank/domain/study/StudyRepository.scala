@@ -26,8 +26,6 @@ class StudyRepositoryImpl
     with StudyRepository {
   import org.biobank.CommonValidations._
 
-  override val hashidsSalt = "biobank-studies"
-
   def nextIdentity: StudyId = new StudyId(nextIdentityAsString)
 
   def studyNotFound(id: StudyId) = IdNotFound(s"study id: $id")

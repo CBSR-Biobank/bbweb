@@ -185,14 +185,18 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
 
   val log = LoggerFactory.getLogger(this.getClass)
 
+  private val loadTestData = (actorSystem.settings.config.hasPath(configPath)
+                                && actorSystem.settings.config.getBoolean(configPath))
+
   def addMultipleCentres(): Unit = {
-    if (actorSystem.settings.config.hasPath(configPath)
-          && actorSystem.settings.config.getBoolean(configPath)) {
+    if (loadTestData) {
       Logger.debug("addMultipleCentres")
 
-      val centres = centreData.map { case (name, description) =>
+      val hashids = Hashids("test-data-centres")
+
+      val centres = centreData.zipWithIndex.foreach { case ((name, description), index) =>
           val centre: Centre = DisabledCentre(
-              id           = centreRepository.nextIdentity,
+              id           = CentreId(hashids.encode(index)),
               version      = 0L,
               timeAdded    = DateTime.now,
               timeModified = None,
@@ -206,15 +210,16 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
   }
 
   def addMultipleStudies(): Unit = {
-    if (actorSystem.settings.config.hasPath(configPath)
-          && actorSystem.settings.config.getBoolean(configPath)) {
+    if (loadTestData) {
       Logger.debug("addMultipleStudies")
 
-      val studies = studyData.map { case (name, description) =>
-          val descMaybe = if (name == "AHFEM") { Some(s"$description\n\n$ahfemDescription")}
-                            else { Some(description) }
+      val hashids = Hashids("test-data-studies")
 
-          val study: Study = DisabledStudy(id              = studyRepository.nextIdentity,
+      val studies = studyData.zipWithIndex.foreach { case ((name, description), index) =>
+          val descMaybe = if (name == "AHFEM") Some(s"$description\n\n$ahfemDescription")
+                          else Some(description)
+
+          val study: Study = DisabledStudy(id              = StudyId(hashids.encode(index)),
                                            version         = 0L,
                                            timeAdded       = DateTime.now,
                                            timeModified    = None,
@@ -232,10 +237,12 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
     Logger.debug("addCollectionEvents")
 
     studyRepository.getValues.find { s => s.name == "BBPSP"}.map { bbpsp =>
+      val hashids = Hashids("test-data-cevent-types")
+
       // Use a list since "id" is determined at the time of adding to the repository
       val ceventTypes =
         List(CollectionEventType(studyId            = bbpsp.id,
-                                 id                 = CollectionEventTypeId(""),
+                                 id                 = CollectionEventTypeId(hashids.encode(1)),
                                  version            = 0L,
                                  timeAdded          = DateTime.now,
                                  timeModified       = None,
@@ -245,7 +252,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
                                  specimenSpecs      = getBbpspSpecimenSpecs,
                                  annotationTypes    = getBbpspCeventAnnotationTypes),
              CollectionEventType(studyId            = bbpsp.id,
-                                 id                 = CollectionEventTypeId(""),
+                                 id                 = CollectionEventTypeId(hashids.encode(2)),
                                  version            = 0L,
                                  timeAdded          = DateTime.now,
                                  timeModified       = None,
@@ -255,9 +262,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
                                  specimenSpecs      = getBbpspSpecimenSpecs,
                                  annotationTypes    = Set.empty))
 
-      ceventTypes.foreach { cet =>
-        collectionEventTypeRepository.put(cet.copy(id = collectionEventTypeRepository.nextIdentity))
-      }
+      ceventTypes.foreach { cet => collectionEventTypeRepository.put(cet) }
     }
     ()
   }
@@ -379,16 +384,16 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
   }
 
   def addMultipleUsers() = {
-    if (actorSystem.settings.config.hasPath(configPath)
-          && actorSystem.settings.config.getBoolean(configPath)) {
+    if (loadTestData) {
       Logger.debug("addMultipleUsers")
 
       val plainPassword = "testuser"
       val salt = passwordHasher.generateSalt
+      val hashids = Hashids("test-data-users")
 
-      val users = userData.map { case(name, email) =>
+      val users = userData.zipWithIndex.foreach { case((name, email), index) =>
           val user: User = ActiveUser(
-              id           = userRepository.nextIdentity,
+              id           = UserId(hashids.encode(index)),
               version      = 0L,
               timeAdded    = DateTime.now,
               timeModified = None,

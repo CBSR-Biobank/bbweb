@@ -10,8 +10,6 @@ import scalaz.Scalaz._
 trait SpecimenRepository
     extends ReadWriteRepository [SpecimenId, Specimen] {
 
-  def nextIdentities(count: Int): List[SpecimenId]
-
   def getForInventoryId(inventoryId: String): DomainValidation[Specimen]
 
 }
@@ -22,14 +20,7 @@ class SpecimenRepositoryImpl
     with SpecimenRepository {
   import org.biobank.CommonValidations._
 
-  override val hashidsSalt = "biobank-specimens"
-
   def nextIdentity: SpecimenId = new SpecimenId(nextIdentityAsString)
-
-  def nextIdentities(count: Int): List[SpecimenId] = {
-    val size = getMap.size
-    (1 to count).map { index => SpecimenId(hashids.encode(size + index)) }.toList
-  }
 
   def notFound(id: SpecimenId) = IdNotFound(s"specimen id: $id")
 

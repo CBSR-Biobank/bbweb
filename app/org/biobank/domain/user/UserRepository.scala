@@ -33,8 +33,6 @@ class UserRepositoryImpl
     with UserRepository {
   import org.biobank.CommonValidations._
 
-  override val hashidsSalt = "biobank-users"
-
   def nextIdentity: UserId = new UserId(nextIdentityAsString)
 
   def notFound(id: UserId) = IdNotFound(s"user id: $id")

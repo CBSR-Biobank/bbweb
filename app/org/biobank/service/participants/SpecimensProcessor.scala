@@ -92,18 +92,11 @@ class SpecimensProcessor @Inject() (
         specIdsValid    <- validateSpecimenInfo(cmd.specimenData, ceventType)
         invIdsValid     <- validateInventoryId(cmd.specimenData)
       } yield {
-        val identities = specimenRepository.nextIdentities(cmd.specimenData.length)
-
         SpecimenEvent(cmd.userId).update(
           _.time                    := ISODateTimeFormat.dateTime.print(DateTime.now),
           _.added.collectionEventId := collectionEvent.id.id,
-          _.added.specimenData      := (cmd.specimenData zip identities).map {
-              case (specimenInfo, specimenId) =>
-                if (specimenRepository.getByKey(specimenId).isSuccess) {
-                  log.error(s"processAddCmd: specimen with id already exsits: $specimenId")
-                }
-
-                specimenInfoToEvent(specimenId, specimenInfo)
+          _.added.specimenData      := cmd.specimenData.map { specimenInfo =>
+              specimenInfoToEvent(specimenRepository.nextIdentity, specimenInfo)
             })
         }
 
@@ -243,7 +236,7 @@ class SpecimensProcessor @Inject() (
     for {
       specimen     <- specimenRepository.getByKey(specimenId)
       cevent       <- collectionEventRepository.getByKey(collectionEventId)
-      validVersion <- cevent.requireVersion(cmd.expectedVersion)
+      validVersion <- specimen.requireVersion(cmd.expectedVersion)
       event        <- fn(cevent, specimen)
     } yield event
   }

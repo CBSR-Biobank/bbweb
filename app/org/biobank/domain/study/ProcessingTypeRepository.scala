@@ -23,8 +23,6 @@ class ProcessingTypeRepositoryImpl
     with ProcessingTypeRepository {
   import org.biobank.CommonValidations._
 
-  override val hashidsSalt = "biobank-processing-types"
-
   def nextIdentity: ProcessingTypeId = new ProcessingTypeId(nextIdentityAsString)
 
   def notFound(id: ProcessingTypeId) = IdNotFound(s"processing type id: $id")

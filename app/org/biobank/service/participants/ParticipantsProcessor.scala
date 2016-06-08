@@ -105,17 +105,12 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
 
   private def processAddCmd(cmd: AddParticipantCmd): Unit = {
     val studyId = StudyId(cmd.studyId)
-    val participantId = participantRepository.nextIdentity
-
-    if (participantRepository.getByKey(participantId).isSuccess) {
-      log.error(s"participant with id already exsits: $participantId")
-    }
 
     val event = for {
       study             <- studyRepository.getEnabled(studyId)
+      participantId     <- validNewIdentity(participantRepository.nextIdentity, participantRepository)
       uniqueIdAvailable <- uniqueIdAvailable(cmd.uniqueId)
-      annotTypes        <- Annotation.validateAnnotations(study.annotationTypes,
-                                                          cmd.annotations)
+      annotTypes        <- Annotation.validateAnnotations(study.annotationTypes, cmd.annotations)
       newParticipant    <- Participant.create(studyId,
                                               participantId,
                                               0L,

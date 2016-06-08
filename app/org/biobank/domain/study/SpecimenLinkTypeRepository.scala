@@ -23,8 +23,6 @@ class SpecimenLinkTypeRepositoryImpl
     extends ReadWriteRepositoryRefImpl[SpecimenLinkTypeId, SpecimenLinkType](v => v.id)
     with SpecimenLinkTypeRepository {
 
-  override val hashidsSalt = "biobank-specimen-link-types"
-
   def nextIdentity: SpecimenLinkTypeId = new SpecimenLinkTypeId(nextIdentityAsString)
 
   def withId(

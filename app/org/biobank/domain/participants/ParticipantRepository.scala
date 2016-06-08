@@ -26,8 +26,6 @@ class ParticipantRepositoryImpl
     with ParticipantRepository {
   import org.biobank.CommonValidations._
 
-  override val hashidsSalt = "biobank-participants"
-
   def nextIdentity: ParticipantId = new ParticipantId(nextIdentityAsString)
 
   def notFound(id: ParticipantId) = IdNotFound(s"participant id: $id")

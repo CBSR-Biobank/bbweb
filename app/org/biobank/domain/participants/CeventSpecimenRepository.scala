@@ -28,8 +28,6 @@ class CeventSpecimenRepositoryImpl
     extends ReadWriteRepositoryRefImpl[SpecimenId, CeventSpecimen](v => v.specimenId)
     with CeventSpecimenRepository {
 
-  override val hashidsSalt = "biobank-collection-event-specimens"
-
   // only existing center and location IDs should be stored, never new IDs
   def nextIdentity = throw new IllegalStateException("should not be used")
 
