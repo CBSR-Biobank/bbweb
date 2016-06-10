@@ -14,8 +14,8 @@
       'common',
       'admin',
       {
-        name: 'admin.directives.centres',
-        location: 'admin/directives/centres'
+        name: 'biobank.admin.centres',
+        location: 'admin/centres'
       },
       {
         name: 'admin.directives.studies',

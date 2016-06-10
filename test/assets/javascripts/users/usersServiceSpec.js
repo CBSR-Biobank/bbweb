@@ -10,7 +10,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  fdescribe('Service: userService', function() {
+  describe('Service: userService', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 

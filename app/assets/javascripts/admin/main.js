@@ -8,10 +8,9 @@ define(function (require) {
   var angular = require('angular'),
       name = 'biobank.admin',
       module,
-      centres = require('./centres/main'),
+      centres = require('biobank.admin.centres'),
       studies = require('./studies/main'),
       users = require('./users/main'),
-      directivesCentres = require('admin.directives.centres'),
       directivesStudies = require('admin.directives.studies'),
       services = require('./services/main');
 
@@ -19,7 +18,6 @@ define(function (require) {
     centres.name,
     studies.name,
     users.name,
-    directivesCentres.name,
     directivesStudies.name,
     services.name,
     'biobank.common',

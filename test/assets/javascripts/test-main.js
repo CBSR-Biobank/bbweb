@@ -32,6 +32,14 @@
     packages: [
       'common',
       'admin',
+      {
+        name: 'biobank.admin.centres',
+        location: 'admin/centres'
+      },
+      {
+        name: 'admin.directives.studies',
+        location: 'admin/directives/studies'
+      },
       'centres',
       'collection',
       'dashboard',
