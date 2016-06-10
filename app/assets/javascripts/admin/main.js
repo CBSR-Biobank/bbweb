@@ -6,20 +6,16 @@ define(function (require) {
   'use strict';
 
   var angular = require('angular'),
-      name = 'biobank.admin',
+      name     = 'biobank.admin',
       module,
-      centres = require('biobank.admin.centres'),
-      studies = require('./studies/main'),
-      users = require('./users/main'),
-      directivesStudies = require('admin.directives.studies'),
-      services = require('./services/main');
+      centres  = require('biobank.admin.centres'),
+      studies  = require('biobank.admin.studies'),
+      users    = require('biobank.admin.users');
 
   module = angular.module(name, [
     centres.name,
     studies.name,
     users.name,
-    directivesStudies.name,
-    services.name,
     'biobank.common',
     'biobank.users',
     'biobank.studies'
@@ -36,6 +32,13 @@ define(function (require) {
 
   module.component('userAdmin',             require('./components/users/userAdmin/userAdminComponent'));
   module.component('usersTable',            require('./components/users/usersTable/usersTableComponent'));
+
+  module.service('adminService', require('./services/adminService'));
+
+  module.service('studyAnnotationTypeUtils',
+                 require('./services/studies/annotationTypes/studyAnnotationTypeUtilsService'));
+  module.service('annotationTypeAddService',
+                 require('./services/studies/annotationTypes/annotationTypeAddService'));
 
   return {
     name: name,

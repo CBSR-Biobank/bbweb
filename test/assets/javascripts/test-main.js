@@ -37,8 +37,12 @@
         location: 'admin/centres'
       },
       {
-        name: 'admin.directives.studies',
-        location: 'admin/directives/studies'
+        name: 'biobank.admin.studies',
+        location: 'admin/studies'
+      },
+      {
+        name: 'biobank.admin.users',
+        location: 'admin/users'
       },
       'centres',
       'collection',

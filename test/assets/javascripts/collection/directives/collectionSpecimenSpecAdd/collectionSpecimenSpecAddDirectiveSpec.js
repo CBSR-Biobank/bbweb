@@ -57,7 +57,7 @@ define([
       self.factory           = self.$injector.get('factory');
 
       self.putHtmlTemplates(
-        '/assets/javascripts/admin/directives/studies/collection/collectionSpecimenSpecAdd/collectionSpecimenSpecAdd.html');
+        '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenSpecAdd/collectionSpecimenSpecAdd.html');
 
       self.jsonCevenType       = self.factory.collectionEventType();
       self.jsonStudy           = self.factory.defaultStudy();

@@ -18,8 +18,12 @@
         location: 'admin/centres'
       },
       {
-        name: 'admin.directives.studies',
-        location: 'admin/directives/studies'
+        name: 'biobank.admin.studies',
+        location: 'admin/studies'
+      },
+      {
+        name: 'biobank.admin.users',
+        location: 'admin/users'
       },
       'centres',
       'collection',
@@ -76,7 +80,7 @@
   };
 
   // Load the app. This is kept minimal so it doesn't need much updating.
-  require([ 'angular', './app' ], function(angular) {
+  require([ 'angular', 'app' ], function(angular) {
     angular.bootstrap(document, ['biobankApp']);
   });
 })(requirejs);
