@@ -21,10 +21,6 @@ define(function (require) {
                    require('./participantAnnotationTypeAdd/participantAnnotationTypeAddDirective'));
   module.directive('participantAnnotationTypeView',
                    require('./participantAnnotationTypeView/participantAnnotationTypeViewDirective'));
-  module.directive('studyAnnotationTypesPanel',
-                   require('./studyAnnotationTypesPanel/studyAnnotationTypesPanelDirective'));
-  module.directive('studyAnnotationTypesTable',
-                   require('./studyAnnotationTypesTable/studyAnnotationTypesTableDirective'));
 
   return {
     name: name,

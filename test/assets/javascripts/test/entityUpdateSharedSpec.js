@@ -47,7 +47,7 @@ define(['underscore'], function(_) {
         this.deferred.resolve(context.newValue);
         spyOn(context.entity.prototype, context.updateFuncName).and.returnValue(this.$q.when(context.entity));
 
-        this.createController();
+        context.createController.call(this);
         expect(this.controller[context.controllerFuncName]).toBeFunction();
         this.controller[context.controllerFuncName]();
         this.scope.$digest();
@@ -68,7 +68,7 @@ define(['underscore'], function(_) {
 
         deferred.reject('simulated error');
 
-        this.createController();
+        context.createController.call(this);
         expect(this.controller[context.controllerFuncName]).toBeFunction();
         this.controller[context.controllerFuncName]();
         this.scope.$digest();

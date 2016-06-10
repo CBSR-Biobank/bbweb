@@ -35,10 +35,16 @@ define(function (require) {
 
   module.service('adminService', require('./services/adminService'));
 
-  module.service('studyAnnotationTypeUtils',
-                 require('./services/studies/annotationTypes/studyAnnotationTypeUtilsService'));
-  module.service('annotationTypeAddService',
-                 require('./services/studies/annotationTypes/annotationTypeAddService'));
+  module.factory('AnnotationTypeModals',   require('./services/AnnotationTypeModals'));
+
+  module.factory('ParticipantAnnotationTypeModals',
+                 require('./services/studies/ParticipantAnnotationTypeModals'));
+  module.factory('CollectionEventAnnotationTypeModals',
+                 require('./services/studies/CollectionEventAnnotationTypeModals'));
+  module.factory('SpecimenLinkAnnotationTypeModals',
+                 require('./services/studies/SpecimenLinkAnnotationTypeModals'));
+
+  module.factory('annotationTypeAddMixin', require('./services/annotationTypeAddMixin'));
 
   return {
     name: name,

@@ -5,9 +5,9 @@
 define(['underscore'], function (_) {
   'use strict';
 
-  templateMixinFactory.$inject = ['$templateCache'];
+  templateMixin.$inject = ['$templateCache'];
 
-  function templateMixinFactory($templateCache) {
+  function templateMixin($templateCache) {
 
     var mixin = {
       putHtmlTemplates: putHtmlTemplates
@@ -25,6 +25,6 @@ define(['underscore'], function (_) {
     }
   }
 
-  return templateMixinFactory;
+  return templateMixin;
 
 });

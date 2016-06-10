@@ -30,7 +30,7 @@ define(['underscore'], function (_) {
     'modalInput',
     'domainEntityService',
     'notificationsService',
-    'studyAnnotationTypeUtils'
+    'CollectionEventAnnotationTypeModals'
   ];
 
   function CeventTypeViewCtrl($state,
@@ -38,8 +38,10 @@ define(['underscore'], function (_) {
                               modalInput,
                               domainEntityService,
                               notificationsService,
-                              studyAnnotationTypeUtils) {
+                              CollectionEventAnnotationTypeModals) {
     var vm = this;
+
+    _.extend(vm, new CollectionEventAnnotationTypeModals());
 
     vm.isPanelCollapsed     = false;
     vm.modificationsAllowed = vm.study.isDisabled();
@@ -144,17 +146,15 @@ define(['underscore'], function (_) {
 
     function removeAnnotationType(annotationType) {
       if (_.contains(vm.annotationTypeIdsInUse, annotationType.uniqueId)) {
-        studyAnnotationTypeUtils.removeInUseModal(annotationType, vm.annotationTypeName);
+        vm.removeInUseModal(annotationType, vm.annotationTypeName);
       } else {
         if (!vm.modificationsAllowed) {
           throw new Error('modifications not allowed');
         }
 
-        studyAnnotationTypeUtils.remove(callback, annotationType);
-      }
-
-      function callback() {
-        return vm.ceventType.removeAnnotationType(annotationType);
+        vm.remove(annotationType, function () {
+          return vm.ceventType.removeAnnotationType(annotationType);
+        });
       }
     }
 

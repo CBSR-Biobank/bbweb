@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function () {
+define(['lodash'], function (_) {
   'use strict';
 
   /**
@@ -25,23 +25,26 @@ define(function () {
   }
 
   CollectionEventAnnotationTypeAddCtrl.$inject = [
-    'annotationTypeAddService'
+    'annotationTypeAddMixin'
   ];
 
   var returnState = 'home.admin.studies.study.collection.ceventType';
 
-  function CollectionEventAnnotationTypeAddCtrl(annotationTypeAddService) {
+  function CollectionEventAnnotationTypeAddCtrl(annotationTypeAddMixin) {
     var vm = this;
 
+    _.extend(vm, annotationTypeAddMixin);
+
     vm.onSubmit        = onSubmit;
-    vm.onAddsuccessful = annotationTypeAddService.onAddSuccessful(returnState);
-    vm.onCancel        = annotationTypeAddService.onCancel(returnState);
+    vm.onAddsuccessful = vm.onAddSuccessful(returnState);
+    vm.onCancel        = vm.onCancel(returnState);
 
     //--
 
     function onSubmit(annotationType) {
       vm.collectionEventType.addAnnotationType(annotationType)
-        .then(vm.onAddsuccessful).catch(annotationTypeAddService.addFailed);
+        .then(vm.onAddsuccessful)
+        .catch(vm.onAddFailed);
     }
   }
 

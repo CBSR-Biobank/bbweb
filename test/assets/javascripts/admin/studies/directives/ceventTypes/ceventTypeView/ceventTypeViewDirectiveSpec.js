@@ -14,14 +14,30 @@ define(function (require) {
 
   describe('ceventTypeViewDirective', function() {
 
+    var createController = function () {
+        this.element = angular.element(
+          '<cevent-type-view study="vm.study" cevent-type="vm.ceventType"></cevent-type-view>');
+
+        this.scope = this.$rootScope.$new();
+        this.scope.vm = {
+          study: this.study,
+          ceventType: this.collectionEventType
+        };
+        this.$compile(this.element)(this.scope);
+        this.scope.$digest();
+        this.controller = this.element.controller('ceventTypeView');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, testUtils, templateMixin) {
+    beforeEach(inject(function(testUtils, templateMixin) {
       var self = this;
 
       _.extend(self, templateMixin);
 
       self.$q                     = self.$injector.get('$q');
+      self.$rootScope             = self.$injector.get('$rootScope');
+      self.$compile               = self.$injector.get('$compile');
       self.$state                 = self.$injector.get('$state');
       self.Study                  = self.$injector.get('Study');
       self.CollectionEventType    = self.$injector.get('CollectionEventType');
@@ -38,8 +54,6 @@ define(function (require) {
 
       spyOn(this.$state, 'go').and.returnValue(true);
 
-      self.createController = createController;
-
       this.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/collection/ceventTypeView/ceventTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle.html',
@@ -48,30 +62,15 @@ define(function (require) {
         '/assets/javascripts/common/directives/updateRemoveButtons.html',
         '/assets/javascripts/admin/directives/statusLine/statusLine.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
-
-      function createController() {
-        self.element = angular.element(
-          '<cevent-type-view study="vm.study" cevent-type="vm.ceventType"></cevent-type-view>');
-
-        self.scope = $rootScope.$new();
-        self.scope.vm = {
-          study: self.study,
-          ceventType: self.collectionEventType
-        };
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('ceventTypeView');
-      }
-
     }));
 
     it('scope should be valid', function() {
-      this.createController();
+      createController.call(this);
       expect(this.controller.ceventType).toBe(this.collectionEventType);
     });
 
     it('calling addAnnotationType should change to the correct state', function() {
-      this.createController();
+      createController.call(this);
       this.controller.addAnnotationType();
       this.scope.$digest();
       expect(this.$state.go)
@@ -79,7 +78,7 @@ define(function (require) {
     });
 
     it('calling addSpecimenSpec should change to the correct state', function() {
-      this.createController();
+      createController.call(this);
       this.controller.addSpecimenSpec();
       this.scope.$digest();
       expect(this.$state.go)
@@ -89,7 +88,7 @@ define(function (require) {
     it('calling editAnnotationType should change to the correct state', function() {
       var annotType = new this.AnnotationType(this.factory.annotationType());
 
-      this.createController();
+      createController.call(this);
       this.controller.editAnnotationType(annotType);
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith(
@@ -103,6 +102,7 @@ define(function (require) {
 
       beforeEach(inject(function () {
         context.entity             = this.CollectionEventType;
+        context.createController   = createController;
         context.updateFuncName     = 'updateName';
         context.controllerFuncName = 'editName';
         context.modalInputFuncName = 'text';
@@ -119,6 +119,7 @@ define(function (require) {
 
       beforeEach(inject(function () {
         context.entity             = this.CollectionEventType;
+        context.createController   = createController;
         context.updateFuncName     = 'updateDescription';
         context.controllerFuncName = 'editDescription';
         context.modalInputFuncName = 'textArea';
@@ -135,6 +136,7 @@ define(function (require) {
 
       beforeEach(inject(function () {
         context.entity               = this.CollectionEventType;
+        context.createController   = createController;
         context.updateFuncName       = 'updateRecurring';
         context.controllerFuncName   = 'editRecurring';
         context.modalInputFuncName = 'boolean';
@@ -148,7 +150,7 @@ define(function (require) {
     it('editing a specimen spec changes to correct state', function() {
       var specimenSpec = new this.CollectionSpecimenSpec(this.factory.collectionSpecimenSpec());
 
-      this.createController();
+      createController.call(this);
       this.controller.editSpecimenSpec(specimenSpec);
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith(
@@ -169,7 +171,7 @@ define(function (require) {
         spyOn(this.CollectionEventType.prototype, 'removeSpecimenSpec')
           .and.returnValue(this.$q.when(ceventType));
 
-        this.createController();
+        createController.call(this);
         this.controller.modificationsAllowed = true;
         this.controller.removeSpecimenSpec(ceventType.specimenSpecs[0]);
         this.scope.$digest();
@@ -184,7 +186,7 @@ define(function (require) {
 
         spyOn(self.domainEntityService, 'removeEntity').and.returnValue(self.$q.when('OK'));
 
-        self.createController();
+        createController.call(self);
         self.controller.modificationsAllowed = false;
 
         expect(function () {
@@ -206,7 +208,7 @@ define(function (require) {
         spyOn(this.CollectionEventType.prototype, 'removeAnnotationType')
           .and.returnValue(this.$q.when(ceventType));
 
-        this.createController();
+        createController.call(this);
         this.controller.annotationTypeIdsInUse = [];
         this.controller.removeAnnotationType(ceventType.annotationTypes[0]);
         this.scope.$digest();
@@ -216,17 +218,14 @@ define(function (require) {
       });
 
       it('throws an error if modifications are not allowed', function() {
-        var annotationType = new this.AnnotationType(this.factory.annotationType()),
-            studyAnnotationTypeUtils = this.$injector.get('studyAnnotationTypeUtils');
+        var annotationType = new this.AnnotationType(this.factory.annotationType());
 
-        spyOn(studyAnnotationTypeUtils, 'removeInUseModal').and.returnValue(this.$q.when('OK'));
         spyOn(this.CollectionEventType.prototype, 'removeAnnotationType').and.callThrough();
 
-        this.createController();
+        createController.call(this);
         this.controller.annotationTypeIdsInUse = [ annotationType.uniqueId ];
         this.controller.removeAnnotationType(annotationType);
 
-        expect(studyAnnotationTypeUtils.removeInUseModal).toHaveBeenCalled();
         expect(this.CollectionEventType.prototype.removeAnnotationType).not.toHaveBeenCalled();
       });
 
@@ -236,7 +235,7 @@ define(function (require) {
 
         spyOn(self.domainEntityService, 'removeEntity').and.returnValue(self.$q.when('OK'));
 
-        self.createController();
+        createController.call(self);
         self.controller.modificationsAllowed = false;
 
         expect(function () {
@@ -249,7 +248,7 @@ define(function (require) {
     it('updates state when panel button is clicked', function() {
       var panelState;
 
-      this.createController();
+      createController.call(this);
       panelState = this.controller.isPanelCollapsed;
       this.controller.panelButtonClicked();
       this.scope.$digest();

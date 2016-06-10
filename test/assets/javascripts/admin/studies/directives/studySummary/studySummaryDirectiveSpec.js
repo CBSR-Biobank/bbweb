@@ -14,21 +14,33 @@ define(function (require) {
 
   describe('Directive: studySummaryDirective', function() {
 
+      var createController = function () {
+        this.element = angular.element('<study-summary study="vm.study"></study-summary>');
+        this.scope = this.$rootScope.$new();
+        this.scope.vm = { study: this.study };
+
+        this.$compile(this.element)(this.scope);
+        this.scope.$digest();
+        this.controller = this.element.controller('studySummary');
+      };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, templateMixin, testUtils) {
+    beforeEach(inject(function(templateMixin, testUtils) {
       var self = this,
           ceventType;
 
       _.extend(self, templateMixin);
 
       self.$q                   = self.$injector.get('$q');
+      self.$rootScope           = self.$injector.get('$rootScope');
+      self.$compile             = self.$injector.get('$compile');
       self.$state               = self.$injector.get('$state');
       self.Study                = self.$injector.get('Study');
       self.CollectionEventType  = self.$injector.get('CollectionEventType');
       self.modalService         = self.$injector.get('modalService');
       self.notificationsService = self.$injector.get('notificationsService');
-      self.factory         = self.$injector.get('factory');
+      self.factory              = self.$injector.get('factory');
 
       ceventType = new self.CollectionEventType(self.factory.collectionEventType());
 
@@ -36,27 +48,16 @@ define(function (require) {
       spyOn(self.modalService, 'showModal').and.returnValue(self.$q.when(true));
 
       self.study = new self.Study(self.factory.study());
-      self.createController = createController;
 
       this.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/studySummary/studySummary.html',
         '/assets/javascripts/common/directives/truncateToggle.html',
         '/assets/javascripts/admin/directives/statusLine/statusLine.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
-
-      function createController() {
-        self.element = angular.element('<study-summary study="vm.study"></study-summary>');
-        self.scope = $rootScope.$new();
-        self.scope.vm = { study: self.study };
-
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('studySummary');
-      }
     }));
 
     it('should contain valid settings to display the study summary', function() {
-      this.createController();
+      createController.call(this);
       expect(this.controller.study).toBe(this.study);
       expect(this.controller.descriptionToggleLength).toBeDefined();
       expect(this.controller.collectionEventTypes).toBeArrayOfSize(1);
@@ -65,7 +66,7 @@ define(function (require) {
 
     it('should have valid settings when study has no collection event types', function() {
       this.CollectionEventType.list = jasmine.createSpy().and.returnValue(this.$q.when([ ]));
-      this.createController();
+      createController.call(this);
       expect(this.controller.collectionEventTypes).toBeEmptyArray();
       expect(this.controller.hasCollectionEventTypes).toBeFalse();
     });
@@ -75,9 +76,10 @@ define(function (require) {
       var context = {};
 
       beforeEach(inject(function () {
-        context.entity               = this.Study;
-        context.updateFuncName       = 'updateName';
-        context.controllerFuncName   = 'editName';
+        context.entity             = this.Study;
+        context.createController   = createController;
+        context.updateFuncName     = 'updateName';
+        context.controllerFuncName = 'editName';
         context.modalInputFuncName = 'text';
       }));
 
@@ -90,9 +92,10 @@ define(function (require) {
       var context = {};
 
       beforeEach(inject(function () {
-        context.entity               = this.Study;
-        context.updateFuncName       = 'updateDescription';
-        context.controllerFuncName   = 'editDescription';
+        context.entity             = this.Study;
+        context.createController   = createController;
+        context.updateFuncName     = 'updateDescription';
+        context.controllerFuncName = 'editDescription';
         context.modalInputFuncName = 'textArea';
       }));
 
@@ -149,7 +152,7 @@ define(function (require) {
           spyOn(this.Study, 'get').and.returnValue(this.$q.when(this.study));
           spyOn(this.Study.prototype, context.status).and.returnValue(this.$q.when(this.study));
 
-          this.createController();
+          createController.call(this);
           this.controller.changeStatus(context.status);
           this.scope.$digest();
           expect(this.Study.prototype[context.status]).toHaveBeenCalled();
@@ -162,7 +165,7 @@ define(function (require) {
       var self = this,
           badStatus = 'xxx';
 
-      this.createController();
+      createController.call(this);
       expect(function () {
         self.controller.changeStatus(badStatus);
       }).toThrow(new Error('invalid status: ' + badStatus));

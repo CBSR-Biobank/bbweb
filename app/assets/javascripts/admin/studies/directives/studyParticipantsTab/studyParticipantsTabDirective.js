@@ -21,11 +21,13 @@ define(['underscore'], function (_) {
 
   StudyParticipantsTabCtrl.$inject = [
     '$state',
-    'studyAnnotationTypeUtils'
+    'ParticipantAnnotationTypeModals'
   ];
 
-  function StudyParticipantsTabCtrl($state, studyAnnotationTypeUtils) {
+  function StudyParticipantsTabCtrl($state, ParticipantAnnotationTypeModals) {
     var vm = this;
+
+    _.extend(vm, new ParticipantAnnotationTypeModals());
 
     // FIXME this is set to empty array for now, but will have to call the correct method in the future
     vm.annotationTypeIdsInUse = [];
@@ -46,18 +48,17 @@ define(['underscore'], function (_) {
 
     function removeAnnotationType(annotationType) {
       if (_.contains(vm.annotationTypeIdsInUse, annotationType.uniqueId)) {
-        studyAnnotationTypeUtils.removeInUseModal(annotationType, 'ParticipantAnnotationType');
+        vm.removeInUseModal(annotationType, 'ParticipantAnnotationType');
       } else {
         if (!vm.modificationsAllowed) {
           throw new Error('modifications not allowed');
         }
 
-        studyAnnotationTypeUtils.remove(callback, annotationType);
+        vm.remove(annotationType, function () {
+          return vm.study.removeAnnotationType(annotationType);
+        });
       }
 
-      function callback() {
-        return vm.study.removeAnnotationType(annotationType);
-      }
     }
   }
 

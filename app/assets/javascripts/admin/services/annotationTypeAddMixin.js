@@ -5,18 +5,19 @@
 define(function () {
   'use strict';
 
-  annotationTypeAddService.$inject = [
+  annotationTypeAddMixin.$inject = [
     '$state',
     'notificationsService',
     'domainEntityService'
   ];
 
   /**
-   * Description
+   * A mixin that can be used by controllers that add annotation types. It is implemented as an Angular
+   * factory.
    */
-  function annotationTypeAddService($state,
-                                    notificationsService,
-                                    domainEntityService) {
+  function annotationTypeAddMixin($state,
+                                  notificationsService,
+                                  domainEntityService) {
     var service = {
       onAddSuccessful: onAddSuccessful,
       onAddFailed: onAddFailed,
@@ -49,5 +50,5 @@ define(function () {
 
   }
 
-  return annotationTypeAddService;
+  return annotationTypeAddMixin;
 });
