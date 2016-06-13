@@ -15,51 +15,52 @@ define([
 
   describe('participantAnnotationTypeViewDirective', function() {
 
+    var createController = function () {
+      this.element = angular.element([
+        '<participant-annotation-type-view',
+        '  study="vm.study"',
+        '  annotation-type="vm.annotationType"',
+        '</participant-annotation-type-view>'
+      ].join(''));
+
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = {
+        study:          this.study,
+        annotationType: this.annotationType
+      };
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('participantAnnotationTypeView');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, templateMixin, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, testSuiteMixin, testUtils) {
       var self = this, jsonAnnotType;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q                   = self.$injector.get('$q');
-      self.notificationsService = self.$injector.get('notificationsService');
-      self.Study                = self.$injector.get('Study');
-      self.AnnotationType       = self.$injector.get('AnnotationType');
-      self.factory         = self.$injector.get('factory');
+      self.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              'notificationsService',
+                              'Study',
+                              'AnnotationType',
+                              'factory');
 
       jsonAnnotType = self.factory.annotationType();
       self.study = new self.Study(_.extend(self.factory.study(),
                                            { annotationTypes: [ jsonAnnotType ]}));
       self.annotationType = new self.AnnotationType(jsonAnnotType);
-      self.createController = createController;
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/annotationTypes/participantAnnotationTypeView/participantAnnotationTypeView.html',
         '/assets/javascripts/admin/directives/annotationTypeView/annotationTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle.html');
-
-      function createController() {
-        self.element = angular.element([
-          '<participant-annotation-type-view',
-          '  study="vm.study"',
-          '  annotation-type="vm.annotationType"',
-          '</participant-annotation-type-view>'
-        ].join(''));
-
-        self.scope = $rootScope.$new();
-        self.scope.vm = {
-          study:          self.study,
-          annotationType: self.annotationType
-        };
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('participantAnnotationTypeView');
-      }
     }));
 
     it('should have  valid scope', function() {
-      this.createController();
+      createController.call(this);
       expect(this.controller.study).toBe(this.study);
       expect(this.controller.annotationType).toBe(this.annotationType);
     });
@@ -72,7 +73,7 @@ define([
         context.updateAnnotationTypeFuncName = 'updateAnnotationType';
         context.parentObject                 = this.study;
         context.annotationType               = this.annotationType;
-        context.createController             = this.createController;
+        context.createController             = createController;
       }));
 
       annotationTypeViewDirectiveSharedSpec(context);

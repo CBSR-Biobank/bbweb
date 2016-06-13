@@ -5,17 +5,26 @@
 define(['underscore'], function (_) {
   'use strict';
 
-  templateMixin.$inject = ['$templateCache'];
+  testSuiteMixin.$inject = ['$templateCache'];
 
-  function templateMixin($templateCache) {
+  function testSuiteMixin($templateCache) {
 
     var mixin = {
+      injectDependencies: injectDependencies,
       putHtmlTemplates: putHtmlTemplates
     };
 
     return mixin;
 
     //---
+
+    function injectDependencies(/* dep1, dep2, ..., depn */) {
+      /*jshint validthis:true */
+      var self = this;
+      _.each(arguments, function (dependency) {
+        self[dependency] = self.$injector.get(dependency);
+      });
+    }
 
     function putHtmlTemplates(/* template1, template2, ... */) {
       _.each(arguments, function (template) {
@@ -25,6 +34,6 @@ define(['underscore'], function (_) {
     }
   }
 
-  return templateMixin;
+  return testSuiteMixin;
 
 });

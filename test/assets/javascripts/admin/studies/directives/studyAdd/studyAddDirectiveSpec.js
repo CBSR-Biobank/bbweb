@@ -13,15 +13,27 @@ define([
 
   describe('Directive: studyAddDirective', function() {
 
+    var createController = function () {
+      this.element = angular.element('<study-add study="vm.study"></study-add>');
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = { study: this.study };
+
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('studyAdd');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, templateMixin, testUtils) {
+    beforeEach(inject(function (testSuiteMixin, testUtils) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.Study        = self.$injector.get('Study');
-      self.factory = self.$injector.get('factory');
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              'Study',
+                              'factory');
 
       self.study = new this.Study();
       self.titleContains = 'Add';
@@ -29,17 +41,10 @@ define([
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/studyAdd/studyAdd.html');
-
-      self.element = angular.element('<study-add study="vm.study"></study-add>');
-      self.scope = $rootScope.$new();
-      self.scope.vm = { study: self.study };
-
-      $compile(self.element)(self.scope);
-      self.scope.$digest();
-      self.controller = self.element.controller('studyAdd');
     }));
 
     it('should contain valid settings to update a study', function() {
+      createController.call(this);
       expect(this.controller.study).toEqual(this.study);
       expect(this.controller.returnState).toBe(this.returnState);
     });
@@ -48,6 +53,7 @@ define([
       var $state = this.$injector.get('$state');
 
       spyOn($state, 'go').and.callFake(function () {} );
+      createController.call(this);
       this.controller.cancel();
       this.scope.$digest();
       expect($state.go).toHaveBeenCalledWith(this.returnState);
@@ -64,6 +70,7 @@ define([
         return deferred.promise;
       });
 
+      createController.call(this);
       this.controller.submit(this.study);
       this.scope.$digest();
       expect(domainEntityService.updateErrorModal)
@@ -79,6 +86,7 @@ define([
         return $q.when('test');
       });
 
+      createController.call(this);
       this.controller.submit(this.study);
       this.scope.$digest();
       expect($state.go).toHaveBeenCalledWith(this.returnState, {}, { reload: true });

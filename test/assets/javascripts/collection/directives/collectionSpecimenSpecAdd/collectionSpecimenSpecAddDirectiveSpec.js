@@ -13,48 +13,41 @@ define([
 
   describe('collectionSpecimenSpecAddDirective', function() {
 
-    function createDirective(test) {
-      var element,
-          scope = test.$rootScope.$new();
-
-      element = angular.element([
+    var createDirective = function (test) {
+      this.element = angular.element([
         '<collection-specimen-spec-add',
         ' study="vm.study"',
         ' collection-event-type="vm.collectionEventType">',
         '</collection-specimen-spec-add>'
       ].join(''));
 
-      scope.vm = {
-        study: test.study,
-        collectionEventType: test.collectionEventType
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = {
+        study: this.study,
+        collectionEventType: this.collectionEventType
       };
-      test.$compile(element)(scope);
-      scope.$digest();
-
-      return {
-        element:    element,
-        scope:      scope,
-        controller: element.controller('collectionSpecimenSpecAdd')
-      };
-    }
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('collectionSpecimenSpecAdd');
+    };
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(templateMixin) {
+    beforeEach(inject(function(testSuiteMixin) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q                     = self.$injector.get('$q');
-      self.$rootScope             = self.$injector.get('$rootScope');
-      self.$compile               = self.$injector.get('$compile');
-      self.$state                 = self.$injector.get('$state');
-      self.notificationsService   = self.$injector.get('notificationsService');
-      self.domainEntityService    = self.$injector.get('domainEntityService');
-      self.Study                  = self.$injector.get('Study');
-      self.CollectionEventType    = self.$injector.get('CollectionEventType');
-      self.CollectionSpecimenSpec = self.$injector.get('CollectionSpecimenSpec');
-      self.factory           = self.$injector.get('factory');
+      self.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              '$state',
+                              'notificationsService',
+                              'domainEntityService',
+                              'Study',
+                              'CollectionEventType',
+                              'CollectionSpecimenSpec',
+                              'factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenSpecAdd/collectionSpecimenSpecAdd.html');
@@ -68,18 +61,18 @@ define([
     }));
 
     it('has valid scope', function() {
-      var directive = createDirective(this);
+      createDirective.call(this);
 
-      expect(directive.controller.study).toBe(this.study);
-      expect(directive.controller.collectionEventType).toBe(this.collectionEventType);
+      expect(this.controller.study).toBe(this.study);
+      expect(this.controller.collectionEventType).toBe(this.collectionEventType);
 
-      expect(directive.controller.submit).toBeFunction();
-      expect(directive.controller.cancel).toBeFunction();
+      expect(this.controller.submit).toBeFunction();
+      expect(this.controller.cancel).toBeFunction();
 
-       expect(directive.controller.anatomicalSourceTypes).toBeDefined();
-       expect(directive.controller.preservTypes).toBeDefined();
-       expect(directive.controller.preservTempTypes).toBeDefined();
-       expect(directive.controller.specimenTypes).toBeDefined();
+      expect(this.controller.anatomicalSourceTypes).toBeDefined();
+      expect(this.controller.preservTypes).toBeDefined();
+      expect(this.controller.preservTempTypes).toBeDefined();
+      expect(this.controller.specimenTypes).toBeDefined();
     });
 
     describe('on submit', function() {
@@ -91,15 +84,13 @@ define([
 
 
       it('can submit a specimen spec', function() {
-        var directive;
-
         spyOn(this.CollectionEventType.prototype, 'addSpecimenSpec')
           .and.returnValue(this.$q.when(this.collectionEventType));
         spyOn(this.notificationsService, 'submitSuccess').and.callThrough();
 
-        directive = createDirective(this);
-        directive.controller.submit(this.specimenSpec);
-        directive.scope.$digest();
+        createDirective.call(this);
+        this.controller.submit(this.specimenSpec);
+        this.scope.$digest();
 
         expect(this.$state.go).toHaveBeenCalledWith(
           'home.admin.studies.study.collection.ceventType', {}, { reload: true });
@@ -107,17 +98,13 @@ define([
       });
 
       it('displays an error when submit fails', function() {
-        var directive,
-            deferred = this.$q.defer();
-
-        deferred.reject('simulated update error');
         spyOn(this.CollectionEventType.prototype, 'addSpecimenSpec')
-          .and.returnValue(deferred.promise);
+          .and.returnValue(this.$q.reject('simulated error'));
         spyOn(this.domainEntityService, 'updateErrorModal').and.returnValue(this.$q.when('OK'));
 
-        directive = createDirective(this);
-        directive.controller.submit(this.specimenSpec);
-        directive.scope.$digest();
+        createDirective.call(this);
+        this.controller.submit(this.specimenSpec);
+        this.scope.$digest();
 
         expect(this.domainEntityService.updateErrorModal).toHaveBeenCalled();
       });
@@ -125,14 +112,11 @@ define([
     });
 
     it('on cancel returns to correct state', function() {
-      var directive;
-
-      directive = createDirective(this);
-      directive.controller.cancel();
-      directive.scope.$digest();
+      createDirective.call(this);
+      this.controller.cancel();
+      this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home.admin.studies.study.collection.ceventType');
     });
-
 
   });
 

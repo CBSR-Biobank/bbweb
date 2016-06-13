@@ -26,15 +26,15 @@ define([
 
       _.extend(self, entityTestSuite, hasAnnotationsEntityTestSuite);
 
-      self.$httpBackend                  = self.$injector.get('$httpBackend');
-      self.Participant                   = self.$injector.get('Participant');
-      self.CollectionEventType           = self.$injector.get('CollectionEventType');
-      self.CollectionEvent               = self.$injector.get('CollectionEvent');
-      self.Annotation                    = self.$injector.get('Annotation');
-      self.AnnotationValueType           = self.$injector.get('AnnotationValueType');
-      self.AnnotationType                = self.$injector.get('AnnotationType');
-      self.factory                  = self.$injector.get('factory');
-      self.testUtils                     = self.$injector.get('testUtils');
+      self.injectDependencies('$httpBackend',
+                              'Participant',
+                              'CollectionEventType',
+                              'CollectionEvent',
+                              'Annotation',
+                              'AnnotationValueType',
+                              'AnnotationType',
+                              'factory',
+                              'testUtils');
 
       testUtils.addCustomMatchers();
 

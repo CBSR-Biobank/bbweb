@@ -13,46 +13,47 @@ define([
 
   describe('Component: usersTableComponent', function() {
 
+    var createUserCounts = function (registered, active, locked) {
+      return new this.UserCounts({
+        total:      registered + active + locked,
+        registered: registered,
+        active:     active,
+        locked:     locked
+      });
+    };
+
+    var createController = function (userCounts) {
+      this.scope = this.$rootScope.$new();
+      this.controller = this.$componentController('usersTable',
+                                                  null,
+                                                  { userCounts: userCounts });
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $componentController) {
+    beforeEach(inject(function(testSuiteMixin) {
       var self = this;
 
-      self.$q              = self.$injector.get('$q');
-      self.modalService    = self.$injector.get('modalService');
-      self.User            = self.$injector.get('User');
-      self.UserCounts      = self.$injector.get('UserCounts');
-      self.UserStatus      = self.$injector.get('UserStatus');
-      self.userStatusLabel = self.$injector.get('userStatusLabel');
-      self.UserViewer      = self.$injector.get('UserViewer');
-      self.factory    = self.$injector.get('factory');
-
-      self.createUserCounts = createUserCounts;
-      self.createController = createController;
-
-      function createUserCounts(registered, active, locked) {
-        return new self.UserCounts({
-          total:      registered + active + locked,
-          registered: registered,
-          active:     active,
-          locked:     locked
-        });
-      }
-
-      function createController(userCounts) {
-        self.scope = $rootScope.$new();
-        self.controller = $componentController('usersTable',
-                                               null,
-                                               { userCounts: userCounts });
-      }
+      _.extend(this, testSuiteMixin);
+      self.injectDependencies('$q',
+                              '$rootScope',
+                              '$componentController',
+                              'modalService',
+                              'User',
+                              'UserCounts',
+                              'UserStatus',
+                              'userStatusLabel',
+                              'EntityViewer',
+                              'UserViewer',
+                              'factory');
     }));
 
     it('scope is valid on startup', function() {
       var self        = this,
           allStatuses = _.values(self.UserStatus),
-          counts      = self.createUserCounts(1, 2, 3);
+          counts      = createUserCounts.call(self, 1, 2, 3);
 
-      self.createController(counts);
+      createController.call(self, counts);
 
       expect(self.controller.users).toBeArrayOfSize(0);
       expect(self.controller.status).toEqual('all');
@@ -68,7 +69,7 @@ define([
 
     it('changing a users status works', function() {
       var self          = this,
-          counts        = self.createUserCounts(1, 2, 3),
+          counts        = createUserCounts.call(self, 1, 2, 3),
           statusFnNames = ['activate', 'lock', 'unlock'],
           user          = self.User.create(self.factory.user());
 
@@ -76,7 +77,7 @@ define([
       spyOn(self.User, 'list').and.returnValue(self.$q.when(self.factory.pagedResult([ user ])));
       spyOn(self.modalService, 'showModal').and.returnValue(self.$q.when('--dont-care--'));
 
-      self.createController(counts);
+      createController.call(self, counts);
       self.controller.getTableData({ pagination: { start: 0 }, search: {}, sort: {} });
       self.scope.$digest();
       expect(self.controller.users).toBeArrayOfSize(1);
@@ -91,21 +92,20 @@ define([
     });
 
     it('can view user information', function() {
-      var EntityViewer = this.$injector.get('EntityViewer'),
-          counts       = this.createUserCounts(1, 2, 3),
+      var counts       = createUserCounts.call(this, 1, 2, 3),
           user         = this.User.create(this.factory.user());
 
-      spyOn(EntityViewer.prototype, 'showModal').and.returnValue(null);
+      spyOn(this.EntityViewer.prototype, 'showModal').and.returnValue(null);
       spyOn(this.User, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([ user ])));
 
-      this.createController(counts);
+      createController.call(this, counts);
       this.controller.getTableData({ pagination: { start: 0 }, search: {}, sort: {} });
       this.scope.$digest();
       expect(this.controller.users).toBeArrayOfSize(1);
 
       this.controller.userInformation(user);
       this.scope.$digest();
-      expect(EntityViewer.prototype.showModal).toHaveBeenCalled();
+      expect(this.EntityViewer.prototype.showModal).toHaveBeenCalled();
     });
 
   });

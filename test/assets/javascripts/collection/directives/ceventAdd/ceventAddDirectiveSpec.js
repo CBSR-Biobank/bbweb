@@ -13,11 +13,8 @@ define([
 
   describe('ceventAddDirective', function() {
 
-    function createDirective(test) {
-      var element,
-          scope = test.$rootScope.$new();
-
-      element = angular.element([
+    var createDirective = function () {
+      this.element = angular.element([
         '<cevent-add',
         '  study="vm.study"',
         '  participant="vm.participant"',
@@ -25,38 +22,34 @@ define([
         '</cevent-add>'
       ].join(''));
 
-      scope.vm = {
-        study:               test.study,
-        participant:         test.participant,
-        collectionEventType: test.collectionEventType
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = {
+        study:               this.study,
+        participant:         this.participant,
+        collectionEventType: this.collectionEventType
       };
-      test.$compile(element)(scope);
-      scope.$digest();
-
-      return {
-        element:    element,
-        scope:      scope,
-        controller: element.controller('ceventAdd')
-      };
-    }
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('ceventAdd');
+    };
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(templateMixin) {
+    beforeEach(inject(function(testSuiteMixin) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q                  = self.$injector.get('$q');
-      self.$rootScope          = self.$injector.get('$rootScope');
-      self.$compile            = self.$injector.get('$compile');
-      self.$state              = self.$injector.get('$state');
-      self.domainEntityService = self.$injector.get('domainEntityService');
-      self.Study               = self.$injector.get('Study');
-      self.Participant         = self.$injector.get('Participant');
-      self.CollectionEvent     = self.$injector.get('CollectionEvent');
-      self.CollectionEventType = self.$injector.get('CollectionEventType');
-      self.factory        = self.$injector.get('factory');
+      self.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              '$state',
+                              'domainEntityService',
+                              'Study',
+                              'Participant',
+                              'CollectionEvent',
+                              'CollectionEventType',
+                              'factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/ceventAdd/ceventAdd.html',
@@ -79,29 +72,27 @@ define([
     }));
 
     it('has valid scope', function() {
-      var directive = createDirective(this);
+      createDirective.call(this);
 
-      expect(directive.controller.study).toBe(this.study);
-      expect(directive.controller.participant).toBe(this.participant);
-      expect(directive.controller.collectionEventType).toBe(this.collectionEventType);
+      expect(this.controller.study).toBe(this.study);
+      expect(this.controller.participant).toBe(this.participant);
+      expect(this.controller.collectionEventType).toBe(this.collectionEventType);
 
-      expect(directive.controller.collectionEvent).toBeDefined();
-      expect(directive.controller.title).toBeDefined();
-      expect(directive.controller.timeCompleted).toBeDate();
+      expect(this.controller.collectionEvent).toBeDefined();
+      expect(this.controller.title).toBeDefined();
+      expect(this.controller.timeCompleted).toBeDate();
 
-      expect(directive.controller.submit).toBeFunction();
-      expect(directive.controller.cancel).toBeFunction();
+      expect(this.controller.submit).toBeFunction();
+      expect(this.controller.cancel).toBeFunction();
     });
 
     it('on submit success changes state', function() {
-      var directive;
-
       spyOn(this.CollectionEvent.prototype, 'add').and.returnValue(this.$q.when(this.collectionEvent));
       spyOn(this.$state, 'go').and.returnValue('ok');
 
-      directive = createDirective(this);
-      directive.controller.submit();
-      directive.scope.$digest();
+      createDirective.call(this);
+      this.controller.submit();
+      this.scope.$digest();
 
       expect(this.$state.go).toHaveBeenCalledWith(
         'home.collection.study.participant.cevents', {}, { reload: true });
@@ -110,35 +101,27 @@ define([
     describe('on submit failure', function() {
 
       it('displays an error modal', function() {
-        var directive,
-            updateDeferred = this.$q.defer();
-
-        updateDeferred.reject('simulated update failure');
-        spyOn(this.CollectionEvent.prototype, 'add').and.returnValue(updateDeferred.promise);
+        spyOn(this.CollectionEvent.prototype, 'add')
+          .and.returnValue(this.$q.reject('simulated update failure'));
         spyOn(this.domainEntityService, 'updateErrorModal').and.returnValue(this.$q.when('ok'));
 
-        directive = createDirective(this);
-        directive.controller.submit();
-        directive.scope.$digest();
+        createDirective.call(this);
+        this.controller.submit();
+        this.scope.$digest();
 
         expect(this.domainEntityService.updateErrorModal).toHaveBeenCalled();
       });
 
       it('changes state when Cancel button pressed on error modal', function() {
-        var directive,
-            updateDeferred = this.$q.defer(),
-            errorModalDeferred = this.$q.defer();
-
-        updateDeferred.reject('simulated update failure');
-        errorModalDeferred.reject('cancel button pressed');
-
-        spyOn(this.CollectionEvent.prototype, 'add').and.returnValue(updateDeferred.promise);
-        spyOn(this.domainEntityService, 'updateErrorModal').and.returnValue(errorModalDeferred.promise);
+        spyOn(this.CollectionEvent.prototype, 'add')
+          .and.returnValue(this.$q.reject('simulated update failure'));
+        spyOn(this.domainEntityService, 'updateErrorModal')
+          .and.returnValue(this.$q.reject('cancel button pressed'));
         spyOn(this.$state, 'go').and.returnValue('ok');
 
-        directive = createDirective(this);
-        directive.controller.submit();
-        directive.scope.$digest();
+        createDirective.call(this);
+        this.controller.submit();
+        this.scope.$digest();
 
       expect(this.$state.go).toHaveBeenCalledWith(
         'home.collection.study.participant', { participantId: this.participant.id });
@@ -147,13 +130,11 @@ define([
     });
 
     it('changes state when forms Cancel button is pressed', function() {
-      var directive;
-
       spyOn(this.$state, 'go').and.returnValue('ok');
 
-      directive = createDirective(this);
-      directive.controller.cancel();
-      directive.scope.$digest();
+      createDirective.call(this);
+      this.controller.cancel();
+      this.scope.$digest();
 
       expect(this.$state.go).toHaveBeenCalledWith('home.collection.study.participant.cevents');
     });

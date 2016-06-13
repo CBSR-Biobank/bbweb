@@ -13,6 +13,16 @@ define([
 
   describe('Directive: centreViewDirective', function() {
 
+    var createController = function (centre) {
+      this.element = angular.element('<centre-view centre="vm.centre"></centre-view>');
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = { centre: centre };
+
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('centreView');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test', function($provide) {
       $provide.value('$window', {
         localStorage: {
@@ -22,47 +32,36 @@ define([
       });
     }));
 
-    beforeEach(inject(function($rootScope, $compile, $timeout, templateMixin) {
+    beforeEach(inject(function($timeout, testSuiteMixin) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$window          = self.$injector.get('$window');
-      self.$state       = self.$injector.get('$state');
-      self.Centre           = self.$injector.get('Centre');
-      self.factory     = self.$injector.get('factory');
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              '$window',
+                              '$state',
+                              'Centre',
+                              'factory');
 
       self.centre = new self.Centre(self.factory.centre());
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/centres/directives/centreView/centreView.html');
-      self.createController = createController;
-
-      //---
-
-      function createController(centre) {
-        self.element = angular.element('<centre-view centre="vm.centre"></centre-view>');
-        self.scope = $rootScope.$new();
-        self.scope.vm = { centre: centre };
-
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('centreView');
-      }
     }));
 
     it('should contain a valid centre', function() {
-      this.createController(this.centre);
+      createController.call(this, this.centre);
       expect(this.scope.vm.centre).toBe(this.centre);
     });
 
     it('should contain initialized panels', function() {
-      this.createController(this.centre);
+      createController.call(this, this.centre);
       expect(this.controller.tabs).toBeArrayOfSize(3);
     });
 
     it('should contain initialized local storage', function() {
-      this.createController(this.centre);
+      createController.call(this, this.centre);
       expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('centre.panel.locations', true);
     });
@@ -71,7 +70,7 @@ define([
       var tab;
 
       this.$state.current.name = 'home.admin.centres.centre.studies';
-      this.createController(this.centre);
+      createController.call(this, this.centre);
 
       tab = _.findWhere(this.controller.tabs, { heading: 'Studies' });
       expect(tab.active).toBe(true);

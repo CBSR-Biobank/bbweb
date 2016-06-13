@@ -14,71 +14,70 @@ define([
 
   describe('annotationTypeViewDirective', function() {
 
+    var createController = function () {
+      this.element = angular.element([
+        '<annotation-type-view ',
+        '  study="vm.study"',
+        '  annotation-type="vm.annotationType"',
+        '  return-state="' + this.returnState  + '"',
+        '  on-update="vm.onUpdate"',
+        '</annotation-type-view>',
+      ].join(''));
+
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = {
+        study:          this.study,
+        annotationType: this.annotationType,
+        returnState:    this.returnState,
+        onUpdate:       this.onUpdate
+      };
+
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('annotationTypeView');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, templateMixin, testUtils) {
+    beforeEach(inject(function (testSuiteMixin, testUtils) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q             = self.$injector.get('$q');
-      self.Study          = self.$injector.get('Study');
-      self.AnnotationType = self.$injector.get('AnnotationType');
-      self.factory   = self.$injector.get('factory');
+      self.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              '$state',
+                              'Study',
+                              'AnnotationType',
+                              'factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/annotationTypeView/annotationTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
 
-      self.createController = createController;
       self.returnState      = 'my-return-state';
       self.study            = new self.Study(self.factory.study());
       self.annotationType   = new self.AnnotationType(self.factory.annotationType());
       self.onUpdate         = jasmine.createSpy('onUpdate').and.returnValue(self.$q.when(self.study));
-
-      function createController() {
-        self.element = angular.element([
-          '<annotation-type-view ',
-          '  study="vm.study"',
-          '  annotation-type="vm.annotationType"',
-          '  return-state="' + self.returnState  + '"',
-          '  on-update="vm.onUpdate"',
-          '</annotation-type-view>',
-        ].join(''));
-
-        self.scope = $rootScope.$new();
-        self.scope.vm = {
-          study:          self.study,
-          annotationType: self.annotationType,
-          returnState:    self.returnState,
-          onUpdate:       self.onUpdate
-        };
-
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('annotationTypeView');
-      }
     }));
 
     it('should have valid scope', function() {
-      this.createController(this.study, this.annotationType);
+      createController.call(this, this.study, this.annotationType);
       expect(this.controller.annotationType).toBe(this.annotationType);
       expect(this.controller.returnState).toBe(this.returnState);
       expect(this.controller.onUpdate).toBeFunction();
     });
 
     it('call to back function returns to valid state', function() {
-      var $state = this.$injector.get('$state');
+      spyOn(this.$state, 'go').and.returnValue(0);
 
-      spyOn($state, 'go').and.returnValue(0);
-
-      this.createController(this.study, this.annotationType);
+      createController.call(this, this.study, this.annotationType);
       this.controller.back();
       this.scope.$digest();
-      expect($state.go).toHaveBeenCalledWith(this.returnState, {}, { reload: true });
+      expect(this.$state.go).toHaveBeenCalledWith(this.returnState, {}, { reload: true });
     });
-
 
     describe('updates to name', function () {
 
@@ -92,7 +91,6 @@ define([
       sharedUpdateBehaviour(context);
 
     });
-
 
     describe('updates to required', function () {
 
@@ -136,20 +134,18 @@ define([
     function sharedUpdateBehaviour(context) {
 
       beforeEach(inject(function () {
-        this.modalInput           = this.$injector.get('modalInput');
-        this.notificationsService = this.$injector.get('notificationsService');
+        this.injectDependencies('modalInput', 'notificationsService');
       }));
 
       describe('(shared) update functions', function () {
 
         it('should update a field', function() {
-          var newValue = this.factory.stringNext(),
-              deferred = this.$q.defer();
+          var newValue = this.factory.stringNext();
 
-          spyOn(this.modalInput, context.modalInputFuncName).and.returnValue({ result: deferred.promise });
-          deferred.resolve(newValue);
+          spyOn(this.modalInput, context.modalInputFuncName).and.returnValue(
+            { result: this.$q.when(newValue)});
 
-          this.createController();
+          createController.call(this);
           expect(this.controller[context.controllerFuncName]).toBeFunction();
           this.controller[context.controllerFuncName]();
           this.scope.$digest();

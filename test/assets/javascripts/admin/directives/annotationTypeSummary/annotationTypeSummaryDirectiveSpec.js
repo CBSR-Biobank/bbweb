@@ -16,10 +16,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (templateMixin, testUtils, factory, AnnotationType) {
+    beforeEach(inject(function (testSuiteMixin, testUtils, factory, AnnotationType) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/annotationTypeSummary/annotationTypeSummary.html');

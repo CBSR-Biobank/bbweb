@@ -16,12 +16,9 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(serverReplyMixin) {
-      _.extend(this, serverReplyMixin);
-
-      this.$q           = this.$injector.get('$q');
-      this.$httpBackend = this.$injector.get('$httpBackend');
-      this.biobankApi   = this.$injector.get('biobankApi');
+    beforeEach(inject(function(testSuiteMixin, serverReplyMixin) {
+      _.extend(this, testSuiteMixin, serverReplyMixin);
+      this.injectDependencies('$q', '$httpBackend', 'biobankApi');
     }));
 
     afterEach(function() {

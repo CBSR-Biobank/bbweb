@@ -20,27 +20,29 @@ define([
    * adds the annotation type.
    *
    * @param {string} context.returnState the state to return after a successful add or when cancel is pressed.
+   *
+   * NOTE: needs that the test suite be extended with testSuiteMixin.
    */
   function annotationTypeAddDirectiveSharedSpec(context) {
 
     describe('(shared) tests', function() {
 
       beforeEach(inject(function() {
-        this.$state         = this.$injector.get('$state');
-        this.AnnotationType = this.$injector.get('AnnotationType');
-        this.factory   = this.$injector.get('factory');
+        this.injectDependencies('$q',
+                                '$state',
+                                'AnnotationType',
+                                'factory');
 
         spyOn(this.$state, 'go').and.returnValue('ok');
       }));
 
       it('should change to correct state on submit', function() {
-        var $q        = this.$injector.get('$q'),
-            annotType = new this.AnnotationType(this.factory.annotationType());
+        var annotType = new this.AnnotationType(this.factory.annotationType());
 
         spyOn(context.entity.prototype, context.addAnnotationTypeFuncName)
-          .and.returnValue($q.when(this.study));
+          .and.returnValue(this.$q.when(this.study));
 
-        context.createController();
+        context.createController.call(this);
 
         this.controller.onSubmit(annotType);
         this.scope.$digest();
@@ -51,7 +53,7 @@ define([
       });
 
       it('on cancel the correct method should be called', function() {
-        context.createController();
+        context.createController.call(this);
         this.controller.onCancel();
         this.scope.$digest();
         expect(this.$state.go).toHaveBeenCalledWith(context.returnState);

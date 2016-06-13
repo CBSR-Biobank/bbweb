@@ -13,35 +13,25 @@ define([
 
   describe('biobankFooterDirective', function() {
 
-    function createDirective(test) {
-      var element,
-          scope = test.$rootScope.$new();
-
-      element = angular.element('<biobank-footer></biobank-footer>');
-      test.$compile(element)(scope);
-      scope.$digest();
-
-      return {
-        element:    element,
-        scope:      scope,
-        controller: element.controller('biobankFooter')
-      };
-    }
+    var createDirective = function () {
+      this.element = angular.element('<biobank-footer></biobank-footer>');
+      this.scope = this.$rootScope.$new();
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('biobankFooter');
+    };
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(templateMixin) {
+    beforeEach(inject(function(testSuiteMixin) {
       var self = this;
-
-      self.$rootScope = self.$injector.get('$rootScope');
-      self.$compile   = self.$injector.get('$compile');
-
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
+      self.injectDependencies('$rootScope', '$compile');
     }));
 
     it('has valid scope', function() {
-      var directive = createDirective(this);
-      expect(directive.controller).toBeDefined();
+      createDirective.call(this);
+      expect(this.controller).toBeDefined();
     });
   });
 

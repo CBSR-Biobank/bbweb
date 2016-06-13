@@ -14,56 +14,53 @@ define([
 
   describe('Component: userAdminComponent', function() {
 
+    var createUserCounts = function (registered, active, locked) {
+      registered = registered || faker.random.number();
+      active = active || faker.random.number();
+      locked = locked || faker.random.number();
+
+      return new this.UserCounts({
+        total:      registered + active + locked,
+        registered: registered,
+        active:     active,
+        locked:     locked
+      });
+    };
+
+    /**
+     * Have to create controller as a directive so that $onInit() is fired on the controller.
+     */
+    var createController = function (userCounts) {
+      this.UserCounts.get = jasmine.createSpy('get').and.returnValue(this.$q.when(userCounts));
+
+      this.element = angular.element('<user-admin></user-admin>');
+      this.scope = this.$rootScope.$new();
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('userAdmin');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, templateMixin) {
+    beforeEach(inject(function($rootScope, $compile, testSuiteMixin) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q         = self.$injector.get('$q');
-      self.UserCounts = self.$injector.get('UserCounts');
+      self.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              'UserCounts');
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/components/users/userAdmin/userAdmin.html',
         '/assets/javascripts/admin/components/users/usersTable/usersTable.html',
         '/assets/javascripts/common/directives/pagination.html');
-
-      self.createUserCounts = createUserCounts;
-      self.createController = createController;
-
-      //---
-
-      function createUserCounts(registered, active, locked) {
-        registered = registered || faker.random.number();
-        active = active || faker.random.number();
-        locked = locked || faker.random.number();
-
-        return new self.UserCounts({
-          total:      registered + active + locked,
-          registered: registered,
-          active:     active,
-          locked:     locked
-        });
-      }
-
-      /**
-       * Have to create controller as a directive so that $onInit() is fired on the controller.
-       */
-      function createController(userCounts) {
-        self.UserCounts.get = jasmine.createSpy('get').and.returnValue(self.$q.when(userCounts));
-
-        self.element = angular.element('<user-admin></user-admin>');
-        self.scope = $rootScope.$new();
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('userAdmin');
-      }
     }));
 
     it('scope is valid on startup', function() {
-      var counts = this.createUserCounts(1, 2, 3);
-      this.createController(counts);
+      var counts = createUserCounts.call(this, 1, 2, 3);
+      createController.call(this, counts);
       expect(this.controller.haveUsers).toBe(counts.total > 0);
     });
 

@@ -11,11 +11,12 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(extendedDomainEntities) {
-      this.AnnotationType           = this.$injector.get('AnnotationType');
-      this.AnnotationValueType      = this.$injector.get('AnnotationValueType');
-      this.AnnotationMaxValueCount  = this.$injector.get('AnnotationMaxValueCount');
-      this.factory             = this.$injector.get('factory');
+    beforeEach(inject(function(testSuiteMixin, extendedDomainEntities) {
+      _.extend(this, testSuiteMixin);
+      this.injectDependencies('AnnotationType',
+                              'AnnotationValueType',
+                              'AnnotationMaxValueCount',
+                              'factory');
     }));
 
     it('invalid objects are reported', function () {

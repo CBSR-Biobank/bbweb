@@ -14,60 +14,37 @@ define([
 
   describe('Directive: selectStudy', function() {
 
-    var scope,
-        q,
-        compile,
-        element,
-        state,
-        factory,
-        panelHeader = 'selectStudy directive header',
+    var panelHeader = 'selectStudy directive header',
         navigateStateName = 'test-navigate-state-name',
         navigateStateParamName = 'test-navigate-state-param-name';
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function(templateMixin, testUtils) {
-      _.extend(this, templateMixin);
-
-      q            = this.$injector.get('$q');
-      compile      = this.$injector.get('$compile');
-      scope        = this.$injector.get('$rootScope');
-      state        = this.$injector.get('$state');
-      factory = this.$injector.get('factory');
-
-      this.putHtmlTemplates(
-        '/assets/javascripts/collection/directives/selectStudy/selectStudy.html');
-
-      element = generateElement(navigateStateName, navigateStateParamName);
-    }));
-
-    function generateElement(navigateStateName, navigateStateParamName) {
-      return angular.element(
-        '<select-study get-header="model.getHeader"' +
-          '            get-studies="model.getStudies"' +
-          '            icon="glyphicon-ok-circle"' +
-          '            page-size="model.pageSize"' +
-          '            messageNoResults="No results match the criteria."' +
-          '            navigate-state-name="' + navigateStateName + '"' +
-          '            navigate-state-param-name="' + navigateStateParamName + '">');
-    }
-
-    function getHeader() {
+    var getHeader = function () {
       return panelHeader;
-    }
+    };
 
-    function createScope(options) {
-      scope.model = _.extend({}, { getHeader:  getHeader }, options);
-      compile(element)(scope);
-      scope.$digest();
-      return scope;
-    }
+    var createScope = function (options) {
+      this.element = angular.element([
+        '<select-study get-header="model.getHeader"',
+        '              get-studies="model.getStudies"',
+        '              icon="glyphicon-ok-circle"',
+        '              page-size="model.pageSize"',
+        '              messageNoResults="No results match the criteria."',
+        '              navigate-state-name="' + navigateStateName + '"',
+        '              navigate-state-param-name="' + navigateStateParamName + '">',
+        '</select-study>'
+      ].join(''));
+      this.scope = this.$rootScope.$new();
+      this.scope.model = _.extend({}, { getHeader:  getHeader }, options);
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+    };
 
-    function createGetStudiesFn(studies) {
+    var createGetStudiesFn = function (studies) {
+      var self = this;
       return getStudies;
 
       function getStudies (pagerOptions) {
-        return q.when({
+        return self.$q.when({
           items:    studies.slice(0, pagerOptions.pageSize),
           page:     0,
           offset:   0,
@@ -76,115 +53,146 @@ define([
           maxPages: studies.length / pagerOptions.pageSize
         });
       }
-    }
+    };
+
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+
+    beforeEach(inject(function(testSuiteMixin, testUtils) {
+      _.extend(this, testSuiteMixin);
+
+
+      this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
+
+      this.putHtmlTemplates(
+        '/assets/javascripts/collection/directives/selectStudy/selectStudy.html');
+    }));
 
     it('displays the list of studies', function() {
-      var studies = _.map(_.range(20), function () { return factory.study(); }),
+      var self = this,
+          studies = _.map(_.range(20), function () { return self.factory.study(); }),
           pageSize = studies.length / 2;
 
-      createScope({
-        getStudies: createGetStudiesFn(studies),
-        pageSize: pageSize
-      });
+      createScope.call(this,
+                       {
+                         getStudies: createGetStudiesFn.call(self, studies),
+                         pageSize: pageSize
+                       });
 
-      expect(element.find('li.list-group-item').length).toBe(pageSize);
-      expect(element.find('input').length).toBe(1);
+      expect(self.element.find('li.list-group-item').length).toBe(pageSize);
+      expect(self.element.find('input').length).toBe(1);
     });
 
     it('displays the pannel header correctly', function() {
-      var studies = _.map(_.range(20), function () { return factory.study(); }),
+      var self = this,
+          studies = _.map(_.range(20), function () { return self.factory.study(); }),
           pageSize = studies.length / 2;
 
-      createScope({
-        getStudies: createGetStudiesFn(studies),
-        pageSize: pageSize
-      });
-      expect(element.find('h3').text()).toBe(panelHeader);
+      createScope.call(this,
+                       {
+                         getStudies: createGetStudiesFn.call(this, studies),
+                         pageSize: pageSize
+                       });
+      expect(self.element.find('h3').text()).toBe(panelHeader);
     });
 
     it('has a name filter', function() {
-      var studies = _.map(_.range(10), function () { return factory.study(); });
+      var self = this,
+          studies = _.map(_.range(10), function () { return self.factory.study(); });
 
-      createScope({
-        getStudies: createGetStudiesFn(studies),
-        pageSize: studies.length
-      });
-      expect(element.find('input').length).toBe(1);
+      createScope.call(this,
+                       {
+                         getStudies: createGetStudiesFn.call(self, studies),
+                         pageSize: studies.length
+                       });
+      expect(self.element.find('input').length).toBe(1);
     });
 
     it('displays pagination controls', function() {
-      var studies = _.map(_.range(20), function () { return factory.study(); }),
+      var self = this,
+          studies = _.map(_.range(20), function () { return self.factory.study(); }),
           pageSize = studies.length / 2,
           scope;
 
-      scope = createScope({
-        getStudies: createGetStudiesFn(studies),
-        pageSize: pageSize
-      });
+      createScope.call(this,
+                       {
+                         getStudies: createGetStudiesFn.call(self, studies),
+                         pageSize: pageSize
+                       });
 
-      expect(element.isolateScope().vm.showPagination).toBe(true);
-      expect(element.find('ul.pagination').length).toBe(1);
+      expect(self.element.isolateScope().vm.showPagination).toBe(true);
+      expect(self.element.find('ul.pagination').length).toBe(1);
     });
 
     it('updates to name filter cause studies to be re-loaded', function() {
-      var studies = _.map(_.range(20), function () { return factory.study(); }),
+      var self = this,
+          studies = _.map(_.range(20), function () { return self.factory.study(); }),
           pageSize = studies.length / 2,
-          scope = createScope({
-            getStudies: createGetStudiesFn(studies),
-            pageSize: pageSize
-          });
+          scope = createScope.call(this,
+                                   {
+                                     getStudies: createGetStudiesFn.call(self, studies),
+                                     pageSize: pageSize
+                                   });
 
-      spyOn(scope.model, 'getStudies').and.callThrough();
-      element.isolateScope().vm.nameFilterUpdated();
-      expect(scope.model.getStudies).toHaveBeenCalled();
+      spyOn(self.scope.model, 'getStudies').and.callThrough();
+      self.element.isolateScope().vm.nameFilterUpdated();
+      expect(this.scope.model.getStudies).toHaveBeenCalled();
     });
 
     it('page change studies to be re-loaded', function() {
-      var studies = _.map(_.range(20), function () { return factory.study(); }),
-          pageSize = studies.length / 2,
-          scope = createScope({
-            getStudies: createGetStudiesFn(studies),
-            pageSize: pageSize
-          });
+      var self = this,
+          studies = _.map(_.range(20), function () { return self.factory.study(); }),
+          pageSize = studies.length / 2;
 
-      spyOn(scope.model, 'getStudies').and.callThrough();
-      element.isolateScope().vm.pageChanged();
-      expect(scope.model.getStudies).toHaveBeenCalled();
+      createScope.call(this,
+                       {
+                         getStudies: createGetStudiesFn.call(self, studies),
+                         pageSize: pageSize
+                       });
+
+      spyOn(self.scope.model, 'getStudies').and.callThrough();
+      self.element.isolateScope().vm.pageChanged();
+      expect(self.scope.model.getStudies).toHaveBeenCalled();
     });
 
     it('clear filter studies to be re-loaded', function() {
-      var studies = _.map(_.range(20), function () { return factory.study(); }),
-          pageSize = studies.length / 2,
-          scope = createScope({
-            getStudies: createGetStudiesFn(studies),
-            pageSize: pageSize
-          });
+      var self = this,
+          studies = _.map(_.range(20), function () { return self.factory.study(); }),
+          pageSize = studies.length / 2;
 
-      spyOn(scope.model, 'getStudies').and.callThrough();
-      element.isolateScope().vm.clearFilter();
-      expect(scope.model.getStudies).toHaveBeenCalled();
+      createScope.call(this,
+                       {
+                         getStudies: createGetStudiesFn.call(self, studies),
+                         pageSize: pageSize
+                       });
+
+      spyOn(self.scope.model, 'getStudies').and.callThrough();
+      self.element.isolateScope().vm.clearFilter();
+      expect(self.scope.model.getStudies).toHaveBeenCalled();
     });
 
     it('navigateToStudyHref returns valid link', function() {
-      var studies = _.map(_.range(20), function () { return factory.study(); }),
+      var self = this,
+          $state = this.$injector.get('$state'),
+          studies = _.map(_.range(20), function () { return self.factory.study(); }),
           pageSize = studies.length / 2,
-          fakeUrl = factory.stringNext(),
+          fakeUrl = self.factory.stringNext(),
           stateNameParam = {},
           studyToNavigateTo = studies[0];
 
-      createScope({
-        getStudies: createGetStudiesFn(studies),
-        pageSize: pageSize
-      });
+      createScope.call(this,
+                       {
+                         getStudies: createGetStudiesFn.call(this, studies),
+                         pageSize: pageSize
+                       });
 
-      spyOn(state, 'href').and.callFake(function () { return  fakeUrl; });
+      spyOn($state, 'href').and.returnValue(fakeUrl);
 
-      expect(element.isolateScope().vm.navigateToStudyHref(studyToNavigateTo))
+      expect(self.element.isolateScope().vm.navigateToStudyHref(studyToNavigateTo))
         .toEqual('<a href="' + fakeUrl + '"><strong><i class="glyphicon glyphicon-ok-circle"></i> ' +
                  studies[0].name + '</strong></a>');
 
       stateNameParam[navigateStateParamName] = studyToNavigateTo.id;
-      expect(state.href).toHaveBeenCalledWith(
+      expect($state.href).toHaveBeenCalledWith(
         navigateStateName,
         stateNameParam,
         { absolute: true});

@@ -101,64 +101,39 @@ define([
 
       describe('(shared)', function () {
 
-        beforeEach(inject(function ($rootScope, $compile, templateMixin, testUtils) {
-          var self = this;
+        var createController = function (getItemsFunc, getItemIconFunc) {
+          var self = this,
+              element = angular.element([
+                '<paged-items-list',
+                '  counts="vm.counts"',
+                '  page-size="vm.pageSize"',
+                '  possible-statuses="vm.possibleStatuses"',
+                '  message-no-items="' + context.messageNoItems + '"',
+                '  message-no-results="' + context.messageNoResults + '"',
+                '  get-items="vm.getItems"',
+                '  get-item-icon="vm.getItemIcon"',
+                '  entity-navigate-state="' + context.entityNavigateState + '"',
+                '  entity-navigate-state-param-name="' + context.entityNavigateStateParamName + '">',
+                '</paged-items-list>'
+          ].join(''));
 
-          _.extend(self, templateMixin);
+          getItemsFunc = getItemsFunc || getItemsFuncDefault;
+          getItemIconFunc = getItemIconFunc || function (entity) { return ''; };
 
-          self.$q                  = self.$injector.get('$q');
-          self.context             = context;
-          self.getItemsSpy         = jasmine.createSpy('getItemsSpy');
-          self.createController    = createController;
-          self.getItemsFuncDefault = getItemsFuncDefault;
+          self.scope = self.$rootScope.$new();
+          self.scope.vm = {
+            counts:           context.counts,
+            pageSize:         context.pageSize,
+            possibleStatuses: context.possibleStatuses,
+            getItems:         getItemsFunc,
+            getItemIcon:      getItemIconFunc
+          };
 
-          self.putHtmlTemplates(
-            '/assets/javascripts/common/directives/pagedItemsList/pagedItemsList.html');
+          self.$compile(element)(self.scope);
+          self.scope.$digest();
+          self.controller = element.controller('pagedItemsList');
 
-          testUtils.addCustomMatchers();
-
-          //--
-
-          function createController(getItemsFunc, getItemIconFunc) {
-            var element = angular.element([
-              '<paged-items-list',
-              '  counts="vm.counts"',
-              '  page-size="vm.pageSize"',
-              '  possible-statuses="vm.possibleStatuses"',
-              '  message-no-items="' + context.messageNoItems + '"',
-              '  message-no-results="' + context.messageNoResults + '"',
-              '  get-items="vm.getItems"',
-              '  get-item-icon="vm.getItemIcon"',
-              '  entity-navigate-state="' + context.entityNavigateState + '"',
-              '  entity-navigate-state-param-name="' + context.entityNavigateStateParamName + '">',
-              '</paged-items-list>'
-            ].join(''));
-
-            getItemsFunc = getItemsFunc || getItemsFuncDefault;
-            getItemIconFunc = getItemIconFunc || function (entity) { return ''; };
-
-            self.scope = $rootScope.$new();
-            self.scope.vm = {
-              counts:           context.counts,
-              pageSize:         context.pageSize,
-              possibleStatuses: context.possibleStatuses,
-              getItems:         getItemsFunc,
-              getItemIcon:      getItemIconFunc
-            };
-
-            $compile(element)(self.scope);
-            self.scope.$digest();
-            self.controller = element.controller('pagedItemsList');
-          }
-
-          /**
-           * This is the default function that will be called by the directive to update it's contents.
-           *
-           * Passed to the directive as an external function.
-           *
-           * See createController().
-           */
-          function getItemsFuncDefault(options) {
+          function getItemsFuncDefault (options) {
             self.getItemsSpy(options);
             return self.$q.when({
               items:    context.entities.slice(0, self.pageSize),
@@ -168,10 +143,25 @@ define([
               total:    context.entities.length
             });
           }
+        };
+
+        beforeEach(inject(function ($rootScope, $compile, testSuiteMixin, testUtils) {
+          var self = this;
+
+          _.extend(self, testSuiteMixin);
+
+          self.injectDependencies('$rootScope', '$compile', '$q');
+          self.context     = context;
+          self.getItemsSpy = jasmine.createSpy('getItemsSpy');
+
+          self.putHtmlTemplates(
+            '/assets/javascripts/common/directives/pagedItemsList/pagedItemsList.html');
+
+          testUtils.addCustomMatchers();
         }));
 
         it('has valid scope', function() {
-          this.createController();
+          createController.call(this);
 
           expect(this.controller.counts).toBe(this.context.counts);
           expect(this.controller.possibleStatuses).toBe(this.context.possibleStatuses);
@@ -186,7 +176,7 @@ define([
         it('has a valid panel heading', function() {
           var self = this;
 
-          self.createController(self.getItemsFuncDefault);
+          createController.call(self);
 
           _.each(context.possibleStatuses, function (status) {
             if (status.id !== 'all') {
@@ -198,7 +188,7 @@ define([
         it('updates items when name filter is updated', function() {
           var nameFilterValue = 'test';
 
-          this.createController();
+          createController.call(this);
 
           this.controller.pagerOptions.filter = nameFilterValue;
           this.controller.nameFilterUpdated();
@@ -215,7 +205,7 @@ define([
         it('updates items when name status filter is updated', function() {
           var statusFilterValue = this.context.possibleStatuses[1];
 
-          this.createController();
+          createController.call(this);
           this.controller.pagerOptions.status = statusFilterValue;
           this.controller.statusFilterUpdated();
           this.scope.$digest();
@@ -229,7 +219,7 @@ define([
         });
 
         it('clears filters', function() {
-          this.createController();
+          createController.call(this);
           this.controller.pagerOptions.filter = 'test';
           this.controller.pagerOptions.status = this.context.possibleStatuses[1];
           this.controller.clearFilters();
@@ -241,7 +231,7 @@ define([
         it('updates items when name sort field is updated', function() {
           var sortFieldValue;
 
-          this.createController();
+          createController.call(this);
           sortFieldValue = this.controller.sortFields[1];
           this.controller.sortFieldSelected(sortFieldValue);
           this.scope.$digest();
@@ -257,7 +247,7 @@ define([
         it('updates items when name page number is changed', function() {
           var page = 2;
 
-          this.createController();
+          createController.call(this);
           this.controller.pagerOptions.page = page;
           this.controller.pageChanged();
           this.scope.$digest();
@@ -273,7 +263,7 @@ define([
         it('has valid display state when there are no entities for criteria', function() {
           var self = this;
 
-          this.createController(getItemsWrapper);
+          createController.call(this, getItemsWrapper);
           expect(this.controller.displayState).toBe(1); // NO_RESULTS
 
           function getItemsWrapper(options) {
@@ -291,7 +281,7 @@ define([
         it('has valid display state when there are entities for criteria', function() {
           var self = this;
 
-          this.createController(getItemsWrapper);
+          createController.call(this, getItemsWrapper);
           expect(self.controller.displayState).toBe(2); // HAVE_RESULTS
 
           function getItemsWrapper(options) {
@@ -310,7 +300,7 @@ define([
           this.context.counts = _.mapObject(this.context.counts, function (val) {
             return 0;
           });
-          this.createController();
+          createController.call(this);
           expect(this.controller.displayState).toBe(0); // NO_ENTITIES
         });
 

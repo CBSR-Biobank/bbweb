@@ -23,23 +23,21 @@ define(function(require) {
 
       _.extend(this, entityTestSuite, hasAnnotationsEntityTestSuite);
 
-      self.$q                       = self.$injector.get('$q');
-      self.$httpBackend             = self.$injector.get('$httpBackend');
-      self.Participant              = self.$injector.get('Participant');
-      self.Study                    = self.$injector.get('Study');
-      self.Annotation               = self.$injector.get('Annotation');
-
-      self.DateTimeAnnotation       = self.$injector.get('DateTimeAnnotation');
-      self.MultipleSelectAnnotation = self.$injector.get('MultipleSelectAnnotation');
-      self.NumberAnnotation         = self.$injector.get('NumberAnnotation');
-      self.SingleSelectAnnotation   = self.$injector.get('SingleSelectAnnotation');
-      self.TextAnnotation           = self.$injector.get('TextAnnotation');
-
-      self.AnnotationValueType      = self.$injector.get('AnnotationValueType');
-      self.AnnotationType           = self.$injector.get('AnnotationType');
-      self.bbwebConfig              = self.$injector.get('bbwebConfig');
-      self.factory                  = self.$injector.get('factory');
-      self.testUtils                = self.$injector.get('testUtils');
+      self.injectDependencies('$q',
+                              '$httpBackend',
+                              'Participant',
+                              'Study',
+                              'Annotation',
+                              'DateTimeAnnotation',
+                              'MultipleSelectAnnotation',
+                              'NumberAnnotation',
+                              'SingleSelectAnnotation',
+                              'TextAnnotation',
+                              'AnnotationValueType',
+                              'AnnotationType',
+                              'bbwebConfig',
+                              'factory',
+                              'testUtils');
 
       self.testUtils.addCustomMatchers();
 

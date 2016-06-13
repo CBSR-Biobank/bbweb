@@ -22,14 +22,15 @@ define([
    *
    * @param {function } context.createController is a function that creates the controller and scope:
    * this.controller, and this.scope.
+   *
+   * NOTE: needs that the test suite be extended with testSuiteMixin.
    */
   function annotationTypeViewDirectiveSharedSpec(context) {
 
     describe('(shared) tests', function() {
 
       beforeEach(inject(function() {
-        this.AnnotationType = this.$injector.get('AnnotationType');
-        this.factory = this.$injector.get('factory');
+        this.injectDependencies('AnnotationType', 'factory');
       }));
 
       it('on update should invoke the update method on entity', function() {
@@ -37,7 +38,7 @@ define([
           .and.returnValue(this.$q.when(context.parentObject));
         spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
-        this.createController();
+        context.createController.call(this);
         this.controller.onUpdate(context.annotationType);
         this.scope.$digest();
         expect(context.entity.prototype[context.updateAnnotationTypeFuncName])
@@ -53,7 +54,7 @@ define([
         spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
         deferred.reject('simulated error');
 
-        this.createController();
+        context.createController.call(this);
         this.controller.onUpdate(context.annotationType);
         this.scope.$digest();
         expect(this.notificationsService.updateError).toHaveBeenCalled();
@@ -67,7 +68,7 @@ define([
           .and.returnValue(this.$q.when(obj));
         spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-        this.createController();
+        context.createController.call(this);
         this.controller.onUpdate(context.annotationType);
         this.scope.$digest();
 

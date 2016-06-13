@@ -13,47 +13,40 @@ define([
 
   describe('participantViewDirective', function() {
 
-    function createDirective(test) {
-      var element,
-          scope = test.$rootScope.$new();
-
-      element = angular.element([
+    var createDirective = function () {
+      this.element = angular.element([
         '<participant-view',
         ' study="vm.study"',
         ' participant="vm.participant">',
         '</participant-view>'
       ].join(''));
 
-      scope.vm = {
-        study:       test.study,
-        participant: test.participant
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = {
+        study:       this.study,
+        participant: this.participant
       };
-      test.$compile(element)(scope);
-      scope.$digest();
-
-      return {
-        element:    element,
-        scope:      scope,
-        controller: element.controller('participantView')
-      };
-    }
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('participantView');
+    };
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(templateMixin) {
+    beforeEach(inject(function(testSuiteMixin) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q                  = self.$injector.get('$q');
-      self.$rootScope          = self.$injector.get('$rootScope');
-      self.$compile            = self.$injector.get('$compile');
-      self.$state              = self.$injector.get('$state');
-      self.domainEntityService = self.$injector.get('domainEntityService');
-      self.modalService        = self.$injector.get('modalService');
-      self.Study               = self.$injector.get('Study');
-      self.Participant         = self.$injector.get('Participant');
-      self.factory        = self.$injector.get('factory');
+      self.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              '$state',
+                              'domainEntityService',
+                              'modalService',
+                              'Study',
+                              'Participant',
+                              'factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/participantView/participantView.html');
@@ -67,25 +60,26 @@ define([
     }));
 
     it('has valid scope', function() {
-      var directive = createDirective(this);
+      createDirective.call(this);
 
-      expect(directive.controller.study).toBe(this.study);
-      expect(directive.controller.participant).toBe(this.participant);
+      expect(this.controller.study).toBe(this.study);
+      expect(this.controller.participant).toBe(this.participant);
 
-      expect(directive.controller.tabs).toBeDefined();
+      expect(this.controller.tabs).toBeDefined();
     });
 
     it('has valid tabs', function() {
-      var directive = createDirective(this);
+      createDirective.call(this);
 
-      expect(directive.controller.tabs).toBeArrayOfSize(2);
+      expect(this.controller.tabs).toBeArrayOfSize(2);
     });
 
     it('should initialize the tab of the current state', function() {
       var self = this,
-          directive = createDirective(this),
           states,
           tab;
+
+      createDirective.call(self);
 
       states = [
         'home.collection.study.participant.summary',
@@ -95,8 +89,8 @@ define([
       _.each(states, function (state) {
         self.$state.current.name = state;
 
-        directive = createDirective(self);
-        tab = _.findWhere(directive.controller.tabs, { sref: state });
+        createDirective.call(self);
+        tab = _.findWhere(self.controller.tabs, { sref: state });
         expect(tab.active).toBe(true);
       });
     });

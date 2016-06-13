@@ -13,19 +13,36 @@ define([
 
   describe('Directive: studiesListDirective', function() {
 
+    var createStudyCounts = function (disabled, enabled, retired) {
+      return new this.StudyCounts({
+        total:    disabled + enabled + retired,
+        disabled: disabled,
+        enabled:  enabled,
+        retired:  retired
+      });
+    };
+
+    var createController = function (studyCounts) {
+      this.element = angular.element('<studies-list></studies-list>');
+      this.scope = this.$rootScope.$new();
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('studiesList');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, templateMixin, testUtils) {
+    beforeEach(inject(function (testSuiteMixin, testUtils) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q                = self.$injector.get('$q');
-      self.Study             = self.$injector.get('Study');
-      self.StudyCounts       = self.$injector.get('StudyCounts');
-      self.factory      = self.$injector.get('factory');
-      self.createStudyCounts = createStudyCounts;
-      self.createController  = createController;
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              '$q',
+                              'Study',
+                              'StudyCounts',
+                              'factory');
 
       testUtils.addCustomMatchers();
 
@@ -34,23 +51,6 @@ define([
         '/assets/javascripts/common/directives/pagedItemsList/pagedItemsList.html');
 
       //---
-
-      function createStudyCounts(disabled, enabled, retired) {
-        return new self.StudyCounts({
-          total:    disabled + enabled + retired,
-          disabled: disabled,
-          enabled:  enabled,
-          retired:  retired
-        });
-      }
-
-      function createController(studyCounts) {
-        self.element = angular.element('<studies-list></studies-list>');
-        self.scope = $rootScope.$new();
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('studiesList');
-      }
     }));
 
     it('scope is valid on startup', function() {
@@ -58,7 +58,7 @@ define([
           StudyStatus      = this.$injector.get('StudyStatus'),
           studyStatusLabel = this.$injector.get('studyStatusLabel'),
           allStatuses      = _.values(StudyStatus),
-          counts           = this.createStudyCounts(1, 2, 3);
+          counts           = createStudyCounts.call(this, 1, 2, 3);
 
       spyOn(self.StudyCounts, 'get').and.callFake(function () {
         return self.$q.when(counts);
@@ -68,7 +68,7 @@ define([
         return self.$q.when(self.factory.pagedResult([]));
       });
 
-      self.createController();
+      createController.call(self);
 
       expect(self.controller.studyCounts).toEqual(counts);
       expect(self.controller.pageSize).toBeDefined();
@@ -82,7 +82,7 @@ define([
 
     it('updateStudies retrieves new list of studies', function() {
       var self = this,
-          counts = self.createStudyCounts(1, 2, 3),
+          counts = createStudyCounts.call(this, 1, 2, 3),
           listOptions = { dummy: 'value' };
 
       spyOn(self.StudyCounts, 'get').and.callFake(function () {
@@ -93,7 +93,7 @@ define([
         return self.$q.when(self.factory.pagedResult([]));
       });
 
-      self.createController(counts);
+      createController.call(self, counts);
       self.controller.updateStudies(listOptions);
       self.scope.$digest();
 

@@ -16,19 +16,39 @@ define([
 
   describe('modalInputModule', function() {
 
-    beforeEach(mocks.module('ngAnimateMock', 'biobankApp', 'biobank.test'));
+    var modalElementFind = function() {
+      return this.$document.find('body > div.modal');
+    };
 
-    beforeEach(inject(function(templateMixin) {
-      var self = this;
+    var open = function (modalInputFunc, defaultValue, title, label, options) {
+      var modal, modalElement;
+      title = title || this.factory.stringNext();
+      label = label || this.factory.stringNext();
+      modal = modalInputFunc(title, label, defaultValue, options);
+      this.$rootScope.$digest();
 
-      _.extend(self, templateMixin);
+      modalElement = modalElementFind.call(this);
 
-      self.$rootScope   = self.$injector.get('$rootScope');
-      self.$animate     = self.$injector.get('$animate');
-      self.$document    = self.$injector.get('$document');
-      self.modalInput   = self.$injector.get('modalInput');
-      self.factory = self.$injector.get('factory');
+      return {
+        modal:   modal,
+        element: modalElement,
+        scope:   modalElement.scope()
+      };
+    };
 
+    var dismiss = function (modal, reason, noFlush) {
+      var closed = modal.dismiss(reason);
+      this.$rootScope.$digest();
+      if (!noFlush) {
+        this.$animate.flush();
+        this.$rootScope.$digest();
+        this.$animate.flush();
+        this.$rootScope.$digest();
+      }
+      return closed;
+    };
+
+    function suiteAddMatchers() {
       jasmine.addMatchers({
         toHaveModalsOpen: function(util, customEqualityTesters) {
           return {
@@ -165,6 +185,20 @@ define([
           };
         }
       });
+    }
+
+    beforeEach(mocks.module('ngAnimateMock', 'biobankApp', 'biobank.test'));
+
+    beforeEach(inject(function(testSuiteMixin) {
+      var self = this;
+
+      _.extend(self, testSuiteMixin);
+
+      self.injectDependencies('$rootScope',
+                              '$animate',
+                              '$document',
+                              'modalInput',
+                              'factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/common/modalInput/modalInput.html',
@@ -181,56 +215,13 @@ define([
         '/assets/javascripts/common/modalInput/text.html',
         '/assets/javascripts/common/modalInput/url.html');
 
-      this.open = open;
-      this.modalElement = modalElement;
-      this.controller = controller;
-      this.dismiss = dismiss;
-
-      //--
-
-      function open(modalInputFunc, defaultValue, title, label, options) {
-        var modal, modalElement;
-        title = title || self.factory.stringNext();
-        label = label || self.factory.stringNext();
-        modal = modalInputFunc(title, label, defaultValue, options);
-        self.$rootScope.$digest();
-
-        modalElement = self.modalElement();
-
-        return {
-          modal:   modal,
-          element: modalElement,
-          scope:   modalElement.scope()
-        };
-      }
-
-      function modalElement() {
-        return self.$document.find('body > div.modal');
-      }
-
-      function controller() {
-        return modalElement().scope().vm;
-      }
-
-      function dismiss(modal, reason, noFlush) {
-        var closed = modal.dismiss(reason);
-        self.$rootScope.$digest();
-        if (!noFlush) {
-          self.$animate.flush();
-          self.$rootScope.$digest();
-          self.$animate.flush();
-          self.$rootScope.$digest();
-        }
-        return closed;
-      }
-
+      suiteAddMatchers();
     }));
 
     beforeEach(function () {
       this.title = this.factory.stringNext();
       this.label = this.factory.stringNext();
     });
-
 
     describe('boolean modal', function() {
 
@@ -239,7 +230,8 @@ define([
       });
 
       it('has valid elements and scope', function() {
-        var modalInfo = this.open(this.modalInput.boolean,
+        var modalInfo = open.call(this,
+                                  this.modalInput.boolean,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
@@ -252,12 +244,13 @@ define([
         expect(modalInfo.element).toHaveValuesInControllerScope(
           { value: this.defaultValue, options: undefined });
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when value is required and both values are unchecked', function() {
-        var modalInfo = this.open(this.modalInput.boolean,
+        var modalInfo = open.call(this,
+                                  this.modalInput.boolean,
                                   this.defaultValue,
                                   this.title,
                                   this.label,
@@ -269,7 +262,7 @@ define([
         modalInfo.scope.form.value.$setViewValue(false);
         expect(modalInfo.scope.form.$valid).toBe(true);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
@@ -285,7 +278,8 @@ define([
       });
 
       it('has valid elements and scope', function() {
-        var modalInfo = this.open(this.modalInput.dateTime,
+        var modalInfo = open.call(this,
+                                  this.modalInput.dateTime,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
@@ -300,12 +294,13 @@ define([
         expect(modalInfo.element.scope().vm.value).toBeDate();
         expect(new Date(modalInfo.element.scope().vm.value)).toEqual(this.date);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when value is required and value is blank', function() {
-        var modalInfo = this.open(this.modalInput.boolean,
+        var modalInfo = open.call(this,
+                                  this.modalInput.boolean,
                                   this.defaultValue,
                                   this.title,
                                   this.label,
@@ -315,7 +310,7 @@ define([
         modalInfo.scope.form.value.$setViewValue('');
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
@@ -328,7 +323,8 @@ define([
       });
 
       it('has valid elements and scope', function() {
-        var modalInfo = this.open(this.modalInput.email,
+        var modalInfo = open.call(this,
+                                  this.modalInput.email,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
@@ -342,12 +338,13 @@ define([
         expect(modalInfo.element).toHaveInputElementTypeAttrBe('email');
         expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when using required option and input is empty', function() {
-        var modalInfo = this.open(this.modalInput.email,
+        var modalInfo = open.call(this,
+                                  this.modalInput.email,
                                   this.defaultValue,
                                   this.title,
                                   this.label,
@@ -356,19 +353,20 @@ define([
         modalInfo.scope.form.value.$setViewValue('');
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when input is an invalid email', function() {
-        var modalInfo = this.open(this.modalInput.email,
+        var modalInfo = open.call(this,
+                                  this.modalInput.email,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
         modalInfo.scope.form.value.$setViewValue('xxx');
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
@@ -381,7 +379,8 @@ define([
       });
 
       it('has valid elements and scope', function() {
-        var modalInfo = this.open(this.modalInput.naturalNumber,
+        var modalInfo = open.call(this,
+                                  this.modalInput.naturalNumber,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
@@ -395,12 +394,13 @@ define([
         expect(modalInfo.element).toHaveInputElementTypeAttrBe('number');
         expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when using required option and input is empty', function() {
-        var modalInfo = this.open(this.modalInput.naturalNumber,
+        var modalInfo = open.call(this,
+                                  this.modalInput.naturalNumber,
                                   this.defaultValue,
                                   this.title,
                                   this.label,
@@ -409,19 +409,20 @@ define([
         modalInfo.scope.form.value.$setViewValue('');
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when input is an invalid number', function() {
-        var modalInfo = this.open(this.modalInput.naturalNumber,
+        var modalInfo = open.call(this,
+                                  this.modalInput.naturalNumber,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
         modalInfo.scope.form.value.$setViewValue('-1');
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
@@ -434,7 +435,8 @@ define([
       });
 
       it('has valid elements and scope', function() {
-        var modalInfo = this.open(this.modalInput.number,
+        var modalInfo = open.call(this,
+                                  this.modalInput.number,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
@@ -448,12 +450,13 @@ define([
         expect(modalInfo.element).toHaveInputElementTypeAttrBe('number');
         expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when using required option and input is empty', function() {
-        var modalInfo = this.open(this.modalInput.number,
+        var modalInfo = open.call(this,
+                                  this.modalInput.number,
                                   this.defaultValue,
                                   this.title,
                                   this.label,
@@ -462,19 +465,20 @@ define([
         modalInfo.scope.form.value.$setViewValue('');
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when input is not a number', function() {
-        var modalInfo = this.open(this.modalInput.number,
+        var modalInfo = open.call(this,
+                                  this.modalInput.number,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
         modalInfo.scope.form.value.$setViewValue('xxx');
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
@@ -488,7 +492,8 @@ define([
 
       it('has valid elements and scope', function() {
         var inputs,
-            modalInfo = this.open(this.modalInput.password,
+            modalInfo = open.call(this,
+                                  this.modalInput.password,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
@@ -506,12 +511,13 @@ define([
           expect(angular.element(input).attr('type')).toBe('password');
         });
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when new password and confirm password do not match', function() {
-        var modalInfo = this.open(this.modalInput.password,
+        var modalInfo = open.call(this,
+                                  this.modalInput.password,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
@@ -519,7 +525,7 @@ define([
         modalInfo.scope.form.confirmPassword.$setViewValue('xyzxyzxyz');
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
@@ -532,7 +538,8 @@ define([
       });
 
       it('has valid elements and scope', function() {
-        var modalInfo = this.open(this.modalInput.positiveFloat,
+        var modalInfo = open.call(this,
+                                  this.modalInput.positiveFloat,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
@@ -546,12 +553,13 @@ define([
         expect(modalInfo.element).toHaveInputElementTypeAttrBe('number');
         expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when using required option and input is empty', function() {
-        var modalInfo = this.open(this.modalInput.positiveFloat,
+        var modalInfo = open.call(this,
+                                  this.modalInput.positiveFloat,
                                   this.defaultValue,
                                   this.title,
                                   this.label,
@@ -560,31 +568,33 @@ define([
         modalInfo.scope.form.value.$setViewValue('');
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when input is not a number', function() {
-        var modalInfo = this.open(this.modalInput.positiveFloat,
+        var modalInfo = open.call(this,
+                                  this.modalInput.positiveFloat,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
         modalInfo.scope.form.value.$setViewValue('xxx');
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when input is a negative number', function() {
-        var modalInfo = this.open(this.modalInput.positiveFloat,
+        var modalInfo = open.call(this,
+                                  this.modalInput.positiveFloat,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
         modalInfo.scope.form.value.$setViewValue('-1.00');
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
@@ -600,7 +610,8 @@ define([
       it('has valid elements and scope', function() {
         var self = this,
             optionElements,
-            modalInfo = self.open(self.modalInput.select,
+            modalInfo = open.call(self,
+                                  self.modalInput.select,
                                   self.defaultValue,
                                   self.title,
                                   self.label,
@@ -620,12 +631,13 @@ define([
           }
         });
 
-        self.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(self, modalInfo.modal, 'closed in test');
         expect(self.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when a value is required and nothing selected', function() {
-        var modalInfo = this.open(this.modalInput.select,
+        var modalInfo = open.call(this,
+                                  this.modalInput.select,
                                   this.defaultValue,
                                   this.title,
                                   this.label,
@@ -644,7 +656,7 @@ define([
         modalInfo.scope.$digest();
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
@@ -660,7 +672,8 @@ define([
       it('has valid elements and scope', function() {
         var self = this,
             labelElements,
-            modalInfo = self.open(self.modalInput.selectMultiple,
+            modalInfo = open.call(self,
+                                  self.modalInput.selectMultiple,
                                   self.defaultValue,
                                   self.title,
                                   self.label,
@@ -678,13 +691,14 @@ define([
           expect(self.options).toContain(angular.element(element).text().trim());
         });
 
-        self.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(self, modalInfo.modal, 'closed in test');
         expect(self.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid if a value is required and nothing selected', function() {
         var self = this,
-            modalInfo = self.open(self.modalInput.selectMultiple,
+            modalInfo = open.call(self,
+                                  self.modalInput.selectMultiple,
                                   self.defaultValue,
                                   self.title,
                                   self.label,
@@ -705,7 +719,7 @@ define([
         modalInfo.scope.$digest();
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        self.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(self, modalInfo.modal, 'closed in test');
         expect(self.$document).toHaveModalsOpen(0);
       });
 
@@ -736,7 +750,8 @@ define([
       });
 
       it('has valid elements and scope', function() {
-        var modalInfo = this.open(this.modalInput.text,
+        var modalInfo = open.call(this,
+                                  this.modalInput.text,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
@@ -749,12 +764,13 @@ define([
         expect(modalInfo.element).toHaveInputElementTypeAttrBe('text');
         expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when using required option and input is empty', function() {
-        var modalInfo = this.open(this.modalInput.text,
+        var modalInfo = open.call(this,
+                                  this.modalInput.text,
                                   this.defaultValue,
                                   this.title,
                                   this.label,
@@ -763,13 +779,14 @@ define([
         modalInfo.scope.form.value.$setViewValue('');
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when minimum length is not met', function() {
         var minLength = 2,
-            modalInfo = this.open(this.modalInput.text,
+            modalInfo = open.call(this,
+                                  this.modalInput.text,
                                   this.defaultValue,
                                   this.title,
                                   this.label,
@@ -779,7 +796,7 @@ define([
         modalInfo.scope.form.value.$setViewValue('x');
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
@@ -792,7 +809,8 @@ define([
       });
 
       it('has valid elements and scope', function() {
-        var modalInfo = this.open(this.modalInput.textArea,
+        var modalInfo = open.call(this,
+                                  this.modalInput.textArea,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
@@ -804,12 +822,13 @@ define([
         expect(modalInfo.element).toHaveValidTextAreaElement();
         expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
-     it('form is invalid when using required option and input is empty', function() {
-        var modalInfo = this.open(this.modalInput.textArea,
+      it('form is invalid when using required option and input is empty', function() {
+        var modalInfo = open.call(this,
+                                  this.modalInput.textArea,
                                   this.defaultValue,
                                   this.title,
                                   this.label,
@@ -818,7 +837,7 @@ define([
         modalInfo.scope.form.value.$setViewValue('');
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
@@ -831,7 +850,8 @@ define([
       });
 
       it('has valid elements and scope', function() {
-        var modalInfo = this.open(this.modalInput.url,
+        var modalInfo = open.call(this,
+                                  this.modalInput.url,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
@@ -845,12 +865,13 @@ define([
         expect(modalInfo.element).toHaveInputElementTypeAttrBe('url');
         expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when using required option and input is empty', function() {
-        var modalInfo = this.open(this.modalInput.url,
+        var modalInfo = open.call(this,
+                                  this.modalInput.url,
                                   this.defaultValue,
                                   this.title,
                                   this.label,
@@ -859,19 +880,20 @@ define([
         modalInfo.scope.form.value.$setViewValue('');
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
       it('form is invalid when input is an invalid email', function() {
-        var modalInfo = this.open(this.modalInput.url,
+        var modalInfo = open.call(this,
+                                  this.modalInput.url,
                                   this.defaultValue,
                                   this.title,
                                   this.label);
         modalInfo.scope.form.value.$setViewValue('xxx');
         expect(modalInfo.scope.form.$valid).toBe(false);
 
-        this.dismiss(modalInfo.modal, 'closed in test');
+        dismiss.call(this,  modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 
@@ -880,7 +902,8 @@ define([
     describe('textArea modal', function() {
 
       it('modal should be closed when OK button is pressed', function() {
-        var modalInfo = this.open(this.modalInput.text,
+        var modalInfo = open.call(this,
+                                  this.modalInput.text,
                                   this.factory.stringNext(),
                                   this.title,
                                   this.label);
@@ -898,7 +921,8 @@ define([
       });
 
       it('modal should be closed when Cancel button is pressed', function() {
-        var modalInfo = this.open(this.modalInput.text,
+        var modalInfo = open.call(this,
+                                  this.modalInput.text,
                                   this.factory.stringNext(),
                                   this.title,
                                   this.label);

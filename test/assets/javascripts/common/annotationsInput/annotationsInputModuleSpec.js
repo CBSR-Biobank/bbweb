@@ -13,25 +13,44 @@ define([
 ], function(angular, mocks, _, moment) {
   'use strict';
 
-  /**
-   *
-   */
   describe('annotationsInputModule', function() {
+
+    var createAnnotation = function (valueType) {
+      return this.annotationFactory.create(
+        undefined,
+        new this.AnnotationType(
+          this.factory.annotationType({ valueType: valueType, required: true })
+        ));
+    };
+
+    var createController = function (annotations) {
+      this.element = angular.element([
+        '<form name="form">',
+        '  <annotations-input annotations="vm.annotations">',
+        '  </annotations-input>',
+        '</form>'
+      ].join(''));
+
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = { annotations: annotations };
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('annotationsInput');
+    };
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, templateMixin, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, testSuiteMixin, testUtils) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.annotationFactory   = self.$injector.get('annotationFactory');
-      self.AnnotationType      = self.$injector.get('AnnotationType');
-      self.AnnotationValueType = self.$injector.get('AnnotationValueType');
-      self.factory        = self.$injector.get('factory');
-
-      self.createAnnotation = createAnnotation;
-      self.createController = createController;
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              'annotationFactory',
+                              'AnnotationType',
+                              'AnnotationValueType',
+                              'factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/common/annotationsInput/annotationsInput.html',
@@ -40,40 +59,13 @@ define([
         '/assets/javascripts/common/annotationsInput/numberAnnotation.html',
         '/assets/javascripts/common/annotationsInput/singleSelectAnnotation.html',
         '/assets/javascripts/common/annotationsInput/textAnnotation.html');
-
-      //--
-
-      function createAnnotation(valueType) {
-        return self.annotationFactory.create(
-          undefined,
-          new self.AnnotationType(
-            self.factory.annotationType({ valueType: valueType, required: true })
-          ));
-      }
-
-      function createController(annotations) {
-        self.element = angular.element([
-          '<form name="form">',
-          '  <annotations-input annotations="vm.annotations">',
-          '  </annotations-input>',
-          '</form>'
-        ].join(''));
-
-        self.scope = $rootScope.$new();
-        self.scope.vm = {
-          annotations: annotations
-        };
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('annotationsInput');
-      }
     }));
 
     it('works for a TEXT annotation', function() {
       var annotationValue = this.factory.stringNext(),
-          annotations = [ this.createAnnotation(this.AnnotationValueType.TEXT) ];
+          annotations = [ createAnnotation.call(this, this.AnnotationValueType.TEXT) ];
 
-      this.createController(annotations);
+      createController.call(this, annotations);
       expect(this.element.find('input').length).toBe(1);
       expect(this.element.find('input').eq(0).attr('type')).toBe('text');
       this.scope.form.annotationSubForm.annotationTextValue.$setViewValue(annotationValue);
@@ -83,9 +75,9 @@ define([
 
     it('works for a NUMBER annotation and a valid number', function() {
       var annotationValue = 111.01,
-          annotations = [ this.createAnnotation(this.AnnotationValueType.NUMBER) ];
+          annotations = [ createAnnotation.call(this, this.AnnotationValueType.NUMBER) ];
 
-      this.createController(annotations);
+      createController.call(this, annotations);
       expect(this.element.find('input').length).toBe(1);
       expect(this.element.find('input').eq(0).attr('type')).toBe('number');
       this.scope.form.annotationSubForm.annotationNumberValue.$setViewValue(annotationValue.toString());
@@ -95,9 +87,9 @@ define([
 
     it('validation fails for a NUMBER annotation and an invalid number', function() {
       var annotationValue = this.factory.stringNext(),
-          annotations = [ this.createAnnotation(this.AnnotationValueType.NUMBER) ];
+          annotations = [ createAnnotation.call(this, this.AnnotationValueType.NUMBER) ];
 
-      this.createController(annotations);
+      createController.call(this, annotations);
       expect(this.element.find('input').length).toBe(1);
       expect(this.element.find('input').eq(0).attr('type')).toBe('number');
       this.scope.form.annotationSubForm.annotationNumberValue.$setViewValue(annotationValue);
@@ -107,10 +99,10 @@ define([
 
     it('works for a DATE_TIME annotation and a valid date', function() {
       var dateStr = '2010-01-10 00:00',
-          annotation = this.createAnnotation(this.AnnotationValueType.DATE_TIME),
+          annotation = createAnnotation.call(this, this.AnnotationValueType.DATE_TIME),
           annotations = [ annotation ];
 
-      this.createController(annotations);
+      createController.call(this, annotations);
       expect(this.element.find('input').length).toBe(1);
       expect(this.element.find('input').eq(0).attr('type')).toBe('text');
 
@@ -134,7 +126,7 @@ define([
 
       annotations = [ self.annotationFactory.create(undefined, annotationType) ];
 
-      self.createController(annotations);
+      createController.call(self, annotations);
       expect(self.element.find('select').length).toBe(1);
 
       // number of options is the number of annotationType options plus one for the '-- make a selection --'
@@ -160,7 +152,7 @@ define([
 
       annotation = this.annotationFactory.create(undefined, annotationType);
 
-      this.createController([ annotation ]);
+      createController.call(this, [ annotation ]);
 
       // has the right number of check boxes
       expect(this.element.find('input').length).toBe(3);
@@ -186,7 +178,7 @@ define([
 
           annotation = self.annotationFactory.create(undefined, annotationType);
 
-          self.createController([ annotation ]);
+          createController.call(self, [ annotation ]);
 
           // has the right number of check boxes
           expect(self.element.find('input').length).toBe(annotationType.options.length);

@@ -14,6 +14,27 @@ define([
 
   describe('collectionDirective', function() {
 
+    var createDirective = function (studyCounts, centreCounts) {
+      studyCounts = studyCounts || getStudyCounts();
+      centreCounts = centreCounts || getCentreCounts();
+
+      this.element = angular.element([
+        '<collection',
+        '  study-counts="vm.studyCounts"',
+        '  centre-counts="vm.centreCounts">',
+        '</collection>'
+      ].join(''));
+
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = {
+        studyCounts: studyCounts,
+        centreCounts: centreCounts
+      };
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('collection');
+    };
+
     function getStudyCounts() {
       return {
         disabled: faker.random.number(),
@@ -31,44 +52,18 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, templateMixin) {
-      var self = this;
+    beforeEach(inject(function(testSuiteMixin) {
+      _.extend(this, testSuiteMixin);
 
-      _.extend(self, templateMixin);
+      this.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              'Study',
+                              'factory');
 
-      self.$q                  = self.$injector.get('$q');
-      self.Study               = self.$injector.get('Study');
-      self.factory        = self.$injector.get('factory');
-
-      self.putHtmlTemplates(
+      this.putHtmlTemplates(
         '/assets/javascripts/collection/directives/collection/collection.html',
         '/assets/javascripts/collection/directives/selectStudy/selectStudy.html');
-
-      self.createDirective = createDirective;
-
-      //--
-
-      function createDirective(studyCounts, centreCounts) {
-        studyCounts = studyCounts || getStudyCounts();
-        centreCounts = centreCounts || getCentreCounts();
-
-        self.element = angular.element([
-          '<collection',
-          '  study-counts="vm.studyCounts"',
-          '  centre-counts="vm.centreCounts">',
-          '</collection>'
-        ].join(''));
-
-        self.scope = $rootScope.$new();
-        self.scope.vm = {
-          studyCounts: studyCounts,
-          centreCounts: centreCounts
-        };
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('collection');
-      }
-
     }));
 
     it('has valid scope', function() {
@@ -77,7 +72,7 @@ define([
 
       spyOn(this.Study, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([])));
 
-      this.createDirective(studyCounts, centreCounts);
+      createDirective.call(this, studyCounts, centreCounts);
       expect(this.controller.studyCounts).toBe(studyCounts);
       expect(this.controller.centreCounts).toBe(centreCounts);
       expect(this.controller.haveEnabledStudies).toBe(studyCounts.enabled > 0);

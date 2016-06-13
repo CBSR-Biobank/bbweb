@@ -13,17 +13,28 @@ define([
 
   describe('Directive: eAddDirective()', function() {
 
+    var createController = function (centre) {
+      this.element = angular.element('<centre-add centre="vm.centre"></centre-add>');
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = { centre: centre };
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('centreAdd');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, $state, templateMixin) {
+    beforeEach(inject(function ($state, testSuiteMixin) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.Centre               = self.$injector.get('Centre');
-      self.factory         = self.$injector.get('factory');
-      self.notificationsService = self.$injector.get('notificationsService');
-      self.domainEntityService  = self.$injector.get('domainEntityService');
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              'Centre',
+                              'factory',
+                              'notificationsService',
+                              'domainEntityService');
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/centres/directives/centreAdd/centreAdd.html');
@@ -33,23 +44,10 @@ define([
         name: 'home.admin.centres',
         params: {}
       };
-
-      self.createController = createController;
-
-      //--
-
-      function createController(centre) {
-        self.element = angular.element('<centre-add centre="vm.centre"></centre-add>');
-        self.scope = $rootScope.$new();
-        self.scope.vm = { centre: centre };
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('centreAdd');
-      }
     }));
 
     it('scope should be valid', function() {
-      this.createController(this.centre);
+      createController.call(this, this.centre);
       expect(this.scope.vm.centre).toEqual(this.centre);
       expect(this.controller.returnState.name).toBe(this.returnState.name);
       expect(this.controller.returnState.params).toEqual(this.returnState.params);
@@ -58,7 +56,7 @@ define([
     it('should return to valid state on cancel', function() {
       var $state = this.$injector.get('$state');
 
-      this.createController(this.centre);
+      createController.call(this, this.centre);
       spyOn($state, 'go').and.callFake(function () {} );
       this.controller.cancel();
       expect($state.go).toHaveBeenCalledWith(this.returnState.name,
@@ -70,7 +68,7 @@ define([
       var $q                  = this.$injector.get('$q'),
           domainEntityService = this.$injector.get('domainEntityService');
 
-      this.createController(this.centre);
+      createController.call(this, this.centre);
       spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
       spyOn(this.Centre.prototype, 'add').and.callFake(function () {
         var deferred = $q.defer();
@@ -88,7 +86,7 @@ define([
       var $q     = this.$injector.get('$q'),
           $state = this.$injector.get('$state');
 
-      this.createController(this.centre);
+      createController.call(this, this.centre);
 
       spyOn($state, 'go').and.callFake(function () {} );
       spyOn(this.Centre.prototype, 'add').and.callFake(function () {

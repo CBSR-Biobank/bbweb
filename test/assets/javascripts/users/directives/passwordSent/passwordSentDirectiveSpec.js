@@ -7,49 +7,38 @@
 define([
   'angular',
   'angularMocks',
-  'underscore',
-  'faker'
-], function(angular, mocks, _, faker) {
+  'underscore'
+], function(angular, mocks, _) {
   'use strict';
 
   describe('passwordSentDirective', function() {
 
-    function createDirective(test) {
-      var element, scope;
-
-      element = angular.element('<password-sent email="vm.email"></password-sent>');
-      scope = test.$rootScope.$new();
-      scope.vm = { email: test.email };
-
-      test.$compile(element)(scope);
-      scope.$digest();
-
-      return {
-        element:    element,
-        scope:      scope,
-        controller: element.controller('passwordSent')
-      };
-    }
+    var createDirective = function () {
+      this.element = angular.element('<password-sent email="vm.email"></password-sent>');
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = { email: this.email };
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('passwordSent');
+    };
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, templateMixin) {
+    beforeEach(inject(function($rootScope, $compile, testSuiteMixin) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$rootScope          = self.$injector.get('$rootScope');
-      self.$compile            = self.$injector.get('$compile');
-
+      self.injectDependencies('$rootScope', '$compile', 'factory');
       self.putHtmlTemplates(
         '/assets/javascripts/users/directives/passwordSent/passwordSent.html');
 
-      self.email = faker.internet.email();
+      self.email = self.factory.emailNext();
     }));
 
     it('has valid scope', function() {
-      var directive = createDirective(this);
-      expect(directive.controller.email).toEqual(this.email);
+      createDirective.call(this);
+      expect(this.controller.email).toEqual(this.email);
     });
 
   });

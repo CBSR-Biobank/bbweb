@@ -170,9 +170,7 @@ define(function (require) {
         }
 
         function multipleSelectSomeSelected() {
-          var result = (_.find(vm.value, { checked: true }) !== undefined);
-          console.log(result);
-          return result;
+          return (_.find(vm.value, { checked: true }) !== undefined);
         }
 
         function openCalendar(e) {

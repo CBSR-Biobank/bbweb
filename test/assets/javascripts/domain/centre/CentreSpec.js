@@ -28,20 +28,21 @@ define([
     beforeEach(inject(function (entityTestSuite, extendedDomainEntities) {
       _.extend(this, entityTestSuite);
 
-      this.httpBackend  = this.$injector.get('$httpBackend');
-      this.Centre       = this.$injector.get('Centre');
-      this.CentreStatus = this.$injector.get('CentreStatus');
-      this.Location     = this.$injector.get('Location');
-      this.funutils     = this.$injector.get('funutils');
-      this.testUtils    = this.$injector.get('testUtils');
-      this.factory = this.$injector.get('factory');
+
+      this.injectDependencies('$httpBackend',
+                              'Centre',
+                              'CentreStatus',
+                              'Location',
+                              'funutils',
+                              'testUtils',
+                              'factory');
 
       Centre = this.Centre;
     }));
 
     afterEach(function() {
-      this.httpBackend.verifyNoOutstandingExpectation();
-      this.httpBackend.verifyNoOutstandingRequest();
+      this.$httpBackend.verifyNoOutstandingExpectation();
+      this.$httpBackend.verifyNoOutstandingRequest();
     });
 
     it('constructor with no parameters has default values', function() {
@@ -94,10 +95,10 @@ define([
     it('can retrieve a single centre', function() {
       var self = this, centre = self.factory.centre();
 
-      self.httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
+      self.$httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
       self.Centre.get(centre.id).then(checkReply).catch(failTest);
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
 
       function checkReply(reply) {
         expect(reply).toEqual(jasmine.any(self.Centre));
@@ -108,10 +109,10 @@ define([
     it('fails when getting a centre and it has a bad format', function() {
       var self = this,
           centre = _.omit(self.factory.centre(), 'name');
-      self.httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
+      self.$httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
       self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
 
       function shouldNotFail(reply) {
         fail('function should not be called');
@@ -126,10 +127,10 @@ define([
       var self = this,
           centre = self.factory.centre({ studyIds: [ '' ]});
 
-      self.httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
+      self.$httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
       self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
 
       function shouldNotFail(reply) {
         fail('function should not be called');
@@ -145,10 +146,10 @@ define([
           location = _.omit(self.factory.location(), 'name'),
           centre = self.factory.centre({ locations: [ location ]});
 
-      self.httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
+      self.$httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
 
       self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
 
       function shouldNotFail(reply) {
         fail('function should not be called');
@@ -164,10 +165,10 @@ define([
           centres = [ self.factory.centre() ],
           reply = self.factory.pagedResult(centres);
 
-      self.httpBackend.whenGET(uri()).respond(serverReply(reply));
+      self.$httpBackend.whenGET(uri()).respond(serverReply(reply));
 
       self.Centre.list().then(checkReply).catch(failTest);
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
 
       function checkReply(pagedResult) {
         expect(pagedResult.items).toBeArrayOfSize(centres.length);
@@ -194,10 +195,10 @@ define([
             reply   = self.factory.pagedResult(centres),
             url     = sprintf.sprintf('%s?%s', uri(), $.param(options, true));
 
-        self.httpBackend.whenGET(url).respond(serverReply(reply));
+        self.$httpBackend.whenGET(url).respond(serverReply(reply));
 
         self.Centre.list(options).then(testStudy).catch(failTest);
-        self.httpBackend.flush();
+        self.$httpBackend.flush();
 
         function testStudy(pagedResult) {
           expect(pagedResult.items).toBeArrayOfSize(centres.length);
@@ -213,10 +214,10 @@ define([
           centres = [ _.omit(self.factory.centre(), 'name') ],
           reply = self.factory.pagedResult(centres);
 
-      self.httpBackend.whenGET(uri()).respond(serverReply(reply));
+      self.$httpBackend.whenGET(uri()).respond(serverReply(reply));
 
       self.Centre.list().then(listFail).catch(shouldFail);
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
 
       function listFail(reply) {
         fail('function should not be called');
@@ -233,10 +234,10 @@ define([
           centre = new self.Centre(_.omit(jsonCentre, 'id')),
           json = _.pick(centre, 'name', 'description');
 
-      self.httpBackend.expectPOST(uri(), json).respond(201, serverReply(jsonCentre));
+      self.$httpBackend.expectPOST(uri(), json).respond(201, serverReply(jsonCentre));
 
       centre.add().then(checkReply).catch(failTest);
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
 
       function checkReply(replyCentre) {
         expect(replyCentre).toEqual(jasmine.any(self.Centre));
@@ -361,9 +362,9 @@ define([
                                            centre.version,
                                            jsonLocation.uniqueId);
 
-        self.httpBackend.expectDELETE(url).respond(201, serverReply(true));
+        self.$httpBackend.expectDELETE(url).respond(201, serverReply(true));
         centre.removeLocation(jsonLocation).then(checkCentre).catch(failTest);
-        self.httpBackend.flush();
+        self.$httpBackend.flush();
 
         function checkCentre(reply) {
           expect(reply).toEqual(jasmine.any(self.Centre));
@@ -402,9 +403,9 @@ define([
                                          centre.version,
                                          jsonStudy.id);
 
-        self.httpBackend.expectDELETE(url).respond(201, serverReply(true));
+        self.$httpBackend.expectDELETE(url).respond(201, serverReply(true));
         centre.removeStudy(jsonStudy).then(checkCentre).catch(failTest);
-        this.httpBackend.flush();
+        this.$httpBackend.flush();
 
         function checkCentre(replyCentre) {
           expect(replyCentre).toEqual(jasmine.any(self.Centre));
@@ -450,10 +451,10 @@ define([
           json       = { expectedVersion: centre.version },
           reply      = replyCentre(jsonCentre, { status: status });
 
-      self.httpBackend.expectPOST(uri(action, centre.id), json).respond(201, serverReply(reply));
+      self.$httpBackend.expectPOST(uri(action, centre.id), json).respond(201, serverReply(reply));
       expect(centre[action]).toBeFunction();
       centre[action]().then(checkCentre).catch(failTest);
-      this.httpBackend.flush();
+      this.$httpBackend.flush();
 
       function checkCentre(reply) {
         expect(reply).toEqual(jasmine.any(self.Centre));

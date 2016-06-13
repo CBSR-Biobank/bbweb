@@ -13,13 +13,12 @@ define([
   'use strict';
 
   describe('adminService', function() {
-    var adminService, $httpBackend;
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function() {
-      adminService = this.$injector.get('adminService');
-      $httpBackend = this.$injector.get('$httpBackend');
+    beforeEach(inject(function(testSuiteMixin) {
+      _.extend(this, testSuiteMixin);
+      this.injectDependencies('adminService', '$httpBackend');
     }));
 
     it('gets the aggregate counts', function(done) {
@@ -28,16 +27,16 @@ define([
                      users: 3
                    };
 
-      $httpBackend.whenGET('/counts').respond({
+      this.$httpBackend.whenGET('/counts').respond({
         status: 'success',
         data: counts
       });
 
-      adminService.aggregateCounts().then(function (reply) {
+      this.adminService.aggregateCounts().then(function (reply) {
         expect(reply).toEqual(counts);
         done();
       });
-      $httpBackend.flush();
+      this.$httpBackend.flush();
     });
 
   });

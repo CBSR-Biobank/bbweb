@@ -16,42 +16,38 @@ define([
   describe('Directive: truncateToggle', function() {
     var textEmptyWarning = 'text not entered yet.';
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function ($rootScope, $compile, templateMixin, testUtils) {
+    var createScope = function (text, toggleLength) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      self.element = angular.element([
+        '<truncate-toggle',
+        '   text="model.text"',
+        '   toggle-length="model.toggleLength"',
+        '   text-empty-warning="' + textEmptyWarning + '">',
+        '</truncate-toggle>'
+      ].join(''));
 
-      self.$filter = this.$injector.get('$filter');
+      self.scope = self.$rootScope.$new();
 
+      self.scope.model = {
+        text:         text,
+        toggleLength: toggleLength
+      };
+
+      this.$compile(self.element)(self.scope);
+      self.scope.$digest();
+    };
+
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+
+    beforeEach(inject(function (testSuiteMixin, testUtils) {
+      var self = this;
+
+      _.extend(self, testSuiteMixin);
+
+      self.injectDependencies('$rootScope', '$compile', '$filter');
       self.putHtmlTemplates(
         '/assets/javascripts/common/directives/truncateToggle.html');
-
-      self.element = angular.element(
-        '<truncate-toggle' +
-          '   text="model.text"' +
-          '   toggle-length="model.toggleLength"' +
-          '   text-empty-warning="' + textEmptyWarning + '">' +
-          '</truncate-toggle>');
-
-      self.createScope = setupScope();
-
-      function setupScope() {
-        return create;
-
-        function create(text, toggleLength) {
-          self.scope = $rootScope;
-
-          self.scope.model = {
-            text:         text,
-            toggleLength: toggleLength
-          };
-
-          $compile(self.element)(self.scope);
-          self.scope.$digest();
-        }
-      }
     }));
 
     it('pressing the button truncates the string', function() {
@@ -60,7 +56,7 @@ define([
           text = '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ' +
           '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ';
 
-      this.createScope(text, 20);
+      createScope.call(this, text, 20);
 
       divs = angular.element(this.element[0].getElementsByClassName('col-md-12'));
       expect(divs.length).toBe(1);
@@ -78,7 +74,7 @@ define([
           text = '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ' +
           '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ';
 
-      this.createScope(text, 20);
+      createScope.call(this, text, 20);
 
       divs = angular.element(this.element[0].getElementsByClassName('col-md-12'));
       expect(divs.length).toBe(1);
@@ -95,7 +91,7 @@ define([
           text = '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ' +
           '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ';
 
-      this.createScope(text, 20);
+      createScope.call(this, text, 20);
       buttons = this.element.find('button');
       expect(buttons.length).toBe(1);
       expect(buttons.eq(0).text().trim()).toBe('Show less');
@@ -105,7 +101,7 @@ define([
       var divs,
           text = '';
 
-      this.createScope(text, 20);
+      createScope.call(this, text, 20);
       divs = angular.element(this.element[0].getElementsByClassName('alert'));
       expect(divs.length).toBe(1);
       expect(divs.eq(0).text().trim()).toBe(textEmptyWarning);

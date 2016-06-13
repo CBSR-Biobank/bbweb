@@ -14,35 +14,35 @@ define([
 
   describe('Controller: RegisterUserCtrl', function() {
 
+    var createController = function () {
+      this.scope = this.$rootScope.$new();
+
+      this.$controller('RegisterUserCtrl as vm', {
+        $scope:               this.scope,
+        $state:               this.$state,
+        User:                 this.User,
+        notificationsService: this.notificationsService
+      });
+      this.scope.$digest();
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $controller, $state) {
+    beforeEach(inject(function(testSuiteMixin) {
       var self = this;
-
-      self.$q                   = self.$injector.get('$q');
-      self.$state               = this.$injector.get('$state');
-      self.User                 = self.$injector.get('User');
-      self.notificationsService = self.$injector.get('notificationsService');
-
-      self.createController = createController;
-
-      function createController(injector) {
-        self.scope = $rootScope.$new();
-
-        $controller('RegisterUserCtrl as vm', {
-          $scope:               self.scope,
-          $state:               $state,
-          User:                 self.User,
-          notificationsService: self.notificationsService
-        });
-        self.scope.$digest();
-      }
+      _.extend(self, testSuiteMixin);
+      self.injectDependencies('$rootScope',
+                              '$controller',
+                              '$q',
+                              '$state',
+                              'User',
+                              'notificationsService');
     }));
 
     it('has valid scope', function() {
       var User  = this.$injector.get('User');
 
-      this.createController();
+      createController.call(this);
       expect(this.scope.vm.user).toEqual(new User());
       expect(this.scope.vm.password).toBeEmptyString();
       expect(this.scope.vm.confirmPassword).toBeEmptyString();
@@ -51,7 +51,7 @@ define([
     it('displays login page after successful registration', function() {
       spyOn(this.User.prototype, 'register').and.returnValue(this.$q.when('ok'));
       spyOn(this.$state, 'go').and.callFake(function () {});
-      this.createController();
+      createController.call(this);
       this.scope.vm.submit({});
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home.users.login');
@@ -62,7 +62,7 @@ define([
 
       spyOn(this.User.prototype, 'register').and.returnValue(deferred.promise);
       spyOn(this.notificationsService, 'error').and.returnValue(this.$q.when('ok'));
-      this.createController();
+      createController.call(this);
       this.scope.vm.submit({});
       deferred.reject({ status: 403, data: { message: 'already registered' } });
       this.scope.$digest();
@@ -74,7 +74,7 @@ define([
 
       spyOn(this.User.prototype, 'register').and.returnValue(deferred.promise);
       spyOn(this.notificationsService, 'error').and.callFake(function () {});
-      this.createController();
+      createController.call(this);
       this.scope.vm.submit({});
       deferred.reject({ status: 401, data: { message: 'xxx' } });
       this.scope.$digest();
@@ -83,7 +83,7 @@ define([
 
     it('goes to home state when cancel button is pressed', function() {
       spyOn(this.$state, 'go').and.callFake(function () {});
-      this.createController();
+      createController.call(this);
       this.scope.vm.cancel();
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home');

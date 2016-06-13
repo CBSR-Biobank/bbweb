@@ -13,42 +13,41 @@ define([
 
   describe('biobankAdminDirective', function() {
 
+    var createController = function () {
+      this.element = angular.element('<biobank-admin></biobank-admin>');
+      this.scope = this.$rootScope.$new();
+
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('biobankAdmin');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, templateMixin) {
+    beforeEach(inject(function($rootScope, $compile, testSuiteMixin) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q               = self.$injector.get('$q');
-      self.adminService     = self.$injector.get('adminService');
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              '$q',
+                              'adminService');
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/biobankAdmin/biobankAdmin.html');
-
-      self.createController = createController;
-
-      //----
-
-      function createController() {
-        self.element = angular.element('<biobank-admin></biobank-admin>');
-        self.scope = $rootScope.$new();
-
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('biobankAdmin');
-      }
     }));
 
     it('has valid scope', function() {
-      var counts = { studies: 1,
-                     centres: 2,
-                     users: 3
-                   };
+      var counts = {
+        studies: 1,
+        centres: 2,
+        users: 3
+      };
 
       spyOn(this.adminService, 'aggregateCounts').and.returnValue(this.$q.when(counts));
 
-      this.createController();
+      createController.call(this);
       expect(this.controller.counts).toEqual(counts);
     });
 

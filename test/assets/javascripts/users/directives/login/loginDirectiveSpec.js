@@ -13,37 +13,35 @@ define([
 
   describe('loginDirective', function() {
 
+    var createController = function () {
+      this.element = angular.element('<login></login>');
+      this.scope = this.$rootScope.$new();
+
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('login');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, templateMixin, testUtils) {
+    beforeEach(inject(function(testSuiteMixin, testUtils) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q           = self.$injector.get('$q');
-      self.$state       = self.$injector.get('$state');
-      self.usersService = self.$injector.get('usersService');
-      self.modalService = self.$injector.get('modalService');
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              '$q',
+                              '$state',
+                              'usersService',
+                              'modalService');
 
       self.putHtmlTemplates(
         '/assets/javascripts/users/directives/login/login.html');
-
-      self.createController = createController;
-
-      ///--
-
-      function createController() {
-        self.element = angular.element('<login></login>');
-        self.scope = $rootScope.$new();
-
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('login');
-      }
     }));
 
     it('has valid state', function() {
-      this.createController();
+      createController.call(this);
       expect(this.controller.credentials.email).toBeEmptyString();
       expect(this.controller.credentials.password).toBeEmptyString();
       expect(this.controller.login).toBeFunction();
@@ -53,7 +51,7 @@ define([
       spyOn(this.usersService, 'isAuthenticated').and.returnValue(true);
       spyOn(this.$state, 'go').and.returnValue(true);
 
-      this.createController();
+      createController.call(this);
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home');
     });
@@ -62,7 +60,7 @@ define([
       spyOn(this.usersService, 'login').and.returnValue(this.$q.when(true));
       spyOn(this.$state, 'go').and.returnValue(true);
 
-      this.createController();
+      createController.call(this);
       this.controller.login({ email: 'test@test.com', password: 'secret-password' });
       this.scope.$digest();
 
@@ -129,51 +127,41 @@ define([
 
     });
 
+    function invalidLoginAttemptShared(context) {
+
+      describe('for invalid login attempt', function() {
+
+        beforeEach(function() {
+          spyOn(this.$state, 'go').and.returnValue(true);
+        });
+
+        it('for invalid email or password and OK', function () {
+          spyOn(this.usersService, 'login').and.returnValue(this.$q.reject(context.loginError));
+          spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+
+          createController.call(this);
+          this.controller.login({ email: 'test@test.com', password: 'secret-password' });
+          this.scope.$digest();
+
+          expect(this.modalService.showModal).toHaveBeenCalled();
+          expect(this.$state.go).toHaveBeenCalledWith('home.users.login', {}, { reload: true });
+        });
+
+        it('for invalid email or password and cancel pressed', function () {
+          spyOn(this.usersService, 'login').and.returnValue(this.$q.reject(context.loginError));
+          spyOn(this.modalService, 'showModal').and.returnValue(this.$q.reject('Cancel'));
+
+          createController.call(this);
+          this.controller.login({ email: 'test@test.com', password: 'secret-password' });
+          this.scope.$digest();
+
+          expect(this.modalService.showModal).toHaveBeenCalled();
+          expect(this.$state.go).toHaveBeenCalledWith('home');
+        });
+
+      });
+    }
+
   });
-
-  function invalidLoginAttemptShared(context) {
-
-    describe('for invalid login attempt', function() {
-
-      beforeEach(function() {
-        spyOn(this.$state, 'go').and.returnValue(true);
-      });
-
-
-      it('for invalid email or password and OK', function () {
-        var deferred = this.$q.defer();
-
-        deferred.reject(context.loginError);
-        spyOn(this.usersService, 'login').and.returnValue(deferred.promise);
-        spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
-
-        this.createController();
-        this.controller.login({ email: 'test@test.com', password: 'secret-password' });
-        this.scope.$digest();
-
-        expect(this.modalService.showModal).toHaveBeenCalled();
-        expect(this.$state.go).toHaveBeenCalledWith('home.users.login', {}, { reload: true });
-      });
-
-      it('for invalid email or password and cancel pressed', function () {
-        var loginDeferred = this.$q.defer(),
-            modalDeferred = this.$q.defer();
-
-        loginDeferred.reject(context.loginError);
-        modalDeferred.reject('Cancel');
-
-        spyOn(this.usersService, 'login').and.returnValue(loginDeferred.promise);
-        spyOn(this.modalService, 'showModal').and.returnValue(modalDeferred.promise);
-
-        this.createController();
-        this.controller.login({ email: 'test@test.com', password: 'secret-password' });
-        this.scope.$digest();
-
-        expect(this.modalService.showModal).toHaveBeenCalled();
-        expect(this.$state.go).toHaveBeenCalledWith('home');
-      });
-
-    });
-  }
 
 });

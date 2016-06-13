@@ -22,12 +22,12 @@ define([
 
       _.extend(self, entityTestSuite);
 
-      self.httpBackend = self.$injector.get('$httpBackend');
-      self.Study       = self.$injector.get('Study');
-      self.StudyStatus = self.$injector.get('StudyStatus');
-      self.funutils    = self.$injector.get('funutils');
-      self.factory     = self.$injector.get('factory');
-      self.testUtils   = self.$injector.get('testUtils');
+      self.injectDependencies('$httpBackend',
+                              'Study',
+                              'StudyStatus',
+                              'funutils',
+                              'factory',
+                              'testUtils');
 
       self.testUtils.addCustomMatchers();
       self.jsonStudy = self.factory.study();
@@ -42,8 +42,8 @@ define([
     }));
 
     afterEach(function() {
-      this.httpBackend.verifyNoOutstandingExpectation();
-      this.httpBackend.verifyNoOutstandingRequest();
+      this.$httpBackend.verifyNoOutstandingExpectation();
+      this.$httpBackend.verifyNoOutstandingRequest();
     });
 
     it('constructor with no parameters has default values', function() {
@@ -95,18 +95,18 @@ define([
 
     it('can retrieve a single study', function() {
       var self = this;
-      self.httpBackend.whenGET(uri(this.jsonStudy.id)).respond(serverReply(this.jsonStudy));
+      self.$httpBackend.whenGET(uri(this.jsonStudy.id)).respond(serverReply(this.jsonStudy));
       self.Study.get(this.jsonStudy.id).then(self.expectStudy).catch(failTest);
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
     });
 
     it('fails when getting a study and it has a bad format', function() {
       var self = this,
           study = _.omit(self.jsonStudy, 'name');
-      self.httpBackend.whenGET(uri(study.id)).respond(serverReply(study));
+      self.$httpBackend.whenGET(uri(study.id)).respond(serverReply(study));
 
       self.Study.get(study.id).then(shouldNotFail).catch(shouldFail);
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
 
       function shouldNotFail(reply) {
         fail('function should not be called');
@@ -122,10 +122,10 @@ define([
           annotationType = _.omit(self.factory.annotationType(), 'name'),
           study = self.factory.study({ annotationTypes: [ annotationType ]});
 
-      self.httpBackend.whenGET(uri(study.id)).respond(serverReply(study));
+      self.$httpBackend.whenGET(uri(study.id)).respond(serverReply(study));
 
       self.Study.get(study.id).then(shouldNotFail).catch(shouldFail);
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
 
       function shouldNotFail(error) {
         fail('function should not be called: ' + error);
@@ -141,10 +141,10 @@ define([
           studies = [ self.factory.study({ annotationTypes: [] }) ],
           reply = self.factory.pagedResult(studies);
 
-      self.httpBackend.whenGET(uri()).respond(serverReply(reply));
+      self.$httpBackend.whenGET(uri()).respond(serverReply(reply));
 
       self.Study.list().then(testStudy).catch(failTest);
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
 
       function testStudy(pagedResult) {
         expect(pagedResult.items).toBeArrayOfSize(1);
@@ -169,10 +169,10 @@ define([
             reply   = self.factory.pagedResult(studies),
             url     = sprintf.sprintf('%s?%s', uri(), $.param(options, true));
 
-        self.httpBackend.whenGET(url).respond(serverReply(reply));
+        self.$httpBackend.whenGET(url).respond(serverReply(reply));
 
         self.Study.list(options).then(testStudy).catch(failTest);
-        self.httpBackend.flush();
+        self.$httpBackend.flush();
 
         function testStudy(pagedResult) {
           expect(pagedResult.items).toBeArrayOfSize(studies.length);
@@ -188,9 +188,9 @@ define([
           studies = [ _.omit(self.jsonStudy, 'name') ],
           reply = self.factory.pagedResult(studies);
 
-      self.httpBackend.whenGET(uri()).respond(serverReply(reply));
+      self.$httpBackend.whenGET(uri()).respond(serverReply(reply));
       self.Study.list().then(listFail).catch(shouldFail);
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
 
       function listFail(reply) {
         fail('function should not be called');
@@ -206,10 +206,10 @@ define([
           study = new self.Study(_.omit(this.jsonStudy, 'id')),
           json = _.pick(study, 'name', 'description');
 
-      self.httpBackend.expectPOST(uri(), json).respond(201, serverReply(this.jsonStudy));
+      self.$httpBackend.expectPOST(uri(), json).respond(201, serverReply(this.jsonStudy));
 
       study.add().then(self.expectStudy).catch(failTest);
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
     });
 
     it('can update the name on a study', function() {
@@ -292,9 +292,9 @@ define([
                                   this.study.version,
                                   this.annotationType.uniqueId);
 
-        this.httpBackend.whenDELETE(url).respond(201, serverReply(true));
+        this.$httpBackend.whenDELETE(url).respond(201, serverReply(true));
         this.study.removeAnnotationType(this.annotationType).then(this.expectStudy).catch(failTest);
-        this.httpBackend.flush();
+        this.$httpBackend.flush();
       });
 
     });
@@ -363,10 +363,10 @@ define([
           json =  { expectedVersion: study.version },
           reply = replyStudy(jsonStudy, { status: status });
 
-      self.httpBackend.expectPOST(uri(action, study.id), json).respond(201, serverReply(reply));
+      self.$httpBackend.expectPOST(uri(action, study.id), json).respond(201, serverReply(reply));
       expect(study[action]).toBeFunction();
       study[action]().then(checkStudy).catch(failTest);
-      self.httpBackend.flush();
+      self.$httpBackend.flush();
 
       function checkStudy(replyStudy) {
         expect(replyStudy).toEqual(jasmine.any(self.Study));

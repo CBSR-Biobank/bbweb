@@ -21,13 +21,12 @@ define([
 
       _.extend(self, entityTestSuite);
 
-      self.UserCounts = self.$injector.get('UserCounts');
-      self.httpBackend = self.$injector.get('$httpBackend');
+      self.injectDependencies('UserCounts', '$httpBackend');
     }));
 
     afterEach(function() {
-      this.httpBackend.verifyNoOutstandingExpectation();
-      this.httpBackend.verifyNoOutstandingRequest();
+      this.$httpBackend.verifyNoOutstandingExpectation();
+      this.$httpBackend.verifyNoOutstandingRequest();
     });
 
     function fakeUserCounts() {
@@ -56,9 +55,9 @@ define([
 
     it('can get user counts from server', function() {
       var counts = fakeUserCounts();
-      this.httpBackend.whenGET('/users/counts').respond(serverReply(counts));
+      this.$httpBackend.whenGET('/users/counts').respond(serverReply(counts));
       this.UserCounts.get().then(expectCounts).catch(failTest);
-      this.httpBackend.flush();
+      this.$httpBackend.flush();
 
       function expectCounts(replyCounts) {
         expect(replyCounts.total).toEqual(counts.total);

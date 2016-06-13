@@ -13,11 +13,8 @@ define([
 
   describe('ceventsListDirective', function() {
 
-    function createDirective(test) {
-      var element,
-          scope = test.$rootScope.$new();
-
-      element = angular.element([
+    var createDirective = function () {
+      this.element = angular.element([
         '<cevents-list',
         '  participant="vm.participant"',
         '  collection-events-paged-result="vm.collectionEventsPagedResult"',
@@ -25,36 +22,32 @@ define([
         '</cevents-list>'
       ].join(''));
 
-      scope.vm = {
-        participant:                 test.participant,
-        collectionEventsPagedResult: test.pagedResult,
-        collectionEventTypes:        test.collectionEventTypes
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = {
+        participant:                 this.participant,
+        collectionEventsPagedResult: this.pagedResult,
+        collectionEventTypes:        this.collectionEventTypes
       };
-      test.$compile(element)(scope);
-      scope.$digest();
-
-      return {
-        element:    element,
-        scope:      scope,
-        controller: element.controller('ceventsList')
-      };
-    }
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('ceventsList');
+    };
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(templateMixin) {
+    beforeEach(inject(function(testSuiteMixin) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q                  = self.$injector.get('$q');
-      self.$rootScope          = self.$injector.get('$rootScope');
-      self.$compile            = self.$injector.get('$compile');
-      self.$state              = self.$injector.get('$state');
-      self.Participant         = self.$injector.get('Participant');
-      self.CollectionEvent     = self.$injector.get('CollectionEvent');
-      self.CollectionEventType = self.$injector.get('CollectionEventType');
-      self.factory        = self.$injector.get('factory');
+      self.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              '$state',
+                              'Participant',
+                              'CollectionEvent',
+                              'CollectionEventType',
+                              'factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/ceventsList/ceventsList.html',
@@ -71,11 +64,11 @@ define([
     }));
 
     it('has valid scope', function() {
-      var directive = createDirective(this);
+      createDirective.call(this);
 
-      expect(directive.controller.participant).toBe(this.participant);
-      expect(directive.controller.collectionEventsPagedResult).toBe(this.pagedResult);
-      expect(directive.controller.collectionEventTypes).toBe(this.collectionEventTypes);
+      expect(this.controller.participant).toBe(this.participant);
+      expect(this.controller.collectionEventsPagedResult).toBe(this.pagedResult);
+      expect(this.controller.collectionEventTypes).toBe(this.collectionEventTypes);
     });
 
     it('throws an error when created with no collection event types', function() {
@@ -83,7 +76,7 @@ define([
 
       self.collectionEventTypes = [];
       expect(function () {
-        createDirective(self);
+        createDirective.call(self);
       }).toThrowError(/no collection event types defined for this study/);
     });
 

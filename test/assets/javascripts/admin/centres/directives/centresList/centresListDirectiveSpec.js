@@ -14,21 +14,37 @@ define([
 
   describe('Directive: centresListDirective', function() {
 
+    var createCentreCounts = function (disabled, enabled, retired) {
+      return new this.CentreCounts({
+        total:    disabled + enabled + retired,
+        disabled: disabled,
+        enabled:  enabled,
+        retired:  retired
+      });
+    };
+
+    var createController = function (centreCounts) {
+      this.element = angular.element('<centres-list></centres-list>');
+      this.scope = this.$rootScope.$new();
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('centresList');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, templateMixin, testUtils) {
+    beforeEach(inject(function(testSuiteMixin, testUtils) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q           = self.$injector.get('$q');
-      self.CentreCounts = self.$injector.get('CentreCounts');
-      self.Centre       = self.$injector.get('Centre');
-      self.CentreStatus = self.$injector.get('CentreStatus');
-      self.factory = self.$injector.get('factory');
-
-      self.createController = createController;
-      self.createCentreCounts = createCentreCounts;
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              '$q',
+                              'CentreCounts',
+                              'Centre',
+                              'CentreStatus',
+                              'factory');
 
       spyOn(self.Centre, 'list').and.callFake(function () {
         return self.$q.when(self.factory.pagedResult([]));
@@ -39,23 +55,6 @@ define([
       self.putHtmlTemplates(
         '/assets/javascripts/admin/centres/directives/centresList/centresList.html',
         '/assets/javascripts/common/directives/pagedItemsList/pagedItemsList.html');
-
-      function createCentreCounts(disabled, enabled, retired) {
-        return new self.CentreCounts({
-          total:    disabled + enabled + retired,
-          disabled: disabled,
-          enabled:  enabled,
-          retired:  retired
-        });
-      }
-
-      function createController(centreCounts) {
-        self.element = angular.element('<centres-list></centres-list>');
-        self.scope = $rootScope.$new();
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('centresList');
-      }
     }));
 
     it('scope is valid on startup', function() {
@@ -63,13 +62,13 @@ define([
           CentreStatus = self.$injector.get('CentreStatus'),
           centreStatusLabel = self.$injector.get('centreStatusLabel'),
           allStatuses = _.values(CentreStatus),
-          counts = self.createCentreCounts(1, 2, 3);
+          counts = createCentreCounts.call(self, 1, 2, 3);
 
       spyOn(self.CentreCounts, 'get').and.callFake(function () {
         return self.$q.when(counts);
       });
 
-      self.createController(counts);
+      createController.call(self, counts);
 
       expect(self.controller.centreCounts).toEqual(counts);
       expect(self.controller.pageSize).toBeDefined();
@@ -86,14 +85,14 @@ define([
     it('updateCentres retrieves new list of centres', function() {
       var self = this,
           Centre = this.$injector.get('Centre'),
-          counts = this.createCentreCounts(1, 2, 3),
+          counts = createCentreCounts.call(this, 1, 2, 3),
           listOptions = {};
 
       spyOn(self.CentreCounts, 'get').and.callFake(function () {
         return self.$q.when(counts);
       });
 
-      self.createController(counts);
+      createController.call(self, counts);
       self.controller.updateCentres(listOptions);
       self.scope.$digest();
 

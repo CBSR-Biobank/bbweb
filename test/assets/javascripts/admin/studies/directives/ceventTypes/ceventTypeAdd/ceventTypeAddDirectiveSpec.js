@@ -9,44 +9,43 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
   describe('Directive: ceventTypeAddDirective', function() {
 
+    var createController = function (study) {
+      this.element = angular.element([
+        '<cevent-type-add',
+        '  study="vm.study">',
+        '<cevent-type-add>'
+      ].join(''));
+
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = { study: study };
+
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('ceventTypeAdd');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, templateMixin, testUtils) {
+    beforeEach(inject(function(testSuiteMixin, testUtils) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.Study               = self.$injector.get('Study');
-      self.CollectionEventType = self.$injector.get('CollectionEventType');
-      self.factory        = self.$injector.get('factory');
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              'Study',
+                              'CollectionEventType',
+                              'factory');
 
       self.study = new self.Study(self.factory.study());
-      self.createController = createController;
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/collection/ceventTypeAdd/ceventTypeAdd.html');
 
-      //--
-
-      function createController(study) {
-        self.element = angular.element([
-          '<cevent-type-add',
-          '  study="vm.study">',
-          '<cevent-type-add>'
-        ].join(''));
-
-        self.scope = $rootScope.$new();
-        self.scope.vm = { study: study };
-
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('ceventTypeAdd');
-      }
-
     }));
 
     it('has valid scope when created', function () {
-      this.createController(this.study);
+      createController.call(this, this.study);
       expect(this.controller.ceventType.isNew()).toBe(true);
     });
 
@@ -57,7 +56,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           ceventType;
 
       ceventType = new this.CollectionEventType(this.factory.collectionEventType(this.study));
-      this.createController(this.study);
+      createController.call(this, this.study);
 
       spyOn(this.CollectionEventType.prototype, 'add').and.callFake(function () {
         return $q.when();
@@ -79,7 +78,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           ceventType;
 
       ceventType = new this.CollectionEventType(this.factory.collectionEventType(this.study));
-      this.createController(this.study);
+      createController.call(this, this.study);
 
       spyOn(this.CollectionEventType.prototype, 'add').and.callFake(function () {
         var deferred = q.defer();
@@ -99,7 +98,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
       var state = this.$injector.get('$state');
 
       spyOn(state, 'go').and.callFake(function () {});
-      this.createController(this.study);
+      createController.call(this, this.study);
 
       this.controller.cancel();
       this.scope.$digest();

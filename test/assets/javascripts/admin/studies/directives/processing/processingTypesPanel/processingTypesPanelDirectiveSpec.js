@@ -20,8 +20,8 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (templateMixin, testUtils) {
-      _.extend(this, templateMixin);
+    beforeEach(inject(function (testSuiteMixin, testUtils) {
+      _.extend(this, testSuiteMixin);
 
       createEntities = setupEntities(this.$injector);
       createController = setupController(this.$injector);

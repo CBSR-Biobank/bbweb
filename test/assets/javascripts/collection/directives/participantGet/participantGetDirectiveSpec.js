@@ -13,23 +13,31 @@ define([
 
   describe('participantGetDirective', function() {
 
+    var createDirective = function () {
+      this.element = angular.element('<participant-get study="vm.study"></participant-get>');
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = { study: this.study };
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('participantGet');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(templateMixin) {
+    beforeEach(inject(function(testSuiteMixin) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q           = self.$injector.get('$q');
-      self.$rootScope   = self.$injector.get('$rootScope');
-      self.$compile     = self.$injector.get('$compile');
-      self.$state       = this.$injector.get('$state');
-      self.stateHelper  = this.$injector.get('stateHelper');
-      self.modalService = self.$injector.get('modalService');
-      self.Study        = self.$injector.get('Study');
-      self.Participant  = self.$injector.get('Participant');
-      self.factory = self.$injector.get('factory');
-
+      self.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              '$state',
+                              'stateHelper',
+                              'modalService',
+                              'Study',
+                              'Participant',
+                              'factory');
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/participantGet/participantGet.html');
 
@@ -37,59 +45,37 @@ define([
       this.jsonStudy       = this.factory.defaultStudy();
       this.participant     = new this.Participant(this.jsonParticipant);
       this.study           = new this.Study(this.jsonStudy);
-
-      //--
-
     }));
 
-    function createDirective(test) {
-      var element = angular.element('<participant-get study="vm.study"></participant-get>'),
-          scope = test.$rootScope.$new();
-
-      scope.vm = { study: test.study };
-      test.$compile(element)(scope);
-      scope.$digest();
-
-      return {
-        element:    element,
-        scope:      scope,
-        controller: element.controller('participantGet')
-      };
-    }
-
     it('has valid scope', function() {
-      var directive = createDirective(this);
+      createDirective.call(this);
 
-      expect(directive.controller).toBeDefined();
-      expect(directive.controller.study).toBe(this.study);
-      expect(directive.controller.uniqueIdChanged).toBeFunction();
+      expect(this.controller).toBeDefined();
+      expect(this.controller.study).toBe(this.study);
+      expect(this.controller.uniqueIdChanged).toBeFunction();
     });
 
     describe('when invoking uniqueIdChanged', function() {
 
       it('does nothing with an empty participant ID', function() {
-        var directive;
-
         spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.when(this.participant));
 
-        directive = createDirective(this);
-        directive.controller.uniqueId = '';
-        directive.controller.uniqueIdChanged();
-        directive.scope.$digest();
+        createDirective.call(this);
+        this.controller.uniqueId = '';
+        this.controller.uniqueIdChanged();
+        this.scope.$digest();
 
         expect(this.Participant.getByUniqueId).not.toHaveBeenCalled();
       });
 
       it('with a valid participant ID changes state', function() {
-        var directive;
-
         spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.when(this.participant));
         spyOn(this.$state, 'go').and.returnValue('ok');
 
-        directive = createDirective(this);
-        directive.controller.uniqueId = this.factory.stringNext();
-        directive.controller.uniqueIdChanged();
-        directive.scope.$digest();
+        createDirective.call(this);
+        this.controller.uniqueId = this.factory.stringNext();
+        this.controller.uniqueIdChanged();
+        this.scope.$digest();
 
         expect(this.$state.go).toHaveBeenCalledWith(
           'home.collection.study.participant.summary',
@@ -97,8 +83,7 @@ define([
       });
 
       it('with an invalid participant ID opens a modal', function() {
-        var directive,
-            uniqueId = this.factory.stringNext(),
+        var uniqueId = this.factory.stringNext(),
             deferred = this.$q.defer();
 
         deferred.reject({ status: 404 });
@@ -106,10 +91,10 @@ define([
         spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('ok'));
         spyOn(this.$state, 'go').and.returnValue('ok');
 
-        directive = createDirective(this);
-        directive.controller.uniqueId = uniqueId;
-        directive.controller.uniqueIdChanged();
-        directive.scope.$digest();
+        createDirective.call(this);
+        this.controller.uniqueId = uniqueId;
+        this.controller.uniqueIdChanged();
+        this.scope.$digest();
 
         expect(this.modalService.showModal).toHaveBeenCalled();
         expect(this.$state.go).toHaveBeenCalledWith(
@@ -118,8 +103,7 @@ define([
       });
 
       it('with an invalid participant ID opens a modal and cancel is pressed', function() {
-        var directive,
-            uniqueId = this.factory.stringNext(),
+        var uniqueId = this.factory.stringNext(),
             participantDeferred = this.$q.defer(),
             modalDeferred = this.$q.defer();
 
@@ -129,27 +113,26 @@ define([
         spyOn(this.modalService, 'showModal').and.returnValue(modalDeferred.promise);
         spyOn(this.stateHelper, 'reloadAndReinit').and.returnValue('ok');
 
-        directive = createDirective(this);
-        directive.controller.uniqueId = uniqueId;
-        directive.controller.uniqueIdChanged();
-        directive.scope.$digest();
+        createDirective.call(this);
+        this.controller.uniqueId = uniqueId;
+        this.controller.uniqueIdChanged();
+        this.scope.$digest();
 
         expect(this.modalService.showModal).toHaveBeenCalled();
         expect(this.stateHelper.reloadAndReinit).toHaveBeenCalled();
       });
 
       it('promise is rejected on a non 404 response', function() {
-        var directive,
-            participantDeferred = this.$q.defer();
+        var participantDeferred = this.$q.defer();
 
         participantDeferred.reject({ status: 400 });
         spyOn(this.Participant, 'getByUniqueId').and.returnValue(participantDeferred.promise);
         spyOn(console, 'error').and.callThrough();
 
-        directive = createDirective(this);
-        directive.controller.uniqueId = this.factory.stringNext();
-        directive.controller.uniqueIdChanged();
-        directive.scope.$digest();
+        createDirective.call(this);
+        this.controller.uniqueId = this.factory.stringNext();
+        this.controller.uniqueIdChanged();
+        this.scope.$digest();
 
         expect(console.error).toHaveBeenCalled();
       });

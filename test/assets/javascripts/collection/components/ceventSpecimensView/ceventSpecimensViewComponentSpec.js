@@ -13,19 +13,50 @@ define([
 
   describe('ceventSpecimensViewComponent', function() {
 
+    var createController = function (collectionEvent) {
+      collectionEvent = collectionEvent || this.collectionEvent;
+      this.scope = this.$rootScope.$new();
+      this.controller = this.$componentController('ceventSpecimensView',
+                                             null,
+                                             { collectionEvent: collectionEvent });
+
+      this.controller.tableController = {
+        tableState: jasmine.createSpy().and.returnValue({
+          sort: { predicate: 'inventoryId', reverse: false },
+          search: {},
+          pagination: { start: 0, totalItemCount: 0 }
+        })
+      };
+    };
+
+    var createCentreLocations = function () {
+      var self = this,
+          centres = _.map(_.range(2), function () {
+            var locations = _.map(_.range(2), function () {
+              return self.factory.location();
+            });
+            return self.factory.centre({ locations: locations });
+          });
+      return self.factory.centreLocations(centres);
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $componentController) {
+    beforeEach(inject(function(testSuiteMixin) {
       var self = this;
 
-      self.$q                  = self.$injector.get('$q');
-      self.Centre              = self.$injector.get('Centre');
-      self.Specimen            = self.$injector.get('Specimen');
-      self.CollectionEvent     = self.$injector.get('CollectionEvent');
-      self.CollectionEventType = self.$injector.get('CollectionEventType');
-      self.specimenAddModal    = self.$injector.get('specimenAddModal');
-      self.domainEntityService = self.$injector.get('domainEntityService');
-      self.factory             = self.$injector.get('factory');
+      _.extend(self, testSuiteMixin);
+
+      self.injectDependencies('$q',
+                              '$rootScope',
+                              '$componentController',
+                              'Centre',
+                              'Specimen',
+                              'CollectionEvent',
+                              'CollectionEventType',
+                              'specimenAddModal',
+                              'domainEntityService',
+                              'factory');
 
       self.rawSpecimenSpec = self.factory.collectionSpecimenSpec();
       self.rawCollectionEventType = self.factory.collectionEventType(
@@ -36,45 +67,14 @@ define([
       self.specimen = new self.Specimen(self.factory.specimen(),
                                         self.collectionEventType.specimenSpecs[0]);
 
-      self.createController = createController;
-      self.createCentreLocations = createCentreLocations;
-
       spyOn(self.Specimen, 'list').and.returnValue(self.$q.when(self.factory.pagedResult([])));
       spyOn(self.Specimen, 'add').and.returnValue(self.$q.when(self.sepcimen));
       spyOn(self.specimenAddModal, 'open').and.returnValue({ result: self.$q.when([ self.specimen ])});
-      spyOn(self.Centre, 'allLocations').and.returnValue(self.$q.when(createCentreLocations()));
-
-      //---
-
-      function createController(collectionEvent) {
-        collectionEvent = collectionEvent || self.collectionEvent;
-        self.scope = $rootScope.$new();
-        self.controller = $componentController('ceventSpecimensView',
-                                               null,
-                                               { collectionEvent: collectionEvent });
-
-        self.controller.tableController = {
-          tableState: jasmine.createSpy().and.returnValue({
-            sort: { predicate: 'inventoryId', reverse: false },
-            search: {},
-            pagination: { start: 0, totalItemCount: 0 }
-          })
-        };
-      }
-
-      function createCentreLocations() {
-        var centres = _.map(_.range(2), function () {
-          var locations = _.map(_.range(2), function () {
-            return self.factory.location();
-          });
-          return self.factory.centre({ locations: locations });
-        });
-        return self.factory.centreLocations(centres);
-      }
+      spyOn(self.Centre, 'allLocations').and.returnValue(self.$q.when(createCentreLocations.call(self)));
     }));
 
     it('has valid scope', function() {
-      this.createController();
+      createController.call(this);
 
       expect(this.controller.specimens).toBeEmptyArray();
       expect(this.controller.centreLocations).toBeEmptyArray();
@@ -90,7 +90,7 @@ define([
       describe('centre locations', function() {
 
         it('are retrieved the first time addSpecimens is called', function() {
-          this.createController();
+          createController.call(this);
           expect(this.controller.centreLocations).toBeEmptyArray();
           this.controller.addSpecimens();
           this.scope.$digest();
@@ -99,8 +99,8 @@ define([
         });
 
         it('are NOT retrieved a second time', function() {
-          this.createController();
-          this.controller.centreLocations = this.createCentreLocations();
+          createController.call(this);
+          this.controller.centreLocations = createCentreLocations.call(this);
           this.controller.addSpecimens();
           this.scope.$digest();
           expect(this.Centre.allLocations).not.toHaveBeenCalled();
@@ -109,8 +109,8 @@ define([
       });
 
       it('can add a specimen', function() {
-        this.createController();
-        this.controller.centreLocations = this.createCentreLocations();
+        createController.call(this);
+        this.controller.centreLocations = createCentreLocations.call(this);
         this.controller.addSpecimens();
         this.scope.$digest();
         expect(this.Specimen.add).toHaveBeenCalledWith(
@@ -122,14 +122,13 @@ define([
     describe('when removing a specimen', function() {
 
       beforeEach(function() {
-        this.modalService = this.$injector.get('modalService');
-        this.domainEntityService = this.$injector.get('domainEntityService');
+        this.injectDependencies('modalService', 'domainEntityService');
         this.modalService.showModal = jasmine.createSpy().and.returnValue(this.$q.when('OK'));
         this.Specimen.prototype.remove = jasmine.createSpy().and.returnValue(this.$q.when(true));
       });
 
       it('opens a modal to confirm the action', function() {
-        this.createController();
+        createController.call(this);
         this.controller.removeSpecimen(this.specimen);
         this.scope.$digest();
         expect(this.Specimen.prototype.remove).toHaveBeenCalled();
@@ -141,7 +140,7 @@ define([
 
         this.modalService.showModal = jasmine.createSpy().and.returnValue(deferred.promise);
 
-        this.createController();
+        createController.call(this);
         this.controller.removeSpecimen(this.specimen);
         this.scope.$digest();
         expect(this.Specimen.prototype.remove).not.toHaveBeenCalled();

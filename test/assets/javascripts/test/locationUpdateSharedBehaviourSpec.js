@@ -19,9 +19,7 @@ define([
     describe('(shared)', function() {
 
       beforeEach(inject(function() {
-        this.$q                   = this.$injector.get('$q');
-        this.modalInput           = this.$injector.get('modalInput');
-        this.notificationsService = this.$injector.get('notificationsService');
+        this.injectDependencies('$q', 'modalInput', 'notificationsService');
       }));
 
       it('on update should invoke the update method on entity', function() {
@@ -35,7 +33,7 @@ define([
           .and.returnValue(this.$q.when(context.entity));
         spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
-        context.createController();
+        context.createController.call(this);
         this.controller[context.controllerUpdateFuncName](context.locationt);
         this.scope.$digest();
 
@@ -56,7 +54,7 @@ define([
           .and.returnValue(updateDeferred.promise);
         spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-        context.createController();
+        context.createController.call(this);
         this.controller[context.controllerUpdateFuncName](context.annotation);
         this.scope.$digest();
 

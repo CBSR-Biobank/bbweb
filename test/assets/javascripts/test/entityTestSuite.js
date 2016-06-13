@@ -5,19 +5,16 @@
 define(['underscore'], function (_) {
   'use strict';
 
-  entityTestSuiteFactory.$inject = ['$httpBackend'];
+  entityTestSuiteFactory.$inject = ['$httpBackend', 'testSuiteMixin'];
 
-  function entityTestSuiteFactory($httpBackend) {
+  function entityTestSuiteFactory($httpBackend, testSuiteMixin) {
 
     /**
      * A mixin for domain entity test suites.
      *
      * @mixin entityTestSuite
      */
-    var mixin = {
-      updateEntity: updateEntity
-    };
-
+    var mixin = _.extend({ updateEntity: updateEntity }, testSuiteMixin);
     return mixin;
 
     //--

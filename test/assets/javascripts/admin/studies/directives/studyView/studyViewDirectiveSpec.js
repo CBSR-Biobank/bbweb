@@ -13,6 +13,16 @@ define([
 
   describe('Directive: studyViewDirective', function() {
 
+    var createController = function () {
+      this.element = angular.element('<study-view study="vm.study"></study-view>');
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = { study: this.study };
+
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('studyView');
+    };
+
     beforeEach(mocks.module('biobankApp', 'ui.router', 'biobank.test', function($provide) {
       $provide.value('$window', {
         localStorage: {
@@ -22,48 +32,36 @@ define([
       });
     }));
 
-    beforeEach(inject(function($rootScope, $compile, $state, templateMixin, testUtils) {
+    beforeEach(inject(function($state, testSuiteMixin, testUtils) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$window      = self.$injector.get('$window');
-      self.$state       = self.$injector.get('$state');
-      self.Study        = self.$injector.get('Study');
-      self.factory = self.$injector.get('factory');
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              '$window',
+                              '$state',
+                              'Study',
+                              'factory');
 
       self.study = new self.Study(self.factory.study());
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/studyView/studyView.html');
-
-      self.createController = createController;
-
-      //--
-
-      function createController() {
-        self.element = angular.element('<study-view study="vm.study"></study-view>');
-        self.scope = $rootScope.$new();
-        self.scope.vm = { study: self.study };
-
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('studyView');
-      }
     }));
 
     it('should contain a valid study', function() {
-      this.createController();
+      createController.call(this);
       expect(this.controller.study).toBe(this.study);
     });
 
     it('should contain initialized tabs', function() {
-      this.createController();
+      createController.call(this);
       expect(this.controller.tabs).toBeArrayOfSize(4);
     });
 
     it('should contain initialized local storage', function() {
-      this.createController();
+      createController.call(this);
 
       expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.processingTypes', true);
@@ -77,7 +75,7 @@ define([
       var tab;
 
       this.$state.current.name = 'home.admin.studies.study.processing';
-      this.createController();
+      createController.call(this);
 
       tab = _.findWhere(this.controller.tabs, { heading: 'Processing' });
 

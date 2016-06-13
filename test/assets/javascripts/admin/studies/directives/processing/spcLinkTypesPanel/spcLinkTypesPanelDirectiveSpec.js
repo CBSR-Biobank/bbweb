@@ -21,8 +21,8 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (templateMixin, testUtils) {
-      _.extend(this, templateMixin);
+    beforeEach(inject(function (testSuiteMixin, testUtils) {
+      _.extend(this, testSuiteMixin);
 
       factory = this.$injector.get('factory');
 

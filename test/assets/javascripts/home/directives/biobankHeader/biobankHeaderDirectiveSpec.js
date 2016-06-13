@@ -13,39 +13,37 @@ define([
 
   describe('biobankHeaderDirective', function() {
 
+    var createController = function () {
+      this.element = angular.element('<biobank-header></biobank-header>');
+      this.scope = this.$rootScope.$new();
+
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('biobankHeader');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, templateMixin, testUtils) {
+    beforeEach(inject(function(testSuiteMixin, testUtils) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q           = self.$injector.get('$q');
-      self.$state       = self.$injector.get('$state');
-      self.User         = self.$injector.get('User');
-      self.usersService = self.$injector.get('usersService');
-      self.factory = self.$injector.get('factory');
+      self.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              '$state',
+                              'User',
+                              'usersService',
+                              'factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/home/directives/biobankHeader/biobankHeader.html',
         '/assets/javascripts/common/directives/uiBreadcrumbs.tpl.html');
-
-      self.createController = createController;
-
-      ///--
-
-      function createController() {
-        self.element = angular.element('<biobank-header></biobank-header>');
-        self.scope = $rootScope.$new();
-
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('biobankHeader');
-      }
     }));
 
     it('should have valid scope', function() {
-      this.createController();
+      createController.call(this);
       this.scope.$digest();
       expect(this.controller.logout).toBeFunction();
     });
@@ -53,7 +51,7 @@ define([
     it('update user on login', function() {
       var jsonUser = this.factory.user();
 
-      this.createController();
+      createController.call(this);
       expect(this.controller.user).toBeUndefined();
 
       spyOn(this.usersService, 'getCurrentUser').and.returnValue(jsonUser);
@@ -65,7 +63,7 @@ define([
       spyOn(this.usersService, 'logout').and.returnValue(this.$q.when(true));
       spyOn(this.$state, 'go').and.returnValue(true);
 
-      this.createController();
+      createController.call(this);
       this.controller.logout();
       this.scope.$digest();
 
@@ -79,7 +77,7 @@ define([
       spyOn(this.$state, 'go').and.returnValue(true);
       deferred.reject('simulated logout failure');
 
-      this.createController();
+      createController.call(this);
       this.controller.logout();
       this.scope.$digest();
 

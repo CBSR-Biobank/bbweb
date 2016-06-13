@@ -14,14 +14,14 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (serverReplyMixin) {
-      _.extend(this, serverReplyMixin);
+    beforeEach(inject(function (testSuiteMixin, serverReplyMixin) {
+      _.extend(this, testSuiteMixin, serverReplyMixin);
 
-      this.$q           = this.$injector.get('$q');
-      this.$httpBackend = this.$injector.get('$httpBackend');
-      this.$cookies     = this.$injector.get('$cookies');
-      this.biobankApi   = this.$injector.get('biobankApi');
-      this.factory      = this.$injector.get('factory');
+      this.injectDependencies('$q',
+                              '$httpBackend',
+                              '$cookies',
+                              'biobankApi',
+                              'factory');
 
       this.user = this.factory.user();
     }));
@@ -69,7 +69,7 @@ define([
     describe('service functions', function () {
 
       beforeEach(function() {
-        this.usersService = this.$injector.get('usersService');
+        this.injectDependencies('usersService');
       });
 
       it('should return the user that is logged in after a session timeout', function() {

@@ -30,22 +30,22 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testUtils, templateMixin) {
+    beforeEach(inject(function(testUtils, testSuiteMixin) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q                     = self.$injector.get('$q');
-      self.$rootScope             = self.$injector.get('$rootScope');
-      self.$compile               = self.$injector.get('$compile');
-      self.$state                 = self.$injector.get('$state');
-      self.Study                  = self.$injector.get('Study');
-      self.CollectionEventType    = self.$injector.get('CollectionEventType');
-      self.CollectionSpecimenSpec = self.$injector.get('CollectionSpecimenSpec');
-      self.AnnotationType         = self.$injector.get('AnnotationType');
-      self.notificationsService   = self.$injector.get('notificationsService');
-      self.domainEntityService    = self.$injector.get('domainEntityService');
-      self.factory           = self.$injector.get('factory');
+      self.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              '$state',
+                              'Study',
+                              'CollectionEventType',
+                              'CollectionSpecimenSpec',
+                              'AnnotationType',
+                              'notificationsService',
+                              'domainEntityService',
+                              'factory');
 
       self.jsonStudy              = this.factory.study();
       self.jsonCet                = self.factory.collectionEventType(self.jsonStudy);

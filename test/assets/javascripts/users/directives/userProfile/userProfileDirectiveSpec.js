@@ -28,20 +28,20 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, templateMixin, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, testSuiteMixin, testUtils) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$rootScope           = this.$injector.get('$rootScope');
-      self.$compile             = this.$injector.get('$compile');
-      self.$q                   = this.$injector.get('$q');
-      self.factory              = this.$injector.get('factory');
-      self.$uibModal            = this.$injector.get('$uibModal');
-      self.modalService         = this.$injector.get('modalService');
-      self.modalInput           = this.$injector.get('modalInput');
-      self.User                 = this.$injector.get('User');
-      self.notificationsService = this.$injector.get('notificationsService');
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              '$q',
+                              'factory',
+                              '$uibModal',
+                              'modalService',
+                              'modalInput',
+                              'User',
+                              'notificationsService');
 
       self.ctrlMethods = ['updateName', 'updateEmail', 'updateAvatarUrl'];
 
@@ -92,7 +92,7 @@ define(function (require) {
       beforeEach(inject(function () {
         context.controllerFuncName = 'updateEmail';
         context.modalInputFuncName = 'email';
-        context.modalReturnValue = this.factory.stringNext();
+        context.modalReturnValue = this.factory.emailNext();
         context.userUpdateFuncName = 'updateEmail';
       }));
 
@@ -107,7 +107,7 @@ define(function (require) {
       beforeEach(inject(function () {
         context.controllerFuncName = 'updateAvatarUrl';
         context.modalInputFuncName = 'url';
-        context.modalReturnValue = this.factory.stringNext();
+        context.modalReturnValue = this.factory.urlNext();
         context.userUpdateFuncName = 'updateAvatarUrl';
       }));
 
@@ -136,14 +136,14 @@ define(function (require) {
       spyOn(this.modalService, 'showModal')
         .and.returnValue({ result: this.$q.when('OK')});
       spyOn(this.User.prototype, 'updateAvatarUrl').and.returnValue(deferred.promise);
-      spyOn(this.notificationsService, 'error').and.returnValue(null);
+      spyOn(this.notificationsService, 'updateError').and.returnValue(null);
 
       deferred.reject({ data: { message: 'xxx' } });
 
       createController.call(this, user);
       this.controller.removeAvatarUrl();
       this.scope.$digest();
-      expect(this.notificationsService.error).toHaveBeenCalled();
+      expect(this.notificationsService.updateError).toHaveBeenCalled();
     });
 
     it('can update users password', function() {
@@ -182,19 +182,18 @@ define(function (require) {
         { result: this.$q.when({ currentPassword: 'xx', newPassword: 'xx' })});
       spyOn(this.User.prototype, 'updatePassword').and.returnValue(
         this.$q.reject({ data: { message: 'xxx' } }));
-      spyOn(this.notificationsService, 'error').and.returnValue(null);
+      spyOn(this.notificationsService, 'updateError').and.returnValue(null);
 
       createController.call(this, user);
       this.controller.updatePassword();
       this.scope.$digest();
-      expect(this.notificationsService.error).toHaveBeenCalled();
+      expect(this.notificationsService.updateError).toHaveBeenCalled();
     });
 
     function sharedUpdateBehaviour(context) {
 
       beforeEach(inject(function () {
-        this.modalInput = this.$injector.get('modalInput');
-        this.notificationsService = this.$injector.get('notificationsService');
+        this.injectDependencies('modalInput', 'notificationsService');
         this.user = new this.User(this.factory.user());
       }));
 
@@ -220,13 +219,13 @@ define(function (require) {
             .and.returnValue({ result: this.$q.when(context.modalReturnValue)});
           spyOn(this.User.prototype, context.userUpdateFuncName)
             .and.returnValue(this.$q.reject({ data: { message: 'simulated error'}}));
-          spyOn(this.notificationsService, 'error').and.returnValue(this.$q.when('OK'));
+          spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
           createController.call(this, this.user);
           this.controller[context.controllerFuncName]();
           this.scope.$digest();
 
-          expect(this.notificationsService.error).toHaveBeenCalled();
+          expect(this.notificationsService.updateError).toHaveBeenCalled();
         });
 
       });

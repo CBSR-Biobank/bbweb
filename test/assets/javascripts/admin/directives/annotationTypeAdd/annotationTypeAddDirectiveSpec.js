@@ -13,53 +13,53 @@ define([
 
   describe('Directive: annotationTypeAddDirective', function() {
 
+    var createController = function () {
+      this.element = angular.element([
+        '<annotation-type-add',
+        '  on-submit="vm.onSubmit"',
+        '  on-cancel="vm.onCancel()"',
+        '</annotation-type-add>'
+      ].join(''));
+
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = {
+        onSubmit: this.onSubmit,
+        onCancel: this.onCancel
+      };
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('annotationTypeAdd');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, testUtils, factory, templateMixin) {
+    beforeEach(inject(function (testUtils, factory, testSuiteMixin) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.AnnotationType      = self.$injector.get('AnnotationType');
-      self.AnnotationValueType = self.$injector.get('AnnotationValueType');
-      self.factory        = self.$injector.get('factory');
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              'AnnotationType',
+                              'AnnotationValueType',
+                              'factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/annotationTypeAdd/annotationTypeAdd.html');
 
       self.onSubmit = jasmine.createSpy('onSubmit');
       self.onCancel = jasmine.createSpy('onCancel');
-
-      self.createController = createController;
-
-      function createController() {
-        self.element = angular.element([
-          '<annotation-type-add',
-          '  on-submit="vm.onSubmit"',
-          '  on-cancel="vm.onCancel()"',
-          '</annotation-type-add>'
-        ].join(''));
-
-        self.scope = $rootScope.$new();
-        self.scope.vm = {
-          onSubmit: self.onSubmit,
-          onCancel: self.onCancel
-        };
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('annotationTypeAdd');
-      }
     }));
 
     it('scope should be valid when adding', function() {
-      this.createController();
+      createController.call(this);
       expect(this.controller.annotationType).toEqual(jasmine.any(this.AnnotationType));
       expect(this.controller.title).toBe('Add Annotation Type');
       expect(this.controller.valueTypes).toEqual(_.values(this.AnnotationValueType));
     });
 
     it('maxValueCountRequired is valid', function() {
-      this.createController();
+      createController.call(this);
 
       this.controller.annotationType.valueType = this.AnnotationValueType.SELECT;
 
@@ -77,7 +77,7 @@ define([
     });
 
     it('calling valueTypeChange clears the options array', function() {
-      this.createController();
+      createController.call(this);
 
       this.controller.annotationType.valueType = 'Select';
       this.controller.annotationType.maxValueCount = 1;
@@ -88,7 +88,7 @@ define([
     });
 
     it('calling optionAdd appends to the options array', function() {
-      this.createController();
+      createController.call(this);
 
       this.controller.annotationType.valueType = 'Select';
       this.controller.annotationType.maxValueCount = 1;
@@ -100,7 +100,7 @@ define([
     });
 
     it('calling optionRemove throws an error on empty array', function() {
-      this.createController();
+      createController.call(this);
 
       this.controller.annotationType.valueType = 'Select';
       this.controller.annotationType.maxValueCount = 1;
@@ -109,7 +109,7 @@ define([
     });
 
     it('calling optionRemove throws an error if removal results in empty array', function() {
-      this.createController();
+      createController.call(this);
 
       this.controller.annotationType.valueType = 'Select';
       this.controller.annotationType.maxValueCount = 1;
@@ -119,7 +119,7 @@ define([
     });
 
     it('calling optionRemove removes an option', function() {
-      this.createController();
+      createController.call(this);
 
       // note: more than two strings in options array
       var options = ['abc', 'def'];
@@ -132,7 +132,7 @@ define([
     });
 
     it('calling removeButtonDisabled returns valid results', function() {
-      this.createController();
+      createController.call(this);
 
       // note: more than two strings in options array
       var options = ['abc', 'def'];
@@ -148,7 +148,7 @@ define([
     });
 
     it('should invoke submit function', function() {
-      this.createController();
+      createController.call(this);
 
       var annotType = new this.AnnotationType(this.factory.annotationType());
       this.controller.submit(annotType);
@@ -156,7 +156,7 @@ define([
     });
 
     it('should invoke cancel function', function() {
-      this.createController();
+      createController.call(this);
 
       this.controller.cancel();
       expect(this.onCancel).toHaveBeenCalled();

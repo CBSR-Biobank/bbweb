@@ -11,11 +11,12 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function () {
-      this.$q                  = this.$injector.get('$q');
-      this.rootScope           = this.$injector.get('$rootScope');
-      this.domainEntityService = this.$injector.get('domainEntityService');
-      this.modalService        = this.$injector.get('modalService');
+    beforeEach(inject(function (testSuiteMixin) {
+      _.extend(this, testSuiteMixin);
+      this.injectDependencies('$q',
+                              '$rootScope',
+                              'domainEntityService',
+                              'modalService');
     }));
 
     describe('updateErrorModal', function () {
@@ -81,7 +82,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
                                               removeFailedHeader,
                                               removeFailedBody)
           .then(function () { done(); });
-        this.rootScope.$digest();
+        this.$rootScope.$digest();
         expect(this.remove).toHaveBeenCalled();
       });
 
@@ -101,7 +102,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
                                               removeFailedHeader,
                                               removeFailedBody);
 
-        this.rootScope.$digest();
+        this.$rootScope.$digest();
         expect(this.remove).not.toHaveBeenCalled();
       });
 
@@ -122,7 +123,7 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
                                          body,
                                          removeFailedHeader,
                                          removeFailedBody);
-        this.rootScope.$digest();
+        this.$rootScope.$digest();
         expect(this.remove).toHaveBeenCalled();
         expect(this.modalService.showModal.calls.count()).toEqual(2);
       });

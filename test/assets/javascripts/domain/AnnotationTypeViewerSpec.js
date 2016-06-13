@@ -16,14 +16,15 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function() {
-      this.modal                = this.$injector.get('$uibModal');
-      this.Study                = this.$injector.get('Study');
-      this.AnnotationType       = this.$injector.get('AnnotationType');
-      this.AnnotationValueType  = this.$injector.get('AnnotationValueType');
-      this.AnnotationTypeViewer = this.$injector.get('AnnotationTypeViewer');
-      this.factory         = this.$injector.get('factory');
-      this.testUtils            = this.$injector.get('testUtils');
+    beforeEach(inject(function(testSuiteMixin) {
+      _.extend(this, testSuiteMixin);
+      this.injectDependencies('$uibModal',
+                              'Study',
+                              'AnnotationType',
+                              'AnnotationValueType',
+                              'AnnotationTypeViewer',
+                              'factory',
+                              'testUtils');
 
       this.study = new this.Study(this.factory.study());
 
@@ -40,14 +41,14 @@ define([
       var self = this,
           count = 0;
 
-      spyOn(self.modal, 'open').and.returnValue(this.testUtils.fakeModal());
+      spyOn(self.$uibModal, 'open').and.returnValue(this.testUtils.fakeModal());
 
       _.each(this.annotatationTypeOptions, function (options) {
         // jshint unused:false
         var annotationType = new self.AnnotationType(self.factory.annotationType(options)),
             viewer = new self.AnnotationTypeViewer(annotationType);
         count++;
-        expect(self.modal.open.calls.count()).toBe(count);
+        expect(self.$uibModal.open.calls.count()).toBe(count);
       });
     });
 

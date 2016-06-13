@@ -14,33 +14,33 @@ define(function (require) {
 
   describe('Directive: studySummaryDirective', function() {
 
-      var createController = function () {
-        this.element = angular.element('<study-summary study="vm.study"></study-summary>');
-        this.scope = this.$rootScope.$new();
-        this.scope.vm = { study: this.study };
+    var createController = function () {
+      this.element = angular.element('<study-summary study="vm.study"></study-summary>');
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = { study: this.study };
 
-        this.$compile(this.element)(this.scope);
-        this.scope.$digest();
-        this.controller = this.element.controller('studySummary');
-      };
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('studySummary');
+    };
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(templateMixin, testUtils) {
+    beforeEach(inject(function(testSuiteMixin, testUtils) {
       var self = this,
           ceventType;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q                   = self.$injector.get('$q');
-      self.$rootScope           = self.$injector.get('$rootScope');
-      self.$compile             = self.$injector.get('$compile');
-      self.$state               = self.$injector.get('$state');
-      self.Study                = self.$injector.get('Study');
-      self.CollectionEventType  = self.$injector.get('CollectionEventType');
-      self.modalService         = self.$injector.get('modalService');
-      self.notificationsService = self.$injector.get('notificationsService');
-      self.factory              = self.$injector.get('factory');
+      self.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              '$state',
+                              'Study',
+                              'CollectionEventType',
+                              'modalService',
+                              'notificationsService',
+                              'factory');
 
       ceventType = new self.CollectionEventType(self.factory.collectionEventType());
 

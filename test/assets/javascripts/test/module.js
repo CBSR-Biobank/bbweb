@@ -18,7 +18,7 @@ define(function (require) {
   module.service('testUtils',          require('../../../test/assets/javascripts/test/testUtils'));
 
   module.factory('entityTestSuite',    require('../../../test/assets/javascripts/test/entityTestSuite'));
-  module.factory('templateMixin',      require('../../../test/assets/javascripts/test/templateMixin'));
+  module.factory('testSuiteMixin',     require('../../../test/assets/javascripts/test/testSuiteMixin'));
   module.factory('serverReplyMixin',   require('../../../test/assets/javascripts/test/serverReplyMixin'));
 
   module.factory('hasAnnotationsEntityTestSuite',

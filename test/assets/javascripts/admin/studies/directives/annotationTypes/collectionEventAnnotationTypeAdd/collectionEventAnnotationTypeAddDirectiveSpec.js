@@ -11,42 +11,42 @@ define(function(require) {
 
   describe('Directive: collectionEventAnnotationTypeAddDirective', function() {
 
+    var createController = function () {
+      this.element = angular.element([
+        '<collection-event-annotation-type-add',
+        '  collection-event-type="vm.ceventType">',
+        '</collection-event-annotation-type-add>'
+      ].join(''));
+
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = { ceventType: this.collectionEventType };
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('collectionEventAnnotationTypeAdd');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, templateMixin, testUtils) {
+    beforeEach(inject(function(testSuiteMixin, testUtils) {
       var self = this;
 
-      _.extend(self, templateMixin);
-
-      self.CollectionEventType = self.$injector.get('CollectionEventType');
-      self.AnnotationType      = self.$injector.get('AnnotationType');
-      self.factory        = self.$injector.get('factory');
+      _.extend(self, testSuiteMixin);
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              'CollectionEventType',
+                              'AnnotationType',
+                              'factory');
 
       self.collectionEventType = new self.CollectionEventType(
         self.factory.collectionEventType(self.factory.study()));
-      self.createController = createController;
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/annotationTypes/collectionEventAnnotationTypeAdd/collectionEventAnnotationTypeAdd.html',
         '/assets/javascripts/admin/directives/annotationTypeAdd/annotationTypeAdd.html');
-
-      function createController() {
-        self.element = angular.element([
-          '<collection-event-annotation-type-add',
-          '  collection-event-type="vm.ceventType">',
-          '</collection-event-annotation-type-add>'
-        ].join(''));
-
-        self.scope = $rootScope.$new();
-        self.scope.vm = { ceventType: self.collectionEventType };
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('collectionEventAnnotationTypeAdd');
-      }
     }));
 
     it('should have  valid scope', function() {
-      this.createController();
+      createController.call(this);
       expect(this.controller.collectionEventType).toBe(this.collectionEventType);
     });
 
@@ -54,7 +54,7 @@ define(function(require) {
       var context = {};
 
       beforeEach(inject(function () {
-        context.createController          = this.createController;
+        context.createController          = createController;
         context.scope                     = this.scope;
         context.controller                = this.controller;
         context.entity                    = this.CollectionEventType;

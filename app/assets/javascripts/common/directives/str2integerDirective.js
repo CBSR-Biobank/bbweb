@@ -20,8 +20,10 @@ define(function (){
     function link(scope, element, attrs, ctrl) {
       ctrl.$parsers.unshift(function(viewValue){
         if (INTEGER_REGEXP.test(viewValue)) {
+          ctrl.$setValidity('str2integer', true);
           return viewValue;
         }
+        ctrl.$setValidity('str2integer', false);
         return undefined;
       });
     }

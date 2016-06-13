@@ -90,8 +90,9 @@ define([
       // utilities
       domainEntityNameNext:              domainEntityNameNext,
       stringNext:                        stringNext,
+      emailNext:                         emailNext,
+      urlNext:                           urlNext,
       pagedResult:                       pagedResult,
-
 
       ENTITY_NAME_PROCESSING_TYPE:       ENTITY_NAME_PROCESSING_TYPE,
       ENTITY_NAME_SPECIMEN_LINK_TYPE:    ENTITY_NAME_SPECIMEN_LINK_TYPE,
@@ -136,6 +137,14 @@ define([
 
     function stringNext() {
       return domainEntityNameNext();
+    }
+
+    function emailNext() {
+      return faker.internet.email();
+    }
+
+    function urlNext() {
+      return faker.internet.url();
     }
 
     function updateDefaultEntity(entityName, entity) {

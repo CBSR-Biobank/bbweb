@@ -57,7 +57,7 @@ define(function () {
     }
 
     function updateError(err) {
-      notificationsService.error(
+      notificationsService.updateError(
         'Your change could not be saved: ' + err.data.message,
         'Cannot apply your change');
     }
@@ -73,27 +73,25 @@ define(function () {
     function updateName() {
       var name = vm.user.name;
 
-      modalInput.text(
-        'Update user name',
-        'Name',
-        name,
-        { required: true, minLength: 2 }
-      ).result.then(function (name) {
-        vm.user.updateName(name)
-          .then(postUpdate('User name updated successfully.',
+      modalInput.text('Update user name',
+                      'Name',
+                      name,
+                      { required: true, minLength: 2 })
+        .result.then(function (name) {
+          vm.user.updateName(name)
+            .then(postUpdate('User name updated successfully.',
                              'Update successful',
-                           1500))
-          .catch(updateError);
-      });
+                             1500))
+            .catch(updateError);
+        });
     }
 
     function updateEmail() {
-      modalInput.email(
-        'Update user email',
-        'Email',
-        vm.user.email,
-        { required: true }
-      ).result.then(function (email) {
+      modalInput.email('Update user email',
+                       'Email',
+                       vm.user.email,
+                       { required: true })
+        .result.then(function (email) {
         vm.user.updateEmail(email)
           .then(postUpdate('Email updated successfully.',
                            'Update successful',
@@ -105,14 +103,14 @@ define(function () {
     function updateAvatarUrl() {
       modalInput.url('Update avatar URL',
                      'Avatar URL',
-                     vm.user.avatarUrl
-      ).result.then(function (avatarUrl) {
-        vm.user.updateAvatarUrl(avatarUrl)
-          .then(postUpdate('Avatar URL updated successfully.',
-                           'Update successful',
-                           1500))
-          .catch(updateError);
-      });
+                     vm.user.avatarUrl)
+        .result.then(function (avatarUrl) {
+          vm.user.updateAvatarUrl(avatarUrl)
+            .then(postUpdate('Avatar URL updated successfully.',
+                             'Update successful',
+                             1500))
+            .catch(updateError);
+        });
     }
 
     function removeAvatarUrl() {

@@ -11,42 +11,40 @@ define([
 
   describe('Directive: participantAnnotationTypeAddDirective', function() {
 
+    var createController = function () {
+      this.element = angular.element([
+        '<participant-annotation-type-add',
+        '  study="vm.study"',
+        '</participant-annotation-type-add>'
+      ].join(''));
+
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = { study: this.study };
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('participantAnnotationTypeAdd');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, templateMixin, testUtils) {
+    beforeEach(inject(function(testSuiteMixin, testUtils) {
       var self = this;
 
-      _.extend(self, templateMixin);
-
-      self.Study          = self.$injector.get('Study');
-      self.factory   = self.$injector.get('factory');
+      _.extend(self, testSuiteMixin);
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              'Study',
+                              'factory');
 
       self.study = new self.Study(self.factory.study());
-      self.createController = createController;
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/annotationTypes/participantAnnotationTypeAdd/participantAnnotationTypeAdd.html',
         '/assets/javascripts/admin/directives/annotationTypeAdd/annotationTypeAdd.html');
-
-      //---
-
-      function createController() {
-        self.element = angular.element([
-          '<participant-annotation-type-add',
-          '  study="vm.study"',
-          '</participant-annotation-type-add>'
-        ].join(''));
-
-        self.scope = $rootScope.$new();
-        self.scope.vm = { study: self.study };
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('participantAnnotationTypeAdd');
-      }
     }));
 
     it('should have  valid scope', function() {
-      this.createController();
+      createController.call(this);
       expect(this.controller.study).toBe(this.study);
     });
 
@@ -54,7 +52,7 @@ define([
       var context = {};
 
       beforeEach(inject(function () {
-        context.createController          = this.createController;
+        context.createController          = createController;
         context.scope                     = this.scope;
         context.controller                = this.controller;
         context.entity                    = this.Study;

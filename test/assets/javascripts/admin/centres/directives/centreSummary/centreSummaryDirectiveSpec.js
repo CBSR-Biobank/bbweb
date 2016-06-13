@@ -13,18 +13,29 @@ define([
 
   describe('Directive: centreSummaryDirective', function() {
 
+    var createController = function (centre) {
+      this.element = angular.element('<centre-summary centre="vm.centre"></centre-summary>');
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = { centre: this.centre };
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('centreSummary');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, modalService, templateMixin) {
+    beforeEach(inject(function(modalService, testSuiteMixin) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q                   = self.$injector.get('$q');
-      self.Centre               = self.$injector.get('Centre');
-      self.CentreStatus         = self.$injector.get('CentreStatus');
-      self.notificationsService = self.$injector.get('notificationsService');
-      self.factory              = self.$injector.get('factory');
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              '$q',
+                              'Centre',
+                              'CentreStatus',
+                              'notificationsService',
+                              'factory');
 
       self.centre = new self.Centre(self.factory.centre());
 
@@ -36,23 +47,10 @@ define([
         '/assets/javascripts/admin/centres/directives/centreSummary/centreSummary.html',
         '/assets/javascripts/common/directives/truncateToggle.html',
         '/assets/javascripts/admin/directives/statusLine/statusLine.html');
-
-      self.createController = createController;
-
-      //--
-
-      function createController(centre) {
-        self.element = angular.element('<centre-summary centre="vm.centre"></centre-summary>');
-        self.scope = $rootScope.$new();
-        self.scope.vm = { centre: self.centre };
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('centreSummary');
-      }
     }));
 
     it('should contain valid settings to display the centre summary', function() {
-      this.createController(this.centre);
+      createController.call(this, this.centre);
       expect(this.scope.vm.centre).toBe(this.centre);
       expect(this.controller.descriptionToggleLength).toBeDefined();
     });
@@ -63,7 +61,7 @@ define([
         /* jshint validthis: true */
         var self = this;
 
-        self.createController(self.centre);
+        createController.call(self, self.centre);
 
         spyOn(self.Centre.prototype, status).and.callFake(function () {
           centre.status = (centre.status === self.CentreStatus.ENABLED) ?

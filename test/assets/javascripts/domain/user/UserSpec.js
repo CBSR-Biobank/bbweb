@@ -19,10 +19,10 @@ define([
 
       _.extend(self, entityTestSuite);
 
-      self.$httpBackend = self.$injector.get('$httpBackend');
-      self.User         = self.$injector.get('User');
-      self.UserStatus   = self.$injector.get('UserStatus');
-      self.factory = self.$injector.get('factory');
+      self.injectDependencies('$httpBackend',
+                              'User',
+                              'UserStatus',
+                              'factory');
 
       self.statusChangeShared = statusChangeShared;
 

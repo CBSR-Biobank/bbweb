@@ -14,34 +14,34 @@ define([
 
   describe('Controller: ForgotPasswordCtrl', function() {
 
+    var createController = function () {
+        this.scope = this.$rootScope.$new();
+
+        this.$controller('ForgotPasswordCtrl as vm', {
+          $scope:       this.scope,
+          $state:       this.$state,
+          usersService: this.usersService,
+          modalService: this.modalService
+        });
+        this.scope.$digest();
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $controller) {
+    beforeEach(inject(function(testSuiteMixin) {
       var self = this;
-
-      self.$q                   = self.$injector.get('$q');
-      self.$state               = self.$injector.get('$state');
-      self.usersService         = self.$injector.get('usersService');
-      self.modalService         = self.$injector.get('modalService');
-      self.notificationsService = self.$injector.get('notificationsService');
-
-      self.createController = createController;
-
-      function createController() {
-        self.scope = $rootScope.$new();
-
-        $controller('ForgotPasswordCtrl as vm', {
-          $scope:       self.scope,
-          $state:       self.$state,
-          usersService: self.usersService,
-          modalService: self.modalService
-        });
-        self.scope.$digest();
-      }
+      _.extend(self, testSuiteMixin);
+      self.injectDependencies('$rootScope',
+                              '$controller',
+                              '$q',
+                              '$state',
+                              'usersService',
+                              'modalService',
+                              'notificationsService');
     }));
 
     it('has valid scope', function() {
-      this.createController();
+      createController.call(this);
       expect(this.scope.vm.email).toBe('');
     });
 
@@ -51,7 +51,7 @@ define([
       spyOn(this.usersService, 'passwordReset').and.returnValue(this.$q.when('OK'));
       spyOn(this.$state, 'go').and.callFake(function () {});
 
-      this.createController();
+      createController.call(this);
       this.scope.vm.submit(email);
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home.users.forgot.passwordSent',
@@ -65,7 +65,7 @@ define([
       spyOn(this.usersService, 'passwordReset').and.returnValue(deferred.promise);
       spyOn(this.$state, 'go').and.callFake(function () {});
 
-      this.createController();
+      createController.call(this);
       this.scope.vm.submit(email);
       deferred.reject({ status: 'error', message: 'email address not registered'});
       this.scope.$digest();
@@ -80,7 +80,7 @@ define([
       spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
       spyOn(this.$state, 'go').and.callFake(function () {});
 
-      this.createController();
+      createController.call(this);
       this.scope.vm.submit(email);
       deferred.reject({ status: 'error', message: 'xxxx'});
       this.scope.$digest();
@@ -99,7 +99,7 @@ define([
       userServiceDeferred.reject({ status: 'error', message: 'xxxx'});
       modalDeferred.reject('Cancel');
 
-      this.createController();
+      createController.call(this);
       this.scope.vm.submit(email);
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home');

@@ -18,9 +18,9 @@ define([
 
     describe('Service: specimenAddModal', function() {
 
-      beforeEach(inject(function() {
-        this.$uibModal   = this.$injector.get('$uibModal');
-        this.specimenAddModal = this.$injector.get('specimenAddModal');
+      beforeEach(inject(function(testSuiteMixin) {
+        _.extend(this, testSuiteMixin);
+        this.injectDependencies('$uibModal', 'specimenAddModal');
       }));
 
       it('service has correct functions', function() {
@@ -37,15 +37,58 @@ define([
 
     describe('Controller: specimenAddModal modal instance', function() {
 
-      beforeEach(inject(function($rootScope, $controller) {
+      var createController = function (centreLocations, specimenSpecs) {
+        centreLocations = centreLocations || [];
+        specimenSpecs = specimenSpecs || [];
+        this.scope = this.$rootScope.$new();
+        this.scope.form = { $setPristine: jasmine.createSpy('modalInstance.form') };
+
+        this.$controller('specimenAddModal.ModalInstanceController as vm', {
+          $scope:            this.scope,
+          $window:           this.$window,
+          $timeout:          this.$timeout,
+          $uibModalInstance: this.modalInstance,
+          bbwebConfig:       this.bbwebConfig,
+          Specimen:          this.Specimen,
+          timeService:       this.timeService,
+          centreLocations:   centreLocations,
+          specimenSpecs:     specimenSpecs
+        });
+        this.scope.$digest();
+      };
+
+      var createCentreLocations = function () {
+        var self = this,
+            centres = _.map(_.range(2), function () {
+              var locations = _.map(_.range(2), function () {
+                return self.factory.location();
+              });
+              return self.factory.centre({ locations: locations });
+            });
+        return self.factory.centreLocations(centres);
+      };
+
+      var createSpecimenSpecs = function () {
+        var self = this;
+        return _.map(_.range(2), function () {
+          return self.factory.collectionSpecimenSpec();
+        });
+      };
+
+      beforeEach(inject(function(testSuiteMixin) {
         var self = this;
 
-        self.$window     = self.$injector.get('$window');
-        self.$timeout    = self.$injector.get('$timeout');
-        self.bbwebConfig = self.$injector.get('bbwebConfig');
-        self.Specimen    = self.$injector.get('Specimen');
-        self.timeService = self.$injector.get('timeService');
-        self.factory     = self.$injector.get('factory');
+        _.extend(self, testSuiteMixin);
+
+        self.injectDependencies('$q',
+                                '$rootScope',
+                                '$controller',
+                                '$window',
+                                '$timeout',
+                                'bbwebConfig',
+                                'Specimen',
+                                'timeService',
+                                'factory');
 
         self.modalInstance = {
           close: jasmine.createSpy('modalInstance.close'),
@@ -54,52 +97,10 @@ define([
             then: jasmine.createSpy('modalInstance.result.then')
           }
         };
-        self.createController = createController;
-        self.createCentreLocations = createCentreLocations;
-        self.createSpecimenSpecs = createSpecimenSpecs;
-
-        //---
-
-        function createController(centreLocations, specimenSpecs) {
-          centreLocations = centreLocations || [];
-          specimenSpecs = specimenSpecs || [];
-          self.scope = $rootScope.$new();
-          self.scope.form = { $setPristine: jasmine.createSpy('modalInstance.form') };
-
-          $controller('specimenAddModal.ModalInstanceController as vm', {
-            $scope:            self.scope,
-            $window:           self.$window,
-            $timeout:          self.$timeout,
-            $uibModalInstance: self.modalInstance,
-            bbwebConfig:       self.bbwebConfig,
-            Specimen:          self.Specimen,
-            timeService:       self.timeService,
-            centreLocations:   centreLocations,
-            specimenSpecs:     specimenSpecs
-          });
-          self.scope.$digest();
-        }
-
-        function createCentreLocations() {
-          var centres = _.map(_.range(2), function () {
-            var locations = _.map(_.range(2), function () {
-              return self.factory.location();
-            });
-            return self.factory.centre({ locations: locations });
-          });
-          return self.factory.centreLocations(centres);
-        }
-
-        function createSpecimenSpecs() {
-          return _.map(_.range(2), function () {
-            return self.factory.collectionSpecimenSpec();
-          });
-        }
-
       }));
 
       it('has valid scope', function() {
-        this.createController();
+        createController.call(this);
 
         expect(this.scope.vm.inventoryId).toBeUndefined();
         expect(this.scope.vm.selectedSpecimenSpec).toBeUndefined();
@@ -124,10 +125,10 @@ define([
       });
 
       it('modal is closed when okPressed is called', function () {
-        var centreLocations = this.createCentreLocations(),
-            specimenSpecs = this.createSpecimenSpecs();
+        var centreLocations = createCentreLocations.call(this),
+            specimenSpecs = createSpecimenSpecs.call(this);
 
-        this.createController(centreLocations, specimenSpecs);
+        createController.call(this, centreLocations, specimenSpecs);
         this.scope.vm.selectedSpecimenSpec = specimenSpecs[0];
         this.scope.vm.okPressed();
         expect(this.modalInstance.close).toHaveBeenCalled();
@@ -136,10 +137,10 @@ define([
       describe('when nextPressed is called', function () {
 
         beforeEach(function() {
-          var centreLocations = this.createCentreLocations(),
-              specimenSpecs = this.createSpecimenSpecs();
+          var centreLocations = createCentreLocations.call(this),
+              specimenSpecs = createSpecimenSpecs.call(this);
 
-          this.createController(centreLocations, specimenSpecs);
+          createController.call(this, centreLocations, specimenSpecs);
           this.scope.vm.selectedSpecimenSpec = specimenSpecs[0];
           this.scope.vm.selectedLocationId = centreLocations[0].locationId;
           this.scope.vm.nextPressed();
@@ -166,23 +167,23 @@ define([
       });
 
       it('modal is closed when closedPressed is called', function() {
-        this.createController();
+        createController.call(this);
         this.scope.vm.closePressed();
         expect(this.modalInstance.dismiss).toHaveBeenCalled();
       });
 
       it('opens the calendar when use default is unchecked', function() {
-        var centreLocations = this.createCentreLocations(),
-            specimenSpecs = this.createSpecimenSpecs();
+        var centreLocations = createCentreLocations.call(this),
+            specimenSpecs = createSpecimenSpecs.call(this);
 
-        this.createController(centreLocations, specimenSpecs);
+        createController.call(this, centreLocations, specimenSpecs);
         this.scope.vm.openCalendar();
         expect(this.scope.vm.calendarOpen).toBe(true);
       });
 
       it('when specimenSpecChanged amount, defaultAmount and units are assigned', function() {
-        var centreLocations = this.createCentreLocations(),
-            specimenSpecs = this.createSpecimenSpecs();
+        var centreLocations = createCentreLocations.call(this),
+            specimenSpecs = createSpecimenSpecs.call(this);
 
         specimenSpecs[0].amount = 10;
         specimenSpecs[1].amount = 20;
@@ -190,7 +191,7 @@ define([
         specimenSpecs[0].units = 'mL';
         specimenSpecs[1].units = 'g';
 
-        this.createController(centreLocations, specimenSpecs);
+        createController.call(this, centreLocations, specimenSpecs);
         this.scope.vm.selectedSpecimenSpec = specimenSpecs[0];
         this.scope.vm.specimenSpecChanged();
 

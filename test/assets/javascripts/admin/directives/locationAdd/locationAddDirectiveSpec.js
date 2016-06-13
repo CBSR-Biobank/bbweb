@@ -13,19 +13,38 @@ define([
 
   describe('Directive: locationAddDirective', function() {
 
+    var createController = function (onSubmit, onCancel) {
+      this.element = angular.element([
+        '<location-add ',
+        '  on-submit="vm.onSubmit"',
+        '  on-cancel="vm.onCancel">',
+        '</location-add>'
+      ].join(''));
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = {
+        onSubmit: onSubmit,
+        onCancel: onCancel
+      };
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('locationAdd');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, $state, templateMixin) {
+    beforeEach(inject(function ($state, testSuiteMixin) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$state               = self.$injector.get('$state');
-      self.Centre               = self.$injector.get('Centre');
-      self.Location             = self.$injector.get('Location');
-      self.factory         = self.$injector.get('factory');
-      self.domainEntityService  = self.$injector.get('domainEntityService');
-      self.notificationsService = self.$injector.get('notificationsService');
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              '$state',
+                              'Centre',
+                              'Location',
+                              'factory',
+                              'domainEntityService',
+                              'notificationsService');
 
       self.centre = new self.Centre(self.factory.centre());
       self.location = new self.Location();
@@ -43,27 +62,10 @@ define([
 
       //--
 
-      function createController(onSubmit, onCancel) {
-        self.element = angular.element([
-          '<location-add ',
-          '  on-submit="vm.onSubmit"',
-          '  on-cancel="vm.onCancel">',
-          '</location-add>'
-        ].join(''));
-        self.scope = $rootScope.$new();
-        self.scope.vm = {
-          onSubmit: onSubmit,
-          onCancel: onCancel
-        };
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('locationAdd');
-      }
-
     }));
 
     it('scope should be valid', function() {
-      this.createController(this.onSubmit, this.onCancel);
+      createController.call(this, this.onSubmit, this.onCancel);
       expect(this.controller.onSubmit).toBeFunction();
       expect(this.controller.onCancel).toBeFunction();
     });
@@ -71,14 +73,14 @@ define([
     it('should invoke function on submit', function() {
       var location = new this.Location();
 
-      this.createController(this.onSubmit, this.onCancel);
+      createController.call(this, this.onSubmit, this.onCancel);
       this.controller.submit(location);
       this.scope.$digest();
       expect(this.onSubmit).toHaveBeenCalledWith(location);
     });
 
     it('should invoke function on cancel', function() {
-      this.createController(this.onSubmit, this.onCancel);
+      createController.call(this, this.onSubmit, this.onCancel);
       this.controller.cancel();
       this.scope.$digest();
       expect(this.onCancel).toHaveBeenCalled();

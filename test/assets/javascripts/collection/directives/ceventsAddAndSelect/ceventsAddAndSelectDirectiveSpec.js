@@ -13,21 +13,42 @@ define([
 
   describe('ceventsAddAndSelectDirective', function() {
 
+    var createController = function () {
+      this.element = angular.element([
+        '<cevents-add-and-select',
+        '  participant="vm.participant"',
+        '  collection-events-paged-result="vm.collectionEventsPagedResult"',
+        '  collection-event-types="vm.collectionEventTypes">',
+        '</cevents-add-and-select>'
+      ].join(''));
+
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = {
+        participant:                 this.participant,
+        collectionEventsPagedResult: this.pagedResult,
+        collectionEventTypes:        this.collectionEventTypes
+      };
+
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('ceventsAddAndSelect');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(templateMixin) {
+    beforeEach(inject(function(testSuiteMixin) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$q                  = self.$injector.get('$q');
-      self.$rootScope          = self.$injector.get('$rootScope');
-      self.$compile            = self.$injector.get('$compile');
-      self.$state              = self.$injector.get('$state');
-      self.Participant         = self.$injector.get('Participant');
-      self.CollectionEvent     = self.$injector.get('CollectionEvent');
-      self.CollectionEventType = self.$injector.get('CollectionEventType');
-      self.factory        = self.$injector.get('factory');
+      self.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              '$state',
+                              'Participant',
+                              'CollectionEvent',
+                              'CollectionEventType',
+                              'factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/ceventsAddAndSelect/ceventsAddAndSelect.html');
@@ -42,29 +63,8 @@ define([
       this.collectionEventTypes = [ new this.CollectionEventType(this.jsonCeventType) ];
     }));
 
-    function createController(test) {
-      test.element = angular.element([
-        '<cevents-add-and-select',
-        '  participant="vm.participant"',
-        '  collection-events-paged-result="vm.collectionEventsPagedResult"',
-        '  collection-event-types="vm.collectionEventTypes">',
-        '</cevents-add-and-select>'
-      ].join(''));
-
-      test.scope = test.$rootScope.$new();
-      test.scope.vm = {
-        participant:                 test.participant,
-        collectionEventsPagedResult: test.pagedResult,
-        collectionEventTypes:        test.collectionEventTypes
-      };
-
-      test.$compile(test.element)(test.scope);
-      test.scope.$digest();
-      test.controller = test.element.controller('ceventsAddAndSelect');
-    }
-
     it('has valid scope', function() {
-      createController(this);
+      createController.call(this);
 
       expect(this.controller.participant).toBe(this.participant);
       expect(this.controller.collectionEventsPagedResult).toBe(this.pagedResult);
@@ -82,7 +82,7 @@ define([
 
         self.collectionEventTypes = [];
 
-        expect(function () { createController(self); })
+        expect(function () { createController.call(self); })
           .toThrowError(/no collection event types defined for this study/);
       });
 
@@ -91,7 +91,7 @@ define([
 
         this.collectionEvent.collectionEventTypeId = self.factory.stringNext();
 
-        expect(function () { createController(self); })
+        expect(function () { createController.call(self); })
           .toThrowError(/collection event type ID not found/);
       });
 
@@ -99,12 +99,12 @@ define([
 
     it('has valid display state when there are no collection events', function() {
       this.pagedResult = this.factory.pagedResult([]);
-      createController(this);
+      createController.call(this);
       expect(this.controller.displayState).toBe(this.controller.displayStates.NO_RESULTS);
     });
 
     it('has valid display state when there are collection events', function() {
-      createController(this);
+      createController.call(this);
       expect(this.controller.displayState).toBe(this.controller.displayStates.HAVE_RESULTS);
     });
 
@@ -112,7 +112,7 @@ define([
       spyOn(this.$state, 'go').and.returnValue('ok');
       spyOn(this.CollectionEvent, 'list').and.returnValue(this.$q.when(this.pagedResult));
 
-      createController(this);
+      createController.call(this);
       this.controller.pageChanged();
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home.collection.study.participant.cevents');
@@ -126,7 +126,7 @@ define([
         spyOn(this.$state, 'go').and.returnValue('ok');
         spyOn(this.CollectionEvent, 'list').and.returnValue(this.$q.when(this.pagedResult));
 
-        createController(this);
+        createController.call(this);
         this.controller.add();
         this.scope.$digest();
         expect(this.$state.go).toHaveBeenCalledWith(
@@ -145,7 +145,7 @@ define([
         spyOn(self.$state, 'go').and.returnValue('ok');
         spyOn(self.CollectionEvent, 'list').and.returnValue(self.$q.when(self.pagedResult));
 
-        createController(self);
+        createController.call(self);
         self.controller.add();
         self.scope.$digest();
         expect(self.$state.go).toHaveBeenCalledWith('home.collection.study.participant.cevents.add');
@@ -156,7 +156,7 @@ define([
     it('when eventInformation is called the state is changed', function() {
       spyOn(this.$state, 'go').and.returnValue('ok');
 
-      createController(this);
+      createController.call(this);
       this.controller.eventInformation(this.collectionEvent);
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith(

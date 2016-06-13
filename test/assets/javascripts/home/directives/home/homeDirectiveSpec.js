@@ -13,33 +13,33 @@ define([
 
   describe('homeDirective', function() {
 
+    var createDirective = function () {
+      this.scope = this.$rootScope.$new();
+      this.element = angular.element('<home></home>');
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('home');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, templateMixin, serverReplyMixin) {
+    beforeEach(inject(function(testSuiteMixin, serverReplyMixin) {
       var self = this;
 
-      _.extend(self, templateMixin, serverReplyMixin);
+      _.extend(self, testSuiteMixin, serverReplyMixin);
 
-      self.$rootScope = self.$injector.get('$rootScope');
-      self.$httpBackend = self.$injector.get('$httpBackend');
+      self.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              '$httpBackend');
+
       self.putHtmlTemplates('/assets/javascripts/home/directives/home/home.html');
-      self.createDirective = createDirective;
-
-      //--
-
-      function createDirective(test) {
-        self.scope = $rootScope.$new();
-        self.element = angular.element('<home></home>');
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('home');
-      }
     }));
 
     it('has valid scope', function() {
       this.$httpBackend.whenGET('/authenticate').respond(this.reply());
 
-      this.createDirective(this);
+      createDirective.call(this);
       expect(this.$rootScope.pageTitle).toBeDefined('Biobank');
     });
   });

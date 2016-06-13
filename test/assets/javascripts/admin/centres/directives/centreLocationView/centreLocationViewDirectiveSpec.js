@@ -15,17 +15,37 @@ define(function (require) {
 
   describe('Directive: centreLocationViewDirective', function() {
 
+    var createController = function (centre, location) {
+      centre = centre || this.centre;
+      location = location || this.location;
+
+      expect(_.findWhere(centre.locations, { uniqueId: location.uniqueId})).toBeDefined();
+
+      this.element = angular.element(
+        '<centre-location-view centre="vm.centre" location="vm.location"></centre-location-view>');
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = {
+        centre: centre,
+        location: location
+      };
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('centreLocationView');
+    };
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, $state, templateMixin) {
+    beforeEach(inject(function ($state, testSuiteMixin) {
       var self = this;
 
-      _.extend(self, templateMixin);
+      _.extend(self, testSuiteMixin);
 
-      self.$state               = self.$injector.get('$state');
-      self.Centre               = self.$injector.get('Centre');
-      self.Location             = self.$injector.get('Location');
-      self.factory         = self.$injector.get('factory');
+      self.injectDependencies('$rootScope',
+                              '$compile',
+                              '$state',
+                              'Centre',
+                              'Location',
+                              'factory');
 
       self.location = new self.Location(self.factory.location());
       self.centre = new self.Centre(self.factory.centre({ locations: [ self.location ]}));
@@ -34,32 +54,10 @@ define(function (require) {
         '/assets/javascripts/admin/centres/directives/centreLocationView/centreLocationView.html');
 
       self.returnStateName = 'home.admin.centres.centre.locations';
-      self.createController = createController;
-
-      //--
-
-      function createController(centre, location) {
-        centre = centre || self.centre;
-        location = location || self.location;
-
-        expect(_.findWhere(centre.locations, { uniqueId: location.uniqueId})).toBeDefined();
-
-        self.element = angular.element(
-          '<centre-location-view centre="vm.centre" location="vm.location"></centre-location-view>');
-        self.scope = $rootScope.$new();
-        self.scope.vm = {
-          centre: centre,
-          location: location
-        };
-        $compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('centreLocationView');
-      }
-
     }));
 
     it('scope should be valid', function() {
-      this.createController();
+      createController.call(this);
       expect(this.controller.centre).toBe(this.centre);
       expect(this.controller.location).toBe(this.location);
       expect(this.controller.back).toBeFunction();
@@ -70,11 +68,10 @@ define(function (require) {
       expect(this.controller.editPostalCode).toBeFunction();
       expect(this.controller.editPoBoxNumber).toBeFunction();
       expect(this.controller.editCountryIsoCode).toBeFunction();
-
     });
 
     it('should return to valid state when back is called', function() {
-      this.createController();
+      createController.call(this);
       spyOn(this.$state, 'go').and.returnValue(null);
       this.controller.back();
       expect(this.$state.go).toHaveBeenCalledWith(this.returnStateName, {}, { reload: true });
@@ -87,7 +84,7 @@ define(function (require) {
       beforeEach(inject(function () {
         context.entity                   = this.Centre;
         context.entityUpdateFuncName     = 'updateLocation';
-        context.createController         = this.createController;
+        context.createController         = createController;
         context.location                 = this.centre.locations[0];
       }));
 

@@ -13,21 +13,39 @@ define([
   'use strict';
 
   describe('Directive: infoUpdateRemoveButtons', function() {
-    var rootScope, compile, element,
-        buttonClickFuncNames = ['information', 'update', 'remove'];
+    var buttonClickFuncNames = ['information', 'update', 'remove'];
+
+    var createScope = function (options) {
+      var self = this;
+
+      self.scope = self.$rootScope.$new();
+
+      options = options || {};
+
+      self.scope.model = {};
+      self.scope.model.updateAllowed = options.updateAllowed || false;
+      self.scope.model.removeAllowed = options.removeAllowed || false;
+
+      _.each(buttonClickFuncNames, function (key){
+        self.scope.model[key] = function () {};
+        spyOn(self.scope.model, key).and.returnValue(key);
+      });
+
+      self.$compile(self.element)(self.scope);
+      self.scope.$digest();
+    };
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($rootScope, $compile, templateMixin, testUtils) {
-      _.extend(this, templateMixin);
+    beforeEach(inject(function (testSuiteMixin, testUtils) {
+      _.extend(this, testSuiteMixin);
 
-      rootScope = $rootScope;
-      compile = $compile;
+      this.injectDependencies('$rootScope', '$compile');
 
       this.putHtmlTemplates(
         '/assets/javascripts/common/directives/infoUpdateRemoveButtons.html');
 
-      element  = angular.element(
+      this.element  = angular.element(
         '<info-update-remove-buttons' +
           '   on-info="model.information()"' +
           '   on-update="model.update()"' +
@@ -37,62 +55,43 @@ define([
           '</info-update-remove-buttons>');
     }));
 
-    function createScope(options) {
-      var scope = rootScope;
-
-      options = options || {};
-
-      scope.model = {};
-      scope.model.updateAllowed = options.updateAllowed || false;
-      scope.model.removeAllowed = options.removeAllowed || false;
-
-      _.each(buttonClickFuncNames, function (key){
-        scope.model[key] = function () {};
-        spyOn(scope.model, key).and.returnValue(key);
-      });
-
-      compile(element)(scope);
-      scope.$digest();
-      return scope;
-    }
-
     it('clicking on a button invokes corresponding function', function() {
-      var buttons,
-          scope = createScope({ updateAllowed: true, removeAllowed: true});
+      var self = this, buttons;
 
-      buttons = element.find('button');
+      createScope.call(self, { updateAllowed: true, removeAllowed: true});
+
+      buttons = self.element.find('button');
 
       expect(buttons.length).toBe(3);
       _.each(_.range(buttons.length), function (i) {
         buttons.eq(i).click();
         switch (i) {
-        case 0: expect(scope.model.information).toHaveBeenCalled(); break;
-        case 1: expect(scope.model.update).toHaveBeenCalled(); break;
-        case 2: expect(scope.model.remove).toHaveBeenCalled(); break;
+        case 0: expect(self.scope.model.information).toHaveBeenCalled(); break;
+        case 1: expect(self.scope.model.update).toHaveBeenCalled(); break;
+        case 2: expect(self.scope.model.remove).toHaveBeenCalled(); break;
         }
       });
     });
 
     it('only one button displayed if updateAllowed and removeAllowed are false', function() {
-      var buttons,
-          scope = createScope({ updateAllowed: false, removeAllowed: false});
+      var buttons;
 
-      buttons = element.find('button');
+      createScope.call(this, { updateAllowed: false, removeAllowed: false});
 
+      buttons = this.element.find('button');
       expect(buttons.length).toBe(1);
-
       buttons.eq(0).click();
 
-      expect(scope.model.information).toHaveBeenCalled();
-      expect(scope.model.update).not.toHaveBeenCalled();
-      expect(scope.model.remove).not.toHaveBeenCalled();
+      expect(this.scope.model.information).toHaveBeenCalled();
+      expect(this.scope.model.update).not.toHaveBeenCalled();
+      expect(this.scope.model.remove).not.toHaveBeenCalled();
     });
 
     it('buttons should have valid icons', function() {
       var icons;
 
-      createScope({ updateAllowed: true, removeAllowed: true});
-      icons = element.find('button i');
+      createScope.call(this, { updateAllowed: true, removeAllowed: true});
+      icons = this.element.find('button i');
 
       expect(icons.length).toBe(3);
       expect(icons.eq(0)).toHaveClass('glyphicon-info-sign');
@@ -103,8 +102,8 @@ define([
     it('buttons should have valid titles', function() {
       var buttons;
 
-      createScope({ updateAllowed: true, removeAllowed: true});
-      buttons = element.find('button');
+      createScope.call(this, { updateAllowed: true, removeAllowed: true});
+      buttons = this.element.find('button');
 
       expect(buttons.length).toBe(3);
       expect(buttons.eq(0).attr('title')).toBe('More information');
