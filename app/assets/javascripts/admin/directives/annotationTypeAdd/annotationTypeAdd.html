@@ -44,7 +44,8 @@
   </div>
 
   <!--VALUE TYPE  -->
-  <div class="form-group">
+  <div class="form-group"
+     ng-class="{ 'has-error' : annotationTypeForm.valueType.$invalid && !annotationTypeForm.valueType.$pristine }">
     <label for="valueType" class="col-md-2 form-control-label">Value Type</label>
     <div class="col-md-10">
       <select class="form-control"

@@ -1,7 +1,6 @@
-<div class="form-group"
-     ng-if="annotation.annotationType.maxValueCount > 1"
+<div class="form-group row"
      ng-class="{ 'has-error' : annotationSubForm.annotationSelectValue.$invalid &&
-               !annotationSubForm.annotationSelectValue.$pristine }">
+               !annotationSubForm.$pristine }">
   <label class="col-md-2 form-control-label">{{annotation.annotationType.name}}</label>
   <div class="col-md-10">
     <div ng-repeat="value in annotation.values">
@@ -9,6 +8,8 @@
         <input type="checkbox"
                name="annotationSelectValue"
                ng-model="value.checked"
+               ng-true-value="true"
+               ng-false-value="false"
                ng-required="annotation.required && !annotation.someSelected()">
         <span>{{value.name}}</span>
       </label>

@@ -1,4 +1,5 @@
-<div class="form-group">
+<div class="form-group row"
+     ng-class="{ 'has-error' : form.selectValue.$invalid && !form.$pristine }">
   <label for="selectValue" class="col-md-2 form-control-label">{{vm.label}}:</label>
   <div class="col-md-10">
     <div ng-repeat="value in vm.value">
@@ -6,14 +7,16 @@
         <input type="checkbox"
                name="selectValue"
                ng-model="value.checked"
-               ng-required="vm.options.required">
+               ng-true-value="true"
+               ng-false-value="false"
+               ng-required="vm.options.required && !vm.multipleSelectSomeSelected()">
         {{value.name}}
       </label>
     </div>
   </div>
-  <div class="col-md-offset-2 col-md-10">
-    <p ng-show="vm.options.required && form.value.$invalid && !form.value.$pristine"
-       class="help-block">
-      A selection is required.</p>
+  <div class="col-md-offset-2 col-md-10"
+       ng-messages="form.selectValue.$error"
+       role="alert">
+    <div ng-message="required" class="help-block">A selection is required</div>
   </div>
 </div>

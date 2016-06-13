@@ -1,4 +1,5 @@
-<div class="form-group">
+<div class="form-group row"
+     ng-class="{ 'has-error' : form.value.$invalid && !form.value.$pristine }">
   <label for="email" class="col-md-3 form-control-label">{{vm.label}}:</label>
   <div class="col-md-9">
     <input

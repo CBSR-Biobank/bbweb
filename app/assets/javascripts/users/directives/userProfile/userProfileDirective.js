@@ -12,9 +12,7 @@ define(function () {
     var directive = {
       restrict: 'E',
       scope: {},
-      bindToController: {
-        user: '='
-      },
+      bindToController: {},
       templateUrl : '/assets/javascripts/users/directives/userProfile/userProfile.html',
       controller: UserProfileCtrl,
       controllerAs: 'vm'
@@ -27,6 +25,7 @@ define(function () {
     'modalService',
     'modalInput',
     'notificationsService',
+    'usersService',
     'User'
   ];
 
@@ -36,12 +35,9 @@ define(function () {
   function UserProfileCtrl(modalService,
                            modalInput,
                            notificationsService,
+                           usersService,
                            User) {
     var vm = this;
-
-    vm.user            = new User(vm.user);
-
-    vm.allowRemoveAvatarUrl = (vm.user.avatarUrl !== null);
 
     vm.updateName      = updateName;
     vm.updateEmail     = updateEmail;
@@ -49,7 +45,16 @@ define(function () {
     vm.updateAvatarUrl = updateAvatarUrl;
     vm.removeAvatarUrl = removeAvatarUrl;
 
+    init();
+
     //--
+
+    function init() {
+      usersService.requestCurrentUser().then(function (user) {
+        vm.user = user;
+        vm.allowRemoveAvatarUrl = (vm.user.avatarUrl !== null);
+      });
+    }
 
     function updateError(err) {
       notificationsService.error(

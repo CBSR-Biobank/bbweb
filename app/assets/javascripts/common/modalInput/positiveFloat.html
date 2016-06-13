@@ -1,18 +1,20 @@
-<div class="form-group">
+<div class="form-group row"
+     ng-class="{ 'has-error' : form.value.$invalid && !form.value.$pristine }">
   <label for="value" class="col-md-3 form-control-label">{{vm.label}}:</label>
   <div class="col-md-9">
-    <input
-       name="value"
-       type="number"
-       class="form-control"
-       ng-model="vm.value"
-       focus-me="true"
-       positive-float
-       required />
+    <input name="value"
+           type="number"
+           class="form-control"
+           ng-model="vm.value"
+           focus-me="true"
+           positive-float
+           required />
   </div>
-  <div class="col-md-offset-3 col-md-10">
-    <p class="help-block" ng-show="form.value.$error.positiveFloat || form.value.$error.required">
+  <div class="col-md-offset-3 col-md-9"
+       ng-messages="form.value.$error"
+       role="alert">
+    <div ng-message="positiveFloat" class="help-block">
       Value should be a positive floating point number
-    </p>
+    </div>
   </div>
 </div>

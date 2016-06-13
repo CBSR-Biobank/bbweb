@@ -1,4 +1,4 @@
-<div class="form-group">
+<div class="form-group row">
   <label for="value" class="col-md-3 form-control-label">{{vm.label}}:</label>
   <div class="col-md-9">
     <input
@@ -13,9 +13,10 @@
   <div class="col-md-offset-3 col-md-9"
        ng-messages="form.value.$error"
        role="alert">
-    <div ng-message="required" class="help-block">A Value is required</div>
+    <div ng-message="required" class="help-block">A value is required</div>
     <div ng-message="minlength" class="help-block">
-      A Value of minimum length {{vm.options.minLength}} is required.
+      A value with a minimum length of {{vm.options.minLength}} is required.
     </div>
   </div>
 </div>
+<pre>{{vm.options | json}}</pre>

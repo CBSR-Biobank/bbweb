@@ -1,4 +1,5 @@
-<div class="form-group">
+<div class="form-group row"
+     ng-class="{ 'has-error' : form.value.$invalid && !form.value.$pristine }">
   <label for="value" class="col-md-3 form-control-label">{{vm.label}}:</label>
   <div class="col-md-9">
     <input name="value"
@@ -14,11 +15,5 @@
        ng-messages="form.value.$error"
        role="alert">
     <div ng-message="required" class="help-block">A number is required</div>
-    <div ng-message="naturalNumber" class="help-block">
-      Value must be a positive whole number greater than zero
-    </div>
-    <div ng-message="positiveFloat" class="help-block">
-      Value should be a positive floating point number greater than zero
-    </div>
   </div>
 </div>

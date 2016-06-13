@@ -140,6 +140,7 @@ define(function (require) {
           vm.value = {};
         } else if (type === 'selectMultiple') {
           vm.value = getSelectMultipleValues();
+          vm.multipleSelectSomeSelected = multipleSelectSomeSelected;
         } else if (type === 'dateTime') {
           vm.open = false;
           vm.value = new Date(vm.defaultValue);
@@ -166,6 +167,12 @@ define(function (require) {
           return _.map(options.selectOptions, function (opt) {
             return { name: opt, checked: _.includes(vm.defaultValue, opt)};
           });
+        }
+
+        function multipleSelectSomeSelected() {
+          var result = (_.find(vm.value, { checked: true }) !== undefined);
+          console.log(result);
+          return result;
         }
 
         function openCalendar(e) {

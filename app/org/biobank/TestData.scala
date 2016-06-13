@@ -380,7 +380,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
           valueType     = AnnotationValueType.Select,
           maxValueCount = Some(2),
           options       = Seq("Surveillance", "Genetic Predisposition", "Previous Samples", "Genetic Mutation"),
-          required      = false))
+          required      = true))
   }
 
   def addMultipleUsers() = {

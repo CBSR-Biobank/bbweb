@@ -1,4 +1,4 @@
-<div class="form-group">
+<div class="form-group row">
   <label for="url" class="col-md-3 form-control-label">{{vm.label}}:</label>
   <div class="col-md-9">
     <input name="value"
@@ -10,8 +10,9 @@
   </div>
   <div class="col-md-offset-3 col-md-9"
        ng-messages="form.value.$error"
+       ng-if="form.value.$dirty"
        role="alert">
-    <div ng-message="required" class="help-block">A Value is required</div>
+    <div ng-message="required" class="help-block">A URL is required</div>
     <div ng-message="url" class="help-block">URL is not valid</div>
   </div>
 </div>

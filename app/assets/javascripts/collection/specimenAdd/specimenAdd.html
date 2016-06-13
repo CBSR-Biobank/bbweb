@@ -4,10 +4,10 @@
 <div class="modal-body">
   <form class="form-horizontal" name="form" novalidate>
 
-    <!-- SPECIMEN SPEC "-->
+    <!-- SPECIMEN SPEC -->
     <div class="form-group row"
          ng-class="{ 'has-error' : form.specimenSpec.$invalid && !form.specimenSpec.$pristine }">
-      <label class="col-md-3 control-label">Specimen type</label>
+      <label class="col-md-3 form-control-label">Specimen type</label>
       <div class="col-md-9">
         <select class="form-control"
                 id="specimenSpec"
@@ -31,7 +31,7 @@
     <!-- UNVENTORY ID -->
     <div class="form-group row"
          ng-class="{ 'has-error' : form.inventoryId.$invalid && !form.inventoryId.$pristine }">
-      <label for="inventoryId" class="col-md-3 control-label">Inventory ID</label>
+      <label for="inventoryId" class="col-md-3 form-control-label">Inventory ID</label>
       <div class="col-md-9">
         <input name="inventoryId"
                type="text"
@@ -62,15 +62,15 @@
     <div class="form-group row"
          ng-class="{ 'has-error' : form.amount.$invalid && !form.amount.$pristine,
                    'has-warning' : !vm.usingDefaultAmount }">
-      <label for="amount" class="col-md-3 control-label">Amount</label>
+      <label for="amount" class="col-md-3 form-control-label">Amount</label>
       <div class="col-md-9">
         <div class="input-group">
           <input name="amount"
                  type="number"
                  class="form-control"
                  ng-model="vm.amount"
-                 positive-float/>
-          <span class="input-group-addon" ng-if="vm.selectedSpecimenSpec")>
+                 positive-float />
+          <span class="input-group-addon" ng-if="vm.selectedSpecimenSpec">
             {{vm.selectedSpecimenSpec.units}}
           </span>
         </div>
@@ -88,7 +88,7 @@
     <!-- TIME COLECTED -->
     <div class="form-group row"
          ng-class="{ 'has-error' : form.date.$invalid && !form.date.$pristine }">
-      <label class="col-md-3 control-label">Time collected</label>
+      <label class="col-md-3 form-control-label">Time collected</label>
       <div class="col-md-9">
         <div class="input-group">
           <input name="date"
@@ -120,7 +120,7 @@
     <!-- CENTRE LOCATIONS "-->
     <div class="form-group row"
          ng-class="{ 'has-error' : form.centre.$invalid && !form.centre.$pristine }">
-      <label class="col-md-3 control-label">Collection centre</label>
+      <label class="col-md-3 form-control-label">Collection centre</label>
       <div class="col-md-9">
         <select class="form-control"
                 name="centre"

@@ -191,9 +191,11 @@ define(function (require) {
      * Called when the user selects a new specimen type in the modal.
      */
     function specimenSpecChanged() {
-      vm.amount        = vm.selectedSpecimenSpec.amount;
-      vm.defaultAmount = vm.selectedSpecimenSpec.amount;
-      vm.units         = vm.selectedSpecimenSpec.units;
+      if (vm.selectedSpecimenSpec) {
+        vm.amount        = vm.selectedSpecimenSpec.amount;
+        vm.defaultAmount = vm.selectedSpecimenSpec.amount;
+        vm.units         = vm.selectedSpecimenSpec.units;
+      }
     }
 
     function inventoryIdUpdated() {

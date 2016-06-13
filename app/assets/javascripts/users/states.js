@@ -77,14 +77,7 @@ define(function () {
       url: '^/profile',
       views: {
         'main@': {
-          template: '<user-profile user="vm.user"></user-profile>',
-          controller: [
-            'user',
-            function (user) {
-              this.user = user;
-            }
-          ],
-          controllerAs: 'vm'
+          template: '<user-profile></user-profile>'
         }
       },
       data: {
