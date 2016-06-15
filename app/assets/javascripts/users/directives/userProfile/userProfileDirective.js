@@ -125,7 +125,7 @@ define(function () {
       };
 
       modalService.showModal(modalDefaults, modalOptions)
-        .then(function() {
+        .result.then(function() {
           vm.user.updateAvatarUrl(null)
             .then(postUpdate('Avatar URL remove successfully.',
                              'Remove successful',
