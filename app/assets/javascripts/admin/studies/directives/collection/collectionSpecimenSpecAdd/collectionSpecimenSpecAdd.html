@@ -19,13 +19,11 @@
              focus-me="true"
              required />
     </div>
-    <div class="col-md-offset-2 col-md-10">
-      <p class="help-block" ng-show="specForm.name.$error.minlength">
-        Name is too short.
-      </p>
-      <p class="help-block"
-         ng-show="specForm.name.$invalid && !specForm.name.$error.minlength && !specForm.name.$pristine">
-        A name is required.</p>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="specForm.name.$error"
+         ng-if="specForm.name.$dirty">
+      <div ng-message="minlength" class="help-block">Name is too short</div>
+      <div ng-message="required" class="help-block">A name is required</div>
     </div>
   </div>
 
@@ -55,10 +53,10 @@
         <option value="">-- make a selection --</option>
       </select>
     </div>
-    <div class="col-md-offset-2 col-md-10">
-      <p class="help-block"
-         ng-show="specForm.anatomicalSourceType.$invalid && !specForm.anatomicalSourceType.$pristine">
-        Anatomical source is required.</p>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="specForm.anatomicalSourceType.$error"
+         ng-if="specForm.anatomicalSourceType.$dirty">
+      <div ng-message="required" class="help-block">Anatomical source is required.</div>
     </div>
   </div>
 
@@ -76,10 +74,10 @@
         <option value="">-- make a selection --</option>
       </select>
     </div>
-    <div class="col-md-offset-2 col-md-10">
-      <p ng-show="specForm.perservationType.$invalid && !specForm.perservationType.$pristine"
-         class="help-block">
-        Preservation type is required.</p>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="specForm.perservationType.$error"
+         ng-if="specForm.perservationType.$dirty">
+      <div ng-message="required" class="help-block">Preservation type is required</div>
     </div>
   </div>
 
@@ -97,10 +95,10 @@
         <option value="">-- make a selection --</option>
       </select>
     </div>
-    <div class="col-md-offset-2 col-md-10">
-      <p ng-show="specForm.perservationTemperature.$invalid && !specForm.perservationTemperature.$pristine"
-         class="help-block">
-        Preservation temperature is required.</p>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="specForm.perservationTemperature.$error"
+         ng-if="specForm.perservationTemperature.$dirty">
+      <div ng-message="required" class="help-block">Preservation temperature is required</div>
     </div>
   </div>
 
@@ -117,10 +115,10 @@
         <option value="">-- make a selection --</option>
       </select>
     </div>
-    <div class="col-md-offset-2 col-md-10">
-      <p ng-show="specForm.specimenType.$invalid && !specForm.specimenType.$pristine"
-         class="help-block">
-        Specimen type is required.</p>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="specForm.specimenType.$error"
+         ng-if="specForm.specimenType.$dirty">
+      <div ng-message="required" class="help-block">Specimen type is required</div>
     </div>
   </div>
 
@@ -136,10 +134,10 @@
              placeholder="the units the specimens are measured in (eg. mL, cm, etc.)"
              required/>
     </div>
-    <div class="col-md-offset-2 col-md-10">
-      <p ng-show="specForm.units.$invalid && !specForm.units.$pristine"
-         class="help-block">
-        Units are required.</p>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="specForm.units.$error"
+         ng-if="specForm.units.$dirty">
+      <div ng-message="required" class="help-block">Units are required</div>
     </div>
   </div>
 
@@ -153,14 +151,13 @@
              class="form-control"
              ng-model="vm.specimenSpec.amount"
              placeholder="the amount"
-             natural-number
+             positive-float
              required/>
     </div>
-    <div class="col-md-offset-2 col-md-10">
-      <p class="help-block"
-         ng-show="specForm.amount.$error.naturalNumber && !sgSubForm.amount.$pristine">
-        Amount should be a positive floating point number
-      </p>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="specForm.amount.$error"
+         ng-if="specForm.amount.$dirty">
+      <div ng-message="positiveFloat" class="help-block">Amount should be a positive floating point number</div>
     </div>
   </div>
 
@@ -174,14 +171,13 @@
              class="form-control"
              ng-model="vm.specimenSpec.maxCount"
              placeholder="maximum count"
-             positive-float
+             natural-number
              required/>
     </div>
-    <div class="col-md-offset-2 col-md-10">
-      <p class="help-block"
-         ng-show="specForm.maxCount.$error.positiveFloat && !specForm.maxCount.$pristine">
-        Count should be a positive number greater than zero
-      </p>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="specForm.maxCount.$error"
+         ng-if="specForm.maxCount.$dirty">
+      <div ng-message="naturalNumber" class="help-block">Count should be a positive number greater than zero</div>
     </div>
   </div>
 

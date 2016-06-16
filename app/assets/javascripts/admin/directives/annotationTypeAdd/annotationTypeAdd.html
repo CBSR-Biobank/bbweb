@@ -16,8 +16,11 @@
              focus-me="true"
              required/>
     </div>
-    <div class="col-md-offset-2 col-md-10">
-      <p class="help-block" ng-show="annotationTypeForm.name.$error.minlength">Name is too short.</p>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="annotationTypeForm.name.$error"
+         ng-if="annotationTypeForm.name.$dirty">
+      <div ng-message="required" class="help-block">Name is required</div>
+      <div ng-message="minlength" class="help-block">Name is too short</div>
     </div>
   </div>
 
@@ -45,7 +48,7 @@
 
   <!--VALUE TYPE  -->
   <div class="form-group"
-     ng-class="{ 'has-error' : annotationTypeForm.valueType.$invalid && !annotationTypeForm.valueType.$pristine }">
+       ng-class="{ 'has-error' : annotationTypeForm.valueType.$invalid && !annotationTypeForm.valueType.$pristine }">
     <label for="valueType" class="col-md-2 form-control-label">Value Type</label>
     <div class="col-md-10">
       <select class="form-control"
@@ -57,15 +60,17 @@
         <option value="">-- make a selection --</option>
       </select>
     </div>
-    <div class="col-md-offset-2 col-md-10">
-      <p ng-show="annotationTypeForm.valueType.$invalid && !annotationTypeForm.valueType.$pristine"
-         class="help-block">
-        Value type is required.</p>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="annotationTypeForm.valueType.$error"
+         role="alert">
+      <div ng-message="required" class="help-block">Value type is required</div>
     </div>
   </div>
 
   <!-- SELECTIONS -->
-  <div class="form-group" ng-if="vm.annotationType.valueType === 'Select'">
+  <div class="form-group"
+       ng-if="vm.annotationType.valueType === 'Select'"
+       ng-class="{ 'has-error' : annotationTypeForm.valueType.$error }">
     <label for="maxValueCount" class="col-md-2 form-control-label">Selections</label>
     <div class="col-md-5">
       <input name="maxValueCount"
@@ -82,17 +87,18 @@
              ng-required="vm.maxValueCountRequired()"
              str2integer /> Multiple selections allowed
     </div>
-    <div class="col-md-offset-2 col-md-10">
-      <p ng-show="annotationTypeForm.maxValueCount.$invalid"
-         class="help-block">
-        Please select one from above.</p>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="annotationTypeForm.maxValueCount.$error"
+         role="alert">
+      <div ng-message="required" class="help-block">Please select one from above</div>
     </div>
   </div>
 
   <!-- SELECTION OPTIONS -->
   <div class="form-group"
        ng-if="vm.annotationType.valueType === 'Select'"
-       ng-repeat="opt in vm.annotationType.options track by $index">
+       ng-repeat="opt in vm.annotationType.options track by $index"
+       ng-class="{ 'has-error' : subForm.option.$invalid && !subForm.option.$pristine }">
     <ng-form name="subForm">
       <label class="col-md-2 form-control-label">Selection Option {{$index + 1}}</label>
       <div class="col-md-8">
@@ -105,15 +111,16 @@
       </div>
       <div class="col-md-2">
         <button class="btn btn-sm btn-warning"
-                ng-click="vm.optionRemove(opt)"
+                ng-click="vm.optionRemove($index)"
                 ng-disabled="vm.removeButtonDisabled()">
           <i class="glyphicon glyphicon-remove"></i> Remove
         </button>
       </div>
-      <div class="col-md-offset-2 col-md-10">
-        <p class="help-block" ng-show="subForm.option.$invalid && !subForm.option.$pristine">
-          A value is required
-        </p>
+      <div class="col-md-offset-2 col-md-10"
+           ng-messages="subForm.option.$error"
+           ng-if="subForm.option.$dirty"
+           role="alert">
+        <div ng-message="required" class="help-block">A value is required</div>
       </div>
     </ng-form>
   </div>

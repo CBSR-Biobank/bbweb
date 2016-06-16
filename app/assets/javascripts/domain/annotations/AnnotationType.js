@@ -142,11 +142,11 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
     /**
      * Used to remove an option. Should only be called when the value type is 'Select'.
      */
-    AnnotationType.prototype.removeOption = function (option) {
+    AnnotationType.prototype.removeOption = function (index) {
       if (this.options.length <= 1) {
         throw new Error('options is empty, cannot remove any more options');
       }
-      this.options = _.without(this.options, option);
+      this.options.splice(index, 1);
     };
 
     /**

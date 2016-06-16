@@ -18,8 +18,10 @@
              focus-me="true"
              required />
     </div>
-    <div class="col-md-offset-2 col-md-10">
-      <p class="help-block" ng-show="sgForm.name.$error.minlength">Name is too short.</p>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="sgForm.name.$error"
+         ng-if="sgForm.name.$dirty">
+      <div ng-message="minlength" class="help-block">Name is too short</div>
     </div>
   </div>
 
@@ -46,6 +48,9 @@
              placeholder="the units the specimens are measured in (eg. mL, cm, etc.)"
              required/>
     </div>
+
+    <!-- TODO: change this to use ng-messages -->
+
     <div class="col-md-offset-2 col-md-10">
       <p ng-show="sgForm.units.$invalid && !sgForm.units.$pristine"
          class="help-block">
@@ -65,6 +70,9 @@
         <option value="">-- make a selection --</option>
       </select>
     </div>
+
+    <!-- TODO: change this to use ng-messages -->
+
     <div class="col-md-offset-2 col-md-10">
       <p ng-show="sgForm.anatomicalSourceType.$invalid && !sgForm.anatomicalSourceType.$pristine"
          class="help-block">
@@ -84,6 +92,9 @@
         <option value="">-- make a selection --</option>
       </select>
     </div>
+
+    <!-- TODO: change this to use ng-messages -->
+
     <div class="col-md-offset-2 col-md-10">
       <p ng-show="sgForm.perservationType.$invalid && !sgForm.perservationType.$pristine"
          class="help-block">
@@ -103,6 +114,9 @@
         <option value="">-- make a selection --</option>
       </select>
     </div>
+
+    <!-- TODO: change this to use ng-messages -->
+
     <div class="col-md-offset-2 col-md-10">
       <p ng-show="sgForm.perservationTempType.$invalid && !sgForm.perservationTempType.$pristine"
          class="help-block">
@@ -122,6 +136,9 @@
         <option value="">-- make a selection --</option>
       </select>
     </div>
+
+    <!-- TODO: change this to use ng-messages -->
+
     <div class="col-md-offset-2 col-md-10">
       <p ng-show="sgForm.specimenType.$invalid && !sgForm.specimenType.$pristine"
          class="help-block">

@@ -9,11 +9,9 @@
            ng-model="annotation.value"
            ng-required="annotation.required"/>
   </div>
-  <div class="col-md-offset-2 col-md-10">
-    <p class="help-block"
-       ng-show="annotationSubForm.annotationTextValue.$error.required &&
-                !annotationSubForm.annotationTextValue.$pristine">
-      Please enter a value
-    </p>
+  <div class="col-md-offset-2 col-md-10"
+       ng-messages="annotationSubForm.annotationTextValue.$error"
+       ng-if="annotationSubForm.annotationTextValue.$dirty">
+    <div ng-message="required" class="help-block">Please enter a value</div>
   </div>
 </div>

@@ -38,15 +38,9 @@ define(['underscore'], function (_) {
      */
     $stateProvider.state('home.admin.centres.add', {
       url: '/add',
-      resolve: {
-        centre: ['Centre', function(Centre) {
-          return new Centre();
-        }]
-      },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/admin/centres/centreForm.html',
-          controller: 'CentreEditCtrl as vm'
+          template: '<centre-add></centre-add>'
         }
       },
       data: {

@@ -20,11 +20,10 @@
           <option value="">-- make a selection --</option>
         </select>
       </div>
-      <div class="col-sm-offset-3 col-sm-9">
-        <p class="help-block" ng-show="form.specimenSpec.$error.required &&
-                                       !form.specimenSpec.$pristine">
-          A specimen type must be selected
-        </p>
+      <div class="col-sm-offset-3 col-sm-9"
+           ng-messages="form.specimenSpec.$error"
+           ng-if="form.specimenSpec.$dirty">
+        <div ng-message="required" class="help-block">A specimen type must be selected</div>
       </div>
     </div>
 
@@ -42,19 +41,17 @@
                ng-change="vm.inventoryIdUpdated()"
                required/>
       </div>
-      <div class="col-md-offset-3 col-md-9">
-        <p class="help-block" ng-show="form.inventoryId.$error.required && !form.inventoryId.$pristine">
-          Inventory ID is required.
-        </p>
-        <p class="help-block" ng-show="form.inventoryId.$error.minlength">
-          Inventory ID is too short.
-        </p>
-        <p class="help-block" ng-show="form.inventoryId.$error.inventoryIdTaken">
-          A specimen already exists with this inventory ID.
-        </p>
-        <p class="help-block" ng-show="form.inventoryId.$error.inventoryIdEntered">
-          You have already entered this inventory ID.
-        </p>
+      <div class="col-sm-offset-3 col-sm-9"
+           ng-messages="form.inventoryId.$error"
+           ng-if="form.inventoryId.$dirty">
+        <div ng-message="required" class="help-block">Inventory ID is required</div>
+        <div ng-message="minlength" class="help-block">Inventory ID is too short</div>
+        <div ng-message="inventoryIdTaken" class="help-block">
+          A specimen already exists with this inventory ID
+        </div>
+        <div ng-message="inventoryIdEntered" class="help-block">
+          You have already entered this inventory ID
+        </div>
       </div>
     </div>
 
@@ -75,13 +72,17 @@
           </span>
         </div>
       </div>
-      <div class="col-md-offset-3 col-md-9">
-        <p class="help-block" ng-show="form.amount.$error.positiveFloat || form.amount.$error.required">
+      <div class="col-md-offset-3 col-md-9"
+           ng-messages="form.amount.$error"
+           ng-if="form.amount.$dirty">
+        <div ng-message="required" class="help-block">
           Value should be a positive floating point number
-        </p>
-        <p class="help-block" ng-show="!vm.usingDefaultAmount">
+        </div>
+      </div>
+      <div class="col-md-offset-3 col-md-9">
+        <div class="help-block" ng-if="!vm.usingDefaultAmount">
           Amount is different than the default ({{vm.defaultAmount}} {{vm.units}})
-        </p>
+        </div>
       </div>
     </div>
 
@@ -110,10 +111,11 @@
           </span>
         </div>
       </div>
-      <div class="col-md-offset-3 col-md-9">
-        <p class="help-block" ng-show="form.date.$error.datetime && !form.date.$pristine">
-          date and / or time are invalid
-        </p>
+      <div class="col-md-offset-3 col-md-9"
+           ng-messages="form.date.$error"
+           ng-if="form.date.$dirty">
+        <div ng-message="datetime" class="help-block">date and / or time are invalid</div>
+        <div ng-message="required" class="help-block">date and time are required</div>
       </div>
     </div>
 
@@ -130,11 +132,10 @@
           <option value="">-- make a selection --</option>
         </select>
       </div>
-      <div class="col-sm-offset-3 col-sm-9">
-        <p class="help-block" ng-show="specimenForm.centre.$error.required &&
-           !specimenForm.centre.$pristine">
-          A centre must be selected
-        </p>
+      <div class="col-sm-offset-3 col-sm-9"
+           ng-messages="form.centre.$error"
+           ng-if="form.centre.$dirty">
+        <div ng-message="required" class="help-block">A centre must be selected</div>
       </div>
     </div>
 
@@ -149,8 +150,3 @@
           ng-click="vm.nextPressed()"
           ng-disabled="form.$invalid">Next</button>
 </div>
-<!--
-<div class="row">
-  <div class="col-xs-12"><pre>form: {{form | json}}</pre></div>
-</div>
--->

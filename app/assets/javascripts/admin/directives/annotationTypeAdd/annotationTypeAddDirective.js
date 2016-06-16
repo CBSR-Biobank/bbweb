@@ -75,8 +75,8 @@ define(['underscore'], function (_) {
     /**
      * Used to remove an option. Should only be called when the value type is 'Select'.
      */
-    function optionRemove(option) {
-      vm.annotationType.removeOption(option);
+    function optionRemove($index) {
+      vm.annotationType.removeOption($index);
     }
 
     /**

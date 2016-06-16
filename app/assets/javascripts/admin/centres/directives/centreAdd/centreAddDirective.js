@@ -12,9 +12,7 @@ define(['underscore'], function(_) {
     var directive = {
       restrict: 'E',
       scope: {},
-      bindToController: {
-        centre: '='
-      },
+      bindToController: {},
       templateUrl : '/assets/javascripts/admin/centres/directives/centreAdd/centreAdd.html',
       controller: CentreAddCtrl,
       controllerAs: 'vm'
@@ -25,19 +23,22 @@ define(['underscore'], function(_) {
 
   CentreAddCtrl.$inject = [
     '$state',
+    'Centre',
     'domainEntityService',
     'notificationsService'
   ];
 
   function CentreAddCtrl($state,
-                          domainEntityService,
-                          notificationsService,
-                          centre) {
+                         Centre,
+                         domainEntityService,
+                         notificationsService) {
     var vm = this;
 
-    vm.title =  'Add centre';
+    vm.centre = new Centre();
+    vm.title  = 'Add centre';
     vm.submit = submit;
     vm.cancel = cancel;
+
     vm.returnState = {
       name: 'home.admin.centres',
       params: { },

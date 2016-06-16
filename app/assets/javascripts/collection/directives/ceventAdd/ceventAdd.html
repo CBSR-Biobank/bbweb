@@ -32,17 +32,12 @@
              focus-me="true"
              required />
     </div>
-    <div class="col-md-offset-2 col-md-10">
-      <p class="help-block"
-         ng-show="collectionEventForm.visitNumber.$error.required &&
-                  !collectionEventForm.visitNumber.$pristine">
-        Visit number is required
-      </p>
-      <p class="help-block"
-         ng-show="collectionEventForm.visitNumber.$error.min &&
-                  !collectionEventForm.visitNumber.$pristine">
-        Visit number has to be a positive number
-      </p>
+    <div class="col-md-offset-2 col-md-10"
+       ng-messages="collectionEventForm.visitNumber.$error"
+       ng-if="collectionEventForm.visitNumber.$dirty">
+      <div ng-message="required" class="help-block">Visit number is required</div>
+      <div ng-message="min" class="help-block">Visit number has to be a positive number</div>
+      <div ng-message="number" class="help-block">Invalid number</div>
     </div>
   </div>
 
@@ -69,16 +64,11 @@
         </span>
       </p>
     </div>
-    <div class="col-md-offset-2 col-md-10">
-      <p class="help-block" ng-show="collectionEventForm.timeCompleted.$invalid &&
-                                     !collectionEventForm.timeCompleted.$error.required &&
-                                     !collectionEventForm.timeCompleted.$pristine">
-        date and / or time are invalid
-      </p>
-      <p class="help-block" ng-show="collectionEventForm.timeCompleted.$error.required &&
-                                     !collectionEventForm.timeCompleted.$pristine">
-        date and / or time are required
-      </p>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="collectionEventForm.timeCompleted.$error"
+         ng-if="collectionEventForm.timeCompleted.$dirty">
+      <div ng-message="datetime" class="help-block">date and / or time are invalid</div>
+      <div ng-message="required" class="help-block">date and time are required</div>
     </div>
   </div>
 

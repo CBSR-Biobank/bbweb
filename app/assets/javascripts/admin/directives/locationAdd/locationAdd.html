@@ -18,14 +18,12 @@
          focus-me="true"
          required />
     </div>
-    <div class="col-md-offset-2 col-md-10">
-      <p class="help-block" ng-show="locationForm.name.$error.minlength">Name is too short.</p>
-      <p class="help-block"
-         ng-show="locationForm.name.$invalid &&
-                  !locationForm.name.$pristine &&
-                  !locationForm.name.$error.minlength">
-        A name is requried.
-      </p>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="locationForm.name.$error"
+         ng-if="locationForm.name.$dirty"
+         role="alert">
+      <div ng-message="required" class="help-block">A name is required</div>
+      <div ng-message="minlength" class="help-block">Name is too short</div>
     </div>
   </div>
 
@@ -44,7 +42,7 @@
 
   <!-- CITY -->
   <div class="form-group">
-    <label for="city" class="col-md-2 form-control-label">City</label>
+    <label for="city" class="col-md- form-control-label">City</label>
     <div class="col-md-10">
       <input
          name="city"

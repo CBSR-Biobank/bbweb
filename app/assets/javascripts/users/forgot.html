@@ -5,8 +5,7 @@
         <h3 class="panel-title">Forgot password</h3>
       </div>
       <div class="panel-body">
-        <form role="form"
-              name="forgotForm"
+        <form name="forgotForm"
               autocomplete="on"
               ng-submit="forgotForm.$valid && vm.submit(vm.email)"
               novalidate>
@@ -21,18 +20,20 @@
                    type="email"
                    class="form-control"
                    ng-model="vm.email"
-                   placeholder="Email"
+                   placeholder="Email address"
                    required/>
-            <p class="help-block"
-               ng-show="forgotForm.email.$invalid && !forgotForm.email.$pristine">
-              Valid email address is required.
-            </p>
+            <div ng-messages="forgotForm.email.$error"
+                 ng-if="forgotForm.email.$dirty"
+                 role="alert">
+              <div ng-message="email" class="help-block">Email address is not valid</div>
+            </div>
           </div>
 
           <!-- BUTTONS  -->
           <div class="form-group">
             <button class="btn btn-primary" ng-disabled="forgotForm.$invalid">Submit</button>
           </div>
+
         </form>
       </div>
     </div>

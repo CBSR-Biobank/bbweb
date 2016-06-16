@@ -110,8 +110,7 @@ define([
     it('displays pagination controls', function() {
       var self = this,
           studies = _.map(_.range(20), function () { return self.factory.study(); }),
-          pageSize = studies.length / 2,
-          scope;
+          pageSize = studies.length / 2;
 
       createScope.call(this,
                        {
@@ -126,13 +125,13 @@ define([
     it('updates to name filter cause studies to be re-loaded', function() {
       var self = this,
           studies = _.map(_.range(20), function () { return self.factory.study(); }),
-          pageSize = studies.length / 2,
-          scope = createScope.call(this,
-                                   {
-                                     getStudies: createGetStudiesFn.call(self, studies),
-                                     pageSize: pageSize
-                                   });
+          pageSize = studies.length / 2;
 
+      createScope.call(this,
+                       {
+                         getStudies: createGetStudiesFn.call(self, studies),
+                         pageSize: pageSize
+                       });
       spyOn(self.scope.model, 'getStudies').and.callThrough();
       self.element.isolateScope().vm.nameFilterUpdated();
       expect(this.scope.model.getStudies).toHaveBeenCalled();

@@ -19,11 +19,10 @@
       </select>
     </div>
   </div>
-  <div class="col-md-offset-3 col-md-9">
-    <p class="help-block"
-       ng-show="spcLinkTypeForm.procTypeName.$error.required && !spcLinkTypeForm.procTypeName.$pristine">
-      Please select a processing type
-    </p>
+  <div class="col-md-offset-3 col-md-9"
+       ng-messages="spcLinkTypeForm.procTypeName.$error"
+       ng-if="spcLinkTypeForm.procTypeName.$dirty">
+    <div ng-message="required" class="help-block">Please select a processing type</div>
   </div>
 
   <!-- INPUT SPECIMEN GROUP -->
@@ -39,11 +38,10 @@
       </select>
     </div>
   </div>
-  <div class="col-md-offset-3 col-md-9">
-    <p class="help-block"
-       ng-show="spcLinkTypeForm.inputGroupName.$error.required && !spcLinkTypeForm.inputGroupName.$pristine">
-      Please select a specimen group
-    </p>
+  <div class="col-md-offset-3 col-md-9"
+       ng-messages="spcLinkTypeForm.inputGroupName.$error"
+       ng-if="spcLinkTypeForm.inputGroupName.$dirty">
+    <div ng-message="required" class="help-block">Please select a specimen group</div>
   </div>
 
   <!-- INPUT COUNT -->
@@ -60,11 +58,12 @@
              required />
     </div>
   </div>
-  <div class="col-md-offset-3 col-md-9">
-    <p class="help-block"
-       ng-show="spcLinkTypeForm.inputCount.$error.validCount">
+  <div class="col-md-offset-3 col-md-9"
+       ng-messages="spcLinkTypeForm.inputCount.$error"
+       ng-if="spcLinkTypeForm.inputCount.$dirty">
+    <div ng-message="validCount" class="help-block">
       Input count should be a positive integer number greater than 1
-    </p>
+    </div>
   </div>
 
   <!-- EXPECTED INPUT CHANGE -->
@@ -84,11 +83,12 @@
       {{vm.getSpecimenGroupUnits(vm.specimenLinkType.inputGroupId)}}
     </div>
   </div>
-  <div class="col-md-offset-3 col-md-9">
-    <p class="help-block"
-       ng-show="spcLinkTypeForm.expectedInputChange.$error.validAmount">
+  <div class="col-md-offset-3 col-md-9"
+       ng-messages="spcLinkTypeForm.expectedInputChange.$error"
+       ng-if="spcLinkTypeForm.expectedInputChange.$dirty">
+    <div ng-message="validAmount" class="help-block">
       Input change should be a positive floating point number greater than zero
-    </p>
+    </div>
   </div>
 
   <!-- INPUT CONTAINER TYPE -->
@@ -117,11 +117,10 @@
       </select>
     </div>
   </div>
-  <div class="col-md-offset-3 col-md-9">
-    <p class="help-block"
-       ng-show="spcLinkTypeForm.outputGroupName.$error.required && !spcLinkTypeForm.outputGroupName.$pristine">
-      Please select a specimen group
-    </p>
+  <div class="col-md-offset-3 col-md-9"
+       ng-messages="spcLinkTypeForm.outputGroupName.$error"
+       ng-if="spcLinkTypeForm.outputGroupName.$dirty">
+    <div ng-message="required" class="help-block">Please select a specimen group</div>
   </div>
 
   <!-- OUTPUT COUNT -->
@@ -138,10 +137,12 @@
              required />
     </div>
   </div>
-  <div class="col-md-offset-3 col-md-9">
-    <p class="help-block" ng-show="spcLinkTypeForm.outputCount.$error.validCount">
+  <div class="col-md-offset-3 col-md-9"
+       ng-messages="spcLinkTypeForm.outputCount.$error"
+       ng-if="spcLinkTypeForm.outputCount.$dirty">
+    <div ng-message="validCount" class="help-block">
       Output count should be a positive an integer number greater than 1
-    </p>
+    </div>
   </div>
 
   <!-- EXPECTED OUTPUT CHANGE -->
@@ -161,11 +162,12 @@
       {{vm.getSpecimenGroupUnits(vm.specimenLinkType.outputGroupId)}}
     </div>
   </div>
-  <div class="col-md-offset-3 col-md-9">
-    <p class="help-block"
-       ng-show="spcLinkTypeForm.expectedOutputChange.$error.validAmount">
+  <div class="col-md-offset-3 col-md-9"
+       ng-messages="spcLinkTypeForm.expectedOutputChange.$error"
+       ng-if="spcLinkTypeForm.expectedOutputChange.$dirty">
+    <div ng-message="validAmount" class="help-block">
       Input change should be a positive floating point number greater than zero
-    </p>
+    </div>
   </div>
 
   <!-- OUTPUT CONTAINER TYPE -->
@@ -205,10 +207,10 @@
           <i class="glyphicon glyphicon-remove"></i> Remove
         </button>
       </div>
-      <div class="col-md-offset-3 col-md-9">
-        <p class="help-block" ng-show="atSubForm.name.$error.required && !atSubForm.name.$pristine">
-          Please select an annotation type
-        </p>
+      <div class="col-md-offset-3 col-md-9"
+           ng-messages="atSubForm.name.$error"
+           ng-if="atSubForm.name.$dirty">
+        <div ng-message="required" class="help-block">Please select an annotation type</div>
       </div>
     </ng-form>
   </div>
