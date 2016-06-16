@@ -55,7 +55,14 @@ define(['angular', 'underscore'], function(angular, _) {
     $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                   angular.bind(panel, panel.watchPanelOpenChangeFunc));
 
+    init();
+
     //--
+
+    function init() {
+      // updates the selected tab in 'studyViewDirective' which is the parent directive
+      $scope.$emit('study-view', 'processing-tab-selected');
+    }
 
     function add() {
       return panel.add();

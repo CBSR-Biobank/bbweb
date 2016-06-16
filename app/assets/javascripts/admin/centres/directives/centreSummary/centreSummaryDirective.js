@@ -24,9 +24,15 @@ define(['underscore'], function (_) {
     return directive;
   }
 
-  CentreSummaryCtrl.$inject = ['$filter', 'modalService', 'modalInput', 'notificationsService'];
+  CentreSummaryCtrl.$inject = [
+    '$scope',
+    '$filter',
+    'modalService',
+    'modalInput',
+    'notificationsService'
+  ];
 
-  function CentreSummaryCtrl($filter, modalService, modalInput, notificationsService) {
+  function CentreSummaryCtrl($scope, $filter, modalService, modalInput, notificationsService) {
     var vm = this;
     vm.descriptionToggleControl = {}; // for truncateToggle directive
     vm.descriptionToggleState = true;
@@ -36,7 +42,14 @@ define(['underscore'], function (_) {
     vm.editName = editName;
     vm.editDescription = editDescription;
 
+    init();
+
     //----
+
+    function init() {
+      // updates the selected tab in 'studyViewDirective' which is the parent directive
+      $scope.$emit('centre-view', 'centre-summary-selected');
+    }
 
     function changeStatus(status) {
       var changeStatusFn;

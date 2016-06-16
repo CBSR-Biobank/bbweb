@@ -45,7 +45,7 @@ define(['underscore'], function (_) {
 
     // initialize the panels to open state when viewing a new centre
     function init() {
-      activeTabUpdateFix();
+      $scope.$on('centre-view', activeTabUpdate);
 
       if (vm.centre.id !== $window.localStorage.getItem('centre.panel.centreId')) {
         // this way when the user selects a new centre, the panels always default to open
@@ -56,7 +56,20 @@ define(['underscore'], function (_) {
       }
     }
 
-    function activeTabUpdateFix() {
+    /**
+     * Updates the selected tab.
+     *
+     * This function is called when event 'centre-view' is emitted by child scopes.
+     *
+     * This event is emitted by the following child directives:
+     * <ul>
+     *   <li>centreSummaryDirective</li>
+     *   <li>centreStudiesPanelDirective</li>
+     *   <li>locationsPanelDirective</li>
+     * </ul>
+     */
+    function activeTabUpdate(event) {
+      event.stopPropagation();
       _.each(vm.tabs, function (tab, index) {
         tab.active = ($state.current.name.indexOf(tab.sref) >= 0);
         if (tab.active) {

@@ -43,7 +43,14 @@ define(['underscore'], function(_) {
     vm.view   = view;
     vm.remove = remove;
 
-    //---
+    init();
+
+    //--
+
+    function init() {
+      // updates the selected tab in 'centreViewDirective' which is the parent directive
+      $scope.$emit('centre-view', 'locations-panel-selected');
+    }
 
     function add() {
       // reload resolves in case centre's version has changed

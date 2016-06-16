@@ -24,6 +24,7 @@ define(['underscore'], function(_) {
   }
 
   StudySummaryCtrl.$inject = [
+    '$scope',
     '$state',
     'modalService',
     'modalInput',
@@ -31,7 +32,8 @@ define(['underscore'], function(_) {
     'CollectionEventType'
   ];
 
-  function StudySummaryCtrl($state,
+  function StudySummaryCtrl($scope,
+                            $state,
                             modalService,
                             modalInput,
                             notificationsService,
@@ -50,6 +52,9 @@ define(['underscore'], function(_) {
     //--
 
     function init() {
+      // updates the selected tab in 'studyViewDirective' which is the parent directive
+      $scope.$emit('study-view', 'study-summary-selected');
+
       CollectionEventType.list(vm.study.id).then(function (list) {
         vm.collectionEventTypes = list;
         vm.hasCollectionEventTypes = (vm.collectionEventTypes.length > 0);

@@ -11,7 +11,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('Directive: centreSummaryDirective', function() {
+  fdescribe('Directive: centreSummaryDirective', function() {
 
     var createController = function (centre) {
       this.element = angular.element('<centre-summary centre="vm.centre"></centre-summary>');
@@ -44,6 +44,7 @@ define([
       });
 
       self.putHtmlTemplates(
+        '/assets/javascripts/admin/centres/directives/centreView/centreView.html',
         '/assets/javascripts/admin/centres/directives/centreSummary/centreSummary.html',
         '/assets/javascripts/common/directives/truncateToggle.html',
         '/assets/javascripts/admin/directives/statusLine/statusLine.html');

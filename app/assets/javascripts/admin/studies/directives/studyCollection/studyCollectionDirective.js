@@ -14,11 +14,26 @@ define([], function() {
       scope: {
         study: '='
       },
-      templateUrl : '/assets/javascripts/admin/studies/directives/studyCollection/studyCollection.html'
+      templateUrl : '/assets/javascripts/admin/studies/directives/studyCollection/studyCollection.html',
+      controller: StudyCollectionCtrl,
+      controllerAs: 'vm'
     };
     return directive;
   }
 
-  return studyCollectionDirective;
+  StudyCollectionCtrl.$inject = ['$scope'];
 
+  function StudyCollectionCtrl($scope) {
+    init();
+
+    //--
+
+    function init() {
+      // updates the selected tab in 'studyViewDirective' which is the parent directive
+      $scope.$emit('study-view', 'collections-tab-selected');
+    }
+
+  }
+
+  return studyCollectionDirective;
 });

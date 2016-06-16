@@ -28,6 +28,7 @@
       Annotations
       <button class="btn btn-xs btn-default pull-right"
               title="Add annotation type"
+              ng-if="vm.study.isDisabled()"
               ng-click="vm.add()">
         <i class="glyphicon glyphicon-plus"></i>
       </button>

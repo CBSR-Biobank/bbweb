@@ -2,7 +2,7 @@ define(['underscore'], function (_) {
   'use strict';
 
   /**
-   *
+   * Displays the participant annotations defined for a study.
    */
   function studyParticipantsTabDirective() {
     var directive = {
@@ -20,11 +20,15 @@ define(['underscore'], function (_) {
   }
 
   StudyParticipantsTabCtrl.$inject = [
+    '$scope',
     '$state',
     'ParticipantAnnotationTypeModals'
   ];
 
-  function StudyParticipantsTabCtrl($state, ParticipantAnnotationTypeModals) {
+  /**
+   * Controller for studyParticipantsTabDirective.
+   */
+  function StudyParticipantsTabCtrl($scope, $state, ParticipantAnnotationTypeModals) {
     var vm = this;
 
     _.extend(vm, new ParticipantAnnotationTypeModals());
@@ -36,6 +40,15 @@ define(['underscore'], function (_) {
     vm.add = add;
     vm.editAnnotationType = editAnnotationType;
     vm.removeAnnotationType = removeAnnotationType;
+
+    init();
+
+    //--
+
+    function init() {
+      // updates the selected tab in 'studyViewDirective' which is the parent directive
+      $scope.$emit('study-view', 'participants-tab-selected');
+    }
 
     function add() {
       $state.go('home.admin.studies.study.participants.annotationTypeAdd');

@@ -23,9 +23,9 @@ define(['underscore'], function (_) {
     return directive;
   }
 
-  StudyViewCtrl.$inject = ['$window', '$state', '$timeout'];
+  StudyViewCtrl.$inject = ['$scope', '$window', '$state', '$timeout'];
 
-  function StudyViewCtrl($window, $state, $timeout) {
+  function StudyViewCtrl($scope, $window, $state, $timeout) {
     var vm = this;
 
     vm.tabs = [
@@ -34,15 +34,18 @@ define(['underscore'], function (_) {
       { heading: 'Collection',   sref: 'home.admin.studies.study.collection',   active: false },
       { heading: 'Processing',   sref: 'home.admin.studies.study.processing',   active: false },
     ];
+    vm.activeTabUpdate = activeTabUpdate;
 
     init();
 
     //--
 
+    /**
+     * Initialize the panels to open state when viewing a new study.
+     */
     function init() {
-      activeTabUpdate();
+      $scope.$on('study-view', activeTabUpdate);
 
-      // initialize the panels to open state when viewing a new study
       if (vm.study.id !== $window.localStorage.getItem('study.panel.studyId')) {
         // this way when the user selects a new study, the panels always default to open
         $window.localStorage.setItem('study.panel.processingTypes',                true);
@@ -54,7 +57,21 @@ define(['underscore'], function (_) {
       }
     }
 
-    function activeTabUpdate() {
+    /**
+     * Updates the selected tab.
+     *
+     * This function is called when event 'study-view' is emitted by child scopes.
+     *
+     * This event is emitted by the following child directives:
+     * <ul>
+     *   <li>studySummaryDirective</li>
+     *   <li>studyParticipantsTabDirective</li>
+     *   <li>studyCollectionDirective</li>
+     *   <li>processingTypesPanelDirective</li>
+     * </ul>
+     */
+    function activeTabUpdate(event) {
+      event.stopPropagation();
       _.each(vm.tabs, function (tab, index) {
         tab.active = ($state.current.name.indexOf(tab.sref) >= 0);
         if (tab.active) {
