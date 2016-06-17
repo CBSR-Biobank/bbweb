@@ -184,13 +184,7 @@ define(function(require) {
 
       function responseError(rejection) {
         if (rejection.status === 401) {
-          $injector.get('usersService').sessionTimeout();
-          $injector.get('modalService').modalOk(
-            'Session timeout',
-            'Your session timed out. Please log in again.'
-          ).then(function () {
-            $injector.get('$state').go('home.users.login');
-          });
+          $injector.get('$state').go('home.users.login');
         }
         return $q.reject(rejection);
       }
