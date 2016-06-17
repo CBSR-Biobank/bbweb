@@ -39,7 +39,8 @@ define([
                               'Participant',
                               'factory');
       self.putHtmlTemplates(
-        '/assets/javascripts/collection/directives/participantGet/participantGet.html');
+        '/assets/javascripts/collection/directives/participantGet/participantGet.html',
+        '/assets/javascripts/common/modalOk.html');
 
       this.jsonParticipant = this.factory.participant();
       this.jsonStudy       = this.factory.defaultStudy();
@@ -82,12 +83,10 @@ define([
           { participantId: this.participant.id });
       });
 
-      it('with an invalid participant ID opens a modal', function() {
-        var uniqueId = this.factory.stringNext(),
-            deferred = this.$q.defer();
+      it('with a NOT_FOUND opens a modal', function() {
+        var uniqueId = this.factory.stringNext();
 
-        deferred.reject({ status: 404 });
-        spyOn(this.Participant, 'getByUniqueId').and.returnValue(deferred.promise);
+        spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject({ status: 404 }));
         spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('ok'));
         spyOn(this.$state, 'go').and.returnValue('ok');
 
@@ -102,16 +101,12 @@ define([
           { uniqueId: uniqueId });
       });
 
-      it('with an invalid participant ID opens a modal and cancel is pressed', function() {
-        var uniqueId = this.factory.stringNext(),
-            participantDeferred = this.$q.defer(),
-            modalDeferred = this.$q.defer();
+      it('with a NOT_FOUND opens a modal and cancel is pressed', function() {
+        var uniqueId = this.factory.stringNext();
 
-        participantDeferred.reject({ status: 404 });
-        modalDeferred.reject('Cancel');
-        spyOn(this.Participant, 'getByUniqueId').and.returnValue(participantDeferred.promise);
-        spyOn(this.modalService, 'showModal').and.returnValue(modalDeferred.promise);
-        spyOn(this.stateHelper, 'reloadAndReinit').and.returnValue('ok');
+        spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject({ status: 404 }));
+        spyOn(this.modalService, 'showModal').and.returnValue(this.$q.reject('Cancel'));
+        spyOn(this.stateHelper, 'reloadAndReinit').and.returnValue(null);
 
         createDirective.call(this);
         this.controller.uniqueId = uniqueId;
@@ -122,11 +117,22 @@ define([
         expect(this.stateHelper.reloadAndReinit).toHaveBeenCalled();
       });
 
-      it('promise is rejected on a non 404 response', function() {
-        var participantDeferred = this.$q.defer();
+      it('on a 404 response, when patient with unique id already exists, modal is shown to user', function() {
+        spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject(
+          { status: 400, data: { message: 'EntityCriteriaError(participant not in study' }}));
+        spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('Ok'));
 
-        participantDeferred.reject({ status: 400 });
-        spyOn(this.Participant, 'getByUniqueId').and.returnValue(participantDeferred.promise);
+        createDirective.call(this);
+        this.controller.uniqueId = this.factory.stringNext();
+        this.controller.uniqueIdChanged();
+        this.scope.$digest();
+
+        expect(this.modalService.modalOk).toHaveBeenCalled();
+      });
+
+      fit('promise is rejected on a non 404 response', function() {
+        spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject(
+          { status: 400, data: { message: 'xxx' } }));
         spyOn(console, 'error').and.callThrough();
 
         createDirective.call(this);

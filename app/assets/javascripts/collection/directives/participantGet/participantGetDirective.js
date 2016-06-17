@@ -47,6 +47,7 @@ define(function () {
     //--
 
     function uniqueIdChanged() {
+      var studyMismatchRe = /EntityCriteriaError.participant not in study/i;
       if (vm.uniqueId.length > 0) {
         Participant.getByUniqueId(vm.study.id, vm.uniqueId)
           .then(function (participant) {
@@ -55,6 +56,14 @@ define(function () {
           .catch(function (error) {
             if (error.status === 404) {
               createParticipantModal(vm.uniqueId);
+            } else if ((error.status === 400) && error.data.message.match(studyMismatchRe)) {
+              modalService.modalOk(
+                'Duplicate unique ID',
+                'Unique ID <strong>' + vm.uniqueId + '</strong> is already in use by a participant ' +
+                  'in another study. Please use a diffent one.')
+                .then(function () {
+                  vm.uniqueId = undefined;
+                });
             } else {
               console.error('could not get participant by uniqueId: ', JSON.stringify(error));
             }
