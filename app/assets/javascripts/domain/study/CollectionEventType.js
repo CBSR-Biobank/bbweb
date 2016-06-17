@@ -11,6 +11,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     'biobankApi',
     'ConcurrencySafeEntity',
     'CollectionSpecimenSpec',
+    'DomainError',
     'AnnotationType',
     'hasCollectionSpecimenSpecs',
     'hasAnnotationTypes'
@@ -24,6 +25,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                                       biobankApi,
                                       ConcurrencySafeEntity,
                                       CollectionSpecimenSpec,
+                                      DomainError,
                                       AnnotationType,
                                       hasCollectionSpecimenSpecs,
                                       hasAnnotationTypes) {
@@ -88,17 +90,17 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     CollectionEventType.create = function (obj) {
       if (!tv4.validate(obj, schema)) {
         console.error('invalid collection event types from server: ' + tv4.error);
-        throw new Error('invalid collection event types from server: ' + tv4.error);
+        throw new DomainError('invalid collection event types from server: ' + tv4.error);
       }
 
       if (!hasCollectionSpecimenSpecs.validSpecimenSpecs(obj.specimenSpecs)) {
         console.error('invalid specimen specs from server: ' + tv4.error);
-        throw new Error('invalid specimen specs from server: ' + tv4.error);
+        throw new DomainError('invalid specimen specs from server: ' + tv4.error);
       }
 
       if (!hasAnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
         console.error('invalid annotation types from server: ' + tv4.error);
-        throw new Error('invalid annotation types from server: ' + tv4.error);
+        throw new DomainError('invalid annotation types from server: ' + tv4.error);
       }
 
       return new CollectionEventType(obj);
@@ -199,7 +201,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
           found = _.findWhere(self.specimenSpecs,  { uniqueId: specimenSpec.uniqueId });
 
       if (!found) {
-        throw new Error('specimen spec with ID not present: ' + specimenSpec.uniqueId);
+        throw new DomainError('specimen spec with ID not present: ' + specimenSpec.uniqueId);
       }
 
       url = sprintf.sprintf('%s/%s/%d/%s',

@@ -9,7 +9,8 @@ define(['underscore'], function(_) {
     'funutils',
     'validationService',
     'biobankApi',
-    'ConcurrencySafeEntity'
+    'ConcurrencySafeEntity',
+    'DomainError'
   ];
 
   /**
@@ -18,7 +19,8 @@ define(['underscore'], function(_) {
   function SpecimenGroupFactory(funutils,
                                 validationService,
                                 biobankApi,
-                                ConcurrencySafeEntity) {
+                                ConcurrencySafeEntity,
+                                DomainError) {
 
     var requiredKeys = [
       'studyId',
@@ -133,7 +135,7 @@ define(['underscore'], function(_) {
       if (sg) {
         return sg.units;
       }
-      throw new Error('specimen group ID not found: ' + id);
+      throw new DomainError('specimen group ID not found: ' + id);
     };
 
     function uri(/* studyId, specimenGroupId, version */) {
@@ -144,7 +146,7 @@ define(['underscore'], function(_) {
           args = _.toArray(arguments);
 
       if (args.length < 1) {
-        throw new Error('study id not specified');
+        throw new DomainError('study id not specified');
       }
 
       studyId = args.shift();

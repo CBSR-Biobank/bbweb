@@ -5,12 +5,12 @@
 define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
   'use strict';
 
-  //LocationFactory.$inject = [ ];
+  LocationFactory.$inject = [ 'DomainError' ];
 
   /**
    *
    */
-  function LocationFactory() {
+  function LocationFactory(DomainError) {
 
     var schema = {
       'id': 'Location',
@@ -68,7 +68,7 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
     Location.create = function(obj) {
       if (!tv4.validate(obj, schema)) {
         console.error('invalid object from server: ' + tv4.error);
-        throw new Error('invalid object from server: ' + tv4.error);
+        throw new DomainError('invalid object from server: ' + tv4.error);
       }
       return new Location(obj);
     };

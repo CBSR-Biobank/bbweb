@@ -5,9 +5,9 @@
 define(['underscore'], function(_) {
   'use strict';
 
-  MultipleSelectAnnotationFactory.$inject = ['Annotation'];
+  MultipleSelectAnnotationFactory.$inject = ['Annotation', 'DomainError'];
 
-  function MultipleSelectAnnotationFactory(Annotation) {
+  function MultipleSelectAnnotationFactory(Annotation, DomainError) {
 
     /**
      * Please use annotationFactory.create to create annotation objects.
@@ -42,7 +42,7 @@ define(['underscore'], function(_) {
 
     MultipleSelectAnnotation.prototype.setValue = function (value) {
       if (!_.isArray(value)) {
-        throw new Error('value is not an array');
+        throw new DomainError('value is not an array');
       }
       this.values = value;
     };

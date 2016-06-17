@@ -9,6 +9,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     '$q',
     'funutils',
     'ConcurrencySafeEntity',
+    'DomainError',
     'Annotation',
     'biobankApi',
     'hasAnnotations',
@@ -21,6 +22,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
   function CollectionEventFactory($q,
                                   funutils,
                                   ConcurrencySafeEntity,
+                                  DomainError,
                                   Annotation,
                                   biobankApi,
                                   hasAnnotations,
@@ -86,7 +88,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
       if (this.collectionEventTypeId &&
           collectionEventType &&
           (this.collectionEventTypeId !== collectionEventType.id)) {
-        throw new Error('invalid collection event type');
+        throw new DomainError('invalid collection event type');
       }
 
       if (collectionEventType) {
@@ -115,12 +117,12 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     CollectionEvent.create = function (obj, collectionEventType) {
       if (!tv4.validate(obj, schema)) {
         console.error('invalid object from server: ' + tv4.error);
-        throw new Error('invalid object from server: ' + tv4.error);
+        throw new DomainError('invalid object from server: ' + tv4.error);
       }
 
       if (!Annotation.validAnnotations(obj.annotations)) {
         console.error('invalid object from server: bad annotations');
-        throw new Error('invalid object from server: bad annotations');
+        throw new DomainError('invalid object from server: bad annotations');
       }
 
       return new CollectionEvent(obj, collectionEventType);
@@ -136,7 +138,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      */
     CollectionEvent.get = function (id, collectionEventType) {
       if (!id) {
-        throw new Error('collection event id not specified');
+        throw new DomainError('collection event id not specified');
       }
 
       return biobankApi.get(uri(id)).then(function (reply) {
@@ -226,7 +228,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
       json.annotations = _.map(self.annotations, function (annotation) {
         // make sure required annotations have values
         if (!annotation.isValueValid()) {
-          throw new Error('required annotation has no value: annotationId: ' +
+          throw new DomainError('required annotation has no value: annotationId: ' +
                           annotation.annotationType.id);
         }
         return annotation.getServerAnnotation();

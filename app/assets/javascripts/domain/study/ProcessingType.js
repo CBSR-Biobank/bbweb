@@ -9,13 +9,15 @@ define(['underscore'], function(_) {
     'funutils',
     'validationService',
     'biobankApi',
-    'ConcurrencySafeEntity'
+    'ConcurrencySafeEntity',
+    'DomainError'
   ];
 
   function ProcessingTypeFactory(funutils,
                                  validationService,
                                  biobankApi,
-                                 ConcurrencySafeEntity) {
+                                 ConcurrencySafeEntity,
+                                 DomainError) {
 
     var requiredKeys = ['id', 'studyId', 'version', 'timeAdded', 'name', 'enabled'];
 
@@ -101,7 +103,7 @@ define(['underscore'], function(_) {
     function uri(studyId, ceventTypeId, version) {
       var result = '/studies';
       if (arguments.length <= 0) {
-        throw new Error('study id not specified');
+        throw new DomainError('study id not specified');
       } else {
         result += '/' + studyId + '/proctypes';
 
@@ -122,4 +124,3 @@ define(['underscore'], function(_) {
   return ProcessingTypeFactory;
 
 });
-

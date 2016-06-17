@@ -5,9 +5,9 @@
 define(['underscore'], function(_) {
   'use strict';
 
-  SingleSelectAnnotationFactory.$inject = ['Annotation'];
+  SingleSelectAnnotationFactory.$inject = ['Annotation', 'DomainError'];
 
-  function SingleSelectAnnotationFactory(Annotation) {
+  function SingleSelectAnnotationFactory(Annotation, DomainError) {
 
     /**
      * Please use annotationFactory.create to create annotation objects.
@@ -26,7 +26,7 @@ define(['underscore'], function(_) {
         } else if (obj.selectedValues.length === 1) {
           self.value = obj.selectedValues[0];
         } else {
-          throw new Error('invalid value for selected values');
+          throw new DomainError('invalid value for selected values');
         }
       }
     }

@@ -6,10 +6,11 @@ define(['moment', 'underscore', 'tv4'], function(moment, _, tv4) {
   'use strict';
 
   AnnotationFactory.$inject = [
-    'AnnotationValueType'
+    'AnnotationValueType',
+    'DomainError'
   ];
 
-  function AnnotationFactory(AnnotationValueType) {
+  function AnnotationFactory(AnnotationValueType, DomainError) {
 
     var schema = {
       'id': 'Annotation',
@@ -43,18 +44,18 @@ define(['moment', 'underscore', 'tv4'], function(moment, _, tv4) {
         self.annotationType = annotationType;
 
         if (!_.contains(_.values(AnnotationValueType), annotationType.valueType)) {
-          throw new Error('value type is invalid: ' + annotationType.valueType);
+          throw new DomainError('value type is invalid: ' + annotationType.valueType);
         }
 
         if (_.isUndefined(annotationType.required)) {
-          throw new Error('required not assigned');
+          throw new DomainError('required not assigned');
         }
 
         self.required = annotationType.required;
 
         if (annotationType.valueType === AnnotationValueType.SELECT) {
           if (!annotationType.isMultipleSelect() && !annotationType.isSingleSelect()) {
-            throw new Error('invalid value for max count');
+            throw new DomainError('invalid value for max count');
           }
         }
       }
@@ -80,7 +81,7 @@ define(['moment', 'underscore', 'tv4'], function(moment, _, tv4) {
     Annotation.create = function (obj) {
       if (!Annotation.validate(obj)) {
         console.error('invalid object to create from: ' + tv4.error);
-        throw new Error('invalid object to create from: ' + tv4.error);
+        throw new DomainError('invalid object to create from: ' + tv4.error);
       }
       return new Annotation(obj);
     };
@@ -90,7 +91,7 @@ define(['moment', 'underscore', 'tv4'], function(moment, _, tv4) {
      */
     Annotation.prototype.getAnnotationTypeId = function () {
       if (_.isUndefined(this.annotationType)) {
-        throw new Error('annotation type not assigned');
+        throw new DomainError('annotation type not assigned');
       }
       return this.annotationType.uniqueId;
     };
@@ -100,7 +101,7 @@ define(['moment', 'underscore', 'tv4'], function(moment, _, tv4) {
      */
     Annotation.prototype.getValueType = function () {
       if (_.isUndefined(this.annotationType)) {
-        throw new Error('annotation type not assigned');
+        throw new DomainError('annotation type not assigned');
       }
       return this.annotationType.valueType;
     };
@@ -114,7 +115,7 @@ define(['moment', 'underscore', 'tv4'], function(moment, _, tv4) {
      */
     Annotation.prototype.getLabel = function () {
       if (_.isUndefined(this.annotationType)) {
-        throw new Error('annotation type not assigned');
+        throw new DomainError('annotation type not assigned');
       }
       return this.annotationType.name;
     };

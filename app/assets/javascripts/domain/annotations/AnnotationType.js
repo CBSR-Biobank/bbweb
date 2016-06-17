@@ -9,6 +9,7 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
     'funutils',
     'validationService',
     'ConcurrencySafeEntity',
+    'DomainError',
     'AnnotationValueType',
     'AnnotationMaxValueCount'
   ];
@@ -19,6 +20,7 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
   function AnnotationTypeFactory(funutils,
                                  validationService,
                                  ConcurrencySafeEntity,
+                                 DomainError,
                                  AnnotationValueType,
                                  AnnotationMaxValueCount) {
 
@@ -59,7 +61,7 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
     AnnotationType.create = function (obj) {
       if (!tv4.validate(obj, schema)) {
         console.error('invalid object from server: ' + tv4.error);
-        throw new Error('invalid object from server: ' + tv4.error);
+        throw new DomainError('invalid object from server: ' + tv4.error);
       }
       return new AnnotationType(obj);
     };
@@ -79,7 +81,7 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
         }
         return 'Multiple Select';
       }
-      throw new Error('invalid type for annotation type: ' + this.valueType);
+      throw new DomainError('invalid type for annotation type: ' + this.valueType);
     };
 
     AnnotationType.prototype.isValueTypeText = function () {
@@ -134,7 +136,7 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
      */
     AnnotationType.prototype.addOption = function () {
       if (!this.isValueTypeSelect()) {
-        throw new Error('value type is not select: ' + this.valueType);
+        throw new DomainError('value type is not select: ' + this.valueType);
       }
       this.options.push('');
     };
@@ -144,7 +146,7 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
      */
     AnnotationType.prototype.removeOption = function (index) {
       if (this.options.length <= 1) {
-        throw new Error('options is empty, cannot remove any more options');
+        throw new DomainError('options is empty, cannot remove any more options');
       }
       this.options.splice(index, 1);
     };

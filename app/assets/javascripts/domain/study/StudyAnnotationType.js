@@ -10,6 +10,7 @@ define(['angular', 'underscore'], function(angular, _) {
     'biobankApi',
     'AnnotationValueType',
     'AnnotationMaxValueCount',
+    'DomainError',
     'validationService',
     'studyAnnotationTypeValidation',
     'AnnotationType'
@@ -22,6 +23,7 @@ define(['angular', 'underscore'], function(angular, _) {
                                       biobankApi,
                                       AnnotationValueType,
                                       AnnotationMaxValueCount,
+                                      DomainError,
                                       validationService,
                                       studyAnnotationTypeValidation,
                                       AnnotationType) {
@@ -88,7 +90,7 @@ define(['angular', 'underscore'], function(angular, _) {
     StudyAnnotationType.prototype.addOrUpdate = function (validator, createFn) {
       var self = this;
       if (self._service === null) {
-        throw new Error('_service is null');
+        throw new DomainError('_service is null');
       }
 
       return self._service.addOrUpdate(self).then(function(reply) {
@@ -99,7 +101,7 @@ define(['angular', 'underscore'], function(angular, _) {
     StudyAnnotationType.prototype.remove = function () {
       var self = this;
       if (self._service === null) {
-        throw new Error('_service is null');
+        throw new DomainError('_service is null');
       }
       return self._service.remove(self);
     };

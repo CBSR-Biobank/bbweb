@@ -5,14 +5,20 @@
 define(['underscore'], function(_) {
   'use strict';
 
-  hasAnnotationTypesFactory.$inject = [ 'biobankApi', 'AnnotationType' ];
+  hasAnnotationTypesFactory.$inject = [
+    'biobankApi',
+    'AnnotationType',
+    'DomainError'
+  ];
 
   /**
    * Maintains an array of annotation types.
    *
    * This is a mixin.
    */
-  function hasAnnotationTypesFactory(biobankApi, AnnotationType) {
+  function hasAnnotationTypesFactory(biobankApi,
+                                     AnnotationType,
+                                     DomainError) {
 
     var mixins = {
       validAnnotationTypes: validAnnotationTypes,
@@ -46,7 +52,7 @@ define(['underscore'], function(_) {
           found = _.findWhere(self.annotationTypes,  { uniqueId: annotationType.uniqueId });
 
       if (!found) {
-        throw new Error('annotation type with ID not present: ' + annotationType.uniqueId);
+        throw new DomainError('annotation type with ID not present: ' + annotationType.uniqueId);
       }
 
       return biobankApi.del(url).then(function () {

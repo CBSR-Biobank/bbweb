@@ -8,6 +8,7 @@ define(['underscore'], function (_) {
   hasAnnotationsFactory.$inject = [
     'biobankApi',
     'ConcurrencySafeEntity',
+    'DomainError',
     'Annotation',
     'annotationFactory'
   ];
@@ -19,6 +20,7 @@ define(['underscore'], function (_) {
    */
   function hasAnnotationsFactory(biobankApi,
                                  ConcurrencySafeEntity,
+                                 DomainError,
                                  Annotation,
                                  annotationFactory) {
 
@@ -49,7 +51,7 @@ define(['underscore'], function (_) {
           found = _.findWhere(self.annotations,  { annotationTypeId: annotation.annotationTypeId });
 
       if (!found) {
-        throw new Error('annotation with annotation type ID not present: ' + annotation.annotationTypeId);
+        throw new DomainError('annotation with annotation type ID not present: ' + annotation.annotationTypeId);
       }
 
       return biobankApi.del(url).then(function () {
@@ -75,7 +77,7 @@ define(['underscore'], function (_) {
                                   _.pluck(annotationTypes, 'uniqueId'));
 
       if (differentIds.length > 0) {
-        throw new Error('annotation types not found: ' + differentIds);
+        throw new DomainError('annotation types not found: ' + differentIds);
       }
 
       self.annotations = _.map(annotationTypes, function (annotationType) {

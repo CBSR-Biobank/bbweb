@@ -9,6 +9,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
     '$q',
     'biobankApi',
     'ConcurrencySafeEntity',
+    'DomainError',
     'CentreStatus',
     'centreStatusLabel',
     'Location'
@@ -35,6 +36,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
   function CentreFactory($q,
                          biobankApi,
                          ConcurrencySafeEntity,
+                         DomainError,
                          CentreStatus,
                          centreStatusLabel,
                          Location) {
@@ -138,17 +140,17 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
     Centre.create = function (obj) {
       if (!tv4.validate(obj, schema)) {
         console.error('invalid object from server: ' + tv4.error);
-        throw new Error('invalid object from server: ' + tv4.error);
+        throw new DomainError('invalid object from server: ' + tv4.error);
       }
 
       if (!validStudyIds(obj.studyIds)) {
         console.error('invalid object from server: bad study ids');
-        throw new Error('invalid object from server: bad study ids');
+        throw new DomainError('invalid object from server: bad study ids');
       }
 
       if (!validLocations(obj.locations)) {
         console.error('invalid object from server: bad locations');
-        throw new Error('invalid object from server: bad locations');
+        throw new DomainError('invalid object from server: bad locations');
       }
 
       return new Centre(obj);
@@ -362,7 +364,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
       var self = this, url;
 
       if (!_.contains(self.studyIds, study.id)) {
-        throw new Error('study ID not present: ' + study.id);
+        throw new DomainError('study ID not present: ' + study.id);
       }
 
       url = sprintf.sprintf('%s/%d/%s', uri('studies', self.id), self.version, study.id);
@@ -412,7 +414,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
 
       existingLoc = _.findWhere(self.locations, { uniqueId: location.uniqueId });
       if (_.isUndefined(existingLoc)) {
-        throw new Error('location does not exist: ' + location.id);
+        throw new DomainError('location does not exist: ' + location.id);
       }
 
       url = sprintf.sprintf('%s/%d/%s', uri('locations', self.id), self.version, location.uniqueId);
@@ -458,7 +460,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
      */
     Centre.prototype.disable = function () {
       if (this.isDisabled()) {
-        throw new Error('already disabled');
+        throw new DomainError('already disabled');
       }
       return changeState(this, 'disable');
     };
@@ -472,7 +474,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
      */
     Centre.prototype.enable = function () {
        if (this.isEnabled()) {
-        throw new Error('already enabled');
+        throw new DomainError('already enabled');
       }
      return changeState(this, 'enable');
     };

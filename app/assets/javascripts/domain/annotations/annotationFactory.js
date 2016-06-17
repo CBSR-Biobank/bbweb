@@ -9,7 +9,8 @@ define(['underscore'], function(_) {
     'MultipleSelectAnnotation',
     'NumberAnnotation',
     'SingleSelectAnnotation',
-    'TextAnnotation'
+    'TextAnnotation',
+    'DomainError'
   ];
 
   function annotationFactoryFactory(funutils,
@@ -19,7 +20,8 @@ define(['underscore'], function(_) {
                                     MultipleSelectAnnotation,
                                     NumberAnnotation,
                                     SingleSelectAnnotation,
-                                    TextAnnotation) {
+                                    TextAnnotation,
+                                    DomainError) {
 
     var service = {
       create: create
@@ -45,13 +47,13 @@ define(['underscore'], function(_) {
       var valid, annotation;
 
       if (_.isUndefined(annotationType)) {
-        throw new Error('annotation type is undefined');
+        throw new DomainError('annotation type is undefined');
       }
 
       if (obj) {
         valid = Annotation.isValid(obj);
         if (!valid) {
-          throw new Error('invalid object from server: ' + Annotation.getInvalidError());
+          throw new DomainError('invalid object from server: ' + Annotation.getInvalidError());
         }
 
         if (obj.selectedValues) {
@@ -59,7 +61,7 @@ define(['underscore'], function(_) {
         }
 
         if (!valid) {
-          throw new Error('invalid selected values in object from server');
+          throw new DomainError('invalid selected values in object from server');
         }
       }
 
@@ -83,13 +85,13 @@ define(['underscore'], function(_) {
         } else if (annotationType.isMultipleSelect()) {
           annotation = new MultipleSelectAnnotation(obj, annotationType);
         } else {
-          throw new Error('invalid select annotation: ' + annotationType.maxValueCount);
+          throw new DomainError('invalid select annotation: ' + annotationType.maxValueCount);
         }
         break;
 
       default:
         // should never happen since this is checked for in the constructor, but just in case
-        throw new Error('value type is invalid: ' + annotationType.valueType);
+        throw new DomainError('value type is invalid: ' + annotationType.valueType);
       }
 
       return annotation;

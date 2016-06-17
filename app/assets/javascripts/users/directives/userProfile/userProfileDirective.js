@@ -133,7 +133,7 @@ define(function () {
     }
 
     function updatePassword() {
-      modalInput.password().result.then(function (result) {
+      modalInput.password('Change password').result.then(function (result) {
         vm.user.updatePassword(result.currentPassword, result.newPassword)
           .then(postUpdate('Your password was updated successfully.',
                            'Update successful',

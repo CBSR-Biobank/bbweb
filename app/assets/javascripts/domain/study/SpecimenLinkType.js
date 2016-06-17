@@ -9,7 +9,8 @@ define(['underscore'], function(_) {
     'funutils',
     'validationService',
     'biobankApi',
-    'ConcurrencySafeEntity'
+    'ConcurrencySafeEntity',
+    'DomainError'
   ];
 
   /**
@@ -18,7 +19,8 @@ define(['underscore'], function(_) {
   function SpecimenLinkTypeFactory(funutils,
                                    validationService,
                                    biobankApi,
-                                   ConcurrencySafeEntity) {
+                                   ConcurrencySafeEntity,
+                                   DomainError) {
 
     var requiredKeys = [
       'id',
@@ -170,7 +172,7 @@ define(['underscore'], function(_) {
     function uri(processingTypeId, ceventTypeId, version) {
       var result = '/studies';
       if (arguments.length <= 0) {
-        throw new Error('study id not specified');
+        throw new DomainError('study id not specified');
       } else {
         result += '/' + processingTypeId + '/sltypes';
 

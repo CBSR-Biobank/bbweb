@@ -10,6 +10,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
     'funutils',
     'biobankApi',
     'ConcurrencySafeEntity',
+    'DomainError',
     'UserStatus',
     'usersService',
     'userStatusLabel'
@@ -22,6 +23,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
                        funutils,
                        biobankApi,
                        ConcurrencySafeEntity,
+                       DomainError,
                        UserStatus,
                        usersService,
                        userStatusLabel) {
@@ -65,7 +67,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
     User.create = function (obj) {
       if (!tv4.validate(obj, schema)) {
         console.error('invalid object from server: ' + tv4.error);
-        throw new Error('invalid object from server: ' + tv4.error);
+        throw new DomainError('invalid object from server: ' + tv4.error);
       }
       return new User(obj);
     };
@@ -179,7 +181,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
       var self = this;
 
       if (self.status !== UserStatus.REGISTERED) {
-        throw new Error('user status is not registered: ' + self.status);
+        throw new DomainError('user status is not registered: ' + self.status);
       }
 
       return changeStatus(this, 'activate');
@@ -189,7 +191,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
       var self = this;
 
       if (self.status !== UserStatus.ACTIVE) {
-        throw new Error('user status is not active: ' + self.status);
+        throw new DomainError('user status is not active: ' + self.status);
       }
 
       return changeStatus(this, 'lock');
@@ -199,7 +201,7 @@ define(['underscore', 'tv4'], function(_, tv4) {
       var self = this;
 
       if (self.status !== UserStatus.LOCKED) {
-        throw new Error('user status is not locked: ' + self.status);
+        throw new DomainError('user status is not locked: ' + self.status);
       }
 
       return changeStatus(this, 'unlock');

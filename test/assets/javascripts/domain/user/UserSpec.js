@@ -64,6 +64,7 @@ define([
       var self = this,
           nonObj = 1;
       expect(function () {
+        console.log('here');
         self.User.create(nonObj);
       }).toThrowError(/invalid object from server/);
     });

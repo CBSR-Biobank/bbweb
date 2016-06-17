@@ -8,6 +8,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
   SpecimenFactory.$inject = [
     '$q',
     'ConcurrencySafeEntity',
+    'DomainError',
     'biobankApi'
   ];
 
@@ -24,6 +25,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
    */
   function SpecimenFactory($q,
                            ConcurrencySafeEntity,
+                           DomainError,
                            biobankApi) {
 
     /**
@@ -182,7 +184,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     Specimen.create = function (obj, specimenSpec) {
       if (!tv4.validate(obj, schema)) {
         console.error('invalid object from server: ' + tv4.error);
-        throw new Error('invalid object from server: ' + tv4.error);
+        throw new DomainError('invalid object from server: ' + tv4.error);
       }
 
       return new Specimen(obj, specimenSpec);
@@ -223,7 +225,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      */
     Specimen.get = function (id) {
       if (!id) {
-        throw new Error('specimen id not specified');
+        throw new DomainError('specimen id not specified');
       }
 
       return biobankApi.get(uri(id)).then(function (reply) {
@@ -240,7 +242,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      */
     Specimen.getByInventoryId = function (inventoryId) {
       if (!inventoryId) {
-        throw new Error('specimen inventory id not specified');
+        throw new DomainError('specimen inventory id not specified');
       }
 
       return biobankApi.get(uri() + '/invid/' + inventoryId).then(function (reply) {
@@ -336,7 +338,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      */
     Specimen.prototype.name = function () {
       if (_.isUndefined(this.specimenSpec)) {
-        throw new Error('specimen spec not assigned');
+        throw new DomainError('specimen spec not assigned');
       }
       return this.specimenSpec.name;
     };
@@ -348,7 +350,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      */
     Specimen.prototype.defaultAmount = function () {
       if (_.isUndefined(this.specimenSpec)) {
-        throw new Error('specimen spec not assigned');
+        throw new DomainError('specimen spec not assigned');
       }
       return this.specimenSpec.amount;
     };
@@ -360,7 +362,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      */
     Specimen.prototype.isDefaultAmount = function () {
       if (_.isUndefined(this.specimenSpec)) {
-        throw new Error('specimen spec not assigned');
+        throw new DomainError('specimen spec not assigned');
       }
       return (this.amount === this.specimenSpec.amount);
     };
@@ -372,7 +374,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      */
     Specimen.prototype.units = function () {
       if (_.isUndefined(this.specimenSpec)) {
-        throw new Error('specimen spec not assigned');
+        throw new DomainError('specimen spec not assigned');
       }
       return this.specimenSpec.units;
     };

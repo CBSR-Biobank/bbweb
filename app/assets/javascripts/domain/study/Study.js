@@ -10,6 +10,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
     'funutils',
     'biobankApi',
     'ConcurrencySafeEntity',
+    'DomainError',
     'StudyStatus',
     'studyStatusLabel',
     'AnnotationType',
@@ -23,6 +24,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
                         funutils,
                         biobankApi,
                         ConcurrencySafeEntity,
+                        DomainError,
                         StudyStatus,
                         studyStatusLabel,
                         AnnotationType,
@@ -126,14 +128,14 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
     Study.create = function (obj) {
       if (!tv4.validate(obj, schema)) {
         console.error('invalid object from server: ' + tv4.error);
-        throw new Error('invalid object from server: ' + tv4.error);
+        throw new DomainError('invalid object from server: ' + tv4.error);
       }
 
       obj.annotationTypes = obj.annotationTypes || {};
 
       if (!hasAnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
         console.error('invalid object from server: bad annotation type');
-        throw new Error('invalid object from server: bad annotation type');
+        throw new DomainError('invalid object from server: bad annotation type');
       }
 
       return new Study(obj);
@@ -354,7 +356,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
      */
     Study.prototype.disable = function () {
       if (this.isDisabled()) {
-        throw new Error('already disabled');
+        throw new DomainError('already disabled');
       }
       return changeState.call(this, 'disable');
     };
@@ -368,7 +370,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
      */
     Study.prototype.enable = function () {
       if (this.isEnabled()) {
-        throw new Error('already enabled');
+        throw new DomainError('already enabled');
       }
       return changeState.call(this, 'enable');
     };
@@ -382,7 +384,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
      */
     Study.prototype.retire = function () {
       if (this.isRetired()) {
-        throw new Error('already retired');
+        throw new DomainError('already retired');
       }
       return changeState.call(this, 'retire');
     };
@@ -396,7 +398,7 @@ define(['angular', 'underscore', 'sprintf', 'tv4'], function(angular, _, sprintf
      */
     Study.prototype.unretire = function () {
       if (!this.isRetired()) {
-        throw new Error('not retired');
+        throw new DomainError('not retired');
       }
       return changeState.call(this, 'unretire');
     };

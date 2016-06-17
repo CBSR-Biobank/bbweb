@@ -9,6 +9,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     '$q',
     'funutils',
     'ConcurrencySafeEntity',
+    'DomainError',
     'biobankApi',
     'hasAnnotations'
   ];
@@ -19,6 +20,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
   function ParticipantFactory($q,
                               funutils,
                               ConcurrencySafeEntity,
+                              DomainError,
                               biobankApi,
                               hasAnnotations) {
 
@@ -70,12 +72,12 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     Participant.create = function (obj) {
       if (!tv4.validate(obj, schema)) {
         console.error('invalid object from server: ' + tv4.error);
-        throw new Error('invalid object from server: ' + tv4.error);
+        throw new DomainError('invalid object from server: ' + tv4.error);
       }
 
       if (!hasAnnotations.validAnnotations(obj.annotations)) {
         console.error('invalid object from server: bad annotation type');
-        throw new Error('invalid object from server: bad annotation type');
+        throw new DomainError('invalid object from server: bad annotation type');
       }
       return new Participant(obj);
     };
