@@ -11,12 +11,16 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  fdescribe('Directive: centreSummaryDirective', function() {
+  describe('Directive: centreSummaryDirective', function() {
 
     var createController = function (centre) {
       this.element = angular.element('<centre-summary centre="vm.centre"></centre-summary>');
       this.scope = this.$rootScope.$new();
       this.scope.vm = { centre: this.centre };
+
+      this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
+      this.scope.$on('centre-view', this.eventRxFunc);
+
       this.$compile(this.element)(this.scope);
       this.scope.$digest();
       this.controller = this.element.controller('centreSummary');
@@ -50,10 +54,11 @@ define([
         '/assets/javascripts/admin/directives/statusLine/statusLine.html');
     }));
 
-    it('should contain valid settings to display the centre summary', function() {
+    it('initialization is valid', function() {
       createController.call(this, this.centre);
       expect(this.scope.vm.centre).toBe(this.centre);
       expect(this.controller.descriptionToggleLength).toBeDefined();
+      expect(this.eventRxFunc).toHaveBeenCalled();
     });
 
     describe('change centre status', function() {

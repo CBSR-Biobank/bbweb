@@ -86,7 +86,7 @@ define([
       }
     }
 
-    it('has valid scope', function () {
+    it('initialization is valid', function() {
       var entities = createEntities();
 
       createController(entities.study, entities.processingTypes);

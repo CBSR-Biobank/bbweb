@@ -19,6 +19,9 @@ define(function (require) {
       this.scope = this.$rootScope.$new();
       this.scope.vm = { study: this.study };
 
+      this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
+      this.scope.$on('study-view', this.eventRxFunc);
+
       this.$compile(this.element)(this.scope);
       this.scope.$digest();
       this.controller = this.element.controller('studySummary');
@@ -28,6 +31,7 @@ define(function (require) {
 
     beforeEach(inject(function(testSuiteMixin, testUtils) {
       var self = this,
+          specimenSpec,
           ceventType;
 
       _.extend(self, testSuiteMixin);
@@ -38,11 +42,14 @@ define(function (require) {
                               '$state',
                               'Study',
                               'CollectionEventType',
+                              'CollectionSpecimenSpec',
                               'modalService',
                               'notificationsService',
                               'factory');
 
-      ceventType = new self.CollectionEventType(self.factory.collectionEventType());
+      specimenSpec = self.factory.collectionSpecimenSpec();
+      ceventType = new self.CollectionEventType(
+        self.factory.collectionEventType({ specimenSpecs: [ specimenSpec ]}));
 
       spyOn(self.CollectionEventType, 'list').and.returnValue(self.$q.when([ ceventType ]));
       spyOn(self.modalService, 'showModal').and.returnValue(self.$q.when(true));
@@ -56,19 +63,18 @@ define(function (require) {
         '/assets/javascripts/common/modalInput/modalInput.html');
     }));
 
-    it('should contain valid settings to display the study summary', function() {
+    it('initialization is valid', function() {
       createController.call(this);
       expect(this.controller.study).toBe(this.study);
       expect(this.controller.descriptionToggleLength).toBeDefined();
-      expect(this.controller.collectionEventTypes).toBeArrayOfSize(1);
-      expect(this.controller.hasCollectionEventTypes).toBeTrue();
+      expect(this.controller.hasSpecimenSpecs).toBeTrue();
+      expect(this.eventRxFunc).toHaveBeenCalled();
     });
 
     it('should have valid settings when study has no collection event types', function() {
       this.CollectionEventType.list = jasmine.createSpy().and.returnValue(this.$q.when([ ]));
       createController.call(this);
-      expect(this.controller.collectionEventTypes).toBeEmptyArray();
-      expect(this.controller.hasCollectionEventTypes).toBeFalse();
+      expect(this.controller.hasSpecimenSpecs).toBeFalse();
     });
 
     describe('updates to name', function () {

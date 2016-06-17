@@ -130,7 +130,7 @@ define([
         expect(this.modalService.modalOk).toHaveBeenCalled();
       });
 
-      fit('promise is rejected on a non 404 response', function() {
+      it('promise is rejected on a non 404 response', function() {
         spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject(
           { status: 400, data: { message: 'xxx' } }));
         spyOn(console, 'error').and.callThrough();

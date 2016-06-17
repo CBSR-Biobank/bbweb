@@ -7,7 +7,7 @@
 define([
   'angular',
   'angularMocks',
-  'underscore',
+  'lodash',
 ], function(angular, mocks, _) {
   'use strict';
 
@@ -66,14 +66,25 @@ define([
         .toHaveBeenCalledWith('centre.panel.locations', true);
     });
 
-    it('should initialize the tab of the current state', function() {
-      var tab;
+    it('should initialize the tab corresponding to the event that was emitted', function() {
+      var self = this,
+          tab,
+          childScope,
+          states = [
+            'home.admin.centres.centre.summary',
+            'home.admin.centres.centre.studies',
+            'home.admin.centres.centre.locations',
+          ];
 
-      this.$state.current.name = 'home.admin.centres.centre.studies';
-      createController.call(this, this.centre);
-
-      tab = _.findWhere(this.controller.tabs, { heading: 'Studies' });
-      expect(tab.active).toBe(true);
+      _(states).forEach(function (state) {
+        self.$state.current.name = state;
+        createController.call(self, self.centre);
+        childScope = self.element.isolateScope().$new();
+        childScope.$emit('study-view');
+        self.scope.$digest();
+        tab = _.find(self.controller.tabs, { sref: state });
+        expect(tab.active).toBeTrue();
+      });
     });
 
   });

@@ -7,7 +7,7 @@
 define([
   'angular',
   'angularMocks',
-  'underscore'
+  'lodash'
 ], function(angular, mocks, _) {
   'use strict';
 
@@ -71,15 +71,26 @@ define([
         .toHaveBeenCalledWith('study.panel.specimenLinkTypes', true);
     });
 
-    it('should initialize the tab of the current state', function() {
-      var tab;
+    it('should initialize the tab corresponding to the event that was emitted', function() {
+      var self = this,
+          tab,
+          childScope,
+          states = [
+            'home.admin.studies.study.summary',
+            'home.admin.studies.study.participants',
+            'home.admin.studies.study.collection',
+            'home.admin.studies.study.processing',
+          ];
 
-      this.$state.current.name = 'home.admin.studies.study.processing';
-      createController.call(this);
-
-      tab = _.findWhere(this.controller.tabs, { heading: 'Processing' });
-
-      expect(tab.active).toBe(true);
+      _(states).forEach(function (state) {
+        self.$state.current.name = state;
+        createController.call(self);
+        childScope = self.element.isolateScope().$new();
+        childScope.$emit('study-view');
+        self.scope.$digest();
+        tab = _.find(self.controller.tabs, { sref: state });
+        expect(tab.active).toBeTrue();
+      });
     });
 
   });

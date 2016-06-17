@@ -32,7 +32,7 @@ define(['underscore'], function (_) {
       { heading: 'Summary',      sref: 'home.admin.studies.study.summary',      active: true },
       { heading: 'Participants', sref: 'home.admin.studies.study.participants', active: false },
       { heading: 'Collection',   sref: 'home.admin.studies.study.collection',   active: false },
-      { heading: 'Processing',   sref: 'home.admin.studies.study.processing',   active: false },
+      { heading: 'Processing',   sref: 'home.admin.studies.study.processing',   active: false }
     ];
     vm.activeTabUpdate = activeTabUpdate;
 

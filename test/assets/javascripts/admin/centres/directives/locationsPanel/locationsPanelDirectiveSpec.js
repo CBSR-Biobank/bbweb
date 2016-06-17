@@ -28,6 +28,10 @@ define([
       var element = angular.element('<locations-panel centre="vm.centre"></locations-panel>');
       this.scope = this.$rootScope.$new();
       this.scope.vm = { centre: centre };
+
+      this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
+      this.scope.$on('centre-view', this.eventRxFunc);
+
       this.$compile(element)(this.scope);
       this.scope.$digest();
       this.controller = element.controller('locationsPanel');
@@ -57,10 +61,11 @@ define([
         '/assets/javascripts/common/directives/updateRemoveButtons.html');
     }));
 
-    it('has valid scope', function() {
+    it('initialization is valid', function() {
       var entities = createEntities.call(this);
       createController.call(this, entities.centre);
       expect(this.controller.centre).toBe(entities.centre);
+      expect(this.eventRxFunc).toHaveBeenCalled();
     });
 
     it('can add a location', function() {

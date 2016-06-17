@@ -60,6 +60,9 @@ define([
         studyNames:    studyNames.call(this, entities.studies)
       };
 
+      this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
+      this.scope.$on('centre-view', this.eventRxFunc);
+
       this.$compile(element)(this.scope);
       this.scope.$digest();
       this.controller = element.controller('centreStudiesPanel');
@@ -87,6 +90,12 @@ define([
       self.putHtmlTemplates(
         '/assets/javascripts/admin/centres/directives/centreStudiesPanel/centreStudiesPanel.html');
     }));
+
+    it('event is emitted to parent on initialization', function() {
+      var entities = createEntities.call(this);
+      createController.call(this, entities);
+      expect(this.eventRxFunc).toHaveBeenCalled();
+    });
 
     it('has valid state for centre with no studies', function() {
       var self = this,

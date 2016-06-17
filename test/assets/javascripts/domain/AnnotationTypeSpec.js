@@ -189,10 +189,10 @@ define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular
           annotationType = new self.AnnotationType(
             self.factory.annotationType({
               valueType: self.AnnotationValueType.SELECT,
-              options: options
+              options: options.slice()
             }));
       expect(annotationType.options).toBeArrayOfSize(options.length);
-      annotationType.removeOption(options[0]);
+      annotationType.removeOption(0);
       expect(annotationType.options).toBeArrayOfSize(options.length - 1);
       expect(annotationType.options[0]).toContain(options[1]);
     });

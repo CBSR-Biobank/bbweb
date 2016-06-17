@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function () {
+define(['lodash'], function (_) {
   'use strict';
 
   /**
@@ -24,17 +24,8 @@ define(function () {
   function HomeCtrl($rootScope, usersService) {
     var vm = this;
 
-    vm.userIsAuthenticated = false;
+    vm.userIsAuthenticated = !_.isUndefined(usersService.getCurrentUser());
     $rootScope.pageTitle = 'Biobank';
-    init();
-
-    //--
-
-    function init() {
-      usersService.requestCurrentUser().then(function () {
-        vm.userIsAuthenticated = true;
-      });
-    }
   }
 
   return homeDirective;

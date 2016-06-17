@@ -22,6 +22,9 @@ define([
       this.scope = this.$rootScope.$new();
       this.scope.study = this.study;
 
+      this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
+      this.scope.$on('study-view', this.eventRxFunc);
+
       this.$compile(this.element)(this.scope);
       this.scope.$digest();
     };
@@ -54,9 +57,10 @@ define([
         '/assets/javascripts/admin/studies/directives/collection/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html');
     }));
 
-    it('has valid scope', function() {
+    it('initialization is valid', function() {
       createDirective.call(this);
       expect(this.scope.study).toBe(this.study);
+      expect(this.eventRxFunc).toHaveBeenCalled();
     });
 
   });

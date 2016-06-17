@@ -9,7 +9,7 @@ define(function (require) {
 
   var angular                = require('angular'),
       mocks                  = require('angularMocks'),
-      _                      = require('underscore'),
+      _                      = require('lodash'),
       entityUpdateSharedSpec = require('../../../../../test/entityUpdateSharedSpec');
 
   describe('ceventTypeViewDirective', function() {
@@ -40,6 +40,7 @@ define(function (require) {
                               '$compile',
                               '$state',
                               'Study',
+                              'StudyStatus',
                               'CollectionEventType',
                               'CollectionSpecimenSpec',
                               'AnnotationType',
@@ -180,18 +181,19 @@ define(function (require) {
         expect(this.CollectionEventType.prototype.removeSpecimenSpec).toHaveBeenCalled();
       });
 
-      it('throws an error if modifications are not allowed', function() {
+      it('throws an error if study is not disabled', function() {
         var self = this,
             specimenSpec = new self.CollectionSpecimenSpec(self.factory.collectionSpecimenSpec());
 
         spyOn(self.domainEntityService, 'removeEntity').and.returnValue(self.$q.when('OK'));
 
-        createController.call(self);
-        self.controller.modificationsAllowed = false;
-
-        expect(function () {
-          self.controller.removeSpecimenSpec(specimenSpec);
-        }).toThrowError('modifications not allowed');
+        _([self.StudyStatus.ENABLED, self.StudyStatus.RETIRED]).forEach(function (status) {
+          self.study.status = status;
+          createController.call(self);
+          expect(function () {
+            self.controller.removeSpecimenSpec(specimenSpec);
+          }).toThrowError('modifications not allowed');
+        });
       });
 
     });
@@ -229,18 +231,20 @@ define(function (require) {
         expect(this.CollectionEventType.prototype.removeAnnotationType).not.toHaveBeenCalled();
       });
 
-      it('throws an error if modifications are not allowed', function() {
+      it('throws an error if study is not disabled', function() {
         var self = this,
             annotationType = new this.AnnotationType(this.factory.annotationType());
 
         spyOn(self.domainEntityService, 'removeEntity').and.returnValue(self.$q.when('OK'));
 
-        createController.call(self);
-        self.controller.modificationsAllowed = false;
+        _([self.StudyStatus.ENABLED, self.StudyStatus.RETIRED]).forEach(function (status) {
+          createController.call(self);
+          self.study.status = status;
 
-        expect(function () {
-          self.controller.removeAnnotationType(annotationType);
-        }).toThrowError('modifications not allowed');
+          expect(function () {
+            self.controller.removeAnnotationType(annotationType);
+          }).toThrowError('modifications not allowed');
+        });
       });
 
     });

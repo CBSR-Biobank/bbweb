@@ -22,6 +22,10 @@ define([
 
       this.scope = this.$rootScope.$new();
       this.scope.vm = { study: this.study };
+
+      this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
+      this.scope.$on('study-view', this.eventRxFunc);
+
       this.$compile(this.element)(this.scope);
       this.scope.$digest();
       this.controller = this.element.controller('studyParticipantsTab');
@@ -56,14 +60,14 @@ define([
       spyOn(this.$state, 'go').and.returnValue('ok');
     }));
 
-    it('has valid scope', function() {
+    it('initialization is valid', function() {
       createDirective.call(this);
 
       expect(this.controller.study).toBe(this.study);
-
       expect(this.controller.add).toBeFunction();
       expect(this.controller.editAnnotationType).toBeFunction();
       expect(this.controller.removeAnnotationType).toBeFunction();
+      expect(this.eventRxFunc).toHaveBeenCalled();
     });
 
     it('invoking add changes state', function() {

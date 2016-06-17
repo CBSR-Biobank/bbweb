@@ -37,8 +37,6 @@ define([
     }));
 
     it('has valid scope', function() {
-      this.$httpBackend.whenGET('/authenticate').respond(this.reply());
-
       createDirective.call(this);
       expect(this.$rootScope.pageTitle).toBeDefined('Biobank');
     });
