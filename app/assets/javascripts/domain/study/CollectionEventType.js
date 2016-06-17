@@ -37,7 +37,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
         'timeAdded':       { 'type': 'string' },
         'timeModified':    { 'type': 'string' },
         'name':            { 'type': 'string' },
-        'description':     { 'type': 'string' },
+        'description':     { 'type': [ 'string', 'null' ] },
         'recurring':       { 'type': 'boolean' },
         'specimenSpecs':   { 'type': 'array' },
         'annotationTypes': { 'type': 'array' }
@@ -202,8 +202,9 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
         throw new Error('specimen spec with ID not present: ' + specimenSpec.uniqueId);
       }
 
-      url = sprintf.sprintf('%s/%d/%s',
-                            uri('spcspec', this.id),
+      url = sprintf.sprintf('%s/%s/%d/%s',
+                            uri('spcspec', this.studyId),
+                            this.id,
                             this.version,
                             specimenSpec.uniqueId);
 

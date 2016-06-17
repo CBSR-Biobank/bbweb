@@ -5,7 +5,7 @@
         <button class="btn btn-xs btn-success"
                 ng-click="vm.changeStatus('enable')"
                 title="Enable"
-                ng-if="vm.study.isDisabled()">
+                ng-disabled="!vm.hasSpecimenSpecs">
           <i class="glyphicon glyphicon-ok-circle"></i>
         </button>
 
@@ -69,10 +69,11 @@
       </div>
     </li>
     <li class="list-group-item"
-        ng-if="!vm.hasCollectionEventTypes">
+        ng-if="!vm.hasSpecimenSpecs">
       <div class="panel panel-warning">
         <div class="panel-heading">
-          Study cannot be enabled until at least one collection event has been added.
+          <span class="glyphicon glyphicon-warning-sign"></span>
+          Study cannot be enabled until at least one specimen is added to a collection event.
         </div>
       </div>
     </li>

@@ -2,11 +2,11 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function(_) {
+define(['lodash'], function(_) {
   'use strict';
 
   /**
-   *
+   * Displays the study name and description and allows the user to change the status of the study.
    */
   function studySummaryDirective() {
     var directive = {
@@ -39,8 +39,8 @@ define(['underscore'], function(_) {
                             notificationsService,
                             CollectionEventType) {
 
-    var validStatusActions = ['disable', 'enable', 'retire', 'unretire'],
-        vm = this;
+    var vm = this,
+        validStatusActions = ['disable', 'enable', 'retire', 'unretire'];
 
     vm.descriptionToggleLength = 100;
     vm.changeStatus            = changeStatus;
@@ -55,9 +55,9 @@ define(['underscore'], function(_) {
       // updates the selected tab in 'studyViewDirective' which is the parent directive
       $scope.$emit('study-view', 'study-summary-selected');
 
-      CollectionEventType.list(vm.study.id).then(function (list) {
-        vm.collectionEventTypes = list;
-        vm.hasCollectionEventTypes = (vm.collectionEventTypes.length > 0);
+      CollectionEventType.list(vm.study.id).then(function (ceTypes) {
+        var specimenSpecs = _.flatMap(ceTypes, function(ceType) { return ceType.specimenSpecs; });
+        vm.hasSpecimenSpecs = (specimenSpecs.length > 0);
       });
     }
 
@@ -68,7 +68,7 @@ define(['underscore'], function(_) {
         bodyHtml: 'Are you sure you want to '
       };
 
-      if (!_.contains(validStatusActions, statusAction)) {
+      if (!_.includes(validStatusActions, statusAction)) {
         throw new Error('invalid status: ' + statusAction);
       }
 

@@ -44,7 +44,6 @@ define(['underscore'], function (_) {
     _.extend(vm, new CollectionEventAnnotationTypeModals());
 
     vm.isPanelCollapsed     = false;
-    vm.modificationsAllowed = vm.study.isDisabled();
 
     vm.editName             = editName;
     vm.editDescription      = editDescription;
@@ -123,7 +122,7 @@ define(['underscore'], function (_) {
     }
 
     function removeSpecimenSpec(specimenSpec) {
-      if (!vm.modificationsAllowed) {
+      if (!vm.study.isDisabled()) {
         throw new Error('modifications not allowed');
       }
 
@@ -132,7 +131,7 @@ define(['underscore'], function (_) {
         'Remove specimen',
         'Are you sure you want to remove specimen ' + specimenSpec.name + '?',
         'Remove failed',
-        'Specimen' + specimenSpec.name + ' cannot be removed');
+        'Specimen ' + specimenSpec.name + ' cannot be removed');
 
       function removePromiseFunc() {
         return vm.ceventType.removeSpecimenSpec(specimenSpec);
@@ -148,7 +147,7 @@ define(['underscore'], function (_) {
       if (_.contains(vm.annotationTypeIdsInUse, annotationType.uniqueId)) {
         vm.removeInUseModal(annotationType, vm.annotationTypeName);
       } else {
-        if (!vm.modificationsAllowed) {
+        if (!vm.study.isDisabled()) {
           throw new Error('modifications not allowed');
         }
 

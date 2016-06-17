@@ -272,8 +272,9 @@ define([
       });
 
       it('should remove a specimen spec', function () {
-        var url = sprintf.sprintf('%s/%d/%s',
-                                  uri('spcspec',this.cet.id),
+        var url = sprintf.sprintf('%s/%s/%d/%s',
+                                  uri('spcspec', this.cet.studyId),
+                                  this.cet.id,
                                   this.cet.version,
                                   this.jsonSpec.uniqueId);
 
