@@ -38,8 +38,7 @@ define(function () {
       },
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/users/forgot.html',
-          controller: 'ForgotPasswordCtrl as vm'
+          templateUrl: '<forgot-password></forgot-password>'
         }
       }
     });

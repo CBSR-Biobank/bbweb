@@ -1,18 +1,23 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 define(function () {
   'use strict';
 
-  ForgotPasswordCtrl.$inject = [
-    '$state', 'usersService', 'modalService',
-  ];
+  var component = {
+    templateUrl : '/assets/javascripts/users/components/forgotPassword/forgotPassword.html',
+    controller: ForgotPasswordController,
+    controllerAs: 'vm',
+    bindings: {}
+  };
+
+  ForgotPasswordController.$inject = [ '$state', 'usersService', 'modalService' ];
 
   /**
-   *
+   * Allows the user to have his password reset by entering the email address he registered with.
    */
-  function ForgotPasswordCtrl($state, usersService, modalService) {
+  function ForgotPasswordController($state, usersService, modalService) {
     var vm = this;
 
     vm.email = '';
@@ -46,8 +51,7 @@ define(function () {
       vm.email = email;
       usersService.passwordReset(email).then(pwdResetSuccess).catch(pwdResetFailure);
     }
-
   }
 
-  return ForgotPasswordCtrl;
+  return component;
 });

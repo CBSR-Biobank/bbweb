@@ -15,8 +15,9 @@ define(function (require) {
 
   module.config(require('./states'));
 
-  module.controller('ForgotPasswordCtrl', require('./ForgotPasswordCtrl'));
-  module.controller('RegisterUserCtrl',   require('./RegisterUserCtrl'));
+  module.component('forgotPassword', require('./components/forgotPassword/forgotPasswordComponent'));
+
+  module.controller('RegisterUserCtrl', require('./RegisterUserCtrl'));
 
   module.directive('login',         require('./directives/login/loginDirective'));
   module.directive('passwordCheck', require('./directives/passwordCheck/passwordCheckDirective'));
