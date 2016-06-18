@@ -1,19 +1,23 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 define(function () {
   'use strict';
 
-  RegisterUserCtrl.$inject = ['$state', 'User', 'notificationsService'];
+  var component = {
+    templateUrl : '/assets/javascripts/users/components/registerUser/registerUser.html',
+    controller: RegisterUserController,
+    controllerAs: 'vm',
+    bindings: {}
+  };
+
+  RegisterUserController.$inject = ['$state', 'User', 'notificationsService'];
 
   /**
-   * Allows the user to register.
    *
-   * Template file: registerUserForm.html
-   * State definition: states.js
    */
-  function RegisterUserCtrl($state, User, notificationsService) {
+  function RegisterUserController($state, User, notificationsService) {
     var vm = this;
 
     vm.user = new User();
@@ -57,5 +61,5 @@ define(function () {
     }
   }
 
-  return RegisterUserCtrl;
+  return component;
 });

@@ -12,79 +12,70 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('Controller: RegisterUserCtrl', function() {
+  describe('Component: registerUser', function() {
 
     var createController = function () {
+      this.element = angular.element('<register-user></register-user>');
       this.scope = this.$rootScope.$new();
-
-      this.$controller('RegisterUserCtrl as vm', {
-        $scope:               this.scope,
-        $state:               this.$state,
-        User:                 this.User,
-        notificationsService: this.notificationsService
-      });
+      this.$compile(this.element)(this.scope);
       this.scope.$digest();
+      this.controller = this.element.controller('registerUser');
     };
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testSuiteMixin) {
+    beforeEach(inject(function(testSuiteMixin, serverReplyMixin) {
       var self = this;
-      _.extend(self, testSuiteMixin);
+      _.extend(self, testSuiteMixin, serverReplyMixin);
       self.injectDependencies('$rootScope',
-                              '$controller',
+                              '$compile',
                               '$q',
                               '$state',
                               'User',
                               'notificationsService');
+      self.putHtmlTemplates(
+        '/assets/javascripts/users/components/registerUser/registerUser.html');
+      spyOn(this.$state, 'go').and.returnValue(null);
     }));
 
     it('has valid scope', function() {
-      var User  = this.$injector.get('User');
-
       createController.call(this);
-      expect(this.scope.vm.user).toEqual(new User());
-      expect(this.scope.vm.password).toBeEmptyString();
-      expect(this.scope.vm.confirmPassword).toBeEmptyString();
+      expect(this.controller.user).toEqual(new this.User());
+      expect(this.controller.password).toBeEmptyString();
+      expect(this.controller.confirmPassword).toBeEmptyString();
     });
 
     it('displays login page after successful registration', function() {
       spyOn(this.User.prototype, 'register').and.returnValue(this.$q.when('ok'));
-      spyOn(this.$state, 'go').and.callFake(function () {});
       createController.call(this);
-      this.scope.vm.submit({});
+      this.controller.submit({});
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home.users.login');
     });
 
     it('displays a notification after registering an already registered email address', function() {
-      var deferred = this.$q.defer();
-
-      spyOn(this.User.prototype, 'register').and.returnValue(deferred.promise);
-      spyOn(this.notificationsService, 'error').and.returnValue(this.$q.when('ok'));
+      spyOn(this.User.prototype, 'register').and.returnValue(
+        this.$q.reject({ status: 403, data: { message: 'already registered' } }));
+      spyOn(this.notificationsService, 'error').and.returnValue(null);
       createController.call(this);
-      this.scope.vm.submit({});
-      deferred.reject({ status: 403, data: { message: 'already registered' } });
+      this.controller.submit({});
       this.scope.$digest();
       expect(this.notificationsService.error).toHaveBeenCalled();
     });
 
     it('displays a notification after registration failure', function() {
-      var deferred = this.$q.defer();
-
-      spyOn(this.User.prototype, 'register').and.returnValue(deferred.promise);
-      spyOn(this.notificationsService, 'error').and.callFake(function () {});
+      spyOn(this.User.prototype, 'register').and.returnValue(
+        this.$q.reject({ status: 401, data: { message: 'xxx' } }));
+      spyOn(this.notificationsService, 'error').and.returnValue(null);
       createController.call(this);
-      this.scope.vm.submit({});
-      deferred.reject({ status: 401, data: { message: 'xxx' } });
+      this.controller.submit({});
       this.scope.$digest();
       expect(this.notificationsService.error).toHaveBeenCalled();
     });
 
     it('goes to home state when cancel button is pressed', function() {
-      spyOn(this.$state, 'go').and.callFake(function () {});
       createController.call(this);
-      this.scope.vm.cancel();
+      this.controller.cancel();
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home');
     });

@@ -38,7 +38,7 @@ define(function () {
       },
       views: {
         'main@': {
-          templateUrl: '<forgot-password></forgot-password>'
+          template: '<forgot-password></forgot-password>'
         }
       }
     });
@@ -63,8 +63,7 @@ define(function () {
       url: '^/register',
       views: {
         'main@': {
-          templateUrl: '/assets/javascripts/users/registerUserForm.html',
-          controller: 'RegisterUserCtrl as vm'
+          template: '<register-user></register-user>'
         }
       }
     });

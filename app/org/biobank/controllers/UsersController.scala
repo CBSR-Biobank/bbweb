@@ -7,14 +7,16 @@ import org.biobank.service.AuthToken
 import org.biobank.service.study.StudiesService
 import org.biobank.service.users.UsersService
 import play.api.cache.CacheApi
+import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.{Environment, Logger}
+import scala.concurrent.Future
 import scala.language.reflectiveCalls
+import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
-import scalaz._
 
 @Singleton
 class UsersController @Inject() (val env:            Environment,
@@ -153,8 +155,29 @@ class UsersController @Inject() (val env:            Environment,
     domainValidationReply(future)
   }
 
-  def registerUser() = commandAction { cmd: RegisterUserCmd =>
-      processCommand(cmd)
+  def registerUser() = Action.async(parse.json) { implicit request =>
+    request.body.validate[RegisterUserCmd].fold(
+      errors => {
+        Future.successful(BadRequest(JsError.toJson(errors)))
+      },
+      cmd => {
+        Logger.debug(s"addUser: cmd: $cmd")
+        val future = usersService.processCommand(cmd)
+        future.map { validation =>
+          validation.fold(
+            err   => {
+              val errs = err.list.toList.mkString(", ")
+              if (errs.contains("exists")) {
+                Forbidden("already registered")
+              } else {
+                BadRequest(errs)
+              }
+            },
+            user => Ok(user)
+          )
+        }
+      }
+    )
   }
 
   def updateName(id: String) =
