@@ -11,7 +11,7 @@ define(function (require) {
   'use strict';
 
   var angular = require('angular'),
-      _       = require('underscore'),
+      _       = require('lodash'),
       name    = 'biobank.specimenAddModal',
       module;
 
@@ -207,7 +207,7 @@ define(function (require) {
         return;
       }
 
-      alreadyEntered = _.findWhere(vm.specimens, { inventoryId: vm.inventoryId });
+      alreadyEntered = _.find(vm.specimens, { inventoryId: vm.inventoryId });
 
       $scope.form.inventoryId.$setValidity('inventoryIdEntered', !alreadyEntered);
 

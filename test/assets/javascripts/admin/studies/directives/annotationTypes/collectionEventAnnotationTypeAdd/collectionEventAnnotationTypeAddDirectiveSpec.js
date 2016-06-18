@@ -6,7 +6,7 @@ define(function(require) {
 
   var angular                              = require('angular'),
       mocks                                = require('angularMocks'),
-      _                                    = require('underscore'),
+      _                                    = require('lodash'),
       annotationTypeAddDirectiveSharedSpec = require('../../../../directives/annotationTypeAddDirectiveSharedSpec');
 
   describe('Directive: collectionEventAnnotationTypeAddDirective', function() {

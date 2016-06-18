@@ -4,7 +4,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function (_) {
+define(['lodash'], function (_) {
   'use strict';
 
   centreStates.$inject = ['$urlRouterProvider', '$stateProvider'];
@@ -150,7 +150,7 @@ define(['underscore'], function (_) {
           '$stateParams',
           'centre',
           function ($stateParams, centre) {
-            return _.findWhere(centre.locations, { uniqueId: $stateParams.uniqueId });
+            return _.find(centre.locations, { uniqueId: $stateParams.uniqueId });
           }
         ]
       },

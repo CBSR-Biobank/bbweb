@@ -4,7 +4,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function(_) {
+define(['lodash'], function(_) {
   'use strict';
 
   config.$inject = ['$urlRouterProvider', '$stateProvider'];
@@ -58,7 +58,7 @@ define(['underscore'], function(_) {
                                     collectionEventTypes,
                                     $stateParams) {
       var cevent,
-          ceventType = _.findWhere(collectionEventTypes, { id: $stateParams.collectionEventTypeId });
+          ceventType = _.find(collectionEventTypes, { id: $stateParams.collectionEventTypeId });
 
       if (!ceventType) {
         throw new Error('could not find collection event type');
@@ -304,7 +304,7 @@ define(['underscore'], function(_) {
               vm.participant = participant;
               vm.collectionEvent = collectionEvent;
 
-              vm.collectionEventType = _.findWhere(collectionEventTypes,
+              vm.collectionEventType = _.find(collectionEventTypes,
                                                    { id: $stateParams.collectionEventTypeId});
               if (_.isUndefined(vm.collectionEventType)) {
                   throw new Error('could not find collection event type');
@@ -334,7 +334,7 @@ define(['underscore'], function(_) {
             return CollectionEvent.get($stateParams.collectionEventId)
               .then(function (cevent) {
                 var deferred = $q.defer(),
-                    ceventType = _.findWhere(collectionEventTypes,
+                    ceventType = _.find(collectionEventTypes,
                                              { id: cevent.collectionEventTypeId });
 
                 if (!ceventType) {

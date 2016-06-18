@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function (_) {
+define(['lodash'], function (_) {
   'use strict';
 
   function serverReplyMixinFactory($templateCache) {

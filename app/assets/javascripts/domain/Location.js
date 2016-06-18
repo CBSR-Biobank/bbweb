@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
+define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
   'use strict';
 
   LocationFactory.$inject = [ 'DomainError' ];

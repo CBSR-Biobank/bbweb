@@ -7,7 +7,7 @@
 define([
   'angular',
   'angularMocks',
-  'underscore',
+  'lodash',
   'faker',
   'moment',
   'sprintf'
@@ -99,8 +99,8 @@ define([
     it('constructor with annotation parameter has valid values', function() {
       var self                = this,
           annotationData      = self.jsonAnnotationData(),
-          jsonAnnotations     = _.pluck(annotationData, 'annotation'),
-          jsonAnnotationTypes = _.pluck(annotationData, 'annotationType'),
+          jsonAnnotations     = _.map(annotationData, 'annotation'),
+          jsonAnnotationTypes = _.map(annotationData, 'annotationType'),
           ceventType;
 
       self.jsonCet = self.factory.collectionEventType({ annotationTypes: jsonAnnotationTypes });
@@ -113,9 +113,9 @@ define([
 
 
       _.each(ceventType.annotationTypes, function (annotationType) {
-        var annotation = _.findWhere(collectionEvent.annotations,
+        var annotation = _.find(collectionEvent.annotations,
                                      { annotationTypeId: annotationType.uniqueId }),
-            jsonAnnotation = _.findWhere(jsonAnnotations,
+            jsonAnnotation = _.find(jsonAnnotations,
                                          { annotationTypeId: annotationType.uniqueId});
         self.validateAnnotationClass(annotationType, annotation);
         annotation.compareToJsonEntity(jsonAnnotation);
@@ -126,7 +126,7 @@ define([
     it('constructor with NO annotations has valid values', function() {
       var self = this,
           annotationData = self.jsonAnnotationData(),
-          jsonAnnotationTypes = _.pluck(annotationData, 'annotationType'),
+          jsonAnnotationTypes = _.map(annotationData, 'annotationType'),
           ceventType;
 
       self.jsonCet = self.factory.collectionEventType({ annotationTypes: jsonAnnotationTypes });
@@ -136,7 +136,7 @@ define([
 
       expect(collectionEvent.annotations).toBeArrayOfSize(annotationData.length);
       _.each(ceventType.annotationTypes, function (annotationType) {
-        var annotation = _.findWhere(collectionEvent.annotations,
+        var annotation = _.find(collectionEvent.annotations,
                                      { annotationTypeId: annotationType.uniqueId });
         self.validateAnnotationClass(annotationType, annotation);
         expect(annotation.required).toBe(annotationType.required);
@@ -211,7 +211,7 @@ define([
 
     it('has valid values when creating from a server response', function() {
       var annotationData    = this.jsonAnnotationData(),
-          annotationTypes   = _.pluck(annotationData, 'annotationType'),
+          annotationTypes   = _.map(annotationData, 'annotationType'),
           jsonCet           = this.factory.collectionEventType({annotationTypes: annotationTypes}),
           cet               = new this.CollectionEventType(jsonCet),
           jsonCevent        = this.factory.collectionEvent({annotationTypes: annotationTypes});
@@ -264,7 +264,7 @@ define([
 
         _.each(pagedResult.items, function(obj) {
           expect(obj).toEqual(jasmine.any(self.CollectionEvent));
-          serverEntity = _.findWhere(collectionEvents, { id: obj.id });
+          serverEntity = _.find(collectionEvents, { id: obj.id });
           expect(serverEntity).toBeDefined();
           obj.compareToJsonEntity(serverEntity);
         });
@@ -362,7 +362,7 @@ define([
     it('setting annotation types fails when it does not belong to collection event type',
         function() {
           var annotationData      = this.jsonAnnotationData(),
-              annotationTypes     = _.pluck(annotationData, 'annotationType'),
+              annotationTypes     = _.map(annotationData, 'annotationType'),
               badAnnotationTypeId = 'bad-annotation-type-id',
               ceventType,
               collectionEvent;

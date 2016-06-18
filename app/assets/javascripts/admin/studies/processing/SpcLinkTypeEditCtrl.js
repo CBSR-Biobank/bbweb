@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function(_) {
+define(['lodash'], function(_) {
   'use strict';
 
   SpcLinkTypeEditCtrl.$inject = [
@@ -31,7 +31,7 @@ define(['underscore'], function(_) {
 
     vm.study                 = study;
     vm.processingTypes       = processingDto.processingTypes;
-    vm.processingTypesById   = _.indexBy(processingDto.processingTypes, 'id');
+    vm.processingTypesById   = _.keyBy(processingDto.processingTypes, 'id');
     vm.studyAnnotationTypes  = processingDto.specimenLinkAnnotationTypes;
     vm.studySpecimenGroups   = processingDto.specimenGroups;
 

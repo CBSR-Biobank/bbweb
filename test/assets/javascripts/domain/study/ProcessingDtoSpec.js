@@ -7,7 +7,7 @@
 define([
   'angular',
   'angularMocks',
-  'underscore',
+  'lodash',
   'biobankApp'
 ], function(angular, mocks, _) {
   'use strict';
@@ -130,7 +130,7 @@ define([
         expect(slt.annotationTypeDataIds()).toBeArrayOfSize(serverObj.specimenLinkAnnotationTypes.length);
 
         expect(slt.annotationTypeDataIds()).toContainAll(
-          _.pluck(serverObj.specimenLinkAnnotationTypes, 'id'));
+          _.map(serverObj.specimenLinkAnnotationTypes, 'id'));
       });
     }
 

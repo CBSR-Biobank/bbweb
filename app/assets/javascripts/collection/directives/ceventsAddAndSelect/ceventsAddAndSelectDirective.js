@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function(_) {
+define(['lodash'], function(_) {
   'use strict';
 
   /**
@@ -64,7 +64,7 @@ define(['underscore'], function(_) {
 
     function setCollectionEventType(cevents) {
       _.map(cevents, function (cevent) {
-        var ceventType = _.findWhere(vm.collectionEventTypes, { id: cevent.collectionEventTypeId });
+        var ceventType = _.find(vm.collectionEventTypes, { id: cevent.collectionEventTypeId });
         if (_.isUndefined(ceventType)) {
           throw new Error('collection event type ID not found: ' + cevent.collectionEventTypeId);
         }

@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['faker', 'underscore'], function(faker, _) {
+define(['faker', 'lodash'], function(faker, _) {
   'use strict';
 
   //testUtils.$inject = [];

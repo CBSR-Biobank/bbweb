@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function(_) {
+define(['lodash'], function(_) {
   'use strict';
 
   MultipleSelectAnnotationFactory.$inject = ['Annotation', 'DomainError'];
@@ -26,7 +26,7 @@ define(['underscore'], function(_) {
           return { name: opt, checked: false };
         });
         _.each(obj.selectedValues, function (sv) {
-          var value = _.findWhere(result, { name: sv });
+          var value = _.find(result, { name: sv });
           value.checked = true;
         });
         return result;
@@ -56,11 +56,9 @@ define(['underscore'], function(_) {
     };
 
     function getValueAsArray(values) {
-      var checked = _.matcher({ checked: true });
-
       return _.chain(values)
-        .filter(checked)
-        .pluck('name')
+        .filter({ checked: true })
+        .map('name')
         .value();
     }
 
@@ -68,7 +66,7 @@ define(['underscore'], function(_) {
      * Returns true if some of the values have the checked field set to true.
      */
     MultipleSelectAnnotation.prototype.someSelected = function () {
-      return (_.findWhere(this.values, { checked: true }) !== undefined);
+      return (_.find(this.values, { checked: true }) !== undefined);
     };
 
     return MultipleSelectAnnotation;

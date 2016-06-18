@@ -6,7 +6,7 @@
  */
 define([
   'angular',
-  'underscore',
+  'lodash',
   'angularMocks'
 ], function(angular, _, mocks) {
   'use strict';

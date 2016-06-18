@@ -9,7 +9,7 @@ define(function (require) {
 
   var angular                       = require('angular'),
       mocks                         = require('angularMocks'),
-      _                             = require('underscore'),
+      _                             = require('lodash'),
       faker                         = require('faker'),
       locationUpdateSharedBehaviour = require('../../../../test/locationUpdateSharedBehaviourSpec');
 
@@ -19,7 +19,7 @@ define(function (require) {
       centre = centre || this.centre;
       location = location || this.location;
 
-      expect(_.findWhere(centre.locations, { uniqueId: location.uniqueId})).toBeDefined();
+      expect(_.find(centre.locations, { uniqueId: location.uniqueId})).toBeDefined();
 
       this.element = angular.element(
         '<centre-location-view centre="vm.centre" location="vm.location"></centre-location-view>');

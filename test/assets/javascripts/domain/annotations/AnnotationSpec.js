@@ -7,7 +7,7 @@
 define([
   'angular',
   'angularMocks',
-  'underscore',
+  'lodash',
   'faker',
   'moment'
 ], function(angular, mocks, _, faker, moment) {

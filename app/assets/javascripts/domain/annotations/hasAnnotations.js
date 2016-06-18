@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function (_) {
+define(['lodash'], function (_) {
   'use strict';
 
   hasAnnotationsFactory.$inject = [
@@ -48,7 +48,7 @@ define(['underscore'], function (_) {
     function removeAnnotation(annotation, url) {
       /* jshint validthis:true */
       var self = this,
-          found = _.findWhere(self.annotations,  { annotationTypeId: annotation.annotationTypeId });
+          found = _.find(self.annotations,  { annotationTypeId: annotation.annotationTypeId });
 
       if (!found) {
         throw new DomainError('annotation with annotation type ID not present: ' + annotation.annotationTypeId);
@@ -73,15 +73,15 @@ define(['underscore'], function (_) {
       self.annotations = self.annotations || [];
 
       // make sure the annotations ids match up with the corresponding annotation types
-      differentIds = _.difference(_.pluck(self.annotations, 'annotationTypeId'),
-                                  _.pluck(annotationTypes, 'uniqueId'));
+      differentIds = _.difference(_.map(self.annotations, 'annotationTypeId'),
+                                  _.map(annotationTypes, 'uniqueId'));
 
       if (differentIds.length > 0) {
         throw new DomainError('annotation types not found: ' + differentIds);
       }
 
       self.annotations = _.map(annotationTypes, function (annotationType) {
-        var jsonAnnotationMaybe = _.findWhere(self.annotations,
+        var jsonAnnotationMaybe = _.find(self.annotations,
                                      { annotationTypeId: annotationType.uniqueId });
 
         if (jsonAnnotationMaybe instanceof Annotation) {

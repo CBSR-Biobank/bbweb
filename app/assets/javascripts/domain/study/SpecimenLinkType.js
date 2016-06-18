@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function(_) {
+define(['lodash'], function(_) {
   'use strict';
 
   SpecimenLinkTypeFactory.$inject = [
@@ -165,8 +165,8 @@ define(['underscore'], function(_) {
     };
 
     SpecimenLinkType.prototype.studySpecimenGroups = function (studySpecimenGroups) {
-      this.inputGroup = _.findWhere(studySpecimenGroups, { id: this.inputGroupId});
-      this.outputGroup = _.findWhere(studySpecimenGroups, { id: this.outputGroupId});
+      this.inputGroup = _.find(studySpecimenGroups, { id: this.inputGroupId});
+      this.outputGroup = _.find(studySpecimenGroups, { id: this.outputGroupId});
     };
 
     function uri(processingTypeId, ceventTypeId, version) {

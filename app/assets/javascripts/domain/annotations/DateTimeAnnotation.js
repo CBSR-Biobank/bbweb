@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['moment', 'underscore'], function(moment, _) {
+define(['moment', 'lodash'], function(moment, _) {
   'use strict';
 
   DateTimeAnnotationFactory.$inject = ['Annotation', 'timeService'];

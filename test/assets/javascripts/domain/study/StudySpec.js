@@ -6,7 +6,7 @@ define([
   'angular',
   'angularMocks',
   'jquery',
-  'underscore',
+  'lodash',
   'sprintf',
   'biobankApp'
 ], function(angular, mocks, $, _, sprintf) {

@@ -7,7 +7,7 @@
 define([
   'angular',
   'angularMocks',
-  'underscore',
+  'lodash',
   'biobankApp'
 ], function(angular, mocks, _) {
   'use strict';
@@ -244,7 +244,7 @@ define([
 
       ids = slt.annotationTypeDataIds();
       expect(ids).toBeArrayOfSize(entities.annotationTypes.length);
-      expect(ids).toContainAll(_.pluck(entities.annotationTypes, 'id'));
+      expect(ids).toContainAll(_.map(entities.annotationTypes, 'id'));
     });
 
     it('getAnnotationTypeDataById throws an error if there are no annotation type data items', function() {

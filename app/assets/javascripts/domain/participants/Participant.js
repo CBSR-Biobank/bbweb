@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
+define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
   'use strict';
 
   ParticipantFactory.$inject = [

@@ -39,7 +39,6 @@
       'jquery':                       '../lib/jquery/jquery',
       'toastr':                       '../lib/toastr/toastr',
       'lodash':                       '../lib/lodash/lodash',
-      'underscore':                   '../lib/underscorejs/underscore',
       'moment':                       '../lib/momentjs/moment',
       'bootstrap':                    '../lib/bootstrap/js/bootstrap',
       'angular':                      '../lib/angularjs/angular',
@@ -60,7 +59,7 @@
         deps: ['jquery'],
         exports: 'angular'
       },
-      'underscore': {
+      'lodash': {
         exports: '_'
       },
       'bootstrap':                    ['jquery'],

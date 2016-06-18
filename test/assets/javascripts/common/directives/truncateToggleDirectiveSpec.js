@@ -7,7 +7,7 @@
 define([
   'angular',
   'angularMocks',
-  'underscore',
+  'lodash',
   'faker',
   'biobankApp'
 ], function(angular, mocks, _, faker) {

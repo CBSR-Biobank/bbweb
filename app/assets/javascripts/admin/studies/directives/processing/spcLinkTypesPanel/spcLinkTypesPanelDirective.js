@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'underscore'], function(angular, _) {
+define(['angular', 'lodash'], function(angular, _) {
   'use strict';
 
   /**
@@ -52,9 +52,9 @@ define(['angular', 'underscore'], function(angular, _) {
         panel = new Panel('study.panel.specimenLinkTypes');
 
     vm.specimenLinkTypes    = vm.processingDto.specimenLinkTypes;
-    vm.processingTypesById  = _.indexBy(vm.processingDto.processingTypes, 'id');
-    vm.specimenGroupsById   = _.indexBy(vm.processingDto.specimenGroups, 'id');
-    vm.annotationTypesById  = _.indexBy(vm.processingDto.specimenLinkAnnotationTypes, 'id');
+    vm.processingTypesById  = _.keyBy(vm.processingDto.processingTypes, 'id');
+    vm.specimenGroupsById   = _.keyBy(vm.processingDto.specimenGroups, 'id');
+    vm.annotationTypesById  = _.keyBy(vm.processingDto.specimenLinkAnnotationTypes, 'id');
 
     vm.viewProcessingType   = viewProcessingType;
     vm.viewSpecimenGroup    = viewSpecimenGroup;

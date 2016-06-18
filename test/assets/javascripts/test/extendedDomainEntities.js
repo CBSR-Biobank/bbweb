@@ -4,7 +4,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
+define(['angular', 'lodash', 'moment'], function(angular, _, moment) {
   'use strict';
 
   extendedDomainEntities.$inject = [
@@ -165,7 +165,7 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
       validateAttrs(this, serverEntity, 'studyId', 'uniqueId');
 
       _.each(this.annotations, function (annotation) {
-        var serverAnnotation = _.findWhere(serverEntity.annotations,
+        var serverAnnotation = _.find(serverEntity.annotations,
                                            { annotationTypeId: annotation.getAnnotationTypeId() });
         Annotation.prototype.compareToJsonEntity.call(annotation, serverAnnotation);
       });
@@ -185,7 +185,7 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
 
         // only compare annotations if annotation is of type Annotation
         if (annotation.getAnnotationTypeId) {
-          var serverAnnotation = _.findWhere(serverEntity.annotations,
+          var serverAnnotation = _.find(serverEntity.annotations,
                                              { annotationTypeId: annotation.getAnnotationTypeId() });
           expect(serverAnnotation).toBeDefined();
           annotation.compareToJsonEntity.call(annotation, serverAnnotation);
@@ -205,7 +205,7 @@ define(['angular', 'underscore', 'moment'], function(angular, _, moment) {
     MultipleSelectAnnotation.prototype.compareToJsonEntity = function (serverEntity) {
       if (serverEntity.selectedValues.length > 0) {
         expect(this.values).toBeArrayOfSize(serverEntity.selectedValues.length);
-        expect(this.values).toContainAll(_.pluck(serverEntity.selectedValues, 'value'));
+        expect(this.values).toContainAll(_.map(serverEntity.selectedValues, 'value'));
       }
     };
 

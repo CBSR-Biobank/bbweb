@@ -4,7 +4,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'angularMocks', 'underscore', 'biobankApp'], function(angular, mocks, _) {
+define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
   describe('CentreCounts', function() {

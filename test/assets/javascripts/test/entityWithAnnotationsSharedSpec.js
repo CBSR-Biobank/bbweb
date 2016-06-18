@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function (_) {
+define(['lodash'], function (_) {
   'use strict';
 
   /**
@@ -33,12 +33,14 @@ define(['underscore'], function (_) {
                           context.updateFuncName,
                           context.annotation,
                           context.addUrl,
-                          _.pick(_.pick(context.annotation,
-                                        'annotationTypeId',
-                                        'stringValue',
-                                        'numberValue',
-                                        'selectedValues'),
-                                 _.identity),
+                          _.pickBy(_.pick(context.annotation,
+                                          [
+                                            'annotationTypeId',
+                                            'stringValue',
+                                            'numberValue',
+                                            'selectedValues'
+                                          ]),
+                                   _.identity),
                           context.response,
                           expectEntity,
                           failTest);

@@ -1,4 +1,4 @@
-define(['underscore'], function(_) {
+define(['lodash'], function(_) {
   'use strict';
 
   annotationFactoryFactory.$inject = [

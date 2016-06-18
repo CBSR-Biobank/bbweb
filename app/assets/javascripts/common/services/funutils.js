@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function(_) {
+define(['lodash'], function(_) {
   'use strict';
 
   //funutils.$inject = [];
@@ -43,7 +43,7 @@ define(['underscore'], function(_) {
     }
 
     function partial(fun /*, pargs */) {
-      var pargs = _.rest(arguments);
+      var pargs = _.drop(arguments);
 
       return function(/* arguments */) {
         var args = cat(pargs, _.toArray(arguments));
@@ -67,8 +67,8 @@ define(['underscore'], function(_) {
                      _.omit.apply(null, construct(obj, _.keys(newNames))));
     }
 
-    function pickOptional(obj /* keys */) {
-      var keys = _.rest(arguments);
+    function pickOptional(obj /*, keys */) {
+      var keys = _.drop(arguments);
       var result = {};
       _.each(keys, function(key) {
         if ((obj[key] !== undefined) && (obj[key] !== null)) {

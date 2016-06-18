@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore', 'tv4'], function(_, tv4) {
+define(['lodash', 'tv4'], function(_, tv4) {
   'use strict';
 
   CollectionSpecimenSpecFactory.$inject = [

@@ -7,7 +7,7 @@
 define([
   'angular',
   'angularMocks',
-  'underscore',
+  'lodash',
   '../../../../directives/annotationTypeViewDirectiveSharedSpec',
   'biobankApp'
 ], function(angular, mocks, _, annotationTypeViewDirectiveSharedSpec) {

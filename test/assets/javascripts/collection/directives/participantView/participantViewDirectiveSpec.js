@@ -7,7 +7,7 @@
 define([
   'angular',
   'angularMocks',
-  'underscore'
+  'lodash'
 ], function(angular, mocks, _) {
   'use strict';
 
@@ -90,7 +90,7 @@ define([
         self.$state.current.name = state;
 
         createDirective.call(self);
-        tab = _.findWhere(self.controller.tabs, { sref: state });
+        tab = _.find(self.controller.tabs, { sref: state });
         expect(tab.active).toBe(true);
       });
     });

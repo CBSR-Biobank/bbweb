@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function (_) {
+define(['lodash'], function (_) {
   'use strict';
 
   config.$inject = [
@@ -103,7 +103,7 @@ define(['underscore'], function (_) {
           'ceventType',
           '$stateParams',
           function (ceventType, $stateParams) {
-            var annotationType = _.findWhere(ceventType.annotationTypes,
+            var annotationType = _.find(ceventType.annotationTypes,
                                              { uniqueId: $stateParams.annotationTypeId });
             if (_.isUndefined(annotationType)) {
               throw new Error('could not find annotation type: ' + $stateParams.annotationTypeId);
@@ -178,7 +178,7 @@ define(['underscore'], function (_) {
           'ceventType',
           '$stateParams',
           function (ceventType, $stateParams) {
-            var specimenSpec = _.findWhere(ceventType.specimenSpecs,
+            var specimenSpec = _.find(ceventType.specimenSpecs,
                                            { uniqueId: $stateParams.specimenSpecId });
             if (_.isUndefined(specimenSpec)) {
               throw new Error('could not find specimen spec: ' + $stateParams.specimenSpecId);

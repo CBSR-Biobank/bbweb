@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function (_) {
+define(['lodash'], function (_) {
   'use strict';
 
   /**
@@ -144,7 +144,7 @@ define(['underscore'], function (_) {
     }
 
     function removeAnnotationType(annotationType) {
-      if (_.contains(vm.annotationTypeIdsInUse, annotationType.uniqueId)) {
+      if (_.includes(vm.annotationTypeIdsInUse, annotationType.uniqueId)) {
         vm.removeInUseModal(annotationType, vm.annotationTypeName);
       } else {
         if (!vm.study.isDisabled()) {

@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function(_) {
+define(['lodash'], function(_) {
   'use strict';
 
   SpecimenGroupFactory.$inject = [
@@ -131,7 +131,7 @@ define(['underscore'], function(_) {
     SpecimenGroup.getUnits = function (specimenGroups, id) {
       if (!id) { return 'Amount'; }
 
-      var sg = _.findWhere(specimenGroups, { id: id });
+      var sg = _.find(specimenGroups, { id: id });
       if (sg) {
         return sg.units;
       }

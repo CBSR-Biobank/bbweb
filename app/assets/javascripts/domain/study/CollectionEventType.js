@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
+define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
   'use strict';
 
   CollectionEventTypeFactory.$inject = [
@@ -198,7 +198,7 @@ define(['underscore', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     CollectionEventType.prototype.removeSpecimenSpec = function (specimenSpec) {
       var self = this,
           url,
-          found = _.findWhere(self.specimenSpecs,  { uniqueId: specimenSpec.uniqueId });
+          found = _.find(self.specimenSpecs,  { uniqueId: specimenSpec.uniqueId });
 
       if (!found) {
         throw new DomainError('specimen spec with ID not present: ' + specimenSpec.uniqueId);

@@ -4,7 +4,7 @@
 define([
   'angular',
   'angularMocks',
-  'underscore',
+  'lodash',
   '../../../../directives/annotationTypeAddDirectiveSharedSpec'
 ], function(angular, mocks, _, annotationTypeAddDirectiveSharedSpec) {
   'use strict';

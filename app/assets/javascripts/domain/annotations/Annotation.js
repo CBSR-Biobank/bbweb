@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['moment', 'underscore', 'tv4'], function(moment, _, tv4) {
+define(['moment', 'lodash', 'tv4'], function(moment, _, tv4) {
   'use strict';
 
   AnnotationFactory.$inject = [
@@ -43,7 +43,7 @@ define(['moment', 'underscore', 'tv4'], function(moment, _, tv4) {
         self.annotationTypeId = annotationType.uniqueId;
         self.annotationType = annotationType;
 
-        if (!_.contains(_.values(AnnotationValueType), annotationType.valueType)) {
+        if (!_.includes(_.values(AnnotationValueType), annotationType.valueType)) {
           throw new DomainError('value type is invalid: ' + annotationType.valueType);
         }
 

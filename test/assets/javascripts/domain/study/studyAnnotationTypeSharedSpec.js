@@ -4,7 +4,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function(_) {
+define(['lodash'], function(_) {
   'use strict';
 
   /**
@@ -55,7 +55,7 @@ define(['underscore'], function(_) {
         expect(annotationType.maxValueCount).toBeNull();
         expect(annotationType.options).toBeEmptyArray();
 
-        if (_.contains(objRequiredKeys, 'required')) {
+        if (_.includes(objRequiredKeys, 'required')) {
           expect(annotationType.required).toBe(false);
         }
       });

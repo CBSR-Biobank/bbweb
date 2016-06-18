@@ -7,7 +7,7 @@
 define([
   'angular',
   'angularMocks',
-  'underscore',
+  'lodash',
   'sprintf',
   'biobankApp'
 ], function(angular, mocks, _, sprintf) {

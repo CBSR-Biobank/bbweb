@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function (_) {
+define(['lodash'], function (_) {
   'use strict';
 
   config.$inject = [
@@ -46,7 +46,7 @@ define(['underscore'], function (_) {
           'study',
           '$stateParams',
           function (study, $stateParams) {
-            var annotationType = _.findWhere(study.annotationTypes,
+            var annotationType = _.find(study.annotationTypes,
                                              { uniqueId: $stateParams.annotationTypeId });
             if (_.isUndefined(annotationType)) {
               throw new Error('could not find annotation type: ' + $stateParams.annotationTypeId);

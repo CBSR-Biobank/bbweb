@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sprintf) {
+define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprintf) {
   'use strict';
 
   CentreFactory.$inject = [
@@ -363,7 +363,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
     Centre.prototype.removeStudy = function (study) {
       var self = this, url;
 
-      if (!_.contains(self.studyIds, study.id)) {
+      if (!_.includes(self.studyIds, study.id)) {
         throw new DomainError('study ID not present: ' + study.id);
       }
 
@@ -412,7 +412,7 @@ define(['angular', 'underscore', 'tv4', 'sprintf'], function(angular, _, tv4, sp
     Centre.prototype.removeLocation = function (location) {
       var self = this, existingLoc, url;
 
-      existingLoc = _.findWhere(self.locations, { uniqueId: location.uniqueId });
+      existingLoc = _.find(self.locations, { uniqueId: location.uniqueId });
       if (_.isUndefined(existingLoc)) {
         throw new DomainError('location does not exist: ' + location.id);
       }

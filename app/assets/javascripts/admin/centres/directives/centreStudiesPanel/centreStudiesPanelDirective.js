@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'underscore'], function(angular, _) {
+define(['angular', 'lodash'], function(angular, _) {
   'use strict';
 
   /**
@@ -69,7 +69,7 @@ define(['angular', 'underscore'], function(angular, _) {
       $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
                     angular.bind(panel, panel.watchPanelOpenChangeFunc));
 
-      vm.studyNamesById = _.indexBy(vm.studyNames, 'id');
+      vm.studyNamesById = _.keyBy(vm.studyNames, 'id');
 
       _.each(vm.centre.studyIds, function (studyId) {
         var study = vm.studyNamesById[studyId];

@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function (_) {
+define(['lodash'], function (_) {
   'use strict';
 
   /**
@@ -45,7 +45,7 @@ define(['underscore'], function (_) {
     function postUpdate(collectionEventType) {
       var deferred = $q.defer();
       vm.collectionEventType = collectionEventType;
-      vm.annotationType = _.findWhere(vm.collectionEventType.annotationTypes,
+      vm.annotationType = _.find(vm.collectionEventType.annotationTypes,
                                       { uniqueId: vm.annotationType.uniqueId });
       if (_.isUndefined(vm.annotationType)) {
         deferred.reject('could not update annotation type');

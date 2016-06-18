@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['underscore'], function(_) {
+define(['lodash'], function(_) {
   'use strict';
 
   hasAnnotationTypesFactory.$inject = [
@@ -49,7 +49,7 @@ define(['underscore'], function(_) {
     function removeAnnotationType(annotationType, url) {
       /* jshint validthis:true */
       var self = this,
-          found = _.findWhere(self.annotationTypes,  { uniqueId: annotationType.uniqueId });
+          found = _.find(self.annotationTypes,  { uniqueId: annotationType.uniqueId });
 
       if (!found) {
         throw new DomainError('annotation type with ID not present: ' + annotationType.uniqueId);

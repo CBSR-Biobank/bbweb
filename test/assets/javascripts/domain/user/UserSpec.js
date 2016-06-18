@@ -5,7 +5,7 @@
 define([
   'angular',
   'angularMocks',
-  'underscore',
+  'lodash',
   'jquery'
 ], function(angular, mocks, _, $) {
   'use strict';

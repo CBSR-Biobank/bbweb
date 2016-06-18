@@ -9,7 +9,7 @@ define(function (require) {
 
   var angular                = require('angular'),
       mocks                  = require('angularMocks'),
-      _                      = require('underscore'),
+      _                      = require('lodash'),
       entityUpdateSharedSpec = require('../../../../test/entityUpdateSharedSpec');
 
   describe('Directive: studySummaryDirective', function() {

@@ -8,7 +8,7 @@ define(function(require) {
   'use strict';
 
   var mocks                           = require('angularMocks'),
-      _                               = require('underscore'),
+      _                               = require('lodash'),
       sprintf                         = require('sprintf'),
       entityWithAnnotationsSharedSpec = require('../../test/entityWithAnnotationsSharedSpec');
 
@@ -119,9 +119,9 @@ define(function(require) {
 
       expect(participant.annotations).toBeArrayOfSize(study.annotationTypes.length);
       _.each(participant.annotations, function (annotation) {
-        var jsonAnnotation = _.findWhere(annotationData.annotations,
+        var jsonAnnotation = _.find(annotationData.annotations,
                                          { annotationTypeId: annotation.annotationTypeId }),
-            annotationType = _.findWhere(study.annotationTypes,
+            annotationType = _.find(study.annotationTypes,
                                          { uniqueId: annotation.annotationTypeId });
 
         self.validateAnnotationClass(annotationType, annotation);
@@ -146,7 +146,7 @@ define(function(require) {
 
       expect(participant.annotations).toBeArrayOfSize(study.annotationTypes.length);
       _.each(participant.annotations, function (annotation) {
-        var annotationType = _.findWhere(study.annotationTypes,
+        var annotationType = _.find(study.annotationTypes,
                                          { uniqueId: annotation.annotationTypeId });
         self.validateAnnotationClass(annotationType, annotation);
         expect(annotation.required).toBe(annotationType.required);

@@ -7,7 +7,7 @@
 define([
   'angular',
   'angularMocks',
-  'underscore',
+  'lodash',
   'biobankApp'
 ], function(angular, mocks, _) {
   'use strict';

@@ -7,7 +7,7 @@
 define([
   'angular',
   'angularMocks',
-  'underscore',
+  'lodash',
   'biobankApp'
 ], function(angular, mocks, _) {
   'use strict';
@@ -297,7 +297,7 @@ define([
         });
 
         it('has valid display state when there are no entities', function() {
-          this.context.counts = _.mapObject(this.context.counts, function (val) {
+          this.context.counts = _.mapValues(this.context.counts, function (val) {
             return 0;
           });
           createController.call(this);

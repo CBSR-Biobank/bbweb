@@ -1,4 +1,4 @@
-define(['underscore'], function (_) {
+define(['lodash'], function (_) {
   'use strict';
 
   /**
@@ -60,7 +60,7 @@ define(['underscore'], function (_) {
     }
 
     function removeAnnotationType(annotationType) {
-      if (_.contains(vm.annotationTypeIdsInUse, annotationType.uniqueId)) {
+      if (_.includes(vm.annotationTypeIdsInUse, annotationType.uniqueId)) {
         vm.removeInUseModal(annotationType, 'ParticipantAnnotationType');
       } else {
         if (!vm.modificationsAllowed) {

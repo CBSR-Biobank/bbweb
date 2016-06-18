@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
+define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
   'use strict';
 
   AnnotationTypeFactory.$inject = [
@@ -161,7 +161,7 @@ define(['angular', 'underscore', 'tv4'], function(angular, _, tv4) {
 
       return _.reduce(options,
                       function (memo, option) {
-                        return memo && _.contains(self.options, option);
+                        return memo && _.includes(self.options, option);
                       },
                       true);
     };
