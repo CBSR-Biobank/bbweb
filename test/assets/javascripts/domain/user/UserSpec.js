@@ -14,10 +14,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(entityTestSuite, extendedDomainEntities) {
+    beforeEach(inject(function(entityTestSuite, serverReplyMixin, extendedDomainEntities) {
       var self = this;
 
-      _.extend(self, entityTestSuite);
+      _.extend(self, entityTestSuite, serverReplyMixin);
 
       self.injectDependencies('$httpBackend',
                               'User',
@@ -33,7 +33,7 @@ define([
         var reply = self.factory.user(user);
 
         self.$httpBackend.expectPOST(updateUri(statusChangePath, user.id), json)
-          .respond(201, serverReply(reply));
+          .respond(self.reply(reply));
 
         user[userMethod]().then(function (replyUser) {
           expect(replyUser).toEqual(jasmine.any(self.User));
@@ -181,7 +181,7 @@ define([
       var self = this,
           user = this.factory.user();
 
-      self.$httpBackend.whenGET(uri(user.id)).respond(serverReply(user));
+      self.$httpBackend.whenGET(uri(user.id)).respond(this.reply(user));
 
       self.User.get(user.id).then(function (reply) {
         expect(reply).toEqual(jasmine.any(self.User));
@@ -196,7 +196,7 @@ define([
       var user = new this.User(_.omit(this.factory.user(), 'id'));
       var cmd = registerCommand(user, password);
 
-      this.$httpBackend.expectPOST(uri(), cmd).respond(201, serverReply());
+      this.$httpBackend.expectPOST(uri(), cmd).respond(this.reply());
 
       user.register(password).then(function(reply) {
         expect(reply).toEqual({});
@@ -357,11 +357,6 @@ define([
         result += '/' + userId;
       }
       return result;
-    }
-
-    function serverReply(obj) {
-      obj = obj || {};
-      return { status: '', data: obj };
     }
 
     function registerCommand(user, password) {

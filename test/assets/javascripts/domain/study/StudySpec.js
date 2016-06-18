@@ -17,10 +17,11 @@ define([
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(entityTestSuite,
+                               serverReplyMixin,
                                extendedDomainEntities) {
       var self = this;
 
-      _.extend(self, entityTestSuite);
+      _.extend(self, entityTestSuite, serverReplyMixin);
 
       self.injectDependencies('$httpBackend',
                               'Study',
@@ -95,7 +96,7 @@ define([
 
     it('can retrieve a single study', function() {
       var self = this;
-      self.$httpBackend.whenGET(uri(this.jsonStudy.id)).respond(serverReply(this.jsonStudy));
+      self.$httpBackend.whenGET(uri(this.jsonStudy.id)).respond(this.reply(this.jsonStudy));
       self.Study.get(this.jsonStudy.id).then(self.expectStudy).catch(failTest);
       self.$httpBackend.flush();
     });
@@ -103,7 +104,7 @@ define([
     it('fails when getting a study and it has a bad format', function() {
       var self = this,
           study = _.omit(self.jsonStudy, 'name');
-      self.$httpBackend.whenGET(uri(study.id)).respond(serverReply(study));
+      self.$httpBackend.whenGET(uri(study.id)).respond(this.reply(study));
 
       self.Study.get(study.id).then(shouldNotFail).catch(shouldFail);
       self.$httpBackend.flush();
@@ -122,7 +123,7 @@ define([
           annotationType = _.omit(self.factory.annotationType(), 'name'),
           study = self.factory.study({ annotationTypes: [ annotationType ]});
 
-      self.$httpBackend.whenGET(uri(study.id)).respond(serverReply(study));
+      self.$httpBackend.whenGET(uri(study.id)).respond(this.reply(study));
 
       self.Study.get(study.id).then(shouldNotFail).catch(shouldFail);
       self.$httpBackend.flush();
@@ -141,7 +142,7 @@ define([
           studies = [ self.factory.study({ annotationTypes: [] }) ],
           reply = self.factory.pagedResult(studies);
 
-      self.$httpBackend.whenGET(uri()).respond(serverReply(reply));
+      self.$httpBackend.whenGET(uri()).respond(this.reply(reply));
 
       self.Study.list().then(testStudy).catch(failTest);
       self.$httpBackend.flush();
@@ -169,7 +170,7 @@ define([
             reply   = self.factory.pagedResult(studies),
             url     = sprintf.sprintf('%s?%s', uri(), $.param(options, true));
 
-        self.$httpBackend.whenGET(url).respond(serverReply(reply));
+        self.$httpBackend.whenGET(url).respond(self.reply(reply));
 
         self.Study.list(options).then(testStudy).catch(failTest);
         self.$httpBackend.flush();
@@ -188,7 +189,7 @@ define([
           studies = [ _.omit(self.jsonStudy, 'name') ],
           reply = self.factory.pagedResult(studies);
 
-      self.$httpBackend.whenGET(uri()).respond(serverReply(reply));
+      self.$httpBackend.whenGET(uri()).respond(this.reply(reply));
       self.Study.list().then(listFail).catch(shouldFail);
       self.$httpBackend.flush();
 
@@ -206,7 +207,7 @@ define([
           study = new self.Study(_.omit(this.jsonStudy, 'id')),
           json = _.pick(study, 'name', 'description');
 
-      self.$httpBackend.expectPOST(uri(), json).respond(201, serverReply(this.jsonStudy));
+      self.$httpBackend.expectPOST(uri(), json).respond(this.reply(this.jsonStudy));
 
       study.add().then(self.expectStudy).catch(failTest);
       self.$httpBackend.flush();
@@ -292,7 +293,7 @@ define([
                                   this.study.version,
                                   this.annotationType.uniqueId);
 
-        this.$httpBackend.whenDELETE(url).respond(201, serverReply(true));
+        this.$httpBackend.whenDELETE(url).respond(this.reply(true));
         this.study.removeAnnotationType(this.annotationType).then(this.expectStudy).catch(failTest);
         this.$httpBackend.flush();
       });
@@ -352,10 +353,6 @@ define([
       return _.extend({}, study, newValues, {version: study.version + 1});
     }
 
-    function serverReply(event) {
-      return { status: 'success', data: event };
-    }
-
     function changeStatusShared(jsonStudy, action, status) {
       /* jshint validthis:true */
       var self  = this,
@@ -363,7 +360,7 @@ define([
           json =  { expectedVersion: study.version },
           reply = replyStudy(jsonStudy, { status: status });
 
-      self.$httpBackend.expectPOST(uri(action, study.id), json).respond(201, serverReply(reply));
+      self.$httpBackend.expectPOST(uri(action, study.id), json).respond(this.reply(reply));
       expect(study[action]).toBeFunction();
       study[action]().then(checkStudy).catch(failTest);
       self.$httpBackend.flush();

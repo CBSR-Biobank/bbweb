@@ -25,9 +25,8 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (entityTestSuite, extendedDomainEntities) {
-      _.extend(this, entityTestSuite);
-
+    beforeEach(inject(function (serverReplyMixin, entityTestSuite, extendedDomainEntities) {
+      _.extend(this, entityTestSuite, serverReplyMixin);
 
       this.injectDependencies('$httpBackend',
                               'Centre',
@@ -95,7 +94,7 @@ define([
     it('can retrieve a single centre', function() {
       var self = this, centre = self.factory.centre();
 
-      self.$httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
+      self.$httpBackend.whenGET(uri(centre.id)).respond(this.reply(centre));
 
       self.Centre.get(centre.id).then(checkReply).catch(failTest);
       self.$httpBackend.flush();
@@ -109,7 +108,7 @@ define([
     it('fails when getting a centre and it has a bad format', function() {
       var self = this,
           centre = _.omit(self.factory.centre(), 'name');
-      self.$httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
+      self.$httpBackend.whenGET(uri(centre.id)).respond(this.reply(centre));
 
       self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
       self.$httpBackend.flush();
@@ -127,7 +126,7 @@ define([
       var self = this,
           centre = self.factory.centre({ studyIds: [ '' ]});
 
-      self.$httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
+      self.$httpBackend.whenGET(uri(centre.id)).respond(this.reply(centre));
 
       self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
       self.$httpBackend.flush();
@@ -146,7 +145,7 @@ define([
           location = _.omit(self.factory.location(), 'name'),
           centre = self.factory.centre({ locations: [ location ]});
 
-      self.$httpBackend.whenGET(uri(centre.id)).respond(serverReply(centre));
+      self.$httpBackend.whenGET(uri(centre.id)).respond(this.reply(centre));
 
       self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
       self.$httpBackend.flush();
@@ -165,7 +164,7 @@ define([
           centres = [ self.factory.centre() ],
           reply = self.factory.pagedResult(centres);
 
-      self.$httpBackend.whenGET(uri()).respond(serverReply(reply));
+      self.$httpBackend.whenGET(uri()).respond(this.reply(reply));
 
       self.Centre.list().then(checkReply).catch(failTest);
       self.$httpBackend.flush();
@@ -195,7 +194,7 @@ define([
             reply   = self.factory.pagedResult(centres),
             url     = sprintf.sprintf('%s?%s', uri(), $.param(options, true));
 
-        self.$httpBackend.whenGET(url).respond(serverReply(reply));
+        self.$httpBackend.whenGET(url).respond(self.reply(reply));
 
         self.Centre.list(options).then(testStudy).catch(failTest);
         self.$httpBackend.flush();
@@ -214,7 +213,7 @@ define([
           centres = [ _.omit(self.factory.centre(), 'name') ],
           reply = self.factory.pagedResult(centres);
 
-      self.$httpBackend.whenGET(uri()).respond(serverReply(reply));
+      self.$httpBackend.whenGET(uri()).respond(this.reply(reply));
 
       self.Centre.list().then(listFail).catch(shouldFail);
       self.$httpBackend.flush();
@@ -234,7 +233,7 @@ define([
           centre = new self.Centre(_.omit(jsonCentre, 'id')),
           json = _.pick(centre, 'name', 'description');
 
-      self.$httpBackend.expectPOST(uri(), json).respond(201, serverReply(jsonCentre));
+      self.$httpBackend.expectPOST(uri(), json).respond(this.reply(jsonCentre));
 
       centre.add().then(checkReply).catch(failTest);
       self.$httpBackend.flush();
@@ -362,7 +361,7 @@ define([
                                            centre.version,
                                            jsonLocation.uniqueId);
 
-        self.$httpBackend.expectDELETE(url).respond(201, serverReply(true));
+        self.$httpBackend.expectDELETE(url).respond(this.reply(true));
         centre.removeLocation(jsonLocation).then(checkCentre).catch(failTest);
         self.$httpBackend.flush();
 
@@ -403,7 +402,7 @@ define([
                                          centre.version,
                                          jsonStudy.id);
 
-        self.$httpBackend.expectDELETE(url).respond(201, serverReply(true));
+        self.$httpBackend.expectDELETE(url).respond(this.reply(true));
         centre.removeStudy(jsonStudy).then(checkCentre).catch(failTest);
         this.$httpBackend.flush();
 
@@ -440,10 +439,6 @@ define([
       return _.extend({}, centre, newValues, {version: centre.version + 1});
     }
 
-    function serverReply(event) {
-      return { status: 'success', data: event };
-    }
-
     function changeStatusShared(jsonCentre, action, status) {
       /* jshint validthis:true */
       var self       = this,
@@ -451,7 +446,7 @@ define([
           json       = { expectedVersion: centre.version },
           reply      = replyCentre(jsonCentre, { status: status });
 
-      self.$httpBackend.expectPOST(uri(action, centre.id), json).respond(201, serverReply(reply));
+      self.$httpBackend.expectPOST(uri(action, centre.id), json).respond(this.reply(reply));
       expect(centre[action]).toBeFunction();
       centre[action]().then(checkCentre).catch(failTest);
       this.$httpBackend.flush();

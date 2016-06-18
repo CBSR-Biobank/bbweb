@@ -21,7 +21,8 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testUtils, extendedDomainEntities) {
+    beforeEach(inject(function(serverReplyMixin, testUtils, extendedDomainEntities) {
+      _.extend(this, serverReplyMixin);
       httpBackend      = this.$injector.get('$httpBackend');
       funutils         = this.$injector.get('funutils');
       SpecimenLinkType = this.$injector.get('SpecimenLinkType');
@@ -120,7 +121,7 @@ define([
                           entities.processingType.id +
                           '/sltypes?slTypeId=' +
                           entities.sltFromServer.id)
-        .respond(serverReply(entities.sltFromServer));
+        .respond(this.reply(entities.sltFromServer));
 
       SpecimenLinkType.get(entities.processingType.id, entities.sltFromServer.id).then(function(slt) {
         slt.compareToJsonEntity(entities.sltFromServer);
@@ -133,7 +134,7 @@ define([
       var entities = entitiesWithLinkedSpecimenLinkType();
 
       httpBackend.whenGET('/studies/' + entities.processingType.id + '/sltypes')
-        .respond(serverReply([ entities.sltFromServer ]));
+        .respond(this.reply([ entities.sltFromServer ]));
 
       SpecimenLinkType.list(entities.processingType.id).then(function(list) {
         _.each(list, function (slt) {
@@ -158,7 +159,7 @@ define([
       cmd = sltToAddCommand(slt);
 
       httpBackend.expectPOST('/studies/' + entities.processingType.id + '/sltypes', cmd)
-        .respond(201, serverReply(entities.sltFromServer));
+        .respond(this.reply(entities.sltFromServer));
 
       slt.addOrUpdate().then(function(reply) {
         reply.compareToJsonEntity(entities.sltFromServer);
@@ -192,7 +193,7 @@ define([
                                entities.slt.processingTypeId + '/sltypes/' +
                                entities.slt.id + '/' +
                                entities.slt.version)
-        .respond(201, serverReply(true));
+        .respond(this.reply(true));
 
       entities.slt.remove();
       httpBackend.flush();
@@ -261,10 +262,6 @@ define([
          expect(slt.getAnnotationTypeDataAsString()).toBeEmptyString();
        });
 
-    function serverReply(obj) {
-      return { status: 'success', data: obj };
-    }
-
     function sltToAddCommand(slt) {
       var cmd =  _.extend(_.pick(slt,
                                  'processingTypeId',
@@ -289,10 +286,11 @@ define([
     }
 
     function updateSltSharedBehaviour(slt, sltFromServer, processingTypeId) {
+      /*jshint validthis:true */
       var cmd = sltToUpdateCommand(slt);
 
       httpBackend.expectPUT('/studies/' + processingTypeId + '/sltypes/' + slt.id, cmd)
-        .respond(201, serverReply(sltFromServer));
+        .respond(this.reply(sltFromServer));
 
       slt.addOrUpdate().then(function(reply) {
         reply.compareToJsonEntity(sltFromServer);

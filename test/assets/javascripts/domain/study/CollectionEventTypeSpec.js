@@ -19,8 +19,8 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(entityTestSuite, extendedDomainEntities) {
-      _.extend(this, entityTestSuite);
+    beforeEach(inject(function(entityTestSuite, serverReplyMixin, extendedDomainEntities) {
+      _.extend(this, entityTestSuite, serverReplyMixin);
 
       this.injectDependencies('$httpBackend',
                               'CollectionEventType',
@@ -86,7 +86,7 @@ define([
                                 this.jsonStudy.id,
                                 this.jsonCet.id);
 
-      this.$httpBackend.whenGET(url).respond(serverReply(this.jsonCet));
+      this.$httpBackend.whenGET(url).respond(this.reply(this.jsonCet));
       CollectionEventType.get(this.jsonStudy.id, this.jsonCet.id)
         .then(expectCet).catch(failTest);
       this.$httpBackend.flush();
@@ -102,7 +102,7 @@ define([
                                   self.jsonStudy.id,
                                   badCet.cet.id);
 
-        self.$httpBackend.whenGET(url).respond(serverReply(badCet.cet));
+        self.$httpBackend.whenGET(url).respond(self.reply(badCet.cet));
         CollectionEventType.get(self.jsonStudy.id, badCet.cet.id)
           .then(getFail).catch(shouldFail);
         self.$httpBackend.flush();
@@ -120,7 +120,7 @@ define([
     it('can list collection event types', function() {
       var url = sprintf.sprintf('%s/%s', uri(), this.jsonStudy.id);
 
-      this.$httpBackend.whenGET(url).respond(serverReply([ this.jsonCet ]));
+      this.$httpBackend.whenGET(url).respond(this.reply([ this.jsonCet ]));
       CollectionEventType.list(this.jsonStudy.id)
         .then(expectCetArray).catch(failTest);
       this.$httpBackend.flush();
@@ -140,7 +140,7 @@ define([
           reqHandler = self.$httpBackend.whenGET(url);
 
       _.each(data, function (item) {
-        reqHandler.respond(serverReply([ item.cet ]));
+        reqHandler.respond(self.reply([ item.cet ]));
         CollectionEventType.list(self.jsonStudy.id).then(getFail).catch(shouldFail);
         self.$httpBackend.flush();
 
@@ -168,7 +168,7 @@ define([
       var ceventType = new CollectionEventType(this.jsonCet),
           url = sprintf.sprintf('%s/%s', uri(), this.jsonStudy.id);
 
-      this.$httpBackend.expectPOST(url).respond(201, serverReply(this.jsonCet));
+      this.$httpBackend.expectPOST(url).respond(this.reply(this.jsonCet));
 
       ceventType.add().then(expectCet).catch(failTest);
       this.$httpBackend.flush();
@@ -182,7 +182,7 @@ define([
                                 ceventType.id,
                                 ceventType.version);
 
-      this.$httpBackend.expectDELETE(url).respond(201, serverReply(true));
+      this.$httpBackend.expectDELETE(url).respond(this.reply(true));
       ceventType.remove();
       this.$httpBackend.flush();
     });
@@ -278,7 +278,7 @@ define([
                                   this.cet.version,
                                   this.jsonSpec.uniqueId);
 
-        this.$httpBackend.whenDELETE(url).respond(201, serverReply(true));
+        this.$httpBackend.whenDELETE(url).respond(this.reply(true));
         this.cet.removeSpecimenSpec(this.jsonSpec).then(expectCet).catch(failTest);
         this.$httpBackend.flush();
       });
@@ -336,7 +336,7 @@ define([
                                   this.cet.version,
                                   this.jsonAnnotType.uniqueId);
 
-        this.$httpBackend.whenDELETE(url).respond(201, serverReply(true));
+        this.$httpBackend.whenDELETE(url).respond(this.reply(true));
         this.cet.removeAnnotationType(this.jsonAnnotType).then(expectCet).catch(failTest);
         this.$httpBackend.flush();
       });
@@ -351,10 +351,6 @@ define([
     // used by promise tests
     function failTest(error) {
       expect(error).toBeUndefined();
-    }
-
-    function serverReply(obj) {
-      return { status: 'success', data: obj };
     }
 
     /**

@@ -23,7 +23,9 @@ define([
     beforeEach(inject(function($httpBackend,
                                _ProcessingType_,
                                _factory_,
+                               serverReplyMixin,
                                extendedDomainEntities) {
+      _.extend(this, serverReplyMixin);
       httpBackend    = $httpBackend;
       ProcessingType = _ProcessingType_;
       factory   = _factory_;
@@ -93,7 +95,7 @@ define([
     it('can retrieve a processing type', function(done) {
       var entities = createEntities();
       httpBackend.whenGET(uri(entities.study.id) + '?procTypeId=' + entities.serverPt.id)
-        .respond(serverReply(entities.serverPt));
+        .respond(this.reply(entities.serverPt));
 
       ProcessingType.get(entities.study.id, entities.serverPt.id).then(function(pt) {
         pt.compareToJsonEntity(entities.serverPt);
@@ -104,7 +106,7 @@ define([
 
     it('can list processing types', function(done) {
       var entities = createEntities();
-      httpBackend.whenGET(uri(entities.study.id)).respond(serverReply([ entities.serverPt ]));
+      httpBackend.whenGET(uri(entities.study.id)).respond(this.reply([ entities.serverPt ]));
       ProcessingType.list(entities.study.id).then(function(list) {
         _.each(list, function (pt) {
           pt.compareToJsonEntity(entities.serverPt);
@@ -119,7 +121,7 @@ define([
           cmd = processingTypeToAddCommand(entities.processingType);
 
       httpBackend.expectPOST(uri(entities.study.id), cmd)
-        .respond(201, serverReply(entities.serverPt));
+        .respond(this.reply(entities.serverPt));
 
       entities.processingType.addOrUpdate().then(function(pt) {
         pt.compareToJsonEntity(entities.serverPt);
@@ -132,7 +134,7 @@ define([
 
       var cmd = processingTypeToUpdateCommand(entities.processingType);
       httpBackend.expectPUT(uri(entities.study.id, entities.processingType.id), cmd)
-        .respond(201, serverReply(entities.serverPt));
+        .respond(this.reply(entities.serverPt));
 
       entities.processingType.addOrUpdate().then(function(pt) {
         pt.compareToJsonEntity(entities.serverPt);
@@ -145,7 +147,7 @@ define([
       var entities = createEntities();
 
       httpBackend.expectDELETE(uri(entities.study.id, entities.processingType.id, entities.processingType.version))
-        .respond(201, serverReply(true));
+        .respond(this.reply(true));
 
       entities.processingType.remove();
       httpBackend.flush();
@@ -165,10 +167,6 @@ define([
       var entities = createEntities();
       expect(entities.processingType.studyId).toBe(entities.study.id);
     });
-
-    function serverReply(obj) {
-      return { status: 'success', data: obj };
-    }
 
     function processingTypeToAddCommand(processingType) {
       return {

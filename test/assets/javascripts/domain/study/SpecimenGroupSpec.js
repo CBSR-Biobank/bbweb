@@ -25,7 +25,9 @@ define([
                                _funutils_,
                                _SpecimenGroup_,
                                factory,
+                               serverReplyMixin,
                                extendedDomainEntities) {
+      _.extend(this, serverReplyMixin);
       httpBackend   = $httpBackend;
       funutils      = _funutils_;
       SpecimenGroup = _SpecimenGroup_;
@@ -100,7 +102,7 @@ define([
     it('can retrieve a specimen group', function(done) {
       var entities = createEntities();
       httpBackend.whenGET(uri(entities.study.id) + '?sgId=' + entities.serverSg.id)
-        .respond(serverReply(entities.serverSg));
+        .respond(this.reply(entities.serverSg));
 
       SpecimenGroup.get(entities.study.id, entities.serverSg.id).then(function(sg) {
         sg.compareToJsonEntity(entities.serverSg);
@@ -111,7 +113,7 @@ define([
 
     it('can list specimen groups', function(done) {
       var entities = createEntities();
-      httpBackend.whenGET(uri(entities.study.id)).respond(serverReply([ entities.serverSg ]));
+      httpBackend.whenGET(uri(entities.study.id)).respond(this.reply([ entities.serverSg ]));
       SpecimenGroup.list(entities.study.id).then(function(list) {
         _.each(list, function (sg) {
           sg.compareToJsonEntity(entities.serverSg);
@@ -126,7 +128,7 @@ define([
           cmd = specimenGroupToAddCommand(entities.specimenGroup);
 
       httpBackend.expectPOST(uri(entities.study.id), cmd)
-        .respond(201, serverReply(entities.serverSg));
+        .respond(this.reply(entities.serverSg));
 
       entities.specimenGroup.addOrUpdate().then(function(sg) {
         sg.compareToJsonEntity(entities.serverSg);
@@ -139,7 +141,7 @@ define([
 
       var cmd = specimenGroupToUpdateCommand(entities.specimenGroup);
       httpBackend.expectPUT(uri(entities.study.id, entities.specimenGroup.id), cmd)
-        .respond(201, serverReply(entities.serverSg));
+        .respond(this.reply(entities.serverSg));
 
       entities.specimenGroup.addOrUpdate().then(function(sg) {
         sg.compareToJsonEntity(entities.serverSg);
@@ -151,7 +153,7 @@ define([
       var entities = createEntities();
 
       httpBackend.expectDELETE(uri(entities.study.id, entities.specimenGroup.id, entities.specimenGroup.version))
-        .respond(201, serverReply(true));
+        .respond(this.reply(true));
 
       entities.specimenGroup.remove();
       httpBackend.flush();
@@ -171,10 +173,6 @@ define([
       var entities = createEntities();
       expect(entities.specimenGroup.studyId).toBe(entities.study.id);
     });
-
-    function serverReply(obj) {
-      return { status: 'success', data: obj };
-    }
 
     function specimenGroupToAddCommand(specimenGroup) {
       return _.extend(_.pick(specimenGroup,

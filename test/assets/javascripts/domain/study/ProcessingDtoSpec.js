@@ -20,7 +20,9 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testUtils) {
+    beforeEach(inject(function(serverReplyMixin, testUtils) {
+      _.extend(this, serverReplyMixin);
+
       httpBackend   = this.$injector.get('$httpBackend');
       ProcessingDto = this.$injector.get('ProcessingDto');
       factory  = this.$injector.get('factory');
@@ -85,7 +87,7 @@ define([
           entities                   = createEntities();
 
       httpBackend.whenGET('/studies/' + entities.study.id + '/dto/processing')
-        .respond(serverReply(entities));
+        .respond(this.reply(entities));
 
       ProcessingDto.get(entities.study.id).then(function(dto) {
         compareToServerObj(dto, entities);
@@ -110,10 +112,6 @@ define([
       });
       httpBackend.flush();
     });
-
-    function serverReply(obj) {
-      return { status: 'success', data: obj };
-    }
 
     function compareToServerObj(dto, serverObj) {
       expect(dto.processingTypes).toBeArrayOfSize(serverObj.processingTypes.length);

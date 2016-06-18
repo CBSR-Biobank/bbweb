@@ -16,10 +16,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(entityTestSuite, extendedDomainEntities) {
+    beforeEach(inject(function(entityTestSuite, serverReplyMixin, extendedDomainEntities) {
       var self = this;
 
-      _.extend(self, entityTestSuite);
+      _.extend(self, entityTestSuite, serverReplyMixin);
 
       self.injectDependencies('UserCounts', '$httpBackend');
     }));
@@ -41,10 +41,6 @@ define([
       };
     }
 
-    function serverReply(obj) {
-      return { status: 'success', data: obj };
-    }
-
     it('can get created from empty object', function() {
       var counts = new this.UserCounts();
       expect(counts.total).toEqual(0);
@@ -55,7 +51,7 @@ define([
 
     it('can get user counts from server', function() {
       var counts = fakeUserCounts();
-      this.$httpBackend.whenGET('/users/counts').respond(serverReply(counts));
+      this.$httpBackend.whenGET('/users/counts').respond(this.reply(counts));
       this.UserCounts.get().then(expectCounts).catch(failTest);
       this.$httpBackend.flush();
 

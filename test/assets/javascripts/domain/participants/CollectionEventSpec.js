@@ -19,12 +19,13 @@ define([
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(entityTestSuite,
+                               serverReplyMixin,
                                hasAnnotationsEntityTestSuite,
                                testUtils,
                                extendedDomainEntities) {
       var self = this;
 
-      _.extend(self, entityTestSuite, hasAnnotationsEntityTestSuite);
+      _.extend(self, entityTestSuite, serverReplyMixin, hasAnnotationsEntityTestSuite);
 
       self.injectDependencies('$httpBackend',
                               'Participant',
@@ -225,7 +226,7 @@ define([
           collectionEvent = self.factory.collectionEvent();
 
       self.$httpBackend.whenGET(uri(collectionEvent.id))
-        .respond(serverReply(collectionEvent));
+        .respond(this.reply(collectionEvent));
 
       self.CollectionEvent.get(collectionEvent.id).then(function (reply) {
         expect(reply).toEqual(jasmine.any(self.CollectionEvent));
@@ -257,7 +258,7 @@ define([
           serverEntity;
 
       self.$httpBackend.whenGET(uriWithPath('list', participant.id))
-        .respond(serverReply(reply));
+        .respond(this.reply(reply));
 
       self.CollectionEvent.list(participant.id).then(function (pagedResult) {
         expect(pagedResult.items).toBeArrayOfSize(collectionEvents.length);
@@ -281,7 +282,7 @@ define([
 
       _.each(sortFields, function (sortField) {
         self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?sort=' + sortField)
-          .respond(serverReply(reply));
+          .respond(self.reply(reply));
 
         self.CollectionEvent.list(participant.id, { sort: sortField }).then(function (pagedResult) {
           expect(pagedResult.items).toBeEmptyArray();
@@ -298,7 +299,7 @@ define([
           pageNumber = 2;
 
       self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?page=' + pageNumber)
-        .respond(serverReply(reply));
+        .respond(this.reply(reply));
 
       self.CollectionEvent.list(participant.id, { page: pageNumber }).then(function (pagedResult) {
         expect(pagedResult.items).toBeEmptyArray();
@@ -314,7 +315,7 @@ define([
           pageSize = 2;
 
       self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?pageSize=' + pageSize)
-        .respond(serverReply(reply));
+        .respond(this.reply(reply));
 
       self.CollectionEvent.list(participant.id, { pageSize: pageSize }).then(function (pagedResult) {
         expect(pagedResult.items).toBeEmptyArray();
@@ -329,7 +330,7 @@ define([
           jsonCevent      = self.factory.defaultCollectionEvent();
 
       self.$httpBackend.whenGET(uri(jsonParticipant.id) + '/visitNumber/' + jsonCevent.visitNumber)
-        .respond(serverReply(jsonCevent));
+        .respond(this.reply(jsonCevent));
 
       self.CollectionEvent.getByVisitNumber(jsonParticipant.id,
                                             jsonCevent.visitNumber,
@@ -350,7 +351,7 @@ define([
 
       _.each(orderingTypes, function (orderingType) {
         self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?order=' + orderingType)
-          .respond(serverReply(reply));
+          .respond(self.reply(reply));
 
         self.CollectionEvent.list(participant.id, { order: orderingType }).then(function (pagedResult) {
           expect(pagedResult.items).toBeEmptyArray();
@@ -385,7 +386,7 @@ define([
           collectionEvent = new this.CollectionEvent(_.omit(jsonCevent, 'id')),
           json            = addJson(collectionEvent);
 
-      this.$httpBackend.expectPOST(uri(jsonCevent.participantId), json).respond(201, serverReply(jsonCevent));
+      this.$httpBackend.expectPOST(uri(jsonCevent.participantId), json).respond(this.reply(jsonCevent));
 
       collectionEvent.add().then(function(reply) {
         _.extend(collectionEvent, { id: reply.id });
@@ -399,7 +400,7 @@ define([
           cmd      = addJson(entities.collectionEvent);
 
       this.$httpBackend.expectPOST(uri(entities.collectionEvent.participantId), cmd)
-        .respond(201, serverReply(entities.serverCollectionEvent));
+        .respond(this.reply(entities.serverCollectionEvent));
 
       entities.collectionEvent.add().then(function(reply) {
         expect(reply.id).toEqual(entities.serverCollectionEvent.id);
@@ -473,7 +474,7 @@ define([
           cevent = entities.collectionEvent,
           url = uri(cevent.participantId, cevent.id, cevent.version);
 
-      this.$httpBackend.expectDELETE(url).respond(201, serverReply(true));
+      this.$httpBackend.expectDELETE(url).respond(this.reply(true));
 
       cevent.remove();
       this.$httpBackend.flush();
@@ -495,10 +496,6 @@ define([
       return _.map(collectionEvent.annotations, function (annotation) {
         return annotation.getServerAnnotation();
       });
-    }
-
-    function serverReply(event) {
-      return { status: 'success', data: event };
     }
 
     function uri(/* participantId, collectionEventId, version */) {

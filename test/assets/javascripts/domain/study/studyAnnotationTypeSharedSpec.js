@@ -30,19 +30,21 @@ define(['lodash'], function(_) {
       beforeEach(inject(function($httpBackend,
                                  _funutils_,
                                  _AnnotationValueType_,
-                                 _AnnotationMaxValueCount_) {
-        httpBackend              = $httpBackend;
-        funutils                 = _funutils_;
-        AnnotationValueType      = _AnnotationValueType_;
-        AnnotationMaxValueCount  = _AnnotationMaxValueCount_;
-        AnnotationTypeType            = context.annotationTypeType;
-        createAnnotationTypeFn        = context.createAnnotationTypeFn;
-        annotationTypesService        = context.annotationTypesService;
-        annotationTypeUriPart         = context.annotationTypeUriPart;
-        objRequiredKeys          = context.objRequiredKeys;
-        createServerAnnotationTypeFn  = context.createServerAnnotationTypeFn;
-        annotationTypeListFn          = context.annotationTypeListFn;
-        annotationTypeGetFn           = context.annotationTypeGetFn;
+                                 _AnnotationMaxValueCount_,
+                                serverReplyMixin) {
+        _.extend(this, serverReplyMixin);
+        httpBackend                  = $httpBackend;
+        funutils                     = _funutils_;
+        AnnotationValueType          = _AnnotationValueType_;
+        AnnotationMaxValueCount      = _AnnotationMaxValueCount_;
+        AnnotationTypeType           = context.annotationTypeType;
+        createAnnotationTypeFn       = context.createAnnotationTypeFn;
+        annotationTypesService       = context.annotationTypesService;
+        annotationTypeUriPart        = context.annotationTypeUriPart;
+        objRequiredKeys              = context.objRequiredKeys;
+        createServerAnnotationTypeFn = context.createServerAnnotationTypeFn;
+        annotationTypeListFn         = context.annotationTypeListFn;
+        annotationTypeGetFn          = context.annotationTypeGetFn;
       }));
 
       it('has default values', function() {
@@ -64,7 +66,7 @@ define(['lodash'], function(_) {
         var serverAnnotationType = createServerAnnotationTypeFn();
         var objs = [serverAnnotationType];
 
-        httpBackend.whenGET(uri(serverAnnotationType.studyId)).respond(serverReply(objs));
+        httpBackend.whenGET(uri(serverAnnotationType.studyId)).respond(this.reply(objs));
 
         annotationTypeListFn(serverAnnotationType.studyId).then(function (annotationTypes) {
           expect(annotationTypes).toBeArrayOfSize(objs.length);
@@ -84,7 +86,7 @@ define(['lodash'], function(_) {
         _.each(objRequiredKeys, function(key) {
           var badObjs = [ _.omit(serverAnnotationType, key) ];
 
-          httpBackend.whenGET(uri(serverAnnotationType.studyId)).respond(serverReply(badObjs));
+          httpBackend.whenGET(uri(serverAnnotationType.studyId)).respond(this.reply(badObjs));
 
           annotationTypeListFn(serverAnnotationType.studyId).then(function (reply) {
             _.each(reply, function(err) {
@@ -104,7 +106,7 @@ define(['lodash'], function(_) {
         var serverAnnotationType = createServerAnnotationTypeFn();
 
         httpBackend.whenGET(uri(serverAnnotationType.studyId) + '?annotTypeId=' + serverAnnotationType.id)
-          .respond(serverReply(serverAnnotationType));
+          .respond(this.reply(serverAnnotationType));
 
         annotationTypeGetFn(serverAnnotationType.studyId, serverAnnotationType.id)
           .then(function (annotationType) {
@@ -122,7 +124,7 @@ define(['lodash'], function(_) {
           var badObj = _.omit(serverAnnotationType, key);
 
         httpBackend.whenGET(uri(serverAnnotationType.studyId) + '?annotTypeId=' + serverAnnotationType.id)
-            .respond(201, serverReply(badObj));
+            .respond(this.reply(badObj));
 
           annotationTypeGetFn(serverAnnotationType.studyId, serverAnnotationType.id)
             .then(function (err) {
@@ -143,7 +145,7 @@ define(['lodash'], function(_) {
         var command = addCommand(baseAnnotationType);
         var reply = replyAnnotationType(baseAnnotationType);
 
-        httpBackend.expectPOST(uri(annotationType.studyId), command).respond(201, serverReply(reply));
+        httpBackend.expectPOST(uri(annotationType.studyId), command).respond(this.reply(reply));
 
         annotationType.addOrUpdate().then(function(replyObj) {
           expect(replyObj).toEqual(jasmine.any(AnnotationTypeType));
@@ -159,7 +161,7 @@ define(['lodash'], function(_) {
         var reply = replyAnnotationType(baseAnnotationType);
 
         httpBackend.expectPUT(uri(annotationType.studyId, annotationType.id), command)
-          .respond(201, serverReply(reply));
+          .respond(this.reply(reply));
 
         annotationType.addOrUpdate().then(function(replyObj) {
           expect(replyObj).toEqual(jasmine.any(AnnotationTypeType));
@@ -267,10 +269,6 @@ define(['lodash'], function(_) {
                                           {version: annotationType.version + 1}));
       }
 
-      function serverReply(obj) {
-        return { status: 'success', data: obj };
-      }
-
       function checkAddOrUpdateInvalidResponse(uri,
                                                serverAnnotationType,
                                                command,
@@ -283,7 +281,7 @@ define(['lodash'], function(_) {
           var annotationType = createAnnotationTypeFn(serverAnnotationType);
           var replyBadAnnotationType = _.omit(replyAnnotationType, key);
 
-          httpBackend[httpBackendMethod](uri, command).respond(201, serverReply(replyBadAnnotationType));
+          httpBackend[httpBackendMethod](uri, command).respond(this.reply(replyBadAnnotationType));
 
           annotationType.addOrUpdate().then(function (reply) {
             expect(reply).toEqual(jasmine.any(Error));

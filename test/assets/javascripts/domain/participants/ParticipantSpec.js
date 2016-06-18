@@ -17,11 +17,12 @@ define(function(require) {
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(entityTestSuite,
+                               serverReplyMixin,
                                hasAnnotationsEntityTestSuite,
                                extendedDomainEntities) {
       var self = this;
 
-      _.extend(this, entityTestSuite, hasAnnotationsEntityTestSuite);
+      _.extend(this, entityTestSuite, serverReplyMixin, hasAnnotationsEntityTestSuite);
 
       self.injectDependencies('$q',
                               '$httpBackend',
@@ -210,7 +211,7 @@ define(function(require) {
           study = self.factory.study(),
           participant = self.factory.participant({ studyId: study.id });
 
-      self.$httpBackend.whenGET(uri(study.id, participant.id)).respond(serverReply(participant));
+      self.$httpBackend.whenGET(uri(study.id, participant.id)).respond(this.reply(participant));
 
       self.Participant.get(study.id, participant.id).then(function (reply) {
         expect(reply).toEqual(jasmine.any(self.Participant));
@@ -226,7 +227,7 @@ define(function(require) {
 
       self.$httpBackend.whenGET(
         sprintf.sprintf('/participants/uniqueId/%s/%s', study.id, participant.uniqueId)
-      ).respond(serverReply(participant));
+      ).respond(this.reply(participant));
 
       self.Participant.getByUniqueId(study.id, participant.uniqueId).then(function (reply) {
         expect(reply).toEqual(jasmine.any(self.Participant));
@@ -242,7 +243,7 @@ define(function(require) {
           participant = new self.Participant(_.omit(jsonParticipant, 'id')),
           reqJson = addJson(participant);
 
-      self.$httpBackend.expectPOST(uri(study.id), reqJson).respond(201, serverReply(jsonParticipant));
+      self.$httpBackend.expectPOST(uri(study.id), reqJson).respond(this.reply(jsonParticipant));
 
       participant.add().then(function(reply) {
         expect(reply).toEqual(jasmine.any(self.Participant));
@@ -260,7 +261,7 @@ define(function(require) {
           reqJson = addJson(entities.participant);
 
       this.$httpBackend.expectPOST(uri(entities.jsonStudy.id), reqJson)
-        .respond(201, serverReply(entities.jsonParticipant));
+        .respond(this.reply(entities.jsonParticipant));
 
       entities.participant.add().then(function(replyParticipant) {
         expect(replyParticipant.id).toEqual(entities.jsonParticipant.id);
@@ -366,11 +367,6 @@ define(function(require) {
       return _.extend(_.pick(participant, 'studyId', 'uniqueId'),
                       { annotations: annotationsForCommand(participant) } );
     }
-
-    function serverReply(event) {
-      return { status: 'success', data: event };
-    }
-
 
     function uri(/* studyId, participantId */) {
       var studyId,

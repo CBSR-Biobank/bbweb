@@ -16,12 +16,13 @@ define([
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(entityTestSuite,
+                               serverReplyMixin,
                                hasAnnotationsEntityTestSuite,
                                testUtils,
                                extendedDomainEntities) {
       var self = this;
 
-      _.extend(self, entityTestSuite, hasAnnotationsEntityTestSuite);
+      _.extend(self, entityTestSuite, serverReplyMixin, hasAnnotationsEntityTestSuite);
 
       self.injectDependencies('$httpBackend',
                               'Participant',
@@ -96,7 +97,7 @@ define([
       specimens    = _.map(_.range(3), function () { return self.factory.specimen(); });
       reply        = self.factory.pagedResult(specimens);
 
-      self.$httpBackend.whenGET(uri(cevent.id)).respond(serverReply(reply));
+      self.$httpBackend.whenGET(uri(cevent.id)).respond(this.reply(reply));
 
       self.Specimen.list(cevent.id).then(function (pagedResult) {
         expect(pagedResult.items).toBeArrayOfSize(specimens.length);
@@ -115,7 +116,7 @@ define([
 
       _.each(sortingTypes, function (sortingType) {
         self.$httpBackend.whenGET(uri(cevent.id) + '?sort=' + sortingType)
-          .respond(serverReply(reply));
+          .respond(self.reply(reply));
 
         self.Specimen.list(cevent.id, { sort: sortingType }).then(function (pagedResult) {
           expect(pagedResult.items).toBeEmptyArray();
@@ -131,7 +132,7 @@ define([
           page = 2;
 
       self.$httpBackend.whenGET(uri(cevent.id) + '?page=' + page)
-        .respond(serverReply(reply));
+        .respond(this.reply(reply));
 
       self.Specimen.list(cevent.id, { page: page }).then(function (pagedResult) {
         expect(pagedResult.items).toBeEmptyArray();
@@ -146,7 +147,7 @@ define([
           pageSize = 2;
 
       self.$httpBackend.whenGET(uri(cevent.id) + '?pageSize=' + pageSize)
-        .respond(serverReply(reply));
+        .respond(this.reply(reply));
 
       self.Specimen.list(cevent.id, { pageSize: pageSize }).then(function (pagedResult) {
         expect(pagedResult.items).toBeEmptyArray();
@@ -162,7 +163,7 @@ define([
 
       _.each(orderingTypes, function (orderingType) {
         self.$httpBackend.whenGET(uri(cevent.id) + '?order=' + orderingType)
-          .respond(serverReply(reply));
+          .respond(self.reply(reply));
 
         self.Specimen.list(cevent.id, { order: orderingType }).then(function (pagedResult) {
           expect(pagedResult.items).toBeEmptyArray();
@@ -192,7 +193,7 @@ define([
       cevent = new this.CollectionEvent(jsonCevent);
       json   = addJson(cevent, jsonSpecimens);
 
-      this.$httpBackend.expectPOST(uri(cevent.id), json).respond(201, serverReply(jsonCevent));
+      this.$httpBackend.expectPOST(uri(cevent.id), json).respond(this.reply(jsonCevent));
 
       self.Specimen.add(cevent.id, specimens);
       this.$httpBackend.flush();
@@ -209,10 +210,6 @@ define([
       return _.pick(specimen, 'inventoryId', 'specimenSpecId', 'timeCreated', 'locationId', 'amount');
     });
     return json;
-  }
-
-  function serverReply(event) {
-    return { status: 'success', data: event };
   }
 
   function uri(collectionEventId) {
