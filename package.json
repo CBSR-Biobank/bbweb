@@ -8,8 +8,7 @@
     "commander": "^2.9.0",
     "console.table": "^0.7.0",
     "grunt-ngdocs": "^0.2.7",
-    "lodash": "^4.13.1",
-    "sprintf-js": "^1.0.3"
+    "lodash": "^4.13.1"
   },
   "devDependencies": {
     "faker": "^3.1.0",
