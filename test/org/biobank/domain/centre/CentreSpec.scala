@@ -79,7 +79,7 @@ class CentreSpec extends DomainSpec {
       }
     }
 
-    "111 be enabled if it has at least one location" in {
+    "be enabled if it has at least one location" in {
       val location = factory.createLocation
       val centre = factory.createDisabledCentre.copy(locations = Set(location))
 

@@ -98,6 +98,8 @@ case class NamedUsersProcessor @Inject() (@Named("usersProcessor") processor: Ac
 
 case class NamedCentresProcessor @Inject() (@Named("centresProcessor") processor: ActorRef)
 
+case class NamedShipmentsProcessor @Inject() (@Named("shipmentsProcessor") processor: ActorRef)
+
 case class NamedCollectionEventTypeProcessor @Inject()        (
   @Named("collectionEventType") processor: ActorRef)
 

@@ -1,0 +1,31 @@
+package org.biobank.infrastructure.event;
+
+message ShipmentSpecimenEvent {
+
+   message Added {
+      optional string shipmentId          = 1;
+      optional string specimenId          = 2;
+      optional string shipmentContainerId = 3;
+   }
+
+   message ContainerUpdated {
+      optional int64  version             = 1;
+      optional string shipmentContainerId = 2;
+   }
+
+   message StateUpdated {
+      optional int64  version   = 1;
+   }
+
+   required string id     = 1;
+   optional string userId = 2;
+   optional string time   = 3;
+
+   oneof event_type {
+      Added            added            = 5;
+      ContainerUpdated containerUpdated = 6;
+      StateUpdated     received         = 8;
+      StateUpdated     missing          = 9;
+      StateUpdated     extra            = 10;
+   }
+}

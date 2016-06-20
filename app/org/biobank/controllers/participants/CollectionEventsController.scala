@@ -23,6 +23,10 @@ class CollectionEventsController @Inject() (val env:          Environment,
 
   private val PageSizeMax = 10
 
+  val listSortFields = Map[String, (CollectionEvent, CollectionEvent) => Boolean](
+      "visitNumber"   -> CollectionEvent.compareByVisitNumber,
+      "timeCompleted" -> CollectionEvent.compareByTimeCompleted)
+
   def get(ceventId: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
       domainValidationReply(service.get(ceventId))
@@ -35,19 +39,19 @@ class CollectionEventsController @Inject() (val env:          Environment,
            order:         String) =
     AuthAction(parse.empty) { (token, userId, request) =>
 
-      Logger.debug(s"CollectionEventsController:list: participantId/$participantId, sort/$sort, page/$page, pageSize/$pageSize, order/$order")
+      Logger.debug(s"""|CollectionEventsController:list: participantId/$participantId,
+                       |  sort/$sort, page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
-      val pagedQuery = PagedQuery(sort, page, pageSize, order)
+      val pagedQuery = PagedQuery(listSortFields, page, pageSize, order)
+
       val validation = for {
-        sortField   <- pagedQuery.getSortField(Seq("visitNumber", "timeCompleted"))
-        sortWith    <- (if (sortField == "visitNumber") (CollectionEvent.compareByVisitNumber _)
-                        else (CollectionEvent.compareByTimeCompleted _)).success
-        sortOrder   <- pagedQuery.getSortOrder
-        cevents     <- service.list(participantId, sortWith, sortOrder)
-        page        <- pagedQuery.getPage(PageSizeMax, cevents.size)
-        pageSize    <- pagedQuery.getPageSize(PageSizeMax)
-        results     <- PagedResults.create(cevents, page, pageSize)
-      } yield results
+          sortFunc    <- pagedQuery.getSortFunc(sort)
+          sortOrder   <- pagedQuery.getSortOrder
+          cevents     <- service.list(participantId, sortFunc, sortOrder)
+          page        <- pagedQuery.getPage(PageSizeMax, cevents.size)
+          pageSize    <- pagedQuery.getPageSize(PageSizeMax)
+          results     <- PagedResults.create(cevents, page, pageSize)
+        } yield results
 
       validation.fold(
         err     => BadRequest(err.list.toList.mkString),

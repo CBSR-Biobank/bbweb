@@ -100,9 +100,9 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "list multiple studies" in {
-        val studies = List(
-            factory.createDisabledStudy,
-            factory.createDisabledStudy).map{ study => studyRepository.put(study) }
+        val studies = List(factory.createDisabledStudy,
+                           factory.createDisabledStudy)
+        studies.foreach(studyRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
             uri = uri,
@@ -116,7 +116,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
       "list a single study when filtered by name" in {
         val studies = List(factory.createDisabledStudy, factory.createEnabledStudy)
-          .map { study => studyRepository.put(study) }
+        studies.foreach(studyRepository.put)
 
         val jsonItem = PagedResultsSpec(this)
           .singleItemResult(uri, Map("filter" -> studies(0).name))
@@ -126,7 +126,8 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       "list a single disabled study when filtered by status" in {
         val studies = List(factory.createDisabledStudy,
                            factory.createEnabledStudy,
-                           factory.createRetiredStudy).map { study => studyRepository.put(study) }
+                           factory.createRetiredStudy)
+        studies.foreach(studyRepository.put)
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
             uri, Map("status" -> "DisabledStudy"))
@@ -138,7 +139,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
                            factory.createDisabledStudy,
                            factory.createEnabledStudy,
                            factory.createEnabledStudy)
-          .map { study => studyRepository.put(study) }
+        studies.foreach(studyRepository.put)
 
         val expectedStudies = List(studies(0), studies(1))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
@@ -154,12 +155,11 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "list enabled studies when filtered by status" in {
-        val studies = List(
-            factory.createDisabledStudy,
-            factory.createDisabledStudy,
-            factory.createEnabledStudy,
-            factory.createEnabledStudy)
-          .map { study => studyRepository.put(study) }
+        val studies = List(factory.createDisabledStudy,
+                           factory.createDisabledStudy,
+                           factory.createEnabledStudy,
+                           factory.createEnabledStudy)
+        studies.foreach(studyRepository.put)
 
         val expectedStudies = List(studies(2), studies(3))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
@@ -175,12 +175,11 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "list studies sorted by name" in {
-        val studies = List(
-            factory.createDisabledStudy.copy(name = "CTR3"),
-            factory.createDisabledStudy.copy(name = "CTR2"),
-            factory.createEnabledStudy.copy(name = "CTR1"),
-            factory.createEnabledStudy.copy(name = "CTR0"))
-          .map { study => studyRepository.put(study) }
+        val studies = List(factory.createDisabledStudy.copy(name = "CTR3"),
+                           factory.createDisabledStudy.copy(name = "CTR2"),
+                           factory.createEnabledStudy.copy(name = "CTR1"),
+                           factory.createEnabledStudy.copy(name = "CTR0"))
+        studies.foreach(studyRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
             uri = uri,
@@ -198,18 +197,16 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "list studies sorted by status" in {
-        val studies = List(
-            factory.createEnabledStudy,
-            factory.createDisabledStudy)
-          .map { study => studyRepository.put(study) }
-
+        val studies = List(factory.createEnabledStudy,
+                           factory.createDisabledStudy)
+        studies.foreach(studyRepository.put)
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri = uri,
+            uri         = uri,
             queryParams = Map("sort" -> "status"),
-            offset = 0,
-            total = studies.size,
-            maybeNext = None,
-            maybePrev = None)
+            offset      = 0,
+            total       = studies.size,
+            maybeNext   = None,
+            maybePrev   = None)
 
         jsonItems must have size studies.size
         compareObj(jsonItems(0), studies(1))
@@ -217,10 +214,9 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "list studies sorted by status in descending order" in {
-        val studies = List(
-            factory.createEnabledStudy,
-            factory.createDisabledStudy)
-          .map { study => studyRepository.put(study) }
+        val studies = List(factory.createEnabledStudy,
+                           factory.createDisabledStudy)
+        studies.foreach(studyRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
             uri = uri,
@@ -236,12 +232,11 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "list a single study when using paged query" in {
-        val studies = List(
-            factory.createDisabledStudy.copy(name = "CTR3"),
-            factory.createDisabledStudy.copy(name = "CTR2"),
-            factory.createEnabledStudy.copy(name = "CTR1"),
-            factory.createEnabledStudy.copy(name = "CTR0"))
-          .map { study => studyRepository.put(study) }
+        val studies = List(factory.createDisabledStudy.copy(name = "CTR3"),
+                           factory.createDisabledStudy.copy(name = "CTR2"),
+                           factory.createEnabledStudy.copy(name = "CTR1"),
+                           factory.createEnabledStudy.copy(name = "CTR0"))
+        studies.foreach(studyRepository.put)
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
             uri = uri,
@@ -253,12 +248,11 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "list the last study when using paged query" in {
-        val studies = List(
-            factory.createDisabledStudy.copy(name = "CTR3"),
-            factory.createDisabledStudy.copy(name = "CTR2"),
-            factory.createEnabledStudy.copy(name = "CTR1"),
-            factory.createEnabledStudy.copy(name = "CTR0"))
-          .map { study => studyRepository.put(study) }
+        val studies = List(factory.createDisabledStudy.copy(name = "CTR3"),
+                           factory.createDisabledStudy.copy(name = "CTR2"),
+                           factory.createEnabledStudy.copy(name = "CTR1"),
+                           factory.createEnabledStudy.copy(name = "CTR0"))
+        studies.foreach(studyRepository.put)
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
             uri = uri,

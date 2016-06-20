@@ -1,5 +1,6 @@
-package org.biobank.controllers
+package org.biobank.controllers.centres
 
+import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain.centre._
 import org.biobank.domain.Location
 import org.biobank.domain.study.Study
@@ -345,8 +346,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
       "add a centre" in {
         val centre = factory.createDisabledCentre
-        val cmdJson = Json.obj("name" -> centre.name, "description" -> centre.description)
-        val json = makeRequest(POST, uri, cmdJson)
+        val addJson = Json.obj("name" -> centre.name, "description" -> centre.description)
+        val json = makeRequest(POST, uri, addJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -371,15 +372,15 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "add a centre with no description" in {
-        val cmdJson = Json.obj("name" -> nameGenerator.next[String])
-        val json = makeRequest(POST, uri, cmdJson)
+        val addJson = Json.obj("name" -> nameGenerator.next[String])
+        val json = makeRequest(POST, uri, addJson)
 
         (json \ "status").as[String] must include ("success")
       }
 
       "not add a centre with a name that is too short" in {
-        val cmdJson = Json.obj("name" -> "A")
-        val json = makeRequest(POST, uri, BAD_REQUEST, json = cmdJson)
+        val addJson = Json.obj("name" -> "A")
+        val json = makeRequest(POST, uri, BAD_REQUEST, json = addJson)
 
         (json \ "status").as[String] must include ("error")
       }
@@ -388,8 +389,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
-        val cmdJson = Json.obj("name" -> centre.name)
-        val json = makeRequest(POST, uri, FORBIDDEN, json = cmdJson)
+        val addJson = Json.obj("name" -> centre.name)
+        val json = makeRequest(POST, uri, FORBIDDEN, json = addJson)
 
         (json \ "status").as[String] must include ("error")
 
@@ -404,9 +405,9 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
-        val cmdJson = Json.obj("expectedVersion" -> Some(centre.version),
+        val updateJson = Json.obj("expectedVersion" -> Some(centre.version),
                                "name"            -> newName)
-        val json = makeRequest(POST, uri(centre, "name"), json = cmdJson)
+        val json = makeRequest(POST, uri(centre, "name"), json = updateJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -438,9 +439,9 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
         val duplicateName = centres(0).name
 
-        val cmdJson = Json.obj("expectedVersion" -> Some(centres(1).version),
+        val updateJson = Json.obj("expectedVersion" -> Some(centres(1).version),
                                "name"            -> duplicateName)
-        val json = makeRequest(POST, uri(centres(1), "name"), FORBIDDEN, json = cmdJson)
+        val json = makeRequest(POST, uri(centres(1), "name"), FORBIDDEN, json = updateJson)
 
         (json \ "status").as[String] must include ("error")
 
@@ -469,9 +470,9 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
-        val cmdJson = Json.obj("expectedVersion" -> Some(centre.version),
+        val updateJson = Json.obj("expectedVersion" -> Some(centre.version),
                                "description"     -> newDescription)
-        val json = makeRequest(POST, uri(centre, "description"), json = cmdJson)
+        val json = makeRequest(POST, uri(centre, "description"), json = updateJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -516,8 +517,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val centre = factory.createDisabledCentre.copy(locations = Set(location))
         centreRepository.put(centre)
 
-        val cmdJson = Json.obj("expectedVersion" -> Some(centre.version))
-        val json = makeRequest(POST, uri(centre, "enable"), json = cmdJson)
+        val updateJson = Json.obj("expectedVersion" -> Some(centre.version))
+        val json = makeRequest(POST, uri(centre, "enable"), json = updateJson)
 
         (json \ "status").as[String] must include ("success")
         val jsonId = (json \ "data" \ "id").as[String]
@@ -544,8 +545,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
-        val cmdJson = Json.obj("expectedVersion" -> Some(centre.version))
-        val json = makeRequest(POST, uri(centre, "enable"), BAD_REQUEST, cmdJson)
+        val updateJson = Json.obj("expectedVersion" -> Some(centre.version))
+        val json = makeRequest(POST, uri(centre, "enable"), BAD_REQUEST, updateJson)
 
         (json \ "status").as[String] must include ("error")
 
@@ -555,8 +556,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       "not enable an invalid centre" in {
         val centre = factory.createDisabledCentre
 
-        val cmdJson = Json.obj("expectedVersion" -> Some(0L))
-        val json = makeRequest(POST, uri(centre, "enable"), NOT_FOUND, json = cmdJson)
+        val updateJson = Json.obj("expectedVersion" -> Some(0L))
+        val json = makeRequest(POST, uri(centre, "enable"), NOT_FOUND, json = updateJson)
 
         (json \ "status").as[String] must include ("error")
 
@@ -571,8 +572,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val centre = factory.createEnabledCentre
         centreRepository.put(centre)
 
-        val cmdJson = Json.obj("expectedVersion" -> Some(centre.version))
-        val json = makeRequest(POST, uri(centre, "disable"), json = cmdJson)
+        val updateJson = Json.obj("expectedVersion" -> Some(centre.version))
+        val json = makeRequest(POST, uri(centre, "disable"), json = updateJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -599,8 +600,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       "not disable an invalid centre" in {
         val centre = factory.createDisabledCentre
 
-        val cmdJson = Json.obj("expectedVersion" -> Some(0L))
-        val json = makeRequest(POST, uri(centre, "disable"), NOT_FOUND, json = cmdJson)
+        val updateJson = Json.obj("expectedVersion" -> Some(0L))
+        val json = makeRequest(POST, uri(centre, "disable"), NOT_FOUND, json = updateJson)
 
         (json \ "status").as[String] must include ("error")
 

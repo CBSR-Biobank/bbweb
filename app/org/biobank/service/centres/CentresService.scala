@@ -91,11 +91,11 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
     val allCentres = centreRepository.getValues
 
     val centresFilteredByName = if (!filter.isEmpty) {
-      val filterLowerCase = filter.toLowerCase
-      allCentres.filter { centre => centre.name.toLowerCase.contains(filterLowerCase) }
-    } else {
-      allCentres
-    }
+        val filterLowerCase = filter.toLowerCase
+        allCentres.filter { centre => centre.name.toLowerCase.contains(filterLowerCase) }
+      } else {
+        allCentres
+      }
 
     val centresFilteredByStatus = status match {
       case "all" =>
@@ -111,11 +111,8 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
     centresFilteredByStatus.map { centres =>
       val result = centres.toSeq.sortWith(sortFunc)
 
-      if (order == AscendingOrder) {
-        result
-      } else {
-        result.reverse
-      }
+      if (order == AscendingOrder) result
+      else result.reverse
     }
   }
 

@@ -1,18 +1,22 @@
 package org.biobank.controllers
 
+import org.biobank.domain._
 import org.biobank.infrastructure._
 import org.biobank.domain.{ DomainError, DomainValidation }
 
 import scalaz.Scalaz._
 
-case class PagedQuery(sortField: String, page: Int, pageSize: Int, order: String) {
+case class PagedQuery[T <: ConcurrencySafeEntity[_]](sortFields: Map[String, (T, T) => Boolean],
+                                                     page:       Int,
+                                                     pageSize:   Int,
+                                                     order:      String) {
 
-  def getSortField(validFields: Seq[String]): DomainValidation[String] = {
-    if (validFields.contains(sortField)) {
-      sortField.successNel
-    } else {
-      DomainError(s"invalid sort field: $sortField").failureNel
-    }
+  def getSortFunc(sortBy: String, default: (T, T) => Boolean): (T, T) => Boolean = {
+    sortFields.getOrElse(sortBy, default)
+  }
+
+  def getSortFunc(sortBy: String): DomainValidation[(T, T) => Boolean] = {
+    sortFields.get(sortBy).toSuccessNel(DomainError(s"invalid sort field: $sortBy"))
   }
 
   def getPageSize(maxPageSize: Int): DomainValidation[Int] = {
@@ -47,4 +51,3 @@ case class PagedQuery(sortField: String, page: Int, pageSize: Int, order: String
   }
 
 }
-

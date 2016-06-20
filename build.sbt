@@ -71,40 +71,40 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   cache,
   filters,
-  ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.4.6" % "compile" ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
-  "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.6",
-  "com.typesafe.akka"           %% "akka-remote"                         % "2.4.6"             % "compile",
-  "com.typesafe.akka"           %% "akka-slf4j"                          % "2.4.6"             % "compile",
+  ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.4.7" % "compile" ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
+  "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.7",
+  "com.typesafe.akka"           %% "akka-remote"                         % "2.4.7"             % "compile",
+  "com.typesafe.akka"           %% "akka-slf4j"                          % "2.4.7"             % "compile",
   "org.scala-stm"               %% "scala-stm"                           % "0.7"               % "compile",
-  "org.scalaz"                  %% "scalaz-core"                         % "7.2.3"             % "compile",
+  "org.scalaz"                  %% "scalaz-core"                         % "7.2.4"             % "compile",
   "org.iq80.leveldb"            % "leveldb"                              % "0.7",
   "org.fusesource.leveldbjni"   % "leveldbjni-all"                       % "1.8",
   "com.github.t3hnar"           %% "scala-bcrypt"                        % "2.6",
   "com.github.ancane"           %% "hashids-scala"                       % "1.2",
   "com.typesafe.play"           %% "play-mailer"                         % "5.0.0-M1",
   "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.4.0",
+  "com.github.nscala-time"      %% "nscala-time"                         % "2.12.0",
   // WebJars infrastructure
   ( "org.webjars"               %% "webjars-play"                        % "2.5.0").exclude("org.webjars", "requirejs"),
   // WebJars dependencies
   "org.webjars"                 %  "requirejs"                           % "2.2.0",
   "org.webjars"                 %  "lodash"                              % "4.0.0",
-  "org.webjars"                 %  "jquery"                              % "2.2.4",
+  "org.webjars"                 %  "jquery"                              % "3.0.0",
   ( "org.webjars"               %  "bootstrap"                           % "3.3.6"  ).excludeAll(ExclusionRule(organization="org.webjars")),
-  ( "org.webjars"               %  "angularjs"                           % "1.5.5"  ).exclude("org.webjars", "jquery"),
+  ( "org.webjars"               %  "angularjs"                           % "1.5.6"  ).exclude("org.webjars", "jquery"),
   ( "org.webjars"               %  "angular-ui-bootstrap"                % "1.3.3" ).exclude("org.webjars", "angularjs"),
   ( "org.webjars"               %  "angular-ui-router"                   % "0.2.18" ).exclude("org.webjars", "angularjs"),
   "org.webjars"                 %  "smart-table"                         % "2.1.3-1",
-  ( "org.webjars"               %  "toastr"                              % "2.1.1"  ).exclude("org.webjars", "jquery"),
+  ( "org.webjars"               %  "toastr"                              % "2.1.2"  ).exclude("org.webjars", "jquery"),
   ( "org.webjars"               %  "angular-sanitize"                    % "1.3.11" ).exclude("org.webjars", "angularjs"),
-  "org.webjars"                 %  "momentjs"                            % "2.12.0",
+  "org.webjars"                 %  "momentjs"                            % "2.13.0",
   "org.webjars"                 %  "sprintf.js"                          % "1.0.0",
   "org.webjars"                 %  "tv4"                                 % "1.0.17-1",
   "org.webjars.bower"           %  "angular-utils-ui-breadcrumbs"        % "0.2.2",
-  "org.webjars.bower"           %  "bootstrap-ui-datetime-picker"        % "2.3.1",
+  "org.webjars.bower"           %  "bootstrap-ui-datetime-picker"        % "2.4.0",
   // Testing
-  "com.github.dnvriend"         %% "akka-persistence-inmemory"           % "1.2.13"             % "test",
-  "com.typesafe.akka"           %% "akka-testkit"                        % "2.4.6"              % "test",
-  "com.github.nscala-time"      %% "nscala-time"                         % "2.12.0"             % "test",
+  "com.github.dnvriend"         %% "akka-persistence-inmemory"           % "1.3.0"              % "test",
+  "com.typesafe.akka"           %% "akka-testkit"                        % "2.4.7"              % "test",
   "org.scalatestplus"           %% "play"                                % "1.4.0"              % "test",
   "org.pegdown"                 %  "pegdown"                             % "1.6.0"              % "test",
   "org.codehaus.janino"         %  "janino"                              % "2.7.8"              % "test"
@@ -129,8 +129,10 @@ pipelineStages := Seq(rjs, digest, gzip)
 // To completely override the optimization process, use this config option:
 //requireNativePath := Some("node r.js -o name=main out=javascript-min/main.min.js")
 
+PB.scalapbVersion := "0.5.31"
 PB.protobufSettings
 
+// Protocol buffers compiler - used by ScalaPB
 PB.runProtoc in PB.protobufConfig := (args =>
   com.github.os72.protocjar.Protoc.runProtoc("-v261" +: args.toArray))
 

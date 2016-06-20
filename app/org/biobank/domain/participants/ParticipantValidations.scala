@@ -16,10 +16,6 @@ trait ParticipantValidations {
 
   case object OriginLocationIdInvalid extends ValidationKey
 
-  case object LocationIdInvalid extends ValidationKey
-
-  case object ContainerIdInvalid extends ValidationKey
-
   case object PositionInvalid extends ValidationKey
 
 }

@@ -80,14 +80,6 @@ object Participant extends ParticipantValidations {
              uniqueId:    String,
              annotations: Set[Annotation])
       : DomainValidation[Participant] = {
-
-    def validateAnnotation(annotation: Annotation): DomainValidation[Annotation] = {
-      Annotation.create(annotation.annotationTypeId,
-                        annotation.stringValue,
-                        annotation.numberValue,
-                        annotation.selectedValues)
-    }
-
     (validateId(id) |@|
        validateId(studyId) |@|
        validateVersion(version) |@|

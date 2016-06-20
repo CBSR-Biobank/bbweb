@@ -3,35 +3,51 @@ package org.biobank.domain.participants
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
 import org.biobank.domain.study._
-
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 
-class CollectionEventSpec extends DomainSpec {
+class CollectionEventSpec extends DomainFreeSpec {
   import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  "A collection event" can {
+  def createFrom(collectionEvent: CollectionEvent): DomainValidation[CollectionEvent] =
+    CollectionEvent.create(id                     = collectionEvent.id,
+                           participantId          = collectionEvent.participantId,
+                           collectionEventTypeId  = collectionEvent.collectionEventTypeId,
+                           version                = collectionEvent.version,
+                           timeCompleted          = collectionEvent.timeCompleted,
+                           visitNumber            = collectionEvent.visitNumber,
+                           annotations            = collectionEvent.annotations)
 
-    "be created" when {
+  "A collection event" - {
 
-      "valid arguments are used" in {
-        val cevent = factory.createCollectionEvent
+    "can be created" - {
 
-        val v = CollectionEvent.create(
-          id                     = cevent.id,
-          participantId          = cevent.participantId,
-          collectionEventTypeId  = cevent.collectionEventTypeId,
-          version                = 0,
-          timeCompleted          = cevent.timeCompleted,
-          visitNumber            = cevent.visitNumber,
-          annotations            = cevent.annotations
-        )
+      "when valid arguments are used and with no annotations" in {
+        val cevent = factory.createCollectionEvent.copy(version = 0L)
+        createFrom(cevent) mustSucceed { ce =>
+          ce must have (
+            'id                     (cevent.id),
+            'participantId          (cevent.participantId),
+            'collectionEventTypeId  (cevent.collectionEventTypeId),
+            'version                (0),
+            'visitNumber            (cevent.visitNumber),
+            'annotations            (cevent.annotations)
+          )
 
-        v mustSucceed { ce =>
+          checkTimeStamps(cevent, ce.timeAdded, ce.timeModified)
+          checkTimeStamps(cevent.timeCompleted, ce.timeCompleted)
+        }
+      }
+
+      "when valid arguments are used and annotations" in {
+        val annotation = factory.createAnnotation
+        val cevent = factory.createCollectionEvent.copy(annotations = Set(annotation),
+                                                        version     = 0L)
+        createFrom(cevent) mustSucceed { ce =>
           ce must have (
             'id                     (cevent.id),
             'participantId          (cevent.participantId),
@@ -47,71 +63,67 @@ class CollectionEventSpec extends DomainSpec {
       }
     }
 
-    "not be created" when {
+    "cannot be created with" - {
 
       "an empty id is used" in {
-        val v = CollectionEvent.create(
-          id                     = CollectionEventId(""),
-          participantId          = ParticipantId(nameGenerator.next[ParticipantId]),
-          collectionEventTypeId  = CollectionEventTypeId(nameGenerator.next[CollectionEventTypeId]),
-          version                = 0L,
-          timeCompleted          = DateTime.now,
-          visitNumber            = 1,
-          annotations            = Set(factory.createAnnotation)
-        )
-        v mustFail "IdRequired"
+        val cevent = factory.createCollectionEvent.copy(id = CollectionEventId(""))
+        createFrom(cevent) mustFail "IdRequired"
       }
 
       "an empty participant id is used" in {
-        val v = CollectionEvent.create(
-          id                     = CollectionEventId(nameGenerator.next[CollectionEventId]),
-          participantId          = ParticipantId(""),
-          collectionEventTypeId  = CollectionEventTypeId(nameGenerator.next[CollectionEventTypeId]),
-          version                = 0L,
-          timeCompleted          = DateTime.now,
-          visitNumber            = 1,
-          annotations            = Set(factory.createAnnotation)
-        )
-        v mustFail "ParticipantIdRequired"
+        val cevent = factory.createCollectionEvent.copy(participantId = ParticipantId(""))
+        createFrom(cevent) mustFail "ParticipantIdRequired"
       }
 
       "an empty collection event type id is used" in {
-        val v = CollectionEvent.create(
-          id                     = CollectionEventId(nameGenerator.next[CollectionEventId]),
-          participantId          = ParticipantId(nameGenerator.next[ParticipantId]),
-          collectionEventTypeId  = CollectionEventTypeId(""),
-          version                = 0L,
-          timeCompleted          = DateTime.now,
-          visitNumber            = 1,
-          annotations            = Set(factory.createAnnotation)
-        )
-        v mustFail "CollectionEventTypeIdRequired"
+        val cevent = factory.createCollectionEvent.copy(collectionEventTypeId = CollectionEventTypeId(""))
+        createFrom(cevent) mustFail "CollectionEventTypeIdRequired"
       }
 
       "an invalid visit number is used" in {
-        val v = CollectionEvent.create(
-          id                     = CollectionEventId(nameGenerator.next[CollectionEventId]),
-          participantId          = ParticipantId(nameGenerator.next[ParticipantId]),
-          collectionEventTypeId  = CollectionEventTypeId(nameGenerator.next[CollectionEventTypeId]),
-          version                = 0L,
-          timeCompleted          = DateTime.now,
-          visitNumber            = 0,
-          annotations            = Set(factory.createAnnotation)
-        )
-        v mustFail "VisitNumberInvalid"
+        val cevent = factory.createCollectionEvent.copy(visitNumber = 0)
+        createFrom(cevent) mustFail "VisitNumberInvalid"
       }
 
       "an invalid version is used" in {
-        val v = CollectionEvent.create(
-          id                     = CollectionEventId(nameGenerator.next[CollectionEventId]),
-          participantId          = ParticipantId(nameGenerator.next[ParticipantId]),
-          collectionEventTypeId  = CollectionEventTypeId(nameGenerator.next[CollectionEventTypeId]),
-          version                = -2,
-          timeCompleted          = DateTime.now,
-          visitNumber            = 1,
-          annotations            = Set(factory.createAnnotation)
-        )
-        v mustFail "InvalidVersion"
+        val cevent = factory.createCollectionEvent.copy(version = -2)
+        createFrom(cevent) mustFail "InvalidVersion"
+      }
+
+    }
+
+    "can be updated" - {
+
+      "with a new visit number" in {
+        val cevent = factory.createCollectionEvent
+        val newVisitNumber = cevent.visitNumber + 10
+
+        cevent.withVisitNumber(newVisitNumber) mustSucceed { s =>
+          s.visitNumber must be (newVisitNumber)
+          s.version must be (cevent.version + 1)
+          checkTimeStamps(s, cevent.timeAdded, DateTime.now)
+        }
+      }
+
+      "with a new time completed" in {
+        val cevent = factory.createCollectionEvent
+        val newTimeCompleted = cevent.timeCompleted.minusDays(10)
+
+        cevent.withTimeCompleted(newTimeCompleted) mustSucceed { s =>
+          s.timeCompleted must be (newTimeCompleted)
+          s.version must be (cevent.version + 1)
+          checkTimeStamps(s, cevent.timeAdded, DateTime.now)
+        }
+      }
+
+    }
+
+    "cannot be updated" - {
+
+      "with an invalid visit number" in {
+        val cevent = factory.createCollectionEvent
+        cevent.withVisitNumber(0) mustFail "VisitNumberInvalid"
+        cevent.withVisitNumber(-1) mustFail "VisitNumberInvalid"
       }
 
     }

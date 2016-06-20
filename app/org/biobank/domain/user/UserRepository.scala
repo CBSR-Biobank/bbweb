@@ -68,7 +68,7 @@ class UserRepositoryImpl
   }
 
   def getByEmail(email: String): DomainValidation[User] = {
-    getValues.find(_.email == email).toSuccess(
-      EmailNotFound(s"user email not found: $email").nel)
+    getValues.find(_.email == email)
+      .toSuccessNel(EmailNotFound(s"user email not found: $email").toString)
   }
 }

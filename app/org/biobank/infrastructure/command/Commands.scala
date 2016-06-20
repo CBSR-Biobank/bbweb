@@ -68,8 +68,15 @@ object Commands {
 
   trait HasProcessingTypeIdentity {
 
-    /** An command that includes the processing type ID that it is related to. */
+    /** A command that includes the processing type ID that it is related to. */
     val processingTypeId: String
+
+  }
+
+  trait HasShipmentIdentity {
+
+    /** A command that includes the shipment ID that it is related to. */
+    val shipmentId: String
 
   }
 

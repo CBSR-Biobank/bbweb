@@ -29,12 +29,12 @@ message CollectionEventTypeEvent {
       optional bool  recurring = 2;
    }
 
-   message CetAnnotationTypeAdded {
+   message AnnotationTypeAdded {
       optional int64          version        = 1;
       optional AnnotationType annotationType = 2;
    };
 
-   message CetAnnotationTypeUpdated {
+   message AnnotationTypeUpdated {
       optional int64          version        = 1;
       optional AnnotationType annotationType = 2;
    };
@@ -73,16 +73,16 @@ message CollectionEventTypeEvent {
    optional string time    = 4;
 
    oneof event_type {
-      Added                    added                 = 5;
-      Removed                  removed               = 6;
-      NameUpdated              nameUpdated           = 7;
-      DescriptionUpdated       descriptionUpdated    = 8;
-      RecurringUpdated         recurringUpdated      = 9;
-      CetAnnotationTypeAdded   annotationTypeAdded   = 10;
-      CetAnnotationTypeUpdated annotationTypeUpdated = 11;
-      AnnotationTypeRemoved    annotationTypeRemoved = 12;
-      SpecimenSpecAdded        specimenSpecAdded     = 13;
-      SpecimenSpecUpdated      specimenSpecUpdated   = 14;
-      SpecimenSpecRemoved      specimenSpecRemoved   = 15;
+      Added                 added                 = 5;
+      Removed               removed               = 6;
+      NameUpdated           nameUpdated           = 7;
+      DescriptionUpdated    descriptionUpdated    = 8;
+      RecurringUpdated      recurringUpdated      = 9;
+      AnnotationTypeAdded   annotationTypeAdded   = 10;
+      AnnotationTypeUpdated annotationTypeUpdated = 11;
+      AnnotationTypeRemoved annotationTypeRemoved = 12;
+      SpecimenSpecAdded     specimenSpecAdded     = 13;
+      SpecimenSpecUpdated   specimenSpecUpdated   = 14;
+      SpecimenSpecRemoved   specimenSpecRemoved   = 15;
    }
 }

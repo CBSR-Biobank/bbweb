@@ -104,16 +104,17 @@ object CollectionEvent
        validateId(participantId, ParticipantIdRequired) |@|
        validateId(collectionEventTypeId, CollectionEventTypeIdRequired) |@|
        validateVersion(version) |@|
-       validateMinimum(visitNumber, 1, VisitNumberInvalid)) {
-      case (_, _, _, _, _) => CollectionEvent(id,
-                                              participantId,
-                                              collectionEventTypeId,
-                                              version,
-                                              DateTime.now,
-                                              None,
-                                              timeCompleted,
-                                              visitNumber,
-                                              annotations)
+       validateMinimum(visitNumber, 1, VisitNumberInvalid) |@|
+       annotations.toList.traverseU(Annotation.validate)) {
+      case (_, _, _, _, _, _) => CollectionEvent(id,
+                                                 participantId,
+                                                 collectionEventTypeId,
+                                                 version,
+                                                 DateTime.now,
+                                                 None,
+                                                 timeCompleted,
+                                                 visitNumber,
+                                                 annotations)
     }
   }
 

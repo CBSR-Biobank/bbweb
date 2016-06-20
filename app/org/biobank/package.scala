@@ -40,6 +40,14 @@ package biobank {
 
     case class EntityRequried(msg: String) extends ValidationMsgKey
 
+    case object LocationIdInvalid extends ValidationKey
+
+    case object ContainerIdInvalid extends ValidationKey
+
+    case object SpecimenIdRequired extends ValidationKey
+
+    case class EntityInUse(msg: String) extends ValidationMsgKey
+
   }
 
 }

@@ -49,7 +49,6 @@ object SpecimenCommands {
                                      expectedVersion:   Long,
                                      amount:            BigDecimal)
       extends SpecimenModifyCommand
-      with HasIdentity
 
   case class SpecimenUpdateUsableCmd(userId:            String,
                                      id:                String,
@@ -57,14 +56,12 @@ object SpecimenCommands {
                                      expectedVersion:   Long,
                                      usable:            Boolean)
       extends SpecimenModifyCommand
-      with HasIdentity
 
   case class RemoveSpecimenCmd(userId:            String,
                                id:                String,
                                collectionEventId: String,
                                expectedVersion:   Long)
       extends SpecimenModifyCommand
-      with HasIdentity
 
   implicit val specimenInfoReads              = Json.reads[SpecimenInfo]
   implicit val addSpecimensCmdReads           = Json.reads[AddSpecimensCmd]

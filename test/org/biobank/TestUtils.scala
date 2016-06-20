@@ -15,6 +15,19 @@ object TestUtils extends MustMatchers with OptionValues {
 
   val TimeCoparisonMillis = 1500L
 
+  def checkOpionalTime(expectedTimeMaybe: Option[DateTime], actualTimeMaybe: Option[DateTime]): Unit = {
+    expectedTimeMaybe match {
+      case Some(expectedTime) => actualTimeMaybe match {
+        case Some(actualTime) => checkTimeStamps(expectedTime, actualTime)
+        case None => fail(s"actual time is None, but expected had a value")
+      }
+      case None => actualTimeMaybe match {
+        case Some(actualTime) => fail(s"expected time was NONE, but actual time had a value")
+        case None => ()
+      }
+    }
+  }
+
   def checkTimeStamps(expectedTime:  DateTime, actualTime: DateTime): Unit = {
     if (expectedTime < actualTime) {
       (expectedTime to actualTime).millis must be < TimeCoparisonMillis
@@ -27,19 +40,7 @@ object TestUtils extends MustMatchers with OptionValues {
                       expectedTimeAdded:    DateTime,
                       expectedTimeModified: Option[DateTime]): Unit = {
     checkTimeStamps(entity.timeAdded, expectedTimeAdded)
-    entity.timeModified.fold {
-      expectedTimeModified.fold { /* both are NONE, do nothing */ }
-      { dateTime => fail("entity has NO modified time, but expected is not NONE") }
-    } { timeModified =>
-      expectedTimeModified.fold { fail("entity has modified time, but expected is NONE") }
-      { dateTime => checkTimeStamps(timeModified, dateTime) }
-    }
-
-    expectedTimeModified.fold {
-      entity.timeModified mustBe (None)
-    } { dateTime =>
-      checkTimeStamps(entity.timeModified.value, dateTime)
-    }
+    checkOpionalTime(expectedTimeModified, entity.timeModified)
   }
 
   def checkTimeStamps(entity:               ConcurrencySafeEntity[_],

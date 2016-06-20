@@ -36,6 +36,10 @@ class StudiesController @Inject() (val env:            Environment,
 
   private val PageSizeMax = 10
 
+  val listSortFields = Map[String, (Study, Study) => Boolean](
+      "name"   -> Study.compareByName,
+      "status" -> Study.compareByStatus)
+
   def studyCounts() =
     AuthAction(parse.empty) { (token, userId, request) =>
       Ok(studiesService.getCountsByStatus)
@@ -49,15 +53,15 @@ class StudiesController @Inject() (val env:            Environment,
            order:    String) =
     AuthAction(parse.empty) { (token, userId, request) =>
 
-      Logger.debug(s"StudiesController:list: filter/$filter, status/$status, sort/$sort, page/$page, pageSize/$pageSize, order/$order")
+      Logger.debug(s"""|StudiesController:list: filter/$filter, status/$status, sort/$sort,
+                       |  page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
-      val pagedQuery = PagedQuery(sort, page, pageSize, order)
+      val pagedQuery = PagedQuery(listSortFields, page, pageSize, order)
+
       val validation = for {
-          sortField   <- pagedQuery.getSortField(Seq("name", "status"))
-          sortWith    <- (if (sortField == "status") (Study.compareByStatus _)
-                          else (Study.compareByName _)).success
+          sortFunc    <- pagedQuery.getSortFunc(sort)
           sortOrder   <- pagedQuery.getSortOrder
-          studies     <- studiesService.getStudies(filter, status, sortWith, sortOrder)
+          studies     <- studiesService.getStudies(filter, status, sortFunc, sortOrder)
           page        <- pagedQuery.getPage(PageSizeMax, studies.size)
           pageSize    <- pagedQuery.getPageSize(PageSizeMax)
           results     <- PagedResults.create(studies, page, pageSize)

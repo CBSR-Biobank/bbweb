@@ -3,7 +3,8 @@ package org.biobank.domain.participants
 import org.biobank.ValidationKey
 import org.biobank.domain.{
   ConcurrencySafeEntity,
-  DomainValidation
+  DomainValidation,
+  Location
 }
 import org.biobank.domain.study.StudyValidations
 import org.biobank.domain.containers.{
@@ -51,7 +52,7 @@ sealed trait Specimen
   val timeCreated: DateTime
 
   /** The amount, in units specified in the [[SpecimenSpec]], for this specimen. */
-  val amount: BigDecimal
+  val amount: scala.math.BigDecimal
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {
@@ -134,28 +135,51 @@ case class UsableSpecimen(id:               SpecimenId,
     with StudyValidations {
 
   import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
 
   def withInventoryId(inventoryId: String): DomainValidation[Specimen] = {
     validateString(inventoryId, InventoryIdInvalid).map { s =>
-      copy(version = version + 1, amount = amount)
+      copy(inventoryId  = inventoryId,
+           version      = version + 1,
+           timeModified = Some(DateTime.now))
     }
   }
 
   def withAmount(amount: BigDecimal): DomainValidation[Specimen] = {
     validatePositiveNumber(amount, AmountInvalid).map { s =>
-      copy(version = version + 1, amount = amount)
+      copy(amount       = amount,
+           version      = version + 1,
+           timeModified = Some(DateTime.now))
     }
   }
 
-  def withLocation(locationId: String): DomainValidation[Specimen] = {
-    validateString(locationId, LocationIdInvalid).map { s =>
-      copy(version = version + 1, locationId = locationId)
+  /**
+   * Location should belong to a centre.
+   */
+  def withOriginLocation(location: Location): DomainValidation[Specimen] = {
+    validateString(location.uniqueId, LocationIdInvalid).map { s =>
+      copy(originLocationId = location.uniqueId,
+           version          = version + 1,
+           timeModified     = Some(DateTime.now))
+    }
+  }
+
+  /**
+   * Location should belong to a centre.
+   */
+  def withLocation(location: Location): DomainValidation[Specimen] = {
+    validateString(location.uniqueId, LocationIdInvalid).map { s =>
+      copy(locationId   = location.uniqueId,
+           version      = version + 1,
+           timeModified = Some(DateTime.now))
     }
   }
 
   def withPosition(positionId: ContainerSchemaPositionId): DomainValidation[Specimen] = {
     validateId(positionId, PositionInvalid).map { s =>
-      copy(version = version + 1, positionId = Some(positionId))
+      copy(positionId   = Some(positionId),
+           version      = version + 1,
+           timeModified = Some(DateTime.now))
     }
   }
 
@@ -165,7 +189,7 @@ case class UsableSpecimen(id:               SpecimenId,
                      specimenSpecId   = this.specimenSpecId,
                      version          = this.version + 1,
                      timeAdded        = this.timeAdded,
-                     timeModified     = this.timeModified,
+                     timeModified     = Some(DateTime.now),
                      originLocationId = this.originLocationId,
                      locationId       = this.locationId,
                      containerId      = this.containerId,
@@ -179,6 +203,8 @@ object UsableSpecimen
     extends SpecimenValidations
     with ParticipantValidations
     with StudyValidations {
+
+  import org.biobank.CommonValidations._
   import org.biobank.domain.CommonValidations._
 
   def create(id:               SpecimenId,
@@ -267,7 +293,7 @@ case class UnusableSpecimen(id:               SpecimenId,
                    specimenSpecId   = this.specimenSpecId,
                    version          = this.version + 1,
                    timeAdded        = this.timeAdded,
-                   timeModified     = this.timeModified,
+                   timeModified     = Some(DateTime.now),
                    originLocationId = this.originLocationId,
                    locationId       = this.locationId,
                    containerId      = this.containerId,

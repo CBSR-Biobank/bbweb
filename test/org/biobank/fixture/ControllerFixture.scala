@@ -157,20 +157,22 @@ abstract class ControllerFixture
 
   def passwordHasher = app.injector.instanceOf[PasswordHasher]
 
-  def collectionEventTypeRepository            = app.injector.instanceOf[CollectionEventTypeRepository]
-  def processingTypeRepository                 = app.injector.instanceOf[ProcessingTypeRepository]
-  def specimenGroupRepository                  = app.injector.instanceOf[SpecimenGroupRepository]
-  def specimenLinkTypeRepository               = app.injector.instanceOf[SpecimenLinkTypeRepository]
-  def studyRepository                          = app.injector.instanceOf[StudyRepository]
+  def collectionEventTypeRepository          = app.injector.instanceOf[CollectionEventTypeRepository]
+  def processingTypeRepository               = app.injector.instanceOf[ProcessingTypeRepository]
+  def specimenGroupRepository                = app.injector.instanceOf[SpecimenGroupRepository]
+  def specimenLinkTypeRepository             = app.injector.instanceOf[SpecimenLinkTypeRepository]
+  def studyRepository                        = app.injector.instanceOf[StudyRepository]
 
-  def participantRepository                    = app.injector.instanceOf[ParticipantRepository]
-  def collectionEventRepository                = app.injector.instanceOf[CollectionEventRepository]
-  def ceventSpecimenRepository                 = app.injector.instanceOf[CeventSpecimenRepository]
-  def specimenRepository                       = app.injector.instanceOf[SpecimenRepository]
-  def processingEventInputSpecimenRepository   = app.injector.instanceOf[ProcessingEventInputSpecimenRepository]
+  def participantRepository                  = app.injector.instanceOf[ParticipantRepository]
+  def collectionEventRepository              = app.injector.instanceOf[CollectionEventRepository]
+  def ceventSpecimenRepository               = app.injector.instanceOf[CeventSpecimenRepository]
+  def specimenRepository                     = app.injector.instanceOf[SpecimenRepository]
+  def processingEventInputSpecimenRepository = app.injector.instanceOf[ProcessingEventInputSpecimenRepository]
 
-  def userRepository = app.injector.instanceOf[UserRepository]
+  def userRepository                         = app.injector.instanceOf[UserRepository]
 
-  def centreRepository = app.injector.instanceOf[CentreRepository]
+  def centreRepository                       = app.injector.instanceOf[CentreRepository]
+  def shipmentRepository                     = app.injector.instanceOf[ShipmentRepository]
+  def shipmentSpecimenRepository             = app.injector.instanceOf[ShipmentSpecimenRepository]
 
 }

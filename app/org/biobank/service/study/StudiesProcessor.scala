@@ -85,18 +85,44 @@ class StudiesProcessor @javax.inject.Inject() (
    *  - [[StudyAnnotationTypeProcessor]]
    */
   val receiveCommand: Receive = {
-    case cmd: StudyCommandWithStudyId                 => validateAndForward(cmd)
-    case cmd: SpecimenLinkTypeCommand                 => validateAndForward(cmd)
-    case cmd: AddStudyCmd                             => processAddCmd(cmd)
-    case cmd: UpdateStudyNameCmd                      => processUpdateNameCmd(cmd)
-    case cmd: UpdateStudyDescriptionCmd               => processUpdateDescriptionCmd(cmd)
-    case cmd: StudyAddParticipantAnnotationTypeCmd    => processAddAnnotationTypeCmd(cmd)
-    case cmd: StudyUpdateParticipantAnnotationTypeCmd => processUpdateAnnotationTypeCmd(cmd)
-    case cmd: UpdateStudyRemoveAnnotationTypeCmd      => processRemoveAnnotationTypeCmd(cmd)
-    case cmd: EnableStudyCmd                          => processEnableCmd(cmd)
-    case cmd: DisableStudyCmd                         => processDisableCmd(cmd)
-    case cmd: RetireStudyCmd                          => processRetireCmd(cmd)
-    case cmd: UnretireStudyCmd                        => processUnretireCmd(cmd)
+    case cmd: StudyCommandWithStudyId => validateAndForward(cmd)
+    case cmd: SpecimenLinkTypeCommand => validateAndForward(cmd)
+
+    case cmd: AddStudyCmd =>
+      process(addCmdToEvent(cmd))(applyAddedEvent)
+
+    case cmd: UpdateStudyNameCmd =>
+      processUpdateCmdOnDisabledStudy(cmd, updateNameCmdToEvent, applyNameUpdatedEvent)
+
+    case cmd: UpdateStudyDescriptionCmd =>
+      processUpdateCmdOnDisabledStudy(cmd, updateDescriptionCmdToEvent, applyDescriptionUpdatedEvent)
+
+    case cmd: StudyAddParticipantAnnotationTypeCmd =>
+      processUpdateCmdOnDisabledStudy(cmd,
+                                      addAnnotationTypeCmdToEvent,
+                                      applyParticipantAnnotationTypeAddedEvent)
+
+    case cmd: StudyUpdateParticipantAnnotationTypeCmd =>
+      processUpdateCmdOnDisabledStudy(cmd,
+                                      updateAnnotationTypeCmdToEvent,
+                                      applyParticipantAnnotationTypeUpdatedEvent)
+
+    case cmd: UpdateStudyRemoveAnnotationTypeCmd =>
+      processUpdateCmdOnDisabledStudy(cmd,
+                                      removeAnnotationTypeCmdToEvent,
+                                      applyParticipantAnnotationTypeRemovedEvent)
+
+    case cmd: EnableStudyCmd =>
+      processUpdateCmdOnDisabledStudy(cmd, enableCmdToEvent, applyEnabledEvent)
+
+    case cmd: DisableStudyCmd =>
+      processUpdateCmdOnEnabledStudy(cmd, disableCmdToEvent, applyDisabledEvent)
+
+    case cmd: RetireStudyCmd =>
+      processUpdateCmdOnDisabledStudy(cmd, retireCmdToEvent, applyRetiredEvent)
+
+    case cmd: UnretireStudyCmd =>
+      processUpdateCmdOnRetiredStudy(cmd, unretireCmdToEvent, applyUnretiredEvent)
 
     case "snap" =>
       saveSnapshot(SnapshotState(studyRepository.getValues.toSet))
@@ -144,8 +170,8 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  private def processAddCmd(cmd: AddStudyCmd): Unit = {
-    val v = for {
+  private def addCmdToEvent(cmd: AddStudyCmd): DomainValidation[StudyEvent] = {
+    for {
       name  <- nameAvailable(cmd.name)
       id    <- validNewIdentity(studyRepository.nextIdentity, studyRepository)
       study <- DisabledStudy.create(id, 0L, cmd.name, cmd.description, Set.empty)
@@ -156,192 +182,190 @@ class StudiesProcessor @javax.inject.Inject() (
         _.added.name                := cmd.name,
         _.added.optionalDescription := cmd.description)
     }
-
-    process(v) { applyAddedEvent(_) }
   }
 
-  private def processUpdateNameCmd(cmd: UpdateStudyNameCmd): Unit = {
-    val v = updateDisabled(cmd) { study =>
-        (nameAvailable(cmd.name, StudyId(cmd.id)) |@|
-           study.withName(cmd.name)) { case (_, _) =>
-            StudyEvent(study.id.id).update(
-              _.optionalUserId      := cmd.userId,
-              _.time                := ISODateTimeFormat.dateTime.print(DateTime.now),
-              _.nameUpdated.version := cmd.expectedVersion,
-              _.nameUpdated.name    := cmd.name)
-        }
-      }
-
-    process(v){ applyNameUpdatedEvent(_) }
+  private def updateNameCmdToEvent(cmd: UpdateStudyNameCmd, study: DisabledStudy)
+      : DomainValidation[StudyEvent] = {
+    (nameAvailable(cmd.name, StudyId(cmd.id)) |@|
+       study.withName(cmd.name)) { case (_, _) =>
+        StudyEvent(study.id.id).update(
+          _.optionalUserId      := cmd.userId,
+          _.time                := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.nameUpdated.version := cmd.expectedVersion,
+          _.nameUpdated.name    := cmd.name)
+    }
   }
 
-  private def processUpdateDescriptionCmd(cmd: UpdateStudyDescriptionCmd): Unit = {
-    val v = updateDisabled(cmd) { study =>
-        study.withDescription(cmd.description).map { _ =>
-          StudyEvent(study.id.id).update(
-            _.optionalUserId                         := cmd.userId,
-            _.time                                   := ISODateTimeFormat.dateTime.print(DateTime.now),
-            _.descriptionUpdated.version             := cmd.expectedVersion,
-            _.descriptionUpdated.optionalDescription := cmd.description)
-        }
-      }
-
-    process(v){ applyDescriptionUpdatedEvent(_) }
+  private def updateDescriptionCmdToEvent(cmd: UpdateStudyDescriptionCmd, study: DisabledStudy)
+      : DomainValidation[StudyEvent] = {
+    study.withDescription(cmd.description).map { _ =>
+      StudyEvent(study.id.id).update(
+        _.optionalUserId                         := cmd.userId,
+        _.time                                   := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.descriptionUpdated.version             := cmd.expectedVersion,
+        _.descriptionUpdated.optionalDescription := cmd.description)
+    }
   }
 
-  private def processAddAnnotationTypeCmd(cmd: StudyAddParticipantAnnotationTypeCmd): Unit = {
-    val v = updateDisabled(cmd) { study =>
-        for {
-          annotationType <- {
-            AnnotationType.create(cmd.name,
-                                  cmd.description,
-                                  cmd.valueType,
-                                  cmd.maxValueCount,
-                                  cmd.options,
-                                  cmd.required)
-          }
-          updatedStudy <- study.withParticipantAnnotationType(annotationType)
-        } yield {
-          StudyEvent(study.id.id).update(
-            _.optionalUserId                     := cmd.userId,
-            _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
-            _.annotationTypeAdded.version        := cmd.expectedVersion,
-            _.annotationTypeAdded.annotationType := EventUtils.annotationTypeToEvent(annotationType))
-          }
-      }
-
-    process(v){ applyParticipantAnnotationTypeAddedEvent(_) }
-  }
-
-  private def processUpdateAnnotationTypeCmd(cmd: StudyUpdateParticipantAnnotationTypeCmd): Unit = {
-    val v = updateDisabled(cmd) { study =>
-        for {
-          annotationType <- {
-            AnnotationType(cmd.uniqueId,
-                           cmd.name,
-                           cmd.description,
-                           cmd.valueType,
-                           cmd.maxValueCount,
-                           cmd.options,
-                           cmd.required).success
-          }
-          updatedStudy <- study.withParticipantAnnotationType(annotationType)
-        } yield {
-          StudyEvent(study.id.id).update(
-            _.optionalUserId                       := cmd.userId,
-            _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
-            _.annotationTypeUpdated.version        := cmd.expectedVersion,
-            _.annotationTypeUpdated.annotationType := EventUtils.annotationTypeToEvent(annotationType))
-          }
-      }
-
-    process(v){ applyParticipantAnnotationTypeUpdatedEvent(_) }
-  }
-
-  private def processRemoveAnnotationTypeCmd(cmd: UpdateStudyRemoveAnnotationTypeCmd): Unit = {
-    val v = updateDisabled(cmd) { study =>
-        study.removeParticipantAnnotationType(cmd.uniqueId) map { s =>
-          StudyEvent(study.id.id).update(
-            _.optionalUserId                 := cmd.userId,
-            _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
-            _.annotationTypeRemoved.version  := cmd.expectedVersion,
-            _.annotationTypeRemoved.uniqueId := cmd.uniqueId)
-        }
-      }
-    process(v){ applyParticipantAnnotationTypeRemovedEvent(_) }
-  }
-
-  private def processEnableCmd(cmd: EnableStudyCmd): Unit = {
-    val v = updateDisabled(cmd) { study =>
-        val collectionEventTypes = collectionEventTypeRepository.allForStudy(study.id)
-
-        if (collectionEventTypes.isEmpty) {
-          EntityCriteriaError("no collection event types").failureNel[StudyEvent]
-        } else if (collectionEventTypes.filter { cet => cet.hasSpecimenSpecs }.isEmpty) {
-          EntityCriteriaError("no collection specimen specs").failureNel[StudyEvent]
-        } else {
-          study.enable.map { _ =>
-            StudyEvent(study.id.id).update(
-              _.optionalUserId  := cmd.userId,
-              _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
-              _.enabled.version := cmd.expectedVersion)
-          }
-        }
-      }
-
-    process(v) { applyEnabledEvent(_) }
-  }
-
-  private def processDisableCmd(cmd: DisableStudyCmd): Unit = {
-    val v = updateEnabled(cmd) {  study =>
-        study.disable map { _ =>
-          StudyEvent(study.id.id).update(
-            _.optionalUserId   := cmd.userId,
-            _.time             := ISODateTimeFormat.dateTime.print(DateTime.now),
-            _.disabled.version := cmd.expectedVersion)
-        }
-      }
-    process(v){ applyDisabledEvent(_) }
-  }
-
-  private def processRetireCmd(cmd: RetireStudyCmd): Unit = {
-    val v = updateDisabled(cmd) { study =>
-        study.retire map { _ =>
-          StudyEvent(study.id.id).update(
-            _.optionalUserId  := cmd.userId,
-            _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
-            _.retired.version := cmd.expectedVersion)
-        }
-      }
-    process(v){ applyRetiredEvent(_) }
-  }
-
-  private def processUnretireCmd(cmd: UnretireStudyCmd): Unit = {
-    val v = updateRetired(cmd) { study =>
-        study.unretire map { _ =>
-          StudyEvent(study.id.id).update(
-            _.optionalUserId    := cmd.userId,
-            _.time              := ISODateTimeFormat.dateTime.print(DateTime.now),
-            _.unretired.version := cmd.expectedVersion)
-        }
-      }
-    process(v) { applyUnretiredEvent(_) }
-  }
-
-  def updateStudy(cmd: StudyModifyCommand)(fn: Study => DomainValidation[StudyEvent])
+  private def addAnnotationTypeCmdToEvent(cmd:   StudyAddParticipantAnnotationTypeCmd,
+                                          study: DisabledStudy)
       : DomainValidation[StudyEvent] = {
     for {
-      study        <- studyRepository.getByKey(StudyId(cmd.id))
-      validVersion <- study.requireVersion(cmd.expectedVersion)
-      updatedStudy <- fn(study)
-    } yield updatedStudy
+      annotationType <- {
+        AnnotationType.create(cmd.name,
+                              cmd.description,
+                              cmd.valueType,
+                              cmd.maxValueCount,
+                              cmd.options,
+                                  cmd.required)
+      }
+      updatedStudy <- study.withParticipantAnnotationType(annotationType)
+    } yield StudyEvent(study.id.id).update(
+      _.optionalUserId                     := cmd.userId,
+      _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.annotationTypeAdded.version        := cmd.expectedVersion,
+      _.annotationTypeAdded.annotationType := EventUtils.annotationTypeToEvent(annotationType))
   }
 
-  def updateDisabled(cmd: StudyModifyCommand)(fn: DisabledStudy => DomainValidation[StudyEvent])
+  private def updateAnnotationTypeCmdToEvent(cmd:   StudyUpdateParticipantAnnotationTypeCmd,
+                                             study: DisabledStudy)
       : DomainValidation[StudyEvent] = {
-    updateStudy(cmd) {
-      case study: DisabledStudy => fn(study)
-      case study => InvalidStatus(s"study not disabled: ${study.id}").failureNel
+    for {
+      annotationType <- AnnotationType(cmd.uniqueId,
+                                       cmd.name,
+                                       cmd.description,
+                                       cmd.valueType,
+                                       cmd.maxValueCount,
+                                       cmd.options,
+                                       cmd.required).success
+      updatedStudy   <- study.withParticipantAnnotationType(annotationType)
+    } yield StudyEvent(study.id.id).update(
+      _.optionalUserId                       := cmd.userId,
+      _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.annotationTypeUpdated.version        := cmd.expectedVersion,
+      _.annotationTypeUpdated.annotationType := EventUtils.annotationTypeToEvent(annotationType))
+  }
+
+  private def removeAnnotationTypeCmdToEvent(cmd: UpdateStudyRemoveAnnotationTypeCmd,
+                                             study: DisabledStudy)
+      : DomainValidation[StudyEvent] = {
+    study.removeParticipantAnnotationType(cmd.uniqueId) map { s =>
+      StudyEvent(study.id.id).update(
+        _.optionalUserId                 := cmd.userId,
+        _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.annotationTypeRemoved.version  := cmd.expectedVersion,
+        _.annotationTypeRemoved.uniqueId := cmd.uniqueId)
     }
   }
 
-  def updateEnabled(cmd: StudyModifyCommand)(fn: EnabledStudy => DomainValidation[StudyEvent])
+  private def enableCmdToEvent(cmd: EnableStudyCmd,
+                               study: DisabledStudy)
       : DomainValidation[StudyEvent] = {
-    updateStudy(cmd) {
-      case study: EnabledStudy => fn(study)
-      case study => InvalidStatus(s"study not enabled: ${study.id}").failureNel
+    val collectionEventTypes = collectionEventTypeRepository.allForStudy(study.id)
+
+    if (collectionEventTypes.isEmpty) {
+      EntityCriteriaError("no collection event types").failureNel[StudyEvent]
+    } else if (collectionEventTypes.filter { cet => cet.hasSpecimenSpecs }.isEmpty) {
+      EntityCriteriaError("no collection specimen specs").failureNel[StudyEvent]
+    } else {
+      study.enable.map { _ =>
+        StudyEvent(study.id.id).update(
+          _.optionalUserId  := cmd.userId,
+          _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.enabled.version := cmd.expectedVersion)
+      }
     }
   }
 
-  def updateRetired(cmd: StudyModifyCommand)(fn: RetiredStudy => DomainValidation[StudyEvent])
+  private def disableCmdToEvent(cmd: DisableStudyCmd,
+                                study: EnabledStudy)
       : DomainValidation[StudyEvent] = {
-    updateStudy(cmd) {
-      case study: RetiredStudy => fn(study)
-      case study => InvalidStatus(s"study not retired: ${study.id}").failureNel
+    study.disable map { _ =>
+      StudyEvent(study.id.id).update(
+        _.optionalUserId   := cmd.userId,
+        _.time             := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.disabled.version := cmd.expectedVersion)
     }
   }
 
-  def onValidEventStudyAndVersion(event: StudyEvent,
+  private def retireCmdToEvent(cmd: RetireStudyCmd,
+                               study: DisabledStudy)
+      : DomainValidation[StudyEvent] = {
+    study.retire map { _ =>
+      StudyEvent(study.id.id).update(
+        _.optionalUserId  := cmd.userId,
+        _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.retired.version := cmd.expectedVersion)
+    }
+  }
+
+  private def unretireCmdToEvent(cmd: UnretireStudyCmd,
+                                 study: RetiredStudy)
+      : DomainValidation[StudyEvent] = {
+    study.unretire map { _ =>
+      StudyEvent(study.id.id).update(
+        _.optionalUserId    := cmd.userId,
+        _.time              := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.unretired.version := cmd.expectedVersion)
+    }
+  }
+
+  private def processUpdateCmd[T <: StudyModifyCommand]
+    (cmd: T,
+     cmdToEvent: (T, Study) => DomainValidation[StudyEvent],
+     applyEvent: StudyEvent => Unit): Unit = {
+    val event = for {
+        study        <- studyRepository.getByKey(StudyId(cmd.id))
+        validVersion <- study.requireVersion(cmd.expectedVersion)
+        event        <- cmdToEvent(cmd, study)
+      } yield event
+
+    process(event)(applyEvent)
+  }
+
+  private def processUpdateCmdOnDisabledStudy[T <: StudyModifyCommand]
+    (cmd: T,
+     cmdToEvent: (T, DisabledStudy) => DomainValidation[StudyEvent],
+     applyEvent: StudyEvent => Unit): Unit = {
+
+    def internal(cmd: T, study: Study): DomainValidation[StudyEvent] =
+      study match {
+        case s: DisabledStudy => cmdToEvent(cmd, s)
+        case s => InvalidStatus(s"study not disabled: ${study.id}").failureNel
+      }
+
+    processUpdateCmd(cmd, internal, applyEvent)
+  }
+
+  private def processUpdateCmdOnEnabledStudy[T <: StudyModifyCommand]
+    (cmd: T,
+     cmdToEvent: (T, EnabledStudy) => DomainValidation[StudyEvent],
+     applyEvent: StudyEvent => Unit): Unit = {
+
+    def internal(cmd: T, study: Study): DomainValidation[StudyEvent] =
+      study match {
+        case s: EnabledStudy => cmdToEvent(cmd, s)
+        case s => InvalidStatus(s"study not enabled: ${study.id}").failureNel
+      }
+
+    processUpdateCmd(cmd, internal, applyEvent)
+  }
+
+  private def processUpdateCmdOnRetiredStudy[T <: StudyModifyCommand]
+    (cmd: T,
+     cmdToEvent: (T, RetiredStudy) => DomainValidation[StudyEvent],
+     applyEvent: StudyEvent => Unit): Unit = {
+
+    def internal(cmd: T, study: Study): DomainValidation[StudyEvent] =
+      study match {
+        case s: RetiredStudy => cmdToEvent(cmd, s)
+        case s => InvalidStatus(s"study not retired: ${study.id}").failureNel
+      }
+
+    processUpdateCmd(cmd, internal, applyEvent)
+  }
+
+  private def onValidEventStudyAndVersion(event: StudyEvent,
                                   eventType: Boolean,
                                   eventVersion: Long)
                                  (fn: Study => Unit): Unit = {
@@ -361,7 +385,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  def onValidEventDisabledStudyAndVersion(event: StudyEvent,
+  private def onValidEventDisabledStudyAndVersion(event: StudyEvent,
                                           eventType: Boolean,
                                           eventVersion: Long)
                                          (fn: DisabledStudy => Unit): Unit = {
@@ -371,7 +395,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  def onValidEventEnabledStudyAndVersion(event: StudyEvent,
+  private def onValidEventEnabledStudyAndVersion(event: StudyEvent,
                                          eventType: Boolean,
                                          eventVersion: Long)
                                         (fn: EnabledStudy => Unit): Unit = {
@@ -381,7 +405,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  def onValidEventRetiredStudyAndVersion(event: StudyEvent,
+  private def onValidEventRetiredStudyAndVersion(event: StudyEvent,
                                          eventType: Boolean,
                                          eventVersion: Long)
                                         (fn: RetiredStudy => Unit): Unit = {
@@ -587,4 +611,41 @@ class StudiesProcessor @javax.inject.Inject() (
   }
 
   testData.addMultipleStudies
+
+  // ------------------- REMOVE -------------------
+
+  private def updateStudy(cmd: StudyModifyCommand)(fn: Study => DomainValidation[StudyEvent])
+      : DomainValidation[StudyEvent] = {
+    for {
+      study        <- studyRepository.getByKey(StudyId(cmd.id))
+      validVersion <- study.requireVersion(cmd.expectedVersion)
+      updatedStudy <- fn(study)
+    } yield updatedStudy
+  }
+
+  private def updateDisabled(cmd: StudyModifyCommand)(fn: DisabledStudy => DomainValidation[StudyEvent])
+      : DomainValidation[StudyEvent] = {
+    updateStudy(cmd) {
+      case study: DisabledStudy => fn(study)
+      case study => InvalidStatus(s"study not disabled: ${study.id}").failureNel
+    }
+  }
+
+  private def updateEnabled(cmd: StudyModifyCommand)(fn: EnabledStudy => DomainValidation[StudyEvent])
+      : DomainValidation[StudyEvent] = {
+    updateStudy(cmd) {
+      case study: EnabledStudy => fn(study)
+      case study => InvalidStatus(s"study not enabled: ${study.id}").failureNel
+    }
+  }
+
+  private def updateRetired(cmd: StudyModifyCommand)(fn: RetiredStudy => DomainValidation[StudyEvent])
+      : DomainValidation[StudyEvent] = {
+    updateStudy(cmd) {
+      case study: RetiredStudy => fn(study)
+      case study => InvalidStatus(s"study not retired: ${study.id}").failureNel
+    }
+  }
+
+
 }

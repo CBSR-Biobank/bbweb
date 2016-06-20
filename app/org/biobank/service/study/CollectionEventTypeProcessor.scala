@@ -8,6 +8,7 @@ import org.biobank.domain.study.{
   CollectionEventTypeRepository,
   CollectionSpecimenSpec
 }
+import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.service.Processor
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.infrastructure.event.EventUtils
@@ -34,9 +35,11 @@ object CollectionEventTypeProcessor {
  * It is a child actor of [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
  */
 class CollectionEventTypeProcessor @javax.inject.Inject() (
-  val collectionEventTypeRepository: CollectionEventTypeRepository)
+  val collectionEventTypeRepository: CollectionEventTypeRepository,
+  val collectionEventRepository:     CollectionEventRepository)
     extends Processor {
 
+  import org.biobank.CommonValidations._
   import org.biobank.infrastructure.event.CollectionEventTypeEvents._
   import org.biobank.infrastructure.event.CollectionEventTypeEvents.CollectionEventTypeEvent.EventType
 
@@ -81,17 +84,38 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
    * back to the user. Each valid command generates one or more events and is journaled.
    */
   override def receiveCommand: Receive = {
-    case cmd: AddCollectionEventTypeCmd                  => processAddCommand(cmd)
-    case cmd: RemoveCollectionEventTypeCmd               => processRemoveCommand(cmd)
-    case cmd: UpdateCollectionEventTypeNameCmd           => processUpdateNameCommand(cmd)
-    case cmd: UpdateCollectionEventTypeDescriptionCmd    => processUpdateDescriptionCommand(cmd)
-    case cmd: UpdateCollectionEventTypeRecurringCmd      => processUpdateRecurringCommand(cmd)
-    case cmd: CollectionEventTypeAddAnnotationTypeCmd    => processAddAnnotationTypeCommand(cmd)
-    case cmd: CollectionEventTypeUpdateAnnotationTypeCmd => processUpdateAnnotationTypeCommand(cmd)
-    case cmd: RemoveCollectionEventTypeAnnotationTypeCmd => processRemoveAnnotationTypeCommand(cmd)
-    case cmd: AddCollectionSpecimenSpecCmd               => processAddSepcimenSpecCommand(cmd)
-    case cmd: UpdateCollectionSpecimenSpecCmd            => processUpdateSepcimenSpecCommand(cmd)
-    case cmd: RemoveCollectionSpecimenSpecCmd            => processRemoveSpecimenSpecCommand(cmd)
+    case cmd: AddCollectionEventTypeCmd =>
+      process(addCmdToEvent(cmd))(applyAddedEvent)
+
+    case cmd: RemoveCollectionEventTypeCmd =>
+      processUpdateCmd(cmd, removeCmdToEvent, applyRemovedEvent)
+
+    case cmd: UpdateCollectionEventTypeNameCmd =>
+      processUpdateCmd(cmd, updateNameCmdToEvent, applyNameUpdatedEvent)
+
+    case cmd: UpdateCollectionEventTypeDescriptionCmd =>
+      processUpdateCmd(cmd, updateDescriptionCmdToEvent, applyDescriptionUpdatedEvent)
+
+    case cmd: UpdateCollectionEventTypeRecurringCmd =>
+      processUpdateCmd(cmd, updateRecurringCmdToEvent, applyRecurringUpdatedEvent)
+
+    case cmd: CollectionEventTypeAddAnnotationTypeCmd =>
+      processUpdateCmd(cmd, addAnnotationTypeCmdToEvent, applyAnnotationTypeAddedEvent)
+
+    case cmd: CollectionEventTypeUpdateAnnotationTypeCmd =>
+      processUpdateCmd(cmd, updateAnnotationTypeCmdToEvent, applyAnnotationTypeRemovedEvent)
+
+    case cmd: RemoveCollectionEventTypeAnnotationTypeCmd =>
+      processUpdateCmd(cmd, removeAnnotationTypeCmdToEvent, applyAnnotationTypeRemovedEvent)
+
+    case cmd: AddCollectionSpecimenSpecCmd =>
+      processUpdateCmd(cmd, addSepcimenSpecCmdToEvent, applySpecimenSpecAddedEvent)
+
+    case cmd: UpdateCollectionSpecimenSpecCmd =>
+      processUpdateCmd(cmd, updateSepcimenSpecCmdToEvent, applySpecimenSpecUpdatedEvent)
+
+    case cmd: RemoveCollectionSpecimenSpecCmd =>
+      processUpdateCmd(cmd, removeSpecimenSpecCmdToEvent, applySpecimenSpecRemovedEvent)
 
     case "snap" =>
       saveSnapshot(SnapshotState(collectionEventTypeRepository.getValues.toSet))
@@ -100,236 +124,215 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     case cmd => log.error(s"CollectionEventTypeProcessor: message not handled: $cmd")
   }
 
-  private def processAddCommand(cmd: AddCollectionEventTypeCmd): Unit = {
+  private def addCmdToEvent(cmd: AddCollectionEventTypeCmd): DomainValidation[CollectionEventTypeEvent] = {
     val studyId = StudyId(cmd.studyId)
-    val event = for {
-        id        <- validNewIdentity(collectionEventTypeRepository.nextIdentity, collectionEventTypeRepository)
-        nameValid <- nameAvailable(cmd.name, studyId)
-        newItem   <- CollectionEventType.create(studyId,
-                                                id,
-                                                0L,
-                                                cmd.name,
-                                                cmd.description,
-                                                cmd.recurring,
-                                                Set.empty,
-                                                Set.empty)
-      } yield {
-        CollectionEventTypeEvent(id.id).update(
-          _.studyId                   := studyId.id,
-          _.optionalUserId            := cmd.userId,
-          _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.added.name                := newItem.name,
-          _.added.optionalDescription := newItem.description,
-          _.added.recurring           := newItem.recurring)
-      }
-
-    process(event) { applyAddedEvent(_) }
+    for {
+      cetId     <- validNewIdentity(collectionEventTypeRepository.nextIdentity, collectionEventTypeRepository)
+      nameValid <- nameAvailable(cmd.name, studyId)
+      newItem   <- CollectionEventType.create(studyId,
+                                              cetId,
+                                              0L,
+                                              cmd.name,
+                                              cmd.description,
+                                              cmd.recurring,
+                                              Set.empty,
+                                              Set.empty)
+    } yield CollectionEventTypeEvent(cetId.id).update(
+      _.studyId                   := studyId.id,
+      _.optionalUserId            := cmd.userId,
+      _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.added.name                := newItem.name,
+      _.added.optionalDescription := newItem.description,
+      _.added.recurring           := newItem.recurring)
   }
 
-  private def processRemoveCommand(cmd: RemoveCollectionEventTypeCmd): Unit = {
-    val v = update(cmd) { cet =>
-        // FIXME check that this CET is not being used
-        CollectionEventTypeEvent(cet.id.id).update(
-          _.studyId         := cet.studyId.id,
-          _.optionalUserId  := cmd.userId,
-          _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.removed.version := cmd.expectedVersion).success
-      }
-
-    process(v){ applyRemovedEvent(_) }
+  private def removeCmdToEvent(cmd: RemoveCollectionEventTypeCmd, ceventType: CollectionEventType)
+      : DomainValidation[CollectionEventTypeEvent] = {
+    if (collectionEventRepository.collectionEventTypeInUse(ceventType.id)) {
+      EntityInUse(s"collection event type in use: ${ceventType.id}").failureNel
+    } else {
+      CollectionEventTypeEvent(ceventType.id.id).update(
+        _.studyId         := ceventType.studyId.id,
+        _.optionalUserId  := cmd.userId,
+        _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.removed.version := cmd.expectedVersion).success
+    }
   }
 
-  private def processUpdateNameCommand(cmd: UpdateCollectionEventTypeNameCmd): Unit = {
-    val v = update(cmd) { cet =>
-        for {
-          nameAvailable <- nameAvailable(cmd.name, cet.studyId, CollectionEventTypeId(cmd.id))
-          newItem       <- cet.withName(cmd.name)
-        } yield CollectionEventTypeEvent(newItem.id.id).update(
-          _.studyId             := newItem.studyId.id,
-          _.optionalUserId      := cmd.userId,
-          _.time                := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.nameUpdated.version := cmd.expectedVersion,
-          _.nameUpdated.name    := newItem.name)
-      }
-
-    process(v){ applyNameUpdatedEvent(_) }
-  }
-
-  def processUpdateDescriptionCommand(cmd: UpdateCollectionEventTypeDescriptionCmd): Unit = {
-    val v = update(cmd) { cet =>
-        cet.withDescription(cmd.description).map { _ =>
-          CollectionEventTypeEvent(cet.id.id).update(
-            _.studyId                                := cet.studyId.id,
-            _.optionalUserId                         := cmd.userId,
-            _.time                                   := ISODateTimeFormat.dateTime.print(DateTime.now),
-            _.descriptionUpdated.version             := cmd.expectedVersion,
-            _.descriptionUpdated.optionalDescription := cmd.description)
-        }
-      }
-
-    process(v){ applyDescriptionUpdatedEvent(_) }
-  }
-
-  def processUpdateRecurringCommand(cmd: UpdateCollectionEventTypeRecurringCmd): Unit = {
-    val v = update(cmd) { cet =>
-        cet.withRecurring(cmd.recurring).map { _ =>
-          CollectionEventTypeEvent(cet.id.id).update(
-            _.studyId                    := cet.studyId.id,
-            _.optionalUserId             := cmd.userId,
-            _.time                       := ISODateTimeFormat.dateTime.print(DateTime.now),
-            _.recurringUpdated.version   := cmd.expectedVersion,
-            _.recurringUpdated.recurring := cmd.recurring)
-        }
-      }
-
-    process(v){ applyRecurringUpdatedEvent(_) }
-  }
-
-  def processAddAnnotationTypeCommand(cmd: CollectionEventTypeAddAnnotationTypeCmd): Unit = {
-    val v = update(cmd) { cet =>
-        for {
-          annotationType <- {
-            // need to call AnnotationType.create so that a new uniqueId is generated
-            AnnotationType.create(cmd.name,
-                                  cmd.description,
-                                  cmd.valueType,
-                                  cmd.maxValueCount,
-                                  cmd.options,
-                                  cmd.required)
-          }
-          updatedCet <- cet.withAnnotationType(annotationType)
-        } yield CollectionEventTypeEvent(cet.id.id).update(
-          _.studyId                            := cet.studyId.id,
-          _.optionalUserId                     := cmd.userId,
-          _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.annotationTypeAdded.version        := cmd.expectedVersion,
-          _.annotationTypeAdded.annotationType := EventUtils.annotationTypeToEvent(annotationType))
-      }
-
-    process(v){ applyAnnotationTypeAddedEvent(_) }
-  }
-
-  def processUpdateAnnotationTypeCommand(cmd: CollectionEventTypeUpdateAnnotationTypeCmd): Unit = {
-    val v = update(cmd) { cet =>
-        for {
-          annotationType <- {
-            AnnotationType(cmd.uniqueId,
-                           cmd.name,
-                           cmd.description,
-                           cmd.valueType,
-                           cmd.maxValueCount,
-                           cmd.options,
-                           cmd.required).success
-          }
-          updatedCet <- cet.withAnnotationType(annotationType)
-        } yield CollectionEventTypeEvent(cet.id.id).update(
-          _.studyId                              := cet.studyId.id,
-          _.optionalUserId                       := cmd.userId,
-          _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.annotationTypeUpdated.version        := cmd.expectedVersion,
-          _.annotationTypeUpdated.annotationType := EventUtils.annotationTypeToEvent(annotationType))
-      }
-
-    process(v){ applyAnnotationTypeUpdatedEvent(_) }
-  }
-
-  def processRemoveAnnotationTypeCommand(cmd: RemoveCollectionEventTypeAnnotationTypeCmd): Unit = {
-    val v = update(cmd) { cet =>
-        cet.removeAnnotationType(cmd.uniqueId) map { c =>
-          CollectionEventTypeEvent(cet.id.id).update(
-          _.studyId                        := cet.studyId.id,
-          _.optionalUserId                 := cmd.userId,
-          _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.annotationTypeRemoved.version  := cmd.expectedVersion,
-          _.annotationTypeRemoved.uniqueId := cmd.uniqueId)
-        }
-      }
-    process(v){ applyAnnotationTypeRemovedEvent(_) }
-  }
-
-  def processAddSepcimenSpecCommand(cmd: AddCollectionSpecimenSpecCmd): Unit = {
-    val v = update(cmd) { cet =>
-        for {
-          specimenSpec <- {
-            // need to call AnnotationType.create so that a new uniqueId is generated
-            CollectionSpecimenSpec.create(cmd.name,
-                                          cmd.description,
-                                          cmd.units,
-                                          cmd.anatomicalSourceType,
-                                          cmd.preservationType,
-                                          cmd.preservationTemperatureType,
-                                          cmd.specimenType,
-                                          cmd.maxCount,
-                                          cmd.amount)
-          }
-          updatedCet <- cet.withSpecimenSpec(specimenSpec)
-        } yield CollectionEventTypeEvent(cet.id.id).update(
-          _.studyId                        := cet.studyId.id,
-          _.optionalUserId                 := cmd.userId,
-          _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.specimenSpecAdded.version      := cmd.expectedVersion,
-          _.specimenSpecAdded.specimenSpec := EventUtils.specimenSpecToEvent(specimenSpec))
-      }
-
-    process(v){ applySpecimenSpecAddedEvent(_) }
-  }
-
-  def processUpdateSepcimenSpecCommand(cmd: UpdateCollectionSpecimenSpecCmd): Unit = {
-    val v = update(cmd) { cet =>
-        for {
-          specimenSpec <- {
-            CollectionSpecimenSpec(cmd.uniqueId,
-                                   cmd.name,
-                                   cmd.description,
-                                   cmd.units,
-                                   cmd.anatomicalSourceType,
-                                   cmd.preservationType,
-                                   cmd.preservationTemperatureType,
-                                   cmd.specimenType,
-                                   cmd.maxCount,
-                                   cmd.amount).success
-          }
-          updatedCet <- cet.withSpecimenSpec(specimenSpec)
-        } yield CollectionEventTypeEvent(cet.id.id).update(
-          _.studyId                          := cet.studyId.id,
-          _.optionalUserId                   := cmd.userId,
-          _.time                             := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.specimenSpecUpdated.version      := cmd.expectedVersion,
-          _.specimenSpecUpdated.specimenSpec := EventUtils.specimenSpecToEvent(specimenSpec))
-      }
-
-    process(v){ applySpecimenSpecUpdatedEvent(_) }
-  }
-
-  def processRemoveSpecimenSpecCommand(cmd: RemoveCollectionSpecimenSpecCmd): Unit = {
-    val v = update(cmd) { cet =>
-        cet.removeSpecimenSpec(cmd.uniqueId) map { c =>
-          CollectionEventTypeEvent(cet.id.id).update(
-          _.studyId                      := cet.studyId.id,
-          _.optionalUserId               := cmd.userId,
-          _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.specimenSpecRemoved.version  := cmd.expectedVersion,
-          _.specimenSpecRemoved.uniqueId := cmd.uniqueId)
-        }
-      }
-    process(v){ applySpecimenSpecRemovedEvent(_) }
-  }
-
-  private def update(cmd: CollectionEventTypeModifyCommand)
-                    (fn: CollectionEventType => DomainValidation[CollectionEventTypeEvent])
+  private def updateNameCmdToEvent(cmd: UpdateCollectionEventTypeNameCmd, cet: CollectionEventType)
       : DomainValidation[CollectionEventTypeEvent] = {
     for {
-      cet          <- collectionEventTypeRepository.withId(StudyId(cmd.studyId),
-                                                           CollectionEventTypeId(cmd.id))
-      validVersion <-  cet.requireVersion(cmd.expectedVersion)
-      event        <- fn(cet)
-    } yield event
+      nameAvailable <- nameAvailable(cmd.name, cet.studyId, CollectionEventTypeId(cmd.id))
+      newItem       <- cet.withName(cmd.name)
+    } yield CollectionEventTypeEvent(newItem.id.id).update(
+      _.studyId             := newItem.studyId.id,
+      _.optionalUserId      := cmd.userId,
+      _.time                := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.nameUpdated.version := cmd.expectedVersion,
+      _.nameUpdated.name    := newItem.name)
   }
 
-  def onValidEventAndVersion(event:        CollectionEventTypeEvent,
-                             eventType:    Boolean,
-                             eventVersion: Long)
-                            (fn: CollectionEventType => Unit): Unit = {
+  private def updateDescriptionCmdToEvent(cmd: UpdateCollectionEventTypeDescriptionCmd,
+                                          cet: CollectionEventType)
+      : DomainValidation[CollectionEventTypeEvent] = {
+    cet.withDescription(cmd.description).map { _ =>
+      CollectionEventTypeEvent(cet.id.id).update(
+        _.studyId                                := cet.studyId.id,
+        _.optionalUserId                         := cmd.userId,
+        _.time                                   := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.descriptionUpdated.version             := cmd.expectedVersion,
+        _.descriptionUpdated.optionalDescription := cmd.description)
+    }
+  }
+
+  private def updateRecurringCmdToEvent(cmd: UpdateCollectionEventTypeRecurringCmd,
+                                        cet: CollectionEventType)
+      : DomainValidation[CollectionEventTypeEvent] = {
+    cet.withRecurring(cmd.recurring).map { _ =>
+      CollectionEventTypeEvent(cet.id.id).update(
+        _.studyId                    := cet.studyId.id,
+        _.optionalUserId             := cmd.userId,
+        _.time                       := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.recurringUpdated.version   := cmd.expectedVersion,
+        _.recurringUpdated.recurring := cmd.recurring)
+    }
+  }
+
+  private def addAnnotationTypeCmdToEvent(cmd: CollectionEventTypeAddAnnotationTypeCmd,
+                                          cet: CollectionEventType)
+      : DomainValidation[CollectionEventTypeEvent] = {
+    for {
+      annotationType <- {
+        // need to call AnnotationType.create so that a new uniqueId is generated
+        AnnotationType.create(cmd.name,
+                              cmd.description,
+                              cmd.valueType,
+                              cmd.maxValueCount,
+                              cmd.options,
+                              cmd.required)
+      }
+      updatedCet <- cet.withAnnotationType(annotationType)
+    } yield CollectionEventTypeEvent(cet.id.id).update(
+      _.studyId                            := cet.studyId.id,
+      _.optionalUserId                     := cmd.userId,
+      _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.annotationTypeAdded.version        := cmd.expectedVersion,
+      _.annotationTypeAdded.annotationType := EventUtils.annotationTypeToEvent(annotationType))
+  }
+
+  private def updateAnnotationTypeCmdToEvent(cmd: CollectionEventTypeUpdateAnnotationTypeCmd,
+                                             cet: CollectionEventType)
+      : DomainValidation[CollectionEventTypeEvent] = {
+    for {
+      annotationType <- {
+        AnnotationType(cmd.uniqueId,
+                       cmd.name,
+                       cmd.description,
+                       cmd.valueType,
+                       cmd.maxValueCount,
+                       cmd.options,
+                       cmd.required).success
+      }
+      updatedCet <- cet.withAnnotationType(annotationType)
+    } yield CollectionEventTypeEvent(cet.id.id).update(
+      _.studyId                              := cet.studyId.id,
+      _.optionalUserId                       := cmd.userId,
+      _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.annotationTypeUpdated.version        := cmd.expectedVersion,
+      _.annotationTypeUpdated.annotationType := EventUtils.annotationTypeToEvent(annotationType))
+  }
+
+  private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotationTypeCmd,
+                                             cet: CollectionEventType)
+      : DomainValidation[CollectionEventTypeEvent] = {
+    cet.removeAnnotationType(cmd.uniqueId) map { c =>
+      CollectionEventTypeEvent(cet.id.id).update(
+        _.studyId                        := cet.studyId.id,
+        _.optionalUserId                 := cmd.userId,
+        _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.annotationTypeRemoved.version  := cmd.expectedVersion,
+        _.annotationTypeRemoved.uniqueId := cmd.uniqueId)
+    }
+  }
+
+  private def addSepcimenSpecCmdToEvent(cmd: AddCollectionSpecimenSpecCmd,
+                                        cet: CollectionEventType)
+      : DomainValidation[CollectionEventTypeEvent] = {
+    for {
+      specimenSpec <- CollectionSpecimenSpec.create(cmd.name,
+                                                    cmd.description,
+                                                    cmd.units,
+                                                    cmd.anatomicalSourceType,
+                                                    cmd.preservationType,
+                                                    cmd.preservationTemperatureType,
+                                                    cmd.specimenType,
+                                                    cmd.maxCount,
+                                                    cmd.amount)
+      updatedCet <- cet.withSpecimenSpec(specimenSpec)
+    } yield CollectionEventTypeEvent(cet.id.id).update(
+      _.studyId                        := cet.studyId.id,
+      _.optionalUserId                 := cmd.userId,
+      _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.specimenSpecAdded.version      := cmd.expectedVersion,
+      _.specimenSpecAdded.specimenSpec := EventUtils.specimenSpecToEvent(specimenSpec))
+  }
+
+  private def updateSepcimenSpecCmdToEvent(cmd: UpdateCollectionSpecimenSpecCmd,
+                                           cet: CollectionEventType)
+      : DomainValidation[CollectionEventTypeEvent] = {
+    for {
+      specimenSpec <- {
+        CollectionSpecimenSpec(cmd.uniqueId,
+                               cmd.name,
+                               cmd.description,
+                               cmd.units,
+                               cmd.anatomicalSourceType,
+                               cmd.preservationType,
+                               cmd.preservationTemperatureType,
+                               cmd.specimenType,
+                               cmd.maxCount,
+                               cmd.amount).success
+      }
+      updatedCet <- cet.withSpecimenSpec(specimenSpec)
+    } yield CollectionEventTypeEvent(cet.id.id).update(
+      _.studyId                          := cet.studyId.id,
+      _.optionalUserId                   := cmd.userId,
+      _.time                             := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.specimenSpecUpdated.version      := cmd.expectedVersion,
+      _.specimenSpecUpdated.specimenSpec := EventUtils.specimenSpecToEvent(specimenSpec))
+  }
+
+  private def removeSpecimenSpecCmdToEvent(cmd: RemoveCollectionSpecimenSpecCmd,
+                                           cet: CollectionEventType)
+      : DomainValidation[CollectionEventTypeEvent] = {
+    cet.removeSpecimenSpec(cmd.uniqueId) map { c =>
+      CollectionEventTypeEvent(cet.id.id).update(
+        _.studyId                      := cet.studyId.id,
+        _.optionalUserId               := cmd.userId,
+        _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.specimenSpecRemoved.version  := cmd.expectedVersion,
+        _.specimenSpecRemoved.uniqueId := cmd.uniqueId)
+    }
+  }
+
+  private def processUpdateCmd[T <: CollectionEventTypeModifyCommand]
+    (cmd: T,
+     cmdToEvent: (T, CollectionEventType) => DomainValidation[CollectionEventTypeEvent],
+     applyEvent: CollectionEventTypeEvent => Unit): Unit = {
+    val event = for {
+        cet          <- collectionEventTypeRepository.withId(StudyId(cmd.studyId),
+                                                             CollectionEventTypeId(cmd.id))
+        validVersion <- cet.requireVersion(cmd.expectedVersion)
+        event        <- cmdToEvent(cmd, cet)
+      } yield event
+
+    process(event)(applyEvent)
+  }
+
+  private def onValidEventAndVersion(event:        CollectionEventTypeEvent,
+                                     eventType:    Boolean,
+                                     eventVersion: Long)
+                                    (fn: CollectionEventType => Unit): Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
     } else {
@@ -487,7 +490,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     }
   }
 
-  def applySpecimenSpecAddedEvent(event: CollectionEventTypeEvent): Unit = {
+  private def applySpecimenSpecAddedEvent(event: CollectionEventTypeEvent): Unit = {
     onValidEventAndVersion(event,
                            event.eventType.isSpecimenSpecAdded,
                            event.getSpecimenSpecAdded.getVersion) { cet =>
@@ -504,7 +507,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     }
   }
 
-  def applySpecimenSpecUpdatedEvent(event: CollectionEventTypeEvent): Unit = {
+  private def applySpecimenSpecUpdatedEvent(event: CollectionEventTypeEvent): Unit = {
     onValidEventAndVersion(event,
                            event.eventType.isSpecimenSpecUpdated,
                            event.getSpecimenSpecUpdated.getVersion) { cet =>
@@ -521,7 +524,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     }
   }
 
-  def applySpecimenSpecRemovedEvent(event: CollectionEventTypeEvent): Unit = {
+  private def applySpecimenSpecRemovedEvent(event: CollectionEventTypeEvent): Unit = {
     onValidEventAndVersion(event,
                            event.eventType.isSpecimenSpecRemoved,
                            event.getSpecimenSpecRemoved.getVersion) { cet =>

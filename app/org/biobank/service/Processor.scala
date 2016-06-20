@@ -10,14 +10,15 @@ import scalaz.Scalaz._
 trait Processor extends PersistentActor with ActorLogging {
   import org.biobank.CommonValidations._
 
-  /** Persists the event passed in the validation if it is successful. In either case
-    * the sender is sent either the success or failure validation.
-    *
-    * @see http://helenaedelson.com/?p=879
-    */
-  protected def process[T <: GeneratedMessage]
-    (validation: DomainValidation[T])
-    (successFn: T => Unit) {
+  /**
+   * Persists the event passed in the validation if it is successful. In either case
+   * the sender is sent either the success or failure validation.
+   *
+   * @see http://helenaedelson.com/?p=879
+   *
+   * TODO: convert to single parameter list
+   */
+  protected def process[T <: GeneratedMessage](validation: DomainValidation[T])(successFn: T => Unit): Unit = {
     val originalSender = context.sender
     validation.fold(
       err => {

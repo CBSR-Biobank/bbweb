@@ -5,7 +5,7 @@ import akka.persistence.SnapshotOffer
 import javax.inject.Inject
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
-import org.biobank.domain.{ Annotation, DomainValidation, DomainError }
+import org.biobank.domain.{ Annotation, DomainValidation }
 import org.biobank.infrastructure.command.CollectionEventCommands._
 import org.biobank.infrastructure.event.CollectionEventEvents._
 import org.biobank.infrastructure.event.CommonEvents._
@@ -64,12 +64,23 @@ class CollectionEventsProcessor @Inject() (
    * back to the user. Each valid command generates one or more events and is journaled.
    */
   val receiveCommand: Receive = {
-    case cmd: AddCollectionEventCmd                 => processAddCmd(cmd)
-    case cmd: UpdateCollectionEventVisitNumberCmd   => processUpdateVisitNumberCmd(cmd)
-    case cmd: UpdateCollectionEventTimeCompletedCmd => processUpdateTimeCompletedCmd(cmd)
-    case cmd: UpdateCollectionEventAnnotationCmd    => processUpdateAnnotationCmd(cmd)
-    case cmd: RemoveCollectionEventAnnotationCmd    => processRemoveAnnotationCmd(cmd)
-    case cmd: RemoveCollectionEventCmd              => processRemoveCmd(cmd)
+    case cmd: AddCollectionEventCmd =>
+      process(addCmdToEvent(cmd))(applyAddedEvent)
+
+    case cmd: UpdateCollectionEventVisitNumberCmd =>
+      processUpdateCmd(cmd, updateVisitNumberCmdToEvent, applyVisitNumberUpdatedEvent)
+
+    case cmd: UpdateCollectionEventTimeCompletedCmd =>
+      processUpdateCmd(cmd, updateTimeCompletedCmdToEvent, applyTimeCompletedUpdatedEvent)
+
+    case cmd: UpdateCollectionEventAnnotationCmd =>
+      processUpdateCmd(cmd, updateAnnotationCmdToEvent, applyAnnotationUpdatedEvent)
+
+    case cmd: RemoveCollectionEventAnnotationCmd =>
+      processUpdateCmd(cmd, removeAnnotationCmdToEvent, applyAnnotationRemovedEvent)
+
+    case cmd: RemoveCollectionEventCmd =>
+      processUpdateCmd(cmd, removeCmdToEvent, applyRemovedEvent)
 
     case "snap" =>
       saveSnapshot(SnapshotState(collectionEventRepository.getValues.toSet))
@@ -79,12 +90,12 @@ class CollectionEventsProcessor @Inject() (
 
   }
 
-  private def processAddCmd(cmd: AddCollectionEventCmd): Unit = {
+  private def addCmdToEvent(cmd:AddCollectionEventCmd): DomainValidation[CollectionEventEvent] = {
     val participantId = ParticipantId(cmd.participantId)
     val collectionEventTypeId = CollectionEventTypeId(cmd.collectionEventTypeId)
     var annotationsSet = cmd.annotations.toSet
 
-    val event = for {
+    for {
       collectionEventId    <- validNewIdentity(collectionEventRepository.nextIdentity, collectionEventRepository)
       participant          <- participantRepository.getByKey(participantId)
       collectionEventType  <- collectionEventTypeRepository.getByKey(collectionEventTypeId)
@@ -100,137 +111,133 @@ class CollectionEventsProcessor @Inject() (
                                                      cmd.timeCompleted,
                                                      cmd.visitNumber,
                                                      annotationsSet)
-      } yield CollectionEventEvent(newCollectionEvent.id.id).update(
-        _.participantId         := cmd.participantId,
-        _.collectionEventTypeId := newCollectionEvent.collectionEventTypeId.id,
-        _.userId                := cmd.userId,
-        _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.added.timeCompleted   := ISODateTimeFormatter.print(cmd.timeCompleted),
-        _.added.visitNumber     := cmd.visitNumber,
-        _.added.annotations     := cmd.annotations.map { annotationToEvent(_) })
-
-    process(event) { applyAddedEvent(_) }
+    } yield CollectionEventEvent(newCollectionEvent.id.id).update(
+      _.participantId         := cmd.participantId,
+      _.collectionEventTypeId := newCollectionEvent.collectionEventTypeId.id,
+      _.userId                := cmd.userId,
+      _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.added.timeCompleted   := ISODateTimeFormatter.print(cmd.timeCompleted),
+      _.added.visitNumber     := cmd.visitNumber,
+      _.added.annotations     := cmd.annotations.map { annotationToEvent(_) })
   }
 
-  private def processUpdateVisitNumberCmd(cmd: UpdateCollectionEventVisitNumberCmd): Unit = {
-    val v = update(cmd) { (participant, collectionEventType, cevent) =>
-      for {
-        visitNumberAvailable <- visitNumberAvailable(participant.id, cmd.visitNumber, cevent.id)
-        updatedCevent        <- cevent.withVisitNumber(cmd.visitNumber)
-      } yield CollectionEventEvent(updatedCevent.id.id).update(
-        _.participantId                  := participant.id.id,
-        _.collectionEventTypeId          := updatedCevent.collectionEventTypeId.id,
-        _.userId                         := cmd.userId,
-        _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.visitNumberUpdated.version     := cmd.expectedVersion,
-        _.visitNumberUpdated.visitNumber := updatedCevent.visitNumber)
-    }
-
-    process(v) { applyVisitNumberUpdatedEvent(_) }
-  }
-
-  private def processUpdateTimeCompletedCmd(cmd: UpdateCollectionEventTimeCompletedCmd): Unit = {
-    val v = update(cmd) { (participant, collectionEventType, cevent) =>
-        cevent.withTimeCompleted(cmd.timeCompleted).map { updatedCevent =>
-          CollectionEventEvent(updatedCevent.id.id).update(
-            _.participantId                      := participant.id.id,
-            _.collectionEventTypeId              := updatedCevent.collectionEventTypeId.id,
-            _.userId                             := cmd.userId,
-            _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
-            _.timeCompletedUpdated.version       := cmd.expectedVersion,
-            _.timeCompletedUpdated.timeCompleted := ISODateTimeFormat.dateTime.print(updatedCevent.timeCompleted))
-        }
-    }
-
-    process(v) { applyTimeCompletedUpdatedEvent(_) }
-  }
-
-  private def processUpdateAnnotationCmd(cmd: UpdateCollectionEventAnnotationCmd): Unit = {
-    val v = update(cmd) { (participant, collectionEventType, cevent) =>
-        for {
-          annotation      <- Annotation.create(cmd.annotationTypeId,
-                                               cmd.stringValue,
-                                               cmd.numberValue,
-                                               cmd.selectedValues)
-          allAnnotations  <- (cevent.annotations + annotation).success
-          validAnnotation <- Annotation.validateAnnotations(collectionEventType.annotationTypes,
-                                                            allAnnotations.toList)
-          updatedCevent   <- cevent.withAnnotation(annotation)
-        } yield CollectionEventEvent(updatedCevent.id.id).update(
-          _.participantId                := participant.id.id,
-          _.collectionEventTypeId        := updatedCevent.collectionEventTypeId.id,
-          _.userId                       := cmd.userId,
-          _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.annotationUpdated.version    := cmd.expectedVersion,
-          _.annotationUpdated.annotation := annotationToEvent(annotation))
-      }
-
-    process(v) { applyAnnotationUpdatedEvent(_) }
-  }
-
-  private def processRemoveAnnotationCmd(cmd: RemoveCollectionEventAnnotationCmd): Unit = {
-    val v = update(cmd) { (participant, collectionEventType, cevent) =>
-        for {
-          annotType <- {
-            collectionEventType.annotationTypes
-              .find { x => x.uniqueId == cmd.annotationTypeId }
-              .toSuccessNel(s"annotation type with ID does not exist: ${cmd.annotationTypeId}")
-          }
-          notRequired <- {
-            if (annotType.required) EntityRequried(s"annotation is required").failureNel
-            else true.success
-          }
-          updatedCevent <- cevent.withoutAnnotation(cmd.annotationTypeId)
-        } yield CollectionEventEvent(updatedCevent.id.id).update(
-          _.participantId                      := participant.id.id,
-          _.collectionEventTypeId              := updatedCevent.collectionEventTypeId.id,
-          _.userId                             := cmd.userId,
-          _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.annotationRemoved.version          := cmd.expectedVersion,
-          _.annotationRemoved.annotationTypeId := cmd.annotationTypeId)
-      }
-
-    process(v) { applyAnnotationRemovedEvent(_) }
-  }
-
-  private def processRemoveCmd(cmd: RemoveCollectionEventCmd): Unit = {
-    val v = update(cmd) { (participant, collectionEventType, cevent) =>
-        CollectionEventEvent(cevent.id.id).update(
-          _.participantId         := participant.id.id,
-          _.collectionEventTypeId := cevent.collectionEventTypeId.id,
-          _.userId                := cmd.userId,
-          _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.removed.version       := cevent.version).success
-      }
-    process(v) { applyRemovedEvent(_) }
-  }
-
-  def update(cmd: CollectionEventModifyCommand)
-            (fn: (Participant, CollectionEventType, CollectionEvent) => DomainValidation[CollectionEventEvent])
+  private def updateVisitNumberCmdToEvent(cmd:                 UpdateCollectionEventVisitNumberCmd,
+                                          participant:         Participant,
+                                          collectionEventType: CollectionEventType,
+                                          cevent:              CollectionEvent)
       : DomainValidation[CollectionEventEvent] = {
-    val collectionEventId = CollectionEventId(cmd.id)
-
     for {
-      cevent              <- collectionEventRepository.getByKey(collectionEventId)
-      validVersion       <-  cevent.requireVersion(cmd.expectedVersion)
-      collectionEventType <- collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
-      participant         <- {
-        participantRepository.getByKey(cevent.participantId).leftMap(_ =>
-          DomainError(s"participant id not found: ${cevent.participantId}")).toValidationNel
-      }
-      studyIdMatching     <- studyIdsMatch(participant, collectionEventType)
-      studyEnabled        <- studyRepository.getEnabled(participant.studyId)
-      event <- fn(participant, collectionEventType, cevent)
-    } yield event
+      visitNumberAvailable <- visitNumberAvailable(participant.id, cmd.visitNumber, cevent.id)
+      updatedCevent        <- cevent.withVisitNumber(cmd.visitNumber)
+    } yield CollectionEventEvent(updatedCevent.id.id).update(
+      _.participantId                  := participant.id.id,
+      _.collectionEventTypeId          := updatedCevent.collectionEventTypeId.id,
+      _.userId                         := cmd.userId,
+      _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.visitNumberUpdated.version     := cmd.expectedVersion,
+      _.visitNumberUpdated.visitNumber := updatedCevent.visitNumber)
   }
 
-  def studyIdsMatch(participant: Participant, collectionEventType: CollectionEventType)
-      : DomainValidation[Boolean] =  {
-    if (participant.studyId == collectionEventType.studyId) {
-      true.success
-    } else {
-      EntityCriteriaError(s"participant and collection event type not in the same study").failureNel
+  private def updateTimeCompletedCmdToEvent(cmd:                 UpdateCollectionEventTimeCompletedCmd,
+                                            participant:         Participant,
+                                            collectionEventType: CollectionEventType,
+                                            cevent:              CollectionEvent)
+      : DomainValidation[CollectionEventEvent] = {
+    cevent.withTimeCompleted(cmd.timeCompleted).map { updatedCevent =>
+      CollectionEventEvent(updatedCevent.id.id).update(
+        _.participantId                      := participant.id.id,
+        _.collectionEventTypeId              := updatedCevent.collectionEventTypeId.id,
+        _.userId                             := cmd.userId,
+        _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.timeCompletedUpdated.version       := cmd.expectedVersion,
+        _.timeCompletedUpdated.timeCompleted := ISODateTimeFormat.dateTime.print(updatedCevent.timeCompleted))
     }
+  }
+
+  private def updateAnnotationCmdToEvent(cmd:                 UpdateCollectionEventAnnotationCmd,
+                                         participant:         Participant,
+                                         collectionEventType: CollectionEventType,
+                                         cevent:              CollectionEvent)
+      : DomainValidation[CollectionEventEvent] = {
+    for {
+      annotation      <- Annotation.create(cmd.annotationTypeId,
+                                           cmd.stringValue,
+                                           cmd.numberValue,
+                                           cmd.selectedValues)
+      allAnnotations  <- (cevent.annotations + annotation).success
+      validAnnotation <- Annotation.validateAnnotations(collectionEventType.annotationTypes,
+                                                        allAnnotations.toList)
+      updatedCevent   <- cevent.withAnnotation(annotation)
+    } yield CollectionEventEvent(updatedCevent.id.id).update(
+      _.participantId                := participant.id.id,
+      _.collectionEventTypeId        := updatedCevent.collectionEventTypeId.id,
+      _.userId                       := cmd.userId,
+      _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.annotationUpdated.version    := cmd.expectedVersion,
+      _.annotationUpdated.annotation := annotationToEvent(annotation))
+  }
+
+  private def removeAnnotationCmdToEvent(cmd:                 RemoveCollectionEventAnnotationCmd,
+                                         participant:         Participant,
+                                         collectionEventType: CollectionEventType,
+                                         cevent:              CollectionEvent)
+      : DomainValidation[CollectionEventEvent] = {
+    for {
+      annotType <- {
+        collectionEventType.annotationTypes
+          .find { x => x.uniqueId == cmd.annotationTypeId }
+          .toSuccessNel(s"annotation type with ID does not exist: ${cmd.annotationTypeId}")
+      }
+      notRequired <- {
+        if (annotType.required) EntityRequried(s"annotation is required").failureNel
+        else true.success
+      }
+      updatedCevent <- cevent.withoutAnnotation(cmd.annotationTypeId)
+    } yield CollectionEventEvent(updatedCevent.id.id).update(
+      _.participantId                      := participant.id.id,
+      _.collectionEventTypeId              := updatedCevent.collectionEventTypeId.id,
+      _.userId                             := cmd.userId,
+      _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.annotationRemoved.version          := cmd.expectedVersion,
+      _.annotationRemoved.annotationTypeId := cmd.annotationTypeId)
+  }
+
+  private def removeCmdToEvent(cmd:                 RemoveCollectionEventCmd,
+                               participant:         Participant,
+                               collectionEventType: CollectionEventType,
+                               cevent:              CollectionEvent)
+      : DomainValidation[CollectionEventEvent] = {
+    CollectionEventEvent(cevent.id.id).update(
+      _.participantId         := participant.id.id,
+      _.collectionEventTypeId := cevent.collectionEventTypeId.id,
+      _.userId                := cmd.userId,
+      _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.removed.version       := cevent.version).success
+  }
+
+  private def processUpdateCmd[T <: CollectionEventModifyCommand](
+    cmd: T,
+    validation: (T,
+                 Participant,
+                 CollectionEventType,
+                 CollectionEvent) => DomainValidation[CollectionEventEvent],
+    applyEvent: CollectionEventEvent => Unit): Unit = {
+    val event = for {
+        cevent              <- collectionEventRepository.getByKey(CollectionEventId(cmd.id))
+        validVersion        <- cevent.requireVersion(cmd.expectedVersion)
+        collectionEventType <- collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
+        participant         <- participantRepository.getByKey(cevent.participantId)
+        studyIdMatching     <- studyIdsMatch(participant, collectionEventType)
+        studyEnabled        <- studyRepository.getEnabled(participant.studyId)
+        event               <- validation(cmd, participant, collectionEventType, cevent)
+      } yield event
+    process(event)(applyEvent)
+  }
+
+  private def studyIdsMatch(participant: Participant, collectionEventType: CollectionEventType)
+      : DomainValidation[Boolean] =  {
+    if (participant.studyId == collectionEventType.studyId) true.success
+    else EntityCriteriaError(s"participant and collection event type not in the same study").failureNel
   }
 
   private def applyAddedEvent(event: CollectionEventEvent): Unit = {
@@ -257,10 +264,10 @@ class CollectionEventsProcessor @Inject() (
     }
   }
 
-  def onValidEventAndVersion(event:        CollectionEventEvent,
-                             eventType:    Boolean,
-                             eventVersion: Long)
-                            (fn: CollectionEvent => Unit): Unit = {
+  private def onValidEventAndVersion(event:        CollectionEventEvent,
+                                     eventType:    Boolean,
+                                     eventVersion: Long)
+                                    (fn: CollectionEvent => Unit): Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
     } else {
@@ -352,8 +359,8 @@ class CollectionEventsProcessor @Inject() (
   protected def visitNumberAvailableMatcher(visitNumber: Int)(matcher: CollectionEvent => Boolean)
       : DomainValidation[Boolean] = {
     val exists = collectionEventRepository.getValues.exists { item =>
-      matcher(item)
-    }
+        matcher(item)
+      }
     if (exists) {
       EntityCriteriaError(s"$errMsgVisitNumberExists: $visitNumber").failureNel
     } else {

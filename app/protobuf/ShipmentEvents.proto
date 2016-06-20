@@ -1,0 +1,52 @@
+package org.biobank.infrastructure.event;
+
+message ShipmentEvent {
+
+   message Added {
+      optional string courierName    = 1;
+      optional string trackingNumber = 2;
+      optional string fromLocationId = 3;
+      optional string toLocationId   = 4;
+   }
+
+   message CourierNameUpdated {
+      optional int64  version     = 1;
+      optional string courierName = 2;
+   }
+
+   message TrackingNumberUpdated {
+      optional int64  version        = 1;
+      optional string trackingNumber = 2;
+   }
+
+   message LocationUpdated {
+      optional int64  version     = 1;
+      optional string locationId  = 2;
+   }
+
+   message StateUpdated {
+      optional int64  version         = 1;
+      optional string stateChangeTime = 2;
+   }
+
+   message StateLost {
+      optional int64  version = 1;
+   }
+
+   required string id     = 1;
+   optional string userId = 2;
+   optional string time   = 3;
+
+   oneof event_type {
+      Added                 added                 = 4;
+      CourierNameUpdated    courierNameUpdated    = 5;
+      TrackingNumberUpdated trackingNumberUpdated = 6;
+      LocationUpdated       fromLocationUpdated   = 7;
+      LocationUpdated       toLocationUpdated     = 8;
+      StateUpdated          packed                = 9;
+      StateUpdated          sent                  = 10;
+      StateUpdated          received              = 11;
+      StateUpdated          unpacked              = 12;
+      StateLost             lost                  = 13;
+   }
+}

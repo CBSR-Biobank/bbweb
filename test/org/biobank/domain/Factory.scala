@@ -411,6 +411,87 @@ class Factory {
     containerSchema
   }
 
+  def createShipment(): Shipment = {
+    val location = defaultLocation
+
+    val shipment = Shipment(id             = ShipmentId(nameGenerator.next[Shipment]),
+                            version        = 0L,
+                            timeAdded      = DateTime.now,
+                            timeModified   = None,
+                            state          = ShipmentState.Created,
+                            courierName    = nameGenerator.next[Shipment],
+                            trackingNumber = nameGenerator.next[Shipment],
+                            fromLocationId = location.uniqueId,
+                            toLocationId   = location.uniqueId,
+                            timePacked     = None,
+                            timeSent       = None,
+                            timeReceived   = None,
+                            timeUnpacked   = None)
+    domainObjects = domainObjects + (classOf[Shipment] -> shipment)
+    shipment
+  }
+
+  def createPackedShipment(): Shipment = {
+    createShipment.copy(state = ShipmentState.Packed,
+                        timePacked = Some(DateTime.now.minusDays(10)))
+  }
+
+  def createSentShipment(): Shipment = {
+    val shipment = createPackedShipment
+    shipment.copy(state = ShipmentState.Sent,
+                  timeSent = Some(shipment.timePacked.get.plusDays(1)))
+  }
+
+  def createReceivedShipment(): Shipment = {
+    val shipment = createSentShipment
+    shipment.copy(state = ShipmentState.Received,
+                  timeReceived = Some(shipment.timeSent.get.plusDays(1)))
+  }
+
+  def createUnpackedShipment(): Shipment = {
+    val shipment = createReceivedShipment
+    shipment.copy(state = ShipmentState.Unpacked,
+                  timeUnpacked = Some(shipment.timeReceived.get.plusDays(1)))
+  }
+
+  def createLostShipment(): Shipment = {
+    createSentShipment.copy(state = ShipmentState.Lost)
+  }
+
+  def createShipmentSpecimen(): ShipmentSpecimen = {
+    val specimen = defaultUsableSpecimen
+    val shipment = defaultShipment
+
+    val shipmentSpecimen = ShipmentSpecimen(
+        id                  = ShipmentSpecimenId(nameGenerator.next[ShipmentSpecimen]),
+        version             = 0L,
+        timeAdded           = DateTime.now,
+        timeModified        = None,
+        shipmentId          = shipment.id,
+        specimenId          = specimen.id,
+        state               = ShipmentItemState.Present,
+        shipmentContainerId = None)
+    domainObjects = domainObjects + (classOf[ShipmentSpecimen] -> shipmentSpecimen)
+    shipmentSpecimen
+  }
+
+  def createShipmentContainer(): ShipmentContainer = {
+    ???
+    // val container = defaultContainer
+    // val shipment = defaultShipment
+
+    // val shipmentContainer = ShipmentContainer(
+    //     id                  = ShipmentContainerId(nameGenerator.next[ShipmentContainer]),
+    //     version             = 0L,
+    //     timeAdded           = DateTime.now,
+    //     timeModified        = None,
+    //     shipmentId          = shipment.id,
+    //     containerId         = container.id,
+    //     state               = ShipmentItemState.Present)
+    // domainObjects = domainObjects + (classOf[ShipmentContainer] -> shipmentContainer)
+    // shipmentContainer
+  }
+
   // def createEnabledContainerType(centre: Centre): EnabledContainerType = {
   //   val containerType = EnabledContainerType(
   //     id           = ContainerTypeId(nameGenerator.next[ContainerType]),
@@ -501,6 +582,14 @@ class Factory {
     defaultObject(classOf[CollectionEvent], createCollectionEvent)
   }
 
+  def defaultUsableSpecimen: UsableSpecimen = {
+    defaultObject(classOf[UsableSpecimen], createUsableSpecimen)
+  }
+
+  def defaultUnusableSpecimen: UnusableSpecimen = {
+    defaultObject(classOf[UnusableSpecimen], createUnusableSpecimen)
+  }
+
   def defaultDisabledCentre: DisabledCentre = {
     defaultObject(classOf[DisabledCentre], createDisabledCentre)
   }
@@ -515,6 +604,18 @@ class Factory {
 
   def defaultContainerSchema: ContainerSchema = {
     defaultObject(classOf[ContainerSchema], createContainerSchema)
+  }
+
+  def defaultShipment: Shipment = {
+    defaultObject(classOf[Shipment], createShipment)
+  }
+
+  def defaultShipmentSpecimen: ShipmentSpecimen = {
+    defaultObject(classOf[ShipmentSpecimen], createShipmentSpecimen)
+  }
+
+  def defaultShipmentContainer: ShipmentContainer = {
+    defaultObject(classOf[ShipmentContainer], createShipmentContainer)
   }
 
   // def defaultDisabledContainerType: DisabledContainerType = {

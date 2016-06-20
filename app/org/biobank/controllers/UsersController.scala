@@ -32,6 +32,12 @@ class UsersController @Inject() (val env:            Environment,
 
   private val PageSizeMax = 20
 
+  val listSortFields = Map[String, (User, User) => Boolean](
+      "name"   -> User.compareByName,
+      "email"  -> User.compareByEmail,
+      "status" -> User.compareByStatus)
+
+
   /** Used for obtaining the email and password from the HTTP login request */
   case class LoginCredentials(email: String, password: String)
 
@@ -118,26 +124,20 @@ class UsersController @Inject() (val env:            Environment,
            pageSize:    Int,
            order:       String) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      Logger.debug(s"UsersController:list: nameFilter/$nameFilter, emailFilter/$emailFilter, status/$status, sort/$sort, page/$page, pageSize/$pageSize, order/$order")
+      Logger.debug(s"""|UsersController:list: nameFilter/$nameFilter, emailFilter/$emailFilter,
+                       |  status/$status, sort/$sort, page/$page, pageSize/$pageSize,
+                       |  order/$order""".stripMargin)
 
-      def sortWith(sortField: String): (User, User) => Boolean = {
-        sortField match {
-          case "name"  => (User.compareByName _)
-          case "email" => (User.compareByEmail _)
-          case _       => (User.compareByStatus _)
-        }
-      }
+      val pagedQuery = PagedQuery(listSortFields, page, pageSize, order)
 
-      val pagedQuery = PagedQuery(sort, page, pageSize, order)
       val validation = for {
-        sortField   <- pagedQuery.getSortField(Seq("name", "email", "status"))
-        sortWith    <- sortWith(sortField).success
-        sortOrder   <- pagedQuery.getSortOrder
-        users       <- usersService.getUsers(nameFilter, emailFilter, status, sortWith, sortOrder)
-        page        <- pagedQuery.getPage(PageSizeMax, users.size)
-        pageSize    <- pagedQuery.getPageSize(PageSizeMax)
-        results     <- PagedResults.create(users, page, pageSize)
-      } yield results
+           sortFunc    <- pagedQuery.getSortFunc(sort)
+           sortOrder   <- pagedQuery.getSortOrder
+           users       <- usersService.getUsers(nameFilter, emailFilter, status, sortFunc, sortOrder)
+           page        <- pagedQuery.getPage(PageSizeMax, users.size)
+           pageSize    <- pagedQuery.getPageSize(PageSizeMax)
+           results     <- PagedResults.create(users, page, pageSize)
+        } yield results
 
       validation.fold(
         err => BadRequest(err.list.toList.mkString),

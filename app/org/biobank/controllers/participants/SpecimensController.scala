@@ -23,9 +23,10 @@ class SpecimensController @Inject() (val env:          Environment,
 
   private val PageSizeMax = 10
 
-  val sortFunc = Map("inventoryId" -> Specimen.compareByInventoryId _,
-                     "timeCreated" -> Specimen.compareByTimeCreated _,
-                     "status"      -> Specimen.compareByStatus _)
+  val listSortFields = Map[String, (Specimen, Specimen) => Boolean](
+      "inventoryId" -> Specimen.compareByInventoryId,
+      "timeCreated" -> Specimen.compareByTimeCreated,
+      "status"      -> Specimen.compareByStatus)
 
   /**
    * Returns the specimen with the given ID.
@@ -48,18 +49,19 @@ class SpecimensController @Inject() (val env:          Environment,
            order:    String) =
     AuthAction(parse.empty) { (token, userId, request) =>
 
-      Logger.debug(s"SpecimensController:list: ceventId/$ceventId, sort/$sort, page/$page, pageSize/$pageSize, order/$order")
+      Logger.debug(s"""|SpecimensController:list: ceventId/$ceventId, sort/$sort,
+                       |  page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
-      val pagedQuery = PagedQuery(sort, page, pageSize, order)
+      val pagedQuery = PagedQuery(listSortFields, page, pageSize, order)
+
       val validation = for {
-        sortField   <- pagedQuery.getSortField(sortFunc.keys.toSeq)
-        sortWith    <- sortFunc.get(sortField).toSuccessNel("invalid sort field")
-        sortOrder   <- pagedQuery.getSortOrder
-        specimens   <- service.list(ceventId, sortWith, sortOrder)
-        page        <- pagedQuery.getPage(PageSizeMax, specimens.size)
-        pageSize    <- pagedQuery.getPageSize(PageSizeMax)
-        results     <- PagedResults.create(specimens, page, pageSize)
-      } yield results
+          sortFunc    <- pagedQuery.getSortFunc(sort)
+          sortOrder   <- pagedQuery.getSortOrder
+          specimens   <- service.list(ceventId, sortFunc, sortOrder)
+          page        <- pagedQuery.getPage(PageSizeMax, specimens.size)
+          pageSize    <- pagedQuery.getPageSize(PageSizeMax)
+          results     <- PagedResults.create(specimens, page, pageSize)
+        } yield results
 
       validation.fold(
         err     => BadRequest(err.list.toList.mkString),

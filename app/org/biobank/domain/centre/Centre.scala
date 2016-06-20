@@ -32,10 +32,13 @@ sealed trait Centre
 
   val locations: Set[Location]
 
-  def locationName(locationId: String): DomainValidation[String] = {
+  def locationWithId(locationId: String): DomainValidation[Location] = {
     locations.find(_.uniqueId == locationId)
       .toSuccessNel(s"invalid location id: $locationId")
-      .map(loc => s"${this.name}: ${loc.name}")
+  }
+
+  def locationName(locationId: String): DomainValidation[String] = {
+    locationWithId(locationId).map(loc => s"${this.name}: ${loc.name}")
   }
 
   override def toString =
@@ -66,7 +69,7 @@ object Centre {
                  "locations"    -> centre.locations,
                  "status"       -> centre.getClass.getSimpleName)
       }
-  }
+    }
 
   def compareByName(a: Centre, b: Centre) = (a.name compareToIgnoreCase b.name) < 0
 
@@ -202,8 +205,8 @@ object DisabledCentre extends CentreValidations {
              version:     Long,
              name:        String,
              description: Option[String],
-             studyIds:     Set[StudyId],
-             locations:    Set[Location]): DomainValidation[DisabledCentre] = {
+             studyIds:    Set[StudyId],
+             locations:   Set[Location]): DomainValidation[DisabledCentre] = {
 
     def validateStudyId(studyId: StudyId) = validateId(studyId, InvalidStudyId)
 

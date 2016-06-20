@@ -70,12 +70,23 @@ class SpecimensProcessor @Inject() (
    * back to the user. Each valid command generates one or more events and is journaled.
    */
   val receiveCommand: Receive = {
-    case cmd: AddSpecimensCmd           => processAddCmd(cmd)
-    case cmd: MoveSpecimensCmd          => processMoveCmd(cmd)
-    case cmd: SpecimenAssignPositionCmd => processAssignPositionCmd(cmd)
-    case cmd: SpecimenRemoveAmountCmd   => processRemoveAmountCmd(cmd)
-    case cmd: SpecimenUpdateUsableCmd   => processUpdateUsableCmd(cmd)
-    case cmd: RemoveSpecimenCmd         => processRemoveCmd(cmd)
+    case cmd: AddSpecimensCmd =>
+      process(addCmdToEvent(cmd))(applyAddedEvent)
+
+    case cmd: MoveSpecimensCmd =>
+      process(moveCmdToEvent(cmd))(applyMovedEvent)
+
+    case cmd: SpecimenAssignPositionCmd =>
+      processUpdateCmd(cmd, assignPositionCmdToEvent, applyPositionAssignedEvent)
+
+    case cmd: SpecimenRemoveAmountCmd =>
+      processUpdateCmd(cmd, removeAmountCmdToEvent, applyAmountRemovedEvent)
+
+    case cmd: SpecimenUpdateUsableCmd =>
+      processUpdateCmd(cmd, updateUsableCmdToEvent, applyUsableUpdatedEvent)
+
+    case cmd: RemoveSpecimenCmd =>
+      processUpdateCmd(cmd, removeCmdToEvent, applyRemovedEvent)
 
     case "snap" =>
       saveSnapshot(SnapshotState(specimenRepository.getValues.toSet))
@@ -85,55 +96,56 @@ class SpecimensProcessor @Inject() (
 
   }
 
-  private def processAddCmd(cmd: AddSpecimensCmd): Unit = {
-    var v = for {
-        collectionEvent <- collectionEventRepository.getByKey(CollectionEventId(cmd.collectionEventId))
-        ceventType      <- collectionEventTypeRepository.getByKey(collectionEvent.collectionEventTypeId)
-        specIdsValid    <- validateSpecimenInfo(cmd.specimenData, ceventType)
-        invIdsValid     <- validateInventoryId(cmd.specimenData)
-      } yield {
-        SpecimenEvent(cmd.userId).update(
-          _.time                    := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.added.collectionEventId := collectionEvent.id.id,
-          _.added.specimenData      := cmd.specimenData.map { specimenInfo =>
-              specimenInfoToEvent(specimenRepository.nextIdentity, specimenInfo)
-            })
-        }
-
-    process(v) { applyAddedEvent(_) }
+  private def addCmdToEvent(cmd: AddSpecimensCmd): DomainValidation[SpecimenEvent] = {
+    for {
+      collectionEvent <- collectionEventRepository.getByKey(CollectionEventId(cmd.collectionEventId))
+      ceventType      <- collectionEventTypeRepository.getByKey(collectionEvent.collectionEventTypeId)
+      specIdsValid    <- validateSpecimenInfo(cmd.specimenData, ceventType)
+      invIdsValid     <- validateInventoryId(cmd.specimenData)
+    } yield SpecimenEvent(cmd.userId).update(
+      _.time                    := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.added.collectionEventId := collectionEvent.id.id,
+      _.added.specimenData      := cmd.specimenData.map { specimenInfo =>
+          specimenInfoToEvent(specimenRepository.nextIdentity, specimenInfo)
+        })
   }
 
-  private def processMoveCmd(cmd: MoveSpecimensCmd): Unit = {
+  private def moveCmdToEvent(cmd: MoveSpecimensCmd): DomainValidation[SpecimenEvent] = {
     ???
   }
 
-  private def processAssignPositionCmd(cmd: SpecimenAssignPositionCmd): Unit = {
+  private def assignPositionCmdToEvent(cmd: SpecimenAssignPositionCmd,
+                                        cevent:   CollectionEvent,
+                                        specimen: Specimen): DomainValidation[SpecimenEvent] = {
     ???
   }
 
-  private def processRemoveAmountCmd(cmd: SpecimenRemoveAmountCmd): Unit = {
+  private def removeAmountCmdToEvent(cmd: SpecimenRemoveAmountCmd,
+                                      cevent:   CollectionEvent,
+                                      specimen: Specimen): DomainValidation[SpecimenEvent] = {
     ???
   }
 
-  private def processUpdateUsableCmd(cmd: SpecimenUpdateUsableCmd): Unit = {
+  private def updateUsableCmdToEvent(cmd: SpecimenUpdateUsableCmd,
+                                      cevent:   CollectionEvent,
+                                      specimen: Specimen): DomainValidation[SpecimenEvent] = {
     ???
   }
 
-  private def processRemoveCmd(cmd: RemoveSpecimenCmd): Unit = {
-    val v = update(cmd) { (cevent, specimen) =>
-        for {
-          collectionEvent <- collectionEventRepository.getByKey(CollectionEventId(cmd.collectionEventId))
-          specimen <- specimenRepository.getByKey(SpecimenId(cmd.id))
-          hasChildren <- specimenHasNoChildren(specimen)
-        } yield {
-          SpecimenEvent(cmd.userId).update(
-            _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
-            _.removed.version           := specimen.version,
-            _.removed.specimenId        := specimen.id.id,
-            _.removed.collectionEventId := collectionEvent.id.id)
-        }
-      }
-    process(v) { applyRemovedEvent(_) }
+  private def removeCmdToEvent(cmd:      RemoveSpecimenCmd,
+                                cevent:   CollectionEvent,
+                                specimen: Specimen): DomainValidation[SpecimenEvent] = {
+    for {
+      collectionEvent <- collectionEventRepository.getByKey(CollectionEventId(cmd.collectionEventId))
+      specimen <- specimenRepository.getByKey(SpecimenId(cmd.id))
+      hasChildren <- specimenHasNoChildren(specimen)
+    } yield {
+      SpecimenEvent(cmd.userId).update(
+        _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.removed.version           := specimen.version,
+        _.removed.specimenId        := specimen.id.id,
+        _.removed.collectionEventId := collectionEvent.id.id)
+    }
   }
 
   private def applyAddedEvent(event: SpecimenEvent): Unit = {
@@ -199,6 +211,23 @@ class SpecimensProcessor @Inject() (
     ()
   }
 
+  private def processUpdateCmd[T <: SpecimenModifyCommand](
+    cmd: T,
+    validation: (T, CollectionEvent, Specimen) => DomainValidation[SpecimenEvent],
+    applyEvent: SpecimenEvent => Unit): Unit = {
+
+    val specimenId = SpecimenId(cmd.id)
+    val collectionEventId = CollectionEventId(cmd.collectionEventId)
+
+    var event = for {
+        specimen     <- specimenRepository.getByKey(specimenId)
+        cevent       <- collectionEventRepository.getByKey(collectionEventId)
+        validVersion <- specimen.requireVersion(cmd.expectedVersion)
+        event        <- validation(cmd, cevent, specimen)
+      } yield event
+    process(event)(applyEvent)
+  }
+
   private def validateSpecimenInfo(specimenData: List[SpecimenInfo], ceventType: CollectionEventType)
       : DomainValidation[Boolean] = {
 
@@ -220,25 +249,11 @@ class SpecimensProcessor @Inject() (
    */
   private def validateInventoryId(specimenData: List[SpecimenInfo]): DomainValidation[Boolean] = {
     specimenData.map { info =>
-        specimenRepository.getByInventoryId(info.inventoryId) fold (
-          err => true.success,
-          spc => s"specimen ID already in use: ${info.inventoryId}".failureNel[Boolean]
-        )
-      }.sequenceU.map { x => true }
-  }
-
-  def update(cmd: SpecimenModifyCommand)
-            (fn: (CollectionEvent, Specimen) => DomainValidation[SpecimenEvent])
-      : DomainValidation[SpecimenEvent] = {
-    val specimenId = SpecimenId(cmd.id)
-    val collectionEventId = CollectionEventId(cmd.collectionEventId)
-
-    for {
-      specimen     <- specimenRepository.getByKey(specimenId)
-      cevent       <- collectionEventRepository.getByKey(collectionEventId)
-      validVersion <- specimen.requireVersion(cmd.expectedVersion)
-      event        <- fn(cevent, specimen)
-    } yield event
+      specimenRepository.getByInventoryId(info.inventoryId) fold (
+        err => true.success,
+        spc => s"specimen ID already in use: ${info.inventoryId}".failureNel[Boolean]
+      )
+    }.sequenceU.map { x => true }
   }
 
   private def validEventType(eventType: Boolean): DomainValidation[Boolean] =
