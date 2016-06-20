@@ -3,7 +3,6 @@ package org.biobank.service.participants
 import akka.actor._
 import akka.persistence.SnapshotOffer
 import javax.inject.Inject
-import org.biobank.TestData
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
 import org.biobank.domain.Annotation
@@ -29,8 +28,7 @@ class CollectionEventsProcessor @Inject() (
   val collectionEventRepository:     CollectionEventRepository,
   val collectionEventTypeRepository: CollectionEventTypeRepository,
   val participantRepository:         ParticipantRepository,
-  val studyRepository:               StudyRepository,
-  val testData:                      TestData)
+  val studyRepository:               StudyRepository)
     extends Processor {
 
   import org.biobank.CommonValidations._

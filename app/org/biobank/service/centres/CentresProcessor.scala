@@ -3,7 +3,6 @@ package org.biobank.service.centres
 import akka.actor._
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import javax.inject.{Inject}
-import org.biobank.TestData
 import org.biobank.domain.centre._
 import org.biobank.domain.study.{StudyId, StudyRepository}
 import org.biobank.domain.Location
@@ -22,8 +21,7 @@ object CentresProcessor {
 }
 
 class CentresProcessor @Inject() (val centreRepository: CentreRepository,
-                                  val studyRepository:  StudyRepository,
-                                  val testData:         TestData)
+                                  val studyRepository:  StudyRepository)
     extends Processor {
   import org.biobank.CommonValidations._
   import CentreEvent.EventType

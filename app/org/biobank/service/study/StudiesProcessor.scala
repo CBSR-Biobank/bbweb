@@ -3,7 +3,6 @@ package org.biobank.service.study
 import akka.actor._
 import akka.persistence.SnapshotOffer
 import javax.inject._
-import org.biobank.TestData
 import org.biobank.domain.study._
 import org.biobank.domain.{AnnotationType, AnnotationValueType}
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
@@ -36,8 +35,7 @@ class StudiesProcessor @javax.inject.Inject() (
   val studyRepository:                                            StudyRepository,
   val processingTypeRepository:                                   ProcessingTypeRepository,
   val specimenGroupRepository:                                    SpecimenGroupRepository,
-  val collectionEventTypeRepository:                              CollectionEventTypeRepository,
-  val testData:                                                   TestData)
+  val collectionEventTypeRepository:                              CollectionEventTypeRepository)
     extends Processor {
   import org.biobank.CommonValidations._
 
@@ -576,4 +574,5 @@ class StudiesProcessor @javax.inject.Inject() (
       (item.name == name) && (item.id != excludeStudyId)
     }
   }
+
 }

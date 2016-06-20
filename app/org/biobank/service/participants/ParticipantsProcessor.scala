@@ -3,7 +3,6 @@ package org.biobank.service.participants
 import akka.actor._
 import akka.persistence.SnapshotOffer
 import javax.inject.Inject
-import org.biobank.TestData
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
 import org.biobank.domain.Annotation
@@ -25,8 +24,7 @@ object ParticipantsProcessor {
  *
  */
 class ParticipantsProcessor @Inject() (val participantRepository:     ParticipantRepository,
-                                       val studyRepository:           StudyRepository,
-                                       val testData:                  TestData)
+                                       val studyRepository:           StudyRepository)
     extends Processor {
 
   import ParticipantEvent.EventType
