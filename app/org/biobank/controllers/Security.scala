@@ -44,19 +44,19 @@ trait Security { self: Controller =>
     for {
       cookieXsrfToken <- {
         request.cookies.get(AuthTokenCookieKey)
-          .map(_.value.successNel[String])
-          .getOrElse(DomainError("Invalid XSRF Token cookie").failureNel)
+          .toSuccessNel(DomainError("Invalid XSRF Token cookie"))
+          .map(_.value)
       }
       headerXsrfToken <- {
         request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey))
-          .map(_.successNel[String])
-          .getOrElse(DomainError("No token").failureNel)
+          .toSuccessNel(DomainError("No token"))
       }
       matchingTokens <- {
         if (cookieXsrfToken == headerXsrfToken) {
           headerXsrfToken.successNel[String]
         } else {
-          DomainError(s"tokens did not match: cookie/$cookieXsrfToken, header/$headerXsrfToken").failureNel
+          DomainError(s"tokens did not match: cookie/$cookieXsrfToken, header/$headerXsrfToken")
+            .failureNel[String]
         }
       }
     } yield headerXsrfToken
@@ -99,7 +99,8 @@ trait Security { self: Controller =>
   /**
     * Ensures that the request has the proper authorization.
     *
-    */
+   */
+  @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
   def AuthAction[A](p: BodyParser[A] = parse.anyContent)
                 (f: (String, UserId,  Request[A]) => Result): Action[A] =
     Action(p) { implicit request =>
@@ -113,6 +114,7 @@ trait Security { self: Controller =>
     * Ensures that the request has the proper authorization.
     *
     */
+  @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
   def AuthActionAsync[A](p: BodyParser[A] = parse.anyContent)
                      (f: (String, UserId, Request[A]) => Future[Result]): Action[A] =
     Action.async(p) { implicit request =>

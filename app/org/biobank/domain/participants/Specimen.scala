@@ -74,7 +74,7 @@ sealed trait Specimen
 object Specimen {
   import org.biobank.infrastructure.JsonUtils._
 
-  implicit val specimenWrites = new Writes[Specimen] {
+  implicit val specimenWrites: Writes[Specimen] = new Writes[Specimen] {
       def writes(specimen: Specimen) = Json.obj(
           "id"               -> specimen.id,
           "inventoryId"      -> specimen.inventoryId,
@@ -117,18 +117,18 @@ trait SpecimenValidations {
 /**
  * A usable specimen is a specimen that can be used for processing.
  */
-case class UsableSpecimen(id:               SpecimenId,
-                          inventoryId:      String,
-                          specimenSpecId:   String,
-                          version:          Long,
-                          timeAdded:        DateTime,
-                          timeModified:     Option[DateTime],
-                          originLocationId: String,
-                          locationId:       String,
-                          containerId:      Option[ContainerId],
-                          positionId:       Option[ContainerSchemaPositionId],
-                          timeCreated:      DateTime,
-                          amount:           BigDecimal)
+final case class UsableSpecimen(id:               SpecimenId,
+                                inventoryId:      String,
+                                specimenSpecId:   String,
+                                version:          Long,
+                                timeAdded:        DateTime,
+                                timeModified:     Option[DateTime],
+                                originLocationId: String,
+                                locationId:       String,
+                                containerId:      Option[ContainerId],
+                                positionId:       Option[ContainerSchemaPositionId],
+                                timeCreated:      DateTime,
+                                amount:           BigDecimal)
     extends Specimen
     with SpecimenValidations
     with ParticipantValidations
@@ -195,7 +195,7 @@ case class UsableSpecimen(id:               SpecimenId,
                      containerId      = this.containerId,
                      positionId       = this.positionId,
                      timeCreated      = this.timeCreated,
-                     amount           = this.amount).success
+                     amount           = this.amount).successNel[String]
   }
 }
 
@@ -273,18 +273,18 @@ object UsableSpecimen
  *
  * It may be that the total amount of the spcimen has already been used in processing.
  */
-case class UnusableSpecimen(id:               SpecimenId,
-                            inventoryId:      String,
-                            specimenSpecId:   String,
-                            version:          Long,
-                            timeAdded:        DateTime,
-                            timeModified:     Option[DateTime],
-                            originLocationId: String,
-                            locationId:       String,
-                            containerId:      Option[ContainerId],
-                            positionId:       Option[ContainerSchemaPositionId],
-                            timeCreated:      DateTime,
-                            amount:           BigDecimal)
+final case class UnusableSpecimen(id:               SpecimenId,
+                                  inventoryId:      String,
+                                  specimenSpecId:   String,
+                                  version:          Long,
+                                  timeAdded:        DateTime,
+                                  timeModified:     Option[DateTime],
+                                  originLocationId: String,
+                                  locationId:       String,
+                                  containerId:      Option[ContainerId],
+                                  positionId:       Option[ContainerSchemaPositionId],
+                                  timeCreated:      DateTime,
+                                  amount:           BigDecimal)
     extends Specimen {
 
   def makeUsable(): DomainValidation[UsableSpecimen] = {
@@ -299,6 +299,6 @@ case class UnusableSpecimen(id:               SpecimenId,
                    containerId      = this.containerId,
                    positionId       = this.positionId,
                    timeCreated      = this.timeCreated,
-                   amount           = this.amount).success
+                   amount           = this.amount).successNel[String]
   }
 }

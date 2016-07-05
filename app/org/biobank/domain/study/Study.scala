@@ -41,7 +41,7 @@ sealed trait Study
 
 object Study {
 
-  implicit val studyWrites = new Writes[Study] {
+  implicit val studyWrites: Writes[Study] = new Writes[Study] {
       def writes(study: Study) = {
         Json.obj("id"              -> study.id,
                  "version"         -> study.version,
@@ -86,13 +86,13 @@ trait StudyValidations {
  * NOTE: functions withName and withDescription should be moved to the Study trait after this
  *       bug is fixed: https://issues.scala-lang.org/browse/SI-5122
  */
-case class DisabledStudy(id:                         StudyId,
-                         version:                    Long,
-                         timeAdded:                  DateTime,
-                         timeModified:               Option[DateTime],
-                         name:                       String,
-                         description:                Option[String],
-                         annotationTypes: Set[AnnotationType])
+final case class DisabledStudy(id:                         StudyId,
+                               version:                    Long,
+                               timeAdded:                  DateTime,
+                               timeModified:               Option[DateTime],
+                               name:                       String,
+                               description:                Option[String],
+                               annotationTypes: Set[AnnotationType])
     extends Study
     with StudyValidations
     with AnnotationTypeValidations
@@ -148,7 +148,7 @@ case class DisabledStudy(id:                         StudyId,
                  timeModified    = Some(DateTime.now),
                  name            = this.name,
                  description     = this.description,
-                 annotationTypes = this.annotationTypes).success
+                 annotationTypes = this.annotationTypes).successNel[String]
   }
 
   /** When a study will no longer collect specimens from participants it can be retired. */
@@ -159,7 +159,7 @@ case class DisabledStudy(id:                         StudyId,
                  timeModified    = Some(DateTime.now),
                  name            = this.name,
                  description     = this.description,
-                 annotationTypes = this.annotationTypes).success
+                 annotationTypes = this.annotationTypes).successNel[String]
   }
 
 }
@@ -199,13 +199,13 @@ object DisabledStudy extends StudyValidations with AnnotationTypeValidations {
  * This class has a private constructor and instances of this class can only be created using
  * the [[EnabledStudy.create]] method on the factory object.
  */
-case class EnabledStudy(id:                         StudyId,
-                        version:                    Long,
-                        timeAdded:                  DateTime,
-                        timeModified:               Option[DateTime],
-                        name:                       String,
-                        description:                Option[String],
-                        annotationTypes: Set[AnnotationType])
+final case class EnabledStudy(id:                         StudyId,
+                              version:                    Long,
+                              timeAdded:                  DateTime,
+                              timeModified:               Option[DateTime],
+                              name:                       String,
+                              description:                Option[String],
+                              annotationTypes: Set[AnnotationType])
     extends Study {
 
   def disable(): DomainValidation[DisabledStudy] = {
@@ -215,7 +215,7 @@ case class EnabledStudy(id:                         StudyId,
                   timeModified    = Some(DateTime.now),
                   name            = this.name,
                   description     = this.description,
-                  annotationTypes = this.annotationTypes).success
+                  annotationTypes = this.annotationTypes).successNel[String]
   }
 }
 
@@ -225,13 +225,13 @@ case class EnabledStudy(id:                         StudyId,
  * This class has a private constructor and instances of this class can only be created using
  * the [[RetiredStudy.create]] method on the factory object.
  */
-case class RetiredStudy(id:                         StudyId,
-                        version:                    Long,
-                        timeAdded:                  DateTime,
-                        timeModified:               Option[DateTime],
-                        name:                       String,
-                        description:                Option[String],
-                        annotationTypes: Set[AnnotationType])
+final case class RetiredStudy(id:                         StudyId,
+                              version:                    Long,
+                              timeAdded:                  DateTime,
+                              timeModified:               Option[DateTime],
+                              name:                       String,
+                              description:                Option[String],
+                              annotationTypes: Set[AnnotationType])
     extends Study {
 
   def unretire(): DomainValidation[DisabledStudy] = {
@@ -241,6 +241,6 @@ case class RetiredStudy(id:                         StudyId,
                   timeModified    = Some(DateTime.now),
                   name            = this.name,
                   description     = this.description,
-                  annotationTypes = this.annotationTypes).success
+                  annotationTypes = this.annotationTypes).successNel[String]
   }
 }

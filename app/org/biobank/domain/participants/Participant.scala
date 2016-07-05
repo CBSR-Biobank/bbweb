@@ -19,13 +19,13 @@ import scalaz.Scalaz._
  *        the system. This identifier is not the same as the ParticipantId value object
  *        used by the domain model.
  */
-case class Participant(id:           ParticipantId,
-                       studyId:      StudyId,
-                       version:      Long,
-                       timeAdded:    DateTime,
-                       timeModified: Option[DateTime],
-                       uniqueId:     String,
-                       annotations:  Set[Annotation])
+final case class Participant(id:           ParticipantId,
+                             studyId:      StudyId,
+                             version:      Long,
+                             timeAdded:    DateTime,
+                             timeModified: Option[DateTime],
+                             uniqueId:     String,
+                             annotations:  Set[Annotation])
     extends ConcurrencySafeEntity[ParticipantId]
     with HasStudyId
     with ParticipantValidations
@@ -90,6 +90,6 @@ object Participant extends ParticipantValidations {
     }
   }
 
-  implicit val participantWrites = Json.writes[Participant]
+  implicit val participantWrites: Writes[Participant] = Json.writes[Participant]
 
 }

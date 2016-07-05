@@ -42,6 +42,7 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
    * These are the events that are recovered during journal recovery. They cannot fail and must be
    * processed to recreate the current state of the aggregate.
    */
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveRecover: Receive = {
     case event: ParticipantEvent => event.eventType match {
       case et: EventType.Added             => applyAddedEvent(event)
@@ -60,6 +61,7 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
    * These are the commands that are requested. A command can fail, and will send the failure as a response
    * back to the user. Each valid command generates one or more events and is journaled.
    */
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveCommand: Receive = {
     case cmd: AddParticipantCmd =>
       process(addCmdToEvent(cmd))(applyAddedEvent)
@@ -122,7 +124,7 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
                                               cmd.stringValue,
                                               cmd.numberValue,
                                               cmd.selectedValues)
-      allAnnotations     <- (participant.annotations + annotation).success
+      allAnnotations     <- (participant.annotations + annotation).successNel[String]
       validAnnotation    <- Annotation.validateAnnotations(study.annotationTypes,
                                                            allAnnotations.toList)
       updatedParticipant <- participant.withAnnotation(annotation)
@@ -143,8 +145,8 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
           .toSuccessNel(s"annotation type with ID does not exist: ${cmd.annotationTypeId}")
       }
       notRequired <- {
-        if (annotType.required) DomainError(s"annotation is required").failureNel
-        else true.success
+        if (annotType.required) DomainError(s"annotation is required").failureNel[Boolean]
+        else true.successNel[String]
       }
       updatedParticipant <- participant.withoutAnnotation(cmd.annotationTypeId)
     } yield ParticipantEvent(updatedParticipant.id.id).update(
@@ -174,25 +176,25 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
     } else {
       val addedEvent = event.getAdded
 
-      Participant.create(studyId      = StudyId(addedEvent.getStudyId),
-                         id           = ParticipantId(event.id),
-                         version      = 0L,
-                         uniqueId     = addedEvent.getUniqueId,
-                         annotations  = addedEvent.annotations.map(annotationFromEvent).toSet
-      ).fold(
-        err => log.error(s"could not add collection event from event: $err, $event"),
-        p => {
-          participantRepository.put(p)
-          ()
-        }
-      )
+      val v = Participant.create(studyId      = StudyId(addedEvent.getStudyId),
+                                 id           = ParticipantId(event.id),
+                                 version      = 0L,
+                                 uniqueId     = addedEvent.getUniqueId,
+                                 annotations  = addedEvent.annotations.map(annotationFromEvent).toSet)
+
+      if (v.isFailure) {
+        log.error(s"could not add collection event from event: $v, $event")
+      }
+
+      v.foreach { p => participantRepository.put(p) }
     }
   }
 
   private def onValidEventAndVersion(event:        ParticipantEvent,
-                             eventType:    Boolean,
-                             eventVersion: Long)
-                            (fn: Participant => Unit): Unit = {
+                                     eventType:    Boolean,
+                                     eventVersion: Long)
+                                    (applyEvent: (Participant, DateTime) => DomainValidation[Boolean])
+      : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
     } else {
@@ -202,50 +204,45 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
           if (participant.version != eventVersion) {
             log.error(s"event version check failed: participant version: ${participant.version}, event: $event")
           } else {
-            fn(participant)
+            val eventTime = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
+            val update = applyEvent(participant, eventTime)
+
+            if (update.isFailure) {
+              log.error(s"participant update from event failed: $update")
+            }
           }
         }
       )
     }
   }
 
-  private def storeUpdated(participant: Participant, time: String): Unit = {
-    participantRepository.put(
-      participant.copy(timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(time))))
-    ()
-  }
-
   private def applyUniqueIdUpdatedEvent(event: ParticipantEvent) = {
     onValidEventAndVersion(event,
                            event.eventType.isUniqueIdUpdated,
-                           event.getUniqueIdUpdated.getVersion) { participant =>
-      participant.withUniqueId(event.getUniqueIdUpdated.getUniqueId).fold(
-        err => log.error(s"updating participant from event failed: $err"),
-        p => storeUpdated(p, event.getTime)
-      )
+                           event.getUniqueIdUpdated.getVersion) { (participant, eventTime) =>
+      val v = participant.withUniqueId(event.getUniqueIdUpdated.getUniqueId)
+      v.foreach( p => participantRepository.put(p.copy(timeModified = Some(eventTime))))
+      v.map(_ => true)
     }
   }
 
   private def applyAnnotationAddedEvent(event: ParticipantEvent) = {
     onValidEventAndVersion(event,
                            event.eventType.isAnnotationAdded,
-                           event.getAnnotationAdded.getVersion) { participant =>
-      val addedEvent = event.getAnnotationAdded
-      participant.withAnnotation(annotationFromEvent(addedEvent.getAnnotation)).fold(
-        err => log.error(s"updating participant from event failed: $err"),
-        p => storeUpdated(p, event.getTime)
-      )
+                           event.getAnnotationAdded.getVersion) { (participant, eventTime) =>
+      val v = participant.withAnnotation(annotationFromEvent(event.getAnnotationAdded.getAnnotation))
+      v.foreach( p => participantRepository.put(p.copy(timeModified = Some(eventTime))))
+      v.map(_ => true)
     }
   }
 
   private def applyAnnotationRemovedEvent(event: ParticipantEvent) = {
     onValidEventAndVersion(event,
                            event.eventType.isAnnotationRemoved,
-                           event.getAnnotationRemoved.getVersion) { participant =>
-      participant.withoutAnnotation(event.getAnnotationRemoved.getAnnotationTypeId).fold(
-        err => log.error(s"removing annotation from collection event failed: $err"),
-        p => storeUpdated(p, event.getTime)
-      )
+                           event.getAnnotationRemoved.getVersion) { (participant, eventTime) =>
+      val v = participant.withoutAnnotation(event.getAnnotationRemoved.getAnnotationTypeId)
+      v.foreach( p => participantRepository.put(p.copy(timeModified = Some(eventTime))))
+      v.map(_ => true)
     }
   }
 
@@ -256,19 +253,18 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
     val exists = participantRepository.getValues.exists { item =>
       matcher(item)
     }
-    if (exists) {
-      DomainError(s"$ErrMsgUniqueIdExists: $uniqueId").failureNel
-    } else {
-      true.success
-    }
+    if (exists) DomainError(s"$ErrMsgUniqueIdExists: $uniqueId").failureNel[Boolean]
+    else true.successNel[String]
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   private def uniqueIdAvailable(uniqueId: String): DomainValidation[Boolean] = {
     uniqueIdAvailableMatcher(uniqueId){ item =>
       item.uniqueId == uniqueId
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   private def uniqueIdAvailable(uniqueId: String, excludeParticipantId: ParticipantId)
       : DomainValidation[Boolean] = {
     uniqueIdAvailableMatcher(uniqueId){ item =>

@@ -45,13 +45,20 @@ class StudiesController @Inject() (val env:            Environment,
       Ok(studiesService.getCountsByStatus)
     }
 
-  def list(filter:   String,
-           status:   String,
-           sort:     String,
-           page:     Int,
-           pageSize: Int,
-           order:    String) =
+  def list(filterMaybe:   Option[String],
+           statusMaybe:   Option[String],
+           sortMaybe:     Option[String],
+           pageMaybe:     Option[Int],
+           pageSizeMaybe: Option[Int],
+           orderMaybe:    Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
+
+      val filter   = filterMaybe.fold { "" } { f => f }
+      val status   = statusMaybe.fold { "all" } { s => s }
+      val sort     = sortMaybe.fold { "name" } { s => s }
+      val page     = pageMaybe.fold { 1 } { p => p }
+      val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
+      val order    = orderMaybe.fold { "asc" } { o => o }
 
       Logger.debug(s"""|StudiesController:list: filter/$filter, status/$status, sort/$sort,
                        |  page/$page, pageSize/$pageSize, order/$order""".stripMargin)
@@ -73,8 +80,11 @@ class StudiesController @Inject() (val env:            Environment,
       )
     }
 
-  def listNames(filter: String, order: String) =
+  def listNames(filterMaybe: Option[String], orderMaybe:  Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
+
+      val filter = filterMaybe.fold { "" } { f => f }
+      val order  = orderMaybe.fold { "asc" } { o => o }
 
       SortOrder.fromString(order).fold(
         err => BadRequest(err.list.toList.mkString),
@@ -123,23 +133,23 @@ class StudiesController @Inject() (val env:            Environment,
     commandAction(Json.obj("id" -> id)) { cmd: UnretireStudyCmd => processCommand(cmd) }
 
   def valueTypes = Action(parse.empty) { request =>
-      Ok(AnnotationValueType.values.map(x => x.toString))
+      Ok(AnnotationValueType.values.map(x => x))
     }
 
   def anatomicalSourceTypes = Action(parse.empty) { request =>
-      Ok(AnatomicalSourceType.values.map(x => x.toString))
+      Ok(AnatomicalSourceType.values.map(x => x))
     }
 
   def specimenTypes = Action(parse.empty) { request =>
-      Ok(SpecimenType.values.map(x => x.toString))
+      Ok(SpecimenType.values.map(x => x))
     }
 
   def preservTypes = Action(parse.empty) { request =>
-      Ok(PreservationType.values.map(x => x.toString))
+      Ok(PreservationType.values.map(x => x))
     }
 
   def preservTempTypes = Action(parse.empty) { request =>
-      Ok(PreservationTemperatureType.values.map(x => x.toString))
+      Ok(PreservationTemperatureType.values.map(x => x))
     }
 
   /** Value types used by Specimen groups.
@@ -148,10 +158,10 @@ class StudiesController @Inject() (val env:            Environment,
   def specimenGroupValueTypes = Action(parse.empty) { request =>
       // FIXME add container types to this response
       Ok(Map(
-           "anatomicalSourceType"        -> AnatomicalSourceType.values.map(x => x.toString),
-           "preservationType"            -> PreservationType.values.map(x => x.toString),
-           "preservationTemperatureType" -> PreservationTemperatureType.values.map(x => x.toString),
-           "specimenType"                -> SpecimenType.values.map(x => x.toString)
+           "anatomicalSourceType"        -> AnatomicalSourceType.values.map(x => x),
+           "preservationType"            -> PreservationType.values.map(x => x),
+           "preservationTemperatureType" -> PreservationTemperatureType.values.map(x => x),
+           "specimenType"                -> SpecimenType.values.map(x => x)
          ))
     }
 

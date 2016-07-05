@@ -23,14 +23,14 @@ import scalaz.Scalaz._
   *         decided to stop a processing type in favour of another.  In this case enabled is set to false.
   *
   */
-case class ProcessingType(studyId:      StudyId,
-                          id:           ProcessingTypeId,
-                          version:      Long,
-                          timeAdded:    DateTime,
-                          timeModified: Option[DateTime],
-                          name:         String,
-                          description:  Option[String],
-                          enabled:      Boolean)
+final case class ProcessingType(studyId:      StudyId,
+                                id:           ProcessingTypeId,
+                                version:      Long,
+                                timeAdded:    DateTime,
+                                timeModified: Option[DateTime],
+                                name:         String,
+                                description:  Option[String],
+                                enabled:      Boolean)
     extends ConcurrencySafeEntity[ProcessingTypeId]
     with HasUniqueName
     with HasDescriptionOption
@@ -88,5 +88,5 @@ object ProcessingType {
     }
   }
 
-  implicit val processingTypeWrites = Json.writes[ProcessingType]
+  implicit val processingTypeWrites: Writes[ProcessingType] = Json.writes[ProcessingType]
 }

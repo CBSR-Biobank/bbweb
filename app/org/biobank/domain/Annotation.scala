@@ -11,10 +11,10 @@ import scalaz.Validation.FlatMap._
  * This is a value type.
  *
  */
-case class Annotation(annotationTypeId: String,
-                      stringValue:      Option[String],
-                      numberValue:      Option[String], // FIXME: should we use java.lang.Number
-                      selectedValues:   Set[String]) {
+final case class Annotation(annotationTypeId: String,
+                            stringValue:      Option[String],
+                            numberValue:      Option[String], // FIXME: should we use java.lang.Number
+                            selectedValues:   Set[String]) {
 
   override def equals(that: Any): Boolean = {
     that match {
@@ -36,7 +36,7 @@ object Annotation {
 
   case object AnnotationTypeIdRequired extends ValidationKey
 
-  implicit val annotationFormat = Json.format[Annotation]
+  implicit val annotationFormat: Format[Annotation] = Json.format[Annotation]
 
   def create(annotationTypeId: String,
              stringValue:      Option[String],
@@ -47,6 +47,7 @@ object Annotation {
       .map { _ => Annotation(annotationTypeId, stringValue, numberValue, selectedValues) }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validate(annotationTypeId: String,
                stringValue:            Option[String],
                numberValue:            Option[String],
@@ -66,7 +67,7 @@ object Annotation {
             || (!selectedValues.isEmpty && (stringValue.isDefined || numberValue.isDefined))) {
           DomainError("cannot have multiple values assigned").failureNel[Boolean]
       } else {
-        true.success
+        true.successNel[String]
       }
     }
 
@@ -79,6 +80,7 @@ object Annotation {
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validate(annotation: Annotation): DomainValidation[Boolean] = {
     validate(annotation.annotationTypeId,
              annotation.stringValue,
@@ -95,6 +97,7 @@ object Annotation {
    *
    * A DomainError is the result if these conditions fail.
    */
+  @SuppressWarnings(Array("org.wartremover.warts.Monad"))
   def validateAnnotations(annotationTypes: Set[AnnotationType],
                           annotations:     List[Annotation])
       : DomainValidation[Boolean]= {
@@ -105,30 +108,30 @@ object Annotation {
       .toSet
 
     if (!requiredAnnotTypeIds.isEmpty && annotations.isEmpty) {
-      DomainError("missing required annotation type(s)").failureNel
+      DomainError("missing required annotation type(s)").failureNel[Boolean]
     } else if (annotations.isEmpty && annotationTypes.isEmpty) {
-      true.success
+      true.successNel[String]
     } else {
       val annotTypeIdsFromAnnotationsAsSet = annotations.map(v => v.annotationTypeId).toSet
 
       for {
         hasAnnotationTypes <- {
-          if (annotationTypes.isEmpty) DomainError("no annotation types").failureNel
-          else true.success
+          if (annotationTypes.isEmpty) DomainError("no annotation types").failureNel[Boolean]
+          else true.successNel[String]
         }
         noDuplicates <- {
           if (annotTypeIdsFromAnnotationsAsSet.size != annotations.size) {
-            DomainError("duplicate annotations").failureNel
+            DomainError("duplicate annotations").failureNel[Boolean]
           } else {
-            true.success
+            true.successNel[String]
           }
         }
         haveRequired <- {
           if (requiredAnnotTypeIds.intersect(annotTypeIdsFromAnnotationsAsSet).size
                 != requiredAnnotTypeIds.size) {
-            DomainError("missing required annotation type(s)").failureNel
+            DomainError("missing required annotation type(s)").failureNel[Boolean]
           } else {
-            true.success
+            true.successNel[String]
           }
         }
         allBelong <- {
@@ -136,10 +139,10 @@ object Annotation {
           val notBelonging = annotTypeIdsFromAnnotationsAsSet.diff(annotTypeIds)
 
           if (notBelonging.isEmpty) {
-            true.success
+            true.successNel[String]
           } else {
             DomainError("annotation(s) do not belong to annotation types: "
-                          + notBelonging.mkString(", ")).failureNel
+                          + notBelonging.mkString(", ")).failureNel[Boolean]
           }
         }
       } yield allBelong

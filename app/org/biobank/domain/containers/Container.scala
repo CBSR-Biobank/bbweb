@@ -39,9 +39,10 @@ trait Container[T <: ContainerType]
    val position: ContainerSchemaPositionId
 }
 
+@SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Nothing"))
 object Container {
 
-  implicit val containerWrites = new Writes[Container[_]] {
+  implicit val containerWrites: Writes[Container[_]] = new Writes[Container[_]] {
     def writes(container: Container[_]) = Json.obj(
       "id"              -> container.id,
       "containerTypeId" -> container.containerTypeId,
@@ -54,22 +55,22 @@ object Container {
 
 }
 
-case class StorageContainer(id:              ContainerId,
-                            version:         Long,
-                            timeAdded:       DateTime,
-                            timeModified:    Option[DateTime],
-                            inventoryId:     String,
-                            containerTypeId: ContainerTypeId,
-                            parentId:        ContainerId,
-                            position:        ContainerSchemaPositionId)
+final case class StorageContainer(id:              ContainerId,
+                                  version:         Long,
+                                  timeAdded:       DateTime,
+                                  timeModified:    Option[DateTime],
+                                  inventoryId:     String,
+                                  containerTypeId: ContainerTypeId,
+                                  parentId:        ContainerId,
+                                  position:        ContainerSchemaPositionId)
     extends Container[StorageContainerType]
 
-case class SpecimenContainer(id:              ContainerId,
-                             version:         Long,
-                             timeAdded:       DateTime,
-                             timeModified:    Option[DateTime],
-                             inventoryId:     String,
-                             containerTypeId: ContainerTypeId,
-                             parentId:        ContainerId,
-                             position:        ContainerSchemaPositionId)
+final case class SpecimenContainer(id:              ContainerId,
+                                   version:         Long,
+                                   timeAdded:       DateTime,
+                                   timeModified:    Option[DateTime],
+                                   inventoryId:     String,
+                                   containerTypeId: ContainerTypeId,
+                                   parentId:        ContainerId,
+                                   position:        ContainerSchemaPositionId)
     extends Container[SpecimenContainerType]

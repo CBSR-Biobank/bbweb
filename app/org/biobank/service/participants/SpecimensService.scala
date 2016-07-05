@@ -126,7 +126,7 @@ class SpecimensServiceImpl @Inject() (
     ask(processor, cmd).mapTo[DomainValidation[SpecimenEvent]].map { validation =>
       for {
         event  <- validation
-        result <- true.success
+        result <- true.successNel[String]
       } yield result
     }
 

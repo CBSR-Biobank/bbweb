@@ -99,13 +99,13 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
 
     val centresFilteredByStatus = status match {
       case "all" =>
-        centresFilteredByName.success
+        centresFilteredByName.successNel[String]
       case "DisabledCentre" =>
-        centresFilteredByName.collect { case s: DisabledCentre => s }.success
+        centresFilteredByName.collect { case s: DisabledCentre => s }.successNel[String]
       case "EnabledCentre" =>
-        centresFilteredByName.collect { case s: EnabledCentre => s }.success
+        centresFilteredByName.collect { case s: EnabledCentre => s }.successNel[String]
       case _ =>
-        InvalidStatus(s"centre: $status").failureNel
+        InvalidStatus(s"centre: $status").failureNel[Seq[Centre]]
     }
 
     centresFilteredByStatus.map { centres =>

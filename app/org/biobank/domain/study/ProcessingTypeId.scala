@@ -9,13 +9,16 @@ import play.api.libs.json.Reads._
   *
   * Used as a value object to maintain associations to with objects in the system.
   */
-case class ProcessingTypeId(val id: String) extends IdentifiedValueObject[String] {}
+final case class ProcessingTypeId(val id: String) extends IdentifiedValueObject[String] {}
 
 object ProcessingTypeId {
 
   // Do not want JSON to create a sub object, we just want it to be converted
   // to a single string
-  implicit val processingTypeIdRead = (__).read[String].map( new ProcessingTypeId(_) )
-  implicit val processingTypeIdWrite = Writes{ (id: ProcessingTypeId) => JsString(id.id) }
+  implicit val processingTypeIdRead: Reads[ProcessingTypeId] =
+    (__).read[String].map( new ProcessingTypeId(_) )
+
+  implicit val processingTypeIdWrite: Writes[ProcessingTypeId] =
+    Writes{ (id: ProcessingTypeId) => JsString(id.id) }
 
 }

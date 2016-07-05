@@ -21,70 +21,70 @@ object StudyCommands {
       with HasIdentity
       with HasExpectedVersion
 
-  case class AddStudyCmd(userId:      Option[String],
-                         name:        String,
-                         description: Option[String])
+  final case class AddStudyCmd(userId:      Option[String],
+                               name:        String,
+                               description: Option[String])
       extends StudyCommand
 
-  case class UpdateStudyNameCmd(userId:          Option[String],
-                                id:              String,
-                                expectedVersion: Long,
-                                name:            String)
+  final case class UpdateStudyNameCmd(userId:          Option[String],
+                                      id:              String,
+                                      expectedVersion: Long,
+                                      name:            String)
       extends StudyModifyCommand
 
-  case class UpdateStudyDescriptionCmd(userId:          Option[String],
-                                       id:              String,
-                                       expectedVersion: Long,
-                                       description:     Option[String])
+  final case class UpdateStudyDescriptionCmd(userId:          Option[String],
+                                             id:              String,
+                                             expectedVersion: Long,
+                                             description:     Option[String])
       extends StudyModifyCommand
 
-  case class StudyAddParticipantAnnotationTypeCmd(userId:          Option[String],
-                                                  id:              String,
-                                                  expectedVersion: Long,
-                                                  name:            String,
-                                                  description:     Option[String],
-                                                  valueType:       AnnotationValueType,
-                                                  maxValueCount:   Option[Int],
-                                                  options:         Seq[String],
-                                                  required:        Boolean)
+  final case class StudyAddParticipantAnnotationTypeCmd(userId:          Option[String],
+                                                        id:              String,
+                                                        expectedVersion: Long,
+                                                        name:            String,
+                                                        description:     Option[String],
+                                                        valueType:       AnnotationValueType,
+                                                        maxValueCount:   Option[Int],
+                                                        options:         Seq[String],
+                                                        required:        Boolean)
       extends StudyModifyCommand
 
-  case class StudyUpdateParticipantAnnotationTypeCmd(userId:          Option[String],
-                                                     id:              String,
-                                                     uniqueId:        String,
-                                                     expectedVersion: Long,
-                                                     name:            String,
-                                                     description:     Option[String],
-                                                     valueType:       AnnotationValueType,
-                                                     maxValueCount:   Option[Int],
-                                                     options:         Seq[String],
-                                                     required:        Boolean)
+  final case class StudyUpdateParticipantAnnotationTypeCmd(userId:          Option[String],
+                                                           id:              String,
+                                                           uniqueId:        String,
+                                                           expectedVersion: Long,
+                                                           name:            String,
+                                                           description:     Option[String],
+                                                           valueType:       AnnotationValueType,
+                                                           maxValueCount:   Option[Int],
+                                                           options:         Seq[String],
+                                                           required:        Boolean)
       extends StudyModifyCommand
 
-  case class UpdateStudyRemoveAnnotationTypeCmd(userId:          Option[String],
-                                                id:              String,
-                                                expectedVersion: Long,
-                                                uniqueId:        String)
+  final case class UpdateStudyRemoveAnnotationTypeCmd(userId:          Option[String],
+                                                      id:              String,
+                                                      expectedVersion: Long,
+                                                      uniqueId:        String)
       extends StudyModifyCommand
 
-  case class EnableStudyCmd(userId:          Option[String],
-                            id:              String,
-                            expectedVersion: Long)
+  final case class EnableStudyCmd(userId:          Option[String],
+                                  id:              String,
+                                  expectedVersion: Long)
       extends StudyModifyCommand
 
-  case class DisableStudyCmd(userId:    Option[String],
-                             id:              String,
-                             expectedVersion: Long)
+  final case class DisableStudyCmd(userId:    Option[String],
+                                   id:              String,
+                                   expectedVersion: Long)
       extends StudyModifyCommand
 
-  case class RetireStudyCmd(userId:    Option[String],
-                            id: String,
-                            expectedVersion: Long)
+  final case class RetireStudyCmd(userId:    Option[String],
+                                  id: String,
+                                  expectedVersion: Long)
       extends StudyModifyCommand
 
-  case class UnretireStudyCmd(userId:    Option[String],
-                              id: String,
-                              expectedVersion: Long)
+  final case class UnretireStudyCmd(userId:    Option[String],
+                                    id: String,
+                                    expectedVersion: Long)
       extends StudyModifyCommand
 
 
@@ -97,18 +97,18 @@ object StudyCommands {
       with HasExpectedVersion
 
   // specimen link annotation type
-  case class AddSpecimenLinkAnnotationTypeCmd(
+  final case class AddSpecimenLinkAnnotationTypeCmd(
     userId:    Option[String],
     studyId:       String,
     name:          String,
     description:   Option[String],
     valueType:     AnnotationValueType,
-    maxValueCount: Option[Int] = None,
+    maxValueCount: Option[Int],
     options:       Seq[String],
     required:      Boolean)
       extends StudyAnnotationTypeCommand
 
-  case class UpdateSpecimenLinkAnnotationTypeCmd(
+  final case class UpdateSpecimenLinkAnnotationTypeCmd(
     userId:    Option[String],
     studyId:         String,
     id:              String,
@@ -121,7 +121,7 @@ object StudyCommands {
     required:      Boolean)
       extends StudyAnnotationTypeModifyCommand
 
-  case class RemoveSpecimenLinkAnnotationTypeCmd(
+  final case class RemoveSpecimenLinkAnnotationTypeCmd(
     userId:    Option[String],
     id:              String,
     expectedVersion: Long)
@@ -134,7 +134,7 @@ object StudyCommands {
       with HasIdentity
       with HasExpectedVersion
 
-  case class AddProcessingTypeCmd(
+  final case class AddProcessingTypeCmd(
     userId:    Option[String],
     studyId:     String,
     name:        String,
@@ -142,7 +142,7 @@ object StudyCommands {
     enabled:     Boolean)
       extends ProcessingTypeCommand
 
-  case class UpdateProcessingTypeCmd(
+  final case class UpdateProcessingTypeCmd(
     userId:    Option[String],
     studyId:         String,
     id:              String,
@@ -152,7 +152,7 @@ object StudyCommands {
     enabled:         Boolean)
       extends ProcessingTypeModifyCommand
 
-  case class RemoveProcessingTypeCmd(
+  final case class RemoveProcessingTypeCmd(
     userId:    Option[String],
     studyId:         String,
     id:              String,
@@ -171,7 +171,7 @@ object StudyCommands {
       with HasIdentity
       with HasExpectedVersion
 
-  case class AddSpecimenLinkTypeCmd(
+  final case class AddSpecimenLinkTypeCmd(
     userId:    Option[String],
     processingTypeId:      String,
     expectedInputChange:   BigDecimal,
@@ -185,7 +185,7 @@ object StudyCommands {
     annotationTypeData:    List[SpecimenLinkTypeAnnotationTypeData])
       extends SpecimenLinkTypeCommand
 
-  case class UpdateSpecimenLinkTypeCmd(
+  final case class UpdateSpecimenLinkTypeCmd(
     userId:    Option[String],
     processingTypeId:      String,
     id:                    String,
@@ -201,33 +201,69 @@ object StudyCommands {
     annotationTypeData:    List[SpecimenLinkTypeAnnotationTypeData])
       extends SpecimenLinkTypeModifyCommand
 
-  case class RemoveSpecimenLinkTypeCmd(
-    userId:    Option[String],
-    processingTypeId: String,
-    id: String,
-    expectedVersion: Long)
+  final case class RemoveSpecimenLinkTypeCmd(userId:           Option[String],
+                                             processingTypeId: String,
+                                             id:               String,
+                                             expectedVersion:  Long)
       extends SpecimenLinkTypeModifyCommand
 
   //--
 
-  implicit val addStudyCmdReads = Json.reads[AddStudyCmd]
-  implicit val updateStudyNameCmdReads = Json.reads[UpdateStudyNameCmd]
-  implicit val updateStudyDescriptionCmdReads = Json.reads[UpdateStudyDescriptionCmd]
-  implicit val studyAddParticipantAnnotationTypeCmdReads = Json.reads[StudyAddParticipantAnnotationTypeCmd]
-  implicit val studyUpdateParticipantAnnotationTypeCmdReads = Json.reads[StudyUpdateParticipantAnnotationTypeCmd]
-  implicit val updateStudyRemoveAnnotationTypeCmdReads = Json.reads[UpdateStudyRemoveAnnotationTypeCmd]
-  implicit val enableStudyCmdReads = Json.reads[EnableStudyCmd]
-  implicit val disableStudyCmdReads = Json.reads[DisableStudyCmd]
-  implicit val retireStudyCmdReads = Json.reads[RetireStudyCmd]
-  implicit val unretireStudyCmdReads = Json.reads[UnretireStudyCmd]
+  implicit val addStudyCmdReads: Reads[AddStudyCmd] =
+    Json.reads[AddStudyCmd]
 
-  implicit val addProcessingTypeCmdReads = Json.reads[AddProcessingTypeCmd]
-  implicit val updateProcessingTypeCmdReads = Json.reads[UpdateProcessingTypeCmd]
-  implicit val removeProcessingTypeCmdReads = Json.reads[RemoveProcessingTypeCmd]
-  implicit val addSpecimenLinkAnnotationTypeCmdReads = Json.reads[AddSpecimenLinkAnnotationTypeCmd]
-  implicit val updateSpecimenLinkAnnotationTypeCmdReads = Json.reads[UpdateSpecimenLinkAnnotationTypeCmd]
-  implicit val removeSpecimenLinkAnnotationTypeCmdReads = Json.reads[RemoveSpecimenLinkAnnotationTypeCmd]
-  implicit val addSpecimenLinkTypeCmdReads = Json.reads[AddSpecimenLinkTypeCmd]
-  implicit val updateSpecimenLinkTypeCmdReads = Json.reads[UpdateSpecimenLinkTypeCmd]
-  implicit val removeSpecimenLinkTypeCmdReads = Json.reads[RemoveSpecimenLinkTypeCmd]
+  implicit val updateStudyNameCmdReads: Reads[UpdateStudyNameCmd] =
+    Json.reads[UpdateStudyNameCmd]
+
+  implicit val updateStudyDescriptionCmdReads: Reads[UpdateStudyDescriptionCmd] =
+    Json.reads[UpdateStudyDescriptionCmd]
+
+  implicit val studyAddParticipantAnnotationTypeCmdReads: Reads[StudyAddParticipantAnnotationTypeCmd] =
+    Json.reads[StudyAddParticipantAnnotationTypeCmd]
+
+  implicit val studyUpdateParticipantAnnotationTypeCmdReads: Reads[StudyUpdateParticipantAnnotationTypeCmd] =
+    Json.reads[StudyUpdateParticipantAnnotationTypeCmd]
+
+  implicit val updateStudyRemoveAnnotationTypeCmdReads: Reads[UpdateStudyRemoveAnnotationTypeCmd] =
+    Json.reads[UpdateStudyRemoveAnnotationTypeCmd]
+
+  implicit val enableStudyCmdReads: Reads[EnableStudyCmd] =
+    Json.reads[EnableStudyCmd]
+
+  implicit val disableStudyCmdReads: Reads[DisableStudyCmd] =
+    Json.reads[DisableStudyCmd]
+
+  implicit val retireStudyCmdReads: Reads[RetireStudyCmd] =
+    Json.reads[RetireStudyCmd]
+
+  implicit val unretireStudyCmdReads: Reads[UnretireStudyCmd] =
+    Json.reads[UnretireStudyCmd]
+
+  implicit val addProcessingTypeCmdReads: Reads[AddProcessingTypeCmd] =
+    Json.reads[AddProcessingTypeCmd]
+
+  implicit val updateProcessingTypeCmdReads: Reads[UpdateProcessingTypeCmd] =
+    Json.reads[UpdateProcessingTypeCmd]
+
+  implicit val removeProcessingTypeCmdReads: Reads[RemoveProcessingTypeCmd] =
+    Json.reads[RemoveProcessingTypeCmd]
+
+  implicit val addSpecimenLinkAnnotationTypeCmdReads: Reads[AddSpecimenLinkAnnotationTypeCmd] =
+    Json.reads[AddSpecimenLinkAnnotationTypeCmd]
+
+  implicit val updateSpecimenLinkAnnotationTypeCmdReads: Reads[UpdateSpecimenLinkAnnotationTypeCmd] =
+    Json.reads[UpdateSpecimenLinkAnnotationTypeCmd]
+
+  implicit val removeSpecimenLinkAnnotationTypeCmdReads: Reads[RemoveSpecimenLinkAnnotationTypeCmd] =
+    Json.reads[RemoveSpecimenLinkAnnotationTypeCmd]
+
+  implicit val addSpecimenLinkTypeCmdReads: Reads[AddSpecimenLinkTypeCmd] =
+    Json.reads[AddSpecimenLinkTypeCmd]
+
+  implicit val updateSpecimenLinkTypeCmdReads: Reads[UpdateSpecimenLinkTypeCmd] =
+    Json.reads[UpdateSpecimenLinkTypeCmd]
+
+  implicit val removeSpecimenLinkTypeCmdReads: Reads[RemoveSpecimenLinkTypeCmd] =
+    Json.reads[RemoveSpecimenLinkTypeCmd]
+
 }

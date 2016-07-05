@@ -52,7 +52,7 @@ class AuthTokenImpl @Inject() (val env: Environment, val cacheApi: CacheApi)
    */
   def getUserId(token: String): DomainValidation[UserId] = {
     val userId = cacheApi.get[UserId](token).toSuccessNel(InvalidToken.toString)
-    userId map { cacheApi.set(token, _, tokenExpirationTime) }
+    userId foreach { cacheApi.set(token, _, tokenExpirationTime) }
     userId
   }
 

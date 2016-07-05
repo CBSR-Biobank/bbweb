@@ -343,7 +343,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include regex ("EntityCriteriaError.centre with location id")
+        (json \ "message").as[String] must include regex ("EntityCriteriaError.*centre with location id")
       }
 
       "fails when adding a shipment with no TO location id" in {
@@ -352,7 +352,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include regex ("EntityCriteriaError.centre with location id")
+        (json \ "message").as[String] must include regex ("EntityCriteriaError.*centre with location id")
       }
 
     }
@@ -484,7 +484,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
       (json \ "status").as[String] must include ("error")
 
-      (json \ "message").as[String] must include regex ("EntityCriteriaError.centre with location id")
+      (json \ "message").as[String] must include regex ("EntityCriteriaError.*centre with location id")
     }
 
     "not allow updating the from location to an invalid id" in {
@@ -499,7 +499,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
       (json \ "status").as[String] must include ("error")
 
-      (json \ "message").as[String] must include regex ("EntityCriteriaError.centre with location id")
+      (json \ "message").as[String] must include regex ("EntityCriteriaError.*centre with location id")
     }
 
   }
@@ -545,7 +545,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
       (json \ "status").as[String] must include ("error")
 
-      (json \ "message").as[String] must include regex ("EntityCriteriaError.centre with location id")
+      (json \ "message").as[String] must include regex ("EntityCriteriaError.*centre with location id")
     }
 
     "not allow updating the TO location to an invalid id" in {
@@ -560,7 +560,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
       (json \ "status").as[String] must include ("error")
 
-      (json \ "message").as[String] must include regex ("EntityCriteriaError.centre with location id")
+      (json \ "message").as[String] must include regex ("EntityCriteriaError.*centre with location id")
     }
 
   }

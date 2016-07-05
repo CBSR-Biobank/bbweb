@@ -76,8 +76,10 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
       "list multiple users" in {
         val users = (0 until 2).map { x =>
-          factory.createRegisteredUser
-        }.map(user => userRepository.put(user)).toList
+            factory.createRegisteredUser
+          }.toList
+
+        users.foreach(userRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri       = uri,
@@ -92,20 +94,17 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
       "list a single user when filtered by name" in {
         val users = List(factory.createRegisteredUser.copy(name = "user1"),
                          factory.createRegisteredUser.copy(name = "user2"))
-        .map(user => userRepository.put(user))
-
-        val jsonItem = PagedResultsSpec(this)
-        .singleItemResult(uri, Map("nameFilter" -> users(0).name))
+        users.foreach(userRepository.put)
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri, Map("nameFilter" -> users(0).name))
         compareObj(jsonItem, users(0))
       }
 
       "list a single user when filtered by email" in {
         val users = List(factory.createRegisteredUser.copy(email = "user1@test.com"),
                          factory.createRegisteredUser.copy(email = "user2@test.com"))
-        .map(user => userRepository.put(user))
+        users.foreach(userRepository.put)
 
-        val jsonItem = PagedResultsSpec(this)
-        .singleItemResult(uri, Map("emailFilter" -> users(0).email))
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri, Map("emailFilter" -> users(0).email))
         compareObj(jsonItem, users(0))
       }
 
@@ -113,10 +112,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val users = List(factory.createRegisteredUser.copy(email = "user1@test.com"),
                          factory.createActiveUser.copy(email = "user2@test.com"),
                          factory.createActiveUser.copy(email = "user3@test.com"))
-        .map(user => userRepository.put(user))
+        users.foreach(userRepository.put)
 
-        val jsonItem = PagedResultsSpec(this)
-        .singleItemResult(uri, Map("status" -> "RegisteredUser"))
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri, Map("status" -> "RegisteredUser"))
         compareObj(jsonItem, users(0))
       }
 
@@ -124,7 +122,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val users = List(factory.createRegisteredUser.copy(email = "user1@test.com"),
                          factory.createActiveUser.copy(email = "user2@test.com"),
                          factory.createActiveUser.copy(email = "user3@test.com"))
-        .map(user => userRepository.put(user))
+        users.foreach(userRepository.put)
 
         val expectedUsers = List(users(1), users(2))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
@@ -143,7 +141,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val users = List(factory.createActiveUser.copy(email = "user1@test.com"),
                          factory.createLockedUser.copy(email = "user2@test.com"),
                          factory.createLockedUser.copy(email = "user3@test.com"))
-        .map(user => userRepository.put(user))
+        users.foreach(userRepository.put)
 
         val expectedUsers = List(users(1), users(2))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
@@ -162,7 +160,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val users = List(factory.createRegisteredUser.copy(name = "user3"),
                          factory.createRegisteredUser.copy(name = "user2"),
                          factory.createRegisteredUser.copy(name = "user1"))
-        .map(user => userRepository.put(user))
+        users.foreach(userRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
@@ -182,7 +180,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val users = List(factory.createRegisteredUser.copy(email = "user3@test.com"),
                          factory.createActiveUser.copy(email = "user2@test.com"),
                          factory.createActiveUser.copy(email = "user1@test.com"))
-        .map(user => userRepository.put(user))
+        users.foreach(userRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
@@ -202,7 +200,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val users = List(factory.createRegisteredUser.copy(email = "user3@test.com"),
                          factory.createLockedUser.copy(email = "user2@test.com"),
                          factory.createActiveUser.copy(email = "user1@test.com"))
-        .map(user => userRepository.put(user))
+        users.foreach(userRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
@@ -222,7 +220,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val users = List(factory.createRegisteredUser.copy(email = "user3@test.com"),
                          factory.createLockedUser.copy(email = "user2@test.com"),
                          factory.createActiveUser.copy(email = "user1@test.com"))
-        .map(user => userRepository.put(user))
+        users.foreach(userRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
@@ -242,7 +240,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val users = List(factory.createRegisteredUser.copy(email = "user3@test.com"),
                          factory.createLockedUser.copy(email = "user2@test.com"),
                          factory.createActiveUser.copy(email = "user1@test.com"))
-        .map(user => userRepository.put(user))
+        users.foreach(userRepository.put)
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
           uri = uri,
@@ -706,7 +704,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val reqJson = Json.obj("expectedVersion" -> Some(user.version))
 
         // this request is valid since user is logged in
-        var fakeRequest = FakeRequest(POST, updateUri(user, "lock"))
+        val fakeRequest = FakeRequest(POST, updateUri(user, "lock"))
         .withJsonBody(reqJson)
         .withHeaders("X-XSRF-TOKEN" -> validToken)
         .withCookies(Cookie("XSRF-TOKEN", badToken))

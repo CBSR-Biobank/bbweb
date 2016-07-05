@@ -127,20 +127,20 @@ class CentreSpec extends DomainSpec {
 
     "not be created with a null or empty name" in {
       List("", null).foreach { name =>
-        var centre = factory.createDisabledCentre.copy(name = name)
+        val centre = factory.createDisabledCentre.copy(name = name)
         createFrom(centre) mustFail "InvalidName"
       }
     }
 
     "not be created with an empty description option" in {
       List(Some(""), Some(null)).foreach { description =>
-        var centre = factory.createDisabledCentre.copy(description = description)
+        val centre = factory.createDisabledCentre.copy(description = description)
         createFrom(centre) mustFail "InvalidDescription"
       }
     }
 
     "have more than one validation fail" in {
-      var centre = factory.createDisabledCentre.copy(version = -2L, name = null)
+      val centre = factory.createDisabledCentre.copy(version = -2L, name = null)
       createFrom(centre) mustFail ("InvalidVersion",  "InvalidName")
     }
 

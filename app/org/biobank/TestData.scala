@@ -194,19 +194,20 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
 
       val hashids = Hashids("test-data-centres")
 
-      val centres = centreData.zipWithIndex.foreach { case ((name, description), index) =>
-          val centre: Centre = DisabledCentre(
-              id           = CentreId(hashids.encode(index)),
-              version      = 0L,
-              timeAdded    = DateTime.now,
-              timeModified = None,
-              name         = name,
-              description  = Some(description),
-              studyIds     = Set.empty,
-              locations    = Set.empty)
-          centreRepository.put(centre)
-        }
+      centreData.zipWithIndex.foreach { case ((name, description), index) =>
+        val centre: Centre = DisabledCentre(
+            id           = CentreId(hashids.encode(index)),
+            version      = 0L,
+            timeAdded    = DateTime.now,
+            timeModified = None,
+            name         = name,
+            description  = Some(description),
+            studyIds     = Set.empty,
+            locations    = Set.empty)
+        centreRepository.put(centre)
+      }
     }
+    ()
   }
 
   def addMultipleStudies(): Unit = {
@@ -215,28 +216,31 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
 
       val hashids = Hashids("test-data-studies")
 
-      val studies = studyData.zipWithIndex.foreach { case ((name, description), index) =>
-          val descMaybe = if (name == "AHFEM") Some(s"$description\n\n$ahfemDescription")
-                          else Some(description)
+      studyData.zipWithIndex.foreach { case ((name, description), index) =>
+        val descMaybe = if (name == "AHFEM") Some(s"$description\n\n$ahfemDescription")
+                        else Some(description)
 
-          val study: Study = DisabledStudy(id              = StudyId(hashids.encode(index)),
-                                           version         = 0L,
-                                           timeAdded       = DateTime.now,
-                                           timeModified    = None,
-                                           name            = name,
-                                           description     = descMaybe,
-                                           annotationTypes = getBbpspParticipantAnnotationTypes)
-          studyRepository.put(study)
-        }
+        val study: Study = DisabledStudy(id              = StudyId(hashids.encode(index)),
+                                         version         = 0L,
+                                         timeAdded       = DateTime.now,
+                                         timeModified    = None,
+                                         name            = name,
+                                         description     = descMaybe,
+                                         annotationTypes = getBbpspParticipantAnnotationTypes)
+        studyRepository.put(study)
+      }
 
       addCollectionEvents
     }
+    ()
   }
 
-  def addCollectionEvents() = {
+  def addCollectionEvents(): Unit = {
     Logger.debug("addCollectionEvents")
 
-    studyRepository.getValues.find { s => s.name == "BBPSP"}.map { bbpsp =>
+    studyRepository.getValues
+      .find { s => s.name == "BBPSP"}
+      .foreach { bbpsp =>
       val hashids = Hashids("test-data-cevent-types")
 
       // Use a list since "id" is determined at the time of adding to the repository
@@ -263,6 +267,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
                                  annotationTypes    = Set.empty))
 
       ceventTypes.foreach { cet => collectionEventTypeRepository.put(cet) }
+      ()
     }
     ()
   }
@@ -350,7 +355,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
           description   = None,
           valueType     = AnnotationValueType.DateTime,
           maxValueCount = None,
-          options       = Seq.empty,
+          options       = Seq.empty[String],
           required      = true),
         AnnotationType(
           uniqueId      = hashids.encode(2),
@@ -371,7 +376,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
           description   = None,
           valueType     = AnnotationValueType.Text,
           maxValueCount = None,
-          options       = Seq.empty,
+          options       = Seq.empty[String],
           required      = true),
         AnnotationType(
           uniqueId      = hashids.encode(2),
@@ -391,20 +396,20 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
       val salt = passwordHasher.generateSalt
       val hashids = Hashids("test-data-users")
 
-      val users = userData.zipWithIndex.foreach { case((name, email), index) =>
-          val user: User = ActiveUser(
-              id           = UserId(hashids.encode(index)),
-              version      = 0L,
-              timeAdded    = DateTime.now,
-              timeModified = None,
-              name         = name,
-              email        = email,
-              password     = passwordHasher.encrypt(plainPassword, salt),
-              salt         = salt,
-              avatarUrl    = None
-            )
-          userRepository.put(user)
-        }
+      userData.zipWithIndex.foreach { case((name, email), index) =>
+        val user: User = ActiveUser(
+            id           = UserId(hashids.encode(index)),
+            version      = 0L,
+            timeAdded    = DateTime.now,
+            timeModified = None,
+            name         = name,
+            email        = email,
+            password     = passwordHasher.encrypt(plainPassword, salt),
+            salt         = salt,
+            avatarUrl    = None
+          )
+        userRepository.put(user)
+      }
     }
   }
 

@@ -6,6 +6,7 @@ import org.biobank.infrastructure.EnumUtils._
 /** Describes how a [[Specimen]] should be preserved/stored by describing a preservation method. Also see
   * [[PreservationTemperatureType]].
   */
+@SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
 object PreservationType extends Enumeration {
   type PreservationType = Value
 
@@ -21,6 +22,7 @@ object PreservationType extends Enumeration {
   * Celcius), as well as a preservation method (see [[PreservationType]]).
   *
   */
+@SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
 object PreservationTemperatureType extends Enumeration {
   type PreservationTemperatureType = Value
 

@@ -75,7 +75,7 @@ sealed trait ContainerType
 
 object ContainerType {
 
-  implicit val containerTypeWrites = new Writes[ContainerType] {
+  implicit val containerTypeWrites: Writes[ContainerType] = new Writes[ContainerType] {
     def writes(containerType: ContainerType) = Json.obj(
       "id"           -> containerType.id,
       "centreId"     -> containerType.centreId,
@@ -95,16 +95,16 @@ object ContainerType {
 /**
  * When a container type is enabled, it ''can'' be used to create new containers.
  */
-case class StorageContainerType(id:           ContainerTypeId,
-                                centreId:     Option[CentreId],
-                                schemaId:     ContainerSchemaId,
-                                version:      Long,
-                                timeAdded:    DateTime,
-                                timeModified: Option[DateTime],
-                                name:         String,
-                                description:  Option[String],
-                                shared:       Boolean,
-                                enabled:      Boolean)
+final case class StorageContainerType(id:           ContainerTypeId,
+                                      centreId:     Option[CentreId],
+                                      schemaId:     ContainerSchemaId,
+                                      version:      Long,
+                                      timeAdded:    DateTime,
+                                      timeModified: Option[DateTime],
+                                      name:         String,
+                                      description:  Option[String],
+                                      shared:       Boolean,
+                                      enabled:      Boolean)
     extends ContainerType {
 
   // override def withName(name: String): DomainValidation[StorageContainerType] = {
@@ -162,16 +162,16 @@ object StorageContainerType extends ContainerValidations {
 /**
  * When a container type is disabled, it ''can not'' be used to create new containers.
  */
-case class SpecimenContainerType(id:           ContainerTypeId,
-                                 centreId:     Option[CentreId],
-                                 schemaId:     ContainerSchemaId,
-                                 version:      Long,
-                                 timeAdded:    DateTime,
-                                 timeModified: Option[DateTime],
-                                 name:         String,
-                                 description:  Option[String],
-                                 shared:       Boolean,
-                                 enabled:      Boolean)
+final case class SpecimenContainerType(id:           ContainerTypeId,
+                                       centreId:     Option[CentreId],
+                                       schemaId:     ContainerSchemaId,
+                                       version:      Long,
+                                       timeAdded:    DateTime,
+                                       timeModified: Option[DateTime],
+                                       name:         String,
+                                       description:  Option[String],
+                                       shared:       Boolean,
+                                       enabled:      Boolean)
     extends ContainerType
 
 object SpecimenContainerType extends ContainerValidations {

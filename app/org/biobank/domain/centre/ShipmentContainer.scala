@@ -8,16 +8,16 @@ import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
 
-case class ShipmentContainerId(id: String) extends IdentifiedValueObject[String]
+final case class ShipmentContainerId(id: String) extends IdentifiedValueObject[String]
 
 object ShipmentContainerId {
 
   // Do not want JSON to create a sub object, we just want it to be converted
   // to a single string
-  implicit val shipmentContainerIdReader =
+  implicit val shipmentContainerIdReader: Reads[ShipmentContainerId] =
     (__ \ "id").read[String].map( new ShipmentContainerId(_) )
 
-  implicit val shipmentContainerIdWriter =
+  implicit val shipmentContainerIdWriter: Writes[ShipmentContainerId] =
     Writes{ (shipmentContainerId: ShipmentContainerId) => JsString(shipmentContainerId.id) }
 
 }
@@ -27,13 +27,13 @@ object ShipmentContainerId {
  * [org.biobank.domain.centre.Shipment].
  *
  */
-case class ShipmentContainer(id:          ShipmentContainerId,
-                            version:      Long,
-                            timeAdded:    DateTime,
-                            timeModified: Option[DateTime],
-                            shipmentId:   ShipmentId,
-                            containerId:  ContainerId,
-                            state:        ShipmentItemState)
+final case class ShipmentContainer(id:          ShipmentContainerId,
+                                   version:      Long,
+                                   timeAdded:    DateTime,
+                                   timeModified: Option[DateTime],
+                                   shipmentId:   ShipmentId,
+                                   containerId:  ContainerId,
+                                   state:        ShipmentItemState)
     extends ConcurrencySafeEntity[ShipmentContainerId] {
 }
 

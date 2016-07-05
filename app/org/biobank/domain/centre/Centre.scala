@@ -57,7 +57,7 @@ sealed trait Centre
 
 object Centre {
 
-  implicit val centreWrites = new Writes[Centre] {
+  implicit val centreWrites: Writes[Centre] = new Writes[Centre] {
       def writes(centre: Centre) = {
         Json.obj("id"           -> centre.id,
                  "version"      -> centre.version,
@@ -100,14 +100,14 @@ trait CentreValidations {
   * This class has a private constructor and instances of this class can only be created using the
   * [[DisabledCentre.create]] method on the factory object.
   */
-case class DisabledCentre(id:           CentreId,
-                          version:      Long,
-                          timeAdded:    DateTime,
-                          timeModified: Option[DateTime],
-                          name:         String,
-                          description:  Option[String],
-                          studyIds:     Set[StudyId],
-                          locations:    Set[Location])
+final case class DisabledCentre(id:           CentreId,
+                                version:      Long,
+                                timeAdded:    DateTime,
+                                timeModified: Option[DateTime],
+                                name:         String,
+                                description:  Option[String],
+                                studyIds:     Set[StudyId],
+                                locations:    Set[Location])
     extends Centre with CentreValidations {
   import org.biobank.CommonValidations._
   import org.biobank.domain.CommonValidations._
@@ -147,7 +147,7 @@ case class DisabledCentre(id:           CentreId,
     } { _ =>
       copy(studyIds     = studyIds - studyId,
            version      = version + 1,
-           timeModified = Some(DateTime.now)).success
+           timeModified = Some(DateTime.now)).successNel[String]
     }
   }
 
@@ -169,14 +169,14 @@ case class DisabledCentre(id:           CentreId,
     } { location =>
       copy(locations    = locations - location,
            version      = version + 1,
-           timeModified = Some(DateTime.now)).success
+           timeModified = Some(DateTime.now)).successNel[String]
     }
   }
 
   /** Used to enable a centre after it has been configured, or had configuration changes made on it. */
   def enable(): DomainValidation[EnabledCentre] = {
     if (this.locations.size <= 0) {
-      EntityCriteriaError("centre does not have locations").failureNel
+      EntityCriteriaError("centre does not have locations").failureNel[EnabledCentre]
     } else {
       EnabledCentre(id           = this.id,
                     version      = this.version + 1,
@@ -185,7 +185,7 @@ case class DisabledCentre(id:           CentreId,
                     name         = this.name,
                     description  = this.description,
                     studyIds     = this.studyIds,
-                    locations    = this.locations).success
+                    locations    = this.locations).successNel[String]
     }
   }
 }
@@ -228,14 +228,14 @@ object DisabledCentre extends CentreValidations {
   * This class has a private constructor and instances of this class can only be created using
   * the [[EnabledCentre.create]] method on the factory object.
   */
-case class EnabledCentre(id:           CentreId,
-                         version:      Long,
-                         timeAdded:    DateTime,
-                         timeModified: Option[DateTime],
-                         name:         String,
-                         description:  Option[String],
-                         studyIds:     Set[StudyId],
-                         locations:    Set[Location])
+final case class EnabledCentre(id:           CentreId,
+                               version:      Long,
+                               timeAdded:    DateTime,
+                               timeModified: Option[DateTime],
+                               name:         String,
+                               description:  Option[String],
+                               studyIds:     Set[StudyId],
+                               locations:    Set[Location])
     extends Centre {
 
   def disable(): DomainValidation[DisabledCentre] = {
@@ -246,6 +246,6 @@ case class EnabledCentre(id:           CentreId,
                    name         = this.name,
                    description  = this.description,
                    studyIds     = this.studyIds,
-                   locations    = this.locations).success
+                   locations    = this.locations).successNel[String]
   }
 }

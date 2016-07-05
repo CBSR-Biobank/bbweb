@@ -9,13 +9,16 @@ import play.api.libs.json.Reads._
   *
   * Used as a value object to maintain associations to with objects in the system.
   */
-case class ParticipantId(id: String) extends IdentifiedValueObject[String]
+final case class ParticipantId(id: String) extends IdentifiedValueObject[String]
 
 object ParticipantId {
 
   // Do not want JSON to create a sub object, we just want it to be converted
   // to a single string
-  implicit val participantIdReader = (__).read[String].map( new ParticipantId(_) )
-  implicit val participantIdWriter = Writes{ (id: ParticipantId) => JsString(id.id) }
+  implicit val participantIdReader: Reads[ParticipantId] =
+    (__).read[String].map( new ParticipantId(_) )
+
+  implicit val participantIdWriter: Writes[ParticipantId] =
+    Writes{ (id: ParticipantId) => JsString(id.id) }
 
 }

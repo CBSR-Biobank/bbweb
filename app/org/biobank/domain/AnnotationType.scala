@@ -1,6 +1,6 @@
 package org.biobank.domain
 
-import org.biobank.ValidationKey
+import org.biobank._
 import org.biobank.domain.AnnotationValueType._
 
 import play.api.libs.json._
@@ -25,13 +25,13 @@ import scalaz.Scalaz._
  *
  * @param required When true, the user must enter a value for this annotation.
  */
-case class AnnotationType(uniqueId:      String,
-                          name:          String,
-                          description:   Option[String],
-                          valueType:     AnnotationValueType,
-                          maxValueCount: Option[Int],
-                          options:       Seq[String],
-                          required:      Boolean)
+final case class AnnotationType(uniqueId:      String,
+                                name:          String,
+                                description:   Option[String],
+                                valueType:     AnnotationValueType,
+                                maxValueCount: Option[Int],
+                                options:       Seq[String],
+                                required:      Boolean)
     extends HasName
     with HasDescriptionOption
     with AnnotationTypeValidations {
@@ -69,6 +69,7 @@ trait AnnotationTypeValidations {
 
   case object DuplicateOptionsError extends ValidationKey
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validate(name:          String,
                description:   Option[String],
                valueType:     AnnotationValueType,
@@ -85,6 +86,7 @@ trait AnnotationTypeValidations {
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validate(annotationType: AnnotationType): DomainValidation[Boolean] = {
     validate(annotationType.name,
              annotationType.description,
@@ -101,7 +103,7 @@ trait AnnotationTypeValidations {
       if (n > -1) {
         option.successNel
       } else {
-        MaxValueCountError.toString.failureNel[Option[Int]]
+        MaxValueCountError.failureNel[Option[Int]]
       }
     }
   }
@@ -110,13 +112,13 @@ trait AnnotationTypeValidations {
    *  Validates each item in the map and returns all failures.
    */
   def validateOptions(options: Seq[String]): DomainValidation[Seq[String]] = {
-    if (options.distinct.size == options.size) {
+    if (options.distinct.size === options.size) {
       options.toList.map(validateString(_, OptionRequired)).sequenceU.fold(
         err => err.toList.mkString(",").failureNel[Seq[String]],
         list => list.toSeq.successNel
       )
     } else {
-      DuplicateOptionsError.toString.failureNel[Seq[String]]
+      DuplicateOptionsError.failureNel[Seq[String]]
     }
   }
 
@@ -130,8 +132,9 @@ trait AnnotationTypeValidations {
    * - max value count must be 0
    * - options must be None
    */
-  def validateSelectParams(
-    valueType: AnnotationValueType, maxValueCount: Option[Int], options: Seq[String])
+  def validateSelectParams(valueType:     AnnotationValueType,
+                           maxValueCount: Option[Int],
+                           options:       Seq[String])
       : DomainValidation[Boolean] = {
     if (valueType == AnnotationValueType.Select) {
       maxValueCount.fold {
@@ -177,7 +180,7 @@ trait AnnotationTypeValidations {
 object AnnotationType extends AnnotationTypeValidations {
   import org.biobank.domain.CommonValidations._
 
-  implicit val annotationTypeWrites = Json.writes[AnnotationType]
+  implicit val annotationTypeWrites: Writes[AnnotationType] = Json.writes[AnnotationType]
 
   def create(name:          String,
              description:   Option[String],

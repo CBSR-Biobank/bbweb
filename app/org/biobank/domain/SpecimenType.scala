@@ -5,6 +5,7 @@ import org.biobank.infrastructure.EnumUtils._
 
 /** A standardized set of classifications that describe what a [[Specimen]] is.
   */
+@SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
 object SpecimenType extends Enumeration {
   type SpecimenType = Value
 

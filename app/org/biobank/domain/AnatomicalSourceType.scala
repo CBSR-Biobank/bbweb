@@ -7,6 +7,7 @@ import org.biobank.infrastructure.EnumUtils._
   * A standardized set of regions from a [[org.biobank.domain.participant.Participant]] where a [[Specimen]]
   * is collected from.
   */
+@SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
 object AnatomicalSourceType extends Enumeration {
   type AnatomicalSourceType = Value
 

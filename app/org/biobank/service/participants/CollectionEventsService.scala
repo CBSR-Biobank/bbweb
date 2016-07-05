@@ -64,9 +64,9 @@ class CollectionEventsServiceImpl @Inject() (
         .sortWith(sortFunc)
 
       if (order == AscendingOrder) {
-        result.success
+        result.successNel[String]
       } else {
-        result.reverse.success
+        result.reverse.successNel[String]
       }
     }
   }
@@ -99,7 +99,7 @@ class CollectionEventsServiceImpl @Inject() (
     ask(processor, cmd).mapTo[DomainValidation[CollectionEventEvent]].map { validation =>
       for {
         event  <- validation
-        result <- true.success
+        result <- true.successNel[String]
       } yield result
     }
 

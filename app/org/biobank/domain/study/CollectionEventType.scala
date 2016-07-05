@@ -46,16 +46,16 @@ trait CollectionEventTypeValidations {
   * @param annotationTypeData The [[AnnotationType]]s for a collection event type.
   *
   */
-case class CollectionEventType(studyId:            StudyId,
-                               id:                 CollectionEventTypeId,
-                               version:            Long,
-                               timeAdded:          DateTime,
-                               timeModified:       Option[DateTime],
-                               name:               String,
-                               description:        Option[String],
-                               recurring:          Boolean,
-                               specimenSpecs:      Set[CollectionSpecimenSpec],
-                               annotationTypes:    Set[AnnotationType])
+final case class CollectionEventType(studyId:            StudyId,
+                                     id:                 CollectionEventTypeId,
+                                     version:            Long,
+                                     timeAdded:          DateTime,
+                                     timeModified:       Option[DateTime],
+                                     name:               String,
+                                     description:        Option[String],
+                                     recurring:          Boolean,
+                                     specimenSpecs:      Set[CollectionSpecimenSpec],
+                                     annotationTypes:    Set[AnnotationType])
     extends ConcurrencySafeEntity[CollectionEventTypeId]
     with HasName
     with HasDescriptionOption
@@ -82,7 +82,7 @@ case class CollectionEventType(studyId:            StudyId,
   def withRecurring(recurring: Boolean): DomainValidation[CollectionEventType] = {
     copy(recurring   = recurring,
          version      = version + 1,
-         timeModified = Some(DateTime.now)).success
+         timeModified = Some(DateTime.now)).successNel[String]
   }
 
   def withAnnotationType(annotationType: AnnotationType)
@@ -164,7 +164,8 @@ case class CollectionEventType(studyId:            StudyId,
 object CollectionEventType extends CollectionEventTypeValidations {
   import org.biobank.domain.CommonValidations._
 
-  implicit val collectionEventTypeWrites = Json.writes[CollectionEventType]
+  implicit val collectionEventTypeWrites: Writes[CollectionEventType] =
+    Json.writes[CollectionEventType]
 
   def create(studyId:            StudyId,
              id:                 CollectionEventTypeId,

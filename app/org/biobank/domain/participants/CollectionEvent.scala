@@ -26,15 +26,15 @@ trait CollectionEventValidations extends ParticipantValidations {
  * @param timeCompleted a time stamp for when the participant made the visit to the centre.
  * @param visitNumber an positive integer used to uniquely identify the visit. The fist visit starts at 1.
  */
-case class CollectionEvent(id:                    CollectionEventId,
-                           participantId:         ParticipantId,
-                           collectionEventTypeId: CollectionEventTypeId,
-                           version:               Long,
-                           timeAdded:             DateTime,
-                           timeModified:          Option[DateTime],
-                           timeCompleted:         DateTime,
-                           visitNumber:           Int,
-                           annotations:           Set[Annotation])
+final case class CollectionEvent(id:                    CollectionEventId,
+                                 participantId:         ParticipantId,
+                                 collectionEventTypeId: CollectionEventTypeId,
+                                 version:               Long,
+                                 timeAdded:             DateTime,
+                                 timeModified:          Option[DateTime],
+                                 timeCompleted:         DateTime,
+                                 visitNumber:           Int,
+                                 annotations:           Set[Annotation])
     extends ConcurrencySafeEntity[CollectionEventId]
     with HasParticipantId
     with CollectionEventValidations
@@ -52,7 +52,7 @@ case class CollectionEvent(id:                    CollectionEventId,
   def withTimeCompleted(timeCompleted: DateTime): DomainValidation[CollectionEvent] = {
     copy(timeCompleted = timeCompleted,
          version         = version + 1,
-         timeModified    = Some(DateTime.now)).success
+         timeModified    = Some(DateTime.now)).successNel[String]
   }
 
   def withAnnotation(annotation: Annotation): DomainValidation[CollectionEvent] = {
@@ -124,5 +124,5 @@ object CollectionEvent
   def compareByTimeCompleted(a: CollectionEvent, b: CollectionEvent) =
     (a.timeCompleted compareTo b.timeCompleted) < 0
 
-  implicit val collectionEventWrites = Json.writes[CollectionEvent]
+  implicit val collectionEventWrites: Writes[CollectionEvent] = Json.writes[CollectionEvent]
 }

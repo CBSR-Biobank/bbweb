@@ -29,7 +29,8 @@ class CeventSpecimenRepositoryImpl
     with CeventSpecimenRepository {
 
   // only existing center and location IDs should be stored, never new IDs
-  def nextIdentity = throw new IllegalStateException("should not be used")
+  @SuppressWarnings(Array("org.wartremover.warts.Throw"))
+  def nextIdentity: SpecimenId = throw new IllegalStateException("should not be used")
 
   def withCeventId(ceventId: CollectionEventId): Set[CeventSpecimen] = {
     getValues.filter(x => x.ceventId == ceventId).toSet
@@ -38,11 +39,11 @@ class CeventSpecimenRepositoryImpl
   def withSpecimenId(specimenId: SpecimenId): DomainValidation[CeventSpecimen] = {
     val ceventSpecimens = getValues.filter(x => x.specimenId == specimenId).toSet
     if (ceventSpecimens.isEmpty) {
-      DomainError(s"location is not for a centre: ${specimenId.id}").failureNel
+      DomainError(s"location is not for a centre: ${specimenId.id}").failureNel[CeventSpecimen]
     } else if (ceventSpecimens.size > 1) {
-      DomainError(s"location has more than one centre: ${specimenId.id}").failureNel
+      DomainError(s"location has more than one centre: ${specimenId.id}").failureNel[CeventSpecimen]
     } else {
-      ceventSpecimens.head.success
+      ceventSpecimens.head.successNel[String]
     }
   }
 

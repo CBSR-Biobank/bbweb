@@ -50,8 +50,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
   }
 
   def checkInvalidCentreId(path: String, jsonField: JsObject): Unit = {
-    var invalidCentreId = nameGenerator.next[Centre]
-    var cmdJson = Json.obj("id"              -> nameGenerator.next[Centre],
+    val invalidCentreId = nameGenerator.next[Centre]
+    val cmdJson = Json.obj("id"              -> nameGenerator.next[Centre],
                            "expectedVersion" -> 0L) ++ jsonField
 
     val json = makeRequest(POST, s"/centres/$path/$invalidCentreId", NOT_FOUND, cmdJson)
@@ -69,7 +69,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
     val centre = factory.createDisabledCentre
     centreRepository.put(centre)
 
-    var cmdJson = Json.obj("id"              -> centre.id.id,
+    val cmdJson = Json.obj("id"              -> centre.id.id,
                            "expectedVersion" -> Some(centre.version + 1)) ++ jsonField
 
     val json = makeRequest(POST, uri(centre, path), BAD_REQUEST, cmdJson)
@@ -90,7 +90,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
     val url = uri(centre, path) + urlExtra
     centreRepository.put(centre)
 
-    var cmdJson = Json.obj("expectedVersion" -> Some(centre.version)) ++ jsonField
+    val cmdJson = Json.obj("expectedVersion" -> Some(centre.version)) ++ jsonField
 
     val json = makeRequest(POST, url, BAD_REQUEST, cmdJson)
 
@@ -149,7 +149,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
       "list multiple centres" in {
         val centres = List(factory.createDisabledCentre, factory.createDisabledCentre)
-          .map{ centre => centreRepository.put(centre) }
+        centres.foreach(centreRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
@@ -163,10 +163,9 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
       "list a single centre when filtered by name" in {
         val centres = List(factory.createDisabledCentre, factory.createEnabledCentre)
-          .map { centre => centreRepository.put(centre) }
+        centres.foreach(centreRepository.put)
 
-        val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri, Map("filter" -> centres(0).name))
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri, Map("filter" -> centres(0).name))
         compareObj(jsonItem, centres(0))
       }
 
@@ -174,7 +173,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val centres = List(factory.createDisabledCentre,
                            factory.createEnabledCentre,
                            factory.createEnabledCentre)
-          .map { centre => centreRepository.put(centre) }
+        centres.foreach(centreRepository.put)
 
         val jsonItem = PagedResultsSpec(this)
           .singleItemResult(uri, Map("status" -> "DisabledCentre"))
@@ -186,7 +185,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
                            factory.createDisabledCentre,
                            factory.createEnabledCentre,
                            factory.createEnabledCentre)
-          .map { centre => centreRepository.put(centre) }
+        centres.foreach(centreRepository.put)
 
         val expectedCentres = List(centres(0), centres(1))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
@@ -206,7 +205,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
                            factory.createDisabledCentre,
                            factory.createEnabledCentre,
                            factory.createEnabledCentre)
-          .map { centre => centreRepository.put(centre) }
+        centres.foreach(centreRepository.put)
 
         val expectedCentres = List(centres(2), centres(3))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
@@ -226,7 +225,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
                            factory.createDisabledCentre.copy(name = "CTR2"),
                            factory.createEnabledCentre.copy(name = "CTR1"),
                            factory.createEnabledCentre.copy(name = "CTR0"))
-          .map { centre => centreRepository.put(centre) }
+        centres.foreach(centreRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
@@ -245,7 +244,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
       "list centres sorted by status" in {
         val centres = List(factory.createEnabledCentre, factory.createDisabledCentre)
-          .map { centre => centreRepository.put(centre) }
+        centres.foreach(centreRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
@@ -262,7 +261,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
       "list centres sorted by status in descending order" in {
         val centres = List(factory.createEnabledCentre, factory.createDisabledCentre)
-          .map { centre => centreRepository.put(centre) }
+        centres.foreach(centreRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
@@ -282,7 +281,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
                            factory.createDisabledCentre.copy(name = "CTR2"),
                            factory.createEnabledCentre.copy(name = "CTR1"),
                            factory.createEnabledCentre.copy(name = "CTR0"))
-          .map { centre => centreRepository.put(centre) }
+        centres.foreach(centreRepository.put)
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
           uri = uri,
@@ -298,7 +297,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
                            factory.createDisabledCentre.copy(name = "CTR2"),
                            factory.createEnabledCentre.copy(name = "CTR1"),
                            factory.createEnabledCentre.copy(name = "CTR0"))
-          .map { centre => centreRepository.put(centre) }
+        centres.foreach(centreRepository.put)
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
           uri = uri,
@@ -331,8 +330,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val centres = List(factory.createDisabledCentre,
                            factory.createDisabledCentre,
                            factory.createEnabledCentre)
-          .foreach { c => centreRepository.put(c) }
-
+        centres.foreach(centreRepository.put)
         val json = makeRequest(GET, uri + "/counts")
         (json \ "status").as[String] must include ("success")
         (json \ "data" \ "total").as[Long] must be (3)
@@ -612,18 +610,6 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     "POST /centres/locations/:id" must {
 
-      def compareLocationsIgnoringId(loc1: Location, loc2: Location) = {
-        loc1 must have (
-          'name           (loc2.name),
-          'street         (loc2.street),
-          'city           (loc2.city),
-          'province       (loc2.province),
-          'postalCode     (loc2.postalCode),
-          'countryIsoCode (loc2.countryIsoCode),
-          'poBoxNumber    (loc2.poBoxNumber)
-        )
-      }
-
       "add a location to a disabled centre" in {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
@@ -638,8 +624,6 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val jsonLocations = (json \ "data" \ "locations").as[List[JsObject]]
         jsonLocations must have length 1
         validateJsonLocation(jsonLocations(0), location)
-
-        val replyCentreId = CentreId((json \ "data" \ "id").as[String])
 
         val jsonId = (json \ "data" \ "id").as[String]
         jsonId must be (centre.id.id)
@@ -712,8 +696,6 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         jsonLocations must have length 1
         validateJsonLocation(jsonLocations(0), locationWithNewName)
 
-        val replyCentreId = CentreId((json \ "data" \ "id").as[String])
-
         val jsonId = (json \ "data" \ "id").as[String]
         jsonId must be (centre.id.id)
 
@@ -773,16 +755,14 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       "delete a location from a centre" in {
         val locations = List(factory.createLocation, factory.createLocation)
         var locationsSet = locations.toSet
-        var centre: Centre = factory.createDisabledCentre.copy(locations = locationsSet)
+        val centre: Centre = factory.createDisabledCentre.copy(locations = locationsSet)
         centreRepository.put(centre)
 
-        var expectedVersion = centre.version
-
-        locations.foreach { location =>
+        locations.zipWithIndex.foreach { case (location, index) =>
+          val expectedVersion = centre.version + index
           val json = makeRequest(DELETE,
                                  uri(centre, "locations") + s"/$expectedVersion/${location.uniqueId}")
 
-          expectedVersion = expectedVersion + 1
           (json \ "status").as[String] must include ("success")
 
           locationsSet = locationsSet - location
@@ -795,7 +775,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
             repoCentre must have (
               'id          (centre.id),
-              'version     (expectedVersion),
+              'version     (expectedVersion + 1),
               'name        (centre.name),
               'description (centre.description)
             )
@@ -827,7 +807,6 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val centre = factory.createDisabledCentre.copy(locations = Set.empty)
         centreRepository.put(centre)
 
-        val locationId = nameGenerator.next[String]
         val json = makeRequest(DELETE,
                                uri(centre, "locations") + s"/${centre.version}/${location.uniqueId}",
                                NOT_FOUND)

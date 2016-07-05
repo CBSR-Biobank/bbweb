@@ -26,10 +26,11 @@ scalacOptions in Compile ++= Seq(
   "-language:existentials",
   "-language:postfixOps",
   "-unchecked",          // additional warnings where generated code depends on assumptions
-  "-Xlint",
+  "-Xlint:_",
   "-Ywarn-adapted-args", // Warn if an argument list is modified to match the receiver
   "-Ywarn-dead-code",
   "-Ywarn-inaccessible",
+  "-Ywarn-unused",
   "-Ywarn-unused-import",
   "-Ywarn-value-discard" // Warn when non-Unit expression results are unused
 )
@@ -108,7 +109,9 @@ libraryDependencies ++= Seq(
   "org.scalatestplus"           %% "play"                                % "1.4.0"              % "test",
   "org.pegdown"                 %  "pegdown"                             % "1.6.0"              % "test",
   "org.codehaus.janino"         %  "janino"                              % "2.7.8"              % "test"
-)
+  )
+
+incOptions := incOptions.value.withNameHashing(true)
 
 routesGenerator := InjectedRoutesGenerator
 
@@ -141,3 +144,13 @@ PB.runProtoc in PB.protobufConfig := (args =>
 com.jamesward.play.BrowserNotifierKeys.shouldOpenBrowser := false
 
 coverageExcludedPackages := "<empty>;Reverse.*"
+
+wartremoverErrors in (Compile, compile) ++= Warts.allBut(Wart.NoNeedForMonad, Wart.Equals, Wart.ToString)
+
+wartremoverExcluded += crossTarget.value / "routes" / "main" / "router" / "Routes.scala"
+wartremoverExcluded += crossTarget.value / "routes" / "main" / "router" / "RoutesPrefix.scala"
+wartremoverExcluded += crossTarget.value / "routes" / "main" / "controllers" / "ReverseRoutes.scala"
+wartremoverExcluded += crossTarget.value / "routes" / "main" / "controllers" / "javascript" / "JavaScriptReverseRoutes.scala"
+
+// see following for explanation: https://github.com/puffnfresh/wartremover/issues/219
+wartremoverExcluded ++= ((sourceManaged.value / "main" / "compiled_protobuf" / "org" / "biobank" / "infrastructure") ** "*.scala").get

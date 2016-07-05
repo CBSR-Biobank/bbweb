@@ -66,7 +66,7 @@ abstract class ControllerFixture
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  private val dbName = "bbweb-test"
+  //private val dbName = "bbweb-test"
 
   var adminToken: String = ""
 
@@ -99,7 +99,7 @@ abstract class ControllerFixture
                   expectedStatus: Int,
                   json:           JsValue,
                   token:          String): JsValue = {
-    var fakeRequest = FakeRequest(method, path)
+    val fakeRequest = FakeRequest(method, path)
       .withJsonBody(json)
       .withHeaders("X-XSRF-TOKEN" -> token)
       .withCookies(Cookie("XSRF-TOKEN", token))

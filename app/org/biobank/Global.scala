@@ -6,31 +6,26 @@ import javax.inject._
 import akka.stream.Materializer
 import play.filters.gzip.GzipFilter
 import play.api.{Configuration}
-import java.io.File
+//import java.io.File
 
 /**
  * This is a trait so that it can be used by tests also.
  */
 @Singleton
+@SuppressWarnings(Array("org.wartremover.warts.Throw"))
 class Global @Inject()(implicit val mat: Materializer,
                        configuration: Configuration) {
 
-  new GzipFilter(shouldGzip = (request, response) => {
-                     response.body.contentType.exists(_.startsWith("text/html"))
+  val filter = new GzipFilter(shouldGzip = (request, response) => {
+                                  response.body.contentType.exists(_.startsWith("text/html"))
                    })
-
-  /**
-   * Controllers must be resolved through the application context. There is a special method of GlobalSettings
-   * that we can override to resolve a given controller. This resolution is required by the Play router.
-   */
-  //override def getControllerInstance[A](controllerClass: Class[A]): A = injector.getInstance(controllerClass)
-
   checkEmailConfig
   createSqlDdlScripts
 
   def checkEmailConfig() = {
-    configuration.getString("play.mailer.host").getOrElse(
-      throw new RuntimeException("smtp server information needs to be set in email.conf"))
+    if (configuration.getString("play.mailer.host").isEmpty) {
+      throw new RuntimeException("smtp server information needs to be set in email.conf")
+    }
   }
 
   /**
@@ -60,14 +55,14 @@ class Global @Inject()(implicit val mat: Materializer,
   /**
    * Writes the given DDL statements to a file.
    */
-  private def writeScript(
-    ddlStatements: Seq[Iterator[String]],
-    directory: File,
-    fileName: String): Unit = {
-    // val createScript = new File(directory, fileName)
-    // val createSql = ddlStatements.flatten.mkString("\n\n")
-    // Files.writeFileIfChanged(createScript, ScriptHeader + createSql)
-  }
+  // private def writeScript(
+  //   ddlStatements: Seq[Iterator[String]],
+  //   directory: File,
+  //   fileName: String): Unit = {
+  //   // val createScript = new File(directory, fileName)
+  //   // val createSql = ddlStatements.flatten.mkString("\n\n")
+  //   // Files.writeFileIfChanged(createScript, ScriptHeader + createSql)
+  // }
 
 }
 

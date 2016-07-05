@@ -36,8 +36,8 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
    * Authenticate a user.
    */
   def authenticate(email: String, password: String): DomainValidation[User] = {
-    if (this.password == password) this.success
-    else DomainError("authentication failure").failureNel
+    if (this.password == password) this.successNel[String]
+    else DomainError("authentication failure").failureNel[User]
   }
 
   override def toString =
@@ -56,7 +56,7 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
 
 object User {
 
-  implicit val userWrites = new Writes[User] {
+  implicit val userWrites: Writes[User] = new Writes[User] {
     def writes(user: User) = {
       Json.obj(
         "id"           -> user.id,
@@ -110,7 +110,7 @@ trait UserValidations {
   val urlRegex = "^((https?|ftp)://|(www|ftp)\\.)[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?$".r
 
   def validateEmail(email: String): DomainValidation[String] = {
-    emailRegex.findFirstIn(email).fold { InvalidEmail.toString.failureNel[String] } { e => email.successNel }
+    emailRegex.findFirstIn(email).fold { InvalidEmail.failureNel[String] } { e => email.successNel }
   }
 
   def validateAvatarUrl(urlOption: Option[String]): DomainValidation[Option[String]] = {
@@ -118,9 +118,9 @@ trait UserValidations {
       none[String].successNel[String]
     } { url  =>
       urlRegex.findFirstIn(url).fold {
-        InvalidUrl.toString.failureNel[Option[String]]
+        InvalidUrl.failureNel[Option[String]]
       } { e =>
-        some(url).successNel
+        some(url).successNel[String]
       }
     }
   }
@@ -130,15 +130,15 @@ trait UserValidations {
 /** A user that just registered with the system. This user does not yet have full access
   * the system.
   */
-case class RegisteredUser(id:           UserId,
-                          version:      Long,
-                          timeAdded:    DateTime,
-                          timeModified: Option[DateTime],
-                          name:         String,
-                          email:        String,
-                          password:     String,
-                          salt:         String,
-                          avatarUrl:    Option[String]) extends User with UserValidations {
+final case class RegisteredUser(id:           UserId,
+                                version:      Long,
+                                timeAdded:    DateTime,
+                                timeModified: Option[DateTime],
+                                name:         String,
+                                email:        String,
+                                password:     String,
+                                salt:         String,
+                                avatarUrl:    Option[String]) extends User with UserValidations {
 
   /* Activates a registered user. */
   def activate(): DomainValidation[ActiveUser] = {
@@ -150,7 +150,7 @@ case class RegisteredUser(id:           UserId,
                email        = this.email,
                password     = this.password,
                salt         = this.salt,
-               avatarUrl    = this.avatarUrl).success
+               avatarUrl    = this.avatarUrl).successNel[String]
   }
 
 }
@@ -183,15 +183,15 @@ object RegisteredUser extends UserValidations {
 }
 
 /** A user that has access to the system. */
-case class ActiveUser(id:           UserId,
-                      version:      Long,
-                      timeAdded:    DateTime,
-                      timeModified: Option[DateTime],
-                      name:         String,
-                      email:        String,
-                      password:     String,
-                      salt:         String,
-                      avatarUrl:    Option[String])
+final case class ActiveUser(id:           UserId,
+                            version:      Long,
+                            timeAdded:    DateTime,
+                            timeModified: Option[DateTime],
+                            name:         String,
+                            email:        String,
+                            password:     String,
+                            salt:         String,
+                            avatarUrl:    Option[String])
     extends User
     with UserValidations {
   import CommonValidations._
@@ -235,21 +235,21 @@ case class ActiveUser(id:           UserId,
                email        = this.email,
                password     = this.password,
                salt         = this.salt,
-               avatarUrl    = this.avatarUrl).success
+               avatarUrl    = this.avatarUrl).successNel[String]
   }
 
 }
 
 /** A user who no longer has access to the system. */
-case class LockedUser(id:           UserId,
-                      version:      Long,
-                      timeAdded:    DateTime,
-                      timeModified: Option[DateTime],
-                      name:         String,
-                      email:        String,
-                      password:     String,
-                      salt:         String,
-                      avatarUrl:    Option[String])
+final case class LockedUser(id:           UserId,
+                            version:      Long,
+                            timeAdded:    DateTime,
+                            timeModified: Option[DateTime],
+                            name:         String,
+                            email:        String,
+                            password:     String,
+                            salt:         String,
+                            avatarUrl:    Option[String])
     extends User {
 
   /** Unlocks a locked user. */
@@ -262,7 +262,7 @@ case class LockedUser(id:           UserId,
                email        = this.email,
                password     = this.password,
                salt         = this.salt,
-               avatarUrl    = this.avatarUrl).success
+               avatarUrl    = this.avatarUrl).successNel[String]
   }
 
 }
@@ -272,29 +272,29 @@ object UserHelper {
 
   def isUserRegistered(user: User): DomainValidation[RegisteredUser] = {
     user match {
-      case registeredUser: RegisteredUser => registeredUser.success
-      case _ => InvalidStatus(s"not registered").failureNel
+      case registeredUser: RegisteredUser => registeredUser.successNel[String]
+      case _ => InvalidStatus(s"not registered").failureNel[RegisteredUser]
     }
   }
 
   def isUserActive(user: User): DomainValidation[ActiveUser] = {
     user match {
-      case activeUser: ActiveUser => activeUser.success
-      case _ => InvalidStatus(s"not active").failureNel
+      case activeUser: ActiveUser => activeUser.successNel[String]
+      case _ => InvalidStatus(s"not active").failureNel[ActiveUser]
     }
   }
 
   def isUserLocked(user: User): DomainValidation[LockedUser] = {
     user match {
-      case lockedUser: LockedUser => lockedUser.success
-      case _ => InvalidStatus(s"not active").failureNel
+      case lockedUser: LockedUser => lockedUser.successNel[String]
+      case _ => InvalidStatus(s"not active").failureNel[LockedUser]
     }
   }
 
   def isUserNotLocked(user: User): DomainValidation[User] = {
     user match {
-      case lockedUser: LockedUser => InvalidStatus(s"user is locked").failureNel
-      case _ => user.success
+      case lockedUser: LockedUser => InvalidStatus(s"user is locked").failureNel[User]
+      case _ => user.successNel[String]
     }
   }
 }

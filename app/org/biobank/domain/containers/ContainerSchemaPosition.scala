@@ -21,9 +21,9 @@ trait ContainerSchemaPositionValidations {
  *
  * This is a value object because it must be referenced and the [[label]] could be quite long.
  */
-case class ContainerSchemaPosition(id:       ContainerSchemaPositionId,
-                                   schemaId: ContainerSchemaId,
-                                   label:    String)
+final case class ContainerSchemaPosition(id:       ContainerSchemaPositionId,
+                                         schemaId: ContainerSchemaId,
+                                         label:    String)
     extends IdentifiedDomainObject[ContainerSchemaPositionId]
 
 object ContainerSchemaPosition extends ContainerSchemaPositionValidations {
@@ -40,6 +40,7 @@ object ContainerSchemaPosition extends ContainerSchemaPositionValidations {
     }
   }
 
-  implicit val containerSchemPositionWrites = Json.writes[ContainerSchemaPosition]
+  implicit val containerSchemPositionWrites: Writes[ContainerSchemaPosition] =
+    Json.writes[ContainerSchemaPosition]
 
 }

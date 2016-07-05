@@ -28,8 +28,6 @@ class UsersController @Inject() (val env:            Environment,
     with JsonController {
 
 
-  private val PageSizeDefault = 5
-
   private val PageSizeMax = 20
 
   val listSortFields = Map[String, (User, User) => Boolean](
@@ -42,7 +40,7 @@ class UsersController @Inject() (val env:            Environment,
   case class LoginCredentials(email: String, password: String)
 
   /** JSON reader for [[LoginCredentials]]. */
-  implicit val loginCredentialsReads = Json.reads[LoginCredentials]
+  implicit val loginCredentialsReads: Reads[LoginCredentials] = Json.reads[LoginCredentials]
 
   /**
     * Log-in a user. Expects the credentials in the body in JSON format.
@@ -116,24 +114,33 @@ class UsersController @Inject() (val env:            Environment,
       Ok(usersService.getCountsByStatus)
     }
 
-  def list(nameFilter:  String,
-           emailFilter: String ,
-           status:      String,
-           sort:        String,
-           page:        Int,
-           pageSize:    Int,
-           order:       String) =
+  def list(nameFilterMaybe:  Option[String],
+           emailFilterMaybe: Option[String] ,
+           statusMaybe:      Option[String],
+           sortMaybe:        Option[String],
+           pageMaybe:        Option[Int],
+           pageSizeMaybe:    Option[Int],
+           orderMaybe:       Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
+      val nameFilter  = nameFilterMaybe.fold { "" } { nf => nf }
+      val emailFilter = emailFilterMaybe.fold { "" } { ef => ef }
+      val status      = statusMaybe.fold { "all" } { s => s }
+      val sort        = sortMaybe.fold { "name" } { s => s }
+      val page        = pageMaybe.fold { 1 } { p => p }
+      val pageSize    = pageSizeMaybe.fold { 5 } { ps => ps }
+      val order       = orderMaybe.fold { "asc" } { o => o }
+
       Logger.debug(s"""|UsersController:list: nameFilter/$nameFilter, emailFilter/$emailFilter,
                        |  status/$status, sort/$sort, page/$page, pageSize/$pageSize,
                        |  order/$order""".stripMargin)
+
 
       val pagedQuery = PagedQuery(listSortFields, page, pageSize, order)
 
       val validation = for {
            sortFunc    <- pagedQuery.getSortFunc(sort)
            sortOrder   <- pagedQuery.getSortOrder
-           users       <- usersService.getUsers(nameFilter, emailFilter, status, sortFunc, sortOrder)
+           users       <- usersService.getUsers[User](nameFilter, emailFilter, status, sortFunc, sortOrder)
            page        <- pagedQuery.getPage(PageSizeMax, users.size)
            pageSize    <- pagedQuery.getPageSize(PageSizeMax)
            results     <- PagedResults.create(users, page, pageSize)

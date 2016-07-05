@@ -11,6 +11,7 @@ import play.api.libs.json._
  * <em>any</em> database. Instead, they should be deprecated and probably always return false when checking
  * allow-ability.
  */
+@SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
 object ShipmentState extends Enumeration {
   type ShipmentState = Value
   val Created  = Value("Created")

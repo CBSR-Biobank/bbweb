@@ -106,7 +106,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
-      val v = SpecimenGroup.create(
+      SpecimenGroup.create(
         studyId, id, version, name, description, units,
         anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
         err => err.list.toList must (have length 1 and contain("IdRequired")),

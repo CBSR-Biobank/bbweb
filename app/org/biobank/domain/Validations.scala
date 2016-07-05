@@ -3,6 +3,7 @@ package org.biobank.domain
 import org.biobank.ValidationKey
 import scala.util.control.Exception._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 object CommonValidations {
 
@@ -20,37 +21,37 @@ object CommonValidations {
 
   case object NonEmptyStringOption extends ValidationKey
 
-  case object InvalidNumberString extends ValidationKey
+  case object InvalidNumberString extends ValidationKey {
+      override val toString = "InvalidNumberString"
+    }
 
   case object CentreIdRequired extends ValidationKey
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading", "org.wartremover.warts.Null"))
   def validateString(s: String, err: ValidationKey): DomainValidation[String] = {
-    if ((s == null) || s.isEmpty()) err.failureNel else s.success
+    if ((s == null) || s.isEmpty()) err.failureNel[String] else s.successNel[String]
   }
 
-  def validateString(s: String, minLength: Long, err: ValidationKey): DomainValidation[String] = {
-    validateString(s, err).fold(
-      err => err.failure,
-      str => {
-        if (str.length < minLength) {
-          err.failureNel
-        } else {
-          str.successNel
-        }
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
+  def validateString(str: String, minLength: Long, err: ValidationKey): DomainValidation[String] = {
+    for {
+      valid <- validateString(str, err)
+      lenValid <- {
+        if (str.length < minLength) err.failureNel[String]
+        else str.successNel[String]
       }
-    )
+    } yield lenValid
   }
 
-  def validateNumberString(s: String): DomainValidation[String] = {
-    validateString(s, InvalidNumberString).fold(
-      err => err.failure,
-      str => {
-        catching(classOf[NumberFormatException]).opt(str.toFloat) match {
-          case None => InvalidNumberString.failureNel
-          case _ => str.successNel
-        }
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  def validateNumberString(str: String): DomainValidation[String] = {
+    for {
+      valid <- validateString(str, InvalidNumberString)
+      number <- {
+        catching[String](classOf[NumberFormatException]).opt(str.toFloat)
+          .toSuccessNel(InvalidNumberString.toString)
       }
-    )
+    } yield valid
   }
 
   def validateNumberStringOption(maybeString: Option[String]): DomainValidation[Option[String]] = {
@@ -58,8 +59,8 @@ object CommonValidations {
       none[String].successNel[String]
     } { str =>
       validateNumberString(str).fold(
-        err => err.failure,
-        numstr => Some(numstr).success
+        err => err.failure[Option[String]],
+        numstr => Some(numstr).successNel[String]
       )
     }
   }
@@ -70,22 +71,24 @@ object CommonValidations {
       none[String].successNel[String]
     } { value =>
       validateString(value, err).fold(
-        err => err.failure,
-        str => Some(str).success
+        err => err.failure[Option[String]],
+        str => Some(str).successNel[String]
       )
     }
   }
 
   def validateMinimum(number: Int, min: Int, err: ValidationKey): DomainValidation[Int] = {
-    if (number < min) err.failureNel else number.success
+    if (number < min) err.failureNel[Int] else number.successNel[String]
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validatePositiveNumber(number: Int, err: ValidationKey): DomainValidation[Int] = {
     validateMinimum(number, 0, err)
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validatePositiveNumber(number: BigDecimal, err: ValidationKey): DomainValidation[BigDecimal] = {
-    if (number < 0) err.failureNel else number.success
+    if (number < 0) err.failureNel[BigDecimal] else number.successNel[String]
   }
 
   def validatePositiveNumberOption(maybeNumber: Option[BigDecimal], err: ValidationKey)
@@ -94,20 +97,22 @@ object CommonValidations {
       none[BigDecimal].successNel[String]
     } { number =>
       if (number < 0) {
-        err.toString.failureNel[Option[BigDecimal]]
+        err.failureNel[Option[BigDecimal]]
       } else {
-        maybeNumber.successNel
+        maybeNumber.successNel[String]
       }
     }
   }
 
   def validateVersion(v: Long): DomainValidation[Long] =
-    if (v < 0) InvalidVersion.failureNel else v.success
+    if (v < 0) InvalidVersion.failureNel[Long] else v.successNel[String]
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validateId[T <: IdentifiedValueObject[String]](id: T, err: ValidationKey): DomainValidation[T] = {
     validateString(id.id, err).map(_ => id)
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validateId[T <: IdentifiedValueObject[String]](maybeId: Option[T], err: ValidationKey)
       : DomainValidation[Option[T]] = {
     maybeId.fold {
@@ -117,6 +122,7 @@ object CommonValidations {
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validateId[T <: IdentifiedValueObject[String]](id: T): DomainValidation[T] = {
     validateId(id, IdRequired)
   }

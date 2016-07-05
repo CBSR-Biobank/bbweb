@@ -49,6 +49,7 @@ class SpecimensProcessor @Inject() (
    * These are the events that are recovered during journal recovery. They cannot fail and must be
    * processed to recreate the current state of the aggregate.
    */
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveRecover: Receive = {
     case event: SpecimenEvent => event.eventType match {
       case et: EventType.Added              => applyAddedEvent(event)
@@ -69,6 +70,7 @@ class SpecimensProcessor @Inject() (
    * These are the commands that are requested. A command can fail, and will send the failure as a response
    * back to the user. Each valid command generates one or more events and is journaled.
    */
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveCommand: Receive = {
     case cmd: AddSpecimensCmd =>
       process(addCmdToEvent(cmd))(applyAddedEvent)
@@ -148,6 +150,7 @@ class SpecimensProcessor @Inject() (
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
   private def applyAddedEvent(event: SpecimenEvent): Unit = {
     val v = for {
         validEventType <- validEventType(event.eventType.isAdded)
@@ -167,15 +170,17 @@ class SpecimensProcessor @Inject() (
         }
       } yield specimens
 
-    logIfError(event, v)
-    v.map { specimens =>
+    if (v.isFailure) {
+      log.error(s"*** ERROR ***: $v, event: $event: ")
+    }
+
+    v.foreach { specimens =>
       val ceventId = CollectionEventId(event.getAdded.getCollectionEventId)
       specimens.foreach { specimen =>
         specimenRepository.put(specimen)
         ceventSpecimenRepository.put(CeventSpecimen(ceventId, specimen.id))
       }
     }
-    ()
   }
 
   private def applyMovedEvent(event: SpecimenEvent): Unit = {
@@ -194,21 +199,21 @@ class SpecimensProcessor @Inject() (
     ???
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
   private def applyRemovedEvent(event: SpecimenEvent): Unit = {
     val v = for {
         validEventType  <- validEventType(event.eventType.isRemoved)
         specimen        <- specimenRepository.getByKey(SpecimenId(event.getRemoved.getSpecimenId))
         validVersion    <- specimen.requireVersion(event.getRemoved.getVersion)
         collectionEvent <- collectionEventRepository.getByKey(CollectionEventId(event.getRemoved.getCollectionEventId))
-      } yield (collectionEvent, specimen)
+      } yield {
+        ceventSpecimenRepository.remove(CeventSpecimen(collectionEvent.id, specimen.id))
+        specimenRepository.remove(specimen)
+      }
 
-    logIfError(event, v)
-
-    v.map { case (collectionEvent, specimen) =>
-      ceventSpecimenRepository.remove(CeventSpecimen(collectionEvent.id, specimen.id))
-      specimenRepository.remove(specimen)
+    if (v.isFailure) {
+      log.error(s"*** ERROR ***: $v, event: $event: ")
     }
-    ()
   }
 
   private def processUpdateCmd[T <: SpecimenModifyCommand](
@@ -219,7 +224,7 @@ class SpecimensProcessor @Inject() (
     val specimenId = SpecimenId(cmd.id)
     val collectionEventId = CollectionEventId(cmd.collectionEventId)
 
-    var event = for {
+    val event = for {
         specimen     <- specimenRepository.getByKey(specimenId)
         cevent       <- collectionEventRepository.getByKey(collectionEventId)
         validVersion <- specimen.requireVersion(cmd.expectedVersion)
@@ -235,12 +240,9 @@ class SpecimensProcessor @Inject() (
     val ceventSpecIds = ceventType.specimenSpecs.map(s => s.uniqueId).toSet
     val notBelonging  = cmdSpecIds.diff(ceventSpecIds)
 
-    if (notBelonging.isEmpty) {
-      true.success
-    } else {
-      EntityCriteriaError("specimen specs do not belong to collection event type: "
-                            + notBelonging.mkString(", ")).failureNel
-    }
+    if (notBelonging.isEmpty) true.successNel[String]
+    else EntityCriteriaError("specimen specs do not belong to collection event type: "
+                               + notBelonging.mkString(", ")).failureNel[Boolean]
   }
 
   /**
@@ -250,25 +252,20 @@ class SpecimensProcessor @Inject() (
   private def validateInventoryId(specimenData: List[SpecimenInfo]): DomainValidation[Boolean] = {
     specimenData.map { info =>
       specimenRepository.getByInventoryId(info.inventoryId) fold (
-        err => true.success,
+        err => true.successNel[String],
         spc => s"specimen ID already in use: ${info.inventoryId}".failureNel[Boolean]
       )
     }.sequenceU.map { x => true }
   }
 
   private def validEventType(eventType: Boolean): DomainValidation[Boolean] =
-    if (eventType) true.success
-    else s"invalid event type".failureNel
-
-  private def logIfError[T](event: SpecimenEvent, validation: DomainValidation[T]) =
-    validation.leftMap { err =>
-      log.error(s"*** ERROR ***: ${err.list.toList.mkString}, event: $event: ")
-    }
+    if (eventType) true.successNel[String]
+    else s"invalid event type".failureNel[Boolean]
 
   private def specimenHasNoChildren(specimen: Specimen): DomainValidation[Boolean] = {
     val children = processingEventInputSpecimenRepository.withSpecimenId(specimen.id)
-    if (children.isEmpty) true.success
-    else DomainError(s"specimen has child specimens: ${specimen.id}").failureNel
+    if (children.isEmpty) true.successNel[String]
+    else DomainError(s"specimen has child specimens: ${specimen.id}").failureNel[Boolean]
   }
 
 

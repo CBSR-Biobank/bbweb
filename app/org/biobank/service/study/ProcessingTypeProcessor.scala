@@ -46,6 +46,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
     * These are the events that are recovered during journal recovery. They cannot fail and must be
     * processed to recreate the current state of the aggregate.
     */
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveRecover: Receive = {
     case event: StudyEventOld => event.eventType match {
       case et: EventType.ProcessingTypeAdded   => applyProcessingTypeAddedEvent(event)
@@ -66,6 +67,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
     * These are the commands that are requested. A command can fail, and will send the failure as a response
     * back to the user. Each valid command generates one or more events and is journaled.
     */
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveCommand: Receive = {
     case cmd: AddProcessingTypeCmd    => processAddProcessingTypeCmd(cmd)
     case cmd: UpdateProcessingTypeCmd => processUpdateProcessingTypeCmd(cmd)
@@ -95,7 +97,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
           processingTypeId = Some(newItem.id.id),
           name             = Some(newItem.name),
           description      = newItem.description,
-          enabled          = Some(newItem.enabled))).success
+          enabled          = Some(newItem.enabled))).successNel[String]
     } yield event
 
     process(event){ applyProcessingTypeAddedEvent(_) }
@@ -112,7 +114,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
             version          = Some(updatedPt.version),
             name             = Some(updatedPt.name),
             description      = updatedPt.description,
-            enabled          = Some(updatedPt.enabled))).success
+            enabled          = Some(updatedPt.enabled))).successNel[String]
       } yield event
     }
     process(v) { applyProcessingTypeUpdatedEvent(_) }
@@ -121,7 +123,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
   private def processRemoveProcessingTypeCmd(cmd: RemoveProcessingTypeCmd): Unit = {
     val v = update(cmd) { pt =>
       createStudyEvent(pt.studyId, cmd).withProcessingTypeRemoved(
-        ProcessingTypeRemovedEvent(Some(cmd.id))).success
+        ProcessingTypeRemovedEvent(Some(cmd.id))).successNel[String]
     }
     process(v){ applyProcessingTypeRemovedEvent(_) }
   }
@@ -142,16 +144,14 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
     if (event.eventType.isProcessingTypeAdded) {
       val addedEvent = event.getProcessingTypeAdded
 
-      processingTypeRepository.put(
-        ProcessingType(studyId      = StudyId(event.id),
-                       id           = ProcessingTypeId(addedEvent.getProcessingTypeId),
-                       version      = 0L,
-                       timeAdded    = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
-                       timeModified = None,
-                       name         = addedEvent.getName,
-                       description  = addedEvent.description,
-                       enabled      = addedEvent.getEnabled))
-      ()
+      val pt = ProcessingType.create(studyId      = StudyId(event.id),
+                                     id           = ProcessingTypeId(addedEvent.getProcessingTypeId),
+                                     version      = 0L,
+                                     name         = addedEvent.getName,
+                                     description  = addedEvent.description,
+                                     enabled      = addedEvent.getEnabled)
+
+      pt.foreach(processingTypeRepository.put)
     } else {
       log.error(s"invalid event type: $event")
     }
@@ -161,18 +161,19 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
     if (event.eventType.isProcessingTypeUpdated) {
       val updatedEvent = event.getProcessingTypeUpdated
 
-      processingTypeRepository.getByKey(ProcessingTypeId(updatedEvent.getProcessingTypeId)).fold(
-        err => log.error(s"updating processing type from event failed: $err"),
-        pt => {
-          processingTypeRepository.put(
-            pt.copy(version      = updatedEvent.getVersion,
-                    timeModified  = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
-                    name         = updatedEvent.getName,
-                    description  = updatedEvent.description,
-                    enabled      = updatedEvent.getEnabled))
-          ()
-        }
-      )
+      val v = processingTypeRepository.getByKey(ProcessingTypeId(updatedEvent.getProcessingTypeId))
+
+      if (v.isFailure) {
+        log.error(s"updating processing type from event failed: $v")
+      }
+
+      v.foreach(pt => processingTypeRepository.put(
+                  pt.copy(version      = updatedEvent.getVersion,
+                          timeModified  = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
+                          name         = updatedEvent.getName,
+                          description  = updatedEvent.description,
+                          enabled      = updatedEvent.getEnabled)))
+
     } else {
       log.error(s"invalid event type: $event")
     }
@@ -181,15 +182,14 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
   private def applyProcessingTypeRemovedEvent(event: StudyEventOld): Unit = {
     if (event.eventType.isProcessingTypeRemoved) {
 
-      processingTypeRepository.getByKey(
-        ProcessingTypeId(event.getProcessingTypeRemoved.getProcessingTypeId))
-      .fold(
-        err => log.error(s"updating processing type from event failed: $err"),
-        pt => {
-          processingTypeRepository.remove(pt)
-          ()
-        }
-      )
+      val v = processingTypeRepository.getByKey(
+          ProcessingTypeId(event.getProcessingTypeRemoved.getProcessingTypeId))
+
+      if (v.isFailure) {
+        log.error(s"removing processing type from event failed: $v")
+      }
+
+      v.foreach(processingTypeRepository.remove)
     } else {
       log.error(s"invalid event type: $event")
     }
@@ -197,12 +197,14 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
 
   val ErrMsgNameExists = "processing type with name already exists"
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   private def nameAvailable(name: String, studyId: StudyId): DomainValidation[Boolean] = {
     nameAvailableMatcher(name, processingTypeRepository, ErrMsgNameExists){ item =>
       (item.name == name) && (item.studyId == studyId)
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   private def nameAvailable(name: String,
                             studyId: StudyId,
                             excludeId: ProcessingTypeId): DomainValidation[Boolean] = {
@@ -215,6 +217,6 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
     // FIXME: this is a stub for now
     //
     // it needs to be replaced with the real check
-    processingType.success
+    processingType.successNel[String]
   }
 }

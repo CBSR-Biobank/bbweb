@@ -23,14 +23,14 @@ import play.api.libs.json._
  *
  * @param countryIsoCode the ISO country code for the country the location is in.
  */
-case class Location(uniqueId:       String,
-                    name:           String,
-                    street:         String,
-                    city:           String,
-                    province:       String,
-                    postalCode:     String,
-                    poBoxNumber:    Option[String],
-                    countryIsoCode: String)
+final case class Location(uniqueId:       String,
+                          name:           String,
+                          street:         String,
+                          city:           String,
+                          province:       String,
+                          postalCode:     String,
+                          poBoxNumber:    Option[String],
+                          countryIsoCode: String)
     extends HasName {
 
   override def equals(that: Any): Boolean = {
@@ -48,7 +48,7 @@ case class Location(uniqueId:       String,
 object Location {
   import org.biobank.domain.CommonValidations._
 
-  implicit val locationWriter = Json.writes[Location]
+  implicit val locationWriter: Writes[Location] = Json.writes[Location]
 
   def create(name:           String,
              street:         String,
@@ -63,6 +63,7 @@ object Location {
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validate(name:           String,
                street:         String,
                city:           String,
@@ -72,6 +73,7 @@ object Location {
                countryIsoCode: String): DomainValidation[Boolean] =
     validateString(name, NameRequired).map { _ => true }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validate(location: Location): DomainValidation[Boolean] =
     validate(location.name,
              location.street,

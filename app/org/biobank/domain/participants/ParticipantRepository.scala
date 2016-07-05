@@ -41,9 +41,9 @@ class ParticipantRepositoryImpl
         if (participant.studyId != studyId) {
           EntityCriteriaError(
             s"study does not have participant: { studyId: $studyId, participantId: $participantId }"
-          ).failureNel
+          ).failureNel[Participant]
         } else {
-          participant.success
+          participant.successNel[String]
         }
       }
     } yield validPtcp
@@ -52,16 +52,16 @@ class ParticipantRepositoryImpl
   def withUniqueId(studyId: StudyId, uniqueId: String): DomainValidation[Participant] = {
     for {
       participant <- {
-        getValues.find(p => p.uniqueId == uniqueId).toSuccessNel(
-          EntityCriteriaNotFound(s"participant with unique ID does not exist: $uniqueId").toString)
+        getValues.find(p => p.uniqueId == uniqueId).toSuccess(
+          EntityCriteriaNotFound(s"participant with unique ID does not exist: $uniqueId").nel)
       }
       valid <- {
         if (participant.studyId != studyId) {
           EntityCriteriaError(
             s"participant not in study: { uniqueId: $uniqueId, studyId: $studyId }"
-          ).failureNel
+          ).failureNel[Participant]
         } else {
-          participant.success
+          participant.successNel[String]
         }
       }
     } yield valid

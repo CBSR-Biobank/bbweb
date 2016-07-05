@@ -17,13 +17,13 @@ trait ContainerSchemaValidations {
 /**
  * A plan for how the children in a {@link Container} are positioned and labelled.
  */
-case class ContainerSchema(id:           ContainerSchemaId,
-                           version:      Long,
-                           timeAdded:    DateTime,
-                           timeModified: Option[DateTime],
-                           name:         String,
-                           description:  Option[String],
-                           shared:       Boolean)
+final case class ContainerSchema(id:           ContainerSchemaId,
+                                 version:      Long,
+                                 timeAdded:    DateTime,
+                                 timeModified: Option[DateTime],
+                                 name:         String,
+                                 description:  Option[String],
+                                 shared:       Boolean)
     extends ConcurrencySafeEntity[ContainerSchemaId]
     with HasUniqueName
     with HasDescriptionOption
@@ -32,22 +32,20 @@ case class ContainerSchema(id:           ContainerSchemaId,
 
   /** Used to change the name. */
   def withName(name: String): DomainValidation[ContainerSchema] = {
-    validateString(name, NameMinLength, InvalidName) fold (
-      err => err.failure,
-      s   => copy(version = version + 1, name = name).success
+    validateString(name, NameMinLength, InvalidName) map (_ =>
+      copy(version = version + 1, name = name)
     )
   }
 
   /** Used to change the description. */
   def withDescription(description: Option[String]): DomainValidation[ContainerSchema] = {
-    validateNonEmptyOption(description, InvalidDescription) fold (
-      err => err.failure,
-      s   => copy(version = version + 1, description  = description).success
+    validateNonEmptyOption(description, InvalidDescription) map (_ =>
+      copy(version = version + 1, description  = description)
     )
   }
 
   def withShared(shared: Boolean): DomainValidation[ContainerSchema] = {
-    copy(version = version + 1, shared  = shared).success
+    copy(version = version + 1, shared  = shared).successNel[String]
   }
 
 }
@@ -77,5 +75,5 @@ object ContainerSchema extends ContainerSchemaValidations {
     }
   }
 
-  implicit val containerSchemaWrites = Json.writes[ContainerSchema]
+  implicit val containerSchemaWrites: Writes[ContainerSchema] = Json.writes[ContainerSchema]
 }

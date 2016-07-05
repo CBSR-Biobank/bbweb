@@ -97,15 +97,15 @@ class UsersServiceImpl @javax.inject.Inject() (
 
     val usersFilteredByStatus = status match {
       case "all" =>
-        usersFilteredByEmail.success
+        usersFilteredByEmail.successNel[String]
       case "RegisteredUser" =>
-        usersFilteredByEmail.collect { case u: RegisteredUser => u }.success
+        usersFilteredByEmail.collect { case u: RegisteredUser => u }.successNel[String]
       case "ActiveUser" =>
-        usersFilteredByEmail.collect { case u: ActiveUser => u }.success
+        usersFilteredByEmail.collect { case u: ActiveUser => u }.successNel[String]
       case "LockedUser" =>
-        usersFilteredByEmail.collect { case u: LockedUser => u }.success
+        usersFilteredByEmail.collect { case u: LockedUser => u }.successNel[String]
       case _ =>
-        InvalidStatus(status).failureNel
+        InvalidStatus(status).failureNel[Seq[User]]
     }
 
     usersFilteredByStatus.map { users =>
@@ -132,11 +132,8 @@ class UsersServiceImpl @javax.inject.Inject() (
     for {
       user <- userRepository.getByEmail(email)
       validPwd <- {
-        if (passwordHasher.valid(user.password, user.salt, enteredPwd)) {
-          user.success
-        } else {
-          InvalidPassword.failureNel
-        }
+        if (passwordHasher.valid(user.password, user.salt, enteredPwd)) user.successNel[String]
+        else InvalidPassword.failureNel[User]
       }
       notLocked <- UserHelper.isUserNotLocked(user)
     } yield user

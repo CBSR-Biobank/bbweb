@@ -38,6 +38,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   case class SnapshotState(shipments: Set[Shipment],
                            shipmentSpecimens: Set[ShipmentSpecimen])
 
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveRecover: Receive = {
     case event: ShipmentEvent => event.eventType match {
       case et: ShipmentEvent.EventType.Added                 => applyAddedEvent(event)
@@ -70,6 +71,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       snapshot.shipmentSpecimens.foreach{ shipmentSpecimenRepository.put(_) }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveCommand: Receive = {
 
     case cmd: AddShipmentCmd =>
@@ -349,9 +351,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isCourierNameUpdated,
                            event.getCourierNameUpdated.getVersion) { (shipment, _, time) =>
-      shipment.withCourier(event.getCourierNameUpdated.getCourierName).map { s =>
-        shipmentRepository.put(s.copy(timeModified = Some(time)))
-      }
+      val v = shipment.withCourier(event.getCourierNameUpdated.getCourierName)
+      v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
+      v
     }
   }
 
@@ -359,9 +361,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isTrackingNumberUpdated,
                            event.getTrackingNumberUpdated.getVersion) { (shipment, _, time) =>
-      shipment.withTrackingNumber(event.getTrackingNumberUpdated.getTrackingNumber).map { s =>
-        shipmentRepository.put(s.copy(timeModified = Some(time)))
-      }
+      val v = shipment.withTrackingNumber(event.getTrackingNumberUpdated.getTrackingNumber)
+      v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
+      v
     }
   }
 
@@ -369,12 +371,13 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isFromLocationUpdated,
                            event.getFromLocationUpdated.getVersion) { (shipment, _, time) =>
-      for {
+      val v = for {
         location <- getLocation(event.getFromLocationUpdated.getLocationId)
         updated  <- shipment.withFromLocation(location)
-      } yield {
-        shipmentRepository.put(updated.copy(timeModified = Some(time)))
-      }
+      } yield updated
+
+      v.foreach(s => shipmentRepository.put(s.copy(timeModified = Some(time))))
+      v
     }
   }
 
@@ -382,12 +385,12 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isToLocationUpdated,
                            event.getToLocationUpdated.getVersion) { (shipment, _, time) =>
-      for {
+      val v = for {
         location <- getLocation(event.getToLocationUpdated.getLocationId)
         updated  <- shipment.withToLocation(location)
-      } yield {
-        shipmentRepository.put(updated.copy(timeModified = Some(time)))
-      }
+      } yield updated
+      v.foreach(s => shipmentRepository.put(s.copy(timeModified = Some(time))))
+      v
     }
   }
 
@@ -396,9 +399,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                            event.eventType.isPacked,
                            event.getPacked.getVersion) { (shipment, _, time) =>
       val stateChangeTime = ISODateTimeFormat.dateTime.parseDateTime(event.getPacked.getStateChangeTime)
-      shipment.packed(stateChangeTime).map { s =>
-        shipmentRepository.put(s.copy(timeModified = Some(time)))
-      }
+      val v = shipment.packed(stateChangeTime)
+      v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
+      v
     }
   }
 
@@ -407,9 +410,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                            event.eventType.isSent,
                            event.getSent.getVersion) { (shipment, _, time) =>
       val stateChangeTime = ISODateTimeFormat.dateTime.parseDateTime(event.getSent.getStateChangeTime)
-      shipment.sent(stateChangeTime).map { s =>
-        shipmentRepository.put(s.copy(timeModified = Some(time)))
-      }
+      val v = shipment.sent(stateChangeTime)
+      v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
+      v
     }
   }
 
@@ -418,9 +421,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                            event.eventType.isReceived,
                            event.getReceived.getVersion) { (shipment, _, time) =>
       val stateChangeTime = ISODateTimeFormat.dateTime.parseDateTime(event.getReceived.getStateChangeTime)
-      shipment.received(stateChangeTime).map { s =>
-        shipmentRepository.put(s.copy(timeModified = Some(time)))
-      }
+      val v = shipment.received(stateChangeTime)
+      v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
+      v
     }
   }
 
@@ -429,9 +432,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                            event.eventType.isUnpacked,
                            event.getUnpacked.getVersion) { (shipment, _, time) =>
       val stateChangeTime = ISODateTimeFormat.dateTime.parseDateTime(event.getUnpacked.getStateChangeTime)
-      shipment.unpacked(stateChangeTime).map { s =>
-        shipmentRepository.put(s.copy(timeModified = Some(time)))
-      }
+      val v = shipment.unpacked(stateChangeTime)
+      v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
+      v
     }
   }
 
@@ -439,9 +442,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isLost,
                            event.getLost.getVersion) { (shipment, _, time) =>
-      shipment.lost.map { s =>
-        shipmentRepository.put(s.copy(timeModified = Some(time)))
-      }
+      val v = shipment.lost
+      v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
+      v
     }
   }
 
@@ -472,9 +475,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                            event.eventType.isContainerUpdated,
                            event.getContainerUpdated.getVersion) { (shipmentSpecimen, _, time) =>
       val shipmentContainerId = event.getContainerUpdated.shipmentContainerId.map(ShipmentContainerId.apply)
-      shipmentSpecimen.withShipmentContainer(shipmentContainerId).map { s =>
-        shipmentSpecimenRepository.put(s.copy(timeModified = Some(time)))
-      }
+      val v = shipmentSpecimen.withShipmentContainer(shipmentContainerId)
+      v.foreach { s => shipmentSpecimenRepository.put(s.copy(timeModified = Some(time))) }
+      v
     }
   }
 
@@ -482,9 +485,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isReceived,
                            event.getReceived.getVersion) { (shipmentSpecimen, _, time) =>
-      shipmentSpecimen.received.map { s =>
-        shipmentSpecimenRepository.put(s.copy(timeModified = Some(time)))
-      }
+      val v = shipmentSpecimen.received
+      v.foreach { s => shipmentSpecimenRepository.put(s.copy(timeModified = Some(time))) }
+      v
     }
   }
 
@@ -492,9 +495,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isMissing,
                            event.getMissing.getVersion) { (shipmentSpecimen, _, time) =>
-      shipmentSpecimen.missing.map { s =>
-        shipmentSpecimenRepository.put(s.copy(timeModified = Some(time)))
-      }
+      val v = shipmentSpecimen.missing
+      v.foreach { s => shipmentSpecimenRepository.put(s.copy(timeModified = Some(time))) }
+      v
     }
   }
 
@@ -502,9 +505,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isExtra,
                            event.getExtra.getVersion) { (shipmentSpecimen, _, time) =>
-      shipmentSpecimen.extra.map { s =>
-        shipmentSpecimenRepository.put(s.copy(timeModified = Some(time)))
-      }
+      val v = shipmentSpecimen.extra
+      v.foreach { s => shipmentSpecimenRepository.put(s.copy(timeModified = Some(time))) }
+      v
     }
   }
 
@@ -512,7 +515,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     (cmd: T,
      cmdToEvent: (T, Shipment) => DomainValidation[ShipmentEvent],
      applyEvent: ShipmentEvent => Unit): Unit = {
-    var event = for {
+    val event = for {
         shipment     <- shipmentRepository.getByKey(ShipmentId(cmd.id))
         validVersion <- shipment.requireVersion(cmd.expectedVersion)
         event        <- cmdToEvent(cmd, shipment)
@@ -524,7 +527,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     (cmd: T,
      cmdToEvent: (T, Shipment, ShipmentSpecimen) => DomainValidation[ShipmentSpecimenEvent],
      applyEvent: ShipmentSpecimenEvent => Unit): Unit = {
-    var event = for {
+    val event = for {
         shipmentSpecimen <- shipmentSpecimenRepository.getByKey(ShipmentSpecimenId(cmd.id))
         shipment         <- shipmentRepository.getByKey(shipmentSpecimen.shipmentId)
         validVersion     <- shipment.requireVersion(cmd.expectedVersion)
@@ -533,6 +536,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     process(event)(applyEvent)
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   private def onValidEventAndVersion(event:        ShipmentEvent,
                                      eventType:    Boolean,
                                      eventVersion: Long)
@@ -560,6 +564,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   private def onValidEventAndVersion(event:        ShipmentSpecimenEvent,
                                      eventType:    Boolean,
                                      eventVersion: Long)

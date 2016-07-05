@@ -19,7 +19,7 @@ trait AnnotationTypeSetSharedSpec[T <: ConcurrencySafeEntity[_]]
   def annotationTypeSetSharedBehaviour() = {
 
     "add an annotation type" in {
-      var entity = createEntity
+      val entity = createEntity
       val annotationTypeCount = getAnnotationTypeSet(entity).size
       val annotationType = factory.createAnnotationType
 

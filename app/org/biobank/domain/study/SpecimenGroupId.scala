@@ -8,11 +8,11 @@ import play.api.libs.json._
   *
   * Used as a value object to maintain associations to with objects in the system.
   */
-case class SpecimenGroupId(id: String) extends IdentifiedValueObject[String]
+final case class SpecimenGroupId(id: String) extends IdentifiedValueObject[String]
 
 object SpecimenGroupId {
 
-  implicit val specimenGroupIdWriter = Writes{
+  implicit val specimenGroupIdWriter: Writes[SpecimenGroupId] = Writes{
     (specimenGroupId: SpecimenGroupId) => JsString(specimenGroupId.id)
   }
 

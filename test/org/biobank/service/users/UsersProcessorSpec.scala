@@ -204,8 +204,6 @@ class UsersProcessorSpec extends TestFixture {
       val user = factory.createActiveUser
       userRepository.put(user)
 
-      val newPassword = nameGenerator.nextEmail[User]
-
       val cmd = ResetUserPasswordCmd(user.email)
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]].futureValue
 
@@ -228,8 +226,6 @@ class UsersProcessorSpec extends TestFixture {
     "not reset a password with an invalid email" in {
       val user = factory.createActiveUser
       userRepository.put(user)
-
-      val newPassword = nameGenerator.nextEmail[User]
 
       val cmd = ResetUserPasswordCmd(nameGenerator.nextEmail[User])
       val v = ask(usersProcessor, cmd).mapTo[DomainValidation[UserEvent]].futureValue

@@ -18,7 +18,7 @@ package infrastructure {
       order match {
         case "asc" => AscendingOrder.successNel
         case "desc" => DescendingOrder.successNel
-        case _ => s"invalid order requested: $order".failureNel
+        case _ => s"invalid order requested: $order".failureNel[SortOrder]
       }
 
     }
@@ -38,12 +38,13 @@ package infrastructure {
   }
 
   /** Used to define annotation types to be used by a [[org.biobank.domain.study.SpecimenLinkType]]. */
-  case class SpecimenLinkTypeAnnotationTypeData(annotationTypeId: String, required: Boolean)
+  final case class SpecimenLinkTypeAnnotationTypeData(annotationTypeId: String, required: Boolean)
       extends AnnotationTypeData
 
   object SpecimenLinkTypeAnnotationTypeData {
 
-    implicit val annotationTypeDataFormat = Json.format[SpecimenLinkTypeAnnotationTypeData]
+    implicit val annotationTypeDataFormat: Format[SpecimenLinkTypeAnnotationTypeData] =
+      Json.format[SpecimenLinkTypeAnnotationTypeData]
 
   }
 

@@ -33,7 +33,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
     uri(study, ceventType, version) + s"/$id"
 
   def createEntities(fn: (Study, CollectionEventType) => Unit): Unit = {
-    var disabledStudy = factory.createDisabledStudy
+    val disabledStudy = factory.createDisabledStudy
     studyRepository.put(disabledStudy)
 
     val cet = factory.createCollectionEventType
@@ -82,7 +82,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
   }
 
   def updateOnInvalidCeventType(path: String, jsonField: JsObject) {
-    var study = factory.createDisabledStudy
+    val study = factory.createDisabledStudy
     studyRepository.put(study)
 
     val cet = factory.createCollectionEventType

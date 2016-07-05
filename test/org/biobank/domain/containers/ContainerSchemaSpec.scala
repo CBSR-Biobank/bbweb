@@ -139,7 +139,7 @@ class ContainerSchemaSpec extends DomainSpec {
     }
 
     "have more than one validation fail" in {
-      var v = ContainerSchema.create(
+      val v = ContainerSchema.create(
         id          = ContainerSchemaId(nameGenerator.next[ContainerType]),
         version     = -2,
         name        = null,

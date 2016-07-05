@@ -3,6 +3,7 @@ package org.biobank.domain
 /**
   * An object with a unique id.
   */
+@SuppressWarnings(Array("org.wartremover.warts.ToString"))
 trait IdentifiedDomainObject[T] {
 
   /** The unique ID for this object. */

@@ -4,7 +4,7 @@ import com.google.inject.ImplementedBy
 import javax.inject.Singleton
 import org.biobank.domain._
 import scalaz.Scalaz._
-import scalaz._
+import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[CentreRepositoryImpl])
 trait CentreRepository extends ReadWriteRepository[CentreId, Centre] {
@@ -32,29 +32,37 @@ class CentreRepositoryImpl
   }
 
   def getDisabled(id: CentreId): DomainValidation[DisabledCentre] = {
-    getByKey(id) match {
-      case Success(s: DisabledCentre) => s.success
-      case Success(s) => InvalidStatus(s"centre is not disabled: $id").failureNel
-      case Failure(err) => err.failure[DisabledCentre]
-    }
+    for {
+      centre <- getByKey(id)
+      disabled <- {
+        centre match {
+          case c: DisabledCentre => c.successNel[String]
+          case c => InvalidStatus(s"centre is not disabled: $id").failureNel[DisabledCentre]
+        }
+      }
+    } yield disabled
   }
 
   def getEnabled(id: CentreId): DomainValidation[EnabledCentre] = {
-    getByKey(id) match {
-      case Success(s: EnabledCentre) => s.success
-      case Success(s) => InvalidStatus(s"centre is not enabled: $id").failureNel
-      case Failure(err) => err.failure[EnabledCentre]
-    }
+    for {
+      centre <- getByKey(id)
+      enabled <- {
+        centre match {
+          case c: EnabledCentre => c.successNel[String]
+          case c => InvalidStatus(s"centre is not enabled: $id").failureNel[EnabledCentre]
+        }
+      }
+    } yield enabled
   }
 
   def getByLocationId(uniqueId: String): DomainValidation[Centre] = {
     val centres = getValues.filter { c => !c.locations.filter( l => l.uniqueId == uniqueId ).isEmpty}
     if (centres.isEmpty) {
-      EntityCriteriaError(s"centre with location id does not exist: $uniqueId").failureNel
+      EntityCriteriaError(s"centre with location id does not exist: $uniqueId").failureNel[Centre]
     } else if (centres.size > 1){
-      EntityCriteriaError(s"multiple centres with location id: $uniqueId").failureNel
+      EntityCriteriaError(s"multiple centres with location id: $uniqueId").failureNel[Centre]
     } else {
-      centres.head.success
+      centres.head.successNel[String]
     }
   }
 }

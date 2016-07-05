@@ -2,14 +2,14 @@ package org.biobank.service.study
 
 import org.biobank.domain._
 import org.biobank.domain.study.{
-  ProcessingType,
+  //ProcessingType,
   ProcessingTypeId,
   ProcessingTypeRepository,
   SpecimenLinkType,
   SpecimenLinkTypeId,
   SpecimenLinkTypeRepository,
-  SpecimenGroup,
-  SpecimenGroupId,
+  //SpecimenGroup,
+  //SpecimenGroupId,
   SpecimenGroupRepository
 }
 import org.biobank.service.Processor
@@ -52,6 +52,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
     * These are the events that are recovered during journal recovery. They cannot fail and must be
     * processed to recreate the current state of the aggregate.
     */
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveRecover: Receive = {
     case event: StudyEventOld => event.eventType match {
       case et: EventType.SpecimenLinkTypeAdded   => applySpecimenLinkTypeAddedEvent(event)
@@ -70,6 +71,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
     * These are the commands that are requested. A command can fail, and will send the failure as a response
     * back to the user. Each valid command generates one or more events and is journaled.
     */
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveCommand: Receive = {
     case cmd: AddSpecimenLinkTypeCmd    => processAddSpecimenLinkTypeCmd(cmd)
     case cmd: UpdateSpecimenLinkTypeCmd => processUpdateSpecimenLinkTypeCmd(cmd)
@@ -178,7 +180,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
         processingType <- processingTypeRepository.getByKey(slt.processingTypeId)
         event <- createStudyEvent(processingType.studyId, cmd).withSpecimenLinkTypeRemoved(
           SpecimenLinkTypeRemovedEvent(Some(cmd.processingTypeId),
-                                       Some(cmd.id))).success
+                                       Some(cmd.id))).successNel[String]
       } yield event
     }
 
@@ -258,75 +260,75 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
   private def applySpecimenLinkTypeRemovedEvent(event: StudyEventOld) : Unit = {
     if (event.eventType.isSpecimenLinkTypeRemoved) {
 
-      specimenLinkTypeRepository.getByKey(
-        SpecimenLinkTypeId(event.getSpecimenLinkTypeRemoved.getSpecimenLinkTypeId)).fold(
-        err => log.error(s"updating specimen link type from event failed: $err"),
-        slt => {
-          specimenLinkTypeRepository.remove(slt)
-          ()
-        }
-      )
+      val v = specimenLinkTypeRepository.getByKey(
+          SpecimenLinkTypeId(event.getSpecimenLinkTypeRemoved.getSpecimenLinkTypeId))
+
+      if (v.isFailure) {
+        log.error(s"removing specimen link type from event failed: $v")
+      }
+
+      v.foreach(specimenLinkTypeRepository.remove)
     } else {
       log.error(s"invalid event type: $event")
     }
   }
 
-  private def validSpecimenGroup(
-    processingType: ProcessingType,
-    specimenGroupId : SpecimenGroupId): DomainValidation[Boolean] = {
+  // private def validSpecimenGroup(
+  //   processingType: ProcessingType,
+  //   specimenGroupId : SpecimenGroupId): DomainValidation[Boolean] = {
 
-    def studyIdMatches(specimenGroup: SpecimenGroup): DomainValidation[Boolean] = {
-      if (specimenGroup.studyId == processingType.studyId) {
-        true.success
-      } else {
-        DomainError("specimen group in wrong study").failureNel
-      }
-    }
+  //   def studyIdMatches(specimenGroup: SpecimenGroup): DomainValidation[Boolean] = {
+  //     if (specimenGroup.studyId == processingType.studyId) {
+  //       true.success
+  //     } else {
+  //       DomainError("specimen group in wrong study").failureNel
+  //     }
+  //   }
 
-    for {
-      specimenGroup <- specimenGroupRepository.getByKey(specimenGroupId)
-      studyMatch <- studyIdMatches(specimenGroup)
-    } yield studyMatch
-  }
+  //   for {
+  //     specimenGroup <- specimenGroupRepository.getByKey(specimenGroupId)
+  //     studyMatch <- studyIdMatches(specimenGroup)
+  //   } yield studyMatch
+  // }
 
   // should only have one specimen link type with these two specimen groups
-  private def validateSpecimenGroupMatcher(
-    inputGroupId: SpecimenGroupId,
-    outputGroupId: SpecimenGroupId)(
-    matcher: SpecimenLinkType => Boolean): DomainValidation[Boolean] = {
-    val exists = specimenLinkTypeRepository.getValues.exists { slType => matcher(slType) }
+  // private def validateSpecimenGroupMatcher(
+  //   inputGroupId: SpecimenGroupId,
+  //   outputGroupId: SpecimenGroupId)(
+  //   matcher: SpecimenLinkType => Boolean): DomainValidation[Boolean] = {
+  //   val exists = specimenLinkTypeRepository.getValues.exists { slType => matcher(slType) }
 
-    if (exists) {
-      DomainError("specimen link type with specimen groups already exists").failureNel
-    } else {
-      true.success
-    }
-  }
+  //   if (exists) {
+  //     DomainError("specimen link type with specimen groups already exists").failureNel
+  //   } else {
+  //     true.success
+  //   }
+  // }
 
-  private def validateSpecimenGroups(
-    inputGroupId: SpecimenGroupId,
-    outputGroupId: SpecimenGroupId): DomainValidation[Boolean] = {
-    validateSpecimenGroupMatcher(inputGroupId, outputGroupId) { slType =>
-      (slType.inputGroupId == inputGroupId) && (slType.outputGroupId == outputGroupId)
-    }
-  }
+  // private def validateSpecimenGroups(
+  //   inputGroupId: SpecimenGroupId,
+  //   outputGroupId: SpecimenGroupId): DomainValidation[Boolean] = {
+  //   validateSpecimenGroupMatcher(inputGroupId, outputGroupId) { slType =>
+  //     (slType.inputGroupId == inputGroupId) && (slType.outputGroupId == outputGroupId)
+  //   }
+  // }
 
-  private def validateSpecimenGroups(
-    inputGroupId: SpecimenGroupId,
-    outputGroupId: SpecimenGroupId,
-    specimenLinkTypeId: SpecimenLinkTypeId): DomainValidation[Boolean] = {
-    validateSpecimenGroupMatcher(inputGroupId, outputGroupId) { slType =>
-      (slType.id != specimenLinkTypeId) &&
-      (slType.inputGroupId == inputGroupId) &&
-      (slType.outputGroupId == outputGroupId)
-    }
-  }
+  // private def validateSpecimenGroups(
+  //   inputGroupId: SpecimenGroupId,
+  //   outputGroupId: SpecimenGroupId,
+  //   specimenLinkTypeId: SpecimenLinkTypeId): DomainValidation[Boolean] = {
+  //   validateSpecimenGroupMatcher(inputGroupId, outputGroupId) { slType =>
+  //     (slType.id != specimenLinkTypeId) &&
+  //     (slType.inputGroupId == inputGroupId) &&
+  //     (slType.outputGroupId == outputGroupId)
+  //   }
+  // }
 
   def checkNotInUse(specimenLinkType: SpecimenLinkType): DomainValidation[SpecimenLinkType] = {
     // FIXME: this is a stub for now
     //
     // it needs to be replaced with the real check
-    specimenLinkType.success
+    specimenLinkType.successNel[String]
   }
 
 }

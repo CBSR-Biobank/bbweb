@@ -13,6 +13,7 @@ import play.api.libs.json._
 import play.mvc.Http
 import play.api.libs.concurrent.Execution.Implicits._
 
+@SuppressWarnings(Array("org.wartremover.warts.Overloading"))
 trait CommandController extends Controller with Security {
 
   implicit val authToken: AuthToken
@@ -44,7 +45,7 @@ trait CommandController extends Controller with Security {
   def commandAction[A, T <: Command](numFields: Integer)(func: T => Future[Result])
                    (implicit reads: Reads[T]) = {
     AuthActionAsync(parse.json) { (token, userId, request) =>
-      var jsonObj = request.body.as[JsObject]
+      val jsonObj = request.body.as[JsObject]
       Logger.debug(s"commandAction: $jsonObj")
       if (jsonObj.keys.size == numFields) {
         val jsonWithUserId = request.body.as[JsObject] ++ Json.obj("userId" -> userId.id)
@@ -74,6 +75,7 @@ trait CommandController extends Controller with Security {
 /**
  *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
  */
+@SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Nothing"))
 trait JsonController extends Controller {
 
   import scala.language.reflectiveCalls
@@ -83,24 +85,28 @@ trait JsonController extends Controller {
   def errorReplyJson(message: String) = Json.obj("status" -> "error", "message" -> message)
 
   override val BadRequest = new Status(Http.Status.BAD_REQUEST) {
-    def apply(message: String): Result = Results.BadRequest(errorReplyJson(message))
-  }
+      @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
+      def apply(message: String): Result = Results.BadRequest(errorReplyJson(message))
+    }
 
   override val Forbidden = new Status(Http.Status.FORBIDDEN) {
-    def apply(message: String): Result = Results.Forbidden(errorReplyJson(message))
-  }
+      @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
+      def apply(message: String): Result = Results.Forbidden(errorReplyJson(message))
+    }
 
   override val NotFound = new Status(Http.Status.NOT_FOUND) {
-    def apply(message: String): Result = Results.NotFound(errorReplyJson(message))
-  }
+      @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
+      def apply(message: String): Result = Results.NotFound(errorReplyJson(message))
+    }
 
+  // Wart Remover complains about Any and Nothing here
   override val Ok = new Status(Http.Status.OK) {
+      @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
+      def apply[T](content: T)(implicit writes: Writes[T]): Result =
+        Results.Ok(Json.obj("status" ->"success", "data" -> Json.toJson[T](content)))
+    }
 
-    def apply[T](obj: T)(implicit writes: Writes[T]): Result =
-      Results.Ok(Json.obj("status" ->"success", "data" -> Json.toJson(obj)))
-
-  }
-
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   protected def domainValidationReply[T](validation: DomainValidation[T])
                                      (implicit writes: Writes[T]): Result = {
     validation.fold(
@@ -125,6 +131,7 @@ trait JsonController extends Controller {
     )
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   protected def domainValidationReply[T](future: Future[DomainValidation[T]])
                                      (implicit writes: Writes[T]): Future[Result] =
     future.map { validation => domainValidationReply(validation) }

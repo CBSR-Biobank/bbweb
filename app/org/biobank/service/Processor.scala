@@ -30,7 +30,7 @@ trait Processor extends PersistentActor with ActorLogging {
         persist(event) { ev =>
           successFn(ev)
           // inform the sender of the successful event resulting from a valid command
-          originalSender ! ev.success
+          originalSender ! ev.successNel[String]
         }
       }
     )
@@ -39,9 +39,9 @@ trait Processor extends PersistentActor with ActorLogging {
   protected def validNewIdentity[I <: IdentifiedValueObject[_], R <: ReadWriteRepository[I,_]](
     id: I, repository: R): DomainValidation[I] = {
     if (repository.getByKey(id).isSuccess) {
-      DomainError(s"could not generate a unique ID: $id").failureNel
+      DomainError(s"could not generate a unique ID: $id").failureNel[I]
     } else {
-      id.success
+      id.successNel[String]
     }
   }
 
@@ -55,8 +55,8 @@ trait Processor extends PersistentActor with ActorLogging {
     val exists = repository.getValues.exists { item =>
       matcher(item)
     }
-    if (exists) EntityCriteriaError(s"$errMsgPrefix: $name").failureNel
-    else true.success
+    if (exists) EntityCriteriaError(s"$errMsgPrefix: $name").failureNel[Boolean]
+    else true.successNel[String]
   }
 
   /** Checks that the domain objects version matches the expected one.
@@ -64,8 +64,8 @@ trait Processor extends PersistentActor with ActorLogging {
   protected def validateVersion[T <: ConcurrencySafeEntity[_]](
     item: T,
     expectedVersion: Option[Long]): DomainValidation[Boolean] = {
-    if (item.versionOption == expectedVersion) true.success
-    else DomainError(s"version mismatch").failureNel
+    if (item.versionOption == expectedVersion) true.successNel[String]
+    else DomainError(s"version mismatch").failureNel[Boolean]
   }
 
 }

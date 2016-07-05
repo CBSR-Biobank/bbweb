@@ -139,14 +139,14 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
     val studiesFilteredByStatus = status match {
       case "all" =>
-        studiesFilteredByName.success
+        studiesFilteredByName.successNel[String]
       case "DisabledStudy" =>
-        studiesFilteredByName.collect { case s: DisabledStudy => s }.success
+        studiesFilteredByName.collect { case s: DisabledStudy => s }.successNel[String]
       case "EnabledStudy" =>
-        studiesFilteredByName.collect { case s: EnabledStudy => s }.success
+        studiesFilteredByName.collect { case s: EnabledStudy => s }.successNel[String]
       case "RetiredStudy" =>
-        studiesFilteredByName.collect { case s: RetiredStudy => s }.success
-      case _ => InvalidStatus(status).failureNel
+        studiesFilteredByName.collect { case s: RetiredStudy => s }.successNel[String]
+      case _ => InvalidStatus(status).failureNel[Seq[Study]]
     }
 
     studiesFilteredByStatus.map { studies =>
@@ -233,7 +233,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
   def collectionEventTypesForStudy(studyId: String)
       : DomainValidation[Set[CollectionEventType]] = {
     validStudyId(studyId) { study =>
-      collectionEventTypeRepository.allForStudy(study.id).success
+      collectionEventTypeRepository.allForStudy(study.id).successNel[String]
     }
   }
 
@@ -247,7 +247,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
   def processingTypesForStudy(studyId: String)
       : DomainValidation[Set[ProcessingType]] = {
     validStudyId(studyId) { study =>
-      processingTypeRepository.allForStudy(study.id).success
+      processingTypeRepository.allForStudy(study.id).successNel[String]
     }
   }
 
@@ -261,12 +261,12 @@ class StudiesServiceImpl @javax.inject.Inject() (
   def specimenLinkTypesForProcessingType(processingTypeId: String)
       : DomainValidation[Set[SpecimenLinkType]] = {
     validProcessingTypeId(processingTypeId) { processingType =>
-      specimenLinkTypeRepository.allForProcessingType(processingType.id).success
+      specimenLinkTypeRepository.allForProcessingType(processingType.id).successNel[String]
     }
   }
 
   def getProcessingDto(studyId: String): DomainValidation[ProcessingDto] = {
-    "deprectated: annot type refactor".failureNel
+    "deprectated: annot type refactor".failureNel[ProcessingDto]
   }
 
   private def validStudyId[T](studyId: String)(fn: Study => DomainValidation[T])
@@ -274,22 +274,6 @@ class StudiesServiceImpl @javax.inject.Inject() (
     for {
       study <- studyRepository.getByKey(StudyId(studyId))
       result <- fn(study)
-    } yield result
-  }
-
-  private def validCollectionEventTypeId[T](id: String)(fn: CollectionEventType => DomainValidation[T])
-      : DomainValidation[T] = {
-    for {
-      cet <- collectionEventTypeRepository.getByKey(CollectionEventTypeId(id))
-      result <- fn(cet)
-    } yield result
-  }
-
-  private def validSpecimenLinkTypeId[T](id: String)(fn: SpecimenLinkType => DomainValidation[T])
-      : DomainValidation[T] = {
-    for {
-      slt <- specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(id))
-      result <- fn(slt)
     } yield result
   }
 
@@ -317,7 +301,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
         Future.successful(DomainError(s"invalid service call: $cmd").failureNel[CollectionEventType])
       case _ => {
         studyRepository.getDisabled(StudyId(cmd.studyId)).fold(
-          err => Future.successful(err.failure),
+          err => Future.successful(err.failure[CollectionEventType]),
           study => {
             ask(ceventTypeProcessor, cmd).mapTo[DomainValidation[CollectionEventTypeEvent]]
               .map { validation =>
@@ -335,7 +319,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
   def processRemoveCollectionEventTypeCommand(cmd: RemoveCollectionEventTypeCmd)
       : Future[DomainValidation[Boolean]] = {
     studyRepository.getDisabled(StudyId(cmd.studyId)).fold(
-      err => Future.successful(err.failure),
+      err => Future.successful(err.failure[Boolean]),
       study => {
         ask(ceventTypeProcessor, cmd).mapTo[DomainValidation[CollectionEventTypeEvent]]
           .map { validation => validation.map(_ => true) }
@@ -362,39 +346,5 @@ class StudiesServiceImpl @javax.inject.Inject() (
       : Future[DomainValidation[Boolean]] =
     ask(studyProcessor, cmd).mapTo[DomainValidation[ProcessingTypeEvent]]
       .map { validation => validation.map(_ => true) }
-
-  private def replyWithSpecimenGroup(future: Future[DomainValidation[StudyEventOld]])
-      : Future[DomainValidation[SpecimenGroup]] = {
-    future map { validation =>
-      for {
-        event <- validation
-        sg <- {
-          val specimenGroupId = if (event.eventType.isSpecimenGroupAdded) {
-            event.getSpecimenGroupAdded.getSpecimenGroupId
-          } else {
-            event.getSpecimenGroupUpdated.getSpecimenGroupId
-          }
-          specimenGroupRepository.getByKey(SpecimenGroupId(specimenGroupId))
-        }
-      } yield sg
-    }
-  }
-
-  private def replyWithSpecimenLinkType(future: Future[DomainValidation[StudyEventOld]])
-      : Future[DomainValidation[SpecimenLinkType]] = {
-    future map { validation =>
-      for {
-        event <- validation
-        slt <- {
-          val sltId = if (event.eventType.isSpecimenLinkTypeAdded) {
-            event.getSpecimenLinkTypeAdded.getSpecimenLinkTypeId
-          } else {
-            event.getSpecimenLinkTypeUpdated.getSpecimenLinkTypeId
-          }
-          specimenLinkTypeRepository.getByKey(SpecimenLinkTypeId(sltId))
-        }
-      } yield slt
-    }
-  }
 
 }

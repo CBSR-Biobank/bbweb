@@ -85,10 +85,9 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
     }
 
     s"fail when adding annotation and ${entityName} parent does not have annotation types" in {
-      val annotationType = factory.createAnnotationType
       val annotation = factory.createAnnotation
 
-      var entity = createEntity(Set.empty, Set(annotation))
+      val entity = createEntity(Set.empty, Set(annotation))
 
       val json = makeRequest(POST,
                              updateUri(entity),
@@ -105,7 +104,7 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
       val annotationType = factory.createAnnotationType
       val annotation = factory.createAnnotation.copy(annotationTypeId = nameGenerator.next[Annotation])
 
-      var entity = createEntity(Set(annotationType), Set(annotation))
+      val entity = createEntity(Set(annotationType), Set(annotation))
 
       val json = makeRequest(POST,
                              updateUri(entity),
@@ -119,10 +118,9 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
     }
 
     "fail when adding annotation with an invalid version" in {
-      val annotationType = factory.createAnnotationType
       val annotation = factory.createAnnotation
 
-      var entity = createEntity(Set.empty, Set(annotation))
+      val entity = createEntity(Set.empty, Set(annotation))
 
       val json = makeRequest(POST,
                              updateUri(entity),
@@ -142,7 +140,7 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
     "remove an annotation" in {
       val annotationType = factory.createAnnotationType
       val annotation = factory.createAnnotation
-      var entity = createEntity(Set(annotationType), Set(annotation))
+      val entity = createEntity(Set(annotationType), Set(annotation))
 
       val json = makeRequest(
           DELETE,
@@ -156,7 +154,7 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
     "fail when attempting to remove a required annotation" in {
       val annotationType = factory.createAnnotationType.copy(required = true)
       val annotation = factory.createAnnotation
-      var entity = createEntity(Set(annotationType), Set(annotation))
+      val entity = createEntity(Set(annotationType), Set(annotation))
 
       val json = makeRequest(
           DELETE,
@@ -185,7 +183,7 @@ trait StudyAnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with Ha
     "fail when adding an annotation on a non enabled study" in {
       val annotationType = factory.createAnnotationType
       val annotation = factory.createAnnotation
-      var entity = createEntity(Set(annotationType), Set(annotation))
+      val entity = createEntity(Set(annotationType), Set(annotation))
 
       getStudy(entity) mustSucceed { study =>
         study.disable mustSucceed { disabledStudy =>

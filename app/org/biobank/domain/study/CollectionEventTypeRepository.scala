@@ -43,11 +43,11 @@ class CollectionEventTypeRepositoryImpl
       cet          <- getByKey(ceventTypeId)
       validStudyId <- {
         if (cet.studyId == studyId) {
-          cet.success
+          cet.successNel[String]
         } else {
           EntityCriteriaError(
             s"collection event type not in study:{ ceventTypeId: $ceventTypeId, studyId: $studyId }")
-            .failureNel
+            .failureNel[CollectionEventType]
         }
       }
     } yield cet

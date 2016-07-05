@@ -40,18 +40,18 @@ import Scalaz._
  *
  * @param specimenType see [[SpecimenType]].
  */
-case class SpecimenGroup(studyId:                     StudyId,
-                         id:                          SpecimenGroupId,
-                         version:                     Long,
-                         timeAdded:                   DateTime,
-                         timeModified:                Option[DateTime],
-                         name:                        String,
-                         description:                 Option[String],
-                         units:                       String,
-                         anatomicalSourceType:        AnatomicalSourceType,
-                         preservationType:            PreservationType,
-                         preservationTemperatureType: PreservationTemperatureType,
-                         specimenType:                SpecimenType)
+final case class SpecimenGroup(studyId:                     StudyId,
+                               id:                          SpecimenGroupId,
+                               version:                     Long,
+                               timeAdded:                   DateTime,
+                               timeModified:                Option[DateTime],
+                               name:                        String,
+                               description:                 Option[String],
+                               units:                       String,
+                               anatomicalSourceType:        AnatomicalSourceType,
+                               preservationType:            PreservationType,
+                               preservationTemperatureType: PreservationTemperatureType,
+                               specimenType:                SpecimenType)
     extends ConcurrencySafeEntity[SpecimenGroupId]
     with HasUniqueName
     with HasDescriptionOption
@@ -149,6 +149,6 @@ object SpecimenGroup extends SpecimenGroupValidations {
     }
   }
 
-  implicit val specimenGroupWrites = Json.writes[SpecimenGroup]
+  implicit val specimenGroupWrites: Writes[SpecimenGroup] = Json.writes[SpecimenGroup]
 
 }

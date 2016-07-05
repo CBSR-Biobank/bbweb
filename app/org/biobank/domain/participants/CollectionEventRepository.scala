@@ -44,9 +44,9 @@ class CollectionEventRepositoryImpl
         if (cevent.participantId != participantId) {
           EntityCriteriaError(
             s"collection event invalid for participant : { participantId: $participantId, collectionEventId: $collectionEventId }"
-          ).failureNel
+          ).failureNel[CollectionEvent]
         } else {
-          cevent.success
+          cevent.successNel[String]
         }
       }
     } yield valid
@@ -71,9 +71,9 @@ class CollectionEventRepositoryImpl
         if (cevent.participantId != participantId) {
           EntityCriteriaError(
             s"participant does not have collection event: { participantId: $participantId, visitNumber: $visitNumber }"
-          ).failureNel
+          ).failureNel[CollectionEvent]
         } else {
-          cevent.success
+          cevent.successNel[String]
         }
       }
     } yield valid

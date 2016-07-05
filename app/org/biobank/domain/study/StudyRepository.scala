@@ -4,8 +4,8 @@ import org.biobank.domain._
 
 import javax.inject.Singleton
 import com.google.inject.ImplementedBy
-import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[StudyRepositoryImpl])
 trait StudyRepository extends ReadWriteRepository[StudyId, Study] {
@@ -37,27 +37,39 @@ class StudyRepositoryImpl
   def allStudies(): Set[Study] = getValues.toSet
 
   def getDisabled(id: StudyId): DomainValidation[DisabledStudy] = {
-    getByKey(id) match {
-      case Success(s: DisabledStudy) => s.success
-      case Success(s) => InvalidStatus(s"study not disabled: $id").failureNel
-      case Failure(err) => err.failure[DisabledStudy]
-    }
+    for {
+      study <- getByKey(id)
+      disabled <- {
+        study match {
+          case s: DisabledStudy => s.successNel[String]
+          case s => InvalidStatus(s"study not disabled: $id").failureNel[DisabledStudy]
+        }
+      }
+    } yield disabled
   }
 
   def getEnabled(id: StudyId): DomainValidation[EnabledStudy] = {
-    getByKey(id) match {
-      case Success(s: EnabledStudy) => s.success
-      case Success(s) => InvalidStatus(s"study not enabled: $id").failureNel
-      case Failure(err) => err.failure[EnabledStudy]
-    }
+    for {
+      study <- getByKey(id)
+      enabled <- {
+        study match {
+          case s: EnabledStudy => s.successNel[String]
+          case s => InvalidStatus(s"study not enabled: $id").failureNel[EnabledStudy]
+        }
+      }
+    } yield enabled
   }
 
   def getRetired(id: StudyId): DomainValidation[RetiredStudy] = {
-    getByKey(id) match {
-      case Success(s: RetiredStudy) => s.success
-      case Success(s) => InvalidStatus(s"study not retired: $id").failureNel
-      case Failure(err) => err.failure[RetiredStudy]
-    }
+    for {
+      study <- getByKey(id)
+      retired <- {
+        study match {
+          case s: RetiredStudy => s.successNel[String]
+          case s => InvalidStatus(s"study not retired: $id").failureNel[RetiredStudy]
+        }
+      }
+    } yield retired
   }
 
 }

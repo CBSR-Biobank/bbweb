@@ -37,8 +37,20 @@ class CentresController @Inject() (val env:            Environment,
       Ok(centresService.getCountsByStatus)
     }
 
-  def list(filter: String, status: String, sort: String, page: Int, pageSize: Int, order: String) =
+  def list(filterMaybe:   Option[String],
+           statusMaybe:   Option[String],
+           sortMaybe:     Option[String],
+           pageMaybe:     Option[Int],
+           pageSizeMaybe: Option[Int],
+           orderMaybe:    Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
+
+      val filter   = filterMaybe.fold { "" } { f => f }
+      val status   = statusMaybe.fold { "all" } { s => s }
+      val sort     = sortMaybe.fold { "name" } { s => s }
+      val page     = pageMaybe.fold { 1 } { p => p }
+      val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
+      val order    = orderMaybe.fold { "asc" } { o => o }
 
       Logger.debug(s"""|CentresController:list: filter/$filter, status/$status, sort/$sort,
                        | page/$page, pageSize/$pageSize, order/$order""".stripMargin)
@@ -48,7 +60,7 @@ class CentresController @Inject() (val env:            Environment,
       val validation = for {
           sortFunc    <- pagedQuery.getSortFunc(sort)
           sortOrder   <- pagedQuery.getSortOrder
-          centres     <- centresService.getCentres(filter, status, sortFunc, sortOrder)
+          centres     <- centresService.getCentres[Centre](filter, status, sortFunc, sortOrder)
           page        <- pagedQuery.getPage(PageSizeMax, centres.size)
           pageSize    <- pagedQuery.getPageSize(PageSizeMax)
           results     <- PagedResults.create(centres, page, pageSize)

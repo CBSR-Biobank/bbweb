@@ -9,7 +9,7 @@ object EnumUtils {
       def reads(json: JsValue): JsResult[E#Value] = json match {
         case JsString(s) => {
           try {
-            JsSuccess(enum.withName(s))
+            JsSuccess[E#Value](enum.withName(s))
           } catch {
             case _: NoSuchElementException =>
                JsError(s"Enumeration expected of type: '${enum.getClass}', but it does not appear to contain the value: '$s'")
@@ -21,9 +21,11 @@ object EnumUtils {
 
   implicit def enumWrites[E <: Enumeration]: Writes[E#Value] =
     new Writes[E#Value] {
+      @SuppressWarnings(Array("org.wartremover.warts.ToString"))
       def writes(v: E#Value): JsValue = JsString(v.toString)
     }
 
+  @SuppressWarnings(Array("org.wartremover.warts.ImplicitConversion"))
   implicit def enumFormat[E <: Enumeration](enum: E): Format[E#Value] = {
     Format(enumReads(enum), enumWrites)
   }

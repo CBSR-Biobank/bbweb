@@ -33,11 +33,16 @@ class CollectionEventsController @Inject() (val env:          Environment,
     }
 
   def list(participantId: String,
-           sort:          String,
-           page:          Int,
-           pageSize:      Int,
-           order:         String) =
+           sortMaybe:     Option[String],
+           pageMaybe:     Option[Int],
+           pageSizeMaybe: Option[Int],
+           orderMaybe:    Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
+
+      val sort     = sortMaybe.fold { "visitNumber" } { s => s }
+      val page     = pageMaybe.fold { 1 } { p => p }
+      val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
+      val order    = orderMaybe.fold { "asc" } { o => o }
 
       Logger.debug(s"""|CollectionEventsController:list: participantId/$participantId,
                        |  sort/$sort, page/$page, pageSize/$pageSize, order/$order""".stripMargin)

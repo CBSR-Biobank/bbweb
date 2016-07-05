@@ -145,7 +145,7 @@ class ProcessingTypeSpec @Inject() (
       val disabledStudy = factory.defaultDisabledStudy
       val processingTypeId = processingTypeRepository.nextIdentity
       val name = nameGenerator.next[ProcessingType]
-      var description: Option[String] = Some(null)
+      val description: Option[String] = Some(null)
       val enabled = true
 
       val validation = ProcessingType.create(

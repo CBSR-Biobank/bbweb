@@ -40,7 +40,7 @@ class AnnotationTypeSpec extends DomainSpec {
     }
 
     "not be created with an empty description option" in {
-      var invalidDescriptions = List(Some(null), Some(""))
+      val invalidDescriptions = List(Some(null), Some(""))
 
       invalidDescriptions.foreach { invalidDescription =>
         createAnnotationType(numberAnnotationTypeTuple.copy(_2 = invalidDescription))

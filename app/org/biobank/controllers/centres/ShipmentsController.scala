@@ -1,6 +1,6 @@
 package org.biobank.controllers.centres
 
-import org.biobank.domain.centre.Shipment
+import org.biobank.domain.centre.{Shipment, ShipmentSpecimen}
 import org.biobank.controllers.{CommandController, JsonController, PagedQuery, PagedResults}
 import javax.inject.{Inject, Singleton}
 import org.biobank.service.AuthToken
@@ -35,13 +35,24 @@ class ShipmentsController @Inject() (val env:              Environment,
       "timeReceived"   -> Shipment.compareByTimeReceived,
       "timeUnpacked"   -> Shipment.compareByTimeUnpacked)
 
-  def list(courierFilter:        String,
-           trackingNumberFilter: String,
-           sort:                 String,
-           page:                 Int,
-           pageSize:             Int,
-           order:                String) =
+  val listSpecimensSortFields = Map[String, (ShipmentSpecimen, ShipmentSpecimen) => Boolean](
+      //"state" -> ShipmentSpecimen.compareByCourier
+    )
+
+  def list(courierFilterMaybe:        Option[String],
+           trackingNumberFilterMaybe: Option[String],
+           sortMaybe:                 Option[String],
+           pageMaybe:                 Option[Int],
+           pageSizeMaybe:             Option[Int],
+           orderMaybe:                Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
+
+      val courierFilter        = courierFilterMaybe.fold { "" } { cn => cn }
+      val trackingNumberFilter = trackingNumberFilterMaybe.fold { "" } { tn => tn }
+      val sort     = sortMaybe.fold { "courierName" } { s => s }
+      val page     = pageMaybe.fold { 1 } { p => p }
+      val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
+      val order    = orderMaybe.fold { "asc" } { o => o }
 
       Logger.debug(s"""|ShipmentsController:list: courierFilter/$courierFilter,
                        |  trackingNumberFilter/$trackingNumberFilter, sort/$sort, page/$page,
@@ -55,14 +66,14 @@ class ShipmentsController @Inject() (val env:              Environment,
           shipments   <- shipmentsService.getShipments(courierFilter,
                                                        trackingNumberFilter,
                                                        sortWith,
-                                                       sortOrder).success
+                                                       sortOrder).successNel[String]
           page        <- pagedQuery.getPage(PageSizeMax, shipments.size)
           pageSize    <- pagedQuery.getPageSize(PageSizeMax)
           results     <- PagedResults.create(shipments, page, pageSize)
         } yield results
 
       validation.fold(
-        err =>      BadRequest(err.list.toList.mkString),
+        err =>      BadRequest(err.toList.mkString),
         results =>  Ok(results)
       )
     }
@@ -70,6 +81,41 @@ class ShipmentsController @Inject() (val env:              Environment,
   def get(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
     domainValidationReply(shipmentsService.getShipment(id))
   }
+
+  def listSpecimens(shipmentId: String,
+                    sort:       String,
+                    page:       Int,
+                    pageSize:   Int,
+                    order:      String) =
+    AuthAction(parse.empty) { (token, userId, request) =>
+      // Logg er.debug(s"""|ShipmentsController:listSpecimens: shipmentId/$shipmentId, sort/$sort,
+      //                   |  page/$page,pageSize/$pageSize, order/$order""".stripMargin)
+
+      // val pagedQuery = PagedQuery(listSortFields, page, pageSize, order)
+
+      // val validation = for {
+      //     sortWith    <- pagedQuery.getSortFunc(sort)
+      //     sortOrder   <- pagedQuery.getSortOrder
+      //     shipments   <- shipmentsService.getShipments(courierFilter,
+      //                                                  trackingNumberFilter,
+      //                                                  sortWith,
+      //                                                  sortOrder).success
+      //     page        <- pagedQuery.getPage(PageSizeMax, shipments.size)
+      //     pageSize    <- pagedQuery.getPageSize(PageSizeMax)
+      //     results     <- PagedResults.create(shipments, page, pageSize)
+      //   } yield results
+
+      // validation.fold(
+      //   err =>      BadRequest(err.list.toList.mkString),
+      //   results =>  Ok(results)
+      // )
+      ???
+    }
+
+  def getSpecimen(shipmentId: String, shipmentSpecimenId: String) =
+    AuthAction(parse.empty) { (token, userId, request) =>
+      ???
+    }
 
   def add() = commandAction { cmd: AddShipmentCmd => processCommand(cmd) }
 

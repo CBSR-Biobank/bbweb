@@ -13,19 +13,19 @@ object ParticipantCommands {
       with HasIdentity
       with HasExpectedVersion
 
-  case class AddParticipantCmd(userId:      String,
+  final case class AddParticipantCmd(userId:      String,
                                studyId:     String,
                                uniqueId:    String,
                                annotations: List[Annotation])
       extends ParticipantCommand
 
-  case class UpdateParticipantUniqueIdCmd(userId:          String,
+  final case class UpdateParticipantUniqueIdCmd(userId:          String,
                                           id:              String,
                                           expectedVersion: Long,
                                           uniqueId:        String)
       extends ParticipantModifyCommand
 
-  case class ParticipantAddAnnotationCmd(userId:           String,
+  final case class ParticipantAddAnnotationCmd(userId:           String,
                                          id:               String,
                                          expectedVersion:  Long,
                                          annotationTypeId: String,
@@ -34,15 +34,22 @@ object ParticipantCommands {
                                          selectedValues:   Set[String])
       extends ParticipantModifyCommand
 
-  case class ParticipantRemoveAnnotationCmd(userId:           String,
+  final case class ParticipantRemoveAnnotationCmd(userId:           String,
                                             id:               String,
                                             expectedVersion:  Long,
                                             annotationTypeId: String)
       extends ParticipantModifyCommand
 
-  implicit val addParticipantCmdReads              = Json.reads[AddParticipantCmd]
-  implicit val updateParticipantUniqueIdCmdReads   = Json.reads[UpdateParticipantUniqueIdCmd]
-  implicit val participantAddAnnotationCmdReads    = Json.reads[ParticipantAddAnnotationCmd]
-  implicit val participantRemoveAnnotationCmdReads = Json.reads[ParticipantRemoveAnnotationCmd]
+  implicit val addParticipantCmdReads: Reads[AddParticipantCmd] =
+    Json.reads[AddParticipantCmd]
+
+  implicit val updateParticipantUniqueIdCmdReads: Reads[UpdateParticipantUniqueIdCmd] =
+    Json.reads[UpdateParticipantUniqueIdCmd]
+
+  implicit val participantAddAnnotationCmdReads: Reads[ParticipantAddAnnotationCmd] =
+    Json.reads[ParticipantAddAnnotationCmd]
+
+  implicit val participantRemoveAnnotationCmdReads: Reads[ParticipantRemoveAnnotationCmd] =
+    Json.reads[ParticipantRemoveAnnotationCmd]
 
 }

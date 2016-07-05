@@ -8,16 +8,16 @@ import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
 
-case class ShipmentSpecimenId(id: String) extends IdentifiedValueObject[String]
+final case class ShipmentSpecimenId(id: String) extends IdentifiedValueObject[String]
 
 object ShipmentSpecimenId {
 
   // Do not want JSON to create a sub object, we just want it to be converted
   // to a single string
-  implicit val shipmentSpecimenIdReader =
+  implicit val shipmentSpecimenIdReader: Reads[ShipmentSpecimenId] =
     (__ \ "id").read[String].map( new ShipmentSpecimenId(_) )
 
-  implicit val shipmentSpecimenIdWriter =
+  implicit val shipmentSpecimenIdWriter: Writes[ShipmentSpecimenId] =
     Writes{ (shipmentSpecimenId: ShipmentSpecimenId) => JsString(shipmentSpecimenId.id) }
 
 }
@@ -35,14 +35,14 @@ trait ShipmentSpecimenValidations {
  * [org.biobank.domain.centre.Shipment].
  *
  */
-case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
-                            version:             Long,
-                            timeAdded:           DateTime,
-                            timeModified:        Option[DateTime],
-                            shipmentId:          ShipmentId,
-                            specimenId:          SpecimenId,
-                            state:               ShipmentItemState,
-                            shipmentContainerId: Option[ShipmentContainerId])
+final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
+                                  version:             Long,
+                                  timeAdded:           DateTime,
+                                  timeModified:        Option[DateTime],
+                                  shipmentId:          ShipmentId,
+                                  specimenId:          SpecimenId,
+                                  state:               ShipmentItemState,
+                                  shipmentContainerId: Option[ShipmentContainerId])
     extends ConcurrencySafeEntity[ShipmentSpecimenId]
     with ShipmentSpecimenValidations {
 
@@ -58,31 +58,31 @@ case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
 
   def received(): DomainValidation[ShipmentSpecimen] = {
     if (state != ShipmentItemState.Present) {
-      DomainError(s"cannot change state to RECEIVED: invalid state: $state").failureNel
+      DomainError(s"cannot change state to RECEIVED: invalid state: $state").failureNel[ShipmentSpecimen]
     } else {
       copy(state        = ShipmentItemState.Received,
            version      = version + 1,
-           timeModified = Some(DateTime.now)).success
+           timeModified = Some(DateTime.now)).successNel[String]
     }
   }
 
   def missing(): DomainValidation[ShipmentSpecimen] = {
     if (state != ShipmentItemState.Present) {
-      DomainError(s"cannot change state to MISSING: invalid state: $state").failureNel
+      DomainError(s"cannot change state to MISSING: invalid state: $state").failureNel[ShipmentSpecimen]
     } else {
       copy(state        = ShipmentItemState.Missing,
            version      = version + 1,
-           timeModified = Some(DateTime.now)).success
+           timeModified = Some(DateTime.now)).successNel[String]
     }
   }
 
   def extra(): DomainValidation[ShipmentSpecimen] = {
     if (state != ShipmentItemState.Present) {
-      DomainError(s"cannot change state to EXTRA: invalid state: $state").failureNel
+      DomainError(s"cannot change state to EXTRA: invalid state: $state").failureNel[ShipmentSpecimen]
     } else {
       copy(state        = ShipmentItemState.Extra,
            version      = version + 1,
-           timeModified = Some(DateTime.now)).success
+           timeModified = Some(DateTime.now)).successNel[String]
     }
   }
 }
@@ -90,6 +90,8 @@ case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
 object ShipmentSpecimen extends ShipmentSpecimenValidations {
   import org.biobank.domain.CommonValidations._
   import org.biobank.CommonValidations._
+
+  def compareByState(a: ShipmentSpecimen, b: ShipmentSpecimen) = (a.state compareTo b.state) < 0
 
   def create(id:                  ShipmentSpecimenId,
              version:             Long,

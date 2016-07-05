@@ -4,8 +4,8 @@ import org.biobank.domain._
 
 import javax.inject.Singleton
 import com.google.inject.ImplementedBy
-import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[ProcessingTypeRepositoryImpl])
 trait ProcessingTypeRepository extends ReadWriteRepository [ProcessingTypeId, ProcessingType] {
@@ -33,18 +33,18 @@ class ProcessingTypeRepositoryImpl
 
   def withId(studyId: StudyId, processingTypeId: ProcessingTypeId)
       : DomainValidation[ProcessingType] = {
-    getByKey(processingTypeId) match  {
-      case Success(pt) => {
+    for {
+      pt    <- getByKey(processingTypeId)
+      valid <- {
         if (pt.studyId == studyId) {
-          pt.success
+          pt.successNel[String]
         } else {
           EntityCriteriaError(
             s"processing type not in study:{ processingTypeId: $processingTypeId, studyId: $studyId }")
-            .failureNel
+            .failureNel[ProcessingType]
         }
       }
-      case err => err
-    }
+    } yield pt
   }
 
   def allForStudy(studyId: StudyId): Set[ProcessingType] = {

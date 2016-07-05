@@ -16,59 +16,59 @@ object SpecimenCommands {
       with HasIdentity
       with HasExpectedVersion
 
-  case class SpecimenInfo(inventoryId:    String,
-                          specimenSpecId: String,
-                          timeCreated:    DateTime,
-                          locationId:     String,
-                          amount:         BigDecimal)
+  final case class SpecimenInfo(inventoryId:    String,
+                                specimenSpecId: String,
+                                timeCreated:    DateTime,
+                                locationId:     String,
+                                amount:         BigDecimal)
 
-  case class AddSpecimensCmd(userId:            String,
-                             collectionEventId: String,
-                             specimenData:      List[SpecimenInfo])
+  final case class AddSpecimensCmd(userId:            String,
+                                   collectionEventId: String,
+                                   specimenData:      List[SpecimenInfo])
       extends SpecimenCommand
 
 
-  case class MoveSpecimensCmd(userId:            String,
-                              collectionEventId: String,
-                              expectedVersion:   Long,
-                              locationId:        String,
-                              specimenData:      Set[SpecimenInfo])
+  final case class MoveSpecimensCmd(userId:            String,
+                                    collectionEventId: String,
+                                    expectedVersion:   Long,
+                                    locationId:        String,
+                                    specimenData:      Set[SpecimenInfo])
       extends SpecimenCommand
 
-  case class SpecimenAssignPositionCmd(userId:            String,
-                                       id:                String,
-                                       collectionEventId: String,
-                                       expectedVersion:   Long,
-                                       positionId:        Option[String])
+  final case class SpecimenAssignPositionCmd(userId:            String,
+                                             id:                String,
+                                             collectionEventId: String,
+                                             expectedVersion:   Long,
+                                             positionId:        Option[String])
       extends SpecimenModifyCommand
       with HasIdentity
 
-  case class SpecimenRemoveAmountCmd(userId:            String,
+  final case class SpecimenRemoveAmountCmd(userId:            String,
+                                           id:                String,
+                                           collectionEventId: String,
+                                           expectedVersion:   Long,
+                                           amount:            BigDecimal)
+      extends SpecimenModifyCommand
+
+  final case class SpecimenUpdateUsableCmd(userId:            String,
+                                           id:                String,
+                                           collectionEventId: String,
+                                           expectedVersion:   Long,
+                                           usable:            Boolean)
+      extends SpecimenModifyCommand
+
+  final case class RemoveSpecimenCmd(userId:            String,
                                      id:                String,
                                      collectionEventId: String,
-                                     expectedVersion:   Long,
-                                     amount:            BigDecimal)
+                                     expectedVersion:   Long)
       extends SpecimenModifyCommand
 
-  case class SpecimenUpdateUsableCmd(userId:            String,
-                                     id:                String,
-                                     collectionEventId: String,
-                                     expectedVersion:   Long,
-                                     usable:            Boolean)
-      extends SpecimenModifyCommand
-
-  case class RemoveSpecimenCmd(userId:            String,
-                               id:                String,
-                               collectionEventId: String,
-                               expectedVersion:   Long)
-      extends SpecimenModifyCommand
-
-  implicit val specimenInfoReads              = Json.reads[SpecimenInfo]
-  implicit val addSpecimensCmdReads           = Json.reads[AddSpecimensCmd]
-  implicit val moveSpecimensCmdReads          = Json.reads[MoveSpecimensCmd]
-  implicit val specimenAssignPositionCmdReads = Json.reads[SpecimenAssignPositionCmd]
-  implicit val specimenRemoveAmountCmdReads   = Json.reads[SpecimenRemoveAmountCmd]
-  implicit val specimenUpdateUsableCmdReads   = Json.reads[SpecimenUpdateUsableCmd]
-  implicit val removeSpecimenCmdReads         = Json.reads[RemoveSpecimenCmd]
+  implicit val specimenInfoReads: Reads[SpecimenInfo]                           = Json.reads[SpecimenInfo]
+  implicit val addSpecimensCmdReads: Reads[AddSpecimensCmd]                     = Json.reads[AddSpecimensCmd]
+  implicit val moveSpecimensCmdReads: Reads[MoveSpecimensCmd]                   = Json.reads[MoveSpecimensCmd]
+  implicit val specimenAssignPositionCmdReads: Reads[SpecimenAssignPositionCmd] = Json.reads[SpecimenAssignPositionCmd]
+  implicit val specimenRemoveAmountCmdReads: Reads[SpecimenRemoveAmountCmd]     = Json.reads[SpecimenRemoveAmountCmd]
+  implicit val specimenUpdateUsableCmdReads: Reads[SpecimenUpdateUsableCmd]     = Json.reads[SpecimenUpdateUsableCmd]
+  implicit val removeSpecimenCmdReads: Reads[RemoveSpecimenCmd]                 = Json.reads[RemoveSpecimenCmd]
 
 }

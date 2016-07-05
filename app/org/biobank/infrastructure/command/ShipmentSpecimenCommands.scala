@@ -12,41 +12,50 @@ object ShipmentSpecimenCommands {
   trait ShipmentSpecimenModifyCommand extends ShipmentSpecimenCommand
       with HasIdentity with HasExpectedVersion
 
-  case class ShipmentAddSpecimenCmd(userId:              String,
-                                    shipmentId:          String,
-                                    specimenId:          String,
-                                    shipmentContainerId: Option[String])
+  final case class ShipmentAddSpecimenCmd(userId:              String,
+                                          shipmentId:          String,
+                                          specimenId:          String,
+                                          shipmentContainerId: Option[String])
       extends ShipmentSpecimenCommand
 
-  case class ShipmentSpecimenUpdateContainerCmd(userId:              String,
-                                                shipmentId:          String,
-                                                id:                  String, // shipment specimen ID
-                                                expectedVersion:     Long,
-                                                shipmentContainerId: Option[String])
+  final case class ShipmentSpecimenUpdateContainerCmd(userId:              String,
+                                                      shipmentId:          String,
+                                                      id:                  String, // shipment specimen ID
+                                                      expectedVersion:     Long,
+                                                      shipmentContainerId: Option[String])
       extends ShipmentSpecimenModifyCommand
 
-  case class ShipmentSpecimenReceivedCmd(userId:          String,
-                                         shipmentId:      String,
-                                         id:              String, // shipment specimen ID
-                                         expectedVersion: Long)
+  final case class ShipmentSpecimenReceivedCmd(userId:          String,
+                                               shipmentId:      String,
+                                               id:              String, // shipment specimen ID
+                                               expectedVersion: Long)
       extends ShipmentSpecimenModifyCommand
 
-  case class ShipmentSpecimenMissingCmd(userId:          String,
-                                        shipmentId:      String,
-                                        id:              String, // shipment specimen ID
-                                        expectedVersion: Long)
+  final case class ShipmentSpecimenMissingCmd(userId:          String,
+                                              shipmentId:      String,
+                                              id:              String, // shipment specimen ID
+                                              expectedVersion: Long)
       extends ShipmentSpecimenModifyCommand
 
-  case class ShipmentSpecimenExtraCmd(userId:          String,
-                                      shipmentId:      String,
-                                      id:              String, // shipment specimen ID
-                                      expectedVersion: Long)
+  final case class ShipmentSpecimenExtraCmd(userId:          String,
+                                            shipmentId:      String,
+                                            id:              String, // shipment specimen ID
+                                            expectedVersion: Long)
       extends ShipmentSpecimenModifyCommand
 
-  implicit val shipmentAddSpecimenCmdReads             = Json.reads[ShipmentAddSpecimenCmd]
-  implicit val shipmentSpecimenUpdateContainerCmdReads = Json.reads[ShipmentSpecimenUpdateContainerCmd]
-  implicit val shipmentSpecimenReceivedCmdReads        = Json.reads[ShipmentSpecimenReceivedCmd]
-  implicit val shipmentSpecimenMissingCmdReads         = Json.reads[ShipmentSpecimenMissingCmd]
-  implicit val shipmentSpecimenExtraCmdReads           = Json.reads[ShipmentSpecimenExtraCmd]
+  implicit val shipmentAddSpecimenCmdReads: Reads[ShipmentAddSpecimenCmd] =
+    Json.reads[ShipmentAddSpecimenCmd]
+
+  implicit val shipmentSpecimenUpdateContainerCmdReads: Reads[ShipmentSpecimenUpdateContainerCmd] =
+    Json.reads[ShipmentSpecimenUpdateContainerCmd]
+
+  implicit val shipmentSpecimenReceivedCmdReads: Reads[ShipmentSpecimenReceivedCmd] =
+    Json.reads[ShipmentSpecimenReceivedCmd]
+
+  implicit val shipmentSpecimenMissingCmdReads: Reads[ShipmentSpecimenMissingCmd] =
+    Json.reads[ShipmentSpecimenMissingCmd]
+
+  implicit val shipmentSpecimenExtraCmdReads: Reads[ShipmentSpecimenExtraCmd] =
+    Json.reads[ShipmentSpecimenExtraCmd]
 
 }

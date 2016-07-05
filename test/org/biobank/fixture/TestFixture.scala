@@ -36,8 +36,6 @@ trait TestFixture
 
   implicit val timeout: Timeout = 5.seconds
 
-  private def dummyUserIdOpt = Some(UserId("dummy_user_id"))
-
   val factory = new Factory
 
   // need to configure scalatest to have more patience when waiting for future results

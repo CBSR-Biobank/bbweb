@@ -12,4 +12,4 @@ import org.joda.time.DateTime
   *
   * @param timeAdded The date and time the comment was made.
   */
-case class Comment(userId: UserId, message: String, timeAdded: DateTime)
+final case class Comment(userId: UserId, message: String, timeAdded: DateTime)

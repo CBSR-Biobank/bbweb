@@ -187,7 +187,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
-        var participant = factory.createParticipant
+        val participant = factory.createParticipant
         participantRepository.put(participant)
 
         val json = makeRequest(GET, uriUniqueId(study, participant))
@@ -199,7 +199,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
       }
 
       "must return BAD_REQUEST for a participant ID that exists but in a different study" in {
-        var participant = factory.createParticipant
+        val participant = factory.createParticipant
         participantRepository.put(participant)
 
         val study = factory.createEnabledStudy
@@ -216,7 +216,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
-        var participant = factory.createParticipant
+        val participant = factory.createParticipant
 
         val json = makeRequest(GET, uriUniqueId(study, participant), NOT_FOUND)
 
@@ -301,7 +301,6 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
-        val annotType = factory.createAnnotationType
         val annotation = factory.createAnnotation
         val participant = factory.createParticipant.copy(annotations = Set(annotation))
 

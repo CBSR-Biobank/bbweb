@@ -26,4 +26,4 @@ addSbtPlugin("com.jamesward" %% "play-auto-refresh" % "0.0.13")
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.3.3")
 
-//addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "4.0.0-RC2")
+addSbtPlugin("org.wartremover" % "sbt-wartremover" % "1.0.1")

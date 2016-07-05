@@ -54,12 +54,12 @@ DELETE  /studies/proctypes/sltypes/:procTypeId/:id/:ver   org.biobank.controller
 #
 # --- STUDY DTOs ---
 #
-GET     /studies/names                          org.biobank.controllers.study.StudiesController.listNames(filter: String ?= "", order: String ?= "asc")
+GET     /studies/names                          org.biobank.controllers.study.StudiesController.listNames(filter: Option[String], order: Option[String])
 
 #
 # --- STUDIES ---
 #
-GET     /studies                                org.biobank.controllers.study.StudiesController.list(filter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
+GET     /studies                                org.biobank.controllers.study.StudiesController.list(filter: Option[String], status: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
 POST    /studies                                org.biobank.controllers.study.StudiesController.add
 GET     /studies/:id                            org.biobank.controllers.study.StudiesController.get(id)
 POST    /studies/name/:id                       org.biobank.controllers.study.StudiesController.updateName(id)
@@ -75,7 +75,7 @@ POST    /studies/unretire/:id                   org.biobank.controllers.study.St
 #
 # --- COLLECTION EVENTS --- order matters: this section must be before participants
 #
-GET     /participants/cevents/list/:participantId               org.biobank.controllers.participants.CollectionEventsController.list(participantId, sort: String ?= "visitNumber", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
+GET     /participants/cevents/list/:participantId               org.biobank.controllers.participants.CollectionEventsController.list(participantId, sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
 GET     /participants/cevents/visitNumber/:participantId/:vn    org.biobank.controllers.participants.CollectionEventsController.getByVisitNumber(participantId, vn: Int)
 GET     /participants/cevents/:ceventId                         org.biobank.controllers.participants.CollectionEventsController.get(ceventId)
 POST    /participants/cevents/:participantId                    org.biobank.controllers.participants.CollectionEventsController.add(participantId)
@@ -90,7 +90,7 @@ DELETE  /participants/cevents/:participantId/:ceventId/:ver     org.biobank.cont
 #
 GET     /participants/cevents/spcs/get/:spcId                   org.biobank.controllers.participants.SpecimensController.get(spcId)
 GET     /participants/cevents/spcs/invid/:invId                 org.biobank.controllers.participants.SpecimensController.getByInventoryId(invId)
-GET     /participants/cevents/spcs/:ceventId                    org.biobank.controllers.participants.SpecimensController.list(ceventId, status: String ?= "all", sort: String ?= "inventoryId", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
+GET     /participants/cevents/spcs/:ceventId                    org.biobank.controllers.participants.SpecimensController.list(ceventId, status: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
 POST    /participants/cevents/spcs/:ceventId                    org.biobank.controllers.participants.SpecimensController.addSpecimens(ceventId)
 DELETE  /participants/cevents/spcs/:ceventId/:spcId/:ver        org.biobank.controllers.participants.SpecimensController.removeSpecimen(ceventId, spcId, ver: Long)
 
@@ -120,7 +120,7 @@ DELETE  /centres/studies/:centreId/:ver/:studyId org.biobank.controllers.centres
 #
 # --- CENTRE DTOs ---
 #
-GET     /centres/names                          org.biobank.controllers.centres.CentresController.listNames(filter: String ?= "", order: String ?= "asc")
+GET     /centres/names                          org.biobank.controllers.centres.CentresController.listNames(filter, order)
 GET     /centres/locations                      org.biobank.controllers.centres.CentresController.locations()
 
 #
@@ -128,7 +128,7 @@ GET     /centres/locations                      org.biobank.controllers.centres.
 #
 GET     /centres/counts                         org.biobank.controllers.centres.CentresController.centreCounts()
 GET     /centres/:id                            org.biobank.controllers.centres.CentresController.query(id)
-GET     /centres                                org.biobank.controllers.centres.CentresController.list(filter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
+GET     /centres                                org.biobank.controllers.centres.CentresController.list(filter: Option[String], status: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
 POST    /centres                                org.biobank.controllers.centres.CentresController.add
 POST    /centres/name/:id                       org.biobank.controllers.centres.CentresController.updateName(id)
 POST    /centres/description/:id                org.biobank.controllers.centres.CentresController.updateDescription(id)
@@ -142,8 +142,6 @@ DELETE  /centres/locations/:id/:ver/:uniqueId   org.biobank.controllers.centres.
 #
 # --- SHIPMENTS ---
 #
-GET     /shipments                              org.biobank.controllers.centres.ShipmentsController.list(courierFilter: String ?= "", trackingNumberFilter: String ?= "", sort: String ?= "courierName", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
-GET     /shipments/:id                          org.biobank.controllers.centres.ShipmentsController.get(id)
 POST    /shipments                              org.biobank.controllers.centres.ShipmentsController.add
 POST    /shipments/courier/:id                  org.biobank.controllers.centres.ShipmentsController.updateCourier(id)
 POST    /shipments/trackingnumber/:id           org.biobank.controllers.centres.ShipmentsController.updateTrackingNumber(id)
@@ -154,12 +152,16 @@ POST    /shipments/sent/:id                     org.biobank.controllers.centres.
 POST    /shipments/received/:id                 org.biobank.controllers.centres.ShipmentsController.received(id)
 POST    /shipments/unpacked/:id                 org.biobank.controllers.centres.ShipmentsController.unpacked(id)
 POST    /shipments/lost/:id                     org.biobank.controllers.centres.ShipmentsController.lost(id)
+GET     /shipments/specimens/:shId/:shSpcId     org.biobank.controllers.centres.ShipmentsController.getSpecimen(shId, shSpcId)
+GET     /shipments/specimens/:id                org.biobank.controllers.centres.ShipmentsController.listSpecimens(id, sort, page: Int, pageSize: Int, order)
+GET     /shipments/:id                          org.biobank.controllers.centres.ShipmentsController.get(id)
+GET     /shipments                              org.biobank.controllers.centres.ShipmentsController.list(courierFilter: Option[String], trackingNumberFilter: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
 
 #
 # --- USERS ---
 #
 GET     /users/counts                           org.biobank.controllers.UsersController.userCounts()
-GET     /users                                  org.biobank.controllers.UsersController.list(nameFilter: String ?= "", emailFilter: String ?= "", status: String ?= "all", sort: String ?= "name", page: Int ?= 1, pageSize: Int ?= 5, order: String ?= "asc")
+GET     /users                                  org.biobank.controllers.UsersController.list(nameFilter: Option[String], emailFilter: Option[String], status: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
 GET     /users/:id                              org.biobank.controllers.UsersController.user(id)
 POST    /users                                  org.biobank.controllers.UsersController.registerUser
 POST    /users/name/:id                         org.biobank.controllers.UsersController.updateName(id)

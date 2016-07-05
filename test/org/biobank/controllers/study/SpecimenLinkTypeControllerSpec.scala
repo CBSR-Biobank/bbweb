@@ -108,7 +108,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture with JsonHelper {
   }
 
   def createEntities()(fn: (Study, ProcessingType) => Unit): Unit = {
-    var disabledStudy = factory.createDisabledStudy
+    val disabledStudy = factory.createDisabledStudy
     studyRepository.put(disabledStudy)
 
     val procType = factory.createProcessingType

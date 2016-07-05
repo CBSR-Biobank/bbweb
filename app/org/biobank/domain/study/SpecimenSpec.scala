@@ -91,6 +91,7 @@ trait SpecimenSpecValidations {
     * @param version the previous version number for the specimen group. If the specimen group is
     * new then this value should be 0L.
     */
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validate(name:                        String,
                description:                 Option[String],
                units:                       String,
@@ -106,6 +107,7 @@ trait SpecimenSpecValidations {
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validate(specimenSpec: SpecimenSpec): DomainValidation[Boolean] =  {
     validate(specimenSpec.name,
              specimenSpec.description,
@@ -118,22 +120,23 @@ trait SpecimenSpecValidations {
 
 }
 
-case class CollectionSpecimenSpec(uniqueId:                    String,
-                                  name:                        String,
-                                  description:                 Option[String],
-                                  units:                       String,
-                                  anatomicalSourceType:        AnatomicalSourceType,
-                                  preservationType:            PreservationType,
-                                  preservationTemperatureType: PreservationTemperatureType,
-                                  specimenType:                SpecimenType,
-                                  maxCount:                    Int,
-                                  amount:                      Option[BigDecimal])
+final case class CollectionSpecimenSpec(uniqueId:                    String,
+                                        name:                        String,
+                                        description:                 Option[String],
+                                        units:                       String,
+                                        anatomicalSourceType:        AnatomicalSourceType,
+                                        preservationType:            PreservationType,
+                                        preservationTemperatureType: PreservationTemperatureType,
+                                        specimenType:                SpecimenType,
+                                        maxCount:                    Int,
+                                        amount:                      Option[BigDecimal])
     extends SpecimenSpec
 
 object CollectionSpecimenSpec extends SpecimenSpecValidations {
   import org.biobank.domain.CommonValidations._
 
-  implicit val collectionSpecimenSpecWrites = Json.writes[CollectionSpecimenSpec]
+  implicit val collectionSpecimenSpecWrites: Writes[CollectionSpecimenSpec] =
+    Json.writes[CollectionSpecimenSpec]
 
   val hashidsSalt = "biobank-collection-event-types"
 
@@ -171,6 +174,7 @@ object CollectionSpecimenSpec extends SpecimenSpecValidations {
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validate(name:                        String,
                description:                 Option[String],
                units:                       String,
@@ -194,6 +198,7 @@ object CollectionSpecimenSpec extends SpecimenSpecValidations {
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validate(specimenSpec: CollectionSpecimenSpec): DomainValidation[Boolean] = {
     validate(specimenSpec.name,
              specimenSpec.description,

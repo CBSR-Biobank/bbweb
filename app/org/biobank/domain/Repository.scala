@@ -26,11 +26,11 @@ trait ReadWriteRepository[K, A] extends ReadRepository[K, A] {
 
   def nextIdentity: K
 
-  def put(value: A): A
+  def put(value: A): Unit
 
-  def remove(value: A): A
+  def remove(value: A): Unit
 
-  def removeAll()
+  def removeAll(): Unit
 
 }
 
@@ -67,17 +67,15 @@ private [domain] abstract class ReadWriteRepositoryRefImpl[K, A](keyGetter: (A) 
   protected def nextIdentityAsString: String =
     play.api.libs.Codecs.sha1(ReadWriteRepositoryRefImpl.md.digest(java.util.UUID.randomUUID.toString.getBytes))
 
-  def put(value: A): A = {
+  def put(value: A): Unit = {
     internalMap.single.transform(map => map + (keyGetter(value) -> value))
-    value
   }
 
-  def remove(value: A): A = {
+  def remove(value: A): Unit = {
     internalMap.single.transform(map => map - keyGetter(value))
-    value
   }
 
-  def removeAll() = {
+  def removeAll(): Unit = {
     internalMap.single.transform(map => map.empty)
   }
 

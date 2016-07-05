@@ -56,7 +56,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
   protected def createEntity(annotationTypes: Set[AnnotationType],
                              annotations:     Set[Annotation]): CollectionEvent = {
-    val (study, participant, ceventType) = createEntities
+    val (_, _, ceventType) = createEntities
 
     collectionEventTypeRepository.put(ceventType.copy(annotationTypes = annotationTypes))
     val cevent = factory.createCollectionEvent.copy(annotations = annotations)
@@ -137,7 +137,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
   }
 
   def createEntities(): (EnabledStudy, Participant, CollectionEventType) = {
-    var study = factory.createEnabledStudy
+    val study = factory.createEnabledStudy
     studyRepository.put(study)
 
     val ceventType = factory.createCollectionEventType.copy(studyId = study.id,
@@ -593,7 +593,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
       "fail when adding and participant and collection event type not in same study" in {
         createEntities { (study, participant, ceventType) =>
-          var otherStudy = factory.createDisabledStudy
+          val otherStudy = factory.createDisabledStudy
           val otherCeventType = factory.createCollectionEventType.copy(studyId = otherStudy.id)
 
           studyRepository.put(otherStudy)
@@ -733,7 +733,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     "POST /participants/cevents/visitNumber/:ceventId" must {
 
-      "update the visit number on a collection event" in {
+      "111 update the visit number on a collection event" in {
         createEntities { (study, participant, ceventType) =>
           val cevent = factory.createCollectionEvent
           val newVisitNumber = cevent.visitNumber + 1

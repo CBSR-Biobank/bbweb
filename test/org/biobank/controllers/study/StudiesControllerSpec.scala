@@ -36,8 +36,8 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
   }
 
   def checkInvalidStudyId(path: String, jsonField: JsObject): Unit = {
-    var invalidStudyId = nameGenerator.next[Study]
-    var cmdJson = Json.obj("expectedVersion" -> 0L) ++ jsonField
+    val invalidStudyId = nameGenerator.next[Study]
+    val cmdJson = Json.obj("expectedVersion" -> 0L) ++ jsonField
 
     val json = makeRequest(POST, s"/studies/$path/$invalidStudyId", NOT_FOUND, cmdJson)
 
@@ -54,7 +54,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
     val study = factory.createDisabledStudy
     studyRepository.put(study)
 
-    var cmdJson = Json.obj("expectedVersion" -> Some(study.version + 1)) ++ jsonField
+    val cmdJson = Json.obj("expectedVersion" -> Some(study.version + 1)) ++ jsonField
 
     val json = makeRequest(POST, uri(study, path), BAD_REQUEST, cmdJson)
 
@@ -75,7 +75,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     studyRepository.put(study)
 
-    var cmdJson = Json.obj("expectedVersion" -> Some(study.version)) ++ jsonField
+    val cmdJson = Json.obj("expectedVersion" -> Some(study.version)) ++ jsonField
 
     val json = makeRequest(POST, uri(study, path), BAD_REQUEST, cmdJson)
 
@@ -286,7 +286,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include regex("IdNotFound.study")
+        (json \ "message").as[String] must include regex("IdNotFound.*study")
       }
 
     }
@@ -620,8 +620,8 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
       "fail when removing an annotation type on a non disabled study" in {
         val annotationType = factory.createAnnotationType
-        var enabledStudy = factory.createEnabledStudy.copy(annotationTypes = Set(annotationType))
-        var retiredStudy = factory.createRetiredStudy.copy(annotationTypes = Set(annotationType))
+        val enabledStudy = factory.createEnabledStudy.copy(annotationTypes = Set(annotationType))
+        val retiredStudy = factory.createRetiredStudy.copy(annotationTypes = Set(annotationType))
 
         List(enabledStudy, retiredStudy).foreach { study =>
           studyRepository.put(study)

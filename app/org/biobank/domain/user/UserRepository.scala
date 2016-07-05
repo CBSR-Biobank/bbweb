@@ -4,8 +4,8 @@ import org.biobank.domain.{ DomainValidation, ReadWriteRepository, ReadWriteRepo
 
 import javax.inject.Singleton
 import com.google.inject.ImplementedBy
-import scalaz._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /** A repository that stores [[User]]s. */
 @ImplementedBy(classOf[UserRepositoryImpl])
@@ -44,31 +44,43 @@ class UserRepositoryImpl
   }
 
   def getRegistered(id: UserId): DomainValidation[RegisteredUser] = {
-    getByKey(id) match {
-      case Success(u: RegisteredUser) => u.success
-      case Success(u) => InvalidStatus(s"user is not registered: $id").failureNel
-      case Failure(err) => err.failure[RegisteredUser]
-    }
+    for {
+      user <- getByKey(id)
+      registered <- {
+        user match {
+          case u: RegisteredUser => u.successNel[String]
+          case u => InvalidStatus(s"user is not registered: $id").failureNel[RegisteredUser]
+        }
+      }
+    } yield registered
   }
 
   def getActive(id: UserId) = {
-    getByKey(id) match {
-      case Success(u: ActiveUser) => u.success
-      case Success(u) => InvalidStatus(s"user is not active: $id").failureNel
-      case Failure(err) => err.failure[ActiveUser]
-    }
+    for {
+      user <- getByKey(id)
+      active <- {
+        user match {
+          case u: ActiveUser => u.successNel[String]
+          case u => InvalidStatus(s"user is not active: $id").failureNel[ActiveUser]
+        }
+      }
+    } yield active
   }
 
   def getLocked(id: UserId) = {
-    getByKey(id) match {
-      case Success(u: LockedUser) => u.success
-      case Success(u) => InvalidStatus(s"user is not active: $id").failureNel
-      case Failure(err) => err.failure[LockedUser]
-    }
+    for {
+      user <- getByKey(id)
+      locked <- {
+        user match {
+          case u: LockedUser => u.successNel[String]
+          case u => InvalidStatus(s"user is not active: $id").failureNel[LockedUser]
+        }
+      }
+    } yield locked
   }
 
   def getByEmail(email: String): DomainValidation[User] = {
     getValues.find(_.email == email)
-      .toSuccessNel(EmailNotFound(s"user email not found: $email").toString)
+      .toSuccess(EmailNotFound(s"user email not found: $email").nel)
   }
 }

@@ -12,6 +12,8 @@ class EmailService @Inject() (env: Environment,
                               mailerClient: MailerClient) {
 
   def passwordResetEmail(recipient: String, password: String) = {
+
+    @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
     val async: Future[Unit] = Future {
         val adminEmail = configuration.getString("admin.email").getOrElse("cbsrbiobank@gmail.com")
       val to = if (env.mode == play.api.Mode.Prod) {

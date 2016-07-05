@@ -17,51 +17,51 @@ object CollectionEventCommands {
       with HasIdentity
       with HasExpectedVersion
 
-  case class AddCollectionEventCmd(userId:                String,
-                                   participantId:         String,
-                                   collectionEventTypeId: String,
-                                   timeCompleted:         DateTime,
-                                   visitNumber:           Int,
-                                   annotations:           List[Annotation])
+  final case class AddCollectionEventCmd(userId:                String,
+                                         participantId:         String,
+                                         collectionEventTypeId: String,
+                                         timeCompleted:         DateTime,
+                                         visitNumber:           Int,
+                                         annotations:           List[Annotation])
       extends CollectionEventCommand
 
-  case class UpdateCollectionEventVisitNumberCmd(userId:          String,
-                                                 id:              String,
-                                    expectedVersion: Long,
-                                                 visitNumber:     Int)
+  final case class UpdateCollectionEventVisitNumberCmd(userId:          String,
+                                                       id:              String,
+                                                       expectedVersion: Long,
+                                                       visitNumber:     Int)
       extends CollectionEventModifyCommand
 
-  case class UpdateCollectionEventTimeCompletedCmd(userId:          String,
-                                                   id:              String,
-                                                   expectedVersion: Long,
-                                                   timeCompleted:   DateTime)
+  final case class UpdateCollectionEventTimeCompletedCmd(userId:          String,
+                                                         id:              String,
+                                                         expectedVersion: Long,
+                                                         timeCompleted:   DateTime)
       extends CollectionEventModifyCommand
 
-  case class UpdateCollectionEventAnnotationCmd(userId:           String,
-                                                id:               String,
-                                                expectedVersion:  Long,
-                                                annotationTypeId: String,
-                                                stringValue:      Option[String],
-                                                numberValue:      Option[String],
-                                                selectedValues:   Set[String])
+  final case class UpdateCollectionEventAnnotationCmd(userId:           String,
+                                                      id:               String,
+                                                      expectedVersion:  Long,
+                                                      annotationTypeId: String,
+                                                      stringValue:      Option[String],
+                                                      numberValue:      Option[String],
+                                                      selectedValues:   Set[String])
       extends CollectionEventModifyCommand
 
-  case class RemoveCollectionEventAnnotationCmd(userId:           String,
-                                                id:               String,
-                                                expectedVersion:  Long,
-                                                annotationTypeId: String)
+  final case class RemoveCollectionEventAnnotationCmd(userId:           String,
+                                                      id:               String,
+                                                      expectedVersion:  Long,
+                                                      annotationTypeId: String)
       extends CollectionEventModifyCommand
 
-  case class RemoveCollectionEventCmd(userId:          String,
-                                      id:              String,
-                                      participantId:   String,
-                                      expectedVersion: Long)
+  final case class RemoveCollectionEventCmd(userId:          String,
+                                            id:              String,
+                                            participantId:   String,
+                                            expectedVersion: Long)
       extends CollectionEventModifyCommand
 
-  implicit val addCollectionEventCmdReads                 = Json.reads[AddCollectionEventCmd]
-  implicit val updateCollectionEventVisitNumberCmdReads   = Json.reads[UpdateCollectionEventVisitNumberCmd]
-  implicit val updateCollectionEventTimeCompletedCmdReads = Json.reads[UpdateCollectionEventTimeCompletedCmd]
-  implicit val updateCollectionEventAnnotationCmdReads    = Json.reads[UpdateCollectionEventAnnotationCmd]
-  implicit val removeCollectionEventCmdReads              = Json.reads[RemoveCollectionEventCmd]
+  implicit val addCollectionEventCmdReads: Reads[AddCollectionEventCmd]                                 = Json.reads[AddCollectionEventCmd]
+  implicit val updateCollectionEventVisitNumberCmdReads: Reads[UpdateCollectionEventVisitNumberCmd]     = Json.reads[UpdateCollectionEventVisitNumberCmd]
+  implicit val updateCollectionEventTimeCompletedCmdReads: Reads[UpdateCollectionEventTimeCompletedCmd] = Json.reads[UpdateCollectionEventTimeCompletedCmd]
+  implicit val updateCollectionEventAnnotationCmdReads: Reads[UpdateCollectionEventAnnotationCmd]       = Json.reads[UpdateCollectionEventAnnotationCmd]
+  implicit val removeCollectionEventCmdReads: Reads[RemoveCollectionEventCmd]                           = Json.reads[RemoveCollectionEventCmd]
 
 }

@@ -51,6 +51,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
    * These are the events that are recovered during journal recovery. They cannot fail and must be
    * processed to recreate the current state of the aggregate.
    */
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   override def receiveRecover: Receive = {
     case event: CollectionEventTypeEvent =>
       event.eventType match {
@@ -83,6 +84,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
    * These are the commands that are requested. A command can fail, and will send the failure as a response
    * back to the user. Each valid command generates one or more events and is journaled.
    */
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   override def receiveCommand: Receive = {
     case cmd: AddCollectionEventTypeCmd =>
       process(addCmdToEvent(cmd))(applyAddedEvent)
@@ -101,9 +103,6 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
 
     case cmd: CollectionEventTypeAddAnnotationTypeCmd =>
       processUpdateCmd(cmd, addAnnotationTypeCmdToEvent, applyAnnotationTypeAddedEvent)
-
-    case cmd: CollectionEventTypeUpdateAnnotationTypeCmd =>
-      processUpdateCmd(cmd, updateAnnotationTypeCmdToEvent, applyAnnotationTypeRemovedEvent)
 
     case cmd: RemoveCollectionEventTypeAnnotationTypeCmd =>
       processUpdateCmd(cmd, removeAnnotationTypeCmdToEvent, applyAnnotationTypeRemovedEvent)
@@ -149,13 +148,13 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
   private def removeCmdToEvent(cmd: RemoveCollectionEventTypeCmd, ceventType: CollectionEventType)
       : DomainValidation[CollectionEventTypeEvent] = {
     if (collectionEventRepository.collectionEventTypeInUse(ceventType.id)) {
-      EntityInUse(s"collection event type in use: ${ceventType.id}").failureNel
+      EntityInUse(s"collection event type in use: ${ceventType.id}").failureNel[CollectionEventTypeEvent]
     } else {
       CollectionEventTypeEvent(ceventType.id.id).update(
         _.studyId         := ceventType.studyId.id,
         _.optionalUserId  := cmd.userId,
         _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.removed.version := cmd.expectedVersion).success
+        _.removed.version := cmd.expectedVersion).successNel[String]
     }
   }
 
@@ -220,29 +219,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       _.annotationTypeAdded.annotationType := EventUtils.annotationTypeToEvent(annotationType))
   }
 
-  private def updateAnnotationTypeCmdToEvent(cmd: CollectionEventTypeUpdateAnnotationTypeCmd,
-                                             cet: CollectionEventType)
-      : DomainValidation[CollectionEventTypeEvent] = {
-    for {
-      annotationType <- {
-        AnnotationType(cmd.uniqueId,
-                       cmd.name,
-                       cmd.description,
-                       cmd.valueType,
-                       cmd.maxValueCount,
-                       cmd.options,
-                       cmd.required).success
-      }
-      updatedCet <- cet.withAnnotationType(annotationType)
-    } yield CollectionEventTypeEvent(cet.id.id).update(
-      _.studyId                              := cet.studyId.id,
-      _.optionalUserId                       := cmd.userId,
-      _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
-      _.annotationTypeUpdated.version        := cmd.expectedVersion,
-      _.annotationTypeUpdated.annotationType := EventUtils.annotationTypeToEvent(annotationType))
-  }
-
-  private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotationTypeCmd,
+private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotationTypeCmd,
                                              cet: CollectionEventType)
       : DomainValidation[CollectionEventTypeEvent] = {
     cet.removeAnnotationType(cmd.uniqueId) map { c =>
@@ -291,7 +268,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                                cmd.preservationTemperatureType,
                                cmd.specimenType,
                                cmd.maxCount,
-                               cmd.amount).success
+                               cmd.amount).successNel[String]
       }
       updatedCet <- cet.withSpecimenSpec(specimenSpec)
     } yield CollectionEventTypeEvent(cet.id.id).update(
@@ -332,7 +309,8 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
   private def onValidEventAndVersion(event:        CollectionEventTypeEvent,
                                      eventType:    Boolean,
                                      eventVersion: Long)
-                                    (fn: CollectionEventType => Unit): Unit = {
+                                    (applyEvent: (CollectionEventType, DateTime) => DomainValidation[Boolean])
+      : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
     } else {
@@ -342,7 +320,12 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
           if (cet.version != eventVersion) {
             log.error(s"event version check failed: cet version: ${cet.version}, event: $event")
           } else {
-            fn(cet)
+            val eventTime = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
+            val update = applyEvent(cet, eventTime)
+
+            if (update.isFailure) {
+              log.error(s"centre update from event failed: $update")
+            }
           }
         }
       )
@@ -355,7 +338,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     } else {
       val addedEvent = event.getAdded
 
-      CollectionEventType.create(
+      val v = CollectionEventType.create(
         studyId           = StudyId(event.getStudyId),
         id                = CollectionEventTypeId(event.id),
         version           = 0L,
@@ -363,191 +346,116 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
         description       = addedEvent.description,
         recurring         = addedEvent.getRecurring,
         specimenSpecs     = Set.empty,
-        annotationTypes   = Set.empty
-      ).fold(
-        err => log.error(s"could not add collection event type from event: $event"),
-        cet => {
-          collectionEventTypeRepository.put(
-            cet.copy(timeAdded = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)))
-          ()
-        }
-      )
+        annotationTypes   = Set.empty)
+
+      if (v.isFailure) {
+        log.error(s"could not add collection event type from event: $v")
+      }
+
+      v.foreach { ct =>
+        val timeAdded = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
+        collectionEventTypeRepository.put(ct.copy(timeAdded = timeAdded))
+      }
     }
   }
 
   private def applyRemovedEvent(event: CollectionEventTypeEvent): Unit = {
     onValidEventAndVersion(event,
                            event.eventType.isRemoved,
-                           event.getRemoved.getVersion) { cet =>
-      collectionEventTypeRepository.getByKey(cet.id).fold(
-        err => log.error(s"removing collection event type from event failed: $err"),
-        cet => {
-          collectionEventTypeRepository.remove(cet)
-          ()
-        }
-      )
+                           event.getRemoved.getVersion) { (cet, _) =>
+      val v = collectionEventTypeRepository.getByKey(cet.id)
+      v.foreach(collectionEventTypeRepository.remove)
+      v.map(_ => true)
     }
+  }
+
+  private def storeIfValid(validation: DomainValidation[CollectionEventType],
+                           eventTime: DateTime): DomainValidation[Boolean] = {
+    validation.foreach { c =>
+      collectionEventTypeRepository.put(c.copy(timeModified = Some(eventTime)))
+    }
+    validation.map(_ => true)
   }
 
   private def applyNameUpdatedEvent(event: CollectionEventTypeEvent): Unit = {
     onValidEventAndVersion(event,
                            event.eventType.isNameUpdated,
-                           event.getNameUpdated.getVersion) { cet =>
-      val updatedEvent = event.getNameUpdated
-      cet.withName(updatedEvent.getName).fold(
-        err => log.error(s"updating cevent type from event failed: $err"),
-        c => {
-          collectionEventTypeRepository.put(
-            c.copy(
-              timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
-          ()
-        }
-      )
+                           event.getNameUpdated.getVersion) { (cet, eventTime) =>
+      storeIfValid(cet.withName(event.getNameUpdated.getName), eventTime)
     }
   }
 
   private def applyDescriptionUpdatedEvent(event: CollectionEventTypeEvent): Unit = {
     onValidEventAndVersion(event,
                            event.eventType.isDescriptionUpdated,
-                           event.getDescriptionUpdated.getVersion) { cet =>
-      val updatedEvent = event.getDescriptionUpdated
-      cet.withDescription(updatedEvent.description).fold(
-        err => log.error(s"updating cevent type from event failed: $err"),
-        c => {
-          collectionEventTypeRepository.put(
-            c.copy(
-              timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
-          ()
-        }
-      )
+                           event.getDescriptionUpdated.getVersion) { (cet, eventTime) =>
+      storeIfValid(cet.withDescription(event.getDescriptionUpdated.description), eventTime)
     }
   }
 
   private def applyRecurringUpdatedEvent(event: CollectionEventTypeEvent): Unit = {
     onValidEventAndVersion(event,
                            event.eventType.isRecurringUpdated,
-                           event.getRecurringUpdated.getVersion) { cet =>
-      val updatedEvent = event.getRecurringUpdated
-      cet.withRecurring(updatedEvent.getRecurring).fold(
-        err => log.error(s"updating cevent type from event failed: $err"),
-        c => {
-          collectionEventTypeRepository.put(
-            c.copy(
-              timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
-          ()
-        }
-      )
+                           event.getRecurringUpdated.getVersion) { (cet, eventTime) =>
+      storeIfValid(cet.withRecurring(event.getRecurringUpdated.getRecurring), eventTime)
     }
   }
 
   private def applyAnnotationTypeAddedEvent(event: CollectionEventTypeEvent): Unit = {
     onValidEventAndVersion(event,
                            event.eventType.isAnnotationTypeAdded,
-                           event.getAnnotationTypeAdded.getVersion) { cet =>
+                           event.getAnnotationTypeAdded.getVersion) { (cet, eventTime) =>
       val eventAnnotationType = event.getAnnotationTypeAdded.getAnnotationType
-      cet.withAnnotationType(EventUtils.annotationTypeFromEvent(eventAnnotationType)).fold(
-        err => log.error(s"updating cevent type from event failed: $err"),
-        c => {
-          collectionEventTypeRepository.put(
-            c.copy(
-              timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
-          ()
-        }
-      )
-    }
-  }
-
-  private def applyAnnotationTypeUpdatedEvent(event: CollectionEventTypeEvent): Unit = {
-    onValidEventAndVersion(event,
-                           event.eventType.isAnnotationTypeUpdated,
-                           event.getAnnotationTypeUpdated.getVersion) { cet =>
-      val eventAnnotationType = event.getAnnotationTypeUpdated.getAnnotationType
-      cet.withAnnotationType(EventUtils.annotationTypeFromEvent(eventAnnotationType)).fold(
-        err => log.error(s"updating cevent type from event failed: $err"),
-        c => {
-          collectionEventTypeRepository.put(
-            c.copy(
-              timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
-          ()
-        }
-      )
+      storeIfValid(cet.withAnnotationType(EventUtils.annotationTypeFromEvent(eventAnnotationType)), eventTime)
     }
   }
 
   private def applyAnnotationTypeRemovedEvent(event: CollectionEventTypeEvent): Unit = {
     onValidEventAndVersion(event,
                            event.eventType.isAnnotationTypeRemoved,
-                           event.getAnnotationTypeRemoved.getVersion) { cet =>
-      cet.removeAnnotationType(event.getAnnotationTypeRemoved.getUniqueId).fold(
-        err => log.error(s"updating cevent type from event failed: $err"),
-        c => {
-          collectionEventTypeRepository.put(
-            c.copy(
-              timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
-          ()
-        }
-      )
+                           event.getAnnotationTypeRemoved.getVersion) { (cet, eventTime) =>
+      storeIfValid(cet.removeAnnotationType(event.getAnnotationTypeRemoved.getUniqueId), eventTime)
     }
   }
 
   private def applySpecimenSpecAddedEvent(event: CollectionEventTypeEvent): Unit = {
     onValidEventAndVersion(event,
                            event.eventType.isSpecimenSpecAdded,
-                           event.getSpecimenSpecAdded.getVersion) { cet =>
-      val eventSpecimenSpec = event.getSpecimenSpecAdded
-      cet.withSpecimenSpec(EventUtils.specimenSpecFromEvent(eventSpecimenSpec.getSpecimenSpec)).fold(
-        err => log.error(s"updating cevent type from event failed: $err"),
-        c => {
-          collectionEventTypeRepository.put(
-            c.copy(
-              timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
-          ()
-        }
-      )
+                           event.getSpecimenSpecAdded.getVersion) { (cet, eventTime) =>
+      storeIfValid(
+        cet.withSpecimenSpec(EventUtils.specimenSpecFromEvent(event.getSpecimenSpecAdded.getSpecimenSpec)),
+        eventTime)
     }
   }
 
   private def applySpecimenSpecUpdatedEvent(event: CollectionEventTypeEvent): Unit = {
     onValidEventAndVersion(event,
                            event.eventType.isSpecimenSpecUpdated,
-                           event.getSpecimenSpecUpdated.getVersion) { cet =>
-      val eventSpecimenSpec = event.getSpecimenSpecUpdated
-      cet.withSpecimenSpec(EventUtils.specimenSpecFromEvent(eventSpecimenSpec.getSpecimenSpec)).fold(
-        err => log.error(s"updating cevent type from event failed: $err"),
-        c => {
-          collectionEventTypeRepository.put(
-            c.copy(
-              timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
-          ()
-        }
-      )
+                           event.getSpecimenSpecUpdated.getVersion) { (cet, eventTime) =>
+      storeIfValid(
+        cet.withSpecimenSpec(EventUtils.specimenSpecFromEvent(event.getSpecimenSpecUpdated.getSpecimenSpec)),
+        eventTime)
     }
   }
 
   private def applySpecimenSpecRemovedEvent(event: CollectionEventTypeEvent): Unit = {
     onValidEventAndVersion(event,
                            event.eventType.isSpecimenSpecRemoved,
-                           event.getSpecimenSpecRemoved.getVersion) { cet =>
-      cet.removeSpecimenSpec(event.getSpecimenSpecRemoved.getUniqueId).fold(
-        err => log.error(s"updating cevent type from event failed: $err"),
-        c => {
-          collectionEventTypeRepository.put(
-            c.copy(
-              timeModified = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime))))
-          ()
-        }
-      )
+                           event.getSpecimenSpecRemoved.getVersion) { (cet, eventTime) =>
+      storeIfValid(cet.removeSpecimenSpec(event.getSpecimenSpecRemoved.getUniqueId), eventTime)
     }
   }
 
   val ErrMsgNameExists = "collection event type with name already exists"
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   private def nameAvailable(name: String, studyId: StudyId): DomainValidation[Boolean] = {
     nameAvailableMatcher(name, collectionEventTypeRepository, ErrMsgNameExists) { item =>
       (item.name == name) && (item.studyId == studyId)
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   private def nameAvailable(name: String,
                             studyId: StudyId,
                             excludeId: CollectionEventTypeId)
