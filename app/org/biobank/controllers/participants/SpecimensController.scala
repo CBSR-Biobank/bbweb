@@ -42,14 +42,12 @@ class SpecimensController @Inject() (val env:          Environment,
     }
 
   def list(ceventId:      String,
-           statusMaybe:   Option[String],
            sortMaybe:     Option[String],
            pageMaybe:     Option[Int],
            pageSizeMaybe: Option[Int],
            orderMaybe:    Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
 
-      val status   = statusMaybe.fold { "all" } { s => s }
       val sort     = sortMaybe.fold { "inventoryId" } { s => s }
       val page     = pageMaybe.fold { 1 } { p => p }
       val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }

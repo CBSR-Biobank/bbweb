@@ -13,7 +13,7 @@ message ShipmentSpecimenEvent {
       optional string shipmentContainerId = 2;
    }
 
-   message StateUpdated {
+   message WithVersion {
       optional int64  version   = 1;
    }
 
@@ -24,8 +24,9 @@ message ShipmentSpecimenEvent {
    oneof event_type {
       Added            added            = 5;
       ContainerUpdated containerUpdated = 6;
-      StateUpdated     received         = 8;
-      StateUpdated     missing          = 9;
-      StateUpdated     extra            = 10;
+      WithVersion      received         = 8;
+      WithVersion      missing          = 9;
+      WithVersion      extra            = 10;
+      WithVersion      removed          = 11;
    }
 }

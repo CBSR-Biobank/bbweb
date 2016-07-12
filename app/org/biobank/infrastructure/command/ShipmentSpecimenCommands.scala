@@ -12,11 +12,17 @@ object ShipmentSpecimenCommands {
   trait ShipmentSpecimenModifyCommand extends ShipmentSpecimenCommand
       with HasIdentity with HasExpectedVersion
 
-  final case class ShipmentAddSpecimenCmd(userId:              String,
+  final case class ShipmentSpecimenAddCmd(userId:              String,
                                           shipmentId:          String,
                                           specimenId:          String,
                                           shipmentContainerId: Option[String])
       extends ShipmentSpecimenCommand
+
+  final case class ShipmentSpecimenRemoveCmd(userId:          String,
+                                             shipmentId:      String,
+                                             id:              String, // shipment specimen ID
+                                             expectedVersion: Long)
+      extends ShipmentSpecimenModifyCommand
 
   final case class ShipmentSpecimenUpdateContainerCmd(userId:              String,
                                                       shipmentId:          String,
@@ -43,8 +49,8 @@ object ShipmentSpecimenCommands {
                                             expectedVersion: Long)
       extends ShipmentSpecimenModifyCommand
 
-  implicit val shipmentAddSpecimenCmdReads: Reads[ShipmentAddSpecimenCmd] =
-    Json.reads[ShipmentAddSpecimenCmd]
+  implicit val shipmentAddSpecimenCmdReads: Reads[ShipmentSpecimenAddCmd] =
+    Json.reads[ShipmentSpecimenAddCmd]
 
   implicit val shipmentSpecimenUpdateContainerCmdReads: Reads[ShipmentSpecimenUpdateContainerCmd] =
     Json.reads[ShipmentSpecimenUpdateContainerCmd]

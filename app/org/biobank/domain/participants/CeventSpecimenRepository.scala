@@ -39,9 +39,11 @@ class CeventSpecimenRepositoryImpl
   def withSpecimenId(specimenId: SpecimenId): DomainValidation[CeventSpecimen] = {
     val ceventSpecimens = getValues.filter(x => x.specimenId == specimenId).toSet
     if (ceventSpecimens.isEmpty) {
-      DomainError(s"location is not for a centre: ${specimenId.id}").failureNel[CeventSpecimen]
+      DomainError(s"cevent specimen repository: specimen id not found: ${specimenId.id}")
+        .failureNel[CeventSpecimen]
     } else if (ceventSpecimens.size > 1) {
-      DomainError(s"location has more than one centre: ${specimenId.id}").failureNel[CeventSpecimen]
+      DomainError(s"cevent specimen repository: more than one entry found for scpecimen: ${specimenId.id}")
+        .failureNel[CeventSpecimen]
     } else {
       ceventSpecimens.head.successNel[String]
     }

@@ -15,7 +15,7 @@ import play.api.libs.json._
 object ShipmentItemState extends Enumeration {
   type ShipmentItemState = Value
   val Present  = Value("Present")
-  val Received = Value("Receiving")
+  val Received = Value("Received")
   val Missing  = Value("Missing")
   val Extra    = Value("Extra")
 

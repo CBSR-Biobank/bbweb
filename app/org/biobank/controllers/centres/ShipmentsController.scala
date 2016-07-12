@@ -24,6 +24,7 @@ class ShipmentsController @Inject() (val env:              Environment,
     with JsonController {
 
   import org.biobank.infrastructure.command.ShipmentCommands._
+  import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
 
   private val PageSizeMax = 10
 
@@ -34,10 +35,6 @@ class ShipmentsController @Inject() (val env:              Environment,
       "timeSent"       -> Shipment.compareByTimeSent,
       "timeReceived"   -> Shipment.compareByTimeReceived,
       "timeUnpacked"   -> Shipment.compareByTimeUnpacked)
-
-  val listSpecimensSortFields = Map[String, (ShipmentSpecimen, ShipmentSpecimen) => Boolean](
-      //"state" -> ShipmentSpecimen.compareByCourier
-    )
 
   def list(courierFilterMaybe:        Option[String],
            trackingNumberFilterMaybe: Option[String],
@@ -73,8 +70,8 @@ class ShipmentsController @Inject() (val env:              Environment,
         } yield results
 
       validation.fold(
-        err =>      BadRequest(err.toList.mkString),
-        results =>  Ok(results)
+        err =>     BadRequest(err.toList.mkString),
+        results => Ok(results)
       )
     }
 
@@ -82,42 +79,52 @@ class ShipmentsController @Inject() (val env:              Environment,
     domainValidationReply(shipmentsService.getShipment(id))
   }
 
-  def listSpecimens(shipmentId: String,
-                    sort:       String,
-                    page:       Int,
-                    pageSize:   Int,
-                    order:      String) =
+  def listSpecimens(shipmentId:      String,
+                    sortMaybe:       Option[String],
+                    pageMaybe:       Option[Int],
+                    pageSizeMaybe:   Option[Int],
+                    orderMaybe:      Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      // Logg er.debug(s"""|ShipmentsController:listSpecimens: shipmentId/$shipmentId, sort/$sort,
-      //                   |  page/$page,pageSize/$pageSize, order/$order""".stripMargin)
 
-      // val pagedQuery = PagedQuery(listSortFields, page, pageSize, order)
+      val sort     = sortMaybe.fold { "inventoryId" } { s => s }
+      val page     = pageMaybe.fold { 1 } { p => p }
+      val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
+      val order    = orderMaybe.fold { "asc" } { o => o }
 
-      // val validation = for {
-      //     sortWith    <- pagedQuery.getSortFunc(sort)
-      //     sortOrder   <- pagedQuery.getSortOrder
-      //     shipments   <- shipmentsService.getShipments(courierFilter,
-      //                                                  trackingNumberFilter,
-      //                                                  sortWith,
-      //                                                  sortOrder).success
-      //     page        <- pagedQuery.getPage(PageSizeMax, shipments.size)
-      //     pageSize    <- pagedQuery.getPageSize(PageSizeMax)
-      //     results     <- PagedResults.create(shipments, page, pageSize)
-      //   } yield results
+      Logger.debug(s"""|ShipmentsController:listSpecimens: shipmentId/$shipmentId, sort/$sort,
+                       |  page/$page,pageSize/$pageSize, order/$order""".stripMargin)
 
-      // validation.fold(
-      //   err =>      BadRequest(err.list.toList.mkString),
-      //   results =>  Ok(results)
-      // )
-      ???
+      val pagedQuery = PagedQuery(Map.empty[String, (ShipmentSpecimen, ShipmentSpecimen) => Boolean], page, pageSize, order)
+
+      val validation = for {
+          sortOrder         <- pagedQuery.getSortOrder
+          shipmentSpecimens <- shipmentsService.getShipmentSpecimens(shipmentId, sort, sortOrder)
+          page              <- pagedQuery.getPage(PageSizeMax, shipmentSpecimens.size)
+          pageSize          <- pagedQuery.getPageSize(PageSizeMax)
+          results           <- PagedResults.create(shipmentSpecimens, page, pageSize)
+        } yield results
+
+      validation.fold(
+        err =>     BadRequest(err.list.toList.mkString),
+        results => Ok(results)
+      )
     }
 
   def getSpecimen(shipmentId: String, shipmentSpecimenId: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      ???
+      domainValidationReply(shipmentsService.getShipmentSpecimen(shipmentId, shipmentSpecimenId))
     }
 
   def add() = commandAction { cmd: AddShipmentCmd => processCommand(cmd) }
+
+  def remove(shipmentId: String, version: Long) =
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
+      val cmd = ShipmentRemoveCmd(userId          = userId.id,
+                                  id              = shipmentId,
+                                  expectedVersion = version)
+      val future = shipmentsService.removeShipment(cmd)
+      domainValidationReply(future)
+    }
 
   def updateCourier(id: String) =
     commandAction(Json.obj("id" -> id)) { cmd : UpdateShipmentCourierNameCmd => processCommand(cmd) }
@@ -146,8 +153,42 @@ class ShipmentsController @Inject() (val env:              Environment,
   def lost(id: String) =
     commandAction(Json.obj("id" -> id)) { cmd : ShipmentLostCmd => processCommand(cmd) }
 
+  def addSpecimen(shipmentId: String) = commandAction(Json.obj("shipmentId" -> shipmentId)) {
+      cmd: ShipmentSpecimenAddCmd => processSpecimenCommand(cmd)
+    }
+
+  def removeSpecimen(shipmentId: String, shipmentSpecimenId: String, version: Long) =
+    AuthActionAsync(parse.empty) { (token, userId, request) =>
+      val cmd = ShipmentSpecimenRemoveCmd(userId          = userId.id,
+                                          shipmentId      = shipmentId,
+                                          id              = shipmentSpecimenId,
+                                          expectedVersion = version)
+      val future = shipmentsService.removeShipmentSpecimen(cmd)
+      domainValidationReply(future)
+    }
+
+  def specimenReceived(shipmentId: String, shipmentSpecimenId: String) =
+    commandAction(Json.obj("shipmentId" -> shipmentId, "id" -> shipmentSpecimenId)) {
+      cmd: ShipmentSpecimenReceivedCmd => processSpecimenCommand(cmd)
+    }
+
+  def specimenMissing(shipmentId: String, shipmentSpecimenId: String) =
+    commandAction(Json.obj("shipmentId" -> shipmentId, "id" -> shipmentSpecimenId)) {
+      cmd: ShipmentSpecimenMissingCmd => processSpecimenCommand(cmd)
+    }
+
+  def specimenExtra(shipmentId: String, shipmentSpecimenId: String) =
+    commandAction(Json.obj("shipmentId" -> shipmentId, "id" -> shipmentSpecimenId)) {
+      cmd: ShipmentSpecimenExtraCmd => processSpecimenCommand(cmd)
+    }
+
   private def processCommand(cmd: ShipmentCommand) = {
     val future = shipmentsService.processCommand(cmd)
+    domainValidationReply(future)
+  }
+
+  private def processSpecimenCommand(cmd: ShipmentSpecimenCommand) = {
+    val future = shipmentsService.processShipmentSpecimenCommand(cmd)
     domainValidationReply(future)
   }
 }

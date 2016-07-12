@@ -5,8 +5,15 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
-import org.biobank.domain.DomainValidation
+import org.biobank.dto.ShipmentSpecimenDto
+import org.biobank.domain.{DomainError, DomainValidation}
 import org.biobank.domain.centre._
+import org.biobank.domain.study.CollectionEventTypeRepository
+import org.biobank.domain.participants.{
+  CeventSpecimenRepository,
+  CollectionEventRepository,
+  SpecimenRepository
+}
 import org.biobank.infrastructure.command.ShipmentCommands._
 import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
 import org.biobank.infrastructure.event.ShipmentEvents._
@@ -27,23 +34,40 @@ trait ShipmentsService {
                    sortFunc:             (Shipment, Shipment) => Boolean,
                    order:                SortOrder): Seq[Shipment]
 
+  val specimenListSortFields = Map[String, (ShipmentSpecimenDto, ShipmentSpecimenDto) => Boolean](
+      "inventoryId" -> ShipmentSpecimenDto.compareByInventoryId,
+      "state"       -> ShipmentSpecimenDto.compareByState)
+
   def getShipment(id: String): DomainValidation[Shipment]
 
-  def getShipmentSpecimen(id: String): DomainValidation[ShipmentSpecimen]
+  def getShipmentSpecimens(shipmentId: String,
+                           sortBy:     String,
+                           order:      SortOrder): DomainValidation[List[ShipmentSpecimenDto]]
+
+  def getShipmentSpecimen(shipmentId: String, shipmentSpecimenId: String)
+      : DomainValidation[ShipmentSpecimenDto]
 
   def processCommand(cmd: ShipmentCommand): Future[DomainValidation[Shipment]]
 
-  def processShipmentSpecimenCommand(cmd: ShipmentSpecimenCommand): Future[DomainValidation[ShipmentSpecimen]]
+  def removeShipment(cmd: ShipmentRemoveCmd): Future[DomainValidation[Boolean]]
 
+  def processShipmentSpecimenCommand(cmd: ShipmentSpecimenCommand):
+      Future[DomainValidation[ShipmentSpecimenDto]]
+
+  def removeShipmentSpecimen(cmd: ShipmentSpecimenRemoveCmd): Future[DomainValidation[Boolean]]
 }
 
 /**
  * Handles all commands dealing with shipments, shipment specimens, and shipment containers.
  */
-class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val processor: ActorRef,
-                                      val centreRepository:            CentreRepository,
-                                      val shipmentRepository:          ShipmentRepository,
-                                      val shipmentSpecimenRepository:  ShipmentSpecimenRepository)
+class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   processor: ActorRef,
+                                      val centreRepository:              CentreRepository,
+                                      val shipmentRepository:            ShipmentRepository,
+                                      val shipmentSpecimenRepository:    ShipmentSpecimenRepository,
+                                      val specimenRepository:            SpecimenRepository,
+                                      val ceventSpecimenRepository:      CeventSpecimenRepository,
+                                      val collectionEventRepository:     CollectionEventRepository,
+                                      val collectionEventTypeRepository: CollectionEventTypeRepository)
     extends ShipmentsService {
 
   val log = LoggerFactory.getLogger(this.getClass)
@@ -81,8 +105,40 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val processor
     shipmentRepository.getByKey(ShipmentId(id))
   }
 
-  def getShipmentSpecimen(id: String): DomainValidation[ShipmentSpecimen] = {
-    shipmentSpecimenRepository.getByKey(ShipmentSpecimenId(id))
+  def getShipmentSpecimens(shipmentId: String,
+                           sortBy:     String,
+                           order:      SortOrder): DomainValidation[List[ShipmentSpecimenDto]] = {
+    specimenListSortFields.get(sortBy).toSuccessNel(DomainError(s"invalid sort field: $sortBy"))
+      .flatMap { sortFunc =>
+      shipmentSpecimenRepository.allForShipment(ShipmentId(shipmentId)).map { ss =>
+        getShipmentSpecimenDto(ss)
+      }.toList.sequenceU.map { list =>
+        val result = list.sortWith(sortFunc)
+        if (order == AscendingOrder) result else result.reverse
+      }
+    }
+  }
+
+  def getShipmentSpecimen(shipmentId: String, shipmentSpecimenId: String)
+      : DomainValidation[ShipmentSpecimenDto] = {
+    for {
+      shipment <- shipmentRepository.getByKey(ShipmentId(shipmentId))
+      ss       <- shipmentSpecimenRepository.getByKey(ShipmentSpecimenId(shipmentSpecimenId))
+      dto      <- getShipmentSpecimenDto(ss)
+    } yield dto
+  }
+
+  private def getShipmentSpecimenDto(shipmentSpecimen: ShipmentSpecimen)
+      : DomainValidation[ShipmentSpecimenDto] = {
+    for {
+      specimen           <- specimenRepository.getByKey(shipmentSpecimen.specimenId)
+      ceventSpecimen     <- ceventSpecimenRepository.withSpecimenId(specimen.id)
+      cevent             <- collectionEventRepository.getByKey(ceventSpecimen.ceventId)
+      ceventType         <- collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
+      specimenSpec       <- ceventType.specimenSpec(specimen.specimenSpecId)
+      centre             <- centreRepository.getByLocationId(specimen.originLocationId)
+      centreLocationName <- centre.locationName(specimen.locationId)
+    } yield shipmentSpecimen.createDto(specimen, centreLocationName, specimenSpec.units)
   }
 
   def processCommand(cmd: ShipmentCommand): Future[DomainValidation[Shipment]] = {
@@ -94,13 +150,26 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val processor
     }
   }
 
+  def removeShipment(cmd: ShipmentRemoveCmd): Future[DomainValidation[Boolean]] = {
+    ask(processor, cmd).mapTo[DomainValidation[ShipmentEvent]].map { validation =>
+      validation.map(_ => true)
+    }
+  }
+
   def processShipmentSpecimenCommand(cmd: ShipmentSpecimenCommand)
-      : Future[DomainValidation[ShipmentSpecimen]] = {
+      : Future[DomainValidation[ShipmentSpecimenDto]] = {
     ask(processor, cmd).mapTo[DomainValidation[ShipmentSpecimenEvent]].map { validation =>
       for {
         event            <- validation
         shipmentSpecimen <- shipmentSpecimenRepository.getByKey(ShipmentSpecimenId(event.id))
-      } yield shipmentSpecimen
+        dto              <- getShipmentSpecimenDto(shipmentSpecimen)
+      } yield dto
+    }
+  }
+
+  def removeShipmentSpecimen(cmd: ShipmentSpecimenRemoveCmd): Future[DomainValidation[Boolean]] = {
+    ask(processor, cmd).mapTo[DomainValidation[ShipmentSpecimenEvent]].map { validation =>
+      validation.map(_ => true)
     }
   }
 }

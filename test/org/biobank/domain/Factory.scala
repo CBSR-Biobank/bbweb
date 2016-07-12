@@ -332,7 +332,7 @@ class Factory {
         timeCreated      = DateTime.now,
         amount           = BigDecimal(1.0)
       )
-    domainObjects = domainObjects + (classOf[Specimen] -> specimen)
+    domainObjects = domainObjects + (classOf[UsableSpecimen] -> specimen)
     specimen
   }
 
@@ -354,7 +354,7 @@ class Factory {
         timeCreated      = DateTime.now,
         amount           = BigDecimal(1.0)
       )
-    domainObjects = domainObjects + (classOf[Specimen] -> specimen)
+    domainObjects = domainObjects + (classOf[UnusableSpecimen] -> specimen)
     specimen
   }
 

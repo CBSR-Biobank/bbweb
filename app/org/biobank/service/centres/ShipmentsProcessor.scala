@@ -4,7 +4,7 @@ import akka.actor._
 import akka.persistence.{ SnapshotOffer }
 import javax.inject.Inject
 //import org.biobank.TestData
-import org.biobank.domain.Location
+import org.biobank.domain.{DomainError, Location}
 import org.biobank.domain.centre._
 import org.biobank.domain.participants.SpecimenId
 import org.biobank.domain.{ DomainValidation }
@@ -51,12 +51,14 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       case et: ShipmentEvent.EventType.Received              => applyReceivedEvent(event)
       case et: ShipmentEvent.EventType.Unpacked              => applyUnpackedEvent(event)
       case et: ShipmentEvent.EventType.Lost                  => applyLostEvent(event)
+      case et: ShipmentEvent.EventType.Removed               => applyRemoveEvent(event)
 
       case event => log.error(s"event not handled: $event")
     }
 
     case event: ShipmentSpecimenEvent => event.eventType match {
       case et: ShipmentSpecimenEvent.EventType.Added            => applySpecimenAddedEvent(event)
+      case et: ShipmentSpecimenEvent.EventType.Removed          => applySpecimenRemovedEvent(event)
       case et: ShipmentSpecimenEvent.EventType.ContainerUpdated => applySpecimenContainerAddedEvent(event)
       case et: ShipmentSpecimenEvent.EventType.Received         => applySpecimenReceivedEvent(event)
       case et: ShipmentSpecimenEvent.EventType.Missing          => applySpecimenMissingEvent(event)
@@ -104,8 +106,14 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     case cmd: ShipmentLostCmd =>
       processUpdateCmd(cmd, lostCmdToEvent, applyLostEvent)
 
-    case cmd: ShipmentAddSpecimenCmd =>
+    case cmd: ShipmentRemoveCmd =>
+      processUpdateCmd(cmd, removeCmdToEvent, applyRemoveEvent)
+
+    case cmd: ShipmentSpecimenAddCmd =>
       process(addSpecimenCmdToEvent(cmd))(applySpecimenAddedEvent)
+
+    case cmd: ShipmentSpecimenRemoveCmd =>
+      processSpecimenUpdateCmd(cmd, removeSpecimenCmdToEvent, applySpecimenRemovedEvent)
 
     case cmd: ShipmentSpecimenUpdateContainerCmd =>
       processSpecimenUpdateCmd(cmd, updateSpecimenContainerCmdToEvent, applySpecimenContainerAddedEvent)
@@ -154,29 +162,32 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
 
   private def updateCourierNameCmdToEvent(cmd:      UpdateShipmentCourierNameCmd,
                                           shipment: Shipment): DomainValidation[ShipmentEvent] = {
-    shipment.withCourier(cmd.courierName).map { _ =>
-      ShipmentEvent(shipment.id.id).update(
-        _.userId                         := cmd.userId,
-        _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.courierNameUpdated.version     := cmd.expectedVersion,
-        _.courierNameUpdated.courierName := cmd.courierName)
-    }
+    for {
+      isCreated <- shipment.isCreated
+      updated   <- shipment.withCourier(cmd.courierName)
+    } yield ShipmentEvent(shipment.id.id).update(
+      _.userId                         := cmd.userId,
+      _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.courierNameUpdated.version     := cmd.expectedVersion,
+      _.courierNameUpdated.courierName := cmd.courierName)
   }
 
   private def updateTrackingNumberCmdToEvent(cmd: UpdateShipmentTrackingNumberCmd,
                                              shipment: Shipment): DomainValidation[ShipmentEvent] = {
-    shipment.withTrackingNumber(cmd.trackingNumber).map { _ =>
-      ShipmentEvent(shipment.id.id).update(
-        _.userId                               := cmd.userId,
-        _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.trackingNumberUpdated.version        := cmd.expectedVersion,
-        _.trackingNumberUpdated.trackingNumber := cmd.trackingNumber)
-    }
+    for {
+      isCreated <- shipment.isCreated
+      updated   <- shipment.withTrackingNumber(cmd.trackingNumber)
+    } yield ShipmentEvent(shipment.id.id).update(
+      _.userId                               := cmd.userId,
+      _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.trackingNumberUpdated.version        := cmd.expectedVersion,
+      _.trackingNumberUpdated.trackingNumber := cmd.trackingNumber)
   }
 
   private def updateFromLocationCmdToEvent(cmd: UpdateShipmentFromLocationCmd,
                                            shipment: Shipment): DomainValidation[ShipmentEvent] = {
     for {
+      isCreated   <- shipment.isCreated
       location    <- getLocation(cmd.locationId)
       newShipment <- shipment.withFromLocation(location)
     } yield ShipmentEvent(shipment.id.id).update(
@@ -189,6 +200,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   private def updateToLocationCmdToEvent(cmd: UpdateShipmentToLocationCmd,
                                          shipment: Shipment): DomainValidation[ShipmentEvent] = {
     for {
+      isCreated   <- shipment.isCreated
       location    <- getLocation(cmd.locationId)
       newShipment <- shipment.withToLocation(location)
     } yield ShipmentEvent(shipment.id.id).update(
@@ -252,16 +264,35 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     }
   }
 
-  private def addSpecimenCmdToEvent(cmd : ShipmentAddSpecimenCmd)
-      : DomainValidation[ShipmentSpecimenEvent] = {
+  private def removeCmdToEvent(cmd: ShipmentRemoveCmd, shipment: Shipment)
+      : DomainValidation[ShipmentEvent] = {
+    val shipmentId = ShipmentId(cmd.id)
     for {
-      id <- validNewIdentity(shipmentSpecimenRepository.nextIdentity, shipmentSpecimenRepository)
-      ss <- ShipmentSpecimen.create(id                  = id,
-                                    version             = 0L,
-                                    shipmentId          = ShipmentId(cmd.shipmentId),
-                                    specimenId          = SpecimenId(cmd.specimenId),
-                                    state               = ShipmentItemState.Present,
-                                    shipmentContainerId = cmd.shipmentContainerId.map(ShipmentContainerId.apply))
+      shipment     <- shipmentRepository.getByKey(shipmentId)
+      isCreated    <- shipment.isCreated
+      hasSpecimens <- {
+        if (shipmentSpecimenRepository.allForShipment(shipmentId).isEmpty) true.successNel[String]
+        else DomainError(s"shipment has specimens, remove specimens first").failureNel[Boolean]
+      }
+    } yield ShipmentEvent(shipment.id.id).update(
+      _.userId          := cmd.userId,
+      _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.removed.version := cmd.expectedVersion)
+  }
+
+  private def addSpecimenCmdToEvent(cmd : ShipmentSpecimenAddCmd)
+      : DomainValidation[ShipmentSpecimenEvent] = {
+    val shipmentId = ShipmentId(cmd.shipmentId)
+    for {
+      shipment  <- shipmentRepository.getByKey(shipmentId)
+      isCreated <- shipment.isCreated
+      id        <- validNewIdentity(shipmentSpecimenRepository.nextIdentity, shipmentSpecimenRepository)
+      ss        <- ShipmentSpecimen.create(id                  = id,
+                                           version             = 0L,
+                                           shipmentId          = shipment.id,
+                                           specimenId          = SpecimenId(cmd.specimenId),
+                                           state               = ShipmentItemState.Present,
+                                           shipmentContainerId = cmd.shipmentContainerId.map(ShipmentContainerId.apply))
     } yield ShipmentSpecimenEvent(id.id).update(
         _.userId                            := cmd.userId,
         _.time                              := ISODateTimeFormat.dateTime.print(DateTime.now),
@@ -269,6 +300,21 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
         _.added.specimenId                  := cmd.specimenId,
         _.added.optionalShipmentContainerId := cmd.shipmentContainerId
       )
+  }
+
+  private def removeSpecimenCmdToEvent(cmd:              ShipmentSpecimenRemoveCmd,
+                                       shipment:         Shipment,
+                                       shipmentSpecimen: ShipmentSpecimen)
+      : DomainValidation[ShipmentSpecimenEvent] = {
+    val shipmentId = ShipmentId(cmd.shipmentId)
+    for {
+      shipment  <- shipmentRepository.getByKey(shipmentId)
+      isCreated <- shipment.isCreated
+      isPresent <- shipmentSpecimen.isStatePresent
+    } yield ShipmentSpecimenEvent(shipmentSpecimen.id.id).update(
+      _.userId          := cmd.userId,
+      _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.removed.version := cmd.expectedVersion)
   }
 
   private def updateSpecimenContainerCmdToEvent(cmd :             ShipmentSpecimenUpdateContainerCmd,
@@ -290,36 +336,39 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                                          shipment:         Shipment,
                                          shipmentSpecimen: ShipmentSpecimen)
       : DomainValidation[ShipmentSpecimenEvent] = {
-    shipmentSpecimen.received map { _ =>
-      ShipmentSpecimenEvent(cmd.id).update(
-        _.userId           := cmd.userId,
-        _.time             := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.received.version := cmd.expectedVersion)
-    }
+    for {
+      isUnpacked <- shipment.isUnpacked
+      received   <- shipmentSpecimen.received
+    } yield ShipmentSpecimenEvent(cmd.id).update(
+      _.userId           := cmd.userId,
+      _.time             := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.received.version := cmd.expectedVersion)
   }
 
   private def specimenMissingCmdToEvent(cmd :             ShipmentSpecimenMissingCmd,
                                         shipment:         Shipment,
                                         shipmentSpecimen: ShipmentSpecimen)
       : DomainValidation[ShipmentSpecimenEvent] = {
-    shipmentSpecimen.missing map { _ =>
-      ShipmentSpecimenEvent(cmd.id).update(
-        _.userId          := cmd.userId,
-        _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.missing.version := cmd.expectedVersion)
-    }
+    for {
+      isUnpacked <- shipment.isUnpacked
+      missing    <- shipmentSpecimen.missing
+    } yield ShipmentSpecimenEvent(cmd.id).update(
+      _.userId          := cmd.userId,
+      _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.missing.version := cmd.expectedVersion)
   }
 
   private def specimenExtraCmdToEvent(cmd :             ShipmentSpecimenExtraCmd,
                                       shipment:         Shipment,
                                       shipmentSpecimen: ShipmentSpecimen)
       : DomainValidation[ShipmentSpecimenEvent] = {
-    shipmentSpecimen.extra map { _ =>
-      ShipmentSpecimenEvent(cmd.id).update(
-        _.userId        := cmd.userId,
-        _.time          := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.extra.version := cmd.expectedVersion)
-    }
+    for {
+      isUnpacked <- shipment.isUnpacked
+      extra      <- shipmentSpecimen.extra
+    } yield ShipmentSpecimenEvent(cmd.id).update(
+      _.userId        := cmd.userId,
+      _.time          := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.extra.version := cmd.expectedVersion)
   }
 
   private def applyAddedEvent(event: ShipmentEvent) = {
@@ -353,7 +402,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                            event.getCourierNameUpdated.getVersion) { (shipment, _, time) =>
       val v = shipment.withCourier(event.getCourierNameUpdated.getCourierName)
       v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
-      v
+      v.map(_ => true)
     }
   }
 
@@ -363,7 +412,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                            event.getTrackingNumberUpdated.getVersion) { (shipment, _, time) =>
       val v = shipment.withTrackingNumber(event.getTrackingNumberUpdated.getTrackingNumber)
       v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
-      v
+      v.map(_ => true)
     }
   }
 
@@ -377,7 +426,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       } yield updated
 
       v.foreach(s => shipmentRepository.put(s.copy(timeModified = Some(time))))
-      v
+      v.map(_ => true)
     }
   }
 
@@ -390,7 +439,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
         updated  <- shipment.withToLocation(location)
       } yield updated
       v.foreach(s => shipmentRepository.put(s.copy(timeModified = Some(time))))
-      v
+      v.map(_ => true)
     }
   }
 
@@ -401,7 +450,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       val stateChangeTime = ISODateTimeFormat.dateTime.parseDateTime(event.getPacked.getStateChangeTime)
       val v = shipment.packed(stateChangeTime)
       v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
-      v
+      v.map(_ => true)
     }
   }
 
@@ -412,7 +461,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       val stateChangeTime = ISODateTimeFormat.dateTime.parseDateTime(event.getSent.getStateChangeTime)
       val v = shipment.sent(stateChangeTime)
       v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
-      v
+      v.map(_ => true)
     }
   }
 
@@ -423,7 +472,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       val stateChangeTime = ISODateTimeFormat.dateTime.parseDateTime(event.getReceived.getStateChangeTime)
       val v = shipment.received(stateChangeTime)
       v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
-      v
+      v.map(_ => true)
     }
   }
 
@@ -434,7 +483,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       val stateChangeTime = ISODateTimeFormat.dateTime.parseDateTime(event.getUnpacked.getStateChangeTime)
       val v = shipment.unpacked(stateChangeTime)
       v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
-      v
+      v.map(_ => true)
     }
   }
 
@@ -444,7 +493,16 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                            event.getLost.getVersion) { (shipment, _, time) =>
       val v = shipment.lost
       v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
-      v
+      v.map(_ => true)
+    }
+  }
+
+  private def applyRemoveEvent(event: ShipmentEvent): Unit = {
+    onValidEventAndVersion(event,
+                           event.eventType.isRemoved,
+                           event.getRemoved.getVersion) { (shipment, _, time) =>
+      shipmentRepository.remove(shipment)
+      true.successNel[String]
     }
   }
 
@@ -470,44 +528,53 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     }
   }
 
+  private def applySpecimenRemovedEvent(event: ShipmentSpecimenEvent): Unit = {
+    onValidSpecimenEventAndVersion(event,
+                                   event.eventType.isRemoved,
+                                   event.getRemoved.getVersion) { (shipmentSpecimen, _, time) =>
+      shipmentSpecimenRepository.remove(shipmentSpecimen)
+      true.successNel[String]
+    }
+  }
+
   private def applySpecimenContainerAddedEvent(event: ShipmentSpecimenEvent): Unit = {
-    onValidEventAndVersion(event,
-                           event.eventType.isContainerUpdated,
-                           event.getContainerUpdated.getVersion) { (shipmentSpecimen, _, time) =>
+    onValidSpecimenEventAndVersion(event,
+                                   event.eventType.isContainerUpdated,
+                                   event.getContainerUpdated.getVersion) { (shipmentSpecimen, _, time) =>
       val shipmentContainerId = event.getContainerUpdated.shipmentContainerId.map(ShipmentContainerId.apply)
       val v = shipmentSpecimen.withShipmentContainer(shipmentContainerId)
       v.foreach { s => shipmentSpecimenRepository.put(s.copy(timeModified = Some(time))) }
-      v
+      v.map(_ => true)
     }
   }
 
   private def applySpecimenReceivedEvent(event: ShipmentSpecimenEvent): Unit = {
-    onValidEventAndVersion(event,
-                           event.eventType.isReceived,
-                           event.getReceived.getVersion) { (shipmentSpecimen, _, time) =>
+    onValidSpecimenEventAndVersion(event,
+                                   event.eventType.isReceived,
+                                   event.getReceived.getVersion) { (shipmentSpecimen, _, time) =>
       val v = shipmentSpecimen.received
       v.foreach { s => shipmentSpecimenRepository.put(s.copy(timeModified = Some(time))) }
-      v
+      v.map(_ => true)
     }
   }
 
   private def applySpecimenMissingEvent(event: ShipmentSpecimenEvent): Unit = {
-    onValidEventAndVersion(event,
-                           event.eventType.isMissing,
-                           event.getMissing.getVersion) { (shipmentSpecimen, _, time) =>
+    onValidSpecimenEventAndVersion(event,
+                                   event.eventType.isMissing,
+                                   event.getMissing.getVersion) { (shipmentSpecimen, _, time) =>
       val v = shipmentSpecimen.missing
       v.foreach { s => shipmentSpecimenRepository.put(s.copy(timeModified = Some(time))) }
-      v
+      v.map(_ => true)
     }
   }
 
   private def applySpecimenExtraEvent(event: ShipmentSpecimenEvent): Unit = {
-    onValidEventAndVersion(event,
-                           event.eventType.isExtra,
-                           event.getExtra.getVersion) { (shipmentSpecimen, _, time) =>
+    onValidSpecimenEventAndVersion(event,
+                                   event.eventType.isExtra,
+                                   event.getExtra.getVersion) { (shipmentSpecimen, _, time) =>
       val v = shipmentSpecimen.extra
       v.foreach { s => shipmentSpecimenRepository.put(s.copy(timeModified = Some(time))) }
-      v
+      v.map(_ => true)
     }
   }
 
@@ -530,7 +597,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     val event = for {
         shipmentSpecimen <- shipmentSpecimenRepository.getByKey(ShipmentSpecimenId(cmd.id))
         shipment         <- shipmentRepository.getByKey(shipmentSpecimen.shipmentId)
-        validVersion     <- shipment.requireVersion(cmd.expectedVersion)
+        validVersion     <- shipmentSpecimen.requireVersion(cmd.expectedVersion)
         event            <- cmdToEvent(cmd, shipment, shipmentSpecimen)
       } yield event
     process(event)(applyEvent)
@@ -542,7 +609,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                                      eventVersion: Long)
                                     (applyEvent:  (Shipment,
                                                    ShipmentEvent,
-                                                   DateTime) => DomainValidation[Shipment])
+                                                   DateTime) => DomainValidation[Boolean])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -565,12 +632,12 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  private def onValidEventAndVersion(event:        ShipmentSpecimenEvent,
-                                     eventType:    Boolean,
-                                     eventVersion: Long)
-                                    (applyEvent:  (ShipmentSpecimen,
-                                                   ShipmentSpecimenEvent,
-                                                   DateTime) => DomainValidation[ShipmentSpecimen])
+  private def onValidSpecimenEventAndVersion(event:        ShipmentSpecimenEvent,
+                                             eventType:    Boolean,
+                                             eventVersion: Long)
+                                            (applyEvent:  (ShipmentSpecimen,
+                                                           ShipmentSpecimenEvent,
+                                                           DateTime) => DomainValidation[Boolean])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")

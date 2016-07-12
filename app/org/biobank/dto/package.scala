@@ -82,6 +82,32 @@ package dto {
 
   }
 
+  final case class ShipmentSpecimenDto(id:                 String,
+                                       shipmentId:         String,
+                                       shipmentItemState:  String,
+                                       specimenId:         String,
+                                       inventoryId:        String,
+                                       version:            Long,
+                                       timeAdded:          DateTime,
+                                       timeModified:       Option[DateTime],
+                                       locationId:         String,
+                                       locationName:       String,
+                                       timeCreated:        DateTime,
+                                       amount:             BigDecimal,
+                                       units:              String,
+                                       status:             String)
+
+  object ShipmentSpecimenDto {
+
+    def compareByInventoryId(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto) =
+      (a.inventoryId compareTo b.inventoryId) < 0
+
+    def compareByState(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto) =
+      (a.shipmentItemState compareTo b.shipmentItemState) < 0
+
+    implicit val shipmentSpecimenDtoWriter: Writes[ShipmentSpecimenDto] = Json.writes[ShipmentSpecimenDto]
+  }
+
   final case class ProcessingDto(
     processingTypes:   List[org.biobank.domain.study.ProcessingType],
     specimenLinkTypes: List[org.biobank.domain.study.SpecimenLinkType],

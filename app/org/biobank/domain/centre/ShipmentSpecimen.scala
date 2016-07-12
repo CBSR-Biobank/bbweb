@@ -1,9 +1,10 @@
 package org.biobank.domain.centre
 
 import org.biobank._
+import org.biobank.dto.ShipmentSpecimenDto
 import org.biobank.domain._
 import org.biobank.domain.centre.ShipmentItemState._
-import org.biobank.domain.participants.SpecimenId
+import org.biobank.domain.participants.{Specimen, SpecimenId}
 import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
@@ -85,11 +86,48 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
            timeModified = Some(DateTime.now)).successNel[String]
     }
   }
+
+  def isStatePresent(): DomainValidation[Boolean] = {
+    if (state == ShipmentItemState.Present) true.successNel[String]
+    else DomainError(s"shipment specimen is not in present state").failureNel[Boolean]
+  }
+
+  def createDto(specimen:     Specimen,
+                locationName: String,
+                units:        String): ShipmentSpecimenDto =
+    ShipmentSpecimenDto(id                 = this.id.id,
+                        shipmentId         = this.shipmentId.id,
+                        shipmentItemState  = this.state.toString,
+                        specimenId         = this.specimenId.id,
+                        inventoryId        = specimen.inventoryId,
+                        version            = this.version,
+                        timeAdded          = this.timeAdded,
+                        timeModified       = this.timeModified,
+                        locationId         = specimen.locationId,
+                        locationName       = locationName,
+                        timeCreated        = specimen.timeCreated,
+                        amount             = specimen.amount,
+                        units              = units,
+                        status             = specimen.getClass.getSimpleName)
+
+  override def toString =
+    s"""|${this.getClass.getSimpleName}: {
+        |  id:                  $id,
+        |  version:             $version,
+        |  timeAdded:           $timeAdded,
+        |  timeModified:        $timeModified,
+        |  shipmentId:          $shipmentId,
+        |  specimenId:          $specimenId,
+        |  state:               $state,
+        |  shipmentContainerId: $shipmentContainerId,
+        |""".stripMargin
 }
 
 object ShipmentSpecimen extends ShipmentSpecimenValidations {
   import org.biobank.domain.CommonValidations._
   import org.biobank.CommonValidations._
+
+  implicit val shipmentSpecimenWrites: Writes[ShipmentSpecimen] = Json.writes[ShipmentSpecimen]
 
   def compareByState(a: ShipmentSpecimen, b: ShipmentSpecimen) = (a.state compareTo b.state) < 0
 

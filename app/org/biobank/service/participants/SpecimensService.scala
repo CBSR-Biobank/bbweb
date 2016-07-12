@@ -52,48 +52,50 @@ class SpecimensServiceImpl @Inject() (
 
   implicit val timeout: Timeout = 5.seconds
 
+  private def convertToDto(collectionEventId: CollectionEventId,
+                           ceventTypeId: CollectionEventTypeId,
+                           specimen: Specimen)
+      : DomainValidation[SpecimenDto] = {
+    for {
+      ceventType         <- collectionEventTypeRepository.getByKey(ceventTypeId)
+      specimenSpec       <- ceventType.specimenSpec(specimen.specimenSpecId)
+      originCentre       <- centreRepository.getByLocationId(specimen.originLocationId)
+      originLocationName <- originCentre.locationName(specimen.originLocationId)
+      centre             <- centreRepository.getByLocationId(specimen.locationId)
+      centreLocationName <- centre.locationName(specimen.locationId)
+    } yield SpecimenDto(id                 = specimen.id.id,
+                        inventoryId        = specimen.inventoryId,
+                        collectionEventId  = collectionEventId.id,
+                        specimenSpecId     = specimen.specimenSpecId,
+                        specimenSpecName   = specimenSpec.name,
+                        version            = specimen.version,
+                        timeAdded          = specimen.timeAdded,
+                        timeModified       = specimen.timeModified,
+                        originLocationId   = specimen.originLocationId,
+                        originLocationName = originLocationName,
+                        locationId         = specimen.locationId,
+                        locationName       = centreLocationName,
+                        containerId        = specimen.containerId.map(_.id),
+                        positionId         = specimen.positionId.map(_.id),
+                        timeCreated        = specimen.timeCreated,
+                        amount             = specimen.amount,
+                        units              = specimenSpec.units,
+                        status             = specimen.getClass.getSimpleName)
+  }
+
   def get(specimenId: String): DomainValidation[Specimen] = {
     specimenRepository.getByKey(SpecimenId(specimenId)).leftMap(_ =>
       DomainError(s"specimen id is invalid: $specimenId")).toValidationNel
   }
 
   def getByInventoryId(inventoryId: String): DomainValidation[Specimen] = {
-    specimenRepository.getByInventoryId(inventoryId).leftMap(_ =>
-      DomainError(s"specimen inventory id is invalid: $inventoryId")).toValidationNel
+    specimenRepository.getByInventoryId(inventoryId)
   }
+
   def list(collectionEventId: String,
            sortFunc:          (Specimen, Specimen) => Boolean,
            order:             SortOrder)
       : DomainValidation[Seq[SpecimenDto]] = {
-
-    def convertToDto(ceventTypeId: CollectionEventTypeId, specimen: Specimen)
-        : DomainValidation[SpecimenDto] = {
-      for {
-        ceventType         <- collectionEventTypeRepository.getByKey(ceventTypeId)
-        specimenSpec       <- ceventType.specimenSpec(specimen.specimenSpecId)
-        originCentre       <- centreRepository.getByLocationId(specimen.originLocationId)
-        originLocationName <- originCentre.locationName(specimen.originLocationId)
-        centre             <- centreRepository.getByLocationId(specimen.locationId)
-        centreLocationName <- centre.locationName(specimen.locationId)
-      } yield SpecimenDto(id                 = specimen.id.id,
-                          inventoryId        = specimen.inventoryId,
-                          collectionEventId  = collectionEventId,
-                          specimenSpecId     = specimen.specimenSpecId,
-                          specimenSpecName   = specimenSpec.name,
-                          version            = specimen.version,
-                          timeAdded          = specimen.timeAdded,
-                          timeModified       = specimen.timeModified,
-                          originLocationId   = specimen.originLocationId,
-                          originLocationName = originLocationName,
-                          locationId         = specimen.locationId,
-                          locationName       = centreLocationName,
-                          containerId        = specimen.containerId.map(_.id),
-                          positionId         = specimen.positionId.map(_.id),
-                          timeCreated        = specimen.timeCreated,
-                          amount             = specimen.amount,
-                          units              = specimenSpec.units,
-                          status             = specimen.getClass.getSimpleName)
-    }
 
     def getSpecimens(ceventId: CollectionEventId): DomainValidation[List[Specimen]] = {
       ceventSpecimenRepository.withCeventId(ceventId)
@@ -109,7 +111,7 @@ class SpecimensServiceImpl @Inject() (
 
     validCevent(collectionEventId) { cevent =>
       getSpecimens(cevent.id).flatMap { specimens =>
-        specimens.map { s => convertToDto(cevent.collectionEventTypeId, s) }.sequenceU
+        specimens.map { s => convertToDto(cevent.id, cevent.collectionEventTypeId, s) }.sequenceU
       }
     }
   }

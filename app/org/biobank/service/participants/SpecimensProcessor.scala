@@ -135,19 +135,15 @@ class SpecimensProcessor @Inject() (
   }
 
   private def removeCmdToEvent(cmd:      RemoveSpecimenCmd,
-                                cevent:   CollectionEvent,
-                                specimen: Specimen): DomainValidation[SpecimenEvent] = {
-    for {
-      collectionEvent <- collectionEventRepository.getByKey(CollectionEventId(cmd.collectionEventId))
-      specimen <- specimenRepository.getByKey(SpecimenId(cmd.id))
-      hasChildren <- specimenHasNoChildren(specimen)
-    } yield {
+                               cevent:   CollectionEvent,
+                               specimen: Specimen): DomainValidation[SpecimenEvent] = {
+    specimenHasNoChildren(specimen).map( _ =>
       SpecimenEvent(cmd.userId).update(
         _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.removed.version           := specimen.version,
         _.removed.specimenId        := specimen.id.id,
-        _.removed.collectionEventId := collectionEvent.id.id)
-    }
+        _.removed.collectionEventId := cevent.id.id)
+    )
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
@@ -225,6 +221,7 @@ class SpecimensProcessor @Inject() (
     val collectionEventId = CollectionEventId(cmd.collectionEventId)
 
     val event = for {
+        pair         <- ceventSpecimenRepository.withSpecimenId(specimenId)
         specimen     <- specimenRepository.getByKey(specimenId)
         cevent       <- collectionEventRepository.getByKey(collectionEventId)
         validVersion <- specimen.requireVersion(cmd.expectedVersion)

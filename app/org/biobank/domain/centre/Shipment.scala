@@ -214,6 +214,18 @@ final case class Shipment(id:             ShipmentId,
            timeModified = Some(DateTime.now)).successNel[String]
     }
 
+  def isCreated(): DomainValidation[Boolean] =
+    if (state == ShipmentState.Created) true.successNel[String]
+    else EntityCriteriaError(s"shipment is not in created state").failureNel[Boolean]
+
+  def isReceived(): DomainValidation[Boolean] =
+    if (state == ShipmentState.Received) true.successNel[String]
+    else EntityCriteriaError(s"shipment is not in received state").failureNel[Boolean]
+
+  def isUnpacked(): DomainValidation[Boolean] =
+    if (state == ShipmentState.Unpacked) true.successNel[String]
+    else EntityCriteriaError(s"shipment is not in unpacked state").failureNel[Boolean]
+
   override def toString: String =
     s"""|Shipment:{
         |  id:             $id,

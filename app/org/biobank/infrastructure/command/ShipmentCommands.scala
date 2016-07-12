@@ -74,6 +74,11 @@ object ShipmentCommands {
                                    expectedVersion: Long)
       extends ShipmentModifyCommand
 
+  final case class ShipmentRemoveCmd(userId:          String,
+                                     id:              String, // shipment ID
+                                     expectedVersion: Long)
+      extends ShipmentModifyCommand
+
   implicit val addShipmentCmdReads: Reads[AddShipmentCmd] =
     Json.reads[AddShipmentCmd]
 
