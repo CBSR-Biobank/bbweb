@@ -82,28 +82,76 @@ package dto {
 
   }
 
-  final case class ShipmentSpecimenDto(id:                 String,
-                                       shipmentId:         String,
-                                       shipmentItemState:  String,
-                                       specimenId:         String,
-                                       inventoryId:        String,
-                                       version:            Long,
-                                       timeAdded:          DateTime,
-                                       timeModified:       Option[DateTime],
-                                       locationId:         String,
-                                       locationName:       String,
-                                       timeCreated:        DateTime,
-                                       amount:             BigDecimal,
-                                       units:              String,
-                                       status:             String)
+  final case class ShipmentDto(id:               String,
+                               version:          Long,
+                               timeAdded:        DateTime,
+                               timeModified:     Option[DateTime],
+                               state:            String,
+                               courierName:      String,
+                               trackingNumber:   String,
+                               fromLocationId:   String,
+                               fromLocationName: String,
+                               toLocationId:     String,
+                               toLocationName:   String,
+                               timePacked:       Option[DateTime],
+                               timeSent:         Option[DateTime],
+                               timeReceived:     Option[DateTime],
+                               timeUnpacked:     Option[DateTime])
+
+  object ShipmentDto {
+
+  val sort2Compare = Map[String, (ShipmentDto, ShipmentDto) => Boolean](
+      "courierName"      -> compareByCourier,
+      "trackingNumber"   -> compareByTrackingNumber,
+      "state"            -> compareByState,
+      "fromLocationName" -> compareByFromLocation,
+      "toLocationName"   -> compareByToLocation)
+
+    def compareByCourier(a: ShipmentDto, b: ShipmentDto) =
+      (a.courierName compareToIgnoreCase b.courierName) < 0
+
+    def compareByTrackingNumber(a: ShipmentDto, b: ShipmentDto) =
+      (a.trackingNumber compareToIgnoreCase b.trackingNumber) < 0
+
+    def compareByState(a: ShipmentDto, b: ShipmentDto) =
+      (a.state compareToIgnoreCase b.state) < 0
+
+    def compareByFromLocation(a: ShipmentDto, b: ShipmentDto) =
+      (a.fromLocationName compareToIgnoreCase b.fromLocationName) < 0
+
+    def compareByToLocation(a: ShipmentDto, b: ShipmentDto) =
+      (a.toLocationName compareToIgnoreCase b.toLocationName) < 0
+
+    implicit val shipmentDtooDtoWriter: Writes[ShipmentDto] = Json.writes[ShipmentDto]
+
+  }
+
+  final case class ShipmentSpecimenDto(id:                  String,
+                                       state:               String,
+                                       shipmentId:          String,
+                                       specimenId:          String,
+                                       shipmentContainerId: Option[String],
+                                       inventoryId:         String,
+                                       version:             Long,
+                                       timeAdded:           DateTime,
+                                       timeModified:        Option[DateTime],
+                                       locationId:          String,
+                                       locationName:        String,
+                                       timeCreated:         DateTime,
+                                       amount:              BigDecimal,
+                                       units:               String,
+                                       status:              String)
 
   object ShipmentSpecimenDto {
+
+  val sort2Compare = Map[String, (ShipmentSpecimenDto, ShipmentSpecimenDto) => Boolean](
+      "inventoryId" -> compareByInventoryId,
+      "state"       -> compareByState)
 
     def compareByInventoryId(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto) =
       (a.inventoryId compareTo b.inventoryId) < 0
 
-    def compareByState(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto) =
-      (a.shipmentItemState compareTo b.shipmentItemState) < 0
+    def compareByState(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto) = (a.state compareTo b.state) < 0
 
     implicit val shipmentSpecimenDtoWriter: Writes[ShipmentSpecimenDto] = Json.writes[ShipmentSpecimenDto]
   }

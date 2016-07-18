@@ -5,7 +5,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
-import org.biobank.dto.ShipmentSpecimenDto
+import org.biobank.dto.{ShipmentDto, ShipmentSpecimenDto}
 import org.biobank.domain.{DomainError, DomainValidation}
 import org.biobank.domain.centre._
 import org.biobank.domain.study.CollectionEventTypeRepository
@@ -31,18 +31,15 @@ trait ShipmentsService {
 
   def getShipments(courierFilter:        String,
                    trackingNumberFilter: String,
-                   sortFunc:             (Shipment, Shipment) => Boolean,
-                   order:                SortOrder): Seq[Shipment]
+                   stateFilter:          String,
+                   sortBy:               String,
+                   order:                SortOrder): DomainValidation[List[ShipmentDto]]
 
-  val specimenListSortFields = Map[String, (ShipmentSpecimenDto, ShipmentSpecimenDto) => Boolean](
-      "inventoryId" -> ShipmentSpecimenDto.compareByInventoryId,
-      "state"       -> ShipmentSpecimenDto.compareByState)
-
-  def getShipment(id: String): DomainValidation[Shipment]
+  def getShipment(id: String): DomainValidation[ShipmentDto]
 
   def getShipmentSpecimens(shipmentId: String,
                            sortBy:     String,
-                           order:      SortOrder): DomainValidation[List[ShipmentSpecimenDto]]
+                           order:      SortOrder): DomainValidation[Seq[ShipmentSpecimenDto]]
 
   def getShipmentSpecimen(shipmentId: String, shipmentSpecimenId: String)
       : DomainValidation[ShipmentSpecimenDto]
@@ -76,39 +73,51 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
 
   def getShipments(courierFilter:        String,
                    trackingNumberFilter: String,
-                   sortFunc:             (Shipment, Shipment) => Boolean,
+                   stateFilter:          String,
+                   sortBy:               String,
                    order:                SortOrder)
-      : Seq[Shipment] = {
-    val allShipments = shipmentRepository.getValues
+      : DomainValidation[List[ShipmentDto]] = {
+    ShipmentDto.sort2Compare.get(sortBy).toSuccessNel(DomainError(s"invalid sort field: $sortBy"))
+      .flatMap { sortFunc =>
+      val allShipments = shipmentRepository.getValues
 
-    val shipmentsFilteredByCourier = if (!courierFilter.isEmpty) {
-        val courierLowerCase = courierFilter.toLowerCase
-        allShipments.filter { _.courierName.toLowerCase.contains(courierLowerCase)}
-      } else {
-        allShipments
+      val shipmentsFilteredByCourier = if (!courierFilter.isEmpty) {
+          val courierLowerCase = courierFilter.toLowerCase
+          allShipments.filter { _.courierName.toLowerCase.contains(courierLowerCase)}
+        } else {
+          allShipments
+        }
+
+      val shipmentsFilteredByTrackingNumber = if (!trackingNumberFilter.isEmpty) {
+          val trackingNumLowerCase = trackingNumberFilter.toLowerCase
+          shipmentsFilteredByCourier.filter { _.trackingNumber.toLowerCase.contains(trackingNumLowerCase)}
+        } else {
+          shipmentsFilteredByCourier
+        }
+
+      val shipmentsFilteredByState = if (!stateFilter.isEmpty) {
+          val stateLowerCase = stateFilter.toLowerCase
+          shipmentsFilteredByTrackingNumber.filter { _.state.toString.toLowerCase.contains(stateLowerCase)}
+        } else {
+          shipmentsFilteredByTrackingNumber
+        }
+
+      shipmentsFilteredByState.toSeq.map(getShipmentDto).toList.sequenceU.map { list =>
+        val result = list.sortWith(sortFunc)
+        if (order == AscendingOrder) result
+        else result.reverse
       }
-
-    val shipmentsFilteredByTrackingNumber = if (!trackingNumberFilter.isEmpty) {
-        val trackingNumLowerCase = trackingNumberFilter.toLowerCase
-        shipmentsFilteredByCourier.filter { _.trackingNumber.toLowerCase.contains(trackingNumLowerCase)}
-      } else {
-        shipmentsFilteredByCourier
-      }
-
-    val result = shipmentsFilteredByTrackingNumber.toSeq.sortWith(sortFunc)
-
-    if (order == AscendingOrder) result
-    else result.reverse
+    }
   }
 
-  def getShipment(id: String): DomainValidation[Shipment] = {
-    shipmentRepository.getByKey(ShipmentId(id))
+  def getShipment(id: String): DomainValidation[ShipmentDto] = {
+    shipmentRepository.getByKey(ShipmentId(id)).flatMap(getShipmentDto)
   }
 
   def getShipmentSpecimens(shipmentId: String,
                            sortBy:     String,
                            order:      SortOrder): DomainValidation[List[ShipmentSpecimenDto]] = {
-    specimenListSortFields.get(sortBy).toSuccessNel(DomainError(s"invalid sort field: $sortBy"))
+    ShipmentSpecimenDto.sort2Compare.get(sortBy).toSuccessNel(DomainError(s"invalid sort field: $sortBy"))
       .flatMap { sortFunc =>
       shipmentSpecimenRepository.allForShipment(ShipmentId(shipmentId)).map { ss =>
         getShipmentSpecimenDto(ss)
@@ -126,6 +135,15 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
       ss       <- shipmentSpecimenRepository.getByKey(ShipmentSpecimenId(shipmentSpecimenId))
       dto      <- getShipmentSpecimenDto(ss)
     } yield dto
+  }
+
+  private def getShipmentDto(shipment: Shipment): DomainValidation[ShipmentDto] = {
+    for {
+      fromCentre <- centreRepository.getByLocationId(shipment.fromLocationId)
+      fromLocationName <- fromCentre.locationName(shipment.fromLocationId)
+      toCentre <- centreRepository.getByLocationId(shipment.toLocationId)
+      toLocationName <- toCentre.locationName(shipment.toLocationId)
+    } yield shipment.toDto(fromLocationName, toLocationName)
   }
 
   private def getShipmentSpecimenDto(shipmentSpecimen: ShipmentSpecimen)

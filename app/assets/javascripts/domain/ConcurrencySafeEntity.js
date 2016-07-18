@@ -15,6 +15,7 @@ define(['angular', 'lodash'], function(angular, _) {
 
     /**
      * @classdesc Used to manage surrogate identity and optimistic concurrency versioning.
+     *
      * @class
      * @memberOf domain
      */
@@ -23,7 +24,7 @@ define(['angular', 'lodash'], function(angular, _) {
        * The unique ID that identifies an object of this type.
        * @name domain.ConcurrencySafeEntity#id
        * @type string
-       * @private
+       * @protected
        */
       this.id = null;
 
@@ -31,7 +32,7 @@ define(['angular', 'lodash'], function(angular, _) {
        * The current version for the object. Used for optimistic concurrency versioning.
        * @name domain.ConcurrencySafeEntity#version
        * @type number
-       * @private
+       * @protected
        */
       this.version = 0;
 
@@ -39,7 +40,7 @@ define(['angular', 'lodash'], function(angular, _) {
        * The date and time, in ISO time format, when this entity was added to the system.
        * @name domain.ConcurrencySafeEntity#timeAdded
        * @type Date
-       * @private
+       * @protected
        */
       this.timeAdded = null;
 
@@ -47,7 +48,7 @@ define(['angular', 'lodash'], function(angular, _) {
        * The date and time, in ISO time format, when this entity was last updated.
        * @name domain.ConcurrencySafeEntity#timeModified
        * @type Date
-       * @private
+       * @protected
        */
       this.timeModified = null;
 

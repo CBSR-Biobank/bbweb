@@ -18,6 +18,7 @@ define(function () {
   CeventSpecimensViewController.$inject = [
     '$q',
     'Specimen',
+    'Centre',
     'specimenAddModal',
     'domainEntityService',
     'notificationsService'
@@ -28,6 +29,7 @@ define(function () {
    */
   function CeventSpecimensViewController($q,
                                          Specimen,
+                                         Centre,
                                          specimenAddModal,
                                          domainEntityService,
                                          notificationsService) {
@@ -48,7 +50,7 @@ define(function () {
 
       if (vm.centreLocations.length <= 0) {
         vm.study.allLocations().then(function (centreLocations) {
-          defer.resolve(centreLocations);
+          defer.resolve(Centre.centreLocationToNames(centreLocations));
         });
       } else {
         defer.resolve(vm.centreLocations);

@@ -52,18 +52,16 @@ define(['lodash'], function(_) {
     }
 
     function submit(centre) {
-      centre.add()
-        .then(submitSuccess)
-        .catch(submitError);
+      centre.add().then(onSubmitSuccess).catch(onSubmitError);
+    }
 
-      function submitSuccess() {
-        notificationsService.submitSuccess();
-        gotoReturnState(vm.returnState);
-      }
+    function onSubmitSuccess() {
+      notificationsService.submitSuccess();
+      gotoReturnState(vm.returnState);
+    }
 
-      function submitError(error) {
-        domainEntityService.updateErrorModal(error, 'centre');
-      }
+    function onSubmitError(error) {
+      domainEntityService.updateErrorModal(error, 'centre');
     }
 
     function cancel() {

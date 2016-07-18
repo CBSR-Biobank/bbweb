@@ -92,6 +92,11 @@ object Specimen {
         )
     }
 
+  val sort2Compare = Map[String, (Specimen, Specimen) => Boolean](
+      "inventoryId" -> compareByInventoryId,
+      "timeCreated" -> compareByTimeCreated,
+      "status"      -> compareByStatus)
+
   def compareById(a: Specimen, b: Specimen) =
     (a.id.id compareTo b.id.id) < 0
 

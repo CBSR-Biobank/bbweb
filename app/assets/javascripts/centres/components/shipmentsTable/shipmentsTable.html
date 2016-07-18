@@ -1,0 +1,70 @@
+<div class="page-header">
+  <h1>{{vm.centre.name}}: <small>Shipping</small></h1>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <h4>Shipments to / from <strong>{{vm.centre.name}}</strong>:</h4>
+  </div>
+</div>
+<div class="row" ng-if="!vm.hasShipments">
+  <div class="col-md-12">
+    <div class="alert alert-warning" role="alert">
+      <p><span class="glyphicon glyphicon-warning-sign"></span>
+        There are no shipments involved with this centre yet.</p>
+    </div>
+  </div>
+</div>
+<table st-table="vm.shipments"
+       st-pipe="vm.getTableData"
+       class="table table-hover table-striped"
+       ng-if="vm.hasShipments">
+  <thead>
+    <tr>
+      <th st-sort="courierName">Courier</th>
+      <th st-sort="trackingNumber">Tracking#</th>
+      <th st-sort="fromLocationName">From</th>
+      <th st-sort="toLocationName">To</th>
+      <th>State</th>
+    </tr>
+    <tr>
+      <th>
+        <input st-search="courierName"
+               placeholder="search for courier"
+               class="input-sm form-control"
+               type="search"/>
+      </th>
+      <th>
+        <input st-search="trackingNumber"
+               placeholder="search for tracking number"
+               class="input-sm form-control"
+               type="search"/>
+      </th>
+      <th></th>
+      <th></th>
+      <th>
+        <select class="form-control input-sm"
+                st-search="state"
+                name="state"
+                ng-model="vm.stateFilter"
+                ng-options="state.value as state.label for state in vm.states">
+        </select>
+      </th>
+    </tr>
+  </thead>
+  <tbody ng-show="!vm.tableDataLoading">
+    <tr ng-repeat="shipment in vm.shipments">
+      <td>
+        <a href ng-click="vm.shipmentInformation(shipment)">{{shipment.courierName}}</a>
+      </td>
+      <td>{{shipment.trackingNumber}}</td>
+      <td>{{shipment.fromLocationName}}</td>
+      <td>{{shipment.toLocationName}}</td>
+      <td>
+        <span class="badge">{{shipment.state}}</span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<div class="row">
+  <div class="col-xs-12"><pre>{{vm.centreLocations | json}}</pre></div>
+</div>

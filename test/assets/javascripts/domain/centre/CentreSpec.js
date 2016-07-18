@@ -60,9 +60,9 @@ define([
 
     it('fails when creating from a non object', function() {
       var self = this,
-          badStudyJson = _.omit(self.factory.centre(), 'name');
+          badCentreJson = _.omit(self.factory.centre(), 'name');
 
-      expect(function () { self.Centre.create(badStudyJson); })
+      expect(function () { self.Centre.create(badCentreJson); })
         .toThrowError(/invalid object from server/);
     });
 
@@ -196,10 +196,10 @@ define([
 
         self.$httpBackend.whenGET(url).respond(self.reply(reply));
 
-        self.Centre.list(options).then(testStudy).catch(failTest);
+        self.Centre.list(options).then(testCentre).catch(failTest);
         self.$httpBackend.flush();
 
-        function testStudy(pagedResult) {
+        function testCentre(pagedResult) {
           expect(pagedResult.items).toBeArrayOfSize(centres.length);
           _.each(pagedResult.items, function (study) {
             expect(study).toEqual(jasmine.any(self.Centre));

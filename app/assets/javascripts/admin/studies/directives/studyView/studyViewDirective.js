@@ -23,9 +23,9 @@ define(['lodash'], function (_) {
     return directive;
   }
 
-  StudyViewCtrl.$inject = ['$scope', '$window', '$state', '$timeout'];
+  StudyViewCtrl.$inject = ['$scope', '$window', '$state'];
 
-  function StudyViewCtrl($scope, $window, $state, $timeout) {
+  function StudyViewCtrl($scope, $window, $state) {
     var vm = this;
 
     vm.tabs = [

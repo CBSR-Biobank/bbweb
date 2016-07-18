@@ -118,6 +118,10 @@ object CollectionEvent
     }
   }
 
+  val sort2Compare = Map[String, (CollectionEvent, CollectionEvent) => Boolean](
+      "visitNumber"   -> compareByVisitNumber,
+      "timeCompleted" -> compareByTimeCompleted)
+
   def compareByVisitNumber(a: CollectionEvent, b: CollectionEvent) =
     (a.visitNumber compareTo b.visitNumber) < 0
 

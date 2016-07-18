@@ -733,7 +733,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     "POST /participants/cevents/visitNumber/:ceventId" must {
 
-      "111 update the visit number on a collection event" in {
+      "update the visit number on a collection event" in {
         createEntities { (study, participant, ceventType) =>
           val cevent = factory.createCollectionEvent
           val newVisitNumber = cevent.visitNumber + 1

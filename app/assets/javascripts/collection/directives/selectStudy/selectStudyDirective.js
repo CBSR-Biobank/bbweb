@@ -29,9 +29,9 @@ define(['lodash'], function(_) {
     return directive;
   }
 
-  SelectStudyCtr.$inject = ['$scope', '$state', 'modalService'];
+  SelectStudyCtr.$inject = ['$state', 'modalService'];
 
-  function SelectStudyCtr($scope, $state, modalService) {
+  function SelectStudyCtr($state, modalService) {
     var vm = this;
 
     vm.displayStates = {

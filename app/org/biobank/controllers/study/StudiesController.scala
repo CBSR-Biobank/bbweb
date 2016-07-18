@@ -36,10 +36,6 @@ class StudiesController @Inject() (val env:            Environment,
 
   private val PageSizeMax = 10
 
-  val listSortFields = Map[String, (Study, Study) => Boolean](
-      "name"   -> Study.compareByName,
-      "status" -> Study.compareByStatus)
-
   def studyCounts() =
     AuthAction(parse.empty) { (token, userId, request) =>
       Ok(studiesService.getCountsByStatus)
@@ -63,10 +59,10 @@ class StudiesController @Inject() (val env:            Environment,
       Logger.debug(s"""|StudiesController:list: filter/$filter, status/$status, sort/$sort,
                        |  page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
-      val pagedQuery = PagedQuery(listSortFields, page, pageSize, order)
+      val pagedQuery = PagedQuery(page, pageSize, order)
 
       val validation = for {
-          sortFunc    <- pagedQuery.getSortFunc(sort)
+          sortFunc    <- Study.sort2Compare.get(sort).toSuccessNel(DomainError(s"invalid sort field: $sort"))
           sortOrder   <- pagedQuery.getSortOrder
           studies     <- studiesService.getStudies(filter, status, sortFunc, sortOrder)
           page        <- pagedQuery.getPage(PageSizeMax, studies.size)

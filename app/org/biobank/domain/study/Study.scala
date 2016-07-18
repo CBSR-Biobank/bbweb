@@ -41,6 +41,10 @@ sealed trait Study
 
 object Study {
 
+  val sort2Compare = Map[String, (Study, Study) => Boolean](
+      "name"   -> compareByName,
+      "status" -> compareByStatus)
+
   implicit val studyWrites: Writes[Study] = new Writes[Study] {
       def writes(study: Study) = {
         Json.obj("id"              -> study.id,

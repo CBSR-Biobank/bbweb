@@ -434,6 +434,8 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
      * Returns all locations for all the centres associated with this study.
      *
      * @returns {Promise<Array<domain.centres.CentreLocationDto>>} A promise.
+     *
+     * @see [Centre.centreLocationToNames()]{@link domain.centres.Centre.centreLocationToNames}
      */
     Study.prototype.allLocations = function () {
       return biobankApi.get('/studies/centres/' + this.id);

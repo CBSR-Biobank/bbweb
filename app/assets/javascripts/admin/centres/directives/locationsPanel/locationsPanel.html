@@ -48,12 +48,21 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-md-offset-1 col-md-11">
+        <div class="col-md-offset-1 col-md-11" ng-if="vm.location.poBoxNumber">
           <small>
             <strong>
               {{location.street}}<br>
               {{location.city}}, {{location.province}}, {{location.postalCode}}<br>
               {{location.poBoxNumber}}, {{location.countryIsoCode}}
+            </strong>
+          </small>
+        </div>
+        <div class="col-md-offset-1 col-md-11" ng-if="!vm.location.poBoxNumber">
+          <small>
+            <strong>
+              {{location.street}}<br>
+              {{location.city}}, {{location.province}}, {{location.postalCode}}<br>
+              {{location.countryIsoCode}}
             </strong>
           </small>
         </div>

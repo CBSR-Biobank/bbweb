@@ -1,13 +1,14 @@
 package org.biobank.domain.centre
 
 import com.github.nscala_time.time.Imports._
-import play.api.libs.json._
-import play.api.libs.json.Reads._
-import org.biobank.{ValidationKey, ValidationMsgKey}
-import org.biobank.domain.centre.ShipmentState._
 import org.biobank.domain._
+import org.biobank.domain.centre.ShipmentState._
+import org.biobank.dto.ShipmentDto
 import org.biobank.infrastructure.JsonUtils._
+import org.biobank.{ValidationKey, ValidationMsgKey}
 import org.joda.time.DateTime
+import play.api.libs.json.Reads._
+import play.api.libs.json._
 import scalaz.Scalaz._
 
 final case class ShipmentId(id: String) extends IdentifiedValueObject[String]
@@ -69,7 +70,7 @@ trait ShipmentValidations {
 
 /**
  * Represents a transfer of [org.biobank.domain.participants.Specimen]s and / or
- * [org.biobank.domain.containers.Container]s from one [org.biobank.domain.centre.Centre] to antoher.
+ * [org.biobank.domain.containers.Container]s from one [org.biobank.domain.centre.Centre] to another.
  *
  * @see org.biobank.domain.centre.ShipmentSpecimen
  * @see org.biobank.domain.centre.ShipmentContainer
@@ -226,6 +227,23 @@ final case class Shipment(id:             ShipmentId,
     if (state == ShipmentState.Unpacked) true.successNel[String]
     else EntityCriteriaError(s"shipment is not in unpacked state").failureNel[Boolean]
 
+  def toDto(fromLocationName: String, toLocationName: String): ShipmentDto =
+      ShipmentDto(id               = this.id.id,
+                  version          = this.version,
+                  timeAdded        = this.timeAdded,
+                  timeModified     = this.timeModified,
+                  state            = this.state.toString,
+                  courierName      = this.courierName,
+                  trackingNumber   = this.trackingNumber,
+                  fromLocationId   = this.fromLocationId,
+                  fromLocationName = fromLocationName,
+                  toLocationId     = this.toLocationId,
+                  toLocationName   = toLocationName,
+                  timePacked       = this.timePacked,
+                  timeSent         = this.timeSent,
+                  timeReceived     = this.timeReceived,
+                  timeUnpacked     = this.timeUnpacked)
+
   override def toString: String =
     s"""|Shipment:{
         |  id:             $id,
@@ -248,34 +266,6 @@ object Shipment extends ShipmentValidations {
   import org.biobank.domain.CommonValidations._
 
   implicit val shipmentWrites: Writes[Shipment] = Json.writes[Shipment]
-
-  def compareByCourier(a: Shipment, b: Shipment) = (a.courierName compareToIgnoreCase b.courierName) < 0
-
-  def compareByTrackingNumber(a: Shipment, b: Shipment) = (a.trackingNumber compareToIgnoreCase b.trackingNumber) < 0
-
-  def compareByTimePacked(a: Shipment, b: Shipment) =
-    (a.timePacked, b.timePacked) match {
-      case (Some(aTimePacked), Some(bTimePacked)) => (aTimePacked compareTo bTimePacked) < 0
-      case _ => false
-    }
-
-  def compareByTimeSent(a: Shipment, b: Shipment) =
-    (a.timeSent, b.timeSent) match {
-      case (Some(aTimeSent), Some(bTimeSent)) => (aTimeSent compareTo bTimeSent) < 0
-      case _ => false
-    }
-
-  def compareByTimeReceived(a: Shipment, b: Shipment) =
-    (a.timeReceived, b.timeReceived) match {
-      case (Some(aTimeReceived), Some(bTimeReceived)) => (aTimeReceived compareTo bTimeReceived) < 0
-      case _ => false
-    }
-
-  def compareByTimeUnpacked(a: Shipment, b: Shipment) =
-    (a.timeUnpacked, b.timeUnpacked) match {
-      case (Some(aTimeUnpacked), Some(bTimeUnpacked)) => (aTimeUnpacked compareTo bTimeUnpacked) < 0
-      case _ => false
-    }
 
   def create(id:             ShipmentId,
              version:        Long,

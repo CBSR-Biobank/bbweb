@@ -21,7 +21,6 @@ object ShipmentState extends Enumeration {
   val Unpacked = Value("Unpacked")
   val Lost     = Value("Lost")
 
-  implicit val shipmentStateFormat: Format[ShipmentState] =
-    enumFormat(ShipmentState)
+  implicit val shipmentStateFormat: Format[ShipmentState] = enumFormat(ShipmentState)
 
 }

@@ -26,6 +26,8 @@ define(function (require) {
   module.constant('AnatomicalSourceType',               require('./AnatomicalSourceType'));
   module.constant('PreservationType',                   require('./PreservationType'));
   module.constant('PreservationTemperatureType',        require('./PreservationTemperatureType'));
+  module.constant('ShipmentState',                      require('./centre/ShipmentState'));
+  module.constant('ShipmentItemState',                  require('./centre/ShipmentItemState'));
 
   module.constant('AnnotationValueType',                require('./AnnotationValueType'));
   module.constant('SpecimenType',                       require('./study/SpecimenType'));
@@ -45,6 +47,8 @@ define(function (require) {
 
   module.factory('Centre',                              require('./centre/Centre'));
   module.factory('CentreCounts',                        require('./centre/CentreCounts'));
+  module.factory('Shipment',                            require('./centre/Shipment'));
+  module.factory('ShipmentSpecimen',                    require('./centre/ShipmentSpecimen'));
 
   module.factory('CollectionEventType',                 require('./study/CollectionEventType'));
   module.factory('CollectionSpecimenSpec',              require('./study/CollectionSpecimenSpec'));

@@ -21,6 +21,8 @@ define([
     'StudyStatus',
     'CentreStatus',
     'UserStatus',
+    'ShipmentState',
+    'ShipmentItemState',
     'bbwebConfig'
   ];
 
@@ -38,6 +40,8 @@ define([
                    StudyStatus,
                    CentreStatus,
                    UserStatus,
+                   ShipmentState,
+                   ShipmentItemState,
                    bbwebConfig) {
 
     var defaultEntities = {},
@@ -74,6 +78,12 @@ define([
 
       centre:                            centre,
       defaultCentre:                     defaultCentre,
+
+      shipment:                          shipment,
+      defaultShipment:                   defaultShipment,
+
+      shipmentSpecimen:                  shipmentSpecimen,
+      defaultShipmentSpecimen:           defaultShipmentSpecimen,
 
       user:                              user,
       defaultUser:                       defaultUser,
@@ -124,6 +134,8 @@ define([
 
     function ENTITY_NAME_CENTRE()                { return 'centre'; }
     function ENTITY_NAME_LOCATION()              { return 'location'; }
+    function ENTITY_NAME_SHIPMENT()              { return 'shipment'; }
+    function ENTITY_NAME_SHIPMENT_SPECIMEN()     { return 'shipmentSpecimen'; }
 
     function ENTITY_NAME_USER()                  { return 'user'; }
 
@@ -415,6 +427,47 @@ define([
 
     function defaultCentre() {
       return defaultEntity(ENTITY_NAME_CENTRE(), centre);
+    }
+
+    function shipment(options) {
+      var defaults = { id:             domainEntityNameNext(ENTITY_NAME_SHIPMENT()),
+                       state:          ShipmentState.CREATED,
+                       courierName:    stringNext(),
+                       trackingNumber: stringNext(),
+                       fromLocationId: location().uniqueId,
+                       toLocationId:   location().uniqueId
+                     },
+          validKeys = commonFieldNames.concat(_.keys(defaults)),
+          s = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
+      updateDefaultEntity(ENTITY_NAME_SHIPMENT(), s);
+      return s;
+    }
+
+    function defaultShipment() {
+      return defaultEntity(ENTITY_NAME_SHIPMENT(), shipment);
+    }
+
+    function shipmentSpecimen(options) {
+      var shipment = defaultShipment(),
+          specimen = defaultSpecimen(),
+          defaults = { id:           domainEntityNameNext(ENTITY_NAME_SHIPMENT()),
+                       state:        ShipmentItemState.PRESENT,
+                       shipmentId:   shipment.id,
+                       specimenId:   specimen.id,
+                       locationId:   location().uniqueId,
+                       locationName: stringNext(),
+                       timeCreated:  moment(faker.date.recent(10)).format(),
+                       amount:       1,
+                       units:        stringNext(),
+                       status:       'UsableSpecimen'},
+          validKeys = commonFieldNames.concat(_.keys(defaults)),
+          ss = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
+      updateDefaultEntity(ENTITY_NAME_SHIPMENT_SPECIMEN(), ss);
+      return ss;
+    }
+
+    function defaultShipmentSpecimen() {
+      return defaultEntity(ENTITY_NAME_SHIPMENT_SPECIMEN(), shipment);
     }
 
     function user(options) {

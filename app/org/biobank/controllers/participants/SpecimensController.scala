@@ -1,14 +1,15 @@
 package org.biobank.controllers.participants
 
-import scala.language.reflectiveCalls
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
+import org.biobank.domain.DomainError
 import org.biobank.domain.participants.Specimen
 import org.biobank.service.AuthToken
 import org.biobank.service.participants.SpecimensService
 import org.biobank.service.users.UsersService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
+import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -22,11 +23,6 @@ class SpecimensController @Inject() (val env:          Environment,
   import org.biobank.infrastructure.command.SpecimenCommands._
 
   private val PageSizeMax = 10
-
-  val listSortFields = Map[String, (Specimen, Specimen) => Boolean](
-      "inventoryId" -> Specimen.compareByInventoryId,
-      "timeCreated" -> Specimen.compareByTimeCreated,
-      "status"      -> Specimen.compareByStatus)
 
   /**
    * Returns the specimen with the given ID.
@@ -53,13 +49,13 @@ class SpecimensController @Inject() (val env:          Environment,
       val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
       val order    = orderMaybe.fold { "asc" } { o => o }
 
-      Logger.debug(s"""|SpecimensController:list: ceventId/$ceventId, sort/$sort,
+      Logger.info(s"""|SpecimensController:list: ceventId/$ceventId, sort/$sort,
                        |  page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
-      val pagedQuery = PagedQuery(listSortFields, page, pageSize, order)
+      val pagedQuery = PagedQuery(page, pageSize, order)
 
       val validation = for {
-          sortFunc    <- pagedQuery.getSortFunc(sort)
+          sortFunc    <- Specimen.sort2Compare.get(sort).toSuccessNel(DomainError(s"invalid sort field: $sort"))
           sortOrder   <- pagedQuery.getSortOrder
           specimens   <- service.list(ceventId, sortFunc, sortOrder)
           page        <- pagedQuery.getPage(PageSizeMax, specimens.size)

@@ -66,7 +66,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      * {@link domain.study.Study}.
      *
      * @class
-     * @memberOf domain.participants
+     * @memberOf domain.centres
      * @extends domain.ConcurrencySafeEntity
      *
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from

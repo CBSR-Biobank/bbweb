@@ -143,26 +143,27 @@ DELETE  /centres/locations/:id/:ver/:uniqueId   org.biobank.controllers.centres.
 #
 # --- SHIPMENTS ---
 #
-POST    /shipments                                   org.biobank.controllers.centres.ShipmentsController.add
-POST    /shipments/courier/:id                       org.biobank.controllers.centres.ShipmentsController.updateCourier(id)
-POST    /shipments/trackingnumber/:id                org.biobank.controllers.centres.ShipmentsController.updateTrackingNumber(id)
-POST    /shipments/fromlocation/:id                  org.biobank.controllers.centres.ShipmentsController.updateFromLocation(id)
-POST    /shipments/tolocation/:id                    org.biobank.controllers.centres.ShipmentsController.updateToLocation(id)
-POST    /shipments/packed/:id                        org.biobank.controllers.centres.ShipmentsController.packed(id)
-POST    /shipments/sent/:id                          org.biobank.controllers.centres.ShipmentsController.sent(id)
-POST    /shipments/received/:id                      org.biobank.controllers.centres.ShipmentsController.received(id)
-POST    /shipments/unpacked/:id                      org.biobank.controllers.centres.ShipmentsController.unpacked(id)
-POST    /shipments/lost/:id                          org.biobank.controllers.centres.ShipmentsController.lost(id)
-GET     /shipments/specimens/:shId/:shSpcId          org.biobank.controllers.centres.ShipmentsController.getSpecimen(shId, shSpcId)
-GET     /shipments/specimens/:id                     org.biobank.controllers.centres.ShipmentsController.listSpecimens(id, sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
-GET     /shipments/:id                               org.biobank.controllers.centres.ShipmentsController.get(id)
-GET     /shipments                                   org.biobank.controllers.centres.ShipmentsController.list(courierFilter: Option[String], trackingNumberFilter: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
-POST    /shipments/specimens/received/:shId/:shSpcId org.biobank.controllers.centres.ShipmentsController.specimenReceived(shId, shSpcId)
-POST    /shipments/specimens/missing/:shId/:shSpcId  org.biobank.controllers.centres.ShipmentsController.specimenMissing(shId, shSpcId)
-POST    /shipments/specimens/extra/:shId/:shSpcId    org.biobank.controllers.centres.ShipmentsController.specimenExtra(shId, shSpcId)
-POST    /shipments/specimens/:id                     org.biobank.controllers.centres.ShipmentsController.addSpecimen(id)
-DELETE  /shipments/:id/:ver                          org.biobank.controllers.centres.ShipmentsController.remove(id, ver: Long)
-DELETE  /shipments/specimens/:shId/:shSpcId/:ver     org.biobank.controllers.centres.ShipmentsController.removeSpecimen(shId, shSpcId, ver: Long)
+POST    /shipments                                    org.biobank.controllers.centres.ShipmentsController.add
+POST    /shipments/courier/:id                        org.biobank.controllers.centres.ShipmentsController.updateCourier(id)
+POST    /shipments/trackingnumber/:id                 org.biobank.controllers.centres.ShipmentsController.updateTrackingNumber(id)
+POST    /shipments/fromlocation/:id                   org.biobank.controllers.centres.ShipmentsController.updateFromLocation(id)
+POST    /shipments/tolocation/:id                     org.biobank.controllers.centres.ShipmentsController.updateToLocation(id)
+POST    /shipments/packed/:id                         org.biobank.controllers.centres.ShipmentsController.packed(id)
+POST    /shipments/sent/:id                           org.biobank.controllers.centres.ShipmentsController.sent(id)
+POST    /shipments/received/:id                       org.biobank.controllers.centres.ShipmentsController.received(id)
+POST    /shipments/unpacked/:id                       org.biobank.controllers.centres.ShipmentsController.unpacked(id)
+POST    /shipments/lost/:id                           org.biobank.controllers.centres.ShipmentsController.lost(id)
+GET     /shipments/specimens/:shId/:shSpcId           org.biobank.controllers.centres.ShipmentsController.getSpecimen(shId, shSpcId)
+GET     /shipments/specimens/:id                      org.biobank.controllers.centres.ShipmentsController.listSpecimens(id, sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
+GET     /shipments/:id                                org.biobank.controllers.centres.ShipmentsController.get(id)
+GET     /shipments                                    org.biobank.controllers.centres.ShipmentsController.list(courierFilter: Option[String], trackingNumberFilter: Option[String], stateFilter: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
+POST    /shipments/specimens/container/:shId/:shSpcId org.biobank.controllers.centres.ShipmentsController.specimenContainer(shId, shSpcId)
+POST    /shipments/specimens/received/:shId/:shSpcId  org.biobank.controllers.centres.ShipmentsController.specimenReceived(shId, shSpcId)
+POST    /shipments/specimens/missing/:shId/:shSpcId   org.biobank.controllers.centres.ShipmentsController.specimenMissing(shId, shSpcId)
+POST    /shipments/specimens/extra/:shId/:shSpcId     org.biobank.controllers.centres.ShipmentsController.specimenExtra(shId, shSpcId)
+POST    /shipments/specimens/:id                      org.biobank.controllers.centres.ShipmentsController.addSpecimen(id)
+DELETE  /shipments/:id/:ver                           org.biobank.controllers.centres.ShipmentsController.remove(id, ver: Long)
+DELETE  /shipments/specimens/:shId/:shSpcId/:ver      org.biobank.controllers.centres.ShipmentsController.removeSpecimen(shId, shSpcId, ver: Long)
 
 #
 # --- USERS ---

@@ -272,7 +272,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
   def compareObj(json: JsValue, dto: ShipmentSpecimenDto) = {
     (json \ "id").as[String] mustBe (dto.id)
     (json \ "shipmentId").as[String] mustBe (dto.shipmentId)
-    (json \ "shipmentItemState").as[String] mustBe (dto.shipmentItemState)
+    (json \ "state").as[String] mustBe (dto.state)
     (json \ "specimenId").as[String] mustBe (dto.specimenId)
     (json \ "inventoryId").as[String] mustBe (dto.inventoryId)
     (json \ "version").as[Long] mustBe (dto.version)
@@ -1383,7 +1383,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
         changeShipmentSpecimenStateNotUnpacked(ShipmentItemState.Received)
       }
 
-      "111 fails for a shipment specimen not in the system" in {
+      "fails for a shipment specimen not in the system" in {
         changeShipmentSpecimenStateInvalidId(ShipmentItemState.Received)
       }
 
@@ -1399,7 +1399,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
         changeShipmentSpecimenStateNotUnpacked(ShipmentItemState.Missing)
       }
 
-      "111 fails for a shipment not in the system" in {
+      "fails for a shipment not in the system" in {
         changeShipmentSpecimenStateInvalidId(ShipmentItemState.Missing)
       }
 
@@ -1415,7 +1415,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
         changeShipmentSpecimenStateNotUnpacked(ShipmentItemState.Extra)
       }
 
-      "111 fails for a shipment not in the system" in {
+      "fails for a shipment not in the system" in {
         changeShipmentSpecimenStateInvalidId(ShipmentItemState.Extra)
       }
 

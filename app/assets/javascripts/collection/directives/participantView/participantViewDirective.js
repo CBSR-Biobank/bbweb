@@ -25,14 +25,13 @@ define(['lodash'], function (_) {
 
   ParticipantViewCtrl.$inject = [
     '$window',
-    '$state',
-    '$timeout'
+    '$state'
   ];
 
   /**
    *
    */
-  function ParticipantViewCtrl($window, $state, $timeout) {
+  function ParticipantViewCtrl($window, $state) {
     var vm = this;
 
     vm.tabs = [

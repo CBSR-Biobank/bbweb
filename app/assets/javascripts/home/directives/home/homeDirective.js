@@ -19,13 +19,24 @@ define(['lodash'], function (_) {
     return directive;
   }
 
-  HomeCtrl.$inject = ['$rootScope', 'usersService'];
+  HomeCtrl.$inject = ['$rootScope', '$timeout', 'usersService'];
 
-  function HomeCtrl($rootScope, usersService) {
+  function HomeCtrl($rootScope, $timeout, usersService) {
     var vm = this;
 
-    vm.userIsAuthenticated = !_.isUndefined(usersService.getCurrentUser());
+    vm.userIsAuthenticated = false;
     $rootScope.pageTitle = 'Biobank';
+    init();
+
+    //--
+
+    function init() {
+      // A bit of a hack: We know that biobankHeaderDirective authenticates the user, so we use a timeout to
+      // wait for authentication reply to have been resolved.
+      $timeout(function () {
+        vm.userIsAuthenticated = usersService.isAuthenticated();
+      }, 50);
+    }
   }
 
   return homeDirective;

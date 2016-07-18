@@ -99,7 +99,12 @@ class SpecimensServiceImpl @Inject() (
 
     def getSpecimens(ceventId: CollectionEventId): DomainValidation[List[Specimen]] = {
       ceventSpecimenRepository.withCeventId(ceventId)
-        .map { cs => specimenRepository.getByKey(cs.specimenId) }
+        .map { cs => {
+                val r = specimenRepository.getByKey(cs.specimenId)
+                log.info(s"-------->  $r")
+                r
+              }
+      }
         .toList
         .sequenceU
         .map { list => {

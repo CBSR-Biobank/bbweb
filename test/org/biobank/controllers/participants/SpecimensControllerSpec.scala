@@ -321,6 +321,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
         val e = createEntities
         val specimen = factory.createUsableSpecimen
         specimenRepository.put(specimen)
+        ceventSpecimenRepository.put(CeventSpecimen(e.cevent.id, specimen.id))
 
         val json = makeRequest(DELETE, uri(e.cevent, specimen, specimen.version))
 
@@ -331,6 +332,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
         val e = createEntities
         val specimen = factory.createUsableSpecimen
         specimenRepository.put(specimen)
+        ceventSpecimenRepository.put(CeventSpecimen(e.cevent.id, specimen.id))
 
         val peis = ProcessingEventInputSpecimen(ProcessingEventInputSpecimenId("abc"),
                                                 ProcessingEventId("def"),

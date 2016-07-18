@@ -1,6 +1,7 @@
 package org.biobank.controllers
 
 import javax.inject.{Inject, Singleton}
+import org.biobank.domain.DomainError
 import org.biobank.domain.user._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.service.AuthToken
@@ -14,9 +15,9 @@ import play.api.mvc._
 import play.api.{Environment, Logger}
 import scala.concurrent.Future
 import scala.language.reflectiveCalls
-import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
+import scalaz._
 
 @Singleton
 class UsersController @Inject() (val env:            Environment,
@@ -29,12 +30,6 @@ class UsersController @Inject() (val env:            Environment,
 
 
   private val PageSizeMax = 20
-
-  val listSortFields = Map[String, (User, User) => Boolean](
-      "name"   -> User.compareByName,
-      "email"  -> User.compareByEmail,
-      "status" -> User.compareByStatus)
-
 
   /** Used for obtaining the email and password from the HTTP login request */
   case class LoginCredentials(email: String, password: String)
@@ -135,10 +130,10 @@ class UsersController @Inject() (val env:            Environment,
                        |  order/$order""".stripMargin)
 
 
-      val pagedQuery = PagedQuery(listSortFields, page, pageSize, order)
+      val pagedQuery = PagedQuery(page, pageSize, order)
 
       val validation = for {
-           sortFunc    <- pagedQuery.getSortFunc(sort)
+          sortFunc     <- User.sort2Compare.get(sort).toSuccessNel(DomainError(s"invalid sort field: $sort"))
            sortOrder   <- pagedQuery.getSortOrder
            users       <- usersService.getUsers[User](nameFilter, emailFilter, status, sortFunc, sortOrder)
            page        <- pagedQuery.getPage(PageSizeMax, users.size)

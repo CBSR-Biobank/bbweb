@@ -26,11 +26,10 @@ define(['lodash'], function (_) {
   CentreViewCtrl.$inject = [
     '$window',
     '$scope',
-    '$state',
-    '$timeout'
+    '$state'
   ];
 
-  function CentreViewCtrl($window, $scope, $state, $timeout) {
+  function CentreViewCtrl($window, $scope, $state) {
     var vm = this;
 
     vm.tabs = [

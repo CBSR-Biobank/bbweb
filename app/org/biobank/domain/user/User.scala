@@ -71,6 +71,11 @@ object User {
     }
   }
 
+  val sort2Compare = Map[String, (User, User) => Boolean](
+      "name"   -> compareByName,
+      "email"  -> compareByEmail,
+      "status" -> compareByStatus)
+
   // users with duplicate emails are not allowed
   def compareByEmail(a: User, b: User) = (a.email compareToIgnoreCase b.email) < 0
 

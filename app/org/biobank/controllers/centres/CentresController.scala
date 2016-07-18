@@ -1,5 +1,6 @@
 package org.biobank.controllers.centres
 
+import org.biobank.domain.DomainError
 import org.biobank.controllers._
 import org.biobank.service._
 import org.biobank.service.users.UsersService
@@ -28,10 +29,6 @@ class CentresController @Inject() (val env:            Environment,
 
   private val PageSizeMax = 10
 
-  val listSortFields = Map[String, (Centre, Centre) => Boolean](
-      "status" -> Centre.compareByStatus,
-      "name"   -> Centre.compareByName)
-
   def centreCounts() =
     AuthAction(parse.empty) { (token, userId, request) =>
       Ok(centresService.getCountsByStatus)
@@ -55,10 +52,10 @@ class CentresController @Inject() (val env:            Environment,
       Logger.debug(s"""|CentresController:list: filter/$filter, status/$status, sort/$sort,
                        | page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
-      val pagedQuery = PagedQuery(listSortFields, page, pageSize, order)
+      val pagedQuery = PagedQuery(page, pageSize, order)
 
       val validation = for {
-          sortFunc    <- pagedQuery.getSortFunc(sort)
+          sortFunc    <- Centre.sort2Compare.get(sort).toSuccessNel(DomainError(s"invalid sort field: $sort"))
           sortOrder   <- pagedQuery.getSortOrder
           centres     <- centresService.getCentres[Centre](filter, status, sortFunc, sortOrder)
           page        <- pagedQuery.getPage(PageSizeMax, centres.size)

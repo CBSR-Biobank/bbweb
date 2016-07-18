@@ -71,6 +71,10 @@ object Centre {
       }
     }
 
+  val sort2Compare = Map[String, (Centre, Centre) => Boolean](
+      "name"   -> Centre.compareByName,
+      "status" -> Centre.compareByStatus)
+
   def compareByName(a: Centre, b: Centre) = (a.name compareToIgnoreCase b.name) < 0
 
   def compareByStatus(a: Centre, b: Centre) = {

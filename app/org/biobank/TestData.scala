@@ -1,6 +1,7 @@
 package org.biobank
 
 import akka.actor.ActorSystem
+import com.github.nscala_time.time.Imports._
 import javax.inject.{ Inject, Singleton }
 import org.biobank.domain._
 import org.biobank.domain.centre._
@@ -19,7 +20,9 @@ import scalaz.Scalaz._
  */
 object TestData {
 
-  val configPath = "application.loadTestData"
+  val configPath = "application.testData.load"
+
+  val configLoadSpecimensPath = "application.testData.loadSpecimens"
 
   val centreData = List(
       ("CL1-Foothills", "CL1-Foothills"),
@@ -179,14 +182,23 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
                           val specimenLinkTypeRepository:    SpecimenLinkTypeRepository,
                           val studyRepository:               StudyRepository,
                           val participantRepository:         ParticipantRepository,
+                          val collectionEventRepository:     CollectionEventRepository,
                           val userRepository:                UserRepository,
-                          val centreRepository:              CentreRepository) {
+                          val centreRepository:              CentreRepository,
+                          val specimenRepository:            SpecimenRepository,
+                          val ceventSpecimenRepository:      CeventSpecimenRepository) {
   import TestData._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
   private val loadTestData = (actorSystem.settings.config.hasPath(configPath)
                                 && actorSystem.settings.config.getBoolean(configPath))
+
+  private val loadSpecimenTestData =
+    (actorSystem.settings.config.hasPath(configLoadSpecimensPath)
+       && actorSystem.settings.config.getBoolean(configLoadSpecimensPath))
+
+  log.info(s"TEST DATA: loadTestData: $loadTestData, loadSpecimenTestData: $loadSpecimenTestData")
 
   def addMultipleCentres(): Unit = {
     if (loadTestData) {
@@ -206,8 +218,49 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
             locations    = Set.empty)
         centreRepository.put(centre)
       }
+
+      centreRepository.getValues
+        .find { s => s.name == "100-Calgary AB"}
+        .foreach { calgary =>
+        calgary match {
+          case c: DisabledCentre => {
+            val location = Location(uniqueId       = "test-data-calgary-location",
+                                    name           = "Primary",
+                                    street         = "1403 29 St NW",
+                                    city           = "Calgary",
+                                    province       = "Alberta",
+                                    postalCode     = "T2N 2T9",
+                                    poBoxNumber    = None,
+                                    countryIsoCode = "CA")
+            c.copy(locations = Set(location)).enable.foreach { centre =>
+              centreRepository.put(centre)
+            }
+          }
+          case s =>
+        }
+      }
+
+      centreRepository.getValues
+        .find { s => s.name == "101-London ON"}
+        .foreach { london =>
+        london match {
+          case c: DisabledCentre => {
+            val location = Location(uniqueId       = "test-data-london-location",
+                                    name           = "Primary",
+                                    street         = "London Health Sciences Center, University Hospital, Rm A3-222B, 339 Windermere Road",
+                                    city           = "London",
+                                    province       = "Ontario",
+                                    postalCode     = "N0L 1W0",
+                                    poBoxNumber    = None,
+                                    countryIsoCode = "CA")
+            c.copy(locations = Set(location)).enable.foreach { centre =>
+              centreRepository.put(centre)
+            }
+          }
+          case s =>
+        }
+      }
     }
-    ()
   }
 
   def addMultipleStudies(): Unit = {
@@ -230,18 +283,38 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
         studyRepository.put(study)
       }
 
-      addCollectionEvents
+      addCollectionEventTypes
+
+      if (loadSpecimenTestData) {
+
+        studyRepository.getValues
+          .find { s => s.name == "BBPSP"}
+          .foreach { bbpsp =>
+          bbpsp match {
+            case s: DisabledStudy => {
+              s.enable.foreach { study =>
+                studyRepository.put(study)
+              }
+            }
+            case s =>
+          }
+        }
+
+        addBbpspParticipants
+        addBbpspCevents
+        addBbpspSpecimens
+      }
     }
-    ()
   }
 
-  def addCollectionEvents(): Unit = {
-    Logger.debug("addCollectionEvents")
+  def addCollectionEventTypes(): Unit = {
+    val hashids = Hashids("test-data-cevent-types")
+
+    Logger.debug("addCollectionEventTypes")
 
     studyRepository.getValues
       .find { s => s.name == "BBPSP"}
       .foreach { bbpsp =>
-      val hashids = Hashids("test-data-cevent-types")
 
       // Use a list since "id" is determined at the time of adding to the repository
       val ceventTypes =
@@ -386,6 +459,96 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
           maxValueCount = Some(2),
           options       = Seq("Surveillance", "Genetic Predisposition", "Previous Samples", "Genetic Mutation"),
           required      = true))
+  }
+
+  def addBbpspParticipants() = {
+    val hashids = Hashids("bbpsp-participants")
+
+    studyRepository.getValues
+      .find { s => s.name == "BBPSP"}
+      .foreach { bbpsp =>
+
+      (0 to 3).foreach { index =>
+        participantRepository.put(
+          Participant(id           = ParticipantId(hashids.encode(index)),
+                      studyId      = bbpsp.id,
+                      version      = 0L,
+                      timeAdded    = DateTime.now,
+                      timeModified = None,
+                      uniqueId     = f"P$index%05d",
+                      annotations  = Set.empty[Annotation]))
+      }
+    }
+  }
+
+  def addBbpspCevents() = {
+    val hashids = Hashids("bbpsp-collection-events")
+
+    studyRepository.getValues
+      .find { s => s.name == "BBPSP"}
+      .foreach { bbpsp =>
+
+      participantRepository.allForStudy(bbpsp.id).zipWithIndex.foreach {
+        case (participant, pIndex) =>
+          collectionEventTypeRepository.allForStudy(bbpsp.id).zipWithIndex.foreach {
+            case (ceventType, cetIndex) =>
+              val id = CollectionEventId(hashids.encode(10 * pIndex + cetIndex))
+              collectionEventRepository.put(
+                CollectionEvent(id                    = id,
+                                participantId         = participant.id,
+                                collectionEventTypeId = ceventType.id,
+                                version               = 0L,
+                                timeAdded             = DateTime.now,
+                                timeModified          = None,
+                                timeCompleted         = DateTime.now.minusDays(1),
+                                visitNumber           = cetIndex + 1,
+                                annotations           = Set.empty[Annotation]))
+          }
+        }
+    }
+  }
+
+  def addBbpspSpecimens() = {
+    studyRepository.getValues.find(s => s.name == "BBPSP").foreach { bbpsp =>
+      centreRepository.getValues.find(c => c.name == "100-Calgary AB").foreach { centre =>
+        centre match {
+          case c: EnabledCentre => {
+            centreRepository.put(c.copy(studyIds = Set(bbpsp.id)))
+
+            val hashids = Hashids("bbpsp-specimens")
+            participantRepository.allForStudy(bbpsp.id).zipWithIndex.foreach { case (participant, pIndex) =>
+              collectionEventRepository.allForParticipant(participant.id).zipWithIndex.foreach {
+                case (cevent, ceventIndex) =>
+                  collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId).foreach { cventType =>
+                    val specimenSpec = cventType.specimenSpecs.head
+                    val location = centre.locations.head
+                    val uniqueId = 10 * pIndex + ceventIndex
+                    val id = SpecimenId(hashids.encode(uniqueId))
+                    val inventoryId = f"A$uniqueId%05d"
+
+                    val specimen = UsableSpecimen(id               = id,
+                                                  inventoryId      = inventoryId,
+                                                  specimenSpecId   = specimenSpec.uniqueId,
+                                                  version          = 0L,
+                                                  timeAdded        = DateTime.now,
+                                                  timeModified     = None,
+                                                  originLocationId = location.uniqueId,
+                                                  locationId       = location.uniqueId,
+                                                  containerId      = None,
+                                                  positionId       = None,
+                                                  timeCreated      = DateTime.now.minusDays(1),
+                                                  amount           = BigDecimal(0.1))
+
+                    specimenRepository.put(specimen)
+                    ceventSpecimenRepository.put(CeventSpecimen(cevent.id, id))
+                  }
+              }
+            }
+          }
+          case _ =>
+        }
+      }
+    }
   }
 
   def addMultipleUsers() = {

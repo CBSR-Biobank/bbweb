@@ -1,6 +1,7 @@
 package org.biobank.controllers.participants
 
 import javax.inject.{Inject, Singleton}
+import org.biobank.domain.DomainError
 import org.biobank.controllers._
 import org.biobank.domain.participants.CollectionEvent
 import org.biobank.infrastructure.command.CollectionEventCommands._
@@ -23,10 +24,6 @@ class CollectionEventsController @Inject() (val env:          Environment,
 
   private val PageSizeMax = 10
 
-  val listSortFields = Map[String, (CollectionEvent, CollectionEvent) => Boolean](
-      "visitNumber"   -> CollectionEvent.compareByVisitNumber,
-      "timeCompleted" -> CollectionEvent.compareByTimeCompleted)
-
   def get(ceventId: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
       domainValidationReply(service.get(ceventId))
@@ -47,10 +44,10 @@ class CollectionEventsController @Inject() (val env:          Environment,
       Logger.debug(s"""|CollectionEventsController:list: participantId/$participantId,
                        |  sort/$sort, page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
-      val pagedQuery = PagedQuery(listSortFields, page, pageSize, order)
+      val pagedQuery = PagedQuery(page, pageSize, order)
 
       val validation = for {
-          sortFunc    <- pagedQuery.getSortFunc(sort)
+          sortFunc    <- CollectionEvent.sort2Compare.get(sort).toSuccessNel(DomainError(s"invalid sort field: $sort"))
           sortOrder   <- pagedQuery.getSortOrder
           cevents     <- service.list(participantId, sortFunc, sortOrder)
           page        <- pagedQuery.getPage(PageSizeMax, cevents.size)

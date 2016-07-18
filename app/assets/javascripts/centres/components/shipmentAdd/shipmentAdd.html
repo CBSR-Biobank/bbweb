@@ -1,0 +1,112 @@
+<div class="page-header">
+  <h1>Add Shipment</h1>
+</div>
+<div class="row" ng-if="!vm.hasValidCentres">
+  <div class="col-md-12">
+    <div class="alert alert-warning" role="alert">
+      Two or more centres, or one centre with more than one location required for shipping.<br> Please
+      configure more centres and / or locations.
+    </div>
+  </div>
+</div>
+<form class="form-horizontal"
+      name="shipmentForm"
+      ng-if="vm.hasValidCentres"
+      novalidate>
+
+  <!-- COURIER NAME -->
+  <div class="form-group"
+       ng-class="{ 'has-error' : shipmentForm.courierName.$invalid &&
+                 !shipmentForm.courierName.$pristine }">
+    <label for="courierName" class="col-md-2 form-control-label">Courier name</label>
+    <div class="col-md-10">
+      <input name="courierName"
+             type="text"
+             class="form-control"
+             ng-model="vm.shipment.courierName"
+             ng-minlength="2"
+             placeholder="The name of the courier company"
+             focus-me="true"
+             required />
+    </div>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="shippmentForm.courierName.$error"
+         ng-if="shippmentForm.courierName.$dirty">
+      <div ng-message="minlength" class="help-block">Courier name is too short</div>
+    </div>
+  </div>
+
+  <!-- TRACKING NUMBER -->
+  <div class="form-group"
+       ng-class="{ 'has-error' : shipmentForm.trackingNumber.$invalid &&
+                 !shipmentForm.trackingNumber.$pristine }">
+    <label for="courierName" class="col-md-2 form-control-label">Tracking number</label>
+    <div class="col-md-10">
+      <input name="trackingNumber"
+             type="text"
+             class="form-control"
+             ng-model="vm.shipment.trackingNumber"
+             ng-minlength="2"
+             placeholder="The number used to track the package"
+             required />
+    </div>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="shippmentForm.trackingNumber.$error"
+         ng-if="shippmentForm.trackingNumber.$dirty">
+      <div ng-message="minlength" class="help-block">Tracking number is too short</div>
+    </div>
+  </div>
+
+  <!-- FROM CENTRE LOCATION -->
+  <div class="form-group row"
+       ng-class="{ 'has-error' : shipmentForm.fromCentre.$invalid && !shipmentForm.fromCentre.$pristine }">
+    <label class="col-md-2 form-control-label">From centre</label>
+    <div class="col-md-10">
+      <select class="form-control"
+              name="centre"
+              ng-model="vm.selectedFromLocationInfo"
+              ng-options="locInfo as locInfo.name for locInfo in vm.fromCentreLocations"
+              ng-change="vm.fromLocationChanged()"
+              required>
+        <option value="">-- make a selection --</option>
+      </select>
+    </div>
+    <div class="col-sm-offset-3 col-sm-9"
+         ng-messages="shipmentForm.fromCentre.$error"
+         ng-if="shipmentForm.fromCentre.$dirty">
+      <div ng-message="required" class="help-block">A centre must be selected</div>
+    </div>
+  </div>
+
+  <!-- TO CENTRE LOCATION -->
+  <div class="form-group row"
+       ng-class="{ 'has-error' : shipmentForm.toCentre.$invalid && !shipmentForm.toCentre.$pristine }">
+    <label class="col-md-2 form-control-label">To centre</label>
+    <div class="col-md-10">
+      <select class="form-control"
+              name="centre"
+              ng-model="vm.selectedToLocationInfo"
+              ng-options="locInfo as locInfo.name for locInfo in vm.toCentreLocations"
+              ng-change="vm.toLocationChanged()"
+              required>
+        <option value="">-- make a selection --</option>
+      </select>
+    </div>
+    <div class="col-sm-offset-3 col-sm-9"
+         ng-messages="shipmentForm.toCentre.$error"
+         ng-if="shipmentForm.toCentre.$dirty">
+      <div ng-message="required" class="help-block">A centre must be selected</div>
+    </div>
+  </div>
+
+
+  <!-- BUTTONS  -->
+  <div class="form-group">
+    <div class="col-md-offset-2 col-md-10">
+      <button class="btn btn-primary"
+              ng-disabled="shipmentForm.$invalid"
+              ng-click="vm.submit()">Submit</button>
+      <button type="button" class="btn" ng-click="vm.cancel()">Cancel</button>
+    </div>
+  </div>
+</form>

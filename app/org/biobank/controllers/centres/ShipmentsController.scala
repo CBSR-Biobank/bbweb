@@ -1,6 +1,5 @@
 package org.biobank.controllers.centres
 
-import org.biobank.domain.centre.{Shipment, ShipmentSpecimen}
 import org.biobank.controllers.{CommandController, JsonController, PagedQuery, PagedResults}
 import javax.inject.{Inject, Singleton}
 import org.biobank.service.AuthToken
@@ -28,42 +27,36 @@ class ShipmentsController @Inject() (val env:              Environment,
 
   private val PageSizeMax = 10
 
-  val listSortFields = Map[String, (Shipment, Shipment) => Boolean](
-      "courierName"    -> Shipment.compareByCourier,
-      "trackingNumber" -> Shipment.compareByTrackingNumber,
-      "timePacked"     -> Shipment.compareByTimePacked,
-      "timeSent"       -> Shipment.compareByTimeSent,
-      "timeReceived"   -> Shipment.compareByTimeReceived,
-      "timeUnpacked"   -> Shipment.compareByTimeUnpacked)
-
   def list(courierFilterMaybe:        Option[String],
            trackingNumberFilterMaybe: Option[String],
+           stateFilterMaybe:          Option[String],
            sortMaybe:                 Option[String],
            pageMaybe:                 Option[Int],
            pageSizeMaybe:             Option[Int],
            orderMaybe:                Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
 
-      val courierFilter        = courierFilterMaybe.fold { "" } { cn => cn }
+      val courierFilter        = courierFilterMaybe.fold { "" } { cn        => cn }
       val trackingNumberFilter = trackingNumberFilterMaybe.fold { "" } { tn => tn }
-      val sort     = sortMaybe.fold { "courierName" } { s => s }
-      val page     = pageMaybe.fold { 1 } { p => p }
-      val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
-      val order    = orderMaybe.fold { "asc" } { o => o }
+      val stateFilter          = stateFilterMaybe.fold { "" } { st => st }
+      val sort                 = sortMaybe.fold { "courierName" } { s       => s }
+      val page                 = pageMaybe.fold { 1 } { p                   => p }
+      val pageSize             = pageSizeMaybe.fold { 5 } { ps              => ps }
+      val order                = orderMaybe.fold { "asc" } { o              => o }
 
-      Logger.debug(s"""|ShipmentsController:list: courierFilter/$courierFilter,
-                       |  trackingNumberFilter/$trackingNumberFilter, sort/$sort, page/$page,
-                       |  pageSize/$pageSize, order/$order""".stripMargin)
+      Logger.debug(
+        s"""|ShipmentsController:list: courierFilter/$courierFilter, trackingNumberFilter/$trackingNumberFilter,
+            |  stateFilter/$stateFilter, sort/$sort, page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
-      val pagedQuery = PagedQuery(listSortFields, page, pageSize, order)
+      val pagedQuery = PagedQuery(page, pageSize, order)
 
       val validation = for {
-          sortWith    <- pagedQuery.getSortFunc(sort)
           sortOrder   <- pagedQuery.getSortOrder
           shipments   <- shipmentsService.getShipments(courierFilter,
                                                        trackingNumberFilter,
-                                                       sortWith,
-                                                       sortOrder).successNel[String]
+                                                       stateFilter,
+                                                       sort,
+                                                       sortOrder)
           page        <- pagedQuery.getPage(PageSizeMax, shipments.size)
           pageSize    <- pagedQuery.getPageSize(PageSizeMax)
           results     <- PagedResults.create(shipments, page, pageSize)
@@ -94,7 +87,7 @@ class ShipmentsController @Inject() (val env:              Environment,
       Logger.debug(s"""|ShipmentsController:listSpecimens: shipmentId/$shipmentId, sort/$sort,
                        |  page/$page,pageSize/$pageSize, order/$order""".stripMargin)
 
-      val pagedQuery = PagedQuery(Map.empty[String, (ShipmentSpecimen, ShipmentSpecimen) => Boolean], page, pageSize, order)
+      val pagedQuery = PagedQuery(page, pageSize, order)
 
       val validation = for {
           sortOrder         <- pagedQuery.getSortOrder
@@ -165,6 +158,11 @@ class ShipmentsController @Inject() (val env:              Environment,
                                           expectedVersion = version)
       val future = shipmentsService.removeShipmentSpecimen(cmd)
       domainValidationReply(future)
+    }
+
+  def specimenContainer(shipmentId: String, shipmentSpecimenId: String) =
+    commandAction(Json.obj("shipmentId" -> shipmentId, "id" -> shipmentSpecimenId)) {
+      cmd: ShipmentSpecimenUpdateContainerCmd => processSpecimenCommand(cmd)
     }
 
   def specimenReceived(shipmentId: String, shipmentSpecimenId: String) =

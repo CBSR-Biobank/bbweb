@@ -91,7 +91,6 @@ define(function (require) {
     vm.selectedLocationId   = undefined;
     vm.amount               = undefined;
     vm.defaultAmount        = undefined;
-    vm.centreLocations      = centreLocationsInit(centreLocations);
     vm.specimenSpecs        = specimenSpecs;
     vm.usingDefaultAmount   = true;
     vm.timeCollected        = new Date();
@@ -112,17 +111,6 @@ define(function (require) {
     });
 
     //--
-
-    /**
-     * Concatenates the centre name and location name so that they can be selected from a
-     * drop down list.
-     */
-    function centreLocationsInit(centreLocations) {
-      return _.map(centreLocations, function (centreLocation) {
-        return _.extend({ name: centreLocation.centreName + ': ' + centreLocation.locationName },
-                        _.pick(centreLocation, 'centreId', 'locationId'));
-      });
-    }
 
     /**
      * Creates a new specimen based on values stored in the controller.

@@ -221,7 +221,30 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
     };
 
     /**
-     * Used to list the centres within the system.
+     * @typedef domain.centres.CentreLocationName
+     * @type object
+     * @property {string} centreId - the ID that identifies the centre.
+     * @property {string} locationId - the ID that identifies the location.
+     * @property {string} name - the centre's name concatenated with the location name.
+     */
+
+    /**
+     * Concatenates the centre name and location name so that they can be selected from a
+     * drop down list.
+     *
+     * @param {domain.centres.CentreLocationDto} - the locations returned from the server.
+     *
+     * @returns {Promise<Array<domain.centres.CentreLocationName>>} A promise.
+     */
+    Centre.centreLocationToNames = function (centreLocations) {
+      return _.map(centreLocations, function (centreLocation) {
+        return _.extend({ name: centreLocation.centreName + ': ' + centreLocation.locationName },
+                        _.pick(centreLocation, 'centreId', 'locationId'));
+      });
+    };
+
+    /**
+     * Used to list the centres stored in the system.
      *
      * <p>A paged API is used to list centres. See below for more details.</p>
      *
