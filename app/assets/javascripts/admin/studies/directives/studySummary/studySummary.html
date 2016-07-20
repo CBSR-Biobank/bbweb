@@ -5,6 +5,7 @@
         <button class="btn btn-xs btn-success"
                 ng-click="vm.changeStatus('enable')"
                 title="Enable"
+                ng-if="vm.study.isDisabled()"
                 ng-disabled="!vm.hasSpecimenSpecs">
           <i class="glyphicon glyphicon-ok-circle"></i>
         </button>

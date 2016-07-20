@@ -90,7 +90,7 @@ libraryDependencies ++= Seq(
   // WebJars dependencies
   "org.webjars"                 %  "requirejs"                           % "2.2.0",
   "org.webjars"                 %  "lodash"                              % "4.0.0",
-  "org.webjars"                 %  "jquery"                              % "3.0.0",
+  "org.webjars"                 %  "jquery"                              % "2.2.4",
   ( "org.webjars"               %  "bootstrap"                           % "3.3.6"  ).excludeAll(ExclusionRule(organization="org.webjars")),
   ( "org.webjars"               %  "angularjs"                           % "1.5.6"  ).exclude("org.webjars", "jquery"),
   ( "org.webjars"               %  "angular-ui-bootstrap"                % "1.3.3" ).exclude("org.webjars", "angularjs"),
