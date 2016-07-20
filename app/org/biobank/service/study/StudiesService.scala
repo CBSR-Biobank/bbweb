@@ -6,6 +6,7 @@ import akka.util.Timeout
 import com.google.inject.ImplementedBy
 import javax.inject._
 import org.biobank.domain.study._
+import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.dto._
@@ -39,6 +40,8 @@ trait StudiesService {
   def getStudyNames(filter: String, order: SortOrder): Seq[NameDto]
 
   def getStudy(id: String): DomainValidation[Study]
+
+  def getCentresForStudy(studyId: String): Set[CentreLocation]
 
   def specimenGroupWithId(studyId: String, specimenGroupId: String)
       : DomainValidation[SpecimenGroup]
@@ -96,6 +99,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
   @Named("studiesProcessor") val studyProcessor:         ActorRef,
   @Named("collectionEventType") val ceventTypeProcessor: ActorRef,
   val studyRepository:                                   StudyRepository,
+  val centreRepository:                                  CentreRepository,
   val processingTypeRepository:                          ProcessingTypeRepository,
   val specimenGroupRepository:                           SpecimenGroupRepository,
   val collectionEventTypeRepository:                     CollectionEventTypeRepository,
@@ -183,6 +187,14 @@ class StudiesServiceImpl @javax.inject.Inject() (
 
   def getStudy(id: String) : DomainValidation[Study] = {
     studyRepository.getByKey(StudyId(id))
+  }
+
+  def getCentresForStudy(studyId: String): Set[CentreLocation] = {
+    centreRepository.withStudy(StudyId(studyId)).flatMap { centre =>
+      centre.locations.map { location =>
+        CentreLocation(centre.id.id, location.uniqueId, centre.name, location.name)
+      }
+    }
   }
 
   def specimenGroupWithId(studyId: String, specimenGroupId: String)

@@ -13,6 +13,7 @@ define(function (require) {
       restrict: 'EA',
       scope: {},
       bindToController: {
+        study:                '=',
         collectionEventTypes: '=',
         collectionEvent:      '='
       },

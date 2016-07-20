@@ -73,6 +73,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      * describes this object.
      */
     function CollectionEvent(obj, collectionEventType) {
+      // FIXME: jsdoc for this classes members is needed
       var defaults = {
         participantId:         null,
         collectionEventTypeId: null,

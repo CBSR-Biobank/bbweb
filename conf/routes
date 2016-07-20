@@ -71,6 +71,7 @@ POST    /studies/enable/:id                     org.biobank.controllers.study.St
 POST    /studies/disable/:id                    org.biobank.controllers.study.StudiesController.disable(id)
 POST    /studies/retire/:id                     org.biobank.controllers.study.StudiesController.retire(id)
 POST    /studies/unretire/:id                   org.biobank.controllers.study.StudiesController.unretire(id)
+GET     /studies/centres/:id                    org.biobank.controllers.study.StudiesController.centresForStudy(id)
 
 #
 # --- COLLECTION EVENTS --- order matters: this section must be before participants

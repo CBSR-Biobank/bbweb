@@ -9,7 +9,7 @@ define(function () {
 
   config.$inject = ['$urlRouterProvider', '$stateProvider'];
 
-  function config($urlRouterProvider, $stateProvider ) {
+  function config($urlRouterProvider, $stateProvider) {
 
     $urlRouterProvider.otherwise('/');
 

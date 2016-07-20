@@ -996,6 +996,35 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
+    "GET /studies/centres/:id" must {
+
+      "111 list the centres associated with a study" in {
+        val study = factory.createEnabledStudy
+        val location = factory.createLocation
+        val centre = factory.createEnabledCentre.copy(studyIds = Set(study.id), locations = Set(location))
+
+        studyRepository.put(study)
+        centreRepository.put(centre)
+
+        val json = makeRequest(GET, s"/studies/centres/${study.id}")
+
+        (json \ "status").as[String] must include ("success")
+
+        val jsonCentreLocations = (json \ "data").as[List[JsObject]]
+        jsonCentreLocations must have length 1
+        val jsonCentreLocation  = jsonCentreLocations(0)
+
+        (jsonCentreLocation \ "centreId").as[String] must be (centre.id.id)
+
+        (jsonCentreLocation \ "locationId").as[String] must be (location.uniqueId)
+
+        (jsonCentreLocation \ "centreName").as[String] must be (centre.name)
+
+        (jsonCentreLocation \ "locationName").as[String] must be (location.name)
+      }
+
+    }
+
   }
 
 }

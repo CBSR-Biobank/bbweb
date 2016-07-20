@@ -3,6 +3,7 @@ package org.biobank.domain.centre
 import com.google.inject.ImplementedBy
 import javax.inject.Singleton
 import org.biobank.domain._
+import org.biobank.domain.study.StudyId
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -14,6 +15,8 @@ trait CentreRepository extends ReadWriteRepository[CentreId, Centre] {
   def getEnabled(id: CentreId): DomainValidation[EnabledCentre]
 
   def getByLocationId(uniqueId: String): DomainValidation[Centre]
+
+  def withStudy(studyId: StudyId): Set[Centre]
 
 }
 
@@ -64,5 +67,9 @@ class CentreRepositoryImpl
     } else {
       centres.head.successNel[String]
     }
+  }
+
+  def withStudy(studyId: StudyId): Set[Centre] = {
+    getValues.filter { c => c.studyIds.contains(studyId) }.toSet
   }
 }

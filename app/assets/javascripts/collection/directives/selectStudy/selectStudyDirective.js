@@ -29,9 +29,9 @@ define(['lodash'], function(_) {
     return directive;
   }
 
-  SelectStudyCtr.$inject = ['$scope', '$state'];
+  SelectStudyCtr.$inject = ['$scope', '$state', 'modalService'];
 
-  function SelectStudyCtr($scope, $state) {
+  function SelectStudyCtr($scope, $state, modalService) {
     var vm = this;
 
     vm.displayStates = {
@@ -39,14 +39,15 @@ define(['lodash'], function(_) {
       HAVE_RESULTS: 1
     };
 
-    vm.updateStudies          = updateStudies;
-    vm.pagedResult            = {};
-    vm.nameFilterUpdated      = nameFilterUpdated;
-    vm.pageChanged            = pageChanged;
-    vm.clearFilter            = clearFilter;
-    vm.displayState           = getDisplayState();
-    vm.navigateToStudyHref    = navigateToStudyHref;
-    vm.showPagination         = getShowPagination();
+    vm.updateStudies     = updateStudies;
+    vm.pagedResult       = {};
+    vm.nameFilterUpdated = nameFilterUpdated;
+    vm.pageChanged       = pageChanged;
+    vm.clearFilter       = clearFilter;
+    vm.displayState      = getDisplayState();
+    vm.studyGlyphicon    = studyGlyphicon;
+    vm.studySelected     = studySelected;
+    vm.showPagination    = getShowPagination();
 
     vm.pagerOptions = {
       filter:    '',
@@ -89,13 +90,25 @@ define(['lodash'], function(_) {
       updateStudies();
     }
 
-    function navigateToStudyHref(study) {
-      var stateParam = {};
+    function studyGlyphicon(study) {
+      return '<i class="glyphicon ' + vm.icon + '"></i>';
+    }
 
-      stateParam[vm.navigateStateParamName] = study.id;
-      var href = $state.href(vm.navigateStateName, stateParam, {absolute: true});
-      return '<a href="' + href + '"><strong><i class="glyphicon ' + vm.icon + '"></i> ' +
-        study.name + '</strong></a>';
+    function studySelected(study) {
+      study.allLocations().then(function (reply) {
+        var headerHtml;
+        var bodyHtml;
+        var stateParam = {};
+        if (reply.length > 0) {
+          stateParam[vm.navigateStateParamName] = study.id;
+          $state.go(vm.navigateStateName, stateParam);
+        } else {
+          headerHtml = 'Centre Configuration';
+          bodyHtml = 'There are no centres configured to participate in this study.' +
+            '<p>Please configure centres for this study.';
+          modalService.modalOk(headerHtml, bodyHtml);
+        }
+      });
     }
 
     function getShowPagination() {

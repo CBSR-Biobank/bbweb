@@ -430,6 +430,15 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
       return (this.status === StudyStatus.RETIRED);
     };
 
+    /**
+     * Returns all locations for all the centres associated with this study.
+     *
+     * @returns {Promise<Array<domain.centres.CentreLocationDto>>} A promise.
+     */
+    Study.prototype.allLocations = function () {
+      return biobankApi.get('/studies/centres/' + this.id);
+    };
+
     function changeState(state) {
       /* jshint validthis:true */
       var self = this,

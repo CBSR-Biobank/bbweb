@@ -96,6 +96,10 @@ class StudiesController @Inject() (val env:            Environment,
       domainValidationReply(studiesService.getStudy(id))
     }
 
+  def centresForStudy(studyId: String) = AuthAction(parse.empty) { (token, userId, request) =>
+      Ok(studiesService.getCentresForStudy(studyId))
+    }
+
   def add() = commandAction { cmd: AddStudyCmd =>
       processCommand(cmd)
     }

@@ -352,15 +352,18 @@ define(['lodash'], function(_) {
         'eventDetails': {
           template: [
             '<cevent-view',
+            '  study="vm.study"',
             '  collection-event-types="vm.collectionEventTypes"',
             '  collection-event="vm.collectionEvent">',
             '</cevents-view>'
           ].join(''),
           controller: [
+            'study',
             'collectionEventTypes',
             'collectionEvent',
-            function (collectionEventTypes, collectionEvent) {
+            function (study, collectionEventTypes, collectionEvent) {
               var vm = this;
+              vm.study = study;
               vm.collectionEventTypes = collectionEventTypes;
               vm.collectionEvent = collectionEvent;
             }

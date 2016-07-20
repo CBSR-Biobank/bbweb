@@ -12,8 +12,13 @@
   </ul>
 
   <ul class="list-group" ng-if="vm.displayState === vm.displayStates.HAVE_RESULTS">
-    <li class="list-group-item" ng-repeat="item in vm.pagedResult.items">
-      <span ng-bind-html="vm.navigateToStudyHref(item)"></span>
+    <li class="list-group-item" ng-repeat="study in vm.pagedResult.items">
+      <a href="" ng-click="vm.studySelected(study)">
+        <strong>
+          <span ng-bind-html="vm.studyGlyphicon(study)"></span>
+          {{study.name}}
+        </strong>
+      </a>
     </li>
   </ul>
 
