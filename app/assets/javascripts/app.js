@@ -184,7 +184,9 @@ define(function(require) {
 
       function responseError(rejection) {
         if (rejection.status === 401) {
-          $injector.get('$state').go('home.users.login');
+          $injector.get('usersService').sessionTimeout();
+          $injector.get('$state').go('home.users.login', {}, { reload: true });
+          $injector.get('$log').info('your session has timed out');
         }
         return $q.reject(rejection);
       }
