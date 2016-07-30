@@ -3,7 +3,6 @@ package org.biobank.service.users
 import akka.actor._
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import org.biobank.TestData
-import org.biobank.domain._
 import org.biobank.domain.user._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
@@ -97,7 +96,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
     case cmd => log.error(s"UsersProcessor: message not handled: $cmd")
   }
 
-  private def registerUserCmdToEvent(cmd: RegisterUserCmd): DomainValidation[UserEvent] = {
+  private def registerUserCmdToEvent(cmd: RegisterUserCmd): ServiceValidation[UserEvent] = {
     val salt = passwordHasher.generateSalt
     val encryptedPwd = passwordHasher.encrypt(cmd.password, salt)
 
@@ -122,7 +121,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   private def activateCmdToEvent(cmd:  ActivateUserCmd,
-                                  user: RegisteredUser): DomainValidation[UserEvent] = {
+                                  user: RegisteredUser): ServiceValidation[UserEvent] = {
     user.activate.map { _ =>
       UserEvent(user.id.id).update(
         _.optionalUserId    := cmd.userId,
@@ -132,7 +131,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   private def updateNameCmdToEvent(cmd:  UpdateUserNameCmd,
-                                    user: ActiveUser): DomainValidation[UserEvent] = {
+                                    user: ActiveUser): ServiceValidation[UserEvent] = {
     user.withName(cmd.name).map { _ =>
       UserEvent(user.id.id).update(
         _.optionalUserId      := cmd.userId,
@@ -143,7 +142,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   private def updateEmailCmdToEvent(cmd:  UpdateUserEmailCmd,
-                                     user: ActiveUser): DomainValidation[UserEvent] = {
+                                     user: ActiveUser): ServiceValidation[UserEvent] = {
     for {
       emailAvailable <- emailAvailable(cmd.email, user.id)
       updatedUser    <- user.withEmail(cmd.email)
@@ -155,7 +154,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   private def updatePasswordCmdToEvent(cmd:  UpdateUserPasswordCmd,
-                                        user: ActiveUser): DomainValidation[UserEvent] = {
+                                        user: ActiveUser): ServiceValidation[UserEvent] = {
     if (passwordHasher.valid(user.password, user.salt, cmd.currentPassword)) {
       val passwordInfo = encryptPassword(user, cmd.newPassword)
       user.withPassword(passwordInfo.password, passwordInfo.salt).map { user =>
@@ -172,7 +171,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   private def updateAvatarUrlCmdToEvent(cmd:  UpdateUserAvatarUrlCmd,
-                                         user: ActiveUser): DomainValidation[UserEvent] = {
+                                         user: ActiveUser): ServiceValidation[UserEvent] = {
     user.withAvatarUrl(cmd.avatarUrl).map { _ =>
       UserEvent(user.id.id).update(
         _.optionalUserId                     := cmd.userId,
@@ -185,7 +184,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   /**
    * only active users can request a password reset
    */
-  private def resetUserPasswordCmdToEvent(cmd: ResetUserPasswordCmd): DomainValidation[UserEvent] = {
+  private def resetUserPasswordCmdToEvent(cmd: ResetUserPasswordCmd): ServiceValidation[UserEvent] = {
     val plainPassword = Utils.randomString(8)
     for {
       user <- userRepository.getByEmail(cmd.email)
@@ -207,7 +206,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   private def lockUserCmdToEvent(cmd:  LockUserCmd,
-                                  user: ActiveUser): DomainValidation[UserEvent] = {
+                                  user: ActiveUser): ServiceValidation[UserEvent] = {
     user.lock.map { _ =>
       UserEvent(user.id.id).update(
         _.optionalUserId := cmd.userId,
@@ -217,7 +216,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   private def unlockUserCmdToEvent(cmd: UnlockUserCmd,
-                                    user: LockedUser): DomainValidation[UserEvent] = {
+                                    user: LockedUser): ServiceValidation[UserEvent] = {
     user.unlock.map { _ =>
       UserEvent(user.id.id).update(
         _.optionalUserId := cmd.userId,
@@ -228,7 +227,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
 
   private def processUpdateCmd[T <: UserModifyCommand]
     (cmd:           T,
-     validateCmd:   (T, User) => DomainValidation[UserEvent],
+     validateCmd:   (T, User) => ServiceValidation[UserEvent],
      applyEvent:    UserEvent => Unit): Unit = {
     val event = for {
         user         <- userRepository.getByKey(UserId(cmd.id))
@@ -241,10 +240,10 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
 
   private def processUpdateCmdOnRegisteredUser[T <: UserModifyCommand]
     (cmd:           T,
-     validateCmd:   (T, RegisteredUser) => DomainValidation[UserEvent],
+     validateCmd:   (T, RegisteredUser) => ServiceValidation[UserEvent],
      applyEvent:    UserEvent => Unit): Unit = {
 
-    def udpateOnRegisteredUser(cmd: T, user: User): DomainValidation[UserEvent] = {
+    def udpateOnRegisteredUser(cmd: T, user: User): ServiceValidation[UserEvent] = {
       user match {
         case u: RegisteredUser => validateCmd(cmd, u)
         case _ => InvalidStatus(s"user not registered: ${cmd.id}").failureNel[UserEvent]
@@ -256,10 +255,10 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
 
   private def processUpdateCmdOnActiveUser[T <: UserModifyCommand]
     (cmd:           T,
-     validateCmd:   (T, ActiveUser) => DomainValidation[UserEvent],
+     validateCmd:   (T, ActiveUser) => ServiceValidation[UserEvent],
      applyEvent:    UserEvent => Unit): Unit = {
 
-    def udpateOnActiveUser(cmd: T, user: User): DomainValidation[UserEvent] = {
+    def udpateOnActiveUser(cmd: T, user: User): ServiceValidation[UserEvent] = {
       user match {
         case u: ActiveUser => validateCmd(cmd, u)
         case _ => InvalidStatus(s"user not active: ${cmd.id}").failureNel[UserEvent]
@@ -271,10 +270,10 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
 
   private def processUpdateCmdOnLockedUser[T <: UserModifyCommand]
     (cmd:           T,
-     validateCmd:   (T, LockedUser) => DomainValidation[UserEvent],
+     validateCmd:   (T, LockedUser) => ServiceValidation[UserEvent],
      applyEvent:    UserEvent => Unit): Unit = {
 
-    def udpateOnLockedUser(cmd: T, user: User): DomainValidation[UserEvent] = {
+    def udpateOnLockedUser(cmd: T, user: User): ServiceValidation[UserEvent] = {
       user match {
         case u: LockedUser => validateCmd(cmd, u)
         case _ => InvalidStatus(s"user not locked: ${cmd.id}").failureNel[UserEvent]
@@ -312,7 +311,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   private def onValidEventUserAndVersion(event: UserEvent,
                                          eventType: Boolean,
                                          eventVersion: Long)
-                                        (applyEvent: (User, DateTime) => DomainValidation[Boolean])
+                                        (applyEvent: (User, DateTime) => ServiceValidation[Boolean])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -339,12 +338,12 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
                                                    eventType: Boolean,
                                                    eventVersion: Long)
                                                   (applyEvent: (RegisteredUser,
-                                                                DateTime) => DomainValidation[Boolean])
+                                                                DateTime) => ServiceValidation[Boolean])
       : Unit = {
     onValidEventUserAndVersion(event, eventType, eventVersion) { (user, eventTime) =>
       user match {
         case user: RegisteredUser => applyEvent(user, eventTime)
-        case user => DomainError(s"user not registered: $event").failureNel[Boolean]
+        case user => ServiceError(s"user not registered: $event").failureNel[Boolean]
       }
     }
   }
@@ -353,12 +352,12 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
                                                eventType: Boolean,
                                                eventVersion: Long)
                                               (applyEvent: (ActiveUser,
-                                                            DateTime) => DomainValidation[Boolean])
+                                                            DateTime) => ServiceValidation[Boolean])
       : Unit = {
     onValidEventUserAndVersion(event, eventType, eventVersion) { (user, eventTime) =>
       user match {
         case user: ActiveUser => applyEvent(user, eventTime)
-        case user => DomainError(s"user not active: $event").failureNel[Boolean]
+        case user => ServiceError(s"user not active: $event").failureNel[Boolean]
       }
     }
   }
@@ -367,12 +366,12 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
                                                eventType: Boolean,
                                                eventVersion: Long)
                                                   (applyEvent: (LockedUser,
-                                                                DateTime) => DomainValidation[Boolean])
+                                                                DateTime) => ServiceValidation[Boolean])
       : Unit = {
     onValidEventUserAndVersion(event, eventType, eventVersion) { (user, eventTime) =>
       user match {
         case user: LockedUser => applyEvent(user, eventTime)
-        case user => DomainError(s"user not locked: $event").failureNel[Boolean]
+        case user => ServiceError(s"user not locked: $event").failureNel[Boolean]
       }
     }
   }
@@ -461,7 +460,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
    *  Searches the repository for a matching item.
    */
   private def emailAvailableMatcher(email: String)(matcher: User => Boolean)
-      : DomainValidation[Boolean] = {
+      : ServiceValidation[Boolean] = {
     val exists = userRepository.getValues.exists { item =>
         matcher(item)
       }
@@ -471,14 +470,14 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  private def emailAvailable(email: String): DomainValidation[Boolean] = {
+  private def emailAvailable(email: String): ServiceValidation[Boolean] = {
     emailAvailableMatcher(email){ item =>
       item.email == email
     }
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  private def emailAvailable(email: String, excludeUserId: UserId): DomainValidation[Boolean] = {
+  private def emailAvailable(email: String, excludeUserId: UserId): ServiceValidation[Boolean] = {
     emailAvailableMatcher(email){ item =>
       (item.email == email) && (item.id != excludeUserId)
     }

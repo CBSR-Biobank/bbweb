@@ -2,9 +2,8 @@ package org.biobank.controllers.participants
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
-import org.biobank.domain.DomainError
 import org.biobank.domain.participants.Specimen
-import org.biobank.service.AuthToken
+import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
 import org.biobank.service.participants.SpecimensService
 import org.biobank.service.users.UsersService
 import play.api.libs.json._
@@ -29,12 +28,12 @@ class SpecimensController @Inject() (val env:          Environment,
    */
   def get(id: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      domainValidationReply(service.get(id))
+      validationReply(service.get(id))
     }
 
   def getByInventoryId(invId: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      domainValidationReply(service.getByInventoryId(invId))
+      validationReply(service.getByInventoryId(invId))
     }
 
   def list(ceventId:      String,
@@ -55,7 +54,7 @@ class SpecimensController @Inject() (val env:          Environment,
       val pagedQuery = PagedQuery(page, pageSize, order)
 
       val validation = for {
-          sortFunc    <- Specimen.sort2Compare.get(sort).toSuccessNel(DomainError(s"invalid sort field: $sort"))
+          sortFunc    <- Specimen.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
           sortOrder   <- pagedQuery.getSortOrder
           specimens   <- service.list(ceventId, sortFunc, sortOrder)
           page        <- pagedQuery.getPage(PageSizeMax, specimens.size)
@@ -72,7 +71,7 @@ class SpecimensController @Inject() (val env:          Environment,
   def addSpecimens(ceventId: String) =
     commandAction(Json.obj("collectionEventId" -> ceventId)) { cmd: AddSpecimensCmd =>
       val future = service.processCommand(cmd)
-      domainValidationReply(future)
+      validationReply(future)
     }
 
   def removeSpecimen(ceventId: String, spcId: String, ver: Long) =
@@ -83,7 +82,7 @@ class SpecimensController @Inject() (val env:          Environment,
           collectionEventId     = ceventId,
           expectedVersion       = ver)
       val future = service.processRemoveCommand(cmd)
-      domainValidationReply(future)
+      validationReply(future)
     }
 
 }

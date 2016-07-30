@@ -5,14 +5,14 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
-import org.biobank.domain._
+import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
-import org.biobank.domain.centre.CentreRepository
 import org.biobank.dto.SpecimenDto
 import org.biobank.infrastructure.command.SpecimenCommands._
 import org.biobank.infrastructure.event.SpecimenEvents._
 import org.biobank.infrastructure.{ SortOrder, AscendingOrder }
+import org.biobank.service.{ServiceError, ServiceValidation}
 import org.slf4j.LoggerFactory
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
@@ -23,18 +23,18 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[SpecimensServiceImpl])
 trait SpecimensService {
 
-  def get(specimenId: String): DomainValidation[Specimen]
+  def get(specimenId: String): ServiceValidation[Specimen]
 
-  def getByInventoryId(inventoryId: String): DomainValidation[Specimen]
+  def getByInventoryId(inventoryId: String): ServiceValidation[Specimen]
 
   def list(collectionEventId: String,
            sortFunc:          (Specimen, Specimen) => Boolean,
            order:             SortOrder)
-      : DomainValidation[Seq[SpecimenDto]]
+      : ServiceValidation[Seq[SpecimenDto]]
 
-  def processCommand(cmd: SpecimenCommand): Future[DomainValidation[CollectionEvent]]
+  def processCommand(cmd: SpecimenCommand): Future[ServiceValidation[CollectionEvent]]
 
-  def processRemoveCommand(cmd: SpecimenCommand): Future[DomainValidation[Boolean]]
+  def processRemoveCommand(cmd: SpecimenCommand): Future[ServiceValidation[Boolean]]
 
 }
 
@@ -55,7 +55,7 @@ class SpecimensServiceImpl @Inject() (
   private def convertToDto(collectionEventId: CollectionEventId,
                            ceventTypeId: CollectionEventTypeId,
                            specimen: Specimen)
-      : DomainValidation[SpecimenDto] = {
+      : ServiceValidation[SpecimenDto] = {
     for {
       ceventType         <- collectionEventTypeRepository.getByKey(ceventTypeId)
       specimenSpec       <- ceventType.specimenSpec(specimen.specimenSpecId)
@@ -83,21 +83,21 @@ class SpecimensServiceImpl @Inject() (
                         status             = specimen.getClass.getSimpleName)
   }
 
-  def get(specimenId: String): DomainValidation[Specimen] = {
+  def get(specimenId: String): ServiceValidation[Specimen] = {
     specimenRepository.getByKey(SpecimenId(specimenId)).leftMap(_ =>
-      DomainError(s"specimen id is invalid: $specimenId")).toValidationNel
+      ServiceError(s"specimen id is invalid: $specimenId")).toValidationNel
   }
 
-  def getByInventoryId(inventoryId: String): DomainValidation[Specimen] = {
+  def getByInventoryId(inventoryId: String): ServiceValidation[Specimen] = {
     specimenRepository.getByInventoryId(inventoryId)
   }
 
   def list(collectionEventId: String,
            sortFunc:          (Specimen, Specimen) => Boolean,
            order:             SortOrder)
-      : DomainValidation[Seq[SpecimenDto]] = {
+      : ServiceValidation[Seq[SpecimenDto]] = {
 
-    def getSpecimens(ceventId: CollectionEventId): DomainValidation[List[Specimen]] = {
+    def getSpecimens(ceventId: CollectionEventId): ServiceValidation[List[Specimen]] = {
       ceventSpecimenRepository.withCeventId(ceventId)
         .map { cs => {
                 val r = specimenRepository.getByKey(cs.specimenId)
@@ -121,24 +121,24 @@ class SpecimensServiceImpl @Inject() (
     }
   }
 
-  def processCommand(cmd: SpecimenCommand): Future[DomainValidation[CollectionEvent]] =
-    ask(processor, cmd).mapTo[DomainValidation[SpecimenEvent]].map { validation =>
+  def processCommand(cmd: SpecimenCommand): Future[ServiceValidation[CollectionEvent]] =
+    ask(processor, cmd).mapTo[ServiceValidation[SpecimenEvent]].map { validation =>
       for {
         event  <- validation
         cevent <- collectionEventRepository.getByKey(CollectionEventId(event.getAdded.getCollectionEventId))
       } yield cevent
     }
 
-  def processRemoveCommand(cmd: SpecimenCommand): Future[DomainValidation[Boolean]] =
-    ask(processor, cmd).mapTo[DomainValidation[SpecimenEvent]].map { validation =>
+  def processRemoveCommand(cmd: SpecimenCommand): Future[ServiceValidation[Boolean]] =
+    ask(processor, cmd).mapTo[ServiceValidation[SpecimenEvent]].map { validation =>
       for {
         event  <- validation
         result <- true.successNel[String]
       } yield result
     }
 
-  private def validCevent[T](ceventId: String)(fn: CollectionEvent => DomainValidation[T])
-      : DomainValidation[T] = {
+  private def validCevent[T](ceventId: String)(fn: CollectionEvent => ServiceValidation[T])
+      : ServiceValidation[T] = {
     for {
       cevent <- collectionEventRepository.getByKey(CollectionEventId(ceventId))
       result <- fn(cevent)

@@ -6,7 +6,6 @@ import akka.util.Timeout
 import com.google.inject.ImplementedBy
 import javax.inject._
 import org.biobank.ValidationKey
-import org.biobank.domain._
 import org.biobank.domain.user._
 import org.biobank.dto._
 import org.biobank.infrastructure._
@@ -33,15 +32,15 @@ trait UsersService {
                           status:      String,
                           sortFunc:    (User, User) => Boolean,
                           order:       SortOrder)
-      : DomainValidation[Seq[User]]
+      : ServiceValidation[Seq[User]]
 
-  def getUser(id: String): DomainValidation[User]
+  def getUser(id: String): ServiceValidation[User]
 
-  def getByEmail(email: String): DomainValidation[User]
+  def getByEmail(email: String): ServiceValidation[User]
 
-  def validatePassword(email: String, enteredPwd: String): DomainValidation[User]
+  def validatePassword(email: String, enteredPwd: String): ServiceValidation[User]
 
-  def processCommand(cmd: UserCommand): Future[DomainValidation[User]]
+  def processCommand(cmd: UserCommand): Future[ServiceValidation[User]]
 
 }
 
@@ -78,7 +77,7 @@ class UsersServiceImpl @javax.inject.Inject() (
                           status:      String,
                           sortFunc:    (User, User) => Boolean,
                           order:       SortOrder)
-      : DomainValidation[Seq[User]] = {
+      : ServiceValidation[Seq[User]] = {
     val allUsers = userRepository.getValues
 
     val usersFilteredByName = if (!nameFilter.isEmpty) {
@@ -119,16 +118,16 @@ class UsersServiceImpl @javax.inject.Inject() (
     }
   }
 
-  def getUser(id: String): DomainValidation[User] = {
+  def getUser(id: String): ServiceValidation[User] = {
     userRepository.getByKey(UserId(id))
       .leftMap(_ => IdNotFound(s"user with id does not exist: $id").nel)
   }
 
-  def getByEmail(email: String): DomainValidation[User] = {
+  def getByEmail(email: String): ServiceValidation[User] = {
     userRepository.getByEmail(email)
   }
 
-  def validatePassword(email: String, enteredPwd: String): DomainValidation[User] = {
+  def validatePassword(email: String, enteredPwd: String): ServiceValidation[User] = {
     for {
       user <- userRepository.getByEmail(email)
       validPwd <- {
@@ -139,8 +138,8 @@ class UsersServiceImpl @javax.inject.Inject() (
     } yield user
   }
 
-  def processCommand(cmd: UserCommand): Future[DomainValidation[User]] =
-    ask(processor, cmd).mapTo[DomainValidation[UserEvent]].map { validation =>
+  def processCommand(cmd: UserCommand): Future[ServiceValidation[User]] =
+    ask(processor, cmd).mapTo[ServiceValidation[UserEvent]].map { validation =>
       for {
         event <- validation
         user  <- userRepository.getByKey(UserId(event.id))

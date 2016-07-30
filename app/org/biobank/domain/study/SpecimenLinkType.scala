@@ -3,7 +3,6 @@ package org.biobank.domain.study
 import org.biobank.ValidationKey
 import org.biobank.domain.{
   ConcurrencySafeEntity,
-  //DomainError,
   DomainValidation
 }
 import org.biobank.infrastructure._

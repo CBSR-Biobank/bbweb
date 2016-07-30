@@ -3,15 +3,14 @@ package org.biobank.service.participants
 import akka.actor._
 import akka.persistence.SnapshotOffer
 import javax.inject.{Inject, Singleton}
-import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.domain.participants._
+import org.biobank.domain.processing.ProcessingEventInputSpecimenRepository
 import org.biobank.domain.study.{CollectionEventType, CollectionEventTypeRepository}
 import org.biobank.infrastructure.command.SpecimenCommands._
 import org.biobank.infrastructure.event.SpecimenEvents._
-import org.biobank.service.Processor
+import org.biobank.service.{Processor, ServiceError, ServiceValidation}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import org.biobank.domain.processing.ProcessingEventInputSpecimenRepository
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -98,7 +97,7 @@ class SpecimensProcessor @Inject() (
 
   }
 
-  private def addCmdToEvent(cmd: AddSpecimensCmd): DomainValidation[SpecimenEvent] = {
+  private def addCmdToEvent(cmd: AddSpecimensCmd): ServiceValidation[SpecimenEvent] = {
     for {
       collectionEvent <- collectionEventRepository.getByKey(CollectionEventId(cmd.collectionEventId))
       ceventType      <- collectionEventTypeRepository.getByKey(collectionEvent.collectionEventTypeId)
@@ -112,31 +111,31 @@ class SpecimensProcessor @Inject() (
         })
   }
 
-  private def moveCmdToEvent(cmd: MoveSpecimensCmd): DomainValidation[SpecimenEvent] = {
+  private def moveCmdToEvent(cmd: MoveSpecimensCmd): ServiceValidation[SpecimenEvent] = {
     ???
   }
 
   private def assignPositionCmdToEvent(cmd: SpecimenAssignPositionCmd,
                                         cevent:   CollectionEvent,
-                                        specimen: Specimen): DomainValidation[SpecimenEvent] = {
+                                        specimen: Specimen): ServiceValidation[SpecimenEvent] = {
     ???
   }
 
   private def removeAmountCmdToEvent(cmd: SpecimenRemoveAmountCmd,
                                       cevent:   CollectionEvent,
-                                      specimen: Specimen): DomainValidation[SpecimenEvent] = {
+                                      specimen: Specimen): ServiceValidation[SpecimenEvent] = {
     ???
   }
 
   private def updateUsableCmdToEvent(cmd: SpecimenUpdateUsableCmd,
                                       cevent:   CollectionEvent,
-                                      specimen: Specimen): DomainValidation[SpecimenEvent] = {
+                                      specimen: Specimen): ServiceValidation[SpecimenEvent] = {
     ???
   }
 
   private def removeCmdToEvent(cmd:      RemoveSpecimenCmd,
                                cevent:   CollectionEvent,
-                               specimen: Specimen): DomainValidation[SpecimenEvent] = {
+                               specimen: Specimen): ServiceValidation[SpecimenEvent] = {
     specimenHasNoChildren(specimen).map( _ =>
       SpecimenEvent(cmd.userId).update(
         _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
@@ -214,7 +213,7 @@ class SpecimensProcessor @Inject() (
 
   private def processUpdateCmd[T <: SpecimenModifyCommand](
     cmd: T,
-    validation: (T, CollectionEvent, Specimen) => DomainValidation[SpecimenEvent],
+    validation: (T, CollectionEvent, Specimen) => ServiceValidation[SpecimenEvent],
     applyEvent: SpecimenEvent => Unit): Unit = {
 
     val specimenId = SpecimenId(cmd.id)
@@ -231,7 +230,7 @@ class SpecimensProcessor @Inject() (
   }
 
   private def validateSpecimenInfo(specimenData: List[SpecimenInfo], ceventType: CollectionEventType)
-      : DomainValidation[Boolean] = {
+      : ServiceValidation[Boolean] = {
 
     val cmdSpecIds    = specimenData.map(s => s.specimenSpecId).toSet
     val ceventSpecIds = ceventType.specimenSpecs.map(s => s.uniqueId).toSet
@@ -246,7 +245,7 @@ class SpecimensProcessor @Inject() (
    * Returns success if none of the inventory IDs are found in the repository.
    *
    */
-  private def validateInventoryId(specimenData: List[SpecimenInfo]): DomainValidation[Boolean] = {
+  private def validateInventoryId(specimenData: List[SpecimenInfo]): ServiceValidation[Boolean] = {
     specimenData.map { info =>
       specimenRepository.getByInventoryId(info.inventoryId) fold (
         err => true.successNel[String],
@@ -255,14 +254,14 @@ class SpecimensProcessor @Inject() (
     }.sequenceU.map { x => true }
   }
 
-  private def validEventType(eventType: Boolean): DomainValidation[Boolean] =
+  private def validEventType(eventType: Boolean): ServiceValidation[Boolean] =
     if (eventType) true.successNel[String]
     else s"invalid event type".failureNel[Boolean]
 
-  private def specimenHasNoChildren(specimen: Specimen): DomainValidation[Boolean] = {
+  private def specimenHasNoChildren(specimen: Specimen): ServiceValidation[Boolean] = {
     val children = processingEventInputSpecimenRepository.withSpecimenId(specimen.id)
     if (children.isEmpty) true.successNel[String]
-    else DomainError(s"specimen has child specimens: ${specimen.id}").failureNel[Boolean]
+    else ServiceError(s"specimen has child specimens: ${specimen.id}").failureNel[Boolean]
   }
 
 

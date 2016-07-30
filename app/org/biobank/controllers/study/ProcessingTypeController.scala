@@ -20,9 +20,9 @@ class ProcessingTypeController @Inject() (val env:            Environment,
   def get(studyId: String, procTypeId: Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
       procTypeId.fold {
-        domainValidationReply(studiesService.processingTypesForStudy(studyId).map(_.toList))
+        validationReply(studiesService.processingTypesForStudy(studyId).map(_.toList))
       } { id =>
-        domainValidationReply(studiesService.processingTypeWithId(studyId, id))
+        validationReply(studiesService.processingTypeWithId(studyId, id))
       }
     }
 
@@ -40,12 +40,12 @@ class ProcessingTypeController @Inject() (val env:            Environment,
     AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveProcessingTypeCmd(Some(userId.id), studyId, id, ver)
     val future = studiesService.processRemoveProcessingTypeCommand(cmd)
-    domainValidationReply(future)
+    validationReply(future)
     }
 
   private def processCommand(cmd: StudyCommand) = {
     val future = studiesService.processProcessingTypeCommand(cmd)
-    domainValidationReply(future)
+    validationReply(future)
   }
 
 }

@@ -5,13 +5,13 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
-import org.biobank.domain.DomainValidation
 import org.biobank.domain.centre._
 import org.biobank.domain.study.StudyRepository
 import org.biobank.dto._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
+import org.biobank.service.ServiceValidation
 import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
@@ -28,15 +28,15 @@ trait CentresService {
 
   def getCentres[T <: Centre]
     (filter: String, status: String, sortFunc: (Centre, Centre) => Boolean, order: SortOrder)
-      : DomainValidation[Seq[Centre]]
+      : ServiceValidation[Seq[Centre]]
 
   def getCountsByStatus(): CentreCountsByStatus
 
   def getCentreNames(filter: String, order: SortOrder): Seq[NameDto]
 
-  def getCentre(id: String): DomainValidation[Centre]
+  def getCentre(id: String): ServiceValidation[Centre]
 
-  def processCommand(cmd: CentreCommand): Future[DomainValidation[Centre]]
+  def processCommand(cmd: CentreCommand): Future[ServiceValidation[Centre]]
 }
 
 /**
@@ -87,7 +87,7 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
                               status: String,
                               sortFunc: (Centre, Centre) => Boolean,
                               order: SortOrder)
-      : DomainValidation[Seq[Centre]] =  {
+      : ServiceValidation[Seq[Centre]] =  {
     val allCentres = centreRepository.getValues
 
     val centresFilteredByName = if (!filter.isEmpty) {
@@ -137,12 +137,12 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
     }
   }
 
-  def getCentre(id: String): DomainValidation[Centre] = {
+  def getCentre(id: String): ServiceValidation[Centre] = {
     centreRepository.getByKey(CentreId(id))
   }
 
-  def processCommand(cmd: CentreCommand): Future[DomainValidation[Centre]] =
-    ask(processor, cmd).mapTo[DomainValidation[CentreEvent]].map { validation =>
+  def processCommand(cmd: CentreCommand): Future[ServiceValidation[Centre]] =
+    ask(processor, cmd).mapTo[ServiceValidation[CentreEvent]].map { validation =>
       for {
         event <- validation
         centre <- centreRepository.getByKey(CentreId(event.id))

@@ -1,6 +1,5 @@
 package org.biobank.controllers.centres
 
-import org.biobank.domain.DomainError
 import org.biobank.controllers._
 import org.biobank.service._
 import org.biobank.service.users.UsersService
@@ -55,7 +54,7 @@ class CentresController @Inject() (val env:            Environment,
       val pagedQuery = PagedQuery(page, pageSize, order)
 
       val validation = for {
-          sortFunc    <- Centre.sort2Compare.get(sort).toSuccessNel(DomainError(s"invalid sort field: $sort"))
+          sortFunc    <- Centre.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
           sortOrder   <- pagedQuery.getSortOrder
           centres     <- centresService.getCentres[Centre](filter, status, sortFunc, sortOrder)
           page        <- pagedQuery.getPage(PageSizeMax, centres.size)
@@ -82,7 +81,7 @@ class CentresController @Inject() (val env:            Environment,
   }
 
   def query(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
-    domainValidationReply(centresService.getCentre(id))
+    validationReply(centresService.getCentre(id))
   }
 
   def add() = commandAction { cmd: AddCentreCmd => processCommand(cmd) }
@@ -123,7 +122,7 @@ class CentresController @Inject() (val env:            Environment,
 
   private def processCommand(cmd: CentreCommand) = {
     val future = centresService.processCommand(cmd)
-    domainValidationReply(future)
+    validationReply(future)
   }
 
 }

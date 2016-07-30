@@ -1,23 +1,11 @@
 package org.biobank.service.study
 
-import org.biobank.domain._
-import org.biobank.domain.study.{
-  //ProcessingType,
-  ProcessingTypeId,
-  ProcessingTypeRepository,
-  SpecimenLinkType,
-  SpecimenLinkTypeId,
-  SpecimenLinkTypeRepository,
-  //SpecimenGroup,
-  //SpecimenGroupId,
-  SpecimenGroupRepository
-}
-import org.biobank.service.Processor
-import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.StudyEvents._
-
 import akka.actor._
 import akka.persistence.SnapshotOffer
+import org.biobank.domain.study.{ProcessingTypeId, ProcessingTypeRepository, SpecimenLinkType, SpecimenLinkTypeId, SpecimenLinkTypeRepository, SpecimenGroupRepository }
+import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.service.{Processor, ServiceValidation}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -189,8 +177,8 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
 
   private def update
     (cmd: SpecimenLinkTypeModifyCommand)
-    (fn: SpecimenLinkType => DomainValidation[StudyEventOld])
-      : DomainValidation[StudyEventOld] = {
+    (fn: SpecimenLinkType => ServiceValidation[StudyEventOld])
+      : ServiceValidation[StudyEventOld] = {
     for {
       processingType <- processingTypeRepository.getByKey(ProcessingTypeId(cmd.processingTypeId))
       slt <- specimenLinkTypeRepository.withId(
@@ -275,13 +263,13 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
 
   // private def validSpecimenGroup(
   //   processingType: ProcessingType,
-  //   specimenGroupId : SpecimenGroupId): DomainValidation[Boolean] = {
+  //   specimenGroupId : SpecimenGroupId): ServiceValidation[Boolean] = {
 
-  //   def studyIdMatches(specimenGroup: SpecimenGroup): DomainValidation[Boolean] = {
+  //   def studyIdMatches(specimenGroup: SpecimenGroup): ServiceValidation[Boolean] = {
   //     if (specimenGroup.studyId == processingType.studyId) {
   //       true.success
   //     } else {
-  //       DomainError("specimen group in wrong study").failureNel
+  //       ServiceError("specimen group in wrong study").failureNel
   //     }
   //   }
 
@@ -295,11 +283,11 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
   // private def validateSpecimenGroupMatcher(
   //   inputGroupId: SpecimenGroupId,
   //   outputGroupId: SpecimenGroupId)(
-  //   matcher: SpecimenLinkType => Boolean): DomainValidation[Boolean] = {
+  //   matcher: SpecimenLinkType => Boolean): ServiceValidation[Boolean] = {
   //   val exists = specimenLinkTypeRepository.getValues.exists { slType => matcher(slType) }
 
   //   if (exists) {
-  //     DomainError("specimen link type with specimen groups already exists").failureNel
+  //     ServiceError("specimen link type with specimen groups already exists").failureNel
   //   } else {
   //     true.success
   //   }
@@ -307,7 +295,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
 
   // private def validateSpecimenGroups(
   //   inputGroupId: SpecimenGroupId,
-  //   outputGroupId: SpecimenGroupId): DomainValidation[Boolean] = {
+  //   outputGroupId: SpecimenGroupId): ServiceValidation[Boolean] = {
   //   validateSpecimenGroupMatcher(inputGroupId, outputGroupId) { slType =>
   //     (slType.inputGroupId == inputGroupId) && (slType.outputGroupId == outputGroupId)
   //   }
@@ -316,7 +304,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
   // private def validateSpecimenGroups(
   //   inputGroupId: SpecimenGroupId,
   //   outputGroupId: SpecimenGroupId,
-  //   specimenLinkTypeId: SpecimenLinkTypeId): DomainValidation[Boolean] = {
+  //   specimenLinkTypeId: SpecimenLinkTypeId): ServiceValidation[Boolean] = {
   //   validateSpecimenGroupMatcher(inputGroupId, outputGroupId) { slType =>
   //     (slType.id != specimenLinkTypeId) &&
   //     (slType.inputGroupId == inputGroupId) &&
@@ -324,7 +312,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
   //   }
   // }
 
-  def checkNotInUse(specimenLinkType: SpecimenLinkType): DomainValidation[SpecimenLinkType] = {
+  def checkNotInUse(specimenLinkType: SpecimenLinkType): ServiceValidation[SpecimenLinkType] = {
     // FIXME: this is a stub for now
     //
     // it needs to be replaced with the real check

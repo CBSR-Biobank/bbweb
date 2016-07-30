@@ -1,12 +1,10 @@
 package org.biobank.service
 
-import org.biobank.domain.DomainValidation
-import org.biobank.domain.user.UserId
-
-import javax.inject.{ Inject, Singleton }
 import com.google.inject.ImplementedBy
-import play.api.cache.CacheApi
+import javax.inject.{ Inject, Singleton }
+import org.biobank.domain.user.UserId
 import play.api.Environment
+import play.api.cache.CacheApi
 import scala.concurrent.duration._
 import scalaz.Scalaz._
 
@@ -22,7 +20,7 @@ trait AuthToken {
 
   def newToken(userId: UserId): String
 
-  def getUserId(token: String): DomainValidation[UserId]
+  def getUserId(token: String): ServiceValidation[UserId]
 
 }
 
@@ -50,7 +48,7 @@ class AuthTokenImpl @Inject() (val env: Environment, val cacheApi: CacheApi)
   /**
    *  If token is valid then the timeout is re-assigned on the cache.
    */
-  def getUserId(token: String): DomainValidation[UserId] = {
+  def getUserId(token: String): ServiceValidation[UserId] = {
     val userId = cacheApi.get[UserId](token).toSuccessNel(InvalidToken.toString)
     userId foreach { cacheApi.set(token, _, tokenExpirationTime) }
     userId

@@ -1,8 +1,8 @@
 package org.biobank.controllers.centres
 
-import org.biobank.controllers.{CommandController, JsonController, PagedQuery, PagedResults}
+import org.biobank.controllers.{CommandController, JsonController}
 import javax.inject.{Inject, Singleton}
-import org.biobank.service.AuthToken
+import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
 import org.biobank.service.centres.ShipmentsService
 import org.biobank.service.users.UsersService
 import play.api.{Environment, Logger}
@@ -69,7 +69,7 @@ class ShipmentsController @Inject() (val env:              Environment,
     }
 
   def get(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
-    domainValidationReply(shipmentsService.getShipment(id))
+    validationReply(shipmentsService.getShipment(id))
   }
 
   def listSpecimens(shipmentId:      String,
@@ -105,7 +105,7 @@ class ShipmentsController @Inject() (val env:              Environment,
 
   def getSpecimen(shipmentId: String, shipmentSpecimenId: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      domainValidationReply(shipmentsService.getShipmentSpecimen(shipmentId, shipmentSpecimenId))
+      validationReply(shipmentsService.getShipmentSpecimen(shipmentId, shipmentSpecimenId))
     }
 
   def add() = commandAction { cmd: AddShipmentCmd => processCommand(cmd) }
@@ -116,7 +116,7 @@ class ShipmentsController @Inject() (val env:              Environment,
                                   id              = shipmentId,
                                   expectedVersion = version)
       val future = shipmentsService.removeShipment(cmd)
-      domainValidationReply(future)
+      validationReply(future)
     }
 
   def updateCourier(id: String) =
@@ -157,7 +157,7 @@ class ShipmentsController @Inject() (val env:              Environment,
                                           id              = shipmentSpecimenId,
                                           expectedVersion = version)
       val future = shipmentsService.removeShipmentSpecimen(cmd)
-      domainValidationReply(future)
+      validationReply(future)
     }
 
   def specimenContainer(shipmentId: String, shipmentSpecimenId: String) =
@@ -182,11 +182,11 @@ class ShipmentsController @Inject() (val env:              Environment,
 
   private def processCommand(cmd: ShipmentCommand) = {
     val future = shipmentsService.processCommand(cmd)
-    domainValidationReply(future)
+    validationReply(future)
   }
 
   private def processSpecimenCommand(cmd: ShipmentSpecimenCommand) = {
     val future = shipmentsService.processShipmentSpecimenCommand(cmd)
-    domainValidationReply(future)
+    validationReply(future)
   }
 }

@@ -22,30 +22,30 @@ class SpecimenLinkTypeController @Inject() (val env:            Environment,
       Logger.debug(s"SpecimenLinkTypeController.get: processingTypeId: $processingTypeId, slTypeId: $slTypeId")
 
       slTypeId.fold {
-        domainValidationReply(
+        validationReply(
           studiesService.specimenLinkTypesForProcessingType(processingTypeId).map(_.toList))
       } { id =>
-        domainValidationReply(studiesService.specimenLinkTypeWithId(processingTypeId, id))
+        validationReply(studiesService.specimenLinkTypeWithId(processingTypeId, id))
       }
     }
 
   def addSpecimenLinkType(procTypeId: String) =
     commandAction(Json.obj("processingTypeId" -> procTypeId)) { cmd: AddSpecimenLinkTypeCmd =>
       val future = studiesService.processCommand(cmd)
-      domainValidationReply(future)
+      validationReply(future)
     }
 
   def updateSpecimenLinkType(procTypeId: String, id: String) =
     commandAction(Json.obj("processingTypeId" -> procTypeId, "id" -> id)) { cmd: UpdateSpecimenLinkTypeCmd =>
       val future = studiesService.processCommand(cmd)
-      domainValidationReply(future)
+      validationReply(future)
     }
 
   def removeSpecimenLinkType(processingTypeId: String, id: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveSpecimenLinkTypeCmd(Some(userId.id), processingTypeId, id, ver)
       val future = studiesService.processCommand(cmd)
-      domainValidationReply(future)
+      validationReply(future)
     }
 
 }

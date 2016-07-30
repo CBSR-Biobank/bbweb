@@ -143,8 +143,8 @@
 //     */
 //   def update
 //     (cmd: StudyAnnotationTypeModifyCommand)
-//     (fn: SpecimenLinkAnnotationType => DomainValidation[StudyEventOld])
-//       : DomainValidation[StudyEventOld] = {
+//     (fn: SpecimenLinkAnnotationType => ServiceValidation[StudyEventOld])
+//       : ServiceValidation[StudyEventOld] = {
 //     for {
 //       annotType    <- annotationTypeRepository.withId(StudyId(cmd.studyId), cmd.id)
 //       notInUse     <- checkNotInUse(annotType)
@@ -200,9 +200,9 @@
 //   }
 
 //   def checkNotInUse(annotationType: SpecimenLinkAnnotationType)
-//       : DomainValidation[SpecimenLinkAnnotationType] = {
+//       : ServiceValidation[SpecimenLinkAnnotationType] = {
 //     if (specimenLinkTypeRepository.annotationTypeInUse(annotationType)) {
-//       DomainError(s"annotation type is in use by specimen link type: ${annotationType.id}").failureNel
+//       ServiceError(s"annotation type is in use by specimen link type: ${annotationType.id}").failureNel
 //     } else {
 //       annotationType.success
 //     }

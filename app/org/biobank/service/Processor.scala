@@ -1,10 +1,9 @@
 package org.biobank.service
 
-import org.biobank.domain._
-
 import akka.actor.ActorLogging
 import akka.persistence.PersistentActor
 import com.trueaccord.scalapb.GeneratedMessage
+import org.biobank.domain._
 import scalaz.Scalaz._
 
 trait Processor extends PersistentActor with ActorLogging {
@@ -18,7 +17,7 @@ trait Processor extends PersistentActor with ActorLogging {
    *
    * TODO: convert to single parameter list
    */
-  protected def process[T <: GeneratedMessage](validation: DomainValidation[T])(successFn: T => Unit): Unit = {
+  protected def process[T <: GeneratedMessage](validation: ServiceValidation[T])(successFn: T => Unit): Unit = {
     val originalSender = context.sender
     validation.fold(
       err => {
@@ -37,9 +36,9 @@ trait Processor extends PersistentActor with ActorLogging {
   }
 
   protected def validNewIdentity[I <: IdentifiedValueObject[_], R <: ReadWriteRepository[I,_]](
-    id: I, repository: R): DomainValidation[I] = {
+    id: I, repository: R): ServiceValidation[I] = {
     if (repository.getByKey(id).isSuccess) {
-      DomainError(s"could not generate a unique ID: $id").failureNel[I]
+      ServiceError(s"could not generate a unique ID: $id").failureNel[I]
     } else {
       id.successNel[String]
     }
@@ -51,7 +50,7 @@ trait Processor extends PersistentActor with ActorLogging {
   protected def nameAvailableMatcher[T <: IdentifiedDomainObject[_]]
     (name: String, repository: ReadRepository[_, T], errMsgPrefix: String)
     (matcher: T => Boolean)
-      : DomainValidation[Boolean] = {
+      : ServiceValidation[Boolean] = {
     val exists = repository.getValues.exists { item =>
       matcher(item)
     }
@@ -63,9 +62,9 @@ trait Processor extends PersistentActor with ActorLogging {
     */
   protected def validateVersion[T <: ConcurrencySafeEntity[_]](
     item: T,
-    expectedVersion: Option[Long]): DomainValidation[Boolean] = {
+    expectedVersion: Option[Long]): ServiceValidation[Boolean] = {
     if (item.versionOption == expectedVersion) true.successNel[String]
-    else DomainError(s"version mismatch").failureNel[Boolean]
+    else ServiceError(s"version mismatch").failureNel[Boolean]
   }
 
 }

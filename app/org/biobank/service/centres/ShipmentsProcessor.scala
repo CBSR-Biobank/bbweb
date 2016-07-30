@@ -3,16 +3,14 @@ package org.biobank.service.centres
 import akka.actor._
 import akka.persistence.{ SnapshotOffer }
 import javax.inject.Inject
-//import org.biobank.TestData
-import org.biobank.domain.{DomainError, Location}
+import org.biobank.domain.Location
 import org.biobank.domain.centre._
 import org.biobank.domain.participants.SpecimenId
-import org.biobank.domain.{ DomainValidation }
 import org.biobank.infrastructure.command.ShipmentCommands._
 import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
 import org.biobank.infrastructure.event.ShipmentEvents._
 import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
-import org.biobank.service.Processor
+import org.biobank.service.{Processor, ServiceError, ServiceValidation}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import scalaz.Scalaz._
@@ -161,7 +159,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   }
 
   private def updateCourierNameCmdToEvent(cmd:      UpdateShipmentCourierNameCmd,
-                                          shipment: Shipment): DomainValidation[ShipmentEvent] = {
+                                          shipment: Shipment): ServiceValidation[ShipmentEvent] = {
     for {
       isCreated <- shipment.isCreated
       updated   <- shipment.withCourier(cmd.courierName)
@@ -173,7 +171,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   }
 
   private def updateTrackingNumberCmdToEvent(cmd: UpdateShipmentTrackingNumberCmd,
-                                             shipment: Shipment): DomainValidation[ShipmentEvent] = {
+                                             shipment: Shipment): ServiceValidation[ShipmentEvent] = {
     for {
       isCreated <- shipment.isCreated
       updated   <- shipment.withTrackingNumber(cmd.trackingNumber)
@@ -185,7 +183,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   }
 
   private def updateFromLocationCmdToEvent(cmd: UpdateShipmentFromLocationCmd,
-                                           shipment: Shipment): DomainValidation[ShipmentEvent] = {
+                                           shipment: Shipment): ServiceValidation[ShipmentEvent] = {
     for {
       isCreated   <- shipment.isCreated
       location    <- getLocation(cmd.locationId)
@@ -198,7 +196,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   }
 
   private def updateToLocationCmdToEvent(cmd: UpdateShipmentToLocationCmd,
-                                         shipment: Shipment): DomainValidation[ShipmentEvent] = {
+                                         shipment: Shipment): ServiceValidation[ShipmentEvent] = {
     for {
       isCreated   <- shipment.isCreated
       location    <- getLocation(cmd.locationId)
@@ -211,7 +209,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   }
 
   private def packedCmdToEvent(cmd: ShipmentPackedCmd,
-                               shipment: Shipment): DomainValidation[ShipmentEvent] = {
+                               shipment: Shipment): ServiceValidation[ShipmentEvent] = {
     shipment.packed(cmd.time).map { _ =>
       ShipmentEvent(shipment.id.id).update(
         _.userId                 := cmd.userId,
@@ -222,7 +220,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   }
 
   private def sentCmdToEvent(cmd: ShipmentSentCmd,
-                             shipment: Shipment): DomainValidation[ShipmentEvent] = {
+                             shipment: Shipment): ServiceValidation[ShipmentEvent] = {
     shipment.sent(cmd.time).map { _ =>
       ShipmentEvent(shipment.id.id).update(
         _.userId               := cmd.userId,
@@ -233,7 +231,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   }
 
   private def recivedCmdToEvent(cmd: ShipmentReceivedCmd,
-                                shipment: Shipment): DomainValidation[ShipmentEvent] = {
+                                shipment: Shipment): ServiceValidation[ShipmentEvent] = {
     shipment.received(cmd.time).map { _ =>
       ShipmentEvent(shipment.id.id).update(
         _.userId                   := cmd.userId,
@@ -244,7 +242,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   }
 
   private def unpackedCmdToEvent(cmd: ShipmentUnpackedCmd,
-                                   shipment: Shipment): DomainValidation[ShipmentEvent] = {
+                                   shipment: Shipment): ServiceValidation[ShipmentEvent] = {
     shipment.unpacked(cmd.time).map { _ =>
       ShipmentEvent(shipment.id.id).update(
         _.userId                   := cmd.userId,
@@ -255,7 +253,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   }
 
   private def lostCmdToEvent(cmd: ShipmentLostCmd,
-                             shipment: Shipment): DomainValidation[ShipmentEvent] = {
+                             shipment: Shipment): ServiceValidation[ShipmentEvent] = {
     shipment.lost.map { _ =>
       ShipmentEvent(shipment.id.id).update(
         _.userId       := cmd.userId,
@@ -265,14 +263,14 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   }
 
   private def removeCmdToEvent(cmd: ShipmentRemoveCmd, shipment: Shipment)
-      : DomainValidation[ShipmentEvent] = {
+      : ServiceValidation[ShipmentEvent] = {
     val shipmentId = ShipmentId(cmd.id)
     for {
       shipment     <- shipmentRepository.getByKey(shipmentId)
       isCreated    <- shipment.isCreated
       hasSpecimens <- {
         if (shipmentSpecimenRepository.allForShipment(shipmentId).isEmpty) true.successNel[String]
-        else DomainError(s"shipment has specimens, remove specimens first").failureNel[Boolean]
+        else ServiceError(s"shipment has specimens, remove specimens first").failureNel[Boolean]
       }
     } yield ShipmentEvent(shipment.id.id).update(
       _.userId          := cmd.userId,
@@ -281,7 +279,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   }
 
   private def addSpecimenCmdToEvent(cmd : ShipmentSpecimenAddCmd)
-      : DomainValidation[ShipmentSpecimenEvent] = {
+      : ServiceValidation[ShipmentSpecimenEvent] = {
     val shipmentId = ShipmentId(cmd.shipmentId)
     for {
       shipment  <- shipmentRepository.getByKey(shipmentId)
@@ -305,7 +303,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   private def removeSpecimenCmdToEvent(cmd:              ShipmentSpecimenRemoveCmd,
                                        shipment:         Shipment,
                                        shipmentSpecimen: ShipmentSpecimen)
-      : DomainValidation[ShipmentSpecimenEvent] = {
+      : ServiceValidation[ShipmentSpecimenEvent] = {
     val shipmentId = ShipmentId(cmd.shipmentId)
     for {
       shipment  <- shipmentRepository.getByKey(shipmentId)
@@ -320,7 +318,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   private def updateSpecimenContainerCmdToEvent(cmd :             ShipmentSpecimenUpdateContainerCmd,
                                                 shipment:         Shipment,
                                                 shipmentSpecimen: ShipmentSpecimen)
-      : DomainValidation[ShipmentSpecimenEvent] = {
+      : ServiceValidation[ShipmentSpecimenEvent] = {
     val shipmentContainerId = cmd.shipmentContainerId.map(ShipmentContainerId.apply)
 
     shipmentSpecimen.withShipmentContainer(shipmentContainerId) map { _ =>
@@ -335,7 +333,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   private def specimenReceivedCmdToEvent(cmd :             ShipmentSpecimenReceivedCmd,
                                          shipment:         Shipment,
                                          shipmentSpecimen: ShipmentSpecimen)
-      : DomainValidation[ShipmentSpecimenEvent] = {
+      : ServiceValidation[ShipmentSpecimenEvent] = {
     for {
       isUnpacked <- shipment.isUnpacked
       received   <- shipmentSpecimen.received
@@ -348,7 +346,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   private def specimenMissingCmdToEvent(cmd :             ShipmentSpecimenMissingCmd,
                                         shipment:         Shipment,
                                         shipmentSpecimen: ShipmentSpecimen)
-      : DomainValidation[ShipmentSpecimenEvent] = {
+      : ServiceValidation[ShipmentSpecimenEvent] = {
     for {
       isUnpacked <- shipment.isUnpacked
       missing    <- shipmentSpecimen.missing
@@ -361,7 +359,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   private def specimenExtraCmdToEvent(cmd :             ShipmentSpecimenExtraCmd,
                                       shipment:         Shipment,
                                       shipmentSpecimen: ShipmentSpecimen)
-      : DomainValidation[ShipmentSpecimenEvent] = {
+      : ServiceValidation[ShipmentSpecimenEvent] = {
     for {
       isUnpacked <- shipment.isUnpacked
       extra      <- shipmentSpecimen.extra
@@ -580,7 +578,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
 
   def processUpdateCmd[T <: ShipmentModifyCommand]
     (cmd: T,
-     cmdToEvent: (T, Shipment) => DomainValidation[ShipmentEvent],
+     cmdToEvent: (T, Shipment) => ServiceValidation[ShipmentEvent],
      applyEvent: ShipmentEvent => Unit): Unit = {
     val event = for {
         shipment     <- shipmentRepository.getByKey(ShipmentId(cmd.id))
@@ -592,7 +590,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
 
   def processSpecimenUpdateCmd[T <: ShipmentSpecimenModifyCommand]
     (cmd: T,
-     cmdToEvent: (T, Shipment, ShipmentSpecimen) => DomainValidation[ShipmentSpecimenEvent],
+     cmdToEvent: (T, Shipment, ShipmentSpecimen) => ServiceValidation[ShipmentSpecimenEvent],
      applyEvent: ShipmentSpecimenEvent => Unit): Unit = {
     val event = for {
         shipmentSpecimen <- shipmentSpecimenRepository.getByKey(ShipmentSpecimenId(cmd.id))
@@ -609,7 +607,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                                      eventVersion: Long)
                                     (applyEvent:  (Shipment,
                                                    ShipmentEvent,
-                                                   DateTime) => DomainValidation[Boolean])
+                                                   DateTime) => ServiceValidation[Boolean])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -637,7 +635,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                                              eventVersion: Long)
                                             (applyEvent:  (ShipmentSpecimen,
                                                            ShipmentSpecimenEvent,
-                                                           DateTime) => DomainValidation[Boolean])
+                                                           DateTime) => ServiceValidation[Boolean])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -660,7 +658,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     }
   }
 
-  private def getLocation(locationId: String): DomainValidation[Location] = {
+  private def getLocation(locationId: String): ServiceValidation[Location] = {
     for {
       centre      <- centreRepository.getByLocationId(locationId)
       location    <- centre.locationWithId(locationId)

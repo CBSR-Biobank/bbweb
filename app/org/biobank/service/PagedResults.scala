@@ -1,13 +1,11 @@
-package org.biobank.controllers
-
-import org.biobank.domain.{ DomainError, DomainValidation }
+package org.biobank.service
 
 import play.api.libs.json._
 import org.slf4j.LoggerFactory
 import scalaz.Scalaz._
 
 /**
-  * Defines a Page of elements.
+  * Defines a Page of items.
   *
   * @param items items in the page
   * @param page page number. Starts at page 1.
@@ -30,13 +28,13 @@ object PagedResults {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  def create[T](items: Seq[T], page: Int, pageSize: Int): DomainValidation[PagedResults[T]]= {
+  def create[T](items: Seq[T], page: Int, pageSize: Int): ServiceValidation[PagedResults[T]]= {
     if (items.isEmpty) {
       PagedResults.createEmpty[T](page, pageSize).successNel[String]
     } else {
       val offset = pageSize * (page - 1)
       if ((offset > 0) && (offset >= items.size)) {
-        DomainError(s"invalid page requested: ${page}").failureNel[PagedResults[T]]
+        ServiceError(s"invalid page requested: ${page}").failureNel[PagedResults[T]]
       } else {
         log.debug(s"PagedResults.create: page:$page, pageSize: $pageSize, offset: $offset")
         PagedResults(items    = items.drop(offset).take(pageSize),

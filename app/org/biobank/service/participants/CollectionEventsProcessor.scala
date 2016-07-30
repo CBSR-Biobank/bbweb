@@ -5,11 +5,11 @@ import akka.persistence.SnapshotOffer
 import javax.inject.Inject
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
-import org.biobank.domain.{ Annotation, DomainValidation }
+import org.biobank.domain.Annotation
 import org.biobank.infrastructure.command.CollectionEventCommands._
 import org.biobank.infrastructure.event.CollectionEventEvents._
 import org.biobank.infrastructure.event.CommonEvents._
-import org.biobank.service.Processor
+import org.biobank.service.{Processor, ServiceValidation}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import scalaz.Scalaz._
@@ -92,7 +92,7 @@ class CollectionEventsProcessor @Inject() (
 
   }
 
-  private def addCmdToEvent(cmd:AddCollectionEventCmd): DomainValidation[CollectionEventEvent] = {
+  private def addCmdToEvent(cmd:AddCollectionEventCmd): ServiceValidation[CollectionEventEvent] = {
     val participantId = ParticipantId(cmd.participantId)
     val collectionEventTypeId = CollectionEventTypeId(cmd.collectionEventTypeId)
     val annotationsSet = cmd.annotations.toSet
@@ -127,7 +127,7 @@ class CollectionEventsProcessor @Inject() (
                                           participant:         Participant,
                                           collectionEventType: CollectionEventType,
                                           cevent:              CollectionEvent)
-      : DomainValidation[CollectionEventEvent] = {
+      : ServiceValidation[CollectionEventEvent] = {
     for {
       visitNumberAvailable <- visitNumberAvailable(participant.id, cmd.visitNumber, cevent.id)
       updatedCevent        <- cevent.withVisitNumber(cmd.visitNumber)
@@ -144,7 +144,7 @@ class CollectionEventsProcessor @Inject() (
                                             participant:         Participant,
                                             collectionEventType: CollectionEventType,
                                             cevent:              CollectionEvent)
-      : DomainValidation[CollectionEventEvent] = {
+      : ServiceValidation[CollectionEventEvent] = {
     cevent.withTimeCompleted(cmd.timeCompleted).map { updatedCevent =>
       CollectionEventEvent(updatedCevent.id.id).update(
         _.participantId                      := participant.id.id,
@@ -160,7 +160,7 @@ class CollectionEventsProcessor @Inject() (
                                          participant:         Participant,
                                          collectionEventType: CollectionEventType,
                                          cevent:              CollectionEvent)
-      : DomainValidation[CollectionEventEvent] = {
+      : ServiceValidation[CollectionEventEvent] = {
     for {
       annotation      <- Annotation.create(cmd.annotationTypeId,
                                            cmd.stringValue,
@@ -183,7 +183,7 @@ class CollectionEventsProcessor @Inject() (
                                          participant:         Participant,
                                          collectionEventType: CollectionEventType,
                                          cevent:              CollectionEvent)
-      : DomainValidation[CollectionEventEvent] = {
+      : ServiceValidation[CollectionEventEvent] = {
     for {
       annotType <- {
         collectionEventType.annotationTypes
@@ -208,7 +208,7 @@ class CollectionEventsProcessor @Inject() (
                                participant:         Participant,
                                collectionEventType: CollectionEventType,
                                cevent:              CollectionEvent)
-      : DomainValidation[CollectionEventEvent] = {
+      : ServiceValidation[CollectionEventEvent] = {
     CollectionEventEvent(cevent.id.id).update(
       _.participantId         := participant.id.id,
       _.collectionEventTypeId := cevent.collectionEventTypeId.id,
@@ -222,7 +222,7 @@ class CollectionEventsProcessor @Inject() (
     validation: (T,
                  Participant,
                  CollectionEventType,
-                 CollectionEvent) => DomainValidation[CollectionEventEvent],
+                 CollectionEvent) => ServiceValidation[CollectionEventEvent],
     applyEvent: CollectionEventEvent => Unit): Unit = {
     val event = for {
         cevent              <- collectionEventRepository.getByKey(CollectionEventId(cmd.id))
@@ -237,7 +237,7 @@ class CollectionEventsProcessor @Inject() (
   }
 
   private def studyIdsMatch(participant: Participant, collectionEventType: CollectionEventType)
-      : DomainValidation[Boolean] =  {
+      : ServiceValidation[Boolean] =  {
     if (participant.studyId == collectionEventType.studyId) true.successNel[String]
     else EntityCriteriaError(s"participant and collection event type not in the same study").failureNel[Boolean]
   }
@@ -270,7 +270,7 @@ class CollectionEventsProcessor @Inject() (
   private def onValidEventAndVersion(event:        CollectionEventEvent,
                                      eventType:    Boolean,
                                      eventVersion: Long)
-                                    (applyEvent: (CollectionEvent, DateTime) => DomainValidation[Boolean])
+                                    (applyEvent: (CollectionEvent, DateTime) => ServiceValidation[Boolean])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -367,7 +367,7 @@ class CollectionEventsProcessor @Inject() (
    *  Searches the repository for a matching item.
    */
   protected def visitNumberAvailableMatcher(visitNumber: Int)(matcher: CollectionEvent => Boolean)
-      : DomainValidation[Boolean] = {
+      : ServiceValidation[Boolean] = {
     val exists = collectionEventRepository.getValues.exists { item =>
         matcher(item)
       }
@@ -380,7 +380,7 @@ class CollectionEventsProcessor @Inject() (
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   private def visitNumberAvailable(participantId: ParticipantId, visitNumber: Int)
-      : DomainValidation[Boolean] = {
+      : ServiceValidation[Boolean] = {
     visitNumberAvailableMatcher(visitNumber){ item =>
       (item.participantId == participantId) && (item.visitNumber == visitNumber)
     }
@@ -390,7 +390,7 @@ class CollectionEventsProcessor @Inject() (
   private def visitNumberAvailable(participantId: ParticipantId,
                                    visitNumber: Int,
                                    excludeCollectionEventId: CollectionEventId)
-      : DomainValidation[Boolean] = {
+      : ServiceValidation[Boolean] = {
     visitNumberAvailableMatcher(visitNumber){ item =>
       (item.participantId == participantId) && (item.visitNumber == visitNumber) && (item.id != excludeCollectionEventId)
     }

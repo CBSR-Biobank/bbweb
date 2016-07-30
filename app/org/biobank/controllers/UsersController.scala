@@ -1,10 +1,9 @@
 package org.biobank.controllers
 
 import javax.inject.{Inject, Singleton}
-import org.biobank.domain.DomainError
 import org.biobank.domain.user._
 import org.biobank.infrastructure.command.UserCommands._
-import org.biobank.service.AuthToken
+import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
 import org.biobank.service.study.StudiesService
 import org.biobank.service.users.UsersService
 import play.api.cache.CacheApi
@@ -133,7 +132,7 @@ class UsersController @Inject() (val env:            Environment,
       val pagedQuery = PagedQuery(page, pageSize, order)
 
       val validation = for {
-          sortFunc     <- User.sort2Compare.get(sort).toSuccessNel(DomainError(s"invalid sort field: $sort"))
+          sortFunc     <- User.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
            sortOrder   <- pagedQuery.getSortOrder
            users       <- usersService.getUsers[User](nameFilter, emailFilter, status, sortFunc, sortOrder)
            page        <- pagedQuery.getPage(PageSizeMax, users.size)
@@ -149,12 +148,12 @@ class UsersController @Inject() (val env:            Environment,
 
   /** Retrieves the user for the given id as JSON */
   def user(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
-    domainValidationReply(usersService.getUser(id))
+    validationReply(usersService.getUser(id))
   }
 
   private def processCommand(cmd: UserCommand) = {
     val future = usersService.processCommand(cmd)
-    domainValidationReply(future)
+    validationReply(future)
   }
 
   def registerUser() = Action.async(parse.json) { implicit request =>

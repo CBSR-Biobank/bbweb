@@ -1,24 +1,17 @@
 package org.biobank.controllers.study
 
-import org.biobank.controllers.{
-  CommandController,
-  JsonController,
-  PagedQuery,
-  PagedResults
-}
+import javax.inject.{Inject, Singleton}
+import org.biobank.controllers.{CommandController, ControllerError, JsonController}
 import org.biobank.domain._
-import org.biobank.service.users.UsersService
 import org.biobank.domain.study._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.service._
+import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
 import org.biobank.service.study.StudiesService
-import org.biobank.controllers.PagedResults._
-
-import javax.inject.{Inject, Singleton}
-import play.api.{ Environment, Logger }
-import play.api.mvc._
+import org.biobank.service.users.UsersService
 import play.api.libs.json._
+import play.api.mvc._
+import play.api.{ Environment, Logger }
 import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -62,7 +55,7 @@ class StudiesController @Inject() (val env:            Environment,
       val pagedQuery = PagedQuery(page, pageSize, order)
 
       val validation = for {
-          sortFunc    <- Study.sort2Compare.get(sort).toSuccessNel(DomainError(s"invalid sort field: $sort"))
+          sortFunc    <- Study.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
           sortOrder   <- pagedQuery.getSortOrder
           studies     <- studiesService.getStudies(filter, status, sortFunc, sortOrder)
           page        <- pagedQuery.getPage(PageSizeMax, studies.size)
@@ -89,7 +82,7 @@ class StudiesController @Inject() (val env:            Environment,
     }
 
   def get(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
-      domainValidationReply(studiesService.getStudy(id))
+      validationReply(studiesService.getStudy(id))
     }
 
   def centresForStudy(studyId: String) = AuthAction(parse.empty) { (token, userId, request) =>
@@ -167,7 +160,7 @@ class StudiesController @Inject() (val env:            Environment,
 
   private def processCommand(cmd: StudyCommand) = {
     val future = studiesService.processCommand(cmd)
-    domainValidationReply(future)
+    validationReply(future)
   }
 
 }

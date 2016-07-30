@@ -1,8 +1,7 @@
 package org.biobank.controllers
 
 import org.biobank.service.users.UsersService
-import org.biobank.domain.DomainValidation
-import org.biobank.service.AuthToken
+import org.biobank.service.{AuthToken, ServiceValidation}
 import org.biobank.infrastructure.command.Commands._
 
 import scala.concurrent.Future
@@ -107,7 +106,7 @@ trait JsonController extends Controller {
     }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  protected def domainValidationReply[T](validation: DomainValidation[T])
+  protected def validationReply[T](validation: ServiceValidation[T])
                                      (implicit writes: Writes[T]): Result = {
     validation.fold(
       err => {
@@ -125,15 +124,15 @@ trait JsonController extends Controller {
         }
       },
       reply => {
-        Log.trace(s"domainValidationReply: $reply")
+        Log.trace(s"validationReply: $reply")
         Ok(reply)
       }
     )
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  protected def domainValidationReply[T](future: Future[DomainValidation[T]])
+  protected def validationReply[T](future: Future[ServiceValidation[T]])
                                      (implicit writes: Writes[T]): Future[Result] =
-    future.map { validation => domainValidationReply(validation) }
+    future.map { validation => validationReply(validation) }
 
 }

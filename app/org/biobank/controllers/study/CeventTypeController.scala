@@ -22,9 +22,9 @@ class CeventTypeController @Inject() (val env:            Environment,
       Logger.debug(s"CeventTypeController.list: studyId: $studyId, ceventTypeId: $ceventTypeId")
 
       ceventTypeId.fold {
-        domainValidationReply(studiesService.collectionEventTypesForStudy(studyId).map(_.toList))
+        validationReply(studiesService.collectionEventTypesForStudy(studyId).map(_.toList))
       } { id =>
-        domainValidationReply(studiesService.collectionEventTypeWithId(studyId, id))
+        validationReply(studiesService.collectionEventTypeWithId(studyId, id))
       }
     }
 
@@ -36,7 +36,7 @@ class CeventTypeController @Inject() (val env:            Environment,
     AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveCollectionEventTypeCmd(Some(userId.id), studyId, id, ver)
       val future = studiesService.processRemoveCollectionEventTypeCommand(cmd)
-      domainValidationReply(future)
+      validationReply(future)
   }
 
   def updateName(id: String) =
@@ -91,11 +91,11 @@ class CeventTypeController @Inject() (val env:            Environment,
 
   def inUse(id: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      domainValidationReply(studiesService.collectionEventTypeInUse(id))
+      validationReply(studiesService.collectionEventTypeInUse(id))
     }
 
   private def processCommand(cmd: CollectionEventTypeCommand) = {
     val future = studiesService.processCollectionEventTypeCommand(cmd)
-    domainValidationReply(future)
+    validationReply(future)
   }
 }

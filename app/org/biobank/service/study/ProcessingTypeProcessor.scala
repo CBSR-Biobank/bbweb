@@ -1,18 +1,11 @@
 package org.biobank.service.study
 
-import org.biobank.domain._
-import org.biobank.domain.study.{
-  StudyId,
-  ProcessingType,
-  ProcessingTypeId,
-  ProcessingTypeRepository
-}
-import org.biobank.service.Processor
-import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.StudyEvents._
-
 import akka.actor._
 import akka.persistence.SnapshotOffer
+import org.biobank.domain.study.{StudyId, ProcessingType, ProcessingTypeId, ProcessingTypeRepository }
+import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.service.{Processor, ServiceValidation}
 import org.joda.time.format.ISODateTimeFormat
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -130,8 +123,8 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
 
   def update
     (cmd: ProcessingTypeModifyCommand)
-    (fn: ProcessingType => DomainValidation[StudyEventOld])
-      : DomainValidation[StudyEventOld] = {
+    (fn: ProcessingType => ServiceValidation[StudyEventOld])
+      : ServiceValidation[StudyEventOld] = {
     for {
       pt           <- processingTypeRepository.withId(StudyId(cmd.studyId), ProcessingTypeId(cmd.id))
       notInUse     <- checkNotInUse(pt)
@@ -198,7 +191,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
   val ErrMsgNameExists = "processing type with name already exists"
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  private def nameAvailable(name: String, studyId: StudyId): DomainValidation[Boolean] = {
+  private def nameAvailable(name: String, studyId: StudyId): ServiceValidation[Boolean] = {
     nameAvailableMatcher(name, processingTypeRepository, ErrMsgNameExists){ item =>
       (item.name == name) && (item.studyId == studyId)
     }
@@ -207,13 +200,13 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   private def nameAvailable(name: String,
                             studyId: StudyId,
-                            excludeId: ProcessingTypeId): DomainValidation[Boolean] = {
+                            excludeId: ProcessingTypeId): ServiceValidation[Boolean] = {
     nameAvailableMatcher(name, processingTypeRepository, ErrMsgNameExists){ item =>
       (item.name == name) && (item.studyId == studyId) && (item.id != excludeId)
     }
   }
 
-  def checkNotInUse(processingType: ProcessingType): DomainValidation[ProcessingType] = {
+  def checkNotInUse(processingType: ProcessingType): ServiceValidation[ProcessingType] = {
     // FIXME: this is a stub for now
     //
     // it needs to be replaced with the real check

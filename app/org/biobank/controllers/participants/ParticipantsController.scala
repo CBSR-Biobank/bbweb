@@ -21,13 +21,13 @@ class ParticipantsController @Inject() (val env:            Environment,
   def get(studyId: String, participantId: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
       Logger.debug(s"ParticipantsController.get: studyId: $studyId, participantId: $participantId")
-      domainValidationReply(participantsService.get(studyId, participantId))
+      validationReply(participantsService.get(studyId, participantId))
     }
 
   def getByUniqueId(studyId: String, uniqueId: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
       Logger.debug(s"ParticipantsController.getByUniqueId: studyId: $studyId, uniqueId: $uniqueId")
-      domainValidationReply(participantsService.getByUniqueId(studyId, uniqueId))
+      validationReply(participantsService.getByUniqueId(studyId, uniqueId))
     }
 
   def add(studyId: String) =
@@ -50,7 +50,7 @@ class ParticipantsController @Inject() (val env:            Environment,
 
   private def processCommand(cmd: ParticipantCommand) = {
     val future = participantsService.processCommand(cmd)
-    domainValidationReply(future)
+    validationReply(future)
   }
 
 }

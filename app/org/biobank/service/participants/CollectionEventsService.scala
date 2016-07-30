@@ -1,39 +1,38 @@
 package org.biobank.service.participants
 
-import org.biobank.infrastructure.{ SortOrder, AscendingOrder }
+import akka.actor._
+import akka.pattern.ask
+import akka.util.Timeout
+import com.google.inject.ImplementedBy
+import javax.inject.{Inject, Named}
+import org.biobank.domain.participants._
+import org.biobank.domain.study._
 import org.biobank.infrastructure.command.CollectionEventCommands._
 import org.biobank.infrastructure.event.CollectionEventEvents._
-import org.biobank.domain._
-import org.biobank.domain.study._
-import org.biobank.domain.participants._
-
-import javax.inject.{Inject, Named}
-import com.google.inject.ImplementedBy
-import akka.actor._
-import akka.util.Timeout
-import akka.pattern.ask
-import scala.concurrent._
-import scala.concurrent.duration._
+import org.biobank.infrastructure.{ SortOrder, AscendingOrder }
+import org.biobank.service.{ServiceError, ServiceValidation}
 import org.slf4j.LoggerFactory
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import scala.concurrent._
+import scala.concurrent.duration._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[CollectionEventsServiceImpl])
 trait CollectionEventsService {
 
-  def get(collectionEventId: String): DomainValidation[CollectionEvent]
+  def get(collectionEventId: String): ServiceValidation[CollectionEvent]
 
   def list(participantId: String,
            sortFunc: (CollectionEvent, CollectionEvent) => Boolean,
            order:    SortOrder)
-      : DomainValidation[Seq[CollectionEvent]]
+      : ServiceValidation[Seq[CollectionEvent]]
 
-  def getByVisitNumber(participantId: String, visitNumber: Int): DomainValidation[CollectionEvent]
+  def getByVisitNumber(participantId: String, visitNumber: Int): ServiceValidation[CollectionEvent]
 
-  def processCommand(cmd: CollectionEventCommand): Future[DomainValidation[CollectionEvent]]
+  def processCommand(cmd: CollectionEventCommand): Future[ServiceValidation[CollectionEvent]]
 
-  def processRemoveCommand(cmd: CollectionEventCommand): Future[DomainValidation[Boolean]]
+  def processRemoveCommand(cmd: CollectionEventCommand): Future[ServiceValidation[Boolean]]
 
 }
 
@@ -48,15 +47,15 @@ class CollectionEventsServiceImpl @Inject() (
 
   implicit val timeout: Timeout = 5.seconds
 
-  def get(collectionEventId: String): DomainValidation[CollectionEvent] = {
+  def get(collectionEventId: String): ServiceValidation[CollectionEvent] = {
     collectionEventRepository.getByKey(CollectionEventId(collectionEventId)).leftMap(_ =>
-      DomainError(s"collection event id is invalid: $collectionEventId")).toValidationNel
+      ServiceError(s"collection event id is invalid: $collectionEventId")).toValidationNel
   }
 
   def list(participantId: String,
            sortFunc:      (CollectionEvent, CollectionEvent) => Boolean,
            order:         SortOrder)
-      : DomainValidation[Seq[CollectionEvent]] = {
+      : ServiceValidation[Seq[CollectionEvent]] = {
     validParticipantId(participantId) { participant =>
       val result = collectionEventRepository
         .allForParticipant(ParticipantId(participantId))
@@ -72,14 +71,14 @@ class CollectionEventsServiceImpl @Inject() (
   }
 
   def getByVisitNumber(participantId: String, visitNumber: Int)
-      : DomainValidation[CollectionEvent] = {
+      : ServiceValidation[CollectionEvent] = {
     validParticipantId(participantId) { participant =>
       collectionEventRepository.withVisitNumber(ParticipantId(participantId), visitNumber)
     }
   }
 
-  private def validParticipantId[T](participantId: String)(fn: Participant => DomainValidation[T])
-      : DomainValidation[T] = {
+  private def validParticipantId[T](participantId: String)(fn: Participant => ServiceValidation[T])
+      : ServiceValidation[T] = {
     for {
       participant <- participantRepository.getByKey(ParticipantId(participantId))
       study       <- studyRepository.getByKey(participant.studyId)
@@ -87,16 +86,16 @@ class CollectionEventsServiceImpl @Inject() (
     } yield result
   }
 
-  def processCommand(cmd: CollectionEventCommand): Future[DomainValidation[CollectionEvent]] =
-    ask(processor, cmd).mapTo[DomainValidation[CollectionEventEvent]].map { validation =>
+  def processCommand(cmd: CollectionEventCommand): Future[ServiceValidation[CollectionEvent]] =
+    ask(processor, cmd).mapTo[ServiceValidation[CollectionEventEvent]].map { validation =>
       for {
         event  <- validation
         cevent <- collectionEventRepository.getByKey(CollectionEventId(event.id))
       } yield cevent
     }
 
-  def processRemoveCommand(cmd: CollectionEventCommand): Future[DomainValidation[Boolean]] =
-    ask(processor, cmd).mapTo[DomainValidation[CollectionEventEvent]].map { validation =>
+  def processRemoveCommand(cmd: CollectionEventCommand): Future[ServiceValidation[Boolean]] =
+    ask(processor, cmd).mapTo[ServiceValidation[CollectionEventEvent]].map { validation =>
       for {
         event  <- validation
         result <- true.successNel[String]

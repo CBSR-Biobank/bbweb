@@ -3,16 +3,12 @@ package org.biobank.service.participants
 import akka.actor._
 import akka.persistence.SnapshotOffer
 import javax.inject.Inject
-import org.biobank.domain.{
-  Annotation,
-  DomainValidation,
-  DomainError
-}
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
+import org.biobank.domain.Annotation
 import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.infrastructure.event.ParticipantEvents._
-import org.biobank.service.Processor
+import org.biobank.service.{Processor, ServiceError, ServiceValidation}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import scalaz.Scalaz._
@@ -84,7 +80,7 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
 
   val ErrMsgUniqueIdExists = "participant with unique ID already exists"
 
-  private def addCmdToEvent(cmd: AddParticipantCmd): DomainValidation[ParticipantEvent] = {
+  private def addCmdToEvent(cmd: AddParticipantCmd): ServiceValidation[ParticipantEvent] = {
     for {
       study             <- studyRepository.getEnabled(StudyId(cmd.studyId))
       participantId     <- validNewIdentity(participantRepository.nextIdentity, participantRepository)
@@ -105,7 +101,7 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
 
   private def updateUniqueIdCmdToEvent(cmd:         UpdateParticipantUniqueIdCmd,
                                        study:       Study,
-                                       participant: Participant): DomainValidation[ParticipantEvent] = {
+                                       participant: Participant): ServiceValidation[ParticipantEvent] = {
     for {
       uniqueIdAvailable  <- uniqueIdAvailable(cmd.uniqueId, participant.id)
       updatedParticipant <- participant.withUniqueId(cmd.uniqueId)
@@ -118,7 +114,7 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
 
   private def addAnnotationCmdToEvent(cmd:          ParticipantAddAnnotationCmd,
                                       study:       Study,
-                                      participant: Participant): DomainValidation[ParticipantEvent] = {
+                                      participant: Participant): ServiceValidation[ParticipantEvent] = {
     for {
       annotation         <- Annotation.create(cmd.annotationTypeId,
                                               cmd.stringValue,
@@ -137,7 +133,7 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
 
   private def removeAnnotationCmdToEvent(cmd:        ParticipantRemoveAnnotationCmd,
                                           study:       Study,
-                                          participant: Participant): DomainValidation[ParticipantEvent] = {
+                                          participant: Participant): ServiceValidation[ParticipantEvent] = {
     for {
       annotType <- {
         study.annotationTypes
@@ -145,7 +141,7 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
           .toSuccessNel(s"annotation type with ID does not exist: ${cmd.annotationTypeId}")
       }
       notRequired <- {
-        if (annotType.required) DomainError(s"annotation is required").failureNel[Boolean]
+        if (annotType.required) ServiceError(s"annotation is required").failureNel[Boolean]
         else true.successNel[String]
       }
       updatedParticipant <- participant.withoutAnnotation(cmd.annotationTypeId)
@@ -158,7 +154,7 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
 
   private def processUpdateCmd[T <: ParticipantModifyCommand](
     cmd: T,
-    validation: (T, Study, Participant) => DomainValidation[ParticipantEvent],
+    validation: (T, Study, Participant) => ServiceValidation[ParticipantEvent],
     applyEvent: ParticipantEvent => Unit): Unit = {
 
     val event = for {
@@ -193,7 +189,7 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
   private def onValidEventAndVersion(event:        ParticipantEvent,
                                      eventType:    Boolean,
                                      eventVersion: Long)
-                                    (applyEvent: (Participant, DateTime) => DomainValidation[Boolean])
+                                    (applyEvent: (Participant, DateTime) => ServiceValidation[Boolean])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -249,16 +245,16 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
   /** Searches the repository for a matching item.
    */
   protected def uniqueIdAvailableMatcher(uniqueId: String)(matcher: Participant => Boolean)
-      : DomainValidation[Boolean] = {
+      : ServiceValidation[Boolean] = {
     val exists = participantRepository.getValues.exists { item =>
       matcher(item)
     }
-    if (exists) DomainError(s"$ErrMsgUniqueIdExists: $uniqueId").failureNel[Boolean]
+    if (exists) ServiceError(s"$ErrMsgUniqueIdExists: $uniqueId").failureNel[Boolean]
     else true.successNel[String]
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  private def uniqueIdAvailable(uniqueId: String): DomainValidation[Boolean] = {
+  private def uniqueIdAvailable(uniqueId: String): ServiceValidation[Boolean] = {
     uniqueIdAvailableMatcher(uniqueId){ item =>
       item.uniqueId == uniqueId
     }
@@ -266,7 +262,7 @@ class ParticipantsProcessor @Inject() (val participantRepository:     Participan
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   private def uniqueIdAvailable(uniqueId: String, excludeParticipantId: ParticipantId)
-      : DomainValidation[Boolean] = {
+      : ServiceValidation[Boolean] = {
     uniqueIdAvailableMatcher(uniqueId){ item =>
       (item.uniqueId == uniqueId) && (item.id != excludeParticipantId)
     }

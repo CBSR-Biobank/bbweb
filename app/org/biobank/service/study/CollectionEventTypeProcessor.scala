@@ -1,19 +1,13 @@
 package org.biobank.service.study
 
-import org.biobank.domain._
-import org.biobank.domain.study.{
-  StudyId,
-  CollectionEventType,
-  CollectionEventTypeId,
-  CollectionEventTypeRepository,
-  CollectionSpecimenSpec
-}
-import org.biobank.domain.participants.CollectionEventRepository
-import org.biobank.service.Processor
-import org.biobank.infrastructure.command.CollectionEventTypeCommands._
-import org.biobank.infrastructure.event.EventUtils
 import akka.actor._
 import akka.persistence.{ SnapshotOffer, RecoveryCompleted }
+import org.biobank.domain._
+import org.biobank.domain.participants.CollectionEventRepository
+import org.biobank.domain.study.{StudyId, CollectionEventType, CollectionEventTypeId, CollectionEventTypeRepository, CollectionSpecimenSpec }
+import org.biobank.infrastructure.command.CollectionEventTypeCommands._
+import org.biobank.infrastructure.event.EventUtils
+import org.biobank.service.{Processor, ServiceValidation}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import scalaz.Scalaz._
@@ -123,7 +117,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     case cmd => log.error(s"CollectionEventTypeProcessor: message not handled: $cmd")
   }
 
-  private def addCmdToEvent(cmd: AddCollectionEventTypeCmd): DomainValidation[CollectionEventTypeEvent] = {
+  private def addCmdToEvent(cmd: AddCollectionEventTypeCmd): ServiceValidation[CollectionEventTypeEvent] = {
     val studyId = StudyId(cmd.studyId)
     for {
       cetId     <- validNewIdentity(collectionEventTypeRepository.nextIdentity, collectionEventTypeRepository)
@@ -146,7 +140,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
   }
 
   private def removeCmdToEvent(cmd: RemoveCollectionEventTypeCmd, ceventType: CollectionEventType)
-      : DomainValidation[CollectionEventTypeEvent] = {
+      : ServiceValidation[CollectionEventTypeEvent] = {
     if (collectionEventRepository.collectionEventTypeInUse(ceventType.id)) {
       EntityInUse(s"collection event type in use: ${ceventType.id}").failureNel[CollectionEventTypeEvent]
     } else {
@@ -159,7 +153,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
   }
 
   private def updateNameCmdToEvent(cmd: UpdateCollectionEventTypeNameCmd, cet: CollectionEventType)
-      : DomainValidation[CollectionEventTypeEvent] = {
+      : ServiceValidation[CollectionEventTypeEvent] = {
     for {
       nameAvailable <- nameAvailable(cmd.name, cet.studyId, CollectionEventTypeId(cmd.id))
       newItem       <- cet.withName(cmd.name)
@@ -173,7 +167,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
 
   private def updateDescriptionCmdToEvent(cmd: UpdateCollectionEventTypeDescriptionCmd,
                                           cet: CollectionEventType)
-      : DomainValidation[CollectionEventTypeEvent] = {
+      : ServiceValidation[CollectionEventTypeEvent] = {
     cet.withDescription(cmd.description).map { _ =>
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                                := cet.studyId.id,
@@ -186,7 +180,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
 
   private def updateRecurringCmdToEvent(cmd: UpdateCollectionEventTypeRecurringCmd,
                                         cet: CollectionEventType)
-      : DomainValidation[CollectionEventTypeEvent] = {
+      : ServiceValidation[CollectionEventTypeEvent] = {
     cet.withRecurring(cmd.recurring).map { _ =>
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                    := cet.studyId.id,
@@ -199,7 +193,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
 
   private def addAnnotationTypeCmdToEvent(cmd: CollectionEventTypeAddAnnotationTypeCmd,
                                           cet: CollectionEventType)
-      : DomainValidation[CollectionEventTypeEvent] = {
+      : ServiceValidation[CollectionEventTypeEvent] = {
     for {
       annotationType <- {
         // need to call AnnotationType.create so that a new uniqueId is generated
@@ -221,7 +215,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
 
 private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotationTypeCmd,
                                              cet: CollectionEventType)
-      : DomainValidation[CollectionEventTypeEvent] = {
+      : ServiceValidation[CollectionEventTypeEvent] = {
     cet.removeAnnotationType(cmd.uniqueId) map { c =>
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                        := cet.studyId.id,
@@ -234,7 +228,7 @@ private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotat
 
   private def addSepcimenSpecCmdToEvent(cmd: AddCollectionSpecimenSpecCmd,
                                         cet: CollectionEventType)
-      : DomainValidation[CollectionEventTypeEvent] = {
+      : ServiceValidation[CollectionEventTypeEvent] = {
     for {
       specimenSpec <- CollectionSpecimenSpec.create(cmd.name,
                                                     cmd.description,
@@ -256,7 +250,7 @@ private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotat
 
   private def updateSepcimenSpecCmdToEvent(cmd: UpdateCollectionSpecimenSpecCmd,
                                            cet: CollectionEventType)
-      : DomainValidation[CollectionEventTypeEvent] = {
+      : ServiceValidation[CollectionEventTypeEvent] = {
     for {
       specimenSpec <- {
         CollectionSpecimenSpec(cmd.uniqueId,
@@ -281,7 +275,7 @@ private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotat
 
   private def removeSpecimenSpecCmdToEvent(cmd: RemoveCollectionSpecimenSpecCmd,
                                            cet: CollectionEventType)
-      : DomainValidation[CollectionEventTypeEvent] = {
+      : ServiceValidation[CollectionEventTypeEvent] = {
     cet.removeSpecimenSpec(cmd.uniqueId) map { c =>
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                      := cet.studyId.id,
@@ -294,7 +288,7 @@ private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotat
 
   private def processUpdateCmd[T <: CollectionEventTypeModifyCommand]
     (cmd: T,
-     cmdToEvent: (T, CollectionEventType) => DomainValidation[CollectionEventTypeEvent],
+     cmdToEvent: (T, CollectionEventType) => ServiceValidation[CollectionEventTypeEvent],
      applyEvent: CollectionEventTypeEvent => Unit): Unit = {
     val event = for {
         cet          <- collectionEventTypeRepository.withId(StudyId(cmd.studyId),
@@ -309,7 +303,7 @@ private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotat
   private def onValidEventAndVersion(event:        CollectionEventTypeEvent,
                                      eventType:    Boolean,
                                      eventVersion: Long)
-                                    (applyEvent: (CollectionEventType, DateTime) => DomainValidation[Boolean])
+                                    (applyEvent: (CollectionEventType, DateTime) => ServiceValidation[Boolean])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -369,8 +363,8 @@ private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotat
     }
   }
 
-  private def storeIfValid(validation: DomainValidation[CollectionEventType],
-                           eventTime: DateTime): DomainValidation[Boolean] = {
+  private def storeIfValid(validation: ServiceValidation[CollectionEventType],
+                           eventTime: DateTime): ServiceValidation[Boolean] = {
     validation.foreach { c =>
       collectionEventTypeRepository.put(c.copy(timeModified = Some(eventTime)))
     }
@@ -449,7 +443,7 @@ private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotat
   val ErrMsgNameExists = "collection event type with name already exists"
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  private def nameAvailable(name: String, studyId: StudyId): DomainValidation[Boolean] = {
+  private def nameAvailable(name: String, studyId: StudyId): ServiceValidation[Boolean] = {
     nameAvailableMatcher(name, collectionEventTypeRepository, ErrMsgNameExists) { item =>
       (item.name == name) && (item.studyId == studyId)
     }
@@ -459,7 +453,7 @@ private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotat
   private def nameAvailable(name: String,
                             studyId: StudyId,
                             excludeId: CollectionEventTypeId)
-      : DomainValidation[Boolean] = {
+      : ServiceValidation[Boolean] = {
     nameAvailableMatcher(name, collectionEventTypeRepository, ErrMsgNameExists){ item =>
       (item.name == name) && (item.studyId == studyId) && (item.id != excludeId)
     }

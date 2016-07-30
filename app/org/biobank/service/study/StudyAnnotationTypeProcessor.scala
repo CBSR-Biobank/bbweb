@@ -14,7 +14,7 @@
 
 //   val ErrMsgNameExists = "annotation type with name already exists"
 
-//   protected def nameAvailable(name: String, studyId: StudyId): DomainValidation[Boolean] = {
+//   protected def nameAvailable(name: String, studyId: StudyId): ServiceValidation[Boolean] = {
 //     nameAvailableMatcher(name, annotationTypeRepository, ErrMsgNameExists){ item =>
 //       (item.name == name) && (item.studyId == studyId)
 //     }
@@ -23,7 +23,7 @@
 //   protected def nameAvailable(name: String,
 //                               studyId: StudyId,
 //                               excludeId: AnnotationTypeId)
-//       : DomainValidation[Boolean] = {
+//       : ServiceValidation[Boolean] = {
 //     nameAvailableMatcher(name, annotationTypeRepository, ErrMsgNameExists){ item =>
 //       (item.name == name) && (item.studyId == studyId) && (item.id != excludeId)
 //     }

@@ -5,12 +5,12 @@ import akka.persistence.SnapshotOffer
 import javax.inject._
 import org.biobank.TestData
 import org.biobank.domain.study._
-import org.biobank.domain.{ AnnotationType, AnnotationValueType, DomainError, DomainValidation }
+import org.biobank.domain.{AnnotationType, AnnotationValueType}
+import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.EventUtils
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.infrastructure.command.CollectionEventTypeCommands._
-import org.biobank.service.Processor
+import org.biobank.service.{Processor, ServiceError, ServiceValidation}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import scalaz.Scalaz._
@@ -172,7 +172,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  private def addCmdToEvent(cmd: AddStudyCmd): DomainValidation[StudyEvent] = {
+  private def addCmdToEvent(cmd: AddStudyCmd): ServiceValidation[StudyEvent] = {
     for {
       name  <- nameAvailable(cmd.name)
       id    <- validNewIdentity(studyRepository.nextIdentity, studyRepository)
@@ -187,7 +187,7 @@ class StudiesProcessor @javax.inject.Inject() (
   }
 
   private def updateNameCmdToEvent(cmd: UpdateStudyNameCmd, study: DisabledStudy)
-      : DomainValidation[StudyEvent] = {
+      : ServiceValidation[StudyEvent] = {
     (nameAvailable(cmd.name, StudyId(cmd.id)) |@|
        study.withName(cmd.name)) { case (_, _) =>
         StudyEvent(study.id.id).update(
@@ -199,7 +199,7 @@ class StudiesProcessor @javax.inject.Inject() (
   }
 
   private def updateDescriptionCmdToEvent(cmd: UpdateStudyDescriptionCmd, study: DisabledStudy)
-      : DomainValidation[StudyEvent] = {
+      : ServiceValidation[StudyEvent] = {
     study.withDescription(cmd.description).map { _ =>
       StudyEvent(study.id.id).update(
         _.optionalUserId                         := cmd.userId,
@@ -211,7 +211,7 @@ class StudiesProcessor @javax.inject.Inject() (
 
   private def addAnnotationTypeCmdToEvent(cmd:   StudyAddParticipantAnnotationTypeCmd,
                                           study: DisabledStudy)
-      : DomainValidation[StudyEvent] = {
+      : ServiceValidation[StudyEvent] = {
     for {
       annotationType <- {
         AnnotationType.create(cmd.name,
@@ -231,7 +231,7 @@ class StudiesProcessor @javax.inject.Inject() (
 
   private def updateAnnotationTypeCmdToEvent(cmd:   StudyUpdateParticipantAnnotationTypeCmd,
                                              study: DisabledStudy)
-      : DomainValidation[StudyEvent] = {
+      : ServiceValidation[StudyEvent] = {
     for {
       annotationType <- AnnotationType(cmd.uniqueId,
                                        cmd.name,
@@ -250,7 +250,7 @@ class StudiesProcessor @javax.inject.Inject() (
 
   private def removeAnnotationTypeCmdToEvent(cmd: UpdateStudyRemoveAnnotationTypeCmd,
                                              study: DisabledStudy)
-      : DomainValidation[StudyEvent] = {
+      : ServiceValidation[StudyEvent] = {
     study.removeParticipantAnnotationType(cmd.uniqueId) map { s =>
       StudyEvent(study.id.id).update(
         _.optionalUserId                 := cmd.userId,
@@ -262,7 +262,7 @@ class StudiesProcessor @javax.inject.Inject() (
 
   private def enableCmdToEvent(cmd: EnableStudyCmd,
                                study: DisabledStudy)
-      : DomainValidation[StudyEvent] = {
+      : ServiceValidation[StudyEvent] = {
     val collectionEventTypes = collectionEventTypeRepository.allForStudy(study.id)
 
     if (collectionEventTypes.isEmpty) {
@@ -281,7 +281,7 @@ class StudiesProcessor @javax.inject.Inject() (
 
   private def disableCmdToEvent(cmd: DisableStudyCmd,
                                 study: EnabledStudy)
-      : DomainValidation[StudyEvent] = {
+      : ServiceValidation[StudyEvent] = {
     study.disable map { _ =>
       StudyEvent(study.id.id).update(
         _.optionalUserId   := cmd.userId,
@@ -292,7 +292,7 @@ class StudiesProcessor @javax.inject.Inject() (
 
   private def retireCmdToEvent(cmd: RetireStudyCmd,
                                study: DisabledStudy)
-      : DomainValidation[StudyEvent] = {
+      : ServiceValidation[StudyEvent] = {
     study.retire map { _ =>
       StudyEvent(study.id.id).update(
         _.optionalUserId  := cmd.userId,
@@ -303,7 +303,7 @@ class StudiesProcessor @javax.inject.Inject() (
 
   private def unretireCmdToEvent(cmd: UnretireStudyCmd,
                                  study: RetiredStudy)
-      : DomainValidation[StudyEvent] = {
+      : ServiceValidation[StudyEvent] = {
     study.unretire map { _ =>
       StudyEvent(study.id.id).update(
         _.optionalUserId    := cmd.userId,
@@ -314,7 +314,7 @@ class StudiesProcessor @javax.inject.Inject() (
 
   private def processUpdateCmd[T <: StudyModifyCommand]
     (cmd: T,
-     cmdToEvent: (T, Study) => DomainValidation[StudyEvent],
+     cmdToEvent: (T, Study) => ServiceValidation[StudyEvent],
      applyEvent: StudyEvent => Unit): Unit = {
     val event = for {
         study        <- studyRepository.getByKey(StudyId(cmd.id))
@@ -327,10 +327,10 @@ class StudiesProcessor @javax.inject.Inject() (
 
   private def processUpdateCmdOnDisabledStudy[T <: StudyModifyCommand]
     (cmd: T,
-     cmdToEvent: (T, DisabledStudy) => DomainValidation[StudyEvent],
+     cmdToEvent: (T, DisabledStudy) => ServiceValidation[StudyEvent],
      applyEvent: StudyEvent => Unit): Unit = {
 
-    def internal(cmd: T, study: Study): DomainValidation[StudyEvent] =
+    def internal(cmd: T, study: Study): ServiceValidation[StudyEvent] =
       study match {
         case s: DisabledStudy => cmdToEvent(cmd, s)
         case s => InvalidStatus(s"study not disabled: ${study.id}").failureNel[StudyEvent]
@@ -341,10 +341,10 @@ class StudiesProcessor @javax.inject.Inject() (
 
   private def processUpdateCmdOnEnabledStudy[T <: StudyModifyCommand]
     (cmd: T,
-     cmdToEvent: (T, EnabledStudy) => DomainValidation[StudyEvent],
+     cmdToEvent: (T, EnabledStudy) => ServiceValidation[StudyEvent],
      applyEvent: StudyEvent => Unit): Unit = {
 
-    def internal(cmd: T, study: Study): DomainValidation[StudyEvent] =
+    def internal(cmd: T, study: Study): ServiceValidation[StudyEvent] =
       study match {
         case s: EnabledStudy => cmdToEvent(cmd, s)
         case s => InvalidStatus(s"study not enabled: ${study.id}").failureNel[StudyEvent]
@@ -355,10 +355,10 @@ class StudiesProcessor @javax.inject.Inject() (
 
   private def processUpdateCmdOnRetiredStudy[T <: StudyModifyCommand]
     (cmd: T,
-     cmdToEvent: (T, RetiredStudy) => DomainValidation[StudyEvent],
+     cmdToEvent: (T, RetiredStudy) => ServiceValidation[StudyEvent],
      applyEvent: StudyEvent => Unit): Unit = {
 
-    def internal(cmd: T, study: Study): DomainValidation[StudyEvent] =
+    def internal(cmd: T, study: Study): ServiceValidation[StudyEvent] =
       study match {
         case s: RetiredStudy => cmdToEvent(cmd, s)
         case s => InvalidStatus(s"study not retired: ${study.id}").failureNel[StudyEvent]
@@ -370,7 +370,7 @@ class StudiesProcessor @javax.inject.Inject() (
   private def onValidEventStudyAndVersion(event: StudyEvent,
                                           eventType: Boolean,
                                           eventVersion: Long)
-                                         (applyEvent: (Study, DateTime) => DomainValidation[Boolean])
+                                         (applyEvent: (Study, DateTime) => ServiceValidation[Boolean])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -396,12 +396,12 @@ class StudiesProcessor @javax.inject.Inject() (
   private def onValidEventDisabledStudyAndVersion(event: StudyEvent,
                                                   eventType: Boolean,
                                                   eventVersion: Long)
-                                                 (applyEvent: (DisabledStudy, DateTime) => DomainValidation[Boolean])
+                                                 (applyEvent: (DisabledStudy, DateTime) => ServiceValidation[Boolean])
       : Unit = {
     onValidEventStudyAndVersion(event, eventType, eventVersion) { (study, eventTime) =>
       study match {
         case study: DisabledStudy => applyEvent(study, eventTime)
-        case study => DomainError(s"study not disabled: $event").failureNel[Boolean]
+        case study => ServiceError(s"study not disabled: $event").failureNel[Boolean]
       }
     }
   }
@@ -409,12 +409,12 @@ class StudiesProcessor @javax.inject.Inject() (
   private def onValidEventEnabledStudyAndVersion(event: StudyEvent,
                                                  eventType: Boolean,
                                                  eventVersion: Long)
-                                                 (applyEvent: (EnabledStudy, DateTime) => DomainValidation[Boolean])
+                                                 (applyEvent: (EnabledStudy, DateTime) => ServiceValidation[Boolean])
       : Unit = {
     onValidEventStudyAndVersion(event, eventType, eventVersion) { (study, eventTime) =>
       study match {
         case study: EnabledStudy => applyEvent(study, eventTime)
-        case study => DomainError(s"study not enabled: $event").failureNel[Boolean]
+        case study => ServiceError(s"study not enabled: $event").failureNel[Boolean]
       }
     }
   }
@@ -422,12 +422,12 @@ class StudiesProcessor @javax.inject.Inject() (
   private def onValidEventRetiredStudyAndVersion(event: StudyEvent,
                                                  eventType: Boolean,
                                                  eventVersion: Long)
-                                                 (applyEvent: (RetiredStudy, DateTime) => DomainValidation[Boolean])
+                                                 (applyEvent: (RetiredStudy, DateTime) => ServiceValidation[Boolean])
       : Unit = {
     onValidEventStudyAndVersion(event, eventType, eventVersion) { (study, eventTime) =>
       study match {
         case study: RetiredStudy => applyEvent(study, eventTime)
-        case study => DomainError(s"study not retired: $event").failureNel[Boolean]
+        case study => ServiceError(s"study not retired: $event").failureNel[Boolean]
       }
     }
   }
@@ -454,20 +454,20 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  private def putDisabledOnSuccess(validation: DomainValidation[DisabledStudy],
-                                   eventTime: DateTime): DomainValidation[Boolean] = {
+  private def putDisabledOnSuccess(validation: ServiceValidation[DisabledStudy],
+                                   eventTime: DateTime): ServiceValidation[Boolean] = {
     validation.foreach { s => studyRepository.put(s.copy(timeModified = Some(eventTime))) }
     validation.map { _ => true }
   }
 
-  private def putEnabledOnSuccess(validation: DomainValidation[EnabledStudy],
-                                   eventTime: DateTime): DomainValidation[Boolean] = {
+  private def putEnabledOnSuccess(validation: ServiceValidation[EnabledStudy],
+                                   eventTime: DateTime): ServiceValidation[Boolean] = {
     validation.foreach { s => studyRepository.put(s.copy(timeModified = Some(eventTime))) }
     validation.map { _ => true }
   }
 
-  private def putRetiredOnSuccess(validation: DomainValidation[RetiredStudy],
-                                   eventTime: DateTime): DomainValidation[Boolean] = {
+  private def putRetiredOnSuccess(validation: ServiceValidation[RetiredStudy],
+                                   eventTime: DateTime): ServiceValidation[Boolean] = {
     validation.foreach { s => studyRepository.put(s.copy(timeModified = Some(eventTime))) }
     validation.map { _ => true }
   }
@@ -564,14 +564,14 @@ class StudiesProcessor @javax.inject.Inject() (
   val ErrMsgNameExists = "name already used"
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  private def nameAvailable(name: String): DomainValidation[Boolean] = {
+  private def nameAvailable(name: String): ServiceValidation[Boolean] = {
     nameAvailableMatcher(name, studyRepository, ErrMsgNameExists) { item =>
       item.name == name
     }
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  private def nameAvailable(name: String, excludeStudyId: StudyId): DomainValidation[Boolean] = {
+  private def nameAvailable(name: String, excludeStudyId: StudyId): ServiceValidation[Boolean] = {
     nameAvailableMatcher(name, studyRepository, ErrMsgNameExists){ item =>
       (item.name == name) && (item.id != excludeStudyId)
     }

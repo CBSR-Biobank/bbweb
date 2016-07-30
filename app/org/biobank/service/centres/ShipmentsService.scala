@@ -5,26 +5,23 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
-import org.biobank.dto.{ShipmentDto, ShipmentSpecimenDto}
-import org.biobank.domain.{DomainError, DomainValidation}
 import org.biobank.domain.centre._
+import org.biobank.domain.participants.{CeventSpecimenRepository, CollectionEventRepository, SpecimenRepository}
 import org.biobank.domain.study.CollectionEventTypeRepository
-import org.biobank.domain.participants.{
-  CeventSpecimenRepository,
-  CollectionEventRepository,
-  SpecimenRepository
-}
+import org.biobank.dto.{ShipmentDto, ShipmentSpecimenDto}
 import org.biobank.infrastructure.command.ShipmentCommands._
 import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
 import org.biobank.infrastructure.event.ShipmentEvents._
 import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
 import org.biobank.infrastructure.{AscendingOrder, SortOrder}
+import org.biobank.service.{ServiceError, ServiceValidation}
 import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.concurrent.duration._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
+
 
 @ImplementedBy(classOf[ShipmentsServiceImpl])
 trait ShipmentsService {
@@ -33,25 +30,25 @@ trait ShipmentsService {
                    trackingNumberFilter: String,
                    stateFilter:          String,
                    sortBy:               String,
-                   order:                SortOrder): DomainValidation[List[ShipmentDto]]
+                   order:                SortOrder): ServiceValidation[List[ShipmentDto]]
 
-  def getShipment(id: String): DomainValidation[ShipmentDto]
+  def getShipment(id: String): ServiceValidation[ShipmentDto]
 
   def getShipmentSpecimens(shipmentId: String,
                            sortBy:     String,
-                           order:      SortOrder): DomainValidation[Seq[ShipmentSpecimenDto]]
+                           order:      SortOrder): ServiceValidation[Seq[ShipmentSpecimenDto]]
 
   def getShipmentSpecimen(shipmentId: String, shipmentSpecimenId: String)
-      : DomainValidation[ShipmentSpecimenDto]
+      : ServiceValidation[ShipmentSpecimenDto]
 
-  def processCommand(cmd: ShipmentCommand): Future[DomainValidation[Shipment]]
+  def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[Shipment]]
 
-  def removeShipment(cmd: ShipmentRemoveCmd): Future[DomainValidation[Boolean]]
+  def removeShipment(cmd: ShipmentRemoveCmd): Future[ServiceValidation[Boolean]]
 
   def processShipmentSpecimenCommand(cmd: ShipmentSpecimenCommand):
-      Future[DomainValidation[ShipmentSpecimenDto]]
+      Future[ServiceValidation[ShipmentSpecimenDto]]
 
-  def removeShipmentSpecimen(cmd: ShipmentSpecimenRemoveCmd): Future[DomainValidation[Boolean]]
+  def removeShipmentSpecimen(cmd: ShipmentSpecimenRemoveCmd): Future[ServiceValidation[Boolean]]
 }
 
 /**
@@ -76,8 +73,8 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
                    stateFilter:          String,
                    sortBy:               String,
                    order:                SortOrder)
-      : DomainValidation[List[ShipmentDto]] = {
-    ShipmentDto.sort2Compare.get(sortBy).toSuccessNel(DomainError(s"invalid sort field: $sortBy"))
+      : ServiceValidation[List[ShipmentDto]] = {
+    ShipmentDto.sort2Compare.get(sortBy).toSuccessNel(ServiceError(s"invalid sort field: $sortBy"))
       .flatMap { sortFunc =>
       val allShipments = shipmentRepository.getValues
 
@@ -110,14 +107,14 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
     }
   }
 
-  def getShipment(id: String): DomainValidation[ShipmentDto] = {
+  def getShipment(id: String): ServiceValidation[ShipmentDto] = {
     shipmentRepository.getByKey(ShipmentId(id)).flatMap(getShipmentDto)
   }
 
   def getShipmentSpecimens(shipmentId: String,
                            sortBy:     String,
-                           order:      SortOrder): DomainValidation[List[ShipmentSpecimenDto]] = {
-    ShipmentSpecimenDto.sort2Compare.get(sortBy).toSuccessNel(DomainError(s"invalid sort field: $sortBy"))
+                           order:      SortOrder): ServiceValidation[List[ShipmentSpecimenDto]] = {
+    ShipmentSpecimenDto.sort2Compare.get(sortBy).toSuccessNel(ServiceError(s"invalid sort field: $sortBy"))
       .flatMap { sortFunc =>
       shipmentSpecimenRepository.allForShipment(ShipmentId(shipmentId)).map { ss =>
         getShipmentSpecimenDto(ss)
@@ -129,7 +126,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
   }
 
   def getShipmentSpecimen(shipmentId: String, shipmentSpecimenId: String)
-      : DomainValidation[ShipmentSpecimenDto] = {
+      : ServiceValidation[ShipmentSpecimenDto] = {
     for {
       shipment <- shipmentRepository.getByKey(ShipmentId(shipmentId))
       ss       <- shipmentSpecimenRepository.getByKey(ShipmentSpecimenId(shipmentSpecimenId))
@@ -137,7 +134,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
     } yield dto
   }
 
-  private def getShipmentDto(shipment: Shipment): DomainValidation[ShipmentDto] = {
+  private def getShipmentDto(shipment: Shipment): ServiceValidation[ShipmentDto] = {
     for {
       fromCentre <- centreRepository.getByLocationId(shipment.fromLocationId)
       fromLocationName <- fromCentre.locationName(shipment.fromLocationId)
@@ -147,7 +144,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
   }
 
   private def getShipmentSpecimenDto(shipmentSpecimen: ShipmentSpecimen)
-      : DomainValidation[ShipmentSpecimenDto] = {
+      : ServiceValidation[ShipmentSpecimenDto] = {
     for {
       specimen           <- specimenRepository.getByKey(shipmentSpecimen.specimenId)
       ceventSpecimen     <- ceventSpecimenRepository.withSpecimenId(specimen.id)
@@ -159,8 +156,8 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
     } yield shipmentSpecimen.createDto(specimen, centreLocationName, specimenSpec.units)
   }
 
-  def processCommand(cmd: ShipmentCommand): Future[DomainValidation[Shipment]] = {
-    ask(processor, cmd).mapTo[DomainValidation[ShipmentEvent]].map { validation =>
+  def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[Shipment]] = {
+    ask(processor, cmd).mapTo[ServiceValidation[ShipmentEvent]].map { validation =>
       for {
         event    <- validation
         shipment <- shipmentRepository.getByKey(ShipmentId(event.id))
@@ -168,15 +165,15 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
     }
   }
 
-  def removeShipment(cmd: ShipmentRemoveCmd): Future[DomainValidation[Boolean]] = {
-    ask(processor, cmd).mapTo[DomainValidation[ShipmentEvent]].map { validation =>
+  def removeShipment(cmd: ShipmentRemoveCmd): Future[ServiceValidation[Boolean]] = {
+    ask(processor, cmd).mapTo[ServiceValidation[ShipmentEvent]].map { validation =>
       validation.map(_ => true)
     }
   }
 
   def processShipmentSpecimenCommand(cmd: ShipmentSpecimenCommand)
-      : Future[DomainValidation[ShipmentSpecimenDto]] = {
-    ask(processor, cmd).mapTo[DomainValidation[ShipmentSpecimenEvent]].map { validation =>
+      : Future[ServiceValidation[ShipmentSpecimenDto]] = {
+    ask(processor, cmd).mapTo[ServiceValidation[ShipmentSpecimenEvent]].map { validation =>
       for {
         event            <- validation
         shipmentSpecimen <- shipmentSpecimenRepository.getByKey(ShipmentSpecimenId(event.id))
@@ -185,8 +182,8 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
     }
   }
 
-  def removeShipmentSpecimen(cmd: ShipmentSpecimenRemoveCmd): Future[DomainValidation[Boolean]] = {
-    ask(processor, cmd).mapTo[DomainValidation[ShipmentSpecimenEvent]].map { validation =>
+  def removeShipmentSpecimen(cmd: ShipmentSpecimenRemoveCmd): Future[ServiceValidation[Boolean]] = {
+    ask(processor, cmd).mapTo[ServiceValidation[ShipmentSpecimenEvent]].map { validation =>
       validation.map(_ => true)
     }
   }

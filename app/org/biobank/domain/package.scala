@@ -8,7 +8,7 @@ package object domain {
   /** Used to validate commands received by the system that act on the domain model. */
   type DomainValidation[A] = ValidationNel[DomainError, A]
 
-  /** Contains an error messsage when a command fails validation. */
+  /** Contains an error messsage when an invalid condition happens. */
   type DomainError = String
 
 }

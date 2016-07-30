@@ -1,6 +1,6 @@
 // package org.biobank.controllers.study
 
-// import org.biobank.domain.DomainError
+// import org.biobank.domain.ControllerError
 // import org.biobank.controllers._
 // import org.biobank.service._
 // import org.biobank.service.users.UsersService
@@ -24,29 +24,29 @@
 //       Logger.debug(s"SpecimenLinkAnnotTypeController.list: specimenLinkTypeId: $specimenLinkTypeId, annotTypeId: $annotTypeId")
 
 //       annotTypeId.fold {
-//         domainValidationReply(studiesService.specimenLinkAnnotationTypes(specimenLinkTypeId).map(_.toList))
+//         validationReply(studiesService.specimenLinkAnnotationTypes(specimenLinkTypeId).map(_.toList))
 //       } { id =>
-//         domainValidationReply(studiesService.specimenLinkAnnotationTypeWithId(id))
+//         validationReply(studiesService.specimenLinkAnnotationTypeWithId(id))
 //       }
 //     }
 
 //   def addAnnotationType() =
 //     commandAction { cmd: AddSpecimenLinkAnnotationTypeCmd =>
 //       val future = studiesService.addSpecimenLinkAnnotationType(cmd)
-//       domainValidationReply(future)
+//       validationReply(future)
 //     }
 
 //   def updateAnnotationType() =
 //     commandAction { cmd: UpdateSpecimenLinkAnnotationTypeCmd =>
 //       val future = studiesService.updateSpecimenLinkAnnotationType(cmd)
-//       domainValidationReply(future)
+//       validationReply(future)
 //     }
 
 //   def removeAnnotationType(annotationTypeId: String, ver: Long) =
 //     AuthActionAsync(parse.empty) { (token, userId, request) =>
 //       val cmd = RemoveSpecimenLinkAnnotationTypeCmd(Some(userId.id), annotationTypeId, ver)
 //       val future = studiesService.removeSpecimenLinkAnnotationType(cmd)
-//       domainValidationReply(future)
+//       validationReply(future)
 //   }
 
 // }

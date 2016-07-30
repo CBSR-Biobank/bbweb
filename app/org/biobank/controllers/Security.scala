@@ -1,6 +1,5 @@
 package org.biobank.controllers
 
-import org.biobank.domain.{ DomainValidation, DomainError }
 import org.biobank.domain.user.{ UserId, UserHelper }
 import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
@@ -40,22 +39,22 @@ trait Security { self: Controller =>
    *
    *  - that the cookie token matches the other one
    */
-  private def validRequestToken[T](request: Request[T]): DomainValidation[String] = {
+  private def validRequestToken[T](request: Request[T]): ControllerValidation[String] = {
     for {
       cookieXsrfToken <- {
         request.cookies.get(AuthTokenCookieKey)
-          .toSuccessNel(DomainError("Invalid XSRF Token cookie"))
+          .toSuccessNel(ControllerError("Invalid XSRF Token cookie"))
           .map(_.value)
       }
       headerXsrfToken <- {
         request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey))
-          .toSuccessNel(DomainError("No token"))
+          .toSuccessNel(ControllerError("No token"))
       }
       matchingTokens <- {
         if (cookieXsrfToken == headerXsrfToken) {
           headerXsrfToken.successNel[String]
         } else {
-          DomainError(s"tokens did not match: cookie/$cookieXsrfToken, header/$headerXsrfToken")
+          ControllerError(s"tokens did not match: cookie/$cookieXsrfToken, header/$headerXsrfToken")
             .failureNel[String]
         }
       }
@@ -63,7 +62,7 @@ trait Security { self: Controller =>
   }
 
   private def getAuthInfo(token: String)
-      : DomainValidation[AuthenticationInfo] = {
+      : ControllerValidation[AuthenticationInfo] = {
     if ((env.mode == Mode.Test) && (token == TestAuthToken)) {
       // when running in TEST mode, always allow the action if the token is the test token
       AuthenticationInfo(token, org.biobank.Global.DefaultUserId).successNel
@@ -89,7 +88,7 @@ trait Security { self: Controller =>
    * Note: there is special behaviour if the code is running in TEST mode.
    */
   private def validateToken[A](request: Request[A])
-      : DomainValidation[AuthenticationInfo] = {
+      : ControllerValidation[AuthenticationInfo] = {
     for {
       token <- validRequestToken(request)
       auth <- getAuthInfo(token)
