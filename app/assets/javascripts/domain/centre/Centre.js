@@ -7,6 +7,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
 
   CentreFactory.$inject = [
     '$q',
+    '$log',
     'biobankApi',
     'ConcurrencySafeEntity',
     'DomainError',
@@ -34,6 +35,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
    * @returns {Factory} The AngularJS factory function.
    */
   function CentreFactory($q,
+                         $log,
                          biobankApi,
                          ConcurrencySafeEntity,
                          DomainError,
@@ -139,17 +141,17 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
      */
     Centre.create = function (obj) {
       if (!tv4.validate(obj, schema)) {
-        console.error('invalid object from server: ' + tv4.error);
+        $log.error('invalid object from server: ' + tv4.error);
         throw new DomainError('invalid object from server: ' + tv4.error);
       }
 
       if (!validStudyIds(obj.studyIds)) {
-        console.error('invalid object from server: bad study ids');
+        $log.error('invalid object from server: bad study ids');
         throw new DomainError('invalid object from server: bad study ids');
       }
 
       if (!validLocations(obj.locations)) {
-        console.error('invalid object from server: bad locations');
+        $log.error('invalid object from server: bad locations');
         throw new DomainError('invalid object from server: bad locations');
       }
 
@@ -186,14 +188,6 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
     };
 
     /**
-     * @typedef domain.centres.CentreDto
-     * @type object
-     * @property {string} id - the ID that identifies this centre.
-     * @property {string} name - the centre's name.
-     * @property {domain.centre.CentreStatus} status - the centre's status.
-     */
-
-    /**
      * Returns the names for all centres.
      *
      * @returns {Array.<domain.centres.CentreDto>} The name of all the centres.
@@ -203,15 +197,6 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
     };
 
     /**
-     * @typedef domain.centres.CentreLocationDto
-     * @type object
-     * @property {string} centreId - the ID that identifies the centre.
-     * @property {string} locationId - the ID that identifies the location.
-     * @property {string} centreName - the centre's name.
-     * @property {string} locationName - the location's name.
-     */
-
-    /**
      * Returns all locations for all centres.
      *
      * @returns {Promise<Array<domain.centres.CentreLocationDto>>} A promise.
@@ -219,14 +204,6 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
     Centre.allLocations = function () {
       return biobankApi.get('/centres/locations');
     };
-
-    /**
-     * @typedef domain.centres.CentreLocationName
-     * @type object
-     * @property {string} centreId - the ID that identifies the centre.
-     * @property {string} locationId - the ID that identifies the location.
-     * @property {string} name - the centre's name concatenated with the location name.
-     */
 
     /**
      * Concatenates the centre name and location name so that they can be selected from a

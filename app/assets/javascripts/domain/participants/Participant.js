@@ -7,6 +7,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
 
   ParticipantFactory.$inject = [
     '$q',
+    '$log',
     'funutils',
     'ConcurrencySafeEntity',
     'DomainError',
@@ -18,6 +19,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
    * Factory for participants.
    */
   function ParticipantFactory($q,
+                              $log,
                               funutils,
                               ConcurrencySafeEntity,
                               DomainError,
@@ -39,23 +41,52 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     };
 
     /**
-     * To convert server side annotations to Annotation class call setAnnotationTypes().
+     * Use this contructor to create a new Participant to be persited on the server. Use {@link
+     * domain.studies.Participant.create|create()} or {@link
+     * domain.studies.Particiapnt.asyncCreate|asyncCreate()} to create objects returned by the server.
      *
-     * @param {object} obj.annotations - server response for annotation.
+     * @classdesc The subject for which a set of specimens were collected from. The subject can be human or
+     * non human. A participant belongs to a single [Study]{@link domain.studies.Study}.
      *
-     * @param {study} study The study this participant is a member of.
+     * @class
+     * @memberOf domain.studies
+     * @extends domain.ConcurrencySafeEntity
+     *
+     * <i>To convert server side annotations to Annotation class call setAnnotationTypes().<i>
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
      */
     function Participant(obj, study) {
-      var defaults = {
-        study:       null,
-        studyId:     null,
-        uniqueId:    '',
-        annotations: []
-      };
+      /**
+       * A participant has a unique identifier that is used to identify the participant in the system. This
+       * identifier is not the same as the <code>id</code> value object used by the domain model.
+       *
+       * @name domain.studies.Participant#uniqueId
+       * @type {string}
+       */
+      this.uniqueId = '';
+
+      /**
+       * The study identifier for the {@link domain.studies.Study|Study} this participant belongs to.
+       *
+       * @name domain.studies.Participant#studyId
+       * @type {string}
+       */
+      this.studyId = null;
+
+      /**
+       * The values of the {@link domain.Annotation|Annotations} collected for this participant.
+       *
+       * @name domain.studies.Participant#annotations
+       * @type {Array<domain.Annotation>}
+       */
+      this.annotations = [];
 
       obj = obj || {};
-      ConcurrencySafeEntity.call(this, obj);
-      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
+      ConcurrencySafeEntity.call(this);
+      _.extend(this, obj);
 
       if (study) {
         this.setStudy(study);
@@ -67,26 +98,92 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     Participant.prototype.constructor = Participant;
 
     /**
-     * Used by promise code, so it must return an error rather than throw one.
+     * Checks if <tt>obj</tt> has valid properties to construct a {@link
+     * domain.studies.Participant|Participant}.
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
      */
-    Participant.create = function (obj) {
+    Participant.validate = function (obj) {
       if (!tv4.validate(obj, schema)) {
-        console.error('invalid object from server: ' + tv4.error);
-        throw new DomainError('invalid object from server: ' + tv4.error);
+        return { valid: false, message : 'invalid object from server: ' + tv4.error };
       }
 
+      obj.annotations = obj.annotations || {};
+
       if (!hasAnnotations.validAnnotations(obj.annotations)) {
-        console.error('invalid object from server: bad annotation type');
-        throw new DomainError('invalid object from server: bad annotation type');
+        return { valid: false, message : 'invalid object from server: bad annotation types' + tv4.error };
+      }
+
+      return { valid: true, message: null };
+    };
+
+    /**
+     * Creates a Participant, but first it validates <tt>obj</tt> to ensure that it has a valid schema.
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @returns {domain.studies.Participant} A participant created from the given object.
+     *
+     * @see {@link domain.studies.Participant.asyncCreate|asyncCreate()} when you need to create a participant
+     * within asynchronous code.
+     */
+    Participant.create = function (obj) {
+      var validation = Participant.validate(obj);
+      if (!validation.valid) {
+        $log.error(validation.message);
+        throw new DomainError(validation.message);
       }
       return new Participant(obj);
     };
 
+    /**
+     * Creates a Participant from a server reply but first validates that <tt>obj</tt> has a valid schema.
+     * <i>Meant to be called from within promise code.</i>
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @returns {Promise<domain.studies.Participant>} A participant wrapped in a promise.
+     *
+     * @see {@link domain.studies.Participant.create|create()} when not creating a Participant within
+     * asynchronous code.
+     */
+    Participant.asyncCreate = function (obj) {
+      var deferred = $q.defer(),
+          validation = Participant.validate(obj);
+
+      if (!validation.valid) {
+        $log.error(validation.message);
+        deferred.reject(validation.message);
+      } else {
+        deferred.resolve(new Participant(obj));
+      }
+      return deferred.promise;
+    };
+
+    /**
+     * Retrieves a Participant from the server.
+     *
+     * @param {string} id the ID of the participant to retrieve.
+     *
+     * @returns {Promise<domain.studies.Participant>} The participant within a promise.
+     */
     Participant.get = function (studyId, id) {
       return biobankApi.get(sprintf.sprintf('/participants/%s/%s', studyId, id))
         .then(Participant.prototype.asyncCreate);
     };
 
+    /**
+     * Retrieves a Participant, using the uniqueId, from the server.
+     *
+     * @param {string} uniqueId the uniqeue ID assigned to the participant.
+     *
+     * @returns {Promise<domain.studies.Participant>} The participant within a promise.
+     */
     Participant.getByUniqueId = function (studyId, uniqueId) {
       return biobankApi.get(sprintf.sprintf('/participants/uniqueId/%s/%s', studyId, uniqueId))
         .then(function (reply) {
@@ -101,21 +198,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     };
 
     Participant.prototype.asyncCreate = function (obj) {
-      var deferred = $q.defer();
-
-      obj = obj || {};
-      obj.annotations = obj.annotations || {};
-
-      if (!tv4.validate(obj, schema)) {
-        console.error('invalid object from server: ' + tv4.error);
-        deferred.reject('invalid object from server: ' + tv4.error);
-      } else if (!hasAnnotations.validAnnotations(obj.annotations)) {
-        console.error('invalid object from server: bad annotation type');
-        deferred.reject('invalid object from server: bad annotation type');
-      } else {
-        deferred.resolve(new Participant(obj));
-      }
-      return deferred.promise;
+      return Participant.asyncCreate(obj);
     };
 
     /**
@@ -151,7 +234,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
       return deferred.promise;
     };
 
-    /**
+    /*
      * Sets the collection event type after an update.
      */
     Participant.prototype.update = function (path, reqJson) {

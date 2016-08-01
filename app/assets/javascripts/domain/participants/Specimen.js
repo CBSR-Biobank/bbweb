@@ -7,6 +7,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
 
   SpecimenFactory.$inject = [
     '$q',
+    '$log',
     'ConcurrencySafeEntity',
     'DomainError',
     'biobankApi'
@@ -24,6 +25,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
    * @returns {Factory} The AngularJS factory function.
    */
   function SpecimenFactory($q,
+                           $log,
                            ConcurrencySafeEntity,
                            DomainError,
                            biobankApi) {
@@ -183,7 +185,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      */
     Specimen.create = function (obj, specimenSpec) {
       if (!tv4.validate(obj, schema)) {
-        console.error('invalid object from server: ' + tv4.error);
+        $log.error('invalid object from server: ' + tv4.error);
         throw new DomainError('invalid object from server: ' + tv4.error);
       }
 
@@ -207,7 +209,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
       var deferred = $q.defer();
 
       if (!tv4.validate(obj, schema)) {
-        console.error('invalid object from server: ' + tv4.error);
+        $log.error('invalid object from server: ' + tv4.error);
         deferred.reject('invalid object from server: ' + tv4.error);
       } else {
         deferred.resolve(new Specimen(obj));

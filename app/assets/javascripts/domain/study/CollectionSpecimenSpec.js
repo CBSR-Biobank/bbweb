@@ -6,7 +6,6 @@ define(['lodash', 'tv4'], function(_, tv4) {
   'use strict';
 
   CollectionSpecimenSpecFactory.$inject = [
-    'funutils',
     'validationService',
     'biobankApi'
   ];
@@ -14,8 +13,7 @@ define(['lodash', 'tv4'], function(_, tv4) {
   /**
    *
    */
-  function CollectionSpecimenSpecFactory(funutils,
-                                         validationService,
+  function CollectionSpecimenSpecFactory(validationService,
                                          biobankApi) {
 
     /**

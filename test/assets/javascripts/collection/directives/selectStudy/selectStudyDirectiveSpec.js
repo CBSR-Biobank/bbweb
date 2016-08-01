@@ -34,9 +34,10 @@ define([
         '</select-study>'
       ].join(''));
       this.scope = this.$rootScope.$new();
-      this.scope.model = _.extend({}, { getHeader:  getHeader }, options);
+      this.scope.model = _.extend({ getHeader:  getHeader }, options);
       this.$compile(this.element)(this.scope);
       this.scope.$digest();
+      this.controller = this.element.controller('selectStudy');
     };
 
     var createGetStudiesFn = function (studies) {
@@ -118,7 +119,7 @@ define([
                          pageSize: pageSize
                        });
 
-      expect(self.element.isolateScope().vm.showPagination).toBe(true);
+      expect(self.controller.showPagination).toBe(true);
       expect(self.element.find('ul.pagination').length).toBe(1);
     });
 
@@ -133,7 +134,7 @@ define([
                          pageSize: pageSize
                        });
       spyOn(self.scope.model, 'getStudies').and.callThrough();
-      self.element.isolateScope().vm.nameFilterUpdated();
+      self.controller.nameFilterUpdated();
       expect(this.scope.model.getStudies).toHaveBeenCalled();
     });
 
@@ -149,7 +150,7 @@ define([
                        });
 
       spyOn(self.scope.model, 'getStudies').and.callThrough();
-      self.element.isolateScope().vm.pageChanged();
+      self.controller.pageChanged();
       expect(self.scope.model.getStudies).toHaveBeenCalled();
     });
 
@@ -165,17 +166,14 @@ define([
                        });
 
       spyOn(self.scope.model, 'getStudies').and.callThrough();
-      self.element.isolateScope().vm.clearFilter();
+      self.controller.clearFilter();
       expect(self.scope.model.getStudies).toHaveBeenCalled();
     });
 
-    it('navigateToStudyHref returns valid link', function() {
+    it('studyGlyphicon returns valid image tag', function() {
       var self = this,
-          $state = this.$injector.get('$state'),
           studies = _.map(_.range(20), function () { return self.factory.study(); }),
           pageSize = studies.length / 2,
-          fakeUrl = self.factory.stringNext(),
-          stateNameParam = {},
           studyToNavigateTo = studies[0];
 
       createScope.call(this,
@@ -184,17 +182,8 @@ define([
                          pageSize: pageSize
                        });
 
-      spyOn($state, 'href').and.returnValue(fakeUrl);
-
-      expect(self.element.isolateScope().vm.navigateToStudyHref(studyToNavigateTo))
-        .toEqual('<a href="' + fakeUrl + '"><strong><i class="glyphicon glyphicon-ok-circle"></i> ' +
-                 studies[0].name + '</strong></a>');
-
-      stateNameParam[navigateStateParamName] = studyToNavigateTo.id;
-      expect($state.href).toHaveBeenCalledWith(
-        navigateStateName,
-        stateNameParam,
-        { absolute: true});
+      expect(self.controller.studyGlyphicon(studyToNavigateTo))
+        .toEqual('<i class="glyphicon glyphicon-ok-circle"></i>');
     });
 
   });

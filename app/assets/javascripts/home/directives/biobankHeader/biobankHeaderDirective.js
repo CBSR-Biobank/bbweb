@@ -19,9 +19,9 @@ define(function () {
     return directive;
   }
 
-  BiobankHeaderCtrl.$inject = ['$scope', '$state', 'usersService'];
+  BiobankHeaderCtrl.$inject = ['$scope', '$state', '$log', 'usersService'];
 
-  function BiobankHeaderCtrl($scope, $state, usersService) {
+  function BiobankHeaderCtrl($scope, $state, $log, usersService) {
     var vm = this;
     vm.logout = logout;
     vm.user = undefined;
@@ -45,7 +45,7 @@ define(function () {
       }
 
       function goHomeError(error) {
-        console.error('logout failed:', error);
+        $log.error('logout failed:', error);
         goHome();
       }
     }

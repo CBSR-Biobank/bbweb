@@ -50,7 +50,6 @@ define([
       expect(user.timeModified).toBeNull();
       expect(user.name).toBeEmptyString();
       expect(user.email).toBeEmptyString();
-      expect(user.avatarUrl).toBeNull();
       expect(user.status).toBe(this.UserStatus.REGISTERED);
     });
 
@@ -64,7 +63,6 @@ define([
       var self = this,
           nonObj = 1;
       expect(function () {
-        console.log('here');
         self.User.create(nonObj);
       }).toThrowError(/invalid object from server/);
     });

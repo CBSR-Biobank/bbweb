@@ -255,8 +255,8 @@ trait JsonHelper extends MustMatchers with OptionValues {
     compareEntity(json, shipment)
     (json \ "courierName").as[String] mustBe (shipment.courierName)
     (json \ "trackingNumber").as[String] mustBe (shipment.trackingNumber)
-    (json \ "fromLocationId").as[String] mustBe (shipment.fromLocationId)
-    (json \ "toLocationId").as[String] mustBe (shipment.toLocationId)
+    (json \ "fromLocationInfo" \ "locationId").as[String] mustBe (shipment.fromLocationId)
+    (json \ "toLocationInfo" \ "locationId").as[String] mustBe (shipment.toLocationId)
 
     TestUtils.checkOpionalTime((json \ "timePacked").asOpt[DateTime], shipment.timePacked)
     TestUtils.checkOpionalTime((json \ "timeSent").asOpt[DateTime], shipment.timeSent)

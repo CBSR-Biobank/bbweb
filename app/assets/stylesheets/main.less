@@ -1,102 +1,104 @@
 body {
-    margin-top: 50px;
-    padding: 10px !important;
+   margin-top: 50px;
+   padding: 10px !important;
 }
 
 @link-color: #e3ffc7;
 
 .basics-nav {
-    /* background-color: #7ece25; */
-    .navbar-brand {
-        color: @link-color;
-    }
-    .navbar-nav {
-        li a {
-            color: @link-color;
-        }
-        .dropdown-menu {
-            a {
-                color: #000;
-            }
-        }
-    }
+   /* background-color: #7ece25; */
+   .navbar-brand {
+      color: @link-color;
+   }
+   .navbar-nav {
+      li a {
+         color: @link-color;
+      }
+      .dropdown-menu {
+         a {
+            color: #000;
+         }
+      }
+   }
 }
 
 /* AngularJS */
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
-    display: none;
+   display: none;
 }
 
 .ng-invalid.ng-dirty {
-    border-color: #FA787E;
+   border-color: #FA787E;
 }
 
 .ng-valid.ng-dirty {
-    border-color: #78FA89;
+   border-color: #78FA89;
 }
 
 /* tables in collapsable panels */
 //accordion > div > participants-annot-types-panel > div > div.panel-collapse.collapse.in > div > table
 .panel-collapse .table {
-    border-top: 1px solid #ddd;
+   border-top: 1px solid #ddd;
 }
 
 fieldset.filter {
-    border: 1px groove #ddd !important;
-    padding: 0 1.4em 1.4em 1.4em !important;
-    margin: 0 0 1.5em 0 !important;
-    -webkit-box-shadow:  0px 0px 0px 0px #000;
-    box-shadow:  0px 0px 0px 0px #000;
+   border: 1px groove #ddd !important;
+   padding: 0 1.4em 1.4em 1.4em !important;
+   margin: 0 0 1.5em 0 !important;
+   -webkit-box-shadow:  0px 0px 0px 0px #000;
+   box-shadow:  0px 0px 0px 0px #000;
 }
 
 legend.filter {
-    font-size: 1.2em !important;
-    font-weight: bold !important;
-    text-align: left !important;
-    width: inherit;
-    padding: 0 10px;
-    border-bottom: none;
+   font-size: 1.2em !important;
+   font-weight: bold !important;
+   text-align: left !important;
+   width: inherit;
+   padding: 0 10px;
+   border-bottom: none;
 }
 
 /* for smart-table */
 .st-sort-ascent:before{
-    content: '\25B2';
+   content: '\25B2';
 }
 
 /* for smart-table */
 .st-sort-descent:before{
-    content: '\25BC';
+   content: '\25BC';
 }
 
 /* for smart-table */
 .select-page {
-  width: 50px;
-  text-align: center;
+   width: 50px;
+   text-align: center;
 }
 
 /* for smart-table */
 .pagination li a input {
-  padding: 0;
-  margin: -5px 0;
+   padding: 0;
+   margin: -5px 0;
 }
 
 .datetimepicker-wrapper {
-  vertical-align: middle;
-  display: inline-block;
+   vertical-align: middle;
+   display: inline-block;
 }
 
 .datetimepicker-wrapper > input {
-  margin-bottom: 0 !important;
-  width: 130px;
+   margin-bottom: 0 !important;
+   width: 130px;
 }
 
 .datetimepicker-wrapper [ng-model=hours],
 .datetimepicker-wrapper [ng-model=minutes] {
-  width: 46px !important;
+   width: 46px !important;
 }
 
 /* fix for borders in tables inside collapsable panels */
 .panel-collapse .table, .panel-collapse .table td {
-  border-top: 0px;
-  border-bottom: 0px;
+   border-top: 0px;
+   border-bottom: 0px;
 }
+
+@import "progress-tracker.less";

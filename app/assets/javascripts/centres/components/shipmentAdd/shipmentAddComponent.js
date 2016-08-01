@@ -18,7 +18,8 @@ define(['lodash'], function (_) {
     '$state',
     'Shipment',
     'domainEntityService',
-    'notificationsService'
+    'notificationsService',
+    'shipmentProgressItems'
   ];
 
   /**
@@ -27,8 +28,14 @@ define(['lodash'], function (_) {
   function ShipmentAddController($state,
                                  Shipment,
                                  domainEntityService,
-                                 notificationsService) {
+                                 notificationsService,
+                                 shipmentProgressItems) {
     var vm = this;
+
+    vm.progressInfo = {
+      items: shipmentProgressItems,
+      current: 1
+    };
 
     vm.hasValidCentres          = (vm.centreLocations.length > 1);
     vm.shipment                 = new Shipment();
@@ -45,17 +52,17 @@ define(['lodash'], function (_) {
     //--
 
     function submit(specimenSpec) {
-      vm.shipment.fromLocationId = vm.selectedFromLocationInfo.locationId;
-      vm.shipment.toLocationId = vm.selectedToLocationInfo.locationId;
+      vm.shipment.fromLocationInfo = { locationId: vm.selectedFromLocationInfo.locationId };
+      vm.shipment.toLocationInfo = { locationId: vm.selectedToLocationInfo.locationId };
       vm.shipment.add().then(onAddSuccessful).catch(onAddFailed);
-    }
 
-    function onAddSuccessful(shipment) {
-      $state.go('home.shipping.addSpecimens', { shipmentId: shipment.id });
-    }
+      function onAddSuccessful(shipment) {
+        $state.go('home.shipping.addSpecimens', { shipmentId: shipment.id });
+      }
 
-    function onAddFailed(error) {
-      domainEntityService.updateErrorModal(error, 'shipment');
+      function onAddFailed(error) {
+        domainEntityService.updateErrorModal(error, 'shipment');
+      }
     }
 
     function cancel() {

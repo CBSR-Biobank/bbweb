@@ -11,6 +11,7 @@ define(function (require) {
 
   ShipmentFactory.$inject = [
     '$q',
+    '$log',
     'ConcurrencySafeEntity',
     'DomainError',
     'ShipmentState',
@@ -18,10 +19,26 @@ define(function (require) {
   ];
 
   function ShipmentFactory($q,
+                           $log,
                            ConcurrencySafeEntity,
                            DomainError,
                            ShipmentState,
                            biobankApi) {
+
+    var centreLocationSchema = {
+      'id': 'CentreLocationInfo',
+      'type': 'object',
+      'properties': {
+        'centreId':   { 'type': 'string' },
+        'locationId': { 'type': 'string' },
+        'name':       { 'type': 'string' }
+      },
+      'required': [
+        'centreId',
+        'locationId',
+        'name',
+      ]
+    };
 
     var schema = {
       'id': 'Shipment',
@@ -34,8 +51,14 @@ define(function (require) {
         'state':            { 'type': 'string' },
         'courierName':      { 'type': 'string' },
         'trackingNumber':   { 'type': 'string' },
-        'fromLocationId':   { 'type': 'string' },
-        'toLocationId':     { 'type': 'string' },
+        'fromLocationInfo': {
+          'type': 'object',
+          'items': { '$ref': 'CentreLocationInfo' }
+        },
+        'toLocationInfo': {
+          'type': 'object',
+          'items': { '$ref': 'CentreLocationInfo' }
+        },
         'timePacked':       { 'type': [ 'string', 'null' ] },
         'timeSent':         { 'type': [ 'string', 'null' ] },
         'timeReceived':     { 'type': [ 'string', 'null' ] },
@@ -47,8 +70,8 @@ define(function (require) {
         'state',
         'courierName',
         'trackingNumber',
-        'fromLocationId',
-        'toLocationId'
+        'fromLocationInfo',
+        'toLocationInfo'
       ]
     };
 
@@ -97,36 +120,20 @@ define(function (require) {
       this.trackingNumber = '';
 
       /**
-       * The centre location ID which is sending the specimens.
+       * The information for the centre location which is sending the specimens.
        *
-       * @name domain.centres.Shipment#fromLocationId
-       * @type {string}
+       * @name domain.centres.Shipment#fromLocationInfo
+       * @type {domain.centres.CentreLocationNameDto}
        */
-      this.fromLocationId = '';
+      this.fromLocationInfo = undefined;
 
       /**
-       * The name of the centre location which is sending the specimens.
+       * The information for the centre location which is receiving the specimens.
        *
-       * @name domain.centres.Shipment#fromLocationName
-       * @type {string}
+       * @name domain.centres.Shipment#toLocationInfo
+       * @type {domain.centres.CentreLocationNameDto}
        */
-      this.toLocationName = '';
-
-      /**
-       * The centre location ID which is receiving the specimens.
-       *
-       * @name domain.centres.Shipment#toLocationId
-       * @type {string}
-       */
-      this.toLocationId = '';
-
-      /**
-       * The name of the centre location which is receiving the specimens.
-       *
-       * @name domain.centres.Shipment#toLocationName
-       * @type {string}
-       */
-      this.toLocationName = '';
+      this.toLocationInfo = undefined;
 
       /**
        * The date and time when the shipment was packed.
@@ -153,7 +160,7 @@ define(function (require) {
        */
 
       obj = obj || {};
-      ConcurrencySafeEntity.call(this, obj);
+      ConcurrencySafeEntity.call(this);
       _.extend(this, obj);
     }
 
@@ -164,6 +171,8 @@ define(function (require) {
      * @private
      */
     Shipment.isValid = function(obj) {
+      tv4.addSchema(centreLocationSchema);
+      tv4.addSchema(schema);
       return tv4.validate(obj, schema);
     };
 
@@ -179,8 +188,8 @@ define(function (require) {
      * a shipment within asynchronous code.
      */
     Shipment.create = function (obj) {
-      if (!tv4.validate(obj, schema)) {
-        console.error('invalid object from server: ' + tv4.error);
+      if (!Shipment.isValid(obj)) {
+        $log.error('invalid object from server: ' + tv4.error);
         throw new DomainError('invalid object from server: ' + tv4.error);
       }
 
@@ -203,8 +212,8 @@ define(function (require) {
     Shipment.asyncCreate = function (obj) {
       var deferred = $q.defer();
 
-      if (!tv4.validate(obj, schema)) {
-        console.error('invalid object from server: ' + tv4.error);
+      if (!Shipment.isValid(obj)) {
+        $log.error('invalid object from server: ' + tv4.error);
         deferred.reject('invalid object from server: ' + tv4.error);
       } else {
         deferred.resolve(new Shipment(obj));
@@ -235,6 +244,8 @@ define(function (require) {
      *
      * <p>A paged API is used to list shipments. See below for more details.</p>
      *
+     * @param {String} centreId - The ID for the centre to list shipments for.
+     *
      * @param {object} options - The options to use to list shipments.
      *
      * @param {string} options.courierFilter The filter to use on courier names. Default is empty string.
@@ -259,8 +270,8 @@ define(function (require) {
      *
      * @return A promise. If the promise succeeds then a paged result is returned.
      */
-    Shipment.list = function (options) {
-      var url = uri(),
+    Shipment.list = function (centreId, options) {
+      var url = uri() + '/list/' + centreId,
           params,
           validKeys = [
             'courierFilter',
@@ -309,8 +320,8 @@ define(function (require) {
     Shipment.prototype.add = function () {
       var json = { courierName:    this.courierName,
                    trackingNumber: this.trackingNumber,
-                   fromLocationId: this.fromLocationId,
-                   toLocationId:   this.toLocationId
+                   fromLocationId: this.fromLocationInfo.locationId,
+                   toLocationId:   this.toLocationInfo.locationId
                  };
       return biobankApi.post(uri(), json).then(function(reply) {
         return Shipment.asyncCreate(reply);

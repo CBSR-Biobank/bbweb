@@ -33,6 +33,23 @@ package dto {
 
   }
 
+  final case class CentreLocationInfo(centreId:   String,
+                                      locationId: String,
+                                      name:       String)
+
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
+  object CentreLocationInfo {
+
+    def apply(centreId: String,
+              locationId: String,
+              centreName: String,
+              locationName: String): CentreLocationInfo =
+        CentreLocationInfo(centreId, locationId, s"$centreName: $locationName")
+
+    implicit val centreLocationInfoWriter: Writes[CentreLocationInfo] = Json.writes[CentreLocationInfo]
+
+  }
+
   final case class StudyCountsByStatus(total:         Long,
                                        disabledCount: Long,
                                        enabledCount:  Long,
@@ -89,10 +106,8 @@ package dto {
                                state:            String,
                                courierName:      String,
                                trackingNumber:   String,
-                               fromLocationId:   String,
-                               fromLocationName: String,
-                               toLocationId:     String,
-                               toLocationName:   String,
+                               fromLocationInfo: CentreLocationInfo,
+                               toLocationInfo:   CentreLocationInfo,
                                timePacked:       Option[DateTime],
                                timeSent:         Option[DateTime],
                                timeReceived:     Option[DateTime],
@@ -117,10 +132,10 @@ package dto {
       (a.state compareToIgnoreCase b.state) < 0
 
     def compareByFromLocation(a: ShipmentDto, b: ShipmentDto) =
-      (a.fromLocationName compareToIgnoreCase b.fromLocationName) < 0
+      (a.fromLocationInfo.name compareToIgnoreCase b.fromLocationInfo.name) < 0
 
     def compareByToLocation(a: ShipmentDto, b: ShipmentDto) =
-      (a.toLocationName compareToIgnoreCase b.toLocationName) < 0
+      (a.toLocationInfo.name compareToIgnoreCase b.toLocationInfo.name) < 0
 
     implicit val shipmentDtooDtoWriter: Writes[ShipmentDto] = Json.writes[ShipmentDto]
 

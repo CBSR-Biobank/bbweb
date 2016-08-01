@@ -7,6 +7,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
 
   CollectionEventFactory.$inject = [
     '$q',
+    '$log',
     'funutils',
     'ConcurrencySafeEntity',
     'DomainError',
@@ -20,6 +21,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
    * Factory for participants.
    */
   function CollectionEventFactory($q,
+                                  $log,
                                   funutils,
                                   ConcurrencySafeEntity,
                                   DomainError,
@@ -74,17 +76,41 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      */
     function CollectionEvent(obj, collectionEventType) {
       // FIXME: jsdoc for this classes members is needed
-      var defaults = {
-        participantId:         null,
-        collectionEventTypeId: null,
-        timeCompleted:         null,
-        visitNumber:           null,
-        annotations:           []
-      };
+      // var defaults = {
+      //   participantId:         null,
+      //   collectionEventTypeId: null,
+      //   timeCompleted:         null,
+      //   visitNumber:           null,
+      //   annotations:           []
+      // };
+
+      /**
+       * The number assigned to the collection event.
+       *
+       * @name domain.participants.CollectionEvent#visitNumber
+       * @type {integer}
+       */
+      this.visitNumber = null;
+
+      /**
+       * The time this collection event was completed at.
+       *
+       * @name domain.participants.CollectionEvent#timeCompleted
+       * @type {Date}
+       */
+      this.timeCompleted = null;
+
+      /**
+       * The annotations assigned to this collection event.
+       *
+       * @name domain.participants.CollectionEvent#annotations
+       * @type {Array<domain.AnnotationType>}
+       */
+      this.annotations = null;
 
       obj = obj || {};
-      ConcurrencySafeEntity.call(this, obj);
-      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
+      ConcurrencySafeEntity.call(this);
+      _.extend(this, obj);
 
       if (this.collectionEventTypeId &&
           collectionEventType &&
@@ -117,12 +143,12 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      */
     CollectionEvent.create = function (obj, collectionEventType) {
       if (!tv4.validate(obj, schema)) {
-        console.error('invalid object from server: ' + tv4.error);
+        $log.error('invalid object from server: ' + tv4.error);
         throw new DomainError('invalid object from server: ' + tv4.error);
       }
 
       if (!Annotation.validAnnotations(obj.annotations)) {
-        console.error('invalid object from server: bad annotations');
+        $log.error('invalid object from server: bad annotations');
         throw new DomainError('invalid object from server: bad annotations');
       }
 
@@ -151,10 +177,10 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
       var deferred = $q.defer();
 
       if (!tv4.validate(obj, schema)) {
-        console.error('invalid object from server: ' + tv4.error);
+        $log.error('invalid object from server: ' + tv4.error);
         deferred.reject('invalid object from server: ' + tv4.error);
       } else if (!Annotation.validAnnotations(obj.annotationTypes)) {
-        console.error('invalid annotation types from server: ' + tv4.error);
+        $log.error('invalid annotation types from server: ' + tv4.error);
         deferred.reject('invalid annotation types from server: ' + tv4.error);
       } else {
         deferred.resolve(new CollectionEvent(obj));

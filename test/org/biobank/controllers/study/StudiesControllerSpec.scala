@@ -998,7 +998,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     "GET /studies/centres/:id" must {
 
-      "111 list the centres associated with a study" in {
+      "list the centres associated with a study" in {
         val study = factory.createEnabledStudy
         val location = factory.createLocation
         val centre = factory.createEnabledCentre.copy(studyIds = Set(study.id), locations = Set(location))

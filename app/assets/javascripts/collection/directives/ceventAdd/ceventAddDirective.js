@@ -70,9 +70,11 @@ define(['lodash'], function(_) {
         });
     }
 
-    function submitSuccess(reply) {
+    function submitSuccess(cevent) {
       notificationsService.submitSuccess();
-      $state.go('home.collection.study.participant.cevents', {}, { reload: true });
+      $state.go('home.collection.study.participant.cevents.details',
+                { collectionEventId: cevent.id },
+                { reload: true });
     }
 
     function cancel() {

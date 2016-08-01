@@ -8,7 +8,7 @@ import javax.inject.{Inject, Named}
 import org.biobank.domain.centre._
 import org.biobank.domain.participants.{CeventSpecimenRepository, CollectionEventRepository, SpecimenRepository}
 import org.biobank.domain.study.CollectionEventTypeRepository
-import org.biobank.dto.{ShipmentDto, ShipmentSpecimenDto}
+import org.biobank.dto.{CentreLocationInfo, ShipmentDto, ShipmentSpecimenDto}
 import org.biobank.infrastructure.command.ShipmentCommands._
 import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
 import org.biobank.infrastructure.event.ShipmentEvents._
@@ -26,7 +26,8 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[ShipmentsServiceImpl])
 trait ShipmentsService {
 
-  def getShipments(courierFilter:        String,
+  def getShipments(centreId:             String,
+                   courierFilter:        String,
                    trackingNumberFilter: String,
                    stateFilter:          String,
                    sortBy:               String,
@@ -41,7 +42,7 @@ trait ShipmentsService {
   def getShipmentSpecimen(shipmentId: String, shipmentSpecimenId: String)
       : ServiceValidation[ShipmentSpecimenDto]
 
-  def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[Shipment]]
+  def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[ShipmentDto]]
 
   def removeShipment(cmd: ShipmentRemoveCmd): Future[ServiceValidation[Boolean]]
 
@@ -68,7 +69,8 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
 
   implicit val timeout: Timeout = 5.seconds
 
-  def getShipments(courierFilter:        String,
+  def getShipments(centreId:             String,
+                   courierFilter:        String,
                    trackingNumberFilter: String,
                    stateFilter:          String,
                    sortBy:               String,
@@ -76,13 +78,13 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
       : ServiceValidation[List[ShipmentDto]] = {
     ShipmentDto.sort2Compare.get(sortBy).toSuccessNel(ServiceError(s"invalid sort field: $sortBy"))
       .flatMap { sortFunc =>
-      val allShipments = shipmentRepository.getValues
+      val centreShipments = shipmentRepository.withCentre(CentreId(centreId))
 
       val shipmentsFilteredByCourier = if (!courierFilter.isEmpty) {
           val courierLowerCase = courierFilter.toLowerCase
-          allShipments.filter { _.courierName.toLowerCase.contains(courierLowerCase)}
+          centreShipments.filter { _.courierName.toLowerCase.contains(courierLowerCase)}
         } else {
-          allShipments
+          centreShipments
         }
 
       val shipmentsFilteredByTrackingNumber = if (!trackingNumberFilter.isEmpty) {
@@ -136,11 +138,19 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
 
   private def getShipmentDto(shipment: Shipment): ServiceValidation[ShipmentDto] = {
     for {
-      fromCentre <- centreRepository.getByLocationId(shipment.fromLocationId)
+      fromCentre       <- centreRepository.getByLocationId(shipment.fromLocationId)
       fromLocationName <- fromCentre.locationName(shipment.fromLocationId)
-      toCentre <- centreRepository.getByLocationId(shipment.toLocationId)
-      toLocationName <- toCentre.locationName(shipment.toLocationId)
-    } yield shipment.toDto(fromLocationName, toLocationName)
+      toCentre         <- centreRepository.getByLocationId(shipment.toLocationId)
+      toLocationName   <- toCentre.locationName(shipment.toLocationId)
+    } yield {
+      val fromLocationInfo = CentreLocationInfo(fromCentre.id.id,
+                                                shipment.fromLocationId,
+                                                fromLocationName)
+      val toLocationInfo = CentreLocationInfo(toCentre.id.id,
+                                              shipment.toLocationId,
+                                              toLocationName)
+      shipment.toDto(fromLocationInfo, toLocationInfo)
+    }
   }
 
   private def getShipmentSpecimenDto(shipmentSpecimen: ShipmentSpecimen)
@@ -156,12 +166,13 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
     } yield shipmentSpecimen.createDto(specimen, centreLocationName, specimenSpec.units)
   }
 
-  def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[Shipment]] = {
+  def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[ShipmentDto]] = {
     ask(processor, cmd).mapTo[ServiceValidation[ShipmentEvent]].map { validation =>
       for {
         event    <- validation
         shipment <- shipmentRepository.getByKey(ShipmentId(event.id))
-      } yield shipment
+        dto      <- getShipmentDto(shipment)
+      } yield dto
     }
   }
 

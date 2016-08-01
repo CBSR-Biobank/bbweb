@@ -13,12 +13,14 @@ define([
 
   describe('ceventSpecimensViewComponent', function() {
 
-    var createController = function (collectionEvent) {
+    var createController = function (study, collectionEvent) {
+      study = study || this.study;
       collectionEvent = collectionEvent || this.collectionEvent;
       this.scope = this.$rootScope.$new();
       this.controller = this.$componentController('ceventSpecimensView',
-                                             null,
-                                             { collectionEvent: collectionEvent });
+                                                  null,
+                                                  { study:           study,
+                                                    collectionEvent: collectionEvent });
 
       this.controller.tableController = {
         tableState: jasmine.createSpy().and.returnValue({
@@ -50,7 +52,7 @@ define([
       self.injectDependencies('$q',
                               '$rootScope',
                               '$componentController',
-                              'Centre',
+                              'Study',
                               'Specimen',
                               'CollectionEvent',
                               'CollectionEventType',
@@ -66,11 +68,13 @@ define([
                                                       self.collectionEventType);
       self.specimen = new self.Specimen(self.factory.specimen(),
                                         self.collectionEventType.specimenSpecs[0]);
+      self.study = new self.Study(self.factory.defaultStudy());
 
       spyOn(self.Specimen, 'list').and.returnValue(self.$q.when(self.factory.pagedResult([])));
       spyOn(self.Specimen, 'add').and.returnValue(self.$q.when(self.sepcimen));
       spyOn(self.specimenAddModal, 'open').and.returnValue({ result: self.$q.when([ self.specimen ])});
-      spyOn(self.Centre, 'allLocations').and.returnValue(self.$q.when(createCentreLocations.call(self)));
+      spyOn(self.Study.prototype, 'allLocations')
+        .and.returnValue(self.$q.when(createCentreLocations.call(self)));
     }));
 
     it('has valid scope', function() {
@@ -94,7 +98,7 @@ define([
           expect(this.controller.centreLocations).toBeEmptyArray();
           this.controller.addSpecimens();
           this.scope.$digest();
-          expect(this.Centre.allLocations).toHaveBeenCalled();
+          expect(this.Study.prototype.allLocations).toHaveBeenCalled();
           expect(this.controller.centreLocations).not.toBeEmptyArray();
         });
 
@@ -103,7 +107,7 @@ define([
           this.controller.centreLocations = createCentreLocations.call(this);
           this.controller.addSpecimens();
           this.scope.$digest();
-          expect(this.Centre.allLocations).not.toHaveBeenCalled();
+          expect(this.Study.prototype.allLocations).not.toHaveBeenCalled();
         });
 
       });

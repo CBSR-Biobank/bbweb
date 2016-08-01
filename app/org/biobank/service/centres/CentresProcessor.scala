@@ -506,6 +506,4 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
 
     processUpdateCmd(cmd, internal, applyEvent)
   }
-
-  testData.addMultipleCentres
 }

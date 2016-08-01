@@ -99,19 +99,14 @@ class SpecimensServiceImpl @Inject() (
 
     def getSpecimens(ceventId: CollectionEventId): ServiceValidation[List[Specimen]] = {
       ceventSpecimenRepository.withCeventId(ceventId)
-        .map { cs => {
-                val r = specimenRepository.getByKey(cs.specimenId)
-                log.info(s"-------->  $r")
-                r
-              }
-      }
+        .map { cs => specimenRepository.getByKey(cs.specimenId) }
         .toList
         .sequenceU
         .map { list => {
                 val result = list.sortWith(sortFunc)
                 if (order == AscendingOrder) result else result.reverse
               }
-        }
+      }
     }
 
     validCevent(collectionEventId) { cevent =>

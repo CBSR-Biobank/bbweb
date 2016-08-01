@@ -55,7 +55,6 @@ define([
       expect(study.timeAdded).toBeNull();
       expect(study.timeModified).toBeNull();
       expect(study.name).toBeEmptyString();
-      expect(study.description).toBeNull();
       expect(study.status).toBe(this.StudyStatus.DISABLED);
     });
 
@@ -133,7 +132,7 @@ define([
       }
 
       function shouldFail(error) {
-        expect(error).toStartWith('invalid annotation types from server');
+        expect(error).toContain('bad annotation types');
       }
     });
 

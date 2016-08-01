@@ -286,23 +286,12 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
       addCollectionEventTypes
 
       if (loadSpecimenTestData) {
-
-        studyRepository.getValues
-          .find { s => s.name == "BBPSP"}
-          .foreach { bbpsp =>
+        studyRepository.getValues.find { s => s.name == "BBPSP"}.foreach { bbpsp =>
           bbpsp match {
-            case s: DisabledStudy => {
-              s.enable.foreach { study =>
-                studyRepository.put(study)
-              }
-            }
+            case s: DisabledStudy => s.enable.foreach(studyRepository.put)
             case s =>
           }
         }
-
-        addBbpspParticipants
-        addBbpspCevents
-        addBbpspSpecimens
       }
     }
   }
@@ -462,90 +451,103 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
   }
 
   def addBbpspParticipants() = {
-    val hashids = Hashids("bbpsp-participants")
+    if (loadSpecimenTestData) {
+      val hashids = Hashids("bbpsp-participants")
 
-    studyRepository.getValues
-      .find { s => s.name == "BBPSP"}
-      .foreach { bbpsp =>
+      studyRepository.getValues
+        .find { s => s.name == "BBPSP"}
+        .foreach { bbpsp =>
 
-      (0 to 3).foreach { index =>
-        participantRepository.put(
-          Participant(id           = ParticipantId(hashids.encode(index)),
-                      studyId      = bbpsp.id,
-                      version      = 0L,
-                      timeAdded    = DateTime.now,
-                      timeModified = None,
-                      uniqueId     = f"P$index%05d",
-                      annotations  = Set.empty[Annotation]))
+        (0 to 3).foreach { index =>
+          participantRepository.put(
+            Participant(id           = ParticipantId(hashids.encode(index)),
+                        studyId      = bbpsp.id,
+                        version      = 0L,
+                        timeAdded    = DateTime.now,
+                        timeModified = None,
+                        uniqueId     = f"P$index%05d",
+                        annotations  = Set.empty[Annotation]))
+        }
       }
     }
   }
 
   def addBbpspCevents() = {
-    val hashids = Hashids("bbpsp-collection-events")
+    log.info(s"addBbpspCevents")
 
-    studyRepository.getValues
-      .find { s => s.name == "BBPSP"}
-      .foreach { bbpsp =>
+    if (loadSpecimenTestData) {
+      val hashids = Hashids("bbpsp-collection-events")
 
-      participantRepository.allForStudy(bbpsp.id).zipWithIndex.foreach {
-        case (participant, pIndex) =>
-          collectionEventTypeRepository.allForStudy(bbpsp.id).zipWithIndex.foreach {
-            case (ceventType, cetIndex) =>
-              val id = CollectionEventId(hashids.encode(10 * pIndex + cetIndex))
-              collectionEventRepository.put(
-                CollectionEvent(id                    = id,
-                                participantId         = participant.id,
-                                collectionEventTypeId = ceventType.id,
-                                version               = 0L,
-                                timeAdded             = DateTime.now,
-                                timeModified          = None,
-                                timeCompleted         = DateTime.now.minusDays(1),
-                                visitNumber           = cetIndex + 1,
-                                annotations           = Set.empty[Annotation]))
-          }
+      studyRepository.getValues
+        .find { s => s.name == "BBPSP"}
+        .foreach { bbpsp =>
+
+        participantRepository.allForStudy(bbpsp.id).zipWithIndex.foreach {
+          case (participant, pIndex) =>
+            collectionEventTypeRepository.allForStudy(bbpsp.id).zipWithIndex.foreach {
+              case (ceventType, cetIndex) =>
+                log.info(s"addBbpspCevents: adding collection event for participant ${participant.uniqueId}")
+
+                val id = CollectionEventId(hashids.encode(10 * pIndex + cetIndex))
+                collectionEventRepository.put(
+                  CollectionEvent(id                    = id,
+                                  participantId         = participant.id,
+                                  collectionEventTypeId = ceventType.id,
+                                  version               = 0L,
+                                  timeAdded             = DateTime.now,
+                                  timeModified          = None,
+                                  timeCompleted         = DateTime.now.minusDays(1),
+                                  visitNumber           = cetIndex + 1,
+                                  annotations           = Set.empty[Annotation]))
+            }
         }
+      }
     }
   }
 
   def addBbpspSpecimens() = {
-    studyRepository.getValues.find(s => s.name == "BBPSP").foreach { bbpsp =>
-      centreRepository.getValues.find(c => c.name == "100-Calgary AB").foreach { centre =>
-        centre match {
-          case c: EnabledCentre => {
-            centreRepository.put(c.copy(studyIds = Set(bbpsp.id)))
+    if (loadSpecimenTestData) {
+      studyRepository.getValues.find(s => s.name == "BBPSP").foreach { bbpsp =>
+        centreRepository.getValues.find(c => c.name == "100-Calgary AB").foreach { centre =>
+          centre match {
+            case c: EnabledCentre => {
+              centreRepository.put(c.copy(studyIds = Set(bbpsp.id)))
 
-            val hashids = Hashids("bbpsp-specimens")
-            participantRepository.allForStudy(bbpsp.id).zipWithIndex.foreach { case (participant, pIndex) =>
-              collectionEventRepository.allForParticipant(participant.id).zipWithIndex.foreach {
-                case (cevent, ceventIndex) =>
-                  collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId).foreach { cventType =>
-                    val specimenSpec = cventType.specimenSpecs.head
-                    val location = centre.locations.head
-                    val uniqueId = 10 * pIndex + ceventIndex
-                    val id = SpecimenId(hashids.encode(uniqueId))
-                    val inventoryId = f"A$uniqueId%05d"
+              val hashids = Hashids("bbpsp-specimens")
+              participantRepository.allForStudy(bbpsp.id)
+                .zipWithIndex.foreach { case (participant, pIndex) =>
+                  collectionEventRepository.allForParticipant(participant.id)
+                    .zipWithIndex.foreach {
+                    case (cevent, ceventIndex) =>
+                      collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
+                        .foreach { cventType =>
+                        val specimenSpec = cventType.specimenSpecs.head
+                        val location = centre.locations.head
+                        val uniqueId = 10 * pIndex + ceventIndex
+                        val id = SpecimenId(hashids.encode(uniqueId))
+                        val inventoryId = f"A$uniqueId%05d"
 
-                    val specimen = UsableSpecimen(id               = id,
-                                                  inventoryId      = inventoryId,
-                                                  specimenSpecId   = specimenSpec.uniqueId,
-                                                  version          = 0L,
-                                                  timeAdded        = DateTime.now,
-                                                  timeModified     = None,
-                                                  originLocationId = location.uniqueId,
-                                                  locationId       = location.uniqueId,
-                                                  containerId      = None,
-                                                  positionId       = None,
-                                                  timeCreated      = DateTime.now.minusDays(1),
-                                                  amount           = BigDecimal(0.1))
+                        val specimen = UsableSpecimen(id               = id,
+                                                      inventoryId      = inventoryId,
+                                                      specimenSpecId   = specimenSpec.uniqueId,
+                                                      version          = 0L,
+                                                      timeAdded        = DateTime.now,
+                                                      timeModified     = None,
+                                                      originLocationId = location.uniqueId,
+                                                      locationId       = location.uniqueId,
+                                                      containerId      = None,
+                                                      positionId       = None,
+                                                      timeCreated      = DateTime.now.minusDays(1),
+                                                      amount           = BigDecimal(0.1))
 
-                    specimenRepository.put(specimen)
-                    ceventSpecimenRepository.put(CeventSpecimen(cevent.id, id))
+                        specimenRepository.put(specimen)
+                        ceventSpecimenRepository.put(CeventSpecimen(cevent.id, id))
+                      }
                   }
               }
             }
+            case _ =>
           }
-          case _ =>
         }
       }
     }
@@ -576,4 +578,11 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
     }
   }
 
+  addMultipleUsers
+  addMultipleCentres
+  addMultipleStudies
+  addCollectionEventTypes
+  addBbpspParticipants
+  addBbpspCevents
+  addBbpspSpecimens
 }

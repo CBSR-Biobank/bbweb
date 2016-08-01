@@ -19,7 +19,7 @@ define(['angular', 'lodash'], function(angular, _) {
      * @class
      * @memberOf domain
      */
-    function ConcurrencySafeEntity(obj) {
+    function ConcurrencySafeEntity() {
       /**
        * The unique ID that identifies an object of this type.
        * @name domain.ConcurrencySafeEntity#id
@@ -51,9 +51,6 @@ define(['angular', 'lodash'], function(angular, _) {
        * @protected
        */
       this.timeModified = null;
-
-      obj = obj || {};
-      _.extend(this, obj);
     }
 
     /**
@@ -76,7 +73,7 @@ define(['angular', 'lodash'], function(angular, _) {
     /** @protected */
     ConcurrencySafeEntity.prototype.asyncCreate = function (obj) {
       var deferred = $q.defer();
-      deferred.reject('derived class should override this method');
+      deferred.reject('the subclass should override this method');
       return deferred.promise;
     };
 

@@ -430,13 +430,21 @@ define([
     }
 
     function shipment(options) {
-      var defaults = { id:             domainEntityNameNext(ENTITY_NAME_SHIPMENT()),
-                       state:          ShipmentState.CREATED,
-                       courierName:    stringNext(),
-                       trackingNumber: stringNext(),
-                       fromLocationId: location().uniqueId,
-                       toLocationId:   location().uniqueId
-                     },
+      var loc = location(),
+          ctr = centre({ locations: [ loc ]}),
+          locationInfo = {
+            centreId: ctr.id,
+            locationId: loc.uniqueId,
+            name: ctr.name + ': ' + loc.name
+          },
+          defaults = {
+            id:               domainEntityNameNext(ENTITY_NAME_SHIPMENT()),
+            state:            ShipmentState.CREATED,
+            courierName:      stringNext(),
+            trackingNumber:   stringNext(),
+            fromLocationInfo: locationInfo,
+            toLocationInfo:   locationInfo
+          },
           validKeys = commonFieldNames.concat(_.keys(defaults)),
           s = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
       updateDefaultEntity(ENTITY_NAME_SHIPMENT(), s);

@@ -6,7 +6,7 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
   'use strict';
 
   AnnotationTypeFactory.$inject = [
-    'funutils',
+    '$log',
     'validationService',
     'ConcurrencySafeEntity',
     'DomainError',
@@ -17,7 +17,7 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
   /**
    *
    */
-  function AnnotationTypeFactory(funutils,
+  function AnnotationTypeFactory($log,
                                  validationService,
                                  ConcurrencySafeEntity,
                                  DomainError,
@@ -60,7 +60,7 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
 
     AnnotationType.create = function (obj) {
       if (!tv4.validate(obj, schema)) {
-        console.error('invalid object from server: ' + tv4.error);
+        $log.error('invalid object from server: ' + tv4.error);
         throw new DomainError('invalid object from server: ' + tv4.error);
       }
       return new AnnotationType(obj);
@@ -69,18 +69,17 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
     // returns a string that can be displayed to the user
     AnnotationType.prototype.getType = function () {
       switch (this.valueType) {
-      case AnnotationValueType.TEXT:
-        return AnnotationValueType.TEXT;
-      case AnnotationValueType.NUMBER:
-        return AnnotationValueType.NUMBER;
-      case AnnotationValueType.DATE_TIME:
-        return AnnotationValueType.DATE_TIME;
+      case AnnotationValueType.TEXT:      return AnnotationValueType.TEXT;
+      case AnnotationValueType.NUMBER:    return AnnotationValueType.NUMBER;
+      case AnnotationValueType.DATE_TIME: return AnnotationValueType.DATE_TIME;
+
       case AnnotationValueType.SELECT:
         if (this.isSingleSelect()) {
           return 'Single Select';
         }
         return 'Multiple Select';
       }
+
       throw new DomainError('invalid type for annotation type: ' + this.valueType);
     };
 

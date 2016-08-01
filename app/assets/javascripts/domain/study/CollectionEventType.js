@@ -7,7 +7,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
 
   CollectionEventTypeFactory.$inject = [
     '$q',
-    'funutils',
+    '$log',
     'biobankApi',
     'ConcurrencySafeEntity',
     'CollectionSpecimenSpec',
@@ -18,10 +18,10 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
   ];
 
   /**
-   * Factory for collectionEventTypes.
+   * Angular factory for collectionEventTypes.
    */
   function CollectionEventTypeFactory($q,
-                                      funutils,
+                                      $log,
                                       biobankApi,
                                       ConcurrencySafeEntity,
                                       CollectionSpecimenSpec,
@@ -48,7 +48,14 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     };
 
     /**
-     * Creates a collection event type object with helper methods.
+     * @classdesc A CollectionEventType defines a classification name, unique to the {@link
+     * domain.studies.Study|Study}, to a {@link domain.studies.Participant|Participant} visit. A participant
+     * visit is a record of when specimens were collected from a participant at a collection centre.
+     *
+     * Use this contructor to create a new CollectionEventType to be persited on the server. Use {@link
+     * domain.studies.CollectionEventType.create|create()} or {@link
+     * domain.studies.CollectionEventType.asyncCreate|asyncCreate()} to create objects returned by the server.
+     *
      * @class
      * @memberOf domain.studies
      *
@@ -57,22 +64,63 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      * @param {Study} options.study the study this collection even type belongs to.
      */
     function CollectionEventType(obj, options) {
-      var self = this,
-          defaults = {
-            studyId:         null,
-            name:            '',
-            description:     null,
-            recurring:       false,
-            specimenSpecs:   [],
-            annotationTypes: []
-          };
+      var self = this;
+
+      /**
+       * The ID of the {@link domain.studies.Study|Study} this collection event type belongs to.
+       *
+       * @name domain.studies.CollectionEventType#studyId
+       * @type {string}
+       */
+      self.studyId = null;
+
+      /**
+       * A short identifying name that is unique.
+       *
+       * @name domain.studies.CollectionEventType#name
+       * @type {string}
+       */
+      self.name = '';
+
+      /**
+       * An optional description that can provide additional details on the name.
+       *
+       * @name domain.studies.CollectionEventType#description
+       * @type {string}
+       * @default null
+       */
+
+      /**
+       * True if this collection events of this type occur more than once for the duration of the study.
+       *
+       * @name domain.studies.CollectionEventType#recurring
+       * @type {boolean}
+       */
+      self.recurring = false;
+
+      /**
+       * The specifications for the specimens that are collected for this collection event type.
+       *
+       * @name domain.studies.CollectionEventType#specimenSpecs
+       * @type {Array<domain.studies.CollectionSpecimenSpec>}
+       */
+      self.annotationTypes = [];
+
+      /**
+       * The annotation types that are collected for this collection event type.
+       *
+       * @name domain.studies.CollectionEventType#annotationTypes
+       * @type {Array<domain.AnnotationType>}
+       */
+      self.annotationTypes = [];
 
       obj = obj || {};
       options = options || {};
-      ConcurrencySafeEntity.call(self, obj);
-      _.extend(self, defaults, _.pick(obj, _.keys(defaults)), _.pick(options, 'study'));
+      ConcurrencySafeEntity.call(self);
+      _.extend(self, obj, _.pick(options, 'study'));
 
-      this.specimenSpecs = _.map(this.specimenSpecs, function (specimenSpec) {
+
+      self.specimenSpecs = _.map(self.specimenSpecs, function (specimenSpec) {
         return new CollectionSpecimenSpec(specimenSpec);
       });
 
@@ -86,32 +134,96 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
 
     _.extend(CollectionEventType.prototype, hasCollectionSpecimenSpecs, hasAnnotationTypes);
 
-
-    CollectionEventType.create = function (obj) {
+    /**
+     * Checks if <tt>obj</tt> has valid properties to construct a {@link
+     * domain.studies.CollectionEventType|CollectionEventType}.
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
+     */
+    CollectionEventType.validate = function (obj) {
       if (!tv4.validate(obj, schema)) {
-        console.error('invalid collection event types from server: ' + tv4.error);
-        throw new DomainError('invalid collection event types from server: ' + tv4.error);
+        return { valid: false, message: 'invalid collection event types from server: ' + tv4.error };
       }
 
       if (!hasCollectionSpecimenSpecs.validSpecimenSpecs(obj.specimenSpecs)) {
-        console.error('invalid specimen specs from server: ' + tv4.error);
-        throw new DomainError('invalid specimen specs from server: ' + tv4.error);
+        return { valid: false, message: 'invalid specimen specs from server: ' + tv4.error };
       }
 
       if (!hasAnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
-        console.error('invalid annotation types from server: ' + tv4.error);
-        throw new DomainError('invalid annotation types from server: ' + tv4.error);
+        return { valid: false, message: 'invalid annotation types from server: ' + tv4.error };
       }
 
+      return { valid: true, message: null };
+    };
+
+    /**
+     * Creates a CollectionEventType, but first it validates <tt>obj</tt> to ensure that it has a valid
+     * schema.
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @returns {domain.studies.CollectionEventType} A collection event type created from the given object.
+     *
+     * @see {@link domain.studies.CollectionEventType.asyncCreate|asyncCreate()} when you need to create a
+     * collection event type within asynchronous code.
+     */
+    CollectionEventType.create = function (obj) {
+      var validation = CollectionEventType.validate(obj);
+      if (!validation.valid) {
+        $log.error(validation.message);
+        throw new DomainError(validation.message);
+      }
       return new CollectionEventType(obj);
     };
 
+    /**
+     * Creates a CollectionEventType from a server reply but first validates that <tt>obj</tt> has a valid
+     * schema. <i>Meant to be called from within promise code.</i>
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @returns {Promise<domain.studies.CollectionEventType>} A collection event type wrapped in a promise.
+     *
+     * @see {@link domain.studies.CollectionEventType.create|create()} when not creating a collection event
+     * type within asynchronous code.
+     */
+    CollectionEventType.asyncCreate = function (obj) {
+      var deferred = $q.defer(),
+          validation = CollectionEventType.validate(obj);
+
+      if (!validation.valid) {
+        $log.error(validation.message);
+        deferred.reject(validation.message);
+      } else {
+        deferred.resolve(new CollectionEventType(obj));
+      }
+      return deferred.promise;
+    };
+
+    /**
+     * Retrieves a CollectionEventType from the server.
+     *
+     * @param {string} id the ID of the collection event type to retrieve.
+     *
+     * @returns {Promise<domain.studies.CollectionEventType>} The collection event type within a promise.
+     */
     CollectionEventType.get = function(studyId, id) {
       return biobankApi.get(uri(studyId) + '?cetId=' + id).then(function(reply) {
         return CollectionEventType.prototype.asyncCreate(reply);
       });
     };
 
+    /**
+     * Fetches all collection event types for a {@link domain.studies.Study|Study}.
+     *
+     * @returns {Promise<Array<domain.studies.CollectionEventType>>} An array of collection event types within
+     * a promise.
+     */
     CollectionEventType.list = function(studyId) {
       return biobankApi.get(uri(studyId)).then(function(reply) {
         var deferred = $q.defer(),
@@ -129,30 +241,22 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
       });
     };
 
+    /**
+     * Creates a CollectionEventType from a server reply but first validates that it has a valid schema.
+     *
+     * <p>A wrapper for {@link domian.studies.CollectionEventType#asyncCreate}.</p>
+     *
+     * @see {@link domain.ConcurrencySafeEntity#update}
+     */
     CollectionEventType.prototype.asyncCreate = function (obj) {
-      var deferred = $q.defer();
-
-      if (!tv4.validate(obj, schema)) {
-        deferred.reject('invalid collection event types from server: ' + tv4.error);
-      } else if (!hasCollectionSpecimenSpecs.validSpecimenSpecs(obj.specimenSpecs)) {
-        deferred.reject('invalid specimen specs from server: ' + tv4.error);
-      } else if (!hasAnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
-        deferred.reject('invalid annotation types from server: ' + tv4.error);
-      } else {
-        deferred.resolve(new CollectionEventType(obj));
-      }
-
-      return deferred.promise;
+      return CollectionEventType.asyncCreate(obj);
     };
 
     CollectionEventType.prototype.add = function() {
-      var self = this,
-          json = _.extend(_.pick(self, 'studyId','name', 'recurring'),
-                         funutils.pickOptional(self, 'description'));
-
-      return biobankApi.post(sprintf.sprintf('%s/%s', uri(), self.studyId), json)
+      var json = _.pick(this, 'studyId','name', 'recurring', 'description');
+      return biobankApi.post(sprintf.sprintf('%s/%s', uri(), this.studyId), json)
         .then(function(reply) {
-          return self.asyncCreate(reply);
+          return CollectionEventType.asyncCreate(reply);
         });
     };
 

@@ -27,7 +27,8 @@ class ShipmentsController @Inject() (val env:              Environment,
 
   private val PageSizeMax = 10
 
-  def list(courierFilterMaybe:        Option[String],
+  def list(centreId:                  String,
+           courierFilterMaybe:        Option[String],
            trackingNumberFilterMaybe: Option[String],
            stateFilterMaybe:          Option[String],
            sortMaybe:                 Option[String],
@@ -52,7 +53,8 @@ class ShipmentsController @Inject() (val env:              Environment,
 
       val validation = for {
           sortOrder   <- pagedQuery.getSortOrder
-          shipments   <- shipmentsService.getShipments(courierFilter,
+          shipments   <- shipmentsService.getShipments(centreId,
+                                                       courierFilter,
                                                        trackingNumberFilter,
                                                        stateFilter,
                                                        sort,

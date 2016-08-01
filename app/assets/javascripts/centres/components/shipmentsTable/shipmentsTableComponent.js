@@ -15,6 +15,8 @@ define(['lodash'], function (_) {
   };
 
   ShipmentsTableController.$inject = [
+    '$log',
+    '$state',
     'Shipment',
     'ShipmentState'
   ];
@@ -22,17 +24,17 @@ define(['lodash'], function (_) {
   /**
    * Displays the shipments originating from, or destined to, a centre.
    */
-  function ShipmentsTableController(Shipment, ShipmentState) {
+  function ShipmentsTableController($log, $state, Shipment, ShipmentState) {
     var vm = this;
 
-    vm.shipments        = getShipments();
     vm.states           = initStates();
     vm.stateFilter      = '';
     vm.centreLocations  = _.keyBy(vm.centreLocations, 'locationId');
-    vm.getTableData     = getTableData;
     vm.tableDataLoading = true;
     vm.pageSize         = 5;
-    vm.hasShipments     = false;
+
+    vm.getTableData        = getTableData;
+    vm.shipmentInformation = shipmentInformation;
 
     //--
 
@@ -58,20 +60,19 @@ define(['lodash'], function (_) {
           };
 
       vm.tableDataLoading = true;
-      getShipments(options).then(function (paginationResult) {
+      Shipment.list(vm.centre.id, options).then(function (paginationResult) {
+        vm.shipments = paginationResult.items;
+        vm.hasShipments = (vm.shipments.length > 0);
         tableState.pagination.numberOfPages = paginationResult.maxPages;
         vm.tableDataLoading = false;
       });
     }
 
-    function getShipments(options) {
-      return Shipment.list(options).then(function (paginationResult) {
-        vm.shipments = paginationResult.items;
-        vm.hasShipments = (vm.shipments.length > 0);
-        return paginationResult;
-      });
+    function shipmentInformation(shipment) {
+      if (shipment.state === ShipmentState.CREATED) {
+        $state.go('home.shipping.addSpecimens', { shipmentId: shipment.id });
+      }
     }
-
   }
 
   return component;

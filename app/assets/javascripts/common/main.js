@@ -16,6 +16,8 @@ define(function (require) {
 
   module = angular.module('biobank.common', [ modalInputModule.name, annotationsInputModule.name ]);
 
+  module.component('progressTracker',         require('./components/progressTracker/progressTrackerComponent'));
+
   module.directive('focusMe',                 require('./directives/focusMeDirective'));
   module.directive('infoUpdateRemoveButtons', require('./directives/infoUpdateRemoveButtonsDirective'));
   module.directive('integer',                 require('./directives/integerDirective'));

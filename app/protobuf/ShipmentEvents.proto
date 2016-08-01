@@ -5,8 +5,10 @@ message ShipmentEvent {
    message Added {
       optional string courierName    = 1;
       optional string trackingNumber = 2;
-      optional string fromLocationId = 3;
-      optional string toLocationId   = 4;
+      optional string fromCentreId   = 3;
+      optional string fromLocationId = 4;
+      optional string toCentreId     = 5;
+      optional string toLocationId   = 6;
    }
 
    message CourierNameUpdated {

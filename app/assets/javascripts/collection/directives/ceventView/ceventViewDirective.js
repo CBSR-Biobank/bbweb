@@ -108,8 +108,8 @@ define(function (require) {
         } else {
           domainEntityService.removeEntity(
             promiseFn,
-            'Remove specimen',
-            'Are you sure you want to remove collection event with visit # <strong>' + vm.collectionEvent.visitNumber + '</strong>?',
+            'Remove event',
+            'Are you sure you want to remove event with visit # <strong>' + vm.collectionEvent.visitNumber + '</strong>?',
             'Remove failed',
             'Collection event with visit number ' + vm.collectionEvent.visitNumber + ' cannot be removed');
         }

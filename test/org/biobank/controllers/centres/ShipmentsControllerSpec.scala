@@ -20,8 +20,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.JsonUtils._
 
-  val nonCreatedStates = List(ShipmentState.Created,
-                              ShipmentState.Packed,
+  val nonCreatedStates = List(ShipmentState.Packed,
                               ShipmentState.Sent,
                               ShipmentState.Received,
                               ShipmentState.Unpacked,
@@ -37,6 +36,9 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
   def uriSpecimen(shipment: Shipment): String =
     uri + s"/specimens/${shipment.id.id}"
+
+  def listUri(centre: Centre): String =
+    uri + s"/list/${centre.id.id}"
 
   def uriSpecimen(shipment: Shipment, shipmentSpecimen: ShipmentSpecimen, path: String): String =
     uri + s"/specimens/$path/${shipment.id.id}/${shipmentSpecimen.id.id}"
@@ -82,69 +84,93 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
     }
   }
 
+  def makePackedShipment(shipment: Shipment): Shipment = {
+    shipment.packed(DateTime.now).fold(err => fail("could not make a packed shipment"), s => s)
+  }
+
+  def makeSentShipment(shipment: Shipment): Shipment = {
+    makePackedShipment(shipment).sent(DateTime.now).fold(
+      err => fail("could not make a sent shipment"), s => s)
+  }
+
+  def makeReceivedShipment(shipment: Shipment): Shipment = {
+    makeSentShipment(shipment).received(DateTime.now).fold(
+      err => fail("could not make a received shipment"), s => s)
+  }
+
+  def makeUnpackedShipment(shipment: Shipment): Shipment = {
+    makeReceivedShipment(shipment).unpacked(DateTime.now).fold(
+      err => fail("could not make a unpacked shipment"), s => s)
+  }
+
+  def makeLostShipment(shipment: Shipment): Shipment = {
+    makeSentShipment(shipment).lost.fold(
+      err => fail("could not make a lost shipment"), s => s)
+  }
+
   def createdShipmentFixture = {
-    val centres = centresFixture
+    val f = centresFixture
     new {
-      val fromCentre = centres.fromCentre
-      val toCentre = centres.toCentre
-      val shipment = factory.createShipment.copy(
-          fromLocationId = fromCentre.locations.head.uniqueId,
-          toLocationId = toCentre.locations.head.uniqueId)
+      val fromCentre = f.fromCentre
+      val toCentre = f.toCentre
+      val shipment = factory.createShipment(f.fromCentre, f.toCentre)
+    }
+  }
+
+  def createdShipmentFixture(numShipments: Int) = {
+    val f = centresFixture
+    new {
+      val fromCentre = f.fromCentre
+      val toCentre = f.toCentre
+      val shipmentMap = (1 to numShipments).map { _ =>
+      val shipment = factory.createShipment(f.fromCentre, f.toCentre)
+          shipment.id -> shipment
+        }.toMap
     }
   }
 
   def packedShipmentFixture = {
-    val centres = centresFixture
+    val f = createdShipmentFixture
     new {
-      val fromCentre = centres.fromCentre
-      val toCentre = centres.toCentre
-      val shipment = factory.createPackedShipment.copy(
-          fromLocationId = fromCentre.locations.head.uniqueId,
-          toLocationId = toCentre.locations.head.uniqueId)
+      val fromCentre = f.fromCentre
+      val toCentre = f.toCentre
+      val shipment = makePackedShipment(f.shipment)
     }
   }
 
   def sentShipmentFixture = {
-    val centres = centresFixture
+    val f = createdShipmentFixture
     new {
-      val fromCentre = centres.fromCentre
-      val toCentre = centres.toCentre
-      val shipment = factory.createSentShipment.copy(
-          fromLocationId = fromCentre.locations.head.uniqueId,
-          toLocationId = toCentre.locations.head.uniqueId)
+      val fromCentre = f.fromCentre
+      val toCentre = f.toCentre
+      val shipment = makeSentShipment(f.shipment)
     }
   }
 
   def receivedShipmentFixture = {
-    val centres = centresFixture
+    val f = createdShipmentFixture
     new {
-      val fromCentre = centres.fromCentre
-      val toCentre = centres.toCentre
-      val shipment = factory.createReceivedShipment.copy(
-          fromLocationId = fromCentre.locations.head.uniqueId,
-          toLocationId = toCentre.locations.head.uniqueId)
+      val fromCentre = f.fromCentre
+      val toCentre = f.toCentre
+      val shipment = makeReceivedShipment(f.shipment)
     }
   }
 
   def unpackedShipmentFixture = {
-    val centres = centresFixture
+    val f = createdShipmentFixture
     new {
-      val fromCentre = centres.fromCentre
-      val toCentre = centres.toCentre
-      val shipment = factory.createUnpackedShipment.copy(
-          fromLocationId = fromCentre.locations.head.uniqueId,
-          toLocationId = toCentre.locations.head.uniqueId)
+      val fromCentre = f.fromCentre
+      val toCentre = f.toCentre
+      val shipment = makeUnpackedShipment(f.shipment)
     }
   }
 
   def lostShipmentFixture = {
-    val centres = centresFixture
+    val f = createdShipmentFixture
     new {
-      val fromCentre = centres.fromCentre
-      val toCentre = centres.toCentre
-      val shipment = factory.createLostShipment.copy(
-          fromLocationId = fromCentre.locations.head.uniqueId,
-          toLocationId = toCentre.locations.head.uniqueId)
+      val fromCentre = f.fromCentre
+      val toCentre = f.toCentre
+      val shipment = makeLostShipment(f.shipment)
     }
   }
 
@@ -154,24 +180,12 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
       val fromCentre = centres.fromCentre
       val toCentre = centres.toCentre
       val shipments = Map(
-          ShipmentState.Created
-            -> factory.createLostShipment.copy(fromLocationId = fromCentre.locations.head.uniqueId,
-                                               toLocationId = toCentre.locations.head.uniqueId),
-          ShipmentState.Packed
-            -> factory.createPackedShipment.copy(fromLocationId = fromCentre.locations.head.uniqueId,
-                                                 toLocationId = toCentre.locations.head.uniqueId),
-          ShipmentState.Sent
-            -> factory.createSentShipment.copy(fromLocationId = fromCentre.locations.head.uniqueId,
-                                               toLocationId = toCentre.locations.head.uniqueId),
-          ShipmentState.Received
-            -> factory.createReceivedShipment.copy(fromLocationId = fromCentre.locations.head.uniqueId,
-                                                   toLocationId = toCentre.locations.head.uniqueId),
-          ShipmentState.Unpacked
-            -> factory.createUnpackedShipment.copy(fromLocationId = fromCentre.locations.head.uniqueId,
-                                                   toLocationId = toCentre.locations.head.uniqueId),
-          ShipmentState.Lost
-            -> factory.createLostShipment.copy(fromLocationId = fromCentre.locations.head.uniqueId,
-                                               toLocationId = toCentre.locations.head.uniqueId))
+          ShipmentState.Created  -> factory.createShipment(fromCentre, toCentre),
+          ShipmentState.Packed   -> factory.createPackedShipment(fromCentre, toCentre),
+          ShipmentState.Sent     -> factory.createSentShipment(fromCentre, toCentre),
+          ShipmentState.Received -> factory.createReceivedShipment(fromCentre, toCentre),
+          ShipmentState.Unpacked -> factory.createUnpackedShipment(fromCentre, toCentre),
+          ShipmentState.Lost     -> factory.createLostShipment(fromCentre, toCentre))
     }
   }
 
@@ -243,30 +257,6 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
       val shipment            = f.shipment
       val shipmentSpecimenMap = map
     }
-  }
-
-  def makePackedShipment(shipment: Shipment): Shipment = {
-    shipment.packed(DateTime.now).fold(err => fail("could not make a packed shipment"), s => s)
-  }
-
-  def makeSentShipment(shipment: Shipment): Shipment = {
-    makePackedShipment(shipment).sent(DateTime.now).fold(
-      err => fail("could not make a sent shipment"), s => s)
-  }
-
-  def makeReceivedShipment(shipment: Shipment): Shipment = {
-    makeSentShipment(shipment).received(DateTime.now).fold(
-      err => fail("could not make a received shipment"), s => s)
-  }
-
-  def makeUnpackedShipment(shipment: Shipment): Shipment = {
-    makeReceivedShipment(shipment).unpacked(DateTime.now).fold(
-      err => fail("could not make a unpacked shipment"), s => s)
-  }
-
-  def makeLostShipment(shipment: Shipment): Shipment = {
-    makeSentShipment(shipment).lost.fold(
-      err => fail("could not make a lost shipment"), s => s)
   }
 
   def compareObj(json: JsValue, dto: ShipmentSpecimenDto) = {
@@ -388,72 +378,61 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
   "Shipment REST API" when {
 
-    "GET /shipments" must {
+    "GET /shipments/list/:centreId" must {
 
       "list none" in {
-        log.info(s"shipmentRepository: $shipmentRepository")
-        PagedResultsSpec(this).emptyResults(uri)
+        val centre = factory.createEnabledCentre
+        PagedResultsSpec(this).emptyResults(listUri(centre))
       }
 
       "list a shipment" in {
-        val shipment = factory.createShipment
-        shipmentRepository.put(shipment)
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri)
-        compareObj(jsonItem, shipment)
+        val f = createdShipmentFixture
+        shipmentRepository.put(f.shipment)
+        val jsonItem = PagedResultsSpec(this).singleItemResult(listUri(f.fromCentre))
+        compareObj(jsonItem, f.shipment)
       }
 
       "list multiple shipments" in {
-        val shipments = (1 to 2)
-          .map { _ =>
-            val shipment = factory.createShipment
-            shipment.id -> shipment
-          }.toMap
-
-        shipments.values.foreach(shipmentRepository.put)
+        val f = createdShipmentFixture(2)
+        f.shipmentMap.values.foreach(shipmentRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri       = uri,
+            uri       = listUri(f.fromCentre),
             offset    = 0,
-            total     = shipments.size,
+            total     = f.shipmentMap.size,
             maybeNext = None,
             maybePrev = None)
-        jsonItems must have size shipments.size
+        jsonItems must have size f.shipmentMap.size
 
-        compareObjs(jsonItems, shipments)
+        compareObjs(jsonItems, f.shipmentMap)
       }
 
       "list a single shipment when filtered by courier name" in {
-        val shipments = (1 to 2)
-          .map { _ =>
-            val shipment = factory.createShipment
-            shipment.id -> shipment
-          }.toMap
-        shipments.values.foreach(shipmentRepository.put)
-        val shipment = shipments.values.head
+        val f = createdShipmentFixture(2)
+        f.shipmentMap.values.foreach(shipmentRepository.put)
+        val shipment = f.shipmentMap.values.head
         val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri, Map("courierFilter" -> shipment.courierName))
+          .singleItemResult(listUri(f.fromCentre), Map("courierFilter" -> shipment.courierName))
         compareObj(jsonItem, shipment)
       }
 
       "list a single shipment when filtered by tracking number" in {
-        val shipments = (1 to 2)
-          .map { _ =>
-            val shipment = factory.createShipment
-            shipment.id -> shipment
-          }.toMap
-        shipments.values.foreach(shipmentRepository.put)
-        val shipment = shipments.values.head
+        val f = createdShipmentFixture(2)
+        f.shipmentMap.values.foreach(shipmentRepository.put)
+        val shipment = f.shipmentMap.values.head
         val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri, Map("trackingNumberFilter" -> shipment.trackingNumber))
+          .singleItemResult(listUri(f.fromCentre), Map("trackingNumberFilter" -> shipment.trackingNumber))
         compareObj(jsonItem, shipment)
       }
 
       "list shipments sorted by courier name" in {
-        val shipments = List("FedEx", "UPS", "Canada Post")
-          .map { name => factory.createShipment.copy(courierName = name) }.toList
+        val f = centresFixture
+        val shipments = List("FedEx", "UPS", "Canada Post").map { name =>
+            factory.createShipment(f.fromCentre, f.toCentre).copy(courierName = name)
+          }.toList
         shipments.foreach(shipmentRepository.put)
         val jsonItems = PagedResultsSpec(this)
-          .multipleItemsResult(uri       = uri,
+          .multipleItemsResult(uri       = listUri(f.fromCentre),
                                queryParams = Map("sort" -> "courierName"),
                                offset    = 0,
                                total     = shipments.size,
@@ -466,11 +445,14 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "list shipments sorted by tracking number" in {
+        val f = centresFixture
         val shipments = List("TN2", "TN3", "TN1")
-          .map { trackingNumber => factory.createShipment.copy(trackingNumber = trackingNumber) }.toList
+          .map { trackingNumber =>
+            factory.createShipment(f.fromCentre, f.toCentre).copy(trackingNumber = trackingNumber)
+          }.toList
         shipments.foreach(shipmentRepository.put)
         val jsonItems = PagedResultsSpec(this)
-          .multipleItemsResult(uri       = uri,
+          .multipleItemsResult(uri       = listUri(f.fromCentre),
                                queryParams = Map("sort" -> "trackingNumber"),
                                offset    = 0,
                                total     = shipments.size,
@@ -484,11 +466,14 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
 
       "list a single shipment when using paged query" in {
+        val f = centresFixture
         val shipments = List("FedEx", "UPS", "Canada Post")
-          .map { name => factory.createShipment.copy(courierName = name) }.toList
+          .map { name =>
+            factory.createShipment(f.fromCentre, f.toCentre).copy(courierName = name)
+          }.toList
         shipments.foreach(shipmentRepository.put)
         val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri       = uri,
+          .singleItemResult(uri       = listUri(f.fromCentre),
                             queryParams = Map("sort" -> "courierName", "pageSize" -> "1"),
                             total     = shipments.size,
                             maybeNext = Some(2))
@@ -496,11 +481,14 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "list the last shipment when using paged query" in {
+        val f = centresFixture
         val shipments = List("FedEx", "UPS", "Canada Post")
-          .map { name => factory.createShipment.copy(courierName = name) }.toList
+          .map { name =>
+            factory.createShipment(f.fromCentre, f.toCentre).copy(courierName = name)
+          }.toList
         shipments.foreach(shipmentRepository.put)
         val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri       = uri,
+          .singleItemResult(uri       = listUri(f.fromCentre),
                             queryParams = Map("sort" -> "courierName", "page" -> "3", "pageSize" -> "1"),
                             total     = shipments.size,
                             offset    = 2,
@@ -510,11 +498,13 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "fail when using an invalid query parameters" in {
-        PagedResultsSpec(this).failWithNegativePageNumber(uri)
-        PagedResultsSpec(this).failWithInvalidPageNumber(uri)
-        PagedResultsSpec(this).failWithNegativePageSize(uri)
-        PagedResultsSpec(this).failWithInvalidPageSize(uri, 100);
-        PagedResultsSpec(this).failWithInvalidSort(uri)
+        val f = centresFixture
+        val url = listUri(f.fromCentre)
+        PagedResultsSpec(this).failWithNegativePageNumber(url)
+        PagedResultsSpec(this).failWithInvalidPageNumber(url)
+        PagedResultsSpec(this).failWithNegativePageSize(url)
+        PagedResultsSpec(this).failWithInvalidPageSize(url, 100);
+        PagedResultsSpec(this).failWithInvalidSort(url)
       }
 
     }
@@ -522,12 +512,12 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
     "GET /shipments/:id" must {
 
       "get a shipment" in {
-        val shipment = factory.createShipment
-        shipmentRepository.put(shipment)
-        val json = makeRequest(GET, uri(shipment))
+        val f = createdShipmentFixture
+        shipmentRepository.put(f.shipment)
+        val json = makeRequest(GET, uri(f.shipment))
                               (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
-        compareObj(jsonObj, shipment)
+        compareObj(jsonObj, f.shipment)
       }
 
       "returns an error for an invalid shipment ID" in {
@@ -552,6 +542,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
       "add a shipment" in {
         val f = createdShipmentFixture
+        shipmentRepository.put(f.shipment)
         val json = makeRequest(POST, uri, shipmentToAddJson(f.shipment))
 
         (json \ "status").as[String] must include ("success")

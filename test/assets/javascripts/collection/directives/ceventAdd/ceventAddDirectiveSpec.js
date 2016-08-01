@@ -95,7 +95,9 @@ define([
       this.scope.$digest();
 
       expect(this.$state.go).toHaveBeenCalledWith(
-        'home.collection.study.participant.cevents', {}, { reload: true });
+        'home.collection.study.participant.cevents.details',
+        { collectionEventId: this.collectionEvent.id },
+        { reload: true });
     });
 
     describe('on submit failure', function() {

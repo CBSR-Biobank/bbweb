@@ -25,6 +25,7 @@ define(function () {
 
   ParticipantGetCtrl.$inject = [
     '$q',
+    '$log',
     '$state',
     'stateHelper',
     'modalService',
@@ -35,6 +36,7 @@ define(function () {
    *
    */
   function ParticipantGetCtrl($q,
+                              $log,
                               $state,
                               stateHelper,
                               modalService,
@@ -65,7 +67,7 @@ define(function () {
                   vm.uniqueId = undefined;
                 });
             } else {
-              console.error('could not get participant by uniqueId: ', JSON.stringify(error));
+              $log.error('could not get participant by uniqueId: ', JSON.stringify(error));
             }
           });
       }

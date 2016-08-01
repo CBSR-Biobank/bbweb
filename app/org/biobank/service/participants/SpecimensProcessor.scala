@@ -3,6 +3,7 @@ package org.biobank.service.participants
 import akka.actor._
 import akka.persistence.SnapshotOffer
 import javax.inject.{Inject, Singleton}
+import org.biobank.TestData
 import org.biobank.domain.participants._
 import org.biobank.domain.processing.ProcessingEventInputSpecimenRepository
 import org.biobank.domain.study.{CollectionEventType, CollectionEventTypeRepository}
@@ -29,7 +30,8 @@ class SpecimensProcessor @Inject() (
   val collectionEventRepository:              CollectionEventRepository,
   val collectionEventTypeRepository:          CollectionEventTypeRepository,
   val ceventSpecimenRepository:               CeventSpecimenRepository,
-  val processingEventInputSpecimenRepository: ProcessingEventInputSpecimenRepository)
+  val processingEventInputSpecimenRepository: ProcessingEventInputSpecimenRepository,
+  val testData:                               TestData)
 // FIXME add container repository when implemented
 //val containerRepository:       ContainerRepository)
     extends Processor {
@@ -263,6 +265,4 @@ class SpecimensProcessor @Inject() (
     if (children.isEmpty) true.successNel[String]
     else ServiceError(s"specimen has child specimens: ${specimen.id}").failureNel[Boolean]
   }
-
-
 }

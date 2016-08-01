@@ -11,7 +11,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('Directive: eAddDirective()', function() {
+  describe('Directive: centreAddDirective()', function() {
 
     var createController = function (centre) {
       this.element = angular.element('<centre-add centre="vm.centre"></centre-add>');

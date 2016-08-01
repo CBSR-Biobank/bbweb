@@ -5,13 +5,18 @@
 define(['lodash'], function(_) {
   'use strict';
 
-  domainEntityService.$inject = ['$q', '$state', 'modalService'];
+  domainEntityService.$inject = [
+    '$q',
+    '$log',
+    '$state',
+    'modalService'
+  ];
 
   /**
    * Utilities for services that access domain objects.
    *
    */
-  function domainEntityService($q, $state, modalService) {
+  function domainEntityService($q, $log, $state, modalService) {
     var service = {
       updateErrorModal:     updateErrorModal,
       removeEntity:         removeEntity
@@ -33,7 +38,7 @@ define(['lodash'], function(_) {
       };
 
       if (error.data.message) {
-        console.error(error.data.message);
+        $log.error(error.data.message);
       }
 
       if (typeof error.data.message === 'string') {

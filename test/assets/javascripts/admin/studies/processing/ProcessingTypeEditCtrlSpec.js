@@ -7,7 +7,7 @@
 define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  describe('Controller: ProcessingTypeEditCtrl', function() {
+  xdescribe('Controller: ProcessingTypeEditCtrl', function() {
 
     var q,
         rootScope,

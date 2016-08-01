@@ -16,7 +16,7 @@ define([
   /**
    *
    */
-  describe('Shipment', function() {
+  describe('ShipmentSpecimen domain object:', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 

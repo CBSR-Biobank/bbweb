@@ -576,6 +576,4 @@ class StudiesProcessor @javax.inject.Inject() (
       (item.name == name) && (item.id != excludeStudyId)
     }
   }
-
-  testData.addMultipleStudies
 }

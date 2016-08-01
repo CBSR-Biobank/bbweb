@@ -1,0 +1,27 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      Specimens in this shipment
+      <span class="pull-right">
+        <button class="btn btn-xs btn-warning"
+                title="Add specimen"
+                ng-click="vm.addSpecimen()">
+          Add specimen <i class="glyphicon glyphicon-plus"></i>
+        </button>
+        <a data-toggle="collapse"
+           href="#collapseSpecimens"
+           class="btn btn-xs btn-default"
+           ng-click="vm.panelButtonClicked()">
+          <i class="glyphicon"
+             ng-class="vm.panelOpen ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
+        </a>
+      </span>
+    </h3>
+  </div>
+
+  <div id="collapseSpecimens" class="panel-collapse collapse in" aria-expanded="true">
+    <ul class="list-group">
+      <li class="list-group-item">test</li>
+    </ul>
+  </div>
+</div>

@@ -513,5 +513,4 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   createDefaultUser
-  testData.addMultipleUsers
 }

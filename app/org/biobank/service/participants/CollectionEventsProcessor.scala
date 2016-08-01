@@ -3,6 +3,7 @@ package org.biobank.service.participants
 import akka.actor._
 import akka.persistence.SnapshotOffer
 import javax.inject.Inject
+import org.biobank.TestData
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
 import org.biobank.domain.Annotation
@@ -28,7 +29,8 @@ class CollectionEventsProcessor @Inject() (
   val collectionEventRepository:     CollectionEventRepository,
   val collectionEventTypeRepository: CollectionEventTypeRepository,
   val participantRepository:         ParticipantRepository,
-  val studyRepository:               StudyRepository)
+  val studyRepository:               StudyRepository,
+  val testData:                      TestData)
     extends Processor {
 
   import org.biobank.CommonValidations._
@@ -356,7 +358,7 @@ class CollectionEventsProcessor @Inject() (
     onValidEventAndVersion(event,
                            event.eventType.isRemoved,
                            event.getRemoved.getVersion) { (cevent, eventTime) =>
-      collectionEventRepository.put(cevent.copy(timeModified = Some(eventTime)))
+      collectionEventRepository.remove(cevent)
       true.successNel[String]
     }
   }

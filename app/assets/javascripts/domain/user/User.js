@@ -7,7 +7,7 @@ define(['lodash', 'tv4'], function(_, tv4) {
 
   UserFactory.$inject = [
     '$q',
-    'funutils',
+    '$log',
     'biobankApi',
     'ConcurrencySafeEntity',
     'DomainError',
@@ -17,10 +17,10 @@ define(['lodash', 'tv4'], function(_, tv4) {
   ];
 
   /**
-   *
+   * Angular factory for Users.
    */
   function UserFactory($q,
-                       funutils,
+                       $log,
                        biobankApi,
                        ConcurrencySafeEntity,
                        DomainError,
@@ -44,17 +44,55 @@ define(['lodash', 'tv4'], function(_, tv4) {
       'required': [ 'id', 'version', 'timeAdded', 'name', 'email', 'status' ]
     };
 
+    /**
+     * Use this contructor to create a new User to be persited on the server. Use {@link
+     * domain.users.User.create|create()} or {@link domain.users.User.asyncCreate|asyncCreate()} to
+     * create objects returned by the server.
+     *
+     * @class
+     * @memberOf domain.users
+     * @extends domain.ConcurrencySafeEntity
+     *
+     * @classdesc Informaiton for a user of the system.
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     */
     function User(obj) {
-      var defaults = {
-        name:      '',
-        email:     '',
-        avatarUrl: null,
-        status:    UserStatus.REGISTERED
-      };
+      /**
+       * The user's full name.
+       *
+       * @name domain.users.User#name
+       * @type {string}
+       */
+      this.name = '';
 
-      ConcurrencySafeEntity.call(this, obj);
+      /**
+       * The user's email address.
+       *
+       * @name domain.users.User#email
+       * @type {string}
+       */
+      this.email = '';
+
+      /**
+       * The user's optional avatar URL.
+       *
+       * @name domain.users.User#avatarUrl
+       * @type {string}
+       */
+
+      /**
+       * The status can be one of: registered, active or locked.
+       *
+       * @name domain.users.User#status
+       * @type {domain.users.UserStatus}
+       */
+      this.status = UserStatus.REGISTERED;
+
+      ConcurrencySafeEntity.call(this);
       obj = obj || {};
-      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
+      _.extend(this, obj);
       this.statusLabel = userStatusLabel.statusToLabel(this.status);
     }
 
@@ -62,21 +100,83 @@ define(['lodash', 'tv4'], function(_, tv4) {
     User.prototype.constructor = User;
 
     /**
-     * Used by promise code, so it must return an error rather than throw one.
+     * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.users.User|User}.
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
+     */
+    User.validate = function (obj) {
+      if (!tv4.validate(obj, schema)) {
+        $log.error('invalid object from server: ' + tv4.error);
+        return { valid: false, message: 'invalid object from server: ' + tv4.error };
+      }
+
+      return { valid: true, message: null };
+    };
+
+    /**
+     * Creates a User, but first it validates <code>obj</code> to ensure that it has a valid schema.
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @returns {domain.users.User} A user created from the given object.
+     *
+     * @see {@link domain.users.User.asyncCreate|asyncCreate()} when you need to create
+     * a user within asynchronous code.
      */
     User.create = function (obj) {
-      if (!tv4.validate(obj, schema)) {
-        console.error('invalid object from server: ' + tv4.error);
-        throw new DomainError('invalid object from server: ' + tv4.error);
+      var validation = User.validate(obj);
+      if (!validation.valid) {
+        $log.error(validation.message);
+        throw new DomainError(validation.message);
       }
       return new User(obj);
     };
 
+    /**
+     * Creates a User from a server reply, but first validates that <tt>obj</tt> has a valid schema.
+     * <i>Meant to be called from within promise code.</i>
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @returns {Promise<domain.users.User>} A user wrapped in a promise.
+     *
+     * @see {@link domain.users.User.create|create()} when not creating a User within asynchronous code.
+     */
+    User.asyncCreate = function (obj) {
+      var deferred = $q.defer(),
+          validation = User.validate(obj);
+
+      if (!validation.valid) {
+        $log.error(validation.message);
+        deferred.reject(validation.message);
+      } else {
+        deferred.resolve(new User(obj));
+      }
+
+      return deferred.promise;
+    };
+
+    /**
+     * Retrieves a User from the server.
+     *
+     * @param {string} id the ID of the user to retrieve.
+     *
+     * @returns {Promise<domain.users.User>} The user within a promise.
+     */
     User.get = function(id) {
       return biobankApi.get(uri(id)).then(User.prototype.asyncCreate);
     };
 
     /**
+     * Used to list users.
+     *
+     * @param {object} options - The options to use to list studies.
+     *
      * @param {string} options.nameFilter The filter to use on user names. Default is empty string.
      *
      * @param {string} options.emailFilter The filter to use on user emails. Default is empty string.
@@ -97,7 +197,8 @@ define(['lodash', 'tv4'], function(_, tv4) {
      * @param {string} options.order One of 'asc' or 'desc'. If an invalid value is used then
      * the response is an error.
      *
-     * @return A promise. If the promise succeeds then a paged result is returned.
+     * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
+     * domain.users.User}.
      */
     User.list = function(options) {
       var validKeys = [ 'nameFilter',
@@ -129,17 +230,15 @@ define(['lodash', 'tv4'], function(_, tv4) {
       });
     };
 
+    /**
+     * Creates a User from a server reply but first validates that it has a valid schema.
+     *
+     * <i>A wrapper for {@link domain.users.User#asyncCreate}.</i>
+     *
+     * @see {@link domain.ConcurrencySafeEntity#update}
+     */
     User.prototype.asyncCreate = function (obj) {
-      var deferred = $q.defer();
-
-      if (!tv4.validate(obj, schema)) {
-        console.error('invalid object from server: ' + tv4.error);
-        deferred.reject('invalid object from server: ' + tv4.error);
-      } else {
-        deferred.resolve(new User(obj));
-      }
-
-      return deferred.promise;
+      return User.asyncCreate(obj);
     };
 
     User.prototype.register = function (password) {

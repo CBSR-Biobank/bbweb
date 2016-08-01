@@ -7,7 +7,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
 
   StudyFactory.$inject = [
     '$q',
-    'funutils',
+    '$log',
     'biobankApi',
     'ConcurrencySafeEntity',
     'DomainError',
@@ -21,7 +21,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
    * Angular factory for Studies.
    */
   function StudyFactory($q,
-                        funutils,
+                        $log,
                         biobankApi,
                         ConcurrencySafeEntity,
                         DomainError,
@@ -50,16 +50,16 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
     };
 
     /**
-     * Use this contructor to create new Study to be persited on the server. Use
-     * [create()]{@link domain.studies.Study.create} or [asyncCreate()]{@link
-     * domain.studies.Study.asyncCreate} to create objects returned by the server.
+     * Use this contructor to create a new Study to be persited on the server. Use {@link
+     * domain.studies.Study.create|create()} or {@link domain.studies.Study.asyncCreate|asyncCreate()} to
+     * create objects returned by the server.
      *
      * @class
      * @memberOf domain.studies
      * @extends domain.ConcurrencySafeEntity
      *
-     * @classdesc A Study represents a collection of participants and specimens collected for a particular research
-     * study.
+     * @classdesc A Study represents a collection of participants and specimens collected for a particular
+     * research study.
      *
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
@@ -75,13 +75,12 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
       this.name = '';
 
       /**
-       * A description that can provide additional details on the name.
+       * An optional description that can provide additional details on the name.
        *
        * @name domain.studies.Study#description
        * @type {string}
        * @default null
        */
-      this.description = null;
 
       /**
        * The annotation types associated with participants of this study.
@@ -100,7 +99,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
       this.status = StudyStatus.DISABLED;
 
       obj = obj || {};
-      ConcurrencySafeEntity.call(this, obj);
+      ConcurrencySafeEntity.call(this);
       _.extend(this, obj);
       this.statusLabel = studyStatusLabel.statusToLabel(this.status);
 
@@ -115,58 +114,83 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
     Study.prototype.constructor = Study;
 
     /**
-     * Creates a Study, but first it validates <code>obj</code> to ensure that it has a valid schema.
+     * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.studies.Study|Study}.
      *
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
      *
-     * @returns {Study} A study created from the given object.
-     *
-     * @see [asyncCreate()]{@link domain.studies.Study.asyncCreate} when you need to create
-     * a study within asynchronous code.
+     * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
      */
-    Study.create = function (obj) {
+    Study.validate = function (obj) {
       if (!tv4.validate(obj, schema)) {
-        console.error('invalid object from server: ' + tv4.error);
-        throw new DomainError('invalid object from server: ' + tv4.error);
+        $log.error('invalid object from server: ' + tv4.error);
+        return { valid: false, message: 'invalid object from server: ' + tv4.error };
       }
 
       obj.annotationTypes = obj.annotationTypes || {};
 
       if (!hasAnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
-        console.error('invalid object from server: bad annotation type');
-        throw new DomainError('invalid object from server: bad annotation type');
+        return { valid: false, message: 'invalid object from server: bad annotation types: ' + tv4.error };
       }
 
+      return { valid: true, message: null };
+    };
+
+    /**
+     * Creates a Study, but first it validates <code>obj</code> to ensure that it has a valid schema.
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @returns {domain.studies.Study} A study created from the given object.
+     *
+     * @see {@link domain.studies.Study.asyncCreate|asyncCreate()} when you need to create
+     * a study within asynchronous code.
+     */
+    Study.create = function (obj) {
+      var validation = Study.validate(obj);
+      if (!validation.valid) {
+        $log.error(validation.message);
+        throw new DomainError(validation.message);
+      }
       return new Study(obj);
     };
 
     /**
-     * Creates a Study from a server reply but first validates that it has a valid schema.
-     *
-     * <p>Meant to be called from within promise code.</p>
+     * Creates a Study from a server reply, but first validates that <tt>obj</tt> has a valid schema.
+     * <i>Meant to be called from within promise code.</i>
      *
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
      *
      * @returns {Promise<domain.studies.Study>} A study wrapped in a promise.
      *
-     * @see [create()]{@link domain.studies.Study.create} when not creating a Study within asynchronous code.
+     * @see {@link domain.studies.Study.create|create()} when not creating a Study within asynchronous code.
      */
     Study.asyncCreate = function (obj) {
-      var deferred = $q.defer();
-
-      if (!tv4.validate(obj, schema)) {
-        console.error('invalid object from server: ' + tv4.error);
-        deferred.reject('invalid object from server: ' + tv4.error);
-      } else if (!hasAnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
-        console.error('invalid annotation types from server: ' + tv4.error);
-        deferred.reject('invalid annotation types from server: ' + tv4.error);
+      var deferred = $q.defer(),
+          validation = Study.validate(obj);
+      if (!validation.valid) {
+        $log.error(validation.message);
+        deferred.reject(validation.message);
       } else {
         deferred.resolve(new Study(obj));
       }
 
       return deferred.promise;
+    };
+
+    /**
+     * Retrieves a Study from the server.
+     *
+     * @param {string} id the ID of the study to retrieve.
+     *
+     * @returns {Promise<domain.studies.Study>} The study within a promise.
+     */
+    Study.get = function (id) {
+      return biobankApi.get(uri(id)).then(function(reply) {
+        return Study.asyncCreate(reply);
+      });
     };
 
     /**
@@ -195,7 +219,8 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
      * @param {string} [options.order=asc] - The order to list studies by. One of: <code>asc</code> for
      * ascending order, or <code>desc</code> for descending order.
      *
-     * @return A promise. If the promise succeeds then a paged result is returned.
+     * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
+     * domain.studies.Study}.
      */
     Study.list = function (options) {
       var url = uri(),
@@ -245,27 +270,12 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
     };
 
     /**
-     * Retrieves a Study from the server.
-     *
-     * @param {string} id the ID of the study to retrieve.
-     *
-     * @returns {Promise<domain.studies.Study>} The study within a promise.
-     */
-    Study.get = function (id) {
-      return biobankApi.get(uri(id)).then(function(reply) {
-        return Study.asyncCreate(reply);
-      });
-    };
-
-    /**
      * Adds a study.
      *
      * @return {Promise<domain.studies.Study>} A promise containing the study that was created.
      */
     Study.prototype.add = function () {
-      var self = this,
-          json = { name: this.name };
-      angular.extend(json, funutils.pickOptional(self, 'description'));
+      var json = _.pick(this, 'name', 'description');
       return biobankApi.post(uri(), json).then(function(reply) {
         return Study.asyncCreate(reply);
       });
@@ -276,7 +286,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
      *
      * <p>A wrapper for {@link domian.studies.Study#asyncCreate}.</p>
      *
-     * @see domain.ConcurrencySafeEntity.update
+     * @see {@link domain.ConcurrencySafeEntity#update}
      */
     Study.prototype.asyncCreate = function (obj) {
       return Study.asyncCreate(obj);
@@ -326,7 +336,8 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
      *
      * @param {domain.AnnotationType} annotationType - the annotation type with the new values.
      *
-     * @returns {Promise<domain.studies.Study>} A promise containing the study with the updated annotation type.
+     * @returns {Promise<domain.studies.Study>} A promise containing the study with the updated annotation
+     * type.
      */
     Study.prototype.updateAnnotationType = function (annotationType) {
       return this.update.call(this,
@@ -339,7 +350,8 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
      *
      * @param {domain.AnnotationType} annotationType - the annotation type to remove.
      *
-     * @returns {Promise<domain.studies.Study>} A promise containing the study with the removed annotation type.
+     * @returns {Promise<domain.studies.Study>} A promise containing the study with the removed annotation
+     * type.
      */
     Study.prototype.removeAnnotationType = function (annotationType) {
       var url = sprintf.sprintf('%s/%d/%s',

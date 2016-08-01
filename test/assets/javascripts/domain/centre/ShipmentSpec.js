@@ -2,21 +2,22 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  'jquery',
-  'sprintf',
-  'faker',
-  'moment'
-], function(angular, mocks, _, $, sprintf, faker, moment) {
+define(function (require) {
   'use strict';
+
+  var mocks   = require('angularMocks'),
+      $       = require('jquery'),
+      _       = require('lodash'),
+      faker   = require('faker'),
+      moment  = require('moment'),
+      sprintf = require('sprintf').sprintf;
+
+  require('angular');
 
   /**
    *
    */
-  describe('Shipment', function() {
+  describe('Shipment domain object:', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -73,18 +74,18 @@ define([
 
       it('fails when creating from a bad from location ID', function() {
         var self = this,
-            badJson = self.factory.shipment({ fromLocationId: undefined });
+            badJson = self.factory.shipment({ fromLocationInfo: undefined });
 
         expect(function () { self.Shipment.create(badJson); })
-          .toThrowError(/invalid object from server.*fromLocationId/);
+          .toThrowError(/invalid object from server.*fromLocationInfo/);
       });
 
       it('fails when creating from a bad to location ID', function() {
         var self = this,
-            badJson = self.factory.shipment({ toLocationId: undefined });
+            badJson = self.factory.shipment({ toLocationInfo: undefined });
 
         expect(function () { self.Shipment.create(badJson); })
-          .toThrowError(/invalid object from server.*toLocationId/);
+          .toThrowError(/invalid object from server.*toLocationInfo/);
       });
 
     });
@@ -125,7 +126,7 @@ define([
 
       it('fails when getting a shipment and it has a bad from location', function() {
         var self = this,
-            shipment = _.omit(self.factory.shipment(), 'fromLocationId');
+            shipment = _.omit(self.factory.shipment(), 'fromLocationInfo');
 
         self.$httpBackend.whenGET(uri(shipment.id)).respond(this.reply(shipment));
 
@@ -143,7 +144,7 @@ define([
 
       it('fails when getting a shipment and it has a bad from location', function() {
         var self = this,
-            shipment = _.omit(self.factory.shipment(), 'toLocationId');
+            shipment = _.omit(self.factory.shipment(), 'toLocationInfo');
 
         self.$httpBackend.whenGET(uri(shipment.id)).respond(this.reply(shipment));
 
@@ -165,27 +166,30 @@ define([
 
       it('can retrieve shipments', function() {
         var self = this,
-            shipments = [ self.factory.shipment() ],
+            centre = self.factory.centre(),
+            shipment = self.factory.shipment(),
+            shipments = [ shipment ],
             reply = self.factory.pagedResult(shipments);
 
-        self.$httpBackend.whenGET(uri()).respond(this.reply(reply));
+        self.$httpBackend.whenGET(listUri(centre.id)).respond(this.reply(reply));
 
-        self.Shipment.list().then(checkReply).catch(failTest);
+        self.Shipment.list(centre.id).then(checkReply).catch(failTest);
         self.$httpBackend.flush();
 
         function checkReply(pagedResult) {
           expect(pagedResult.items).toBeArrayOfSize(shipments.length);
           _.each(pagedResult.items, function (item) {
             expect(item).toEqual(jasmine.any(self.Shipment));
-            item.compareToJsonEntity(shipments[0]);
+            item.compareToJsonEntity(shipment);
           });
         }
       });
 
-      it('can list shipments using options', function() {
+      it('can use options', function() {
         var self = this,
+            centre = self.factory.centre(),
             optionList = [
-              { courierNameFilter: 'Fedex' },
+              { courierFilter: 'Fedex' },
               { trackingNumberFilter: 'ABC' },
               { sort: 'state' },
               { page: 2 },
@@ -196,11 +200,11 @@ define([
         _.each(optionList, function (options) {
           var shipments = [ self.factory.shipment() ],
               reply   = self.factory.pagedResult(shipments),
-              url     = sprintf.sprintf('%s?%s', uri(), $.param(options, true));
+              url     = sprintf('%s?%s', listUri(centre.id), $.param(options, true));
 
           self.$httpBackend.whenGET(url).respond(self.reply(reply));
 
-          self.Shipment.list(options).then(testShipment).catch(failTest);
+          self.Shipment.list(centre.id, options).then(testShipment).catch(failTest);
           self.$httpBackend.flush();
 
           function testShipment(pagedResult) {
@@ -214,12 +218,13 @@ define([
 
       it('fails when list returns an invalid shipment', function() {
         var self = this,
+            centre = self.factory.centre(),
             shipments = [ _.omit(self.factory.shipment(), 'courierName') ],
             reply = self.factory.pagedResult(shipments);
 
-        self.$httpBackend.whenGET(uri()).respond(this.reply(reply));
+        self.$httpBackend.whenGET(listUri(centre.id)).respond(this.reply(reply));
 
-        self.Shipment.list().then(listFail).catch(shouldFail);
+        self.Shipment.list(centre.id).then(listFail).catch(shouldFail);
         self.$httpBackend.flush();
 
         function listFail(reply) {
@@ -239,11 +244,11 @@ define([
         var self = this,
             jsonShipment = self.factory.shipment(),
             shipment = new self.Shipment(_.omit(jsonShipment, 'id')),
-            json = _.pick(shipment,
-                          'courierName',
-                          'trackingNumber',
-                          'fromLocationId',
-                          'toLocationId');
+            json = _.extend(_.pick(shipment, 'courierName', 'trackingNumber'),
+                            {
+                              fromLocationId: shipment.fromLocationInfo.locationId,
+                              toLocationId:   shipment.toLocationInfo.locationId
+                            });
 
         self.$httpBackend.expectPOST(uri(), json).respond(this.reply(jsonShipment));
 
@@ -431,6 +436,10 @@ define([
       }
 
       return result;
+    }
+
+    function listUri(centreId) {
+      return uri() +'/list/' + centreId;
     }
   });
 

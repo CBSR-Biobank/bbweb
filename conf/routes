@@ -144,6 +144,7 @@ DELETE  /centres/locations/:id/:ver/:uniqueId   org.biobank.controllers.centres.
 # --- SHIPMENTS ---
 #
 POST    /shipments                                    org.biobank.controllers.centres.ShipmentsController.add
+GET     /shipments/list/:centreId                     org.biobank.controllers.centres.ShipmentsController.list(centreId: String, courierFilter: Option[String], trackingNumberFilter: Option[String], stateFilter: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
 POST    /shipments/courier/:id                        org.biobank.controllers.centres.ShipmentsController.updateCourier(id)
 POST    /shipments/trackingnumber/:id                 org.biobank.controllers.centres.ShipmentsController.updateTrackingNumber(id)
 POST    /shipments/fromlocation/:id                   org.biobank.controllers.centres.ShipmentsController.updateFromLocation(id)
@@ -156,7 +157,6 @@ POST    /shipments/lost/:id                           org.biobank.controllers.ce
 GET     /shipments/specimens/:shId/:shSpcId           org.biobank.controllers.centres.ShipmentsController.getSpecimen(shId, shSpcId)
 GET     /shipments/specimens/:id                      org.biobank.controllers.centres.ShipmentsController.listSpecimens(id, sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
 GET     /shipments/:id                                org.biobank.controllers.centres.ShipmentsController.get(id)
-GET     /shipments                                    org.biobank.controllers.centres.ShipmentsController.list(courierFilter: Option[String], trackingNumberFilter: Option[String], stateFilter: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
 POST    /shipments/specimens/container/:shId/:shSpcId org.biobank.controllers.centres.ShipmentsController.specimenContainer(shId, shSpcId)
 POST    /shipments/specimens/received/:shId/:shSpcId  org.biobank.controllers.centres.ShipmentsController.specimenReceived(shId, shSpcId)
 POST    /shipments/specimens/missing/:shId/:shSpcId   org.biobank.controllers.centres.ShipmentsController.specimenMissing(shId, shSpcId)

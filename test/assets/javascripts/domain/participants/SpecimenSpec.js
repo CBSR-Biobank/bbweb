@@ -60,8 +60,6 @@ define([
     it('constructor with default parameters has default values', function() {
       var specimen = new this.Specimen();
 
-      console.log(specimen);
-
       expect(specimen.id).toBeNull();
       expect(specimen.version).toBe(0);
       expect(specimen.originLocationId).toBeNull();

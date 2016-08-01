@@ -194,7 +194,7 @@ define(function(require) {
 
       jsonParticipant.annotations = [{ tmp: 1 }];
       expect(function () { self.Participant.create(jsonParticipant); })
-        .toThrowError('invalid object from server: bad annotation type');
+        .toThrowError(/bad annotation type/);
     });
 
     it('has valid values when creating from a server response', function() {

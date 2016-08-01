@@ -3,7 +3,6 @@ package org.biobank.service.centres
 import akka.actor._
 import akka.persistence.{ SnapshotOffer }
 import javax.inject.Inject
-import org.biobank.domain.Location
 import org.biobank.domain.centre._
 import org.biobank.domain.participants.SpecimenId
 import org.biobank.infrastructure.command.ShipmentCommands._
@@ -143,7 +142,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                                     state          = ShipmentState.Created,
                                     courierName    = cmd.courierName,
                                     trackingNumber = cmd.trackingNumber,
+                                    fromCentreId   = fromCentre.id,
                                     fromLocationId = cmd.fromLocationId,
+                                    toCentreId     = toCentre.id,
                                     toLocationId   = cmd.toLocationId,
                                     timePacked     = None,
                                     timeSent       = None,
@@ -154,7 +155,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       _.time                 := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.added.courierName    := shipment.courierName,
       _.added.trackingNumber := shipment.trackingNumber,
+      _.added.fromCentreId   := shipment.fromCentreId.id,
       _.added.fromLocationId := shipment.fromLocationId,
+      _.added.toCentreId     := shipment.toCentreId.id,
       _.added.toLocationId   := shipment.toLocationId)
   }
 
@@ -186,8 +189,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                                            shipment: Shipment): ServiceValidation[ShipmentEvent] = {
     for {
       isCreated   <- shipment.isCreated
-      location    <- getLocation(cmd.locationId)
-      newShipment <- shipment.withFromLocation(location)
+      centre      <- centreRepository.getByLocationId(cmd.locationId)
+      location    <- centre.locationWithId(cmd.locationId)
+      newShipment <- shipment.withFromLocation(centre, location)
     } yield ShipmentEvent(shipment.id.id).update(
       _.userId                         := cmd.userId,
       _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
@@ -199,8 +203,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                                          shipment: Shipment): ServiceValidation[ShipmentEvent] = {
     for {
       isCreated   <- shipment.isCreated
-      location    <- getLocation(cmd.locationId)
-      newShipment <- shipment.withToLocation(location)
+      centre      <- centreRepository.getByLocationId(cmd.locationId)
+      location    <- centre.locationWithId(cmd.locationId)
+      newShipment <- shipment.withToLocation(centre, location)
     } yield ShipmentEvent(shipment.id.id).update(
       _.userId                       := cmd.userId,
       _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
@@ -380,7 +385,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                                 state          = ShipmentState.Created,
                                 courierName    = addedEvent.getCourierName,
                                 trackingNumber = addedEvent.getTrackingNumber,
+                                fromCentreId   = CentreId(addedEvent.getFromCentreId),
                                 fromLocationId = addedEvent.getFromLocationId,
+                                toCentreId     = CentreId(addedEvent.getToCentreId),
                                 toLocationId   = addedEvent.getToLocationId,
                                 timePacked     = None,
                                 timeSent       = None,
@@ -418,10 +425,12 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isFromLocationUpdated,
                            event.getFromLocationUpdated.getVersion) { (shipment, _, time) =>
+      val locationId = event.getFromLocationUpdated.getLocationId
       val v = for {
-        location <- getLocation(event.getFromLocationUpdated.getLocationId)
-        updated  <- shipment.withFromLocation(location)
-      } yield updated
+          centre   <- centreRepository.getByLocationId(locationId)
+          location <- centre.locationWithId(locationId)
+          updated  <- shipment.withFromLocation(centre, location)
+        } yield updated
 
       v.foreach(s => shipmentRepository.put(s.copy(timeModified = Some(time))))
       v.map(_ => true)
@@ -432,10 +441,12 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isToLocationUpdated,
                            event.getToLocationUpdated.getVersion) { (shipment, _, time) =>
+      val locationId = event.getToLocationUpdated.getLocationId
       val v = for {
-        location <- getLocation(event.getToLocationUpdated.getLocationId)
-        updated  <- shipment.withToLocation(location)
-      } yield updated
+          centre   <- centreRepository.getByLocationId(locationId)
+          location <- centre.locationWithId(locationId)
+          updated  <- shipment.withToLocation(centre, location)
+        } yield updated
       v.foreach(s => shipmentRepository.put(s.copy(timeModified = Some(time))))
       v.map(_ => true)
     }
@@ -656,13 +667,6 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
         }
       )
     }
-  }
-
-  private def getLocation(locationId: String): ServiceValidation[Location] = {
-    for {
-      centre      <- centreRepository.getByLocationId(locationId)
-      location    <- centre.locationWithId(locationId)
-    } yield location
   }
 
 }

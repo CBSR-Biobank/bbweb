@@ -30,6 +30,7 @@ define([
       _.extend(self, testSuiteMixin);
 
       self.injectDependencies('$q',
+                              '$log',
                               '$rootScope',
                               '$compile',
                               '$state',
@@ -133,14 +134,14 @@ define([
       it('promise is rejected on a non 404 response', function() {
         spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject(
           { status: 400, data: { message: 'xxx' } }));
-        spyOn(console, 'error').and.callThrough();
+        spyOn(this.$log, 'error').and.callThrough();
 
         createDirective.call(this);
         this.controller.uniqueId = this.factory.stringNext();
         this.controller.uniqueIdChanged();
         this.scope.$digest();
 
-        expect(console.error).toHaveBeenCalled();
+        expect(this.$log.error).toHaveBeenCalled();
       });
 
     });

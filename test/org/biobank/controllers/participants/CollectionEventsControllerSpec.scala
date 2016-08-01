@@ -928,7 +928,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     }
 
-    "DELETE /participants/cevents/{participantId}/{id}/{ver}" must {
+    "DELETE /participants/cevents/:participantId/:ceventId/:ver" must {
 
       "remove a collection event" in {
         createEntities { (study, participant, ceventType) =>
@@ -938,6 +938,10 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           val json = makeRequest(DELETE, uri(participant, cevent, cevent.version))
 
           (json \ "status").as[String] must include ("success")
+
+          (json \ "data").as[Boolean] must be (true)
+
+          collectionEventRepository.getByKey(cevent.id) mustFail("IdNotFound: collection event.*")
         }
       }
 

@@ -91,6 +91,7 @@ define(function (require) {
     vm.selectedLocationId   = undefined;
     vm.amount               = undefined;
     vm.defaultAmount        = undefined;
+    vm.centreLocations      = centreLocations;
     vm.specimenSpecs        = specimenSpecs;
     vm.usingDefaultAmount   = true;
     vm.timeCollected        = new Date();
