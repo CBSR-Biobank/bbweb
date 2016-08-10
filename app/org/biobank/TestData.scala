@@ -198,7 +198,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
     (actorSystem.settings.config.hasPath(configLoadSpecimensPath)
        && actorSystem.settings.config.getBoolean(configLoadSpecimensPath))
 
-  log.info(s"TEST DATA: loadTestData: $loadTestData, loadSpecimenTestData: $loadSpecimenTestData")
+  log.debug(s"TEST DATA: loadTestData: $loadTestData, loadSpecimenTestData: $loadSpecimenTestData")
 
   def addMultipleCentres(): Unit = {
     if (loadTestData) {
@@ -473,7 +473,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
   }
 
   def addBbpspCevents() = {
-    log.info(s"addBbpspCevents")
+    log.debug(s"addBbpspCevents")
 
     if (loadSpecimenTestData) {
       val hashids = Hashids("bbpsp-collection-events")
@@ -486,7 +486,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
           case (participant, pIndex) =>
             collectionEventTypeRepository.allForStudy(bbpsp.id).zipWithIndex.foreach {
               case (ceventType, cetIndex) =>
-                log.info(s"addBbpspCevents: adding collection event for participant ${participant.uniqueId}")
+                log.debug(s"addBbpspCevents: adding collection event for participant ${participant.uniqueId}")
 
                 val id = CollectionEventId(hashids.encode(10 * pIndex + cetIndex))
                 collectionEventRepository.put(

@@ -48,7 +48,7 @@ class SpecimensController @Inject() (val env:          Environment,
       val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
       val order    = orderMaybe.fold { "asc" } { o => o }
 
-      Logger.info(s"""|SpecimensController:list: ceventId/$ceventId, sort/$sort,
+      Logger.debug(s"""|SpecimensController:list: ceventId/$ceventId, sort/$sort,
                        |  page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
       val pagedQuery = PagedQuery(page, pageSize, order)
