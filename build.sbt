@@ -114,7 +114,7 @@ routesGenerator := InjectedRoutesGenerator
 
 JsEngineKeys.engineType := JsEngineKeys.EngineType.Node
 
-EclipseKeys.withSource := true
+//EclipseKeys.withSource := true
 
 //net.virtualvoid.sbt.graph.Plugin.graphSettings
 
