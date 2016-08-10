@@ -3,6 +3,7 @@ scala:
   - 2.11.8
 branches:
   only:
+  - master
   - dev-loyola
 jdk:
   - oraclejdk8
