@@ -1,9 +1,9 @@
 package org.biobank.controllers.centres
 
-import org.biobank.TestUtils
 import com.github.nscala_time.time.Imports._
+import org.biobank.TestUtils
 import org.biobank.controllers.PagedResultsSpec
-import org.biobank.dto.ShipmentSpecimenDto
+import org.biobank.dto.{CentreLocationInfo, ShipmentSpecimenDto}
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.centre._
 import org.biobank.domain.centre.ShipmentItemState._
@@ -238,7 +238,9 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
                                                                    specimenId = specimen.id)
         val name = f.fromCentre.locationName(specimen.locationId).fold(e => "error", n => n)
         val dto = shipmentSpecimen.createDto(updatedSpecimen,
-                                             name,
+                                             CentreLocationInfo(f.fromCentre.id.id,
+                                                                specimen.locationId,
+                                                                name),
                                              f.ceventType.specimenSpecs.head.units)
         (updatedSpecimen.id, (updatedSpecimen, shipmentSpecimen, dto))
       }.toMap
@@ -268,8 +270,8 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
     (json \ "version").as[Long] mustBe (dto.version)
     TestUtils.checkTimeStamps(dto.timeAdded, (json \ "timeAdded").as[DateTime])
     TestUtils.checkOpionalTime(dto.timeModified, (json \ "timeModified").asOpt[DateTime])
-    (json \ "locationId").as[String] mustBe (dto.locationId)
-    (json \ "locationName").as[String] mustBe (dto.locationName)
+    (json \ "locationInfo" \ "locationId").as[String] mustBe (dto.locationInfo.locationId)
+    (json \ "locationInfo" \ "name").as[String] mustBe (dto.locationInfo.name)
     TestUtils.checkTimeStamps(dto.timeCreated, (json \ "timeCreated").as[DateTime])
     (json \ "amount").as[BigDecimal] mustBe (dto.amount)
     (json \ "units").as[String] mustBe (dto.units)
@@ -1178,7 +1180,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
         f.fromCentre.locationName(specimen.locationId) mustSucceed { name =>
           val dto = shipmentSpecimen.createDto(
               specimen,
-              name,
+              CentreLocationInfo(f.fromCentre.id.id, specimen.locationId, name),
               f.ceventType.specimenSpecs.head.units)
           compareObj(jsonItem, dto)
         }
@@ -1207,7 +1209,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
           f.fromCentre.locationName(specimen.locationId) mustSucceed { name =>
             val dto = shipmentSpecimen.createDto(
                 specimen,
-                name,
+                CentreLocationInfo(f.fromCentre.id.id, specimen.locationId, name),
                 f.ceventType.specimenSpecs.head.units)
             compareObj(jsonItems(index), dto)
           }

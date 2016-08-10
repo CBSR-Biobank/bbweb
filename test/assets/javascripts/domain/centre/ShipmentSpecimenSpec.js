@@ -87,18 +87,10 @@ define([
 
       it('fails when creating from a bad location ID', function() {
         var self = this,
-            badJson = self.factory.shipmentSpecimen({ locationId: undefined });
+            badJson = self.factory.shipmentSpecimen({ locationInfo: undefined });
 
         expect(function () { self.ShipmentSpecimen.create(badJson); })
-          .toThrowError(/invalid object from server.*locationId/);
-      });
-
-      it('fails when creating from a bad location name', function() {
-        var self = this,
-            badJson = self.factory.shipmentSpecimen({ locationName: undefined });
-
-        expect(function () { self.ShipmentSpecimen.create(badJson); })
-          .toThrowError(/invalid object from server.*locationName/);
+          .toThrowError(/invalid object from server.*locationInfo/);
       });
 
       it('fails when creating from a bad time created', function() {
@@ -158,8 +150,7 @@ define([
                                    'state',
                                    'shipmentId',
                                    'specimenId',
-                                   'locationId',
-                                   'locationName',
+                                   'locationInfo',
                                    'timeCreated',
                                    'amount',
                                    'units',

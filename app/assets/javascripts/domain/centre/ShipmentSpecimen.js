@@ -15,7 +15,8 @@ define(function (require) {
     'ConcurrencySafeEntity',
     'DomainError',
     'ShipmentItemState',
-    'biobankApi'
+    'biobankApi',
+    'centreLocationInfoSchema'
   ];
 
   function ShipmentFactory($q,
@@ -23,7 +24,8 @@ define(function (require) {
                            ConcurrencySafeEntity,
                            DomainError,
                            ShipmentItemState,
-                           biobankApi) {
+                           biobankApi,
+                           centreLocationInfoSchema) {
 
     var schema = {
       'id': 'Shipment',
@@ -37,8 +39,10 @@ define(function (require) {
         'shipmentId':          { 'type': 'string' },
         'specimenId':          { 'type': 'string' },
         'shipmentContainerId': { 'type': [ 'string', 'null' ] },
-        'locationId':          { 'type': 'string' },
-        'locationName':        { 'type': 'string' },
+        'locationInfo': {
+          'type': 'object',
+          'items': { '$ref': 'CentreLocationInfo' }
+        },
         'timeCreated':         { 'type': 'string' },
         'amount':              { 'type': 'number' },
         'units':               { 'type': 'string' },
@@ -50,8 +54,7 @@ define(function (require) {
         'state',
         'shipmentId',
         'specimenId',
-        'locationId',
-        'locationName',
+        'locationInfo',
         'timeCreated',
         'amount',
         'units',
@@ -115,23 +118,13 @@ define(function (require) {
        */
 
       /**
-       * The location ID where this specimen is currently at.
+       * The location information for where this specimen is currently at.
        *
-       * @name domain.centres.ShipmentSpecimen#locationId
+       * @name domain.centres.ShipmentSpecimen#locationInfo
        * @type {string}
        * @protected
        */
-      this.locationId = null;
-
-      /**
-       * The name of the location (contains the centre name also) where this specimen is currently
-       * at.
-       *
-       * @name domain.centres.ShipmentSpecimen#locationName
-       * @type {string}
-       * @protected
-       */
-      this.locationName = null;
+      this.locationInfo = null;
 
       /**
        * The date and time this specimen was created.
@@ -189,6 +182,8 @@ define(function (require) {
      * @private
      */
     ShipmentSpecimen.isValid = function(obj) {
+      tv4.addSchema(centreLocationInfoSchema);
+      tv4.addSchema(schema);
       return tv4.validate(obj, schema);
     };
 
@@ -205,7 +200,7 @@ define(function (require) {
      * a shipment specimen within asynchronous code.
      */
     ShipmentSpecimen.create = function (obj) {
-      if (!tv4.validate(obj, schema)) {
+      if (!ShipmentSpecimen.isValid(obj)) {
         $log.error('invalid object from server: ' + tv4.error);
         throw new DomainError('invalid object from server: ' + tv4.error);
       }
@@ -229,7 +224,7 @@ define(function (require) {
     ShipmentSpecimen.asyncCreate = function (obj) {
       var deferred = $q.defer();
 
-      if (!tv4.validate(obj, schema)) {
+      if (!ShipmentSpecimen.isValid(obj)) {
         $log.error('invalid object from server: ' + tv4.error);
         deferred.reject('invalid object from server: ' + tv4.error);
       } else {

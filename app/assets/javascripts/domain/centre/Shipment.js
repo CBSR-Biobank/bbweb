@@ -15,7 +15,8 @@ define(function (require) {
     'ConcurrencySafeEntity',
     'DomainError',
     'ShipmentState',
-    'biobankApi'
+    'biobankApi',
+    'centreLocationInfoSchema'
   ];
 
   function ShipmentFactory($q,
@@ -23,22 +24,8 @@ define(function (require) {
                            ConcurrencySafeEntity,
                            DomainError,
                            ShipmentState,
-                           biobankApi) {
-
-    var centreLocationSchema = {
-      'id': 'CentreLocationInfo',
-      'type': 'object',
-      'properties': {
-        'centreId':   { 'type': 'string' },
-        'locationId': { 'type': 'string' },
-        'name':       { 'type': 'string' }
-      },
-      'required': [
-        'centreId',
-        'locationId',
-        'name',
-      ]
-    };
+                           biobankApi,
+                           centreLocationInfoSchema) {
 
     var schema = {
       'id': 'Shipment',
@@ -123,7 +110,7 @@ define(function (require) {
        * The information for the centre location which is sending the specimens.
        *
        * @name domain.centres.Shipment#fromLocationInfo
-       * @type {domain.centres.CentreLocationNameDto}
+       * @type {domain.centres.CentreLocationInfo}
        */
       this.fromLocationInfo = undefined;
 
@@ -131,7 +118,7 @@ define(function (require) {
        * The information for the centre location which is receiving the specimens.
        *
        * @name domain.centres.Shipment#toLocationInfo
-       * @type {domain.centres.CentreLocationNameDto}
+       * @type {domain.centres.CentreLocationInfo}
        */
       this.toLocationInfo = undefined;
 
@@ -171,7 +158,7 @@ define(function (require) {
      * @private
      */
     Shipment.isValid = function(obj) {
-      tv4.addSchema(centreLocationSchema);
+      tv4.addSchema(centreLocationInfoSchema);
       tv4.addSchema(schema);
       return tv4.validate(obj, schema);
     };

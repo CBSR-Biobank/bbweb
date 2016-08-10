@@ -23,9 +23,11 @@ define(function () {
   function ShipmentSpecimensController() {
     var vm = this;
 
+    vm.specimens = [];
     vm.panelOpen = true;
 
     vm.panelButtonClicked = panelButtonClicked;
+    vm.addSpecimen        = addSpecimen;
 
     //---
 
@@ -33,6 +35,9 @@ define(function () {
       vm.panelOpen = !vm.panelOpen;
     }
 
+    function addSpecimen() {
+      console.log('test');
+    }
 
   }
 

@@ -28,6 +28,7 @@ define(function (require) {
   module.constant('PreservationTemperatureType',        require('./PreservationTemperatureType'));
   module.constant('ShipmentState',                      require('./centre/ShipmentState'));
   module.constant('ShipmentItemState',                  require('./centre/ShipmentItemState'));
+  module.constant('centreLocationInfoSchema',           require('./centre/centreLocationInfoSchema'));
 
   module.constant('AnnotationValueType',                require('./AnnotationValueType'));
   module.constant('SpecimenType',                       require('./study/SpecimenType'));

@@ -23,15 +23,3 @@
  *
  * @property {string} locationName - the location's name.
  */
-
-/**
- * @typedef domain.centres.CentreLocationNameDto
- *
- * @type object
- *
- * @property {string} centreId - the ID that identifies the centre.
- *
- * @property {string} locationId - the ID that identifies the location.
- *
- * @property {string} name - the centre's name concatenated with the location name.
- */

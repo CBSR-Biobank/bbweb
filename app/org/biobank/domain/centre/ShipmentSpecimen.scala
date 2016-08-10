@@ -1,7 +1,7 @@
 package org.biobank.domain.centre
 
 import org.biobank._
-import org.biobank.dto.ShipmentSpecimenDto
+import org.biobank.dto.{CentreLocationInfo, ShipmentSpecimenDto}
 import org.biobank.domain._
 import org.biobank.domain.centre.ShipmentItemState._
 import org.biobank.domain.participants.{Specimen, SpecimenId}
@@ -93,7 +93,7 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
   }
 
   def createDto(specimen:     Specimen,
-                locationName: String,
+                locationInfo: CentreLocationInfo,
                 units:        String): ShipmentSpecimenDto =
     ShipmentSpecimenDto(id                  = this.id.id,
                         shipmentId          = this.shipmentId.id,
@@ -104,8 +104,7 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
                         version             = this.version,
                         timeAdded           = this.timeAdded,
                         timeModified        = this.timeModified,
-                        locationId          = specimen.locationId,
-                        locationName        = locationName,
+                        locationInfo        = locationInfo,
                         timeCreated         = specimen.timeCreated,
                         amount              = specimen.amount,
                         units               = units,
