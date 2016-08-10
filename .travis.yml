@@ -1,6 +1,8 @@
 language: scala
 scala:
-  - 2.11.2
+  - 2.11.8
 branches:
   only:
   - dev-loyola
+jdk:
+  - oraclejdk8
