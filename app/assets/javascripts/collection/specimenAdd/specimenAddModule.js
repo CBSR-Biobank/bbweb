@@ -30,7 +30,7 @@ define(function (require) {
    */
   function specimenAddModalService($uibModal) {
     var service = {
-      open: open
+      open: openModal
     };
     return service;
 
@@ -38,8 +38,11 @@ define(function (require) {
 
     /**
      * Creates a modal that allows the user add one or more specimens to a collection event.
+     *
+     * When running the Travis CI build, jshint did not like that this function was named "open". Therefore,
+     * it was renamed.
      */
-    function open(centreLocations, specimenSpecs) {
+    function openModal(centreLocations, specimenSpecs) {
       var modalInstance = $uibModal.open({
         templateUrl: '/assets/javascripts/collection/specimenAdd/specimenAdd.html',
         controller: 'specimenAddModal.ModalInstanceController',
