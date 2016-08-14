@@ -308,7 +308,6 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
           repoSpecimens.head.ceventId must be (cevent.id)
 
           specimenRepository.getByKey(repoSpecimens.head.specimenId) mustSucceed { repoSpecimen =>
-            log.info(s"specimen: ${repoSpecimens.head}")
 
             repoSpecimen must have (
               'inventoryId       (specimen.inventoryId),

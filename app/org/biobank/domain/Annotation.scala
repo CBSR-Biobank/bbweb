@@ -104,9 +104,6 @@ object Annotation {
       .map(annotationType => annotationType.uniqueId)
       .toSet
 
-    log.info(s"requiredAnnotTypeIds: $requiredAnnotTypeIds")
-    log.info(s"annotations: $annotations")
-
     if (!requiredAnnotTypeIds.isEmpty && annotations.isEmpty) {
       DomainError("missing required annotation type(s)").failureNel
     } else if (annotations.isEmpty && annotationTypes.isEmpty) {
