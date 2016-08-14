@@ -24,7 +24,7 @@
   <logger name="application" level="INFO" />
   <logger name="play.api.libs.mailer.MockMailer" level="WARN" />
 
-  <root level="DEBUG">
+  <root level="INFO">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>
