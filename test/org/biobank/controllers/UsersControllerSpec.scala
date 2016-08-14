@@ -341,7 +341,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val json = makeRequest(POST, uri, FORBIDDEN, json = reqJson)
 
         (json \ "status").as[String] must be ("error")
-        (json \ "message").as[String] must startWith("EmailNotAvailable")
+        (json \ "message").as[String] must startWith("already registered")
       }
     }
 
