@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/cbsrbiobank/bbweb.svg?branch=master)](https://travis-ci.org/cbsrbiobank/bbweb)
+
 # Biobank Web Application
 
 Biobank version 4 is a rewrite of the [Biobank] (https://github.com/cbsrbiobank/biobank) application
@@ -18,4 +20,3 @@ Not all users will be required to install the desktop client.
 1. [Development](documentation/Development.md)
 1. [Notes](NOTES.md)
 1. [Todo](Todo.md)
-
