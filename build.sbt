@@ -77,7 +77,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka"           %% "akka-remote"                         % "2.4.8"             % "compile",
   "com.typesafe.akka"           %% "akka-slf4j"                          % "2.4.8"             % "compile",
   "org.scala-stm"               %% "scala-stm"                           % "0.7"               % "compile",
-  "org.scalaz"                  %% "scalaz-core"                         % "7.2.4"             % "compile",
+  "org.scalaz"                  %% "scalaz-core"                         % "7.2.5"             % "compile",
   "org.iq80.leveldb"            % "leveldb"                              % "0.9",
   "org.fusesource.leveldbjni"   % "leveldbjni-all"                       % "1.8",
   "com.github.t3hnar"           %% "scala-bcrypt"                        % "2.6",

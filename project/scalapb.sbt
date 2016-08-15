@@ -1,4 +1,4 @@
-addSbtPlugin("com.trueaccord.scalapb" % "sbt-scalapb" % "0.5.31")
+addSbtPlugin("com.trueaccord.scalapb" % "sbt-scalapb" % "0.5.38")
 
 libraryDependencies ++= Seq(
   "com.trueaccord.scalapb" %% "compilerplugin" % "0.5.38",
