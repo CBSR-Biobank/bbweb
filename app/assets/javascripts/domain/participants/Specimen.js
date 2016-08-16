@@ -10,7 +10,8 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     '$log',
     'ConcurrencySafeEntity',
     'DomainError',
-    'biobankApi'
+    'biobankApi',
+    'centreLocationInfoSchema'
   ];
 
   /**
@@ -28,36 +29,8 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                            $log,
                            ConcurrencySafeEntity,
                            DomainError,
-                           biobankApi) {
-
-    /**
-     * Used for validation.
-     */
-    var schema = {
-      'id': 'Specimen',
-      'type': 'object',
-      'properties': {
-        'id':               { 'type': 'string' },
-        'specimenSpecId':   { 'type': 'string' },
-        'version':          { 'type': 'integer', 'minimum': 0 },
-        'timeAdded':        { 'type': 'string' },
-        'timeModified':     { 'type': [ 'string', 'null' ] },
-        'originLocationId': { 'type': 'string' },
-        'locationId':       { 'type': 'string' },
-        'containerId':      { 'type': [ 'string', 'null' ] },
-        'postitionId':      { 'type': [ 'string', 'null' ] },
-        'timeCreated':      { 'type': 'string' },
-        'amount':           { 'type': 'number' },
-        'status':           { 'type': 'string' }
-      },
-      'required': [
-        'id',
-        'specimenSpecId',
-        'timeCreated',
-        'status',
-        'version'
-      ]
-    };
+                           biobankApi,
+                           centreLocationInfoSchema) {
 
     /**
      * Use this contructor to create new Specimens to be persited on the server. Use
@@ -104,14 +77,14 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
        * @name domain.participants.Specimen#originLocationId
        * @type {string}
        */
-      this.originLocationId = null;
+      this.originLocationInfo = null;
 
       /**
        * The location of the {@link domain.centres.Centre} where this specimen is currently located.
        * @name domain.participants.Specimen#locationId
        * @type {string}
        */
-      this.locationId = null;
+      this.locationInfo = null;
 
       /**
        * The ID of the {@link domain.centres.Container} this specimen is stored in.
@@ -163,10 +136,51 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     Specimen.prototype.constructor = Specimen;
 
     /**
+     * Used for validation.
+     */
+    Specimen.schema = {
+      'id': 'Specimen',
+      'type': 'object',
+      'properties': {
+        'id':               { 'type': 'string' },
+        'inventoryId':      { 'type': 'string' },
+        'specimenSpecId':   { 'type': 'string' },
+        'version':          { 'type': 'integer', 'minimum': 0 },
+        'timeAdded':        { 'type': 'string' },
+        'timeModified':     { 'type': [ 'string', 'null' ] },
+        'originLocationInfo': {
+          'type': 'object',
+          'items': { '$ref': 'CentreLocationInfo' }
+        },
+        'locationInfo': {
+          'type': 'object',
+          'items': { '$ref': 'CentreLocationInfo' }
+        },
+        'containerId':      { 'type': [ 'string', 'null' ] },
+        'postitionId':      { 'type': [ 'string', 'null' ] },
+        'timeCreated':      { 'type': 'string' },
+        'amount':           { 'type': 'number' },
+        'status':           { 'type': 'string' }
+      },
+      'required': [
+        'id',
+        'inventoryId',
+        'specimenSpecId',
+        'version',
+        'timeCreated',
+        'status',
+        'originLocationInfo',
+        'locationInfo'
+      ]
+    };
+
+    /**
      * @private
      */
     Specimen.isValid = function(obj) {
-      return tv4.validate(obj, schema);
+      tv4.addSchema(centreLocationInfoSchema);
+      tv4.addSchema(Specimen.schema);
+      return tv4.validate(obj, Specimen.schema);
     };
 
     /**
@@ -184,7 +198,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      * a specimen within asynchronous code.
      */
     Specimen.create = function (obj, specimenSpec) {
-      if (!tv4.validate(obj, schema)) {
+      if (!Specimen.isValid(obj)) {
         $log.error('invalid object from server: ' + tv4.error);
         throw new DomainError('invalid object from server: ' + tv4.error);
       }
@@ -208,7 +222,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     Specimen.asyncCreate = function (obj) {
       var deferred = $q.defer();
 
-      if (!tv4.validate(obj, schema)) {
+      if (!Specimen.isValid(obj)) {
         $log.error('invalid object from server: ' + tv4.error);
         deferred.reject('invalid object from server: ' + tv4.error);
       } else {

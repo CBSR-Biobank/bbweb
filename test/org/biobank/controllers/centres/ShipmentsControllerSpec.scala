@@ -3,7 +3,7 @@ package org.biobank.controllers.centres
 import com.github.nscala_time.time.Imports._
 import org.biobank.TestUtils
 import org.biobank.controllers.PagedResultsSpec
-import org.biobank.dto.{CentreLocationInfo, ShipmentSpecimenDto}
+import org.biobank.dto.{CentreLocationInfo}
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.centre._
 import org.biobank.domain.centre.ShipmentItemState._
@@ -236,13 +236,14 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
         specimenRepository.put(updatedSpecimen)
         val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id,
                                                                    specimenId = specimen.id)
-        val name = f.fromCentre.locationName(specimen.locationId).fold(e => "error", n => n)
-        val dto = shipmentSpecimen.createDto(updatedSpecimen,
-                                             CentreLocationInfo(f.fromCentre.id.id,
-                                                                specimen.locationId,
-                                                                name),
-                                             f.ceventType.specimenSpecs.head.units)
-        (updatedSpecimen.id, (updatedSpecimen, shipmentSpecimen, dto))
+        val originLocationName = f.fromCentre.locationName(specimen.originLocationId)
+          .fold(e => "error", n => n)
+        val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
+                                                    specimen.originLocationId,
+                                                    originLocationName)
+        val specimenDto =
+          specimen.createDto(f.cevent, f.specimenSpec, centreLocationInfo, centreLocationInfo)
+        (updatedSpecimen.id, (updatedSpecimen, shipmentSpecimen, shipmentSpecimen.createDto(specimenDto)))
       }.toMap
 
     map.values.foreach(x => shipmentSpecimenRepository.put(x._2))
@@ -259,23 +260,6 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
       val shipment            = f.shipment
       val shipmentSpecimenMap = map
     }
-  }
-
-  def compareObj(json: JsValue, dto: ShipmentSpecimenDto) = {
-    (json \ "id").as[String] mustBe (dto.id)
-    (json \ "shipmentId").as[String] mustBe (dto.shipmentId)
-    (json \ "state").as[String] mustBe (dto.state)
-    (json \ "specimenId").as[String] mustBe (dto.specimenId)
-    (json \ "inventoryId").as[String] mustBe (dto.inventoryId)
-    (json \ "version").as[Long] mustBe (dto.version)
-    TestUtils.checkTimeStamps(dto.timeAdded, (json \ "timeAdded").as[DateTime])
-    TestUtils.checkOpionalTime(dto.timeModified, (json \ "timeModified").asOpt[DateTime])
-    (json \ "locationInfo" \ "locationId").as[String] mustBe (dto.locationInfo.locationId)
-    (json \ "locationInfo" \ "name").as[String] mustBe (dto.locationInfo.name)
-    TestUtils.checkTimeStamps(dto.timeCreated, (json \ "timeCreated").as[DateTime])
-    (json \ "amount").as[BigDecimal] mustBe (dto.amount)
-    (json \ "units").as[String] mustBe (dto.units)
-    (json \ "status").as[String] mustBe (dto.status)
   }
 
   val stateToUrl = Map(
@@ -1177,13 +1161,15 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(uri(f.shipment, "specimens"))
 
-        f.fromCentre.locationName(specimen.locationId) mustSucceed { name =>
-          val dto = shipmentSpecimen.createDto(
-              specimen,
-              CentreLocationInfo(f.fromCentre.id.id, specimen.locationId, name),
-              f.ceventType.specimenSpecs.head.units)
-          compareObj(jsonItem, dto)
-        }
+        val originLocationName = f.fromCentre.locationName(specimen.originLocationId)
+          .fold(e => "error", n => n)
+        val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
+                                                    specimen.originLocationId,
+                                                    originLocationName)
+
+        val dto = shipmentSpecimen.createDto(
+            specimen.createDto(f.cevent, f.specimenSpec, centreLocationInfo, centreLocationInfo))
+        compareObj(jsonItem, dto)
       }
 
       "work for shipment with more than one specimen" in {
@@ -1206,13 +1192,15 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
             maybePrev = None)
 
         shipmentSpecimenMap.zipWithIndex.foreach { case ((specimen, shipmentSpecimen), index) =>
-          f.fromCentre.locationName(specimen.locationId) mustSucceed { name =>
-            val dto = shipmentSpecimen.createDto(
-                specimen,
-                CentreLocationInfo(f.fromCentre.id.id, specimen.locationId, name),
-                f.ceventType.specimenSpecs.head.units)
-            compareObj(jsonItems(index), dto)
-          }
+          val originLocationName = f.fromCentre.locationName(specimen.originLocationId)
+            .fold(e => "error", n => n)
+
+          val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
+                                                      specimen.originLocationId,
+                                                      originLocationName)
+          val dto = shipmentSpecimen.createDto(
+              specimen.createDto(f.cevent, f.specimenSpec, centreLocationInfo, centreLocationInfo))
+          compareObj(jsonItems(index), dto)
         }
       }
 

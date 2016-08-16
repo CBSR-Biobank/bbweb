@@ -62,8 +62,8 @@ define([
 
       expect(specimen.id).toBeNull();
       expect(specimen.version).toBe(0);
-      expect(specimen.originLocationId).toBeNull();
-      expect(specimen.locationId).toBeNull();
+      expect(specimen.originLocationInfo).toBeNull();
+      expect(specimen.locationInfo).toBeNull();
       expect(specimen.containerId).toBeUndefined();
       expect(specimen.positionId).toBeUndefined();
       expect(specimen.timeAdded).toBeNull();

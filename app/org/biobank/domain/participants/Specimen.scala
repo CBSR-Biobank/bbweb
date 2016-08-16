@@ -1,17 +1,10 @@
 package org.biobank.domain.participants
 
 import org.biobank.ValidationKey
-import org.biobank.domain.{
-  ConcurrencySafeEntity,
-  DomainValidation,
-  Location
-}
-import org.biobank.domain.study.StudyValidations
-import org.biobank.domain.containers.{
-  ContainerId,
-  ContainerSchemaPositionId
-}
-
+import org.biobank.dto.{CentreLocationInfo, SpecimenDto}
+import org.biobank.domain.containers.{ContainerId, ContainerSchemaPositionId}
+import org.biobank.domain.study.{CollectionSpecimenSpec, StudyValidations}
+import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation, Location}
 import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
@@ -53,6 +46,27 @@ sealed trait Specimen
 
   /** The amount, in units specified in the [[SpecimenSpec]], for this specimen. */
   val amount: scala.math.BigDecimal
+
+  def createDto(collectionEvent:    CollectionEvent,
+                specimenSpec:       CollectionSpecimenSpec,
+                originLocationInfo: CentreLocationInfo,
+                locationInfo:       CentreLocationInfo): SpecimenDto =
+    SpecimenDto(id                 = this.id.id,
+                inventoryId        = this.inventoryId,
+                collectionEventId  = collectionEvent.id.id,
+                specimenSpecId     = this.specimenSpecId,
+                specimenSpecName   = specimenSpec.name,
+                version            = this.version,
+                timeAdded          = this.timeAdded,
+                timeModified       = this.timeModified,
+                originLocationInfo = originLocationInfo,
+                locationInfo       = locationInfo,
+                containerId        = this.containerId.map(_.id),
+                positionId         = this.positionId.map(_.id),
+                timeCreated        = this.timeCreated,
+                amount             = this.amount,
+                units              = specimenSpec.units,
+                status             = this.getClass.getSimpleName)
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {
@@ -108,7 +122,6 @@ object Specimen {
 
   def compareByStatus(a: Specimen, b: Specimen) =
     (a.getClass.getSimpleName compareTo b.getClass.getSimpleName) < 0
-
 }
 
 trait SpecimenValidations {

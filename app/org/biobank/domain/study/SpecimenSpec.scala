@@ -1,16 +1,11 @@
 package org.biobank.domain.study
 
 import org.biobank.ValidationKey
-import org.biobank.domain.{
-  DomainValidation,
-  HasUniqueName,
-  HasDescriptionOption
-}
 import org.biobank.domain.AnatomicalSourceType._
-import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
+import org.biobank.domain.PreservationType._
 import org.biobank.domain.SpecimenType._
-
+import org.biobank.domain.{DomainValidation, HasUniqueName, HasDescriptionOption}
 import play.api.libs.json._
 import scalaz.Scalaz._
 

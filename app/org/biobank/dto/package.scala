@@ -82,10 +82,8 @@ package dto {
                                version:            Long,
                                timeAdded:          DateTime,
                                timeModified:       Option[DateTime],
-                               originLocationId:   String,
-                               originLocationName: String,
-                               locationId:         String,
-                               locationName:       String,
+                               originLocationInfo: CentreLocationInfo,
+                               locationInfo:       CentreLocationInfo,
                                containerId:        Option[String],
                                positionId:         Option[String],
                                timeCreated:        DateTime,
@@ -142,19 +140,13 @@ package dto {
   }
 
   final case class ShipmentSpecimenDto(id:                  String,
-                                       state:               String,
-                                       shipmentId:          String,
-                                       specimenId:          String,
-                                       shipmentContainerId: Option[String],
-                                       inventoryId:         String,
                                        version:             Long,
                                        timeAdded:           DateTime,
                                        timeModified:        Option[DateTime],
-                                       locationInfo:        CentreLocationInfo,
-                                       timeCreated:         DateTime,
-                                       amount:              BigDecimal,
-                                       units:               String,
-                                       status:              String)
+                                       state:               String,
+                                       shipmentId:          String,
+                                       shipmentContainerId: Option[String],
+                                       specimen:            SpecimenDto)
 
   object ShipmentSpecimenDto {
 
@@ -163,7 +155,7 @@ package dto {
       "state"       -> compareByState)
 
     def compareByInventoryId(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto) =
-      (a.inventoryId compareTo b.inventoryId) < 0
+      (a.specimen.inventoryId compareTo b.specimen.inventoryId) < 0
 
     def compareByState(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto) = (a.state compareTo b.state) < 0
 

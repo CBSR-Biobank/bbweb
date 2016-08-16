@@ -51,9 +51,7 @@ trait Processor extends PersistentActor with ActorLogging {
     (name: String, repository: ReadRepository[_, T], errMsgPrefix: String)
     (matcher: T => Boolean)
       : ServiceValidation[Boolean] = {
-    val exists = repository.getValues.exists { item =>
-      matcher(item)
-    }
+    val exists = repository.getValues.exists(matcher)
     if (exists) EntityCriteriaError(s"$errMsgPrefix: $name").failureNel[Boolean]
     else true.successNel[String]
   }

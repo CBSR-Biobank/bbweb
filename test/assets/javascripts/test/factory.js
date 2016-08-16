@@ -375,15 +375,26 @@ define([
       return defaultEntity(ENTITY_NAME_COLLECTION_EVENT(), collectionEvent);
     }
 
+    function centreLocationInfo(centre) {
+      if (!centre.locations || (centre.locations.length < 1)) {
+        throw new Error('centre does not have any locations');
+      }
+      return {
+        centreId: centre.id,
+        locationId: centre.locations[0].uniqueId,
+        name: centre.name +': ' + centre.locations[0].name
+      };
+    }
+
     function specimen(options, specimenSpec) {
-      var collectionEventType = defaultCollectionEventType(),
-          centre = defaultCentre(),
+      var ceventType = collectionEventType({ specimenSpecs: [ collectionSpecimenSpec() ] }),
+          ctr = centre({ locations: [ location() ]}),
           defaults = {
             id:                  domainEntityNameNext(ENTITY_NAME_SPECIMEN()),
             inventoryId:         domainEntityNameNext(ENTITY_NAME_SPECIMEN()),
             specimenSpecId:      null,
-            originLocationId:    null,
-            locationId:          null,
+            originLocationInfo:  null,
+            locationInfo:        null,
             timeCreated:         moment(faker.date.recent(10)).format(),
             amount:              1,
             status:              'UsableSpecimen'
@@ -393,13 +404,13 @@ define([
 
       options = options || {};
 
-      if (collectionEventType.specimenSpecs && (collectionEventType.specimenSpecs.length > 0)) {
-        defaults.specimenSpecId = collectionEventType.specimenSpecs[0].uniqueId;
+      if (ceventType.specimenSpecs && (ceventType.specimenSpecs.length > 0)) {
+        defaults.specimenSpecId = ceventType.specimenSpecs[0].uniqueId;
       }
 
-      if (centre.locations && (centre.locations.length > 0)) {
-        defaults.originLocationId = centre.locations[0].uniqueId;
-        defaults.locationId = defaults.originLocationId;
+      if (ctr.locations && (ctr.locations.length > 0)) {
+        defaults.originLocationInfo = centreLocationInfo(ctr);
+        defaults.locationInfo = defaults.originLocationInfo;
       }
 
       spc = _.extend(defaults, commonFields(), _.pick(options, validKeys));
@@ -461,12 +472,8 @@ define([
           defaults = { id:           domainEntityNameNext(ENTITY_NAME_SHIPMENT()),
                        state:        ShipmentItemState.PRESENT,
                        shipmentId:   shipment.id,
-                       specimenId:   specimen.id,
-                       locationInfo: shipment.fromLocationInfo,
-                       timeCreated:  moment(faker.date.recent(10)).format(),
-                       amount:       1,
-                       units:        stringNext(),
-                       status:       'UsableSpecimen'},
+                       specimen:     specimen
+                     },
           validKeys = commonFieldNames.concat(_.keys(defaults)),
           ss = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
       updateDefaultEntity(ENTITY_NAME_SHIPMENT_SPECIMEN(), ss);

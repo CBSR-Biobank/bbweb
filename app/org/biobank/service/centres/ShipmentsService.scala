@@ -161,13 +161,20 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
       cevent             <- collectionEventRepository.getByKey(ceventSpecimen.ceventId)
       ceventType         <- collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
       specimenSpec       <- ceventType.specimenSpec(specimen.specimenSpecId)
-      centre             <- centreRepository.getByLocationId(specimen.originLocationId)
-      centreLocationName <- centre.locationName(specimen.locationId)
-    } yield shipmentSpecimen.createDto(specimen,
-                                       CentreLocationInfo(centre.id.id,
-                                                          specimen.locationId,
-                                                          centreLocationName),
-                                       specimenSpec.units)
+      originCentre       <- centreRepository.getByLocationId(specimen.originLocationId)
+      originLocationName <- originCentre.locationName(specimen.originLocationId)
+      centre             <- centreRepository.getByLocationId(specimen.locationId)
+      locationName       <- centre.locationName(specimen.locationId)
+    } yield {
+      val originLocationInfo = CentreLocationInfo(originCentre.id.id,
+                                                  specimen.originLocationId,
+                                                  originLocationName)
+      val locationInfo = CentreLocationInfo(centre.id.id,
+                                            specimen.locationId,
+                                            locationName)
+      val specimenDto = specimen.createDto(cevent, specimenSpec, originLocationInfo, locationInfo)
+      shipmentSpecimen.createDto(specimenDto)
+      }
   }
 
   def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[ShipmentDto]] = {

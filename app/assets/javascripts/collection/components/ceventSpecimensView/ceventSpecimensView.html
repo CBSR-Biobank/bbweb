@@ -30,7 +30,7 @@
         <td>{{specimen.amount}} {{specimen.units}}</td>
         <td>{{specimen.specimenSpecName}}</td>
         <td>{{specimen.timeCreated| localTime}}</td>
-        <td>{{specimen.locationName}}</td>
+        <td>{{specimen.locationInfo.name}}</td>
         <td>
           <button class="btn btn-xs btn-warning"
                   ng-click="vm.removeSpecimen(specimen)"

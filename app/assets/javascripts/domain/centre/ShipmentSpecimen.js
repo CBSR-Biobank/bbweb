@@ -15,6 +15,7 @@ define(function (require) {
     'ConcurrencySafeEntity',
     'DomainError',
     'ShipmentItemState',
+    'Specimen',
     'biobankApi',
     'centreLocationInfoSchema'
   ];
@@ -24,6 +25,7 @@ define(function (require) {
                            ConcurrencySafeEntity,
                            DomainError,
                            ShipmentItemState,
+                           Specimen,
                            biobankApi,
                            centreLocationInfoSchema) {
 
@@ -37,28 +39,17 @@ define(function (require) {
         'timeModified':        { 'type': [ 'string', 'null' ] },
         'state':               { 'type': 'string' },
         'shipmentId':          { 'type': 'string' },
-        'specimenId':          { 'type': 'string' },
-        'shipmentContainerId': { 'type': [ 'string', 'null' ] },
-        'locationInfo': {
+        'specimen': {
           'type': 'object',
-          'items': { '$ref': 'CentreLocationInfo' }
-        },
-        'timeCreated':         { 'type': 'string' },
-        'amount':              { 'type': 'number' },
-        'units':               { 'type': 'string' },
-        'status':              { 'type': 'string' }
+          'items': { '$ref': 'Specimen' }
+        }
       },
       'required': [
         'id',
         'version',
         'state',
         'shipmentId',
-        'specimenId',
-        'locationInfo',
-        'timeCreated',
-        'amount',
-        'units',
-        'status'
+        'specimen'
       ]
     };
 
@@ -107,7 +98,7 @@ define(function (require) {
        * @type {string}
        * @protected
        */
-      this.specimenId = null;
+      this.specimen = null;
 
       /**
        * The shipment container this shipment specimen can be found in.
@@ -116,59 +107,6 @@ define(function (require) {
        * @type {string}
        * @protected
        */
-
-      /**
-       * The location information for where this specimen is currently at.
-       *
-       * @name domain.centres.ShipmentSpecimen#locationInfo
-       * @type {string}
-       * @protected
-       */
-      this.locationInfo = null;
-
-      /**
-       * The date and time this specimen was created.
-       *
-       * @name domain.centres.ShipmentSpecimen#timeCreated
-       * @type {Date}
-       * @protected
-       *
-       * @see [Specimen.timeCreated]{@link domain.participants.Specimen#timeCreated}
-       */
-      this.timeCreated = null;
-
-      /**
-       * The amount this specimen contains.
-       *
-       * @name domain.centres.ShipmentSpecimen#amount
-       * @type {number}
-       * @protected
-       *
-       * @see [Specimen.amount]{@link domain.participants.Specimen#amount}
-       */
-      this.amount = null;
-
-      /**
-       * The units this specimen is measured in.
-       *
-       * @name domain.centres.ShipmentSpecimen#units
-       * @type {number}
-       * @protected
-       *
-       * @see [CollectionSpecimenSpec.units]{@link domain.studies.CollectionSpecimenSpec#units}
-       */
-      this.units = null;
-
-      /**
-       * The status for this specimen
-       *
-       * @name domain.centres.ShipmentSpecimen#status
-       * @type {number}
-       * @protected
-       *
-       * @see [Specimen.status]{@link domain.participants.Specimen#status}
-       */
-      this.status = null;
 
       obj = obj || {};
       ConcurrencySafeEntity.call(this, obj);
@@ -183,8 +121,9 @@ define(function (require) {
      */
     ShipmentSpecimen.isValid = function(obj) {
       tv4.addSchema(centreLocationInfoSchema);
+      tv4.addSchema(Specimen.schema);
       tv4.addSchema(schema);
-      return tv4.validate(obj, schema);
+      return tv4.validate(obj, schema) && tv4.validate(obj.specimen, Specimen.schema);
     };
 
     /**
@@ -204,6 +143,26 @@ define(function (require) {
         $log.error('invalid object from server: ' + tv4.error);
         throw new DomainError('invalid object from server: ' + tv4.error);
       }
+
+      return new ShipmentSpecimen(obj);
+    };
+
+    /**
+     * Creates a shipment specimen from the specimen it represents.
+     *
+     * @param {domain.participants.Specimen} specimen - The specimen to base this shipment specimen on.
+     *
+     * @returns {ShipmentSpecimen} A shipment specimen.
+     */
+    ShipmentSpecimen.createFromSpecimen = function (specimen) {
+      var obj = _.extend(
+        _.pick(specimen, 'amount', 'timeCreated'),
+        {
+          state: ShipmentItemState.PRESENT,
+          specimenId: specimen.id,
+          locationInfo: { locationId: specimen.locationId },
+          status: specimen.status
+        });
 
       return new ShipmentSpecimen(obj);
     };

@@ -1,10 +1,10 @@
 package org.biobank.domain.centre
 
 import org.biobank._
-import org.biobank.dto.{CentreLocationInfo, ShipmentSpecimenDto}
+import org.biobank.dto.{ShipmentSpecimenDto, SpecimenDto}
 import org.biobank.domain._
 import org.biobank.domain.centre.ShipmentItemState._
-import org.biobank.domain.participants.{Specimen, SpecimenId}
+import org.biobank.domain.participants.SpecimenId
 import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
@@ -92,23 +92,15 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
     else DomainError(s"shipment specimen is not in present state").failureNel[Boolean]
   }
 
-  def createDto(specimen:     Specimen,
-                locationInfo: CentreLocationInfo,
-                units:        String): ShipmentSpecimenDto =
+  def createDto(specimenDto: SpecimenDto): ShipmentSpecimenDto =
     ShipmentSpecimenDto(id                  = this.id.id,
-                        shipmentId          = this.shipmentId.id,
-                        state               = this.state.toString,
-                        specimenId          = this.specimenId.id,
-                        inventoryId         = specimen.inventoryId,
-                        shipmentContainerId = this.shipmentContainerId.map(id => id.id),
                         version             = this.version,
                         timeAdded           = this.timeAdded,
                         timeModified        = this.timeModified,
-                        locationInfo        = locationInfo,
-                        timeCreated         = specimen.timeCreated,
-                        amount              = specimen.amount,
-                        units               = units,
-                        status              = specimen.getClass.getSimpleName)
+                        shipmentId          = this.shipmentId.id,
+                        shipmentContainerId = this.shipmentContainerId.map(id => id.id),
+                        state               = this.state.toString,
+                        specimen            = specimenDto)
 
   override def toString =
     s"""|${this.getClass.getSimpleName}: {

@@ -14,6 +14,8 @@ trait ShipmentSpecimenRepository extends ReadWriteRepository[ShipmentSpecimenId,
 
   def allForSpecimen(id: SpecimenId): Set[ShipmentSpecimen]
 
+  def specimenCanBeAddedToShipment(specimenId: SpecimenId, shipmentId: ShipmentId)
+      : DomainValidation[Boolean]
 }
 
 @Singleton
@@ -26,6 +28,9 @@ class ShipmentSpecimenRepositoryImpl
 
   def notFound(id: ShipmentSpecimenId) = IdNotFound(s"shipment specimen id: $id")
 
+  def shipmentAndSpecimenNotFound(shipmentId: ShipmentId, specimenId: SpecimenId) =
+    IdNotFound(s"shipment id: $shipmentId, specimen id: $specimenId")
+
   override def getByKey(id: ShipmentSpecimenId): DomainValidation[ShipmentSpecimen] = {
     getMap.get(id).toSuccessNel(notFound(id).toString)
   }
@@ -36,5 +41,12 @@ class ShipmentSpecimenRepositoryImpl
 
   def allForSpecimen(id: SpecimenId): Set[ShipmentSpecimen] = {
     getValues.filter { ss => ss.specimenId == id }.toSet
+  }
+
+  def specimenCanBeAddedToShipment(specimenId: SpecimenId, shipmentId: ShipmentId)
+      : DomainValidation[Boolean] = {
+    val exists = getValues.exists(ss => (ss.shipmentId == shipmentId) && (ss.specimenId == specimenId))
+    if (exists) EntityCriteriaError(s"specimen already present in shipment").failureNel[Boolean]
+    else true.successNel[String]
   }
 }

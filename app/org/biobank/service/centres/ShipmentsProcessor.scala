@@ -4,7 +4,7 @@ import akka.actor._
 import akka.persistence.{ SnapshotOffer }
 import javax.inject.Inject
 import org.biobank.domain.centre._
-import org.biobank.domain.participants.SpecimenId
+import org.biobank.domain.participants.{SpecimenId, SpecimenRepository}
 import org.biobank.infrastructure.command.ShipmentCommands._
 import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
 import org.biobank.infrastructure.event.ShipmentEvents._
@@ -26,7 +26,8 @@ object ShipmentsProcessor {
  */
 class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepository,
                                     val shipmentSpecimenRepository: ShipmentSpecimenRepository,
-                                    val centreRepository:           CentreRepository)
+                                    val centreRepository:           CentreRepository,
+                                    val specimenRepository:         SpecimenRepository)
     extends Processor
     with ShipmentValidations {
 
@@ -286,16 +287,25 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   private def addSpecimenCmdToEvent(cmd : ShipmentSpecimenAddCmd)
       : ServiceValidation[ShipmentSpecimenEvent] = {
     val shipmentId = ShipmentId(cmd.shipmentId)
+    val specimenId = SpecimenId(cmd.specimenId)
+    val shipmentContainerId = cmd.shipmentContainerId.map(ShipmentContainerId.apply)
+
     for {
-      shipment  <- shipmentRepository.getByKey(shipmentId)
-      isCreated <- shipment.isCreated
-      id        <- validNewIdentity(shipmentSpecimenRepository.nextIdentity, shipmentSpecimenRepository)
-      ss        <- ShipmentSpecimen.create(id                  = id,
-                                           version             = 0L,
-                                           shipmentId          = shipment.id,
-                                           specimenId          = SpecimenId(cmd.specimenId),
-                                           state               = ShipmentItemState.Present,
-                                           shipmentContainerId = cmd.shipmentContainerId.map(ShipmentContainerId.apply))
+      specimen   <- specimenRepository.getByKey(specimenId)
+      shipment   <- shipmentRepository.getByKey(shipmentId)
+      isCreated  <- shipment.isCreated
+      canBeAdded <- shipmentSpecimenRepository.specimenCanBeAddedToShipment(specimenId, shipmentId)
+      atCentre   <- {
+        if (specimen.locationId == shipment.fromLocationId) true.successNel[String]
+        else ServiceError(s"specimen not present at shipment's from centre").failureNel[Boolean]
+      }
+      id         <- validNewIdentity(shipmentSpecimenRepository.nextIdentity, shipmentSpecimenRepository)
+      ss         <- ShipmentSpecimen.create(id                  = id,
+                                            version             = 0L,
+                                            shipmentId          = shipmentId,
+                                            specimenId          = specimenId,
+                                            state               = ShipmentItemState.Present,
+                                            shipmentContainerId = shipmentContainerId)
     } yield ShipmentSpecimenEvent(id.id).update(
         _.userId                            := cmd.userId,
         _.time                              := ISODateTimeFormat.dateTime.print(DateTime.now),

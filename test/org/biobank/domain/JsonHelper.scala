@@ -1,21 +1,16 @@
 package org.biobank.domain
 
-import org.biobank.TestUtils
-import org.biobank.dto._
-import org.biobank.domain.user._
-import org.biobank.domain.study._
-import org.biobank.domain.participants.{
-  CollectionEvent,
-  Participant,
-  Specimen
-}
-import org.biobank.domain.centre._
-import org.biobank.infrastructure._
-
-import play.api.libs.json._
 import com.github.nscala_time.time.Imports._
-import org.scalatest._
 import com.typesafe.scalalogging._
+import org.biobank.TestUtils
+import org.biobank.domain.centre._
+import org.biobank.domain.participants.{CollectionEvent, Participant}
+import org.biobank.domain.study._
+import org.biobank.domain.user._
+import org.biobank.dto._
+import org.biobank.infrastructure._
+import org.scalatest._
+import play.api.libs.json._
 
 trait JsonHelper extends MustMatchers with OptionValues {
   import org.biobank.infrastructure.JsonUtils._
@@ -201,26 +196,6 @@ trait JsonHelper extends MustMatchers with OptionValues {
     ((json \ "timeCompleted").as[DateTime] to collectionEvent.timeCompleted).millis must be < 1000L
   }
 
-  def compareObj(json: JsValue, specimen: Specimen) = {
-    compareEntity(json, specimen)
-
-    (json \ "specimenSpecId").as[String]   mustBe (specimen.specimenSpecId)
-
-    (json \ "originLocationId").as[String] mustBe (specimen.originLocationId)
-
-    (json \ "locationId").as[String]       mustBe (specimen.locationId)
-
-    (json \ "containerId").asOpt[String]   mustBe (specimen.containerId)
-
-    (json \ "positionId").asOpt[String]    mustBe (specimen.positionId)
-
-    (json \ "amount").as[BigDecimal]       mustBe (specimen.amount)
-
-    (json \ "status").as[String]           mustBe (specimen.getClass.getSimpleName)
-
-    ((json \ "timeCreated").as[DateTime] to specimen.timeCreated).millis must be < 1000L
-  }
-
   def compareObj(json: JsValue, centre: Centre) = {
     compareEntity(json, centre)
 
@@ -292,6 +267,51 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
   def collectionSpecimenSpecToJsonNoId(spec: CollectionSpecimenSpec): JsObject = {
     collectionSpecimenSpecToJson(spec) - "id"
+  }
+
+  def compareCentreLocationInfo(json: JsValue, centreLocatinInfo: CentreLocationInfo) = {
+    (json \ "centreId").as[String] mustBe (centreLocatinInfo.centreId)
+
+    (json \ "locationId").as[String] mustBe (centreLocatinInfo.locationId)
+
+    (json \ "name").as[String] mustBe (centreLocatinInfo.name)
+  }
+
+  def compareObj(json: JsValue, specimen: SpecimenDto) = {
+    compareSpecimenDto(json, specimen)
+  }
+
+  def compareSpecimenDto(json: JsValue, specimenDto: SpecimenDto) = {
+    (json \ "id").as[String] mustBe (specimenDto.id)
+    (json \ "version").as[Long] mustBe (specimenDto.version)
+    TestUtils.checkTimeStamps(specimenDto.timeAdded, (json \ "timeAdded").as[DateTime])
+    TestUtils.checkOpionalTime(specimenDto.timeModified, (json \ "timeModified").asOpt[DateTime])
+
+    (json \ "specimenSpecId").as[String]   mustBe (specimenDto.specimenSpecId)
+
+    compareCentreLocationInfo((json \ "originLocationInfo").as[JsValue], specimenDto.originLocationInfo)
+    compareCentreLocationInfo((json \ "locationInfo").as[JsValue], specimenDto.locationInfo)
+
+    (json \ "containerId").asOpt[String]   mustBe (specimenDto.containerId)
+
+    (json \ "positionId").asOpt[String]    mustBe (specimenDto.positionId)
+
+    (json \ "amount").as[BigDecimal]       mustBe (specimenDto.amount)
+
+    (json \ "status").as[String]           mustBe (specimenDto.status)
+
+    ((json \ "timeCreated").as[DateTime] to specimenDto.timeCreated).millis must be < 1000L
+  }
+
+  def compareObj(json: JsValue, dto: ShipmentSpecimenDto) = {
+    (json \ "id").as[String] mustBe (dto.id)
+    (json \ "version").as[Long] mustBe (dto.version)
+    (json \ "shipmentId").as[String] mustBe (dto.shipmentId)
+    (json \ "state").as[String] mustBe (dto.state)
+    TestUtils.checkTimeStamps(dto.timeAdded, (json \ "timeAdded").as[DateTime])
+    TestUtils.checkOpionalTime(dto.timeModified, (json \ "timeModified").asOpt[DateTime])
+
+    compareSpecimenDto((json \ "specimen").as[JsValue], dto.specimen)
   }
 
 }

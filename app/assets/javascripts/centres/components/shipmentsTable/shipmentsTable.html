@@ -40,8 +40,8 @@
         <a href ng-click="vm.shipmentInformation(shipment)">{{shipment.courierName}}</a>
       </td>
       <td>{{shipment.trackingNumber}}</td>
-      <td>{{shipment.fromLocationName}}</td>
-      <td>{{shipment.toLocationName}}</td>
+      <td>{{shipment.fromLocationInfo.name}}</td>
+      <td>{{shipment.toLocationInfo.name}}</td>
       <td>
         <span class="badge">{{shipment.state}}</span>
       </td>

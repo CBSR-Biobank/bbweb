@@ -8,11 +8,11 @@ import javax.inject.{Inject, Named}
 import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
-import org.biobank.dto.SpecimenDto
+import org.biobank.dto.{CentreLocationInfo, SpecimenDto}
 import org.biobank.infrastructure.command.SpecimenCommands._
 import org.biobank.infrastructure.event.SpecimenEvents._
 import org.biobank.infrastructure.{ SortOrder, AscendingOrder }
-import org.biobank.service.{ServiceError, ServiceValidation}
+import org.biobank.service.ServiceValidation
 import org.slf4j.LoggerFactory
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
@@ -23,9 +23,9 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[SpecimensServiceImpl])
 trait SpecimensService {
 
-  def get(specimenId: String): ServiceValidation[Specimen]
+  def get(specimenId: String): ServiceValidation[SpecimenDto]
 
-  def getByInventoryId(inventoryId: String): ServiceValidation[Specimen]
+  def getByInventoryId(inventoryId: String): ServiceValidation[SpecimenDto]
 
   def list(collectionEventId: String,
            sortFunc:          (Specimen, Specimen) => Boolean,
@@ -52,44 +52,39 @@ class SpecimensServiceImpl @Inject() (
 
   implicit val timeout: Timeout = 5.seconds
 
-  private def convertToDto(collectionEventId: CollectionEventId,
-                           ceventTypeId: CollectionEventTypeId,
-                           specimen: Specimen)
-      : ServiceValidation[SpecimenDto] = {
+  private def convertToDto(specimen: Specimen): ServiceValidation[SpecimenDto] = {
     for {
-      ceventType         <- collectionEventTypeRepository.getByKey(ceventTypeId)
+      ceventSpecimen     <- ceventSpecimenRepository.withSpecimenId(specimen.id)
+      cevent             <- collectionEventRepository.getByKey(ceventSpecimen.ceventId)
+      ceventType         <- collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
       specimenSpec       <- ceventType.specimenSpec(specimen.specimenSpecId)
       originCentre       <- centreRepository.getByLocationId(specimen.originLocationId)
       originLocationName <- originCentre.locationName(specimen.originLocationId)
       centre             <- centreRepository.getByLocationId(specimen.locationId)
-      centreLocationName <- centre.locationName(specimen.locationId)
-    } yield SpecimenDto(id                 = specimen.id.id,
-                        inventoryId        = specimen.inventoryId,
-                        collectionEventId  = collectionEventId.id,
-                        specimenSpecId     = specimen.specimenSpecId,
-                        specimenSpecName   = specimenSpec.name,
-                        version            = specimen.version,
-                        timeAdded          = specimen.timeAdded,
-                        timeModified       = specimen.timeModified,
-                        originLocationId   = specimen.originLocationId,
-                        originLocationName = originLocationName,
-                        locationId         = specimen.locationId,
-                        locationName       = centreLocationName,
-                        containerId        = specimen.containerId.map(_.id),
-                        positionId         = specimen.positionId.map(_.id),
-                        timeCreated        = specimen.timeCreated,
-                        amount             = specimen.amount,
-                        units              = specimenSpec.units,
-                        status             = specimen.getClass.getSimpleName)
+      locationName       <- centre.locationName(specimen.locationId)
+    } yield {
+      val originLocationInfo = CentreLocationInfo(originCentre.id.id,
+                                                  specimen.originLocationId,
+                                                  originLocationName)
+      val locationInfo = CentreLocationInfo(centre.id.id,
+                                            specimen.locationId,
+                                            locationName)
+      specimen.createDto(cevent, specimenSpec, originLocationInfo, locationInfo)
+    }
   }
 
-  def get(specimenId: String): ServiceValidation[Specimen] = {
-    specimenRepository.getByKey(SpecimenId(specimenId)).leftMap(_ =>
-      ServiceError(s"specimen id is invalid: $specimenId")).toValidationNel
+  def get(specimenId: String): ServiceValidation[SpecimenDto] = {
+    for {
+      specimen <- specimenRepository.getByKey(SpecimenId(specimenId))
+      dto      <- convertToDto(specimen)
+    } yield dto
   }
 
-  def getByInventoryId(inventoryId: String): ServiceValidation[Specimen] = {
-    specimenRepository.getByInventoryId(inventoryId)
+  def getByInventoryId(inventoryId: String): ServiceValidation[SpecimenDto] = {
+    for {
+      specimen <- specimenRepository.getByInventoryId(inventoryId)
+      dto      <- convertToDto(specimen)
+    } yield dto
   }
 
   def list(collectionEventId: String,
@@ -110,9 +105,7 @@ class SpecimensServiceImpl @Inject() (
     }
 
     validCevent(collectionEventId) { cevent =>
-      getSpecimens(cevent.id).flatMap { specimens =>
-        specimens.map { s => convertToDto(cevent.id, cevent.collectionEventTypeId, s) }.sequenceU
-      }
+      getSpecimens(cevent.id).flatMap { specimens => specimens.map(convertToDto).sequenceU }
     }
   }
 

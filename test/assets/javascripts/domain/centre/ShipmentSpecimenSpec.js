@@ -59,7 +59,7 @@ define([
         expect(ss.timeModified).toBeNull();
         expect(ss.state).toBe(this.ShipmentItemState.PRESENT);
         expect(ss.shipmentId).toBeNull();
-        expect(ss.specimenId).toBeNull();
+        expect(ss.specimen).toBeNull();
       });
 
       it('fails when creating from a non object', function() {
@@ -77,52 +77,30 @@ define([
           .toThrowError(/invalid object from server.*shipmentId/);
       });
 
-      it('fails when creating from a bad specimen ID', function() {
+      it('fails when creating from a bad specimen', function() {
         var self = this,
-            badJson = self.factory.shipmentSpecimen({ specimenId: undefined });
+            specimen = self.factory.specimen(),
+            badJson = self.factory.shipmentSpecimen({ specimen: _.omit(specimen, 'originLocationInfo') });
 
         expect(function () { self.ShipmentSpecimen.create(badJson); })
-          .toThrowError(/invalid object from server.*specimenId/);
+          .toThrowError(/invalid object from server.*originLocationInfo/);
       });
 
       it('fails when creating from a bad location ID', function() {
         var self = this,
-            badJson = self.factory.shipmentSpecimen({ locationInfo: undefined });
+            specimen = self.factory.specimen(),
+            badJson = self.factory.shipmentSpecimen({ specimen: _.omit(specimen, 'locationInfo') });
 
         expect(function () { self.ShipmentSpecimen.create(badJson); })
           .toThrowError(/invalid object from server.*locationInfo/);
       });
 
-      it('fails when creating from a bad time created', function() {
+      it('fails when creating from a bad state', function() {
         var self = this,
-            badJson = self.factory.shipmentSpecimen({ timeCreated: undefined });
+            badJson = self.factory.shipmentSpecimen({ state: undefined });
 
         expect(function () { self.ShipmentSpecimen.create(badJson); })
-          .toThrowError(/invalid object from server.*timeCreated/);
-      });
-
-      it('fails when creating from a bad amount', function() {
-        var self = this,
-            badJson = self.factory.shipmentSpecimen({ amount: undefined });
-
-        expect(function () { self.ShipmentSpecimen.create(badJson); })
-          .toThrowError(/invalid object from server.*amount/);
-      });
-
-      it('fails when creating from a bad units', function() {
-        var self = this,
-            badJson = self.factory.shipmentSpecimen({ units: undefined });
-
-        expect(function () { self.ShipmentSpecimen.create(badJson); })
-          .toThrowError(/invalid object from server.*units/);
-      });
-
-      it('fails when creating from a bad status', function() {
-        var self = this,
-            badJson = self.factory.shipmentSpecimen({ status: undefined });
-
-        expect(function () { self.ShipmentSpecimen.create(badJson); })
-          .toThrowError(/invalid object from server.*status/);
+          .toThrowError(/invalid object from server.*state/);
       });
 
     });
@@ -149,12 +127,8 @@ define([
             requiredProperties = [ 'version',
                                    'state',
                                    'shipmentId',
-                                   'specimenId',
-                                   'locationInfo',
-                                   'timeCreated',
-                                   'amount',
-                                   'units',
-                                   'status'];
+                                   'specimen'
+                                 ];
 
         _(requiredProperties).forEach(function (property) {
           var ss = _.omit(self.factory.shipmentSpecimen(), property);
