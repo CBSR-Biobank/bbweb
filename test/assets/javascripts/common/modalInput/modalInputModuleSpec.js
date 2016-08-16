@@ -4,15 +4,15 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  'moment',
-  'faker',
-  'sprintf'
-], function(angular, mocks, _, moment, faker, sprintf) {
+define(function (require) {
   'use strict';
+
+  var angular = require('angular'),
+      mocks   = require('angularMocks'),
+      _       = require('lodash'),
+      moment  = require('moment'),
+      faker   = require('faker'),
+      sprintf = require('sprintf').sprintf;
 
   describe('modalInputModule', function() {
 
@@ -55,10 +55,10 @@ define([
             compare: function(actual, expected) {
               var modalDomEls = actual.find('body > div.modal'),
                   pass        = util.equals(modalDomEls.length, expected, customEqualityTesters),
-                  message     = sprintf.sprintf('Expected "%s" %s have "%s" modals opened.',
-                                                angular.mock.dump(modalDomEls),
-                                                pass ? 'not to' : 'to',
-                                                expected);
+                  message     = sprintf('Expected "%s" %s have "%s" modals opened.',
+                                        angular.mock.dump(modalDomEls),
+                                        pass ? 'not to' : 'to',
+                                        expected);
 
               return { pass: pass, message: message };
             }
@@ -69,10 +69,10 @@ define([
             compare: function(actual, expected) {
               var element = actual.find('.modal-title'),
                   pass    = util.equals(element.text(), expected, customEqualityTesters),
-                  message = sprintf.sprintf('Expected "%s" %s have title be "%s"',
-                                            angular.mock.dump(element),
-                                            pass ? 'not to' : 'to',
-                                            expected);
+                  message = sprintf('Expected "%s" %s have title be "%s"',
+                                    angular.mock.dump(element),
+                                    pass ? 'not to' : 'to',
+                                    expected);
 
               return { pass: pass, message: message };
             }
@@ -87,10 +87,10 @@ define([
 
               expected = expected || '';
               pass    = element.text().slice(0, expected.length) === expected;
-              message = sprintf.sprintf('Expected "%s" %s have label be "%s"',
-                                        angular.mock.dump(element),
-                                        pass ? 'not to' : 'to',
-                                        expected);
+              message = sprintf('Expected "%s" %s have label be "%s"',
+                                angular.mock.dump(element),
+                                pass ? 'not to' : 'to',
+                                expected);
 
               return { pass: pass, message: message };
             }
@@ -101,10 +101,10 @@ define([
             compare: function(actual, expected) {
               var element = actual.find('form').find('input'),
                   pass = (element.length === 1) && (element.attr('focus-me') === 'true'),
-                  message = sprintf.sprintf('Expected input element %s be valid',
-                                            angular.mock.dump(element),
-                                            pass ? 'not to' : 'to',
-                                            expected);
+                  message = sprintf('Expected input element %s be valid',
+                                    angular.mock.dump(element),
+                                    pass ? 'not to' : 'to',
+                                    expected);
 
               return { pass: pass, message: message };
             }
@@ -116,10 +116,10 @@ define([
               var pass, message, element = actual.find('form').find('input');
               expected = expected || 0;
               pass = (element.length === expected);
-              message = sprintf.sprintf('Expected "%s" %s have %d input elements',
-                                        angular.mock.dump(element),
-                                        pass ? 'not to' : 'to',
-                                        expected);
+              message = sprintf('Expected "%s" %s have %d input elements',
+                                angular.mock.dump(element),
+                                pass ? 'not to' : 'to',
+                                expected);
               return { pass: pass, message: message };
             }
           };
@@ -133,10 +133,10 @@ define([
 
               expected = expected || '';
               pass = (element.length === 1) && (element.attr('type') === expected);
-              message = sprintf.sprintf('Expected "%s"" type %s be "%s"',
-                                        angular.mock.dump(element),
-                                        pass ? 'not to' : 'to',
-                                        expected);
+              message = sprintf('Expected "%s"" type %s be "%s"',
+                                angular.mock.dump(element),
+                                pass ? 'not to' : 'to',
+                                expected);
 
               return { pass: pass, message: message };
             }
@@ -153,10 +153,10 @@ define([
                 (element.attr('focus-me') === 'true') &&
                 (element.attr('ng-model') === 'vm.value') &&
                 (element.attr('ng-required') === 'vm.options.required');
-              message = sprintf.sprintf('Expected modal %s have a textarea element',
-                                        angular.mock.dump(element),
-                                        pass ? 'not to' : 'to',
-                                        expected);
+              message = sprintf('Expected modal %s have a textarea element',
+                                angular.mock.dump(element),
+                                pass ? 'not to' : 'to',
+                                expected);
 
               return { pass: pass, message: message };
             }
@@ -171,16 +171,31 @@ define([
 
               expected = expected || {};
               pass = _.chain(expected).keys().every(checkScopeValue).value();
-              message = sprintf.sprintf('Expected modal controller scope "%s" %s have a values "%s"',
-                                        angular.mock.dump(scope),
-                                        pass ? 'not to' : 'to',
-                                        angular.mock.dump(expected));
+              message = sprintf('Expected modal controller scope "%s" %s have a values "%s"',
+                                angular.mock.dump(scope),
+                                pass ? 'not to' : 'to',
+                                angular.mock.dump(expected));
 
               return { pass: pass, message: message };
 
               function checkScopeValue(key) {
                 return _.has(scope, key) && _.isEqual(expected[key], scope[key]);
               }
+            }
+          };
+        },
+        toHaveHelpBlocks: function(util, customEqualityTesters) {
+          return {
+            compare: function(actual, expected) {
+              var element = actual.find('form').find('.help-block'),
+                  pass,
+                  message;
+
+              expected = expected || '';
+              pass = (element.length > 0);
+              message = sprintf('Expected modal %s have help blocks', pass ? 'not to' : 'to');
+
+              return { pass: pass, message: message };
             }
           };
         }
@@ -290,6 +305,7 @@ define([
         expect(modalInfo.element).toHaveLabelStartWith(this.label);
         expect(modalInfo.element).toHaveInputs(1);
         expect(modalInfo.element).toHaveValuesInControllerScope({ options: undefined });
+        expect(modalInfo.element).not.toHaveHelpBlocks();
 
         expect(modalInfo.element.scope().vm.value).toBeDate();
         expect(new Date(modalInfo.element.scope().vm.value)).toEqual(this.date);
@@ -337,6 +353,7 @@ define([
         expect(modalInfo.element).toHaveInputElementBeFocused();
         expect(modalInfo.element).toHaveInputElementTypeAttrBe('email');
         expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
+        expect(modalInfo.element).not.toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
@@ -352,6 +369,7 @@ define([
         expect(modalInfo.element).toHaveValuesInControllerScope({ options: { required: true } });
         modalInfo.scope.form.value.$setViewValue('');
         expect(modalInfo.scope.form.$valid).toBe(false);
+        expect(modalInfo.element).toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
@@ -365,6 +383,7 @@ define([
                                   this.label);
         modalInfo.scope.form.value.$setViewValue('xxx');
         expect(modalInfo.scope.form.$valid).toBe(false);
+        expect(modalInfo.element).toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
@@ -393,6 +412,7 @@ define([
         expect(modalInfo.element).toHaveInputElementBeFocused();
         expect(modalInfo.element).toHaveInputElementTypeAttrBe('number');
         expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
+        expect(modalInfo.element).not.toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
@@ -408,6 +428,7 @@ define([
         expect(modalInfo.element).toHaveValuesInControllerScope({ options: { required: true } });
         modalInfo.scope.form.value.$setViewValue('');
         expect(modalInfo.scope.form.$valid).toBe(false);
+        expect(modalInfo.element).toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
@@ -421,6 +442,7 @@ define([
                                   this.label);
         modalInfo.scope.form.value.$setViewValue('-1');
         expect(modalInfo.scope.form.$valid).toBe(false);
+        expect(modalInfo.element).toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
@@ -449,6 +471,7 @@ define([
         expect(modalInfo.element).toHaveInputElementBeFocused();
         expect(modalInfo.element).toHaveInputElementTypeAttrBe('number');
         expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
+        expect(modalInfo.element).not.toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
@@ -464,6 +487,7 @@ define([
         expect(modalInfo.element).toHaveValuesInControllerScope({ options: { required: true } });
         modalInfo.scope.form.value.$setViewValue('');
         expect(modalInfo.scope.form.$valid).toBe(false);
+        expect(modalInfo.element).toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
@@ -503,6 +527,7 @@ define([
         expect(modalInfo.element).toHaveTitle(this.title);
         expect(modalInfo.element).toHaveInputs(3);
         expect(modalInfo.element).toHaveValuesInControllerScope({ value: { } });
+        expect(modalInfo.element).not.toHaveHelpBlocks();
 
         inputs = modalInfo.element.find('form').find('input');
         expect(inputs.attr('focus-me')).toBe('true');
@@ -524,6 +549,7 @@ define([
         modalInfo.scope.form.newPassword.$setViewValue('abcabcabc');
         modalInfo.scope.form.confirmPassword.$setViewValue('xyzxyzxyz');
         expect(modalInfo.scope.form.$valid).toBe(false);
+        expect(modalInfo.element).toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
@@ -552,6 +578,7 @@ define([
         expect(modalInfo.element).toHaveInputElementBeFocused();
         expect(modalInfo.element).toHaveInputElementTypeAttrBe('number');
         expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
+        expect(modalInfo.element).not.toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
@@ -567,6 +594,7 @@ define([
         expect(modalInfo.element).toHaveValuesInControllerScope({ options: { required: true } });
         modalInfo.scope.form.value.$setViewValue('');
         expect(modalInfo.scope.form.$valid).toBe(false);
+        expect(modalInfo.element).toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
@@ -580,6 +608,7 @@ define([
                                   this.label);
         modalInfo.scope.form.value.$setViewValue('xxx');
         expect(modalInfo.scope.form.$valid).toBe(false);
+        expect(modalInfo.element).toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
@@ -593,6 +622,7 @@ define([
                                   this.label);
         modalInfo.scope.form.value.$setViewValue('-1.00');
         expect(modalInfo.scope.form.$valid).toBe(false);
+        expect(modalInfo.element).toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
@@ -622,6 +652,7 @@ define([
         expect(modalInfo.element).toHaveTitle(self.title);
         expect(modalInfo.element).toHaveLabelStartWith(self.label);
         expect(modalInfo.element).toHaveValuesInControllerScope({ value: self.defaultValue });
+        expect(modalInfo.element).not.toHaveHelpBlocks();
 
         optionElements = modalInfo.element.find('form').find('option');
         _.each(optionElements, function (optElement) {
@@ -652,9 +683,9 @@ define([
         expect(modalInfo.element).toHaveLabelStartWith(this.label);
         expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
 
-        modalInfo.scope.vm.value = '';
-        modalInfo.scope.$digest();
+        modalInfo.scope.form.value.$setViewValue('');
         expect(modalInfo.scope.form.$valid).toBe(false);
+        expect(modalInfo.element).toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
@@ -714,10 +745,34 @@ define([
         expect(modalInfo.element).toHaveInputs(this.options.length);
 
         _.each(modalInfo.scope.vm.value, function (value) {
+          value.checked = true;
+        });
+        modalInfo.scope.$digest();
+        _.each(modalInfo.scope.vm.value, function (value) {
           value.checked = false;
         });
         modalInfo.scope.$digest();
+        modalInfo.scope.form.selectValue.$setViewValue(false);
         expect(modalInfo.scope.form.$valid).toBe(false);
+        expect(modalInfo.element).toHaveHelpBlocks();
+
+        dismiss.call(self, modalInfo.modal, 'closed in test');
+        expect(self.$document).toHaveModalsOpen(0);
+      });
+
+      it('has a help block when required', function() {
+        var self = this,
+            modalInfo = open.call(self,
+                                  self.modalInput.selectMultiple,
+                                  [],
+                                  self.title,
+                                  self.label,
+                                  {
+                                    required: true,
+                                    selectOptions: self.options
+                                  });
+
+        expect(modalInfo.element).toHaveHelpBlocks();
 
         dismiss.call(self, modalInfo.modal, 'closed in test');
         expect(self.$document).toHaveModalsOpen(0);
@@ -763,6 +818,7 @@ define([
         expect(modalInfo.element).toHaveInputElementBeFocused();
         expect(modalInfo.element).toHaveInputElementTypeAttrBe('text');
         expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
+        expect(modalInfo.element).not.toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
@@ -778,6 +834,7 @@ define([
         expect(modalInfo.element).toHaveValuesInControllerScope({ options: { required: true } });
         modalInfo.scope.form.value.$setViewValue('');
         expect(modalInfo.scope.form.$valid).toBe(false);
+        expect(modalInfo.element).toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
@@ -795,111 +852,11 @@ define([
         expect(modalInfo.element).toHaveValuesInControllerScope({ options: { minLength: minLength } });
         modalInfo.scope.form.value.$setViewValue('x');
         expect(modalInfo.scope.form.$valid).toBe(false);
+        expect(modalInfo.element).toHaveHelpBlocks();
 
         dismiss.call(this, modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
-
-    });
-
-    describe('textArea modal', function() {
-
-      beforeEach(function () {
-        this.defaultValue = faker.lorem.sentences(4);
-      });
-
-      it('has valid elements and scope', function() {
-        var modalInfo = open.call(this,
-                                  this.modalInput.textArea,
-                                  this.defaultValue,
-                                  this.title,
-                                  this.label);
-
-        expect(this.$document).toHaveModalsOpen(1);
-
-        expect(modalInfo.element).toHaveTitle(this.title);
-        expect(modalInfo.element).toHaveLabelStartWith(this.label);
-        expect(modalInfo.element).toHaveValidTextAreaElement();
-        expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
-
-        dismiss.call(this, modalInfo.modal, 'closed in test');
-        expect(this.$document).toHaveModalsOpen(0);
-      });
-
-      it('form is invalid when using required option and input is empty', function() {
-        var modalInfo = open.call(this,
-                                  this.modalInput.textArea,
-                                  this.defaultValue,
-                                  this.title,
-                                  this.label,
-                                  { required: true });
-        expect(modalInfo.element).toHaveValuesInControllerScope({ options: { required: true } });
-        modalInfo.scope.form.value.$setViewValue('');
-        expect(modalInfo.scope.form.$valid).toBe(false);
-
-        dismiss.call(this, modalInfo.modal, 'closed in test');
-        expect(this.$document).toHaveModalsOpen(0);
-      });
-
-    });
-
-    describe('url modal', function() {
-
-      beforeEach(function () {
-        this.defaultValue = faker.image.imageUrl();
-      });
-
-      it('has valid elements and scope', function() {
-        var modalInfo = open.call(this,
-                                  this.modalInput.url,
-                                  this.defaultValue,
-                                  this.title,
-                                  this.label);
-
-        expect(this.$document).toHaveModalsOpen(1);
-
-        expect(modalInfo.element).toHaveTitle(this.title);
-        expect(modalInfo.element).toHaveLabelStartWith(this.label);
-        expect(modalInfo.element).toHaveInputs(1);
-        expect(modalInfo.element).toHaveInputElementBeFocused();
-        expect(modalInfo.element).toHaveInputElementTypeAttrBe('url');
-        expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
-
-        dismiss.call(this, modalInfo.modal, 'closed in test');
-        expect(this.$document).toHaveModalsOpen(0);
-      });
-
-      it('form is invalid when using required option and input is empty', function() {
-        var modalInfo = open.call(this,
-                                  this.modalInput.url,
-                                  this.defaultValue,
-                                  this.title,
-                                  this.label,
-                                  { required: true });
-        expect(modalInfo.element).toHaveValuesInControllerScope({ options: { required: true } });
-        modalInfo.scope.form.value.$setViewValue('');
-        expect(modalInfo.scope.form.$valid).toBe(false);
-
-        dismiss.call(this, modalInfo.modal, 'closed in test');
-        expect(this.$document).toHaveModalsOpen(0);
-      });
-
-      it('form is invalid when input is an invalid email', function() {
-        var modalInfo = open.call(this,
-                                  this.modalInput.url,
-                                  this.defaultValue,
-                                  this.title,
-                                  this.label);
-        modalInfo.scope.form.value.$setViewValue('xxx');
-        expect(modalInfo.scope.form.$valid).toBe(false);
-
-        dismiss.call(this,  modalInfo.modal, 'closed in test');
-        expect(this.$document).toHaveModalsOpen(0);
-      });
-
-    });
-
-    describe('textArea modal', function() {
 
       it('modal should be closed when OK button is pressed', function() {
         var modalInfo = open.call(this,
@@ -936,6 +893,108 @@ define([
         this.$animate.flush();
         this.$rootScope.$digest();
 
+        expect(this.$document).toHaveModalsOpen(0);
+      });
+
+    });
+
+    describe('textArea modal', function() {
+
+      beforeEach(function () {
+        this.defaultValue = faker.lorem.sentences(4);
+      });
+
+      it('has valid elements and scope', function() {
+        var modalInfo = open.call(this,
+                                  this.modalInput.textArea,
+                                  this.defaultValue,
+                                  this.title,
+                                  this.label);
+
+        expect(this.$document).toHaveModalsOpen(1);
+
+        expect(modalInfo.element).toHaveTitle(this.title);
+        expect(modalInfo.element).toHaveLabelStartWith(this.label);
+        expect(modalInfo.element).toHaveValidTextAreaElement();
+        expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
+        expect(modalInfo.element).not.toHaveHelpBlocks();
+
+        dismiss.call(this, modalInfo.modal, 'closed in test');
+        expect(this.$document).toHaveModalsOpen(0);
+      });
+
+      it('form is invalid when using required option and input is empty', function() {
+        var modalInfo = open.call(this,
+                                  this.modalInput.textArea,
+                                  this.defaultValue,
+                                  this.title,
+                                  this.label,
+                                  { required: true });
+        expect(modalInfo.element).toHaveValuesInControllerScope({ options: { required: true } });
+        modalInfo.scope.form.value.$setViewValue('');
+        expect(modalInfo.scope.form.$valid).toBe(false);
+        expect(modalInfo.element).toHaveHelpBlocks();
+
+        dismiss.call(this, modalInfo.modal, 'closed in test');
+        expect(this.$document).toHaveModalsOpen(0);
+      });
+
+    });
+
+    describe('url modal', function() {
+
+      beforeEach(function () {
+        this.defaultValue = faker.image.imageUrl();
+      });
+
+      it('has valid elements and scope', function() {
+        var modalInfo = open.call(this,
+                                  this.modalInput.url,
+                                  this.defaultValue,
+                                  this.title,
+                                  this.label);
+
+        expect(this.$document).toHaveModalsOpen(1);
+
+        expect(modalInfo.element).toHaveTitle(this.title);
+        expect(modalInfo.element).toHaveLabelStartWith(this.label);
+        expect(modalInfo.element).toHaveInputs(1);
+        expect(modalInfo.element).toHaveInputElementBeFocused();
+        expect(modalInfo.element).toHaveInputElementTypeAttrBe('url');
+        expect(modalInfo.element).toHaveValuesInControllerScope({ value: this.defaultValue });
+        expect(modalInfo.element).not.toHaveHelpBlocks();
+
+        dismiss.call(this, modalInfo.modal, 'closed in test');
+        expect(this.$document).toHaveModalsOpen(0);
+      });
+
+      it('form is invalid when using required option and input is empty', function() {
+        var modalInfo = open.call(this,
+                                  this.modalInput.url,
+                                  this.defaultValue,
+                                  this.title,
+                                  this.label,
+                                  { required: true });
+        expect(modalInfo.element).toHaveValuesInControllerScope({ options: { required: true } });
+        modalInfo.scope.form.value.$setViewValue('');
+        expect(modalInfo.scope.form.$valid).toBe(false);
+        expect(modalInfo.element).toHaveHelpBlocks();
+
+        dismiss.call(this, modalInfo.modal, 'closed in test');
+        expect(this.$document).toHaveModalsOpen(0);
+      });
+
+      it('form is invalid when input is an invalid email', function() {
+        var modalInfo = open.call(this,
+                                  this.modalInput.url,
+                                  this.defaultValue,
+                                  this.title,
+                                  this.label);
+        modalInfo.scope.form.value.$setViewValue('xxx');
+        expect(modalInfo.scope.form.$valid).toBe(false);
+        expect(modalInfo.element).toHaveHelpBlocks();
+
+        dismiss.call(this,  modalInfo.modal, 'closed in test');
         expect(this.$document).toHaveModalsOpen(0);
       });
 

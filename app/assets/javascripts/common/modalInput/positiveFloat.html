@@ -12,6 +12,7 @@
   </div>
   <div class="col-md-offset-3 col-md-9"
        ng-messages="form.value.$error"
+       ng-if="form.value.$dirty"
        role="alert">
     <div ng-message="positiveFloat" class="help-block">
       Value should be a positive floating point number

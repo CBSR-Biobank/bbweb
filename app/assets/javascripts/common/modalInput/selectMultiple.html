@@ -14,6 +14,7 @@
       </label>
     </div>
   </div>
+  <!-- DO NOT USE ng-if here for ng-messages, always display the help block -->
   <div class="col-md-offset-2 col-md-10"
        ng-messages="form.selectValue.$error"
        role="alert">

@@ -12,6 +12,7 @@
   </div>
   <div class="col-md-offset-2 col-md-10"
        ng-messages="form.value.$error"
+       ng-if="form.value.$dirty"
        role="alert">
     <div ng-message="required" class="help-block">A selection is required</div>
   </div>
