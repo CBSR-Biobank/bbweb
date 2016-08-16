@@ -23,7 +23,8 @@ object UsersProcessor {
  */
 class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
                                              val passwordHasher: PasswordHasher,
-                                             val emailService:   EmailService)
+                                             val emailService:   EmailService,
+                                             val testData:       TestData)
     extends Processor {
   import org.biobank.CommonValidations._
 
