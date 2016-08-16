@@ -14,24 +14,18 @@ define(function () {
 
   function config($urlRouterProvider, $stateProvider) {
 
+    resolveShipment.$inject = ['Shipment', '$stateParams'];
+    function resolveShipment(Shipment, $stateParams) {
+      return Shipment.get($stateParams.shipmentId);
+    }
+
     $urlRouterProvider.otherwise('/');
 
     $stateProvider.state('home.shipping', {
       url: 'shipping',
-      resolve: {
-        centreLocations: ['Centre', function (Centre) {
-          return Centre.allLocations().then(function (centreLocations) {
-            return Centre.centreLocationToNames(centreLocations);
-          });
-        }]
-      },
       views: {
         'main@': {
-          template: '<shipping-home centre-locations="vm.centreLocations"></shipping-home>',
-          controller: [ 'centreLocations', function (centreLocations) {
-            this.centreLocations = centreLocations;
-          }],
-          controllerAs: 'vm'
+          template: '<shipping-home></shipping-home>'
         }
       },
       data: {
@@ -68,9 +62,21 @@ define(function () {
       url: '/add',
       views: {
         'main@': {
-          template: '<shipment-add centre-locations="vm.centreLocations"></shipment-add>',
-          controller: [ 'centreLocations', function (centreLocations) {
-            this.centreLocations = centreLocations;
+          template: '<shipment-add></shipment-add>'
+        }
+      },
+      data: {
+        displayName: 'Add'
+      }
+    });
+
+    $stateProvider.state('home.shipping.addItems', {
+      url: '/additems/{shipmentId}',
+      views: {
+        'main@': {
+          template: '<shipment-add-items shipment-id="vm.shipmentId"></shipment-add-items>',
+          controller: [ '$stateParams', function ($stateParams) {
+            this.shipmentId = $stateParams.shipmentId;
           }],
           controllerAs: 'vm'
         }
@@ -80,26 +86,22 @@ define(function () {
       }
     });
 
-    $stateProvider.state('home.shipping.addSpecimens', {
+    $stateProvider.state('home.shipping.shipment', {
       url: '/{shipmentId}',
-      resolve: {
-        shipment: ['Shipment', '$stateParams', function (Shipment, $stateParams) {
-          return Shipment.get($stateParams.shipmentId);
-        }]
-      },
       views: {
         'main@': {
-          template: '<shipment-add-items shipment="vm.shipment"></shipment-add-items>',
-          controller: [ 'shipment', function (shipment) {
-            this.shipment = shipment;
+          template: '<shipment-view shipment-id="vm.shipmentId"></shipment-view>',
+          controller: [ '$stateParams', function ($stateParams) {
+            this.shipmentId = $stateParams.shipmentId;
           }],
           controllerAs: 'vm'
         }
       },
       data: {
-        displayName: 'Add'
+        displayName: 'Packed'
       }
     });
+
   }
 
   return config;

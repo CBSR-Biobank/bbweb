@@ -237,7 +237,10 @@ final case class Shipment(id:             ShipmentId,
     if (state == ShipmentState.Unpacked) true.successNel[String]
     else EntityCriteriaError(s"shipment is not in unpacked state").failureNel[Boolean]
 
-  def toDto(fromLocationInfo: CentreLocationInfo, toLocationInfo: CentreLocationInfo): ShipmentDto =
+  def toDto(fromLocationInfo: CentreLocationInfo,
+            toLocationInfo:   CentreLocationInfo,
+            specimenCount:     Int,
+            containerCount:    Int): ShipmentDto =
       ShipmentDto(id               = this.id.id,
                   version          = this.version,
                   timeAdded        = this.timeAdded,
@@ -250,7 +253,9 @@ final case class Shipment(id:             ShipmentId,
                   timePacked       = this.timePacked,
                   timeSent         = this.timeSent,
                   timeReceived     = this.timeReceived,
-                  timeUnpacked     = this.timeUnpacked)
+                  timeUnpacked     = this.timeUnpacked,
+                  specimenCount     = specimenCount,
+                  containerCount    = containerCount)
 
   override def toString: String =
     s"""|Shipment:{

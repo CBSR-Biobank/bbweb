@@ -1,0 +1,9 @@
+<div ng-switch="vm.shipment.state">
+  <shipment-view-packed ng-switch-when="Packed" shipment="vm.shipment"></shipment-view-packed>
+  <shipment-view-sent   ng-switch-when="Sent"   shipment="vm.shipment"></shipment-view-sent>
+</div>
+<shipping-info-view
+   shipment="vm.shipment"
+   read-only="true"
+   collapsable="false">
+</shipping-info-view>

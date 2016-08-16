@@ -506,47 +506,60 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
   }
 
   def addBbpspSpecimens() = {
+
+    def addSpecimen(id:           SpecimenId,
+                    inventoryId:  String,
+                    specimenSpec: CollectionSpecimenSpec,
+                    location:     Location) =
+      UsableSpecimen(id               = id,
+                     inventoryId      = inventoryId,
+                     specimenSpecId   = specimenSpec.uniqueId,
+                     version          = 0L,
+                     timeAdded        = DateTime.now,
+                     timeModified     = None,
+                     originLocationId = location.uniqueId,
+                     locationId       = location.uniqueId,
+                     containerId      = None,
+                     positionId       = None,
+                     timeCreated      = DateTime.now.minusDays(1),
+                     amount           = BigDecimal(0.1))
+
+
     if (loadSpecimenTestData) {
       studyRepository.getValues.find(s => s.name == "BBPSP").foreach { bbpsp =>
-        centreRepository.getValues.find(c => c.name == "100-Calgary AB").foreach { centre =>
-          centre match {
-            case c: EnabledCentre => {
-              centreRepository.put(c.copy(studyIds = Set(bbpsp.id)))
 
-              val hashids = Hashids("bbpsp-specimens")
-              participantRepository.allForStudy(bbpsp.id)
-                .zipWithIndex.foreach { case (participant, pIndex) =>
-                  collectionEventRepository.allForParticipant(participant.id)
-                    .zipWithIndex.foreach {
-                    case (cevent, ceventIndex) =>
-                      collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
-                        .foreach { cventType =>
-                        val specimenSpec = cventType.specimenSpecs.head
-                        val location = centre.locations.head
-                        val uniqueId = 10 * pIndex + ceventIndex
-                        val id = SpecimenId(hashids.encode(uniqueId))
-                        val inventoryId = f"A$uniqueId%05d"
+        val centreNames = List("100-Calgary AB", "101-London ON")
 
-                        val specimen = UsableSpecimen(id               = id,
-                                                      inventoryId      = inventoryId,
-                                                      specimenSpecId   = specimenSpec.uniqueId,
-                                                      version          = 0L,
-                                                      timeAdded        = DateTime.now,
-                                                      timeModified     = None,
-                                                      originLocationId = location.uniqueId,
-                                                      locationId       = location.uniqueId,
-                                                      containerId      = None,
-                                                      positionId       = None,
-                                                      timeCreated      = DateTime.now.minusDays(1),
-                                                      amount           = BigDecimal(0.1))
+        centreNames.zipWithIndex.foreach { case (centreName, centreIndex) =>
+          centreRepository.getValues.find(c => c.name == centreName).foreach { centre =>
+            centre match {
+              case c: EnabledCentre => {
+                centreRepository.put(c.copy(studyIds = Set(bbpsp.id)))
 
-                        specimenRepository.put(specimen)
-                        ceventSpecimenRepository.put(CeventSpecimen(cevent.id, id))
-                      }
-                  }
+                val hashids = Hashids("bbpsp-specimens")
+                participantRepository.allForStudy(bbpsp.id)
+                  .zipWithIndex.foreach { case (participant, pIndex) =>
+                    collectionEventRepository.allForParticipant(participant.id)
+                      .zipWithIndex.foreach {
+                      case (cevent, ceventIndex) =>
+                        collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
+                          .foreach { cventType =>
+                          val uniqueId = 100 * centreIndex + 10 * pIndex + ceventIndex
+                          val inventoryId = f"A$uniqueId%05d"
+                          val specimen = addSpecimen(SpecimenId(hashids.encode(uniqueId)),
+                                                     inventoryId,
+                                                     cventType.specimenSpecs.head,
+                                                     centre.locations.head)
+                          specimenRepository.put(specimen)
+                          ceventSpecimenRepository.put(CeventSpecimen(cevent.id, specimen.id))
+
+                          log.info(s"added specimen: invId: $inventoryId, participant: ${participant.uniqueId}, visitNum: ${cevent.visitNumber}, centre: $centreName")
+                        }
+                    }
+                }
               }
+              case _ =>
             }
-            case _ =>
           }
         }
       }

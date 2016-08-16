@@ -88,9 +88,9 @@ define(function () {
 
       vm.tableDataLoading = true;
 
-      Specimen.list(vm.collectionEvent.id, options).then(function (paginatedUsers) {
-        vm.specimens = paginatedUsers.items;
-        tableState.pagination.numberOfPages = paginatedUsers.maxPages;
+      Specimen.list(vm.collectionEvent.id, options).then(function (paginatedSpecimens) {
+        vm.specimens = paginatedSpecimens.items;
+        tableState.pagination.numberOfPages = paginatedSpecimens.maxPages;
         vm.tableDataLoading = false;
       });
     }

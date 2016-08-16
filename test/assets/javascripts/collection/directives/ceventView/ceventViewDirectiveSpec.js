@@ -95,7 +95,6 @@ define(function(require) {
       expect(this.controller.collectionEventTypes).toBe(this.collectionEventTypes);
       expect(this.controller.collectionEvent).toBe(this.collectionEvent);
       expect(this.controller.panelOpen).toBeTrue();
-      expect(this.controller.timeCompletedLocal).toBeDefined();
 
       expect(this.controller.editVisitType).toBeFunction();
       expect(this.controller.editTimeCompleted).toBeFunction();

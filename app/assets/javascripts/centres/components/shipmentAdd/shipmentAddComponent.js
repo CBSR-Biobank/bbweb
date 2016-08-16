@@ -9,13 +9,12 @@ define(['lodash'], function (_) {
     templateUrl : '/assets/javascripts/centres/components/shipmentAdd/shipmentAdd.html',
     controller: ShipmentAddController,
     controllerAs: 'vm',
-    bindings: {
-      centreLocations: '<'
-    }
+    bindings: {}
   };
 
   ShipmentAddController.$inject = [
     '$state',
+    'Centre',
     'Shipment',
     'domainEntityService',
     'notificationsService',
@@ -26,6 +25,7 @@ define(['lodash'], function (_) {
    *
    */
   function ShipmentAddController($state,
+                                 Centre,
                                  Shipment,
                                  domainEntityService,
                                  notificationsService,
@@ -37,19 +37,23 @@ define(['lodash'], function (_) {
       current: 1
     };
 
-    vm.hasValidCentres          = (vm.centreLocations.length > 1);
+    vm.hasValidCentres          = false;
     vm.shipment                 = new Shipment();
-    vm.fromCentreLocations      = _.clone(vm.centreLocations);
-    vm.toCentreLocations        = _.clone(vm.centreLocations);
     vm.selectedFromLocationInfo = undefined;
     vm.selectedToLocationInfo   = undefined;
 
-    vm.submit              = submit;
-    vm.cancel              = cancel;
-    vm.fromLocationChanged = fromLocationChanged;
-    vm.toLocationChanged   = toLocationChanged;
+    vm.$onInit               = onInit;
+    vm.submit                = submit;
+    vm.cancel                = cancel;
+    vm.getCentreLocationInfo = getCentreLocationInfo;
 
     //--
+
+    function onInit() {
+      return Centre.locationsSearch('').then(function (results) {
+          vm.hasValidCentres = (results.length > 1);
+        });
+    }
 
     function submit(specimenSpec) {
       vm.shipment.fromLocationInfo = { locationId: vm.selectedFromLocationInfo.locationId };
@@ -57,7 +61,7 @@ define(['lodash'], function (_) {
       vm.shipment.add().then(onAddSuccessful).catch(onAddFailed);
 
       function onAddSuccessful(shipment) {
-        $state.go('home.shipping.addSpecimens', { shipmentId: shipment.id });
+        $state.go('home.shipping.addItems', { shipmentId: shipment.id });
       }
 
       function onAddFailed(error) {
@@ -69,26 +73,8 @@ define(['lodash'], function (_) {
       $state.go('home.shipping');
     }
 
-    function fromLocationChanged() {
-      if (vm.selectedFromLocationInfo) {
-        // remove selected location from options available for 'To centre'
-        vm.toCentreLocations = _.omitBy(vm.centreLocations, function (item) {
-          return item.locationId === vm.selectedFromLocationInfo.locationId;
-        });
-      } else {
-        vm.toCentreLocations = _.clone(vm.centreLocations);
-      }
-    }
-
-    function toLocationChanged() {
-      if (vm.selectedToLocationInfo) {
-        // remove selected location from options available for 'From centre'
-        vm.fromCentreLocations = _.omitBy(vm.centreLocations, function (item) {
-          return item.locationId === vm.selectedToLocationInfo.locationId;
-        });
-      } else {
-        vm.fromCentreLocations = _.clone(vm.centreLocations);
-      }
+    function getCentreLocationInfo(filter) {
+      return Centre.locationsSearch(filter);
     }
 
   }

@@ -10,127 +10,75 @@ define(['lodash'], function (_) {
     controller: ShipmentAddItemsController,
     controllerAs: 'vm',
     bindings: {
-      shipment: '<'
+      shipmentId: '<'
     }
   };
 
   ShipmentAddItemsController.$inject = [
-    'Centre',
+    '$state',
     'shipmentProgressItems',
+    'Shipment',
     'modalInput',
+    'modalService',
+    'timeService',
     'notificationsService'
   ];
 
   /**
    *
    */
-  function ShipmentAddItemsController(Centre,
+  function ShipmentAddItemsController($state,
                                       shipmentProgressItems,
+                                      Shipment,
                                       modalInput,
+                                      modalService,
+                                      timeService,
                                       notificationsService) {
     var vm = this;
+
+    vm.$onInit = onInit;
+    vm.shipment = null;
+    vm.allItemsAdded = allItemsAdded;
 
     vm.progressInfo = {
       items: shipmentProgressItems,
       current: 2
     };
 
-    vm.centreLocations = [];
-    vm.notificationTimeout = 1500;
-
-    vm.editCourierName    = editCourierName;
-    vm.editTrackingNumber = editTrackingNumber;
-    vm.editFromLocation   = editFromLocation;
-    vm.editToLocation     = editToLocation;
-
-    init();
-
     //--
 
-    function init() {
-      return Centre.allLocations().then(function (centreLocations) {
-        vm.centreLocations = Centre.centreLocationToNames(centreLocations);
-        vm.centreLocationNames = _.map(vm.centreLocations, function (cl) {
-          return cl.name;
-        });
-      });
-    }
-
-    function postUpdate(message, title, timeout) {
-      timeout = timeout || vm.notificationTimeout;
-      return function (shipment) {
+    function onInit() {
+      Shipment.get(vm.shipmentId).then(function (shipment){
         vm.shipment = shipment;
-        notificationsService.success(message, title, timeout);
-      };
-    }
-
-    function editCourierName() {
-      modalInput.text('Edit courier', 'Courier', vm.shipment.courierName, { required: true, minLength: 2 })
-        .result.then(function (name) {
-          vm.shipment.updateCourierName(name)
-            .then(postUpdate('Courier changed successfully.', 'Change successful'))
-            .catch(notificationsService.updateError);
-        });
-    }
-
-    function editTrackingNumber() {
-      modalInput.text('Edit tracking number',
-                      'Tracking Number',
-                      vm.shipment.trackingNumber,
-                      { required: true, minLength: 2 })
-        .result.then(function (tn) {
-          vm.shipment.updateTrackingNumber(tn)
-            .then(postUpdate('Tracking number changed successfully.', 'Change successful'))
-            .catch(notificationsService.updateError);
-        });
-    }
-
-    function editFromLocation() {
-      var locationNames = _.filter(vm.centreLocationNames, function (name) {
-        return name !== vm.shipment.toLocationInfo.name;
       });
-      modalInput.select('Update from centre',
-                        'From centre',
-                        vm.shipment.fromLocationInfo.name,
-                        {
-                          required: true,
-                          selectOptions: locationNames
-                        })
-        .result.then(function (selection) {
-          var centreLocation = _.find(vm.centreLocations, function (cl) {
-            return cl.name === selection;
-          });
-          if (centreLocation) {
-            vm.shipment.updateFromLocation(centreLocation.locationId)
-            .then(postUpdate('From location changed successfully.', 'Change successful'))
-            .catch(notificationsService.updateError);
-          }
-        });
     }
 
-    function editToLocation() {
-      var locationNames = _.filter(vm.centreLocationNames, function (name) {
-        return name !== vm.shipment.fromLocationInfo.name;
+    /**
+     * Invoked by user when all items have been added to the shipment and it is now packed.
+     */
+    function allItemsAdded() {
+      Shipment.get(vm.shipment.id).then(function (shipment) {
+        if (shipment.specimenCount > 0) {
+          if (_.isUndefined(vm.timePacked)) {
+            vm.timePacked = new Date();
+          }
+          return modalInput.dateTime('Date and time shipment was packed',
+                                     'Time packed',
+                                     vm.timePacked,
+                                     { required: true }).result
+            .then(function (timePacked) {
+              return vm.shipment.packed(timeService.dateToUtcString(timePacked))
+                .then(function (shipment) {
+                  return $state.go('home.shipping.shipment', { shipmentId: shipment.id});
+                })
+                .catch(notificationsService.updateError);
+            });
+        }
+
+        return modalService.modalOk('Shipment has no specimens',
+                                    'Please add specimens to this shipment fist.');
       });
-      modalInput.select('Update to centre',
-                        'To centre',
-                        vm.shipment.toLocationInfo.name,
-                        {
-                          required: true,
-                          selectOptions: locationNames
-                        })
-        .result.then(function (selection) {
-          var centreLocation = _.find(vm.centreLocations, function (cl) {
-            return cl.name === selection;
-          });
-          if (centreLocation) {
-            vm.shipment.updateToLocation(centreLocation.locationId)
-            .then(postUpdate('To location changed successfully.', 'Change successful'))
-            .catch(notificationsService.updateError);
-          }
-        });
     }
-
   }
 
   return component;

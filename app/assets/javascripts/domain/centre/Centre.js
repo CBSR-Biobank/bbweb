@@ -206,6 +206,21 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
     };
 
     /**
+     * Returns centre locations names matching criteria.
+     *
+     * @param {string} filter - the string to match.
+     *
+     * @returns {Promise<Array<domain.centres.CentreLocationDto>>} A promise.
+     */
+    Centre.locationsSearch = function (filter) {
+      return biobankApi.post('/centres/locations',
+                             {
+                               filter: filter,
+                               maxResults: 10
+                             });
+    };
+
+    /**
      * Concatenates the centre name and location name so that they can be selected from a
      * drop down list.
      *

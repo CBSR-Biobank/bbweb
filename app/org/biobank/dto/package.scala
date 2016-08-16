@@ -109,7 +109,9 @@ package dto {
                                timePacked:       Option[DateTime],
                                timeSent:         Option[DateTime],
                                timeReceived:     Option[DateTime],
-                               timeUnpacked:     Option[DateTime])
+                               timeUnpacked:     Option[DateTime],
+                               specimenCount:    Int,
+                               containerCount:    Int)
 
   object ShipmentDto {
 
@@ -152,12 +154,20 @@ package dto {
 
   val sort2Compare = Map[String, (ShipmentSpecimenDto, ShipmentSpecimenDto) => Boolean](
       "inventoryId" -> compareByInventoryId,
-      "state"       -> compareByState)
+      "state"       -> compareByState,
+      "specName"    -> compareBySpecName,
+      "timeCreated" -> compareByTimeCreated)
 
     def compareByInventoryId(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto) =
       (a.specimen.inventoryId compareTo b.specimen.inventoryId) < 0
 
     def compareByState(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto) = (a.state compareTo b.state) < 0
+
+    def compareBySpecName(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto) =
+      (a.specimen.specimenSpecName compareTo b.specimen.specimenSpecName) < 0
+
+    def compareByTimeCreated(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto) =
+      (a.specimen.timeCreated compareTo b.specimen.timeCreated) < 0
 
     implicit val shipmentSpecimenDtoWriter: Writes[ShipmentSpecimenDto] = Json.writes[ShipmentSpecimenDto]
   }

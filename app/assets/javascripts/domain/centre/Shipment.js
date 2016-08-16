@@ -432,6 +432,14 @@ define(function (require) {
       return this.update.call(this, uri('lost', this.id), {});
     };
 
+    Shipment.prototype.isPacked = function () {
+      return this.state === ShipmentState.PACKED;
+    };
+
+    Shipment.prototype.isSent = function () {
+      return this.state === ShipmentState.SENT;
+    };
+
     function uri(/* path, shipmentId */) {
       var shipmentId,
           result = '/shipments',

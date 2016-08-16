@@ -3,94 +3,25 @@
    current="vm.progressInfo.current">
 </progress-tracker>
 <div class="page-header">
-  <h1>Add items to shipment</h1>
+  <h1>
+    Add items to ship
+    <div class="btn-group pull-right">
+      <button class="btn btn-xs btn-primary"
+              title="All items added and ready to ship"
+              ng-click="vm.allItemsAdded()">
+        All items added
+      </button>
+    </div>
+  </h1>
 </div>
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title">Shipment information</h3>
-  </div>
 
-  <ul class="list-group">
+<shipping-info-view
+   shipment="vm.shipment"
+   read-only="false"
+   collapsable="true">
+</shipping-info-view>
 
-    <!-- COURIER NAME -->
-    <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-3">
-          <strong>Courier</strong>
-        </div>
-        <div class="col-md-7">
-          {{vm.shipment.courierName}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  title="Update courier"
-                  ng-click="vm.editCourierName()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
-        </div>
-      </div>
-    </li>
-
-    <!-- TRACKING NUMBER -->
-    <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-3">
-          <strong>Tracking number</strong>
-        </div>
-        <div class="col-md-7">
-          {{vm.shipment.trackingNumber}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  title="Update tracking number"
-                  ng-click="vm.editTrackingNumber()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
-        </div>
-      </div>
-    </li>
-
-    <!-- FROM CENTRE -->
-    <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-3">
-          <strong>From</strong>
-        </div>
-        <div class="col-md-7">
-          {{vm.shipment.fromLocationInfo.name}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  title="Update from location"
-                  ng-click="vm.editFromLocation()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
-        </div>
-      </div>
-    </li>
-
-    <!-- TO CENTRE -->
-    <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-3">
-          <strong>To</strong>
-        </div>
-        <div class="col-md-7">
-          {{vm.shipment.toLocationInfo.name}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  title="Update to location"
-                  ng-click="vm.editToLocation()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
-        </div>
-      </div>
-    </li>
-
-  </ul>
-  <status-line item="vm.shipment"></status-line>
-</div>
+<shipment-specimens-view shipment="vm.shipment"></shipment-specimens-view>
 
 <div class="panel panel-default">
   <div class="panel-heading">
@@ -99,8 +30,4 @@
 
   <ul class="list-group">
   </ul>
-</div>
-<shipment-specimens shipment="vm.shipment"></shipment-specimens>
-<div class="row">
-  <div class="col-xs-12"><pre>Shipment: {{vm.shipment | json}}</pre></div>
 </div>

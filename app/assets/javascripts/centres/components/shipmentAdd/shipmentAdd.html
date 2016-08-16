@@ -3,7 +3,7 @@
    current="vm.progressInfo.current">
 </progress-tracker>
 <div class="page-header">
-  <h1>Add Shipment</h1>
+  <h1>Shipping information</h1>
 </div>
 <div class="row" ng-if="!vm.hasValidCentres">
   <div class="col-md-12">
@@ -66,18 +66,19 @@
        ng-class="{ 'has-error' : shipmentForm.fromCentre.$invalid && !shipmentForm.fromCentre.$pristine }">
     <label class="col-md-2 form-control-label">From centre</label>
     <div class="col-md-10">
-      <select class="form-control"
-              name="centre"
-              ng-model="vm.selectedFromLocationInfo"
-              ng-options="locInfo as locInfo.name for locInfo in vm.fromCentreLocations"
-              ng-change="vm.fromLocationChanged()"
-              required>
-        <option value="">-- make a selection --</option>
-      </select>
+      <input name="fromCentreLocation"
+             type="text"
+             class="form-control"
+             ng-model="vm.selectedFromLocationInfo"
+             placeholder="The location of the centre ndthis shipment is coming from"
+             uib-typeahead="centreLocationInfo.name for centreLocationInfo in
+                            vm.getCentreLocationInfo($viewValue)"
+             typeahead-editable="false"
+             required />
     </div>
     <div class="col-sm-offset-3 col-sm-9"
          ng-messages="shipmentForm.fromCentre.$error"
-         ng-if="shipmentForm.fromCentre.$dirty">
+         ng-if="shipmentForm.fromCentreLocation.$dirty">
       <div ng-message="required" class="help-block">A centre must be selected</div>
     </div>
   </div>
@@ -87,18 +88,19 @@
        ng-class="{ 'has-error' : shipmentForm.toCentre.$invalid && !shipmentForm.toCentre.$pristine }">
     <label class="col-md-2 form-control-label">To centre</label>
     <div class="col-md-10">
-      <select class="form-control"
-              name="centre"
-              ng-model="vm.selectedToLocationInfo"
-              ng-options="locInfo as locInfo.name for locInfo in vm.toCentreLocations"
-              ng-change="vm.toLocationChanged()"
-              required>
-        <option value="">-- make a selection --</option>
-      </select>
+      <input name="toCentreLocation"
+             type="text"
+             class="form-control"
+             ng-model="vm.selectedToLocationInfo"
+             placeholder="The location of the centre this shipment is going tocomma"
+             uib-typeahead="centreLocationInfo.name for centreLocationInfo in
+                            vm.getCentreLocationInfo($viewValue)"
+             typeahead-editable="false"
+             required />
     </div>
     <div class="col-sm-offset-3 col-sm-9"
          ng-messages="shipmentForm.toCentre.$error"
-         ng-if="shipmentForm.toCentre.$dirty">
+         ng-if="shipmentForm.toCentreLocation.$dirty">
       <div ng-message="required" class="help-block">A centre must be selected</div>
     </div>
   </div>

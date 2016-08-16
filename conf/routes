@@ -123,6 +123,7 @@ DELETE  /centres/studies/:centreId/:ver/:studyId org.biobank.controllers.centres
 #
 GET     /centres/names                          org.biobank.controllers.centres.CentresController.listNames(filter, order)
 GET     /centres/locations                      org.biobank.controllers.centres.CentresController.locations()
+POST    /centres/locations                      org.biobank.controllers.centres.CentresController.searchLocations()
 
 #
 # --- CENTRES ---

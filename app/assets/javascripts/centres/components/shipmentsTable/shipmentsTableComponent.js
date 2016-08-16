@@ -70,7 +70,9 @@ define(['lodash'], function (_) {
 
     function shipmentInformation(shipment) {
       if (shipment.state === ShipmentState.CREATED) {
-        $state.go('home.shipping.addSpecimens', { shipmentId: shipment.id });
+        $state.go('home.shipping.addItems', { shipmentId: shipment.id });
+      } else {
+        $state.go('home.shipping.shipment', { shipmentId: shipment.id });
       }
     }
   }

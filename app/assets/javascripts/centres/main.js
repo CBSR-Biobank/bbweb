@@ -21,9 +21,15 @@ define(function (require) {
   module.component('shippingHome',         require('./components/shippingHome/shippingHomeComponent'));
   module.component('selectCentre',         require('./components/selectCentre/selectCentreComponent'));
   module.component('shipmentAdd',          require('./components/shipmentAdd/shipmentAddComponent'));
+  module.component('shippingInfoView',     require('./components/shippingInfoView/shippingInfoViewComponent'));
   module.component('shipmentAddItems',     require('./components/shipmentAddItems/shipmentAddItemsComponent'));
-  module.component('shipmentSpecimens',    require('./components/shipmentSpecimens/shipmentSpecimensComponent'));
+  module.component('shipmentView',         require('./components/shipmentView/shipmentViewComponent'));
+  module.component('shipmentViewPacked',   require('./components/shipmentViewPacked/shipmentViewPackedComponent'));
+  module.component('shipmentViewSent',     require('./components/shipmentViewSent/shipmentViewSentComponent'));
   module.component('shipmentsTable',       require('./components/shipmentsTable/shipmentsTableComponent'));
+
+  module.component('shipmentSpecimensView',
+                   require('./components/shipmentSpecimensView/shipmentSpecimensViewComponent'));
 
   module.service('centreStatusLabel', require('./services/centreStatusLabelService'));
 

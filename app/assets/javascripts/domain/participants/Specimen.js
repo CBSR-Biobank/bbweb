@@ -41,7 +41,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      * {@link domain.study.Study}.
      *
      * @class
-     * @memberOf domain.centres
+     * @memberOf domain.participants
      * @extends domain.ConcurrencySafeEntity
      *
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
@@ -73,21 +73,21 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
       this.specimenSpecId = null;
 
       /**
-       * The location of the {@link domain.centres.Centre} where this specimen was created.
+       * The location of the {@link domain.participants.Centre} where this specimen was created.
        * @name domain.participants.Specimen#originLocationId
        * @type {string}
        */
       this.originLocationInfo = null;
 
       /**
-       * The location of the {@link domain.centres.Centre} where this specimen is currently located.
+       * The location of the {@link domain.participants.Centre} where this specimen is currently located.
        * @name domain.participants.Specimen#locationId
        * @type {string}
        */
       this.locationInfo = null;
 
       /**
-       * The ID of the {@link domain.centres.Container} this specimen is stored in.
+       * The ID of the {@link domain.participants.Container} this specimen is stored in.
        * @name domain.participants.Specimen#containerId
        * @type {string}
        */

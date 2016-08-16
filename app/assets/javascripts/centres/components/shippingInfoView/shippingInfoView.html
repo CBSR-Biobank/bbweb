@@ -1,0 +1,140 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      Shipment information
+      <span class="pull-right">
+        <a data-toggle="collapse"
+           href="#collapseShippingInfo"
+           class="btn btn-xs btn-default"
+           ng-click="vm.panelButtonClicked()"
+           ng-if="vm.collapsable">
+          <i class="glyphicon"
+             ng-class="vm.panelOpen ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
+        </a>
+      </span>
+    </h3>
+  </div>
+
+  <div id="collapseShippingInfo" class="panel-collapse collapse in" aria-expanded="true">
+    <ul class="list-group">
+
+      <!-- COURIER NAME -->
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-md-3">
+            <strong>Courier</strong>
+          </div>
+          <div class="col-md-7">
+            {{vm.shipment.courierName}}
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-xs btn-primary pull-right"
+                    title="Update courier"
+                    ng-if="!vm.readOnly"
+                    ng-click="vm.editCourierName()">
+              <i class="glyphicon glyphicon-edit"></i>
+            </button>
+          </div>
+        </div>
+      </li>
+
+      <!-- TRACKING NUMBER -->
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-md-3">
+            <strong>Tracking number</strong>
+          </div>
+          <div class="col-md-7">
+            {{vm.shipment.trackingNumber}}
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-xs btn-primary pull-right"
+                    title="Update tracking number"
+                    ng-if="!vm.readOnly"
+                    ng-click="vm.editTrackingNumber()">
+              <i class="glyphicon glyphicon-edit"></i>
+            </button>
+          </div>
+        </div>
+      </li>
+
+      <!-- FROM CENTRE -->
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-md-3">
+            <strong>From</strong>
+          </div>
+          <div class="col-md-7">
+            {{vm.shipment.fromLocationInfo.name}}
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-xs btn-primary pull-right"
+                    title="Update from location"
+                    ng-if="!vm.readOnly"
+                    ng-click="vm.editFromLocation()">
+              <i class="glyphicon glyphicon-edit"></i>
+            </button>
+          </div>
+        </div>
+      </li>
+
+      <!-- TO CENTRE -->
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-md-3">
+            <strong>To</strong>
+          </div>
+          <div class="col-md-7">
+            {{vm.shipment.toLocationInfo.name}}
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-xs btn-primary pull-right"
+                    title="Update to location"
+                    ng-if="!vm.readOnly"
+                    ng-click="vm.editToLocation()">
+              <i class="glyphicon glyphicon-edit"></i>
+            </button>
+          </div>
+        </div>
+      </li>
+
+      <!-- TIME PACKED -->
+      <li class="list-group-item" ng-if="vm.shipment.isPacked()">
+        <div class="row">
+          <div class="col-md-3">
+            <strong>Time packed</strong>
+          </div>
+          <div class="col-md-9">
+            {{vm.shipment.timePacked | localTime}}
+          </div>
+        </div>
+      </li>
+
+      <!-- NUM SPECIMENS -->
+      <li class="list-group-item" ng-if="vm.shipment.isPacked()">
+        <div class="row">
+          <div class="col-md-3">
+            <strong>Number of specimens</strong>
+          </div>
+          <div class="col-md-9">
+            {{vm.shipment.specimenCount}}
+          </div>
+        </div>
+      </li>
+
+      <!-- NUM CONTAINERS -->
+      <li class="list-group-item" ng-if="vm.shipment.isPacked() && vm.shipment.containerCount > 0">
+        <div class="row">
+          <div class="col-md-3">
+            <strong>Number of containers</strong>
+          </div>
+          <div class="col-md-9">
+            {{vm.shipment.containerCount}}
+          </div>
+        </div>
+      </li>
+
+    </ul>
+    <status-line item="vm.shipment"></status-line>
+  </div>
+</div>

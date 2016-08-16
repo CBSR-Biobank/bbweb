@@ -260,6 +260,27 @@ define(function (require) {
     };
 
     /**
+     * Adds a shipment specimen to the system.
+     *
+     * @param {string} shipmentId - the shipment this ShipmentSpecimen will belong to.
+     *
+     * @param {string} specimenId - the specimen to be added to the shipment.
+     *
+     * @param {string} shipmentContainerId - the container this specimen will be found in the shipment.
+     *
+     * @returns {Promise} The added shipment wrapped in a promise.
+     */
+    ShipmentSpecimen.add = function (shipmentId, specimenId, shipmentContainerId) {
+      var json = { shipmentId: shipmentId, specimenId: specimenId };
+      if (shipmentContainerId) {
+        _.extend(json, { shipmentContainerId: shipmentContainerId });
+      }
+      return biobankApi.post(uri(shipmentId), json).then(function(reply) {
+        return ShipmentSpecimen.asyncCreate(reply);
+      });
+    };
+
+    /**
      * Creates a Shipment Specimen from a server reply but first validates that it has a valid schema.
      *
      * <p>A wrapper for {@link domian.centres.Shipment#asyncCreate}.</p>
@@ -268,21 +289,6 @@ define(function (require) {
      */
     ShipmentSpecimen.prototype.asyncCreate = function (obj) {
       return ShipmentSpecimen.asyncCreate(obj);
-    };
-
-    /**
-     * Adds a shipment specimen to the system.
-     *
-     * @returns {Promise} The added shipment wrapped in a promise.
-     */
-    ShipmentSpecimen.prototype.add = function (shipmentId, specimenId, shipmentContainerId) {
-      var json = { shipmentId: shipmentId, specimenId: specimenId };
-      if (shipmentContainerId) {
-        _.extend(json, { shipmentContainerId: shipmentContainerId });
-      }
-      return biobankApi.post(uri(shipmentId), json).then(function(reply) {
-        return ShipmentSpecimen.asyncCreate(reply);
-      });
     };
 
     /**

@@ -26,6 +26,8 @@ trait CentresService {
 
   def centreLocations(): Set[CentreLocation]
 
+  def searchLocations(cmd: SearchCentreLocationsCmd): Set[CentreLocationInfo]
+
   def getCentres[T <: Centre]
     (filter: String, status: String, sortFunc: (Centre, Centre) => Boolean, order: SortOrder)
       : ServiceValidation[Seq[Centre]]
@@ -71,6 +73,19 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
         CentreLocation(centre.id.id, location.uniqueId, centre.name, location.name)
       }
     }.toSet
+  }
+
+  def searchLocations(cmd: SearchCentreLocationsCmd): Set[CentreLocationInfo] =  {
+    val filterLowerCase = cmd.filter.toLowerCase
+    centreRepository.getValues.flatMap { centre =>
+      centre.locations.map { location =>
+        CentreLocationInfo(centre.id.id, location.uniqueId, centre.name, location.name)
+      }
+    }.filter { cl =>
+      cl.name.toLowerCase contains filterLowerCase
+    }.toSeq.sortWith { (a, b) =>
+      (a.name compareToIgnoreCase b.name) < 0
+    }.take(cmd.maxResults).toSet
   }
 
   def getCountsByStatus(): CentreCountsByStatus = {

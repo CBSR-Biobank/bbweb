@@ -80,6 +80,10 @@ class CentresController @Inject() (val env:            Environment,
       Ok(centresService.centreLocations)
   }
 
+  def searchLocations() = commandAction { cmd: SearchCentreLocationsCmd =>
+      Ok(centresService.searchLocations(cmd))
+    }
+
   def query(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
     validationReply(centresService.getCentre(id))
   }

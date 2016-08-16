@@ -232,7 +232,7 @@ define([
 
         self.$httpBackend.expectPOST(uri(ss.shipmentId)).respond(this.reply(jsonSs));
 
-        ss.add(ss.shipmentId, ss.specimenId).then(checkReply).catch(failTest);
+        self.ShipmentSpecimen.add(ss.shipmentId, ss.specimenId).then(checkReply).catch(failTest);
         self.$httpBackend.flush();
 
         function checkReply(reply) {

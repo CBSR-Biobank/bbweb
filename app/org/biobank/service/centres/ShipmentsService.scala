@@ -149,7 +149,10 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
       val toLocationInfo = CentreLocationInfo(toCentre.id.id,
                                               shipment.toLocationId,
                                               toLocationName)
-      shipment.toDto(fromLocationInfo, toLocationInfo)
+      val specimens = shipmentSpecimenRepository.allForShipment(shipment.id)
+
+      // TODO: update with container count when ready
+      shipment.toDto(fromLocationInfo, toLocationInfo, specimens.size, 0)
     }
   }
 

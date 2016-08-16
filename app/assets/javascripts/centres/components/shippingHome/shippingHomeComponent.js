@@ -26,12 +26,23 @@ define(function () {
     var vm = this;
 
     vm.updateCentres   = updateCentres;
-    vm.hasValidCentres = (vm.centreLocations.length > 1);
+    vm.hasValidCentres = false;
     vm.panelHeader     = 'Select a centre to view its shipping information';
     vm.centreIcon      = 'glyphicon-ok-circle';
     vm.centreSelected  = centreSelected;
 
+    vm.$onInit = onInit;
+
     //---
+
+    function onInit() {
+      return Centre.allLocations()
+        .then(Centre.centreLocationToNames)
+        .then(function (centreLocations) {
+          vm.centreLocations = centreLocations;
+          vm.hasValidCentres = (centreLocations.length > 1);
+        });
+    }
 
     function updateCentres(options) {
       return Centre.list(options);
