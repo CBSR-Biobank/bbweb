@@ -100,8 +100,8 @@ define(function (require) {
     }
 
     function remove() {
-      Specimen.list(vm.collectionEvent.id).then(function (paginatedUsers) {
-        if (paginatedUsers.items.length > 0) {
+      Specimen.list(vm.collectionEvent.id).then(function (pagedResult) {
+        if (pagedResult.items.length > 0) {
           modalService.modalOk(
             'Cannot remove collection event',
             'This collection event has specimens. Please remove the specimens first.');
