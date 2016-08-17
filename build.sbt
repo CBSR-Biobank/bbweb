@@ -37,11 +37,16 @@ scalacOptions in Compile ++= Seq(
 
 scalacOptions in (Compile,doc) ++= Seq("-groups", "-implicits")
 
+fork in Test := true
+
 //javaOptions ++= Seq("-Xmx1024M", "-XX:MaxPermSize=512m")
 
 javaOptions in Test ++=  Seq(
-  "-Dconfig.file=conf/test.conf",
-  "-Dlogger.resource=logback-test.xml"
+    "-Xms512M",
+    "-Xmx2048M",
+    "-XX:+CMSClassUnloadingEnabled",
+    "-Dconfig.file=conf/test.conf",
+    "-Dlogger.resource=logback-test.xml"
 )
 
 javacOptions in ThisBuild  ++= Seq(
