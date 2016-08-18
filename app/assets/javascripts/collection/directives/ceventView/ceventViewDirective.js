@@ -49,7 +49,6 @@ define(function (require) {
     var vm = this;
 
     vm.canUpdateVisitType = (vm.collectionEventTypes.length > 1);
-    vm.timeCompletedLocal = timeService.dateToDisplayString(vm.collectionEvent.timeCompleted);
     vm.panelOpen          = true;
 
     vm.editVisitType      = editVisitType;
@@ -63,7 +62,6 @@ define(function (require) {
     function postUpdate(message, title, timeout) {
       return function (cevent) {
         vm.collectionEvent = cevent;
-        vm.timeCompletedLocal = timeService.dateToDisplayString(vm.collectionEvent.timeCompleted);
         notificationsService.success(message, title, timeout);
       };
     }
@@ -77,7 +75,7 @@ define(function (require) {
     function editTimeCompleted() {
       modalInput.dateTime('Update time completed',
                           'Time completed',
-                          vm.timeCompletedLocal,
+                          vm.collectionEvent.timeCompleted,
                           { required: true })
         .result.then(function (timeCompleted) {
           vm.collectionEvent.updateTimeCompleted(timeService.dateToUtcString(timeCompleted))
