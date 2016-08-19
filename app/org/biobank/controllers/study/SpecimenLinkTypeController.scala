@@ -30,13 +30,13 @@ class SpecimenLinkTypeController @Inject() (val env:            Environment,
     }
 
   def addSpecimenLinkType(procTypeId: String) =
-    commandAction(Json.obj("processingTypeId" -> procTypeId)) { cmd: AddSpecimenLinkTypeCmd =>
+    commandActionAsync(Json.obj("processingTypeId" -> procTypeId)) { cmd: AddSpecimenLinkTypeCmd =>
       val future = studiesService.processCommand(cmd)
       validationReply(future)
     }
 
   def updateSpecimenLinkType(procTypeId: String, id: String) =
-    commandAction(Json.obj("processingTypeId" -> procTypeId, "id" -> id)) { cmd: UpdateSpecimenLinkTypeCmd =>
+    commandActionAsync(Json.obj("processingTypeId" -> procTypeId, "id" -> id)) { cmd: UpdateSpecimenLinkTypeCmd =>
       val future = studiesService.processCommand(cmd)
       validationReply(future)
     }

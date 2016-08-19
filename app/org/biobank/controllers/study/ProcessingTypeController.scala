@@ -27,12 +27,12 @@ class ProcessingTypeController @Inject() (val env:            Environment,
     }
 
   def addProcessingType(studyId: String) =
-    commandAction(Json.obj("studyId" -> studyId)) { cmd: AddProcessingTypeCmd =>
+    commandActionAsync(Json.obj("studyId" -> studyId)) { cmd: AddProcessingTypeCmd =>
       processCommand(cmd)
   }
 
   def updateProcessingType(studyId: String, id: String) =
-    commandAction(Json.obj("studyId" -> studyId, "id" -> id)) { cmd: UpdateProcessingTypeCmd =>
+    commandActionAsync(Json.obj("studyId" -> studyId, "id" -> id)) { cmd: UpdateProcessingTypeCmd =>
       processCommand(cmd)
   }
 

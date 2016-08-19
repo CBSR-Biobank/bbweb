@@ -15,8 +15,6 @@ import play.api.libs.json._
 trait JsonHelper extends MustMatchers with OptionValues {
   import org.biobank.infrastructure.JsonUtils._
 
-  val log: Logger
-
   private def compareEntity[T <: IdentifiedDomainObject[_]](json: JsValue, entity: ConcurrencySafeEntity[T]) = {
     (json \ "id").as[String] mustBe (entity.id.toString)
     (json \ "version").as[Long] mustBe (entity.version)

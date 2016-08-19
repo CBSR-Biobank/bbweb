@@ -89,21 +89,21 @@ class StudiesController @Inject() (val env:            Environment,
       Ok(studiesService.getCentresForStudy(studyId))
     }
 
-  def add() = commandAction { cmd: AddStudyCmd =>
+  def add() = commandActionAsync { cmd: AddStudyCmd =>
       processCommand(cmd)
     }
 
   def updateName(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : UpdateStudyNameCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateStudyNameCmd => processCommand(cmd) }
 
   def updateDescription(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : UpdateStudyDescriptionCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateStudyDescriptionCmd => processCommand(cmd) }
 
   def addAnnotationType(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : StudyAddParticipantAnnotationTypeCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : StudyAddParticipantAnnotationTypeCmd => processCommand(cmd) }
 
   def updateAnnotationType(id: String, uniqueId: String) =
-    commandAction(Json.obj("id" -> id, "uniqueId" -> uniqueId)) {
+    commandActionAsync(Json.obj("id" -> id, "uniqueId" -> uniqueId)) {
       cmd : StudyUpdateParticipantAnnotationTypeCmd => processCommand(cmd)
     }
 
@@ -114,16 +114,16 @@ class StudiesController @Inject() (val env:            Environment,
     }
 
   def enable(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd: EnableStudyCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd: EnableStudyCmd => processCommand(cmd) }
 
   def disable(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd: DisableStudyCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd: DisableStudyCmd => processCommand(cmd) }
 
   def retire(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd: RetireStudyCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd: RetireStudyCmd => processCommand(cmd) }
 
   def unretire(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd: UnretireStudyCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd: UnretireStudyCmd => processCommand(cmd) }
 
   def valueTypes = Action(parse.empty) { request =>
       Ok(AnnotationValueType.values.map(x => x))

@@ -3,11 +3,10 @@ package org.biobank.controllers
 import org.biobank.domain.user.{ UserId, UserHelper }
 import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
-
-import scala.concurrent.Future
-import play.api.{ Environment, Logger, Mode }
-import play.api.mvc._
 import play.api.libs.json._
+import play.api.mvc._
+import play.api.{ Environment, Logger, Mode }
+import scala.concurrent.Future
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -16,6 +15,8 @@ import scalaz.Validation.FlatMap._
   * Can be composed to fine-tune access control.
  */
 trait Security { self: Controller =>
+
+  private val log: Logger = Logger(this.getClass)
 
   val env: Environment
 
@@ -51,18 +52,14 @@ trait Security { self: Controller =>
           .toSuccessNel(ControllerError("No token"))
       }
       matchingTokens <- {
-        if (cookieXsrfToken == headerXsrfToken) {
-          headerXsrfToken.successNel[String]
-        } else {
-          ControllerError(s"tokens did not match: cookie/$cookieXsrfToken, header/$headerXsrfToken")
-            .failureNel[String]
-        }
+        if (cookieXsrfToken == headerXsrfToken) headerXsrfToken.successNel[String]
+        else ControllerError(s"tokens did not match: cookie/$cookieXsrfToken, header/$headerXsrfToken")
+          .failureNel[String]
       }
     } yield headerXsrfToken
   }
 
-  private def getAuthInfo(token: String)
-      : ControllerValidation[AuthenticationInfo] = {
+  private def getAuthInfo(token: String): ControllerValidation[AuthenticationInfo] = {
     if ((env.mode == Mode.Test) && (token == TestAuthToken)) {
       // when running in TEST mode, always allow the action if the token is the test token
       AuthenticationInfo(token, org.biobank.Global.DefaultUserId).successNel
@@ -87,8 +84,7 @@ trait Security { self: Controller =>
    *
    * Note: there is special behaviour if the code is running in TEST mode.
    */
-  private def validateToken[A](request: Request[A])
-      : ControllerValidation[AuthenticationInfo] = {
+  private def validateToken[A](request: Request[A]): ControllerValidation[AuthenticationInfo] = {
     for {
       token <- validRequestToken(request)
       auth <- getAuthInfo(token)
@@ -119,9 +115,9 @@ trait Security { self: Controller =>
     Action.async(p) { implicit request =>
       validateToken(request).fold(
         err => {
-          Logger.debug(s"AuthActionAsync: $err")
-          Future.successful(
-            Unauthorized(Json.obj("status" ->"error", "message" -> err.list.toList.mkString(", "))))
+          log.error(s"AuthActionAsync: $err")
+          Future.successful(Unauthorized(Json.obj("status"  ->"error",
+                                                  "message" -> err.list.toList.mkString(", "))))
         },
         authInfo => f(authInfo.token, authInfo.userId, request)
       )

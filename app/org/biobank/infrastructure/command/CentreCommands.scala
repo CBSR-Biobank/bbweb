@@ -85,15 +85,40 @@ object CentreCommands {
                                             studyId:         String)
       extends CentreModifyCommand
 
-  implicit val addCentreCmdReads: Reads[AddCentreCmd]                             = Json.reads[AddCentreCmd]
-  implicit val updateCentreNameCmdReads: Reads[UpdateCentreNameCmd]               = Json.reads[UpdateCentreNameCmd]
-  implicit val updateCentreDescriptionCmdReads: Reads[UpdateCentreDescriptionCmd] = Json.reads[UpdateCentreDescriptionCmd]
-  implicit val enableCentreCmdReads: Reads[EnableCentreCmd]                       = Json.reads[EnableCentreCmd]
-  implicit val disableCentreCmdReads: Reads[DisableCentreCmd]                     = Json.reads[DisableCentreCmd]
-  implicit val addCentreLocationCmdReads: Reads[AddCentreLocationCmd]             = Json.reads[AddCentreLocationCmd]
-  implicit val updateCentreLocationCmdReads: Reads[UpdateCentreLocationCmd]       = Json.reads[UpdateCentreLocationCmd]
-  implicit val removeCentreLocationCmdReads: Reads[RemoveCentreLocationCmd]       = Json.reads[RemoveCentreLocationCmd]
-  implicit val addStudyToCentreCmdReads: Reads[AddStudyToCentreCmd]               = Json.reads[AddStudyToCentreCmd]
-  implicit val removeStudyFromCentreCmdReads: Reads[RemoveStudyFromCentreCmd]     = Json.reads[RemoveStudyFromCentreCmd]
+  final case class SearchCentreLocationsCmd(filter: String, maxResults: Int)
+      extends Command
+
+  implicit val addCentreCmdReads: Reads[AddCentreCmd] =
+    Json.reads[AddCentreCmd]
+
+  implicit val updateCentreNameCmdReads: Reads[UpdateCentreNameCmd] =
+    Json.reads[UpdateCentreNameCmd]
+
+  implicit val updateCentreDescriptionCmdReads: Reads[UpdateCentreDescriptionCmd] =
+    Json.reads[UpdateCentreDescriptionCmd]
+
+  implicit val enableCentreCmdReads: Reads[EnableCentreCmd] =
+    Json.reads[EnableCentreCmd]
+
+  implicit val disableCentreCmdReads: Reads[DisableCentreCmd] =
+    Json.reads[DisableCentreCmd]
+
+  implicit val addCentreLocationCmdReads: Reads[AddCentreLocationCmd] =
+    Json.reads[AddCentreLocationCmd]
+
+  implicit val updateCentreLocationCmdReads: Reads[UpdateCentreLocationCmd] =
+    Json.reads[UpdateCentreLocationCmd]
+
+  implicit val removeCentreLocationCmdReads: Reads[RemoveCentreLocationCmd] =
+    Json.reads[RemoveCentreLocationCmd]
+
+  implicit val addStudyToCentreCmdReads: Reads[AddStudyToCentreCmd] =
+    Json.reads[AddStudyToCentreCmd]
+
+  implicit val removeStudyFromCentreCmdReads: Reads[RemoveStudyFromCentreCmd] =
+    Json.reads[RemoveStudyFromCentreCmd]
+
+  implicit val searchCentreLocationsCmdReads: Reads[SearchCentreLocationsCmd] =
+    Json.reads[SearchCentreLocationsCmd]
 
 }

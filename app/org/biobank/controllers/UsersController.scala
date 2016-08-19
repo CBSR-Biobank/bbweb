@@ -3,9 +3,10 @@ package org.biobank.controllers
 import javax.inject.{Inject, Singleton}
 import org.biobank.domain.user._
 import org.biobank.infrastructure.command.UserCommands._
-import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
 import org.biobank.service.study.StudiesService
 import org.biobank.service.users.UsersService
+import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
+import play.api.Logger
 import play.api.cache.CacheApi
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Reads._
@@ -27,6 +28,7 @@ class UsersController @Inject() (val env:            Environment,
     extends CommandController
     with JsonController {
 
+  val log = Logger(this.getClass())
 
   private val PageSizeMax = 20
 
@@ -67,7 +69,7 @@ class UsersController @Inject() (val env:            Environment,
           },
           user => {
             val token = authToken.newToken(user.id)
-            Logger.debug(s"user logged in: ${user.email}, token: $token")
+            log.debug(s"user logged in: ${user.email}, token: $token")
             Ok(token).withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
           }
         )
@@ -99,7 +101,7 @@ class UsersController @Inject() (val env:            Environment,
 
   /** Resets the user's password.
     */
-  def passwordReset() = commandAction { cmd: ResetUserPasswordCmd =>
+  def passwordReset() = commandActionAsync { cmd: ResetUserPasswordCmd =>
       processCommand(cmd)
     }
 
@@ -124,7 +126,7 @@ class UsersController @Inject() (val env:            Environment,
       val pageSize    = pageSizeMaybe.fold { 5 } { ps => ps }
       val order       = orderMaybe.fold { "asc" } { o => o }
 
-      Logger.debug(s"""|UsersController:list: nameFilter/$nameFilter, emailFilter/$emailFilter,
+      log.debug(s"""|UsersController:list: nameFilter/$nameFilter, emailFilter/$emailFilter,
                        |  status/$status, sort/$sort, page/$page, pageSize/$pageSize,
                        |  order/$order""".stripMargin)
 
@@ -162,7 +164,7 @@ class UsersController @Inject() (val env:            Environment,
         Future.successful(BadRequest(JsError.toJson(errors)))
       },
       cmd => {
-        Logger.debug(s"addUser: cmd: $cmd")
+        log.debug(s"addUser: cmd: $cmd")
         val future = usersService.processCommand(cmd)
         future.map { validation =>
           validation.fold(
@@ -182,37 +184,37 @@ class UsersController @Inject() (val env:            Environment,
   }
 
   def updateName(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd: UpdateUserNameCmd =>
+    commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserNameCmd =>
       processCommand(cmd)
     }
 
   def updateEmail(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd: UpdateUserEmailCmd =>
+    commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserEmailCmd =>
       processCommand(cmd)
   }
 
   def updatePassword(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd: UpdateUserPasswordCmd =>
+    commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserPasswordCmd =>
       processCommand(cmd)
   }
 
   def updateAvatarUrl(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd: UpdateUserAvatarUrlCmd =>
+    commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserAvatarUrlCmd =>
       processCommand(cmd)
   }
 
   def activateUser(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd: ActivateUserCmd =>
+    commandActionAsync(Json.obj("id" -> id)) { cmd: ActivateUserCmd =>
       processCommand(cmd)
   }
 
   def lockUser(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd: LockUserCmd =>
+    commandActionAsync(Json.obj("id" -> id)) { cmd: LockUserCmd =>
       processCommand(cmd)
   }
 
   def unlockUser(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd: UnlockUserCmd =>
+    commandActionAsync(Json.obj("id" -> id)) { cmd: UnlockUserCmd =>
       processCommand(cmd)
   }
 

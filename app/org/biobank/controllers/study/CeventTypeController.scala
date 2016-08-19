@@ -29,7 +29,7 @@ class CeventTypeController @Inject() (val env:            Environment,
     }
 
   def add(studyId: String) =
-    commandAction(Json.obj("studyId" -> studyId)) {
+    commandActionAsync(Json.obj("studyId" -> studyId)) {
       cmd: AddCollectionEventTypeCmd => processCommand(cmd) }
 
   def remove(studyId: String, id: String, ver: Long) =
@@ -40,23 +40,23 @@ class CeventTypeController @Inject() (val env:            Environment,
   }
 
   def updateName(id: String) =
-    commandAction(Json.obj("id" -> id)) {
+    commandActionAsync(Json.obj("id" -> id)) {
       cmd: UpdateCollectionEventTypeNameCmd => processCommand(cmd) }
 
   def updateDescription(id: String) =
-    commandAction(Json.obj("id" -> id)) {
+    commandActionAsync(Json.obj("id" -> id)) {
       cmd: UpdateCollectionEventTypeDescriptionCmd => processCommand(cmd) }
 
   def updateRecurring(id: String) =
-    commandAction(Json.obj("id" -> id)) {
+    commandActionAsync(Json.obj("id" -> id)) {
       cmd: UpdateCollectionEventTypeRecurringCmd => processCommand(cmd) }
 
   def addAnnotationType(id: String) =
-    commandAction(Json.obj("id" -> id)) {
+    commandActionAsync(Json.obj("id" -> id)) {
         cmd: CollectionEventTypeAddAnnotationTypeCmd => processCommand(cmd) }
 
   def updateAnnotationType(id: String, uniqueId: String) =
-    commandAction(Json.obj("id" -> id, "uniqueId" -> uniqueId)) {
+    commandActionAsync(Json.obj("id" -> id, "uniqueId" -> uniqueId)) {
         cmd: CollectionEventTypeUpdateAnnotationTypeCmd => processCommand(cmd) }
 
   def removeAnnotationType(studyId: String, id: String, ver: Long, uniqueId: String) =
@@ -71,11 +71,11 @@ class CeventTypeController @Inject() (val env:            Environment,
     }
 
   def addSpecimenSpec(id: String) =
-    commandAction(Json.obj("id" -> id)) {
+    commandActionAsync(Json.obj("id" -> id)) {
       cmd: AddCollectionSpecimenSpecCmd => processCommand(cmd) }
 
   def updateSpecimenSpec(id: String, uniqueId: String) =
-    commandAction(Json.obj("id" -> id, "uniqueId" -> uniqueId)) {
+    commandActionAsync(Json.obj("id" -> id, "uniqueId" -> uniqueId)) {
       cmd: UpdateCollectionSpecimenSpecCmd => processCommand(cmd) }
 
   def removeSpecimenSpec(studyId: String, id: String, ver: Long, uniqueId: String) =

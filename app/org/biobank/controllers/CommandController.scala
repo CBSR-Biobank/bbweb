@@ -1,16 +1,16 @@
 package org.biobank.controllers
 
+import org.biobank.domain.user.UserId
+import org.biobank.infrastructure.command.Commands._
 import org.biobank.service.users.UsersService
 import org.biobank.service.{AuthToken, ServiceValidation}
-import org.biobank.infrastructure.command.Commands._
-
-import scala.concurrent.Future
-import org.slf4j.LoggerFactory
-import play.Logger
-import play.api.mvc._
-import play.api.libs.json._
-import play.mvc.Http
+import play.api.Logger
 import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.json._
+import play.api.mvc._
+import play.mvc.Http
+import scala.concurrent.Future
+import scala.language.reflectiveCalls
 
 @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
 trait CommandController extends Controller with Security {
@@ -19,55 +19,37 @@ trait CommandController extends Controller with Security {
 
   implicit val usersService: UsersService
 
-  def commandAction[T <: Command](additionalJson: JsObject)(func: T => Future[Result])
-                   (implicit reads: Reads[T]): Action[JsValue] = {
-    AuthActionAsync(parse.json) { (token, userId, request) =>
-      val jsonCmd = request.body.as[JsObject] ++ additionalJson ++ Json.obj("userId" -> userId.id)
-      jsonCmd.validate[T].fold(
-        errors => {
-          Future.successful(
-            BadRequest(Json.obj("status" ->"error", "message" -> JsError.toJson(errors))))
-        },
-        cmd => {
-          Logger.debug(s"commandAction: $cmd")
-          func(cmd)
-        }
+  private def commandFromJson(json: JsValue, jsonExtra: JsValue, userId: UserId): JsObject = {
+    val result = Json.obj("userId" -> userId.id) ++ json.as[JsObject]
+    if (jsonExtra == JsNull) result
+    else result ++ jsonExtra.as[JsObject]
+  }
+
+  def commandAction[T <: Command](additionalJson: JsValue)(func: T => Result)
+                   (implicit reads: Reads[T]): Action[JsValue] =
+    AuthAction(parse.json) { (token, userId, request) =>
+      commandFromJson(request.body, additionalJson, userId).validate[T].fold(
+        errors => BadRequest(Json.obj("status" ->"error", "message" -> JsError.toJson(errors))),
+        cmd => func(cmd)
       )
     }
-  }
 
-  def commandAction[T <: Command](func: T => Future[Result])
-                   (implicit reads: Reads[T]): Action[JsValue] = {
-    commandAction(Json.obj()) { cmd: T => func(cmd) }
-  }
+  def commandAction[T <: Command](func: T => Result)(implicit reads: Reads[T]): Action[JsValue] =
+    commandAction(JsNull)(func)
 
-  def commandAction[A, T <: Command](numFields: Integer)(func: T => Future[Result])
-                   (implicit reads: Reads[T]) = {
+  def commandActionAsync[T <: Command](additionalJson: JsValue)(func: T => Future[Result])
+                   (implicit reads: Reads[T]): Action[JsValue] =
     AuthActionAsync(parse.json) { (token, userId, request) =>
-      val jsonObj = request.body.as[JsObject]
-      Logger.debug(s"commandAction: $jsonObj")
-      if (jsonObj.keys.size == numFields) {
-        val jsonWithUserId = request.body.as[JsObject] ++ Json.obj("userId" -> userId.id)
-        val cmdResult = jsonWithUserId.validate[T]
-        cmdResult.fold(
-          errors => {
-            Future.successful(
-              BadRequest(Json.obj("status" ->"error", "message" -> JsError.toJson(errors))))
-          },
-          cmd => {
-            Logger.debug(s"commandAction: $cmd")
-            func(cmd)
-          }
-        )
-      } else {
-        Future.successful(
-          BadRequest(
-            Json.obj(
-              "status" ->"error",
-              "message" -> s"Invalid JSON object - missing attributes: expected $numFields, got ${jsonObj.keys.size}")))
-      }
+      commandFromJson(request.body, additionalJson, userId).validate[T].fold(
+        errors => Future.successful(BadRequest(Json.obj("status" ->"error",
+                                                        "message" -> JsError.toJson(errors)))),
+        cmd => func(cmd)
+      )
     }
-  }
+
+  def commandActionAsync[T <: Command](func: T => Future[Result])
+                   (implicit reads: Reads[T]): Action[JsValue] =
+    commandActionAsync(JsNull)(func)
 
 }
 
@@ -77,9 +59,7 @@ trait CommandController extends Controller with Security {
 @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Nothing"))
 trait JsonController extends Controller {
 
-  import scala.language.reflectiveCalls
-
-  val Log = LoggerFactory.getLogger(this.getClass)
+  private val log: Logger = Logger(this.getClass)
 
   def errorReplyJson(message: String) = Json.obj("status" -> "error", "message" -> message)
 
@@ -107,10 +87,10 @@ trait JsonController extends Controller {
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   protected def validationReply[T](validation: ServiceValidation[T])
-                                     (implicit writes: Writes[T]): Result = {
+                               (implicit writes: Writes[T]): Result = {
     validation.fold(
       err => {
-        Log.trace("*** ERROR ***: " + err.list.toList.mkString(", "))
+        log.trace("*** ERROR ***: " + err.list.toList.mkString(", "))
         val errMsgs = err.list.toList.mkString(", ")
         if (("IdNotFound".r.findAllIn(errMsgs).length > 0)
               || ("not found".r.findAllIn(errMsgs).length > 0)
@@ -124,7 +104,7 @@ trait JsonController extends Controller {
         }
       },
       reply => {
-        Log.trace(s"validationReply: $reply")
+        log.trace(s"validationReply: $reply")
         Ok(reply)
       }
     )
@@ -132,7 +112,7 @@ trait JsonController extends Controller {
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   protected def validationReply[T](future: Future[ServiceValidation[T]])
-                                     (implicit writes: Writes[T]): Future[Result] =
+                               (implicit writes: Writes[T]): Future[Result] =
     future.map { validation => validationReply(validation) }
 
 }

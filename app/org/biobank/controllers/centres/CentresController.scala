@@ -84,16 +84,16 @@ class CentresController @Inject() (val env:            Environment,
     validationReply(centresService.getCentre(id))
   }
 
-  def add() = commandAction { cmd: AddCentreCmd => processCommand(cmd) }
+  def add() = commandActionAsync { cmd: AddCentreCmd => processCommand(cmd) }
 
   def updateName(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : UpdateCentreNameCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateCentreNameCmd => processCommand(cmd) }
 
   def updateDescription(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : UpdateCentreDescriptionCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateCentreDescriptionCmd => processCommand(cmd) }
 
   def addStudy(centreId: String) =
-    commandAction(Json.obj("id" -> centreId)) { cmd : AddStudyToCentreCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> centreId)) { cmd : AddStudyToCentreCmd => processCommand(cmd) }
 
   def removeStudy(centreId: String, ver: Long, studyId: String) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
@@ -101,10 +101,10 @@ class CentresController @Inject() (val env:            Environment,
     }
 
   def addLocation(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : AddCentreLocationCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : AddCentreLocationCmd => processCommand(cmd) }
 
   def updateLocation(id: String, locationId: String) =
-    commandAction(Json.obj("id"         -> id,
+    commandActionAsync(Json.obj("id"         -> id,
                            "locationId" -> locationId)) { cmd : UpdateCentreLocationCmd =>
       processCommand(cmd)
     }
@@ -115,10 +115,10 @@ class CentresController @Inject() (val env:            Environment,
     }
 
   def enable(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : EnableCentreCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : EnableCentreCmd => processCommand(cmd) }
 
   def disable(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : DisableCentreCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : DisableCentreCmd => processCommand(cmd) }
 
   private def processCommand(cmd: CentreCommand) = {
     val future = centresService.processCommand(cmd)

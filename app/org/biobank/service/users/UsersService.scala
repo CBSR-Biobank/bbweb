@@ -53,7 +53,7 @@ class UsersServiceImpl @javax.inject.Inject() (
 
   case object InvalidPassword extends ValidationKey
 
-  val Log = LoggerFactory.getLogger(this.getClass)
+  val log = LoggerFactory.getLogger(this.getClass)
 
   implicit val timeout: Timeout = 5.seconds
 
@@ -138,12 +138,13 @@ class UsersServiceImpl @javax.inject.Inject() (
     } yield user
   }
 
-  def processCommand(cmd: UserCommand): Future[ServiceValidation[User]] =
+  def processCommand(cmd: UserCommand): Future[ServiceValidation[User]] = {
+    log.debug(s"processCommand: cmd: $cmd")
     ask(processor, cmd).mapTo[ServiceValidation[UserEvent]].map { validation =>
       for {
         event <- validation
         user  <- userRepository.getByKey(UserId(event.id))
       } yield user
     }
-
+  }
 }

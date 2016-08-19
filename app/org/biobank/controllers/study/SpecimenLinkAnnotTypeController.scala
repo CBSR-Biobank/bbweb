@@ -31,13 +31,13 @@
 //     }
 
 //   def addAnnotationType() =
-//     commandAction { cmd: AddSpecimenLinkAnnotationTypeCmd =>
+//     commandActionAsync { cmd: AddSpecimenLinkAnnotationTypeCmd =>
 //       val future = studiesService.addSpecimenLinkAnnotationType(cmd)
 //       validationReply(future)
 //     }
 
 //   def updateAnnotationType() =
-//     commandAction { cmd: UpdateSpecimenLinkAnnotationTypeCmd =>
+//     commandActionAsync { cmd: UpdateSpecimenLinkAnnotationTypeCmd =>
 //       val future = studiesService.updateSpecimenLinkAnnotationType(cmd)
 //       validationReply(future)
 //     }

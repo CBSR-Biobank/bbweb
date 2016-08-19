@@ -31,13 +31,13 @@ class ParticipantsController @Inject() (val env:            Environment,
     }
 
   def add(studyId: String) =
-    commandAction(Json.obj("studyId" -> studyId)) { cmd : AddParticipantCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("studyId" -> studyId)) { cmd : AddParticipantCmd => processCommand(cmd) }
 
   def updateUniqueId(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd: UpdateParticipantUniqueIdCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateParticipantUniqueIdCmd => processCommand(cmd) }
 
   def addAnnotation(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd: ParticipantAddAnnotationCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd: ParticipantAddAnnotationCmd => processCommand(cmd) }
 
   def removeAnnotation(participantId: String, annotTypeId: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>

@@ -110,7 +110,7 @@ class ShipmentsController @Inject() (val env:              Environment,
       validationReply(shipmentsService.getShipmentSpecimen(shipmentId, shipmentSpecimenId))
     }
 
-  def add() = commandAction { cmd: AddShipmentCmd => processCommand(cmd) }
+  def add() = commandActionAsync { cmd: AddShipmentCmd => processCommand(cmd) }
 
   def remove(shipmentId: String, version: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
@@ -122,33 +122,33 @@ class ShipmentsController @Inject() (val env:              Environment,
     }
 
   def updateCourier(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : UpdateShipmentCourierNameCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateShipmentCourierNameCmd => processCommand(cmd) }
 
   def updateTrackingNumber(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : UpdateShipmentTrackingNumberCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateShipmentTrackingNumberCmd => processCommand(cmd) }
 
   def updateFromLocation(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : UpdateShipmentFromLocationCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateShipmentFromLocationCmd => processCommand(cmd) }
 
   def updateToLocation(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : UpdateShipmentToLocationCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateShipmentToLocationCmd => processCommand(cmd) }
 
   def packed(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : ShipmentPackedCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentPackedCmd => processCommand(cmd) }
 
   def sent(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : ShipmentSentCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentSentCmd => processCommand(cmd) }
 
   def received(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : ShipmentReceivedCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentReceivedCmd => processCommand(cmd) }
 
   def unpacked(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : ShipmentUnpackedCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentUnpackedCmd => processCommand(cmd) }
 
   def lost(id: String) =
-    commandAction(Json.obj("id" -> id)) { cmd : ShipmentLostCmd => processCommand(cmd) }
+    commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentLostCmd => processCommand(cmd) }
 
-  def addSpecimen(shipmentId: String) = commandAction(Json.obj("shipmentId" -> shipmentId)) {
+  def addSpecimen(shipmentId: String) = commandActionAsync(Json.obj("shipmentId" -> shipmentId)) {
       cmd: ShipmentSpecimenAddCmd => processSpecimenCommand(cmd)
     }
 
@@ -163,22 +163,22 @@ class ShipmentsController @Inject() (val env:              Environment,
     }
 
   def specimenContainer(shipmentId: String, shipmentSpecimenId: String) =
-    commandAction(Json.obj("shipmentId" -> shipmentId, "id" -> shipmentSpecimenId)) {
+    commandActionAsync(Json.obj("shipmentId" -> shipmentId, "id" -> shipmentSpecimenId)) {
       cmd: ShipmentSpecimenUpdateContainerCmd => processSpecimenCommand(cmd)
     }
 
   def specimenReceived(shipmentId: String, shipmentSpecimenId: String) =
-    commandAction(Json.obj("shipmentId" -> shipmentId, "id" -> shipmentSpecimenId)) {
+    commandActionAsync(Json.obj("shipmentId" -> shipmentId, "id" -> shipmentSpecimenId)) {
       cmd: ShipmentSpecimenReceivedCmd => processSpecimenCommand(cmd)
     }
 
   def specimenMissing(shipmentId: String, shipmentSpecimenId: String) =
-    commandAction(Json.obj("shipmentId" -> shipmentId, "id" -> shipmentSpecimenId)) {
+    commandActionAsync(Json.obj("shipmentId" -> shipmentId, "id" -> shipmentSpecimenId)) {
       cmd: ShipmentSpecimenMissingCmd => processSpecimenCommand(cmd)
     }
 
   def specimenExtra(shipmentId: String, shipmentSpecimenId: String) =
-    commandAction(Json.obj("shipmentId" -> shipmentId, "id" -> shipmentSpecimenId)) {
+    commandActionAsync(Json.obj("shipmentId" -> shipmentId, "id" -> shipmentSpecimenId)) {
       cmd: ShipmentSpecimenExtraCmd => processSpecimenCommand(cmd)
     }
 

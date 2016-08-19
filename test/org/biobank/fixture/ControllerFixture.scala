@@ -1,18 +1,17 @@
 package org.biobank.fixture
 
-import com.typesafe.scalalogging._
 import org.biobank.Global
 import org.biobank.controllers.FixedEhCache
 import org.biobank.domain._
 import org.biobank.domain.centre._
 import org.biobank.domain.participants._
-import org.biobank.domain.study._
 import org.biobank.domain.processing._
+import org.biobank.domain.study._
 import org.biobank.domain.user.UserRepository
 import org.biobank.service.PasswordHasher
 import org.scalatest._
 import org.scalatestplus.play._
-import org.slf4j.LoggerFactory
+import play.api.Logger
 import play.api.cache.{ CacheApi /* , EhCacheModule */ }
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -62,9 +61,9 @@ abstract class ControllerFixture
     with OptionValues
     with BbwebFakeApplication {
 
-  val log = Logger(LoggerFactory.getLogger(this.getClass.getSimpleName))
+  val log = Logger(this.getClass())
 
-  val nameGenerator = new NameGenerator(this.getClass)
+  val nameGenerator = new NameGenerator(this.getClass())
 
   //private val dbName = "bbweb-test"
 

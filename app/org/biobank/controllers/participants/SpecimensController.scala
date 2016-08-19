@@ -69,7 +69,7 @@ class SpecimensController @Inject() (val env:          Environment,
     }
 
   def addSpecimens(ceventId: String) =
-    commandAction(Json.obj("collectionEventId" -> ceventId)) { cmd: AddSpecimensCmd =>
+    commandActionAsync(Json.obj("collectionEventId" -> ceventId)) { cmd: AddSpecimensCmd =>
       val future = service.processCommand(cmd)
       validationReply(future)
     }

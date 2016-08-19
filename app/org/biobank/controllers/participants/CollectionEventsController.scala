@@ -66,22 +66,22 @@ class CollectionEventsController @Inject() (val env:          Environment,
     }
 
   def add(participantId: String) =
-    commandAction(Json.obj("participantId" -> participantId)) { cmd: AddCollectionEventCmd =>
+    commandActionAsync(Json.obj("participantId" -> participantId)) { cmd: AddCollectionEventCmd =>
       processCommand(cmd)
     }
 
   def updateVisitNumber(ceventId: String) =
-    commandAction(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventVisitNumberCmd =>
+    commandActionAsync(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventVisitNumberCmd =>
       processCommand(cmd)
     }
 
   def updateTimeCompleted(ceventId: String) =
-    commandAction(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventTimeCompletedCmd =>
+    commandActionAsync(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventTimeCompletedCmd =>
       processCommand(cmd)
     }
 
   def addAnnotation(ceventId: String) =
-    commandAction(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventAnnotationCmd =>
+    commandActionAsync(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventAnnotationCmd =>
       processCommand(cmd)
     }
 
@@ -93,11 +93,6 @@ class CollectionEventsController @Inject() (val env:          Environment,
                                                    id               = ceventId,
                                                    expectedVersion  = ver,
                                                    annotationTypeId = annotTypeId)
-      processCommand(cmd)
-    }
-
-  def addSpecimens(ceventId: String) =
-    commandAction(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventTimeCompletedCmd =>
       processCommand(cmd)
     }
 

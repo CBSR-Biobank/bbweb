@@ -1,28 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
+  <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel" />
+
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>DEBUG</level>
+    </filter -->
+
     <!-- encoders are assigned the type
          ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
     <encoder>
-      <pattern>%date{HH:mm:ss.SSS} %-5level %C{36}.%M\(%line\) | %X{akkaSource} | %msg%n</pattern>
+      <pattern>%date{ISO8601} %coloredLevel %C{36}.%M - %message%n%xException{10}</pattern>
       <immediateFlush>true</immediateFlush>
     </encoder>
   </appender>
 
-  <logger name="com" level="INFO" />
-  <logger name="net" level="INFO" />
-  <logger name="io.netty" level="INFO" />
-  <logger name="play" level="INFO" />
-  <logger name="akka.event.slf4j" level="WARN" />
-
   <logger name="org.biobank" level="INFO" />
   <logger name="org.biobank.domain" level="INFO" />
   <logger name="org.biobank.service" level="INFO" />
-
+  <logger name="org.biobank.controllers.UsersController" level="INFO" />
+  <logger name="org.biobank.controllers.JsonController" level="DEBUG" />
   <logger name="org.biobank.fixture" level="INFO" />
-  <logger name="application" level="INFO" />
-  <logger name="play.api.libs.mailer.MockMailer" level="WARN" />
+
+  <logger name="application" level="WARN" />
+  <logger name="akka.event.slf4j" level="WARN" />
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />
