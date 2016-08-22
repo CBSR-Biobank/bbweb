@@ -1,7 +1,8 @@
-package org.biobank.controllers
+package org.biobank.controllers.users
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.domain.user._
+import org.biobank.controllers._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.service.studies.StudiesService
 import org.biobank.service.users.UsersService

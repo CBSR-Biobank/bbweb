@@ -169,27 +169,27 @@ DELETE  /shipments/specimens/:shId/:shSpcId/:ver      org.biobank.controllers.ce
 #
 # --- USERS ---
 #
-GET     /users/counts                           org.biobank.controllers.UsersController.userCounts()
-GET     /users                                  org.biobank.controllers.UsersController.list(nameFilter: Option[String], emailFilter: Option[String], status: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
-GET     /users/:id                              org.biobank.controllers.UsersController.user(id)
-POST    /users                                  org.biobank.controllers.UsersController.registerUser
-POST    /users/name/:id                         org.biobank.controllers.UsersController.updateName(id)
-POST    /users/email/:id                        org.biobank.controllers.UsersController.updateEmail(id)
-POST    /users/password/:id                     org.biobank.controllers.UsersController.updatePassword(id)
-POST    /users/avatarurl/:id                    org.biobank.controllers.UsersController.updateAvatarUrl(id)
-POST    /users/activate/:id                     org.biobank.controllers.UsersController.activateUser(id)
-POST    /users/lock/:id                         org.biobank.controllers.UsersController.lockUser(id)
-POST    /users/unlock/:id                       org.biobank.controllers.UsersController.unlockUser(id)
+GET     /users/counts                           org.biobank.controllers.users.UsersController.userCounts()
+GET     /users                                  org.biobank.controllers.users.UsersController.list(nameFilter: Option[String], emailFilter: Option[String], status: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
+GET     /users/:id                              org.biobank.controllers.users.UsersController.user(id)
+POST    /users                                  org.biobank.controllers.users.UsersController.registerUser
+POST    /users/name/:id                         org.biobank.controllers.users.UsersController.updateName(id)
+POST    /users/email/:id                        org.biobank.controllers.users.UsersController.updateEmail(id)
+POST    /users/password/:id                     org.biobank.controllers.users.UsersController.updatePassword(id)
+POST    /users/avatarurl/:id                    org.biobank.controllers.users.UsersController.updateAvatarUrl(id)
+POST    /users/activate/:id                     org.biobank.controllers.users.UsersController.activateUser(id)
+POST    /users/lock/:id                         org.biobank.controllers.users.UsersController.lockUser(id)
+POST    /users/unlock/:id                       org.biobank.controllers.users.UsersController.unlockUser(id)
 
-GET     /users/studies/:id                      org.biobank.controllers.UsersController.userStudies(id, query: Option[String], sort: Option[String], order: Option[String])
+GET     /users/studies/:id                      org.biobank.controllers.users.UsersController.userStudies(id, query: Option[String], sort: Option[String], order: Option[String])
 
 #
 # --- AUTHENTICATION ---
 #
-GET     /authenticate                           org.biobank.controllers.UsersController.authenticateUser
-POST    /login                                  org.biobank.controllers.UsersController.login
-POST    /logout                                 org.biobank.controllers.UsersController.logout
-POST    /passreset                              org.biobank.controllers.UsersController.passwordReset
+GET     /authenticate                           org.biobank.controllers.users.UsersController.authenticateUser
+POST    /login                                  org.biobank.controllers.users.UsersController.login
+POST    /logout                                 org.biobank.controllers.users.UsersController.logout
+POST    /passreset                              org.biobank.controllers.users.UsersController.passwordReset
 
 #
 # --- DTOs ---
