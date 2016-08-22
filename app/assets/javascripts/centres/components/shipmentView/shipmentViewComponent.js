@@ -10,15 +10,12 @@ define(function (require) {
     controller: ShipmentViewController,
     controllerAs: 'vm',
     bindings: {
-      shipmentId: '<'
+      shipment: '<'
     }
   };
 
   ShipmentViewController.$inject = [
     '$state',
-    'Shipment',
-    'ShipmentState',
-    'shipmentProgressItems',
     'modalInput',
     'notificationsService',
     'timeService'
@@ -28,26 +25,14 @@ define(function (require) {
    *
    */
   function ShipmentViewController($state,
-                                  Shipment,
-                                  ShipmentState,
-                                  shipmentProgressItems,
                                   modalInput,
                                   notificationsService,
                                   timeService) {
     var vm = this;
 
-    vm.$onInit = onInit;
     vm.sendShipment = sendShipment;
 
-    vm.shipment = null;
-
     //--
-
-    function onInit() {
-      Shipment.get(vm.shipmentId).then(function (shipment) {
-        vm.shipment = shipment;
-       });
-    }
 
     function sendShipment() {
       return modalInput.dateTime('Date and time shipment was sent',

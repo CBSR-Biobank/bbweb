@@ -18,6 +18,5 @@ define(function () {
     LOST:     'Lost'
   };
 
-
   return ShipmentState;
 });

@@ -2,8 +2,10 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function (_) {
+define(function (require) {
   'use strict';
+
+  var _ = require('lodash');
 
   var component = {
     templateUrl : '/assets/javascripts/centres/components/shipmentAddItems/shipmentAddItems.html',

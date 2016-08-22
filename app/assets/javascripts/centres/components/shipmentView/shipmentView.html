@@ -1,6 +1,7 @@
 <div ng-switch="vm.shipment.state">
-  <shipment-view-packed ng-switch-when="Packed" shipment="vm.shipment"></shipment-view-packed>
-  <shipment-view-sent   ng-switch-when="Sent"   shipment="vm.shipment"></shipment-view-sent>
+  <shipment-view-packed ng-switch-when="Packed"   shipment="vm.shipment"></shipment-view-packed>
+  <shipment-view-sent   ng-switch-when="Sent"     shipment="vm.shipment"></shipment-view-sent>
+  <shipment-view-sent   ng-switch-when="Received" shipment="vm.shipment"></shipment-view-received>
 </div>
 <shipping-info-view
    shipment="vm.shipment"

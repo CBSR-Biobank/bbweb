@@ -432,12 +432,20 @@ define(function (require) {
       return this.update.call(this, uri('lost', this.id), {});
     };
 
+    Shipment.prototype.isCreated = function () {
+      return this.state === ShipmentState.CREATED;
+    };
+
     Shipment.prototype.isPacked = function () {
       return this.state === ShipmentState.PACKED;
     };
 
     Shipment.prototype.isSent = function () {
       return this.state === ShipmentState.SENT;
+    };
+
+    Shipment.prototype.isNotCreatedOrUnpacked = function () {
+      return (this.state !== ShipmentState.PACKED) && (this.state !== ShipmentState.PACKED);
     };
 
     function uri(/* path, shipmentId */) {

@@ -88,17 +88,20 @@ define(function () {
 
     $stateProvider.state('home.shipping.shipment', {
       url: '/{shipmentId}',
+      resolve: {
+        shipment: resolveShipment
+      },
       views: {
         'main@': {
-          template: '<shipment-view shipment-id="vm.shipmentId"></shipment-view>',
-          controller: [ '$stateParams', function ($stateParams) {
-            this.shipmentId = $stateParams.shipmentId;
+          template: '<shipment-view shipment="vm.shipment"></shipment-view>',
+          controller: [ 'shipment', function (shipment) {
+            this.shipment = shipment;
           }],
           controllerAs: 'vm'
         }
       },
       data: {
-        displayName: 'Packed'
+        displayName: 'Shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
       }
     });
 

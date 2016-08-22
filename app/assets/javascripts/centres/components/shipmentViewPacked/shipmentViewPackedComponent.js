@@ -5,12 +5,14 @@
 define(function (require) {
   'use strict';
 
+  var _ = require('lodash');
+
   var component = {
     templateUrl : '/assets/javascripts/centres/components/shipmentViewPacked/shipmentViewPacked.html',
     controller: ShipmentViewPackedController,
     controllerAs: 'vm',
     bindings: {
-      shipmentId: '<'
+      shipment: '<'
     }
   };
 
@@ -39,18 +41,20 @@ define(function (require) {
     };
 
     function sendShipment() {
+      if (_.isUndefined(vm.timeSent)) {
+        vm.timeSent = new Date();
+      }
       return modalInput.dateTime('Date and time shipment was sent',
                                  'Time sent',
                                  vm.timeSent,
-                                 { required: true })
-        .result
+                                 { required: true }).result
         .then(function (timeSent) {
-          return vm.shipment.sent(timeService.dateToUtcString(timeSent));
-        })
-        .then(function (shipment) {
-          return $state.go('home.shipping');
-        })
-        .catch(notificationsService.updateError);
+          return vm.shipment.sent(timeService.dateToUtcString(timeSent))
+            .then(function (shipment) {
+              return $state.go('home.shipping');
+            })
+            .catch(notificationsService.updateError);
+        });
     }
   }
 

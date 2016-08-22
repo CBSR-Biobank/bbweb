@@ -8,15 +8,15 @@ define(function (require) {
   var _ = require('lodash');
 
   var component = {
-    templateUrl : '/assets/javascripts/centres/components/shipmentViewSent/shipmentViewSent.html',
-    controller: ShipmentViewSentController,
+    templateUrl : '/assets/javascripts/centres/components/shipmentViewReceived/shipmentViewReceived.html',
+    controller: ShipmentViewReceivedController,
     controllerAs: 'vm',
     bindings: {
       shipmentId: '<'
     }
   };
 
-  ShipmentViewSentController.$inject = [
+  ShipmentViewReceivedController.$inject = [
     '$state',
     'modalInput',
     'notificationsService',
@@ -26,25 +26,25 @@ define(function (require) {
   /**
    *
    */
-  function ShipmentViewSentController($state,
-                                      modalInput,
-                                      notificationsService,
-                                      timeService) {
+  function ShipmentViewReceivedController($state,
+                                          modalInput,
+                                          notificationsService,
+                                          timeService) {
     var vm = this;
 
     vm.receiveShipment = receiveShipment;
 
     function receiveShipment() {
-      if (_.isUndefined(vm.timeReceived)) {
-        vm.timeReceived = new Date();
+      if (_.isUndefined(vm.timeUnpacked)) {
+        vm.timeUnpacked = new Date();
       }
-      return modalInput.dateTime('Date and time shipment was received',
+      return modalInput.dateTime('Date and time shipment was unpacked',
                                  'Time received',
-                                 vm.timeReceived,
+                                 vm.timeUnpacked,
                                  { required: true })
         .result
-        .then(function (timeReceived) {
-          return vm.shipment.received(timeService.dateToUtcString(timeReceived));
+        .then(function (timeUnpacked) {
+          return vm.shipment.received(timeService.dateToUtcString(timeUnpacked));
         })
         .then(function (shipment) {
           return $state.go('home.shipping');
