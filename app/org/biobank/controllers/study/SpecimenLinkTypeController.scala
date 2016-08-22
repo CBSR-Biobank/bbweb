@@ -6,6 +6,7 @@ import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service.AuthToken
 import org.biobank.service.study.StudiesService
 import org.biobank.service.users.UsersService
+import play.api.Logger
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
 
@@ -17,9 +18,11 @@ class SpecimenLinkTypeController @Inject() (val env:            Environment,
     extends CommandController
     with JsonController {
 
+  val log = Logger(this.getClass)
+
   def get(processingTypeId: String, slTypeId: Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      Logger.debug(s"SpecimenLinkTypeController.get: processingTypeId: $processingTypeId, slTypeId: $slTypeId")
+      log.debug(s"SpecimenLinkTypeController.get: processingTypeId: $processingTypeId, slTypeId: $slTypeId")
 
       slTypeId.fold {
         validationReply(

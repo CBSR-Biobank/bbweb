@@ -25,6 +25,8 @@ class ShipmentsController @Inject() (val env:              Environment,
   import org.biobank.infrastructure.command.ShipmentCommands._
   import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
 
+  val log = Logger(this.getClass)
+
   private val PageSizeMax = 10
 
   def list(centreId:                  String,
@@ -45,7 +47,7 @@ class ShipmentsController @Inject() (val env:              Environment,
       val pageSize             = pageSizeMaybe.fold { 5 } { ps              => ps }
       val order                = orderMaybe.fold { "asc" } { o              => o }
 
-      Logger.debug(
+      log.debug(
         s"""|ShipmentsController:list: courierFilter/$courierFilter, trackingNumberFilter/$trackingNumberFilter,
             |  stateFilter/$stateFilter, sort/$sort, page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
@@ -86,7 +88,7 @@ class ShipmentsController @Inject() (val env:              Environment,
       val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
       val order    = orderMaybe.fold { "asc" } { o => o }
 
-      Logger.debug(s"""|ShipmentsController:listSpecimens: shipmentId/$shipmentId, sort/$sort,
+      log.debug(s"""|ShipmentsController:listSpecimens: shipmentId/$shipmentId, sort/$sort,
                        |  page/$page,pageSize/$pageSize, order/$order""".stripMargin)
 
       val pagedQuery = PagedQuery(page, pageSize, order)

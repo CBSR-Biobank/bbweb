@@ -8,12 +8,10 @@ import org.biobank.service.users.UsersService
 import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
 import play.api.Logger
 import play.api.cache.CacheApi
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.{Environment, Logger}
-import scala.concurrent.Future
 import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -28,7 +26,7 @@ class UsersController @Inject() (val env:            Environment,
     extends CommandController
     with JsonController {
 
-  val log = Logger(this.getClass())
+  val log = Logger(this.getClass)
 
   private val PageSizeMax = 20
 
@@ -126,9 +124,9 @@ class UsersController @Inject() (val env:            Environment,
       val pageSize    = pageSizeMaybe.fold { 5 } { ps => ps }
       val order       = orderMaybe.fold { "asc" } { o => o }
 
-      log.debug(s"""|UsersController:list: nameFilter/$nameFilter, emailFilter/$emailFilter,
-                       |  status/$status, sort/$sort, page/$page, pageSize/$pageSize,
-                       |  order/$order""".stripMargin)
+      log.debug(
+        s"""|UsersController:list: nameFilter/$nameFilter, emailFilter/$emailFilter,
+            |  status/$status, sort/$sort, page/$page, pageSize/$pageSize,  order/$order""".stripMargin)
 
 
       val pagedQuery = PagedQuery(page, pageSize, order)
@@ -153,35 +151,10 @@ class UsersController @Inject() (val env:            Environment,
     validationReply(usersService.getUser(id))
   }
 
-  private def processCommand(cmd: UserCommand) = {
-    val future = usersService.processCommand(cmd)
-    validationReply(future)
-  }
-
-  def registerUser() = Action.async(parse.json) { implicit request =>
-    request.body.validate[RegisterUserCmd].fold(
-      errors => {
-        Future.successful(BadRequest(JsError.toJson(errors)))
-      },
-      cmd => {
-        log.debug(s"addUser: cmd: $cmd")
-        val future = usersService.processCommand(cmd)
-        future.map { validation =>
-          validation.fold(
-            err   => {
-              val errs = err.list.toList.mkString(", ")
-              if (errs.contains("exists")) {
-                Forbidden("already registered")
-              } else {
-                BadRequest(errs)
-              }
-            },
-            user => Ok(user)
-          )
-        }
-      }
-    )
-  }
+  def registerUser() =
+    commandActionAsync { cmd: RegisterUserCmd =>
+      processCommand(cmd)
+    }
 
   def updateName(id: String) =
     commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserNameCmd =>
@@ -226,4 +199,9 @@ class UsersController @Inject() (val env:            Environment,
       val studies = studiesService.getStudyCount
       Ok(studies)
     }
+
+
+  private def processCommand(cmd: UserCommand) = {
+    validationReply(usersService.processCommand(cmd))
+  }
 }

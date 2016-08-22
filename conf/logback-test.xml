@@ -16,12 +16,10 @@
     </encoder>
   </appender>
 
-  <logger name="org.biobank" level="INFO" />
   <logger name="org.biobank.domain" level="INFO" />
   <logger name="org.biobank.service" level="INFO" />
-  <logger name="org.biobank.controllers.UsersController" level="INFO" />
-  <logger name="org.biobank.controllers.JsonController" level="DEBUG" />
   <logger name="org.biobank.fixture" level="INFO" />
+  <logger name="org.biobank" level="INFO" />
 
   <logger name="application" level="WARN" />
   <logger name="akka.event.slf4j" level="WARN" />

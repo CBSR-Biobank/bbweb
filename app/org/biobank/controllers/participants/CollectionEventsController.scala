@@ -21,6 +21,8 @@ class CollectionEventsController @Inject() (val env:          Environment,
     extends CommandController
     with JsonController {
 
+  val log = Logger(this.getClass)
+
   private val PageSizeMax = 10
 
   def get(ceventId: String) =
@@ -40,8 +42,8 @@ class CollectionEventsController @Inject() (val env:          Environment,
       val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
       val order    = orderMaybe.fold { "asc" } { o => o }
 
-      Logger.debug(s"""|CollectionEventsController:list: participantId/$participantId,
-                       |  sort/$sort, page/$page, pageSize/$pageSize, order/$order""".stripMargin)
+      log.debug(s"""|CollectionEventsController:list: participantId/$participantId,
+                    |  sort/$sort, page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
       val pagedQuery = PagedQuery(page, pageSize, order)
 

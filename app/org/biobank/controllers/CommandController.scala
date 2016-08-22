@@ -4,7 +4,6 @@ import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.command.Commands._
 import org.biobank.service.users.UsersService
 import org.biobank.service.{AuthToken, ServiceValidation}
-import play.api.Logger
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json._
 import play.api.mvc._
@@ -19,7 +18,7 @@ trait CommandController extends Controller with Security {
 
   implicit val usersService: UsersService
 
-  private def commandFromJson(json: JsValue, jsonExtra: JsValue, userId: UserId): JsObject = {
+  def commandFromJson(json: JsValue, jsonExtra: JsValue, userId: UserId): JsObject = {
     val result = Json.obj("userId" -> userId.id) ++ json.as[JsObject]
     if (jsonExtra == JsNull) result
     else result ++ jsonExtra.as[JsObject]
@@ -59,8 +58,6 @@ trait CommandController extends Controller with Security {
 @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Nothing"))
 trait JsonController extends Controller {
 
-  private val log: Logger = Logger(this.getClass)
-
   def errorReplyJson(message: String) = Json.obj("status" -> "error", "message" -> message)
 
   override val BadRequest = new Status(Http.Status.BAD_REQUEST) {
@@ -90,7 +87,6 @@ trait JsonController extends Controller {
                                (implicit writes: Writes[T]): Result = {
     validation.fold(
       err => {
-        log.trace("*** ERROR ***: " + err.list.toList.mkString(", "))
         val errMsgs = err.list.toList.mkString(", ")
         if (("IdNotFound".r.findAllIn(errMsgs).length > 0)
               || ("not found".r.findAllIn(errMsgs).length > 0)
@@ -104,7 +100,6 @@ trait JsonController extends Controller {
         }
       },
       reply => {
-        log.trace(s"validationReply: $reply")
         Ok(reply)
       }
     )

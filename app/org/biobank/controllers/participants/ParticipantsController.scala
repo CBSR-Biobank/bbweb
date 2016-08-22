@@ -18,15 +18,17 @@ class ParticipantsController @Inject() (val env:            Environment,
     extends CommandController
     with JsonController {
 
+  val log = Logger(this.getClass)
+
   def get(studyId: String, participantId: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      Logger.debug(s"ParticipantsController.get: studyId: $studyId, participantId: $participantId")
+      log.debug(s"ParticipantsController.get: studyId: $studyId, participantId: $participantId")
       validationReply(participantsService.get(studyId, participantId))
     }
 
   def getByUniqueId(studyId: String, uniqueId: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      Logger.debug(s"ParticipantsController.getByUniqueId: studyId: $studyId, uniqueId: $uniqueId")
+      log.debug(s"ParticipantsController.getByUniqueId: studyId: $studyId, uniqueId: $uniqueId")
       validationReply(participantsService.getByUniqueId(studyId, uniqueId))
     }
 
@@ -49,8 +51,7 @@ class ParticipantsController @Inject() (val env:            Environment,
     }
 
   private def processCommand(cmd: ParticipantCommand) = {
-    val future = participantsService.processCommand(cmd)
-    validationReply(future)
+    validationReply(participantsService.processCommand(cmd))
   }
 
 }

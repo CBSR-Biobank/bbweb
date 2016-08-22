@@ -21,6 +21,8 @@ class SpecimensController @Inject() (val env:          Environment,
     with JsonController {
   import org.biobank.infrastructure.command.SpecimenCommands._
 
+  val log = Logger(this.getClass)
+
   private val PageSizeMax = 10
 
   /**
@@ -48,8 +50,8 @@ class SpecimensController @Inject() (val env:          Environment,
       val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
       val order    = orderMaybe.fold { "asc" } { o => o }
 
-      Logger.debug(s"""|SpecimensController:list: ceventId/$ceventId, sort/$sort,
-                       |  page/$page, pageSize/$pageSize, order/$order""".stripMargin)
+      log.debug(s"""|SpecimensController:list: ceventId/$ceventId, sort/$sort,
+                    |  page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
       val pagedQuery = PagedQuery(page, pageSize, order)
 

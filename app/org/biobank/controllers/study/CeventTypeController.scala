@@ -6,6 +6,7 @@ import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.service.AuthToken
 import org.biobank.service.study.StudiesService
 import org.biobank.service.users.UsersService
+import play.api.Logger
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
 
@@ -17,9 +18,11 @@ class CeventTypeController @Inject() (val env:            Environment,
     extends CommandController
     with JsonController {
 
+  val log = Logger(this.getClass)
+
   def get(studyId: String, ceventTypeId: Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
-      Logger.debug(s"CeventTypeController.list: studyId: $studyId, ceventTypeId: $ceventTypeId")
+      log.debug(s"CeventTypeController.list: studyId: $studyId, ceventTypeId: $ceventTypeId")
 
       ceventTypeId.fold {
         validationReply(studiesService.collectionEventTypesForStudy(studyId).map(_.toList))

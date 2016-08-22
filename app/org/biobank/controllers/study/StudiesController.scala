@@ -9,6 +9,7 @@ import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
 import org.biobank.service.study.StudiesService
 import org.biobank.service.users.UsersService
+import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.{ Environment, Logger }
@@ -26,6 +27,8 @@ class StudiesController @Inject() (val env:            Environment,
                                    val studiesService: StudiesService)
     extends CommandController
     with JsonController {
+
+  val log = Logger(this.getClass)
 
   private val PageSizeMax = 10
 
@@ -49,8 +52,8 @@ class StudiesController @Inject() (val env:            Environment,
       val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
       val order    = orderMaybe.fold { "asc" } { o => o }
 
-      Logger.debug(s"""|StudiesController:list: filter/$filter, status/$status, sort/$sort,
-                       |  page/$page, pageSize/$pageSize, order/$order""".stripMargin)
+      log.debug(s"""|StudiesController:list: filter/$filter, status/$status, sort/$sort,
+                    |  page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
       val pagedQuery = PagedQuery(page, pageSize, order)
 

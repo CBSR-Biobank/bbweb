@@ -29,18 +29,18 @@ class ProcessingTypeController @Inject() (val env:            Environment,
   def addProcessingType(studyId: String) =
     commandActionAsync(Json.obj("studyId" -> studyId)) { cmd: AddProcessingTypeCmd =>
       processCommand(cmd)
-  }
+    }
 
   def updateProcessingType(studyId: String, id: String) =
     commandActionAsync(Json.obj("studyId" -> studyId, "id" -> id)) { cmd: UpdateProcessingTypeCmd =>
       processCommand(cmd)
-  }
+    }
 
   def removeProcessingType(studyId: String, id: String, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveProcessingTypeCmd(Some(userId.id), studyId, id, ver)
-    val future = studiesService.processRemoveProcessingTypeCommand(cmd)
-    validationReply(future)
+      val future = studiesService.processRemoveProcessingTypeCommand(cmd)
+      validationReply(future)
     }
 
   private def processCommand(cmd: StudyCommand) = {

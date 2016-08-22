@@ -26,6 +26,8 @@ class CentresController @Inject() (val env:            Environment,
     extends CommandController
     with JsonController {
 
+  val log = Logger(this.getClass)
+
   private val PageSizeMax = 10
 
   def centreCounts() =
@@ -48,8 +50,8 @@ class CentresController @Inject() (val env:            Environment,
       val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
       val order    = orderMaybe.fold { "asc" } { o => o }
 
-      Logger.debug(s"""|CentresController:list: filter/$filter, status/$status, sort/$sort,
-                       | page/$page, pageSize/$pageSize, order/$order""".stripMargin)
+      log.debug(s"""|CentresController:list: filter/$filter, status/$status, sort/$sort,
+                    | page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
       val pagedQuery = PagedQuery(page, pageSize, order)
 

@@ -465,7 +465,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
         matcher(item)
       }
 
-    if (exists)  EmailNotAvailable(s"user with email already exists: $email").failureNel[Boolean]
+    if (exists) EmailNotAvailable(s"user with email already exists: $email").failureNel[Boolean]
     else true.successNel[String]
   }
 
