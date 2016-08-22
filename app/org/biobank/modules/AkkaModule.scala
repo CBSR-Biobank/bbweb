@@ -1,7 +1,7 @@
 package org.biobank.modules
 
 import org.biobank.service.centres._
-import org.biobank.service.study._
+import org.biobank.service.studies._
 import org.biobank.service.participants._
 import org.biobank.service.users._
 

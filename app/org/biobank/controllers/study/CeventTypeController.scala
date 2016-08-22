@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.service.AuthToken
-import org.biobank.service.study.StudiesService
+import org.biobank.service.studies.StudiesService
 import org.biobank.service.users.UsersService
 import play.api.Logger
 import play.api.libs.json._

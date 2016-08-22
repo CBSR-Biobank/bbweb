@@ -1,4 +1,4 @@
-package org.biobank.service.study
+package org.biobank.service.studies
 
 import akka.actor._
 import akka.persistence.SnapshotOffer

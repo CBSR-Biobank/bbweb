@@ -4,7 +4,7 @@
 // import org.biobank.controllers._
 // import org.biobank.service._
 // import org.biobank.service.users.UsersService
-// import org.biobank.service.study.StudiesService
+// import org.biobank.service.studies.StudiesService
 // import org.biobank.infrastructure.command.StudyCommands._
 
 // import javax.inject.{Inject => javaxInject, Singleton}

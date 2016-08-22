@@ -7,7 +7,7 @@ import org.biobank.domain.study._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
-import org.biobank.service.study.StudiesService
+import org.biobank.service.studies.StudiesService
 import org.biobank.service.users.UsersService
 import play.api.Logger
 import play.api.libs.json._

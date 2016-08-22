@@ -1,4 +1,4 @@
-// package org.biobank.service.study
+// package org.biobank.service.studies
 
 // import org.biobank.infrastructure.command.StudyCommands._
 // import org.biobank.infrastructure.event.StudyEvents._
