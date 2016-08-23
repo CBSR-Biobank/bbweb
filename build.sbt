@@ -108,6 +108,7 @@ libraryDependencies ++= Seq(
   "org.webjars"                 %  "tv4"                                 % "1.0.17-1",
   "org.webjars.bower"           %  "angular-utils-ui-breadcrumbs"        % "0.2.2",
   "org.webjars.bower"           %  "bootstrap-ui-datetime-picker"        % "2.4.3",
+  "org.webjars.bower"           %  "angular-gettext"                     % "2.2.1",
   // Testing
   "com.github.dnvriend"         %% "akka-persistence-inmemory"           % "1.3.5"              % "test",
   "com.typesafe.akka"           %% "akka-testkit"                        % "2.4.8"              % "test",

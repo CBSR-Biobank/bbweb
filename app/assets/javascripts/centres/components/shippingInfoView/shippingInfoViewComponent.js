@@ -20,34 +20,40 @@ define(function (require) {
 
   ShippingInfoViewController.$inject = [
     '$filter',
+    'gettext',
     'Centre',
     'shipmentProgressItems',
     'modalInput',
-    'notificationsService'
+    'notificationsService',
+    'centreLocationsModalService'
   ];
 
   /**
    *
    */
   function ShippingInfoViewController($filter,
+                                      gettext,
                                       Centre,
                                       shipmentProgressItems,
                                       modalInput,
-                                      notificationsService) {
+                                      notificationsService,
+                                      centreLocationsModalService) {
     var vm = this;
 
     vm.notificationTimeout = 1500;
     vm.panelOpen = true;
 
-    vm.$onInit            = onInit;
+    vm.$onChanges         = onChanges;
     vm.panelButtonClicked = panelButtonClicked;
 
 
     //--
 
-    function onInit() {
-      commonDisplayProperties();
-      displayPropertiesByState();
+    function onChanges(changesObj) {
+      if (changesObj.shipment && vm.shipment) {
+        commonDisplayProperties();
+        displayPropertiesByState();
+      }
     }
 
     function commonDisplayProperties() {
@@ -139,57 +145,43 @@ define(function (require) {
                       { required: true, minLength: 2 })
         .result.then(function (tn) {
           vm.shipment.updateTrackingNumber(tn)
-            .then(postUpdate('Tracking number changed successfully.', 'Change successful'))
+            .then(postUpdate(gettext('Tracking number changed successfully.', 'Change successful')))
             .catch(notificationsService.updateError);
         });
     }
 
     function editFromLocation() {
-      editLocation('Update from centre',
-                   'From centre',
-                   vm.shipment.fromLocationInfo.name,
-                   vm.shipment.toLocationInfo.name,
-                   'From location changed successfully.');
+      centreLocationsModalService.open(
+        gettext('Update from centre'),
+        gettext('From centre'),
+        gettext('The location of the centre this shipment is coming from'),
+        vm.shipment.fromLocationInfo,
+        [ vm.shipment.toLocationInfo ]
+      ).result.then(function (selection) {
+        if (selection) {
+          vm.shipment.updateFromLocation(selection.locationId)
+            .then(postUpdate(gettext('From location changed successfully.'),
+                             gettext('Change successful')))
+            .catch(notificationsService.updateError);
+        }
+      });
     }
 
     function editToLocation() {
-      editLocation('Update to centre',
-                   'To centre',
-                   vm.shipment.toLocationInfo.name,
-                   vm.shipment.fromLocationInfo.name,
-                   'To location changed successfully.');
-    }
-
-    function editLocation(title,
-                          label,
-                          defaultValue,
-                          locationNameToOmit,
-                          notificationMessage) {
-      return Centre.allLocations()
-        .then(Centre.centreLocationToNames)
-        .then(function (centreLocations) {
-          return _.keyBy(centreLocations, 'name');
-        })
-        .then(function (centreLocationsByName) {
-          var validLocationNames = _(centreLocationsByName).omit([ locationNameToOmit ]).keys().value();
-          modalInput.select(title,
-                            label,
-                            defaultValue,
-                            { required: true, selectOptions: validLocationNames }).result
-            .then(function (selection) {
-              if (selection) {
-                var centreLocation = centreLocationsByName[selection];
-
-                if (!centreLocation) {
-                  throw new Error('centre location lookup by name failed: ' + selection);
-                }
-
-                vm.shipment.updateFromLocation(centreLocation.locationId)
-                  .then(postUpdate(notificationMessage, 'Change successful'))
-                  .catch(notificationsService.updateError);
-              }
-            });
-        });
+      centreLocationsModalService.open(
+        gettext('Update to centre'),
+        gettext('To centre'),
+        gettext('The location of the centre this shipment is going to'),
+        vm.shipment.toLocationInfo,
+        [ vm.shipment.fromLocationInfo ]
+      ).result.then(function (selection) {
+        if (selection) {
+          vm.shipment.updateToLocation(selection.locationId)
+            .then(postUpdate(gettext('To location changed successfully.'),
+                             gettext('Change successful')))
+            .catch(notificationsService.updateError);
+        }
+      });
     }
 
   }

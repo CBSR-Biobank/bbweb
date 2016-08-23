@@ -36,6 +36,7 @@ define(function(require) {
   require('smart-table');
   require('angular-utils-ui-breadcrumbs');
   require('bootstrap-ui-datetime-picker');
+  require('angular-gettext');
 
   // We must already declare most dependencies here (except for common), or the submodules' routes
   // will not be resolved
@@ -48,6 +49,7 @@ define(function(require) {
     'smart-table',
     'angularUtils.directives.uiBreadcrumbs',
     'ui.bootstrap.datetimepicker',
+    'gettext',
     admin.name,
     centres.name,
     common.name,
@@ -61,6 +63,10 @@ define(function(require) {
 
   // For debugging
   //
+  app.run(function (gettextCatalog) {
+    gettextCatalog.debug = true;
+    gettextCatalog.currentLanguage = 'en';
+  });
   app.run(debugFunc);
   app.constant('bbwebConfig',
                {

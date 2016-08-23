@@ -33,5 +33,8 @@ define(function (require) {
 
   module.service('centreStatusLabel', require('./services/centreStatusLabelService'));
 
+  module.service('centreLocationsModalService',
+                 require('./services/centreLocationsModal/centreLocationsModalService'));
+
   return module;
 });

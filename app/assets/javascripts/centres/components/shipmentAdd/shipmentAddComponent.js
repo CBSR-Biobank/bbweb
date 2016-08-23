@@ -37,7 +37,6 @@ define(['lodash'], function (_) {
       current: 1
     };
 
-    vm.centreLocationsByName    = [];
     vm.hasValidCentres          = false;
     vm.shipment                 = new Shipment();
     vm.selectedFromLocationInfo = undefined;
@@ -52,25 +51,13 @@ define(['lodash'], function (_) {
 
     function onInit() {
       return Centre.locationsSearch('').then(function (results) {
-        vm.centreLocationsByName = _.keyBy(results, 'name');
         vm.hasValidCentres = (results.length > 1);
       });
     }
 
     function submit(specimenSpec) {
-      var fromLocation = vm.centreLocationsByName[vm.selectedFromLocationInfo],
-          toLocation = vm.centreLocationsByName[vm.selectedToLocationInfo];
-
-      if (!fromLocation) {
-        throw new Error('could not determine from location: ' + vm.selectedFromLocationInfo);
-      }
-
-      if (!toLocation) {
-        throw new Error('could not determine from location: ' + vm.selectedFromLocationInfo);
-      }
-
-      vm.shipment.fromLocationInfo = { locationId: fromLocation.locationId };
-      vm.shipment.toLocationInfo = { locationId: toLocation.locationId };
+      vm.shipment.fromLocationInfo = { locationId: vm.selectedFromLocationInfo.locationId };
+      vm.shipment.toLocationInfo = { locationId: vm.selectedToLocationInfo.locationId };
       vm.shipment.add().then(onAddSuccessful).catch(onAddFailed);
 
       function onAddSuccessful(shipment) {

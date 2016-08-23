@@ -61,6 +61,27 @@ module.exports = function(grunt) {
         jshintrc: '.jshintrc',
         reporter: './node_modules/grunt-contrib-jshint/node_modules/jshint/src/reporters/unix'
       }
+    },
+
+    nggettext_extract: {
+      pot: {
+        files: {
+          'po/template.pot': ['app/assets/javascripts/**/*.html', 'app/assets/javascripts/**/*.js']
+        }
+      },
+    },
+
+    nggettext_compile: {
+      all: {
+        options: {
+          module: 'biobankApp',
+          requirejs: true,
+          jshintIgnore: true
+        },
+        files: {
+          'app/assets/javascripts/translations.js': ['po/*.po']
+        }
+      },
     }
 
     // ngAnnotate: {
@@ -104,6 +125,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-ngdocs');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-jsdoc');
+  grunt.loadNpmTasks('grunt-angular-gettext');
 
   // grunt.registerTask('test', 'Run tests on singleRun karma server', function () {
   //   if (grunt.option('coverage')) {

@@ -70,8 +70,8 @@
              type="text"
              class="form-control"
              ng-model="vm.selectedFromLocationInfo"
-             placeholder="The location of the centre ndthis shipment is coming from"
-             uib-typeahead="centreLocationInfo.name for centreLocationInfo in
+             placeholder="The location of the centre this shipment is coming from"
+             uib-typeahead="locationInfo as locationInfo.name for locationInfo in
                             vm.getCentreLocationInfo($viewValue)"
              typeahead-editable="false"
              required />
@@ -92,8 +92,8 @@
              type="text"
              class="form-control"
              ng-model="vm.selectedToLocationInfo"
-             placeholder="The location of the centre this shipment is going tocomma"
-             uib-typeahead="centreLocationInfo.name for centreLocationInfo in
+             placeholder="The location of the centre this shipment is going to"
+             uib-typeahead="locationInfo as locationInfo.name for locationInfo in
                             vm.getCentreLocationInfo($viewValue)"
              typeahead-editable="false"
              required />

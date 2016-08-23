@@ -445,7 +445,7 @@ define(function (require) {
     };
 
     Shipment.prototype.isNotCreatedOrUnpacked = function () {
-      return (this.state !== ShipmentState.PACKED) && (this.state !== ShipmentState.PACKED);
+      return (this.state !== ShipmentState.CREATED) && (this.state !== ShipmentState.UNPACKED);
     };
 
     function uri(/* path, shipmentId */) {

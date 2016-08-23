@@ -40,3 +40,5 @@ email.conf
 .worksheet/
 .chrome/
 documentation/js/
+/app/assets/javascripts/translations.js
+/po

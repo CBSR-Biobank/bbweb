@@ -51,7 +51,8 @@
       'smart-table':                  '../lib/smart-table/smart-table',
       'sprintf':                      '../lib/sprintf.js/sprintf.min',
       'tv4':                          '../lib/tv4/tv4',
-      'bootstrap-ui-datetime-picker': '../lib/bootstrap-ui-datetime-picker/dist/datetime-picker'
+      'bootstrap-ui-datetime-picker': '../lib/bootstrap-ui-datetime-picker/dist/datetime-picker',
+      'angular-gettext':              '../lib/angular-gettext/dist/angular-gettext'
     },
 
     shim: {
@@ -70,7 +71,8 @@
       'angular-utils-ui-breadcrumbs': ['angular'],
       'smart-table':                  ['angular'],
       'ui-bootstrap':                 ['angular'],
-      'bootstrap-ui-datetime-picker': ['angular']
+      'bootstrap-ui-datetime-picker': ['angular'],
+      'angular-gettext':              ['angular']
     }
   });
 

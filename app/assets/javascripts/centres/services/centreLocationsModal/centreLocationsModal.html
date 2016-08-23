@@ -1,0 +1,38 @@
+<div class="modal-header">
+  <button type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-hidden="true"
+          ng-click="vm.closePressed()">&times;</button>
+  <h3 class="modal-title">{{vm.heading}}</h3>
+</div>
+<div class="modal-body" ng-switch="vm.type">
+  <form class="form-horiontal" name="form" novalidate>
+    <div class="form-group row">
+      <label for="value" class="col-md-3 form-control-label">{{vm.label}}:</label>
+      <div class="col-md-9">
+        <input name="fromCentreLocation"
+               type="text"
+               class="form-control"
+               ng-model="vm.locationInfo"
+               placeholder="{{vm.placeholder}}"
+               uib-typeahead="locationInfo as locationInfo.name for locationInfo in
+                              vm.getCentreLocationInfo($viewValue)"
+               typeahead-editable="false"
+               autocomplete="off"
+               required />
+      <div class="col-md-offset-3 col-md-9"
+           ng-messages="form.value.$error"
+           ng-if="form.value.$dirty"
+           role="alert">
+        <div ng-message="required" class="help-block" translate>A centre must be selected</div>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button class="btn" ng-click="vm.closePressed()" translate>Cancel</button>
+  <button class="btn btn-primary"
+          ng-click="vm.okPressed()"
+          ng-disabled="form.$invalid" translate>OK</button>
+</div>
