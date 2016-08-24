@@ -18,6 +18,7 @@ define(function (require) {
 
   ShipmentViewPackedController.$inject = [
     '$state',
+    'gettext',
     'shipmentProgressItems',
     'modalInput',
     'notificationsService',
@@ -28,6 +29,7 @@ define(function (require) {
    *
    */
   function ShipmentViewPackedController($state,
+                                        gettext,
                                         shipmentProgressItems,
                                         modalInput,
                                         notificationsService,
@@ -44,8 +46,8 @@ define(function (require) {
       if (_.isUndefined(vm.timeSent)) {
         vm.timeSent = new Date();
       }
-      return modalInput.dateTime('Date and time shipment was sent',
-                                 'Time sent',
+      return modalInput.dateTime(gettext('Date and time shipment was sent'),
+                                 gettext('Time sent'),
                                  vm.timeSent,
                                  { required: true }).result
         .then(function (timeSent) {

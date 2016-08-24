@@ -64,8 +64,10 @@ define(function(require) {
   // For debugging
   //
   app.run(function (gettextCatalog) {
+    gettextCatalog.currentLanguage = 'fr';
+  });
+  app.run(function (gettextCatalog) {
     gettextCatalog.debug = true;
-    gettextCatalog.currentLanguage = 'en';
   });
   app.run(debugFunc);
   app.constant('bbwebConfig',

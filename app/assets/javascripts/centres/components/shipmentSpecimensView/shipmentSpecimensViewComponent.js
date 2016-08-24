@@ -18,6 +18,8 @@ define(function (require) {
 
   ShipmentSpecimensViewController.$inject = [
     '$log',
+    'gettext',
+    'gettextCatalog',
     'modalService',
     'modalInput',
     'domainEntityService',
@@ -31,6 +33,8 @@ define(function (require) {
    *
    */
   function ShipmentSpecimensViewController($log,
+                                           gettext,
+                                           gettextCatalog,
                                            modalService,
                                            modalInput,
                                            domainEntityService,
@@ -55,8 +59,8 @@ define(function (require) {
     }
 
     function addSpecimen() {
-      modalInput.text('Add specimen to ship',
-                      'Inventory ID',
+      modalInput.text(gettext('Add specimen to ship'),
+                      gettext('Inventory ID'),
                       vm.inventoryId,
                       { required: true, minLength: 2 }).result
         .then(function (inventoryId) {
@@ -70,9 +74,11 @@ define(function (require) {
               .then(function (specimen) {
                 if (specimen.locationInfo.locationId !== vm.shipment.fromLocationInfo.locationId) {
                   return modalService.modalOk(
-                    'Specimen location error',
-                    'Specimen with inventory ID <b>' + inventoryId +
-                      '</b> is not present at the centre this shipment is coming from.');
+                    gettext('Specimen location error'),
+                    gettextCatalog.getString(
+                      'Specimen with inventory ID <b>{{id}}</b> is not present at the centre ' +
+                        'this shipment is comes from.',
+                      { id: inventoryId }));
                 }
 
                 return ShipmentSpecimen.add(vm.shipment.id, specimen.id)
@@ -81,24 +87,28 @@ define(function (require) {
                     var message;
 
                     if (error.data && error.data.message.match(/inventory ID not found/)) {
-                      message = 'Specimen with inventory ID <b>' + inventoryId +
-                        '</b> is not present in the system.';
+                      message = gettextCatalog.getString(
+                        'Specimen with inventory ID <b>{{id}}</b> is not present in the system.',
+                        { id: inventoryId });
                     } else if (error.data &&
                                error.data.message.match(/specimen is already in active shipment/)) {
-                      message = 'Specimen with inventory ID <b>' + inventoryId +
-                        '</b> is already in another shipment.';
+                      message = gettextCatalog.getString(
+                        'Specimen with inventory ID <b>{{id}}</b> is already in another shipment.',
+                        { id: inventoryId });
                     } else {
                       message = error.data.message;
                     }
 
-                    modalService.modalOk('Specimen error', message);
+                    modalService.modalOk(gettext('Specimen error'), message);
                   });
               });
           }
 
-          modalService.modalOk('Specimen already in shipment',
-                               'Specimen with inventory ID <b>' + inventoryId +
-                               '</b> has already been added to this shipment');
+          modalService.modalOk(gettext('Specimen already in shipment'),
+                               gettextCatalog.getString(
+                                 'Specimen with inventory ID <b>{{id}}</b> ' +
+                                   'has already been added to this shipment.',
+                                 { id: inventoryId }));
 
           return false;
         });
@@ -137,15 +147,19 @@ define(function (require) {
     function removeShipmentSpecimen(shipmentSpecimen) {
       domainEntityService.removeEntity(
         promiseFn,
-        'Remove specimen',
-        'Are you sure you want to remove specimen with inventory ID <strong>' +
-          shipmentSpecimen.specimen.inventoryId + '</strong> from this shipment?',
-        'Remove failed',
-        'Specimen with ID ' + shipmentSpecimen.specimen.inventoryId + ' cannot be removed');
+        gettext('Remove specimen'),
+        gettextCatalog.getString(
+          'Are you sure you want to remove specimen with inventory ID <strong>{{id}}</strong> ' +
+            'from this shipment?',
+          { id: shipmentSpecimen.specimen.inventoryId }),
+        gettext('Remove failed'),
+        gettextCatalog.getString(
+          'Specimen with ID {{id}} cannot be removed',
+          { id: shipmentSpecimen.specimen.inventoryId }));
 
       function promiseFn() {
         return shipmentSpecimen.remove().then(function () {
-          notificationsService.success('Specimen removed');
+          notificationsService.success(gettext('Specimen removed'));
           reloadTableData();
         });
       }

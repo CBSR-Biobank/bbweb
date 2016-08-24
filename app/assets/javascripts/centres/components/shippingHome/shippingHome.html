@@ -3,7 +3,7 @@
     Shipping
     <div class="btn-group pull-right" ng-if="vm.hasValidCentres">
       <a ui-sref="home.shipping.add" class="btn btn-xs btn-primary" type="button">
-        Add shipment <i class="glyphicon glyphicon-plus"></i>
+        <translate>Add shipment</translate> <i class="glyphicon glyphicon-plus"></i>
       </a>
     </div>
   </h1>
@@ -11,8 +11,11 @@
 <div class="row" ng-if="!vm.hasValidCentres">
   <div class="col-md-12">
     <div class="alert alert-warning" role="alert">
-      Two or more centres, or one centre with more than one location required for shipping.<br> Please
-      configure more centres and / or locations.
+      <translate>
+        Two or more centres, or one centre with more than one location required for shipping.
+      </translate>
+      <br>
+      <translate>Please configure more centres and / or locations.</translate>
     </div>
   </div>
 </div>
@@ -26,7 +29,7 @@
        on-centre-selected="vm.centreSelected"
        icon="{{vm.centreIcon}}"
        page-size="4"
-       message-no-results="No results match the criteria."
+       message-no-results="{{'No results match the criteria.'|translate}}"
        navigate-state-name="home.shipments.table"
        navigate-state-param-name="centreId">
     </select-centre>

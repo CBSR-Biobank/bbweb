@@ -3,12 +3,13 @@
    current="vm.progressInfo.current">
 </progress-tracker>
 <div class="page-header">
-  <h1>
-    Add items to ship
+  <h1 >
+    <translate>Add items to ship</translate>
     <div class="btn-group pull-right">
       <button class="btn btn-xs btn-primary"
-              title="All items added and ready to ship"
-              ng-click="vm.allItemsAdded()">
+              title="{{'All items added and ready to ship'|translate}}"
+              ng-click="vm.allItemsAdded()"
+              translate>
         All items added
       </button>
     </div>
@@ -25,7 +26,7 @@
 
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">Containers in this shipment</h3>
+    <h3 class="panel-title" translate>Containers in this shipment</h3>
   </div>
 
   <ul class="list-group">

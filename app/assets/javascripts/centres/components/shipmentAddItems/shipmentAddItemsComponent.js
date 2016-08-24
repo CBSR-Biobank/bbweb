@@ -18,6 +18,7 @@ define(function (require) {
 
   ShipmentAddItemsController.$inject = [
     '$state',
+    'gettext' ,
     'shipmentProgressItems',
     'Shipment',
     'modalInput',
@@ -27,9 +28,12 @@ define(function (require) {
   ];
 
   /**
+   * Allows the user to add items to a shipment.
    *
+   * A task progress bar is used to give feedback to the user that this is one step in a multi-step process.
    */
   function ShipmentAddItemsController($state,
+                                      gettext,
                                       shipmentProgressItems,
                                       Shipment,
                                       modalInput,
@@ -38,19 +42,19 @@ define(function (require) {
                                       notificationsService) {
     var vm = this;
 
-    vm.$onInit = onInit;
-    vm.shipment = null;
+    vm.$onInit       = onInit;
+    vm.shipment      = null;
     vm.allItemsAdded = allItemsAdded;
 
-    vm.progressInfo = {
-      items: shipmentProgressItems,
-      current: 2
-    };
+     vm.progressInfo = {
+        items: shipmentProgressItems,
+        current: 2
+     };
 
     //--
 
     function onInit() {
-      Shipment.get(vm.shipmentId).then(function (shipment){
+      Shipment.get(vm.shipmentId).then(function (shipment) {
         vm.shipment = shipment;
       });
     }
@@ -64,8 +68,8 @@ define(function (require) {
           if (_.isUndefined(vm.timePacked)) {
             vm.timePacked = new Date();
           }
-          return modalInput.dateTime('Date and time shipment was packed',
-                                     'Time packed',
+          return modalInput.dateTime(gettext('Date and time shipment was packed'),
+                                     gettext('Time packed'),
                                      vm.timePacked,
                                      { required: true }).result
             .then(function (timePacked) {
@@ -77,8 +81,8 @@ define(function (require) {
             });
         }
 
-        return modalService.modalOk('Shipment has no specimens',
-                                    'Please add specimens to this shipment fist.');
+        return modalService.modalOk(gettext('Shipment has no specimens'),
+                                    gettext('Please add specimens to this shipment fist.'));
       });
     }
   }

@@ -16,6 +16,7 @@ define(function (require) {
 
   ShipmentViewController.$inject = [
     '$state',
+    'gettext',
     'modalInput',
     'notificationsService',
     'timeService'
@@ -25,6 +26,7 @@ define(function (require) {
    *
    */
   function ShipmentViewController($state,
+                                  gettext,
                                   modalInput,
                                   notificationsService,
                                   timeService) {
@@ -35,11 +37,10 @@ define(function (require) {
     //--
 
     function sendShipment() {
-      return modalInput.dateTime('Date and time shipment was sent',
-                                 'Time sent',
+      return modalInput.dateTime(gettext('Date and time shipment was sent'),
+                                 gettext('Time sent'),
                                  vm.timeSent,
-                                 { required: true })
-        .result
+                                 { required: true }).result
         .then(function (timeSent) {
           return vm.shipment.sent(timeService.dateToUtcString(timeSent));
         })

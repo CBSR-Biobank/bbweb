@@ -1,16 +1,22 @@
 <div class="page-header">
-  <h1>{{vm.centre.name}}: <small>Shipping</small></h1>
+  <h1>{{vm.centre.name}}: <small translate>Shipping</small></h1>
 </div>
 <div class="row">
   <div class="col-md-12">
-    <h4>Shipments to / from <strong>{{vm.centre.name}}</strong>:</h4>
+    <h4>
+      <translate>Shipments to / from</translate>
+      <strong>{{vm.centre.name}}</strong>:
+    </h4>
   </div>
 </div>
 <div class="row" ng-if="!vm.hasShipments">
   <div class="col-md-12">
     <div class="alert alert-warning" role="alert">
       <p><span class="glyphicon glyphicon-warning-sign"></span>
-        There are no shipments involved with this centre yet.</p>
+        <translate>
+          There are no shipments involved with this centre yet.
+        </translate>
+      </p>
     </div>
   </div>
 </div>

@@ -58,17 +58,17 @@ define(function (require) {
 
     function commonDisplayProperties() {
       var properties = {
-        courier:        new DisplayProperty('Courier',         vm.shipment.courierName),
-        trackingNumber: new DisplayProperty('Tracking Number', vm.shipment.trackingNumber),
-        fromLocation:   new DisplayProperty('From centre',     vm.shipment.fromLocationInfo.name),
-        toLocation:     new DisplayProperty('To centre',       vm.shipment.toLocationInfo.name)
+        courier:        new DisplayProperty(gettext('Courier'),         vm.shipment.courierName),
+        trackingNumber: new DisplayProperty(gettext('Tracking Number'), vm.shipment.trackingNumber),
+        fromLocation:   new DisplayProperty(gettext('From centre'),     vm.shipment.fromLocationInfo.name),
+        toLocation:     new DisplayProperty(gettext('To centre'),       vm.shipment.toLocationInfo.name)
       };
 
       if (!vm.readOnly) {
-        properties.courier.allowEdit(editCourierName, 'Update courier');
-        properties.trackingNumber.allowEdit(editTrackingNumber, 'Update tracking number');
-        properties.fromLocation.allowEdit(editFromLocation, 'Update from location');
-        properties.toLocation.allowEdit(editToLocation, 'Update to location');
+        properties.courier.allowEdit(editCourierName,           gettext('Update courier'));
+        properties.trackingNumber.allowEdit(editTrackingNumber, gettext('Update tracking number'));
+        properties.fromLocation.allowEdit(editFromLocation,     gettext('Update from location'));
+        properties.toLocation.allowEdit(editToLocation,         gettext('Update to location'));
       }
 
       vm.displayProperties = _.values(properties);
@@ -76,25 +76,27 @@ define(function (require) {
 
     function displayPropertiesByState() {
       if (vm.shipment.timePacked) {
-        vm.displayProperties.push(new DisplayProperty('Time packed',
+        vm.displayProperties.push(new DisplayProperty(gettext('Time packed'),
                                                       $filter('localTime')(vm.shipment.timePacked)));
       }
 
       if (vm.shipment.timeSent) {
-        vm.displayProperties.push(new DisplayProperty('Time sent',
+        vm.displayProperties.push(new DisplayProperty(gettext('Time sent'),
                                                       $filter('localTime')(vm.shipment.timeSent)));
       }
 
       if (vm.shipment.timeReceived) {
-        vm.displayProperties.push(new DisplayProperty('Time received',
+        vm.displayProperties.push(new DisplayProperty(gettext('Time received'),
                                                       $filter('localTime')(vm.shipment.timeReceived)));
       }
 
       if (vm.shipment.isNotCreatedOrUnpacked()) {
-        vm.displayProperties.push(new DisplayProperty('Number of specimens', vm.shipment.specimenCount));
+        vm.displayProperties.push(new DisplayProperty(gettext('Number of specimens'),
+                                                      vm.shipment.specimenCount));
 
         if (vm.shipment.containerCount) {
-          vm.displayProperties.push(new DisplayProperty('Number of containers', vm.shipment.specimenCount));
+          vm.displayProperties.push(new DisplayProperty(gettext('Number of containers'),
+                                                        vm.shipment.specimenCount));
         }
       }
     }
@@ -130,22 +132,26 @@ define(function (require) {
     }
 
     function editCourierName() {
-      modalInput.text('Edit courier', 'Courier', vm.shipment.courierName, { required: true, minLength: 2 })
-        .result.then(function (name) {
+      modalInput.text(gettext('Edit courier'),
+                      gettext('Courier'),
+                      vm.shipment.courierName,
+                      { required: true, minLength: 2 }).result
+        .then(function (name) {
           vm.shipment.updateCourierName(name)
-            .then(postUpdate('Courier changed successfully.', 'Change successful'))
+            .then(postUpdate(gettext('Courier changed successfully.'), gettext('Change successful')))
             .catch(notificationsService.updateError);
         });
     }
 
     function editTrackingNumber() {
-      modalInput.text('Edit tracking number',
-                      'Tracking Number',
+      modalInput.text(gettext('Edit tracking number'),
+                      gettext('Tracking Number'),
                       vm.shipment.trackingNumber,
-                      { required: true, minLength: 2 })
-        .result.then(function (tn) {
+                      { required: true, minLength: 2 }).result
+        .then(function (tn) {
           vm.shipment.updateTrackingNumber(tn)
-            .then(postUpdate(gettext('Tracking number changed successfully.', 'Change successful')))
+            .then(postUpdate(gettext('Tracking number changed successfully.',
+                                     gettext('Change successful'))))
             .catch(notificationsService.updateError);
         });
     }
@@ -168,20 +174,19 @@ define(function (require) {
     }
 
     function editToLocation() {
-      centreLocationsModalService.open(
-        gettext('Update to centre'),
-        gettext('To centre'),
-        gettext('The location of the centre this shipment is going to'),
-        vm.shipment.toLocationInfo,
-        [ vm.shipment.fromLocationInfo ]
-      ).result.then(function (selection) {
-        if (selection) {
-          vm.shipment.updateToLocation(selection.locationId)
-            .then(postUpdate(gettext('To location changed successfully.'),
-                             gettext('Change successful')))
-            .catch(notificationsService.updateError);
-        }
-      });
+      centreLocationsModalService.open(gettext('Update to centre'),
+                                       gettext('To centre'),
+                                       gettext('The location of the centre this shipment is going to'),
+                                       vm.shipment.toLocationInfo,
+                                       [ vm.shipment.fromLocationInfo ]).result
+        .then(function (selection) {
+          if (selection) {
+            vm.shipment.updateToLocation(selection.locationId)
+              .then(postUpdate(gettext('To location changed successfully.'),
+                               gettext('Change successful')))
+              .catch(notificationsService.updateError);
+          }
+        });
     }
 
   }

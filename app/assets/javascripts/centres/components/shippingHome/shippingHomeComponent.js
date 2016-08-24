@@ -16,18 +16,19 @@ define(function () {
 
   ShippingHomeController.$inject = [
     '$state',
+    'gettext',
     'Centre'
   ];
 
   /**
    * Allows the user to select a centre associated to her account or the user group she is associated with.
    */
-  function ShippingHomeController($state, Centre) {
+  function ShippingHomeController($state, gettext, Centre) {
     var vm = this;
 
     vm.updateCentres   = updateCentres;
     vm.hasValidCentres = false;
-    vm.panelHeader     = 'Select a centre to view its shipping information';
+    vm.panelHeader     = gettext('Select a centre to view its shipping information');
     vm.centreIcon      = 'glyphicon-ok-circle';
     vm.centreSelected  = centreSelected;
 

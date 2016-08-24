@@ -3,13 +3,18 @@
    current="vm.progressInfo.current">
 </progress-tracker>
 <div class="page-header">
-  <h1>Shipping information</h1>
+  <h1 translate>Shipping information</h1>
 </div>
 <div class="row" ng-if="!vm.hasValidCentres">
   <div class="col-md-12">
     <div class="alert alert-warning" role="alert">
-      Two or more centres, or one centre with more than one location required for shipping.<br> Please
-      configure more centres and / or locations.
+      <translate>
+        Two or more centres, or one centre with more than one location required for shipping.
+      </translate>
+      <br>
+      <translate>
+        Please configure more centres and / or locations.
+      </translate>
     </div>
   </div>
 </div>
@@ -29,14 +34,14 @@
              class="form-control"
              ng-model="vm.shipment.courierName"
              ng-minlength="2"
-             placeholder="The name of the courier company"
+             placeholder="{{'The name of the courier company'|translate}}""
              focus-me="true"
              required />
     </div>
     <div class="col-md-offset-2 col-md-10"
          ng-messages="shippmentForm.courierName.$error"
          ng-if="shippmentForm.courierName.$dirty">
-      <div ng-message="minlength" class="help-block">Courier name is too short</div>
+      <div ng-message="minlength" class="help-block" translate>Courier name is too short</div>
     </div>
   </div>
 
@@ -51,13 +56,13 @@
              class="form-control"
              ng-model="vm.shipment.trackingNumber"
              ng-minlength="2"
-             placeholder="The number used to track the package"
+             placeholder="{{'The number used to track the package'|translate}}"
              required />
     </div>
     <div class="col-md-offset-2 col-md-10"
          ng-messages="shippmentForm.trackingNumber.$error"
          ng-if="shippmentForm.trackingNumber.$dirty">
-      <div ng-message="minlength" class="help-block">Tracking number is too short</div>
+      <div ng-message="minlength" class="help-block" translate>Tracking number is too short</div>
     </div>
   </div>
 
@@ -70,7 +75,7 @@
              type="text"
              class="form-control"
              ng-model="vm.selectedFromLocationInfo"
-             placeholder="The location of the centre this shipment is coming from"
+             placeholder="{{'The location of the centre this shipment is coming from'|translate}}"
              uib-typeahead="locationInfo as locationInfo.name for locationInfo in
                             vm.getCentreLocationInfo($viewValue)"
              typeahead-editable="false"
@@ -79,7 +84,7 @@
     <div class="col-sm-offset-3 col-sm-9"
          ng-messages="shipmentForm.fromCentre.$error"
          ng-if="shipmentForm.fromCentreLocation.$dirty">
-      <div ng-message="required" class="help-block">A centre must be selected</div>
+      <div ng-message="required" class="help-block" translate>A centre must be selected</div>
     </div>
   </div>
 
@@ -92,7 +97,7 @@
              type="text"
              class="form-control"
              ng-model="vm.selectedToLocationInfo"
-             placeholder="The location of the centre this shipment is going to"
+             placeholder="{{'The location of the centre this shipment is going to'|translate}}"
              uib-typeahead="locationInfo as locationInfo.name for locationInfo in
                             vm.getCentreLocationInfo($viewValue)"
              typeahead-editable="false"
@@ -101,7 +106,7 @@
     <div class="col-sm-offset-3 col-sm-9"
          ng-messages="shipmentForm.toCentre.$error"
          ng-if="shipmentForm.toCentreLocation.$dirty">
-      <div ng-message="required" class="help-block">A centre must be selected</div>
+      <div ng-message="required" class="help-block" translate>A centre must be selected</div>
     </div>
   </div>
 
@@ -111,8 +116,9 @@
     <div class="col-md-offset-2 col-md-10">
       <button class="btn btn-primary"
               ng-disabled="shipmentForm.$invalid"
-              ng-click="vm.submit()">Submit</button>
-      <button type="button" class="btn" ng-click="vm.cancel()">Cancel</button>
+              ng-click="vm.submit()"
+              translate>Submit</button>
+      <button type="button" class="btn" ng-click="vm.cancel()" translate>Cancel</button>
     </div>
   </div>
 </form>
