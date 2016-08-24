@@ -25,27 +25,26 @@
   <div class="panel-footer text-center"
        style="padding:5px 10px;"
        ng-if="vm.showPagination">
-    <uib-pagination
-       class="pagination-sm"
-       style="margin:0;"
-       boundary-links="true"
-       total-items="vm.pagedResult.total"
-       items-per-page="vm.pagerOptions.pageSize"
-       ng-model="vm.pagerOptions.page"
-       ng-change="vm.pageChanged()"
-       max-size="5"
-       rotate="false"
-       previous-text="&lsaquo;"
-       next-text="&rsaquo;"
-       first-text="&laquo;"
-       last-text="&raquo;">
+    <uib-pagination class="pagination-sm"
+                    style="margin:0;"
+                    boundary-links="true"
+                    total-items="vm.pagedResult.total"
+                    items-per-page="vm.pagerOptions.pageSize"
+                    ng-model="vm.pagerOptions.page"
+                    ng-change="vm.pageChanged()"
+                    max-size="5"
+                    rotate="false"
+                    previous-text="&lsaquo;"
+                    next-text="&rsaquo;"
+                    first-text="&laquo;"
+                    last-text="&raquo;">
     </uib-pagination>
   </div>
 
   <div class="panel-footer">
     <form class="form-inline" name="filters">
       <div class="form-group">
-        <label for="nameFilter" class="small">Name filter:</label>
+        <label for="nameFilter" class="small" translate>Name filter:</label>
         <input type="text"
                class="form-control input-sm"
                name="nameFilter"
@@ -56,7 +55,10 @@
       <div class="form-group">
         <button class="btn btn-sm"
                 ng-click="vm.clearFilter()">
-          Clear filter <i class="glyphicon glyphicon-erase"></i>
+          <translate translate-context="filter is used to narrow a search">
+            Clear filter
+          </translate>
+          <i class="glyphicon glyphicon-erase"></i>
         </button>
       </div>
     </form>

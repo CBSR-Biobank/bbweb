@@ -29,9 +29,9 @@ define(['lodash'], function(_) {
     return directive;
   }
 
-  SelectStudyCtr.$inject = ['$state', 'modalService'];
+  SelectStudyCtr.$inject = ['$state', 'gettext', 'modalService'];
 
-  function SelectStudyCtr($state, modalService) {
+  function SelectStudyCtr($state, gettext, modalService) {
     var vm = this;
 
     vm.displayStates = {
@@ -96,17 +96,15 @@ define(['lodash'], function(_) {
 
     function studySelected(study) {
       study.allLocations().then(function (reply) {
-        var headerHtml;
-        var bodyHtml;
         var stateParam = {};
         if (reply.length > 0) {
           stateParam[vm.navigateStateParamName] = study.id;
           $state.go(vm.navigateStateName, stateParam);
         } else {
-          headerHtml = 'Centre Configuration';
-          bodyHtml = 'There are no centres configured to participate in this study.' +
-            '<p>Please configure centres for this study.';
-          modalService.modalOk(headerHtml, bodyHtml);
+          modalService.modalOk(
+            gettext('Centre Configuration'),
+            gettext('There are no centres configured to participate in this study.' +
+                    '<p>Please configure centres for this study.'));
         }
       });
     }

@@ -1,20 +1,20 @@
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">Participant</h3>
+    <h3 class="panel-title" translate>Participant</h3>
   </div>
 
   <ul class="list-group">
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-3">
-          <strong>Unique ID</strong>
+          <strong translate>Unique ID</strong>
         </div>
         <div class="col-md-7">
           {{vm.participant.uniqueId}}
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="Update unique ID"
+                  title="{{'Update unique ID'|translate}}"
                   ng-click="vm.editUniqueId()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -24,7 +24,7 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-3">
-          <strong>Study</strong>
+          <strong translate>Study</strong>
         </div>
         <div class="col-md-7">
           {{vm.study.name}}
@@ -41,7 +41,7 @@
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="Update {{annotation.getLabel()}}"
+                  title="{{vm.getAnnotationUpdateButtonTitle(annotation)}}"
                   ng-click="vm.editAnnotation(annotation)">
             <i class="glyphicon glyphicon-edit"></i>
           </button>

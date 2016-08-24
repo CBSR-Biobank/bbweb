@@ -1,11 +1,12 @@
 <div class="page-header">
-  <h1>Specimen collection</h1>
+  <h1 translate>Specimen collection</h1>
 </div>
 <div class="row" ng-if="!vm.haveEnabledStudies">
   <div class="col-md-12">
     <div class="alert alert-warning" role="alert">
       <p><span class="glyphicon glyphicon-warning-sign"></span>
-        No studies are enabled. Cannot process any specimens yet.</p>
+        <translate>No studies are enabled. Cannot process any specimens yet.</translate>
+      </p>
     </div>
   </div>
 </div>
@@ -13,13 +14,14 @@
   <div class="col-md-12">
     <div class="alert alert-warning" role="alert">
       <p><span class="glyphicon glyphicon-warning-sign"></span>
-        No centres are enabled. Cannot process any specimens yet.</p>
+        <translate>No centres are enabled. Cannot process any specimens yet.</translate>
+      </p>
     </div>
   </div>
 </div>
 <div class="row" ng-if="vm.isCollectionAllowed">
   <div class="col-md-12">
-    <h4>Select the study you wish to work with:</h4>
+    <h4 translate>Select the study you wish to work with:</h4>
   </div>
 </div>
 <div class="row" ng-if="vm.isCollectionAllowed" ng-cloak>
@@ -28,7 +30,7 @@
                   get-studies="vm.updateEnabledStudies"
                   icon="glyphicon-ok-circle"
                   page-size="4"
-                  message-no-results="No results match the criteria."
+                  message-no-results="{{'No results match the criteria.'|translate}}"
                   navigate-state-name="home.collection.study"
                   navigate-state-param-name="studyId">
     </select-study>
@@ -36,13 +38,14 @@
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title">Studies you contribute to</h3>
+        <h3 class="panel-title" translate>Studies you contribute to</h3>
       </div>
 
       <ul class="list-group">
         <li class="list-group-item">
           <p class="alert alert-warning" role="alert">
-            <span class="glyphicon glyphicon-warning-sign"></span> You have not contributed to any studies.
+            <span class="glyphicon glyphicon-warning-sign"></span>
+            <translate>You have not contributed to any studies.</translate>
           </p>
         </li>
       </ul>
@@ -50,7 +53,7 @@
       <div class="panel-footer">
         <form class="form-inline" name="filters">
           <div class="form-group">
-            <label for="nameFilter" class="small">Name filter:</label>
+            <label for="nameFilter" class="small" translate>Name filter:</label>
             <input type="text"
                    class="form-control input-sm"
                    name="nameFilter"
@@ -61,7 +64,10 @@
           <div class="form-group">
             <button class="btn btn-sm"
                     ng-click="vm.clearFilter()">
-              Clear filter <i class="glyphicon glyphicon-erase"></i>
+              <translate translate-context="filter is used to narrow a search">
+                Clear filter
+              </translate>
+              <i class="glyphicon glyphicon-erase"></i>
             </button>
           </div>
         </form>

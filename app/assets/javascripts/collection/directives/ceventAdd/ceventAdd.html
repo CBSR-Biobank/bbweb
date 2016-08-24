@@ -8,7 +8,7 @@
 
   <!-- COLLECTION EVENT TYPE: read only -->
   <div class="form-group row">
-    <label for="ceventTypeId" class="col-md-2 form-control-label">Event Type</label>
+    <label for="ceventTypeId" class="col-md-2 form-control-label" translate>Event Type</label>
     <div class="col-md-10">
       <input ng-readonly="true"
              class="form-control"
@@ -21,23 +21,23 @@
        ng-class="{ 'has-error' : collectionEventForm.visitNumber.$invalid &&
                  !collectionEventForm.visitNumber.$pristine }">
 
-    <label for="visitNumber" class="col-md-2 form-control-label">Visit number</label>
+    <label for="visitNumber" class="col-md-2 form-control-label" translate>Visit number</label>
     <div class="col-md-10">
       <input name="visitNumber"
              type="number"
              class="form-control"
              ng-model="vm.collectionEvent.visitNumber"
              min="1"
-             placeholder="A unique number for this participant"
+             placeholder="{{'A unique number for this participant'|translate}}"
              focus-me="true"
              required />
     </div>
     <div class="col-md-offset-2 col-md-10"
-       ng-messages="collectionEventForm.visitNumber.$error"
-       ng-if="collectionEventForm.visitNumber.$dirty">
-      <div ng-message="required" class="help-block">Visit number is required</div>
-      <div ng-message="min" class="help-block">Visit number has to be a positive number</div>
-      <div ng-message="number" class="help-block">Invalid number</div>
+         ng-messages="collectionEventForm.visitNumber.$error"
+         ng-if="collectionEventForm.visitNumber.$dirty">
+      <div ng-message="required" class="help-block" translate>Visit number is required</div>
+      <div ng-message="min" class="help-block" translate>Visit number has to be a positive number</div>
+      <div ng-message="number" class="help-block" translate>Invalid number</div>
     </div>
   </div>
 
@@ -45,7 +45,7 @@
   <div class="form-group row"
        ng-class="{ 'has-error' : collectionEventForm.timeCompleted.$invalid &&
                  !collectionEventForm.timeCompleted.$pristine }">
-    <label class="col-sm-2 form-control-label">Time completed</label>
+    <label class="col-sm-2 form-control-label" translate>Time completed</label>
     <div class="col-sm-10">
       <p class="input-group">
         <input name="timeCompleted"
@@ -67,21 +67,22 @@
     <div class="col-md-offset-2 col-md-10"
          ng-messages="collectionEventForm.timeCompleted.$error"
          ng-if="collectionEventForm.timeCompleted.$dirty">
-      <div ng-message="datetime" class="help-block">date and / or time are invalid</div>
-      <div ng-message="required" class="help-block">date and time are required</div>
+      <div ng-message="datetime" class="help-block" translate>date and / or time are invalid</div>
+      <div ng-message="required" class="help-block" translate>date and time are required</div>
     </div>
   </div>
 
-<!-- ANNOTATION TYPES  -->
-<annotations-input annotations="vm.collectionEvent.annotations"></annotations-input>
+  <!-- ANNOTATION TYPES  -->
+  <annotations-input annotations="vm.collectionEvent.annotations"></annotations-input>
 
-<!-- BUTTONS  -->
-<div class="form-group row">
-  <div class="col-md-offset-2 col-md-10">
-    <button class="btn btn-primary"
-            ng-disabled="collectionEventForm.$invalid"
-            ng-click="vm.submit()">Submit</button>
-    <button type="button" class="btn" ng-click="vm.cancel()">Cancel</button>
+  <!-- BUTTONS  -->
+  <div class="form-group row">
+    <div class="col-md-offset-2 col-md-10">
+      <button class="btn btn-primary"
+              ng-disabled="collectionEventForm.$invalid"
+              ng-click="vm.submit()"
+              translate>Submit</button>
+      <button type="button" class="btn" ng-click="vm.cancel()" translate>Cancel</button>
+    </div>
   </div>
-</div>
 </form>

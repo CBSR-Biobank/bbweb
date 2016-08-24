@@ -2,7 +2,7 @@
   <h1>{{vm.study.name}} <small>{{vm.title}}</small></h1>
 </div>
 
-<p>Select the type of collection event:</p>
+<p translate>Select the type of collection event:</p>
 
 <form class="form-horizontal"
       name="collectionEventForm"
@@ -12,7 +12,7 @@
   <div class="form-group"
        ng-class="{ 'has-error' : collectionEventForm.ceventTypeId.$invalid &&
                  !collectionEventForm.ceventTypeId.$pristine }">
-    <label for="ceventTypeId" class="col-md-2 form-control-label">Event Type</label>
+    <label for="ceventTypeId" class="col-md-2 form-control-label" translate>Event Type</label>
     <div class="col-md-8">
       <select class="form-control"
               name="ceventTypeId"
@@ -27,7 +27,7 @@
     <div class="col-md-offset-2 col-md-10"
          ng-messages="collectionEventForm.ceventTypeId.$error"
          ng-if="collectionEventForm.ceventTypeId.$dirty">
-      <div ng-message="required" class="help-block">Please select a type</div>
+      <div ng-message="required" class="help-block" translate>Please select a type</div>
     </div>
   </div>
 

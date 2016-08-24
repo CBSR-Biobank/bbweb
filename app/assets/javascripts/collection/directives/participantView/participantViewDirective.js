@@ -25,18 +25,19 @@ define(['lodash'], function (_) {
 
   ParticipantViewCtrl.$inject = [
     '$window',
-    '$state'
+    '$state',
+    'gettext'
   ];
 
   /**
    *
    */
-  function ParticipantViewCtrl($window, $state) {
+  function ParticipantViewCtrl($window, $state, gettext) {
     var vm = this;
 
     vm.tabs = [
-      { heading: 'Summary',    sref: 'home.collection.study.participant.summary', active: false },
-      { heading: 'Collection', sref: 'home.collection.study.participant.cevents', active: false}
+      { heading: gettext('Summary'),    sref: 'home.collection.study.participant.summary', active: false },
+      { heading: gettext('Collection'), sref: 'home.collection.study.participant.cevents', active: false }
     ];
 
     init();

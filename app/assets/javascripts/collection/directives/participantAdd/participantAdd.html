@@ -1,5 +1,5 @@
 <div class="page-header">
-  <h1>{{vm.study.name}} <small>{{vm.title}}</small></h1>
+  <h1>{{vm.study.name}} <small translate>Add participant</small></h1>
 </div>
 <form class="form-horizontal"
       name="participantForm"
@@ -15,15 +15,15 @@
              class="form-control"
              ng-model="vm.participant.uniqueId"
              ng-minlength="2"
-             placeholder="Identifies a participant in the system"
+             placeholder="{{'Identifies a participant in the system'|translate}}"
              focus-me="true"
              required/>
     </div>
     <div class="col-md-offset-2 col-md-10"
          ng-messages="participantForm.uniqueId.$error"
          ng-if="participantForm.uniqueId.$dirty">
-      <div ng-message="required" class="help-block">A unique ID is required</div>
-      <div ng-message="minlength" class="help-block">Unique ID is too short</div>
+      <div ng-message="required" class="help-block" translate>A unique ID is required</div>
+      <div ng-message="minlength" class="help-block" translate>Unique ID is too short</div>
     </div>
   </div>
 
@@ -35,8 +35,11 @@
     <div class="col-md-offset-2 col-md-10">
       <button class="btn btn-primary"
               ng-disabled="participantForm.$invalid"
-              ng-click="vm.submit(vm.participant)">Submit</button>
-      <button type="button" class="btn" ng-click="vm.cancel()">Cancel</button>
+              ng-click="vm.submit(vm.participant)"
+              translate>
+        Submit
+      </button>
+      <button type="button" class="btn" ng-click="vm.cancel()" translate>Cancel</button>
     </div>
   </div>
 </form>

@@ -26,6 +26,8 @@ define(function (require) {
 
   CeventViewCtrl.$inject = [
     '$state',
+    'gettext',
+    'gettextCatalog',
     'Specimen',
     'timeService',
     'modalService',
@@ -39,6 +41,8 @@ define(function (require) {
    *
    */
   function CeventViewCtrl($state,
+                          gettext,
+                          gettextCatalog,
                           Specimen,
                           timeService,
                           modalService,
@@ -51,11 +55,12 @@ define(function (require) {
     vm.canUpdateVisitType = (vm.collectionEventTypes.length > 1);
     vm.panelOpen          = true;
 
-    vm.editVisitType      = editVisitType;
-    vm.editTimeCompleted  = editTimeCompleted;
-    vm.editAnnotation     = editAnnotation;
-    vm.panelButtonClicked = panelButtonClicked;
-    vm.remove             = remove;
+    vm.editVisitType                  = editVisitType;
+    vm.editTimeCompleted              = editTimeCompleted;
+    vm.editAnnotation                 = editAnnotation;
+    vm.panelButtonClicked             = panelButtonClicked;
+    vm.remove                         = remove;
+    vm.getAnnotationUpdateButtonTitle = getAnnotationUpdateButtonTitle;
 
     //--
 
@@ -73,13 +78,15 @@ define(function (require) {
     }
 
     function editTimeCompleted() {
-      modalInput.dateTime('Update time completed',
-                          'Time completed',
+      modalInput.dateTime(gettext('Update time completed'),
+                          gettext('Time completed'),
                           vm.collectionEvent.timeCompleted,
                           { required: true })
         .result.then(function (timeCompleted) {
           vm.collectionEvent.updateTimeCompleted(timeService.dateToUtcString(timeCompleted))
-            .then(postUpdate('Time completed updated successfully.', 'Change successful', 1500))
+            .then(postUpdate(gettext('Time completed updated successfully.'),
+                             gettext('Change successful'),
+                             1500))
             .catch(notificationsService.updateError);
         });
     }
@@ -88,7 +95,9 @@ define(function (require) {
       annotationUpdate.update(annotation, 'Update ' + annotation.getLabel())
         .then(function (newAnnotation) {
           vm.collectionEvent.addAnnotation(newAnnotation)
-            .then(postUpdate('Annotation updated successfully.', 'Change successful', 1500))
+            .then(postUpdate(gettext('Annotation updated successfully.'),
+                             gettext('Change successful'),
+                             1500))
             .catch(notificationsService.updateError);
         });
     }
@@ -101,24 +110,34 @@ define(function (require) {
       Specimen.list(vm.collectionEvent.id).then(function (pagedResult) {
         if (pagedResult.items.length > 0) {
           modalService.modalOk(
-            'Cannot remove collection event',
-            'This collection event has specimens. Please remove the specimens first.');
+            gettext('Cannot remove collection event'),
+            gettext('This collection event has specimens. Please remove the specimens first.'));
         } else {
           domainEntityService.removeEntity(
             promiseFn,
-            'Remove event',
-            'Are you sure you want to remove event with visit # <strong>' + vm.collectionEvent.visitNumber + '</strong>?',
-            'Remove failed',
-            'Collection event with visit number ' + vm.collectionEvent.visitNumber + ' cannot be removed');
+            gettext('Remove event'),
+            /// visit number comes from the collection event
+            gettextCatalog.getString(
+              'Are you sure you want to remove event with visit # <strong>{{visitNumber}}</strong>?',
+              { visitNumber: vm.collectionEvent.visitNumber}),
+            gettext('Remove failed'),
+            gettextCatalog.getString(
+              'Collection event with visit number {{visitNumber}} cannot be removed',
+              { visitNumber: vm.collectionEvent.visitNumber}));
         }
 
         function promiseFn() {
           return vm.collectionEvent.remove().then(function () {
-            notificationsService.success('Collection event removed');
+            notificationsService.success(gettext('Collection event removed'));
             $state.go('home.collection.study.participant.cevents', {}, { reload: true });
           });
         }
       });
+    }
+
+    function getAnnotationUpdateButtonTitle(annotation) {
+      /// label is a name assigned by the user for an annotation type
+      return gettextCatalog.getString('Update {{label}}', { label: annotation.getLabel() });
     }
 
   }

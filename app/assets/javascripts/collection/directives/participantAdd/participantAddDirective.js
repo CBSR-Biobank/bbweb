@@ -25,6 +25,7 @@ define(['lodash'], function(_) {
 
   ParticipantAddCtrl.$inject = [
     '$state',
+    'gettext',
     'Participant',
     'domainEntityService',
     'notificationsService'
@@ -34,12 +35,12 @@ define(['lodash'], function(_) {
    * This controller is used for adding or editing a participant.
    */
   function ParticipantAddCtrl($state,
+                              gettext,
                               Participant,
                               domainEntityService,
                               notificationsService) {
     var vm = this;
 
-    vm.title       = 'Add participant';
     vm.participant = new Participant({ uniqueId: vm.uniqueId }, vm.study);
     vm.submit      = submit;
     vm.cancel      = cancel;
@@ -49,15 +50,14 @@ define(['lodash'], function(_) {
       participant.add()
         .then(submitSuccess)
         .catch(function(error) {
-          return domainEntityService.updateErrorModal(error, 'participant');
+          return domainEntityService.updateErrorModal(error, gettext('participant'));
         }).catch(function () {
           $state.go('home.collection.study', { studyId: vm.study.id });
         });
     }
 
     function submitSuccess(reply) {
-      // the reply contains the id assigned to this new participant, therefore, the state data can be
-      // updated
+      // the reply contains the id assigned to this new participant, therefore, the state data can be updated
       notificationsService.submitSuccess();
       $state.go(
         'home.collection.study.participant.summary',

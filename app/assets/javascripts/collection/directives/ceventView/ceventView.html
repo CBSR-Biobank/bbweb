@@ -4,9 +4,10 @@
       Visit # {{vm.collectionEvent.visitNumber}}
       <span class="pull-right">
         <button class="btn btn-xs btn-warning"
-                title="remove event"
+                title="{{'remove event'|translate}}"
                 ng-click="vm.remove()">
-          Remove <i class="glyphicon glyphicon-remove"></i>
+          <translate>Remove</translate>
+          <i class="glyphicon glyphicon-remove"></i>
         </button>
         <a data-toggle="collapse"
            href="#collapseCevent"
@@ -23,14 +24,14 @@
       <li class="list-group-item">
         <div class="row">
           <div class="col-md-3">
-            <strong>Visit type</strong>
+            <strong translate>Visit type</strong>
           </div>
           <div class="col-md-7">
             {{vm.collectionEvent.collectionEventType.name}}
           </div>
           <div class="col-md-2" ng-if="vm.canUpdateVisitType">
             <button class="btn btn-xs btn-primary pull-right"
-                    title="Update visit type"
+                    title="{{'Update visit type'|translate}}"
                     ng-click="vm.editVisitType()">
               <i class="glyphicon glyphicon-edit"></i>
             </button>
@@ -40,14 +41,14 @@
       <li class="list-group-item">
         <div class="row">
           <div class="col-md-3">
-            <strong>Time completed</strong>
+            <strong translate>Time completed</strong>
           </div>
           <div class="col-md-7">
             {{vm.collectionEvent.timeCompleted | localTime}}
           </div>
           <div class="col-md-2">
             <button class="btn btn-xs btn-primary pull-right"
-                    title="Update time completed"
+                    title="{{'Update time completed'|translate}}"
                     ng-click="vm.editTimeCompleted()">
               <i class="glyphicon glyphicon-edit"></i>
             </button>
@@ -64,7 +65,7 @@
           </div>
           <div class="col-md-2">
             <button class="btn btn-xs btn-primary pull-right"
-                    title="Update {{annotation.getLabel()}}"
+                    title="{{vm.getAnnotationUpdateButtonTitle(annotation)}}"
                     ng-click="vm.editAnnotation(annotation)">
               <i class="glyphicon glyphicon-edit"></i>
             </button>

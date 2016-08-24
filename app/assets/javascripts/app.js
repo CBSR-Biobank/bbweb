@@ -64,9 +64,7 @@ define(function(require) {
   // For debugging
   //
   app.run(function (gettextCatalog) {
-    gettextCatalog.currentLanguage = 'fr';
-  });
-  app.run(function (gettextCatalog) {
+    gettextCatalog.currentLanguage = 'en';
     gettextCatalog.debug = true;
   });
   app.run(debugFunc);

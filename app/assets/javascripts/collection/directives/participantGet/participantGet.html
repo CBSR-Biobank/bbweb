@@ -1,18 +1,24 @@
 <div class="page-header">
-  <h1>{{vm.study.name}} <small>collection</small></h1>
+  <h1>{{vm.study.name}}
+    <small translate
+           translate-context="used in page where a user's unique Id should be entered">
+      collection
+    </small>
+  </h1>
 </div>
 <form class="form-inline" name="UniqueId">
   <div class="form-group">
-    <label for="nameFilter">Enter the participant's unique ID:</label>
+    <label for="nameFilter" translate>Enter the participant's unique ID:</label>
     <input type="text"
            class="form-control"
            name="uniqueId"
            ng-model="vm.uniqueId"
-           placeholder="unique id"0>
+           placeholder="{{'unique id'|translate}}">
   </div>
   <button type="submit"
           class="btn btn-primary"
-          ng-click="vm.uniqueIdChanged()">
-    Submit <i class="glyphicon glyphicon-ok"></i>
+          ng-click="vm.onSubmit()">
+    <translate>Submit</translate>
+    <i class="glyphicon glyphicon-ok"></i>
   </button>
 </form>

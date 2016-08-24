@@ -72,8 +72,8 @@ define(function (require) {
         function getCentreLocationInfo(filter) {
           return Centre.locationsSearch(filter)
             .then(function (locations) {
-              return _.filter(locations, function (location) {
-                return ! _.includes(locationInfosToOmit.locationId, location.locationId);
+              return _.remove(locations, function (location) {
+                return _.includes(locationInfosToOmit.locationId, location.locationId);
               });
             });
         }

@@ -5,16 +5,20 @@
 define(['lodash'], function (_) {
   'use strict';
 
-  centreStatusLabelService.$inject = ['CentreStatus'];
+  centreStatusLabelService.$inject = [
+    'gettext',
+    'CentreStatus'
+  ];
 
   /**
    * Description
    */
-  function centreStatusLabelService(CentreStatus) {
+  function centreStatusLabelService(gettext,
+                                    CentreStatus) {
     var labels = {};
 
-    labels[CentreStatus.DISABLED] = 'Disabled';
-    labels[CentreStatus.ENABLED]  = 'Enabled';
+    labels[CentreStatus.DISABLED] = gettext('Disabled');
+    labels[CentreStatus.ENABLED]  = gettext('Enabled');
 
     var service = {
       statusToLabel: statusToLabel

@@ -25,18 +25,18 @@ define(function () {
     return directive;
   }
 
-  CollectionCtrl.$inject = ['Study'];
+  CollectionCtrl.$inject = ['gettext', 'Study'];
 
   /**
    *
    */
-  function CollectionCtrl(Study) {
+  function CollectionCtrl(gettext, Study) {
     var vm = this;
 
-    vm.haveEnabledStudies = (vm.studyCounts.enabled > 0);
-    vm.haveEnabledCentres = (vm.centreCounts.enabled > 0);
-    vm.isCollectionAllowed = vm.haveEnabledStudies && vm.haveEnabledCentres;
-    vm.updateEnabledStudies = updateEnabledStudies;
+    vm.haveEnabledStudies           = (vm.studyCounts.enabled > 0);
+    vm.haveEnabledCentres           = (vm.centreCounts.enabled > 0);
+    vm.isCollectionAllowed          = vm.haveEnabledStudies && vm.haveEnabledCentres;
+    vm.updateEnabledStudies         = updateEnabledStudies;
     vm.getEnabledStudiesPanelHeader = getEnabledStudiesPanelHeader;
 
     //---
@@ -46,7 +46,7 @@ define(function () {
     }
 
     function getEnabledStudiesPanelHeader() {
-      return 'Studies you participate in';
+      return gettext('Studies you participate in');
     }
 
   }

@@ -24,18 +24,21 @@ define(function () {
     return directive;
   }
 
-    CeventGetTypeCtrl.$inject = [
+  CeventGetTypeCtrl.$inject = [
     '$state',
+    'gettextCatalog',
     'CollectionEvent'
   ];
 
   /**
    * Used to add or edit a collection event.
    */
-  function CeventGetTypeCtrl($state, CollectionEvent) {
+  function CeventGetTypeCtrl($state, gettextCatalog, CollectionEvent) {
     var vm = this;
 
-    vm.title = 'Participant ' + vm.participant.uniqueId + ': Add collection event';
+    vm.title = gettextCatalog.getString(
+      'Participant {{id}}: Add collection event',
+      { id: vm.participant.uniqueId });
     vm.collectionEvent = new CollectionEvent();
     vm.updateCollectionEventType = updateCollectionEventType;
 

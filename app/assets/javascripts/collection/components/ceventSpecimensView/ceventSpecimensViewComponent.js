@@ -17,6 +17,8 @@ define(function () {
 
   CeventSpecimensViewController.$inject = [
     '$q',
+    'gettext',
+    'gettextCatalog',
     'Specimen',
     'Centre',
     'specimenAddModal',
@@ -28,6 +30,8 @@ define(function () {
    *
    */
   function CeventSpecimensViewController($q,
+                                         gettext,
+                                         gettextCatalog,
                                          Specimen,
                                          Centre,
                                          specimenAddModal,
@@ -66,7 +70,7 @@ define(function () {
           return Specimen.add(vm.collectionEvent.id, specimens);
         })
         .then(function () {
-          notificationsService.success('Specimen added');
+          notificationsService.success(gettext('Specimen added'));
           reloadTableData();
         });
     }
@@ -102,14 +106,18 @@ define(function () {
     function removeSpecimen(specimen) {
       domainEntityService.removeEntity(
         promiseFn,
-        'Remove specimen',
-        'Are you sure you want to remove specimen with inventory ID <strong>' + specimen.inventoryId + '</strong>?',
-        'Remove failed',
-        'Specimen with ID ' + specimen.inventoryId + ' cannot be removed');
+        gettext('Remove specimen'),
+        gettextCatalog.getString(
+          'Are you sure you want to remove specimen with inventory ID <strong>{{id}}</strong>?',
+          { id: specimen.inventoryId }),
+        gettext('Remove failed'),
+        gettextCatalog.getString(
+          'Specimen with ID {{id}} cannot be removed',
+          { id: specimen.inventoryId }));
 
       function promiseFn() {
         return specimen.remove().then(function () {
-          notificationsService.success('Specimen removed');
+          notificationsService.success(gettext('Specimen removed'));
           reloadTableData();
         });
       }
