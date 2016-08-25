@@ -17,7 +17,10 @@ define(['lodash'], function (_) {
                                     CentreStatus) {
     var labels = {};
 
+    /// centre status
     labels[CentreStatus.DISABLED] = gettext('Disabled');
+
+    /// centre status
     labels[CentreStatus.ENABLED]  = gettext('Enabled');
 
     var service = {

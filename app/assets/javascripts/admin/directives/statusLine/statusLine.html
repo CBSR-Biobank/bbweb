@@ -1,17 +1,22 @@
 <table class="table table-bordered table-condensed">
   <!-- Meant to be used within a bootstarap panel -->
   <tr>
-    <td ng-if="item.status">
-      <small class="text-muted">Status: <strong>{{ item.statusLabel }}</strong></small>
+    <td ng-if="showStatus">
+      <small class="text-muted text-info">
+        <translate>Status:</translate>
+        <strong>{{ item.statusLabel }}</strong>
+      </small>
     </td>
     <td>
-      <small class="text-muted">Added: <strong>{{item.timeAdded | timeago}}</strong></small>
+      <small class="text-muted text-info">
+        <translate>Added:</translate>
+        <strong>{{item.timeAdded | timeago}}</strong></small>
     </td>
     <td>
-      <small class="text-muted">
-        Modified:
+      <small class="text-muted text-info">
+        <translate>Modified:</translate>
         <strong ng-if="!!item.timeModified">{{item.timeModified | timeago}}</strong>
-        <strong ng-if="! item.timeModified">Never</strong>
+        <strong ng-if="! item.timeModified" translate>Never</strong>
       </small>
     </td>
   </tr>

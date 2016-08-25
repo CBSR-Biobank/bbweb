@@ -3,12 +3,13 @@
 </div>
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">Profile
+    <h3 class="panel-title">
+      <translate>Profile</translate>
       <span class="btn-group pull-right">
         <button class="btn btn-xs btn-primary"
                 ng-click="vm.updatePassword()"
-                title="Update password">
-          Update password
+                title="{{'Change your password'|translate}}">
+          <translate>Update password</translate>
           <i class="glyphicon glyphicon-edit"></i>
         </button>
       </span>
@@ -18,11 +19,11 @@
   <ul class="list-group">
     <li class="list-group-item">
       <div class="row">
-        <div class="col-md-2"><strong>Name</strong></div>
+        <div class="col-md-2"><strong translate>Name</strong></div>
         <div class="col-md-8">{{vm.user.name}}</div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="Update name"
+                  title="{{'Update name'|translate}}"
                   ng-click="vm.updateName()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -31,11 +32,11 @@
     </li>
     <li class="list-group-item">
       <div class="row">
-        <div class="col-md-2"><strong>Email</strong></div>
+        <div class="col-md-2"><strong translate>Email</strong></div>
         <div class="col-md-8">{{vm.user.email}}</div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="Update email"
+                  title="{{'Update email'|translate}}"
                   ng-click="vm.updateEmail()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -44,11 +45,11 @@
     </li>
     <li class="list-group-item">
       <div class="row">
-        <div class="col-md-2"><strong>Avatar URL</strong></div>
+        <div class="col-md-2"><strong translate>Avatar URL</strong></div>
         <div class="col-md-7" ng-if="vm.user.avatarUrl">
           <a target="_blank" ng-href="{{vm.user.avatarUrl}}">{{vm.user.avatarUrl}}</a>
         </div>
-        <div class="col-md-7" ng-if="! vm.user.avatarUrl">
+        <div class="col-md-7" ng-if="! vm.user.avatarUrl" translate>
           None
         </div>
         <div class="col-md-3">
@@ -62,17 +63,5 @@
       </div>
     </li>
   </ul>
-  <table class="table table-bordered">
-    <tr>
-      <td>
-        <small class="text-muted">Added: <strong>{{vm.user.timeAdded | timeago}}</strong></small>
-      </td>
-      <td>
-        <small class="text-muted">
-          Modified:
-          <strong>{{vm.user.timeModified | timeago}}</strong>
-        </small>
-      </td>
-    </tr>
-  </table>
+  <status-line item="vm.user" show-status="false"></status-line>
 </div>

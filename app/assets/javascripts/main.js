@@ -27,7 +27,6 @@
       },
       'centres',
       'collection',
-      'dashboard',
       'domain',
       'home',
       'studies',

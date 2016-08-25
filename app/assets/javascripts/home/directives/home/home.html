@@ -1,9 +1,9 @@
 <div class="page-header">
-  <h1>Welcome to Biobank</h1>
+  <h1 translate>Welcome to Biobank</h1>
 </div>
 <div class="container" ng-if="!vm.userIsAuthenticated">
   <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-12" translate>
       Please log in.
     </div>
   </div>
@@ -11,7 +11,7 @@
 <div class="container" ng-if="vm.userIsAuthenticated">
   <div class="row">
     <div class="col-md-12" ng-if="vm.userIsAuthenticated">
-      <h2>Select a task</h2>
+      <h2 translate>Select a task</h2>
     </div>
   </div>
 
@@ -21,14 +21,14 @@
       <div class="panel panel-default">
         <div class="panel-heading">
           <h3 class="panel-title">
-            Collection
+            <translate>Collection</translate>
             <span class="btn-group pull-right">
               <a ui-sref="home.collection" class="btn btn-xs btn-primary" type="button">Select</a>
             </span>
           </h3>
         </div>
         <div class="panel-body">
-          <p>Record specimen collection.</p>
+          <p translate>Record specimen collection.</p>
         </div>
       </div>
     </div>
@@ -38,14 +38,14 @@
       <div class="panel panel-default">
         <div class="panel-heading">
           <h3 class="panel-title">
-            Shipping
+            <translate>Shipping</translate>
             <span class="btn-group pull-right">
               <a ui-sref="home.shipping" class="btn btn-xs btn-primary" type="button">Select</a>
             </span>
           </h3>
         </div>
         <div class="panel-body">
-          <p>Enter shipping information for specimens.</p>
+          <p translate>Enter shipping information for specimens.</p>
         </div>
       </div>
     </div>
@@ -59,14 +59,14 @@
       <div class="panel panel-default">
         <div class="panel-heading">
           <h3 class="panel-title">
-            Administration
+            <translate>Administration</translate>
             <span class="btn-group pull-right">
               <a ui-sref="home.admin" class="btn btn-xs btn-primary" type="button">Select</a>
             </span>
           </h3>
         </div>
         <div class="panel-body">
-          <p>Perform administrative tasks.</p>
+          <p translate>Perform administrative tasks.</p>
         </div>
       </div>
     </div>

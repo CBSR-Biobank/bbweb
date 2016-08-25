@@ -12,12 +12,20 @@ define(function () {
     bindings: {}
   };
 
-  ForgotPasswordController.$inject = [ '$state', 'usersService', 'modalService' ];
+  ForgotPasswordController.$inject = [
+    '$state',
+    'gettext',
+    'usersService',
+    'modalService'
+  ];
 
   /**
    * Allows the user to have his password reset by entering the email address he registered with.
    */
-  function ForgotPasswordController($state, usersService, modalService) {
+  function ForgotPasswordController($state,
+                                    gettext,
+                                    usersService,
+                                    modalService) {
     var vm = this;
 
     vm.email = '';
@@ -38,10 +46,9 @@ define(function () {
       if (response.message === 'email address not registered') {
         $state.go('home.users.forgot.emailNotFound');
       } else {
-        var headerHtml = 'Cannot reset your password';
-        var bodyHtml = 'The account associated with that email is not active in the system. ' +
-            'Please contact your system administrator for more information.';
-        modalService.modalOk(headerHtml, bodyHtml)
+        modalService.modalOk(gettext('Cannot reset your password'),
+                             gettext('The account associated with that email is not active in the system. ' +
+                                     'Please contact your system administrator for more information.'))
           .then(gotoReturnState)
           .catch(gotoReturnState);
       }

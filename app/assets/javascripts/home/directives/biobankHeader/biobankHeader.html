@@ -11,13 +11,15 @@
           <ul class="dropdown-menu" role="menu">
             <li>
               <a href="#/profile">
-                <span class="glyphicon glyphicon-cog"></span> Profile
+                <span class="glyphicon glyphicon-cog"></span>
+                <translate>Profile</translate>
               </a>
             </li>
             <li class="divider"></li>
             <li>
               <a href ng-click="vm.logout()">
-                <span class="glyphicon glyphicon-off"></span> Logout
+                <span class="glyphicon glyphicon-off"></span>
+                <translate>Logout</translate>
               </a>
             </li>
           </ul>
@@ -25,7 +27,7 @@
       </ul>
     </div>
     <ul class="nav navbar-nav pull-right" ng-if="!vm.user" ng-cloak>
-      <li><a href="#/login">Login</a></li>
+      <li><a href="#/login" translate>Login</a></li>
     </ul>
   </div>
 </header>

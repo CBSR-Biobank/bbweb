@@ -1,8 +1,8 @@
 <div class="row">
   <div class="col-md-offset-2 col-md-8">
-    <div class="panel panel-info">
+    <div class="panel panel-primary">
       <div class="panel-heading">
-        <h3 class="panel-title">Login</h3>
+        <h3 class="panel-title" translate>Login</h3>
       </div>
       <div class="panel-body">
 
@@ -14,28 +14,28 @@
 
           <!-- EMAIL -->
           <div class="form-group">
-            <label for="email" class="col-md-3 form-control-label">Email address</label>
+            <label for="email" class="col-md-3 form-control-label" translate>Email address</label>
             <div class="col-md-8">
               <input
                  name="email"
                  type="email"
                  class="form-control"
                  ng-model="vm.credentials.email"
-                 placeholder="Email"
+                 placeholder="{{'Email'|translate}}"
                  required/>
             </div>
           </div>
 
           <!-- PASSWORD -->
           <div class="form-group">
-            <label for="password" class="col-md-3 form-control-label">Password</label>
+            <label for="password" class="col-md-3 form-control-label" translate>Password</label>
             <div class="col-md-8">
               <input
                  name="password"
                  type="password"
                  class="form-control"
                  ng-model="vm.credentials.password"
-                 placeholder="Password"
+                 placeholder="{{'Password'|translate}}"
                  required />
             </div>
           </div>
@@ -43,14 +43,19 @@
           <!-- BUTTONS  -->
           <div class="form-group">
             <div class="col-md-offset-3 col-md-8">
-              <button class="btn btn-primary" ng-disabled="loginForm.$invalid">Log In</button>
+              <button class="btn btn-primary" ng-disabled="loginForm.$invalid" translate>Log In</button>
             </div>
           </div>
         </form>
 
         <div class="col-md-12">
-          <p><a ui-sref="home.users.forgot">Forgot password?</a></p>
-          <p>If you don't have an account yet you can <a ui-sref="home.users.register">register here</a>.</p>
+          <p><a ui-sref="home.users.forgot" translate>Forgot password?</a></p>
+          <p>
+            <translate translate-context="used in the login page">
+              Don't have an account?
+            </translate>
+            <a ui-sref="home.users.register" translate>Register</a>
+          </p>
         </div>
       </div>
     </div>

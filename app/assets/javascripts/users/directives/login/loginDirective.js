@@ -25,17 +25,22 @@ define(function () {
 
   LoginCtrl.$inject = [
     '$state',
+    'gettext',
     'usersService',
     'modalService',
   ];
 
-  function LoginCtrl($state, usersService, modalService) {
+  function LoginCtrl($state,
+                     gettext,
+                     usersService,
+                     modalService) {
     var vm = this;
 
     vm.credentials = {
       email: '',
       password: ''
     };
+
     vm.login = login;
 
     init();
@@ -62,47 +67,42 @@ define(function () {
     }
 
     function loginFailure(error) {
-      var modalDefaults = {};
-      var modalOptions = {};
+      var header, body;
 
       if (!error.hasOwnProperty('data') || (error.data === null)) {
-          modalOptions.headerHtml = 'Login error';
-          modalOptions.bodyHtml = 'Cannot login: server is not reachable.';
-          modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
-      } else {
-        switch (error.data.message)  {
-        case 'invalid email or password':
-          modalOptions.closeButtonText = 'Cancel';
-          modalOptions.actionButtonText = 'Retry';
-          modalOptions.headerHtml = 'Invalid login credentials';
-          modalOptions.bodyHtml = 'The email and / or password you entered are invalid.';
-          break;
+        header = gettext('Login error');
+        body = gettext('Cannot login: server is not reachable.');
+    } else {
+      switch (error.data.message)  {
+      case 'invalid email':
+      case 'InvalidPassword':
+        header = gettext('Invalid login credentials');
+        body = gettext('The email and / or password you entered are invalid.');
+        break;
 
-        case 'the user is not active':
-          modalOptions.headerHtml = 'Login not active';
-          modalOptions.bodyHtml = 'Your login is not active yet. ' +
-            'Please contact your system admnistrator for more information.';
-          modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
-          break;
+      case 'the user is not active':
+        header = gettext('Login not active');
+        body = gettext('Your login is not active yet. ' +
+                       'Please contact your system admnistrator for more information.');
+        break;
 
-        case 'the user is locked':
-          modalOptions.headerHtml = 'Login is locked';
-          modalOptions.bodyHtml = 'Your login is locked. ' +
-            'Please contact your system admnistrator for more information.';
-          modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
-          break;
+      case 'the user is locked':
+        header = gettext('Login is locked');
+        body = gettext('Your login is locked. ' +
+                       'Please contact your system admnistrator for more information.');
+        break;
 
-        default:
-          modalOptions.headerHtml = 'Login error';
-          modalOptions.bodyHtml = 'Cannot login: ' + error.data.message;
-          modalDefaults.templateUrl = '/assets/javascripts/common/modalOk.html';
-        }
+      default:
+        header = gettext('Login error');
+        body = gettext('Cannot login: ') + error.data.message;
       }
+    }
 
-      modalService.showModal(modalDefaults, modalOptions)
+    return modalService.modalOk(header, body)
         .then(returnToLoginState)
         .catch(goToHomeState);
     }
+
   }
 
   return loginDirective;

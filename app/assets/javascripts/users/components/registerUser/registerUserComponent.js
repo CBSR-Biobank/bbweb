@@ -12,12 +12,20 @@ define(function () {
     bindings: {}
   };
 
-  RegisterUserController.$inject = ['$state', 'User', 'notificationsService'];
+  RegisterUserController.$inject = [
+    '$state',
+    'gettext',
+    'User',
+    'notificationsService'
+  ];
 
   /**
    *
    */
-  function RegisterUserController($state, User, notificationsService) {
+  function RegisterUserController($state,
+                                  gettext,
+                                  User,
+                                  notificationsService) {
     var vm = this;
 
     vm.user = new User();
@@ -38,8 +46,8 @@ define(function () {
     function registerSuccess() {
       // user has been registerd
       notificationsService.success(
-        'Your account was created and is now pending administrator approval.',
-        'Registration success',
+        gettext('Your account was created and is now pending administrator approval.'),
+        gettext('Registration success'),
         4000);
       $state.go('home.users.login');
     }
@@ -47,13 +55,15 @@ define(function () {
     function registerFailure(err) {
       var message;
       if ((err.status === 403) && (err.data.message === 'already registered')) {
-        message = 'That email address is already registered.';
+        message = gettext('That email address is already registered.');
       } else {
         message = err.data.message;
       }
 
       // registration failed
-      notificationsService.error(message, 'Registration error', 4000);
+      notificationsService.error(message,
+                                 gettext('Registration error'),
+                                 4000);
     }
 
     function cancel() {

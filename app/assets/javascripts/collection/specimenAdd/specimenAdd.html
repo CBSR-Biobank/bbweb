@@ -1,5 +1,5 @@
 <div class="modal-header">
-  <h3 class="modal-title">Add specimen</h3>
+  <h3 class="modal-title" translate>Add specimen</h3>
 </div>
 <div class="modal-body">
   <form class="form-horizontal" name="form" novalidate>
@@ -7,7 +7,7 @@
     <!-- SPECIMEN SPEC -->
     <div class="form-group row"
          ng-class="{ 'has-error' : form.specimenSpec.$invalid && !form.specimenSpec.$pristine }">
-      <label class="col-md-3 form-control-label">Specimen type</label>
+      <label class="col-md-3 form-control-label" translate>Specimen type</label>
       <div class="col-md-9">
         <select class="form-control"
                 id="specimenSpec"
@@ -17,20 +17,20 @@
                 ng-change="vm.specimenSpecChanged()"
                 focus-me="true"
                 required>
-          <option value="">-- make a selection --</option>
+          <option value="" translate>-- make a selection --</option>
         </select>
       </div>
       <div class="col-sm-offset-3 col-sm-9"
            ng-messages="form.specimenSpec.$error"
            ng-if="form.specimenSpec.$dirty">
-        <div ng-message="required" class="help-block">A specimen type must be selected</div>
+        <div ng-message="required" class="help-block" translate>A specimen type must be selected</div>
       </div>
     </div>
 
     <!-- INVENTORY ID -->
     <div class="form-group row"
          ng-class="{ 'has-error' : form.inventoryId.$invalid && !form.inventoryId.$pristine }">
-      <label for="inventoryId" class="col-md-3 form-control-label">Inventory ID</label>
+      <label for="inventoryId" class="col-md-3 form-control-label" translate>Inventory ID</label>
       <div class="col-md-9">
         <input name="inventoryId"
                type="text"
@@ -44,12 +44,12 @@
       <div class="col-sm-offset-3 col-sm-9"
            ng-messages="form.inventoryId.$error"
            ng-if="form.inventoryId.$dirty">
-        <div ng-message="required" class="help-block">Inventory ID is required</div>
-        <div ng-message="minlength" class="help-block">Inventory ID is too short</div>
-        <div ng-message="inventoryIdTaken" class="help-block">
+        <div ng-message="required" class="help-block" translate>Inventory ID is required</div>
+        <div ng-message="minlength" class="help-block" translate>Inventory ID is too short</div>
+        <div ng-message="inventoryIdTaken" class="help-block" translate>
           A specimen already exists with this inventory ID
         </div>
-        <div ng-message="inventoryIdEntered" class="help-block">
+        <div ng-message="inventoryIdEntered" class="help-block" translate>
           You have already entered this inventory ID
         </div>
       </div>
@@ -59,7 +59,7 @@
     <div class="form-group row"
          ng-class="{ 'has-error' : form.amount.$invalid && !form.amount.$pristine,
                    'has-warning' : !vm.usingDefaultAmount }">
-      <label for="amount" class="col-md-3 form-control-label">Amount</label>
+      <label for="amount" class="col-md-3 form-control-label" translate>Amount</label>
       <div class="col-md-9">
         <div class="input-group">
           <input name="amount"
@@ -75,12 +75,12 @@
       <div class="col-md-offset-3 col-md-9"
            ng-messages="form.amount.$error"
            ng-if="form.amount.$dirty">
-        <div ng-message="required" class="help-block">
+        <div ng-message="required" class="help-block" translate>
           Value should be a positive floating point number
         </div>
       </div>
       <div class="col-md-offset-3 col-md-9">
-        <div class="help-block" ng-if="!vm.usingDefaultAmount">
+        <div class="help-block" ng-if="!vm.usingDefaultAmount" translate>
           Amount is different than the default ({{vm.defaultAmount}} {{vm.units}})
         </div>
       </div>
@@ -89,7 +89,7 @@
     <!-- TIME COLECTED -->
     <div class="form-group row"
          ng-class="{ 'has-error' : form.date.$invalid && !form.date.$pristine }">
-      <label class="col-md-3 form-control-label">Time collected</label>
+      <label class="col-md-3 form-control-label" translate>Time collected</label>
       <div class="col-md-9">
         <div class="input-group">
           <input name="date"
@@ -114,39 +114,45 @@
       <div class="col-md-offset-3 col-md-9"
            ng-messages="form.date.$error"
            ng-if="form.date.$dirty">
-        <div ng-message="datetime" class="help-block">date and / or time are invalid</div>
-        <div ng-message="required" class="help-block">date and time are required</div>
+        <div ng-message="datetime" class="help-block" translate>date and / or time are invalid</div>
+        <div ng-message="required" class="help-block" translate>date and time are required</div>
       </div>
     </div>
 
     <!-- CENTRE LOCATION -->
     <div class="form-group row"
          ng-class="{ 'has-error' : form.centre.$invalid && !form.centre.$pristine }">
-      <label class="col-md-3 form-control-label">Collection centre</label>
+      <label class="col-md-3 form-control-label" translate>Collection centre</label>
       <div class="col-md-9">
         <select class="form-control"
                 name="centre"
                 ng-model="vm.selectedLocationId"
                 ng-options="locInfo.locationId as locInfo.name for locInfo in vm.centreLocations"
                 required>
-          <option value="">-- make a selection --</option>
+          <option value="" translate>-- make a selection --</option>
         </select>
       </div>
       <div class="col-sm-offset-3 col-sm-9"
            ng-messages="form.centre.$error"
            ng-if="form.centre.$dirty">
-        <div ng-message="required" class="help-block">A centre must be selected</div>
+        <div ng-message="required" class="help-block" translate>A centre must be selected</div>
       </div>
     </div>
 
   </form>
 </div>
 <div class="modal-footer">
-  <button class="btn" ng-click="vm.closePressed()">Cancel</button>
+  <button class="btn" ng-click="vm.closePressed()" translate>Cancel</button>
   <button class="btn btn-primary"
           ng-click="vm.okPressed()"
-          ng-disabled="form.$invalid">OK</button>
+          ng-disabled="form.$invalid"
+          translate>
+    OK
+  </button>
   <button class="btn btn-primary"
           ng-click="vm.nextPressed()"
-          ng-disabled="form.$invalid">Next</button>
+          ng-disabled="form.$invalid"
+          translate>
+    Next
+  </button>
 </div>

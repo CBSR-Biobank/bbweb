@@ -13,7 +13,8 @@ define(function () {
       restrict: 'E',
       replace: true,
       scope: {
-        item: '='
+        item: '=',
+        showStatus: '='
       },
       templateUrl : '/assets/javascripts/admin/directives/statusLine/statusLine.html'
     };

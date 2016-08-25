@@ -5,17 +5,26 @@
 define(['lodash'], function (_) {
   'use strict';
 
-  userStatusLabelService.$inject = ['UserStatus'];
+  userStatusLabelService.$inject = [
+    'UserStatus',
+    'gettext'
+  ];
 
   /**
    * Description
    */
-  function userStatusLabelService(UserStatus) {
+  function userStatusLabelService(UserStatus,
+                                  gettext) {
     var labels = {};
 
-    labels[UserStatus.REGISTERED] = 'Registered';
-    labels[UserStatus.ACTIVE]     = 'Active';
-    labels[UserStatus.LOCKED]     = 'Locked';
+    /// user status
+    labels[UserStatus.REGISTERED] = gettext('Registered');
+
+    /// user status
+    labels[UserStatus.ACTIVE]     = gettext('Active');
+
+    /// user status
+    labels[UserStatus.LOCKED]     = gettext('Locked');
 
     var service = {
       statusToLabel: statusToLabel

@@ -1,5 +1,5 @@
 <div class="page-header">
-  <h1>Register as a user</h1>
+  <h1 translate>Register as a user</h1>
 </div>
 <form class="form-horizontal"
       name="registrationForm"
@@ -8,63 +8,70 @@
   <!-- NAME -->
   <div class="form-group"
        ng-class="{ 'has-error' : registrationForm.name.$invalid && !registrationForm.name.$pristine }">
-    <label for="name" class="col-md-3 form-control-label">Name</label>
+    <label for="name" class="col-md-3 form-control-label" translate>Name</label>
     <div class="col-md-7">
       <input name="name"
              type="text"
              class="form-control"
              ng-model="vm.user.name"
              ng-minlength="2"
-             placeholder="given name(s) followed by surname(s) separated by spaces"
+             placeholder="{{'given name(s) followed by surname(s) separated by spaces'|translate}}"
              focus-me="true"
              required/>
     </div>
     <div class="col-md-offset-3 col-md-7"
          ng-messages="registrationForm.name.$error"
          ng-if="registrationForm.name.$dirty">
-      <div ng-message="minlength" class="help-block">Name is too short</div>
-      <div ng-message="required" class="help-block">A name is requried</div>
+      <div ng-message="minlength" class="help-block" translate>Name is too short</div>
+      <div ng-message="required" class="help-block" translate>A name is requried</div>
     </div>
   </div>
 
   <!-- NAME -->
   <div class="form-group"
        ng-class="{ 'has-error' : registrationForm.email.$invalid && !registrationForm.email.$pristine }">
-    <label for="email" class="col-md-3 form-control-label">Email address</label>
+    <label for="email" class="col-md-3 form-control-label" translate>Email address</label>
     <div class="col-md-7">
       <input
          name="email"
          type="email"
          class="form-control"
          ng-model="vm.user.email"
-         placeholder="Email"
+         placeholder="{{'Email'|translate}}"
          required/>
     </div>
     <div class="col-md-offset-3 col-md-7"
          ng-messages="registrationForm.email.$error"
          ng-if="registrationForm.email.$dirty">
-      <div ng-message="email" class="help-block">A valid email address is required</div>
+      <div ng-message="email" class="help-block" translate>A valid email address is required</div>
     </div>
   </div>
 
   <!-- PASSWORD -->
   <div class="form-group"
        ng-class="{ 'has-error' : registrationForm.password.$invalid && !registrationForm.password.$pristine }">
-    <label for="password" class="col-md-3 form-control-label">Password</label>
+    <label for="password"
+           class="col-md-3 form-control-label"
+           translate
+           translate-context="used in a web form where the user should enter his password">
+      Password
+    </label>
     <div class="col-md-7">
       <input
          name="password"
          type="password"
          class="form-control"
          ng-model="vm.password"
-         placeholder="Password"
+         placeholder="{{'Password'|translate}}"
          ng-minlength="8"
          required />
     </div>
     <div class="col-md-offset-3 col-md-7"
          ng-messages="registrationForm.password.$error"
          ng-if="registrationForm.password.$dirty">
-      <div ng-message="minlength" class="help-block">
+      <div ng-message="minlength"
+           class="help-block"
+           translate>
         Password should be at least 8 characters
       </div>
     </div>
@@ -74,21 +81,26 @@
   <div class="form-group"
        ng-class="{ 'has-error' : registrationForm.confirmPassword.$invalid &&
                  !registrationForm.confirmPassword.$pristine }">
-    <label for="password" class="col-md-3 form-control-label">Confirm password</label>
+    <label for="password"
+           class="col-md-3 form-control-label"
+           translate
+           translate-context="used in a web form where the user should enter his password">
+      Confirm password
+    </label>
     <div class="col-md-7">
       <input
          name="confirmPassword"
          type="password"
          class="form-control"
          ng-model="vm.confirmPassword"
-         placeholder="Password"
+         placeholder="{{'Password'|translate}}"
          password-check="vm.password"
          ng-required />
     </div>
     <div class="col-md-offset-3 col-md-7"
          ng-messages="registrationForm.confirmPassword.$error"
          ng-if="registrationForm.confirmPassword.$dirty">
-      <div ng-message="passwordmatch" class="help-block">Passwords do not match</div>
+      <div ng-message="passwordmatch" class="help-block" translate>Passwords do not match</div>
     </div>
   </div>
 
@@ -97,8 +109,11 @@
     <div class="col-md-offset-3 col-md-9">
       <button class="btn btn-primary"
               ng-disabled="userRegForm.$invalid"
-              ng-click="vm.submit(vm.user)">Submit</button>
-      <button type="button" class="btn" ng-click="vm.cancel()">Cancel</button>
+              ng-click="vm.submit(vm.user)"
+              translate>
+        Submit
+      </button>
+      <button type="button" class="btn" ng-click="vm.cancel()" translate>Cancel</button>
     </div>
   </div>
 </form>
