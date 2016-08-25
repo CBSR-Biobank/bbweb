@@ -26,13 +26,13 @@ define(['lodash'], function(_) {
   CeventTypeAddCtrl.$inject = [
     '$state',
     'CollectionEventType',
-    'domainEntityService',
+    'domainNotificationService',
     'notificationsService'
   ];
 
   function CeventTypeAddCtrl($state,
                              CollectionEventType,
-                             domainEntityService,
+                             domainNotificationService,
                              notificationsService) {
     var vm = this;
 
@@ -54,7 +54,7 @@ define(['lodash'], function(_) {
       }
 
       function submitError(error) {
-        domainEntityService.updateErrorModal(error, 'collection event type');
+        domainNotificationService.updateErrorModal(error, 'collection event type');
       }
     }
 

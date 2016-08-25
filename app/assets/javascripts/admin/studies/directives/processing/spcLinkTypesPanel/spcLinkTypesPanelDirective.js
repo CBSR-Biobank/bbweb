@@ -28,7 +28,7 @@ define(['angular', 'lodash'], function(angular, _) {
     '$scope',
     '$state',
     'modalService',
-    'domainEntityService',
+    'domainNotificationService',
     'Panel',
     'SpcLinkTypeViewer',
     'ProcessingTypeViewer',
@@ -42,7 +42,7 @@ define(['angular', 'lodash'], function(angular, _) {
   function SpcLinkTypesPanelCtrl($scope,
                                  $state,
                                  modalService,
-                                 domainEntityService,
+                                 domainNotificationService,
                                  Panel,
                                  SpcLinkTypeViewer,
                                  ProcessingTypeViewer,
@@ -128,7 +128,7 @@ define(['angular', 'lodash'], function(angular, _) {
       if (!vm.study.isDisabled()) {
         throw new Error('study is not disabled');
       }
-      domainEntityService.removeEntity(
+      domainNotificationService.removeEntity(
         promiseFunc,
         'Remove Specimen Link Type',
         'Are you sure you want to remove this specimen link type?',

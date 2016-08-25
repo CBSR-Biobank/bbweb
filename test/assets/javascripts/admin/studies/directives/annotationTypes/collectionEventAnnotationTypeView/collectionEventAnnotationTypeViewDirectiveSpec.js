@@ -60,7 +60,7 @@ define([
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/annotationTypes/collectionEventAnnotationTypeView/collectionEventAnnotationTypeView.html',
         '/assets/javascripts/admin/directives/annotationTypeView/annotationTypeView.html',
-        '/assets/javascripts/common/directives/truncateToggle.html');
+        '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html');
 
     }));
 

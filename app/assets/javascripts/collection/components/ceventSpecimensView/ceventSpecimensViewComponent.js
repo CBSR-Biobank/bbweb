@@ -22,7 +22,7 @@ define(function () {
     'Specimen',
     'Centre',
     'specimenAddModal',
-    'domainEntityService',
+    'domainNotificationService',
     'notificationsService'
   ];
 
@@ -35,7 +35,7 @@ define(function () {
                                          Specimen,
                                          Centre,
                                          specimenAddModal,
-                                         domainEntityService,
+                                         domainNotificationService,
                                          notificationsService) {
     var vm = this;
 
@@ -104,7 +104,7 @@ define(function () {
     }
 
     function removeSpecimen(specimen) {
-      domainEntityService.removeEntity(
+      domainNotificationService.removeEntity(
         promiseFn,
         gettext('Remove specimen'),
         gettextCatalog.getString(

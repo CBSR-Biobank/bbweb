@@ -17,7 +17,8 @@ define([
     var createScope = function (entity) {
       this.scope = this.$rootScope;
 
-      this.element = angular.element('<status-line item="model.entity"></status-line>');
+      this.element = angular.element(
+        '<status-line item="model.entity" show-status="true"></status-line>');
       this.scope.model = { entity: entity };
 
       this.$compile(this.element)(this.scope);
@@ -38,7 +39,7 @@ define([
                               'factory');
 
       self.putHtmlTemplates(
-        '/assets/javascripts/admin/directives/statusLine/statusLine.html');
+        '/assets/javascripts/common/directives/statusLine/statusLine.html');
     }));
 
     it('has the correct number of table cells', function() {
@@ -78,6 +79,11 @@ define([
       cells = this.element.find('td');
       expect(cells.eq(2).find('small').eq(0).text()).toContain('Never');
     });
+
+    it('add tests for showStatus = false', function() {
+      fail('need to implement these tests');
+    });
+
 
   });
 

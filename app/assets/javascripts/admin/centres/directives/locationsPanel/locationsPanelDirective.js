@@ -27,7 +27,7 @@ define(['lodash'], function(_) {
     '$scope',
     '$state',
     'LocationViewer',
-    'domainEntityService'
+    'domainNotificationService'
   ];
 
   /**
@@ -36,7 +36,7 @@ define(['lodash'], function(_) {
   function LocationsPanelCtrl($scope,
                               $state,
                               LocationViewer,
-                              domainEntityService) {
+                              domainNotificationService) {
     var vm = this;
 
     vm.add    = add;
@@ -62,7 +62,7 @@ define(['lodash'], function(_) {
     }
 
     function remove(location) {
-      domainEntityService.removeEntity(
+      domainNotificationService.removeEntity(
         doRemove,
         'Remove Location',
         'Are you sure you want to remove location ' + location.name + '?',

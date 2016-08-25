@@ -7,7 +7,7 @@ define(function () {
 
   ProcessingTypeEditCtrl.$inject = [
     '$state',
-    'domainEntityService',
+    'domainNotificationService',
     'notificationsService',
     'processingType'
   ];
@@ -16,7 +16,7 @@ define(function () {
    *
    */
   function ProcessingTypeEditCtrl($state,
-                                  domainEntityService,
+                                  domainNotificationService,
                                   notificationsService,
                                   processingType) {
 
@@ -42,7 +42,7 @@ define(function () {
       processingType.addOrUpdate()
         .then(submitSuccess)
         .catch(function(error) {
-          domainEntityService.updateErrorModal(
+          domainNotificationService.updateErrorModal(
             error, 'processing type');
         });
     }

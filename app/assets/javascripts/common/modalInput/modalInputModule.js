@@ -78,7 +78,8 @@ define(function (require) {
    * @param {object} options.minLength Used for "text" and "textArea" and specifies the minimum length that is
    * accepted.
    *
-   * @param {object} options.selectOptions for "select" and "selectMultiple", these are the options to be displayed.
+   * @param {object} options.selectOptions for "select" and "selectMultiple", these are the options to be
+   * displayed.
    *
    * @return $uibModal returns the modal object used by ui-bootstrap.
    */

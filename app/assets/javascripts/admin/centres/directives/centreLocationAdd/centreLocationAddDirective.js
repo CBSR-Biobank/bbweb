@@ -25,11 +25,11 @@ define(function () {
 
   CentreLocationAddCtrl.$inject = [
     '$state',
-    'domainEntityService',
+    'domainNotificationService',
     'notificationsService'
   ];
 
-  function CentreLocationAddCtrl($state, domainEntityService, notificationsService) {
+  function CentreLocationAddCtrl($state, domainNotificationService, notificationsService) {
     var vm = this;
 
     vm.submit = submit;
@@ -51,7 +51,7 @@ define(function () {
       }
 
       function submitError(error) {
-        return domainEntityService.updateErrorModal(error, 'location');
+        return domainNotificationService.updateErrorModal(error, 'location');
       }
     }
 

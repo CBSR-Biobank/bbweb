@@ -7,7 +7,7 @@ define(['lodash'], function(_) {
 
   SpecimenGroupEditCtrl.$inject = [
     '$state',
-    'domainEntityService',
+    'domainNotificationService',
     'notificationsService',
     'AnatomicalSourceType',
     'PreservationType',
@@ -21,7 +21,7 @@ define(['lodash'], function(_) {
    * Add or update an specimen Group.
    */
   function SpecimenGroupEditCtrl($state,
-                                 domainEntityService,
+                                 domainNotificationService,
                                  notificationsService,
                                  AnatomicalSourceType,
                                  PreservationType,
@@ -84,7 +84,7 @@ define(['lodash'], function(_) {
       specimenGroup.addOrUpdate()
         .then(submitSuccess)
         .catch(function(error) {
-          domainEntityService.updateErrorModal(
+          domainNotificationService.updateErrorModal(
             error,'specimen group');
         });
     }

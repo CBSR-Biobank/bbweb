@@ -24,13 +24,13 @@ define(['lodash'], function(_) {
   CentreAddCtrl.$inject = [
     '$state',
     'Centre',
-    'domainEntityService',
+    'domainNotificationService',
     'notificationsService'
   ];
 
   function CentreAddCtrl($state,
                          Centre,
-                         domainEntityService,
+                         domainNotificationService,
                          notificationsService) {
     var vm = this;
 
@@ -61,7 +61,7 @@ define(['lodash'], function(_) {
     }
 
     function onSubmitError(error) {
-      domainEntityService.updateErrorModal(error, 'centre');
+      domainNotificationService.updateErrorModal(error, 'centre');
     }
 
     function cancel() {

@@ -50,7 +50,7 @@ define([
                               'Centre',
                               'Location',
                               'modalService',
-                              'domainEntityService',
+                              'domainNotificationService',
                               'factory');
 
       testUtils.addCustomMatchers();

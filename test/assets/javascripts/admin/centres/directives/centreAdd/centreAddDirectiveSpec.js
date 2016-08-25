@@ -34,7 +34,7 @@ define([
                               'Centre',
                               'factory',
                               'notificationsService',
-                              'domainEntityService');
+                              'domainNotificationService');
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/centres/directives/centreAdd/centreAdd.html');
@@ -66,10 +66,10 @@ define([
 
     it('should return to valid state on invalid submit', function() {
       var $q                  = this.$injector.get('$q'),
-          domainEntityService = this.$injector.get('domainEntityService');
+          domainNotificationService = this.$injector.get('domainNotificationService');
 
       createController.call(this, this.centre);
-      spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
+      spyOn(domainNotificationService, 'updateErrorModal').and.callFake(function () {});
       spyOn(this.Centre.prototype, 'add').and.callFake(function () {
         var deferred = $q.defer();
         deferred.reject('err');
@@ -78,7 +78,7 @@ define([
 
       this.controller.submit(this.centre);
       this.scope.$digest();
-      expect(domainEntityService.updateErrorModal).toHaveBeenCalledWith('err', 'centre');
+      expect(domainNotificationService.updateErrorModal).toHaveBeenCalledWith('err', 'centre');
     });
 
 

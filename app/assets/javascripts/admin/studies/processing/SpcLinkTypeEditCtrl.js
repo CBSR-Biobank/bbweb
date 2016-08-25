@@ -9,7 +9,7 @@ define(['lodash'], function(_) {
     '$state',
     'SpecimenLinkType',
     'SpecimenGroup',
-    'domainEntityService',
+    'domainNotificationService',
     'notificationsService',
     'study',
     'spcLinkType',
@@ -22,7 +22,7 @@ define(['lodash'], function(_) {
   function SpcLinkTypeEditCtrl($state,
                                SpecimenLinkType,
                                SpecimenGroup,
-                               domainEntityService,
+                               domainNotificationService,
                                notificationsService,
                                study,
                                spcLinkType,
@@ -65,7 +65,7 @@ define(['lodash'], function(_) {
       specimenLinkType.addOrUpdate()
         .then(submitSuccess)
         .catch(function(error) {
-          domainEntityService.updateErrorModal(
+          domainNotificationService.updateErrorModal(
             error, 'collection event type');
         });
     }

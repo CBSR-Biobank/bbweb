@@ -42,7 +42,7 @@ define([
                               '$rootScope',
                               '$compile',
                               '$state',
-                              'domainEntityService',
+                              'domainNotificationService',
                               'modalService',
                               'Study',
                               'AnnotationType',

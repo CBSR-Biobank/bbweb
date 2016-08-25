@@ -44,7 +44,7 @@ define([
                               '$rootScope',
                               '$compile',
                               '$state',
-                              'domainEntityService',
+                              'domainNotificationService',
                               'Study',
                               'Participant',
                               'CollectionEvent',
@@ -105,19 +105,19 @@ define([
       it('displays an error modal', function() {
         spyOn(this.CollectionEvent.prototype, 'add')
           .and.returnValue(this.$q.reject('simulated update failure'));
-        spyOn(this.domainEntityService, 'updateErrorModal').and.returnValue(this.$q.when('ok'));
+        spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(this.$q.when('ok'));
 
         createDirective.call(this);
         this.controller.submit();
         this.scope.$digest();
 
-        expect(this.domainEntityService.updateErrorModal).toHaveBeenCalled();
+        expect(this.domainNotificationService.updateErrorModal).toHaveBeenCalled();
       });
 
       it('changes state when Cancel button pressed on error modal', function() {
         spyOn(this.CollectionEvent.prototype, 'add')
           .and.returnValue(this.$q.reject('simulated update failure'));
-        spyOn(this.domainEntityService, 'updateErrorModal')
+        spyOn(this.domainNotificationService, 'updateErrorModal')
           .and.returnValue(this.$q.reject('cancel button pressed'));
         spyOn(this.$state, 'go').and.returnValue('ok');
 

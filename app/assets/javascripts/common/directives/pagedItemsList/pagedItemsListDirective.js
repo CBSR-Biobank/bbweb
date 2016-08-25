@@ -31,20 +31,20 @@ define(['lodash'], function(_) {
     return directive;
   }
 
-  PagedItemsListCtrl.$inject = ['$scope'];
+  PagedItemsListCtrl.$inject = ['$scope', 'gettext'];
 
   /**
-   * @param {Array} $scope.possibleStatuses - an array with 2 keys: 'id' and 'name'. The value for the 'id'
-   * key is a status for the entities being displayed, and used with the $scope.getItems function. The value
-   * for the 'Name' key is what is displayed in the 'Status' drop down box. The first item of the array should be
-   * { id: 'all', name: 'All' } so that all items are displayed.
+   * @param {Array} $scope.possibleStatuses - an array of objects, where each object has 2 keys: 'id' and
+   * 'name'. The value for the 'id' key is a status for the entities being displayed, and used with the
+   * $scope.getItems function. The value for the 'Name' key is what is displayed in the 'Status' drop down
+   * box. The first item of the array should be { id: 'all', name: 'All' } so that all items are displayed.
    */
-  function PagedItemsListCtrl($scope) {
+  function PagedItemsListCtrl($scope, gettext) {
     var vm = this;
 
     vm.pagedResult                  = { total: vm.counts.total };
     vm.paginationNumPages           = 5;
-    vm.sortFields                   = ['Name', 'Status'];
+    vm.sortFields                   = [ gettext('Name'), gettext('Status') ];
     vm.nameFilterUpdated            = nameFilterUpdated;
     vm.statusFilterUpdated          = statusFilterUpdated;
     vm.pageChanged                  = pageChanged;

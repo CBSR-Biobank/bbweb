@@ -76,7 +76,7 @@ define(function(require) {
 
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/participantSummary/participantSummary.html',
-        '/assets/javascripts/admin/directives/statusLine/statusLine.html');
+        '/assets/javascripts/common/directives/statusLine/statusLine.html');
 
       self.jsonParticipant = self.factory.participant();
       self.jsonStudy       = self.factory.defaultStudy();

@@ -54,7 +54,7 @@ define([
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/annotationTypeView/annotationTypeView.html',
-        '/assets/javascripts/common/directives/truncateToggle.html',
+        '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
 
       self.returnState      = 'my-return-state';

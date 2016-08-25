@@ -30,7 +30,7 @@ define(['angular', 'lodash'], function(angular, _) {
     '$state',
     'Panel',
     'ProcessingTypeViewer',
-    'domainEntityService'
+    'domainNotificationService'
   ];
 
   /**
@@ -40,7 +40,7 @@ define(['angular', 'lodash'], function(angular, _) {
                                     $state,
                                     Panel,
                                     ProcessingTypeViewer,
-                                    domainEntityService) {
+                                    domainNotificationService) {
     var vm = this,
         panel = new Panel('study.panel.processingTypes',
                           'home.admin.studies.study.processing.processingTypeAdd');
@@ -91,7 +91,7 @@ define(['angular', 'lodash'], function(angular, _) {
       if (!vm.study.isDisabled()) {
         throw new Error('study is not disabled');
       }
-      domainEntityService.removeEntity(
+      domainNotificationService.removeEntity(
         callback,
         'Remove Processing Type',
         'Are you sure you want to remove processing type ' + processingType.name + '?',

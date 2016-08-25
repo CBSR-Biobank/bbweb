@@ -160,17 +160,17 @@ define([
 
     it('can remove a processing type', function() {
       var q                   = this.$injector.get('$q'),
-          domainEntityService = this.$injector.get('domainEntityService'),
+          domainNotificationService = this.$injector.get('domainNotificationService'),
           entities            = createEntities(),
           ptToRemove          = entities.processingTypes[1];
 
       createController(entities.study, entities.processingTypes);
-      spyOn(domainEntityService, 'removeEntity').and.callFake(function () {
+      spyOn(domainNotificationService, 'removeEntity').and.callFake(function () {
         return q.when('OK');
       });
       controller.remove(ptToRemove);
       scope.$digest();
-      expect(domainEntityService.removeEntity).toHaveBeenCalled();
+      expect(domainNotificationService.removeEntity).toHaveBeenCalled();
       expect(controller.processingTypes).toBeArrayOfSize(entities.processingTypes.length - 1);
     });
 

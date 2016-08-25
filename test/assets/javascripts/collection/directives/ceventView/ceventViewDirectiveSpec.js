@@ -76,7 +76,7 @@ define(function(require) {
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/ceventView/ceventView.html',
         '/assets/javascripts/collection/components/ceventSpecimensView/ceventSpecimensView.html',
-        '/assets/javascripts/admin/directives/statusLine/statusLine.html',
+        '/assets/javascripts/common/directives/statusLine/statusLine.html',
         '/assets/javascripts/common/directives/pagination.html');
 
       self.jsonCevent      = self.factory.collectionEvent();

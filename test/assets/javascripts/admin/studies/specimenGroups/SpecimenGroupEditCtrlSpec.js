@@ -87,7 +87,7 @@ define([
           var $rootScope           = userContext.$injector.get('$rootScope'),
               $controller          = userContext.$injector.get('$controller'),
               $state               = userContext.$injector.get('$state'),
-              domainEntityService  = userContext.$injector.get('domainEntityService'),
+              domainNotificationService  = userContext.$injector.get('domainNotificationService'),
               notificationsService = userContext.$injector.get('notificationsService');
 
           return create;
@@ -102,7 +102,7 @@ define([
             $controller('SpecimenGroupEditCtrl as vm', {
               $scope:                      userContext.scope,
               $state:                      $state,
-              domainEntityService:         domainEntityService,
+              domainNotificationService:         domainNotificationService,
               notificationsService:        notificationsService,
               AnatomicalSourceType:        userContext.AnatomicalSourceType,
               PreservationType:            userContext.PreservationType,
@@ -164,7 +164,7 @@ define([
 
         it('on submit error, displays an error modal', function() {
           var q                   = this.$injector.get('$q'),
-              domainEntityService = this.$injector.get('domainEntityService'),
+              domainNotificationService = this.$injector.get('domainNotificationService'),
               entities            = this.createEntities();
 
           this.createController(entities);
@@ -173,12 +173,12 @@ define([
             deferred.reject('xxx');
             return deferred.promise;
           });
-          spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
+          spyOn(domainNotificationService, 'updateErrorModal').and.callFake(function () {});
 
           this.scope.vm.submit(entities.specimenGroup);
           this.scope.$digest();
 
-          expect(domainEntityService.updateErrorModal)
+          expect(domainNotificationService.updateErrorModal)
             .toHaveBeenCalledWith('xxx', 'specimen group');
         });
 

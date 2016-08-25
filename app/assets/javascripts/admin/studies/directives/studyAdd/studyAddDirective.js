@@ -26,12 +26,12 @@ define(['lodash'], function(_) {
   StudyAddCtrl.$inject = [
     '$state',
     'notificationsService',
-    'domainEntityService'
+    'domainNotificationService'
   ];
 
   function StudyAddCtrl($state,
                          notificationsService,
-                         domainEntityService) {
+                         domainNotificationService) {
 
     var vm = this;
 
@@ -53,7 +53,7 @@ define(['lodash'], function(_) {
       }
 
       function submitError(error) {
-        domainEntityService.updateErrorModal(error, 'study');
+        domainNotificationService.updateErrorModal(error, 'study');
       }
     }
 

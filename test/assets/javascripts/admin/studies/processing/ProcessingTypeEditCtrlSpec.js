@@ -15,7 +15,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
         state,
         Study,
         ProcessingType,
-        domainEntityService,
+        domainNotificationService,
         notificationsService,
         factory;
 
@@ -27,7 +27,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
                                $state,
                                _Study_,
                                _ProcessingType_,
-                               _domainEntityService_,
+                               _domainNotificationService_,
                                _notificationsService_,
                                _factory_) {
       q                          = $q;
@@ -36,7 +36,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
       state                      = $state;
       Study                      = _Study_;
       ProcessingType             = _ProcessingType_;
-      domainEntityService        = _domainEntityService_;
+      domainNotificationService        = _domainNotificationService_;
       notificationsService       = _notificationsService_;
       factory               = _factory_;
     }));
@@ -69,7 +69,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
       controller('ProcessingTypeEditCtrl as vm', {
         $scope:               scope,
         $state:               state,
-        domainEntityService:  domainEntityService,
+        domainNotificationService:  domainNotificationService,
         notificationsService: notificationsService,
         processingType:       entities.processingType
       });
@@ -108,7 +108,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
     it('on submit failure, changes to correct state', function() {
       var entities = createEntities(),
           scope = createController(entities);
-      spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
+      spyOn(domainNotificationService, 'updateErrorModal').and.callFake(function () {});
       spyOn(entities.processingType, 'addOrUpdate').and.callFake(function () {
         var deferred = q.defer();
         deferred.reject('error');
@@ -116,7 +116,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
       });
       scope.vm.submit(scope.vm.processingType);
       scope.$digest();
-      expect(domainEntityService.updateErrorModal).toHaveBeenCalledWith(
+      expect(domainNotificationService.updateErrorModal).toHaveBeenCalledWith(
         'error', 'processing type');
     });
 

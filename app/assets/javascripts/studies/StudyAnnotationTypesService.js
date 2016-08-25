@@ -7,11 +7,11 @@ define(['angular', 'lodash'], function(angular, _) {
 
   studyAnnotationTypesServiceFactory.$inject = [
     'biobankApi',
-    'domainEntityService'
+    'domainNotificationService'
   ];
 
   function studyAnnotationTypesServiceFactory(biobankApi,
-                                         domainEntityService,
+                                         domainNotificationService,
                                          ParticipantAnnotationType) {
 
     /**

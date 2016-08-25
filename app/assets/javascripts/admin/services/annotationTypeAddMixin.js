@@ -8,7 +8,7 @@ define(function () {
   annotationTypeAddMixin.$inject = [
     '$state',
     'notificationsService',
-    'domainEntityService'
+    'domainNotificationService'
   ];
 
   /**
@@ -17,7 +17,7 @@ define(function () {
    */
   function annotationTypeAddMixin($state,
                                   notificationsService,
-                                  domainEntityService) {
+                                  domainNotificationService) {
     var service = {
       onAddSuccessful: onAddSuccessful,
       onAddFailed: onAddFailed,
@@ -37,7 +37,7 @@ define(function () {
     }
 
     function onAddFailed(error) {
-      return domainEntityService.updateErrorModal(error, 'study');
+      return domainNotificationService.updateErrorModal(error, 'study');
     }
 
     function onCancel(state) {

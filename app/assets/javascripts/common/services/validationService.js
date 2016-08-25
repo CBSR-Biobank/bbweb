@@ -11,6 +11,8 @@ define(['lodash'], function(_) {
    * Used for validating responses from the server.
    *
    * Ideas taken from Functional Javascript by Michael Fogus.
+   *
+   * FIXME: should be removed since tv4 is now used (Nelson 2016-08-25).
    */
   function validationService(funutils) {
 

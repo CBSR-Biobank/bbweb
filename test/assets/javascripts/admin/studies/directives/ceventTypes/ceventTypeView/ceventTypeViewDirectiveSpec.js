@@ -45,7 +45,7 @@ define(function (require) {
                               'CollectionSpecimenSpec',
                               'AnnotationType',
                               'notificationsService',
-                              'domainEntityService',
+                              'domainNotificationService',
                               'factory');
 
       self.jsonStudy              = this.factory.study();
@@ -57,11 +57,11 @@ define(function (require) {
 
       this.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/collection/ceventTypeView/ceventTypeView.html',
-        '/assets/javascripts/common/directives/truncateToggle.html',
+        '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
         '/assets/javascripts/admin/directives/annotationTypeSummary/annotationTypeSummary.html',
         '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenSpecSummary/collectionSpecimenSpecSummary.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html',
-        '/assets/javascripts/admin/directives/statusLine/statusLine.html',
+        '/assets/javascripts/common/directives/statusLine/statusLine.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
     }));
 
@@ -168,7 +168,7 @@ define(function (require) {
             ceventType = new this.CollectionEventType(jsonCeventType);
 
         spyOn(modalService, 'showModal').and.returnValue(this.$q.when('OK'));
-        spyOn(this.domainEntityService, 'removeEntity').and.callThrough();
+        spyOn(this.domainNotificationService, 'removeEntity').and.callThrough();
         spyOn(this.CollectionEventType.prototype, 'removeSpecimenSpec')
           .and.returnValue(this.$q.when(ceventType));
 
@@ -177,7 +177,7 @@ define(function (require) {
         this.controller.removeSpecimenSpec(ceventType.specimenSpecs[0]);
         this.scope.$digest();
 
-        expect(this.domainEntityService.removeEntity).toHaveBeenCalled();
+        expect(this.domainNotificationService.removeEntity).toHaveBeenCalled();
         expect(this.CollectionEventType.prototype.removeSpecimenSpec).toHaveBeenCalled();
       });
 
@@ -185,7 +185,7 @@ define(function (require) {
         var self = this,
             specimenSpec = new self.CollectionSpecimenSpec(self.factory.collectionSpecimenSpec());
 
-        spyOn(self.domainEntityService, 'removeEntity').and.returnValue(self.$q.when('OK'));
+        spyOn(self.domainNotificationService, 'removeEntity').and.returnValue(self.$q.when('OK'));
 
         _([self.StudyStatus.ENABLED, self.StudyStatus.RETIRED]).forEach(function (status) {
           self.study.status = status;
@@ -235,7 +235,7 @@ define(function (require) {
         var self = this,
             annotationType = new this.AnnotationType(this.factory.annotationType());
 
-        spyOn(self.domainEntityService, 'removeEntity').and.returnValue(self.$q.when('OK'));
+        spyOn(self.domainNotificationService, 'removeEntity').and.returnValue(self.$q.when('OK'));
 
         _([self.StudyStatus.ENABLED, self.StudyStatus.RETIRED]).forEach(function (status) {
           createController.call(self);

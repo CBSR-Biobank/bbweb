@@ -43,7 +43,7 @@ define([
                               '$compile',
                               '$state',
                               'notificationsService',
-                              'domainEntityService',
+                              'domainNotificationService',
                               'Study',
                               'CollectionEventType',
                               'CollectionSpecimenSpec',
@@ -100,13 +100,13 @@ define([
       it('displays an error when submit fails', function() {
         spyOn(this.CollectionEventType.prototype, 'addSpecimenSpec')
           .and.returnValue(this.$q.reject('simulated error'));
-        spyOn(this.domainEntityService, 'updateErrorModal').and.returnValue(this.$q.when('OK'));
+        spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(this.$q.when('OK'));
 
         createDirective.call(this);
         this.controller.submit(this.specimenSpec);
         this.scope.$digest();
 
-        expect(this.domainEntityService.updateErrorModal).toHaveBeenCalled();
+        expect(this.domainNotificationService.updateErrorModal).toHaveBeenCalled();
       });
 
     });

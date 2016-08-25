@@ -7,13 +7,13 @@ define([], function() {
 
   AnnotationTypeModalsFactory.$inject = [
     'modalService',
-    'domainEntityService'
+    'domainNotificationService'
   ];
 
   /**
    *
    */
-  function AnnotationTypeModalsFactory(modalService, domainEntityService) {
+  function AnnotationTypeModalsFactory(modalService, domainNotificationService) {
 
     /**
      * This is a base class and should not be used. Instead use one of the following:
@@ -33,7 +33,7 @@ define([], function() {
     };
 
     AnnotationTypeModals.prototype.remove = function (annotationType, removePromiseFunc) {
-      return domainEntityService.removeEntity(
+      return domainNotificationService.removeEntity(
         removePromiseFunc,
         'Remove Annotation Type',
         'Are you sure you want to remove annotation type ' + annotationType.name + '?',

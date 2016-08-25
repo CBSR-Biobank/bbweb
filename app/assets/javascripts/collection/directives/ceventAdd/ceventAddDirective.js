@@ -29,7 +29,7 @@ define(['lodash'], function(_) {
     'gettextCatalog',
     'bbwebConfig',
     'notificationsService',
-    'domainEntityService',
+    'domainNotificationService',
     'timeService',
     'CollectionEvent'
   ];
@@ -41,7 +41,7 @@ define(['lodash'], function(_) {
                              gettextCatalog,
                              bbwebConfig,
                              notificationsService,
-                             domainEntityService,
+                             domainNotificationService,
                              timeService,
                              CollectionEvent) {
     var vm = this;
@@ -75,7 +75,7 @@ define(['lodash'], function(_) {
       }
 
       function submitError(error) {
-        domainEntityService.updateErrorModal(error, 'collectionEvent')
+        domainNotificationService.updateErrorModal(error, 'collectionEvent')
           .catch(function () {
             $state.go('home.collection.study.participant', { participantId: vm.participant.id });
           });

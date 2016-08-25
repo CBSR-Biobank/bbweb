@@ -32,7 +32,7 @@ define(function (require) {
     'timeService',
     'modalService',
     'modalInput',
-    'domainEntityService',
+    'domainNotificationService',
     'notificationsService',
     'annotationUpdate'
   ];
@@ -47,7 +47,7 @@ define(function (require) {
                           timeService,
                           modalService,
                           modalInput,
-                          domainEntityService,
+                          domainNotificationService,
                           notificationsService,
                           annotationUpdate) {
     var vm = this;
@@ -113,7 +113,7 @@ define(function (require) {
             gettext('Cannot remove collection event'),
             gettext('This collection event has specimens. Please remove the specimens first.'));
         } else {
-          domainEntityService.removeEntity(
+          domainNotificationService.removeEntity(
             promiseFn,
             gettext('Remove event'),
             /// visit number comes from the collection event

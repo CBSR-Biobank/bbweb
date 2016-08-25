@@ -29,13 +29,13 @@ define(['lodash'], function(_) {
   LocationAddCtrl.$inject = [
     '$state',
     'Location',
-    'domainEntityService',
+    'domainNotificationService',
     'notificationsService'
   ];
 
   function LocationAddCtrl($state,
                            Location,
-                           domainEntityService,
+                           domainNotificationService,
                            notificationsService) {
     var vm = this;
 

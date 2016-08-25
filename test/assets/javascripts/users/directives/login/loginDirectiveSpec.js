@@ -37,7 +37,8 @@ define([
                               'modalService');
 
       self.putHtmlTemplates(
-        '/assets/javascripts/users/directives/login/login.html');
+        '/assets/javascripts/users/directives/login/login.html',
+        '/assets/javascripts/common/services/modalService/modalOk.html');
     }));
 
     it('has valid state', function() {
@@ -137,25 +138,25 @@ define([
 
         it('for invalid email or password and OK', function () {
           spyOn(this.usersService, 'login').and.returnValue(this.$q.reject(context.loginError));
-          spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+          spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
 
           createController.call(this);
           this.controller.login({ email: 'test@test.com', password: 'secret-password' });
           this.scope.$digest();
 
-          expect(this.modalService.showModal).toHaveBeenCalled();
+          expect(this.modalService.modalOk).toHaveBeenCalled();
           expect(this.$state.go).toHaveBeenCalledWith('home.users.login', {}, { reload: true });
         });
 
         it('for invalid email or password and cancel pressed', function () {
           spyOn(this.usersService, 'login').and.returnValue(this.$q.reject(context.loginError));
-          spyOn(this.modalService, 'showModal').and.returnValue(this.$q.reject('Cancel'));
+          spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.reject('Cancel'));
 
           createController.call(this);
           this.controller.login({ email: 'test@test.com', password: 'secret-password' });
           this.scope.$digest();
 
-          expect(this.modalService.showModal).toHaveBeenCalled();
+          expect(this.modalService.modalOk).toHaveBeenCalled();
           expect(this.$state.go).toHaveBeenCalledWith('home');
         });
 

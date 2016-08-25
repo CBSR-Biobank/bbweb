@@ -7,7 +7,7 @@
 define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mocks, _) {
   'use strict';
 
-  describe('Service: domainEntityService', function() {
+  describe('Service: domainNotificationService', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -15,7 +15,8 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
       _.extend(this, testSuiteMixin);
       this.injectDependencies('$q',
                               '$rootScope',
-                              'domainEntityService',
+                              'gettext',
+                              'domainNotificationService',
                               'modalService');
     }));
 
@@ -28,7 +29,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
       it('opens a modal when error is a version mismatch error', function() {
         var err = { data: { message: 'expected version doesn\'t match current version' } };
         var domainEntityName = 'entity';
-        this.domainEntityService.updateErrorModal(err, domainEntityName);
+        this.domainNotificationService.updateErrorModal(err, domainEntityName);
         expect(this.modalService.showModal).toHaveBeenCalledWith({
           templateUrl: '/assets/javascripts/common/modalConcurrencyError.html'
         }, {
@@ -39,25 +40,17 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
       });
 
       it('opens a modal when error is a string', function() {
-        var err = { data: { message: 'update error' } };
-        this.domainEntityService.updateErrorModal(err, 'entity');
-        expect(this.modalService.showModal).toHaveBeenCalledWith({}, {
-          closeButtonText: 'Cancel',
-          actionButtonText: 'OK',
-          headerHtml: 'Cannot submit this change',
-          bodyHtml: 'Error: ' + err.data.message
-        });
+        var self = this,
+            err = { data: { message: 'update error' } };
+        self.domainNotificationService.updateErrorModal(err, 'entity');
+        expect(self.modalService.showModal).toHaveBeenCalled();
       });
 
       it('opens a modal when error is a list', function() {
-        var err = { data: { message: [ 'update error1', 'update error2' ] } };
-        this.domainEntityService.updateErrorModal(err, 'entity');
-        expect(this.modalService.showModal).toHaveBeenCalledWith({}, {
-          closeButtonText: 'Cancel',
-          actionButtonText: 'OK',
-          headerHtml: 'Cannot submit this change',
-          bodyHtml: 'Error: ' + JSON.stringify(err.data.message)
-        });
+        var self = this,
+            err = { data: { message: [ 'update error1', 'update error2' ] } };
+        self.domainNotificationService.updateErrorModal(err, 'entity');
+        expect(self.modalService.showModal).toHaveBeenCalled();
       });
 
     });
@@ -76,7 +69,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
 
         spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
 
-        this.domainEntityService.removeEntity(this.remove,
+        this.domainNotificationService.removeEntity(this.remove,
                                               header,
                                               body,
                                               removeFailedHeader,
@@ -96,7 +89,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
         spyOn(this.modalService, 'showModal').and.returnValue(deferred.promise);
         deferred.reject('simulated error');
 
-        this.domainEntityService.removeEntity(this.remove,
+        this.domainNotificationService.removeEntity(this.remove,
                                               header,
                                               body,
                                               removeFailedHeader,
@@ -118,7 +111,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
         this.remove = jasmine.createSpy('remove').and.returnValue(deferred.promise);
         deferred.reject('simulated error');
 
-        this.domainEntityService.removeEntity(this.remove,
+        this.domainNotificationService.removeEntity(this.remove,
                                          header,
                                          body,
                                          removeFailedHeader,

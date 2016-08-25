@@ -61,9 +61,9 @@ define([
 
     it('should return to valid state on invalid submit', function() {
       var $q                  = this.$injector.get('$q'),
-          domainEntityService = this.$injector.get('domainEntityService');
+          domainNotificationService = this.$injector.get('domainNotificationService');
 
-      spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
+      spyOn(domainNotificationService, 'updateErrorModal').and.callFake(function () {});
       spyOn(this.Study.prototype, 'add').and.callFake(function () {
         var deferred = $q.defer();
         deferred.reject('err');
@@ -73,7 +73,7 @@ define([
       createController.call(this);
       this.controller.submit(this.study);
       this.scope.$digest();
-      expect(domainEntityService.updateErrorModal)
+      expect(domainNotificationService.updateErrorModal)
         .toHaveBeenCalledWith('err', 'study');
     });
 

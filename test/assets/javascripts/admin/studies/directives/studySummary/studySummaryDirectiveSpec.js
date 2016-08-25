@@ -58,8 +58,8 @@ define(function (require) {
 
       this.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/studySummary/studySummary.html',
-        '/assets/javascripts/common/directives/truncateToggle.html',
-        '/assets/javascripts/admin/directives/statusLine/statusLine.html',
+        '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
+        '/assets/javascripts/common/directives/statusLine/statusLine.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
     }));
 

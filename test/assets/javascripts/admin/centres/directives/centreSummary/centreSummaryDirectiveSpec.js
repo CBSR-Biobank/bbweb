@@ -50,8 +50,8 @@ define([
       self.putHtmlTemplates(
         '/assets/javascripts/admin/centres/directives/centreView/centreView.html',
         '/assets/javascripts/admin/centres/directives/centreSummary/centreSummary.html',
-        '/assets/javascripts/common/directives/truncateToggle.html',
-        '/assets/javascripts/admin/directives/statusLine/statusLine.html');
+        '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
+        '/assets/javascripts/common/directives/statusLine/statusLine.html');
     }));
 
     it('initialization is valid', function() {

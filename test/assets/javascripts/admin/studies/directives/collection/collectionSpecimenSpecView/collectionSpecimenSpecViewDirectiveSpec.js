@@ -52,7 +52,7 @@ define(function (require) {
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenSpecView/collectionSpecimenSpecView.html',
-        '/assets/javascripts/common/directives/truncateToggle.html');
+        '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html');
 
       self.jsonSpecimenSpec    = self.factory.collectionSpecimenSpec();
       self.jsonCeventType      = self.factory.collectionEventType({

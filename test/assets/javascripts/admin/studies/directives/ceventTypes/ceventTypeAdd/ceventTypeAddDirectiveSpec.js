@@ -74,7 +74,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
 
     it('on submit error, displays an error modal', function() {
       var q                   = this.$injector.get('$q'),
-          domainEntityService = this.$injector.get('domainEntityService'),
+          domainNotificationService = this.$injector.get('domainNotificationService'),
           ceventType;
 
       ceventType = new this.CollectionEventType(this.factory.collectionEventType(this.study));
@@ -85,12 +85,12 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
         deferred.reject('simulated error for test');
         return deferred.promise;
       });
-      spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
+      spyOn(domainNotificationService, 'updateErrorModal').and.callFake(function () {});
 
       this.controller.submit(ceventType);
       this.scope.$digest();
 
-      expect(domainEntityService.updateErrorModal)
+      expect(domainNotificationService.updateErrorModal)
         .toHaveBeenCalledWith('simulated error for test', 'collection event type');
     });
 

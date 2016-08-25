@@ -5,7 +5,7 @@
 define(['angular', 'lodash'], function(angular, _) {
   'use strict';
 
-  modalService.$inject = ['$uibModal'];
+  modalService.$inject = ['$uibModal', 'gettext'];
 
   /**
    * Originally the code was taken from the URL given below, but then it was modified.
@@ -13,15 +13,15 @@ define(['angular', 'lodash'], function(angular, _) {
    * http://weblogs.asp.net/dwahlin/building-an-angularjs-modal-service
    *
    */
-  function modalService($uibModal) {
-    var modalDefaults = { backdrop: true,
-                          keyboard: true,
-                          modalFade: true,
-                          templateUrl: '/assets/javascripts/common/modal.html'
+  function modalService($uibModal, gettext) {
+    var modalDefaults = { backdrop:    true,
+                          keyboard:    true,
+                          modalFade:   true,
+                          templateUrl: '/assets/javascripts/common/services/modalService/modal.html'
                         },
-        modalOptions = { actionButtonText: 'OK', //closeButtonText: 'Close',
-                         headerHtml: 'Proceed?',
-                         bodyHtml: 'Perform this action?'
+        modalOptions = { actionButtonText: gettext('OK'),
+                         headerHtml:       gettext('Proceed?'),
+                         bodyHtml:         gettext('Perform this action?')
                        };
 
     var service = {
@@ -71,7 +71,7 @@ define(['angular', 'lodash'], function(angular, _) {
 
     function modalOk(headerHtml, bodyHtml) {
       var modalDefaults = {
-        templateUrl: '/assets/javascripts/common/modalOk.html'
+        templateUrl: '/assets/javascripts/common/services/modalService/modalOk.html'
       };
       var modalOptions = {
         headerHtml: headerHtml,
@@ -82,7 +82,7 @@ define(['angular', 'lodash'], function(angular, _) {
 
     function modalOkCancel(headerHtml, bodyHtml) {
       var modalOptions = {
-        closeButtonText: 'Cancel',
+        closeButtonText: gettext('Cancel'),
         headerHtml: headerHtml,
         bodyHtml: bodyHtml
       };

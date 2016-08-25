@@ -16,7 +16,7 @@ define(['lodash'], function (_) {
     '$state',
     'Centre',
     'Shipment',
-    'domainEntityService',
+    'domainNotificationService',
     'notificationsService',
     'shipmentProgressItems'
   ];
@@ -27,7 +27,7 @@ define(['lodash'], function (_) {
   function ShipmentAddController($state,
                                  Centre,
                                  Shipment,
-                                 domainEntityService,
+                                 domainNotificationService,
                                  notificationsService,
                                  shipmentProgressItems) {
     var vm = this;
@@ -65,7 +65,7 @@ define(['lodash'], function (_) {
       }
 
       function onAddFailed(error) {
-        domainEntityService.updateErrorModal(error, 'shipment');
+        domainNotificationService.updateErrorModal(error, 'shipment');
       }
     }
 

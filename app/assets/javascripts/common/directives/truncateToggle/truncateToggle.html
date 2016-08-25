@@ -3,7 +3,7 @@
     <div class="col-md-10"  ng-if="(vm.text != null) && vm.text.length > 0" >
       <button ng-if="vm.text.length > vm.toggleLength"
               class="btn btn-xs btn-default"
-              title="Edit"
+              title="{{'Edit'|translate}}"
               ng-click="vm.toggleText()">
         {{vm.buttonLabel}}
       </button>

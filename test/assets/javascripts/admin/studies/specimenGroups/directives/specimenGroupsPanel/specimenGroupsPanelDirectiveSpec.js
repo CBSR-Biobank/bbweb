@@ -187,17 +187,17 @@ define([
 
     it('can remove a specimen group', function() {
       var q                   = this.$injector.get('$q'),
-          domainEntityService = this.$injector.get('domainEntityService'),
+          domainNotificationService = this.$injector.get('domainNotificationService'),
           entities            = createEntities(),
           sgToRemove          = entities.specimenGroups[1];
 
       createController(entities);
-      spyOn(domainEntityService, 'removeEntity').and.callFake(function () {
+      spyOn(domainNotificationService, 'removeEntity').and.callFake(function () {
         return q.when('OK');
       });
       controller.remove(sgToRemove);
       scope.$digest();
-      expect(domainEntityService.removeEntity).toHaveBeenCalled();
+      expect(domainNotificationService.removeEntity).toHaveBeenCalled();
       expect(controller.specimenGroups).toBeArrayOfSize(entities.specimenGroups.length - 1);
     });
 

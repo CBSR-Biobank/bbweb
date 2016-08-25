@@ -43,7 +43,7 @@ define([
                               'Centre',
                               'Location',
                               'factory',
-                              'domainEntityService',
+                              'domainNotificationService',
                               'notificationsService');
 
       self.centre = new self.Centre(self.factory.centre());

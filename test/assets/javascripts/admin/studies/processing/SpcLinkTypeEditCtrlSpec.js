@@ -83,7 +83,7 @@ define([
           controller                 = injector.get('$controller'),
           state                      = injector.get('$state'),
           SpecimenLinkType           = injector.get('SpecimenLinkType'),
-          domainEntityService        = injector.get('domainEntityService'),
+          domainNotificationService        = injector.get('domainNotificationService'),
           notificationsService       = injector.get('notificationsService');
 
       return create;
@@ -97,7 +97,7 @@ define([
           $scope:               scope,
           $state:               state,
           SpecimenLinkType:     SpecimenLinkType,
-          domainEntityService:  domainEntityService,
+          domainNotificationService:  domainNotificationService,
           notificationsService: notificationsService,
           study:                entities.study,
           spcLinkType:          entities.specimenLinkType,
@@ -170,7 +170,7 @@ define([
 
     it('on submit error, displays an error modal', function() {
       var q = this.$injector.get('$q'),
-          domainEntityService = this.$injector.get('domainEntityService'),
+          domainNotificationService = this.$injector.get('domainNotificationService'),
           entities = createEntities(),
           scope = createController(entities);
 
@@ -179,12 +179,12 @@ define([
         deferred.reject('xxx');
         return deferred.promise;
       });
-      spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
+      spyOn(domainNotificationService, 'updateErrorModal').and.callFake(function () {});
 
       scope.vm.submit(entities.specimenLinkType);
       scope.$digest();
 
-      expect(domainEntityService.updateErrorModal)
+      expect(domainNotificationService.updateErrorModal)
         .toHaveBeenCalledWith('xxx', 'collection event type');
     });
 

@@ -30,7 +30,7 @@ define(['angular', 'lodash'], function(angular, _) {
     '$state',
     'Panel',
     'modalService',
-    'domainEntityService',
+    'domainNotificationService',
     'SpecimenGroupViewer',
     'specimenGroupUtils'
   ];
@@ -42,7 +42,7 @@ define(['angular', 'lodash'], function(angular, _) {
                                    $state,
                                    Panel,
                                    modalService,
-                                   domainEntityService,
+                                   domainNotificationService,
                                    SpecimenGroupViewer,
                                    specimenGroupUtils) {
     var vm = this,
@@ -101,7 +101,7 @@ define(['angular', 'lodash'], function(angular, _) {
         return;
       }
 
-      domainEntityService.removeEntity(
+      domainNotificationService.removeEntity(
         specimenGroup.remove,
         'Remove Specimen Group',
         'Are you sure you want to remove specimen group ' + specimenGroup.name + '?',

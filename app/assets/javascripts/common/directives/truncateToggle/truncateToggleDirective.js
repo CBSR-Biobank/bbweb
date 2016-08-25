@@ -19,7 +19,7 @@ define(function () {
         allowEdit:        '=',
         onEdit:           '&'
       },
-      templateUrl : '/assets/javascripts/common/directives/truncateToggle.html',
+      templateUrl : '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
       controller: TruncateToggleCtrl,
       controllerAs: 'vm'
     };
@@ -27,13 +27,17 @@ define(function () {
     return directive;
   }
 
-  TruncateToggleCtrl.$inject = ['$scope', '$filter'];
+  TruncateToggleCtrl.$inject = [
+    '$scope',
+    '$filter',
+    'gettext'
+  ];
 
-  var showLessLabel = 'Show less',
-      showMoreLabel = 'Show more';
+  function TruncateToggleCtrl($scope, $filter, gettext) {
+    var vm = this,
+        showLessLabel = gettext('Show less'),
+        showMoreLabel = gettext('Show more');
 
-  function TruncateToggleCtrl($scope, $filter) {
-    var vm = this;
 
     vm.displayText = vm.text || '';
     vm.toggleState = true;

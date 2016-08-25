@@ -1,60 +1,57 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
+define(function () {
   'use strict';
 
-  domainEntityService.$inject = [
+  domainNotificationService.$inject = [
     '$q',
     '$log',
     '$state',
+    'gettext',
     'modalService'
   ];
 
   /**
    * Utilities for services that access domain objects.
-   *
    */
-  function domainEntityService($q, $log, $state, modalService) {
+  function domainNotificationService($q, $log, $state, gettext, modalService) {
     var service = {
       updateErrorModal:     updateErrorModal,
       removeEntity:         removeEntity
     };
     return service;
 
+    //-------
+
     /**
      * Called when either adding or updating a domain entity and there is afailure. Displays the error message
      * and asks the user if he / she wishes to attempt the change again.
      *
-     * Returns a promise. The promise is resolved if the user pressed the OK button, or rejected if the CANCEL button
-     * was pressed.
+     * Returns a promise. The promise is resolved if the user pressed the OK button, or rejected if the CANCEL
+     * button was pressed.
      */
     function updateErrorModal(error, domainObjTypeName) {
       var modalDefaults = {};
       var modalOptions = {
-        closeButtonText: 'Cancel',
-        actionButtonText: 'OK'
+        closeButtonText: gettext('Cancel'),
+        actionButtonText: gettext('OK')
       };
 
       if (error.data.message) {
         $log.error(error.data.message);
       }
 
-      if (typeof error.data.message === 'string') {
-        if (error.data.message.indexOf('expected version doesn\'t match current version') > -1) {
+      if ((typeof error.data.message === 'string') &&
+          (error.data.message.indexOf('expected version doesn\'t match current version') > -1)) {
           /* concurrent change error */
           modalDefaults.templateUrl = '/assets/javascripts/common/modalConcurrencyError.html';
           modalOptions.domainType = domainObjTypeName;
-        } else {
-          /* some other error */
-          modalOptions.headerHtml = 'Cannot submit this change';
-          modalOptions.bodyHtml = 'Error: ' + error.data.message;
-        }
       } else {
         // most likely a programming error
-        modalOptions.headerHtml = 'Cannot submit this change';
-        modalOptions.bodyHtml = 'Error: ' + JSON.stringify(error.data.message);
+        modalOptions.headerHtml = gettext('Cannot submit this change');
+        modalOptions.bodyHtml = gettext('Error: ') + JSON.stringify(error.data.message);
       }
 
       return modalService.showModal(modalDefaults, modalOptions);
@@ -99,7 +96,7 @@ define(['lodash'], function(_) {
       function removeConfirmed() {
         return promiseFunc().catch(function (error) {
           var modalOptions = {
-            closeButtonText: 'Cancel',
+            closeButtonText: gettext('Cancel'),
             headerHtml:      removeFailedHeaderHtml,
             bodyHtml:        removeFaileBodyHtml + ': ' + error
           };
@@ -110,5 +107,5 @@ define(['lodash'], function(_) {
     }
   }
 
-  return domainEntityService;
+  return domainNotificationService;
 });

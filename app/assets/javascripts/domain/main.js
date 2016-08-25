@@ -17,7 +17,6 @@ define(function (require) {
 
   module.factory('AnnotationTypeViewer',                require('./AnnotationTypeViewer'));
   module.factory('ConcurrencySafeEntity',               require('./ConcurrencySafeEntity'));
-  module.service('domainEntityService',                 require('./domainEntityService') );
   module.factory('DomainError',                         require('./DomainError'));
   module.factory('EntityViewer',                        require('./EntityViewer'));
   module.factory('Location',                            require('./Location'));

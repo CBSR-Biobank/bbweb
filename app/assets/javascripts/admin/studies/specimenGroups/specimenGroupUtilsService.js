@@ -6,11 +6,11 @@ define(['lodash'], function(_) {
   'use strict';
 
   specimenGroupUtils.$inject = [
-    'domainEntityService',
+    'domainNotificationService',
     'modalService'
   ];
 
-  function specimenGroupUtils(domainEntityService,
+  function specimenGroupUtils(domainNotificationService,
                               modalService) {
     var service = {
       updateInUseModal: updateInUseModal,

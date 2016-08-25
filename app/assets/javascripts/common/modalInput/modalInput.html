@@ -25,8 +25,11 @@
   </form>
 </div>
 <div class="modal-footer">
-  <button class="btn" ng-click="vm.closePressed()">Cancel</button>
+  <button class="btn" ng-click="vm.closePressed()" translate>Cancel</button>
   <button class="btn btn-primary"
           ng-click="vm.okPressed()"
-          ng-disabled="form.$invalid">OK</button>
+          ng-disabled="form.$invalid"
+          translate>
+    OK
+  </button>
 </div>

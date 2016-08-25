@@ -57,7 +57,7 @@ define([
                               'CollectionEvent',
                               'CollectionEventType',
                               'specimenAddModal',
-                              'domainEntityService',
+                              'domainNotificationService',
                               'factory');
 
       self.rawSpecimenSpec = self.factory.collectionSpecimenSpec();
@@ -126,7 +126,7 @@ define([
     describe('when removing a specimen', function() {
 
       beforeEach(function() {
-        this.injectDependencies('modalService', 'domainEntityService');
+        this.injectDependencies('modalService', 'domainNotificationService');
         this.modalService.showModal = jasmine.createSpy().and.returnValue(this.$q.when('OK'));
         this.Specimen.prototype.remove = jasmine.createSpy().and.returnValue(this.$q.when(true));
       });

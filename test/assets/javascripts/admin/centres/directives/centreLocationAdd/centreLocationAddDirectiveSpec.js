@@ -37,7 +37,7 @@ define([
                               'Centre',
                               'Location',
                               'factory',
-                              'domainEntityService',
+                              'domainNotificationService',
                               'notificationsService');
 
       self.centre = new self.Centre(self.factory.centre());
@@ -65,11 +65,11 @@ define([
 
     it('should display failure information on invalid submit', function() {
       var $q                  = this.$injector.get('$q'),
-          domainEntityService = this.$injector.get('domainEntityService');
+          domainNotificationService = this.$injector.get('domainNotificationService');
 
       createController.call(this, this.centre);
 
-      spyOn(domainEntityService, 'updateErrorModal').and.callFake(function () {});
+      spyOn(domainNotificationService, 'updateErrorModal').and.callFake(function () {});
       spyOn(this.Centre.prototype, 'addLocation').and.callFake(function () {
         var deferred = $q.defer();
         deferred.reject('err');
@@ -78,7 +78,7 @@ define([
 
       this.controller.submit(this.location);
       this.scope.$digest();
-      expect(domainEntityService.updateErrorModal)
+      expect(domainNotificationService.updateErrorModal)
         .toHaveBeenCalledWith('err', 'location');
     });
 

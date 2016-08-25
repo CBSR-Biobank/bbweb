@@ -39,7 +39,7 @@ define([
                               '$rootScope',
                               '$compile',
                               '$state',
-                              'domainEntityService',
+                              'domainNotificationService',
                               'notificationsService',
                               'Study',
                               'Participant',
@@ -101,13 +101,13 @@ define([
           participantAddDeferred.reject('submit failure');
 
           spyOn(this.Participant.prototype, 'add').and.returnValue(participantAddDeferred.promise);
-          spyOn(this.domainEntityService, 'updateErrorModal').and.returnValue(this.$q.when('OK'));
+          spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(this.$q.when('OK'));
 
           createDirective.call(this);
           this.controller.submit(this.participant);
           this.scope.$digest();
 
-          expect(this.domainEntityService.updateErrorModal).toHaveBeenCalled();
+          expect(this.domainNotificationService.updateErrorModal).toHaveBeenCalled();
         });
 
         it('user presses Cancel on error modal', function() {
@@ -118,14 +118,14 @@ define([
           updateErrorModalDeferred.reject('Cancel');
 
           spyOn(this.Participant.prototype, 'add').and.returnValue(participantAddDeferred.promise);
-          spyOn(this.domainEntityService, 'updateErrorModal')
+          spyOn(this.domainNotificationService, 'updateErrorModal')
             .and.returnValue(updateErrorModalDeferred.promise);
 
           createDirective.call(this);
           this.controller.submit(this.participant);
           this.scope.$digest();
 
-          expect(this.domainEntityService.updateErrorModal).toHaveBeenCalled();
+          expect(this.domainNotificationService.updateErrorModal).toHaveBeenCalled();
           expect(this.$state.go).toHaveBeenCalledWith(
             'home.collection.study',
             { studyId: this.study.id });

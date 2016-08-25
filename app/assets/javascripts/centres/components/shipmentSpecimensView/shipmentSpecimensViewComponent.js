@@ -22,7 +22,7 @@ define(function (require) {
     'gettextCatalog',
     'modalService',
     'modalInput',
-    'domainEntityService',
+    'domainNotificationService',
     'notificationsService',
     'Specimen',
     'Shipment',
@@ -37,7 +37,7 @@ define(function (require) {
                                            gettextCatalog,
                                            modalService,
                                            modalInput,
-                                           domainEntityService,
+                                           domainNotificationService,
                                            notificationsService,
                                            Specimen,
                                            Shipment,
@@ -145,7 +145,7 @@ define(function (require) {
     }
 
     function removeShipmentSpecimen(shipmentSpecimen) {
-      domainEntityService.removeEntity(
+      domainNotificationService.removeEntity(
         promiseFn,
         gettext('Remove specimen'),
         gettextCatalog.getString(

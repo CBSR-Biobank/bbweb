@@ -41,7 +41,8 @@ define([
                               'factory');
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/participantGet/participantGet.html',
-        '/assets/javascripts/common/modalOk.html');
+        '/assets/javascripts/common/services/modalService/modal.html',
+        '/assets/javascripts/common/services/modalService/modalOk.html');
 
       this.jsonParticipant = this.factory.participant();
       this.jsonStudy       = this.factory.defaultStudy();
@@ -54,7 +55,7 @@ define([
 
       expect(this.controller).toBeDefined();
       expect(this.controller.study).toBe(this.study);
-      expect(this.controller.uniqueIdChanged).toBeFunction();
+      expect(this.controller.onSubmit).toBeFunction();
     });
 
     describe('when invoking uniqueIdChanged', function() {
@@ -64,7 +65,7 @@ define([
 
         createDirective.call(this);
         this.controller.uniqueId = '';
-        this.controller.uniqueIdChanged();
+        this.controller.onSubmit();
         this.scope.$digest();
 
         expect(this.Participant.getByUniqueId).not.toHaveBeenCalled();
@@ -76,7 +77,7 @@ define([
 
         createDirective.call(this);
         this.controller.uniqueId = this.factory.stringNext();
-        this.controller.uniqueIdChanged();
+        this.controller.onSubmit();
         this.scope.$digest();
 
         expect(this.$state.go).toHaveBeenCalledWith(
@@ -88,15 +89,15 @@ define([
         var uniqueId = this.factory.stringNext();
 
         spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject({ status: 404 }));
-        spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('ok'));
+        spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('ok'));
         spyOn(this.$state, 'go').and.returnValue('ok');
 
         createDirective.call(this);
         this.controller.uniqueId = uniqueId;
-        this.controller.uniqueIdChanged();
+        this.controller.onSubmit();
         this.scope.$digest();
 
-        expect(this.modalService.showModal).toHaveBeenCalled();
+        expect(this.modalService.modalOkCancel).toHaveBeenCalled();
         expect(this.$state.go).toHaveBeenCalledWith(
           'home.collection.study.participantAdd',
           { uniqueId: uniqueId });
@@ -106,15 +107,15 @@ define([
         var uniqueId = this.factory.stringNext();
 
         spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject({ status: 404 }));
-        spyOn(this.modalService, 'showModal').and.returnValue(this.$q.reject('Cancel'));
+        spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
         spyOn(this.stateHelper, 'reloadAndReinit').and.returnValue(null);
 
         createDirective.call(this);
         this.controller.uniqueId = uniqueId;
-        this.controller.uniqueIdChanged();
+        this.controller.onSubmit();
         this.scope.$digest();
 
-        expect(this.modalService.showModal).toHaveBeenCalled();
+        expect(this.modalService.modalOkCancel).toHaveBeenCalled();
         expect(this.stateHelper.reloadAndReinit).toHaveBeenCalled();
       });
 
@@ -125,7 +126,7 @@ define([
 
         createDirective.call(this);
         this.controller.uniqueId = this.factory.stringNext();
-        this.controller.uniqueIdChanged();
+        this.controller.onSubmit();
         this.scope.$digest();
 
         expect(this.modalService.modalOk).toHaveBeenCalled();
@@ -138,7 +139,7 @@ define([
 
         createDirective.call(this);
         this.controller.uniqueId = this.factory.stringNext();
-        this.controller.uniqueIdChanged();
+        this.controller.onSubmit();
         this.scope.$digest();
 
         expect(this.$log.error).toHaveBeenCalled();

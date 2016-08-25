@@ -250,17 +250,17 @@ define([
 
     it('can remove a specimen link type', function() {
       var q                   = this.$injector.get('$q'),
-          domainEntityService = this.$injector.get('domainEntityService'),
+          domainNotificationService = this.$injector.get('domainNotificationService'),
           entities            = createEntities(),
           sltToRemove         = entities.specimenLinkTypes[0];
 
       createController(entities);
-      spyOn(domainEntityService, 'removeEntity').and.callFake(function () {
+      spyOn(domainNotificationService, 'removeEntity').and.callFake(function () {
         return q.when('OK');
       });
       controller.remove(sltToRemove);
       scope.$digest();
-      expect(domainEntityService.removeEntity).toHaveBeenCalled();
+      expect(domainNotificationService.removeEntity).toHaveBeenCalled();
       expect(controller.specimenLinkTypes).toBeArrayOfSize(entities.specimenLinkTypes.length - 1);
     });
 

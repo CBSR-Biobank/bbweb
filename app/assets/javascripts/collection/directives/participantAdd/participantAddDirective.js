@@ -27,7 +27,7 @@ define(['lodash'], function(_) {
     '$state',
     'gettext',
     'Participant',
-    'domainEntityService',
+    'domainNotificationService',
     'notificationsService'
   ];
 
@@ -37,7 +37,7 @@ define(['lodash'], function(_) {
   function ParticipantAddCtrl($state,
                               gettext,
                               Participant,
-                              domainEntityService,
+                              domainNotificationService,
                               notificationsService) {
     var vm = this;
 
@@ -50,7 +50,7 @@ define(['lodash'], function(_) {
       participant.add()
         .then(submitSuccess)
         .catch(function(error) {
-          return domainEntityService.updateErrorModal(error, gettext('participant'));
+          return domainNotificationService.updateErrorModal(error, gettext('participant'));
         }).catch(function () {
           $state.go('home.collection.study', { studyId: vm.study.id });
         });

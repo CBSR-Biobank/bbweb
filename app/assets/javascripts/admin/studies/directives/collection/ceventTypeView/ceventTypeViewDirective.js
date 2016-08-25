@@ -28,7 +28,7 @@ define(['lodash'], function (_) {
     '$state',
     'modalService',
     'modalInput',
-    'domainEntityService',
+    'domainNotificationService',
     'notificationsService',
     'CollectionEventAnnotationTypeModals'
   ];
@@ -36,7 +36,7 @@ define(['lodash'], function (_) {
   function CeventTypeViewCtrl($state,
                               modalService,
                               modalInput,
-                              domainEntityService,
+                              domainNotificationService,
                               notificationsService,
                               CollectionEventAnnotationTypeModals) {
     var vm = this;
@@ -126,7 +126,7 @@ define(['lodash'], function (_) {
         throw new Error('modifications not allowed');
       }
 
-      return domainEntityService.removeEntity(
+      return domainNotificationService.removeEntity(
         removePromiseFunc,
         'Remove specimen',
         'Are you sure you want to remove specimen ' + specimenSpec.name + '?',
@@ -170,7 +170,7 @@ define(['lodash'], function (_) {
               'If you still want to remove it, the participants using it have to be modified ' +
               'to no longer use it.');
         } else {
-          domainEntityService.removeEntity(
+          domainNotificationService.removeEntity(
             promiseFn,
             'Remove collection event',
             'Are you sure you want to remove collection event with name <strong>' +

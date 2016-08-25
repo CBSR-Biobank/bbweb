@@ -47,7 +47,7 @@ define([
 
       self.injectDependencies('$rootScope', '$compile', '$filter');
       self.putHtmlTemplates(
-        '/assets/javascripts/common/directives/truncateToggle.html');
+        '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html');
     }));
 
     it('pressing the button truncates the string', function() {
