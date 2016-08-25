@@ -16,7 +16,7 @@ define(function (require) {
 
   module = angular.module('biobank.common', [ modalInputModule.name, annotationsInputModule.name ]);
 
-  module.component('progressTracker',         require('./components/progressTracker/progressTrackerComponent'));
+  module.component('progressTracker', require('./components/progressTracker/progressTrackerComponent'));
 
   module.directive('focusMe',                 require('./directives/focusMeDirective'));
   module.directive('infoUpdateRemoveButtons', require('./directives/infoUpdateRemoveButtonsDirective'));
@@ -28,9 +28,9 @@ define(function (require) {
   module.directive('updateRemoveButtons',     require('./directives/updateRemoveButtonsDirective'));
   module.directive('pageSelect',              require('./directives/pageSelectDirective'));
   module.directive('pagedItemsList',          require('./directives/pagedItemsList/pagedItemsListDirective'));
-
   module.directive('positiveFloat',           require('./directives/positiveFloat/positiveFloatDirective'));
   module.directive('naturalNumber',           require('./directives/naturalNumber/naturalNumberDirective'));
+  module.directive('statusLine',              require('./directives/statusLine/statusLineDirective'));
 
   module.filter('localTime',                  require('./filters/localTimeFilter'));
   module.filter('nl2br',                      require('./filters/nl2brFilter'));

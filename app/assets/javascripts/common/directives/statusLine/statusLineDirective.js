@@ -16,7 +16,7 @@ define(function () {
         item: '=',
         showStatus: '='
       },
-      templateUrl : '/assets/javascripts/admin/directives/statusLine/statusLine.html'
+      templateUrl : '/assets/javascripts/common/directives/statusLine/statusLine.html'
     };
     return directive;
   }
