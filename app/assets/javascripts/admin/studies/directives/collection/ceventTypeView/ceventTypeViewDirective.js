@@ -26,6 +26,8 @@ define(['lodash'], function (_) {
 
   CeventTypeViewCtrl.$inject = [
     '$state',
+    'gettext',
+    'gettextCatalog',
     'modalService',
     'modalInput',
     'domainNotificationService',
@@ -34,6 +36,8 @@ define(['lodash'], function (_) {
   ];
 
   function CeventTypeViewCtrl($state,
+                              gettext,
+                              gettextCatalog,
                               modalService,
                               modalInput,
                               domainNotificationService,
@@ -61,6 +65,7 @@ define(['lodash'], function (_) {
     //--
 
     function postUpdate(message, title, timeout) {
+      timeout = timeout || 1500;
       return function (ceventType) {
         vm.ceventType = ceventType;
         notificationsService.success(message, title, timeout);
@@ -68,43 +73,41 @@ define(['lodash'], function (_) {
     }
 
     function editName() {
-      modalInput.text(
-        'Edit Event Type name',
-        'Name',
-        vm.ceventType.name,
-        { required: true, minLength: 2 }
-      ).result.then(function (name) {
-        vm.ceventType.updateName(name)
-          .then(postUpdate('Name changed successfully.', 'Change successful', 1500))
-          .catch(notificationsService.updateError);
-      });
+      modalInput.text(gettext('Edit Event Type name'),
+                      gettext('Name'),
+                      vm.ceventType.name,
+                      { required: true, minLength: 2 }).result
+        .then(function (name) {
+          vm.ceventType.updateName(name)
+            .then(postUpdate(gettext('Name changed successfully.'),
+                             gettext('Change successful')))
+            .catch(notificationsService.updateError);
+        });
     }
 
     function editDescription() {
-      modalInput.textArea(
-        'Edit Event Type description',
-        'Description',
-        vm.ceventType.description
-      ).result.then(function (description) {
-        vm.ceventType.updateDescription(description)
-          .then(postUpdate('Description changed successfully.',
-                           'Change successful',
-                           1500))
-          .catch(notificationsService.updateError);
+      modalInput.textArea(gettext('Edit Event Type description'),
+                          gettext('Description'),
+                          vm.ceventType.description
+                         ).result
+        .then(function (description) {
+          vm.ceventType.updateDescription(description)
+            .then(postUpdate(gettext('Description changed successfully.'),
+                             gettext('Change successful')))
+            .catch(notificationsService.updateError);
       });
     }
 
     function editRecurring() {
-      modalInput.boolean(
-        'Edit Event Type recurring',
-        'Recurring',
-        vm.ceventType.recurring.toString()
-      ).result.then(function (recurring) {
-        vm.ceventType.updateRecurring(recurring === 'true')
-          .then(postUpdate('Recurring changed successfully.',
-                           'Change successful',
-                             1500))
-          .catch(notificationsService.updateError);
+      modalInput.boolean(gettext('Edit Event Type recurring'),
+                         gettext('Recurring'),
+                         vm.ceventType.recurring.toString()
+                        ).result
+        .then(function (recurring) {
+          vm.ceventType.updateRecurring(recurring === 'true')
+            .then(postUpdate(gettext('Recurring changed successfully.'),
+                             gettext('Change successful')))
+            .catch(notificationsService.updateError);
       });
     }
 
@@ -128,10 +131,12 @@ define(['lodash'], function (_) {
 
       return domainNotificationService.removeEntity(
         removePromiseFunc,
-        'Remove specimen',
-        'Are you sure you want to remove specimen ' + specimenSpec.name + '?',
-        'Remove failed',
-        'Specimen ' + specimenSpec.name + ' cannot be removed');
+        gettext('Remove specimen'),
+        gettextCatalog.getString('Are you sure you want to remove specimen {{name}}?',
+                                 { name: specimenSpec.name }),
+        gettext('Remove failed'),
+        gettextCatalog.getString('Specimen {[name]} cannot be removed',
+                                 { name: specimenSpec.name }));
 
       function removePromiseFunc() {
         return vm.ceventType.removeSpecimenSpec(specimenSpec);
@@ -165,23 +170,24 @@ define(['lodash'], function (_) {
       vm.ceventType.inUse().then(function (inUse) {
         if (inUse) {
           modalService.modalOk(
-            'Collection event in use',
-            'This collection event cannot be removed since one or more participants are using it. ' +
-              'If you still want to remove it, the participants using it have to be modified ' +
-              'to no longer use it.');
+            gettext('Collection event in use'),
+            gettext('This collection event cannot be removed since one or more participants are using it. ' +
+                    'If you still want to remove it, the participants using it have to be modified ' +
+                    'to no longer use it.'));
         } else {
           domainNotificationService.removeEntity(
             promiseFn,
-            'Remove collection event',
-            'Are you sure you want to remove collection event with name <strong>' +
-              vm.ceventType.name + '</strong>?',
-            'Remove failed',
-            'Collection event with name ' + vm.ceventType.name + ' cannot be removed');
+            gettext('Remove collection event'),
+            gettext('Are you sure you want to remove collection event with name <strong>{{name}}</strong>?',
+                    { name: vm.ceventType.name }),
+            gettext('Remove failed'),
+            gettext('Collection event with name {{name}} cannot be removed',
+                    { name: vm.ceventType.name }));
         }
 
         function promiseFn() {
           return vm.ceventType.remove().then(function () {
-            notificationsService.success('Collection event removed');
+            notificationsService.success(gettext('Collection event removed'));
             $state.go('home.admin.studies.study.collection', {}, { reload: true });
           });
         }

@@ -51,7 +51,7 @@ define([
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/studyParticipantsTab/studyParticipantsTab.html',
         '/assets/javascripts/admin/studies/directives/studyNotDisabledWarning/studyNotDisabledWarning.html',
-        '/assets/javascripts/admin/directives/annotationTypeSummary/annotationTypeSummary.html',
+        '/assets/javascripts/admin/components/annotationTypeSummary/annotationTypeSummary.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html');
 
       self.jsonStudy = self.factory.study();

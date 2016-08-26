@@ -5,19 +5,24 @@
 define([], function() {
   'use strict';
 
-  SpecimenLinkAnnotationTypeModalsFactory.$inject = ['AnnotationTypeModals'];
+  SpecimenLinkAnnotationTypeModalsFactory.$inject = [
+    'gettext',
+    'AnnotationTypeModals'
+  ];
 
   /**
    *
    */
-  function SpecimenLinkAnnotationTypeModalsFactory(AnnotationTypeModals) {
+  function SpecimenLinkAnnotationTypeModalsFactory(gettext,
+                                                   AnnotationTypeModals) {
 
     function SpecimenLinkAnnotationTypeModals() {
-      AnnotationTypeModals.call(this,
-                                     'This annotation type is in use by a specimen link type. ' +
-                                     'If you want to make changes to the annotation type, ' +
-                                     'it must first be removed from the specimen link type(s) that use it.');
-    }
+      AnnotationTypeModals.call(
+        this,
+        gettext('This annotation type is in use by a specimen link type. ' +
+                'If you want to make changes to the annotation type, ' +
+                'it must first be removed from the specimen link type(s) that use it.'));
+      }
 
     SpecimenLinkAnnotationTypeModals.prototype = Object.create(AnnotationTypeModals.prototype);
     SpecimenLinkAnnotationTypeModals.prototype.construcor = SpecimenLinkAnnotationTypeModals;

@@ -26,6 +26,8 @@ define(['lodash'], function(_) {
   StudySummaryCtrl.$inject = [
     '$scope',
     '$state',
+    'gettext',
+    'gettextCatalog',
     'modalService',
     'modalInput',
     'notificationsService',
@@ -34,13 +36,14 @@ define(['lodash'], function(_) {
 
   function StudySummaryCtrl($scope,
                             $state,
+                            gettext,
+                            gettextCatalog,
                             modalService,
                             modalInput,
                             notificationsService,
                             CollectionEventType) {
 
-    var vm = this,
-        validStatusActions = ['disable', 'enable', 'retire', 'unretire'];
+    var vm = this;
 
     vm.descriptionToggleLength = 100;
     vm.changeStatus            = changeStatus;
@@ -62,28 +65,42 @@ define(['lodash'], function(_) {
     }
 
     function changeStatus(statusAction) {
-      var modalOptions = {
-        closeButtonText: 'Cancel',
-        headerHtml: 'Confirm study ',
-        bodyHtml: 'Are you sure you want to '
-      };
+      var body;
 
-      if (!_.includes(validStatusActions, statusAction)) {
+      switch (statusAction) {
+      case 'disable':
+        body = gettextCatalog.getString('Are you sure you want to disable study {{name}}',
+                                        { name: vm.study.name });
+        break;
+      case 'enable':
+         body = gettextCatalog.getString('Are you sure you want to enable study {{name}}',
+                                         { name: vm.study.name });
+        break;
+      case 'retire':
+        body = gettextCatalog.getString('Are you sure you want to retire study {{name}}',
+                                         { name: vm.study.name });
+        break;
+      case 'unretire':
+        body = gettextCatalog.getString('Are you sure you want to unretire study {{name}}',
+                                         { name: vm.study.name });
+        break;
+      default:
         throw new Error('invalid status: ' + statusAction);
       }
 
-      modalOptions.headerHtml += statusAction;
-      modalOptions.bodyHtml += statusAction + ' study ' + vm.study.name + '?';
+      body += statusAction + ' study ' + vm.study.name + '?';
 
-      modalService.showModal({}, modalOptions).then(function () {
-        return vm.study[statusAction]();
-      }).then(function (study) {
-        vm.study = study;
-        notificationsService.success('The study\'s status has been updated.', null, 2000);
-      });
+      modalService.modalOkCancel(gettext('Confirm study status change'), body)
+        .then(function () {
+          return vm.study[statusAction]();
+        }).then(function (study) {
+          vm.study = study;
+          notificationsService.success('The study\'s status has been updated.', null, 2000);
+        });
     }
 
     function postUpdate(message, title, timeout) {
+      timeout = timeout || 1500;
       return function (study) {
         vm.study = study;
         notificationsService.success(message, title, timeout);
@@ -91,26 +108,26 @@ define(['lodash'], function(_) {
     }
 
     function editName() {
-      modalInput.text('Edit name',
-                      'Name',
+      modalInput.text(gettext('Edit name'),
+                      gettext('Name'),
                       vm.study.name,
-                      { required: true, minLength: 2 })
-        .result.then(function (name) {
+                      { required: true, minLength: 2 }).result
+        .then(function (name) {
           vm.study.updateName(name)
-            .then(postUpdate('Name changed successfully.',
-                             'Change successful',
-                             1500))
+            .then(postUpdate(gettext('Name changed successfully.'),
+                             gettext('Change successful')))
             .catch(notificationsService.updateError);
         });
     }
 
     function editDescription() {
-      modalInput.textArea('Edit description', 'Description', vm.study.description)
-        .result.then(function (description) {
+      modalInput.textArea(gettext('Edit description'),
+                          gettext('Description'),
+                          vm.study.description).result
+        .then(function (description) {
           vm.study.updateDescription(description)
-            .then(postUpdate('Description changed successfully.',
-                             'Change successful',
-                             1500))
+            .then(postUpdate(gettext('Description changed successfully.'),
+                             gettext('Change successful')))
             .catch(notificationsService.updateError);
         });
     }

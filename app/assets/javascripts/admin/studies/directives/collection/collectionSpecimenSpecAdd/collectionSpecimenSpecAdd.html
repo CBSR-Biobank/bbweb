@@ -1,5 +1,8 @@
 <div class="page-header">
-  <h1>{{vm.study.name}} <small>Add Collection Specimen</small></h1>
+  <h1>
+    {{vm.study.name}}
+    <small translate>Add Collection Specimen</small>
+  </h1>
 </div>
 <form class="form-horizontal"
       name="specForm"
@@ -8,34 +11,34 @@
   <!-- NAME -->
   <div class="form-group"
        ng-class="{ 'has-error' : specForm.name.$invalid && !specForm.name.$pristine }">
-    <label for="name" class="col-md-2 form-control-label">Name</label>
+    <label for="name" class="col-md-2 form-control-label" translate>Name</label>
     <div class="col-md-10">
       <input name="name"
              type="text"
              class="form-control"
              ng-model="vm.specimenSpec.name"
              ng-minlength="2"
-             placeholder="A short name for the specimen group"
+             placeholder="{{'A short name for the specimen group'|translate}}"
              focus-me="true"
              required />
     </div>
     <div class="col-md-offset-2 col-md-10"
          ng-messages="specForm.name.$error"
          ng-if="specForm.name.$dirty">
-      <div ng-message="minlength" class="help-block">Name is too short</div>
-      <div ng-message="required" class="help-block">A name is required</div>
+      <div ng-message="minlength" class="help-block" translate>Name is too short</div>
+      <div ng-message="required" class="help-block" translate>A name is required</div>
     </div>
   </div>
 
   <!-- DESCRIPTION -->
   <div class="form-group">
-    <label for="description" class="col-md-2 form-control-label">Description</label>
+    <label for="description" class="col-md-2 form-control-label" translate>Description</label>
     <div class="col-md-10">
       <textarea name="description"
                 class="form-control"
                 rows="10"
                 ng-model="vm.specimenSpec.description"
-                placeholder="A description of the specimen group (optional)" />
+                placeholder="{{'A description of the specimen group (optional)'|translate}}" />
     </div>
   </div>
 
@@ -43,20 +46,22 @@
   <div class="form-group"
        ng-class="{ 'has-error' : specForm.anatomicalSourceType.$invalid &&
                  !specForm.anatomicalSourceType.$pristine }">
-    <label for="anatomicalSourceType" class="col-md-2 form-control-label">Anatomical Source</label>
+    <label for="anatomicalSourceType" class="col-md-2 form-control-label" translate>
+      Anatomical Source
+    </label>
     <div class="col-md-10">
       <select class="form-control"
               name="anatomicalSourceType"
               ng-model="vm.specimenSpec.anatomicalSourceType"
               ng-options="source for source in vm.anatomicalSourceTypes"
               required>
-        <option value="">-- make a selection --</option>
+        <option value="" translate>-- make a selection --</option>
       </select>
     </div>
     <div class="col-md-offset-2 col-md-10"
          ng-messages="specForm.anatomicalSourceType.$error"
          ng-if="specForm.anatomicalSourceType.$dirty">
-      <div ng-message="required" class="help-block">Anatomical source is required.</div>
+      <div ng-message="required" class="help-block" translate>Anatomical source is required.</div>
     </div>
   </div>
 
@@ -64,20 +69,20 @@
   <div class="form-group"
        ng-class="{ 'has-error' : specForm.perservationType.$invalid &&
                  !specForm.perservationType.$pristine }">
-    <label for="perservationType" class="col-md-2 form-control-label">Preservation Type</label>
+    <label for="perservationType" class="col-md-2 form-control-label" translate>Preservation Type</label>
     <div class="col-md-10">
       <select class="form-control"
               name="perservationType"
               ng-model="vm.specimenSpec.preservationType"
               ng-options="preserv for preserv in vm.preservTypes"
               required>
-        <option value="">-- make a selection --</option>
+        <option value="" translate>-- make a selection --</option>
       </select>
     </div>
     <div class="col-md-offset-2 col-md-10"
          ng-messages="specForm.perservationType.$error"
          ng-if="specForm.perservationType.$dirty">
-      <div ng-message="required" class="help-block">Preservation type is required</div>
+      <div ng-message="required" class="help-block" translate>Preservation type is required</div>
     </div>
   </div>
 
@@ -85,99 +90,105 @@
   <div class="form-group"
        ng-class="{ 'has-error' : specForm.perservationTemperature.$invalid &&
                  !specForm.perservationTemperature.$pristine }">
-    <label for="perservationTemperature" class="col-md-2 form-control-label">Preservation Temperature</label>
+    <label for="perservationTemperature" class="col-md-2 form-control-label" translate>
+      Preservation Temperature
+    </label>
     <div class="col-md-10">
       <select class="form-control"
               name="perservationTemperature"
               ng-model="vm.specimenSpec.preservationTemperatureType"
               ng-options="temp for temp in vm.preservTempTypes"
               required>
-        <option value="">-- make a selection --</option>
+        <option value="" translate>-- make a selection --</option>
       </select>
     </div>
     <div class="col-md-offset-2 col-md-10"
          ng-messages="specForm.perservationTemperature.$error"
          ng-if="specForm.perservationTemperature.$dirty">
-      <div ng-message="required" class="help-block">Preservation temperature is required</div>
+      <div ng-message="required" class="help-block" translate>Preservation temperature is required</div>
     </div>
   </div>
 
   <!-- SPECIMEN TYPE -->
   <div class="form-group"
        ng-class="{ 'has-error' : specForm.specimenType.$invalid && !specForm.specimenType.$pristine }">
-    <label for="specimenType" class="col-md-2 form-control-label">Specimen Type</label>
+    <label for="specimenType" class="col-md-2 form-control-label" translate>Specimen Type</label>
     <div class="col-md-10">
       <select class="form-control"
               name="specimenType"
               ng-model="vm.specimenSpec.specimenType"
               ng-options="type for type in vm.specimenTypes"
               required>
-        <option value="">-- make a selection --</option>
+        <option value="" translate>-- make a selection --</option>
       </select>
     </div>
     <div class="col-md-offset-2 col-md-10"
          ng-messages="specForm.specimenType.$error"
          ng-if="specForm.specimenType.$dirty">
-      <div ng-message="required" class="help-block">Specimen type is required</div>
+      <div ng-message="required" class="help-block" translate>Specimen type is required</div>
     </div>
   </div>
 
   <!-- UNITS -->
   <div class="form-group"
        ng-class="{ 'has-error' : specForm.units.$invalid && !specForm.units.$pristine }">
-    <label for="units" class="col-md-2 form-control-label">Units</label>
+    <label for="units" class="col-md-2 form-control-label" translate>Units</label>
     <div class="col-md-10">
       <input name="units"
              type="text"
              class="form-control"
              ng-model="vm.specimenSpec.units"
-             placeholder="the units the specimens are measured in (eg. mL, cm, etc.)"
+             placeholder="{{'the units the specimens are measured in (eg. mL, cm, etc.)'|translate}}"
              required/>
     </div>
     <div class="col-md-offset-2 col-md-10"
          ng-messages="specForm.units.$error"
          ng-if="specForm.units.$dirty">
-      <div ng-message="required" class="help-block">Units are required</div>
+      <div ng-message="required" class="help-block" translate>Units are required</div>
     </div>
   </div>
 
   <!-- AMOUNT -->
   <div class="form-group"
        ng-class="{ 'has-error' : specForm.amount.$invalid && !specForm.amount.$pristine }">
-    <label for="amount" class="col-md-2 form-control-label">Amount</label>
+    <label for="amount" class="col-md-2 form-control-label" translate>Amount</label>
     <div class="col-md-10">
       <input name="amount"
              type="number"
              class="form-control"
              ng-model="vm.specimenSpec.amount"
-             placeholder="the amount"
+             placeholder="{{'an amount'|translate}}"
              positive-float
              required/>
     </div>
     <div class="col-md-offset-2 col-md-10"
          ng-messages="specForm.amount.$error"
          ng-if="specForm.amount.$dirty">
-      <div ng-message="positiveFloat" class="help-block">Amount should be a positive floating point number</div>
+      <div ng-message="positiveFloat" class="help-block" translate>
+        Amount should be a positive floating point number
+      </div>
     </div>
   </div>
 
   <!-- MAX COUNT -->
   <div class="form-group"
        ng-class="{ 'has-error' : specForm.maxCount.$invalid && !specForm.maxCount.$pristine }">
-    <label for="maxCount" class="col-md-2 form-control-label">Count</label>
+    <label for="maxCount" class="col-md-2 form-control-label" translate>Count</label>
     <div class="col-md-10">
       <input name="maxCount"
              type="number"
              class="form-control"
              ng-model="vm.specimenSpec.maxCount"
-             placeholder="maximum count"
+             placeholder="{{'maximum count'|translate}}"
              natural-number
              required/>
     </div>
     <div class="col-md-offset-2 col-md-10"
          ng-messages="specForm.maxCount.$error"
          ng-if="specForm.maxCount.$dirty">
-      <div ng-message="naturalNumber" class="help-block">Count should be a positive number greater than zero</div>
+      <div ng-message="naturalNumber" class="help-block" translate>
+        Count should be a positive number greater than zero
+      </div>
     </div>
   </div>
 
@@ -186,8 +197,9 @@
     <div class="col-md-offset-2 col-md-10">
       <button class="btn btn-primary"
               ng-disabled="specForm.$invalid"
-              ng-click="vm.submit(vm.specimenSpec)">Submit</button>
-      <button type="button" class="btn" ng-click="vm.cancel()">Cancel</button>
+              ng-click="vm.submit(vm.specimenSpec)"
+              translate>Submit</button>
+      <button type="button" class="btn" ng-click="vm.cancel()" translate>Cancel</button>
     </div>
   </div>
 </form>

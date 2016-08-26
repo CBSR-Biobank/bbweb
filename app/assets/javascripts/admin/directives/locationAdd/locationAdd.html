@@ -6,106 +6,100 @@
   <!-- NAME -->
   <div class="form-group"
        ng-class="{ 'has-error' : locationForm.name.$invalid && !locationForm.name.$pristine }">
-    <label for="name" class="col-md-2 form-control-label">Name</label>
+    <label for="name" class="col-md-2 form-control-label" translate>Name</label>
     <div class="col-md-10">
-      <input
-         name="name"
-         type="text"
-         class="form-control"
-         ng-model="vm.location.name"
-         ng-minlength="2"
-         placeholder="A short name for the location"
-         focus-me="true"
-         required />
+      <input name="name"
+             type="text"
+             class="form-control"
+             ng-model="vm.location.name"
+             ng-minlength="2"
+             placeholder="{{'A short name for the location'|translate}}"
+             focus-me="true"
+             required />
     </div>
     <div class="col-md-offset-2 col-md-10"
          ng-messages="locationForm.name.$error"
          ng-if="locationForm.name.$dirty"
          role="alert">
-      <div ng-message="required" class="help-block">A name is required</div>
-      <div ng-message="minlength" class="help-block">Name is too short</div>
+      <div ng-message="required" class="help-block" translate>A name is required</div>
+      <div ng-message="minlength" class="help-block" translate>Name is too short</div>
     </div>
   </div>
 
   <!-- STREET -->
   <div class="form-group">
-    <label for="street" class="col-md-2 form-control-label">Street</label>
+    <label for="street" class="col-md-2 form-control-label" translate>Street</label>
     <div class="col-md-10">
-      <input
-         name="street"
-         type="text"
-         class="form-control"
-         ng-model="vm.location.street"
-         placeholder="Street address for this location (including unit number)" />
+      <input name="street"
+             type="text"
+             class="form-control"
+             ng-model="vm.location.street"
+             placeholder="{{'Street address for this location (including unit number)'|translate}}" />
     </div>
   </div>
 
   <!-- CITY -->
   <div class="form-group">
-    <label for="city" class="col-md-2 form-control-label">City</label>
+    <label for="city" class="col-md-2 form-control-label" translate>City</label>
     <div class="col-md-10">
-      <input
-         name="city"
-         type="text"
-         class="form-control"
-         ng-model="vm.location.city" />
+      <input name="city"
+             type="text"
+             class="form-control"
+             ng-model="vm.location.city" />
     </div>
   </div>
 
   <!-- PROVINCE -->
   <div class="form-group">
-    <label for="province" class="col-md-2 form-control-label">Province / State</label>
+    <label for="province" class="col-md-2 form-control-label" translate>Province / State</label>
     <div class="col-md-10">
-      <input
-         name="province"
-         type="text"
-         class="form-control"
-         ng-model="vm.location.province" />
+      <input name="province"
+             type="text"
+             class="form-control"
+             ng-model="vm.location.province" />
     </div>
   </div>
 
   <!-- POSTAL CODE -->
   <div class="form-group">
-    <label for="postal_code" class="col-md-2 form-control-label">Postal / Zip code</label>
+    <label for="postal_code" class="col-md-2 form-control-label" translate>Postal / Zip code</label>
     <div class="col-md-10">
-      <input
-         name="postalCode"
-         type="text"
-         class="form-control"
-         ng-model="vm.location.postalCode" />
+      <input name="postalCode"
+             type="text"
+             class="form-control"
+             ng-model="vm.location.postalCode" />
     </div>
   </div>
 
   <!-- PO BOX NUMBER -->
   <div class="form-group">
-    <label for="po box number" class="col-md-2 form-control-label">PO box number</label>
+    <label for="po box number" class="col-md-2 form-control-label" translate>PO box number</label>
     <div class="col-md-10">
       <input
          name="poBoxNumber"
          type="text"
          class="form-control"
          ng-model="vm.location.poBoxNumber"
-         placeholder="Optional" />
+         placeholder="{{'Optional'|translate}}" />
     </div>
   </div>
 
   <!-- COUNTRY ISO CODE -->
   <div class="form-group">
-    <label for="country iso code" class="col-md-2 form-control-label">Country ISO code</label>
+    <label for="country iso code" class="col-md-2 form-control-label" translate>Country ISO code</label>
     <div class="col-md-10">
-      <input
-         name="countryIsoCode"
-         type="text"
-         class="form-control"
-         ng-model="vm.location.countryIsoCode" />
+      <input name="countryIsoCode"
+             type="text"
+             class="form-control"
+             ng-model="vm.location.countryIsoCode" />
     </div>
   </div>
 
   <!-- BUTTONS  -->
   <div class="form-group">
     <div class="col-md-offset-2 col-md-10">
-      <button class="btn btn-primary" ng-disabled="locationForm.$invalid">Submit</button>
-      <button type="button" class="btn" ng-click="vm.cancel()">Cancel</button>
+      <button class="btn btn-primary" ng-disabled="locationForm.$invalid" translate>Submit</button>
+      <button type="button" class="btn" ng-click="vm.cancel()" translate>Cancel</button>
     </div>
   </div>
 </form>

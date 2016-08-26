@@ -46,7 +46,6 @@ define([
     it('should contain valid settings to update a study', function() {
       createController.call(this);
       expect(this.controller.study).toEqual(this.study);
-      expect(this.controller.returnState).toBe(this.returnState);
     });
 
     it('should return to valid state on cancel', function() {

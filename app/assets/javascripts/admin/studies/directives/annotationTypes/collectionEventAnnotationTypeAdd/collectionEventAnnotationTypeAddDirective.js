@@ -35,16 +35,19 @@ define(['lodash'], function (_) {
 
     _.extend(vm, annotationTypeAddMixin);
 
-    vm.onSubmit        = onSubmit;
-    vm.onAddsuccessful = vm.onAddSuccessful(returnState);
-    vm.onCancel        = vm.onCancel(returnState);
+    vm.submit = submit;
+    vm.cancel = cancel;
 
     //--
 
-    function onSubmit(annotationType) {
+    function submit(annotationType) {
       vm.collectionEventType.addAnnotationType(annotationType)
-        .then(vm.onAddsuccessful)
+        .then(vm.onAddSuccessful(returnState))
         .catch(vm.onAddFailed);
+    }
+
+    function cancel() {
+      vm.onCancel(returnState)();
     }
   }
 

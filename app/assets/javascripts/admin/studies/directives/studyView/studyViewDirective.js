@@ -23,16 +23,21 @@ define(['lodash'], function (_) {
     return directive;
   }
 
-  StudyViewCtrl.$inject = ['$scope', '$window', '$state'];
+  StudyViewCtrl.$inject = [
+    '$scope',
+    '$window',
+    '$state',
+    'gettext'
+  ];
 
-  function StudyViewCtrl($scope, $window, $state) {
+  function StudyViewCtrl($scope, $window, $state, gettext) {
     var vm = this;
 
     vm.tabs = [
-      { heading: 'Summary',      sref: 'home.admin.studies.study.summary',      active: true },
-      { heading: 'Participants', sref: 'home.admin.studies.study.participants', active: false },
-      { heading: 'Collection',   sref: 'home.admin.studies.study.collection',   active: false },
-      { heading: 'Processing',   sref: 'home.admin.studies.study.processing',   active: false }
+      { heading: gettext('Summary'),      sref: 'home.admin.studies.study.summary',      active: true },
+      { heading: gettext('Participants'), sref: 'home.admin.studies.study.participants', active: false },
+      { heading: gettext('Collection'),   sref: 'home.admin.studies.study.collection',   active: false },
+      { heading: gettext('Processing'),   sref: 'home.admin.studies.study.processing',   active: false }
     ];
     vm.activeTabUpdate = activeTabUpdate;
 

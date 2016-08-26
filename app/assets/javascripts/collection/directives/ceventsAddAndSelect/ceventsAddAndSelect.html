@@ -68,7 +68,12 @@
        ng-if="vm.showPagination">
     <form class="form-inline" name="filters">
       <div class="form-group">
-        <label for="nameFilter" class="small" translate>Visit# filter:</label>
+        <label for="nameFilter"
+               class="small"
+               translate
+               translate-context="a search filter used to search by visit number">
+          Visit# filter:
+        </label>
         <input type="text"
                class="form-control input-sm"
                name="nameFilter"

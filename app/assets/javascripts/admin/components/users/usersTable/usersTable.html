@@ -3,18 +3,24 @@
        class="table table-hover table-striped">
   <thead>
     <tr>
-      <th st-sort="email">Email</th>
-      <th st-sort="name">Name</th>
-      <th>Added</th>
-      <th>Status</th>
-      <th>Action</th>
+      <th st-sort="email" translate>Email</th>
+      <th st-sort="name" translate>Name</th>
+      <th translate>Added</th>
+      <th translate>Status</th>
+      <th translate>Action</th>
     </tr>
     <tr>
       <th>
-        <input st-search="email" placeholder="search for email" class="input-sm form-control" type="search"/>
+        <input st-search="email"
+               placeholder="{{'search for email'|translate}}"
+               class="input-sm form-control"
+               type="search"/>
       </th>
       <th>
-        <input st-search="name" placeholder="search for name" class="input-sm form-control" type="search"/>
+        <input st-search="name"
+               placeholder="{{'search for name'|translate}}"
+               class="input-sm form-control"
+               type="search"/>
       </th>
       <th></th>
       <th>
@@ -27,7 +33,7 @@
       </th>
     </tr>
   </thead>
-  <tbody ng-show="!vm.tableDataLoading">
+  <tbody ng-if="!vm.tableDataLoading">
     <tr ng-repeat="user in vm.users">
       <td>
         <span ng-click="vm.userInformation(user)">
@@ -52,21 +58,21 @@
           <button class="btn btn-xs btn-success"
                   ng-click="vm.activate(user)"
                   data-toggle="tooltip"
-                  title="Activate user"
+                  title="{{'Activate user'|translate}}"
                   ng-if="user.isRegistered()">
             <i class="glyphicon glyphicon-check"></i>
           </button>
           <button class="btn btn-xs btn-warning"
                   ng-click="vm.lock(user)"
                   data-toggle="tooltip"
-                  title="Lock user"
+                  title="{{'Lock user'|translate}}"
                   ng-if="user.isActive()">
             <i class="glyphicon glyphicon-lock"></i>
           </button>
           <button class="btn btn-xs btn-danger"
                   ng-click="vm.unlock(user)"
                   data-toggle="tooltip"
-                  title="Unlock user"
+                  title="{{'Unlock user'|translate}}"
                   ng-if="user.isLocked()">
             <i class="glyphicon glyphicon-plus"></i>
           </button>
@@ -75,9 +81,9 @@
 
     </tr>
   </tbody>
-  <tbody ng-show="vm.tableDataLoading">
+  <tbody ng-if="vm.tableDataLoading">
     <tr>
-      <td colspan="5" class="text-center">Loading ... </td>
+      <td colspan="5" class="text-center" translate>Loading ...</td>
     </tr>
   </tbody>
   <tfoot>

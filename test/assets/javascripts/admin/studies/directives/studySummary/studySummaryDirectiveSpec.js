@@ -155,6 +155,7 @@ define(function (require) {
       describe('(shared) study status', function () {
 
         it('change status', function () {
+          spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('ok'));
           spyOn(this.Study, 'get').and.returnValue(this.$q.when(this.study));
           spyOn(this.Study.prototype, context.status).and.returnValue(this.$q.when(this.study));
 

@@ -58,7 +58,7 @@ define(function (require) {
       this.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/collection/ceventTypeView/ceventTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
-        '/assets/javascripts/admin/directives/annotationTypeSummary/annotationTypeSummary.html',
+        '/assets/javascripts/admin/components/annotationTypeSummary/annotationTypeSummary.html',
         '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenSpecSummary/collectionSpecimenSpecSummary.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html',
         '/assets/javascripts/common/directives/statusLine/statusLine.html',

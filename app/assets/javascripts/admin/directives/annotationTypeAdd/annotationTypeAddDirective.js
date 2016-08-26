@@ -37,7 +37,6 @@ define(['lodash'], function (_) {
     var vm = this;
 
     vm.annotationType        = new AnnotationType();
-    vm.title                 = 'Add Annotation Type';
     vm.valueTypes            = _.values(AnnotationValueType);
 
     vm.valueTypeChange       = valueTypeChange;
@@ -100,7 +99,7 @@ define(['lodash'], function (_) {
      * Called when the user presses the cancel button on the form.
      */
     function cancel() {
-      vm.onCancel();
+      vm.onCancel()();
     }
 
   }

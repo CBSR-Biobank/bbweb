@@ -27,6 +27,7 @@ define(['lodash'], function (_) {
 
   CollectionSpecimenSpecViewCtrl.$inject = [
     '$state',
+    'gettext',
     'modalInput',
     'notificationsService',
     'CollectionSpecimenSpec',
@@ -37,6 +38,7 @@ define(['lodash'], function (_) {
   ];
 
   function CollectionSpecimenSpecViewCtrl($state,
+                                          gettext,
                                           modalInput,
                                           notificationsService,
                                           CollectionSpecimenSpec,
@@ -66,10 +68,9 @@ define(['lodash'], function (_) {
     //--
 
     function notifySuccess() {
-      return notificationsService.success(
-        'Annotation type changed successfully.',
-        'Change successful',
-        1500);
+      return notificationsService.success(gettext('Annotation type changed successfully.'),
+                                          gettext('Change successful'),
+                                          1500);
     }
 
     function updateCollectionEventType() {
@@ -82,109 +83,110 @@ define(['lodash'], function (_) {
     }
 
     function editName() {
-      modalInput.text('Specimen spec name',
-                      'Name',
+      modalInput.text(gettext('Specimen spec name'),
+                      gettext('Name'),
                       vm.specimenSpec.name,
-                      { required: true, minLength: 2 })
-        .result.then(function (name) {
+                      { required: true, minLength: 2 }).result
+        .then(function (name) {
           vm.specimenSpec.name = name;
           return updateCollectionEventType();
         });
     }
 
     function editDescription() {
-      modalInput.textArea('Specimen spec description',
-                          'Description',
-                          vm.specimenSpec.description)
-        .result.then(function (description) {
+      modalInput.textArea(gettext('Specimen spec description'),
+                          gettext('Description'),
+                          vm.specimenSpec.description).result
+        .then(function (description) {
           vm.specimenSpec.description = description;
           return updateCollectionEventType();
         });
     }
 
     function editAnatomicalSource() {
-      modalInput.select('Specimen spec anatomical source',
-                        'Anatomical source',
+      modalInput.select(gettext('Specimen spec anatomical source'),
+                        gettext('Anatomical source'),
                         vm.specimenSpec.anatomicalSourceType,
                         {
                           required: true,
                           selectOptions: _.values(AnatomicalSourceType)
-                        })
-        .result.then(function (selection) {
+                        }).result
+        .then(function (selection) {
           vm.specimenSpec.anatomicalSourceType = selection;
           return updateCollectionEventType();
         });
     }
 
     function editPreservationType() {
-      modalInput.select('Specimen spec preservation type',
-                        'Preservation type',
+      modalInput.select(gettext('Specimen spec preservation type'),
+                        gettext('Preservation type'),
                         vm.specimenSpec.preservationType,
                         {
                           required: true,
                           selectOptions: _.values(PreservationType)
-                        })
-        .result.then(function (selection) {
+                        }).result
+        .then(function (selection) {
           vm.specimenSpec.preservationType = selection;
           return updateCollectionEventType();
         });
     }
 
     function editPreservationTemperature() {
-      modalInput.select('Specimen spec preservation temperature',
-                        'Preservation temperature',
+      modalInput.select(gettext('Specimen spec preservation temperature'),
+                        gettext('Preservation temperature'),
                         vm.specimenSpec.preservationTemperatureType,
                         {
                           required: true,
                           selectOptions: _.values(PreservationTemperatureType)
-                        })
-        .result.then(function (selection) {
+                        }).result
+        .then(function (selection) {
           vm.specimenSpec.preservationTemperatureType = selection;
           return updateCollectionEventType();
         });
     }
 
     function editSpecimenType() {
-      modalInput.select('Specimen spec - specimen type',
-                        'Sepcimen type',
+      modalInput.select(gettext('Specimen spec - specimen type'),
+                        gettext('Sepcimen type'),
                         vm.specimenSpec.specimenType,
                         {
                           required: true,
                           selectOptions: _.values(SpecimenType)
-                        })
-        .result.then(function (selection) {
+                        }).result
+        .then(function (selection) {
           vm.specimenSpec.specimenType = selection;
           return updateCollectionEventType();
         });
     }
 
     function editUnits() {
-      modalInput.text('Specimen spec units', 'Units', vm.specimenSpec.units, { required: true })
-        .result.then(function (units) {
+      modalInput.text(gettext('Specimen spec units'),
+                      gettext('Units'),
+                      vm.specimenSpec.units,
+                      { required: true }).result
+        .then(function (units) {
           vm.specimenSpec.units = units;
           return updateCollectionEventType();
         });
     }
 
     function editAmount() {
-      modalInput.positiveFloat(
-        'Specimen spec amount',
-        'Amount',
-        vm.specimenSpec.amount,
-        { required: true, positiveFloat: true }
-      ).result.then(function (value) {
-        vm.specimenSpec.amount = value;
+      modalInput.positiveFloat(gettext('Specimen spec amount'),
+                               gettext('Amount'),
+                               vm.specimenSpec.amount,
+                               { required: true, positiveFloat: true }).result
+        .then(function (value) {
+          vm.specimenSpec.amount = value;
           return updateCollectionEventType();
-      });
+        });
     }
 
     function editMaxCount() {
-      modalInput.naturalNumber(
-        'Specimen spec max count',
-        'Max count',
-        vm.specimenSpec.maxCount,
-        { required: true, naturalNumber: true, min: 1 }
-      ).result.then(function (value) {
+      modalInput.naturalNumber(gettext('Specimen spec max count'),
+                               gettext('Max count'),
+                               vm.specimenSpec.maxCount,
+                               { required: true, naturalNumber: true, min: 1 }).result
+        .then(function (value) {
           vm.specimenSpec.maxCount = value;
           return updateCollectionEventType();
         });

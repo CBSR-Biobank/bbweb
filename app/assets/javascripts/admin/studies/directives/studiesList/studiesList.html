@@ -1,24 +1,24 @@
 <div class="page-header">
   <h1>
-    Study administration
+    <translate>Study administration</translate>
     <div class="btn-group pull-right">
       <a ui-sref="home.admin.studies.add" class="btn btn-xs btn-primary" type="button">
-        Add study <i class="glyphicon glyphicon-plus"></i>
+        <translate>Add study</translate>
+        <i class="glyphicon glyphicon-plus"></i>
       </a>
     </div>
   </h1>
 </div>
 
 <div class="clearfix">
-  <paged-items-list
-     counts="vm.studyCounts"
-     page-size="vm.pageSize"
-     possible-statuses="vm.possibleStatuses"
-     message-no-items="No studies have been added yet."
-     message-no-results="No studies match the criteria."
-     get-items="vm.updateStudies"
-     get-item-icon="vm.getStudyIcon"
-     entity-navigate-state="home.admin.studies.study.summary"
-     entity-navigate-state-param-name="studyId">
+  <paged-items-list counts="vm.studyCounts"
+                    page-size="vm.pageSize"
+                    possible-statuses="vm.possibleStatuses"
+                    message-no-items="{{'No studies have been added yet.'|translate}}"
+                    message-no-results="{{'No studies match the criteria.'|translate}}"
+                    get-items="vm.updateStudies"
+                    get-item-icon="vm.getStudyIcon"
+                    entity-navigate-state="home.admin.studies.study.summary"
+                    entity-navigate-state-param-name="studyId">
   </paged-items-list>
 </div>

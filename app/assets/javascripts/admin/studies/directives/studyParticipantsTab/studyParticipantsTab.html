@@ -7,17 +7,14 @@
 </div>
 
 <div class="row">
-  <div class="col-md-12">
+  <div class="col-md-12" translate>
     Participant annotations allow a study to collect custom named and defined pieces of data for each
     participant. Annotations are optional and are not required to be defined.
-
-    <p ng-if="vm.study.annotationTypes.length > 0">
-    </p>
   </div>
 </div>
 
 <div class="panel panel-warning" ng-if="vm.study.annotationTypes.length <= 0">
-  <div class="panel-heading">
+  <div class="panel-heading" translate>
     No annotations have not been entered yet.
   </div>
 </div>
@@ -25,9 +22,9 @@
 <div class="panel panel-default" ng-if="vm.study.annotationTypes.length > 0">
   <div class="panel-heading">
     <h3 class="panel-title">
-      Annotations
+      <translate>Annotations</translate>
       <button class="btn btn-xs btn-default pull-right"
-              title="Add annotation type"
+              title="{{'Add annotation type'|translate}}"
               ng-if="vm.study.isDisabled()"
               ng-click="vm.add()">
         <i class="glyphicon glyphicon-plus"></i>
@@ -35,7 +32,7 @@
     </h3>
   </div>
   <ul class="list-group">
-    <li class="list-group-item" ng-if="vm.study.annotationTypes.length > 0">
+    <li class="list-group-item" ng-if="vm.study.annotationTypes.length > 0" translate>
       The following annotations have been entered.
     </li>
     <li class="list-group-item" ng-repeat="annotationType in vm.study.annotationTypes">
@@ -44,11 +41,10 @@
           <annotation-type-summary annotation-type="annotationType"></annotation-type-summary>
         </div>
         <div class="col-md-2">
-          <update-remove-buttons
-             on-update="vm.editAnnotationType(annotationType)"
-             on-remove="vm.removeAnnotationType(annotationType)"
-             update-button-enabled="vm.study.isDisabled()"
-             remove-button-enabled="vm.study.isDisabled()">
+          <update-remove-buttons on-update="vm.editAnnotationType(annotationType)"
+                                 on-remove="vm.removeAnnotationType(annotationType)"
+                                 update-button-enabled="vm.study.isDisabled()"
+                                 remove-button-enabled="vm.study.isDisabled()">
           </update-remove-buttons>
         </div>
       </div>

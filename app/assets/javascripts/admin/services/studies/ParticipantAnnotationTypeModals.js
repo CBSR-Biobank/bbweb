@@ -5,18 +5,23 @@
 define([], function() {
   'use strict';
 
-  ParticipantAnnotationTypeModalsFactory.$inject = ['AnnotationTypeModals'];
+  ParticipantAnnotationTypeModalsFactory.$inject = [
+    'gettext',
+    'AnnotationTypeModals'
+  ];
 
   /**
    *
    */
-  function ParticipantAnnotationTypeModalsFactory(AnnotationTypeModals) {
+  function ParticipantAnnotationTypeModalsFactory(gettext,
+                                                  AnnotationTypeModals) {
 
     function ParticipantAnnotationTypeModals() {
-      AnnotationTypeModals.call(this,
-                                     'This annotation type is in use by participants. ' +
-                                     'If you want to make changes to the annotation type, ' +
-                                     'it must first be removed from the participants that use it.');
+      AnnotationTypeModals.call(
+        this,
+        gettext('This annotation type is in use by participants. ' +
+                'If you want to make changes to the annotation type, ' +
+                'it must first be removed from the participants that use it.'));
     }
 
     ParticipantAnnotationTypeModals.prototype = Object.create(AnnotationTypeModals.prototype);

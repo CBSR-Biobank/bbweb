@@ -31,16 +31,24 @@ define(['lodash'], function (_) {
 
   AnnotationTypeViewCtrl.$inject = [
     '$state',
+    'gettext',
     'modalInput',
     'notificationsService',
+    'annotationValueTypeLabelService',
     'AnnotationType'
   ];
 
   function AnnotationTypeViewCtrl($state,
+                                  gettext,
                                   modalInput,
                                   notificationsService,
+                                  annotationValueTypeLabelService,
                                   AnnotationType) {
     var vm = this;
+
+    vm.annotationTypeValueTypeLabel =
+      annotationValueTypeLabelService.valueTypeToLabel(vm.annotationType.getType());
+    vm.requiredLabel = vm.annotationType.required ? gettext('Yes') : gettext('No');
 
     vm.editName            = editName;
     vm.editRequired        = editRequired;
@@ -51,30 +59,30 @@ define(['lodash'], function (_) {
     //--
 
     function editName() {
-      modalInput.text('Edit Annotation name',
-                      'Name',
+      modalInput.text(gettext('Edit Annotation name'),
+                      gettext('Name'),
                       vm.annotationType.name,
-                      { required: true, minLength: 2 })
-        .result.then(function (name) {
+                      { required: true, minLength: 2 }).result
+        .then(function (name) {
           vm.annotationType.name = name;
           vm.onUpdate()(vm.annotationType);
         });
     }
 
     function editRequired() {
-      modalInput.boolean('Edit Annotation required',
-                         'Required',
+      modalInput.boolean(gettext('Edit Annotation required'),
+                         gettext('Required'),
                          vm.annotationType.required.toString(),
-                         { required: true })
-        .result.then(function (required) {
+                         { required: true }).result
+        .then(function (required) {
           vm.annotationType.required = (required === 'true' );
           vm.onUpdate()(vm.annotationType);
         });
     }
 
     function editDescription() {
-      modalInput.textArea('Edit Annotation description',
-                          'Description',
+      modalInput.textArea(gettext('Edit Annotation description'),
+                          gettext('Description'),
                           vm.annotationType.description)
         .result.then(function (description) {
           var annotationType = _.extend({}, vm.annotationType, { description: description });
@@ -84,13 +92,12 @@ define(['lodash'], function (_) {
 
     function addSelectionOptions() {
       // FIXME: if selections are in use they cannot be modified
-      modalInput.selectMultiple('Edit Annotation Type selections',
-                                'Add selections',
+      modalInput.selectMultiple(gettext('Edit Annotation Type selections'),
+                                gettext('Add selections'),
                                 {
                                   required: vm.annotationType.required,
-                                  selectOptions:  vm.annotationType.options
-                                })
-        .result.then(function (selections) {
+                                  selectOptions:  vm.annotationType.options}).result
+        .then(function (selections) {
           var annotationType = _.extend({}, vm.annotationType, { options: selections.split(/[ ,]+/) });
           vm.onUpdate()(annotationType);
         });

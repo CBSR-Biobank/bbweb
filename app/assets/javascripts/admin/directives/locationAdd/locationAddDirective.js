@@ -40,7 +40,6 @@ define(['lodash'], function(_) {
     var vm = this;
 
     vm.location = new Location();
-    vm.title =  'Add Location';
     vm.submit = submit;
     vm.cancel = cancel;
 

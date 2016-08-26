@@ -7,40 +7,45 @@
   <!-- NAME -->
   <div class="form-group"
        ng-class="{ 'has-error' : cetForm.name.$invalid && !cetForm.name.$pristine }">
-    <label for="name" class="col-md-2 form-control-label">Name</label>
+    <label for="name" class="col-md-2 form-control-label" translate>Name</label>
     <div class="col-md-10">
       <input name="name"
              type="text"
              class="form-control"
              ng-model="vm.ceventType.name"
              ng-minlength="2"
-             placeholder="A short name for the collection event type"
+             placeholder="{{'A short name for the collection event type'|translate}}"
              focus-me="true"
              required/>
     </div>
     <div class="col-md-offset-2 col-md-10"
          ng-messages="cetForm.name.$error"
          ng-if="cetForm.name.$dirty">
-      <div ng-message="minlength" class="help-block">Name is too short</div>
+      <div ng-message="minlength" class="help-block" translate>Name is too short</div>
     </div>
   </div>
 
   <!-- DESCRIPTION -->
   <div class="form-group">
-    <label for="description" class="col-md-2 form-control-label">Description</label>
+    <label for="description" class="col-md-2 form-control-label" translate>Description</label>
     <div class="col-md-10">
       <textarea name="description"
                 class="form-control"
                 rows="10"
                 ng-model="vm.ceventType.description"
-                placeholder="A description of the collection event type (optional)" />
+                placeholder="{{'A description of the collection event type (optional)'|translate}}" />
     </div>
   </div>
 
   <!-- RECURRING -->
   <div class="form-group">
     <div class="col-md-offset-2 col-md-10">
-      <input name="recurring" type="checkbox" ng-model="vm.ceventType.recurring"/> Recurring
+      <input name="recurring"
+             type="checkbox"
+             ng-model="vm.ceventType.recurring">
+      <translate translate-context="whether or not the collection event is recurring">
+        Recurring
+      </translate>
     </div>
   </div>
 
@@ -49,8 +54,9 @@
     <div class="col-md-offset-2 col-md-10">
       <button class="btn btn-primary"
               ng-disabled="cetForm.$invalid"
-              ng-click="vm.submit(vm.ceventType)">Submit</button>
-      <button type="button" class="btn" ng-click="vm.cancel()">Cancel</button>
+              ng-click="vm.submit(vm.ceventType)"
+              translate>Submit</button>
+      <button type="button" class="btn" ng-click="vm.cancel()" translate>Cancel</button>
     </div>
   </div>
 </form>

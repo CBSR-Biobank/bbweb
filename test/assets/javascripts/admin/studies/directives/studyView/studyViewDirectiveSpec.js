@@ -23,17 +23,13 @@ define([
       this.controller = this.element.controller('studyView');
     };
 
-    beforeEach(mocks.module('biobankApp', 'ui.router', 'biobank.test', function($provide) {
-      $provide.value('$window', {
-        localStorage: {
-          setItem: jasmine.createSpy('mockWindowService.setItem'),
-          getItem: jasmine.createSpy('mockWindowService.getItem')
-        }
-      });
-    }));
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($state, testSuiteMixin, testUtils) {
+    beforeEach(inject(function($window, $state, testSuiteMixin, testUtils) {
       var self = this;
+
+      $window.localStorage.setItem = jasmine.createSpy().and.returnValue(null);
+      $window.localStorage.getItem = jasmine.createSpy().and.returnValue(null);
 
       _.extend(self, testSuiteMixin);
 

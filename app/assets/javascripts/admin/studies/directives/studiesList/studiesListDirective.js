@@ -22,6 +22,7 @@ define(['lodash'], function(_) {
   }
 
   StudiesListCtrl.$inject = [
+    'gettext',
     'Study',
     'StudyStatus',
     'studyStatusLabel',
@@ -32,7 +33,11 @@ define(['lodash'], function(_) {
    * Displays a list of studies with each in its own mini-panel.
    *
    */
-  function StudiesListCtrl(Study, StudyStatus, studyStatusLabel, StudyCounts) {
+  function StudiesListCtrl(gettext,
+                           Study,
+                           StudyStatus,
+                           studyStatusLabel,
+                           StudyCounts) {
     var vm = this;
 
     vm.studyCounts      = {};
@@ -40,7 +45,7 @@ define(['lodash'], function(_) {
     vm.updateStudies    = Study.list;
     vm.getStudyIcon     = getStudyIcon;
 
-    vm.possibleStatuses = [ { id: 'all', label: 'All' } ];
+    vm.possibleStatuses = [ { id: 'all', label: gettext('All') } ];
 
     _.each(_.values(StudyStatus), function (status) {
       vm.possibleStatuses.push({id: status, label: studyStatusLabel.statusToLabel(status)});

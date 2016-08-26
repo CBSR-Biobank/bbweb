@@ -1,9 +1,10 @@
   <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">Events
+    <h3 class="panel-title">
+      <translate translate-context="used to list collection events">Events</translate>
       <span class="btn-group pull-right">
         <button class="btn btn-xs btn-default"
-                title="add collection event"
+                title="{{'add collection event'|translate}}"
                 ng-click="vm.add()">
           <i class="glyphicon glyphicon-plus"></i>
         </button>
@@ -13,7 +14,7 @@
 
   <div class="panel-body" ng-if="vm.collectionEventTypes.length <= 0">
     <div class="panel panel-warning">
-      <div class="panel-heading">
+      <div class="panel-heading" translate>
         No collection event types added to this study yet.
       </div>
     </div>
@@ -40,20 +41,19 @@
   <div class="panel-footer text-center"
        style="padding:5px 10px;"
        ng-if="vm.showPagination">
-    <uib-pagination
-       class="pagination-sm"
-       style="margin:0;"
-       boundary-links="true"
-       total-items="vm.collectionEventsPagedResult.total"
-       items-per-page="vm.pagerOptions.pageSize"
-       ng-model="vm.pagerOptions.page"
-       ng-change="vm.pageChanged()"
-       max-size="5"
-       rotate="false"
-       previous-text="&lsaquo;"
-       next-text="&rsaquo;"
-       first-text="&laquo;"
-       last-text="&raquo;">
+    <uib-pagination class="pagination-sm"
+                    style="margin:0;"
+                    boundary-links="true"
+                    total-items="vm.collectionEventsPagedResult.total"
+                    items-per-page="vm.pagerOptions.pageSize"
+                    ng-model="vm.pagerOptions.page"
+                    ng-change="vm.pageChanged()"
+                    max-size="5"
+                    rotate="false"
+                    previous-text="&lsaquo;"
+                    next-text="&rsaquo;"
+                    first-text="&laquo;"
+                    last-text="&raquo;">
     </uib-pagination>
   </div>
 
@@ -61,7 +61,12 @@
        ng-if="vm.showPagination">
     <form class="form-inline" name="filters">
       <div class="form-group">
-        <label for="nameFilter" class="small">Visit# filter:</label>
+        <label for="nameFilter"
+               class="small"
+               translate
+               translate-context="a search filter used to search by visit number">
+          Visit# filter:
+        </label>
         <input type="text"
                class="form-control input-sm"
                name="nameFilter"

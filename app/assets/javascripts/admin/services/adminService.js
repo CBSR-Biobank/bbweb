@@ -13,6 +13,7 @@ define(function () {
     };
     return service;
 
+    // FIXME: move this to the domain layer?
     function aggregateCounts() {
       return biobankApi.get('/counts');
     }

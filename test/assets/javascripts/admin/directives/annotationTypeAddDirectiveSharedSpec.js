@@ -44,7 +44,7 @@ define([
 
         context.createController.call(this);
 
-        this.controller.onSubmit(annotType);
+        this.controller.submit(annotType);
         this.scope.$digest();
         expect(context.entity.prototype[context.addAnnotationTypeFuncName])
           .toHaveBeenCalledWith(annotType);
@@ -54,7 +54,7 @@ define([
 
       it('on cancel the correct method should be called', function() {
         context.createController.call(this);
-        this.controller.onCancel();
+        this.controller.cancel();
         this.scope.$digest();
         expect(this.$state.go).toHaveBeenCalledWith(context.returnState);
       });

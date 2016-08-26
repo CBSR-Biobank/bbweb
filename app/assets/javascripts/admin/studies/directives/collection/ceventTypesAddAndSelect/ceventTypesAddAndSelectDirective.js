@@ -23,9 +23,15 @@ define(function () {
     return directive;
   }
 
-  CeventTypesAddAndSelectCtrl.$injector = [ '$state', 'CollectionEventType' ];
+  CeventTypesAddAndSelectCtrl.$injector = [
+    '$state',
+    'gettext',
+    'CollectionEventType'
+  ];
 
-  function CeventTypesAddAndSelectCtrl($state, CollectionEventType) {
+  function CeventTypesAddAndSelectCtrl($state,
+                                       gettext,
+                                       CollectionEventType) {
     var vm = this;
 
     vm.collectionEventTypes = [];
@@ -55,7 +61,7 @@ define(function () {
     }
 
     function getRecurringLabel(ceventType) {
-      return ceventType.recurring ? 'Recurring' : 'Not recurring';
+      return ceventType.recurring ? gettext('Recurring') : gettext('Not recurring');
     }
   }
 

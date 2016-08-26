@@ -1,9 +1,8 @@
 <div class="page-header">
-  <h1>{{vm.study.name}} <small>Collection Event Annotation</small></h1>
+  <h1>{{vm.study.name}} <small translate>Collection Event Annotation</small></h1>
 </div>
-<annotation-type-view
-   study="vm.study"
-   annotation-type="vm.annotationType"
-   return-state="home.admin.studies.study.collection.ceventType"
-   on-update="vm.onUpdate">
+<annotation-type-view study="vm.study"
+                      annotation-type="vm.annotationType"
+                      return-state="home.admin.studies.study.collection.ceventType"
+                      on-update="vm.onUpdate">
 </annotation-type-view>

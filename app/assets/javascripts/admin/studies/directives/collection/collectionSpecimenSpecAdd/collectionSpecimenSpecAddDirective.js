@@ -26,6 +26,7 @@ define(['lodash'], function (_) {
 
   CollectionSpecimenSpecAddCtrl.$inject = [
     '$state',
+    'gettext',
     'domainNotificationService',
     'notificationsService',
     'AnatomicalSourceType',
@@ -37,6 +38,7 @@ define(['lodash'], function (_) {
   var returnState = 'home.admin.studies.study.collection.ceventType';
 
   function CollectionSpecimenSpecAddCtrl($state,
+                                         gettext,
                                          domainNotificationService,
                                          notificationsService,
                                          AnatomicalSourceType,
@@ -66,7 +68,7 @@ define(['lodash'], function (_) {
       }
 
       function onAddFailed(error) {
-        return domainNotificationService.updateErrorModal(error, 'study');
+        return domainNotificationService.updateErrorModal(error, gettext('study'));
       }
     }
 

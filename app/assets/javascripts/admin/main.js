@@ -25,12 +25,14 @@ define(function (require) {
 
   module.directive('annotationTypeAdd',     require('./directives/annotationTypeAdd/annotationTypeAddDirective'));
   module.directive('annotationTypeView',    require('./directives/annotationTypeView/annotationTypeViewDirective'));
-  module.directive('annotationTypeSummary', require('./directives/annotationTypeSummary/annotationTypeSummaryDirective'));
   module.directive('locationAdd',           require('./directives/locationAdd/locationAddDirective'));
   module.directive('biobankAdmin',          require('./directives/biobankAdmin/biobankAdminDirective'));
 
   module.component('userAdmin',             require('./components/users/userAdmin/userAdminComponent'));
   module.component('usersTable',            require('./components/users/usersTable/usersTableComponent'));
+
+  module.component('annotationTypeSummary',
+                   require('./components/annotationTypeSummary/annotationTypeSummaryComponent'));
 
   module.service('adminService', require('./services/adminService'));
 

@@ -1,10 +1,11 @@
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">{{vm.study.name}}
+    <h3 class="panel-title">
+      {{vm.study.name}}
       <span class="btn-group pull-right">
         <button class="btn btn-xs btn-success"
                 ng-click="vm.changeStatus('enable')"
-                title="Enable"
+                title="{{'Enable'|translate}}"
                 ng-if="vm.study.isDisabled()"
                 ng-disabled="!vm.hasSpecimenSpecs">
           <i class="glyphicon glyphicon-ok-circle"></i>
@@ -12,21 +13,21 @@
 
         <button class="btn btn-xs btn-danger"
                 ng-click="vm.changeStatus('disable')"
-                title="Disable"
+                title="{{'Disable'|translate}}"
                 ng-if="vm.study.isEnabled()">
           <i class="glyphicon glyphicon-cog"></i>
         </button>
 
         <button class="btn btn-xs btn-danger"
                 ng-click="vm.changeStatus('retire')"
-                title="Retire"
+                title="{{'Retire'|translate}}"
                 ng-if="vm.study.isDisabled()">
           <i class="glyphicon glyphicon-arrow-down"></i>
         </button>
 
         <button class="btn btn-xs btn-danger"
                 ng-click="vm.changeStatus('unretire')"
-                title="Unretire"
+                title="{{'Unretire'|translate}}"
                 ng-if="vm.study.isRetired()">
           <i class="glyphicon glyphicon-arrow-up"></i>
         </button>
@@ -38,14 +39,14 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-2">
-          <strong>Name:</strong>
+          <strong translate>Name:</strong>
         </div>
         <div class="col-md-8">
           {{vm.study.name}}
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="Edit name"
+                  title="{{'Edit name'|translate}}"
                   ng-click="vm.editName()"
                   ng-if="vm.study.isDisabled()">
             <i class="glyphicon glyphicon-edit"></i>
@@ -56,15 +57,14 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-2">
-          <strong>Description:</strong>
+          <strong translate>Description:</strong>
         </div>
         <div class="col-md-10">
-          <truncate-toggle
-             text="vm.study.description"
-             toggle-length="vm.descriptionToggleLength"
-             text-empty-warning="Description not entered yet."
-             allow-edit="vm.study.isDisabled()"
-             on-edit="vm.editDescription()">
+          <truncate-toggle text="vm.study.description"
+                           toggle-length="vm.descriptionToggleLength"
+                           text-empty-warning="{{'Description not entered yet.'|translate}}"
+                           allow-edit="vm.study.isDisabled()"
+                           on-edit="vm.editDescription()">
           </truncate-toggle>
         </div>
       </div>
@@ -74,7 +74,9 @@
       <div class="panel panel-warning">
         <div class="panel-heading">
           <span class="glyphicon glyphicon-warning-sign"></span>
-          Study cannot be enabled until at least one specimen is added to a collection event.
+          <translate>
+            Study cannot be enabled until at least one specimen is added to a collection event.
+          </translate>
         </div>
       </div>
     </li>

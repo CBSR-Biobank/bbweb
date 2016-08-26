@@ -17,7 +17,7 @@ define([
       this.element = angular.element([
         '<annotation-type-add',
         '  on-submit="vm.onSubmit"',
-        '  on-cancel="vm.onCancel()"',
+        '  on-cancel="vm.onCancel"',
         '</annotation-type-add>'
       ].join(''));
 
@@ -54,7 +54,6 @@ define([
     it('scope should be valid when adding', function() {
       createController.call(this);
       expect(this.controller.annotationType).toEqual(jasmine.any(this.AnnotationType));
-      expect(this.controller.title).toBe('Add Annotation Type');
       expect(this.controller.valueTypes).toEqual(_.values(this.AnnotationValueType));
     });
 
@@ -157,7 +156,6 @@ define([
 
     it('should invoke cancel function', function() {
       createController.call(this);
-
       this.controller.cancel();
       expect(this.onCancel).toHaveBeenCalled();
     });

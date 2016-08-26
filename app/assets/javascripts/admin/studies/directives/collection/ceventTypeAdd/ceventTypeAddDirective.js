@@ -25,12 +25,14 @@ define(['lodash'], function(_) {
 
   CeventTypeAddCtrl.$inject = [
     '$state',
+    'gettext',
     'CollectionEventType',
     'domainNotificationService',
     'notificationsService'
   ];
 
   function CeventTypeAddCtrl($state,
+                             gettext,
                              CollectionEventType,
                              domainNotificationService,
                              notificationsService) {
@@ -39,7 +41,7 @@ define(['lodash'], function(_) {
     vm.ceventType  = new CollectionEventType({ studyId: vm.study.id });
     vm.returnState = 'home.admin.studies.study.collection';
 
-    vm.title       = 'Add Collection Event';
+    vm.title       = gettext('Add Collection Event');
     vm.submit      = submit;
     vm.cancel      = cancel;
 
@@ -54,7 +56,7 @@ define(['lodash'], function(_) {
       }
 
       function submitError(error) {
-        domainNotificationService.updateErrorModal(error, 'collection event type');
+        domainNotificationService.updateErrorModal(error, gettext('collection event type'));
       }
     }
 

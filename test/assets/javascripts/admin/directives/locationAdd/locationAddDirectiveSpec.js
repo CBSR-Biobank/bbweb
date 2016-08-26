@@ -14,12 +14,8 @@ define([
   describe('Directive: locationAddDirective', function() {
 
     var createController = function (onSubmit, onCancel) {
-      this.element = angular.element([
-        '<location-add ',
-        '  on-submit="vm.onSubmit"',
-        '  on-cancel="vm.onCancel">',
-        '</location-add>'
-      ].join(''));
+      this.element = angular.element(
+        '<location-add on-submit="vm.onSubmit" on-cancel="vm.onCancel"> </location-add>');
       this.scope = this.$rootScope.$new();
       this.scope.vm = {
         onSubmit: onSubmit,
@@ -82,7 +78,6 @@ define([
     it('should invoke function on cancel', function() {
       createController.call(this, this.onSubmit, this.onCancel);
       this.controller.cancel();
-      this.scope.$digest();
       expect(this.onCancel).toHaveBeenCalled();
     });
 

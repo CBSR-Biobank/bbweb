@@ -25,10 +25,14 @@ define(['lodash'], function (_) {
   }
 
   ParticipantAnnotationTypeViewCtrl.$inject = [
-    '$q', 'notificationsService'
+    '$q',
+    'gettext',
+    'notificationsService'
   ];
 
-  function ParticipantAnnotationTypeViewCtrl($q, notificationsService) {
+  function ParticipantAnnotationTypeViewCtrl($q,
+                                             gettext,
+                                             notificationsService) {
     var vm = this;
 
     vm.onUpdate = onUpdate;
@@ -41,23 +45,19 @@ define(['lodash'], function (_) {
     }
 
     function postUpdate(study) {
-      var deferred = $q.defer();
-
       vm.study = study;
       vm.annotationType = _.find(vm.study.annotationTypes,
-                                      { uniqueId: vm.annotationType.uniqueId });
+                                 { uniqueId: vm.annotationType.uniqueId });
       if (_.isUndefined(vm.annotationType)) {
-        deferred.reject('could not update annotation type');
-      } else {
-        deferred.resolve(true);
+        return $q.reject('could not update annotation type');
       }
-      return deferred.promise;
+      return $q.when(true);
     }
 
     function notifySuccess() {
       return notificationsService.success(
-        'Annotation type changed successfully.',
-        'Change successful',
+        gettext('Annotation type changed successfully.'),
+        gettext('Change successful'),
         1500);
     }
 

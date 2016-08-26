@@ -30,6 +30,8 @@ define(['lodash'], function(_) {
     'domainNotificationService'
   ];
 
+  var returnState = 'home.admin.studies';
+
   function StudyAddCtrl($state,
                         gettext,
                         notificationsService,
@@ -37,10 +39,8 @@ define(['lodash'], function(_) {
 
     var vm = this;
 
-    vm.title =  'Add study';
     vm.submit = submit;
     vm.cancel = cancel;
-    vm.returnState = 'home.admin.studies';
 
     //--
 
@@ -51,7 +51,7 @@ define(['lodash'], function(_) {
 
       function submitSuccess() {
         notificationsService.submitSuccess();
-        $state.go(vm.returnState, {}, { reload: true });
+        $state.go(returnState, {}, { reload: true });
       }
 
       function submitError(error) {
@@ -60,7 +60,7 @@ define(['lodash'], function(_) {
     }
 
     function cancel() {
-      $state.go(vm.returnState);
+      $state.go(returnState);
     }
   }
 
