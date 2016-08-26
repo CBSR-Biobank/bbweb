@@ -27,19 +27,27 @@ define(['lodash'], function (_) {
   CentreSummaryCtrl.$inject = [
     '$scope',
     '$filter',
+    'gettext',
+    'gettextCatalog',
     'modalService',
     'modalInput',
     'notificationsService'
   ];
 
-  function CentreSummaryCtrl($scope, $filter, modalService, modalInput, notificationsService) {
+  function CentreSummaryCtrl($scope,
+                             $filter,
+                             gettext,
+                             gettextCatalog,
+                             modalService,
+                             modalInput,
+                             notificationsService) {
     var vm = this;
     vm.descriptionToggleControl = {}; // for truncateToggle directive
-    vm.descriptionToggleState = true;
-    vm.descriptionToggleLength = 100;
+    vm.descriptionToggleState   = true;
+    vm.descriptionToggleLength  = 100;
 
-    vm.changeStatus = changeStatus;
-    vm.editName = editName;
+    vm.changeStatus    = changeStatus;
+    vm.editName        = editName;
     vm.editDescription = editDescription;
 
     init();
@@ -52,32 +60,30 @@ define(['lodash'], function (_) {
     }
 
     function changeStatus(status) {
-      var changeStatusFn;
-      var modalOptions = {
-        closeButtonText: 'Cancel',
-        headerHtml: 'Confirm centre ',
-        bodyHtml: 'Are you sure you want to '
-      };
+      var changeStatusFn, statusChangeMsg;
 
       if (status === 'enable') {
         changeStatusFn = vm.centre.enable;
+        statusChangeMsg = gettextCatalog.getString('Are you sure you want to enable centre {{name}}?',
+                                                   { name: vm.centre.name });
       } else if (status === 'disable') {
         changeStatusFn = vm.centre.disable;
+        statusChangeMsg = gettextCatalog.getString('Are you sure you want to disable centre {{name}}?',
+                                                   { name: vm.centre.name });
       } else {
         throw new Error('invalid status: ' + status);
       }
 
-      modalOptions.headerHtml += status;
-      modalOptions.bodyHtml += status + ' centre ' + vm.centre.name + '?';
-
-      modalService.showModal({}, modalOptions).then(function () {
-        _.bind(changeStatusFn, vm.centre)().then(function (centre) {
-          vm.centre = centre;
-        });
+      modalService.modalOkCancel(gettext('Confirm status change on centre', statusChangeMsg))
+        .then(function () {
+          _.bind(changeStatusFn, vm.centre)().then(function (centre) {
+            vm.centre = centre;
+          });
       });
     }
 
     function postUpdate(message, title, timeout) {
+      timeout = timeout || 1500;
       return function (centre) {
         vm.centre = centre;
         notificationsService.success(message, title, timeout);
@@ -85,26 +91,26 @@ define(['lodash'], function (_) {
     }
 
     function editName() {
-      modalInput.text('Edit name',
-                      'Name',
+      modalInput.text(gettext('Edit name'),
+                      gettext('Name'),
                       vm.centre.name,
-                      { required: true, minLength: 2 })
-        .result.then(function (name) {
+                      { required: true, minLength: 2 }).result
+        .then(function (name) {
           vm.centre.updateName(name)
-            .then(postUpdate('Name changed successfully.',
-                             'Change successful',
-                             1500))
+            .then(postUpdate(gettext('Name changed successfully.'),
+                             gettext('Change successful')))
             .catch(notificationsService.updateError);
         });
     }
 
     function editDescription() {
-      modalInput.textArea('Edit description', 'Description', vm.centre.description)
-        .result.then(function (description) {
+      modalInput.textArea(gettext('Edit description'),
+                          gettext('Description'),
+                          vm.centre.description).result
+        .then(function (description) {
           vm.centre.updateDescription(description)
-            .then(postUpdate('Description changed successfully.',
-                             'Change successful',
-                             1500))
+            .then(postUpdate(gettext('Description changed successfully.'),
+                             gettext('Change successful')))
             .catch(notificationsService.updateError);
         });
     }

@@ -23,19 +23,20 @@ define(['lodash'], function(_) {
 
   CentreAddCtrl.$inject = [
     '$state',
+    'gettext',
     'Centre',
     'domainNotificationService',
     'notificationsService'
   ];
 
   function CentreAddCtrl($state,
+                         gettext,
                          Centre,
                          domainNotificationService,
                          notificationsService) {
     var vm = this;
 
     vm.centre = new Centre();
-    vm.title  = 'Add centre';
     vm.submit = submit;
     vm.cancel = cancel;
 
@@ -61,7 +62,7 @@ define(['lodash'], function(_) {
     }
 
     function onSubmitError(error) {
-      domainNotificationService.updateErrorModal(error, 'centre');
+      domainNotificationService.updateErrorModal(error, gettext('centre'));
     }
 
     function cancel() {

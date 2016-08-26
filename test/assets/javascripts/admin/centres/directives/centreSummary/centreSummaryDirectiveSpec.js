@@ -43,9 +43,7 @@ define([
 
       self.centre = new self.Centre(self.factory.centre());
 
-      spyOn(modalService, 'showModal').and.callFake(function () {
-        return self.$q.when('modalResult');
-      });
+      spyOn(modalService, 'modalOkCancel').and.returnValue(self.$q.when('ok'));
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/centres/directives/centreView/centreView.html',

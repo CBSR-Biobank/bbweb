@@ -26,6 +26,7 @@ define(['lodash'], function(_) {
 
   CollectionAddCtrl.$inject = [
     '$state',
+    'gettext',
     'gettextCatalog',
     'bbwebConfig',
     'notificationsService',
@@ -38,6 +39,7 @@ define(['lodash'], function(_) {
    * Used to add or edit a collection event.
    */
   function CollectionAddCtrl($state,
+                             gettext,
                              gettextCatalog,
                              bbwebConfig,
                              notificationsService,
@@ -75,7 +77,7 @@ define(['lodash'], function(_) {
       }
 
       function submitError(error) {
-        domainNotificationService.updateErrorModal(error, 'collectionEvent')
+        domainNotificationService.updateErrorModal(error, gettext('collectionEvent'))
           .catch(function () {
             $state.go('home.collection.study.participant', { participantId: vm.participant.id });
           });

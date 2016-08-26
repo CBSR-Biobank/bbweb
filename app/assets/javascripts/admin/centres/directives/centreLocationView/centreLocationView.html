@@ -3,7 +3,10 @@
 </div>
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">Location: {{vm.location.name}}</h3>
+    <h3 class="panel-title">
+      <translate>Location:</translate>
+      {{vm.location.name}}
+    </h3>
   </div>
   <ul class="list-group" ng-if="vm.centre.hasLocations()">
 
@@ -11,14 +14,14 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-2">
-          <strong>Name</strong>
+          <strong translate>Name</strong>
         </div>
         <div class="col-md-8">
           {{vm.location.name}}
         </div>
         <div class="col-md-2" ng-if="vm.centre.isDisabled()">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="Edit name"
+                  title="{{'Edit name'|translate}}"
                   ng-click="vm.editName()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -30,14 +33,14 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-2">
-          <strong>Street</strong>
+          <strong translate>Street</strong>
         </div>
         <div class="col-md-8">
           {{vm.location.street}}
         </div>
         <div class="col-md-2" ng-if="vm.centre.isDisabled()">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="Edit name"
+                  title="{{'Edit street'|translate}}"
                   ng-click="vm.editStreet()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -49,14 +52,14 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-2">
-          <strong>City</strong>
+          <strong translate>City</strong>
         </div>
         <div class="col-md-8">
           {{vm.location.city}}
         </div>
         <div class="col-md-2" ng-if="vm.centre.isDisabled()">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="Edit name"
+                  title="{{'Edit city'|translate}}"
                   ng-click="vm.editCity()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -68,14 +71,14 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-2">
-          <strong>Province</strong>
+          <strong translate>Province</strong>
         </div>
         <div class="col-md-8">
           {{vm.location.province}}
         </div>
         <div class="col-md-2" ng-if="vm.centre.isDisabled()">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="Edit name"
+                  title="{{'Edit province'|translate}}"
                   ng-click="vm.editProvince()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -87,14 +90,14 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-2">
-          <strong>PostalCode</strong>
+          <strong translate>Postal code</strong>
         </div>
         <div class="col-md-8">
           {{vm.location.postalCode}}
         </div>
         <div class="col-md-2" ng-if="vm.centre.isDisabled()">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="Edit name"
+                  title="{{'Edit postal code'|translate}}"
                   ng-click="vm.editPostalCode()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -106,14 +109,14 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-2">
-          <strong>PoBoxNumber</strong>
+          <strong translate>Postal Box Number</strong>
         </div>
         <div class="col-md-8">
           {{vm.location.poBoxNumber}}
         </div>
         <div class="col-md-2" ng-if="vm.centre.isDisabled()">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="Edit name"
+                  title="{{'Edit postal box number'|translate}}"
                   ng-click="vm.editPoBoxNumber()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -125,14 +128,14 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-2">
-          <strong>CountryIsoCode</strong>
+          <strong translate>Country ISO code</strong>
         </div>
         <div class="col-md-8">
           {{vm.location.countryIsoCode}}
         </div>
         <div class="col-md-2" ng-if="vm.centre.isDisabled()">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="Edit name"
+                  title="{{'Edit country ISO code'|translate}}"
                   ng-click="vm.editCountryIsoCode()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -144,7 +147,7 @@
 </div>
 
 <button class="btn btn-primary"
-        title="Back to locations"
+        title="{{'Back to locations'|translate}}"
         ng-click="vm.back()">
   Back
 </button>

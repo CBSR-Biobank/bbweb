@@ -1,11 +1,13 @@
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">This centre participates in these studies</h3>
+    <h3 class="panel-title" translate>
+      This centre participates in these studies
+    </h3>
   </div>
   <ul class="list-group" ng-if="vm.studyCollection.length <= 0">
     <li class="list-group-item">
       <div class="panel panel-warning">
-        <div class="panel-heading">
+        <div class="panel-heading" translate>
           This centre is not participating in any studies.
         </div>
       </div>
@@ -17,8 +19,8 @@
          class="table table-hover table-condensed"
          ng-if="vm.studyCollection.length > 0">
     <thead>
-      <th st-sort="name">Name</th>
-      <th st-sort="status">Status</th>
+      <th st-sort="name" translate>Name</th>
+      <th st-sort="status" translate>Status</th>
       <th></th>
     </thead>
 
@@ -31,11 +33,11 @@
         </td>
         <td>{{study.statusLabel}}</td>
         <td>
-          <!-- FIXME studies should only be removed if no centre is not storing specimens  -->
+          <!-- FIXME studies should only be removed if no centre is not storing specimens for it  -->
           <div class="btn-group pull-right">
             <button class="btn btn-xs btn-warning"
                     ng-click="vm.remove(study.id)"
-                    title="Remove">
+                    title="{{'Remove'|translate}}">
               <i class="glyphicon glyphicon-remove"></i>
             </button>
           </div>
@@ -47,12 +49,15 @@
   <ul class="list-group" ng-if="vm.centre.isDisabled()">
     <li class="list-group-item">
       <div class="input-group" style="margin-top: 10px;">
-        <span class="input-group-addon">Add Study <i class="glyphicon glyphicon-plus"></i></span>
+        <span class="input-group-addon">
+          <translate>Add Study</translate>
+          <i class="glyphicon glyphicon-plus"></i>
+        </span>
         <input type="text"
                ng-model="vm.selected"
                uib-typeahead="study as study.name for study in vm.studyNames | filter:$viewValue | limitTo:8"
                typeahead-on-select="vm.onSelect($item)"
-               placeholder="enter a study's name or partial name"
+               placeholder="{{'enter a study\'s name or partial name'|translate}}"
                class="form-control">
       </div>
     </li>

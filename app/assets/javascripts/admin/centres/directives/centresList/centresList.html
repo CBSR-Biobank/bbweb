@@ -1,25 +1,23 @@
 <div class="page-header">
   <h1>
-    Centre administration
+    <translate>Centre administration</translate>
     <div class="btn-group pull-right">
-
       <a ui-sref="home.admin.centres.add" class="btn btn-xs btn-primary" type="button">
-        Add centre <i class="glyphicon glyphicon-plus"></i>
+        <translate>Add centre</translate>
+        <i class="glyphicon glyphicon-plus"></i>
       </a>
-
     </div>
   </h1>
 </div>
 <div class="clearfix">
-  <paged-items-list
-     counts="vm.centreCounts"
-     page-size="vm.pageSize"
-     possible-statuses="vm.possibleStatuses"
-     message-no-items="No centres have been added yet."
-     message-no-results="No centres match the criteria."
-     get-items="vm.updateCentres"
-     get-item-icon="vm.getCentreIcon"
-     entity-navigate-state="home.admin.centres.centre.summary"
-     entity-navigate-state-param-name="centreId">
+  <paged-items-list counts="vm.centreCounts"
+                    page-size="vm.pageSize"
+                    possible-statuses="vm.possibleStatuses"
+                    message-no-items="{{'No centres have been added yet.'|translate}}"
+                    message-no-results="{{'No centres match the criteria.'|translate}}"
+                    get-items="vm.updateCentres"
+                    get-item-icon="vm.getCentreIcon"
+                    entity-navigate-state="home.admin.centres.centre.summary"
+                    entity-navigate-state-param-name="centreId">
   </paged-items-list>
 </div>

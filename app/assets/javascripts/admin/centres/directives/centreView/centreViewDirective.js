@@ -26,23 +26,29 @@ define(['lodash'], function (_) {
   CentreViewCtrl.$inject = [
     '$window',
     '$scope',
-    '$state'
+    '$state',
+    'gettext'
   ];
 
-  function CentreViewCtrl($window, $scope, $state) {
+  function CentreViewCtrl($window,
+                          $scope,
+                          $state,
+                          gettext) {
     var vm = this;
 
     vm.tabs = [
-      { heading: 'Summary',   sref: 'home.admin.centres.centre.summary',   active: true },
-      { heading: 'Studies',   sref: 'home.admin.centres.centre.studies',   active: true },
-      { heading: 'Locations', sref: 'home.admin.centres.centre.locations', active: true },
+      { heading: gettext('Summary'),   sref: 'home.admin.centres.centre.summary',   active: true },
+      { heading: gettext('Studies'),   sref: 'home.admin.centres.centre.studies',   active: true },
+      { heading: gettext('Locations'), sref: 'home.admin.centres.centre.locations', active: true },
     ];
 
     init();
 
     //--
 
-    // initialize the panels to open state when viewing a new centre
+    /**
+     * initialize the panels to open state when viewing a new centre
+     */
     function init() {
       $scope.$on('centre-view', activeTabUpdate);
 

@@ -1,9 +1,9 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">
-      Locations
+      <translate>Locations</translate>
       <button class="btn btn-xs btn-primary pull-right"
-              title="Add location"
+              title="{{'Add location'|translate}}"
               ng-if="vm.centre.isDisabled()"
               ng-click="vm.add()">
         <i class="glyphicon glyphicon-plus"></i>
@@ -15,7 +15,7 @@
 
     <li class="list-group-item" ng-if="!vm.centre.hasLocations()">
       <div class="panel panel-warning">
-        <div class="panel-heading">
+        <div class="panel-heading" translate>
           Locations have not been added.
         </div>
       </div>
@@ -33,13 +33,13 @@
         <div class="col-md-2">
           <span class="btn-group pull-right">
             <button class="btn btn-xs btn-primary"
-                    title="Edit location"
+                    title="{{'Edit location'|translate}}"
                     ng-if="vm.centre.isDisabled()"
                     ng-click="vm.view(location)">
               <i class="glyphicon glyphicon-edit"></i>
             </button>
             <button class="btn btn-xs btn-warning"
-                    title="Remove location"
+                    title="{{'Remove location'|translate}}"
                     ng-if="vm.centre.isDisabled()"
                     ng-click="vm.remove(location)">
               <i class="glyphicon glyphicon-remove"></i>

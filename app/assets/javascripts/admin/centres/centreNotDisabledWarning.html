@@ -1,4 +1,5 @@
-<div class="alert alert-warning" role="alert" ng-if="centre.status !== 'Disabled'">
+<div class="alert alert-warning" role="alert" ng-if="centre.status.isDisabled()">
   <p><span class="glyphicon glyphicon-warning-sign"></span>
-    Some settings cannot be modified since centre is not disabled.</p>
+    <translate>Some settings cannot be modified since centre is not disabled.</translate>
+  </p>
 </div>

@@ -26,6 +26,9 @@ define(['angular', 'lodash'], function(angular, _) {
 
   CentreStudiesPanelCtrl.$inject = [
     '$scope',
+    '$log',
+    'gettext',
+    'gettextCatalog',
     'Panel',
     'Study',
     'StudyViewer',
@@ -37,6 +40,9 @@ define(['angular', 'lodash'], function(angular, _) {
    *
    */
   function CentreStudiesPanelCtrl($scope,
+                                  $log,
+                                  gettext,
+                                  gettextCatalog,
                                   Panel,
                                   Study,
                                   StudyViewer,
@@ -80,7 +86,7 @@ define(['angular', 'lodash'], function(angular, _) {
 
     function onSelect(item) {
       if (!vm.centre.isDisabled()) {
-        console.error('Should not be allowed to add studies to centre if centre is not disabled');
+        $log.error('Should not be allowed to add studies to centre if centre is not disabled');
         throw new Error('An application error occurred, please contact your administrator.');
       }
 
@@ -108,29 +114,21 @@ define(['angular', 'lodash'], function(angular, _) {
 
     function remove(studyId) {
       // FIXME should not allow study to be removed if centre holds specimens for study
-      var modalOptions = {
-        closeButtonText: 'Cancel',
-        headerHtml: 'Remove study',
-        bodyHtml: 'Are you sure you want to remove study ' + vm.studyNamesById[studyId].name + '?'
-      };
-
-      modalService.showModal({}, modalOptions).then(function () {
-        return vm.centre.removeStudy({id: studyId})
-          .then(function () {
-            vm.studyCollection = _.without(vm.studyCollection, vm.studyNamesById[studyId]);
-          })
-          .catch(removeFailed);
-      });
-
-      function removeFailed(error) {
-        var modalOptions = {
-          closeButtonText: 'Cancel',
-          headerHtml: 'Remove failed',
-          bodyHtml: 'Could not remove study: ' + error
-        };
-
-        modalService.showModal({}, modalOptions);
-      }
+      modalService.modalOkCancel(
+        gettext('Remove study'),
+        gettextCatalog.getString(
+          'Are you sure you want to remove study {{name}}?',
+          { name: vm.studyNamesById[studyId].name }))
+        .then(function () {
+          return vm.centre.removeStudy({id: studyId})
+            .then(function () {
+              vm.studyCollection = _.without(vm.studyCollection, vm.studyNamesById[studyId]);
+            })
+            .catch(function (error) {
+              modalService.modalOkCancel(gettext('Remove failed'),
+                                         gettext('Could not remove study: ') + error);
+            });
+        });
     }
 
   }

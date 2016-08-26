@@ -14,6 +14,7 @@ define(['lodash'], function (_) {
 
   ShipmentAddController.$inject = [
     '$state',
+    'gettext',
     'Centre',
     'Shipment',
     'domainNotificationService',
@@ -25,6 +26,7 @@ define(['lodash'], function (_) {
    *
    */
   function ShipmentAddController($state,
+                                 gettext,
                                  Centre,
                                  Shipment,
                                  domainNotificationService,
@@ -65,7 +67,7 @@ define(['lodash'], function (_) {
       }
 
       function onAddFailed(error) {
-        domainNotificationService.updateErrorModal(error, 'shipment');
+        domainNotificationService.updateErrorModal(error, gettext('shipment'));
       }
     }
 

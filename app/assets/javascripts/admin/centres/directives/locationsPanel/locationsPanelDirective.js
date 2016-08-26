@@ -26,6 +26,8 @@ define(['lodash'], function(_) {
   LocationsPanelCtrl.$inject = [
     '$scope',
     '$state',
+    'gettext',
+    'gettextCatalog',
     'LocationViewer',
     'domainNotificationService'
   ];
@@ -35,6 +37,8 @@ define(['lodash'], function(_) {
    */
   function LocationsPanelCtrl($scope,
                               $state,
+                              gettext,
+                              gettextCatalog,
                               LocationViewer,
                               domainNotificationService) {
     var vm = this;
@@ -64,10 +68,12 @@ define(['lodash'], function(_) {
     function remove(location) {
       domainNotificationService.removeEntity(
         doRemove,
-        'Remove Location',
-        'Are you sure you want to remove location ' + location.name + '?',
-        'Remove Failed',
-        'Location ' + location.name + ' cannot be removed: ');
+        gettext('Remove Location'),
+        gettextCatalog.getString('Are you sure you want to remove location {{name}}?',
+                                 { name: location.name}),
+        gettext('Remove Failed'),
+        gettextCatalog.getString('Location {{name}} cannot be removed: ',
+                                 { name: location.name}));
 
       function doRemove() {
         return vm.centre.removeLocation(location).then(function (centre) {

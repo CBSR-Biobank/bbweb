@@ -4,7 +4,7 @@
       {{vm.centre.name}}
       <span class="btn-group pull-right">
         <button class="btn btn-xs btn-success"
-                title="Enable"
+                title="{{'Enable'|translate}}"
                 ng-disabled="!vm.centre.hasLocations()"
                 ng-if="vm.centre.isDisabled()"
                 ng-click="vm.changeStatus('enable')">
@@ -13,7 +13,7 @@
 
         <button class="btn btn-xs btn-danger"
                 ng-click="vm.changeStatus('disable')"
-                title="Disable"
+                title="{{'Disable'|translate}}"
                 ng-if="vm.centre.isEnabled()">
           <i class="glyphicon glyphicon-cog"></i>
         </button>
@@ -25,14 +25,14 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-2">
-          <strong>Name:</strong>
+          <strong translate>Name:</strong>
         </div>
         <div class="col-md-8">
           {{vm.centre.name}}
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="Edit name"
+                  title="{{'Edit name'|translate}}"
                   ng-if="vm.centre.isDisabled()"
                   ng-click="vm.editName()">
             <i class="glyphicon glyphicon-edit"></i>
@@ -43,15 +43,14 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-2">
-          <strong>Description:</strong>
+          <strong translate>Description:</strong>
         </div>
         <div class="col-md-10">
-          <truncate-toggle
-             text="vm.centre.description"
-             toggle-length="vm.descriptionToggleLength"
-             text-empty-warning="Description not entered yet."
-             allow-edit="vm.centre.isDisabled()"
-             on-edit="vm.editDescription()">
+          <truncate-toggle text="vm.centre.description"
+                           toggle-length="vm.descriptionToggleLength"
+                           text-empty-warning="{{'Description not entered yet.'|translate}}"
+                           allow-edit="vm.centre.isDisabled()"
+                           on-edit="vm.editDescription()">
           </truncate-toggle>
         </div>
       </div>
@@ -59,7 +58,7 @@
     <li class="list-group-item"
         ng-if="!vm.centre.hasLocations()">
       <div class="panel panel-warning">
-        <div class="panel-heading">
+        <div class="panel-heading" translate>
           Centre cannot be enabled until at least one location is added.
         </div>
       </div>

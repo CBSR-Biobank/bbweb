@@ -169,10 +169,10 @@ define([
     });
 
     it('study viewer is displayed', function() {
-      var entities     = createEntities.call(this);
+      var entities = createEntities.call(this);
 
       createController.call(this, entities);
-      spyOn(this.EntityViewer.prototype, 'showModal').and.callFake(function () {});
+      spyOn(this.EntityViewer.prototype, 'showModal').and.returnValue(this.$q.when('ok'));
       spyOn(this.Study, 'get').and.returnValue(this.$q.when(entities.studies[0]));
       this.controller.information(entities.studies[0].id);
       this.scope.$digest();
@@ -185,7 +185,7 @@ define([
 
       entities.centre.studyIds.push(studyToRemove.id);
 
-      spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
       spyOn(entities.centre, 'removeStudy').and.returnValue(this.$q.when(entities.centre));
 
       createController.call(this, entities);
@@ -199,14 +199,14 @@ define([
           entities      = createEntities.call(this),
           studyToRemove = entities.studies[1];
 
-      spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
       spyOn(entities.centre, 'removeStudy').and.returnValue(deferred.promise);
 
       deferred.reject('err');
       createController.call(this, entities);
       this.controller.remove(studyToRemove.id);
       this.scope.$digest();
-      expect(this.modalService.showModal.calls.count()).toBe(2);
+      expect(this.modalService.modalOkCancel.calls.count()).toBe(2);
     });
 
   });

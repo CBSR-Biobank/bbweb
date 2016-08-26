@@ -58,7 +58,7 @@ define([
       expect(cells.eq(1).find('small').eq(0).text()).toContain(this.$filter('timeago')(centre.timeAdded));
     });
 
-    it('displays correct value if timeModified has a value', function() {
+    it('displays correpct value if timeModified has a value', function() {
       var centre = new this.Centre(this.factory.centre()),
           cells;
 
