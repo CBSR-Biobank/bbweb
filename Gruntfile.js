@@ -74,13 +74,18 @@ module.exports = function(grunt) {
     nggettext_compile: {
       all: {
         options: {
-          module: 'biobankApp',
-          requirejs: true,
-          jshintIgnore: true
+          format: 'json'
         },
-        files: {
-          'app/assets/javascripts/translations.js': ['po/*.po']
-        }
+        files: [
+          {
+            expand: true,
+            dot: true,
+            cwd: 'po/',
+            dest: 'app/assets/languages',
+            src: ['*.po'],
+            ext: '.json'
+          }
+        ]
       },
     }
 
@@ -104,7 +109,7 @@ module.exports = function(grunt) {
 
     // protractor: {
     //   options: {
-    //     configFile: "node_modules/protractor/referenceConf.js", // Default config file
+    //     configFile: 'node_modules/protractor/referenceConf.js', // Default config file
     //     keepAlive: true, // If false, the grunt process stops when the test fails.
     //     noColor: false, // If true, protractor will not use colors in its output.
     //     args: {
@@ -113,7 +118,7 @@ module.exports = function(grunt) {
     //   },
     //   your_target: {   // Grunt requires at least one target to run so you can simply put 'all: {}' here too.
     //     options: {
-    //       configFile: "e2e.conf.js", // Target-specific config file
+    //       configFile: 'e2e.conf.js', // Target-specific config file
     //       args: {} // Target-specific arguments
     //     }
     //   },

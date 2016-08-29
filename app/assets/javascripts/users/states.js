@@ -7,7 +7,10 @@
 define(function () {
   'use strict';
 
-  config.$inject = ['$urlRouterProvider', '$stateProvider'];
+  config.$inject = [
+    '$urlRouterProvider',
+    '$stateProvider'
+  ];
 
   function config($urlRouterProvider, $stateProvider) {
 

@@ -27,7 +27,6 @@ define(['lodash'], function (_) {
   CentreSummaryCtrl.$inject = [
     '$scope',
     '$filter',
-    'gettext',
     'gettextCatalog',
     'modalService',
     'modalInput',
@@ -36,7 +35,6 @@ define(['lodash'], function (_) {
 
   function CentreSummaryCtrl($scope,
                              $filter,
-                             gettext,
                              gettextCatalog,
                              modalService,
                              modalInput,
@@ -74,7 +72,7 @@ define(['lodash'], function (_) {
         throw new Error('invalid status: ' + status);
       }
 
-      modalService.modalOkCancel(gettext('Confirm status change on centre', statusChangeMsg))
+      modalService.modalOkCancel(gettextCatalog.getString('Confirm status change on centre', statusChangeMsg))
         .then(function () {
           _.bind(changeStatusFn, vm.centre)().then(function (centre) {
             vm.centre = centre;
@@ -91,26 +89,26 @@ define(['lodash'], function (_) {
     }
 
     function editName() {
-      modalInput.text(gettext('Edit name'),
-                      gettext('Name'),
+      modalInput.text(gettextCatalog.getString('Edit name'),
+                      gettextCatalog.getString('Name'),
                       vm.centre.name,
                       { required: true, minLength: 2 }).result
         .then(function (name) {
           vm.centre.updateName(name)
-            .then(postUpdate(gettext('Name changed successfully.'),
-                             gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('Name changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }
 
     function editDescription() {
-      modalInput.textArea(gettext('Edit description'),
-                          gettext('Description'),
+      modalInput.textArea(gettextCatalog.getString('Edit description'),
+                          gettextCatalog.getString('Description'),
                           vm.centre.description).result
         .then(function (description) {
           vm.centre.updateDescription(description)
-            .then(postUpdate(gettext('Description changed successfully.'),
-                             gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('Description changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }

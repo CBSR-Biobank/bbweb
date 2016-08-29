@@ -56,22 +56,30 @@ define(function(require) {
     domain.name,
     home.name,
     studies.name,
-    users.name
+    users.name,
   ]);
+
+  app.run(['languageService', function (languageService) {
+    languageService.initLanguage({ debug: true });
+  }]);
 
   // For debugging
   //
-  app.run(function (gettextCatalog) {
-    gettextCatalog.currentLanguage = 'en';
-    gettextCatalog.debug = true;
-  });
   app.run(debugFunc);
+
   app.constant('bbwebConfig',
                {
                  dateFormat:       'YYYY-MM-DD',
                  dateTimeFormat:   'YYYY-MM-DD HH:mm',
                  datepickerFormat: 'yyyy-MM-dd HH:mm'
                });
+
+  // see http://blog.thoughtram.io/angularjs/2014/12/22/exploring-angular-1.3-disabling-debug-info.html
+  //
+  // app.config(['$compileProvider', function ($compileProvider) {
+  //   $compileProvider.debugInfoEnabled(false);
+  // }]);
+
   app.config(exceptionConfig);
   app.config(loggingConfig);
   app.config(httpInterceptorConfig);

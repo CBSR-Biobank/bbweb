@@ -18,7 +18,7 @@ define(function (require) {
 
   ShipmentViewReceivedController.$inject = [
     '$state',
-    'gettext',
+    'gettextCatalog',
     'modalInput',
     'notificationsService',
     'timeService'
@@ -28,7 +28,7 @@ define(function (require) {
    *
    */
   function ShipmentViewReceivedController($state,
-                                          gettext,
+                                          gettextCatalog,
                                           modalInput,
                                           notificationsService,
                                           timeService) {
@@ -40,8 +40,8 @@ define(function (require) {
       if (_.isUndefined(vm.timeUnpacked)) {
         vm.timeUnpacked = new Date();
       }
-      return modalInput.dateTime(gettext('Date and time shipment was unpacked'),
-                                 gettext('Time received'),
+      return modalInput.dateTime(gettextCatalog.getString('Date and time shipment was unpacked'),
+                                 gettextCatalog.getString('Time received'),
                                  vm.timeUnpacked,
                                  { required: true })
         .result

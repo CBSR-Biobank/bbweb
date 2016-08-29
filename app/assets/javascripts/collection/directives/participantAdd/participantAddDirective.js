@@ -25,7 +25,7 @@ define(['lodash'], function(_) {
 
   ParticipantAddCtrl.$inject = [
     '$state',
-    'gettext',
+    'gettextCatalog',
     'Participant',
     'domainNotificationService',
     'notificationsService'
@@ -35,7 +35,7 @@ define(['lodash'], function(_) {
    * This controller is used for adding or editing a participant.
    */
   function ParticipantAddCtrl($state,
-                              gettext,
+                              gettextCatalog,
                               Participant,
                               domainNotificationService,
                               notificationsService) {
@@ -50,7 +50,7 @@ define(['lodash'], function(_) {
       participant.add()
         .then(submitSuccess)
         .catch(function(error) {
-          return domainNotificationService.updateErrorModal(error, gettext('participant'));
+          return domainNotificationService.updateErrorModal(error, gettextCatalog.getString('participant'));
         }).catch(function () {
           $state.go('home.collection.study', { studyId: vm.study.id });
         });

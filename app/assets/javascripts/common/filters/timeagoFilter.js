@@ -5,14 +5,14 @@
 define(['moment'], function(moment) {
   'use strict';
 
-  //timeagoFactory.$inject = [];
+  timeagoFilterFactory.$inject = ['gettextCatalog'];
 
   /**
    * Originally taken from link below and then modified.
    *
    * http://stackoverflow.com/questions/14774486/use-jquery-timeago-or-momentjs-and-angularjs-together
    */
-  function timeagoFilterFactory() {
+  function timeagoFilterFactory(gettextCatalog) {
     return timeago;
 
     /*
@@ -20,7 +20,7 @@ define(['moment'], function(moment) {
      */
     function timeago(time) {
       if(!time) {
-        return 'never';
+        return gettextCatalog.getString('never');
       }
       return moment(time).fromNow();
     }

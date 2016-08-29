@@ -45,7 +45,7 @@ define([
 
       _.extend(self, testSuiteMixin);
 
-      self.injectDependencies('$rootScope', '$compile', '$filter');
+      self.injectDependencies('$rootScope', '$compile', '$filter', 'gettextCatalog');
       self.putHtmlTemplates(
         '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html');
     }));
@@ -94,7 +94,7 @@ define([
       createScope.call(this, text, 20);
       buttons = this.element.find('button');
       expect(buttons.length).toBe(1);
-      expect(buttons.eq(0).text().trim()).toBe('Show less');
+      expect(buttons.eq(0).text().trim()).toBe(this.gettextCatalog.getString('Show less'));
     });
 
     it('if text is null then warning message is displayed', function() {

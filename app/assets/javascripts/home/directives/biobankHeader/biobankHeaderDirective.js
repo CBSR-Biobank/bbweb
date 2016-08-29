@@ -19,12 +19,25 @@ define(function () {
     return directive;
   }
 
-  BiobankHeaderCtrl.$inject = ['$scope', '$state', '$log', 'usersService'];
+  BiobankHeaderCtrl.$inject = [
+    '$window',
+    '$scope',
+    '$state',
+    '$log',
+    'languageService',
+    'usersService'
+  ];
 
-  function BiobankHeaderCtrl($scope, $state, $log, usersService) {
+  function BiobankHeaderCtrl($window,
+                             $scope,
+                             $state,
+                             $log,
+                             languageService,
+                             usersService) {
     var vm = this;
     vm.logout = logout;
     vm.user = undefined;
+    vm.changeLanguage = changeLanguage;
 
     // Wrap the current user from the service in a watch expression to display the user's name in
     // the navigation bar
@@ -48,6 +61,10 @@ define(function () {
         $log.error('logout failed:', error);
         goHome();
       }
+    }
+
+    function changeLanguage(lang) {
+      languageService.setLanguage(lang);
     }
   }
 

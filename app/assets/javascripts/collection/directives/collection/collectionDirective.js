@@ -25,12 +25,12 @@ define(function () {
     return directive;
   }
 
-  CollectionCtrl.$inject = ['gettext', 'Study'];
+  CollectionCtrl.$inject = ['gettextCatalog', 'Study'];
 
   /**
    *
    */
-  function CollectionCtrl(gettext, Study) {
+  function CollectionCtrl(gettextCatalog, Study) {
     var vm = this;
 
     vm.haveEnabledStudies           = (vm.studyCounts.enabled > 0);
@@ -46,7 +46,7 @@ define(function () {
     }
 
     function getEnabledStudiesPanelHeader() {
-      return gettext('Studies you participate in');
+      return gettextCatalog.getString('Studies you participate in');
     }
 
   }

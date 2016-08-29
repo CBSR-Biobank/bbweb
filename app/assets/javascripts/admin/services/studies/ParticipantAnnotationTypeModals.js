@@ -6,20 +6,20 @@ define([], function() {
   'use strict';
 
   ParticipantAnnotationTypeModalsFactory.$inject = [
-    'gettext',
+    'gettextCatalog',
     'AnnotationTypeModals'
   ];
 
   /**
    *
    */
-  function ParticipantAnnotationTypeModalsFactory(gettext,
+  function ParticipantAnnotationTypeModalsFactory(gettextCatalog,
                                                   AnnotationTypeModals) {
 
     function ParticipantAnnotationTypeModals() {
       AnnotationTypeModals.call(
         this,
-        gettext('This annotation type is in use by participants. ' +
+        gettextCatalog.getString('This annotation type is in use by participants. ' +
                 'If you want to make changes to the annotation type, ' +
                 'it must first be removed from the participants that use it.'));
     }

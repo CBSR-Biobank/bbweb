@@ -7,24 +7,24 @@ define(['lodash'], function (_) {
 
   userStatusLabelService.$inject = [
     'UserStatus',
-    'gettext'
+    'gettextCatalog'
   ];
 
   /**
    * Description
    */
   function userStatusLabelService(UserStatus,
-                                  gettext) {
+                                  gettextCatalog) {
     var labels = {};
 
     /// user status
-    labels[UserStatus.REGISTERED] = gettext('Registered');
+    labels[UserStatus.REGISTERED] = gettextCatalog.getString('Registered');
 
     /// user status
-    labels[UserStatus.ACTIVE]     = gettext('Active');
+    labels[UserStatus.ACTIVE]     = gettextCatalog.getString('Active');
 
     /// user status
-    labels[UserStatus.LOCKED]     = gettext('Locked');
+    labels[UserStatus.LOCKED]     = gettextCatalog.getString('Locked');
 
     var service = {
       statusToLabel: statusToLabel

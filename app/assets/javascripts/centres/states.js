@@ -82,7 +82,7 @@ define(function () {
         }
       },
       data: {
-        displayName: 'Add'
+        displayName: 'Add items'
       }
     });
 

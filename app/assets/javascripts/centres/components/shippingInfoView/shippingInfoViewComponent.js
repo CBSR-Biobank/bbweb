@@ -20,7 +20,7 @@ define(function (require) {
 
   ShippingInfoViewController.$inject = [
     '$filter',
-    'gettext',
+    'gettextCatalog',
     'Centre',
     'shipmentProgressItems',
     'modalInput',
@@ -32,7 +32,7 @@ define(function (require) {
    *
    */
   function ShippingInfoViewController($filter,
-                                      gettext,
+                                      gettextCatalog,
                                       Centre,
                                       shipmentProgressItems,
                                       modalInput,
@@ -58,17 +58,17 @@ define(function (require) {
 
     function commonDisplayProperties() {
       var properties = {
-        courier:        new DisplayProperty(gettext('Courier'),         vm.shipment.courierName),
-        trackingNumber: new DisplayProperty(gettext('Tracking Number'), vm.shipment.trackingNumber),
-        fromLocation:   new DisplayProperty(gettext('From centre'),     vm.shipment.fromLocationInfo.name),
-        toLocation:     new DisplayProperty(gettext('To centre'),       vm.shipment.toLocationInfo.name)
+        courier:        new DisplayProperty(gettextCatalog.getString('Courier'),         vm.shipment.courierName),
+        trackingNumber: new DisplayProperty(gettextCatalog.getString('Tracking Number'), vm.shipment.trackingNumber),
+        fromLocation:   new DisplayProperty(gettextCatalog.getString('From centre'),     vm.shipment.fromLocationInfo.name),
+        toLocation:     new DisplayProperty(gettextCatalog.getString('To centre'),       vm.shipment.toLocationInfo.name)
       };
 
       if (!vm.readOnly) {
-        properties.courier.allowEdit(editCourierName,           gettext('Update courier'));
-        properties.trackingNumber.allowEdit(editTrackingNumber, gettext('Update tracking number'));
-        properties.fromLocation.allowEdit(editFromLocation,     gettext('Update from location'));
-        properties.toLocation.allowEdit(editToLocation,         gettext('Update to location'));
+        properties.courier.allowEdit(editCourierName,           gettextCatalog.getString('Update courier'));
+        properties.trackingNumber.allowEdit(editTrackingNumber, gettextCatalog.getString('Update tracking number'));
+        properties.fromLocation.allowEdit(editFromLocation,     gettextCatalog.getString('Update from location'));
+        properties.toLocation.allowEdit(editToLocation,         gettextCatalog.getString('Update to location'));
       }
 
       vm.displayProperties = _.values(properties);
@@ -76,26 +76,26 @@ define(function (require) {
 
     function displayPropertiesByState() {
       if (vm.shipment.timePacked) {
-        vm.displayProperties.push(new DisplayProperty(gettext('Time packed'),
+        vm.displayProperties.push(new DisplayProperty(gettextCatalog.getString('Time packed'),
                                                       $filter('localTime')(vm.shipment.timePacked)));
       }
 
       if (vm.shipment.timeSent) {
-        vm.displayProperties.push(new DisplayProperty(gettext('Time sent'),
+        vm.displayProperties.push(new DisplayProperty(gettextCatalog.getString('Time sent'),
                                                       $filter('localTime')(vm.shipment.timeSent)));
       }
 
       if (vm.shipment.timeReceived) {
-        vm.displayProperties.push(new DisplayProperty(gettext('Time received'),
+        vm.displayProperties.push(new DisplayProperty(gettextCatalog.getString('Time received'),
                                                       $filter('localTime')(vm.shipment.timeReceived)));
       }
 
       if (vm.shipment.isNotCreatedOrUnpacked()) {
-        vm.displayProperties.push(new DisplayProperty(gettext('Number of specimens'),
+        vm.displayProperties.push(new DisplayProperty(gettextCatalog.getString('Number of specimens'),
                                                       vm.shipment.specimenCount));
 
         if (vm.shipment.containerCount) {
-          vm.displayProperties.push(new DisplayProperty(gettext('Number of containers'),
+          vm.displayProperties.push(new DisplayProperty(gettextCatalog.getString('Number of containers'),
                                                         vm.shipment.specimenCount));
         }
       }
@@ -132,58 +132,58 @@ define(function (require) {
     }
 
     function editCourierName() {
-      modalInput.text(gettext('Edit courier'),
-                      gettext('Courier'),
+      modalInput.text(gettextCatalog.getString('Edit courier'),
+                      gettextCatalog.getString('Courier'),
                       vm.shipment.courierName,
                       { required: true, minLength: 2 }).result
         .then(function (name) {
           vm.shipment.updateCourierName(name)
-            .then(postUpdate(gettext('Courier changed successfully.'), gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('Courier changed successfully.'), gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }
 
     function editTrackingNumber() {
-      modalInput.text(gettext('Edit tracking number'),
-                      gettext('Tracking Number'),
+      modalInput.text(gettextCatalog.getString('Edit tracking number'),
+                      gettextCatalog.getString('Tracking Number'),
                       vm.shipment.trackingNumber,
                       { required: true, minLength: 2 }).result
         .then(function (tn) {
           vm.shipment.updateTrackingNumber(tn)
-            .then(postUpdate(gettext('Tracking number changed successfully.',
-                                     gettext('Change successful'))))
+            .then(postUpdate(gettextCatalog.getString('Tracking number changed successfully.',
+                                     gettextCatalog.getString('Change successful'))))
             .catch(notificationsService.updateError);
         });
     }
 
     function editFromLocation() {
       centreLocationsModalService.open(
-        gettext('Update from centre'),
-        gettext('From centre'),
-        gettext('The location of the centre this shipment is coming from'),
+        gettextCatalog.getString('Update from centre'),
+        gettextCatalog.getString('From centre'),
+        gettextCatalog.getString('The location of the centre this shipment is coming from'),
         vm.shipment.fromLocationInfo,
         [ vm.shipment.toLocationInfo ]
       ).result.then(function (selection) {
         if (selection) {
           vm.shipment.updateFromLocation(selection.locationId)
-            .then(postUpdate(gettext('From location changed successfully.'),
-                             gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('From location changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         }
       });
     }
 
     function editToLocation() {
-      centreLocationsModalService.open(gettext('Update to centre'),
-                                       gettext('To centre'),
-                                       gettext('The location of the centre this shipment is going to'),
+      centreLocationsModalService.open(gettextCatalog.getString('Update to centre'),
+                                       gettextCatalog.getString('To centre'),
+                                       gettextCatalog.getString('The location of the centre this shipment is going to'),
                                        vm.shipment.toLocationInfo,
                                        [ vm.shipment.fromLocationInfo ]).result
         .then(function (selection) {
           if (selection) {
             vm.shipment.updateToLocation(selection.locationId)
-              .then(postUpdate(gettext('To location changed successfully.'),
-                               gettext('Change successful')))
+              .then(postUpdate(gettextCatalog.getString('To location changed successfully.'),
+                               gettextCatalog.getString('Change successful')))
               .catch(notificationsService.updateError);
           }
         });

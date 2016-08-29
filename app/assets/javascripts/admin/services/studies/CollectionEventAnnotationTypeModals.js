@@ -6,20 +6,20 @@ define([], function() {
   'use strict';
 
   CollectionEventAnnotationTypeModalsFactory.$inject = [
-    'gettext',
+    'gettextCatalog',
     'AnnotationTypeModals']
   ;
 
   /**
    *
    */
-  function CollectionEventAnnotationTypeModalsFactory(gettext,
+  function CollectionEventAnnotationTypeModalsFactory(gettextCatalog,
                                                       AnnotationTypeModals) {
 
     function CollectionEventAnnotationTypeModals() {
       AnnotationTypeModals.call(
         this,
-        gettext('This annotation type is in use by a collection event type. ' +
+        gettextCatalog.getString('This annotation type is in use by a collection event type. ' +
                 'If you want to make changes to the annotation type, ' +
                 'it must first be removed from the collection event type(s) that use it.'));
     }

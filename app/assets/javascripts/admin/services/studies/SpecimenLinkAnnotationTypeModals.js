@@ -6,20 +6,20 @@ define([], function() {
   'use strict';
 
   SpecimenLinkAnnotationTypeModalsFactory.$inject = [
-    'gettext',
+    'gettextCatalog',
     'AnnotationTypeModals'
   ];
 
   /**
    *
    */
-  function SpecimenLinkAnnotationTypeModalsFactory(gettext,
+  function SpecimenLinkAnnotationTypeModalsFactory(gettextCatalog,
                                                    AnnotationTypeModals) {
 
     function SpecimenLinkAnnotationTypeModals() {
       AnnotationTypeModals.call(
         this,
-        gettext('This annotation type is in use by a specimen link type. ' +
+        gettextCatalog.getString('This annotation type is in use by a specimen link type. ' +
                 'If you want to make changes to the annotation type, ' +
                 'it must first be removed from the specimen link type(s) that use it.'));
       }

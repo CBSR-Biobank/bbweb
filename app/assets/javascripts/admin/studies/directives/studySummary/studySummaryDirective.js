@@ -26,7 +26,6 @@ define(['lodash'], function(_) {
   StudySummaryCtrl.$inject = [
     '$scope',
     '$state',
-    'gettext',
     'gettextCatalog',
     'modalService',
     'modalInput',
@@ -36,7 +35,6 @@ define(['lodash'], function(_) {
 
   function StudySummaryCtrl($scope,
                             $state,
-                            gettext,
                             gettextCatalog,
                             modalService,
                             modalInput,
@@ -90,7 +88,7 @@ define(['lodash'], function(_) {
 
       body += statusAction + ' study ' + vm.study.name + '?';
 
-      modalService.modalOkCancel(gettext('Confirm study status change'), body)
+      modalService.modalOkCancel(gettextCatalog.getString('Confirm study status change'), body)
         .then(function () {
           return vm.study[statusAction]();
         }).then(function (study) {
@@ -108,26 +106,26 @@ define(['lodash'], function(_) {
     }
 
     function editName() {
-      modalInput.text(gettext('Edit name'),
-                      gettext('Name'),
+      modalInput.text(gettextCatalog.getString('Edit name'),
+                      gettextCatalog.getString('Name'),
                       vm.study.name,
                       { required: true, minLength: 2 }).result
         .then(function (name) {
           vm.study.updateName(name)
-            .then(postUpdate(gettext('Name changed successfully.'),
-                             gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('Name changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }
 
     function editDescription() {
-      modalInput.textArea(gettext('Edit description'),
-                          gettext('Description'),
+      modalInput.textArea(gettextCatalog.getString('Edit description'),
+                          gettextCatalog.getString('Description'),
                           vm.study.description).result
         .then(function (description) {
           vm.study.updateDescription(description)
-            .then(postUpdate(gettext('Description changed successfully.'),
-                             gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('Description changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }

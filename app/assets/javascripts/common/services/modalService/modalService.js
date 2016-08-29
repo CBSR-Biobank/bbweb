@@ -5,7 +5,7 @@
 define(['angular', 'lodash'], function(angular, _) {
   'use strict';
 
-  modalService.$inject = ['$uibModal', 'gettext'];
+  modalService.$inject = ['$uibModal', 'gettextCatalog'];
 
   /**
    * Originally the code was taken from the URL given below, but then it was modified.
@@ -13,15 +13,15 @@ define(['angular', 'lodash'], function(angular, _) {
    * http://weblogs.asp.net/dwahlin/building-an-angularjs-modal-service
    *
    */
-  function modalService($uibModal, gettext) {
+  function modalService($uibModal, gettextCatalog) {
     var modalDefaults = { backdrop:    true,
                           keyboard:    true,
                           modalFade:   true,
                           templateUrl: '/assets/javascripts/common/services/modalService/modal.html'
                         },
-        modalOptions = { actionButtonText: gettext('OK'),
-                         headerHtml:       gettext('Proceed?'),
-                         bodyHtml:         gettext('Perform this action?')
+        modalOptions = { actionButtonText: gettextCatalog.getString('OK'),
+                         headerHtml:       gettextCatalog.getString('Proceed?'),
+                         bodyHtml:         gettextCatalog.getString('Perform this action?')
                        };
 
     var service = {
@@ -82,7 +82,7 @@ define(['angular', 'lodash'], function(angular, _) {
 
     function modalOkCancel(headerHtml, bodyHtml) {
       var modalOptions = {
-        closeButtonText: gettext('Cancel'),
+        closeButtonText: gettextCatalog.getString('Cancel'),
         headerHtml: headerHtml,
         bodyHtml: bodyHtml
       };

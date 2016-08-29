@@ -27,17 +27,33 @@ define(['lodash'], function (_) {
     '$scope',
     '$window',
     '$state',
-    'gettext'
+    'gettextCatalog'
   ];
 
-  function StudyViewCtrl($scope, $window, $state, gettext) {
+  function StudyViewCtrl($scope, $window, $state, gettextCatalog) {
     var vm = this;
 
     vm.tabs = [
-      { heading: gettext('Summary'),      sref: 'home.admin.studies.study.summary',      active: true },
-      { heading: gettext('Participants'), sref: 'home.admin.studies.study.participants', active: false },
-      { heading: gettext('Collection'),   sref: 'home.admin.studies.study.collection',   active: false },
-      { heading: gettext('Processing'),   sref: 'home.admin.studies.study.processing',   active: false }
+      {
+        heading: gettextCatalog.getString('Summary'),
+        sref: 'home.admin.studies.study.summary',
+        active: true
+      },
+      {
+        heading: gettextCatalog.getString('Participants'),
+        sref: 'home.admin.studies.study.participants',
+        active: false
+      },
+      {
+        heading: gettextCatalog.getString('Collection'),
+        sref: 'home.admin.studies.study.collection',
+        active: false
+      },
+      {
+        heading: gettextCatalog.getString('Processing'),
+        sref: 'home.admin.studies.study.processing',
+        active: false
+      }
     ];
     vm.activeTabUpdate = activeTabUpdate;
 

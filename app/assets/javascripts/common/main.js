@@ -37,8 +37,8 @@ define(function (require) {
   module.filter('timeago',                    require('./filters/timeagoFilter'));
   module.filter('truncate',                   require('./filters/truncateFilter'));
 
-  module.service('annotationUpdate',          require('./services/annotationUpdateService'));
   module.service('Panel',                     require('./services/Panel'));
+  module.service('annotationUpdate',          require('./services/annotationUpdateService'));
   module.service('biobankApi',                require('./services/biobankApiService'));
   module.service('funutils',                  require('./services/funutils'));
   module.service('modalService',              require('./services/modalService/modalService'));
@@ -47,7 +47,7 @@ define(function (require) {
   module.service('timeService',               require('./services/timeService'));
   module.service('validationService',         require('./services/validationService'));
   module.service('domainNotificationService', require('./services/domainNotification/domainNotificationService') );
-
+  module.service('languageService',           require('./services/languageService'));
   return {
     name: name,
     module: module

@@ -7,9 +7,12 @@
 define(['lodash'], function (_) {
   'use strict';
 
-  centreStates.$inject = ['$urlRouterProvider', '$stateProvider'];
+  centreStates.$inject = [
+    '$urlRouterProvider',
+    '$stateProvider'
+  ];
 
-  function centreStates($urlRouterProvider, $stateProvider, usersService ) {
+  function centreStates($urlRouterProvider, $stateProvider) {
 
     resolveCentre.$inject = ['$stateParams', 'Centre'];
     function resolveCentre($stateParams, Centre) {

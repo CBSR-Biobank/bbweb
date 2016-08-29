@@ -6,22 +6,22 @@ define(['lodash'], function (_) {
   'use strict';
 
   centreStatusLabelService.$inject = [
-    'gettext',
+    'gettextCatalog',
     'CentreStatus'
   ];
 
   /**
    * Description
    */
-  function centreStatusLabelService(gettext,
+  function centreStatusLabelService(gettextCatalog,
                                     CentreStatus) {
     var labels = {};
 
     /// centre status
-    labels[CentreStatus.DISABLED] = gettext('Disabled');
+    labels[CentreStatus.DISABLED] = gettextCatalog.getString('Disabled');
 
     /// centre status
-    labels[CentreStatus.ENABLED]  = gettext('Enabled');
+    labels[CentreStatus.ENABLED]  = gettextCatalog.getString('Enabled');
 
     var service = {
       statusToLabel: statusToLabel

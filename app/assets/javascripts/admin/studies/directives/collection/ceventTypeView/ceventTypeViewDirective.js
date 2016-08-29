@@ -26,7 +26,6 @@ define(['lodash'], function (_) {
 
   CeventTypeViewCtrl.$inject = [
     '$state',
-    'gettext',
     'gettextCatalog',
     'modalService',
     'modalInput',
@@ -36,7 +35,6 @@ define(['lodash'], function (_) {
   ];
 
   function CeventTypeViewCtrl($state,
-                              gettext,
                               gettextCatalog,
                               modalService,
                               modalInput,
@@ -73,40 +71,40 @@ define(['lodash'], function (_) {
     }
 
     function editName() {
-      modalInput.text(gettext('Edit Event Type name'),
-                      gettext('Name'),
+      modalInput.text(gettextCatalog.getString('Edit Event Type name'),
+                      gettextCatalog.getString('Name'),
                       vm.ceventType.name,
                       { required: true, minLength: 2 }).result
         .then(function (name) {
           vm.ceventType.updateName(name)
-            .then(postUpdate(gettext('Name changed successfully.'),
-                             gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('Name changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }
 
     function editDescription() {
-      modalInput.textArea(gettext('Edit Event Type description'),
-                          gettext('Description'),
+      modalInput.textArea(gettextCatalog.getString('Edit Event Type description'),
+                          gettextCatalog.getString('Description'),
                           vm.ceventType.description
                          ).result
         .then(function (description) {
           vm.ceventType.updateDescription(description)
-            .then(postUpdate(gettext('Description changed successfully.'),
-                             gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('Description changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
       });
     }
 
     function editRecurring() {
-      modalInput.boolean(gettext('Edit Event Type recurring'),
-                         gettext('Recurring'),
+      modalInput.boolean(gettextCatalog.getString('Edit Event Type recurring'),
+                         gettextCatalog.getString('Recurring'),
                          vm.ceventType.recurring.toString()
                         ).result
         .then(function (recurring) {
           vm.ceventType.updateRecurring(recurring === 'true')
-            .then(postUpdate(gettext('Recurring changed successfully.'),
-                             gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('Recurring changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
       });
     }
@@ -131,10 +129,10 @@ define(['lodash'], function (_) {
 
       return domainNotificationService.removeEntity(
         removePromiseFunc,
-        gettext('Remove specimen'),
+        gettextCatalog.getString('Remove specimen'),
         gettextCatalog.getString('Are you sure you want to remove specimen {{name}}?',
                                  { name: specimenSpec.name }),
-        gettext('Remove failed'),
+        gettextCatalog.getString('Remove failed'),
         gettextCatalog.getString('Specimen {[name]} cannot be removed',
                                  { name: specimenSpec.name }));
 
@@ -170,24 +168,24 @@ define(['lodash'], function (_) {
       vm.ceventType.inUse().then(function (inUse) {
         if (inUse) {
           modalService.modalOk(
-            gettext('Collection event in use'),
-            gettext('This collection event cannot be removed since one or more participants are using it. ' +
+            gettextCatalog.getString('Collection event in use'),
+            gettextCatalog.getString('This collection event cannot be removed since one or more participants are using it. ' +
                     'If you still want to remove it, the participants using it have to be modified ' +
                     'to no longer use it.'));
         } else {
           domainNotificationService.removeEntity(
             promiseFn,
-            gettext('Remove collection event'),
-            gettext('Are you sure you want to remove collection event with name <strong>{{name}}</strong>?',
+            gettextCatalog.getString('Remove collection event'),
+            gettextCatalog.getString('Are you sure you want to remove collection event with name <strong>{{name}}</strong>?',
                     { name: vm.ceventType.name }),
-            gettext('Remove failed'),
-            gettext('Collection event with name {{name}} cannot be removed',
+            gettextCatalog.getString('Remove failed'),
+            gettextCatalog.getString('Collection event with name {{name}} cannot be removed',
                     { name: vm.ceventType.name }));
         }
 
         function promiseFn() {
           return vm.ceventType.remove().then(function () {
-            notificationsService.success(gettext('Collection event removed'));
+            notificationsService.success(gettextCatalog.getString('Collection event removed'));
             $state.go('home.admin.studies.study.collection', {}, { reload: true });
           });
         }

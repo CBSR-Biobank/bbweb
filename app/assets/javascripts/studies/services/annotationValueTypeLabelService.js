@@ -6,27 +6,27 @@ define(['lodash'], function (_) {
   'use strict';
 
   annotationValueTypeLabelService.$inject = [
-    'gettext',
+    'gettextCatalog',
     'AnnotationValueType'
   ];
 
   /**
    * Description
    */
-  function annotationValueTypeLabelService(gettext, AnnotationValueType) {
+  function annotationValueTypeLabelService(gettextCatalog, AnnotationValueType) {
     var labels = {};
 
     /// annotation value type
-    labels[AnnotationValueType.TEXT] = gettext('Text');
+    labels[AnnotationValueType.TEXT] = gettextCatalog.getString('Text');
 
     /// annotation value type
-    labels[AnnotationValueType.NUMBER]  = gettext('Number');
+    labels[AnnotationValueType.NUMBER]  = gettextCatalog.getString('Number');
 
     /// annotation value type
-    labels[AnnotationValueType.DATE_TIME]  = gettext('Date and time');
+    labels[AnnotationValueType.DATE_TIME]  = gettextCatalog.getString('Date and time');
 
     /// annotation value type
-    labels[AnnotationValueType.SELECT]  = gettext('Select');
+    labels[AnnotationValueType.SELECT]  = gettextCatalog.getString('Select');
 
     var service = {
       valueTypeToLabel: valueTypeToLabel

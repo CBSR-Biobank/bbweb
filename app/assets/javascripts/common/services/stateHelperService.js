@@ -1,21 +1,20 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (){
+define(function () {
   'use strict';
 
-  stateHelper.$inject = ['$state', '$stateParams'];
+  stateHelperService.$inject = ['$state', '$stateParams'];
 
   /**
    * Utility function dealing with ui-router states.
    */
-  function stateHelper($state, $stateParams) {
+  function stateHelperService($state, $stateParams) {
     var service = {
       reloadAndReinit: reloadAndReinit,
       reloadStateAndReinit: reloadStateAndReinit
     };
-
     return service;
 
     //-------
@@ -40,5 +39,5 @@ define(function (){
     }
   }
 
-  return stateHelper;
+  return stateHelperService;
 });

@@ -9,14 +9,14 @@ define(function () {
     '$q',
     '$log',
     '$state',
-    'gettext',
+    'gettextCatalog',
     'modalService'
   ];
 
   /**
    * Utilities for services that access domain objects.
    */
-  function domainNotificationService($q, $log, $state, gettext, modalService) {
+  function domainNotificationService($q, $log, $state, gettextCatalog, modalService) {
     var service = {
       updateErrorModal:     updateErrorModal,
       removeEntity:         removeEntity
@@ -35,8 +35,8 @@ define(function () {
     function updateErrorModal(error, domainObjTypeName) {
       var modalDefaults = {};
       var modalOptions = {
-        closeButtonText: gettext('Cancel'),
-        actionButtonText: gettext('OK')
+        closeButtonText: gettextCatalog.getString('Cancel'),
+        actionButtonText: gettextCatalog.getString('OK')
       };
 
       if (error.data.message) {
@@ -50,8 +50,8 @@ define(function () {
           modalOptions.domainType = domainObjTypeName;
       } else {
         // most likely a programming error
-        modalOptions.headerHtml = gettext('Cannot submit this change');
-        modalOptions.bodyHtml = gettext('Error: ') + JSON.stringify(error.data.message);
+        modalOptions.headerHtml = gettextCatalog.getString('Cannot submit this change');
+        modalOptions.bodyHtml = gettextCatalog.getString('Error: ') + JSON.stringify(error.data.message);
       }
 
       return modalService.showModal(modalDefaults, modalOptions);
@@ -96,7 +96,7 @@ define(function () {
       function removeConfirmed() {
         return promiseFunc().catch(function (error) {
           var modalOptions = {
-            closeButtonText: gettext('Cancel'),
+            closeButtonText: gettextCatalog.getString('Cancel'),
             headerHtml:      removeFailedHeaderHtml,
             bodyHtml:        removeFaileBodyHtml + ': ' + error
           };

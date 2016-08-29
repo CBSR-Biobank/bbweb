@@ -26,12 +26,12 @@ define(['lodash'], function (_) {
 
   ParticipantAnnotationTypeViewCtrl.$inject = [
     '$q',
-    'gettext',
+    'gettextCatalog',
     'notificationsService'
   ];
 
   function ParticipantAnnotationTypeViewCtrl($q,
-                                             gettext,
+                                             gettextCatalog,
                                              notificationsService) {
     var vm = this;
 
@@ -56,8 +56,8 @@ define(['lodash'], function (_) {
 
     function notifySuccess() {
       return notificationsService.success(
-        gettext('Annotation type changed successfully.'),
-        gettext('Change successful'),
+        gettextCatalog.getString('Annotation type changed successfully.'),
+        gettextCatalog.getString('Change successful'),
         1500);
     }
 

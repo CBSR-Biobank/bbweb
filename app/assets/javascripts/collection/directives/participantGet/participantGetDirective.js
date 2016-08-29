@@ -27,7 +27,6 @@ define(function () {
     '$q',
     '$log',
     '$state',
-    'gettext',
     'gettextCatalog',
     'stateHelper',
     'modalService',
@@ -40,7 +39,6 @@ define(function () {
   function ParticipantGetCtrl($q,
                               $log,
                               $state,
-                              gettext,
                               gettextCatalog,
                               stateHelper,
                               modalService,
@@ -68,7 +66,7 @@ define(function () {
         createParticipantModal(vm.uniqueId);
       } else if ((error.status === 400) && error.data.message.match(studyMismatchRe)) {
         modalService.modalOk(
-          gettext('Duplicate unique ID'),
+          gettextCatalog.getString('Duplicate unique ID'),
           gettextCatalog.getString(
           'Unique ID <strong>{{id}}</strong> is already in use by a participant ' +
               'in another study. Please use a diffent one.',
@@ -83,7 +81,7 @@ define(function () {
 
     function createParticipantModal(uniqueId) {
       modalService.modalOkCancel(
-        gettext('Create participant'),
+        gettextCatalog.getString('Create participant'),
         gettextCatalog.getString(
           'Would you like to create participant with unique ID <strong>{{id}}</strong>?',
           { id: uniqueId })

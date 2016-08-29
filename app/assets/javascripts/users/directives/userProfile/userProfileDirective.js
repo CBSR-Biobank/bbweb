@@ -22,6 +22,7 @@ define(function () {
   }
 
   UserProfileCtrl.$inject = [
+    'gettextCatalog',
     'modalService',
     'modalInput',
     'notificationsService',
@@ -32,7 +33,8 @@ define(function () {
   /**
    * Displays a list of users in a table.
    */
-  function UserProfileCtrl(modalService,
+  function UserProfileCtrl(gettextCatalog,
+                           modalService,
                            modalInput,
                            notificationsService,
                            usersService,
@@ -58,11 +60,12 @@ define(function () {
 
     function updateError(err) {
       notificationsService.updateError(
-        'Your change could not be saved: ' + err.data.message,
-        'Cannot apply your change');
+        gettextCatalog.getString('Your change could not be saved: ') + err.data.message,
+        gettextCatalog.getString('Cannot apply your change'));
     }
 
     function postUpdate(message, title, timeout) {
+      timeout = timeout || 1500;
       return function (user) {
         vm.user = user;
         vm.allowRemoveAvatarUrl = (vm.user.avatarUrl !== null);
@@ -73,81 +76,70 @@ define(function () {
     function updateName() {
       var name = vm.user.name;
 
-      modalInput.text('Update user name',
-                      'Name',
+      modalInput.text(gettextCatalog.getString('Update user name'),
+                      gettextCatalog.getString('Name'),
                       name,
                       { required: true, minLength: 2 })
         .result.then(function (name) {
           vm.user.updateName(name)
-            .then(postUpdate('User name updated successfully.',
-                             'Update successful',
-                             1500))
+            .then(postUpdate(gettextCatalog.getString('User name updated successfully.'),
+                             gettextCatalog.getString('Update successful')))
             .catch(updateError);
         });
     }
 
     function updateEmail() {
-      modalInput.email('Update user email',
-                       'Email',
+      modalInput.email(gettextCatalog.getString('Update user email'),
+                       gettextCatalog.getString('Email'),
                        vm.user.email,
                        { required: true })
         .result.then(function (email) {
         vm.user.updateEmail(email)
-          .then(postUpdate('Email updated successfully.',
-                           'Update successful',
-                           1500))
+          .then(postUpdate(gettextCatalog.getString('Email updated successfully.'),
+                           gettextCatalog.getString('Update successful')))
           .catch(updateError);
       });
     }
 
     function updateAvatarUrl() {
-      modalInput.url('Update avatar URL',
-                     'Avatar URL',
+      modalInput.url(gettextCatalog.getString('Update avatar URL'),
+                     gettextCatalog.getString('Avatar URL'),
                      vm.user.avatarUrl)
         .result.then(function (avatarUrl) {
           vm.user.updateAvatarUrl(avatarUrl)
-            .then(postUpdate('Avatar URL updated successfully.',
-                             'Update successful',
-                             1500))
+            .then(postUpdate(gettextCatalog.getString('Avatar URL updated successfully.'),
+                             gettextCatalog.getString('Update successful')))
             .catch(updateError);
         });
     }
 
     function removeAvatarUrl() {
-      var modalDefaults = {};
-      var modalOptions = {
-        headerHtml       : 'Remove Avatar URL',
-        bodyHtml         : 'Are you sure you want to remove your Avatar URL?',
-        closeButtonText  : 'Cancel',
-        actionButtonText : 'OK'
-      };
-
-      modalService.showModal(modalDefaults, modalOptions)
-        .result.then(function() {
+      modalService.modalOkCancel(gettextCatalog.getString('Remove Avatar URL'),
+                                 gettextCatalog.getString('Are you sure you want to remove your Avatar URL?'))
+        .then(function() {
           vm.user.updateAvatarUrl(null)
-            .then(postUpdate('Avatar URL remove successfully.',
-                             'Remove successful',
-                             1500))
+            .then(postUpdate(gettextCatalog.getString('Avatar URL remove successfully.'),
+                             gettextCatalog.getString('Remove successful')))
             .catch(updateError);
         });
     }
 
     function updatePassword() {
-      modalInput.password('Change password').result.then(function (result) {
-        vm.user.updatePassword(result.currentPassword, result.newPassword)
-          .then(postUpdate('Your password was updated successfully.',
-                           'Update successful',
-                           1500))
-          .catch(function (err) {
-            if (err.data.message.indexOf('invalid password') > -1) {
-              notificationsService.error(
-                'Your current password was incorrect.',
-                'Cannot update your password');
-            } else {
-              updateError(err);
-            }
-          });
-      });
+      modalInput.password(gettextCatalog.getString('Change password')).result
+        .then(function (result) {
+          vm.user.updatePassword(result.currentPassword, result.newPassword)
+            .then(postUpdate(gettextCatalog.getString('Your password was updated successfully.'),
+                             gettextCatalog.getString('Update successful')))
+            .catch(function (err) {
+              if (err.data.message.indexOf('invalid password') > -1) {
+                notificationsService.error(
+                  gettextCatalog.getString('Your current password was incorrect.'),
+                  gettextCatalog.getString('Cannot update your password'));
+              } else {
+                updateError(err);
+              }
+            });
+        });
     }
   }
 

@@ -25,7 +25,7 @@ define(['lodash'], function(_) {
 
   StudyAddCtrl.$inject = [
     '$state',
-    'gettext',
+    'gettextCatalog',
     'notificationsService',
     'domainNotificationService'
   ];
@@ -33,7 +33,7 @@ define(['lodash'], function(_) {
   var returnState = 'home.admin.studies';
 
   function StudyAddCtrl($state,
-                        gettext,
+                        gettextCatalog,
                         notificationsService,
                         domainNotificationService) {
 
@@ -55,7 +55,7 @@ define(['lodash'], function(_) {
       }
 
       function submitError(error) {
-        domainNotificationService.updateErrorModal(error, gettext('study'));
+        domainNotificationService.updateErrorModal(error, gettextCatalog.getString('study'));
       }
     }
 

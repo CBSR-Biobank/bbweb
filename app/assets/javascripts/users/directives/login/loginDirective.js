@@ -25,13 +25,13 @@ define(function () {
 
   LoginCtrl.$inject = [
     '$state',
-    'gettext',
+    'gettextCatalog',
     'usersService',
     'modalService',
   ];
 
   function LoginCtrl($state,
-                     gettext,
+                     gettextCatalog,
                      usersService,
                      modalService) {
     var vm = this;
@@ -70,31 +70,31 @@ define(function () {
       var header, body;
 
       if (!error.hasOwnProperty('data') || (error.data === null)) {
-        header = gettext('Login error');
-        body = gettext('Cannot login: server is not reachable.');
+        header = gettextCatalog.getString('Login error');
+        body = gettextCatalog.getString('Cannot login: server is not reachable.');
     } else {
       switch (error.data.message)  {
       case 'invalid email':
       case 'InvalidPassword':
-        header = gettext('Invalid login credentials');
-        body = gettext('The email and / or password you entered are invalid.');
+        header = gettextCatalog.getString('Invalid login credentials');
+        body = gettextCatalog.getString('The email and / or password you entered are invalid.');
         break;
 
       case 'the user is not active':
-        header = gettext('Login not active');
-        body = gettext('Your login is not active yet. ' +
+        header = gettextCatalog.getString('Login not active');
+        body = gettextCatalog.getString('Your login is not active yet. ' +
                        'Please contact your system admnistrator for more information.');
         break;
 
       case 'the user is locked':
-        header = gettext('Login is locked');
-        body = gettext('Your login is locked. ' +
+        header = gettextCatalog.getString('Login is locked');
+        body = gettextCatalog.getString('Your login is locked. ' +
                        'Please contact your system admnistrator for more information.');
         break;
 
       default:
-        header = gettext('Login error');
-        body = gettext('Cannot login: ') + error.data.message;
+        header = gettextCatalog.getString('Login error');
+        body = gettextCatalog.getString('Cannot login: ') + error.data.message;
       }
     }
 

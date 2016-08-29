@@ -7,7 +7,10 @@
 define(['lodash'], function(_) {
   'use strict';
 
-  config.$inject = ['$urlRouterProvider', '$stateProvider'];
+  config.$inject = [
+    '$urlRouterProvider',
+    '$stateProvider'
+  ];
 
   function config($urlRouterProvider, $stateProvider) {
 
@@ -241,9 +244,6 @@ define(['lodash'], function(_) {
           ],
           controllerAs: 'vm'
         }
-      },
-      data: {
-        displayName: 'Participant {{participant.uniqueId}}'
       }
     });
 

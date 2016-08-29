@@ -5,12 +5,12 @@
 define(['toastr'], function(toastr) {
   'use strict';
 
-  notificationsService.$inject = ['gettext'];
+  notificationsService.$inject = ['gettextCatalog'];
 
   /**
    *
    */
-  function notificationsService(gettext) {
+  function notificationsService(gettextCatalog) {
     var service = {
       submitSuccess: submitSuccess,
       success:       success,
@@ -53,8 +53,8 @@ define(['toastr'], function(toastr) {
      * Error is the error returned from a biobankApiService call that failed.
      */
     function updateError(err) {
-      var message = gettext('Your change could not be saved'),
-          title   = gettext('Cannot apply your change');
+      var message = gettextCatalog.getString('Your change could not be saved'),
+          title   = gettextCatalog.getString('Cannot apply your change');
       if (err.data) {
         message += ': ' + err.data.message;
       }

@@ -26,13 +26,13 @@ define(['lodash'], function (_) {
 
   CentreLocationViewCtrl.$inject = [
     '$state',
-    'gettext',
+    'gettextCatalog',
     'modalInput',
     'notificationsService'
   ];
 
   function CentreLocationViewCtrl($state,
-                                  gettext,
+                                  gettextCatalog,
                                   modalInput,
                                   notificationsService) {
     var vm = this;
@@ -62,93 +62,93 @@ define(['lodash'], function (_) {
     }
 
     function editName() {
-      modalInput.text(gettext('Edit location name'),
-                      gettext('Name'),
+      modalInput.text(gettextCatalog.getString('Edit location name'),
+                      gettextCatalog.getString('Name'),
                       vm.location.name,
                       { required: true, minLength: 2 }).result
         .then(function (name) {
           vm.location.name = name;
           vm.centre.updateLocation(vm.location)
-            .then(postUpdate(gettext('Name changed successfully.'),
-                             gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('Name changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }
 
     function editStreet() {
-      modalInput.text(gettext('Edit street address'),
-                      gettext('Street address'),
+      modalInput.text(gettextCatalog.getString('Edit street address'),
+                      gettextCatalog.getString('Street address'),
                       vm.location.street).result
         .then(function (street) {
           vm.location.street = street;
           vm.centre.updateLocation(vm.location)
-            .then(postUpdate(gettext('Street address changed successfully.'),
-                             gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('Street address changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
       });
     }
 
     function editCity() {
-      modalInput.text(gettext('Edit city name'),
-                      gettext('City'),
+      modalInput.text(gettextCatalog.getString('Edit city name'),
+                      gettextCatalog.getString('City'),
                       vm.location.city).result
         .then(function (city) {
           vm.location.city = city;
           vm.centre.updateLocation(vm.location)
-            .then(postUpdate(gettext('City changed successfully.'),
-                             gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('City changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }
 
     function editProvince() {
-      modalInput.text(gettext('Edit province'),
-                      gettext('Province'),
+      modalInput.text(gettextCatalog.getString('Edit province'),
+                      gettextCatalog.getString('Province'),
                       vm.location.province).result
         .then(function (province) {
           vm.location.province = province;
           vm.centre.updateLocation(vm.location)
-            .then(postUpdate(gettext('Province changed successfully.'),
-                             gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('Province changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }
 
     function editPostalCode() {
-      modalInput.text(gettext('Edit postal code'),
-                      gettext('Postal code'),
+      modalInput.text(gettextCatalog.getString('Edit postal code'),
+                      gettextCatalog.getString('Postal code'),
                       vm.location.postalCode).result
         .then(function (postalCode) {
           vm.location.postalCode = postalCode;
           vm.centre.updateLocation(vm.location)
-            .then(postUpdate(gettext('PostalCode changed successfully.'),
-                             gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('PostalCode changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }
 
     function editPoBoxNumber() {
-      modalInput.text(gettext('Edit PO box number'),
-                      gettext('PO box Number'),
+      modalInput.text(gettextCatalog.getString('Edit PO box number'),
+                      gettextCatalog.getString('PO box Number'),
                       vm.location.postalCode).result
         .then(function (poBoxNumber) {
           vm.location.poBoxNumber = poBoxNumber;
           vm.centre.updateLocation(vm.location)
-            .then(postUpdate(gettext('PoBoxNumber changed successfully.'),
-                             gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('PoBoxNumber changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }
 
     function editCountryIsoCode() {
-      modalInput.text(gettext('Edit country ISO code'),
-                      gettext('Country ISO code'),
+      modalInput.text(gettextCatalog.getString('Edit country ISO code'),
+                      gettextCatalog.getString('Country ISO code'),
                       vm.location.postalCode).result.
         then(function (countryIsoCode) {
           vm.location.countryIsoCode = countryIsoCode;
           vm.centre.updateLocation(vm.location)
-            .then(postUpdate(gettext('CountryIsoCode changed successfully.'),
-                             gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('CountryIsoCode changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }

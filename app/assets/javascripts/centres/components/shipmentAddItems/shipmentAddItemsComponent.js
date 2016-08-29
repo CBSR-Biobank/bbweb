@@ -18,7 +18,7 @@ define(function (require) {
 
   ShipmentAddItemsController.$inject = [
     '$state',
-    'gettext' ,
+    'gettextCatalog' ,
     'shipmentProgressItems',
     'Shipment',
     'modalInput',
@@ -33,7 +33,7 @@ define(function (require) {
    * A task progress bar is used to give feedback to the user that this is one step in a multi-step process.
    */
   function ShipmentAddItemsController($state,
-                                      gettext,
+                                      gettextCatalog,
                                       shipmentProgressItems,
                                       Shipment,
                                       modalInput,
@@ -68,8 +68,8 @@ define(function (require) {
           if (_.isUndefined(vm.timePacked)) {
             vm.timePacked = new Date();
           }
-          return modalInput.dateTime(gettext('Date and time shipment was packed'),
-                                     gettext('Time packed'),
+          return modalInput.dateTime(gettextCatalog.getString('Date and time shipment was packed'),
+                                     gettextCatalog.getString('Time packed'),
                                      vm.timePacked,
                                      { required: true }).result
             .then(function (timePacked) {
@@ -81,8 +81,8 @@ define(function (require) {
             });
         }
 
-        return modalService.modalOk(gettext('Shipment has no specimens'),
-                                    gettext('Please add specimens to this shipment fist.'));
+        return modalService.modalOk(gettextCatalog.getString('Shipment has no specimens'),
+                                    gettextCatalog.getString('Please add specimens to this shipment fist.'));
       });
     }
   }

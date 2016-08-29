@@ -25,6 +25,28 @@
           </ul>
         </li>
       </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
+            <translate>Language</translate>
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a href ng-click="vm.changeLanguage('en')">
+                <span class="glyphicon glyphicon-cog"></span>
+                <translate>English</translate>
+              </a>
+            </li>
+            <li>
+              <a href ng-click="vm.changeLanguage('es_419')">
+                <span class="glyphicon glyphicon-cog"></span>
+                <translate>Spanish</translate>
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
     </div>
     <ul class="nav navbar-nav pull-right" ng-if="!vm.user" ng-cloak>
       <li><a href="#/login" translate>Login</a></li>

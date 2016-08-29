@@ -119,8 +119,7 @@ define(function (require) {
     it('can remove a users avatar', function() {
       var user = new this.User(this.factory.user());
 
-      spyOn(this.modalService, 'showModal')
-        .and.returnValue({ result: this.$q.when('OK')});
+      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
       spyOn(this.User.prototype, 'updateAvatarUrl').and.returnValue(this.$q.when(new this.User()));
       spyOn(this.notificationsService, 'success').and.returnValue(null);
 
@@ -134,8 +133,7 @@ define(function (require) {
       var deferred = this.$q.defer(),
           user = new this.User(this.factory.user());
 
-      spyOn(this.modalService, 'showModal')
-        .and.returnValue({ result: this.$q.when('OK')});
+      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
       spyOn(this.User.prototype, 'updateAvatarUrl').and.returnValue(deferred.promise);
       spyOn(this.notificationsService, 'updateError').and.returnValue(null);
 

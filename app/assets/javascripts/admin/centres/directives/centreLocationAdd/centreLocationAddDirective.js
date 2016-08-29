@@ -25,13 +25,13 @@ define(function () {
 
   CentreLocationAddCtrl.$inject = [
     '$state',
-    'gettext',
+    'gettextCatalog',
     'domainNotificationService',
     'notificationsService'
   ];
 
   function CentreLocationAddCtrl($state,
-                                 gettext,
+                                 gettextCatalog,
                                  domainNotificationService,
                                  notificationsService) {
     var vm = this;
@@ -55,7 +55,7 @@ define(function () {
       }
 
       function submitError(error) {
-        return domainNotificationService.updateErrorModal(error, gettext('location'));
+        return domainNotificationService.updateErrorModal(error, gettextCatalog.getString('location'));
       }
     }
 

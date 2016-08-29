@@ -25,19 +25,33 @@ define(['lodash'], function (_) {
 
   ParticipantViewCtrl.$inject = [
     '$window',
+    '$scope',
     '$state',
-    'gettext'
+    'gettextCatalog',
+    'stateHelper'
   ];
 
   /**
    *
    */
-  function ParticipantViewCtrl($window, $state, gettext) {
+  function ParticipantViewCtrl($window,
+                               $scope,
+                               $state,
+                               gettextCatalog,
+                               stateHelper) {
     var vm = this;
 
     vm.tabs = [
-      { heading: gettext('Summary'),    sref: 'home.collection.study.participant.summary', active: false },
-      { heading: gettext('Collection'), sref: 'home.collection.study.participant.cevents', active: false }
+      {
+        heading: gettextCatalog.getString('Summary'),
+        sref: 'home.collection.study.participant.summary',
+        active: false
+      },
+      {
+        heading: gettextCatalog.getString('Collection'),
+        sref: 'home.collection.study.participant.cevents',
+        active: false
+      }
     ];
 
     init();
@@ -52,6 +66,9 @@ define(['lodash'], function (_) {
         }
       });
 
+      $scope.$on('gettextLanguageChanged', function () {
+        stateHelper.reloadAndReinit();
+      });
     }
 
   }

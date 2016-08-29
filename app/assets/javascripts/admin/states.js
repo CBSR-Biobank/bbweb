@@ -12,7 +12,8 @@ define(function () {
     '$stateProvider'
   ];
 
-  function config($urlRouterProvider, $stateProvider) {
+  function config($urlRouterProvider,
+                  $stateProvider) {
 
     $urlRouterProvider.otherwise('/');
 

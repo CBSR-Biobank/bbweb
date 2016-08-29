@@ -25,12 +25,12 @@ define(function () {
 
   CeventTypesAddAndSelectCtrl.$injector = [
     '$state',
-    'gettext',
+    'gettextCatalog',
     'CollectionEventType'
   ];
 
   function CeventTypesAddAndSelectCtrl($state,
-                                       gettext,
+                                       gettextCatalog,
                                        CollectionEventType) {
     var vm = this;
 
@@ -61,7 +61,7 @@ define(function () {
     }
 
     function getRecurringLabel(ceventType) {
-      return ceventType.recurring ? gettext('Recurring') : gettext('Not recurring');
+      return ceventType.recurring ? gettextCatalog.getString('Recurring') : gettextCatalog.getString('Not recurring');
     }
   }
 

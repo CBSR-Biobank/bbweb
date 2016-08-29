@@ -31,7 +31,7 @@ define(['lodash'], function (_) {
 
   AnnotationTypeViewCtrl.$inject = [
     '$state',
-    'gettext',
+    'gettextCatalog',
     'modalInput',
     'notificationsService',
     'annotationValueTypeLabelService',
@@ -39,7 +39,7 @@ define(['lodash'], function (_) {
   ];
 
   function AnnotationTypeViewCtrl($state,
-                                  gettext,
+                                  gettextCatalog,
                                   modalInput,
                                   notificationsService,
                                   annotationValueTypeLabelService,
@@ -48,7 +48,7 @@ define(['lodash'], function (_) {
 
     vm.annotationTypeValueTypeLabel =
       annotationValueTypeLabelService.valueTypeToLabel(vm.annotationType.getType());
-    vm.requiredLabel = vm.annotationType.required ? gettext('Yes') : gettext('No');
+    vm.requiredLabel = vm.annotationType.required ? gettextCatalog.getString('Yes') : gettextCatalog.getString('No');
 
     vm.editName            = editName;
     vm.editRequired        = editRequired;
@@ -59,8 +59,8 @@ define(['lodash'], function (_) {
     //--
 
     function editName() {
-      modalInput.text(gettext('Edit Annotation name'),
-                      gettext('Name'),
+      modalInput.text(gettextCatalog.getString('Edit Annotation name'),
+                      gettextCatalog.getString('Name'),
                       vm.annotationType.name,
                       { required: true, minLength: 2 }).result
         .then(function (name) {
@@ -70,8 +70,8 @@ define(['lodash'], function (_) {
     }
 
     function editRequired() {
-      modalInput.boolean(gettext('Edit Annotation required'),
-                         gettext('Required'),
+      modalInput.boolean(gettextCatalog.getString('Edit Annotation required'),
+                         gettextCatalog.getString('Required'),
                          vm.annotationType.required.toString(),
                          { required: true }).result
         .then(function (required) {
@@ -81,8 +81,8 @@ define(['lodash'], function (_) {
     }
 
     function editDescription() {
-      modalInput.textArea(gettext('Edit Annotation description'),
-                          gettext('Description'),
+      modalInput.textArea(gettextCatalog.getString('Edit Annotation description'),
+                          gettextCatalog.getString('Description'),
                           vm.annotationType.description)
         .result.then(function (description) {
           var annotationType = _.extend({}, vm.annotationType, { description: description });
@@ -92,8 +92,8 @@ define(['lodash'], function (_) {
 
     function addSelectionOptions() {
       // FIXME: if selections are in use they cannot be modified
-      modalInput.selectMultiple(gettext('Edit Annotation Type selections'),
-                                gettext('Add selections'),
+      modalInput.selectMultiple(gettextCatalog.getString('Edit Annotation Type selections'),
+                                gettextCatalog.getString('Add selections'),
                                 {
                                   required: vm.annotationType.required,
                                   selectOptions:  vm.annotationType.options}).result

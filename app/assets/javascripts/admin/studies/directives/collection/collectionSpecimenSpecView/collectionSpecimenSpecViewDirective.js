@@ -27,7 +27,7 @@ define(['lodash'], function (_) {
 
   CollectionSpecimenSpecViewCtrl.$inject = [
     '$state',
-    'gettext',
+    'gettextCatalog',
     'modalInput',
     'notificationsService',
     'CollectionSpecimenSpec',
@@ -38,7 +38,7 @@ define(['lodash'], function (_) {
   ];
 
   function CollectionSpecimenSpecViewCtrl($state,
-                                          gettext,
+                                          gettextCatalog,
                                           modalInput,
                                           notificationsService,
                                           CollectionSpecimenSpec,
@@ -68,8 +68,8 @@ define(['lodash'], function (_) {
     //--
 
     function notifySuccess() {
-      return notificationsService.success(gettext('Annotation type changed successfully.'),
-                                          gettext('Change successful'),
+      return notificationsService.success(gettextCatalog.getString('Annotation type changed successfully.'),
+                                          gettextCatalog.getString('Change successful'),
                                           1500);
     }
 
@@ -83,8 +83,8 @@ define(['lodash'], function (_) {
     }
 
     function editName() {
-      modalInput.text(gettext('Specimen spec name'),
-                      gettext('Name'),
+      modalInput.text(gettextCatalog.getString('Specimen spec name'),
+                      gettextCatalog.getString('Name'),
                       vm.specimenSpec.name,
                       { required: true, minLength: 2 }).result
         .then(function (name) {
@@ -94,8 +94,8 @@ define(['lodash'], function (_) {
     }
 
     function editDescription() {
-      modalInput.textArea(gettext('Specimen spec description'),
-                          gettext('Description'),
+      modalInput.textArea(gettextCatalog.getString('Specimen spec description'),
+                          gettextCatalog.getString('Description'),
                           vm.specimenSpec.description).result
         .then(function (description) {
           vm.specimenSpec.description = description;
@@ -104,8 +104,8 @@ define(['lodash'], function (_) {
     }
 
     function editAnatomicalSource() {
-      modalInput.select(gettext('Specimen spec anatomical source'),
-                        gettext('Anatomical source'),
+      modalInput.select(gettextCatalog.getString('Specimen spec anatomical source'),
+                        gettextCatalog.getString('Anatomical source'),
                         vm.specimenSpec.anatomicalSourceType,
                         {
                           required: true,
@@ -118,8 +118,8 @@ define(['lodash'], function (_) {
     }
 
     function editPreservationType() {
-      modalInput.select(gettext('Specimen spec preservation type'),
-                        gettext('Preservation type'),
+      modalInput.select(gettextCatalog.getString('Specimen spec preservation type'),
+                        gettextCatalog.getString('Preservation type'),
                         vm.specimenSpec.preservationType,
                         {
                           required: true,
@@ -132,8 +132,8 @@ define(['lodash'], function (_) {
     }
 
     function editPreservationTemperature() {
-      modalInput.select(gettext('Specimen spec preservation temperature'),
-                        gettext('Preservation temperature'),
+      modalInput.select(gettextCatalog.getString('Specimen spec preservation temperature'),
+                        gettextCatalog.getString('Preservation temperature'),
                         vm.specimenSpec.preservationTemperatureType,
                         {
                           required: true,
@@ -146,8 +146,8 @@ define(['lodash'], function (_) {
     }
 
     function editSpecimenType() {
-      modalInput.select(gettext('Specimen spec - specimen type'),
-                        gettext('Sepcimen type'),
+      modalInput.select(gettextCatalog.getString('Specimen spec - specimen type'),
+                        gettextCatalog.getString('Sepcimen type'),
                         vm.specimenSpec.specimenType,
                         {
                           required: true,
@@ -160,8 +160,8 @@ define(['lodash'], function (_) {
     }
 
     function editUnits() {
-      modalInput.text(gettext('Specimen spec units'),
-                      gettext('Units'),
+      modalInput.text(gettextCatalog.getString('Specimen spec units'),
+                      gettextCatalog.getString('Units'),
                       vm.specimenSpec.units,
                       { required: true }).result
         .then(function (units) {
@@ -171,8 +171,8 @@ define(['lodash'], function (_) {
     }
 
     function editAmount() {
-      modalInput.positiveFloat(gettext('Specimen spec amount'),
-                               gettext('Amount'),
+      modalInput.positiveFloat(gettextCatalog.getString('Specimen spec amount'),
+                               gettextCatalog.getString('Amount'),
                                vm.specimenSpec.amount,
                                { required: true, positiveFloat: true }).result
         .then(function (value) {
@@ -182,8 +182,8 @@ define(['lodash'], function (_) {
     }
 
     function editMaxCount() {
-      modalInput.naturalNumber(gettext('Specimen spec max count'),
-                               gettext('Max count'),
+      modalInput.naturalNumber(gettextCatalog.getString('Specimen spec max count'),
+                               gettextCatalog.getString('Max count'),
                                vm.specimenSpec.maxCount,
                                { required: true, naturalNumber: true, min: 1 }).result
         .then(function (value) {

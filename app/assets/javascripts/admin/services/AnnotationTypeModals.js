@@ -6,7 +6,6 @@ define([], function() {
   'use strict';
 
   AnnotationTypeModalsFactory.$inject = [
-    'gettext',
     'gettextCatalog',
     'modalService',
     'domainNotificationService'
@@ -15,8 +14,7 @@ define([], function() {
   /**
    * Angular factory.
    */
-  function AnnotationTypeModalsFactory(gettext,
-                                       gettextCatalog,
+  function AnnotationTypeModalsFactory(gettextCatalog,
                                        modalService,
                                        domainNotificationService) {
 
@@ -33,18 +31,18 @@ define([], function() {
     }
 
     AnnotationTypeModals.prototype.removeInUseModal = function () {
-      var headerHtml = gettext('Cannot remove this annotation type');
+      var headerHtml = gettextCatalog.getString('Cannot remove this annotation type');
       return modalService.modalOk(headerHtml, this.modalBodyHtml);
     };
 
     AnnotationTypeModals.prototype.remove = function (annotationType, removePromiseFunc) {
       return domainNotificationService.removeEntity(
         removePromiseFunc,
-        gettext('Remove Annotation Type'),
-        gettext('Are you sure you want to remove annotation type {{name}}',
+        gettextCatalog.getString('Remove Annotation Type'),
+        gettextCatalog.getString('Are you sure you want to remove annotation type {{name}}',
                 { name: annotationType.name }),
-        gettext('Remove failed'),
-        gettext('Annotation type {{name}} cannot be removed', { name: annotationType.name }));
+        gettextCatalog.getString('Remove failed'),
+        gettextCatalog.getString('Annotation type {{name}} cannot be removed', { name: annotationType.name }));
     };
 
     return AnnotationTypeModals;

@@ -282,6 +282,11 @@ Or, within the SBT cli:
 ; clean; coverage; test; coverageReport
 ```
 
+# Translations
+
+Internationalization is done with [angular-gettext](https://angular-gettext.rocketeer.be/). To include the
+latest translations, the command `grunt nggettext_compile` must be run from the command line.
+
 ---
 
 [Back to top](../README.md)

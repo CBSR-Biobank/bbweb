@@ -27,7 +27,6 @@ define(['angular', 'lodash'], function(angular, _) {
   CentreStudiesPanelCtrl.$inject = [
     '$scope',
     '$log',
-    'gettext',
     'gettextCatalog',
     'Panel',
     'Study',
@@ -41,7 +40,6 @@ define(['angular', 'lodash'], function(angular, _) {
    */
   function CentreStudiesPanelCtrl($scope,
                                   $log,
-                                  gettext,
                                   gettextCatalog,
                                   Panel,
                                   Study,
@@ -115,7 +113,7 @@ define(['angular', 'lodash'], function(angular, _) {
     function remove(studyId) {
       // FIXME should not allow study to be removed if centre holds specimens for study
       modalService.modalOkCancel(
-        gettext('Remove study'),
+        gettextCatalog.getString('Remove study'),
         gettextCatalog.getString(
           'Are you sure you want to remove study {{name}}?',
           { name: vm.studyNamesById[studyId].name }))
@@ -125,8 +123,8 @@ define(['angular', 'lodash'], function(angular, _) {
               vm.studyCollection = _.without(vm.studyCollection, vm.studyNamesById[studyId]);
             })
             .catch(function (error) {
-              modalService.modalOkCancel(gettext('Remove failed'),
-                                         gettext('Could not remove study: ') + error);
+              modalService.modalOkCancel(gettextCatalog.getString('Remove failed'),
+                                         gettextCatalog.getString('Could not remove study: ') + error);
             });
         });
     }

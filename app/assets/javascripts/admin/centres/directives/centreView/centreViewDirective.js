@@ -27,19 +27,19 @@ define(['lodash'], function (_) {
     '$window',
     '$scope',
     '$state',
-    'gettext'
+    'gettextCatalog'
   ];
 
   function CentreViewCtrl($window,
                           $scope,
                           $state,
-                          gettext) {
+                          gettextCatalog) {
     var vm = this;
 
     vm.tabs = [
-      { heading: gettext('Summary'),   sref: 'home.admin.centres.centre.summary',   active: true },
-      { heading: gettext('Studies'),   sref: 'home.admin.centres.centre.studies',   active: true },
-      { heading: gettext('Locations'), sref: 'home.admin.centres.centre.locations', active: true },
+      { heading: gettextCatalog.getString('Summary'),   sref: 'home.admin.centres.centre.summary',   active: true },
+      { heading: gettextCatalog.getString('Studies'),   sref: 'home.admin.centres.centre.studies',   active: true },
+      { heading: gettextCatalog.getString('Locations'), sref: 'home.admin.centres.centre.locations', active: true },
     ];
 
     init();

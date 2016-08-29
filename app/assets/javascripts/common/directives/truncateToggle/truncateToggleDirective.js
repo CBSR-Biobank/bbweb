@@ -30,14 +30,13 @@ define(function () {
   TruncateToggleCtrl.$inject = [
     '$scope',
     '$filter',
-    'gettext'
+    'gettextCatalog'
   ];
 
-  function TruncateToggleCtrl($scope, $filter, gettext) {
+  function TruncateToggleCtrl($scope, $filter, gettextCatalog) {
     var vm = this,
-        showLessLabel = gettext('Show less'),
-        showMoreLabel = gettext('Show more');
-
+        showLessLabel = gettextCatalog.getString('Show less'),
+        showMoreLabel = gettextCatalog.getString('Show more');
 
     vm.displayText = vm.text || '';
     vm.toggleState = true;

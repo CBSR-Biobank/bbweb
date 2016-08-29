@@ -25,7 +25,6 @@ define(function () {
   }
 
   ParticipantSummaryCtrl.$inject = [
-    'gettext',
     'gettextCatalog',
     'annotationUpdate',
     'notificationsService',
@@ -35,8 +34,7 @@ define(function () {
   /**
    *
    */
-  function ParticipantSummaryCtrl(gettext,
-                                  gettextCatalog,
+  function ParticipantSummaryCtrl(gettextCatalog,
                                   annotationUpdate,
                                   notificationsService,
                                   modalInput) {
@@ -57,14 +55,14 @@ define(function () {
     }
 
     function editUniqueId() {
-      modalInput.text(gettext('Update unique ID'),
-                      gettext('Unique ID'),
+      modalInput.text(gettextCatalog.getString('Update unique ID'),
+                      gettextCatalog.getString('Unique ID'),
                       vm.participant.uniqueId,
                       { required: true }).result
         .then(function (uniqueId) {
           vm.participant.updateUniqueId(uniqueId)
-            .then(postUpdate(gettext('Unique ID updated successfully.'),
-                             gettext('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('Unique ID updated successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }
@@ -72,8 +70,8 @@ define(function () {
     function editAnnotation(annotation) {
       annotationUpdate.update(annotation).then(function (newAnnotation) {
         vm.participant.addAnnotation(newAnnotation)
-          .then(postUpdate(gettext('Annotation updated successfully.'),
-                           gettext('Change successful')))
+          .then(postUpdate(gettextCatalog.getString('Annotation updated successfully.'),
+                           gettextCatalog.getString('Change successful')))
           .catch(notificationsService.updateError);
       });
     }

@@ -26,14 +26,14 @@ define(function () {
 
   CeventGetTypeCtrl.$inject = [
     '$state',
-    'gettextCatalog',
-    'CollectionEvent'
+    'CollectionEvent',
+    'gettextCatalog'
   ];
 
   /**
    * Used to add or edit a collection event.
    */
-  function CeventGetTypeCtrl($state, gettextCatalog, CollectionEvent) {
+  function CeventGetTypeCtrl($state, CollectionEvent, gettextCatalog) {
     var vm = this;
 
     vm.title = gettextCatalog.getString(

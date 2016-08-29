@@ -16,16 +16,16 @@ define(function () {
   };
 
   AnnotationTypeSummaryController.$inject = [
-    'gettext'
+    'gettextCatalog'
   ];
 
   /**
    *
    */
-  function AnnotationTypeSummaryController(gettext) {
+  function AnnotationTypeSummaryController(gettextCatalog) {
     var vm = this;
 
-    vm.requiredLabel = vm.annotationType.required ? gettext('Yes') : gettext('No');
+    vm.requiredLabel = vm.annotationType.required ? gettextCatalog.getString('Yes') : gettextCatalog.getString('No');
   }
 
   return component;
