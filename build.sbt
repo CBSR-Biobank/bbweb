@@ -77,10 +77,10 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   cache,
   filters,
-  ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.4.8" % "compile" ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
-  "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.8",
-  "com.typesafe.akka"           %% "akka-remote"                         % "2.4.8"             % "compile",
-  "com.typesafe.akka"           %% "akka-slf4j"                          % "2.4.8"             % "compile",
+  ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.4.9" % "compile" ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
+  "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.9",
+  "com.typesafe.akka"           %% "akka-remote"                         % "2.4.9"             % "compile",
+  "com.typesafe.akka"           %% "akka-slf4j"                          % "2.4.9"             % "compile",
   "org.scala-stm"               %% "scala-stm"                           % "0.7"               % "compile",
   "org.scalaz"                  %% "scalaz-core"                         % "7.2.5"             % "compile",
   "org.iq80.leveldb"            % "leveldb"                              % "0.9",
@@ -94,10 +94,10 @@ libraryDependencies ++= Seq(
   ( "org.webjars"               %% "webjars-play"                        % "2.5.0").exclude("org.webjars", "requirejs"),
   // WebJars dependencies
   "org.webjars"                 %  "requirejs"                           % "2.2.0",
-  "org.webjars"                 %  "lodash"                              % "4.0.0",
+  "org.webjars"                 %  "lodash"                              % "4.15.0",
   "org.webjars"                 %  "jquery"                              % "2.2.4",
   ( "org.webjars"               %  "bootstrap"                           % "3.3.7"  ).excludeAll(ExclusionRule(organization="org.webjars")),
-  ( "org.webjars"               %  "angularjs"                           % "1.5.7"  ).exclude("org.webjars", "jquery"),
+  ( "org.webjars"               %  "angularjs"                           % "1.5.8"  ).exclude("org.webjars", "jquery"),
   ( "org.webjars"               %  "angular-ui-bootstrap"                % "1.3.3" ).exclude("org.webjars", "angularjs"),
   ( "org.webjars"               %  "angular-ui-router"                   % "0.2.18" ).exclude("org.webjars", "angularjs"),
   "org.webjars"                 %  "smart-table"                         % "2.1.3-1",
@@ -110,11 +110,11 @@ libraryDependencies ++= Seq(
   "org.webjars.bower"           %  "bootstrap-ui-datetime-picker"        % "2.4.3",
   "org.webjars.bower"           %  "angular-gettext"                     % "2.2.1",
   // Testing
-  "com.github.dnvriend"         %% "akka-persistence-inmemory"           % "1.3.5"              % "test",
-  "com.typesafe.akka"           %% "akka-testkit"                        % "2.4.8"              % "test",
+  "com.github.dnvriend"         %% "akka-persistence-inmemory"           % "1.3.7"              % "test",
+  "com.typesafe.akka"           %% "akka-testkit"                        % "2.4.9"              % "test",
   "org.scalatestplus"           %% "play"                                % "1.4.0"              % "test",
   "org.pegdown"                 %  "pegdown"                             % "1.6.0"              % "test",
-  "org.codehaus.janino"         %  "janino"                              % "3.0.0"              % "test"
+  "org.codehaus.janino"         %  "janino"                              % "3.0.1"              % "test"
   )
 
 incOptions := incOptions.value.withNameHashing(true)
@@ -138,7 +138,9 @@ pipelineStages := Seq(rjs, digest, gzip)
 // To completely override the optimization process, use this config option:
 //requireNativePath := Some("node r.js -o name=main out=javascript-min/main.min.js")
 
-PB.scalapbVersion := "0.5.31"
+PB.flatPackage in PB.protobufConfig := true
+
+PB.scalapbVersion := "0.5.40"
 PB.protobufSettings
 
 // Protocol buffers compiler - used by ScalaPB
