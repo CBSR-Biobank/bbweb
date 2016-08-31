@@ -2,16 +2,13 @@
 
   <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel" />
 
-  <!-- sends logs to logback-beagle -->
-  <consolePlugin />
-
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <!-- encoders are assigned the type
          ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
     <encoder>
       <!-- Using %L for logging is slow, replace this for production server -->
       <!-- pattern>%d{HH:mm:ss.SSS} %-5level %c{1}:%L - %msg%n</pattern -->
-      <pattern>%d{ABSOLUTE} %5p %c{1}:%L - %m%n</pattern>
+      <pattern>%d{ABSOLUTE} %coloredLevel %c{1}.%M - %message%n%xException{10}</pattern>
       <immediateFlush>true</immediateFlush>
     </encoder>
   </appender>

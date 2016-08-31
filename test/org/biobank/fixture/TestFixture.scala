@@ -1,23 +1,37 @@
 package org.biobank.fixture
 
-import org.biobank.domain._
-import org.biobank.domain.study._
-import org.biobank.domain.participants._
-import org.biobank.domain.centre._
-import org.biobank.domain.user._
-import org.biobank.domain.user.UserId
-import org.biobank.service._
-//import org.biobank.query._
-
 import akka.actor.ActorRef
 import akka.actor._
+import akka.persistence.inmemory.extension.{ InMemoryJournalStorage, InMemorySnapshotStorage, StorageExtension }
+import akka.testkit.TestProbe
 import akka.util.Timeout
 import javax.inject.{ Inject, Named }
+import org.biobank.domain._
+import org.biobank.domain.centre._
+import org.biobank.domain.participants._
+import org.biobank.domain.study._
+import org.biobank.domain.user.UserId
+import org.biobank.domain.user._
+import org.biobank.service._
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time._
 import play.api.inject.guice.GuiceApplicationBuilder
 import scala.concurrent.duration._
+
+trait InMemoryCleanup extends BeforeAndAfterEach { _: Suite =>
+
+  implicit val system: ActorSystem
+
+  override protected def beforeEach(): Unit = {
+    val tp = TestProbe()
+    tp.send(StorageExtension(system).journalStorage, InMemoryJournalStorage.ClearJournal)
+    tp.expectMsg(akka.actor.Status.Success(""))
+    tp.send(StorageExtension(system).snapshotStorage, InMemorySnapshotStorage.ClearSnapshots)
+    tp.expectMsg(akka.actor.Status.Success(""))
+    super.beforeEach()
+  }
+}
 
 /**
  * Test fixture to make it easier to write specifications.
@@ -26,7 +40,7 @@ trait TestFixture
     extends WordSpecLike
     with ScalaFutures
     with MustMatchers
-    with BeforeAndAfterEach
+    with InMemoryCleanup
     with BeforeAndAfterAll
     with TestDbConfiguration {
 

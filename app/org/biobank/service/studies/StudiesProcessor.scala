@@ -1,7 +1,7 @@
 package org.biobank.service.studies
 
 import akka.actor._
-import akka.persistence.SnapshotOffer
+import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
 import javax.inject._
 import org.biobank.domain.study._
 import org.biobank.domain.{AnnotationType, AnnotationValueType}
@@ -21,6 +21,8 @@ object StudiesProcessor {
 
 }
 
+final case class SnapshotState(studies: List[Study])
+
 /**
  * The StudiesProcessor is responsible for maintaining state changes for all
  * [[org.biobank.domain.study.Study]] aggregates. This particular processor uses Akka-Persistence's
@@ -39,9 +41,7 @@ class StudiesProcessor @javax.inject.Inject() (
     extends Processor {
   import org.biobank.CommonValidations._
 
-  override def persistenceId = "study-processor-id"
-
-  case class SnapshotState(studies: Set[Study])
+  override def persistenceId = "studies-processor-id"
 
   /**
    * These are the events that are recovered during journal recovery. They cannot fail and must be
@@ -65,7 +65,10 @@ class StudiesProcessor @javax.inject.Inject() (
     }
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
-      snapshot.studies.foreach{ study => studyRepository.put(study) }
+      snapshot.studies.foreach(studyRepository.put)
+
+    case RecoveryCompleted => log.debug(s"recovery completed")
+
   }
 
   /**
@@ -83,7 +86,7 @@ class StudiesProcessor @javax.inject.Inject() (
    *  - [[StudiesProcessor]]
    *  - [[StudyAnnotationTypeProcessor]]
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {
     case cmd: StudyCommandWithStudyId => validateAndForward(cmd)
     case cmd: SpecimenLinkTypeCommand => validateAndForward(cmd)
@@ -125,8 +128,17 @@ class StudiesProcessor @javax.inject.Inject() (
       processUpdateCmdOnRetiredStudy(cmd, unretireCmdToEvent, applyUnretiredEvent)
 
     case "snap" =>
-      saveSnapshot(SnapshotState(studyRepository.getValues.toSet))
-      stash()
+      saveSnapshot(SnapshotState(studyRepository.getValues.toList))
+
+    case SaveSnapshotSuccess(metadata) =>
+      log.debug(s"snapshot saved successfully: persistenceId: ${metadata.persistenceId}, sequenceNr: ${metadata.sequenceNr}")
+
+    case SaveSnapshotFailure(metadata, reason) =>
+      log.error(s"snapshot save error: persistenceId: ${metadata.persistenceId}, sequenceNr: ${metadata.sequenceNr}, reason: ${reason.getMessage}")
+      reason.printStackTrace
+
+    case "persistence_restart" =>
+      throw new Exception("Intentionally throwing exception to test persistence by restarting the actor")
 
     case cmd => log.error(s"StudiesProcessor: message not handled: $cmd")
   }

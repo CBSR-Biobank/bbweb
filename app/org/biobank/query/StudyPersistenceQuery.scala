@@ -26,7 +26,7 @@
 //     LeveldbReadJournal.Identifier)
 
 //   val src: Source[EventEnvelope, Unit] =
-//     queries.eventsByPersistenceId("study-processor-id", 0L, Long.MaxValue)
+//     queries.eventsByPersistenceId("studies-processor-id", 0L, Long.MaxValue)
 
 //   val events: Source[Any, Unit] = src.map(_.event)
 
