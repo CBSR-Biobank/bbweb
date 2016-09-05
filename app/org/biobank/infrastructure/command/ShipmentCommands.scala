@@ -45,6 +45,12 @@ object ShipmentCommands {
                                                locationId:      String)
       extends ShipmentModifyCommand
 
+  // sets the state back to created from packed
+  final case class ShipmentCreatedCmd(userId:          String,
+                                      id:              String, // shipment ID
+                                      expectedVersion: Long)
+      extends ShipmentModifyCommand
+
   final case class ShipmentPackedCmd(userId:          String,
                                      id:              String, // shipment ID
                                      expectedVersion: Long,
@@ -93,6 +99,9 @@ object ShipmentCommands {
 
   implicit val updateShipmentToLocationCmdReads: Reads[UpdateShipmentToLocationCmd] =
     Json.reads[UpdateShipmentToLocationCmd]
+
+  implicit val shipmentCreatedCmdReads: Reads[ShipmentCreatedCmd] =
+    Json.reads[ShipmentCreatedCmd]
 
   implicit val shipmentPackedCmdReads: Reads[ShipmentPackedCmd] =
     Json.reads[ShipmentPackedCmd]

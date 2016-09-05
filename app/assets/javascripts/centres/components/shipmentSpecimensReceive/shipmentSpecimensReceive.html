@@ -1,0 +1,41 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      <translate>Specimens in this shipment</translate>
+      <span class="pull-right">
+        <a data-toggle="collapse"
+           href="#collapseShippingInfo"
+           class="btn btn-xs btn-default"
+           ng-click="vm.panelButtonClicked()"
+           ng-if="vm.collapsable">
+          <i class="glyphicon"
+             ng-class="vm.panelOpen ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
+        </a>
+      </span>
+    </h3>
+  </div>
+
+  <div id="collapseShippingInfo" class="panel-collapse collapse in" aria-expanded="true">
+    <ul class="list-group">
+
+      <li class="list-group-item" ng-repeat="displayProperty in vm.displayProperties">
+        <div class="row">
+          <div class="col-md-3">
+            <strong>{{displayProperty.label}}</strong>
+          </div>
+          <div class="col-md-7">
+            {{displayProperty.value}}
+          </div>
+          <div class="col-md-2" ng-if="displayProperty.editFunc">
+            <button class="btn btn-xs btn-primary pull-right"
+                    title="displayProperty.buttonTitle"
+                    ng-click="displayProperty.editFunc()">
+              <i class="glyphicon glyphicon-edit"></i>
+            </button>
+          </div>
+        </div>
+      </li>
+
+    </ul>
+  </div>
+</div>

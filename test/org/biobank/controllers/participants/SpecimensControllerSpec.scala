@@ -161,7 +161,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
         compareObj((json \ "data").get, specimenDto)
       }
 
-      "111 fails for an invalid inventory ID" in {
+      "fails for an invalid inventory ID" in {
         val invalidInventoryId = nameGenerator.next[Specimen]
         val json = makeRequest(GET, s"${uri}/invid/$invalidInventoryId", NOT_FOUND)
 

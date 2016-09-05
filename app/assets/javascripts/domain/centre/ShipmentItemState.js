@@ -10,10 +10,10 @@ define(function () {
    * @memberOf domain.centres
    */
   var ShipmentItemState = {
-    PRESENT:  'Present',
-    RECEIVED: 'Received',
-    MISSING:  'Missing',
-    EXTRA:    'Extra'
+    PRESENT:  'present',
+    RECEIVED: 'received',
+    MISSING:  'missing',
+    EXTRA:    'extra'
   };
 
 

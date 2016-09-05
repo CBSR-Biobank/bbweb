@@ -4,16 +4,18 @@
 </progress-tracker>
 <div class="page-header">
   <h1>
-    <translate>Sent shipment</translate>
+    <translate>Received shipment</translate>
     <div class="pull-right">
       <button class="btn btn-xs btn-warning"
-              title="{{'Return shipment to packed state'|translate}}"
-              ng-click="vm.returnToPackedState()">
-        <translate>Mark as unsent</translate>
+              title="{{'Return shipment to sent state'|translate}}"
+              ng-click="vm.returnToSentState()">
+        <i class="glyphicon glyphicon-chevron-left"></i>
+        <translate>Previous step</translate>
       </button>
       <button class="btn btn-xs btn-primary"
-              title="{{'Mark shipment as received'|translate}}"
-              ng-click="vm.receiveShipment()">
+              title="{{'Record items unpacked from shipment'|translate}}"
+              ng-click="vm.unpackShipment()"
+              translate>
         <translate>Next step</translate>
         <i class="glyphicon glyphicon-chevron-right"></i>
       </button>

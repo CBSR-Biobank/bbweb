@@ -1,0 +1,22 @@
+<progress-tracker
+   items="vm.progressInfo.items"
+   current="vm.progressInfo.current">
+</progress-tracker>
+<div class="page-header">
+  <h1>
+    <translate>Unpack shipment</translate>
+    <div class="pull-right">
+      <button class="btn btn-xs btn-warning"
+              title="{{'Return shipment to received'|translate}}"
+              ng-click="vm.returnToReceivedState()">
+        <i class="glyphicon glyphicon-chevron-left"></i>
+        <translate>Previous step</translate>
+      </button>
+    </div>
+  </h1>
+</div>
+<shipping-info-view shipment="vm.shipment"
+                    read-only="true"
+                    collapsable="true">
+</shipping-info-view>
+<shipment-specimens-receive shipment="vm.shipment"></shipment-specimens-receive>

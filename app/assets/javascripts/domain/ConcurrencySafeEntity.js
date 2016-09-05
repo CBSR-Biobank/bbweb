@@ -63,18 +63,18 @@ define(['angular', 'lodash'], function(angular, _) {
     };
 
     /** @protected */
+    ConcurrencySafeEntity.prototype.asyncCreate = function (obj) {
+      var deferred = $q.defer();
+      deferred.reject('the subclass should override this method');
+      return deferred.promise;
+    };
+
+    /** @protected */
     ConcurrencySafeEntity.prototype.update = function (url, additionalJson) {
       var self = this, json = _.extend({ expectedVersion: self.version }, additionalJson || {});
       return biobankApi.post(url, json).then(function(reply) {
         return self.asyncCreate(reply);
       });
-    };
-
-    /** @protected */
-    ConcurrencySafeEntity.prototype.asyncCreate = function (obj) {
-      var deferred = $q.defer();
-      deferred.reject('the subclass should override this method');
-      return deferred.promise;
     };
 
     return ConcurrencySafeEntity;

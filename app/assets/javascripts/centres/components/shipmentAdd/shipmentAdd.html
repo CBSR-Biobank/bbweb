@@ -34,7 +34,7 @@
              class="form-control"
              ng-model="vm.shipment.courierName"
              ng-minlength="2"
-             placeholder="{{'The name of the courier company'|translate}}""
+             placeholder="{{'The name of the courier company'|translate}}"
              focus-me="true"
              required />
     </div>
@@ -74,11 +74,12 @@
       <input name="fromCentreLocation"
              type="text"
              class="form-control"
-             ng-model="vm.selectedFromLocationInfo"
+             ng-model="vm.shipment.fromLocationInfo"
              placeholder="{{'The location of the centre this shipment is coming from'|translate}}"
              uib-typeahead="locationInfo as locationInfo.name for locationInfo in
-                            vm.getCentreLocationInfo($viewValue)"
+                            vm.getFromCentreLocationInfo($viewValue)"
              typeahead-editable="false"
+             autocomplete="off"
              required />
     </div>
     <div class="col-sm-offset-3 col-sm-9"
@@ -96,11 +97,12 @@
       <input name="toCentreLocation"
              type="text"
              class="form-control"
-             ng-model="vm.selectedToLocationInfo"
+             ng-model="vm.shipment.toLocationInfo"
              placeholder="{{'The location of the centre this shipment is going to'|translate}}"
              uib-typeahead="locationInfo as locationInfo.name for locationInfo in
-                            vm.getCentreLocationInfo($viewValue)"
+                            vm.getToCentreLocationInfo($viewValue)"
              typeahead-editable="false"
+             autocomplete="off"
              required />
     </div>
     <div class="col-sm-offset-3 col-sm-9"

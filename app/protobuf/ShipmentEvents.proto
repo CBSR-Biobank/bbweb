@@ -23,7 +23,8 @@ message ShipmentEvent {
 
    message LocationUpdated {
       optional int64  version     = 1;
-      optional string locationId  = 2;
+      optional string centreId    = 2;
+      optional string locationId  = 3;
    }
 
    message StateUpdated {
@@ -35,6 +36,7 @@ message ShipmentEvent {
       optional int64  version = 1;
    }
 
+
    required string id     = 1;
    optional string userId = 2;
    optional string time   = 3;
@@ -45,11 +47,12 @@ message ShipmentEvent {
       TrackingNumberUpdated trackingNumberUpdated = 6;
       LocationUpdated       fromLocationUpdated   = 7;
       LocationUpdated       toLocationUpdated     = 8;
-      StateUpdated          packed                = 9;
-      StateUpdated          sent                  = 10;
-      StateUpdated          received              = 11;
-      StateUpdated          unpacked              = 12;
-      WithVersion           lost                  = 13;
-      WithVersion           removed               = 14;
+      StateUpdated          created               = 9;
+      StateUpdated          packed                = 10;
+      StateUpdated          sent                  = 11;
+      StateUpdated          received              = 12;
+      StateUpdated          unpacked              = 13;
+      WithVersion           lost                  = 14;
+      WithVersion           removed               = 15;
    }
 }

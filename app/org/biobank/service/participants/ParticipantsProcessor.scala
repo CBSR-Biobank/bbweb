@@ -23,8 +23,8 @@ object ParticipantsProcessor {
 /**
  *
  */
-class ParticipantsProcessor @Inject() (val participantRepository:     ParticipantRepository,
-                                       val studyRepository:           StudyRepository)
+class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRepository,
+                                       val studyRepository:       StudyRepository)
     extends Processor {
 
   import ParticipantEvent.EventType

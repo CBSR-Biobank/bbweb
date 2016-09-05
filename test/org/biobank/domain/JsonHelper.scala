@@ -303,9 +303,13 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
   def compareObj(json: JsValue, dto: ShipmentSpecimenDto) = {
     (json \ "id").as[String] mustBe (dto.id)
+
     (json \ "version").as[Long] mustBe (dto.version)
+
     (json \ "shipmentId").as[String] mustBe (dto.shipmentId)
+
     (json \ "state").as[String] mustBe (dto.state)
+
     TestUtils.checkTimeStamps(dto.timeAdded, (json \ "timeAdded").as[DateTime])
     TestUtils.checkOpionalTime(dto.timeModified, (json \ "timeModified").asOpt[DateTime])
 

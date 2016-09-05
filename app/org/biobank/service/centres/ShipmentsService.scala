@@ -36,6 +36,7 @@ trait ShipmentsService {
   def getShipment(id: String): ServiceValidation[ShipmentDto]
 
   def getShipmentSpecimens(shipmentId: String,
+                           state:      String,
                            sortBy:     String,
                            order:      SortOrder): ServiceValidation[Seq[ShipmentSpecimenDto]]
 
@@ -76,55 +77,90 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
                    sortBy:               String,
                    order:                SortOrder)
       : ServiceValidation[List[ShipmentDto]] = {
-    ShipmentDto.sort2Compare.get(sortBy).toSuccessNel(ServiceError(s"invalid sort field: $sortBy"))
-      .flatMap { sortFunc =>
-      val centreShipments = shipmentRepository.withCentre(CentreId(centreId))
+    ShipmentDto.sort2Compare.get(sortBy).
+      toSuccessNel(ServiceError(s"invalid sort field: $sortBy")).
+      flatMap { sortFunc =>
 
-      val shipmentsFilteredByCourier = if (!courierFilter.isEmpty) {
-          val courierLowerCase = courierFilter.toLowerCase
-          centreShipments.filter { _.courierName.toLowerCase.contains(courierLowerCase)}
-        } else {
-          centreShipments
+        val centreShipments = shipmentRepository.withCentre(CentreId(centreId))
+
+        val shipmentsFilteredByCourier = if (!courierFilter.isEmpty) {
+            val courierLowerCase = courierFilter.toLowerCase
+            centreShipments.filter { _.courierName.toLowerCase.contains(courierLowerCase)}
+          } else {
+            centreShipments
+          }
+
+        val shipmentsFilteredByTrackingNumber: Set[Shipment] =
+          if (!trackingNumberFilter.isEmpty) {
+            val trackingNumLowerCase = trackingNumberFilter.toLowerCase
+            shipmentsFilteredByCourier.filter { _.trackingNumber.toLowerCase.contains(trackingNumLowerCase)}
+          } else {
+            shipmentsFilteredByCourier
+          }
+
+        val stateFilterValidation = if (stateFilter.isEmpty) {
+            shipmentsFilteredByTrackingNumber.successNel[String]
+          } else {
+            val stateFilterLowercase = stateFilter.toLowerCase
+            ShipmentState.values.find(_.toString == stateFilterLowercase) match {
+              case Some(state) =>
+                shipmentsFilteredByTrackingNumber.filter(_.state == state).successNel[String]
+              case None =>
+                ServiceError(s"invalid shipment state: $stateFilter").failureNel[Set[Shipment]]
+            }
+          }
+
+        stateFilterValidation.flatMap {
+            _.map(getShipmentDto).
+              toList.
+              sequenceU.
+              map { list =>
+                val result = list.sortWith(sortFunc)
+                if (order == AscendingOrder) result
+                else result.reverse
+              }
         }
-
-      val shipmentsFilteredByTrackingNumber = if (!trackingNumberFilter.isEmpty) {
-          val trackingNumLowerCase = trackingNumberFilter.toLowerCase
-          shipmentsFilteredByCourier.filter { _.trackingNumber.toLowerCase.contains(trackingNumLowerCase)}
-        } else {
-          shipmentsFilteredByCourier
-        }
-
-      val shipmentsFilteredByState = if (!stateFilter.isEmpty) {
-          val stateLowerCase = stateFilter.toLowerCase
-          shipmentsFilteredByTrackingNumber.filter { _.state.toString.toLowerCase.contains(stateLowerCase)}
-        } else {
-          shipmentsFilteredByTrackingNumber
-        }
-
-      shipmentsFilteredByState.toSeq.map(getShipmentDto).toList.sequenceU.map { list =>
-        val result = list.sortWith(sortFunc)
-        if (order == AscendingOrder) result
-        else result.reverse
       }
-    }
   }
 
   def getShipment(id: String): ServiceValidation[ShipmentDto] = {
     shipmentRepository.getByKey(ShipmentId(id)).flatMap(getShipmentDto)
   }
 
-  def getShipmentSpecimens(shipmentId: String,
-                           sortBy:     String,
-                           order:      SortOrder): ServiceValidation[List[ShipmentSpecimenDto]] = {
-    ShipmentSpecimenDto.sort2Compare.get(sortBy).toSuccessNel(ServiceError(s"invalid sort field: $sortBy"))
-      .flatMap { sortFunc =>
-      shipmentSpecimenRepository.allForShipment(ShipmentId(shipmentId)).map { ss =>
-        getShipmentSpecimenDto(ss)
-      }.toList.sequenceU.map { list =>
-        val result = list.sortWith(sortFunc)
-        if (order == AscendingOrder) result else result.reverse
+  def getShipmentSpecimens(shipmentId:  String,
+                           stateFilter: String,
+                           sortBy:      String,
+                           order:       SortOrder): ServiceValidation[List[ShipmentSpecimenDto]] = {
+    ShipmentSpecimenDto.sort2Compare.get(sortBy).
+      toSuccessNel(ServiceError(s"invalid sort field: $sortBy")).
+      flatMap { sortFunc =>
+
+        val shipmentSpecimens = shipmentSpecimenRepository.allForShipment(ShipmentId(shipmentId))
+
+        val stateFilterValidation = if (stateFilter.isEmpty) {
+            shipmentSpecimens.successNel[String]
+          } else {
+            val sateFilterLowercase = stateFilter.toLowerCase
+            ShipmentItemState.values.find(_.toString == sateFilterLowercase) match {
+              case Some(state) =>
+                shipmentSpecimens.filter(_.state == state).successNel[String]
+              case None =>
+                ServiceError(s"invalid shipment item state: $stateFilter").
+                  failureNel[Set[ShipmentSpecimen]]
+            }
+          }
+
+        stateFilterValidation.flatMap {
+          _.map(getShipmentSpecimenDto).
+            toList.
+            sequenceU.
+            map { list =>
+              val result = list.sortWith(sortFunc)
+              if (order == AscendingOrder) result
+              else result.reverse
+            }
+        }
       }
-    }
   }
 
   def getShipmentSpecimen(shipmentId: String, shipmentSpecimenId: String)

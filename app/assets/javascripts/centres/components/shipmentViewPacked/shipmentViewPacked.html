@@ -5,11 +5,17 @@
 <div class="page-header">
   <h1>
     <translate>Packed shipment</translate>
-    <div class="btn-group pull-right">
+    <div class="pull-right">
+      <button class="btn btn-xs btn-warning"
+              title="{{'Add more items to this shipment'|translate}}"
+              ng-click="vm.addMoreItems()">
+        <i class="glyphicon glyphicon-chevron-left"></i>
+        <translate>Previous step</translate>
+      </button>
       <button class="btn btn-xs btn-primary"
               title="{{'Mark shipment as sent'|translate}}"
               ng-click="vm.sendShipment()">
-        Send shipment
+        <translate>Tag as sent</translate>
       </button>
     </div>
   </h1>

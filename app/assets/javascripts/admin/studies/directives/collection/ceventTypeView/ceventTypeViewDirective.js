@@ -133,7 +133,7 @@ define(['lodash'], function (_) {
         gettextCatalog.getString('Are you sure you want to remove specimen {{name}}?',
                                  { name: specimenSpec.name }),
         gettextCatalog.getString('Remove failed'),
-        gettextCatalog.getString('Specimen {[name]} cannot be removed',
+        gettextCatalog.getString('Specimen {{name} cannot be removed',
                                  { name: specimenSpec.name }));
 
       function removePromiseFunc() {

@@ -122,7 +122,7 @@ class ShipmentSpec extends DomainFreeSpec {
         val shipment = factory.createShipment
         val location = factory.createLocation
         val centre   = factory.createEnabledCentre.copy(locations = Set(location))
-        shipment.withFromLocation(centre, location) mustSucceed { s =>
+        shipment.withFromLocation(centre.id, location.uniqueId) mustSucceed { s =>
           s.fromLocationId must be (location.uniqueId)
           s.version must be (shipment.version + 1)
           checkTimeStamps(s, shipment.timeAdded, DateTime.now)
@@ -133,7 +133,7 @@ class ShipmentSpec extends DomainFreeSpec {
         val shipment = factory.createShipment
         val location = factory.createLocation
         val centre   = factory.createEnabledCentre.copy(locations = Set(location))
-        shipment.withToLocation(centre, location) mustSucceed { s =>
+        shipment.withToLocation(centre.id, location.uniqueId) mustSucceed { s =>
           s.toLocationId must be (location.uniqueId)
           s.version must be (shipment.version + 1)
           checkTimeStamps(s, shipment.timeAdded, DateTime.now)
@@ -275,7 +275,6 @@ class ShipmentSpec extends DomainFreeSpec {
       "to packed from an invalid state" in {
         val f = allShipmentsFixture
         List(ShipmentState.Packed,
-             ShipmentState.Sent,
              ShipmentState.Received,
              ShipmentState.Unpacked,
              ShipmentState.Lost
@@ -290,7 +289,6 @@ class ShipmentSpec extends DomainFreeSpec {
         val f = allShipmentsFixture
         List(ShipmentState.Created,
              ShipmentState.Sent,
-             ShipmentState.Received,
              ShipmentState.Unpacked,
              ShipmentState.Lost
         ).foreach { state =>
@@ -305,7 +303,6 @@ class ShipmentSpec extends DomainFreeSpec {
         List(ShipmentState.Created,
              ShipmentState.Packed,
              ShipmentState.Received,
-             ShipmentState.Unpacked,
              ShipmentState.Lost
         ).foreach {  state =>
           val shipment = f.shipments(state)

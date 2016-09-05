@@ -5,8 +5,6 @@
 define(function (require) {
   'use strict';
 
-  var _ = require('lodash');
-
   var component = {
     templateUrl : '/assets/javascripts/centres/components/shippingInfoView/shippingInfoView.html',
     controller: ShippingInfoViewController,
@@ -22,7 +20,6 @@ define(function (require) {
     '$filter',
     'gettextCatalog',
     'Centre',
-    'shipmentProgressItems',
     'modalInput',
     'notificationsService',
     'centreLocationsModalService'
@@ -34,7 +31,6 @@ define(function (require) {
   function ShippingInfoViewController($filter,
                                       gettextCatalog,
                                       Centre,
-                                      shipmentProgressItems,
                                       modalInput,
                                       notificationsService,
                                       centreLocationsModalService) {
@@ -43,87 +39,19 @@ define(function (require) {
     vm.notificationTimeout = 1500;
     vm.panelOpen = true;
 
-    vm.$onChanges         = onChanges;
+    vm.editCourierName    = editCourierName;
+    vm.editTrackingNumber = editTrackingNumber;
+    vm.editFromLocation   = editFromLocation;
+    vm.editToLocation     = editToLocation;
     vm.panelButtonClicked = panelButtonClicked;
 
-
     //--
-
-    function onChanges(changesObj) {
-      if (changesObj.shipment && vm.shipment) {
-        commonDisplayProperties();
-        displayPropertiesByState();
-      }
-    }
-
-    function commonDisplayProperties() {
-      var properties = {
-        courier:        new DisplayProperty(gettextCatalog.getString('Courier'),         vm.shipment.courierName),
-        trackingNumber: new DisplayProperty(gettextCatalog.getString('Tracking Number'), vm.shipment.trackingNumber),
-        fromLocation:   new DisplayProperty(gettextCatalog.getString('From centre'),     vm.shipment.fromLocationInfo.name),
-        toLocation:     new DisplayProperty(gettextCatalog.getString('To centre'),       vm.shipment.toLocationInfo.name)
-      };
-
-      if (!vm.readOnly) {
-        properties.courier.allowEdit(editCourierName,           gettextCatalog.getString('Update courier'));
-        properties.trackingNumber.allowEdit(editTrackingNumber, gettextCatalog.getString('Update tracking number'));
-        properties.fromLocation.allowEdit(editFromLocation,     gettextCatalog.getString('Update from location'));
-        properties.toLocation.allowEdit(editToLocation,         gettextCatalog.getString('Update to location'));
-      }
-
-      vm.displayProperties = _.values(properties);
-    }
-
-    function displayPropertiesByState() {
-      if (vm.shipment.timePacked) {
-        vm.displayProperties.push(new DisplayProperty(gettextCatalog.getString('Time packed'),
-                                                      $filter('localTime')(vm.shipment.timePacked)));
-      }
-
-      if (vm.shipment.timeSent) {
-        vm.displayProperties.push(new DisplayProperty(gettextCatalog.getString('Time sent'),
-                                                      $filter('localTime')(vm.shipment.timeSent)));
-      }
-
-      if (vm.shipment.timeReceived) {
-        vm.displayProperties.push(new DisplayProperty(gettextCatalog.getString('Time received'),
-                                                      $filter('localTime')(vm.shipment.timeReceived)));
-      }
-
-      if (vm.shipment.isNotCreatedOrUnpacked()) {
-        vm.displayProperties.push(new DisplayProperty(gettextCatalog.getString('Number of specimens'),
-                                                      vm.shipment.specimenCount));
-
-        if (vm.shipment.containerCount) {
-          vm.displayProperties.push(new DisplayProperty(gettextCatalog.getString('Number of containers'),
-                                                        vm.shipment.specimenCount));
-        }
-      }
-    }
-
-    function DisplayProperty(label, value, editFunc, buttonTitle) {
-      this.label = label;
-      this.value = value;
-      if (editFunc) {
-        this.editFunc = editFunc;
-      }
-      if (buttonTitle) {
-        this.buttonTitle = buttonTitle;
-      }
-    }
-
-    DisplayProperty.prototype.allowEdit = function (editFunc, buttonTitle) {
-      this.editFunc = editFunc;
-      if (buttonTitle) {
-        this.buttonTitle = buttonTitle;
-      }
-    };
 
     function panelButtonClicked() {
       vm.panelOpen = !vm.panelOpen;
     }
 
-    function postUpdate(message, title, timeout) {
+    function postUpdate(property, message, title, timeout) {
       timeout = timeout || vm.notificationTimeout;
       return function (shipment) {
         vm.shipment = shipment;

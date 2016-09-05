@@ -19,7 +19,7 @@ define(['lodash'], function (_) {
     'Shipment',
     'domainNotificationService',
     'notificationsService',
-    'shipmentProgressItems'
+    'shipmentSendProgressItems'
   ];
 
   /**
@@ -31,23 +31,21 @@ define(['lodash'], function (_) {
                                  Shipment,
                                  domainNotificationService,
                                  notificationsService,
-                                 shipmentProgressItems) {
+                                 shipmentSendProgressItems) {
     var vm = this;
 
     vm.progressInfo = {
-      items: shipmentProgressItems,
+      items: shipmentSendProgressItems,
       current: 1
     };
 
-    vm.hasValidCentres          = false;
-    vm.shipment                 = new Shipment();
-    vm.selectedFromLocationInfo = undefined;
-    vm.selectedToLocationInfo   = undefined;
-
-    vm.$onInit               = onInit;
-    vm.submit                = submit;
-    vm.cancel                = cancel;
-    vm.getCentreLocationInfo = getCentreLocationInfo;
+    vm.hasValidCentres           = false;
+    vm.shipment                  = new Shipment();
+    vm.$onInit                   = onInit;
+    vm.submit                    = submit;
+    vm.cancel                    = cancel;
+    vm.getFromCentreLocationInfo = getFromCentreLocationInfo;
+    vm.getToCentreLocationInfo   = getToCentreLocationInfo;
 
     //--
 
@@ -58,8 +56,6 @@ define(['lodash'], function (_) {
     }
 
     function submit(specimenSpec) {
-      vm.shipment.fromLocationInfo = { locationId: vm.selectedFromLocationInfo.locationId };
-      vm.shipment.toLocationInfo = { locationId: vm.selectedToLocationInfo.locationId };
       vm.shipment.add().then(onAddSuccessful).catch(onAddFailed);
 
       function onAddSuccessful(shipment) {
@@ -75,10 +71,31 @@ define(['lodash'], function (_) {
       $state.go('home.shipping');
     }
 
-    function getCentreLocationInfo(filter) {
-      return Centre.locationsSearch(filter);
+    function getCentreLocationInfo(filter, locationIdsToOmit) {
+      return Centre.locationsSearch(filter)
+        .then(function (locations) {
+          _.remove(locations, function (location) {
+            return _.includes(locationIdsToOmit, location.locationId);
+          });
+          return locations;
+        });
     }
 
+    function getFromCentreLocationInfo(filter) {
+      var locationIdsToOmit = [];
+      if (vm.shipment.toLocationInfo) {
+        locationIdsToOmit.push(vm.shipment.toLocationInfo.locationId);
+      }
+      return getCentreLocationInfo(filter, locationIdsToOmit);
+    }
+
+    function getToCentreLocationInfo(filter) {
+      var locationIdsToOmit = [];
+      if (vm.shipment.fromLocationInfo) {
+        locationIdsToOmit.push(vm.shipment.fromLocationInfo.locationId);
+      }
+      return getCentreLocationInfo(filter, locationIdsToOmit);
+    }
   }
 
   return component;

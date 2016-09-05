@@ -12,7 +12,7 @@ define(function (require) {
     controller: ShipmentViewSentController,
     controllerAs: 'vm',
     bindings: {
-      shipmentId: '<'
+      shipment: '<'
     }
   };
 
@@ -21,7 +21,10 @@ define(function (require) {
     'gettextCatalog',
     'modalInput',
     'notificationsService',
-    'timeService'
+    'timeService',
+    'stateHelper',
+    'modalService',
+    'shipmentReceiveProgressItems'
   ];
 
   /**
@@ -31,10 +34,21 @@ define(function (require) {
                                       gettextCatalog,
                                       modalInput,
                                       notificationsService,
-                                      timeService) {
+                                      timeService,
+                                      stateHelper,
+                                      modalService,
+                                      shipmentReceiveProgressItems) {
     var vm = this;
 
     vm.receiveShipment = receiveShipment;
+    vm.returnToPackedState = returnToPackedState;
+
+    vm.progressInfo = {
+      items: shipmentReceiveProgressItems,
+      current: 1
+    };
+
+    //----
 
     function receiveShipment() {
       if (_.isUndefined(vm.timeReceived)) {
@@ -45,12 +59,21 @@ define(function (require) {
                                  vm.timeReceived,
                                  { required: true }).result
         .then(function (timeReceived) {
-          return vm.shipment.received(timeService.dateToUtcString(timeReceived));
-        })
-        .then(function (shipment) {
-          return $state.go('home.shipping');
-        })
-        .catch(notificationsService.updateError);
+          return vm.shipment.received(timeService.dateToUtcString(timeReceived))
+            .then(stateHelper.reloadAndReinit)
+            .catch(notificationsService.updateError);
+        });
+    }
+
+    function returnToPackedState() {
+      modalService.modalOkCancel(
+        gettextCatalog.getString('Please confirm'),
+        gettextCatalog.getString('Are you sure you want to place this shipment in <b>packed</b> state?'))
+        .then(function () {
+          return vm.shipment.packed(vm.shipment.timePacked)
+            .then(stateHelper.reloadAndReinit)
+            .catch(notificationsService.updateError);
+        });
     }
   }
 

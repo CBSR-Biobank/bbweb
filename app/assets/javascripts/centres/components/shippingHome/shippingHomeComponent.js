@@ -37,7 +37,7 @@ define(function () {
     //---
 
     function onInit() {
-      return Centre.allLocations()
+      return Centre.locationsSearch()
         .then(Centre.centreLocationToNames)
         .then(function (centreLocations) {
           vm.centreLocations = centreLocations;

@@ -45,6 +45,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       case et: ShipmentEvent.EventType.TrackingNumberUpdated => applyTrackingNumberUpdatedEvent(event)
       case et: ShipmentEvent.EventType.FromLocationUpdated   => applyFromLocationUpdatedEvent(event)
       case et: ShipmentEvent.EventType.ToLocationUpdated     => applyToLocationUpdatedEvent(event)
+      case et: ShipmentEvent.EventType.Created               => applyCreatedEvent(event)
       case et: ShipmentEvent.EventType.Packed                => applyPackedEvent(event)
       case et: ShipmentEvent.EventType.Sent                  => applySentEvent(event)
       case et: ShipmentEvent.EventType.Received              => applyReceivedEvent(event)
@@ -89,6 +90,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
 
     case cmd: UpdateShipmentToLocationCmd =>
       processUpdateCmd(cmd, updateToLocationCmdToEvent, applyToLocationUpdatedEvent)
+
+    case cmd: ShipmentCreatedCmd =>
+      processUpdateCmd(cmd, createdCmdToEvent, applyCreatedEvent)
 
     case cmd: ShipmentPackedCmd =>
       processUpdateCmd(cmd, packedCmdToEvent, applyPackedEvent)
@@ -193,11 +197,12 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       isCreated   <- shipment.isCreated
       centre      <- centreRepository.getByLocationId(cmd.locationId)
       location    <- centre.locationWithId(cmd.locationId)
-      newShipment <- shipment.withFromLocation(centre, location)
+      newShipment <- shipment.withFromLocation(centre.id, location.uniqueId)
     } yield ShipmentEvent(shipment.id.id).update(
       _.userId                         := cmd.userId,
       _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.fromLocationUpdated.version    := cmd.expectedVersion,
+      _.fromLocationUpdated.centreId   := centre.id.id,
       _.fromLocationUpdated.locationId := cmd.locationId)
   }
 
@@ -207,12 +212,23 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       isCreated   <- shipment.isCreated
       centre      <- centreRepository.getByLocationId(cmd.locationId)
       location    <- centre.locationWithId(cmd.locationId)
-      newShipment <- shipment.withToLocation(centre, location)
+      newShipment <- shipment.withToLocation(centre.id, location.uniqueId)
     } yield ShipmentEvent(shipment.id.id).update(
       _.userId                       := cmd.userId,
       _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.toLocationUpdated.version    := cmd.expectedVersion,
+      _.toLocationUpdated.centreId   := centre.id.id,
       _.toLocationUpdated.locationId := cmd.locationId)
+  }
+
+  private def createdCmdToEvent(cmd: ShipmentCreatedCmd,
+                               shipment: Shipment): ServiceValidation[ShipmentEvent] = {
+    shipment.created.map { _ =>
+      ShipmentEvent(shipment.id.id).update(
+        _.userId          := cmd.userId,
+        _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.created.version := cmd.expectedVersion)
+    }
   }
 
   private def packedCmdToEvent(cmd: ShipmentPackedCmd,
@@ -436,13 +452,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isFromLocationUpdated,
                            event.getFromLocationUpdated.getVersion) { (shipment, _, time) =>
+      val centreId = CentreId(event.getFromLocationUpdated.getCentreId)
       val locationId = event.getFromLocationUpdated.getLocationId
-      val v = for {
-          centre   <- centreRepository.getByLocationId(locationId)
-          location <- centre.locationWithId(locationId)
-          updated  <- shipment.withFromLocation(centre, location)
-        } yield updated
-
+      val v = shipment.withFromLocation(centreId, locationId)
       v.foreach(s => shipmentRepository.put(s.copy(timeModified = Some(time))))
       v.map(_ => true)
     }
@@ -452,13 +464,20 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isToLocationUpdated,
                            event.getToLocationUpdated.getVersion) { (shipment, _, time) =>
+      val centreId = CentreId(event.getToLocationUpdated.getCentreId)
       val locationId = event.getToLocationUpdated.getLocationId
-      val v = for {
-          centre   <- centreRepository.getByLocationId(locationId)
-          location <- centre.locationWithId(locationId)
-          updated  <- shipment.withToLocation(centre, location)
-        } yield updated
+      val v = shipment.withToLocation(centreId, locationId)
       v.foreach(s => shipmentRepository.put(s.copy(timeModified = Some(time))))
+      v.map(_ => true)
+    }
+  }
+
+  private def applyCreatedEvent(event: ShipmentEvent): Unit = {
+    onValidEventAndVersion(event,
+                           event.eventType.isCreated,
+                           event.getCreated.getVersion) { (shipment, _, time) =>
+      val v = shipment.created
+      v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
       v.map(_ => true)
     }
   }
@@ -540,8 +559,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                                         specimenId          = SpecimenId(addedEvent.getSpecimenId),
                                         state               = ShipmentItemState.Present,
                                         shipmentContainerId = shipmentContainerId)
-        .map { s => shipmentSpecimenRepository.put(s.copy(timeAdded = eventTime)) }
-
+      add.foreach { s => shipmentSpecimenRepository.put(s.copy(timeAdded = eventTime)) }
       if (add.isFailure) {
         log.error(s"could not add shipment specimen from event: $event, err: $add")
       }
@@ -643,7 +661,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
             val eventTime = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
             val update = applyEvent(shipment, event, eventTime)
             if (update.isFailure) {
-              log.error(s"shipment update from event failed: $update")
+              log.error(s"shipment update from event failed: event: $event, reason: $update")
             }
           }
         }

@@ -1,366 +1,22 @@
 package org.biobank.controllers.centres
 
 import com.github.nscala_time.time.Imports._
-import org.biobank.TestUtils
 import org.biobank.controllers.PagedResultsSpec
-import org.biobank.dto.{CentreLocationInfo}
-import org.biobank.domain.JsonHelper
 import org.biobank.domain.centre._
-import org.biobank.domain.centre.ShipmentItemState._
-import org.biobank.domain.participants._
-import org.biobank.fixture.ControllerFixture
 import play.api.libs.json._
 import play.api.test.Helpers._
 import scala.language.reflectiveCalls
 
 /**
- * Tests the REST API for [[Shipments]]s.
+ * Tests the REST API for [[Shipment]]s.
+ *
+ * Tests for [[ShipmentSpecimen]]s in ShipmentSpecimensControllerSpec.scala.
  */
-class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
+class ShipmentsControllerSpec
+    extends ShipmentsControllerSpecFixtures
+    with ShipmentsControllerSpecUtils {
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.JsonUtils._
-
-  val nonCreatedStates = List(ShipmentState.Packed,
-                              ShipmentState.Sent,
-                              ShipmentState.Received,
-                              ShipmentState.Unpacked,
-                              ShipmentState.Lost)
-
-  def uri(): String = "/shipments"
-
-  def uri(shipment: Shipment): String = uri + s"/${shipment.id.id}"
-
-  def uri(path: String): String = uri + s"/$path"
-
-  def uri(shipment: Shipment, path: String): String = uri(path) + s"/${shipment.id.id}"
-
-  def uriSpecimen(shipment: Shipment): String =
-    uri + s"/specimens/${shipment.id.id}"
-
-  def listUri(centre: Centre): String =
-    uri + s"/list/${centre.id.id}"
-
-  def uriSpecimen(shipment: Shipment, shipmentSpecimen: ShipmentSpecimen, path: String): String =
-    uri + s"/specimens/$path/${shipment.id.id}/${shipmentSpecimen.id.id}"
-
-  def uriSpecimen(shipment: Shipment, shipmentSpecimen: ShipmentSpecimen): String =
-    uriSpecimen(shipment) + s"/${shipmentSpecimen.id.id}"
-
-  def compareObjs(jsonList: List[JsObject], shipmentsMap: Map[ShipmentId, Shipment]) = {
-    jsonList.foreach { jsonObj =>
-      val jsonId = ShipmentId((jsonObj \ "id").as[String])
-      compareObj(jsonObj, shipmentsMap(jsonId))
-    }
-  }
-
-  def compareTimestamps(shipment:     Shipment,
-                        timePacked:   Option[DateTime],
-                        timeSent:     Option[DateTime],
-                        timeReceived: Option[DateTime],
-                        timeUnpacked: Option[DateTime]): Unit = {
-    checkOpionalTime(timePacked,   shipment.timePacked)
-    checkOpionalTime(timeSent,     shipment.timeSent)
-    checkOpionalTime(timeReceived, shipment.timeReceived)
-    checkOpionalTime(timeUnpacked, shipment.timeUnpacked)
-  }
-
-  def compareTimestamps(shipment1: Shipment, shipment2: Shipment): Unit = {
-    compareTimestamps(shipment1,
-                      shipment2.timePacked,
-                      shipment2.timeSent,
-                      shipment2.timeReceived,
-                      shipment2.timeUnpacked)
-  }
-
-  def centresFixture = {
-    val centres = (1 to 2).map { _ =>
-        val location = factory.createLocation
-        factory.createEnabledCentre.copy(locations = Set(location))
-      }
-    centres.foreach(centreRepository.put)
-    new {
-      val fromCentre = centres(0)
-      val toCentre = centres(1)
-    }
-  }
-
-  def makePackedShipment(shipment: Shipment): Shipment = {
-    shipment.packed(DateTime.now).fold(err => fail("could not make a packed shipment"), s => s)
-  }
-
-  def makeSentShipment(shipment: Shipment): Shipment = {
-    makePackedShipment(shipment).sent(DateTime.now).fold(
-      err => fail("could not make a sent shipment"), s => s)
-  }
-
-  def makeReceivedShipment(shipment: Shipment): Shipment = {
-    makeSentShipment(shipment).received(DateTime.now).fold(
-      err => fail("could not make a received shipment"), s => s)
-  }
-
-  def makeUnpackedShipment(shipment: Shipment): Shipment = {
-    makeReceivedShipment(shipment).unpacked(DateTime.now).fold(
-      err => fail("could not make a unpacked shipment"), s => s)
-  }
-
-  def makeLostShipment(shipment: Shipment): Shipment = {
-    makeSentShipment(shipment).lost.fold(
-      err => fail("could not make a lost shipment"), s => s)
-  }
-
-  def createdShipmentFixture = {
-    val f = centresFixture
-    new {
-      val fromCentre = f.fromCentre
-      val toCentre = f.toCentre
-      val shipment = factory.createShipment(f.fromCentre, f.toCentre)
-    }
-  }
-
-  def createdShipmentFixture(numShipments: Int) = {
-    val f = centresFixture
-    new {
-      val fromCentre = f.fromCentre
-      val toCentre = f.toCentre
-      val shipmentMap = (1 to numShipments).map { _ =>
-      val shipment = factory.createShipment(f.fromCentre, f.toCentre)
-          shipment.id -> shipment
-        }.toMap
-    }
-  }
-
-  def packedShipmentFixture = {
-    val f = createdShipmentFixture
-    new {
-      val fromCentre = f.fromCentre
-      val toCentre = f.toCentre
-      val shipment = makePackedShipment(f.shipment)
-    }
-  }
-
-  def sentShipmentFixture = {
-    val f = createdShipmentFixture
-    new {
-      val fromCentre = f.fromCentre
-      val toCentre = f.toCentre
-      val shipment = makeSentShipment(f.shipment)
-    }
-  }
-
-  def receivedShipmentFixture = {
-    val f = createdShipmentFixture
-    new {
-      val fromCentre = f.fromCentre
-      val toCentre = f.toCentre
-      val shipment = makeReceivedShipment(f.shipment)
-    }
-  }
-
-  def unpackedShipmentFixture = {
-    val f = createdShipmentFixture
-    new {
-      val fromCentre = f.fromCentre
-      val toCentre = f.toCentre
-      val shipment = makeUnpackedShipment(f.shipment)
-    }
-  }
-
-  def lostShipmentFixture = {
-    val f = createdShipmentFixture
-    new {
-      val fromCentre = f.fromCentre
-      val toCentre = f.toCentre
-      val shipment = makeLostShipment(f.shipment)
-    }
-  }
-
-  def allShipmentsFixture = {
-    val centres = centresFixture
-    new {
-      val fromCentre = centres.fromCentre
-      val toCentre = centres.toCentre
-      val shipments = Map(
-          ShipmentState.Created  -> factory.createShipment(fromCentre, toCentre),
-          ShipmentState.Packed   -> factory.createPackedShipment(fromCentre, toCentre),
-          ShipmentState.Sent     -> factory.createSentShipment(fromCentre, toCentre),
-          ShipmentState.Received -> factory.createReceivedShipment(fromCentre, toCentre),
-          ShipmentState.Unpacked -> factory.createUnpackedShipment(fromCentre, toCentre),
-          ShipmentState.Lost     -> factory.createLostShipment(fromCentre, toCentre))
-    }
-  }
-
-  def specimensFixture(numSpecimens: Int) = {
-    val f = createdShipmentFixture
-    val _study = factory.createEnabledStudy
-    val _specimenSpec = factory.createCollectionSpecimenSpec
-    val _ceventType = factory.createCollectionEventType.copy(studyId = _study.id,
-                                                             specimenSpecs = Set(_specimenSpec),
-                                                             annotationTypes = Set.empty)
-    val _participant = factory.createParticipant.copy(studyId = _study.id)
-    val _cevent = factory.createCollectionEvent
-    val _specimens = (1 to numSpecimens).map { _ =>
-        factory.createUsableSpecimen.copy(originLocationId = f.fromCentre.locations.head.uniqueId,
-                                          locationId = f.fromCentre.locations.head.uniqueId)
-      }.toList
-
-    centreRepository.put(f.fromCentre)
-    centreRepository.put(f.toCentre)
-    studyRepository.put(_study)
-    collectionEventTypeRepository.put(_ceventType)
-    participantRepository.put(_participant)
-    collectionEventRepository.put(_cevent)
-    _specimens.foreach { specimen =>
-      specimenRepository.put(specimen)
-      ceventSpecimenRepository.put(CeventSpecimen(_cevent.id, specimen.id))
-    }
-    shipmentRepository.put(f.shipment)
-
-    new {
-      val fromCentre   = f.fromCentre
-      val toCentre     = f.toCentre
-      val study        = _study
-      val specimenSpec = _specimenSpec
-      val ceventType   = _ceventType
-      val participant  = _participant
-      val cevent       = _cevent
-      val specimens    = _specimens
-      val shipment     = f.shipment
-    }
-  }
-
-  def shipmentSpecimensFixture(numSpecimens: Int) = {
-    val f = specimensFixture(numSpecimens)
-
-    val map = f.specimens.zipWithIndex.map { case (specimen, index) =>
-        val updatedSpecimen = specimen.copy(inventoryId = s"inventoryId_$index")
-        specimenRepository.put(updatedSpecimen)
-        val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id,
-                                                                   specimenId = specimen.id)
-        val originLocationName = f.fromCentre.locationName(specimen.originLocationId)
-          .fold(e => "error", n => n)
-        val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
-                                                    specimen.originLocationId,
-                                                    originLocationName)
-        val specimenDto =
-          specimen.createDto(f.cevent, f.specimenSpec, centreLocationInfo, centreLocationInfo)
-        (updatedSpecimen.id, (updatedSpecimen, shipmentSpecimen, shipmentSpecimen.createDto(specimenDto)))
-      }.toMap
-
-    map.values.foreach(x => shipmentSpecimenRepository.put(x._2))
-
-    new {
-      val fromCentre          = f.fromCentre
-      val toCentre            = f.toCentre
-      val study               = f.study
-      val specimenSpec        = f.specimenSpec
-      val ceventType          = f.ceventType
-      val participant         = f.participant
-      val cevent              = f.cevent
-      val specimens           = f.specimens
-      val shipment            = f.shipment
-      val shipmentSpecimenMap = map
-    }
-  }
-
-  val stateToUrl = Map(
-      ShipmentItemState.Received -> "received",
-      ShipmentItemState.Missing  -> "missing",
-      ShipmentItemState.Extra    -> "extra"
-
-    )
-
-  def changeShipmentSpecimenState(state: ShipmentItemState): Unit = {
-    val f = specimensFixture(1)
-
-    val shipment = makeUnpackedShipment(f.shipment)
-    shipmentRepository.put(shipment)
-
-    val specimen = f.specimens.head
-    val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id,
-                                                               specimenId = specimen.id)
-    shipmentSpecimenRepository.put(shipmentSpecimen)
-    val url = uriSpecimen(f.shipment, shipmentSpecimen, stateToUrl(state))
-
-    val updateJson = Json.obj("shipmentId"      -> shipment.id.id,
-                              "id"              -> shipmentSpecimen.id.id,
-                              "expectedVersion" -> shipmentSpecimen.version)
-
-    val reply = makeRequest(POST, url, updateJson)
-
-    (reply \ "status").as[String] must include ("success")
-
-    val ssId = ShipmentSpecimenId((reply \ "data" \ "id").as[String])
-
-    shipmentSpecimenRepository.getByKey(ssId) mustSucceed { repoSs =>
-
-      repoSs must have (
-        'id         (ssId),
-        'version    (shipmentSpecimen.version + 1),
-        'shipmentId (shipment.id),
-        'specimenId (specimen.id),
-        'state      (state)
-      )
-
-      TestUtils.checkTimeStamps(repoSs.timeAdded, shipmentSpecimen.timeAdded)
-      TestUtils.checkOpionalTime(repoSs.timeModified, Some(DateTime.now))
-    }
-  }
-
-  def changeShipmentSpecimenStateNotUnpacked(state: ShipmentItemState) = {
-
-    def attemptStateChange(shipment: Shipment, specimen: Specimen) = {
-      shipmentRepository.put(shipment)
-
-      val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = shipment.id,
-                                                                 specimenId = specimen.id)
-      shipmentSpecimenRepository.put(shipmentSpecimen)
-      val url = uriSpecimen(shipment, shipmentSpecimen, stateToUrl(state))
-
-      val updateJson = Json.obj("shipmentId"      -> shipment.id.id,
-                                "id"              -> shipmentSpecimen.id.id,
-                                "expectedVersion" -> shipmentSpecimen.version)
-
-      val reply = makeRequest(POST, url, BAD_REQUEST, updateJson)
-
-      (reply \ "status").as[String] must include ("error")
-
-      (reply \ "message").as[String] must include (
-        "EntityCriteriaError: shipment is not in unpacked state")
-    }
-
-    val f = specimensFixture(1)
-
-    attemptStateChange(f.shipment, f.specimens.head)
-
-    val packedShipment = makePackedShipment(f.shipment)
-    attemptStateChange(packedShipment, f.specimens.head)
-
-    val sentShipment = makeSentShipment(f.shipment)
-    attemptStateChange(sentShipment, f.specimens.head)
-
-    val receivedShipment = makeReceivedShipment(f.shipment)
-    attemptStateChange(receivedShipment, f.specimens.head)
-
-    val lostShipment = makeLostShipment(f.shipment)
-    attemptStateChange(lostShipment, f.specimens.head)
-  }
-
-  def changeShipmentSpecimenStateInvalidId(state: ShipmentItemState) = {
-    val f = specimensFixture(1)
-    val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id,
-                                                               specimenId = f.specimens.head.id)
-    val url = uriSpecimen(f.shipment, shipmentSpecimen, stateToUrl(state))
-
-    val updateJson = Json.obj("shipmentId"      -> f.shipment.id.id,
-                              "id"              -> shipmentSpecimen.id.id,
-                              "expectedVersion" -> shipmentSpecimen.version)
-
-    val reply = makeRequest(POST, url, NOT_FOUND, updateJson)
-
-    (reply \ "status").as[String] must include ("error")
-
-    (reply \ "message").as[String] must include ("IdNotFound: shipment specimen id")
-  }
 
   "Shipment REST API" when {
 
@@ -393,6 +49,28 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
         compareObjs(jsonItems, f.shipmentMap)
       }
 
+      "list a single shipment when filtered by state" in {
+        val f = allShipmentsFixture
+        f.shipments.values.foreach(shipmentRepository.put)
+        ShipmentState.values.foreach { state =>
+          info(s"$state shipment")
+          val jsonItem = PagedResultsSpec(this)
+            .singleItemResult(listUri(f.fromCentre), Map("stateFilter" -> state.toString))
+          compareObj(jsonItem, f.shipments.get(state).value)
+        }
+      }
+
+      "fail when using an invalid state filter" in {
+        val f = centresFixture
+        val invalidStateName = nameGenerator.next[Shipment]
+
+        val reply = makeRequest(GET, listUri(f.fromCentre) + s"?stateFilter=$invalidStateName", BAD_REQUEST)
+
+        (reply \ "status").as[String] must include ("error")
+
+        (reply \ "message").as[String] must include regex ("invalid shipment state")
+      }
+
       "list a single shipment when filtered by courier name" in {
         val f = createdShipmentFixture(2)
         f.shipmentMap.values.foreach(shipmentRepository.put)
@@ -411,43 +89,77 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
         compareObj(jsonItem, shipment)
       }
 
-      "list shipments sorted by courier name" in {
-        val f = centresFixture
-        val shipments = List("FedEx", "UPS", "Canada Post").map { name =>
-            factory.createShipment(f.fromCentre, f.toCentre).copy(courierName = name)
-          }.toList
-        shipments.foreach(shipmentRepository.put)
-        val jsonItems = PagedResultsSpec(this)
-          .multipleItemsResult(uri       = listUri(f.fromCentre),
-                               queryParams = Map("sort" -> "courierName"),
-                               offset    = 0,
-                               total     = shipments.size,
-                               maybeNext = None,
-                               maybePrev = None)
-        jsonItems must have size shipments.size
-        compareObj(jsonItems(0), shipments(2))
-        compareObj(jsonItems(1), shipments(0))
-        compareObj(jsonItems(2), shipments(1))
+      "list shipments sorted by courier name" must {
+
+        def requestShipments(order: String) = {
+          val f = centresFixture
+          val shipments = List("FedEx", "UPS", "Canada Post").map { name =>
+              factory.createShipment(f.fromCentre, f.toCentre).copy(courierName = name)
+            }.toList
+          shipments.foreach(shipmentRepository.put)
+          val jsonItems = PagedResultsSpec(this)
+            .multipleItemsResult(uri       = listUri(f.fromCentre),
+                                 queryParams = Map("sort" -> "courierName",
+                                                   "order" -> order),
+                                 offset    = 0,
+                                 total     = shipments.size,
+                                 maybeNext = None,
+                                 maybePrev = None)
+          (shipments, jsonItems)
+        }
+
+        "in ascending order" in {
+          val (shipments, jsonItems) = requestShipments("asc")
+          jsonItems must have size shipments.size
+          compareObj(jsonItems(0), shipments(2))
+          compareObj(jsonItems(1), shipments(0))
+          compareObj(jsonItems(2), shipments(1))
+        }
+
+        "in descending order" in {
+          val (shipments, jsonItems) = requestShipments("desc")
+          jsonItems must have size shipments.size
+          compareObj(jsonItems(0), shipments(1))
+          compareObj(jsonItems(1), shipments(0))
+          compareObj(jsonItems(2), shipments(2))
+        }
       }
 
-      "list shipments sorted by tracking number" in {
-        val f = centresFixture
-        val shipments = List("TN2", "TN3", "TN1")
-          .map { trackingNumber =>
-            factory.createShipment(f.fromCentre, f.toCentre).copy(trackingNumber = trackingNumber)
-          }.toList
-        shipments.foreach(shipmentRepository.put)
-        val jsonItems = PagedResultsSpec(this)
-          .multipleItemsResult(uri       = listUri(f.fromCentre),
-                               queryParams = Map("sort" -> "trackingNumber"),
-                               offset    = 0,
-                               total     = shipments.size,
-                               maybeNext = None,
-                               maybePrev = None)
-        jsonItems must have size shipments.size
-        compareObj(jsonItems(0), shipments(2))
-        compareObj(jsonItems(1), shipments(0))
-        compareObj(jsonItems(2), shipments(1))
+      "list shipments sorted by tracking number" must {
+
+        def requestShipments(order: String) = {
+          val f = centresFixture
+          val shipments = List("TN2", "TN3", "TN1")
+            .map { trackingNumber =>
+              factory.createShipment(f.fromCentre, f.toCentre).copy(trackingNumber = trackingNumber)
+            }.toList
+          shipments.foreach(shipmentRepository.put)
+          val jsonItems = PagedResultsSpec(this)
+            .multipleItemsResult(uri       = listUri(f.fromCentre),
+                                 queryParams = Map("sort" -> "trackingNumber",
+                                                   "order" -> order),
+                                 offset    = 0,
+                                 total     = shipments.size,
+                                 maybeNext = None,
+                                 maybePrev = None)
+          (shipments, jsonItems)
+        }
+
+        "in ascending order" in {
+          val (shipments, jsonItems) = requestShipments("asc")
+          jsonItems must have size shipments.size
+          compareObj(jsonItems(0), shipments(2))
+          compareObj(jsonItems(1), shipments(0))
+          compareObj(jsonItems(2), shipments(1))
+        }
+
+        "in descending order" in {
+          val (shipments, jsonItems) = requestShipments("desc")
+          jsonItems must have size shipments.size
+          compareObj(jsonItems(0), shipments(1))
+          compareObj(jsonItems(1), shipments(0))
+          compareObj(jsonItems(2), shipments(2))
+        }
       }
 
 
@@ -593,7 +305,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
     }
 
 
-    "POST /shipment/courier/:id" must {
+    "POST /shipments/courier/:id" must {
 
       "allow updating the courier name" in {
         val f = createdShipmentFixture
@@ -652,7 +364,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "POST /shipment/trackingnumber/:id" must {
+    "POST /shipments/trackingnumber/:id" must {
 
       "allow updating the tracking number" in {
         val f = createdShipmentFixture
@@ -711,7 +423,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "POST /shipment/fromlocation/:id" must {
+    "POST /shipments/fromlocation/:id" must {
 
       "allow updating the location the shipment is from" in {
         val f = createdShipmentFixture
@@ -790,7 +502,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "POST /shipment/tolocation/:id" must {
+    "POST /shipments/tolocation/:id" must {
 
       "allow updating the location the shipment is going to" in {
         val f = createdShipmentFixture
@@ -869,7 +581,40 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "POST /shipment/packed/:id" must {
+    "POST /shipments/created/:id" must {
+
+      "allow setting a shipment back to CREATED state from PACKED state" in {
+        val f = packedShipmentFixture
+        shipmentRepository.put(f.shipment)
+        val updateJson = Json.obj("expectedVersion" -> f.shipment.version)
+        val json = makeRequest(POST, uri(f.shipment, "created"), updateJson)
+
+        (json \ "status").as[String] must include ("success")
+
+        shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
+          compareObj((json \ "data").as[JsObject], repoShipment)
+
+          repoShipment must have (
+            'id             (f.shipment.id),
+            'version        (f.shipment.version + 1),
+            'state          (ShipmentState.Created),
+            'courierName    (f.shipment.courierName),
+            'trackingNumber (f.shipment.trackingNumber),
+            'fromLocationId (f.shipment.fromLocationId),
+            'toLocationId   (f.shipment.toLocationId))
+
+          checkTimeStamps(repoShipment, f.shipment.timeAdded, DateTime.now)
+          compareTimestamps(shipment     = repoShipment,
+                            timePacked   = None,
+                            timeSent     = None,
+                            timeReceived = None,
+                            timeUnpacked = None)
+        }
+
+      }
+    }
+
+    "POST /shipments/packed/:id" must {
 
       "allow updating the time the shipment was packed" in {
         val f = createdShipmentFixture
@@ -903,7 +648,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    "POST /shipment/sent/:id" must {
+    "POST /shipments/sent/:id" must {
 
       "allow setting a shipment's state to SENT" in {
         val f = packedShipmentFixture
@@ -966,7 +711,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "POST /shipment/received/:id" must {
+    "POST /shipments/received/:id" must {
 
       "allow setting a shipment's state to RECEIVED" in {
         val f = sentShipmentFixture
@@ -1016,7 +761,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "POST /shipment/unpacked/:id" must {
+    "POST /shipments/unpacked/:id" must {
 
       "allow setting a shipment's state to UNPACKED" in {
         val f = receivedShipmentFixture
@@ -1066,7 +811,7 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "POST /shipment/lost/:id" must {
+    "POST /shipments/lost/:id" must {
 
       "allow setting a shipment's state to LOST" in {
         val f = sentShipmentFixture
@@ -1133,333 +878,22 @@ class ShipmentsControllerSpec extends ControllerFixture with JsonHelper {
           (json \ "message").as[String] must include ("shipment is not in created state")
         }
       }
-    }
 
-    "GET /shipments/specimens/:id" must {
-
-      "work for shipment with no specimens" in {
-        val f = createdShipmentFixture
-        shipmentRepository.put(f.shipment)
-
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri       = uri(f.shipment, "specimens"),
-            offset    = 0,
-            total     = 0,
-            maybeNext = None,
-            maybePrev = None)
-        jsonItems must have size 0
-      }
-
-      "work for shipment with one specimen" in {
-        val f = specimensFixture(1)
-
-        val specimen = f.specimens.head
-        val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id,
-                                                                   specimenId = specimen.id)
-
-        shipmentSpecimenRepository.put(shipmentSpecimen)
-
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri(f.shipment, "specimens"))
-
-        val originLocationName = f.fromCentre.locationName(specimen.originLocationId)
-          .fold(e => "error", n => n)
-        val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
-                                                    specimen.originLocationId,
-                                                    originLocationName)
-
-        val dto = shipmentSpecimen.createDto(
-            specimen.createDto(f.cevent, f.specimenSpec, centreLocationInfo, centreLocationInfo))
-        compareObj(jsonItem, dto)
-      }
-
-      "work for shipment with more than one specimen" in {
-        val numSpecimens = 2
-        val f = specimensFixture(numSpecimens)
-
-        val shipmentSpecimenMap = f.specimens.map { specimen =>
-            val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id,
-                                                                       specimenId = specimen.id)
-            specimen -> shipmentSpecimen
-          }.toMap
-
-        shipmentSpecimenMap.values.foreach(shipmentSpecimenRepository.put)
-
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri       = uri(f.shipment, "specimens"),
-            offset    = 0,
-            total     = numSpecimens,
-            maybeNext = None,
-            maybePrev = None)
-
-        shipmentSpecimenMap.zipWithIndex.foreach { case ((specimen, shipmentSpecimen), index) =>
-          val originLocationName = f.fromCentre.locationName(specimen.originLocationId)
-            .fold(e => "error", n => n)
-
-          val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
-                                                      specimen.originLocationId,
-                                                      originLocationName)
-          val dto = shipmentSpecimen.createDto(
-              specimen.createDto(f.cevent, f.specimenSpec, centreLocationInfo, centreLocationInfo))
-          compareObj(jsonItems(index), dto)
-        }
-      }
-
-      "list a single specimen when using paged query" in {
-        val numSpecimens = 2
-        val f = shipmentSpecimensFixture(numSpecimens)
-
-        val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uri(f.shipment, "specimens"),
-            queryParams = Map("pageSize" -> "1"),
-            total       = numSpecimens,
-            maybeNext   = Some(2))
-
-
-        compareObj(jsonItem, f.shipmentSpecimenMap.values.head._3)
-      }
-
-      "list the last specimen when using paged query" in {
-        val numSpecimens = 2
-        val f = shipmentSpecimensFixture(numSpecimens)
-
-        val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uri(f.shipment, "specimens"),
-            queryParams = Map("page" -> "2", "pageSize" -> "1"),
-            total       = numSpecimens,
-            offset      = 1,
-            maybeNext   = None,
-            maybePrev   = Some(1))
-
-        compareObj(jsonItem, f.shipmentSpecimenMap.values.toList(1)._3)
-      }
-
-      "fail when using an invalid query parameters" in {
-        val f = shipmentSpecimensFixture(2)
-        val url = uri(f.shipment, "specimens")
-        PagedResultsSpec(this).failWithNegativePageNumber(url)
-        PagedResultsSpec(this).failWithInvalidPageNumber(url)
-        PagedResultsSpec(this).failWithNegativePageSize(url)
-        PagedResultsSpec(this).failWithInvalidPageSize(url, 100);
-        PagedResultsSpec(this).failWithInvalidSort(url)
-      }
-    }
-
-    "GET /shipments/specimens/:shId/:shSpcId" must {
-
-      "get a shipment specimen" in {
-        val f = shipmentSpecimensFixture(1)
-        val shipmentSpecimen = f.shipmentSpecimenMap.values.head._2
-        val dto = f.shipmentSpecimenMap.values.head._3
-
-        val json = makeRequest(GET, uri(f.shipment, "specimens") + s"/${shipmentSpecimen.id}")
-
-        (json \ "status").as[String] must include ("success")
-
-        val jsonObj = (json \ "data").as[JsObject]
-
-        compareObj(jsonObj, dto)
-      }
-
-      "fails for an invalid shipment id" in {
-        val f = shipmentSpecimensFixture(1)
-        val shipmentSpecimen = f.shipmentSpecimenMap.values.head._2
-
-        val badShipment = factory.createShipment
-
-        val json = makeRequest(GET, uri(badShipment, "specimens") + s"/${shipmentSpecimen.id}", NOT_FOUND)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex ("IdNotFound.*shipment id")
-      }
-
-      "fails for an invalid shipment specimen id" in {
-        val f = shipmentSpecimensFixture(1)
-        val badShipmentSpecimen = factory.createShipmentSpecimen
-
-        val json = makeRequest(GET, uri(f.shipment, "specimens") + s"/${badShipmentSpecimen.id}", NOT_FOUND)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex ("IdNotFound.*shipment specimen id")
-      }
-
-    }
-
-    "POST /shipments/specimens/:id" must {
-
-      "add a specimen to a shipment" in {
-        val f = specimensFixture(1)
-        val specimen = f.specimens.head
-        val addJson = Json.obj("shipmentId" -> f.shipment.id.id, "specimenId" -> specimen.id.id)
-        val reply = makeRequest(POST, uriSpecimen(f.shipment), addJson)
-
-        (reply \ "status").as[String] must include ("success")
-
-        val replyId = ShipmentSpecimenId((reply \ "data" \ "id").as[String])
-
-        shipmentSpecimenRepository.getByKey(replyId) mustSucceed { repoSs =>
-
-          repoSs must have (
-            'id         (replyId),
-            'version    (0L),
-            'shipmentId (f.shipment.id),
-            'specimenId (specimen.id),
-            'state      (ShipmentItemState.Present)
-            )
-
-          TestUtils.checkTimeStamps(repoSs.timeAdded, DateTime.now)
-          TestUtils.checkOpionalTime(repoSs.timeModified, None)
-        }
-      }
-
-      "not add a specimen to a shipment which is not in the system" in {
-        val f = specimensFixture(1)
-        val shipment = factory.createShipment
-        val specimen = f.specimens.head
-        val addJson = Json.obj("shipmentId" -> shipment.id.id, "specimenId" -> specimen.id.id)
-        val reply = makeRequest(POST, uriSpecimen(shipment), NOT_FOUND, addJson)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include regex ("IdNotFound.*shipment id")
-      }
-
-      "not add a specimen to a shipment not in created state" in {
-        def tryAddOnBadShipment(shipment: Shipment, specimen: UsableSpecimen): Unit = {
-          val addJson = Json.obj("shipmentId" -> shipment.id.id, "specimenId" -> specimen.id.id)
-
-          shipmentRepository.put(shipment)
-
-          val reply = makeRequest(POST, uriSpecimen(shipment), BAD_REQUEST, addJson)
-
-          (reply \ "status").as[String] must include ("error")
-
-          (reply \ "message").as[String] must include regex ("EntityCriteriaError.*not in created state")
-        }
-
-        val f = specimensFixture(1)
-        val specimen = f.specimens.head
-
-        info("packed shipment")
-        tryAddOnBadShipment(makePackedShipment(f.shipment), specimen)
-        info("sent shipment")
-        tryAddOnBadShipment(makeSentShipment(f.shipment), specimen)
-        info("received shipment")
-        tryAddOnBadShipment(makeReceivedShipment(f.shipment), specimen)
-        info("unpacked shipment")
-        tryAddOnBadShipment(makeUnpackedShipment(f.shipment), specimen)
-        info("lost shipment")
-        tryAddOnBadShipment(makeLostShipment(f.shipment), specimen)
-      }
-    }
-
-    "POST /shipments/specimens/received/:shId/:shSpcId" must {
-
-      "change the status on a shipment specimen" in {
-        changeShipmentSpecimenState(ShipmentItemState.Received)
-      }
-
-      "fails for a shipment not in unpacked state" in {
-        changeShipmentSpecimenStateNotUnpacked(ShipmentItemState.Received)
-      }
-
-      "fails for a shipment specimen not in the system" in {
-        changeShipmentSpecimenStateInvalidId(ShipmentItemState.Received)
-      }
-
-    }
-
-    "POST /shipments/specimens/missing/:shId/:shSpcId" must {
-
-      "change the status on a shipment specimen" in {
-        changeShipmentSpecimenState(ShipmentItemState.Missing)
-      }
-
-      "fails for a shipment not in packed state" in {
-        changeShipmentSpecimenStateNotUnpacked(ShipmentItemState.Missing)
-      }
-
-      "fails for a shipment not in the system" in {
-        changeShipmentSpecimenStateInvalidId(ShipmentItemState.Missing)
-      }
-
-    }
-
-    "POST /shipments/specimens/extra/:shId/:shSpcId"  must {
-
-      "change the status on a shipment specimen" in {
-        changeShipmentSpecimenState(ShipmentItemState.Extra)
-      }
-
-      "fails for a shipment not in packed state" in {
-        changeShipmentSpecimenStateNotUnpacked(ShipmentItemState.Extra)
-      }
-
-      "fails for a shipment not in the system" in {
-        changeShipmentSpecimenStateInvalidId(ShipmentItemState.Extra)
-      }
-
-    }
-
-
-    "DELETE /shipments/specimens/:shId/:shSpcId/:ver" must {
-
-      "must delete a specimen from shipment in created state" in {
+      "attempt to remove a shipment containing specimens fails" in {
         val f = specimensFixture(1)
 
         val specimen = f.specimens.head
         val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id,
                                                                    specimenId = specimen.id)
         shipmentSpecimenRepository.put(shipmentSpecimen)
-        val url = uriSpecimen(f.shipment, shipmentSpecimen) + s"/${shipmentSpecimen.version}"
 
-        val json = makeRequest(DELETE, url)
+        val json = makeRequest(DELETE, uri(f.shipment) + s"/${f.shipment.version}", BAD_REQUEST)
 
-        (json \ "status").as[String] must include ("success")
+        (json \ "status").as[String] must include ("error")
 
-        shipmentSpecimenRepository.getByKey(shipmentSpecimen.id) mustFail "IdNotFound.*shipment specimen.*"
+        (json \ "message").as[String] must include regex ("shipment has specimens.*")
       }
-
-      "must not delete a specimen from a shipment not in created state" in {
-        def removeShipment(shipment: Shipment, specimen: Specimen): Unit = {
-          shipmentRepository.put(shipment)
-          val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = shipment.id,
-                                                                     specimenId = specimen.id)
-
-          val url = uriSpecimen(shipment, shipmentSpecimen) + s"/${shipmentSpecimen.version}"
-          shipmentSpecimenRepository.put(shipmentSpecimen)
-
-          val json = makeRequest(DELETE, url, BAD_REQUEST)
-
-          (json \ "status").as[String] must include ("error")
-
-          (json \ "message").as[String] must include regex (
-            "EntityCriteriaError.*shipment is not in created state")
-
-          shipmentSpecimenRepository.getByKey(shipmentSpecimen.id).leftMap { _ =>
-            fail("should still be in repository")
-          }
-          ()
-        }
-
-        val f = specimensFixture(1)
-        val specimen = f.specimens.head
-
-        info("packed shipment")
-        removeShipment(makePackedShipment(f.shipment), specimen)
-        info("sent shipment")
-        removeShipment(makeSentShipment(f.shipment), specimen)
-        info("received shipment")
-        removeShipment(makeReceivedShipment(f.shipment), specimen)
-        info("unpacked shipment")
-        removeShipment(makeUnpackedShipment(f.shipment), specimen)
-        info("lost shipment")
-        removeShipment(makeLostShipment(f.shipment), specimen)
-      }
-
     }
 
   }
-
 }

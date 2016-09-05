@@ -48,6 +48,9 @@ define(function (require) {
   module.service('validationService',         require('./services/validationService'));
   module.service('domainNotificationService', require('./services/domainNotification/domainNotificationService') );
   module.service('languageService',           require('./services/languageService'));
+
+  module.factory('BbwebError',                require('./BbwebError'));
+
   return {
     name: name,
     module: module

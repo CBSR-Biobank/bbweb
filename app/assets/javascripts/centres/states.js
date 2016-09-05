@@ -105,6 +105,22 @@ define(function () {
       }
     });
 
+    $stateProvider.state('home.shipping.shipment.unpack', {
+      url: '/unpack',
+      views: {
+        'main@': {
+          template: '<shipment-unpack shipment="vm.shipment"></shipment-unpack>',
+          controller: [ 'shipment', function (shipment) {
+            this.shipment = shipment;
+          }],
+          controllerAs: 'vm'
+        }
+      },
+      data: {
+        displayName: 'Unpack'
+      }
+    });
+
   }
 
   return config;

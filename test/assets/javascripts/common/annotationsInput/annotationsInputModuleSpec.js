@@ -74,7 +74,7 @@ define([
     });
 
     it('works for a NUMBER annotation and a valid number', function() {
-      var annotationValue = 111.01,
+      var annotationValue = 123.01,
           annotations = [ createAnnotation.call(this, this.AnnotationValueType.NUMBER) ];
 
       createController.call(this, annotations);

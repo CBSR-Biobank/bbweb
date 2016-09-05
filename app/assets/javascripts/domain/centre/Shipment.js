@@ -321,7 +321,7 @@ define(function (require) {
      * @returns ???
      */
     Shipment.prototype.remove = function () {
-      var url = sprintf('%s/%d', uri( this.shipmentId), this.version);
+      var url = sprintf('%s/%d', uri(this.id), this.version);
       return biobankApi.del(url);
     };
 
@@ -367,6 +367,17 @@ define(function (require) {
      */
     Shipment.prototype.updateToLocation = function (toLocation) {
       return this.update.call(this, uri('tolocation', this.id), { locationId: toLocation });
+    };
+
+    /**
+     * Changes the state of this shipment to <code>Created</code>.
+     *
+     * @see [ShipmentState]{@link domain.centres.ShipmentState}
+     *
+     * @returns {Promise} A copy of this shipment, but with the state set to Created.
+     */
+    Shipment.prototype.created = function () {
+      return this.update.call(this, uri('created', this.id));
     };
 
     /**
@@ -444,7 +455,7 @@ define(function (require) {
       return this.state === ShipmentState.SENT;
     };
 
-    Shipment.prototype.isNotCreatedOrUnpacked = function () {
+    Shipment.prototype.isNotCreatedNorUnpacked = function () {
       return (this.state !== ShipmentState.CREATED) && (this.state !== ShipmentState.UNPACKED);
     };
 

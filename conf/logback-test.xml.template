@@ -16,10 +16,19 @@
     </encoder>
   </appender>
 
+  <logger name="org.biobank" level="INFO" />
   <logger name="org.biobank.domain" level="INFO" />
   <logger name="org.biobank.service" level="INFO" />
   <logger name="org.biobank.fixture" level="INFO" />
-  <logger name="org.biobank" level="INFO" />
+  <logger name="org.biobank.controllers.centres" level="INFO" />
+
+  <!--
+       <logger name="com.gargoylesoftware.htmlunit" level="INFO" />
+       <logger name="com.google" level="INFO" />
+       <logger name="play" level="INFO" />
+       <logger name="net.sf.ehcache" level="INFO" />
+       <logger name="io.netty" level="INFO" />
+  -->
 
   <logger name="application" level="WARN" />
   <logger name="akka.event.slf4j" level="WARN" />

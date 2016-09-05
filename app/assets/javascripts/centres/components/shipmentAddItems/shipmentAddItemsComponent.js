@@ -19,12 +19,13 @@ define(function (require) {
   ShipmentAddItemsController.$inject = [
     '$state',
     'gettextCatalog' ,
-    'shipmentProgressItems',
+    'shipmentSendProgressItems',
     'Shipment',
     'modalInput',
     'modalService',
     'timeService',
-    'notificationsService'
+    'notificationsService',
+    'domainNotificationService'
   ];
 
   /**
@@ -34,29 +35,35 @@ define(function (require) {
    */
   function ShipmentAddItemsController($state,
                                       gettextCatalog,
-                                      shipmentProgressItems,
+                                      shipmentSendProgressItems,
                                       Shipment,
                                       modalInput,
                                       modalService,
                                       timeService,
-                                      notificationsService) {
+                                      notificationsService,
+                                      domainNotificationService) {
     var vm = this;
 
-    vm.$onInit       = onInit;
-    vm.shipment      = null;
-    vm.allItemsAdded = allItemsAdded;
+    vm.$onInit        = onInit;
+    vm.shipment       = null;
+    vm.allItemsAdded  = allItemsAdded;
+    vm.removeShipment = removeShipment;
 
-     vm.progressInfo = {
-        items: shipmentProgressItems,
-        current: 2
-     };
+    vm.progressInfo = {
+      items: shipmentSendProgressItems,
+      current: 2
+    };
 
     //--
 
     function onInit() {
-      Shipment.get(vm.shipmentId).then(function (shipment) {
-        vm.shipment = shipment;
-      });
+      Shipment.get(vm.shipmentId)
+        .then(function (shipment) {
+          vm.shipment = shipment;
+        })
+        .catch(function (err) {
+          $state.go('home.shipping');
+        });
     }
 
     /**
@@ -84,6 +91,26 @@ define(function (require) {
         return modalService.modalOk(gettextCatalog.getString('Shipment has no specimens'),
                                     gettextCatalog.getString('Please add specimens to this shipment fist.'));
       });
+    }
+
+    function removeShipment() {
+      if (!vm.shipment) { return; }
+
+      domainNotificationService.removeEntity(
+        doRemove,
+        gettextCatalog.getString('Remove shipment'),
+        gettextCatalog.getString('Are you sure you want to remove shipment {{trackingNumber}}?',
+                                 { trackingNumber: vm.shipment.trackingNumber }),
+        gettextCatalog.getString('Remove failed'),
+        gettextCatalog.getString('Shipment {{trackingNumber}} cannot be removed',
+                                 { trackingNumber: vm.shipment.trackingNumber }));
+
+      function doRemove() {
+        return vm.shipment.remove().then(function () {
+          notificationsService.success(gettextCatalog.getString('Shipment removed'));
+          $state.go('home.shipping');
+        });
+      }
     }
   }
 

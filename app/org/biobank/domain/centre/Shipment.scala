@@ -122,11 +122,11 @@ final case class Shipment(id:             ShipmentId,
   /**
    * Must be a centre's location.
    */
-  def withFromLocation(centre: Centre, location: Location): DomainValidation[Shipment] =
-    (validateString(location.uniqueId, LocationIdInvalid) |@|
-       centre.locationWithId(location.uniqueId)) { case (_, _) =>
-        copy(fromCentreId   = centre.id,
-             fromLocationId = location.uniqueId,
+  def withFromLocation(centreId: CentreId, locationId: String): DomainValidation[Shipment] =
+    (validateString(centreId.id, FromCentreIdInvalid) |@|
+       validateString(locationId, LocationIdInvalid)) { case (_, _) =>
+        copy(fromCentreId   = centreId,
+             fromLocationId = locationId,
              version        = version + 1,
              timeModified   = Some(DateTime.now))
     }
@@ -134,19 +134,31 @@ final case class Shipment(id:             ShipmentId,
   /**
    * Must be a centre's location.
    */
-  def withToLocation(centre: Centre, location: Location): DomainValidation[Shipment] =
-    (validateString(location.uniqueId, LocationIdInvalid) |@|
-       centre.locationWithId(location.uniqueId)) { case (_, _) =>
-        copy(toCentreId   = centre.id,
-             toLocationId = location.uniqueId,
+  def withToLocation(centreId: CentreId, locationId: String): DomainValidation[Shipment] =
+    (validateString(centreId.id, ToCentreIdInvalid) |@|
+       validateString(locationId, LocationIdInvalid)) { case (_, _) =>
+        copy(toCentreId   = centreId,
+             toLocationId = locationId,
              version      = version + 1,
              timeModified = Some(DateTime.now))
     }
 
-  def packed(time: DateTime): DomainValidation[Shipment] =
-    if (state != ShipmentState.Created) {
-      InvalidStateTransition(s"cannot set state to PACKED: shipment state is invalid: $state").failureNel[Shipment]
+  def created(): DomainValidation[Shipment] =
+    if (state == ShipmentState.Packed) {
+      copy(state        = ShipmentState.Created,
+           timePacked   = None,
+           timeSent     = None,
+           timeReceived = None,
+           timeUnpacked = None,
+           version      = version + 1,
+           timeModified = Some(DateTime.now)).successNel[String]
     } else {
+      InvalidStateTransition(s"cannot set state to CREATED: shipment state is invalid: $state")
+        .failureNel[Shipment]
+    }
+
+  def packed(time: DateTime): DomainValidation[Shipment] =
+    if ((state == ShipmentState.Created) || (state == ShipmentState.Sent)) {
       copy(state        = ShipmentState.Packed,
            timePacked   = Some(time),
            timeSent     = None,
@@ -154,13 +166,13 @@ final case class Shipment(id:             ShipmentId,
            timeUnpacked = None,
            version      = version + 1,
            timeModified = Some(DateTime.now)).successNel[String]
+    } else {
+      InvalidStateTransition(s"cannot set state to PACKED: shipment state is invalid: $state")
+        .failureNel[Shipment]
     }
 
   def sent(timeSent: DateTime): DomainValidation[Shipment] = {
-    if (state != ShipmentState.Packed) {
-      InvalidStateTransition(s"cannot set state to SENT: shipment state is invalid: $state")
-        .failureNel[Shipment]
-    } else {
+    if ((state == ShipmentState.Packed) || (state == ShipmentState.Received)) {
       timePacked.fold {
         TimePackedUndefined.failureNel[Shipment]
       } { time =>
@@ -175,13 +187,14 @@ final case class Shipment(id:             ShipmentId,
                timeModified = Some(DateTime.now)).successNel[String]
         }
       }
+    } else {
+      InvalidStateTransition(s"cannot set state to SENT: shipment state is invalid: $state")
+        .failureNel[Shipment]
     }
   }
 
   def received(timeReceived: DateTime): DomainValidation[Shipment] =
-    if (state != ShipmentState.Sent) {
-      InvalidStateTransition(s"cannot set state to RECEIVED: shipment state is invalid: $state").failureNel[Shipment]
-    } else {
+    if ((state == ShipmentState.Sent) || (state == ShipmentState.Unpacked)) {
       timeSent.fold  {
         TimeSentUndefined.failureNel[Shipment]
       } { time =>
@@ -195,11 +208,15 @@ final case class Shipment(id:             ShipmentId,
                timeModified = Some(DateTime.now)).successNel[String]
         }
       }
+    } else {
+      InvalidStateTransition(s"cannot set state to RECEIVED: shipment state is invalid: $state")
+        .failureNel[Shipment]
     }
 
   def unpacked(timeUnpacked: DateTime): DomainValidation[Shipment] =
     if (state != ShipmentState.Received) {
-      InvalidStateTransition(s"cannot set state to UNPACKED: shipment state is invalid: $state").failureNel[Shipment]
+      InvalidStateTransition(s"cannot set state to UNPACKED: shipment state is invalid: $state")
+        .failureNel[Shipment]
     } else {
       timeReceived.fold {
         TimeReceivedUndefined.failureNel[Shipment]

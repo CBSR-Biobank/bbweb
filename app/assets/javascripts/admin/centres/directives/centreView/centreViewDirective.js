@@ -37,9 +37,21 @@ define(['lodash'], function (_) {
     var vm = this;
 
     vm.tabs = [
-      { heading: gettextCatalog.getString('Summary'),   sref: 'home.admin.centres.centre.summary',   active: true },
-      { heading: gettextCatalog.getString('Studies'),   sref: 'home.admin.centres.centre.studies',   active: true },
-      { heading: gettextCatalog.getString('Locations'), sref: 'home.admin.centres.centre.locations', active: true },
+      {
+        heading: gettextCatalog.getString('Summary'),
+        sref: 'home.admin.centres.centre.summary',
+        active: true
+      },
+      {
+        heading: gettextCatalog.getString('Studies'),
+        sref: 'home.admin.centres.centre.studies',
+        active: true
+      },
+      {
+        heading: gettextCatalog.getString('Locations'),
+        sref: 'home.admin.centres.centre.locations',
+        active: true
+      },
     ];
 
     init();

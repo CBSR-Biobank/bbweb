@@ -15,40 +15,12 @@ define(function (require) {
   };
 
   ShipmentViewController.$inject = [
-    '$state',
-    'gettextCatalog',
-    'modalInput',
-    'notificationsService',
-    'timeService'
   ];
 
   /**
    *
    */
-  function ShipmentViewController($state,
-                                  gettextCatalog,
-                                  modalInput,
-                                  notificationsService,
-                                  timeService) {
-    var vm = this;
-
-    vm.sendShipment = sendShipment;
-
-    //--
-
-    function sendShipment() {
-      return modalInput.dateTime(gettextCatalog.getString('Date and time shipment was sent'),
-                                 gettextCatalog.getString('Time sent'),
-                                 vm.timeSent,
-                                 { required: true }).result
-        .then(function (timeSent) {
-          return vm.shipment.sent(timeService.dateToUtcString(timeSent));
-        })
-        .then(function (shipment) {
-          return $state.go('home.shipping');
-        })
-        .catch(notificationsService.updateError);
-    }
+  function ShipmentViewController() {
   }
 
   return component;

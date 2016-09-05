@@ -14,10 +14,10 @@ import play.api.libs.json._
 @SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
 object ShipmentItemState extends Enumeration {
   type ShipmentItemState = Value
-  val Present  = Value("Present")
-  val Received = Value("Received")
-  val Missing  = Value("Missing")
-  val Extra    = Value("Extra")
+  val Present  = Value("present")
+  val Received = Value("received")
+  val Missing  = Value("missing")
+  val Extra    = Value("extra")
 
   implicit val shipmentItemStateFormat: Format[ShipmentItemState] =
     enumFormat(ShipmentItemState)

@@ -39,17 +39,23 @@ class ShipmentsController @Inject() (val env:              Environment,
            orderMaybe:                Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
 
-      val courierFilter        = courierFilterMaybe.fold { "" } { cn        => cn }
+      val courierFilter        = courierFilterMaybe.fold { "" } { cn => cn }
       val trackingNumberFilter = trackingNumberFilterMaybe.fold { "" } { tn => tn }
       val stateFilter          = stateFilterMaybe.fold { "" } { st => st }
-      val sort                 = sortMaybe.fold { "courierName" } { s       => s }
-      val page                 = pageMaybe.fold { 1 } { p                   => p }
-      val pageSize             = pageSizeMaybe.fold { 5 } { ps              => ps }
-      val order                = orderMaybe.fold { "asc" } { o              => o }
+      val sort                 = sortMaybe.fold { "courierName" } { s => s }
+      val page                 = pageMaybe.fold { 1 } { p => p }
+      val pageSize             = pageSizeMaybe.fold { 5 } { ps => ps }
+      val order                = orderMaybe.fold { "asc" } { o => o }
 
       log.debug(
-        s"""|ShipmentsController:list: courierFilter/$courierFilter, trackingNumberFilter/$trackingNumberFilter,
-            |  stateFilter/$stateFilter, sort/$sort, page/$page, pageSize/$pageSize, order/$order""".stripMargin)
+        s"""|ShipmentsController:list:
+            | courierFilter:        $courierFilter,
+            | trackingNumberFilter: $trackingNumberFilter,
+            | stateFilter:          $stateFilter,
+            | sort:                 $sort,
+            | page:                 $page,
+            | pageSize:             $pageSize,
+            | order:                $order""".stripMargin)
 
       val pagedQuery = PagedQuery(page, pageSize, order)
 
@@ -76,26 +82,33 @@ class ShipmentsController @Inject() (val env:              Environment,
     validationReply(shipmentsService.getShipment(id))
   }
 
-  def listSpecimens(shipmentId:      String,
-                    sortMaybe:       Option[String],
-                    pageMaybe:       Option[Int],
-                    pageSizeMaybe:   Option[Int],
-                    orderMaybe:      Option[String]) =
+  def listSpecimens(shipmentId:       String,
+                    stateFilterMaybe: Option[String],
+                    sortMaybe:        Option[String],
+                    pageMaybe:        Option[Int],
+                    pageSizeMaybe:    Option[Int],
+                    orderMaybe:       Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
 
-      val sort     = sortMaybe.fold { "inventoryId" } { s => s }
-      val page     = pageMaybe.fold { 1 } { p => p }
-      val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
-      val order    = orderMaybe.fold { "asc" } { o => o }
+      val stateFilter = stateFilterMaybe.fold { "" } { s => s }
+      val sort        = sortMaybe.fold { "inventoryId" } { s => s }
+      val page        = pageMaybe.fold { 1 } { p => p }
+      val pageSize    = pageSizeMaybe.fold { 5 } { ps => ps }
+      val order       = orderMaybe.fold { "asc" } { o => o }
 
-      log.debug(s"""|ShipmentsController:listSpecimens: shipmentId/$shipmentId, sort/$sort,
-                       |  page/$page,pageSize/$pageSize, order/$order""".stripMargin)
+      log.debug(s"""|ShipmentsController:listSpecimens:
+                    | shipmentId:  $shipmentId,
+                    | stateFilter: $stateFilter,
+                    | sort:        $sort,
+                    | page:        $page,
+                    | pageSize:    $pageSize,
+                    | order:       $order""".stripMargin)
 
       val pagedQuery = PagedQuery(page, pageSize, order)
 
       val validation = for {
           sortOrder         <- pagedQuery.getSortOrder
-          shipmentSpecimens <- shipmentsService.getShipmentSpecimens(shipmentId, sort, sortOrder)
+          shipmentSpecimens <- shipmentsService.getShipmentSpecimens(shipmentId, stateFilter, sort, sortOrder)
           page              <- pagedQuery.getPage(PageSizeMax, shipmentSpecimens.size)
           pageSize          <- pagedQuery.getPageSize(PageSizeMax)
           results           <- PagedResults.create(shipmentSpecimens, page, pageSize)
@@ -134,6 +147,9 @@ class ShipmentsController @Inject() (val env:              Environment,
 
   def updateToLocation(id: String) =
     commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateShipmentToLocationCmd => processCommand(cmd) }
+
+  def created(id: String) =
+    commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentCreatedCmd => processCommand(cmd) }
 
   def packed(id: String) =
     commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentPackedCmd => processCommand(cmd) }

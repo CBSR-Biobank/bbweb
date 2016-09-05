@@ -25,7 +25,10 @@ define(function (require) {
     //-------
 
     function openModal(heading, label, placeholder, value, locationInfosToOmit) {
-      var modal;
+      var modal,
+          locationIdsToOmit =  _.map(locationInfosToOmit, function (locInfo) {
+            return locInfo.locationId;
+          });
 
       ModalController.$inject = [
         'bbwebConfig',
@@ -72,9 +75,10 @@ define(function (require) {
         function getCentreLocationInfo(filter) {
           return Centre.locationsSearch(filter)
             .then(function (locations) {
-              return _.remove(locations, function (location) {
-                return _.includes(locationInfosToOmit.locationId, location.locationId);
+              _.remove(locations, function (location) {
+                return _.includes(locationIdsToOmit, location.locationId);
               });
+              return locations;
             });
         }
       }
