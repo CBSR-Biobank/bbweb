@@ -42,3 +42,5 @@ email.conf
 documentation/js/
 /app/assets/languages/
 /po
+logback-test.xml
+
