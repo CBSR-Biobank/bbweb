@@ -488,29 +488,4 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
     val newPwd = passwordHasher.encrypt(newPlainPassword, newSalt)
     PasswordInfo(newPwd, newSalt)
   }
-
-  /**
-   * For debug only in development mode - password is "testuser"
-   */
-  private  def createDefaultUser(): Unit = {
-    if (context.system.settings.config.hasPath(TestData.configPath)
-          && context.system.settings.config.getBoolean(TestData.configPath)) {
-
-      log.debug("createDefaultUser")
-
-      userRepository.put(
-        ActiveUser(id           = org.biobank.Global.DefaultUserId,
-                   version      = 0L,
-                   timeAdded    = DateTime.now,
-                   timeModified = None,
-                   name         = "Administrator",
-                   email        = org.biobank.Global.DefaultUserEmail,
-                   password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
-                   salt         =  "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
-                   avatarUrl    = None))
-      ()
-    }
-  }
-
-  createDefaultUser
 }
