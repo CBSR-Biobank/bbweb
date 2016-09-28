@@ -19,7 +19,7 @@ package dto {
   object NameDto {
     def compareByName(a: NameDto, b: NameDto) = (a.name compareToIgnoreCase b.name) < 0
 
-    implicit val studyNameDtoWriter: Writes[NameDto] = Json.writes[NameDto]
+    implicit val nameDtoWriter: Writes[NameDto] = Json.writes[NameDto]
   }
 
   final case class CentreLocation(centreId:     String,

@@ -197,15 +197,6 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
     };
 
     /**
-     * Returns all locations for all centres.
-     *
-     * @returns {Promise<Array<domain.centres.CentreLocationDto>>} A promise.
-     */
-    Centre.allLocations = function () {
-      return biobankApi.get('/centres/locations');
-    };
-
-    /**
      * Returns centre locations names matching criteria.
      *
      * @param {string} filter - the string to match.
@@ -213,6 +204,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
      * @returns {Promise<Array<domain.centres.CentreLocationDto>>} A promise.
      */
     Centre.locationsSearch = function (filter) {
+      filter = filter || '';
       return biobankApi.post('/centres/locations',
                              {
                                filter: filter,

@@ -22,9 +22,7 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[CentresServiceImpl])
 trait CentresService {
 
-  def getAll: Set[Centre]
-
-  def centreLocations(): Set[CentreLocation]
+  def getCentresCount(): Int
 
   def searchLocations(cmd: SearchCentreLocationsCmd): Set[CentreLocationInfo]
 
@@ -60,32 +58,28 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
 
   implicit val timeout: Timeout = 5.seconds
 
-  /**
-   * FIXME: use paging and sorting
-   */
-  def getAll: Set[Centre] = {
-    centreRepository.getValues.toSet
-  }
-
-  def centreLocations(): Set[CentreLocation] = {
-    centreRepository.getValues.flatMap { centre =>
-      centre.locations.map { location =>
-        CentreLocation(centre.id.id, location.uniqueId, centre.name, location.name)
-      }
-    }.toSet
+  def getCentresCount(): Int = {
+    centreRepository.getValues.size
   }
 
   def searchLocations(cmd: SearchCentreLocationsCmd): Set[CentreLocationInfo] =  {
-    val filterLowerCase = cmd.filter.toLowerCase
-    centreRepository.getValues.flatMap { centre =>
-      centre.locations.map { location =>
-        CentreLocationInfo(centre.id.id, location.uniqueId, centre.name, location.name)
+    val allLocationInfos = centreRepository.getValues.flatMap { centre =>
+        centre.locations.map { location =>
+          CentreLocationInfo(centre.id.id, location.uniqueId, centre.name, location.name)
+        }
       }
-    }.filter { cl =>
-      cl.name.toLowerCase contains filterLowerCase
-    }.toSeq.sortWith { (a, b) =>
-      (a.name compareToIgnoreCase b.name) < 0
-    }.take(cmd.maxResults).toSet
+
+    val filterLowerCase = cmd.filter.toLowerCase.trim
+    val filteredLocationInfos = if (filterLowerCase.isEmpty) { allLocationInfos }
+                                else allLocationInfos.filter { l =>
+                                  l.name.toLowerCase contains filterLowerCase
+                                }
+
+    filteredLocationInfos.
+      toSeq.
+      sortWith { (a, b) => (a.name compareToIgnoreCase b.name) < 0 }.
+      take(cmd.maxResults).
+      toSet
   }
 
   def getCountsByStatus(): CentreCountsByStatus = {

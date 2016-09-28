@@ -312,4 +312,12 @@ trait JsonHelper extends MustMatchers with OptionValues {
     compareSpecimenDto((json \ "specimen").as[JsValue], dto.specimen)
   }
 
+  def compareObj(json: JsValue, dto: CentreLocationInfo) = {
+    (json \ "centreId").as[String] mustBe (dto.centreId)
+
+    (json \ "locationId").as[String] mustBe (dto.locationId)
+
+    (json \ "name").as[String] mustBe (dto.name)
+  }
+
 }

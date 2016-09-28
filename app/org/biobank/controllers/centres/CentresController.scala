@@ -70,17 +70,21 @@ class CentresController @Inject() (val env:            Environment,
       )
     }
 
-  def listNames(filter: String, order: String) =
+  def listNames(filterMaybe: Option[String], orderMaybe: Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
+
+      val filter = filterMaybe.fold { "" } { f => f }
+      val order = orderMaybe.fold { "asc" } { o => o }
+
       SortOrder.fromString(order).fold(
         err => BadRequest(err.list.toList.mkString),
         so  => Ok(centresService.getCentreNames(filter, so))
       )
     }
 
-  def locations() = AuthAction(parse.empty) { (token, userId, request) =>
-      Ok(centresService.centreLocations)
-  }
+  // def locations() = AuthAction(parse.empty) { (token, userId, request) =>
+  //     Ok(centresService.centreLocations)
+  // }
 
   def searchLocations() = commandAction { cmd: SearchCentreLocationsCmd =>
       Ok(centresService.searchLocations(cmd))

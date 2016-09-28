@@ -1,15 +1,16 @@
 package org.biobank.controllers.centres
 
 import org.biobank.controllers.PagedResultsSpec
-import org.biobank.domain.centre._
-import org.biobank.domain.Location
-import org.biobank.domain.study.Study
 import org.biobank.domain.JsonHelper
+import org.biobank.domain.Location
+import org.biobank.domain.centre._
+import org.biobank.domain.study.Study
+import org.biobank.dto._
 import org.biobank.fixture.ControllerFixture
-
 import org.joda.time.DateTime
-import play.api.test.Helpers._
 import play.api.libs.json._
+import play.api.test.Helpers._
+import scala.language.reflectiveCalls
 
 /**
   * Tests the REST API for [[Centre]]s.
@@ -937,6 +938,140 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must include ("error")
 
         (json \ "message").as[String] must include ("centre is not disabled")
+      }
+
+    }
+
+    "GET /centres/names" must {
+
+      "111 must return centre names" must {
+
+        def createFixture() = {
+          val _centres = (1 to 2).map {_ => factory.createDisabledCentre }
+          val _nameDtos = _centres.map(_.nameDto).toSeq
+          _centres.foreach(centreRepository.put)
+
+          new {
+            val centres = _centres
+            val nameDtos = _nameDtos
+          }
+        }
+
+        "in ascending order" in {
+          val f = createFixture
+          val nameDtos = f.nameDtos.sortWith { (a, b) => (a.name compareToIgnoreCase b.name) < 0 }
+
+          val json = makeRequest(GET, uri + "/names")
+
+          (json \ "status").as[String] must include ("success")
+
+          val jsonObjs = (json \ "data").as[List[JsObject]]
+
+          jsonObjs.size must be (nameDtos.size)
+          jsonObjs.zip(nameDtos).foreach { case (jsonObj, nameDtos) =>
+            compareObj(jsonObj, nameDtos)
+          }
+        }
+
+        "in reverse order" in {
+          val f = createFixture
+          val nameDtos = f.nameDtos.sortWith { (a, b) => (a.name compareToIgnoreCase b.name) > 0 }
+
+          val json = makeRequest(GET, uri + "/names?order=desc")
+
+          (json \ "status").as[String] must include ("success")
+
+          val jsonObjs = (json \ "data").as[List[JsObject]]
+
+          jsonObjs.size must be (nameDtos.size)
+          jsonObjs.zip(nameDtos).foreach { case (jsonObj, nameDtos) =>
+            compareObj(jsonObj, nameDtos)
+          }
+        }
+      }
+
+      "must return centre names filtered by name" in {
+        val centres = (1 to 2).map {_ => factory.createDisabledCentre }
+        centres.foreach(centreRepository.put)
+        val centre = centres.head
+
+        val json = makeRequest(GET, uri + s"/names?filter=${centre.name}")
+
+        (json \ "status").as[String] must include ("success")
+
+        val jsonObjs = (json \ "data").as[List[JsObject]]
+
+        jsonObjs.size must be (1)
+        compareObj(jsonObjs(0), centre.nameDto)
+      }
+
+    }
+
+    "POST /centres/locations" must {
+
+      "must return centre locations" in {
+        val location = factory.createLocation
+        val centre = factory.createDisabledCentre.copy(locations = Set(location))
+        centreRepository.put(centre)
+
+        val reqJson = Json.obj("filter" -> "", "maxResults" -> 10)
+        val reply = makeRequest(POST, uri + "/locations", reqJson)
+
+        (reply \ "status").as[String] must include ("success")
+
+        val jsonObjs = (reply \ "data").as[List[JsObject]]
+
+        jsonObjs.size must be (1)
+        compareObj(jsonObjs(0),
+                   CentreLocationInfo(centre.id.id, location.uniqueId, centre.name, location.name))
+      }
+
+      "must return centre locations filtered by name" in {
+        val centres = (1 to 2).map {_ =>
+            factory.createDisabledCentre.copy(locations = Set(factory.createLocation))
+          }
+        val centre = centres(0)
+        val location = centre.locations.head
+        centres.foreach(centreRepository.put)
+
+        val reqJson = Json.obj("filter" -> location.name, "maxResults" -> 10)
+        val reply = makeRequest(POST, uri + "/locations", reqJson)
+
+        (reply \ "status").as[String] must include ("success")
+
+        val jsonObjs = (reply \ "data").as[List[JsObject]]
+
+        jsonObjs.size must be (1)
+        compareObj(jsonObjs(0),
+                   CentreLocationInfo(centre.id.id, location.uniqueId, centre.name, location.name))
+      }
+
+      "must return centre locations sorted by name" in {
+        val centres = (1 to 2).map {_ =>
+            factory.createDisabledCentre.copy(locations = Set(factory.createLocation))
+          }
+        centres.foreach(centreRepository.put)
+
+        val centreLocationsByName = centres.
+          map { centre =>
+            val location = centre.locations.head
+            CentreLocationInfo(centre.id.id, location.uniqueId, centre.name, location.name)
+          }.
+          toSeq.
+          sortWith { (a, b) => (a.name compareToIgnoreCase b.name) < 0 }.
+          toList
+
+        val reqJson = Json.obj("filter" -> "", "maxResults" -> 10)
+        val reply = makeRequest(POST, uri + "/locations", reqJson)
+
+        (reply \ "status").as[String] must include ("success")
+
+        val jsonObjs = (reply \ "data").as[List[JsObject]]
+
+        jsonObjs.size must be (centres.size)
+        jsonObjs.zip(centreLocationsByName).foreach { case (jsonObj, centreLocation) =>
+          compareObj(jsonObj, centreLocation)
+        }
       }
 
     }

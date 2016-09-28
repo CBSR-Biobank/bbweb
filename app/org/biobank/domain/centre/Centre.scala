@@ -1,6 +1,7 @@
 package org.biobank.domain.centre
 
 import org.biobank.ValidationKey
+import org.biobank.dto.NameDto
 import org.biobank.domain._
 import org.biobank.domain.study.StudyId
 import org.biobank.infrastructure.JsonUtils._
@@ -40,6 +41,8 @@ sealed trait Centre
   def locationName(locationId: String): DomainValidation[String] = {
     locationWithId(locationId).map(loc => s"${this.name}: ${loc.name}")
   }
+
+  def nameDto(): NameDto = NameDto(id.id, name, this.getClass.getSimpleName)
 
   override def toString =
     s"""|${this.getClass.getSimpleName}: {
