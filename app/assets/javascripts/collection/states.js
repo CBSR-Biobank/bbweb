@@ -244,6 +244,9 @@ define(['lodash'], function(_) {
           ],
           controllerAs: 'vm'
         }
+      },
+      data: {
+        displayName: 'Participant {{participant.uniqueId}}'
       }
     });
 
