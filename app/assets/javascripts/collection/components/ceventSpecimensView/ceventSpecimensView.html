@@ -33,6 +33,11 @@
         <td>{{specimen.timeCreated| localTime}}</td>
         <td>{{specimen.locationInfo.name}}</td>
         <td>
+          <button class="btn btn-xs btn-primary"
+                  ng-click="vm.viewSpecimen(specimen)"
+                  title="{{'View specimen'|translate}}">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
           <button class="btn btn-xs btn-warning"
                   ng-click="vm.removeSpecimen(specimen)"
                   title="{{'Remove specimen'|translate}}">

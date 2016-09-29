@@ -41,9 +41,10 @@ define(function () {
     vm.centreLocations = [];
     vm.tableController = undefined;
 
-    vm.addSpecimens       = addSpecimens;
-    vm.getTableData       = getTableData;
-    vm.removeSpecimen     = removeSpecimen;
+    vm.addSpecimens    = addSpecimens;
+    vm.getTableData    = getTableData;
+    vm.removeSpecimen  = removeSpecimen;
+    vm.viewSpecimen    = viewSpecimen;
 
     //--
 
@@ -99,6 +100,10 @@ define(function () {
 
     function reloadTableData() {
       getTableData(vm.tableController.tableState());
+    }
+
+    function viewSpecimen(specimen) {
+
     }
 
     function removeSpecimen(specimen) {
