@@ -132,7 +132,7 @@ define(function (require) {
         vm.label        = label;
         vm.okPressed    = okPressed;
         vm.closePressed = closePressed;
-        vm.openCalendar = openCalendar;
+        vm.dateTimeOnEdit = dateTimeOnEdit;
 
         options = options || {};
         vm.value = vm.defaultValue;
@@ -143,9 +143,7 @@ define(function (require) {
           vm.value = getSelectMultipleValues();
           vm.multipleSelectSomeSelected = multipleSelectSomeSelected;
         } else if (type === 'dateTime') {
-          vm.open = false;
           vm.value = new Date(vm.defaultValue);
-          vm.datetimePickerFormat = bbwebConfig.datepickerFormat;
         }
 
         function okPressed() {
@@ -174,8 +172,8 @@ define(function (require) {
           return (_.find(vm.value, { checked: true }) !== undefined);
         }
 
-        function openCalendar(e) {
-          vm.open = true;
+        function dateTimeOnEdit(datetime) {
+          vm.value = datetime;
         }
       }
     }

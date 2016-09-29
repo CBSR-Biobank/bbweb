@@ -42,35 +42,11 @@
   </div>
 
   <!-- TIME COMPLETED -->
-  <div class="form-group row"
-       ng-class="{ 'has-error' : collectionEventForm.timeCompleted.$invalid &&
-                 !collectionEventForm.timeCompleted.$pristine }">
-    <label class="col-sm-2 form-control-label" translate>Time completed</label>
-    <div class="col-sm-10">
-      <p class="input-group">
-        <input name="timeCompleted"
-               type="text"
-               class="form-control"
-               datetime-picker="{{vm.datetimePickerFormat}}"
-               ng-model="vm.timeCompleted"
-               is-open="vm.open"
-               ng-required="true" />
-        <span class="input-group-btn">
-          <button type="button"
-                  class="btn btn-default"
-                  ng-click="vm.openCalendar($event)">
-            <i class="glyphicon glyphicon-calendar"></i>
-          </button>
-        </span>
-      </p>
-    </div>
-    <div class="col-md-offset-2 col-md-10"
-         ng-messages="collectionEventForm.timeCompleted.$error"
-         ng-if="collectionEventForm.timeCompleted.$dirty">
-      <div ng-message="datetime" class="help-block" translate>date and / or time are invalid</div>
-      <div ng-message="required" class="help-block" translate>date and time are required</div>
-    </div>
-  </div>
+  <date-time-picker label="{{'Time completed'|translate}}"
+                    default-value="vm.timeCompleted"
+                    required="true"
+                    on-edit="vm.dateTimeOnEdit">
+  </date-time-picker>
 
   <!-- ANNOTATION TYPES  -->
   <annotations-input annotations="vm.collectionEvent.annotations"></annotations-input>

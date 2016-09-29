@@ -1,0 +1,32 @@
+<ng-form name="dateTimePickerSubForm">
+  <div class="form-group row"
+       ng-class="{ 'has-error' : dateTimePickerSubForm.$invalid && !dateTimePickerSubForm.$pristine }">
+    <label class="form-control-label" ng-class="vm.labelCols">{{vm.label}}</label>
+    <div ng-class="vm.inputCols">
+      <p class="input-group">
+        <input name="date"
+               type="text"
+               class="form-control"
+               datetime-picker="{{vm.datetimePickerFormat}}"
+               timepicker-options="vm.timepickerOptions"
+               ng-model="vm.value"
+               is-open="vm.open"
+               ng-required="vm.required"
+               ng-change="vm.onChange()"/>
+        <span class="input-group-btn">
+          <button type="button"
+                  class="btn btn-default"
+                  ng-click="vm.openCalendar($event)">
+            <i class="glyphicon glyphicon-calendar"></i>
+          </button>
+        </span>
+      </p>
+    </div>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="dateTimePickerSubForm.date.$error"
+         ng-if="dateTimePickerSubForm.$dirty">
+      <div ng-message="datetime" class="help-block" translate>date and / or time are invalid</div>
+      <div ng-message="required" class="help-block" translate>date and time are required</div>
+    </div>
+  </div>
+</ng-form>

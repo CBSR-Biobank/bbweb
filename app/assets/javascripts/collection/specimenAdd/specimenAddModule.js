@@ -95,17 +95,14 @@ define(function (require) {
     vm.specimenSpecs        = specimenSpecs;
     vm.usingDefaultAmount   = true;
     vm.timeCollected        = new Date();
-    vm.datetimePickerFormat = bbwebConfig.datepickerFormat;
-    vm.timepickerOptions    = { readonlyInput: false, showMeridian: false };
-    vm.calendarOpen         = false;
     vm.specimens            = [];
 
-    vm.okPressed    = okPressed;
-    vm.nextPressed  = nextPressed;
-    vm.closePressed = closePressed;
-    vm.openCalendar = openCalendar;
-    vm.specimenSpecChanged = specimenSpecChanged;
-    vm.inventoryIdUpdated = inventoryIdUpdated;
+    vm.okPressed            = okPressed;
+    vm.nextPressed          = nextPressed;
+    vm.closePressed         = closePressed;
+    vm.dateTimeOnEdit       = dateTimeOnEdit;
+    vm.specimenSpecChanged  = specimenSpecChanged;
+    vm.inventoryIdUpdated   = inventoryIdUpdated;
 
     $scope.$watch('vm.amount', function () {
       vm.usingDefaultAmount = (_.isUndefined(vm.defaultAmount) || (vm.amount === vm.defaultAmount));
@@ -173,10 +170,10 @@ define(function (require) {
     }
 
     /**
-     * Called when the user presses the modal's calendar button.
+     * Called when the user updates Time Completed.
      */
-    function openCalendar(e) {
-      vm.calendarOpen = true;
+    function dateTimeOnEdit(datetime) {
+      vm.timeCompleted = datetime;
     }
 
     /**

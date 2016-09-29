@@ -16,6 +16,7 @@ define(function (require) {
 
   module = angular.module('biobank.common', [ modalInputModule.name, annotationsInputModule.name ]);
 
+  module.component('dateTimePicker',  require('./components/dateTimePicker/dateTimePickerComponent'));
   module.component('progressTracker', require('./components/progressTracker/progressTrackerComponent'));
 
   module.directive('focusMe',                 require('./directives/focusMeDirective'));

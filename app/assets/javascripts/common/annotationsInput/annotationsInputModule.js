@@ -6,8 +6,8 @@ define(function (require) {
   'use strict';
 
   var angular = require('angular'),
-      _ = require('lodash'),
-      name = 'biobank.annotationsInput',
+      _       = require('lodash'),
+      name    = 'biobank.annotationsInput',
       module;
 
   var annotations = [
@@ -42,8 +42,28 @@ define(function (require) {
         restrict: 'E',
         templateUrl : '/assets/javascripts/common/annotationsInput/' + name + '.html'
       };
+
+      if (name === 'dateTimeAnnotation') {
+        _.extend(directive,
+                 {
+                   bindToController: { annotation: '=' },
+                   controller: DateTimeController,
+                   controllerAs: 'vm'
+                 });
+      }
+
       return directive;
     };
+
+    function DateTimeController() {
+      var vm = this;
+
+      vm.dateTimeOnEdit = dateTimeOnEdit;
+
+      function dateTimeOnEdit(datetime) {
+        vm.annotation.value = datetime;
+      }
+    }
   }
 
   /**
@@ -65,17 +85,7 @@ define(function (require) {
   }
 
   function AnnotationsInputCtrl(bbwebConfig) {
-    var vm = this;
 
-    vm.open = false;
-    vm.openCalendar = openCalendar;
-    vm.datetimePickerFormat = bbwebConfig.datepickerFormat;
-
-    //--
-
-    function openCalendar(e) {
-      vm.open = true;
-    }
   }
 
   return {

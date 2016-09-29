@@ -67,8 +67,8 @@
                  class="form-control"
                  ng-model="vm.amount"
                  positive-float />
-          <span class="input-group-addon" ng-if="vm.selectedSpecimenSpec">
-            {{vm.selectedSpecimenSpec.units}}
+          <span class="input-group-addon">
+            {{vm.selectedSpecimenSpec ? vm.selectedSpecimenSpec.units : ''}}
           </span>
         </div>
       </div>
@@ -86,38 +86,14 @@
       </div>
     </div>
 
-    <!-- TIME COLECTED -->
-    <div class="form-group row"
-         ng-class="{ 'has-error' : form.date.$invalid && !form.date.$pristine }">
-      <label class="col-md-3 form-control-label" translate>Time collected</label>
-      <div class="col-md-9">
-        <div class="input-group">
-          <input name="date"
-                 type="text"
-                 class="form-control"
-                 datetime-picker="{{vm.datetimePickerFormat}}"
-                 timepicker-options="vm.timepickerOptions"
-                 ng-model="vm.timeCollected"
-                 is-open="vm.calendarOpen"
-                 ng-disabled="vm.useDefault"
-                 ng-required="true" />
-          <span class="input-group-btn">
-            <button type="button"
-                    class="btn btn-default"
-                    ng-click="vm.openCalendar($event)"
-                    ng-disabled="vm.useDefault">
-              <i class="glyphicon glyphicon-calendar"></i>
-            </button>
-          </span>
-        </div>
-      </div>
-      <div class="col-md-offset-3 col-md-9"
-           ng-messages="form.date.$error"
-           ng-if="form.date.$dirty">
-        <div ng-message="datetime" class="help-block" translate>date and / or time are invalid</div>
-        <div ng-message="required" class="help-block" translate>date and time are required</div>
-      </div>
-    </div>
+    <!-- TIME COLLECTED -->
+    <date-time-picker label="{{'Time collected'|translate}}"
+                      default-value="vm.timeCollected"
+                      required="true"
+                      on-edit="vm.dateTimeOnEdit"
+                      label-cols="col-sm-3"
+                      input-cols="col-sm-9">
+    </date-time-picker>
 
     <!-- CENTRE LOCATION -->
     <div class="form-group row"

@@ -52,12 +52,10 @@ define(['lodash'], function(_) {
     vm.title = gettextCatalog.getString(
       'Participant {{id}}: Add collection event', { id: vm.participant.uniqueId });
     vm.timeCompleted = new Date();
-    vm.open = false;
-    vm.datetimePickerFormat = bbwebConfig.datepickerFormat;
 
     vm.submit = submit;
     vm.cancel = cancel;
-    vm.openCalendar = openCalendar;
+    vm.dateTimeOnEdit = dateTimeOnEdit;
 
     // --
 
@@ -86,8 +84,8 @@ define(['lodash'], function(_) {
       $state.go('home.collection.study.participant.cevents');
     }
 
-    function openCalendar(e) {
-      vm.open = true;
+    function dateTimeOnEdit(datetime) {
+      vm.timeCompleted = datetime;
     }
   }
 
