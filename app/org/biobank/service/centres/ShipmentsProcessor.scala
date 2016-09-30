@@ -40,18 +40,15 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveRecover: Receive = {
     case event: ShipmentEvent => event.eventType match {
-      case et: ShipmentEvent.EventType.Added                 => applyAddedEvent(event)
-      case et: ShipmentEvent.EventType.CourierNameUpdated    => applyCourierNameUpdatedEvent(event)
-      case et: ShipmentEvent.EventType.TrackingNumberUpdated => applyTrackingNumberUpdatedEvent(event)
-      case et: ShipmentEvent.EventType.FromLocationUpdated   => applyFromLocationUpdatedEvent(event)
-      case et: ShipmentEvent.EventType.ToLocationUpdated     => applyToLocationUpdatedEvent(event)
-      case et: ShipmentEvent.EventType.Created               => applyCreatedEvent(event)
-      case et: ShipmentEvent.EventType.Packed                => applyPackedEvent(event)
-      case et: ShipmentEvent.EventType.Sent                  => applySentEvent(event)
-      case et: ShipmentEvent.EventType.Received              => applyReceivedEvent(event)
-      case et: ShipmentEvent.EventType.Unpacked              => applyUnpackedEvent(event)
-      case et: ShipmentEvent.EventType.Lost                  => applyLostEvent(event)
-      case et: ShipmentEvent.EventType.Removed               => applyRemoveEvent(event)
+      case et: ShipmentEvent.EventType.Added                  => applyAddedEvent(event)
+      case et: ShipmentEvent.EventType.CourierNameUpdated     => applyCourierNameUpdatedEvent(event)
+      case et: ShipmentEvent.EventType.TrackingNumberUpdated  => applyTrackingNumberUpdatedEvent(event)
+      case et: ShipmentEvent.EventType.FromLocationUpdated    => applyFromLocationUpdatedEvent(event)
+      case et: ShipmentEvent.EventType.ToLocationUpdated      => applyToLocationUpdatedEvent(event)
+      case et: ShipmentEvent.EventType.StateChanged           => applyStateChangedEvent(event)
+      case et: ShipmentEvent.EventType.Removed                => applyRemovedEvent(event)
+      case et: ShipmentEvent.EventType.SkippedToSentState     => applySkippedToSentStateEvent(event)
+      case et: ShipmentEvent.EventType.SkippedToUnpackedState => applySkippedToUnpackedStateEvent(event)
 
       case event => log.error(s"event not handled: $event")
     }
@@ -91,26 +88,17 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     case cmd: UpdateShipmentToLocationCmd =>
       processUpdateCmd(cmd, updateToLocationCmdToEvent, applyToLocationUpdatedEvent)
 
-    case cmd: ShipmentCreatedCmd =>
-      processUpdateCmd(cmd, createdCmdToEvent, applyCreatedEvent)
+    case cmd: ShipmentChangeStateCmd =>
+      processUpdateCmd(cmd, changeStateCmdToEvent, applyStateChangedEvent)
 
-    case cmd: ShipmentPackedCmd =>
-      processUpdateCmd(cmd, packedCmdToEvent, applyPackedEvent)
+    case cmd: ShipmentSkipStateToSentCmd =>
+      processUpdateCmd(cmd, skipStateToSentCmdToEvent, applySkippedToSentStateEvent)
 
-    case cmd: ShipmentSentCmd =>
-      processUpdateCmd(cmd, sentCmdToEvent, applySentEvent)
-
-    case cmd: ShipmentReceivedCmd =>
-      processUpdateCmd(cmd, recivedCmdToEvent, applyReceivedEvent)
-
-    case cmd: ShipmentUnpackedCmd =>
-      processUpdateCmd(cmd, unpackedCmdToEvent, applyUnpackedEvent)
-
-    case cmd: ShipmentLostCmd =>
-      processUpdateCmd(cmd, lostCmdToEvent, applyLostEvent)
+    case cmd: ShipmentSkipStateToUnpackedCmd =>
+      processUpdateCmd(cmd, skipStateToUnpackedCmdToEvent, applySkippedToUnpackedStateEvent)
 
     case cmd: ShipmentRemoveCmd =>
-      processUpdateCmd(cmd, removeCmdToEvent, applyRemoveEvent)
+      processUpdateCmd(cmd, removeCmdToEvent, applyRemovedEvent)
 
     case cmd: ShipmentSpecimenAddCmd =>
       process(addSpecimenCmdToEvent(cmd))(applySpecimenAddedEvent)
@@ -221,67 +209,39 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       _.toLocationUpdated.locationId := cmd.locationId)
   }
 
-  private def createdCmdToEvent(cmd: ShipmentCreatedCmd,
-                               shipment: Shipment): ServiceValidation[ShipmentEvent] = {
-    shipment.created.map { _ =>
+  private def changeStateCmdToEvent(cmd: ShipmentChangeStateCmd,
+                                    shipment: Shipment): ServiceValidation[ShipmentEvent] = {
+    shipment.changeState(cmd.newState, cmd.datetime).map { _ =>
       ShipmentEvent(shipment.id.id).update(
-        _.userId          := cmd.userId,
-        _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.created.version := cmd.expectedVersion)
+        _.userId                               := cmd.userId,
+        _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.stateChanged.version                 := cmd.expectedVersion,
+        _.stateChanged.stateName               := cmd.newState.toString,
+        _.stateChanged.optionalStateChangeTime := cmd.datetime.map(ISODateTimeFormat.dateTime.print))
     }
   }
 
-  private def packedCmdToEvent(cmd: ShipmentPackedCmd,
-                               shipment: Shipment): ServiceValidation[ShipmentEvent] = {
-    shipment.packed(cmd.time).map { _ =>
+  private def skipStateToSentCmdToEvent(cmd: ShipmentSkipStateToSentCmd,
+                                        shipment: Shipment): ServiceValidation[ShipmentEvent] = {
+    shipment.skipToSentState(cmd.timePacked, cmd.timeSent).map { _ =>
       ShipmentEvent(shipment.id.id).update(
-        _.userId                 := cmd.userId,
-        _.time                   := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.packed.version         := cmd.expectedVersion,
-        _.packed.stateChangeTime := ISODateTimeFormat.dateTime.print(cmd.time))
+        _.userId                        := cmd.userId,
+        _.time                          := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.skippedToSentState.version    := cmd.expectedVersion,
+        _.skippedToSentState.timePacked := ISODateTimeFormat.dateTime.print(cmd.timePacked),
+        _.skippedToSentState.timeSent   := ISODateTimeFormat.dateTime.print(cmd.timeSent))
     }
   }
 
-  private def sentCmdToEvent(cmd: ShipmentSentCmd,
-                             shipment: Shipment): ServiceValidation[ShipmentEvent] = {
-    shipment.sent(cmd.time).map { _ =>
+  private def skipStateToUnpackedCmdToEvent(cmd: ShipmentSkipStateToUnpackedCmd,
+                                        shipment: Shipment): ServiceValidation[ShipmentEvent] = {
+    shipment.skipToUnpackedState(cmd.timeReceived, cmd.timeUnpacked).map { _ =>
       ShipmentEvent(shipment.id.id).update(
-        _.userId               := cmd.userId,
-        _.time                 := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.sent.version         := cmd.expectedVersion,
-        _.sent.stateChangeTime := ISODateTimeFormat.dateTime.print(cmd.time))
-    }
-  }
-
-  private def recivedCmdToEvent(cmd: ShipmentReceivedCmd,
-                                shipment: Shipment): ServiceValidation[ShipmentEvent] = {
-    shipment.received(cmd.time).map { _ =>
-      ShipmentEvent(shipment.id.id).update(
-        _.userId                   := cmd.userId,
-        _.time                     := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.received.version         := cmd.expectedVersion,
-        _.received.stateChangeTime := ISODateTimeFormat.dateTime.print(cmd.time))
-    }
-  }
-
-  private def unpackedCmdToEvent(cmd: ShipmentUnpackedCmd,
-                                   shipment: Shipment): ServiceValidation[ShipmentEvent] = {
-    shipment.unpacked(cmd.time).map { _ =>
-      ShipmentEvent(shipment.id.id).update(
-        _.userId                   := cmd.userId,
-        _.time                     := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.unpacked.version         := cmd.expectedVersion,
-        _.unpacked.stateChangeTime := ISODateTimeFormat.dateTime.print(cmd.time))
-    }
-  }
-
-  private def lostCmdToEvent(cmd: ShipmentLostCmd,
-                             shipment: Shipment): ServiceValidation[ShipmentEvent] = {
-    shipment.lost.map { _ =>
-      ShipmentEvent(shipment.id.id).update(
-        _.userId       := cmd.userId,
-        _.time         := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.lost.version := cmd.expectedVersion)
+        _.userId                              := cmd.userId,
+        _.time                                := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.skippedToUnpackedState.version      := cmd.expectedVersion,
+        _.skippedToUnpackedState.timeReceived := ISODateTimeFormat.dateTime.print(cmd.timeReceived),
+        _.skippedToUnpackedState.timeUnpacked := ISODateTimeFormat.dateTime.print(cmd.timeUnpacked))
     }
   }
 
@@ -472,71 +432,47 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     }
   }
 
-  private def applyCreatedEvent(event: ShipmentEvent): Unit = {
+  private def applyStateChangedEvent(event: ShipmentEvent): Unit = {
     onValidEventAndVersion(event,
-                           event.eventType.isCreated,
-                           event.getCreated.getVersion) { (shipment, _, time) =>
-      val v = shipment.created
+                           event.eventType.isStateChanged,
+                           event.getStateChanged.getVersion) { (shipment, _, time) =>
+      val stateChangeTime =
+        event.getStateChanged.stateChangeTime.map(ISODateTimeFormat.dateTime.parseDateTime)
+      val v = shipment.changeState(ShipmentState.withName(event.getStateChanged.getStateName),
+                                   stateChangeTime)
       v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
       v.map(_ => true)
     }
   }
 
-  private def applyPackedEvent(event: ShipmentEvent): Unit = {
+  private def applySkippedToSentStateEvent(event: ShipmentEvent): Unit = {
     onValidEventAndVersion(event,
-                           event.eventType.isPacked,
-                           event.getPacked.getVersion) { (shipment, _, time) =>
-      val stateChangeTime = ISODateTimeFormat.dateTime.parseDateTime(event.getPacked.getStateChangeTime)
-      val v = shipment.packed(stateChangeTime)
+                           event.eventType.isSkippedToSentState,
+                           event.getSkippedToSentState.getVersion) { (shipment, _, time) =>
+      val timePacked = ISODateTimeFormat.dateTime.parseDateTime(event.getSkippedToSentState.getTimePacked)
+      val timeSent   = ISODateTimeFormat.dateTime.parseDateTime(event.getSkippedToSentState.getTimeSent)
+      val v = shipment.skipToSentState(timePacked, timeSent)
       v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
       v.map(_ => true)
     }
   }
 
-  private def applySentEvent(event: ShipmentEvent): Unit = {
+  private def applySkippedToUnpackedStateEvent(event: ShipmentEvent): Unit = {
     onValidEventAndVersion(event,
-                           event.eventType.isSent,
-                           event.getSent.getVersion) { (shipment, _, time) =>
-      val stateChangeTime = ISODateTimeFormat.dateTime.parseDateTime(event.getSent.getStateChangeTime)
-      val v = shipment.sent(stateChangeTime)
+                           event.eventType.isSkippedToUnpackedState,
+                           event.getSkippedToUnpackedState.getVersion) { (shipment, _, time) =>
+      val timeReceived =
+        ISODateTimeFormat.dateTime.parseDateTime(event.getSkippedToUnpackedState.getTimeReceived)
+      val timeUnpacked =
+        ISODateTimeFormat.dateTime.parseDateTime(event.getSkippedToUnpackedState.getTimeUnpacked)
+
+      val v = shipment.skipToUnpackedState(timeReceived, timeUnpacked)
       v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
       v.map(_ => true)
     }
   }
 
-  private def applyReceivedEvent(event: ShipmentEvent): Unit = {
-    onValidEventAndVersion(event,
-                           event.eventType.isReceived,
-                           event.getReceived.getVersion) { (shipment, _, time) =>
-      val stateChangeTime = ISODateTimeFormat.dateTime.parseDateTime(event.getReceived.getStateChangeTime)
-      val v = shipment.received(stateChangeTime)
-      v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
-      v.map(_ => true)
-    }
-  }
-
-  private def applyUnpackedEvent(event: ShipmentEvent): Unit = {
-    onValidEventAndVersion(event,
-                           event.eventType.isUnpacked,
-                           event.getUnpacked.getVersion) { (shipment, _, time) =>
-      val stateChangeTime = ISODateTimeFormat.dateTime.parseDateTime(event.getUnpacked.getStateChangeTime)
-      val v = shipment.unpacked(stateChangeTime)
-      v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
-      v.map(_ => true)
-    }
-  }
-
-  private def applyLostEvent(event: ShipmentEvent): Unit = {
-    onValidEventAndVersion(event,
-                           event.eventType.isLost,
-                           event.getLost.getVersion) { (shipment, _, time) =>
-      val v = shipment.lost
-      v.foreach { s => shipmentRepository.put(s.copy(timeModified = Some(time))) }
-      v.map(_ => true)
-    }
-  }
-
-  private def applyRemoveEvent(event: ShipmentEvent): Unit = {
+  private def applyRemovedEvent(event: ShipmentEvent): Unit = {
     onValidEventAndVersion(event,
                            event.eventType.isRemoved,
                            event.getRemoved.getVersion) { (shipment, _, time) =>

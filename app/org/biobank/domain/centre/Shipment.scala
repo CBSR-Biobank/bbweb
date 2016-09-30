@@ -10,6 +10,7 @@ import org.joda.time.DateTime
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 final case class ShipmentId(id: String) extends IdentifiedValueObject[String]
 
@@ -193,6 +194,20 @@ final case class Shipment(id:             ShipmentId,
     }
   }
 
+  def packedAndSent(timePacked: DateTime, timeSent: DateTime): DomainValidation[Shipment] =
+    if (state == ShipmentState.Created) {
+      copy(state        = ShipmentState.Packed,
+           timePacked   = Some(timePacked),
+           timeSent     = Some(timeSent),
+           timeReceived = None,
+           timeUnpacked = None,
+           version      = version + 1,
+           timeModified = Some(DateTime.now)).successNel[String]
+    } else {
+      InvalidStateTransition(s"cannot set state to PACKED: shipment state is invalid: $state")
+        .failureNel[Shipment]
+    }
+
   def received(timeReceived: DateTime): DomainValidation[Shipment] =
     if ((state == ShipmentState.Sent) || (state == ShipmentState.Unpacked)) {
       timeSent.fold  {
@@ -241,6 +256,63 @@ final case class Shipment(id:             ShipmentId,
            version      = version + 1,
            timeModified = Some(DateTime.now)).successNel[String]
     }
+
+  def skipToSentState(timePacked: DateTime, timeSent: DateTime): DomainValidation[Shipment] = {
+    if (state == ShipmentState.Created) {
+      if (timeSent < timePacked) {
+        TimeSentBeforePacked.failureNel[Shipment]
+      } else {
+        copy(state        = ShipmentState.Sent,
+             timePacked   = Some(timePacked),
+             timeSent     = Some(timeSent),
+             timeReceived = None,
+             timeUnpacked = None,
+             version      = version + 1,
+             timeModified = Some(DateTime.now)).successNel[String]
+      }
+    } else {
+      InvalidStateTransition(s"cannot set state to SENT: shipment state is invalid: $state")
+        .failureNel[Shipment]
+    }
+  }
+
+  def skipToUnpackedState(timeReceived: DateTime, timeUnpacked: DateTime): DomainValidation[Shipment] = {
+    if (state == ShipmentState.Sent) {
+      if (timeUnpacked < timeReceived) {
+        TimeUnpackedBeforeReceived.failureNel[Shipment]
+      } else {
+        copy(state          = ShipmentState.Unpacked,
+             timeReceived   = Some(timeReceived),
+             timeUnpacked   = Some(timeUnpacked),
+             version        = version + 1,
+             timeModified   = Some(DateTime.now)).successNel[String]
+      }
+    } else {
+      InvalidStateTransition(s"cannot set state to UNPACKED: shipment state is invalid: $state")
+        .failureNel[Shipment]
+    }
+  }
+
+  val stateRequiresTime = List(Packed, Sent, Received, Unpacked)
+
+  def changeState(newState: ShipmentState, stateChangeTimeMaybe: Option[DateTime])
+      : DomainValidation[Shipment] = {
+    val validTime: DomainValidation[DateTime] = if (stateRequiresTime.contains(newState)) {
+        stateChangeTimeMaybe.toSuccessNel(DomainError("state change requires a date and time"))
+      } else {
+        DateTime.now.successNel[String]
+      }
+    validTime.flatMap { time =>
+      newState match {
+        case Created  => created
+        case Packed   => packed(time)
+        case Sent     => sent(time)
+        case Received => received(time)
+        case Unpacked => unpacked(time)
+        case Lost     => lost
+      }
+    }
+  }
 
   def isCreated(): DomainValidation[Boolean] =
     if (state == ShipmentState.Created) true.successNel[String]

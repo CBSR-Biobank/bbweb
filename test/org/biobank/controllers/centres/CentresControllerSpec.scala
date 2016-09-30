@@ -944,7 +944,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     "GET /centres/names" must {
 
-      "111 must return centre names" must {
+      "must return centre names" must {
 
         def createFixture() = {
           val _centres = (1 to 2).map {_ => factory.createDisabledCentre }

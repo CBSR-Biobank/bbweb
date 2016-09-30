@@ -370,91 +370,83 @@ define(function (require) {
     };
 
     /**
-     * Changes the state of this shipment to <code>Created</code>.
+     * Changes the state of this shipment.
      *
-     * @see [ShipmentState]{@link domain.centres.ShipmentState}
+     * @param {ShipmentState|link domain.centres.ShipmentState} the new state.
+     *
+     * @param {Date} [datetime] - the date and time this shipment took this state. Only required for the
+     * following states: Packed, Sent, Received, Unpacked.
      *
      * @returns {Promise} A copy of this shipment, but with the state set to Created.
      */
-    Shipment.prototype.created = function () {
-      return this.update.call(this, uri('created', this.id));
+    Shipment.prototype.changeState = function (state, datetime) {
+      var json = { newState: state };
+      if (datetime) {
+        _.extend(json, { datetime: datetime });
+      }
+      return this.update.call(this, uri('state', this.id), json);
     };
 
     /**
-     * Changes the state of this shipment to <code>Packed</code>.
+     * Changes the state of this shipment from CREATED to SENT.
      *
-     * @param {Date} The date and time this shipment's state was changed.
+     * @param {Date} timePacked - the date and time this shipment was packed.
      *
-     * @see [ShipmentState]{@link domain.centres.ShipmentState}
+     * @param {Date} timeSent - the date and time this shipment was sent.
      *
-     * @returns {Promise} A copy of this shipment, but with the state set to Packed.
+     * @returns {Promise} A copy of this shipment, but with the state set to SENT.
      */
-    Shipment.prototype.packed = function (datetime) {
-      return this.update.call(this, uri('packed', this.id), { time: datetime });
+    Shipment.prototype.skipToStateSent = function (timePacked, timeSent) {
+      var json = { timePacked: timePacked, timeSent: timeSent };
+      return this.update.call(this, uri('state/skip-to-sent', this.id), json);
     };
 
     /**
-     * Changes the state of this shipment to <code>Sent</code>.
+     * Changes the state of this shipment from SENT to UNPACKED.
      *
-     * @param {Date} The date and time this shipment's state was changed.
+     * @param {Date} timeReceived - the date and time this shipment was received.
      *
-     * @see [ShipmentState]{@link domain.centres.ShipmentState}
+     * @param {Date} timeUnpacked - the date and time this shipment was unpacked.
      *
-     * @returns {Promise} A copy of this shipment, but with the state set to Sent.
+     * @returns {Promise} A copy of this shipment, but with the state set to UNPACKED.
      */
-    Shipment.prototype.sent = function (datetime) {
-      return this.update.call(this, uri('sent', this.id), { time: datetime });
+    Shipment.prototype.skipToStateUnpacked = function (timeReceived, timeUnpacked) {
+      var json = { timeReceived: timeReceived, timeUnpacked: timeUnpacked };
+      return this.update.call(this, uri('state/skip-to-unpacked', this.id), json);
     };
 
     /**
-     * Changes the state of this shipment to <code>Received</code>.
+     * A predicate to test if the shipment's state is CREATED.
      *
-     * @param {Date} The date and time this shipment's state was changed.
-     *
-     * @see [ShipmentState]{@link domain.centres.ShipmentState}
-     *
-     * @returns {Promise} A copy of this shipment, but with the state set to Received.
+     * @returns {boolean} TRUE if the state is CREATED.
      */
-    Shipment.prototype.received = function (datetime) {
-      return this.update.call(this, uri('received', this.id), { time: datetime });
-    };
-
-    /**
-     * Changes the state of this shipment to <code>Unpacked</code>.
-     *
-     * @param {Date} The date and time this shipment's state was changed.
-     *
-     * @see [ShipmentState]{@link domain.centres.ShipmentState}
-     *
-     * @returns {Promise} A copy of this shipment, but with the state set to Unpacked.
-     */
-    Shipment.prototype.unpacked = function (datetime) {
-      return this.update.call(this, uri('unpacked', this.id), { time: datetime });
-    };
-
-    /**
-     * Changes the state of this shipment to <code>Lost</code>.
-     *
-     * @see [ShipmentState]{@link domain.centres.ShipmentState}
-     *
-     * @returns {Promise} A copy of this shipment, but with the state set to Lost.
-     */
-    Shipment.prototype.lost = function () {
-      return this.update.call(this, uri('lost', this.id), {});
-    };
-
     Shipment.prototype.isCreated = function () {
       return this.state === ShipmentState.CREATED;
     };
 
+    /**
+     * A predicate to test if the shipment's state is PACKED.
+     *
+     * @returns {boolean} TRUE if the state is PACKED.
+     */
     Shipment.prototype.isPacked = function () {
       return this.state === ShipmentState.PACKED;
     };
 
+    /**
+     * A predicate to test if the shipment's state is SENT.
+     *
+     * @returns {boolean} TRUE if the state is SENT.
+     */
     Shipment.prototype.isSent = function () {
       return this.state === ShipmentState.SENT;
     };
 
+    /**
+     * A predicate to test if the shipment's state is NOT CREATED or UNPACKED.
+     *
+     * @returns {boolean} TRUE if the state is NOT CREATED or UNPACKED.
+     */
     Shipment.prototype.isNotCreatedNorUnpacked = function () {
       return (this.state !== ShipmentState.CREATED) && (this.state !== ShipmentState.UNPACKED);
     };

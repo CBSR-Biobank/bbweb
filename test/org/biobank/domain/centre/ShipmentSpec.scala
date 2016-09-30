@@ -203,6 +203,37 @@ class ShipmentSpec extends DomainFreeSpec {
 
     }
 
+    "can skip state" - {
+
+      "from created to sent" in {
+        val shipment = factory.createShipment
+        val timePacked = DateTime.now.minusDays(10)
+        val timeSent = timePacked.plusDays(1)
+        shipment.skipToSentState(timePacked, timeSent) mustSucceed { s =>
+          s.timePacked must be (Some(timePacked))
+          s.timeSent must be (Some(timeSent))
+          s.version must be (shipment.version + 1)
+          s.state must be (ShipmentState.Sent)
+          checkTimeStamps(s, shipment.timeAdded, DateTime.now)
+        }
+      }
+
+      "from sent to unpacked" in {
+        val f = allShipmentsFixture
+        val shipment = f.shipments(ShipmentState.Sent)
+        val timeReceived = shipment.timeSent.fold { DateTime.now } { t => t }
+        val timeUnpacked = timeReceived.plusDays(1)
+        shipment.skipToUnpackedState(timeReceived, timeUnpacked) mustSucceed { s =>
+          s.timeReceived must be (Some(timeReceived))
+          s.timeUnpacked must be (Some(timeUnpacked))
+          s.version must be (shipment.version + 1)
+          s.state must be (ShipmentState.Unpacked)
+          checkTimeStamps(s, shipment.timeAdded, DateTime.now)
+        }
+      }
+
+    }
+
     "cannot be created" - {
 
       "with an invalid ID" in {
@@ -336,6 +367,41 @@ class ShipmentSpec extends DomainFreeSpec {
           val shipment = f.shipments(state)
           info(s"shipment from ${shipment.state} to Lost fails")
           shipment.lost mustFail "InvalidStateTransition.*LOST.*"
+        }
+      }
+
+    }
+
+    "state cannot be skipped" - {
+
+      "to sent from an invalid state" in {
+        val f = allShipmentsFixture
+        List(ShipmentState.Packed,
+             ShipmentState.Received,
+             ShipmentState.Unpacked,
+             ShipmentState.Lost
+        ).foreach {  state =>
+          val shipment = f.shipments(state)
+          info(s"shipment from ${shipment.state} to sent fails")
+          val timePacked = DateTime.now.minusDays(10)
+          val timeSent = timePacked.plusDays(1)
+          shipment.skipToSentState(timePacked, timeSent) mustFail "InvalidStateTransition.*SENT.*"
+        }
+      }
+
+      "to unpacked from an invalid state" in {
+        val f = allShipmentsFixture
+        List(ShipmentState.Created,
+             ShipmentState.Packed,
+             ShipmentState.Received,
+             ShipmentState.Unpacked,
+             ShipmentState.Lost
+        ).foreach {  state =>
+          val shipment = f.shipments(state)
+          info(s"shipment from ${shipment.state} to sent fails")
+          val timeReceived = DateTime.now.plusDays(1)
+          val timeUnpacked = timeReceived.plusDays(1)
+          shipment.skipToUnpackedState(timeReceived, timeUnpacked) mustFail "InvalidStateTransition.*UNPACKED.*"
         }
       }
 

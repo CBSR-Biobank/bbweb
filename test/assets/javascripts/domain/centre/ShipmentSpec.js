@@ -328,91 +328,176 @@ define(function (require) {
                                failTest);
       });
 
-      it('can update a shipment to packed state', function() {
-        var self         = this,
-            jsonShipment = self.factory.shipment(),
-            time         = moment(faker.date.recent(10)).format(),
-            shipment     = new self.Shipment(jsonShipment);
+      describe('can change state on a shipment', function() {
 
-        this.updateEntity.call(this,
-                               shipment,
-                               'packed',
-                               time,
-                               uri('packed', shipment.id ),
-                               { time: time },
-                               jsonShipment,
-                               this.expectShipment,
-                               failTest);
+        var context = {};
+
+        beforeEach(inject(function () {
+          context.jsonShipment = this.factory.shipment();
+          context.expectedShipment = this.expectShipment;
+        }));
+
+        describe('to created state', function() {
+
+          beforeEach(inject(function () {
+            context.state = this.ShipmentState.CREATED;
+          }));
+
+          changeStateSharedBehaviour(context);
+
+        });
+
+        describe('to packed state', function() {
+
+          beforeEach(inject(function () {
+            context.state = this.ShipmentState.PACKED;
+          }));
+
+          changeStateSharedBehaviour(context);
+
+        });
+
+        describe('to sent state', function() {
+
+          beforeEach(inject(function () {
+            context.state = this.ShipmentState.SENT;
+          }));
+
+          changeStateSharedBehaviour(context);
+
+        });
+
+        describe('to received state', function() {
+
+          beforeEach(inject(function () {
+            context.state = this.ShipmentState.RECEIVED;
+          }));
+
+          changeStateSharedBehaviour(context);
+
+        });
+
+        describe('to unpacked state', function() {
+
+          beforeEach(inject(function () {
+            context.state = this.ShipmentState.UNPACKED;
+          }));
+
+          changeStateSharedBehaviour(context);
+
+        });
+
+        describe('to lost state', function() {
+
+          beforeEach(inject(function () {
+            context.state = this.ShipmentState.LOST;
+          }));
+
+          changeStateSharedBehaviour(context);
+
+        });
+
       });
 
-      it('can update a shipment to sent state', function() {
-        var self         = this,
-            jsonShipment = self.factory.shipment(),
-            time         = moment(faker.date.recent(10)).format(),
-            shipment     = new self.Shipment(jsonShipment);
+      describe('can change state on a shipment', function() {
 
-        this.updateEntity.call(this,
-                               shipment,
-                               'sent',
-                               time,
-                               uri('sent', shipment.id ),
-                               { time: time },
-                               jsonShipment,
-                               this.expectShipment,
-                               failTest);
-      });
+        beforeEach(function() {
+          this.jsonShipment = this.factory.shipment();
+          this.time         = moment(faker.date.recent(10)).format();
+          this.shipment     = new this.Shipment(this.jsonShipment);
+        });
 
-      it('can update a shipment to received state', function() {
-        var self         = this,
-            jsonShipment = self.factory.shipment(),
-            time         = moment(faker.date.recent(10)).format(),
-            shipment     = new self.Shipment(jsonShipment);
+        it('can skip state to SENT', function() {
+          this.updateEntity.call(this,
+                                 this.shipment,
+                                 'skipToStateSent',
+                                 [ this.time, this.time ],
+                                 uri('state/skip-to-sent', this.shipment.id ),
+                                 { timePacked: this.time, timeSent: this.time },
+                                 this.jsonShipment,
+                                 this.expectShipment,
+                                 failTest);
+        });
 
-        this.updateEntity.call(this,
-                               shipment,
-                               'received',
-                               time,
-                               uri('received', shipment.id ),
-                               { time: time },
-                               jsonShipment,
-                               this.expectShipment,
-                               failTest);
-      });
+        it('can skip state to UNPACKED', function() {
+          this.updateEntity.call(this,
+                                 this.shipment,
+                                 'skipToStateUnpacked',
+                                 [ this.time, this.time ],
+                                 uri('state/skip-to-unpacked', this.shipment.id ),
+                                 { timeReceived: this.time, timeUnpacked: this.time },
+                                 this.jsonShipment,
+                                 this.expectShipment,
+                                 failTest);
+        });
 
-      it('can update a shipment to unpacked state', function() {
-        var self         = this,
-            jsonShipment = self.factory.shipment(),
-            time         = moment(faker.date.recent(10)).format(),
-            shipment     = new self.Shipment(jsonShipment);
 
-        this.updateEntity.call(this,
-                               shipment,
-                               'unpacked',
-                               time,
-                               uri('unpacked', shipment.id ),
-                               { time: time },
-                               jsonShipment,
-                               this.expectShipment,
-                               failTest);
-      });
-
-      it('can update a shipment to lost state', function() {
-        var self         = this,
-            jsonShipment = self.factory.shipment(),
-            shipment     = new self.Shipment(jsonShipment);
-
-        this.updateEntity.call(this,
-                               shipment,
-                               'lost',
-                               undefined,
-                               uri('lost', shipment.id ),
-                               {},
-                               jsonShipment,
-                               this.expectShipment,
-                               failTest);
       });
 
     });
+
+    describe('state predicates', function() {
+
+      it('for CREATED state predicate', function() {
+        var shipment = new this.Shipment(this.factory.shipment({ state: this.ShipmentState.CREATED }));
+        expect(shipment.isCreated()).toBeTrue();
+      });
+
+      it('for PACKED state predicate', function() {
+        var shipment = new this.Shipment(this.factory.shipment({ state: this.ShipmentState.PACKED }));
+        expect(shipment.isPacked()).toBeTrue();
+      });
+
+      it('for SENT state predicate', function() {
+        var shipment = new this.Shipment(this.factory.shipment({ state: this.ShipmentState.SENT }));
+        expect(shipment.isSent()).toBeTrue();
+      });
+
+      it('for not CREATED nor UNPACKED predicate', function() {
+        var self = this;
+
+        _.forEach([
+          self.ShipmentState.PACKED,
+          self.ShipmentState.SENT,
+          self.ShipmentState.RECEIVED,
+          self.ShipmentState.LOST,
+        ], function (state) {
+          var shipment = new self.Shipment(self.factory.shipment({ state: state }));
+          expect(shipment.isNotCreatedNorUnpacked()).toBeTrue();
+        });
+      });
+
+    });
+
+    /**
+     * @param {domain.centres.ShipmentState} context.state - the new state to change to.
+     *
+     * @param {Object} context.jsonShipment - A Json object representing the shipment.
+     *
+     * @param {domain.centres.Shipment} context.expectedShipment - The Shipment object that should be returned
+     * from the update request.
+     */
+    function changeStateSharedBehaviour(context) {
+
+      describe('shared state change behaviour', function () {
+
+        it('can change state', function() {
+          var time         = moment(faker.date.recent(10)).format(),
+              shipment     = new this.Shipment(context.jsonShipment);
+
+          this.updateEntity.call(this,
+                                 shipment,
+                                 'changeState',
+                                 [ context.state, time ],
+                                 uri('state', shipment.id ),
+                                 { newState: context.state, datetime: time },
+                                 context.jsonShipment,
+                                 context.expectShipment,
+                                 failTest);
+        });
+
+      });
+    }
 
     // used by promise tests
     function failTest(error) {

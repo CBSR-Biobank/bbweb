@@ -3,6 +3,7 @@ package org.biobank.controllers.centres
 import com.github.nscala_time.time.Imports._
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.centre._
+import org.joda.time.DateTime
 import play.api.libs.json._
 
 private[centres] trait ShipmentsControllerSpecUtils extends JsonHelper {

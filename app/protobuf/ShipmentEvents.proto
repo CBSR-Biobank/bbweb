@@ -29,7 +29,20 @@ message ShipmentEvent {
 
    message StateUpdated {
       optional int64  version         = 1;
-      optional string stateChangeTime = 2;
+      optional string stateName       = 2;
+      optional string stateChangeTime = 3;
+   }
+
+   message SkippedToSentState {
+      optional int64  version    = 1;
+      optional string timePacked = 2;
+      optional string timeSent   = 3;
+   }
+
+   message SkippedToUnpackedState {
+      optional int64  version      = 1;
+      optional string timeReceived = 2;
+      optional string timeUnpacked = 3;
    }
 
    message WithVersion {
@@ -42,17 +55,14 @@ message ShipmentEvent {
    optional string time   = 3;
 
    oneof event_type {
-      Added                 added                 = 4;
-      CourierNameUpdated    courierNameUpdated    = 5;
-      TrackingNumberUpdated trackingNumberUpdated = 6;
-      LocationUpdated       fromLocationUpdated   = 7;
-      LocationUpdated       toLocationUpdated     = 8;
-      StateUpdated          created               = 9;
-      StateUpdated          packed                = 10;
-      StateUpdated          sent                  = 11;
-      StateUpdated          received              = 12;
-      StateUpdated          unpacked              = 13;
-      WithVersion           lost                  = 14;
-      WithVersion           removed               = 15;
+      Added                  added                  = 4;
+      CourierNameUpdated     courierNameUpdated     = 5;
+      TrackingNumberUpdated  trackingNumberUpdated  = 6;
+      LocationUpdated        fromLocationUpdated    = 7;
+      LocationUpdated        toLocationUpdated      = 8;
+      StateUpdated           stateChanged           = 9;
+      WithVersion            removed                = 10;
+      SkippedToSentState     skippedToSentState     = 11;
+      SkippedToUnpackedState skippedToUnpackedState = 12;
    }
 }

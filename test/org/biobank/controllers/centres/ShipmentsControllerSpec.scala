@@ -3,6 +3,8 @@ package org.biobank.controllers.centres
 import com.github.nscala_time.time.Imports._
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain.centre._
+import org.biobank.domain.centre.ShipmentState._
+import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.test.Helpers._
 import scala.language.reflectiveCalls
@@ -17,6 +19,32 @@ class ShipmentsControllerSpec
     with ShipmentsControllerSpecUtils {
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.JsonUtils._
+
+  def skipStateCommon(shipment:   Shipment,
+                      newState:   ShipmentState,
+                      uriPath:    String,
+                      updateJson: JsValue) = {
+
+    shipmentRepository.put(shipment)
+    val json = makeRequest(POST, uri(shipment, uriPath), updateJson)
+
+    (json \ "status").as[String] must include ("success")
+
+    shipmentRepository.getByKey(shipment.id) mustSucceed { repoShipment =>
+      compareObj((json \ "data").as[JsObject], repoShipment)
+
+      repoShipment must have (
+        'id             (shipment.id),
+        'version        (shipment.version + 1),
+        'state          (newState),
+        'courierName    (shipment.courierName),
+        'trackingNumber (shipment.trackingNumber),
+        'fromLocationId (shipment.fromLocationId),
+        'toLocationId   (shipment.toLocationId))
+
+      checkTimeStamps(repoShipment, shipment.timeAdded, DateTime.now)
+    }
+  }
 
   "Shipment REST API" when {
 
@@ -266,7 +294,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "fails when adding a shipment with no courier name" in {
+      "fail when adding a shipment with no courier name" in {
         val shipment = createdShipmentFixture.shipment.copy(courierName = "")
         val json = makeRequest(POST, uri, BAD_REQUEST, shipmentToAddJson(shipment))
 
@@ -275,7 +303,7 @@ class ShipmentsControllerSpec
         (json \ "message").as[String] must include ("CourierNameInvalid")
       }
 
-      "fails when adding a shipment with no tracking number" in {
+      "fail when adding a shipment with no tracking number" in {
         val shipment = createdShipmentFixture.shipment.copy(trackingNumber = "")
         val json = makeRequest(POST, uri, BAD_REQUEST, shipmentToAddJson(shipment))
 
@@ -284,7 +312,7 @@ class ShipmentsControllerSpec
         (json \ "message").as[String] must include ("TrackingNumberInvalid")
       }
 
-      "fails when adding a shipment with no FROM location id" in {
+      "fail when adding a shipment with no FROM location id" in {
         val shipment = createdShipmentFixture.shipment.copy(fromLocationId = "")
         val json = makeRequest(POST, uri, NOT_FOUND, shipmentToAddJson(shipment))
 
@@ -293,7 +321,7 @@ class ShipmentsControllerSpec
         (json \ "message").as[String] must include regex ("EntityCriteriaError.*centre with location id")
       }
 
-      "fails when adding a shipment with no TO location id" in {
+      "fail when adding a shipment with no TO location id" in {
         val shipment = createdShipmentFixture.shipment.copy(toLocationId = "")
         val json = makeRequest(POST, uri, NOT_FOUND, shipmentToAddJson(shipment))
 
@@ -581,264 +609,307 @@ class ShipmentsControllerSpec
 
     }
 
-    "POST /shipments/created/:id" must {
+    "POST /shipments/state/:id" must {
 
-      "allow setting a shipment back to CREATED state from PACKED state" in {
-        val f = packedShipmentFixture
-        shipmentRepository.put(f.shipment)
-        val updateJson = Json.obj("expectedVersion" -> f.shipment.version)
-        val json = makeRequest(POST, uri(f.shipment, "created"), updateJson)
+      def changeStateCommon(shipment: Shipment,
+                            newState: ShipmentState,
+                            timeMaybe:     Option[DateTime]) = {
+        shipmentRepository.put(shipment)
+        val baseJson = Json.obj("expectedVersion" -> shipment.version,
+                                "newState"        -> newState)
+
+        val updateJson = timeMaybe.fold { baseJson } { time =>
+            baseJson ++ Json.obj("datetime" -> time) }
+
+        val json = makeRequest(POST, uri(shipment, "state"), updateJson)
 
         (json \ "status").as[String] must include ("success")
 
-        shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
+        shipmentRepository.getByKey(shipment.id) mustSucceed { repoShipment =>
           compareObj((json \ "data").as[JsObject], repoShipment)
 
           repoShipment must have (
-            'id             (f.shipment.id),
-            'version        (f.shipment.version + 1),
-            'state          (ShipmentState.Created),
-            'courierName    (f.shipment.courierName),
-            'trackingNumber (f.shipment.trackingNumber),
-            'fromLocationId (f.shipment.fromLocationId),
-            'toLocationId   (f.shipment.toLocationId))
+            'id             (shipment.id),
+            'version        (shipment.version + 1),
+            'state          (newState),
+            'courierName    (shipment.courierName),
+            'trackingNumber (shipment.trackingNumber),
+            'fromLocationId (shipment.fromLocationId),
+            'toLocationId   (shipment.toLocationId))
 
-          checkTimeStamps(repoShipment, f.shipment.timeAdded, DateTime.now)
+          checkTimeStamps(repoShipment, shipment.timeAdded, DateTime.now)
+        }
+      }
+
+      "for all states" should {
+
+        "fail requests to update the state on a shipment that does not exist" in {
+          val f = createdShipmentFixture
+          val time = DateTime.now.minusDays(10)
+
+          ShipmentState.values.foreach { state =>
+            info(s"for $state state")
+
+            val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
+                                      "newState"        -> state,
+                                      "datetime"        -> time)
+
+            val json = makeRequest(POST, uri(f.shipment, "state"), NOT_FOUND, updateJson)
+
+            (json \ "status").as[String] must include ("error")
+
+            (json \ "message").as[String] must include regex ("IdNotFound.*shipment.*")
+          }
+
+        }
+
+      }
+
+      "for CREATED state" should {
+
+        "change to CREATED state from PACKED state" in {
+          val f = packedShipmentFixture
+
+          changeStateCommon(f.shipment, ShipmentState.Created, None)
+          shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
+            compareTimestamps(shipment     = repoShipment,
+                              timePacked   = None,
+                              timeSent     = None,
+                              timeReceived = None,
+                              timeUnpacked = None)
+          }
+        }
+      }
+
+      "for PACKED state" should {
+
+        "change to SENT state from" in {
+          val f = allShipmentsFixture
+          val timePacked = DateTime.now.minusDays(10)
+
+          List(ShipmentState.Created, ShipmentState.Sent).foreach { state =>
+            info(s"from $state state")
+
+            val shipment = f.shipments(state)
+            changeStateCommon(shipment, ShipmentState.Packed, Some(timePacked))
+            shipmentRepository.getByKey(shipment.id) mustSucceed { repoShipment =>
+              compareTimestamps(repoShipment,
+                                Some(timePacked),
+                                None,
+                                None,
+                                None)
+            }
+          }
+        }
+
+      }
+
+      "for SENT state" must {
+
+        "change to SENT state from" in {
+          val f = allShipmentsFixture
+
+          List(ShipmentState.Packed, ShipmentState.Received).foreach { state =>
+            info(s"$state state")
+            val shipment =  f.shipments(state)
+            val time = shipment.timePacked.get.plusDays(1)
+
+            changeStateCommon(shipment, ShipmentState.Sent, Some(time))
+            shipmentRepository.getByKey(shipment.id) mustSucceed { repoShipment =>
+              compareTimestamps(repoShipment,
+                                shipment.timePacked,
+                                Some(time),
+                                None,
+                                None)
+            }
+          }
+        }
+
+        "fail when updating state to SENT where time is less than packed time" in {
+          val f = packedShipmentFixture
+          shipmentRepository.put(f.shipment)
+          val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
+                                    "newState"        -> ShipmentState.Sent,
+                                    "datetime"        -> f.shipment.timePacked.get.minusDays(1))
+
+          val json = makeRequest(POST, uri(f.shipment, "state"), BAD_REQUEST, updateJson)
+
+          (json \ "status").as[String] must include ("error")
+
+          (json \ "message").as[String] must include ("TimeSentBeforePacked")
+        }
+
+      }
+
+      "for RECEIVED state" must {
+
+        "change to RECEIVED state from" in {
+          val f = allShipmentsFixture
+
+          List(ShipmentState.Sent, ShipmentState.Unpacked).foreach { state =>
+            info(s"$state state")
+            val shipment =  f.shipments(state)
+            val time = shipment.timeSent.get.plusDays(1)
+
+            changeStateCommon(shipment, ShipmentState.Received, Some(time))
+            shipmentRepository.getByKey(shipment.id) mustSucceed { repoShipment =>
+              compareTimestamps(repoShipment,
+                                shipment.timePacked,
+                                shipment.timeSent,
+                                Some(time),
+                                None)
+            }
+          }
+        }
+
+        "fail for updating state to RECEIVED where time is less than sent time" in {
+          val f = sentShipmentFixture
+          shipmentRepository.put(f.shipment)
+          val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
+                                    "newState"        -> ShipmentState.Received,
+                                    "datetime"        -> f.shipment.timeSent.get.minusDays(1))
+
+          val json = makeRequest(POST, uri(f.shipment, "state"), BAD_REQUEST, updateJson)
+
+          (json \ "status").as[String] must include ("error")
+
+          (json \ "message").as[String] must include ("TimeReceivedBeforeSent")
+        }
+
+      }
+
+      "for UNPACKED state" must {
+
+        "change to UNPACKED state from RECEIVED" in {
+          val f = receivedShipmentFixture
+          val timeUnpacked = f.shipment.timeReceived.get.plusDays(1)
+
+          changeStateCommon(f.shipment, ShipmentState.Unpacked, Some(timeUnpacked))
+          shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
+            compareTimestamps(repoShipment,
+                              f.shipment.timePacked,
+                              f.shipment.timeSent,
+                              f.shipment.timeReceived,
+                              Some(timeUnpacked))
+          }
+        }
+
+        "fail for updating state to RECEIVED where time is less than sent time" in {
+          val f = receivedShipmentFixture
+          shipmentRepository.put(f.shipment)
+          val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
+                                    "newState"        -> ShipmentState.Unpacked,
+                                    "datetime"        -> f.shipment.timeReceived.get.minusDays(1))
+
+          val json = makeRequest(POST, uri(f.shipment, "state"), BAD_REQUEST, updateJson)
+
+          (json \ "status").as[String] must include ("error")
+
+          (json \ "message").as[String] must include ("TimeUnpackedBeforeReceived")
+        }
+      }
+
+      "for LOST state" must {
+
+        "allow setting a shipment's state to LOST" in {
+          val f = sentShipmentFixture
+
+          changeStateCommon(f.shipment, ShipmentState.Lost, None)
+          shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
+            compareTimestamps(f.shipment, repoShipment)
+          }
+        }
+      }
+
+    }
+
+    "POST /shipments/state/skip-to-sent/:id" must {
+
+      "switch from CREATED to SENT state" in {
+        val f = createdShipmentFixture
+        val timePacked = DateTime.now.minusDays(10)
+        val timeSent = timePacked.plusDays(1)
+        val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
+                                  "timePacked"      -> timePacked,
+                                  "timeSent"        -> timeSent)
+
+        skipStateCommon(f.shipment, ShipmentState.Sent, "state/skip-to-sent", updateJson)
+        shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
           compareTimestamps(shipment     = repoShipment,
-                            timePacked   = None,
-                            timeSent     = None,
+                            timePacked   = Some(timePacked),
+                            timeSent     = Some(timeSent),
                             timeReceived = None,
                             timeUnpacked = None)
         }
-
       }
-    }
 
-    "POST /shipments/packed/:id" must {
+      "fails when skipping to SENT state from state" in {
+        val f = allShipmentsFixture
 
-      "allow updating the time the shipment was packed" in {
-        val f = createdShipmentFixture
-        shipmentRepository.put(f.shipment)
+        List(ShipmentState.Packed,
+             ShipmentState.Sent,
+             ShipmentState.Received,
+             ShipmentState.Unpacked,
+             ShipmentState.Lost).foreach { state =>
+          info(s"$state")
+          val shipment =  f.shipments(state)
+          val time = DateTime.now.minusDays(10)
+          val updateJson = Json.obj("expectedVersion" -> shipment.version,
+                                    "timePacked"      -> time,
+                                    "timeSent"        -> time)
+          shipmentRepository.put(shipment)
+          val json = makeRequest(POST, uri(shipment, "state/skip-to-sent"), BAD_REQUEST, updateJson)
 
-        val timePacked = DateTime.now.minusDays(10)
-        val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
-                                  "time"            -> timePacked)
-        val json = makeRequest(POST, uri(f.shipment, "packed"), updateJson)
-                              (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("error")
 
-        shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
-          compareObj((json \ "data").as[JsObject], repoShipment)
-
-          repoShipment must have (
-            'id             (f.shipment.id),
-            'version        (f.shipment.version + 1),
-            'state          (ShipmentState.Packed),
-            'courierName    (f.shipment.courierName),
-            'trackingNumber (f.shipment.trackingNumber),
-            'fromLocationId (f.shipment.fromLocationId),
-            'toLocationId   (f.shipment.toLocationId))
-
-          checkTimeStamps(repoShipment, f.shipment.timeAdded, DateTime.now)
-          compareTimestamps(repoShipment,
-                            Some(timePacked),
-                            f.shipment.timeSent,
-                            f.shipment.timeReceived,
-                            f.shipment.timeUnpacked)
-        }
-      }
-    }
-
-    "POST /shipments/sent/:id" must {
-
-      "allow setting a shipment's state to SENT" in {
-        val f = packedShipmentFixture
-        shipmentRepository.put(f.shipment)
-
-        val timeSent = f.shipment.timePacked.get.plusDays(1)
-        val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
-                                  "time"            -> timeSent)
-
-        val json = makeRequest(POST, uri(f.shipment, "sent"), updateJson)
-
-        (json \ "status").as[String] must include ("success")
-
-        shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
-          compareObj((json \ "data").as[JsObject], repoShipment)
-
-          repoShipment must have (
-            'id             (f.shipment.id),
-            'version        (f.shipment.version + 1),
-            'state          (ShipmentState.Sent),
-            'courierName    (f.shipment.courierName),
-            'trackingNumber (f.shipment.trackingNumber),
-            'fromLocationId (f.shipment.fromLocationId),
-            'toLocationId   (f.shipment.toLocationId))
-
-          checkTimeStamps(repoShipment, f.shipment.timeAdded, DateTime.now)
-          compareTimestamps(repoShipment,
-                            f.shipment.timePacked,
-                            Some(timeSent),
-                            f.shipment.timeReceived,
-                            f.shipment.timeUnpacked)
+          (json \ "message").as[String] must include regex ("InvalidStateTransition.*SENT")
         }
       }
 
-      "fails for updating state to SENT on a shipment that does not exist" in {
-        val f = packedShipmentFixture
-        val timeSent = f.shipment.timePacked.get.plusDays(1)
-        val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
-                                  "time"            -> timeSent)
-
-        val json = makeRequest(POST, uri(f.shipment, "sent"), NOT_FOUND, updateJson)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex ("IdNotFound.*shipment.*")
-      }
-
-      "fails for updating state to SENT where time is less than packed time" in {
-        val f = packedShipmentFixture
-        shipmentRepository.put(f.shipment)
-        val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
-                                  "time"            -> f.shipment.timePacked.get.minusDays(1))
-
-        val json = makeRequest(POST, uri(f.shipment, "sent"), BAD_REQUEST, updateJson)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include ("TimeSentBeforePacked")
-      }
-
     }
 
-    "POST /shipments/received/:id" must {
+    "POST /shipments/state/skip-to-unpacked/:id" must {
 
-      "allow setting a shipment's state to RECEIVED" in {
+      "switch from SENT to UNPACKED state" in {
         val f = sentShipmentFixture
-        shipmentRepository.put(f.shipment)
-
-        val timeReceived = f.shipment.timeSent.get.plusDays(1)
+        val timeReceived = f.shipment.timeSent.fold { DateTime.now } { t => t.plusDays(1) }
+        val timeUnpacked = timeReceived.plusDays(1)
         val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
-                                  "time"            -> timeReceived)
-
-        val json = makeRequest(POST, uri(f.shipment, "received"), updateJson)
-
-        (json \ "status").as[String] must include ("success")
-
+                                  "timeReceived"    -> timeReceived,
+                                  "timeUnpacked"    -> timeUnpacked)
+        skipStateCommon(f.shipment, ShipmentState.Unpacked, "state/skip-to-unpacked", updateJson)
         shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
-          compareObj((json \ "data").as[JsObject], repoShipment)
-
-          repoShipment must have (
-            'id             (f.shipment.id),
-            'version        (f.shipment.version + 1),
-            'state          (ShipmentState.Received),
-            'courierName    (f.shipment.courierName),
-            'trackingNumber (f.shipment.trackingNumber),
-            'fromLocationId (f.shipment.fromLocationId),
-            'toLocationId   (f.shipment.toLocationId))
-
-          checkTimeStamps(repoShipment, f.shipment.timeAdded, DateTime.now)
-          compareTimestamps(repoShipment,
-                            f.shipment.timePacked,
-                            f.shipment.timeSent,
-                            Some(timeReceived),
-                            f.shipment.timeUnpacked)
+          compareTimestamps(shipment     = repoShipment,
+                            timePacked   = f.shipment.timePacked,
+                            timeSent     = f.shipment.timeSent,
+                            timeReceived = Some(timeReceived),
+                            timeUnpacked = Some(timeUnpacked))
         }
       }
 
-      "fails for updating state to RECEIVED where time is less than sent time" in {
-        val f = sentShipmentFixture
-        shipmentRepository.put(f.shipment)
-        val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
-                                  "time"            -> f.shipment.timeSent.get.minusDays(1))
+      "111 fails when skipping to UNPACKED state from state" in {
+        val f = allShipmentsFixture
 
-        val json = makeRequest(POST, uri(f.shipment, "received"), BAD_REQUEST, updateJson)
+        List(ShipmentState.Created,
+             ShipmentState.Packed,
+             ShipmentState.Received,
+             ShipmentState.Unpacked,
+             ShipmentState.Lost).foreach { state =>
+          info(s"$state")
+          val shipment =  f.shipments(state)
+          val time = shipment.timeSent.fold { DateTime.now } { t => t }
+          val updateJson = Json.obj("expectedVersion" -> shipment.version,
+                                    "timeReceived"    -> time,
+                                    "timeUnpacked"    -> time)
+          shipmentRepository.put(shipment)
+          val json = makeRequest(POST, uri(shipment, "state/skip-to-unpacked"), BAD_REQUEST, updateJson)
 
-        (json \ "status").as[String] must include ("error")
+          (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include ("TimeReceivedBeforeSent")
-      }
-
-    }
-
-    "POST /shipments/unpacked/:id" must {
-
-      "allow setting a shipment's state to UNPACKED" in {
-        val f = receivedShipmentFixture
-        shipmentRepository.put(f.shipment)
-
-        val timeUnpacked = f.shipment.timeReceived.get.plusDays(1)
-        val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
-                                  "time"            -> timeUnpacked)
-
-        val json = makeRequest(POST, uri(f.shipment, "unpacked"), updateJson)
-
-        (json \ "status").as[String] must include ("success")
-
-        shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
-          compareObj((json \ "data").as[JsObject], repoShipment)
-
-          repoShipment must have (
-            'id             (f.shipment.id),
-            'version        (f.shipment.version + 1),
-            'state          (ShipmentState.Unpacked),
-            'courierName    (f.shipment.courierName),
-            'trackingNumber (f.shipment.trackingNumber),
-            'fromLocationId (f.shipment.fromLocationId),
-            'toLocationId   (f.shipment.toLocationId))
-
-          checkTimeStamps(repoShipment, f.shipment.timeAdded, DateTime.now)
-          compareTimestamps(repoShipment,
-                            f.shipment.timePacked,
-                            f.shipment.timeSent,
-                            f.shipment.timeReceived,
-                            Some(timeUnpacked))
+          (json \ "message").as[String] must include regex ("InvalidStateTransition.*UNPACKED")
         }
       }
 
-      "fails for updating state to RECEIVED where time is less than sent time" in {
-        val f = receivedShipmentFixture
-        shipmentRepository.put(f.shipment)
-        val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
-                                  "time"            -> f.shipment.timeReceived.get.minusDays(1))
-
-        val json = makeRequest(POST, uri(f.shipment, "unpacked"), BAD_REQUEST, updateJson)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include ("TimeUnpackedBeforeReceived")
-      }
-
-    }
-
-    "POST /shipments/lost/:id" must {
-
-      "allow setting a shipment's state to LOST" in {
-        val f = sentShipmentFixture
-        shipmentRepository.put(f.shipment)
-
-        val json = makeRequest(POST,
-                               uri(f.shipment, "lost"),
-                               Json.obj("expectedVersion" -> f.shipment.version))
-
-        (json \ "status").as[String] must include ("success")
-
-        shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
-          compareObj((json \ "data").as[JsObject], repoShipment)
-
-          repoShipment must have (
-            'id             (f.shipment.id),
-            'version        (f.shipment.version + 1),
-            'state          (ShipmentState.Lost),
-            'courierName    (f.shipment.courierName),
-            'trackingNumber (f.shipment.trackingNumber),
-            'fromLocationId (f.shipment.fromLocationId),
-            'toLocationId   (f.shipment.toLocationId))
-
-          checkTimeStamps(repoShipment, f.shipment.timeAdded, DateTime.now)
-          compareTimestamps(f.shipment, repoShipment)
-        }
-      }
     }
 
     "DELETE /shipments/:id/:ver" must {
@@ -854,7 +925,7 @@ class ShipmentsControllerSpec
         shipmentRepository.getByKey(f.shipment.id) mustFail "IdNotFound.*shipment id.*"
       }
 
-      "fails on attempt to delete a shipment not in the system"  in {
+      "fail on attempt to delete a shipment not in the system"  in {
         val f = createdShipmentFixture
 
         val json = makeRequest(DELETE, uri(f.shipment) + s"/${f.shipment.version}", NOT_FOUND)
@@ -894,6 +965,6 @@ class ShipmentsControllerSpec
         (json \ "message").as[String] must include regex ("shipment has specimens.*")
       }
     }
-
   }
+
 }

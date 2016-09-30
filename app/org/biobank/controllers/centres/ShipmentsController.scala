@@ -148,23 +148,20 @@ class ShipmentsController @Inject() (val env:              Environment,
   def updateToLocation(id: String) =
     commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateShipmentToLocationCmd => processCommand(cmd) }
 
-  def created(id: String) =
-    commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentCreatedCmd => processCommand(cmd) }
+  /**
+   * Changes the state of a shipment from CREATED to SENT (skipping the PACKED state)
+   */
+  def skipStateSent(id: String) =
+    commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentSkipStateToSentCmd => processCommand(cmd) }
 
-  def packed(id: String) =
-    commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentPackedCmd => processCommand(cmd) }
+  /**
+   * Changes the state of a shipment from SENT to UNPACKED (skipping the RECEVIED state)
+   */
+  def skipStateUnpacked(id: String) =
+    commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentSkipStateToUnpackedCmd => processCommand(cmd) }
 
-  def sent(id: String) =
-    commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentSentCmd => processCommand(cmd) }
-
-  def received(id: String) =
-    commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentReceivedCmd => processCommand(cmd) }
-
-  def unpacked(id: String) =
-    commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentUnpackedCmd => processCommand(cmd) }
-
-  def lost(id: String) =
-    commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentLostCmd => processCommand(cmd) }
+  def changeState(id: String) =
+    commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentChangeStateCmd => processCommand(cmd) }
 
   def addSpecimen(shipmentId: String) = commandActionAsync(Json.obj("shipmentId" -> shipmentId)) {
       cmd: ShipmentSpecimenAddCmd => processSpecimenCommand(cmd)
