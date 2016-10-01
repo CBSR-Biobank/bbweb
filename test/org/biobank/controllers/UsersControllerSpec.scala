@@ -84,10 +84,10 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri       = uri,
           offset    = 0,
-          total     = users.size,
+          total     = users.size.toLong,
           maybeNext = None,
           maybePrev = None)
-        jsonItems must have size users.size
+        jsonItems must have size users.size.toLong
         compareObjs(jsonItems, users)
       }
 
@@ -129,11 +129,11 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
           uri = uri,
           queryParams = Map("status" -> "ActiveUser"),
           offset = 0,
-          total = expectedUsers.size,
+          total = expectedUsers.size.toLong,
           maybeNext = None,
           maybePrev = None)
 
-        jsonItems must have size expectedUsers.size
+        jsonItems must have size expectedUsers.size.toLong
         compareObjs(jsonItems, expectedUsers)
       }
 
@@ -148,11 +148,11 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
           uri = uri,
           queryParams = Map("status" -> "LockedUser"),
           offset = 0,
-          total = expectedUsers.size,
+          total = expectedUsers.size.toLong,
           maybeNext = None,
           maybePrev = None)
 
-        jsonItems must have size expectedUsers.size
+        jsonItems must have size expectedUsers.size.toLong
         compareObjs(jsonItems, expectedUsers)
       }
 
@@ -166,11 +166,11 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
           uri = uri,
           queryParams = Map("sort" -> "name"),
           offset = 0,
-          total = users.size,
+          total = users.size.toLong,
           maybeNext = None,
           maybePrev = None)
 
-        jsonItems must have size users.size
+        jsonItems must have size users.size.toLong
         compareObj(jsonItems(0), users(2))
         compareObj(jsonItems(1), users(1))
         compareObj(jsonItems(2), users(0))
@@ -186,11 +186,11 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
           uri = uri,
           queryParams = Map("sort" -> "email"),
           offset = 0,
-          total = users.size,
+          total = users.size.toLong,
           maybeNext = None,
           maybePrev = None)
 
-        jsonItems must have size users.size
+        jsonItems must have size users.size.toLong
         compareObj(jsonItems(0), users(2))
         compareObj(jsonItems(1), users(1))
         compareObj(jsonItems(2), users(0))
@@ -206,11 +206,11 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
           uri = uri,
           queryParams = Map("sort" -> "status"),
           offset = 0,
-          total = users.size,
+          total = users.size.toLong,
           maybeNext = None,
           maybePrev = None)
 
-        jsonItems must have size users.size
+        jsonItems must have size users.size.toLong
         compareObj(jsonItems(0), users(2))
         compareObj(jsonItems(1), users(1))
         compareObj(jsonItems(2), users(0))
@@ -226,11 +226,11 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
           uri = uri,
           queryParams = Map("sort" -> "status", "order" -> "desc"),
           offset = 0,
-          total = users.size,
+          total = users.size.toLong,
           maybeNext = None,
           maybePrev = None)
 
-        jsonItems must have size users.size
+        jsonItems must have size users.size.toLong
         compareObj(jsonItems(0), users(0))
         compareObj(jsonItems(1), users(1))
         compareObj(jsonItems(2), users(2))
@@ -245,7 +245,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val jsonItem = PagedResultsSpec(this).singleItemResult(
           uri = uri,
           queryParams = Map("sort" -> "email", "pageSize" -> "1"),
-          total = users.size,
+          total = users.size.toLong,
           maybeNext = Some(2))
 
         compareObj(jsonItem, users(2))

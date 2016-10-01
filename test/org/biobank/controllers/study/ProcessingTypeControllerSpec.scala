@@ -140,7 +140,7 @@ class ProcessingTypeControllerSpec extends ControllerFixture with JsonHelper {
           (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
 
-        jsonList must have size proctypes.size
+        jsonList must have size proctypes.size.toLong
           (jsonList zip proctypes).map { item => compareObj(item._1, item._2) }
         ()
       }

@@ -30,6 +30,7 @@ scalacOptions in Compile ++= Seq(
   "-Ywarn-adapted-args", // Warn if an argument list is modified to match the receiver
   "-Ywarn-dead-code",
   "-Ywarn-inaccessible",
+  "-Ywarn-numeric-widen",
   "-Ywarn-unused",
   "-Ywarn-unused-import",
   "-Ywarn-value-discard" // Warn when non-Unit expression results are unused

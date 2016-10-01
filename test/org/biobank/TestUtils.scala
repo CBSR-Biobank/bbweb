@@ -101,7 +101,7 @@ object TestUtils extends MustMatchers with OptionValues {
       validation.fold(
         err => {
           val errList = err.list.toList
-          errList must have size expectedMessages.size
+          errList must have size expectedMessages.size.toLong
           expectedMessages.foreach { em =>
             errList must containItemMatchingRegex (em)
           }
@@ -136,7 +136,7 @@ object TestUtils extends MustMatchers with OptionValues {
     def mustFailContains(expectedMessages: String*): Unit = {
       validation.fold(
         err => {
-          err.list.toList must have size expectedMessages.size
+          err.list.toList must have size expectedMessages.size.toLong
           expectedMessages.foreach { em =>
             err.list.toList must containItemContainingRegex (em)
           }

@@ -182,7 +182,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
           val json = makeRequest(GET, uri(study))
                                 (json \ "status").as[String] must include ("success")
           val jsonList = (json \ "data").as[List[JsObject]]
-          jsonList must have size cetypes.size
+          jsonList must have size cetypes.size.toLong
 
           jsonList.foreach { jsonCet =>
             val jsonId = (jsonCet \ "id").as[String]
@@ -253,8 +253,8 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
             'recurring   (cet.recurring)
           )
 
-          repoCet.specimenSpecs must have size cet.specimenSpecs.size
-          repoCet.annotationTypes must have size cet.annotationTypes.size
+          repoCet.specimenSpecs must have size cet.specimenSpecs.size.toLong
+          repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
           checkTimeStamps(repoCet, cet.timeAdded, None)
         }
       }
@@ -280,8 +280,8 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
               'recurring   (cet.recurring)
             )
 
-            repoCet.specimenSpecs must have size cet.specimenSpecs.size
-            repoCet.annotationTypes must have size cet.annotationTypes.size
+            repoCet.specimenSpecs must have size cet.specimenSpecs.size.toLong
+            repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
             checkTimeStamps(repoCet, cet.timeAdded, None)
           }
         }
@@ -375,8 +375,8 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
               'recurring   (cet.recurring)
             )
 
-            repoCet.specimenSpecs must have size cet.specimenSpecs.size
-            repoCet.annotationTypes must have size cet.annotationTypes.size
+            repoCet.specimenSpecs must have size cet.specimenSpecs.size.toLong
+            repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
             checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
           }
         }
@@ -416,8 +416,8 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
               'recurring   (cet.recurring)
             )
 
-            repoCet.specimenSpecs must have size cet.specimenSpecs.size
-            repoCet.annotationTypes must have size cet.annotationTypes.size
+            repoCet.specimenSpecs must have size cet.specimenSpecs.size.toLong
+            repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
             checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
           }
         }
@@ -494,8 +494,8 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
               'recurring   (cet.recurring)
             )
 
-            repoCet.specimenSpecs must have size cet.specimenSpecs.size
-            repoCet.annotationTypes must have size cet.annotationTypes.size
+            repoCet.specimenSpecs must have size cet.specimenSpecs.size.toLong
+            repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
             checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
           }
         }
@@ -555,8 +555,8 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
                 'recurring   (recurring)
               )
 
-              repoCet.specimenSpecs must have size cet.specimenSpecs.size
-              repoCet.annotationTypes must have size cet.annotationTypes.size
+              repoCet.specimenSpecs must have size cet.specimenSpecs.size.toLong
+              repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
               checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
             }
           }
@@ -614,7 +614,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
               'recurring   (cet.recurring)
             )
 
-            repoCet.specimenSpecs must have size cet.specimenSpecs.size
+            repoCet.specimenSpecs must have size cet.specimenSpecs.size.toLong
             repoCet.annotationTypes must have size 1
 
             repoCet.annotationTypes.head.uniqueId must not be empty
@@ -689,7 +689,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
               'recurring   (cet.recurring)
             )
 
-            repoCet.specimenSpecs must have size cet.specimenSpecs.size
+            repoCet.specimenSpecs must have size cet.specimenSpecs.size.toLong
             repoCet.annotationTypes must have size 0
 
             checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
@@ -811,7 +811,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
               'recurring   (cet.recurring)
             )
 
-            repoCet.annotationTypes must have size cet.annotationTypes.size
+            repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
             repoCet.specimenSpecs must have size 1
 
             repoCet.specimenSpecs.head.uniqueId must not be empty
@@ -885,7 +885,7 @@ class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
               'recurring   (cet.recurring)
             )
 
-            repoCet.annotationTypes must have size cet.annotationTypes.size
+            repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
             repoCet.specimenSpecs must have size 0
 
             checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)

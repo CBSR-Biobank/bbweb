@@ -208,7 +208,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
 
       centreData.zipWithIndex.foreach { case ((name, description), index) =>
         val centre: Centre = DisabledCentre(
-            id           = CentreId(hashids.encode(index)),
+            id           = CentreId(hashids.encode(index.toLong)),
             version      = 0L,
             timeAdded    = DateTime.now,
             timeModified = None,
@@ -273,7 +273,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
         val descMaybe = if (name == "AHFEM") Some(s"$description\n\n$ahfemDescription")
                         else Some(description)
 
-        val study: Study = DisabledStudy(id              = StudyId(hashids.encode(index)),
+        val study: Study = DisabledStudy(id              = StudyId(hashids.encode(index.toLong)),
                                          version         = 0L,
                                          timeAdded       = DateTime.now,
                                          timeModified    = None,
@@ -460,7 +460,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
 
         (0 to 3).foreach { index =>
           participantRepository.put(
-            Participant(id           = ParticipantId(hashids.encode(index)),
+            Participant(id           = ParticipantId(hashids.encode(index.toLong)),
                         studyId      = bbpsp.id,
                         version      = 0L,
                         timeAdded    = DateTime.now,
@@ -488,7 +488,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
               case (ceventType, cetIndex) =>
                 log.debug(s"addBbpspCevents: adding collection event for participant ${participant.uniqueId}")
 
-                val id = CollectionEventId(hashids.encode(10 * pIndex + cetIndex))
+                val id = CollectionEventId(hashids.encode(10L * pIndex.toLong + cetIndex.toLong))
                 collectionEventRepository.put(
                   CollectionEvent(id                    = id,
                                   participantId         = participant.id,
@@ -546,7 +546,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
                           .foreach { cventType =>
                           val uniqueId = 100 * centreIndex + 10 * pIndex + ceventIndex
                           val inventoryId = f"A$uniqueId%05d"
-                          val specimen = addSpecimen(SpecimenId(hashids.encode(uniqueId)),
+                          val specimen = addSpecimen(SpecimenId(hashids.encode(uniqueId.toLong)),
                                                      inventoryId,
                                                      cventType.specimenSpecs.head,
                                                      centre.locations.head)
@@ -576,7 +576,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
 
       userData.zipWithIndex.foreach { case((name, email), index) =>
         val user: User = ActiveUser(
-            id           = UserId(hashids.encode(index)),
+            id           = UserId(hashids.encode(index.toLong)),
             version      = 0L,
             timeAdded    = DateTime.now,
             timeModified = None,

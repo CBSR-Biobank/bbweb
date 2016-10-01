@@ -169,7 +169,7 @@ class SpecimenLinkTypeControllerSpec extends ControllerFixture with JsonHelper {
           (json \ "status").as[String] must include ("success")
           val jsonList = (json \ "data").as[List[JsObject]]
 
-          jsonList must have size sltypes.size
+          jsonList must have size sltypes.size.toLong
           (jsonList zip sltypes).map { item => compareObj(item._1, item._2) }
           ()
         }

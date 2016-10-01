@@ -9,7 +9,7 @@ import play.api.libs.json._
 import scalaz.Scalaz._
 
 trait ContainerTypeValidations {
-  val NameMinLength = 2
+  val NameMinLength = 2L
 
   case object ContainerSchemaIdInvalid extends ValidationKey
 

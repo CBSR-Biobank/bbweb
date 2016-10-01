@@ -73,7 +73,7 @@ object Study {
 
 trait StudyValidations {
 
-  val NameMinLength = 2
+  val NameMinLength = 2L
 
   case object InvalidStudyId extends ValidationKey
 

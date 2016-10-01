@@ -83,7 +83,7 @@ class ShipmentSpecimensControllerSpec
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
             uri       = uri(f.shipment, "specimens"),
             offset    = 0,
-            total     = numSpecimens,
+            total     = numSpecimens.toLong,
             maybeNext = None,
             maybePrev = None)
 
@@ -107,7 +107,7 @@ class ShipmentSpecimensControllerSpec
         val jsonItem = PagedResultsSpec(this).singleItemResult(
             uri         = uri(f.shipment, "specimens"),
             queryParams = Map("pageSize" -> "1"),
-            total       = numSpecimens,
+            total       = numSpecimens.toLong,
             maybeNext   = Some(2))
 
 
@@ -157,7 +157,7 @@ class ShipmentSpecimensControllerSpec
         val jsonItem = PagedResultsSpec(this).singleItemResult(
             uri         = uri(f.shipment, "specimens"),
             queryParams = Map("pageSize" -> "1"),
-            total       = numSpecimens,
+            total       = numSpecimens.toLong,
             maybeNext   = Some(2))
 
 
@@ -171,7 +171,7 @@ class ShipmentSpecimensControllerSpec
         val jsonItem = PagedResultsSpec(this).singleItemResult(
             uri         = uri(f.shipment, "specimens"),
             queryParams = Map("page" -> "2", "pageSize" -> "1"),
-            total       = numSpecimens,
+            total       = numSpecimens.toLong,
             offset      = 1,
             maybeNext   = None,
             maybePrev   = Some(1))
@@ -205,7 +205,7 @@ class ShipmentSpecimensControllerSpec
             uri         = uri(f.shipment, "specimens"),
             queryParams = Map("sort" -> "state", "order" -> "desc"),
             offset      = 0,
-            total       = shipmentSpecimensMap.size,
+            total       = shipmentSpecimensMap.size.toLong,
             maybeNext   = None,
             maybePrev   = None)
 

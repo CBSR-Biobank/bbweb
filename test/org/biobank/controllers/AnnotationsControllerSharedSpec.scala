@@ -70,7 +70,7 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
         addedAnnotations += annotation
 
         val jsonAnnotations = (json \ "data" \ "annotations").as[List[JsObject]]
-        jsonAnnotations must have size addedAnnotations.size
+        jsonAnnotations must have size addedAnnotations.size.toLong
 
         jsonAnnotations.foreach { jsonAnnotation =>
           val jsonAnnotationTypeId = (jsonAnnotation \ "annotationTypeId").as[String]

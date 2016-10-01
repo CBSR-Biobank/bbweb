@@ -42,7 +42,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
     val jsonAnnotationTypes = (json \ "annotationTypes").as[List[JsObject]]
 
-    jsonAnnotationTypes must have size (study.annotationTypes.size)
+    jsonAnnotationTypes must have size (study.annotationTypes.size.toLong)
 
     jsonAnnotationTypes.foreach { json =>
       val jsonUniqueId = (json \ "uniqueId").as[String]
@@ -95,8 +95,8 @@ trait JsonHelper extends MustMatchers with OptionValues {
     (json \ "description").asOpt[String] mustBe (ceventType.description)
     (json \ "recurring").as[Boolean] mustBe (ceventType.recurring)
 
-    (json \ "specimenSpecs").as[List[JsObject]] must have size ceventType.specimenSpecs.size
-    (json \ "annotationTypes").as[List[JsObject]] must have size ceventType.annotationTypes.size
+    (json \ "specimenSpecs").as[List[JsObject]] must have size ceventType.specimenSpecs.size.toLong
+    (json \ "annotationTypes").as[List[JsObject]] must have size ceventType.annotationTypes.size.toLong
 
     (json \ "specimenSpecs").as[List[JsObject]].foreach { jsItem =>
       val jsonId = (jsItem \ "uniqueId").as[String]
@@ -143,7 +143,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
     (json \ "inputContainerTypeId").asOpt[String] mustBe (specimenLinkType.inputContainerTypeId.map(_.id))
     (json \ "outputContainerTypeId").asOpt[String] mustBe (specimenLinkType.outputContainerTypeId.map(_.id))
 
-    (json \ "annotationTypeData").as[List[JsObject]] must have size specimenLinkType.annotationTypeData.size
+    (json \ "annotationTypeData").as[List[JsObject]] must have size specimenLinkType.annotationTypeData.size.toLong
 
     (json \ "annotationTypeData")
       .as[List[JsObject]].zip(specimenLinkType.annotationTypeData).foreach { item =>
@@ -156,7 +156,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
     (json \ "stringValue").asOpt[String] mustBe (annotation.stringValue)
     (json \ "numberValue").asOpt[String] mustBe (annotation.numberValue)
 
-    (json \ "selectedValues").as[List[String]] must have size annotation.selectedValues.size
+    (json \ "selectedValues").as[List[String]] must have size annotation.selectedValues.size.toLong
 
     (json \ "selectedValues").as[List[String]].foreach { svJson =>
       annotation.selectedValues.contains(svJson)
@@ -168,7 +168,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
     (json \ "studyId").as[String] mustBe (participant.studyId.id)
     (json \ "uniqueId").as[String] mustBe (participant.uniqueId)
 
-    (json \ "annotations").as[List[JsObject]] must have size participant.annotations.size
+    (json \ "annotations").as[List[JsObject]] must have size participant.annotations.size.toLong
 
     (json \ "annotations").as[List[JsObject]].foreach { jsAnnotation =>
       val annotationTypeId = (jsAnnotation \ "annotationTypeId").as[String]

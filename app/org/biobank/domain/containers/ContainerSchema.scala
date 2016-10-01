@@ -9,7 +9,7 @@ import scalaz.Scalaz._
 
 trait ContainerSchemaValidations {
 
-  val NameMinLength = 2
+  val NameMinLength = 2L
 
 }
 

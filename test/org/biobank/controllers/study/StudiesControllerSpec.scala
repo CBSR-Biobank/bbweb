@@ -107,10 +107,10 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
             uri = uri,
             offset = 0,
-            total = studies.size,
+            total = studies.size.toLong,
             maybeNext = None,
             maybePrev = None)
-        jsonItems must have size studies.size
+        jsonItems must have size studies.size.toLong
         compareObjs(jsonItems, studies)
       }
 
@@ -146,11 +146,11 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             uri = uri,
             queryParams = Map("status" -> "DisabledStudy"),
             offset = 0,
-            total = expectedStudies.size,
+            total = expectedStudies.size.toLong,
             maybeNext = None,
             maybePrev = None)
 
-        jsonItems must have size expectedStudies.size
+        jsonItems must have size expectedStudies.size.toLong
         compareObjs(jsonItems, expectedStudies)
       }
 
@@ -166,11 +166,11 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             uri = uri,
             queryParams = Map("status" -> "EnabledStudy"),
             offset = 0,
-            total = expectedStudies.size,
+            total = expectedStudies.size.toLong,
             maybeNext = None,
             maybePrev = None)
 
-        jsonItems must have size expectedStudies.size
+        jsonItems must have size expectedStudies.size.toLong
         compareObjs(jsonItems, expectedStudies)
       }
 
@@ -185,11 +185,11 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             uri = uri,
             queryParams = Map("sort" -> "name"),
             offset = 0,
-            total = studies.size,
+            total = studies.size.toLong,
             maybeNext = None,
             maybePrev = None)
 
-        jsonItems must have size studies.size
+        jsonItems must have size studies.size.toLong
         compareObj(jsonItems(0), studies(3))
         compareObj(jsonItems(1), studies(2))
         compareObj(jsonItems(2), studies(1))
@@ -204,11 +204,11 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             uri         = uri,
             queryParams = Map("sort" -> "status"),
             offset      = 0,
-            total       = studies.size,
+            total       = studies.size.toLong,
             maybeNext   = None,
             maybePrev   = None)
 
-        jsonItems must have size studies.size
+        jsonItems must have size studies.size.toLong
         compareObj(jsonItems(0), studies(1))
         compareObj(jsonItems(1), studies(0))
       }
@@ -222,11 +222,11 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             uri = uri,
             queryParams = Map("sort" -> "status", "order" -> "desc"),
             offset = 0,
-            total = studies.size,
+            total = studies.size.toLong,
             maybeNext = None,
             maybePrev = None)
 
-        jsonItems must have size studies.size
+        jsonItems must have size studies.size.toLong
         compareObj(jsonItems(0), studies(0))
         compareObj(jsonItems(1), studies(1))
       }
@@ -241,7 +241,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val jsonItem = PagedResultsSpec(this).singleItemResult(
             uri = uri,
             queryParams = Map("sort" -> "name", "pageSize" -> "1"),
-            total = studies.size,
+            total = studies.size.toLong,
             maybeNext = Some(2))
 
         compareObj(jsonItem, studies(3))
@@ -375,7 +375,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             'description (study.description)
           )
 
-          repoStudy.annotationTypes must have size study.annotationTypes.size
+          repoStudy.annotationTypes must have size study.annotationTypes.size.toLong
           checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
         }
       }
@@ -457,7 +457,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             'description (newDescription)
           )
 
-          repoStudy.annotationTypes must have size study.annotationTypes.size
+          repoStudy.annotationTypes must have size study.annotationTypes.size.toLong
           checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
         }
       }
@@ -573,7 +573,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             'description (study.description)
             )
 
-          repoStudy.annotationTypes must have size (study.annotationTypes.size - 1)
+          repoStudy.annotationTypes must have size (study.annotationTypes.size.toLong - 1)
           checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
         }
       }
@@ -668,7 +668,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             'description (study.description)
             )
 
-          repoStudy.annotationTypes must have size (study.annotationTypes.size)
+          repoStudy.annotationTypes must have size (study.annotationTypes.size.toLong)
           checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
         }
       }
@@ -745,7 +745,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             'description (study.description)
             )
 
-          repoStudy.annotationTypes must have size (study.annotationTypes.size)
+          repoStudy.annotationTypes must have size (study.annotationTypes.size.toLong)
           checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
         }
       }
@@ -784,7 +784,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             'description (study.description)
             )
 
-          repoStudy.annotationTypes must have size (study.annotationTypes.size)
+          repoStudy.annotationTypes must have size (study.annotationTypes.size.toLong)
           checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
         }
       }
@@ -823,7 +823,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             'description (study.description)
             )
 
-          repoStudy.annotationTypes must have size (study.annotationTypes.size)
+          repoStudy.annotationTypes must have size (study.annotationTypes.size.toLong)
           checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
         }
       }
@@ -943,7 +943,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val json = makeRequest(GET, "/studies/names?order=asc")
                               (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList must have size studies.size
+        jsonList must have size studies.size.toLong
 
         compareNameDto(jsonList(0), study1)
         compareNameDto(jsonList(1), study2)

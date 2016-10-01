@@ -65,10 +65,10 @@ class UsersServiceImpl @javax.inject.Inject() (
     // FIXME should be replaced by DTO query to the database
     val users = userRepository.getValues
       UserCountsByStatus(
-        total           = users.size,
-        registeredCount = users.collect { case u: RegisteredUser => u }.size,
-        activeCount     = users.collect { case u: ActiveUser     => u }.size,
-        lockedCount     = users.collect { case u: LockedUser     => u }.size
+        total           = users.size.toLong,
+        registeredCount = users.collect { case u: RegisteredUser => u }.size.toLong,
+        activeCount     = users.collect { case u: ActiveUser     => u }.size.toLong,
+        lockedCount     = users.collect { case u: LockedUser     => u }.size.toLong
       )
   }
 

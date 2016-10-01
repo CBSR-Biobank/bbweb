@@ -155,10 +155,10 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
           offset = 0,
-          total = centres.size,
+          total = centres.size.toLong,
           maybeNext = None,
           maybePrev = None)
-        jsonItems must have size centres.size
+        jsonItems must have size centres.size.toLong
         compareObjs(jsonItems, centres)
       }
 
@@ -193,11 +193,11 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
           uri = uri,
           queryParams = Map("status" -> "DisabledCentre"),
           offset = 0,
-          total = expectedCentres.size,
+          total = expectedCentres.size.toLong,
           maybeNext = None,
           maybePrev = None)
 
-        jsonItems must have size expectedCentres.size
+        jsonItems must have size expectedCentres.size.toLong
         compareObjs(jsonItems, expectedCentres)
       }
 
@@ -213,11 +213,11 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
           uri = uri,
           queryParams = Map("status" -> "EnabledCentre"),
           offset = 0,
-          total = expectedCentres.size,
+          total = expectedCentres.size.toLong,
           maybeNext = None,
           maybePrev = None)
 
-        jsonItems must have size expectedCentres.size
+        jsonItems must have size expectedCentres.size.toLong
         compareObjs(jsonItems, expectedCentres)
       }
 
@@ -232,11 +232,11 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
           uri = uri,
           queryParams = Map("sort" -> "name"),
           offset = 0,
-          total = centres.size,
+          total = centres.size.toLong,
           maybeNext = None,
           maybePrev = None)
 
-        jsonItems must have size centres.size
+        jsonItems must have size centres.size.toLong
         compareObj(jsonItems(0), centres(3))
         compareObj(jsonItems(1), centres(2))
         compareObj(jsonItems(2), centres(1))
@@ -251,11 +251,11 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
           uri = uri,
           queryParams = Map("sort" -> "status"),
           offset = 0,
-          total = centres.size,
+          total = centres.size.toLong,
           maybeNext = None,
           maybePrev = None)
 
-        jsonItems must have size centres.size
+        jsonItems must have size centres.size.toLong
         compareObj(jsonItems(0), centres(1))
         compareObj(jsonItems(1), centres(0))
       }
@@ -268,11 +268,11 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
           uri = uri,
           queryParams = Map("sort" -> "status", "order" -> "desc"),
           offset = 0,
-          total = centres.size,
+          total = centres.size.toLong,
           maybeNext = None,
           maybePrev = None)
 
-        jsonItems must have size centres.size
+        jsonItems must have size centres.size.toLong
         compareObj(jsonItems(0), centres(0))
         compareObj(jsonItems(1), centres(1))
       }
@@ -287,7 +287,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val jsonItem = PagedResultsSpec(this).singleItemResult(
           uri = uri,
           queryParams = Map("sort" -> "name", "pageSize" -> "1"),
-          total = centres.size,
+          total = centres.size.toLong,
           maybeNext = Some(2))
 
         compareObj(jsonItem, centres(3))
@@ -423,8 +423,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
             'description (centre.description)
             )
 
-          repoCentre.studyIds must have size centre.studyIds.size
-          repoCentre.locations must have size centre.locations.size
+          repoCentre.studyIds must have size centre.studyIds.size.toLong
+          repoCentre.locations must have size centre.locations.size.toLong
           checkTimeStamps(repoCentre, centre.timeAdded, DateTime.now)
         }
       }
@@ -488,8 +488,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
             'description (Some(newDescription))
             )
 
-          repoCentre.studyIds must have size centre.studyIds.size
-          repoCentre.locations must have size centre.locations.size
+          repoCentre.studyIds must have size centre.studyIds.size.toLong
+          repoCentre.locations must have size centre.locations.size.toLong
           checkTimeStamps(repoCentre, centre.timeAdded, DateTime.now)
         }
       }
@@ -534,8 +534,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
             'description (centre.description)
             )
 
-          repoCentre.studyIds must have size centre.studyIds.size
-          repoCentre.locations must have size centre.locations.size
+          repoCentre.studyIds must have size centre.studyIds.size.toLong
+          repoCentre.locations must have size centre.locations.size.toLong
           checkTimeStamps(repoCentre, centre.timeAdded, DateTime.now)
         }
       }
@@ -590,8 +590,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
             'description (centre.description)
             )
 
-          repoCentre.studyIds must have size centre.studyIds.size
-          repoCentre.locations must have size centre.locations.size
+          repoCentre.studyIds must have size centre.studyIds.size.toLong
+          repoCentre.locations must have size centre.locations.size.toLong
           checkTimeStamps(repoCentre, centre.timeAdded, DateTime.now)
         }
       }
@@ -639,7 +639,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
             'description (centre.description)
             )
 
-          repoCentre.studyIds must have size centre.studyIds.size
+          repoCentre.studyIds must have size centre.studyIds.size.toLong
           repoCentre.locations must have size (1)
           checkTimeStamps(repoCentre, centre.timeAdded, DateTime.now)
 
@@ -710,8 +710,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
             'description (centre.description)
             )
 
-          repoCentre.studyIds must have size centre.studyIds.size
-          repoCentre.locations must have size (centre.locations.size)
+          repoCentre.studyIds must have size centre.studyIds.size.toLong
+          repoCentre.locations must have size (centre.locations.size.toLong)
           checkTimeStamps(repoCentre, centre.timeAdded, DateTime.now)
 
           repoCentre.locations.head must have (
@@ -781,8 +781,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
               'description (centre.description)
             )
 
-            repoCentre.studyIds must have size centre.studyIds.size
-            repoCentre.locations must have size locationsSet.size
+            repoCentre.studyIds must have size centre.studyIds.size.toLong
+            repoCentre.locations must have size locationsSet.size.toLong
             checkTimeStamps(repoCentre, centre.timeAdded, DateTime.now)
           }
         }
@@ -847,8 +847,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
             'description (centre.description)
             )
 
-          repoCentre.studyIds must have size (centre.studyIds.size + 1)
-          repoCentre.locations must have size centre.locations.size
+          repoCentre.studyIds must have size (centre.studyIds.size.toLong + 1L)
+          repoCentre.locations must have size centre.locations.size.toLong
           checkTimeStamps(repoCentre, centre.timeAdded, DateTime.now)
         }
       }
@@ -904,8 +904,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
             'description (centre.description)
             )
 
-          repoCentre.studyIds must have size (centre.studyIds.size - 1)
-          repoCentre.locations must have size centre.locations.size
+          repoCentre.studyIds must have size (centre.studyIds.size.toLong - 1)
+          repoCentre.locations must have size centre.locations.size.toLong
           checkTimeStamps(repoCentre, centre.timeAdded, DateTime.now)
         }
       }

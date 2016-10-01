@@ -40,8 +40,8 @@ object PagedResults {
         PagedResults(items    = items.drop(offset).take(pageSize),
                      page     = page,
                      pageSize = pageSize,
-                     offset   = offset,
-                     total    = items.size).successNel[String]
+                     offset   = offset.toLong,
+                     total    = items.size.toLong).successNel[String]
       }
     }
   }

@@ -120,10 +120,10 @@ class StudiesServiceImpl @javax.inject.Inject() (
     // FIXME should be replaced by DTO query to the database
     val studies = studyRepository.getValues
     StudyCountsByStatus(
-      total         = studies.size,
-      disabledCount = studies.collect { case s: DisabledStudy => s }.size,
-      enabledCount  = studies.collect { case s: EnabledStudy => s }.size,
-      retiredCount  = studies.collect { case s: RetiredStudy => s }.size
+      total         = studies.size.toLong,
+      disabledCount = studies.collect { case s: DisabledStudy => s }.size.toLong,
+      enabledCount  = studies.collect { case s: EnabledStudy => s }.size.toLong,
+      retiredCount  = studies.collect { case s: RetiredStudy => s }.size.toLong
     )
   }
 

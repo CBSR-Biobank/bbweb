@@ -185,10 +185,10 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
             uri       = uri(e.cevent),
             offset    = 0,
-            total     = e.specimens.size,
+            total     = e.specimens.size.toLong,
             maybeNext = None,
             maybePrev = None)
-        jsonItems must have size e.specimens.size
+        jsonItems must have size e.specimens.size.toLong
 
         compareObjs(jsonItems, e.specimenDtos)
       }
@@ -212,11 +212,11 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
               uri         = uri(e.cevent),
               queryParams = Map("sort" -> "inventoryId", "order" -> ordering),
               offset      = 0,
-              total       = specimens.size,
+              total       = specimens.size.toLong,
               maybeNext   = None,
               maybePrev   = None)
 
-          jsonItems must have size specimens.size
+          jsonItems must have size specimens.size.toLong
           if (ordering == "asc") {
             compareObj(jsonItems(0), specimenDtos(0))
             compareObj(jsonItems(1), specimenDtos(1))
@@ -246,11 +246,11 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
               uri         = uri(e.cevent),
               queryParams = Map("sort" -> "timeCreated", "order" -> ordering),
               offset      = 0,
-              total       = specimens.size,
+              total       = specimens.size.toLong,
               maybeNext   = None,
               maybePrev   = None)
 
-          jsonItems must have size specimens.size
+          jsonItems must have size specimens.size.toLong
           if (ordering == "asc") {
             compareObj(jsonItems(0), specimenDtos(0))
             compareObj(jsonItems(1), specimenDtos(1))
@@ -279,11 +279,11 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
               uri         = uri(e.cevent),
               queryParams = Map("sort" -> "status", "order" -> ordering),
               offset      = 0,
-              total       = specimens.size,
+              total       = specimens.size.toLong,
               maybeNext   = None,
               maybePrev   = None)
 
-          jsonItems must have size specimens.size
+          jsonItems must have size specimens.size.toLong
           if (ordering == "asc") {
             compareObj(jsonItems(0), specimenDtos(1))
             compareObj(jsonItems(1), specimenDtos(0))
@@ -311,7 +311,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
             uri         = uri(e.cevent),
             queryParams = Map("sort" -> "inventoryId", "pageSize" -> "1"),
             offset      = 0,
-            total       = specimens.size,
+            total       = specimens.size.toLong,
             maybeNext   = Some(2))
 
         compareObj(jsonItem, specimenDto)
@@ -334,7 +334,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
             uri         = uri(e.cevent),
             queryParams = Map("sort" -> "inventoryId", "page" -> "2", "pageSize" -> "1"),
             offset      = 1,
-            total       = specimens.size,
+            total       = specimens.size.toLong,
             maybeNext   = None,
             maybePrev   = Some(1))
 
@@ -411,7 +411,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
         compareObj(jsonObj, e.cevent)
 
         val repoSpecimens = ceventSpecimenRepository.withCeventId(e.cevent.id)
-        repoSpecimens must have size specimens.size
+        repoSpecimens must have size specimens.size.toLong
       }
     }
 

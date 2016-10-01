@@ -99,7 +99,7 @@ object User {
 }
 
 trait UserValidations {
-  val NameMinLength = 2
+  val NameMinLength = 2L
 
   case object PasswordRequired extends ValidationKey
 

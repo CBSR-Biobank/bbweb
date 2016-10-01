@@ -321,10 +321,10 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
             val jsonItems = PagedResultsSpec(this).multipleItemsResult(
                 uri       = listUri(participant.id),
                 offset    = 0,
-                total     = cevents.size,
+                total     = cevents.size.toLong,
                 maybeNext = None,
                 maybePrev = None)
-            jsonItems must have size cevents.size
+            jsonItems must have size cevents.size.toLong
             //log.info(s"--> $jsonItems")
             compareObjs(jsonItems, participantCevents)
           }
@@ -346,11 +346,11 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
                 uri         = listUri(participant.id),
                 queryParams = Map("sort" -> "visitNumber", "order" -> ordering),
                 offset      = 0,
-                total       = cevents.size,
+                total       = cevents.size.toLong,
                 maybeNext   = None,
                 maybePrev   = None)
 
-            jsonItems must have size cevents.size
+            jsonItems must have size cevents.size.toLong
             if (ordering == "asc") {
               compareObj(jsonItems(0), cevents(0))
               compareObj(jsonItems(1), cevents(1))
@@ -382,11 +382,11 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
                 uri         = listUri(participant.id),
                 queryParams = Map("sort" -> "timeCompleted", "order" -> ordering),
                 offset      = 0,
-                total       = cevents.size,
+                total       = cevents.size.toLong,
                 maybeNext   = None,
                 maybePrev   = None)
 
-            jsonItems must have size cevents.size
+            jsonItems must have size cevents.size.toLong
             if (ordering == "asc") {
               compareObj(jsonItems(0), cevents(0))
               compareObj(jsonItems(1), cevents(1))
@@ -416,7 +416,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           val jsonItem = PagedResultsSpec(this).singleItemResult(
               uri         = listUri(participant.id),
               queryParams = Map("sort" -> "timeCompleted", "pageSize" -> "1"),
-              total       = cevents.size,
+              total       = cevents.size.toLong,
               maybeNext   = Some(2))
 
           compareObj(jsonItem, cevents(0))
@@ -436,7 +436,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           val jsonItem = PagedResultsSpec(this).singleItemResult(
               uri         = listUri(participant.id),
               queryParams = Map("sort" -> "timeCompleted", "page" -> "4", "pageSize" -> "1"),
-              total       = cevents.size,
+              total       = cevents.size.toLong,
               offset      = 3,
               maybeNext   = None,
               maybePrev   = Some(3))
@@ -577,9 +577,9 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
           (json \ "status").as[String] must include ("success")
 
-          (json \ "data" \ "annotations").as[List[JsObject]] must have size annotTypes.size
+          (json \ "data" \ "annotations").as[List[JsObject]] must have size annotTypes.size.toLong
           val jsonAnnotations = (json \ "data" \ "annotations").as[List[JsObject]]
-          jsonAnnotations must have size annotations.size
+          jsonAnnotations must have size annotations.size.toLong
 
           jsonAnnotations.foreach { jsonAnnotation =>
             val jsonAnnotationTypeId = (jsonAnnotation \ "annotationTypeId").as[String]

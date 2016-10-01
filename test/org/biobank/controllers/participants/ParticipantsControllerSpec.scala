@@ -263,7 +263,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         (json \ "status").as[String] must include ("success")
 
         val jsonAnnotations = (json \ "data" \ "annotations").as[List[JsObject]]
-        jsonAnnotations must have size annotations.size
+        jsonAnnotations must have size annotations.size.toLong
 
         jsonAnnotations.foreach { jsonAnnotation =>
           val jsonAnnotationTypeId = (jsonAnnotation \ "annotationTypeId").as[String]

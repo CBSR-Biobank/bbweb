@@ -92,7 +92,7 @@ object Centre {
 
 trait CentreValidations {
 
-  val NameMinLength = 2
+  val NameMinLength = 2L
 
   case object InvalidName extends ValidationKey
 

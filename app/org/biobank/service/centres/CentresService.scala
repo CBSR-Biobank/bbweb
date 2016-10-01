@@ -86,9 +86,9 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
     // FIXME should be replaced by DTO query to the database
     val centres = centreRepository.getValues
     CentreCountsByStatus(
-      total         = centres.size,
-      disabledCount = centres.collect { case s: DisabledCentre => s }.size,
-      enabledCount  = centres.collect { case s: EnabledCentre => s }.size
+      total         = centres.size.toLong,
+      disabledCount = centres.collect { case s: DisabledCentre => s }.size.toLong,
+      enabledCount  = centres.collect { case s: EnabledCentre => s }.size.toLong
     )
   }
 

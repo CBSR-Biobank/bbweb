@@ -41,10 +41,10 @@ class ShipmentsControllerSpec
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
             uri       = listUri(f.fromCentre),
             offset    = 0,
-            total     = f.shipmentMap.size,
+            total     = f.shipmentMap.size.toLong,
             maybeNext = None,
             maybePrev = None)
-        jsonItems must have size f.shipmentMap.size
+        jsonItems must have size f.shipmentMap.size.toLong
 
         compareObjs(jsonItems, f.shipmentMap)
       }
@@ -102,7 +102,7 @@ class ShipmentsControllerSpec
                                  queryParams = Map("sort" -> "courierName",
                                                    "order" -> order),
                                  offset    = 0,
-                                 total     = shipments.size,
+                                 total     = shipments.size.toLong,
                                  maybeNext = None,
                                  maybePrev = None)
           (shipments, jsonItems)
@@ -110,7 +110,7 @@ class ShipmentsControllerSpec
 
         "in ascending order" in {
           val (shipments, jsonItems) = requestShipments("asc")
-          jsonItems must have size shipments.size
+          jsonItems must have size shipments.size.toLong
           compareObj(jsonItems(0), shipments(2))
           compareObj(jsonItems(1), shipments(0))
           compareObj(jsonItems(2), shipments(1))
@@ -118,7 +118,7 @@ class ShipmentsControllerSpec
 
         "in descending order" in {
           val (shipments, jsonItems) = requestShipments("desc")
-          jsonItems must have size shipments.size
+          jsonItems must have size shipments.size.toLong
           compareObj(jsonItems(0), shipments(1))
           compareObj(jsonItems(1), shipments(0))
           compareObj(jsonItems(2), shipments(2))
@@ -139,7 +139,7 @@ class ShipmentsControllerSpec
                                  queryParams = Map("sort" -> "trackingNumber",
                                                    "order" -> order),
                                  offset    = 0,
-                                 total     = shipments.size,
+                                 total     = shipments.size.toLong,
                                  maybeNext = None,
                                  maybePrev = None)
           (shipments, jsonItems)
@@ -147,7 +147,7 @@ class ShipmentsControllerSpec
 
         "in ascending order" in {
           val (shipments, jsonItems) = requestShipments("asc")
-          jsonItems must have size shipments.size
+          jsonItems must have size shipments.size.toLong
           compareObj(jsonItems(0), shipments(2))
           compareObj(jsonItems(1), shipments(0))
           compareObj(jsonItems(2), shipments(1))
@@ -155,7 +155,7 @@ class ShipmentsControllerSpec
 
         "in descending order" in {
           val (shipments, jsonItems) = requestShipments("desc")
-          jsonItems must have size shipments.size
+          jsonItems must have size shipments.size.toLong
           compareObj(jsonItems(0), shipments(1))
           compareObj(jsonItems(1), shipments(0))
           compareObj(jsonItems(2), shipments(2))
@@ -173,7 +173,7 @@ class ShipmentsControllerSpec
         val jsonItem = PagedResultsSpec(this)
           .singleItemResult(uri       = listUri(f.fromCentre),
                             queryParams = Map("sort" -> "courierName", "pageSize" -> "1"),
-                            total     = shipments.size,
+                            total     = shipments.size.toLong,
                             maybeNext = Some(2))
         compareObj(jsonItem, shipments(2))
       }
@@ -188,7 +188,7 @@ class ShipmentsControllerSpec
         val jsonItem = PagedResultsSpec(this)
           .singleItemResult(uri       = listUri(f.fromCentre),
                             queryParams = Map("sort" -> "courierName", "page" -> "3", "pageSize" -> "1"),
-                            total     = shipments.size,
+                            total     = shipments.size.toLong,
                             offset    = 2,
                             maybeNext = None,
                             maybePrev = Some(2))

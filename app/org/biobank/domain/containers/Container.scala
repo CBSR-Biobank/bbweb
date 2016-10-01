@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 import play.api.libs.json._
 
 trait ContainerValidations {
-  val NameMinLength = 2
+  val NameMinLength = 2L
 
   case object ContainerSchemaIdInvalid extends ValidationKey
 
