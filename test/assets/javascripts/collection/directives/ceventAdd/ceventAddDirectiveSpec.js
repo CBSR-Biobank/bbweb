@@ -58,7 +58,8 @@ define([
         '/assets/javascripts/common/annotationsInput/numberAnnotation.html',
         '/assets/javascripts/common/annotationsInput/dateTimeAnnotation.html',
         '/assets/javascripts/common/annotationsInput/singleSelectAnnotation.html',
-        '/assets/javascripts/common/annotationsInput/multipleSelectAnnotation.html');
+        '/assets/javascripts/common/annotationsInput/multipleSelectAnnotation.html',
+        '/assets/javascripts/common/components/dateTimePicker/dateTimePicker.html');
 
       self.jsonCevent      = self.factory.collectionEvent();
       self.jsonCeventType  = self.factory.defaultCollectionEventType();

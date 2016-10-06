@@ -112,14 +112,11 @@ define([
         expect(this.scope.vm.specimenSpecs).toBeEmptyArray();
         expect(this.scope.vm.usingDefaultAmount).toBeBoolean();
         expect(this.scope.vm.timeCollected).toBeDate();
-        expect(this.scope.vm.datetimePickerFormat).toBe(this.bbwebConfig.datepickerFormat);
-        expect(this.scope.vm.calendarOpen).toBeFalse();
         expect(this.scope.vm.specimens).toBeEmptyArray();
 
         expect(this.scope.vm.okPressed).toBeFunction();
         expect(this.scope.vm.nextPressed).toBeFunction();
         expect(this.scope.vm.closePressed).toBeFunction();
-        expect(this.scope.vm.openCalendar).toBeFunction();
         expect(this.scope.vm.specimenSpecChanged).toBeFunction();
 
       });
@@ -170,15 +167,6 @@ define([
         createController.call(this);
         this.scope.vm.closePressed();
         expect(this.modalInstance.dismiss).toHaveBeenCalled();
-      });
-
-      it('opens the calendar when use default is unchecked', function() {
-        var centreLocations = createCentreLocations.call(this),
-            specimenSpecs = createSpecimenSpecs.call(this);
-
-        createController.call(this, centreLocations, specimenSpecs);
-        this.scope.vm.openCalendar();
-        expect(this.scope.vm.calendarOpen).toBe(true);
       });
 
       it('when specimenSpecChanged amount, defaultAmount and units are assigned', function() {
