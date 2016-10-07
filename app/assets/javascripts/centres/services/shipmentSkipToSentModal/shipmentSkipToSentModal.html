@@ -1,0 +1,32 @@
+<div class="modal-header">
+  <button type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-hidden="true"
+          ng-click="vm.closePressed()">&times;</button>
+  <h3 class="modal-title">Tag shipment as sent</h3>
+</div>
+<div class="modal-body" ng-switch="vm.type">
+  <form class="form-horiontal" name="form" novalidate>
+    <date-time-picker label="Time packed"
+                      default-value="vm.timePacked"
+                      required="true"
+                      on-edit="vm.timePackedOnEdit"
+                      label-cols="col-sm-3"
+                      input-cols="col-sm-9">
+    </date-time-picker>
+    <date-time-picker label="Time sent"
+                      default-value="vm.timeSent"
+                      required="true"
+                      on-edit="vm.timeSentOnEdit"
+                      label-cols="col-sm-3"
+                      input-cols="col-sm-9">
+    </date-time-picker>
+  </form>
+</div>
+<div class="modal-footer">
+  <button class="btn" ng-click="vm.cancelPressed()" translate>Cancel</button>
+  <button class="btn btn-primary"
+          ng-click="vm.okPressed()"
+          ng-disabled="form.$invalid" translate>OK</button>
+</div>

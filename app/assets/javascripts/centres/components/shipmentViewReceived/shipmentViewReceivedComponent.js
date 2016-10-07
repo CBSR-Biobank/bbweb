@@ -24,7 +24,8 @@ define(function (require) {
     'timeService',
     'modalService',
     'stateHelper',
-    'shipmentReceiveProgressItems'
+    'shipmentReceiveProgressItems',
+    'ShipmentState'
   ];
 
   /**
@@ -37,7 +38,8 @@ define(function (require) {
                                           timeService,
                                           modalService,
                                           stateHelper,
-                                          shipmentReceiveProgressItems) {
+                                          shipmentReceiveProgressItems,
+                                          ShipmentState) {
     var vm = this;
 
     vm.unpackShipment       = unpackShipment;
@@ -62,7 +64,7 @@ define(function (require) {
           return vm.shipment.unpacked(timeService.dateToUtcString(timeUnpacked));
         })
         .then(function (shipment) {
-          return $state.go('home.shipping.shipment.unpack', { shipmentId: shipment.id });
+          return $state.go('home.shipping.unpack', { shipmentId: shipment.id });
         })
         .catch(notificationsService.updateError);
     }
@@ -72,7 +74,7 @@ define(function (require) {
         gettextCatalog.getString('Please confirm'),
         gettextCatalog.getString('Are you sure you want to place this shipment in <b>sent</b> state?'))
         .then(function () {
-          return vm.shipment.sent(vm.shipment.timeSent)
+          return vm.shipment.changeState(ShipmentState.SENT, vm.shipment.timeSent)
             .then(stateHelper.reloadAndReinit)
             .catch(notificationsService.updateError);
         });

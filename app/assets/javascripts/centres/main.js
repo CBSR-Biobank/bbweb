@@ -44,12 +44,18 @@ define(function (require) {
       'shipmentSpecimensView',
       require('./components/shipmentSpecimensView/shipmentSpecimensViewComponent'))
     .component(
-      'shipmentSpecimensReceive',
-      require('./components/shipmentSpecimensReceive/shipmentSpecimensReceiveComponent'))
+      'shipmentSpecimensPanel',
+      require('./components/shipmentSpecimensPanel/shipmentSpecimensPanelComponent'))
     .service('centreStatusLabel', require('./services/centreStatusLabelService'))
     .service(
       'centreLocationsModalService',
-      require('./services/centreLocationsModal/centreLocationsModalService'));
+      require('./services/centreLocationsModal/centreLocationsModalService'))
+    .service(
+      'shipmentSkipToSentModalService',
+      require('./services/shipmentSkipToSentModal/shipmentSkipToSentModalService'))
+    .service(
+      'shipmentSkipToUnpackedModalService',
+      require('./services/shipmentSkipToUnpackedModal/shipmentSkipToUnpackedModalService'));
 
   return module;
 });

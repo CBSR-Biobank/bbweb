@@ -12,20 +12,23 @@ define(function (require) {
     controller: ShipmentAddItemsController,
     controllerAs: 'vm',
     bindings: {
-      shipmentId: '<'
+      shipment: '<'
     }
   };
 
   ShipmentAddItemsController.$inject = [
+    '$q',
     '$state',
     'gettextCatalog' ,
     'shipmentSendProgressItems',
     'Shipment',
+    'ShipmentState',
     'modalInput',
     'modalService',
     'timeService',
     'notificationsService',
-    'domainNotificationService'
+    'domainNotificationService',
+    'shipmentSkipToSentModalService'
   ];
 
   /**
@@ -33,19 +36,20 @@ define(function (require) {
    *
    * A task progress bar is used to give feedback to the user that this is one step in a multi-step process.
    */
-  function ShipmentAddItemsController($state,
+  function ShipmentAddItemsController($q,
+                                      $state,
                                       gettextCatalog,
                                       shipmentSendProgressItems,
                                       Shipment,
+                                      ShipmentState,
                                       modalInput,
                                       modalService,
                                       timeService,
                                       notificationsService,
-                                      domainNotificationService) {
+                                      domainNotificationService,
+                                      shipmentSkipToSentModalService) {
     var vm = this;
 
-    vm.$onInit        = onInit;
-    vm.shipment       = null;
     vm.tagAsPacked    = tagAsPacked;
     vm.tagAsSent      = tagAsSent;
     vm.removeShipment = removeShipment;
@@ -57,50 +61,52 @@ define(function (require) {
 
     //--
 
-    function onInit() {
-      Shipment.get(vm.shipmentId)
-        .then(function (shipment) {
-          vm.shipment = shipment;
-        })
-        .catch(function (err) {
-          $state.go('home.shipping');
-        });
+    function validateStateChangeAllowed() {
+      return Shipment.get(vm.shipment.id).then(function (shipment) {
+        if (shipment.specimenCount <= 0) {
+          modalService.modalOk(gettextCatalog.getString('Shipment has no specimens'),
+                               gettextCatalog.getString('Please add specimens to this shipment fist.'));
+          return $q.reject(false);
+        }
+
+        return $q.when(true);
+      });
     }
-
-    // function tagShipment(onUpdate) {
-    //   Shipment.get(vm.shipment.id).then(function (shipment) {
-    //     if (shipment.specimenCount > 0) {
-    //       if (_.isUndefined(vm.timePacked)) {
-    //         vm.timePacked = new Date();
-    //       }
-    //       return modalInput.dateTime(gettextCatalog.getString('Date and time shipment was packed'),
-    //                                  gettextCatalog.getString('Time packed'),
-    //                                  vm.timePacked,
-    //                                  { required: true }).result
-    //         .then(function (timePacked) {
-    //           return vm.shipment.packed(timeService.dateToUtcString(timePacked))
-    //             .then(function (shipment) {
-    //               return onUpdate(shipment);
-    //             })
-    //             .catch(notificationsService.updateError);
-    //         });
-    //     }
-
-    //     return modalService.modalOk(gettextCatalog.getString('Shipment has no specimens'),
-    //                                 gettextCatalog.getString('Please add specimens to this shipment fist.'));
-    //   });
-    // }
 
     /**
      * Invoked by user when all items have been added to the shipment and it is now packed.
      */
     function tagAsPacked() {
-      // tagShipment(function (shipment) {
-      //   return $state.go('home.shipping.shipment', { shipmentId: shipment.id});
-      // });
+      return validateStateChangeAllowed().then(function () {
+        vm.timePacked = new Date();
+        return modalInput.dateTime(gettextCatalog.getString('Date and time shipment was packed'),
+                                   gettextCatalog.getString('Time packed'),
+                                   vm.timePacked,
+                                   { required: true }).result
+          .then(function (timePacked) {
+            return vm.shipment.changeState(ShipmentState.PACKED, timeService.dateToUtcString(timePacked))
+              .then(function (shipment) {
+                return $state.go('home.shipping.shipment', { shipmentId: shipment.id});
+              })
+              .catch(notificationsService.updateError);
+          });
+      });
     }
 
     function tagAsSent() {
+      return validateStateChangeAllowed().then(function () {
+        vm.timePacked = new Date();
+        vm.timeSent = new Date();
+        return shipmentSkipToSentModalService.open().result
+          .then(function (timeResult) {
+            return vm.shipment.skipToStateSent(timeService.dateToUtcString(timeResult.timePacked),
+                                               timeService.dateToUtcString(timeResult.timeSent))
+              .then(function (shipment) {
+                return $state.go('home.shipping.shipment', { shipmentId: shipment.id});
+              })
+              .catch(notificationsService.updateError);
+          });
+      });
     }
 
     function removeShipment() {

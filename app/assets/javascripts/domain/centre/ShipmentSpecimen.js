@@ -217,6 +217,9 @@ define(function (require) {
      *
      * @param {object} options - The options to use to list shipments.
      *
+     * @param {domain.centres.ShipmentItemState} options.stateFilter - The shipment item state to filter
+     * specimens by.
+     *
      * @param {string} options.sortField Shipments can be sorted by 'inventoryId' or by 'state'. Values other
      * than these two yield an error.
      *
@@ -235,6 +238,7 @@ define(function (require) {
       var url = uri(shipmentId),
           params,
           validKeys = [
+            'stateFilter',
             'sort',
             'page',
             'pageSize',

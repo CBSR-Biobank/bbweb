@@ -13,7 +13,7 @@ import scala.language.reflectiveCalls
 /**
  * Tests the REST API for [[ShipmentSpecimen]]s.
  *
- * Tests for [[Shipment]]s in ShipmentControllerSpec.scala.
+ * Tests for [[Shipment]]s in ShipmentsControllerSpec.scala.
  */
 class ShipmentSpecimensControllerSpec
     extends ShipmentsControllerSpecFixtures

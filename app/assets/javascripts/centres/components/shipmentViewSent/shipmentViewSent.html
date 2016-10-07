@@ -7,15 +7,19 @@
     <translate>Sent shipment</translate>
     <div class="pull-right">
       <button class="btn btn-xs btn-warning"
-              title="{{'Return shipment to packed state'|translate}}"
+              title="{{'Return shipment to packed state (un-send this shipment)'|translate}}"
               ng-click="vm.returnToPackedState()">
-        <translate>Mark as unsent</translate>
+        <translate>Return to packed</translate>
       </button>
       <button class="btn btn-xs btn-primary"
               title="{{'Mark shipment as received'|translate}}"
               ng-click="vm.receiveShipment()">
-        <translate>Next step</translate>
-        <i class="glyphicon glyphicon-chevron-right"></i>
+        <translate>Tag as received</translate>
+      </button>
+      <button class="btn btn-xs btn-primary"
+              title="{{'Mark shipment as received and start unpacking it'|translate}}"
+              ng-click="vm.unpackShipment()">
+        <translate>Tag as unpacked</translate>
       </button>
     </div>
   </h1>

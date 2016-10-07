@@ -1,6 +1,6 @@
 <progress-tracker
-   items="vm.progressInfo.items"
-   current="vm.progressInfo.current">
+  items="vm.progressInfo.items"
+  current="vm.progressInfo.current">
 </progress-tracker>
 <div class="page-header">
   <h1>
@@ -19,4 +19,50 @@
                     read-only="true"
                     collapsable="true">
 </shipping-info-view>
-<shipment-specimens-receive shipment="vm.shipment"></shipment-specimens-receive>
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title" translate>Receive items</h3>
+      </div>
+      <div class="panel-body">
+        <form class="form-inline" name="UniqueId">
+          <div class="form-group">
+            <label for="nameFilter" translate>Enter the specimen inventory ID to receive:</label>
+            <input type="text"
+                   class="form-control"
+                   name="inventoryId"
+                   ng-model="vm.inventoryId"
+                   placeholder="{{'inventory id'|translate}}">
+          </div>
+          <button type="submit"
+                  class="btn btn-sm btn-primary"
+                  ng-click="vm.onInventoryIdSubmit()">
+            <i class="glyphicon glyphicon-plus"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+    <shipment-specimens-panel heading="{{'Specimens in Shipment'|translate}}"
+                              on-get-specimens="vm.getPresentSpecimens"
+                              no-specimens-message="{{'No specimens present in shipment'|translate}}"
+                              refresh="vm.refresh">
+    </shipment-specimens-panel>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-12">
+    <shipment-specimens-panel heading="{{'Received specimens'|translate}}"
+                              on-get-specimens="vm.getReceivedSpecimens"
+                              no-specimens-message="{{'No specimens marked as received'|translate}}"
+                              refresh="vm.refresh">
+    </shipment-specimens-panel>
+  </div>
+</div>

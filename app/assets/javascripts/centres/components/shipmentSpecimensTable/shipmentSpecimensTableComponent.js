@@ -20,10 +20,11 @@ define(function () {
     controllerAs: 'vm',
     bindings: {
       defaultSortField: '@',
-      refresh: '<',
-      onGetSpecimens: '&',
-      onRemoveSpecimen: '&',
-      readOnly: '<'
+      refresh:            '<',
+      onGetSpecimens:     '&',
+      onRemoveSpecimen:   '&',
+      readOnly:           '<',
+      noSpecimensMessage: '@'
     }
   };
 

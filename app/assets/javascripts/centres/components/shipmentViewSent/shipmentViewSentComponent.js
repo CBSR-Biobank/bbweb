@@ -24,7 +24,9 @@ define(function (require) {
     'timeService',
     'stateHelper',
     'modalService',
-    'shipmentReceiveProgressItems'
+    'shipmentReceiveProgressItems',
+    'ShipmentState',
+    'shipmentSkipToUnpackedModalService'
   ];
 
   /**
@@ -37,11 +39,14 @@ define(function (require) {
                                       timeService,
                                       stateHelper,
                                       modalService,
-                                      shipmentReceiveProgressItems) {
+                                      shipmentReceiveProgressItems,
+                                      ShipmentState,
+                                      shipmentSkipToUnpackedModalService) {
     var vm = this;
 
-    vm.receiveShipment = receiveShipment;
     vm.returnToPackedState = returnToPackedState;
+    vm.receiveShipment     = receiveShipment;
+    vm.unpackShipment      = unpackShipment;
 
     vm.progressInfo = {
       items: shipmentReceiveProgressItems,
@@ -49,6 +54,17 @@ define(function (require) {
     };
 
     //----
+
+    function returnToPackedState() {
+      modalService.modalOkCancel(
+        gettextCatalog.getString('Please confirm'),
+        gettextCatalog.getString('Are you sure you want to place this shipment in <b>packed</b> state?'))
+        .then(function () {
+          return vm.shipment.changeState(ShipmentState.PACKED, vm.shipment.timePacked)
+            .then(stateHelper.reloadAndReinit)
+            .catch(notificationsService.updateError);
+        });
+    }
 
     function receiveShipment() {
       if (_.isUndefined(vm.timeReceived)) {
@@ -59,19 +75,22 @@ define(function (require) {
                                  vm.timeReceived,
                                  { required: true }).result
         .then(function (timeReceived) {
-          return vm.shipment.received(timeService.dateToUtcString(timeReceived))
+          return vm.shipment.changeState(ShipmentState.RECEIVED, timeService.dateToUtcString(timeReceived))
             .then(stateHelper.reloadAndReinit)
             .catch(notificationsService.updateError);
         });
     }
 
-    function returnToPackedState() {
-      modalService.modalOkCancel(
-        gettextCatalog.getString('Please confirm'),
-        gettextCatalog.getString('Are you sure you want to place this shipment in <b>packed</b> state?'))
-        .then(function () {
-          return vm.shipment.packed(vm.shipment.timePacked)
-            .then(stateHelper.reloadAndReinit)
+    function unpackShipment() {
+      vm.timeReceived = new Date();
+      vm.timeUnpacked = new Date();
+      return shipmentSkipToUnpackedModalService.open().result
+        .then(function (timeResult) {
+          return vm.shipment.skipToStateUnpacked(timeService.dateToUtcString(timeResult.timeReceived),
+                                                 timeService.dateToUtcString(timeResult.timeUnpacked))
+            .then(function (shipment) {
+              return $state.go('home.shipping.unpack', { shipmentId: shipment.id});
+            })
             .catch(notificationsService.updateError);
         });
     }

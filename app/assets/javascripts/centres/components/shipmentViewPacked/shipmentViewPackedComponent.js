@@ -23,7 +23,8 @@ define(function (require) {
     'modalInput',
     'notificationsService',
     'timeService',
-    'modalService'
+    'modalService',
+    'ShipmentState'
   ];
 
   /**
@@ -35,7 +36,8 @@ define(function (require) {
                                         modalInput,
                                         notificationsService,
                                         timeService,
-                                        modalService) {
+                                        modalService,
+                                        ShipmentState) {
     var vm = this;
 
     vm.sendShipment = sendShipment;
@@ -70,7 +72,7 @@ define(function (require) {
         gettextCatalog.getString('Please confirm'),
         gettextCatalog.getString('Are you sure you want to add more items to this shipment?'))
         .then(function () {
-          return vm.shipment.created(vm.shipment.timePacked)
+          return vm.shipment.changeState(ShipmentState.CREATED)
             .then(function () {
               $state.go('home.shipping.addItems', { shipmentId: vm.shipment.id });
             })

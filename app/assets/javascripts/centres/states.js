@@ -72,17 +72,18 @@ define(function () {
 
     $stateProvider.state('home.shipping.addItems', {
       url: '/additems/{shipmentId}',
+      resolve: {
+        shipment: resolveShipment
+      },
       views: {
         'main@': {
-          template: '<shipment-add-items shipment-id="vm.shipmentId"></shipment-add-items>',
-          controller: [ '$stateParams', function ($stateParams) {
-            this.shipmentId = $stateParams.shipmentId;
-          }],
+          template: '<shipment-add-items shipment="vm.shipment"></shipment-add-items>',
+          controller: ShipmentController,
           controllerAs: 'vm'
         }
       },
       data: {
-        displayName: 'Add items'
+        displayName: 'Items to ship: {{shipment.courierName}} - {{shipment.trackingNumber}}'
       }
     });
 
@@ -94,9 +95,7 @@ define(function () {
       views: {
         'main@': {
           template: '<shipment-view shipment="vm.shipment"></shipment-view>',
-          controller: [ 'shipment', function (shipment) {
-            this.shipment = shipment;
-          }],
+          controller: ShipmentController,
           controllerAs: 'vm'
         }
       },
@@ -105,21 +104,28 @@ define(function () {
       }
     });
 
-    $stateProvider.state('home.shipping.shipment.unpack', {
-      url: '/unpack',
+    $stateProvider.state('home.shipping.unpack', {
+      url: '/unpack/{shipmentId}',
+      resolve: {
+        shipment: resolveShipment
+      },
       views: {
         'main@': {
           template: '<shipment-unpack shipment="vm.shipment"></shipment-unpack>',
-          controller: [ 'shipment', function (shipment) {
-            this.shipment = shipment;
-          }],
+          controller: ShipmentController,
           controllerAs: 'vm'
         }
       },
       data: {
-        displayName: 'Unpack'
+        displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
       }
     });
+
+    ShipmentController.$inject = ['shipment'];
+
+    function ShipmentController(shipment) {
+      this.shipment = shipment;
+    }
 
   }
 

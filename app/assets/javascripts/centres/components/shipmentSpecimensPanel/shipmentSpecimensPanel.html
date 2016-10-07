@@ -1,0 +1,23 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      {{vm.heading}}
+      <span class="pull-right">
+        <a data-toggle="collapse"
+           href="#collapseSpecimenInfo"
+           class="btn btn-xs btn-default"
+           ng-click="vm.panelButtonClicked()">
+          <i class="glyphicon"
+             ng-class="vm.panelOpen ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
+        </a>
+      </span>
+    </h3>
+  </div>
+  <div id="collapseSpecimenInfo" class="panel-collapse collapse in" aria-expanded="true">
+    <shipment-specimens-table on-get-specimens="vm.getSpecimens"
+                              read-only="true"
+                              no-specimens-message="{{vm.noSpecimensMessage}}"
+                              refresh="vm.refresh">
+    </shipment-specimens-table>
+  </div>
+</div>

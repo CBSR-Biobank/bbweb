@@ -22,12 +22,12 @@
   </div>
 
   <div id="collapseSpecimens" class="panel-collapse collapse in" aria-expanded="true">
-    <shipment-specimens-table
-      default-sort-field="inventoryId"
-      refresh="vm.refresh"
-      on-get-specimens="vm.getSpecimens"
-      on-remove-specimen="vm.removeShipmentSpecimen"
-      read-only="vm.readOnly">
+    <shipment-specimens-table default-sort-field="inventoryId"
+                              refresh="vm.refresh"
+                              on-get-specimens="vm.getSpecimens"
+                              on-remove-specimen="vm.removeShipmentSpecimen"
+                              read-only="vm.readOnly"
+                              no-specimens-message="{{'No specimens added yet.'|translate}}">
     </shipment-specimens-table>
   </div>
 </div>
