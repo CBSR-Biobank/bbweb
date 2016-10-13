@@ -14,11 +14,12 @@ define([
 
   describe('Directive: statusLineDirective', function() {
 
-    var createScope = function (entity) {
+    var createScope = function (entity, showStatus) {
+      showStatus = _.isUndefined(showStatus) ? 'true' : (showStatus ? 'true' : 'false');
       this.scope = this.$rootScope;
 
       this.element = angular.element(
-        '<status-line item="model.entity" show-status="true"></status-line>');
+        '<status-line item="model.entity" show-status="' + showStatus + '"></status-line>');
       this.scope.model = { entity: entity };
 
       this.$compile(this.element)(this.scope);
@@ -27,7 +28,7 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testSuiteMixin, factory, testUtils) {
+    beforeEach(inject(function(testSuiteMixin, factory) {
       var self = this;
 
       _.extend(self, testSuiteMixin);
@@ -80,8 +81,13 @@ define([
       expect(cells.eq(2).find('small').eq(0).text()).toContain('Never');
     });
 
-    it('add tests for showStatus = false', function() {
-      fail('need to implement these tests');
+    it('does not show status if `showStatus` is false', function() {
+      var centre = new this.Centre(this.factory.centre()),
+          cells;
+
+      createScope.call(this, centre, false);
+      cells = this.element.find('td');
+      expect(cells.eq(0).find('small').eq(0).text()).not.toContain(centre.statusLabel);
     });
 
 

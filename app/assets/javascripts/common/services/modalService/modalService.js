@@ -36,7 +36,7 @@ define(['angular', 'lodash'], function(angular, _) {
     //-------
 
     function showModal(customModalDefaults, customModalOptions) {
-      if (!customModalDefaults) { customModalDefaults = {}; }
+      customModalDefaults = customModalDefaults || {};
       customModalDefaults.backdrop = 'static';
       return show(customModalDefaults, customModalOptions);
     }
@@ -45,27 +45,23 @@ define(['angular', 'lodash'], function(angular, _) {
       var tempModalDefaults = {},
           tempModalOptions = {};
 
-      controller.$inject = ['$scope', '$uibModalInstance'];
-
+      ModalController.$inject = ['$scope', '$uibModalInstance'];
       angular.extend(tempModalDefaults, modalDefaults, customModalDefaults);
       angular.extend(tempModalOptions, modalOptions, customModalOptions);
-
-      if (!tempModalDefaults.controller) {
-        tempModalDefaults.controller = controller;
-      }
+      tempModalDefaults.controller = tempModalDefaults.controller || ModalController;
 
       return $uibModal.open(tempModalDefaults).result;
 
       //--
 
-      function controller($scope, $uibModalInstance) {
+      function ModalController($scope, $uibModalInstance) {
         $scope.modalOptions = tempModalOptions;
         $scope.modalOptions.ok = function (result) {
           $uibModalInstance.close(result);
         };
-          $scope.modalOptions.close = function () {
-            $uibModalInstance.dismiss('cancel');
-          };
+        $scope.modalOptions.close = function () {
+          $uibModalInstance.dismiss('cancel');
+        };
       }
     }
 

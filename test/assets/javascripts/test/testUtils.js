@@ -2,21 +2,25 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['faker', 'lodash'], function(faker, _) {
+define(function (require) {
   'use strict';
 
-  //testUtils.$inject = [];
+  var angular = require('angular'),
+      _       = require('lodash'),
+      faker   = require('faker'),
+      sprintf = require('sprintf').sprintf;
 
   /**
    * Description
    */
   function testUtils() {
     var service = {
-      uuid:                          uuid,
-      randomBoolean:                 randomBoolean,
-      fakeModal:                     fakeModal,
-      addCustomMatchers:             addCustomMatchers,
-      camelCaseToUnderscore:         camelCaseToUnderscore
+      uuid:                    uuid,
+      randomBoolean:           randomBoolean,
+      fakeModal:               fakeModal,
+      addCustomMatchers:       addCustomMatchers,
+      camelCaseToUnderscore:   camelCaseToUnderscore,
+      jasmineAddModalMatchers: jasmineAddModalMatchers
     };
     return service;
 
@@ -85,6 +89,56 @@ define(['faker', 'lodash'], function(faker, _) {
         .replace(/([A-Z])/g, '_$1').toUpperCase()
         .replace(' ', '');
       return result;
+    }
+
+    /**
+     * jasmine matchers that inspect the DOM for modal elements.
+     */
+    function jasmineAddModalMatchers() {
+      jasmine.addMatchers({
+        toHaveModalsOpen: function(util, customEqualityTesters) {
+          return {
+            compare: function(actual, expected) {
+              var modalDomEls = actual.find('body > div.modal'),
+                  pass        = util.equals(modalDomEls.length, expected, customEqualityTesters),
+                  message     = sprintf('Expected "%s" %s have "%s" modals opened.',
+                                        angular.mock.dump(modalDomEls),
+                                        pass ? 'not to' : 'to',
+                                        expected);
+
+              return { pass: pass, message: message };
+            }
+          };
+        },
+        toHaveTitle: function(util, customEqualityTesters) {
+          return {
+            compare: function(actual, expected) {
+              var element = actual.find('.modal-title'),
+                  pass    = util.equals(element.text(), expected, customEqualityTesters),
+                  message = sprintf('Expected "%s" %s have title be "%s"',
+                                    angular.mock.dump(element),
+                                    pass ? 'not to' : 'to',
+                                    expected);
+
+              return { pass: pass, message: message };
+            }
+          };
+        },
+        toHaveBody: function(util, customEqualityTesters) {
+          return {
+            compare: function(actual, expected) {
+              var element = actual.find('.modal-body'),
+                  pass    = util.equals(element.text(), expected, customEqualityTesters),
+                  message = sprintf('Expected "%s" %s have be "%s"',
+                                    angular.mock.dump(element),
+                                    pass ? 'not to' : 'to',
+                                    expected);
+
+              return { pass: pass, message: message };
+            }
+          };
+        }
+      });
     }
 
   }

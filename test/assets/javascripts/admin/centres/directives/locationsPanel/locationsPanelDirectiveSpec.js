@@ -89,7 +89,7 @@ define([
       entities.centre.locations.push(locationToRemove);
       createController.call(this, entities.centre);
 
-      spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
       spyOn(this.Centre.prototype, 'removeLocation').and.returnValue(this.$q.when(entities.centre));
 
       this.controller.remove(locationToRemove);
@@ -105,13 +105,13 @@ define([
       deferred.reject('simulated remove error');
       entities.centre.locations.push(locationToRemove);
 
-      spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
       spyOn(this.Centre.prototype, 'removeLocation').and.returnValue(deferred.promise);
 
       createController.call(this, entities.centre);
       this.controller.remove(locationToRemove);
       this.scope.$digest();
-      expect(this.modalService.showModal.calls.count()).toBe(2);
+      expect(this.modalService.modalOkCancel.calls.count()).toBe(2);
     });
 
   });

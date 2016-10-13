@@ -50,34 +50,6 @@ define(function (require) {
 
     function suiteAddMatchers() {
       jasmine.addMatchers({
-        toHaveModalsOpen: function(util, customEqualityTesters) {
-          return {
-            compare: function(actual, expected) {
-              var modalDomEls = actual.find('body > div.modal'),
-                  pass        = util.equals(modalDomEls.length, expected, customEqualityTesters),
-                  message     = sprintf('Expected "%s" %s have "%s" modals opened.',
-                                        angular.mock.dump(modalDomEls),
-                                        pass ? 'not to' : 'to',
-                                        expected);
-
-              return { pass: pass, message: message };
-            }
-          };
-        },
-        toHaveTitle: function(util, customEqualityTesters) {
-          return {
-            compare: function(actual, expected) {
-              var element = actual.find('.modal-title'),
-                  pass    = util.equals(element.text(), expected, customEqualityTesters),
-                  message = sprintf('Expected "%s" %s have title be "%s"',
-                                    angular.mock.dump(element),
-                                    pass ? 'not to' : 'to',
-                                    expected);
-
-              return { pass: pass, message: message };
-            }
-          };
-        },
         toHaveLabelStartWith: function(util, customEqualityTesters) {
           return {
             compare: function(actual, expected) {
@@ -204,7 +176,7 @@ define(function (require) {
 
     beforeEach(mocks.module('ngAnimateMock', 'biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testSuiteMixin) {
+    beforeEach(inject(function(testSuiteMixin, testUtils) {
       var self = this;
 
       _.extend(self, testSuiteMixin);
@@ -231,6 +203,7 @@ define(function (require) {
         '/assets/javascripts/common/modalInput/url.html',
         '/assets/javascripts/common/components/dateTimePicker/dateTimePicker.html');
 
+      testUtils.jasmineAddModalMatchers();
       suiteAddMatchers();
     }));
 

@@ -167,7 +167,7 @@ define(function (require) {
             jsonCeventType = this.factory.collectionEventType({ specimenSpecs: [ jsonSpecimenSpec ]}),
             ceventType = new this.CollectionEventType(jsonCeventType);
 
-        spyOn(modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+        spyOn(modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
         spyOn(this.domainNotificationService, 'removeEntity').and.callThrough();
         spyOn(this.CollectionEventType.prototype, 'removeSpecimenSpec')
           .and.returnValue(this.$q.when(ceventType));
@@ -206,7 +206,7 @@ define(function (require) {
             jsonCeventType = this.factory.collectionEventType({ annotationTypes: [ jsonAnnotType ]}),
             ceventType = new this.CollectionEventType(jsonCeventType);
 
-        spyOn(modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+        spyOn(modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
         spyOn(this.CollectionEventType.prototype, 'removeAnnotationType')
           .and.returnValue(this.$q.when(ceventType));
 
@@ -215,7 +215,7 @@ define(function (require) {
         this.controller.removeAnnotationType(ceventType.annotationTypes[0]);
         this.scope.$digest();
 
-        expect(modalService.showModal).toHaveBeenCalled();
+        expect(modalService.modalOkCancel).toHaveBeenCalled();
         expect(this.CollectionEventType.prototype.removeAnnotationType).toHaveBeenCalled();
       });
 

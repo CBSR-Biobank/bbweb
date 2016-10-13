@@ -127,7 +127,7 @@ define([
 
       beforeEach(function() {
         this.injectDependencies('modalService', 'domainNotificationService');
-        this.modalService.showModal = jasmine.createSpy().and.returnValue(this.$q.when('OK'));
+        this.modalService.modalOkCancel = jasmine.createSpy().and.returnValue(this.$q.when('OK'));
         this.Specimen.prototype.remove = jasmine.createSpy().and.returnValue(this.$q.when(true));
       });
 
@@ -139,10 +139,7 @@ define([
       });
 
       it('specimen is not removed if user cancels when asked for confirmation', function() {
-        var deferred = this.$q.defer();
-        deferred.reject('CANCEL');
-
-        this.modalService.showModal = jasmine.createSpy().and.returnValue(deferred.promise);
+        this.modalService.modalOkCancel = jasmine.createSpy().and.returnValue(this.$q.reject('Cancel'));
 
         createController.call(this);
         this.controller.removeSpecimen(this.specimen);

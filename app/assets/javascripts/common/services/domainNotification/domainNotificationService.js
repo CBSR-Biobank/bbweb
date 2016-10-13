@@ -85,25 +85,14 @@ define(function () {
                           bodyHtml,
                           removeFailedHeaderHtml,
                           removeFaileBodyHtml) {
-      var modalOptions = {
-        closeButtonText: 'Cancel',
-        headerHtml: headerHtml,
-        bodyHtml: bodyHtml
-      };
-
-      return modalService.showModal({}, modalOptions).then(removeConfirmed);
+      return modalService.modalOkCancel(headerHtml, bodyHtml).then(removeConfirmed);
 
       function removeConfirmed() {
         return promiseFunc().catch(function (error) {
-          var modalOptions = {
-            closeButtonText: gettextCatalog.getString('Cancel'),
-            headerHtml:      removeFailedHeaderHtml,
-            bodyHtml:        removeFaileBodyHtml + ': ' + error
-          };
-          modalService.showModal({}, modalOptions);
+          return modalService.modalOkCancel(removeFailedHeaderHtml,
+                                            removeFaileBodyHtml + ': ' + error);
         });
       }
-
     }
   }
 

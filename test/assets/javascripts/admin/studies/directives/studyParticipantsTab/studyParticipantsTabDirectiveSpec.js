@@ -100,7 +100,7 @@ define([
       describe('when removing an annotation type', function() {
 
         it('removes the annotation type from the study when valid conditions met', function() {
-          spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+          spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
           spyOn(this.Study.prototype, 'removeAnnotationType')
             .and.returnValue(this.$q.when(this.study));
 

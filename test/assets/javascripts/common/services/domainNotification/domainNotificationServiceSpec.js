@@ -67,13 +67,13 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
             removeFailedHeader = 'removeFailedHeaderHtml',
             removeFailedBody = 'removeFailedBody';
 
-        spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+        spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
 
         this.domainNotificationService.removeEntity(this.remove,
-                                              header,
-                                              body,
-                                              removeFailedHeader,
-                                              removeFailedBody)
+                                                    header,
+                                                    body,
+                                                    removeFailedHeader,
+                                                    removeFailedBody)
           .then(function () { done(); });
         this.$rootScope.$digest();
         expect(this.remove).toHaveBeenCalled();
@@ -86,7 +86,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
             removeFailedBody = 'removeFailedBody',
             deferred = this.$q.defer();
 
-        spyOn(this.modalService, 'showModal').and.returnValue(deferred.promise);
+        spyOn(this.modalService, 'modalOkCancel').and.returnValue(deferred.promise);
         deferred.reject('simulated error');
 
         this.domainNotificationService.removeEntity(this.remove,
@@ -107,7 +107,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
             removeFailedBody = 'removeFailedBody',
             deferred = self.$q.defer();
 
-        spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
+        spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
         this.remove = jasmine.createSpy('remove').and.returnValue(deferred.promise);
         deferred.reject('simulated error');
 
@@ -118,7 +118,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
                                          removeFailedBody);
         this.$rootScope.$digest();
         expect(this.remove).toHaveBeenCalled();
-        expect(this.modalService.showModal.calls.count()).toEqual(2);
+        expect(this.modalService.modalOkCancel.calls.count()).toEqual(2);
       });
 
     });
