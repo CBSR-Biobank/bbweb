@@ -25,13 +25,13 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($window, $state, testSuiteMixin, testUtils) {
+    beforeEach(inject(function($window, $state, TestSuiteMixin, testUtils) {
       var self = this;
 
       $window.localStorage.setItem = jasmine.createSpy().and.returnValue(null);
       $window.localStorage.getItem = jasmine.createSpy().and.returnValue(null);
 
-      _.extend(self, testSuiteMixin);
+      _.extend(self, TestSuiteMixin.prototype);
 
       self.injectDependencies('$rootScope',
                               '$compile',

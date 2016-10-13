@@ -25,7 +25,7 @@ define([
                                _factory_,
                                serverReplyMixin,
                                extendedDomainEntities) {
-      _.extend(this, serverReplyMixin);
+      _.extend(this, ServerReplyMixin.prototype);
       httpBackend    = $httpBackend;
       ProcessingType = _ProcessingType_;
       factory   = _factory_;

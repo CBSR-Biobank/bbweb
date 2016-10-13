@@ -145,10 +145,10 @@ define([
           }
         };
 
-        beforeEach(inject(function ($rootScope, $compile, testSuiteMixin, testUtils) {
+        beforeEach(inject(function ($rootScope, $compile, TestSuiteMixin, testUtils) {
           var self = this;
 
-          _.extend(self, testSuiteMixin);
+          _.extend(self, TestSuiteMixin.prototype);
 
           self.injectDependencies('$rootScope', '$compile', '$q');
           self.context     = context;

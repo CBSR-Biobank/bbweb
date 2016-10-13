@@ -27,7 +27,7 @@ define([
                                factory,
                                serverReplyMixin,
                                extendedDomainEntities) {
-      _.extend(this, serverReplyMixin);
+      _.extend(this, ServerReplyMixin.prototype);
       httpBackend   = $httpBackend;
       funutils      = _funutils_;
       SpecimenGroup = _SpecimenGroup_;

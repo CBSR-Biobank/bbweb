@@ -23,7 +23,7 @@ define([
    * @param {function } context.createController is a function that creates the controller and scope:
    * this.controller, and this.scope.
    *
-   * NOTE: needs that the test suite be extended with testSuiteMixin.
+   * NOTE: requires that the test suite be extended with TestSuiteMixin.
    */
   function annotationTypeViewDirectiveSharedSpec(context) {
 

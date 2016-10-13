@@ -80,11 +80,9 @@ define(function(require) {
   //   $compileProvider.debugInfoEnabled(false);
   // }]);
 
-  app.config(exceptionConfig);
+  //app.config(exceptionConfig);
   app.config(loggingConfig);
   app.config(httpInterceptorConfig);
-
-  extendExceptionHandler.$inject = ['$delegate'];
 
   //--
 
@@ -146,32 +144,34 @@ define(function(require) {
     /*jshint unused: true*/
   }
 
-  exceptionConfig.$inject = ['$provide'];
+  // exceptionConfig.$inject = ['$provide'];
 
-  function exceptionConfig($provide) {
-    $provide.decorator('$exceptionHandler', extendExceptionHandler);
-  }
+  // function exceptionConfig($provide) {
+  //   $provide.decorator('$exceptionHandler', extendExceptionHandler);
+  // }
 
-  function extendExceptionHandler($delegate) {
-    return function (exception, cause) {
-      $delegate(exception, cause);
-      // var errorData = {
-      //   exception: exception,
-      //   cause: cause
-      // };
+  // extendExceptionHandler.$inject = ['$delegate'];
 
-      /**
-       * Could add the error to a service's collection,
-       * add errors to $rootScope, log errors to remote web server,
-       * or log locally. Or throw hard. It is entirely up to you.
-       * throw exception;
-       */
-      toastr.error(
-        exception.message,
-        'Exception',
-        { positionClass: 'toast-bottom-right' });
-    };
-  }
+  // function extendExceptionHandler($delegate) {
+  //   return function (exception, cause) {
+  //     $delegate(exception, cause);
+  //     // var errorData = {
+  //     //   exception: exception,
+  //     //   cause: cause
+  //     // };
+
+  //     /**
+  //      * Could add the error to a service's collection,
+  //      * add errors to $rootScope, log errors to remote web server,
+  //      * or log locally. Or throw hard. It is entirely up to you.
+  //      * throw exception;
+  //      */
+  //     toastr.error(
+  //       exception.message,
+  //       'Exception',
+  //       { positionClass: 'toast-bottom-right' });
+  //   };
+  // }
 
   loggingConfig.$inject = ['$logProvider'];
 

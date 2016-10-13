@@ -17,7 +17,6 @@ define(['moment'], function(moment) {
    */
   function timeService(bbwebConfig) {
     var service = {
-      dateToLocal:                dateToLocal,
       dateToUtcString:            dateToUtcString,
       dateAndTimeToUtcString:     dateAndTimeToUtcString,
       dateToDisplayString:        dateToDisplayString
@@ -29,11 +28,12 @@ define(['moment'], function(moment) {
     /**
      * @function common.timeService.dateToLocal
      *
-     * @description Converts date to local time and returns it as a string.
+     * @description Converts date to local time, with seconds and milliseconds set to zero, and returns it as
+     * a moment.
      *
      * @param {Date} date - the date to convert to local time.
      *
-     * @return {String} The date as local time in a string.
+     * @return {Moment} The date as local time in a string.
      *
      * @throws An error if date is undefined.
      */
@@ -64,7 +64,7 @@ define(['moment'], function(moment) {
      * paramerter are ignored. If this parameter is omitted, then the time values in the <code>date</code>
      * parameter are used.
      *
-     * @return {String} The combined date and time as local time in a string.
+     * @return {Moment} The combined date and time as local time.
      *
      * @throws An error if date or time are undefined.
      */
@@ -128,9 +128,9 @@ define(['moment'], function(moment) {
         throw new Error('date or time is invalid');
       }
       if (!time) {
-        return dateToLocal(date).format();
+        return dateToLocal(date).utc().format();
       }
-      return dateAndTimeToLocal(date, time).format();
+      return dateAndTimeToLocal(date, time).utc().format();
     }
 
     /**

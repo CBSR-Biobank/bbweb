@@ -14,8 +14,8 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (testSuiteMixin, serverReplyMixin) {
-      _.extend(this, testSuiteMixin, serverReplyMixin);
+    beforeEach(inject(function (TestSuiteMixin, ServerReplyMixin) {
+      _.extend(this, TestSuiteMixin.prototype, ServerReplyMixin.prototype);
 
       this.injectDependencies('$q',
                               '$httpBackend',

@@ -32,7 +32,7 @@ define(['lodash'], function(_) {
                                  _AnnotationValueType_,
                                  _AnnotationMaxValueCount_,
                                 serverReplyMixin) {
-        _.extend(this, serverReplyMixin);
+        _.extend(this, ServerReplyMixin.prototype);
         httpBackend                  = $httpBackend;
         funutils                     = _funutils_;
         AnnotationValueType          = _AnnotationValueType_;

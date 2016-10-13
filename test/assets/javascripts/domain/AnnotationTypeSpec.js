@@ -11,8 +11,8 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testSuiteMixin, extendedDomainEntities) {
-      _.extend(this, testSuiteMixin);
+    beforeEach(inject(function(TestSuiteMixin, extendedDomainEntities) {
+      _.extend(this, TestSuiteMixin.prototype);
       this.injectDependencies('AnnotationType',
                               'AnnotationValueType',
                               'AnnotationMaxValueCount',

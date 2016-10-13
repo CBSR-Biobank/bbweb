@@ -12,16 +12,56 @@ define([
 ], function(angular, mocks, $, _, sprintf) {
   'use strict';
 
+  function SuiteMixinFactory(EntityTestSuiteMixin, ServerReplyMixin) {
+
+    function SuiteMixin() {
+      EntityTestSuiteMixin.call(this);
+      ServerReplyMixin.call(this);
+    }
+
+    SuiteMixin.prototype = Object.create(EntityTestSuiteMixin.prototype);
+    _.extend(SuiteMixin.prototype, ServerReplyMixin.prototype);
+    SuiteMixin.prototype.constructor = SuiteMixin;
+
+    // used by promise tests
+    SuiteMixin.prototype.failTest = function (error) {
+      expect(error).toBeUndefined();
+    };
+
+    SuiteMixin.prototype.uri = function(/* path, studyId */) {
+      var args = _.toArray(arguments),
+          studyId,
+          path;
+
+      var result = '/studies';
+
+      if (args.length > 0) {
+        path = args.shift();
+        result += '/' + path;
+      }
+
+      if (args.length > 0) {
+        studyId = args.shift();
+        result += '/' + studyId;
+      }
+
+      return result;
+    };
+
+    return SuiteMixin;
+  }
+
   describe('Study', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(entityTestSuite,
-                               serverReplyMixin,
+    beforeEach(inject(function(EntityTestSuiteMixin,
+                               ServerReplyMixin,
                                extendedDomainEntities) {
-      var self = this;
+      var self = this,
+          SuiteMixin = new SuiteMixinFactory(EntityTestSuiteMixin, ServerReplyMixin);
 
-      _.extend(self, entityTestSuite, serverReplyMixin);
+      _.extend(self, SuiteMixin.prototype);
 
       self.injectDependencies('$httpBackend',
                               'Study',
@@ -33,8 +73,6 @@ define([
       self.testUtils.addCustomMatchers();
       self.jsonStudy = self.factory.study();
       self.expectStudy = expectStudy;
-
-      //--
 
       // used by promise tests
       function expectStudy(entity) {
@@ -95,15 +133,15 @@ define([
 
     it('can retrieve a single study', function() {
       var self = this;
-      self.$httpBackend.whenGET(uri(this.jsonStudy.id)).respond(this.reply(this.jsonStudy));
-      self.Study.get(this.jsonStudy.id).then(self.expectStudy).catch(failTest);
+      self.$httpBackend.whenGET(self.uri(self.jsonStudy.id)).respond(self.reply(self.jsonStudy));
+      self.Study.get(self.jsonStudy.id).then(self.expectStudy).catch(self.failTest);
       self.$httpBackend.flush();
     });
 
     it('fails when getting a study and it has a bad format', function() {
       var self = this,
           study = _.omit(self.jsonStudy, 'name');
-      self.$httpBackend.whenGET(uri(study.id)).respond(this.reply(study));
+      self.$httpBackend.whenGET(this.uri(study.id)).respond(this.reply(study));
 
       self.Study.get(study.id).then(shouldNotFail).catch(shouldFail);
       self.$httpBackend.flush();
@@ -122,7 +160,7 @@ define([
           annotationType = _.omit(self.factory.annotationType(), 'name'),
           study = self.factory.study({ annotationTypes: [ annotationType ]});
 
-      self.$httpBackend.whenGET(uri(study.id)).respond(this.reply(study));
+      self.$httpBackend.whenGET(this.uri(study.id)).respond(this.reply(study));
 
       self.Study.get(study.id).then(shouldNotFail).catch(shouldFail);
       self.$httpBackend.flush();
@@ -141,9 +179,9 @@ define([
           studies = [ self.factory.study({ annotationTypes: [] }) ],
           reply = self.factory.pagedResult(studies);
 
-      self.$httpBackend.whenGET(uri()).respond(this.reply(reply));
+      self.$httpBackend.whenGET(this.uri()).respond(this.reply(reply));
 
-      self.Study.list().then(testStudy).catch(failTest);
+      self.Study.list().then(testStudy).catch(this.failTest);
       self.$httpBackend.flush();
 
       function testStudy(pagedResult) {
@@ -167,11 +205,11 @@ define([
       _.each(optionList, function (options) {
         var studies = [ self.jsonStudy ],
             reply   = self.factory.pagedResult(studies),
-            url     = sprintf.sprintf('%s?%s', uri(), $.param(options, true));
+            url     = sprintf.sprintf('%s?%s', self.uri(), $.param(options, true));
 
         self.$httpBackend.whenGET(url).respond(self.reply(reply));
 
-        self.Study.list(options).then(testStudy).catch(failTest);
+        self.Study.list(options).then(testStudy).catch(self.failTest);
         self.$httpBackend.flush();
 
         function testStudy(pagedResult) {
@@ -188,7 +226,7 @@ define([
           studies = [ _.omit(self.jsonStudy, 'name') ],
           reply = self.factory.pagedResult(studies);
 
-      self.$httpBackend.whenGET(uri()).respond(this.reply(reply));
+      self.$httpBackend.whenGET(this.uri()).respond(this.reply(reply));
       self.Study.list().then(listFail).catch(shouldFail);
       self.$httpBackend.flush();
 
@@ -206,9 +244,9 @@ define([
           study = new self.Study(_.omit(this.jsonStudy, 'id')),
           json = _.pick(study, 'name', 'description');
 
-      self.$httpBackend.expectPOST(uri(), json).respond(this.reply(this.jsonStudy));
+      self.$httpBackend.expectPOST(this.uri(), json).respond(this.reply(this.jsonStudy));
 
-      study.add().then(self.expectStudy).catch(failTest);
+      study.add().then(self.expectStudy).catch(this.failTest);
       self.$httpBackend.flush();
     });
 
@@ -220,11 +258,11 @@ define([
                              study,
                              'updateName',
                              study.name,
-                             uri('name', study.id),
+                             this.uri('name', study.id),
                              { name: study.name },
                              this.jsonStudy,
                              self.expectStudy,
-                             failTest);
+                             this.failTest);
     });
 
     it('can update the description on a study', function() {
@@ -235,21 +273,21 @@ define([
                              study,
                              'updateDescription',
                              undefined,
-                             uri('description', study.id),
+                             this.uri('description', study.id),
                              { },
                              this.jsonStudy,
                              self.expectStudy,
-                             failTest);
+                             this.failTest);
 
       this.updateEntity.call(this,
                              study,
                              'updateDescription',
                              study.description,
-                             uri('description', study.id),
+                             this.uri('description', study.id),
                              { description: study.description },
                              this.jsonStudy,
                              self.expectStudy,
-                             failTest);
+                             this.failTest);
     });
 
     describe('for annotation types', function() {
@@ -265,11 +303,11 @@ define([
                                this.study,
                                'addAnnotationType',
                                _.omit(this.annotationType, 'uniqueId'),
-                               uri('pannottype', this.study.id),
+                               this.uri('pannottype', this.study.id),
                                _.omit(this.annotationType, 'uniqueId'),
                                this.jsonStudy,
                                this.expectStudy,
-                               failTest);
+                               this.failTest);
       });
 
       it('can update an annotation type on a study', function() {
@@ -278,30 +316,37 @@ define([
                                'updateAnnotationType',
                                this.annotationType,
                                sprintf.sprintf('%s/%s',
-                                               uri('pannottype', this.study.id),
+                                               this.uri('pannottype', this.study.id),
                                                this.annotationType.uniqueId),
                                this.annotationType,
                                this.jsonStudy,
                                this.expectStudy,
-                               failTest);
+                               this.failTest);
       });
 
       it('can remove an annotation on a study', function() {
         var url = sprintf.sprintf('%s/%d/%s',
-                                  uri('pannottype', this.study.id),
+                                  this.uri('pannottype', this.study.id),
                                   this.study.version,
                                   this.annotationType.uniqueId);
 
         this.$httpBackend.whenDELETE(url).respond(this.reply(true));
-        this.study.removeAnnotationType(this.annotationType).then(this.expectStudy).catch(failTest);
+        this.study.removeAnnotationType(this.annotationType).then(this.expectStudy).catch(this.failTest);
         this.$httpBackend.flush();
       });
 
     });
 
-    it('can disable a study', function() {
-      var jsonStudy = this.factory.study({ status: this.StudyStatus.ENABLED });
-      changeStatusShared.call(this, jsonStudy, 'disable', this.StudyStatus.DISABLED);
+    describe('can disable a study', function() {
+      var context = {};
+
+      beforeEach(function() {
+        context.jsonStudy = this.factory.study({ status: this.StudyStatus.ENABLED });
+        context.action = 'disable';
+        context.status = this.StudyStatus.DISABLED;
+      });
+
+      changeStatusBehaviour(context);
     });
 
     it('throws an error when disabling a study and it is already disabled', function() {
@@ -310,9 +355,16 @@ define([
         .toThrowError('already disabled');
     });
 
-    it('can enable a study', function() {
-      var jsonStudy = this.factory.study({ status: this.StudyStatus.DISABLED });
-      changeStatusShared.call(this, jsonStudy, 'enable', this.StudyStatus.ENABLED);
+    describe('can disable a study', function() {
+      var context = {};
+
+      beforeEach(function() {
+        context.jsonStudy = this.factory.study({ status: this.StudyStatus.DISABLED });
+        context.action = 'enable';
+        context.status = this.StudyStatus.ENABLED;
+      });
+
+      changeStatusBehaviour(context);
     });
 
     it('throws an error when enabling a study and it is already enabled', function() {
@@ -321,9 +373,16 @@ define([
         .toThrowError('already enabled');
     });
 
-    it('can retire a study', function() {
-      var jsonStudy = this.factory.study({ status: this.StudyStatus.DISABLED });
-      changeStatusShared.call(this, jsonStudy, 'retire', this.StudyStatus.RETIRED);
+    describe('can disable a study', function() {
+      var context = {};
+
+      beforeEach(function() {
+        context.jsonStudy = this.factory.study({ status: this.StudyStatus.DISABLED });
+        context.action = 'retire';
+        context.status = this.StudyStatus.RETIRED;
+      });
+
+      changeStatusBehaviour(context);
     });
 
     it('throws an error when retiring a study and it is already retired', function() {
@@ -332,9 +391,16 @@ define([
         .toThrowError('already retired');
     });
 
-    it('can unretire a study', function() {
-      var jsonStudy = this.factory.study({ status: this.StudyStatus.RETIRED });
-      changeStatusShared.call(this, jsonStudy, 'unretire', this.StudyStatus.DISABLED);
+    describe('can disable a study', function() {
+      var context = {};
+
+      beforeEach(function() {
+        context.jsonStudy = this.factory.study({ status: this.StudyStatus.RETIRED });
+        context.action = 'unretire';
+        context.status = this.StudyStatus.DISABLED;
+      });
+
+      changeStatusBehaviour(context);
     });
 
     it('throws an error when unretiring a study and it is not retired', function() {
@@ -347,59 +413,63 @@ define([
         .toThrowError('not retired');
     });
 
-    function replyStudy(study, newValues) {
-      newValues = newValues || {};
-      return _.extend({}, study, newValues, {version: study.version + 1});
-    }
+    it('can get a list of study names', function() {
+      var self = this,
+          dto = self.factory.studyNameDto();
 
-    function changeStatusShared(jsonStudy, action, status) {
-      /* jshint validthis:true */
-      var self  = this,
-          study = new self.Study(jsonStudy),
-          json =  { expectedVersion: study.version },
-          reply = replyStudy(jsonStudy, { status: status });
-
-      self.$httpBackend.expectPOST(uri(action, study.id), json).respond(this.reply(reply));
-      expect(study[action]).toBeFunction();
-      study[action]().then(checkStudy).catch(failTest);
+      self.$httpBackend.whenGET('/studies/names').respond([ dto ]);
+      self.Study.names()
+        .then(function (reply) {
+          expect(reply).toContainAll([ dto ]);
+        })
+        .catch(self.failTest);
       self.$httpBackend.flush();
+    });
 
-      function checkStudy(replyStudy) {
-        expect(replyStudy).toEqual(jasmine.any(self.Study));
-        expect(replyStudy.id).toEqual(study.id);
-        expect(replyStudy.version).toEqual(study.version + 1);
-        expect(replyStudy.status).toBe(status);
-      }
+    it('can get a list of centre locations', function() {
+      var self = this,
+          location = self.factory.location(),
+          centre = self.factory.centre({ locations: [ location ]}),
+          dto = self.factory.centreLocationDto(centre),
+          study = new this.Study(this.factory.study());
+
+      self.$httpBackend.whenGET('/studies/centres/' + study.id).respond([ dto ]);
+      study.allLocations()
+        .then(function (reply) {
+          expect(reply).toContainAll([ dto ]);
+        })
+        .catch(self.failTest);
+      self.$httpBackend.flush();
+    });
+
+    function changeStatusBehaviour(context) {
+
+      describe('change status shared behaviour', function() {
+
+        it('change status', function() {
+          var self  = this,
+              study = new self.Study(context.jsonStudy),
+              json =  { expectedVersion: study.version },
+              reply = replyStudy(context.jsonStudy, { status: context.status });
+
+          self.$httpBackend.expectPOST(self.uri(context.action, study.id), json).respond(self.reply(reply));
+          expect(study[context.action]).toBeFunction();
+          study[context.action]().then(checkStudy).catch(self.failTest);
+          self.$httpBackend.flush();
+
+          function checkStudy(replyStudy) {
+            expect(replyStudy).toEqual(jasmine.any(self.Study));
+            expect(replyStudy.status).toBe(context.status);
+          }
+        });
+
+        function replyStudy(study, newValues) {
+          newValues = newValues || {};
+          return _.extend({}, study, newValues);
+        }
+      });
+
     }
-
-    // used by promise tests
-    function failTest(error) {
-      expect(error).toBeUndefined();
-    }
-
-    function uri(/* path, studyId */) {
-      var args = _.toArray(arguments),
-          studyId,
-          path;
-
-      var result = '/studies';
-
-      if (args.length > 0) {
-        path = args.shift();
-        result += '/' + path;
-      }
-
-      if (args.length > 0) {
-        studyId = args.shift();
-        result += '/' + studyId;
-      }
-
-      return result;
-    }
-
   });
 
 });
-/* Local Variables:  */
-/* mode: js          */
-/* End:              */

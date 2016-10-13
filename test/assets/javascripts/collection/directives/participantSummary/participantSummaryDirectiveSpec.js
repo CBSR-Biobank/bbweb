@@ -11,11 +11,18 @@ define(function(require) {
       mocks                           = require('angularMocks'),
       _                               = require('lodash'),
       faker                           = require('faker'),
-      annotationUpdateSharedBehaviour = require('../../../common/annotationUpdateSharedBehaviourSpec');
+      annotationUpdateSharedBehaviour = require('../../../test/annotationUpdateSharedBehaviour');
 
-  describe('participantSummaryDirective', function() {
+  function SuiteMixinFactory(TestSuiteMixin) {
 
-    var participantWithAnnotation = function (valueType, maxValueCount) {
+    function SuiteMixin() {
+      TestSuiteMixin.call(this);
+    }
+
+    SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
+    SuiteMixin.prototype.constructor = SuiteMixin;
+
+    SuiteMixin.prototype.participantWithAnnotation = function (valueType, maxValueCount) {
       var jsonAnnotationType,
           value,
           jsonAnnotation,
@@ -37,7 +44,7 @@ define(function(require) {
       return new this.Participant(jsonParticipant, study);
     };
 
-    var createDirective = function (study, participant) {
+    SuiteMixin.prototype.createDirective = function (study, participant) {
       study = study || this.study;
       participant = participant || this.participant;
 
@@ -58,14 +65,21 @@ define(function(require) {
       this.controller = this.element.controller('participantSummary');
     };
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+    return SuiteMixin;
+  }
 
-    beforeEach(inject(function(testSuiteMixin) {
-      var self = this;
+  describe('participantSummaryDirective', function() {
 
-      _.extend(self, testSuiteMixin);
+    mocks.module.sharedInjector();
 
-      self.injectDependencies('$rootScope',
+    beforeAll(mocks.module('biobankApp', 'biobank.test'));
+
+    beforeEach(inject(function(TestSuiteMixin) {
+      var SuiteMixin = new SuiteMixinFactory(TestSuiteMixin);
+
+      _.extend(this, SuiteMixin.prototype);
+
+      this.injectDependencies('$rootScope',
                               '$compile',
                               '$q',
                               '$state',
@@ -74,19 +88,19 @@ define(function(require) {
                               'AnnotationValueType',
                               'factory');
 
-      self.putHtmlTemplates(
+      this.putHtmlTemplates(
         '/assets/javascripts/collection/directives/participantSummary/participantSummary.html',
         '/assets/javascripts/common/directives/statusLine/statusLine.html');
 
-      self.jsonParticipant = self.factory.participant();
-      self.jsonStudy       = self.factory.defaultStudy();
+      this.jsonParticipant = this.factory.participant();
+      this.jsonStudy       = this.factory.defaultStudy();
 
-      self.participant = new self.Participant(self.jsonParticipant);
-      self.study       = new self.Study(self.jsonStudy);
+      this.participant = new this.Participant(this.jsonParticipant);
+      this.study       = new this.Study(this.jsonStudy);
     }));
 
     it('has valid scope', function() {
-      createDirective.call(this, this.study, this.participant);
+      this.createDirective(this.study, this.participant);
 
       expect(this.controller.study).toBe(this.study);
       expect(this.controller.participant).toBe(this.participant);
@@ -100,115 +114,137 @@ define(function(require) {
       var context = {};
 
       beforeEach(inject(function () {
+        var self = this;
+
         context.createDirective           = createDirective;
         context.controllerUpdateFuncName  = 'editUniqueId';
         context.modalInputFuncName        = 'text';
         context.participantUpdateFuncName = 'updateUniqueId';
-        context.participant               = this.participant;
+        context.participant               = self.participant;
         context.newValue                  = faker.random.word();
+
+        function createDirective() {
+          return self.createDirective(self.study, self.participant);
+        }
       }));
 
       sharedUpdateBehaviour(context);
 
     });
 
-    describe('updates to a text annotation', function () {
+    describe('updates to annotations', function () {
 
       var context = {};
 
       beforeEach(inject(function () {
-        var participant = participantWithAnnotation.call(this, this.AnnotationValueType.TEXT);
-
-        context.createDirective           = createDirective;
-        context.controllerUpdateFuncName = 'editAnnotation';
-        context.modalInputFuncName       = 'text';
         context.entity                   = this.Participant;
         context.entityUpdateFuncName     = 'addAnnotation';
-        context.annotation               = participant.annotations[0];
-        context.newValue                 = faker.random.word();
       }));
 
-      annotationUpdateSharedBehaviour(context);
+      describe('updates to a text annotation', function () {
 
-    });
+        beforeEach(inject(function () {
+          var self = this,
+              participant = self.participantWithAnnotation(self.AnnotationValueType.TEXT);
 
-    describe('updates to a date time annotation', function () {
+          context.createDirective           = createDirective;
+          context.controllerUpdateFuncName = 'editAnnotation';
+          context.modalInputFuncName       = 'text';
+          context.annotation               = participant.annotations[0];
+          context.newValue                 = faker.random.word();
 
-      var context = {};
+          function createDirective() {
+            return self.createDirective(self.study, participant);
+          }
+        }));
 
-      beforeEach(inject(function () {
-        var participant = participantWithAnnotation.call(this, this.AnnotationValueType.DATE_TIME);
+        annotationUpdateSharedBehaviour(context);
 
-        context.createDirective           = createDirective;
-        context.controllerUpdateFuncName = 'editAnnotation';
-        context.modalInputFuncName       = 'dateTime';
-        context.entity                   = this.Participant;
-        context.entityUpdateFuncName     = 'addAnnotation';
-        context.annotation               = participant.annotations[0];
-        context.newValue                 = faker.date.recent(10);
-      }));
+      });
 
-      annotationUpdateSharedBehaviour(context);
+      describe('updates to a date time annotation', function () {
 
-    });
+        beforeEach(inject(function () {
+          var self = this,
+              participant = self.participantWithAnnotation(self.AnnotationValueType.DATE_TIME);
 
-    describe('updates to a number annotation', function () {
+          context.createDirective           = createDirective;
+          context.controllerUpdateFuncName = 'editAnnotation';
+          context.modalInputFuncName       = 'dateTime';
+          context.annotation               = participant.annotations[0];
+          context.newValue                 = faker.date.recent(10);
 
-      var context = {};
+          function createDirective() {
+            return self.createDirective(self.study, participant);
+          }
+        }));
 
-      beforeEach(inject(function () {
-        var participant = participantWithAnnotation.call(this, this.AnnotationValueType.NUMBER);
+        annotationUpdateSharedBehaviour(context);
 
-        context.createDirective           = createDirective;
-        context.controllerUpdateFuncName = 'editAnnotation';
-        context.modalInputFuncName       = 'number';
-        context.entity                   = this.Participant;
-        context.entityUpdateFuncName     = 'addAnnotation';
-        context.annotation               = participant.annotations[0];
-        context.newValue                 = 10;
-      }));
+      });
 
-      annotationUpdateSharedBehaviour(context);
+      describe('updates to a number annotation', function () {
 
-    });
+        beforeEach(inject(function () {
+          var self = this,
+              participant = self.participantWithAnnotation(self.AnnotationValueType.NUMBER);
 
-    describe('updates to a single select annotation', function () {
+          context.createDirective           = createDirective;
+          context.controllerUpdateFuncName = 'editAnnotation';
+          context.modalInputFuncName       = 'number';
+          context.annotation               = participant.annotations[0];
+          context.newValue                 = 10;
 
-      var context = {};
+          function createDirective() {
+            return self.createDirective(self.study, participant);
+          }
+        }));
 
-      beforeEach(inject(function () {
-        var participant = participantWithAnnotation.call(this, this.AnnotationValueType.SELECT, 1);
+        annotationUpdateSharedBehaviour(context);
 
-        context.createDirective           = createDirective;
-        context.controllerUpdateFuncName = 'editAnnotation';
-        context.modalInputFuncName       = 'select';
-        context.entity                   = this.Participant;
-        context.entityUpdateFuncName     = 'addAnnotation';
-        context.annotation               = participant.annotations[0];
-        context.newValue                 = participant.annotations[0].annotationType.options[0];
-      }));
+      });
 
-      annotationUpdateSharedBehaviour(context);
+      describe('updates to a single select annotation', function () {
 
-    });
+        beforeEach(inject(function () {
+          var self = this,
+              participant = self.participantWithAnnotation(self.AnnotationValueType.SELECT, 1);
 
-    describe('updates to a multiple select annotation', function () {
+          context.createDirective           = createDirective;
+          context.controllerUpdateFuncName = 'editAnnotation';
+          context.modalInputFuncName       = 'select';
+          context.annotation               = participant.annotations[0];
+          context.newValue                 = participant.annotations[0].annotationType.options[0];
 
-      var context = {};
+          function createDirective() {
+            return self.createDirective(self.study, participant);
+          }
+        }));
 
-      beforeEach(inject(function () {
-        var participant = participantWithAnnotation.call(this, this.AnnotationValueType.SELECT, 2);
+        annotationUpdateSharedBehaviour(context);
 
-        context.createDirective           = createDirective;
-        context.controllerUpdateFuncName = 'editAnnotation';
-        context.modalInputFuncName       = 'selectMultiple';
-        context.entity                   = this.Participant;
-        context.entityUpdateFuncName     = 'addAnnotation';
-        context.annotation               = participant.annotations[0];
-        context.newValue                 = participant.annotations[0].annotationType.options;
-      }));
+      });
 
-      annotationUpdateSharedBehaviour(context);
+      describe('updates to a multiple select annotation', function () {
+
+        beforeEach(inject(function () {
+          var self = this,
+              participant = self.participantWithAnnotation(self.AnnotationValueType.SELECT, 2);
+
+          context.createDirective           = createDirective;
+          context.controllerUpdateFuncName = 'editAnnotation';
+          context.modalInputFuncName       = 'selectMultiple';
+          context.annotation               = participant.annotations[0];
+          context.newValue                 = participant.annotations[0].annotationType.options;
+
+          function createDirective() {
+            return self.createDirective(self.study, participant);
+          }
+        }));
+
+        annotationUpdateSharedBehaviour(context);
+
+      });
 
     });
 
@@ -232,7 +268,7 @@ define(function(require) {
             .and.returnValue(this.$q.when(context.participant));
           spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
-          createDirective.call(this);
+          this.createDirective();
           this.controller[context.controllerUpdateFuncName]();
           this.scope.$digest();
 
@@ -253,7 +289,7 @@ define(function(require) {
             .and.returnValue(updateDeferred.promise);
           spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-          createDirective.call(this);
+          this.createDirective();
           this.controller[context.controllerUpdateFuncName]();
           this.scope.$digest();
 

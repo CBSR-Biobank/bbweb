@@ -372,7 +372,7 @@ define(function (require) {
     /**
      * Changes the state of this shipment.
      *
-     * @param {ShipmentState|link domain.centres.ShipmentState} the new state.
+     * @param {ShipmentState|domain.centres.ShipmentState} the new state.
      *
      * @param {Date} [datetime] - the date and time this shipment took this state. Only required for the
      * following states: Packed, Sent, Received, Unpacked.

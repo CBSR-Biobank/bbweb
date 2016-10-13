@@ -67,6 +67,8 @@ define([
       study:                             study,
       defaultStudy:                      defaultStudy,
 
+      studyNameDto:                      studyNameDto,
+
       participant:                       participant,
       defaultParticipant:                defaultParticipant,
 
@@ -96,6 +98,8 @@ define([
       collectionSpecimenSpec:            collectionSpecimenSpec,
       location:                          location,
       centreLocations:                   centreLocations,
+      centreLocationInfo:                centreLocationInfo,
+      centreLocationDto:                 centreLocationDto,
 
       // utilities
       domainEntityNameNext:              domainEntityNameNext,
@@ -305,6 +309,11 @@ define([
       return defaultEntity(ENTITY_NAME_STUDY(), study);
     }
 
+    function studyNameDto() {
+      var study = defaultStudy();
+      return _.pick(study, ['id', 'name', 'status']);
+    }
+
     /**
      * If defaultStudy has annotation types, then participant will have annotations based on the study's,
      * unless options.annotationTypes is defined.
@@ -380,9 +389,21 @@ define([
         throw new Error('centre does not have any locations');
       }
       return {
-        centreId: centre.id,
+        centreId:   centre.id,
         locationId: centre.locations[0].uniqueId,
-        name: centre.name +': ' + centre.locations[0].name
+        name:       centre.name +': ' + centre.locations[0].name
+      };
+    }
+
+    function centreLocationDto(centre) {
+      if (!centre.locations || (centre.locations.length < 1)) {
+        throw new Error('centre does not have any locations');
+      }
+      return {
+        centreId:     centre.id,
+        locationId:   centre.locations[0].uniqueId,
+        centreName:   centre.name,
+        locationName: centre.locations[0].name
       };
     }
 

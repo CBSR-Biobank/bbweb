@@ -5,19 +5,21 @@
 define(['lodash'], function (_) {
   'use strict';
 
-  entityTestSuiteFactory.$inject = ['$httpBackend', 'testSuiteMixin'];
+  EntityTestSuiteMixinFactory.$inject = ['$httpBackend', 'TestSuiteMixin'];
 
-  function entityTestSuiteFactory($httpBackend, testSuiteMixin) {
+  function EntityTestSuiteMixinFactory($httpBackend, TestSuiteMixin) {
 
     /**
      * A mixin for domain entity test suites.
      *
      * @mixin entityTestSuite
      */
-    var mixin = _.extend({ updateEntity: updateEntity }, testSuiteMixin);
-    return mixin;
+    function EntityTestSuiteMixin() {
+      TestSuiteMixin.call(this);
+    }
 
-    //--
+    EntityTestSuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
+    EntityTestSuiteMixin.prototype.constructor = EntityTestSuiteMixin;
 
     /**
      * @method
@@ -30,8 +32,8 @@ define(['lodash'], function (_) {
      *
      * @param {string} updateFuncName - The name of the update function on the entity to be tested.
      *
-     * @param {(string[]|Object)} updateParams - the parameters to pass to the update function. If this is not an
-     * string array, it will be converted to a single item array.
+     * @param {(string[]|Object)} updateParams - the parameters to pass to the update function. If this is not
+     * an string array, it will be converted to a single item array.
      *
      * @param {string} url - the URL on the server where the request will be POSTed to.
      *
@@ -44,8 +46,14 @@ define(['lodash'], function (_) {
      *
      * @param {function(string)} catchFunc the fail function to be called if the update to the entity fails.
      */
-    function updateEntity(entity, updateFuncName, updateParams, url, json, reply, thenFunc, catchFunc) {
-      /* jshint validthis: true */
+    EntityTestSuiteMixin.prototype.updateEntity = function (entity,
+                                                            updateFuncName,
+                                                            updateParams,
+                                                            url,
+                                                            json,
+                                                            reply,
+                                                            thenFunc,
+                                                            catchFunc) {
       _.extend(json, { expectedVersion: 0 });
       $httpBackend.expectPOST(url, json).respond(201, { status: 'success', data: reply });
       expect(entity[updateFuncName]).toBeFunction();
@@ -56,9 +64,11 @@ define(['lodash'], function (_) {
 
       entity[updateFuncName].apply(entity, updateParams).then(thenFunc).catch(catchFunc);
       $httpBackend.flush();
-    }
+    };
+
+    return EntityTestSuiteMixin;
   }
 
-  return entityTestSuiteFactory;
+  return EntityTestSuiteMixinFactory;
 
 });

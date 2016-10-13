@@ -1,0 +1,7 @@
+* SuiteMixin - NL 2016-10-19
+
+  In order to clean up test suites, they now have a SuiteMixin class
+  defined at the top of the file. This class usually has common code
+  for each of the test cases in the suite.
+
+  Not all test suites have been refactored for this.

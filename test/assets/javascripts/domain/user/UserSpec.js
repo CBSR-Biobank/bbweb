@@ -14,10 +14,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(entityTestSuite, serverReplyMixin, extendedDomainEntities) {
+    beforeEach(inject(function(EntityTestSuiteMixin, ServerReplyMixin, extendedDomainEntities) {
       var self = this;
 
-      _.extend(self, entityTestSuite, serverReplyMixin);
+      _.extend(self, EntityTestSuiteMixin.prototype, ServerReplyMixin.prototype);
 
       self.injectDependencies('$httpBackend',
                               'User',

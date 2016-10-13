@@ -23,10 +23,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testSuiteMixin, serverReplyMixin) {
+    beforeEach(inject(function(TestSuiteMixin, ServerReplyMixin) {
       var self = this;
 
-      _.extend(self, testSuiteMixin, serverReplyMixin);
+      _.extend(self, TestSuiteMixin.prototype, ServerReplyMixin.prototype);
 
       self.injectDependencies('$q',
                               '$rootScope',

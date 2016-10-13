@@ -11,18 +11,21 @@ define(function (require) {
 
   var angular = require('angular');
 
-  var module = angular.module('biobank.test', []);
-
-  module.service('extendedDomainEntities', require('../../../test/assets/javascripts/test/extendedDomainEntities'));
-  module.service('factory',            require('../../../test/assets/javascripts/test/factory'));
-  module.service('testUtils',          require('../../../test/assets/javascripts/test/testUtils'));
-
-  module.factory('entityTestSuite',    require('../../../test/assets/javascripts/test/entityTestSuite'));
-  module.factory('testSuiteMixin',     require('../../../test/assets/javascripts/test/testSuiteMixin'));
-  module.factory('serverReplyMixin',   require('../../../test/assets/javascripts/test/serverReplyMixin'));
-
-  module.factory('hasAnnotationsEntityTestSuite',
-                 require('../../../test/assets/javascripts/test/hasAnnotationsEntityTestSuite'));
-
-  return module;
+  return angular.module('biobank.test', [])
+    .service('extendedDomainEntities',
+             require('../../../test/assets/javascripts/test/extendedDomainEntities'))
+    .service('factory',
+             require('../../../test/assets/javascripts/test/factory'))
+    .service('testUtils',
+             require('../../../test/assets/javascripts/test/testUtils'))
+    .factory('EntityTestSuiteMixin',
+             require('../../../test/assets/javascripts/test/EntityTestSuiteMixin'))
+    .factory('ModalTestSuiteMixin',
+             require('../../../test/assets/javascripts/test/ModalTestSuiteMixin'))
+    .factory('TestSuiteMixin',
+             require('../../../test/assets/javascripts/test/TestSuiteMixin'))
+    .factory('ServerReplyMixin',
+             require('../../../test/assets/javascripts/test/ServerReplyMixin'))
+    .factory('hasAnnotationsEntityTestSuite',
+             require('../../../test/assets/javascripts/test/hasAnnotationsEntityTestSuite'));
 });

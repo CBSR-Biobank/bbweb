@@ -52,14 +52,14 @@ define(function (require) {
                                timeService) {
         var vm = this;
 
-        vm.heading = heading;
-        vm.label   = label;
-        vm.placeholder = placeholder;
-        vm.locationInfo = value;
-        vm.centreLocations = undefined;
+        vm.heading               = heading;
+        vm.label                 = label;
+        vm.placeholder           = placeholder;
+        vm.locationInfo          = value;
+        vm.centreLocations       = undefined;
 
-        vm.okPressed    = okPressed;
-        vm.closePressed = closePressed;
+        vm.okPressed             = okPressed;
+        vm.closePressed          = closePressed;
         vm.getCentreLocationInfo = getCentreLocationInfo;
 
         //--

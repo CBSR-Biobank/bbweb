@@ -83,7 +83,7 @@ define(function () {
       updateCentres();
     }
 
-    function centreGlyphicon(study) {
+    function centreGlyphicon() {
       return '<i class="glyphicon ' + vm.icon + '"></i>';
     }
 

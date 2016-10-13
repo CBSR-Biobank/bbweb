@@ -25,13 +25,13 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($window, $timeout, testSuiteMixin) {
+    beforeEach(inject(function($window, $timeout, TestSuiteMixin) {
       var self = this;
 
       $window.localStorage.setItem = jasmine.createSpy().and.returnValue(null);
       $window.localStorage.getItem = jasmine.createSpy().and.returnValue(null);
 
-      _.extend(self, testSuiteMixin);
+      _.extend(self, TestSuiteMixin.prototype);
 
       self.injectDependencies('$rootScope',
                               '$compile',
@@ -76,7 +76,7 @@ define([
         self.$state.current.name = state;
         createController.call(self, self.centre);
         childScope = self.element.isolateScope().$new();
-        childScope.$emit('study-view');
+        childScope.$emit('centre-view');
         self.scope.$digest();
         tab = _.find(self.controller.tabs, { sref: state });
         expect(tab.active).toBeTrue();

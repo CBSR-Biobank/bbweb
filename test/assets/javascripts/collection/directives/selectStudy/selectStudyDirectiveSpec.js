@@ -58,12 +58,10 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testSuiteMixin, testUtils) {
-      _.extend(this, testSuiteMixin);
-
+    beforeEach(inject(function(TestSuiteMixin, testUtils) {
+      _.extend(this, TestSuiteMixin.prototype);
 
       this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
-
       this.putHtmlTemplates(
         '/assets/javascripts/collection/directives/selectStudy/selectStudy.html');
     }));
@@ -138,7 +136,7 @@ define([
       expect(this.scope.model.getStudies).toHaveBeenCalled();
     });
 
-    it('page change studies to be re-loaded', function() {
+    it('page change causes studies to be re-loaded', function() {
       var self = this,
           studies = _.map(_.range(20), function () { return self.factory.study(); }),
           pageSize = studies.length / 2;
@@ -154,7 +152,7 @@ define([
       expect(self.scope.model.getStudies).toHaveBeenCalled();
     });
 
-    it('clear filter studies to be re-loaded', function() {
+    it('clear filter causes studies to be re-loaded', function() {
       var self = this,
           studies = _.map(_.range(20), function () { return self.factory.study(); }),
           pageSize = studies.length / 2;

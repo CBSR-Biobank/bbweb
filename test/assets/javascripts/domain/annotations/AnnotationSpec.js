@@ -25,8 +25,8 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(entityTestSuite, testUtils, extendedDomainEntities) {
-      _.extend(this, entityTestSuite);
+    beforeEach(inject(function(EntityTestSuiteMixin, testUtils, extendedDomainEntities) {
+      _.extend(this, EntityTestSuiteMixin.prototype);
 
       bbwebConfig                   = this.$injector.get('bbwebConfig');
       Study                         = this.$injector.get('Study');

@@ -20,8 +20,8 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(serverReplyMixin, testUtils) {
-      _.extend(this, serverReplyMixin);
+    beforeEach(inject(function(ServerReplyMixin, testUtils) {
+      _.extend(this, ServerReplyMixin.prototype);
 
       httpBackend   = this.$injector.get('$httpBackend');
       ProcessingDto = this.$injector.get('ProcessingDto');

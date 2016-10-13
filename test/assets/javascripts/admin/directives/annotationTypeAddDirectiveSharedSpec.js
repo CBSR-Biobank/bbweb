@@ -21,7 +21,7 @@ define([
    *
    * @param {string} context.returnState the state to return after a successful add or when cancel is pressed.
    *
-   * NOTE: needs that the test suite be extended with testSuiteMixin.
+   * NOTE: requires that the test suite be extended with TestSuiteMixin.
    */
   function annotationTypeAddDirectiveSharedSpec(context) {
 

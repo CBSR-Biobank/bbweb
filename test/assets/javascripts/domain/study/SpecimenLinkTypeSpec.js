@@ -21,8 +21,8 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(serverReplyMixin, testUtils, extendedDomainEntities) {
-      _.extend(this, serverReplyMixin);
+    beforeEach(inject(function(ServerReplyMixin, testUtils, extendedDomainEntities) {
+      _.extend(this, ServerReplyMixin.prototype);
       httpBackend      = this.$injector.get('$httpBackend');
       funutils         = this.$injector.get('funutils');
       SpecimenLinkType = this.$injector.get('SpecimenLinkType');

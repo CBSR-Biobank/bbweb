@@ -4,23 +4,89 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  'sprintf',
-  'biobankApp'
-], function(angular, mocks, _, sprintf) {
+define(function (require) {
   'use strict';
+
+  var mocks   = require('angularMocks'),
+      _       = require('lodash'),
+      sprintf = require('sprintf').sprintf;
+
+  var CollectionEventType;
+
+  function SuiteMixinFactory(EntityTestSuiteMixin, ServerReplyMixin) {
+
+    function SuiteMixin() {
+      EntityTestSuiteMixin.call(this);
+      ServerReplyMixin.call(this);
+    }
+
+    SuiteMixin.prototype = Object.create(EntityTestSuiteMixin.prototype);
+    _.extend(SuiteMixin.prototype, ServerReplyMixin.prototype);
+    SuiteMixin.prototype.constructor = SuiteMixin;
+
+    // used by promise tests
+    SuiteMixin.prototype.expectCet = function (entity) {
+      expect(entity).toEqual(jasmine.any(CollectionEventType));
+    };
+
+    // used by promise tests
+    SuiteMixin.prototype.failTest = function (error) {
+      expect(error).toBeUndefined();
+    };
+
+    /**
+     * Returns 3 collection event types, each one with a different missing field.
+     */
+    SuiteMixin.prototype.getBadCollectionEventTypes = function (jsonStudy) {
+      var badSpecimenSpec   = _.omit(this.factory.collectionSpecimenSpec(), 'name'),
+          badAnnotationType = _.omit(this.factory.annotationType(), 'name'),
+          data = [
+            {
+              cet: _.omit(this.factory.collectionEventType(), 'name'),
+              errMsg : 'invalid collection event types from server'
+            },
+            {
+              cet: this.factory.collectionEventType({ specimenSpecs: [ badSpecimenSpec ]}),
+              errMsg : 'invalid specimen specs from server'
+            },
+            {
+              cet: this.factory.collectionEventType({ annotationTypes: [ badAnnotationType ]}),
+              errMsg : 'invalid annotation types from server'
+            }
+          ];
+      return data;
+    };
+
+    SuiteMixin.prototype.uri = function (/* path, cetypeId */) {
+      var args = _.toArray(arguments),
+          cetypeId,
+          path;
+
+      var result = '/studies/cetypes';
+
+      if (args.length > 0) {
+        path = args.shift();
+        result += '/' + path;
+      }
+
+      if (args.length > 0) {
+        cetypeId = args.shift();
+        result += '/' + cetypeId;
+      }
+
+      return result;
+    };
+
+    return SuiteMixin;
+  }
 
   describe('CollectionEventType', function() {
 
-    var CollectionEventType;
-
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(entityTestSuite, serverReplyMixin, extendedDomainEntities) {
-      _.extend(this, entityTestSuite, serverReplyMixin);
+    beforeEach(inject(function(EntityTestSuiteMixin, ServerReplyMixin, extendedDomainEntities) {
+      var SuiteMixin = new SuiteMixinFactory(EntityTestSuiteMixin, ServerReplyMixin);
+      _.extend(this, SuiteMixin.prototype);
 
       this.injectDependencies('$httpBackend',
                               'CollectionEventType',
@@ -80,27 +146,27 @@ define([
       ceventType.compareToJsonEntity(jsonCet);
     });
 
-    it('can retrieve a collection event type', function() {
-      var url = sprintf.sprintf('%s/%s?cetId=%s',
-                                uri(),
-                                this.jsonStudy.id,
-                                this.jsonCet.id);
+   it('can retrieve a collection event type', function() {
+      var url = sprintf('%s/%s?cetId=%s',
+                        this.uri(),
+                        this.jsonStudy.id,
+                        this.jsonCet.id);
 
       this.$httpBackend.whenGET(url).respond(this.reply(this.jsonCet));
       CollectionEventType.get(this.jsonStudy.id, this.jsonCet.id)
-        .then(expectCet).catch(failTest);
+        .then(this.expectCet).catch(this.failTest);
       this.$httpBackend.flush();
     });
 
     it('fails when getting a collection event type and it has a bad format', function() {
       var self = this,
-          data = getBadCollectionEventTypes(self.factory, self.jsonStudy);
+          data = self.getBadCollectionEventTypes(self.jsonStudy);
 
       _.each(data, function (badCet) {
-        var url = sprintf.sprintf('%s/%s?cetId=%s',
-                                  uri(),
-                                  self.jsonStudy.id,
-                                  badCet.cet.id);
+        var url = sprintf('%s/%s?cetId=%s',
+                          self.uri(),
+                          self.jsonStudy.id,
+                          badCet.cet.id);
 
         self.$httpBackend.whenGET(url).respond(self.reply(badCet.cet));
         CollectionEventType.get(self.jsonStudy.id, badCet.cet.id)
@@ -118,11 +184,11 @@ define([
     });
 
     it('can list collection event types', function() {
-      var url = sprintf.sprintf('%s/%s', uri(), this.jsonStudy.id);
+      var url = sprintf('%s/%s', this.uri(), this.jsonStudy.id);
 
       this.$httpBackend.whenGET(url).respond(this.reply([ this.jsonCet ]));
       CollectionEventType.list(this.jsonStudy.id)
-        .then(expectCetArray).catch(failTest);
+        .then(expectCetArray).catch(this.failTest);
       this.$httpBackend.flush();
 
       function expectCetArray(array) {
@@ -135,8 +201,8 @@ define([
       // assigns result of self.$httpBackend.whenGET() to variable so that the response
       // can be changed inside the loop
       var self = this,
-          data = getBadCollectionEventTypes(self.factory, self.jsonStudy),
-          url = sprintf.sprintf('%s/%s', uri(), self.jsonStudy.id),
+          data = self.getBadCollectionEventTypes(self.jsonStudy),
+          url = sprintf('%s/%s', self.uri(), self.jsonStudy.id),
           reqHandler = self.$httpBackend.whenGET(url);
 
       _.each(data, function (item) {
@@ -166,18 +232,18 @@ define([
 
     it('can add a collection event type', function() {
       var ceventType = new CollectionEventType(this.jsonCet),
-          url = sprintf.sprintf('%s/%s', uri(), this.jsonStudy.id);
+          url = sprintf('%s/%s', this.uri(), this.jsonStudy.id);
 
       this.$httpBackend.expectPOST(url).respond(this.reply(this.jsonCet));
 
-      ceventType.add().then(expectCet).catch(failTest);
+      ceventType.add().then(this.expectCet).catch(this.failTest);
       this.$httpBackend.flush();
     });
 
     it('should remove a collection event type', function() {
       var ceventType = new CollectionEventType(this.jsonCet),
-          url = sprintf.sprintf('%s/%s/%s/%d',
-                                uri(),
+          url = sprintf('%s/%s/%s/%d',
+                                this.uri(),
                                 this.jsonStudy.id,
                                 ceventType.id,
                                 ceventType.version);
@@ -193,11 +259,11 @@ define([
                              cet,
                              'updateName',
                              cet.name,
-                             uri('name', cet.id),
+                             this.uri('name', cet.id),
                              { name: cet.name, studyId: cet.studyId },
                              this.jsonCet,
-                             expectCet,
-                             failTest);
+                             this.expectCet,
+                             this.failTest);
     });
 
     it('should update description', function () {
@@ -207,21 +273,21 @@ define([
                              cet,
                              'updateDescription',
                              undefined,
-                             uri('description', cet.id),
+                             this.uri('description', cet.id),
                              { studyId: cet.studyId },
                              this.jsonCet,
-                             expectCet,
-                             failTest);
+                             this.expectCet,
+                             this.failTest);
 
       this.updateEntity.call(this,
                              cet,
                              'updateDescription',
                              cet.description,
-                             uri('description', cet.id),
+                             this.uri('description', cet.id),
                              { description: cet.description, studyId: cet.studyId },
                              this.jsonCet,
-                             expectCet,
-                             failTest);
+                             this.expectCet,
+                             this.failTest);
     });
 
     it('should update recurring', function () {
@@ -230,11 +296,11 @@ define([
                              cet,
                              'updateRecurring',
                              cet.recurring,
-                             uri('recurring', cet.id),
+                             this.uri('recurring', cet.id),
                              { recurring: cet.recurring, studyId: cet.studyId },
                              this.jsonCet,
-                             expectCet,
-                             failTest);
+                             this.expectCet,
+                             this.failTest);
     });
 
     describe('for specimen specs', function() {
@@ -250,11 +316,11 @@ define([
                                this.cet,
                                'addSpecimenSpec',
                                _.omit(this.jsonSpec, 'uniqueId'),
-                               uri('spcspec', this.cet.id),
+                               this.uri('spcspec', this.cet.id),
                                _.extend(_.omit(this.jsonSpec, 'uniqueId'), { studyId: this.cet.studyId }),
                                this.jsonCet,
-                               expectCet,
-                               failTest);
+                               this.expectCet,
+                               this.failTest);
       });
 
       it('should update a specimen spec', function () {
@@ -262,24 +328,24 @@ define([
                                this.cet,
                                'updateSpecimenSpec',
                                this.jsonSpec,
-                               sprintf.sprintf('%s/%s',
-                                               uri('spcspec', this.cet.id),
+                               sprintf('%s/%s',
+                                               this.uri('spcspec', this.cet.id),
                                                this.jsonSpec.uniqueId),
                                _.extend(this.jsonSpec, { studyId: this.cet.studyId }),
                                this.jsonCet,
-                               expectCet,
-                               failTest);
+                               this.expectCet,
+                               this.failTest);
       });
 
       it('should remove a specimen spec', function () {
-        var url = sprintf.sprintf('%s/%s/%d/%s',
-                                  uri('spcspec', this.cet.studyId),
+        var url = sprintf('%s/%s/%d/%s',
+                                  this.uri('spcspec', this.cet.studyId),
                                   this.cet.id,
                                   this.cet.version,
                                   this.jsonSpec.uniqueId);
 
         this.$httpBackend.whenDELETE(url).respond(this.reply(true));
-        this.cet.removeSpecimenSpec(this.jsonSpec).then(expectCet).catch(failTest);
+        this.cet.removeSpecimenSpec(this.jsonSpec).then(this.expectCet).catch(this.failTest);
         this.$httpBackend.flush();
       });
 
@@ -288,7 +354,7 @@ define([
 
         self.cet.specimenSpecs = [];
         expect(function () {
-          self.cet.removeSpecimenSpec(self.jsonSpec).then(expectCet).catch(failTest);
+          self.cet.removeSpecimenSpec(self.jsonSpec).then(this.expectCet).catch(this.failTest);
         }).toThrowError(/specimen spec with ID not present/);
       });
 
@@ -307,12 +373,12 @@ define([
                                this.cet,
                                'addAnnotationType',
                                _.omit(this.jsonAnnotType, 'uniqueId'),
-                               uri('annottype', this.cet.id),
+                               this.uri('annottype', this.cet.id),
                                _.extend(_.omit(this.jsonAnnotType, 'uniqueId'),
                                         { studyId: this.cet.studyId }),
                                this.jsonCet,
-                               expectCet,
-                               failTest);
+                               this.expectCet,
+                               this.failTest);
       });
 
       it('should update an annotation type', function () {
@@ -320,81 +386,51 @@ define([
                                this.cet,
                                'updateAnnotationType',
                                this.jsonAnnotType,
-                               sprintf.sprintf('%s/%s',
-                                               uri('annottype', this.cet.id),
+                               sprintf('%s/%s',
+                                               this.uri('annottype', this.cet.id),
                                                this.jsonAnnotType.uniqueId),
                                _.extend(this.jsonAnnotType, { studyId: this.cet.studyId }),
                                this.jsonCet,
-                               expectCet,
-                               failTest);
+                               this.expectCet,
+                               this.failTest);
       });
 
       it('should remove an annotation type', function () {
-        var url = sprintf.sprintf('%s/%s/%d/%s',
-                                  uri('annottype', this.cet.studyId),
+        var url = sprintf('%s/%s/%d/%s',
+                                  this.uri('annottype', this.cet.studyId),
                                   this.cet.id,
                                   this.cet.version,
                                   this.jsonAnnotType.uniqueId);
 
         this.$httpBackend.whenDELETE(url).respond(this.reply(true));
-        this.cet.removeAnnotationType(this.jsonAnnotType).then(expectCet).catch(failTest);
+        this.cet.removeAnnotationType(this.jsonAnnotType).then(this.expectCet).catch(this.failTest);
         this.$httpBackend.flush();
       });
 
     });
 
-    // used by promise tests
-    function expectCet(entity) {
-      expect(entity).toEqual(jasmine.any(CollectionEventType));
-    }
+    it('inUse has valid URL and returns FALSE', function() {
+      var cet     = new this.CollectionEventType(this.factory.collectionEventType());
+      this.$httpBackend.whenGET(this.uri('inuse', cet.id)).respond(this.reply(false));
+      cet.inUse()
+        .then(function (reply) {
+          expect(reply).toBe(false);
+        })
+        .catch(this.failTest);
+      this.$httpBackend.flush();
+    });
 
-    // used by promise tests
-    function failTest(error) {
-      expect(error).toBeUndefined();
-    }
+    it('inUse has valid URL and returns TRUE', function() {
+      var cet     = new this.CollectionEventType(this.factory.collectionEventType());
+      this.$httpBackend.whenGET(this.uri('inuse', cet.id)).respond(this.reply(true));
+      cet.inUse()
+        .then(function (reply) {
+          expect(reply).toBe(true);
+        })
+        .catch(this.failTest);
+      this.$httpBackend.flush();
+    });
 
-    /**
-     * Returns 3 collection event types, each one with a different missing field.
-     */
-    function getBadCollectionEventTypes(factory, jsonStudy) {
-      var badSpecimenSpec   = _.omit(factory.collectionSpecimenSpec(), 'name'),
-          badAnnotationType = _.omit(factory.annotationType(), 'name'),
-          data = [
-            {
-              cet: _.omit(factory.collectionEventType(), 'name'),
-              errMsg : 'invalid collection event types from server'
-            },
-            {
-              cet: factory.collectionEventType({ specimenSpecs: [ badSpecimenSpec ]}),
-              errMsg : 'invalid specimen specs from server'
-            },
-            {
-              cet: factory.collectionEventType({ annotationTypes: [ badAnnotationType ]}),
-              errMsg : 'invalid annotation types from server'
-            }
-          ];
-      return data;
-    }
-
-    function uri(/* path, cetypeId */) {
-      var args = _.toArray(arguments),
-          cetypeId,
-          path;
-
-      var result = '/studies/cetypes';
-
-      if (args.length > 0) {
-        path = args.shift();
-        result += '/' + path;
-      }
-
-      if (args.length > 0) {
-        cetypeId = args.shift();
-        result += '/' + cetypeId;
-      }
-
-      return result;
-    }
   });
 
 });

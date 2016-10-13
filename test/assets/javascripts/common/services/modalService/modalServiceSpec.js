@@ -11,59 +11,70 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('modalService', function() {
+  function SuiteMixinFactory(ModalTestSuiteMixin) {
 
-    var modalElementFind = function() {
-      return this.$document.find('body > div.modal');
-    };
+    function SuiteMixin() {
+      ModalTestSuiteMixin.call(this);
+    }
 
-    var open = function (modalOpenFunc, modalDefaults, modalOptions) {
-      var modalElement;
+    SuiteMixin.prototype = Object.create(ModalTestSuiteMixin.prototype);
+    SuiteMixin.prototype.constructor = SuiteMixin;
+
+    function openCommon() {
+      /*jshint validthis:true */
+      this.$rootScope.$digest();
+      this.modalElement = this.modalElementFind();
+      this.scope = this.modalElement.scope();
+    }
+
+    SuiteMixin.prototype.openModal = function (modalOpenFunc, modalDefaults, modalOptions) {
       modalOpenFunc(modalDefaults, modalOptions);
-      this.$rootScope.$digest();
-
-      modalElement = modalElementFind.call(this);
-
-      return {
-        element: modalElement,
-        scope:   modalElement.scope()
-      };
+      openCommon.call(this);
     };
 
-    var flush = function () {
-      this.$animate.flush();
-      this.$rootScope.$digest();
-      this.$animate.flush();
-      this.$rootScope.$digest();
+    SuiteMixin.prototype.openModalOk = function (headerHtml, bodyHtml) {
+      this.modalService.modalOk(headerHtml, bodyHtml);
+      openCommon.call(this);
     };
 
-    var dismiss = function (scope, noFlush) {
+    SuiteMixin.prototype.openModalOkCancel = function (headerHtml, bodyHtml) {
+      this.modalService.modalOkCancel(headerHtml, bodyHtml);
+      openCommon.call(this);
+    };
+
+    SuiteMixin.prototype.dismiss = function (scope, noFlush) {
+      scope = scope || this.scope;
       scope.modalOptions.close();
       this.$rootScope.$digest();
       if (!noFlush) {
-        flush.call(this);
+        this.flush();
       }
       return closed;
     };
 
+    return SuiteMixin;
+  }
+
+  describe('modalService', function() {
+
     beforeEach(mocks.module('ngAnimateMock', 'biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testSuiteMixin, factory, testUtils) {
-      var self = this;
+    beforeEach(inject(function(ModalTestSuiteMixin, factory, testUtils) {
+      var SuiteMixin = new SuiteMixinFactory(ModalTestSuiteMixin);
 
-      _.extend(self, testSuiteMixin);
+      _.extend(this, SuiteMixin.prototype);
 
-      self.injectDependencies('$rootScope',
+      this.injectDependencies('$rootScope',
                               '$animate',
                               '$document',
                               'modalService',
                               '$filter',
                               'factory');
-      self.putHtmlTemplates(
+      this.putHtmlTemplates(
         '/assets/javascripts/common/services/modalService/modal.html',
         '/assets/javascripts/common/services/modalService/modalOk.html');
 
-      testUtils.jasmineAddModalMatchers();
+      this.addModalMatchers();
     }));
 
     beforeEach(function () {
@@ -92,10 +103,9 @@ define([
       showSharedBehaviour(context);
 
       it('can open modal with no custom modal defaults', function() {
-        var modalInfo;
-        modalInfo = open.call(this, this.modalService.show, undefined);
+        this.openModal(this.modalService.show, undefined);
         expect(this.$document).toHaveModalsOpen(1);
-        dismiss.call(this, modalInfo.scope);
+        this.dismiss();
       });
 
     });
@@ -105,27 +115,27 @@ define([
       describe('shared behaviour', function() {
 
         it('has valid scope', function() {
-          var modalInfo = open.call(this, context.modalOpenFunc);
-          expect(modalInfo.scope).toBeObject();
-          expect(modalInfo.scope.modalOptions).toBeObject();
-          expect(modalInfo.scope.modalOptions.ok).toBeFunction();
-          expect(modalInfo.scope.modalOptions.close).toBeFunction();
-          dismiss.call(this, modalInfo.scope);
+          this.openModal(context.modalOpenFunc);
+          expect(this.scope).toBeObject();
+          expect(this.scope.modalOptions).toBeObject();
+          expect(this.scope.modalOptions.ok).toBeFunction();
+          expect(this.scope.modalOptions.close).toBeFunction();
+          this.dismiss();
         });
 
         it('can open a modal and close it with the OK button', function() {
-          var modalInfo = open.call(this, context.modalOpenFunc);
+          this.openModal(context.modalOpenFunc);
           expect(this.$document).toHaveModalsOpen(1);
-          modalInfo.scope.modalOptions.ok('result');
+          this.scope.modalOptions.ok('result');
           this.$rootScope.$digest();
-          flush.call(this);
+          this.flush();
           expect(this.$document).toHaveModalsOpen(0);
         });
 
         it('can open a modal and close it with the CLOSE button', function() {
-          var modalInfo = open.call(this, context.modalOpenFunc);
+          this.openModal(context.modalOpenFunc);
           expect(this.$document).toHaveModalsOpen(1);
-          dismiss.call(this, modalInfo.scope);
+          this.dismiss();
           expect(this.$document).toHaveModalsOpen(0);
         });
 
@@ -134,29 +144,16 @@ define([
 
     describe('modalOk', function() {
 
-      var open = function (headerHtml, bodyHtml) {
-        var modalElement;
-        this.modalService.modalOk(headerHtml, bodyHtml);
-        this.$rootScope.$digest();
-
-        modalElement = modalElementFind.call(this);
-
-        return {
-          element: modalElement,
-          scope:   modalElement.scope()
-        };
-      };
-
       it('can open a modal and close it with the OK button', function() {
         var modalInfo,
             header = this.factory.stringNext(),
             body = this.factory.stringNext();
 
-        modalInfo = open.call(this, header, body);
+        modalInfo = this.openModalOk(header, body);
         expect(this.$document).toHaveModalsOpen(1);
-        modalInfo.scope.modalOptions.ok('result');
+        this.scope.modalOptions.ok('result');
         this.$rootScope.$digest();
-        flush.call(this);
+        this.flush();
         expect(this.$document).toHaveModalsOpen(0);
       });
 
@@ -165,14 +162,14 @@ define([
             header = this.factory.stringNext(),
             body = this.factory.stringNext();
 
-        modalInfo = open.call(this, header, body);
+        modalInfo = this.openModalOk(header, body);
         expect(this.$document).toHaveModalsOpen(1);
-        modalInfo.scope.modalOptions.ok('result');
+        this.scope.modalOptions.ok('result');
         this.$rootScope.$digest();
-        expect(modalInfo.element).toHaveTitle(header);
-        expect(modalInfo.element).toHaveBody(body);
+        expect(this.modalElement).toHaveModalTitle(header);
+        expect(this.modalElement).toHaveModalBody(body);
 
-        flush.call(this);
+        this.flush();
         expect(this.$document).toHaveModalsOpen(0);
       });
 
@@ -180,29 +177,16 @@ define([
 
     describe('modalOkCancel', function() {
 
-      var open = function (headerHtml, bodyHtml) {
-        var modalElement;
-        this.modalService.modalOkCancel(headerHtml, bodyHtml);
-        this.$rootScope.$digest();
-
-        modalElement = modalElementFind.call(this);
-
-        return {
-          element: modalElement,
-          scope:   modalElement.scope()
-        };
-      };
-
       it('can open a modal and close it with the OK button', function() {
         var modalInfo,
             header = this.factory.stringNext(),
             body = this.factory.stringNext();
 
-        modalInfo = open.call(this, header, body);
+        modalInfo = this.openModalOkCancel(header, body);
         expect(this.$document).toHaveModalsOpen(1);
-        modalInfo.scope.modalOptions.ok('result');
+        this.scope.modalOptions.ok('result');
         this.$rootScope.$digest();
-        flush.call(this);
+        this.flush();
         expect(this.$document).toHaveModalsOpen(0);
       });
 
@@ -211,11 +195,11 @@ define([
             header = this.factory.stringNext(),
             body = this.factory.stringNext();
 
-        modalInfo = open.call(this, header, body);
+        modalInfo = this.openModalOkCancel(header, body);
         expect(this.$document).toHaveModalsOpen(1);
-        modalInfo.scope.modalOptions.close('result');
+        this.scope.modalOptions.close('result');
         this.$rootScope.$digest();
-        flush.call(this);
+        this.flush();
         expect(this.$document).toHaveModalsOpen(0);
       });
 
@@ -224,13 +208,13 @@ define([
             header = this.factory.stringNext(),
             body = this.factory.stringNext();
 
-        modalInfo = open.call(this, header, body);
+        modalInfo = this.openModalOkCancel(header, body);
         expect(this.$document).toHaveModalsOpen(1);
-        modalInfo.scope.modalOptions.ok('result');
+        this.scope.modalOptions.ok('result');
         this.$rootScope.$digest();
-        expect(modalInfo.element).toHaveTitle(header);
-        expect(modalInfo.element).toHaveBody(body);
-        flush.call(this);
+        expect(this.modalElement).toHaveModalTitle(header);
+        expect(this.modalElement).toHaveModalBody(body);
+        this.flush();
         expect(this.$document).toHaveModalsOpen(0);
       });
 

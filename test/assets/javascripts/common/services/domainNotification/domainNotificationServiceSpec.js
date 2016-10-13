@@ -11,8 +11,8 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (testSuiteMixin) {
-      _.extend(this, testSuiteMixin);
+    beforeEach(inject(function (TestSuiteMixin) {
+      _.extend(this, TestSuiteMixin.prototype);
       this.injectDependencies('$q',
                               '$rootScope',
                               'gettext',
