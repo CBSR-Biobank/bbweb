@@ -476,11 +476,12 @@ define(function (require) {
       });
 
       it('has valid elements and scope', function() {
-        var inputs,
-            modalInfo = this.openModal(this.modalInput.password,
-                                       this.defaultValue,
-                                       this.title,
-                                       this.label);
+        var inputs;
+
+        this.openModal(this.modalInput.password,
+                       this.defaultValue,
+                       this.title,
+                       this.label);
 
         expect(this.$document).toHaveModalsOpen(1);
 
@@ -594,12 +595,13 @@ define(function (require) {
 
       it('has valid elements and scope', function() {
         var self = this,
-            optionElements,
-            modalInfo = self.openModal(self.modalInput.select,
-                                       self.defaultValue,
-                                       self.title,
-                                       self.label,
-                                       { selectOptions: self.options });
+            optionElements;
+
+        self.openModal(self.modalInput.select,
+                       self.defaultValue,
+                       self.title,
+                       self.label,
+                       { selectOptions: self.options });
 
         expect(self.$document).toHaveModalsOpen(1);
 
@@ -655,12 +657,13 @@ define(function (require) {
 
       it('has valid elements and scope', function() {
         var self = this,
-            labelElements,
-            modalInfo = self.openModal(self.modalInput.selectMultiple,
-                                       self.defaultValue,
-                                       self.title,
-                                       self.label,
-                                       { selectOptions: self.options });
+            labelElements;
+
+        self.openModal(self.modalInput.selectMultiple,
+                       self.defaultValue,
+                       self.title,
+                       self.label,
+                       { selectOptions: self.options });
 
         expect(self.$document).toHaveModalsOpen(1);
 
@@ -679,15 +682,16 @@ define(function (require) {
       });
 
       it('form is invalid if a value is required and nothing selected', function() {
-        var self = this,
-            modalInfo = self.openModal(self.modalInput.selectMultiple,
-                                       self.defaultValue,
-                                       self.title,
-                                       self.label,
-                                       {
-                                         required: true,
-                                         selectOptions: self.options
-                                       });
+        var self = this;
+
+        self.openModal(self.modalInput.selectMultiple,
+                       self.defaultValue,
+                       self.title,
+                       self.label,
+                       {
+                         required: true,
+                         selectOptions: self.options
+                       });
 
         expect(self.$document).toHaveModalsOpen(1);
 
@@ -712,15 +716,16 @@ define(function (require) {
       });
 
       it('has a help block when required', function() {
-        var self = this,
-            modalInfo = self.openModal(self.modalInput.selectMultiple,
-                                       [],
-                                       self.title,
-                                       self.label,
-                                       {
-                                         required: true,
-                                         selectOptions: self.options
-                                       });
+        var self = this;
+
+        self.openModal(self.modalInput.selectMultiple,
+                       [],
+                       self.title,
+                       self.label,
+                       {
+                         required: true,
+                         selectOptions: self.options
+                       });
 
         expect(this.modalElement).toHaveHelpBlocks();
 
@@ -783,12 +788,13 @@ define(function (require) {
       });
 
       it('form is invalid when minimum length is not met', function() {
-        var minLength = 2,
-            modalInfo = this.openModal(this.modalInput.text,
-                                       this.defaultValue,
-                                       this.title,
-                                       this.label,
-                                       { minLength: minLength });
+        var minLength = 2;
+
+        this.openModal(this.modalInput.text,
+                       this.defaultValue,
+                       this.title,
+                       this.label,
+                       { minLength: minLength });
 
         expect(this.modalElement).toHaveValuesInControllerScope({ options: { minLength: minLength } });
         this.scope.form.value.$setViewValue('x');

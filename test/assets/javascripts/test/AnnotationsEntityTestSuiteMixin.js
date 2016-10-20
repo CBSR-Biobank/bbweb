@@ -5,7 +5,7 @@
 define(['lodash'], function (_) {
   'use strict';
 
-  hasAnnotationsEntityTestSuite.$inject = [
+  AnnotationsEntityTestSuiteMixinFactory.$inject = [
     'AnnotationType',
     'AnnotationValueType',
     'TextAnnotation',
@@ -19,24 +19,18 @@ define(['lodash'], function (_) {
   /**
    * A mixin for test suites for domain entities.
    */
-  function hasAnnotationsEntityTestSuite(AnnotationType,
-                                         AnnotationValueType,
-                                         TextAnnotation,
-                                         DateTimeAnnotation,
-                                         NumberAnnotation,
-                                         SingleSelectAnnotation,
-                                         MultipleSelectAnnotation,
-                                         factory) {
-    var mixin = {
-      jsonAnnotationData: jsonAnnotationData,
-      validateAnnotationClass: validateAnnotationClass
-    };
+  function AnnotationsEntityTestSuiteMixinFactory(AnnotationType,
+                                                  AnnotationValueType,
+                                                  TextAnnotation,
+                                                  DateTimeAnnotation,
+                                                  NumberAnnotation,
+                                                  SingleSelectAnnotation,
+                                                  MultipleSelectAnnotation,
+                                                  factory) {
 
-    return mixin;
+    function AnnotationsEntityTestSuiteMixin() {}
 
-    //--
-
-    function jsonAnnotationData(serverStudy) {
+    AnnotationsEntityTestSuiteMixin.prototype.jsonAnnotationData = function (serverStudy) {
       var annotationTypes = factory.allAnnotationTypes();
 
       return _.map(annotationTypes, function (annotationType) {
@@ -48,14 +42,15 @@ define(['lodash'], function (_) {
           annotation:     annotation
         };
       });
-    }
+    };
 
     /**
      * @param {AnnotationType} annotationType the AnnotationType this annotion is based on.
      *
      * @param {Annotation} the annotation.
      */
-    function validateAnnotationClass(annotationType, annotation) {
+    AnnotationsEntityTestSuiteMixin.prototype.validateAnnotationClass = function  (annotationType,
+                                                                                   annotation) {
       switch (annotationType.valueType) {
       case AnnotationValueType.TEXT:
         expect(annotation).toEqual(jasmine.any(TextAnnotation));
@@ -77,10 +72,10 @@ define(['lodash'], function (_) {
       default:
         fail('invalid annotation value type: ' + annotationType.valueType);
       }
-    }
+    };
 
+    return AnnotationsEntityTestSuiteMixin;
   }
 
-  return hasAnnotationsEntityTestSuite;
-
+  return AnnotationsEntityTestSuiteMixinFactory;
 });

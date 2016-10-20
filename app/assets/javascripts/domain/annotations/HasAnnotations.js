@@ -5,7 +5,8 @@
 define(['lodash'], function (_) {
   'use strict';
 
-  hasAnnotationsFactory.$inject = [
+  HasAnnotationsFactory.$inject = [
+    '$q',
     'biobankApi',
     'ConcurrencySafeEntity',
     'DomainError',
@@ -18,40 +19,30 @@ define(['lodash'], function (_) {
    *
    * Maintains an array of annotations.
    */
-  function hasAnnotationsFactory(biobankApi,
+  function HasAnnotationsFactory($q,
+                                 biobankApi,
                                  ConcurrencySafeEntity,
                                  DomainError,
                                  Annotation,
                                  annotationFactory) {
 
-    var mixin = {
-      addAnnotation:      addAnnotation,
-      setAnnotationTypes: setAnnotationTypes,
-      validAnnotations: validAnnotations,
-      removeAnnotation: removeAnnotation
-    };
+    function HasAnnotations() {}
 
-    return mixin;
-
-    //-
-
-    function addAnnotation(annotation, url) {
-      /* jshint validthis:true */
+    HasAnnotations.prototype.addAnnotation = function (annotation, url) {
       return ConcurrencySafeEntity.prototype.update.call(this,
                                                          url,
                                                          annotation.getServerAnnotation());
-    }
+    };
 
     /**
      * The entity that includes this mixin needs to implement 'asyncCreate'.
      */
-    function removeAnnotation(annotation, url) {
-      /* jshint validthis:true */
+    HasAnnotations.prototype.removeAnnotation = function (annotation, url) {
       var self = this,
           found = _.find(self.annotations,  { annotationTypeId: annotation.annotationTypeId });
 
       if (!found) {
-        throw new DomainError('annotation with annotation type ID not present: ' + annotation.annotationTypeId);
+        return $q.reject('annotation with annotation type ID not present: ' + annotation.annotationTypeId);
       }
 
       return biobankApi.del(url).then(function () {
@@ -63,10 +54,9 @@ define(['lodash'], function (_) {
             })
           }));
       });
-    }
+    };
 
-    function setAnnotationTypes(annotationTypes) {
-      /* jshint validthis:true */
+    HasAnnotations.prototype.setAnnotationTypes = function (annotationTypes) {
       var self = this,
           differentIds;
 
@@ -92,9 +82,9 @@ define(['lodash'], function (_) {
         // undefined is valid input
         return annotationFactory.create(jsonAnnotationMaybe, annotationType);
       });
-    }
+    };
 
-    function validAnnotations(annotations) {
+    HasAnnotations.prototype.validAnnotations = function (annotations) {
       var result;
 
       if (_.isUndefined(annotations) || (annotations.length <= 0)) {
@@ -106,9 +96,10 @@ define(['lodash'], function (_) {
       });
 
       return _.isUndefined(result);
-    }
+    };
 
+    return HasAnnotations;
   }
 
-  return hasAnnotationsFactory;
+  return HasAnnotationsFactory;
 });

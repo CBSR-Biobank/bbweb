@@ -13,8 +13,8 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     'CollectionSpecimenSpec',
     'DomainError',
     'AnnotationType',
-    'hasCollectionSpecimenSpecs',
-    'hasAnnotationTypes'
+    'HasCollectionSpecimenSpecs',
+    'HasAnnotationTypes'
   ];
 
   /**
@@ -27,8 +27,8 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                                       CollectionSpecimenSpec,
                                       DomainError,
                                       AnnotationType,
-                                      hasCollectionSpecimenSpecs,
-                                      hasAnnotationTypes) {
+                                      HasCollectionSpecimenSpecs,
+                                      HasAnnotationTypes) {
 
     var schema = {
       'id': 'CollectionEventType',
@@ -130,9 +130,10 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     }
 
     CollectionEventType.prototype = Object.create(ConcurrencySafeEntity.prototype);
+    _.extend(CollectionEventType.prototype,
+             HasAnnotationTypes.prototype,
+             HasCollectionSpecimenSpecs.prototype);
     CollectionEventType.prototype.constructor = CollectionEventType;
-
-    _.extend(CollectionEventType.prototype, hasCollectionSpecimenSpecs, hasAnnotationTypes);
 
     /**
      * Checks if <tt>obj</tt> has valid properties to construct a {@link
@@ -148,11 +149,11 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
         return { valid: false, message: 'invalid collection event types from server: ' + tv4.error };
       }
 
-      if (!hasCollectionSpecimenSpecs.validSpecimenSpecs(obj.specimenSpecs)) {
+      if (!HasCollectionSpecimenSpecs.prototype.validSpecimenSpecs(obj.specimenSpecs)) {
         return { valid: false, message: 'invalid specimen specs from server: ' + tv4.error };
       }
 
-      if (!hasAnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
+      if (!HasAnnotationTypes.prototype.validAnnotationTypes(obj.annotationTypes)) {
         return { valid: false, message: 'invalid annotation types from server: ' + tv4.error };
       }
 
@@ -346,7 +347,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                                 this.version,
                                 annotationType.uniqueId);
 
-      return hasAnnotationTypes.removeAnnotationType.call(this, annotationType, url);
+      return HasAnnotationTypes.prototype.removeAnnotationType.call(this, annotationType, url);
     };
 
     CollectionEventType.prototype.inUse = function () {

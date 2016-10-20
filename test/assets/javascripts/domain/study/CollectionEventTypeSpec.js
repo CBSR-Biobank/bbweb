@@ -88,7 +88,8 @@ define(function (require) {
       var SuiteMixin = new SuiteMixinFactory(EntityTestSuiteMixin, ServerReplyMixin);
       _.extend(this, SuiteMixin.prototype);
 
-      this.injectDependencies('$httpBackend',
+      this.injectDependencies('$rootScope',
+                              '$httpBackend',
                               'CollectionEventType',
                               'factory',
                               'testUtils');
@@ -395,16 +396,29 @@ define(function (require) {
                                this.failTest);
       });
 
-      it('should remove an annotation type', function () {
-        var url = sprintf('%s/%s/%d/%s',
-                                  this.uri('annottype', this.cet.studyId),
-                                  this.cet.id,
-                                  this.cet.version,
-                                  this.jsonAnnotType.uniqueId);
+      describe('removing an annotation type', function() {
 
-        this.$httpBackend.whenDELETE(url).respond(this.reply(true));
-        this.cet.removeAnnotationType(this.jsonAnnotType).then(this.expectCet).catch(this.failTest);
-        this.$httpBackend.flush();
+        it('should remove an annotation type', function () {
+          var url = sprintf('%s/%s/%d/%s',
+                            this.uri('annottype', this.cet.studyId),
+                            this.cet.id,
+                            this.cet.version,
+                            this.jsonAnnotType.uniqueId);
+
+          this.$httpBackend.whenDELETE(url).respond(this.reply(true));
+          this.cet.removeAnnotationType(this.jsonAnnotType).then(this.expectCet).catch(this.failTest);
+          this.$httpBackend.flush();
+        });
+
+        it('fails when removing an invalid annotation type', function() {
+          var jsonAnnotType = _.extend({}, this.jsonAnnotType, { uniqueId: this.factory.stringNext() });
+          this.cet.removeAnnotationType(jsonAnnotType)
+            .catch(function (err) {
+              expect(err).toStartWith('annotation type with ID not present:');
+            });
+          this.$rootScope.$digest();
+        });
+
       });
 
     });

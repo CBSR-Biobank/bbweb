@@ -26,6 +26,6 @@ define(function (require) {
              require('../../../test/assets/javascripts/test/TestSuiteMixin'))
     .factory('ServerReplyMixin',
              require('../../../test/assets/javascripts/test/ServerReplyMixin'))
-    .factory('hasAnnotationsEntityTestSuite',
-             require('../../../test/assets/javascripts/test/hasAnnotationsEntityTestSuite'));
+    .factory('AnnotationsEntityTestSuiteMixin',
+             require('../../../test/assets/javascripts/test/AnnotationsEntityTestSuiteMixin'));
 });

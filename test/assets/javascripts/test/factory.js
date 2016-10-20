@@ -14,6 +14,7 @@ define([
 
   factory.$inject = [
     'AnnotationValueType',
+    'AnnotationMaxValueCount',
     'AnatomicalSourceType',
     'PreservationTemperatureType',
     'PreservationType',
@@ -33,6 +34,7 @@ define([
    * can be injected (i.e. AnnotationValueType).
    */
   function factory(AnnotationValueType,
+                   AnnotationMaxValueCount,
                    AnatomicalSourceType,
                    PreservationTemperatureType,
                    PreservationType,
@@ -535,7 +537,7 @@ define([
                        description:   null,
                        valueType:     AnnotationValueType.TEXT,
                        options:       [],
-                       maxValueCount: null,
+                       maxValueCount: AnnotationMaxValueCount.NONE,
                        required:      false
                      },
           validKeys = _.keys(defaults),
@@ -549,7 +551,7 @@ define([
 
       if (options.valueType === AnnotationValueType.SELECT) {
         if (_.isUndefined(options.maxValueCount)) {
-          options.maxValueCount = 1;
+          options.maxValueCount = AnnotationMaxValueCount.SELECT_SINGLE;
         }
 
         if (_.isUndefined(options.options)) {
@@ -570,7 +572,7 @@ define([
       });
       annotationTypes.push(annotationType({
         valueType:     AnnotationValueType.SELECT,
-        maxValueCount: 2,
+        maxValueCount: AnnotationMaxValueCount.SELECT_MULTIPLE,
         options:       [ 'opt1', 'opt2', 'opt3' ]
       }));
       return annotationTypes;
@@ -626,9 +628,9 @@ define([
 
         case AnnotationValueType.SELECT:
           if (options.value !== '') {
-            if (annotationType.maxValueCount === 1) {
+            if (annotationType.maxValueCount === AnnotationMaxValueCount.SELECT_SINGLE) {
               annotation.selectedValues =  [ options.value ];
-            } else if (annotationType.maxValueCount > 1) {
+            } else if (annotationType.maxValueCount === AnnotationMaxValueCount.SELECT_MULTIPLE) {
               annotation.selectedValues = options.value;
             } else {
               throw new Error('invalid max value count for annotation: ' + annotationType.maxValueCount);
@@ -660,13 +662,13 @@ define([
             'millisecond': 0,
             'second':      0
           })
-          .local()
+          .utc()
           .format();
 
       case AnnotationValueType.SELECT:
-        if (annotationType.maxValueCount === 1) {
+        if (annotationType.maxValueCount === AnnotationMaxValueCount.SELECT_SINGLE) {
           return annotationType.options[0];
-        } else if (annotationType.maxValueCount === 2) {
+        } else if (annotationType.maxValueCount === AnnotationMaxValueCount.SELECT_MULTIPLE) {
           return annotationType.options;
         } else {
           throw new Error('invalid max value count: ' + annotationType.maxValueCount);

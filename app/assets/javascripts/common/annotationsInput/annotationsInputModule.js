@@ -30,8 +30,8 @@ define(function (require) {
    */
   function init() {
     _.each(annotations, function (annotation) {
-      var name = annotation + 'Annotation';
-      var directive = directiveGenerator(name);
+      var name = annotation + 'Annotation',
+          directive = directiveGenerator(name);
       module.directive(name, directive);
     });
   }

@@ -84,7 +84,7 @@ define(function (require) {
                                    vm.timePacked,
                                    { required: true }).result
           .then(function (timePacked) {
-            return vm.shipment.changeState(ShipmentState.PACKED, timeService.dateToUtcString(timePacked))
+            return vm.shipment.changeState(ShipmentState.PACKED, timeService.dateAndTimeToUtcString(timePacked))
               .then(function (shipment) {
                 return $state.go('home.shipping.shipment', { shipmentId: shipment.id});
               })
@@ -99,8 +99,8 @@ define(function (require) {
         vm.timeSent = new Date();
         return shipmentSkipToSentModalService.open().result
           .then(function (timeResult) {
-            return vm.shipment.skipToStateSent(timeService.dateToUtcString(timeResult.timePacked),
-                                               timeService.dateToUtcString(timeResult.timeSent))
+            return vm.shipment.skipToStateSent(timeService.dateAndTimeToUtcString(timeResult.timePacked),
+                                               timeService.dateAndTimeToUtcString(timeResult.timeSent))
               .then(function (shipment) {
                 return $state.go('home.shipping.shipment', { shipmentId: shipment.id});
               })

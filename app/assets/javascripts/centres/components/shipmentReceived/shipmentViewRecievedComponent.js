@@ -46,7 +46,7 @@ define(function (require) {
                                  { required: true })
         .result
         .then(function (timeUnpacked) {
-          return vm.shipment.received(timeService.dateToUtcString(timeUnpacked));
+          return vm.shipment.received(timeService.dateAndTimeToUtcString(timeUnpacked));
         })
         .then(function (shipment) {
           return $state.go('home.shipping');

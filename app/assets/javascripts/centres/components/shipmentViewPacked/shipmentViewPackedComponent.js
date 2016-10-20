@@ -59,7 +59,7 @@ define(function (require) {
                                  vm.timeSent,
                                  { required: true }).result
         .then(function (timeSent) {
-          return vm.shipment.sent(timeService.dateToUtcString(timeSent))
+          return vm.shipment.sent(timeService.dateAndTimeToUtcString(timeSent))
             .then(function (shipment) {
               return $state.go('home.shipping');
             })

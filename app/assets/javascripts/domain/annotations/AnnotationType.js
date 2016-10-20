@@ -32,7 +32,7 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
         'name':            { 'type': 'string'  },
         'description':     { 'type': [ 'string', 'null' ] },
         'valueType':       { 'type': 'string'  },
-        'maxValueCount':   { 'type': [ 'integer', 'null' ] },
+        'maxValueCount':   { 'type': [ 'string', 'null' ] },
         'options':         { 'type': 'array'   },
         'required':        { 'type': 'boolean' }
       },
@@ -101,12 +101,12 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
 
     AnnotationType.prototype.isSingleSelect = function () {
       return (this.valueType === AnnotationValueType.SELECT) &&
-        (this.maxValueCount === AnnotationMaxValueCount.SELECT_SINGLE());
+        (this.maxValueCount === AnnotationMaxValueCount.SELECT_SINGLE);
     };
 
     AnnotationType.prototype.isMultipleSelect = function () {
       return (this.valueType === AnnotationValueType.SELECT) &&
-        (this.maxValueCount === AnnotationMaxValueCount.SELECT_MULTIPLE());
+        (this.maxValueCount === AnnotationMaxValueCount.SELECT_MULTIPLE);
     };
 
     /**
@@ -117,7 +117,7 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
         return (this.isSingleSelect() || this.isMultipleSelect());
       }
       return ((this.maxValueCount === null) ||
-              (this.maxValueCount === AnnotationMaxValueCount.NONE()));
+              (this.maxValueCount === AnnotationMaxValueCount.NONE));
     };
 
     /**
@@ -125,7 +125,7 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
      */
     AnnotationType.prototype.valueTypeChanged = function () {
       if (!this.isValueTypeSelect()) {
-        this.maxValueCount = null;
+        this.maxValueCount = AnnotationMaxValueCount.NONE;
       }
       this.options = [];
     };

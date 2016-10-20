@@ -23,7 +23,7 @@ define([
     beforeEach(inject(function($httpBackend,
                                _ProcessingType_,
                                _factory_,
-                               serverReplyMixin,
+                               ServerReplyMixin,
                                extendedDomainEntities) {
       _.extend(this, ServerReplyMixin.prototype);
       httpBackend    = $httpBackend;

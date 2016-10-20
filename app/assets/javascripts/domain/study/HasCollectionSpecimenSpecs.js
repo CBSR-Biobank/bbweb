@@ -5,28 +5,22 @@
 define(['lodash'], function(_) {
   'use strict';
 
-  hasCollectionSpecimenSpecsFactory.$inject = [ 'biobankApi', 'CollectionSpecimenSpec' ];
+  HasCollectionSpecimenSpecsFactory.$inject = [ 'biobankApi', 'CollectionSpecimenSpec' ];
 
   /**
    * Maintains an array of specimen specs.
    *
    * This is a mixin.
    */
-  function hasCollectionSpecimenSpecsFactory(biobankApi, CollectionSpecimenSpec) {
+  function HasCollectionSpecimenSpecsFactory(biobankApi, CollectionSpecimenSpec) {
 
-    var mixins = {
-      validSpecimenSpecs:    validSpecimenSpecs
-    };
+    function HasCollectionSpecimenSpecs() {}
 
-    return mixins;
-
-    //--
-
-    function validSpecimenSpecs(specimenSpecs) {
+    HasCollectionSpecimenSpecs.prototype.validSpecimenSpecs = function (specimenSpecs) {
       var result;
 
       if (_.isUndefined(specimenSpecs) || (specimenSpecs.length <= 0)) {
-        // there are no annotation types, nothing to validate
+        // there are no specimen specs types, nothing to validate
         return true;
       }
       result = _.find(specimenSpecs, function (annotType) {
@@ -34,9 +28,10 @@ define(['lodash'], function(_) {
       });
 
       return _.isUndefined(result);
-    }
+    };
 
+    return HasCollectionSpecimenSpecs;
   }
 
-  return hasCollectionSpecimenSpecsFactory;
+  return HasCollectionSpecimenSpecsFactory;
 });

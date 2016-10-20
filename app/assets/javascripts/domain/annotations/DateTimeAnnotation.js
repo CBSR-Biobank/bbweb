@@ -54,7 +54,7 @@ define(['moment', 'lodash'], function(moment, _) {
     DateTimeAnnotation.prototype.getServerAnnotation = function () {
       return {
         annotationTypeId: this.getAnnotationTypeId(),
-        stringValue:      timeService.dateToUtcString(this.value),
+        stringValue:      this.value ? timeService.dateAndTimeToUtcString(this.value) : '',
         selectedValues:   []
       };
     };

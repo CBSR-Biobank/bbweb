@@ -198,7 +198,7 @@ define(['angular', 'lodash', 'moment'], function(angular, _, moment) {
         expect(this.value).toBeNull();
       } else {
         // has to be comparetd to UTC time
-        expect(moment(this.value).local().format()).toEqual(serverEntity.stringValue);
+        expect(moment(this.value).utc().format()).toEqual(serverEntity.stringValue);
       }
     };
 

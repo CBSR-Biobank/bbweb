@@ -75,7 +75,7 @@ define(function (require) {
                                  vm.timeReceived,
                                  { required: true }).result
         .then(function (timeReceived) {
-          return vm.shipment.changeState(ShipmentState.RECEIVED, timeService.dateToUtcString(timeReceived))
+          return vm.shipment.changeState(ShipmentState.RECEIVED, timeService.dateAndTimeToUtcString(timeReceived))
             .then(stateHelper.reloadAndReinit)
             .catch(notificationsService.updateError);
         });
@@ -86,8 +86,8 @@ define(function (require) {
       vm.timeUnpacked = new Date();
       return shipmentSkipToUnpackedModalService.open().result
         .then(function (timeResult) {
-          return vm.shipment.skipToStateUnpacked(timeService.dateToUtcString(timeResult.timeReceived),
-                                                 timeService.dateToUtcString(timeResult.timeUnpacked))
+          return vm.shipment.skipToStateUnpacked(timeService.dateAndTimeToUtcString(timeResult.timeReceived),
+                                                 timeService.dateAndTimeToUtcString(timeResult.timeUnpacked))
             .then(function (shipment) {
               return $state.go('home.shipping.unpack', { shipmentId: shipment.id});
             })

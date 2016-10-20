@@ -97,7 +97,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
           }));
 
         expect(annotationType.isSingleSelect()).toBe(
-          (maxValueCount === self.AnnotationMaxValueCount.SELECT_SINGLE()));
+          (maxValueCount === self.AnnotationMaxValueCount.SELECT_SINGLE));
       });
     });
 
@@ -112,7 +112,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
           }));
 
         expect(annotationType.isMultipleSelect()).toBe(
-          (maxValueCount === self.AnnotationMaxValueCount.SELECT_MULTIPLE()));
+          (maxValueCount === self.AnnotationMaxValueCount.SELECT_MULTIPLE));
       });
     });
 
@@ -127,8 +127,8 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
           }));
 
         expect(annotationType.isMaxValueCountValid()).toBe(
-          (maxValueCount === self.AnnotationMaxValueCount.SELECT_SINGLE()) ||
-            (maxValueCount === self.AnnotationMaxValueCount.SELECT_MULTIPLE()));
+          (maxValueCount === self.AnnotationMaxValueCount.SELECT_SINGLE) ||
+            (maxValueCount === self.AnnotationMaxValueCount.SELECT_MULTIPLE));
       });
 
       _.each(_.range(4), function (maxValueCount) {
@@ -139,7 +139,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
           }));
 
         expect(annotationType.isMaxValueCountValid())
-          .toBe(maxValueCount === self.AnnotationMaxValueCount.NONE());
+          .toBe(maxValueCount === self.AnnotationMaxValueCount.NONE);
       });
     });
 
@@ -196,6 +196,84 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
       expect(annotationType.options).toBeArrayOfSize(options.length - 1);
       expect(annotationType.options[0]).toContain(options[1]);
     });
+
+    describe('getType', function() {
+
+      it('returns valid type for value type TEXT', function() {
+        var annotationType = new this.AnnotationType(this.factory.annotationType(
+          { valueType: this.AnnotationValueType.TEXT }));
+        expect(annotationType.getType()).toBe(this.AnnotationValueType.TEXT);
+      });
+
+      it('returns valid type for value type NUMBER', function() {
+        var annotationType = new this.AnnotationType(this.factory.annotationType(
+          { valueType: this.AnnotationValueType.NUMBER }));
+        expect(annotationType.getType()).toBe(this.AnnotationValueType.NUMBER);
+      });
+
+      it('returns valid type for value type DATE_TIME', function() {
+        var annotationType = new this.AnnotationType(this.factory.annotationType(
+          { valueType: this.AnnotationValueType.DATE_TIME }));
+        expect(annotationType.getType()).toBe(this.AnnotationValueType.DATE_TIME);
+      });
+
+      it('returns valid type for value type SINGLE SELECT', function() {
+        var annotationType = new this.AnnotationType(this.factory.annotationType(
+          {
+            valueType: this.AnnotationValueType.SELECT,
+            maxValueCount: this.AnnotationMaxValueCount.SELECT_SINGLE
+          }));
+        expect(annotationType.getType()).toBe('Single Select');
+      });
+
+      it('returns valid type for value type MULTIPLE SELECT', function() {
+        var annotationType = new this.AnnotationType(this.factory.annotationType(
+          {
+            valueType: this.AnnotationValueType.SELECT,
+            maxValueCount: this.AnnotationMaxValueCount.SELECT_MULTIPLE
+          }));
+        expect(annotationType.getType()).toBe('Multiple Select');
+      });
+
+      it('throws exception for invalid value type', function() {
+        var self = this,
+            annotationType = new self.AnnotationType(self.factory.annotationType(
+              { valueType: self.factory.stringNext }));
+        expect(function () {
+          annotationType.getType();
+        }).toThrowError(/invalid type for annotation type/);
+      });
+
+    });
+
+    describe('calling valueTypeChanged', function() {
+
+      it('clears the options array', function() {
+        var annotationTypeJson = this.factory.annotationType({
+              valueType: this.AnnotationValueType.SELECT,
+              options: ['opt1', 'opt2']
+            }),
+            annotationType = this.AnnotationType.create(annotationTypeJson);
+
+        annotationType.valueType = this.AnnotationValueType.TEXT;
+        annotationType.valueTypeChanged();
+        expect(annotationType.options).toBeEmptyArray();
+      });
+
+      it('max value count is set to NONE', function() {
+        var annotationTypeJson = this.factory.annotationType({
+              valueType: this.AnnotationValueType.SELECT,
+              options: ['opt1', 'opt2']
+            }),
+            annotationType = this.AnnotationType.create(annotationTypeJson);
+
+        annotationType.valueType = this.AnnotationValueType.TEXT;
+        annotationType.valueTypeChanged();
+        expect(annotationType.maxValueCount).toBe(this.AnnotationMaxValueCount.NONE);
+      });
+
+    });
+
   });
 
 });

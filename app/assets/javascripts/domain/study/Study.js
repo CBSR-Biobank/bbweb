@@ -14,7 +14,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
     'StudyStatus',
     'studyStatusLabel',
     'AnnotationType',
-    'hasAnnotationTypes'
+    'HasAnnotationTypes'
   ];
 
   /**
@@ -28,7 +28,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
                         StudyStatus,
                         studyStatusLabel,
                         AnnotationType,
-                        hasAnnotationTypes) {
+                        HasAnnotationTypes) {
 
     /**
      * Used for validating plain objects.
@@ -109,7 +109,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
     }
 
     Study.prototype = Object.create(ConcurrencySafeEntity.prototype);
-    _.extend(Study.prototype, hasAnnotationTypes);
+    _.extend(Study.prototype, HasAnnotationTypes.prototype);
 
     Study.prototype.constructor = Study;
 
@@ -129,7 +129,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
 
       obj.annotationTypes = obj.annotationTypes || {};
 
-      if (!hasAnnotationTypes.validAnnotationTypes(obj.annotationTypes)) {
+      if (!HasAnnotationTypes.prototype.validAnnotationTypes(obj.annotationTypes)) {
         return { valid: false, message: 'invalid object from server: bad annotation types: ' + tv4.error };
       }
 
@@ -356,7 +356,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
     Study.prototype.removeAnnotationType = function (annotationType) {
       var url = sprintf.sprintf('%s/%d/%s',
                                 uri('pannottype', this.id), this.version, annotationType.uniqueId);
-      return hasAnnotationTypes.removeAnnotationType.call(this, annotationType, url);
+      return HasAnnotationTypes.prototype.removeAnnotationType.call(this, annotationType, url);
     };
 
     /**

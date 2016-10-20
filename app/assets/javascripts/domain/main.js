@@ -30,6 +30,7 @@ define(function (require) {
   module.constant('centreLocationInfoSchema',           require('./centre/centreLocationInfoSchema'));
 
   module.constant('AnnotationValueType',                require('./AnnotationValueType'));
+  module.constant('AnnotationMaxValueCount',            require('./annotations/AnnotationMaxValueCount'));
   module.constant('SpecimenType',                       require('./study/SpecimenType'));
 
   module.factory('Annotation',                          require('./annotations/Annotation'));
@@ -39,9 +40,8 @@ define(function (require) {
   module.factory('NumberAnnotation',                    require('./annotations/NumberAnnotation'));
   module.factory('SingleSelectAnnotation',              require('./annotations/SingleSelectAnnotation'));
   module.factory('TextAnnotation',                      require('./annotations/TextAnnotation'));
-  module.factory('hasAnnotationTypes',                  require('./annotations/hasAnnotationTypes'));
-  module.factory('hasAnnotations',                      require('./annotations/hasAnnotations'));
-  module.service('AnnotationMaxValueCount',             require('./annotations/AnnotationMaxValueCount'));
+  module.factory('HasAnnotationTypes',                  require('./annotations/HasAnnotationTypes'));
+  module.factory('HasAnnotations',                      require('./annotations/HasAnnotations'));
   module.service('annotationFactory',                   require('./annotations/annotationFactory'));
   module.service('annotationTypeValidation',            require('./annotations/annotationTypeValidation'));
 
@@ -52,7 +52,7 @@ define(function (require) {
 
   module.factory('CollectionEventType',                 require('./study/CollectionEventType'));
   module.factory('CollectionSpecimenSpec',              require('./study/CollectionSpecimenSpec'));
-  module.factory('hasCollectionSpecimenSpecs',          require('./study/hasCollectionSpecimenSpecs'));
+  module.factory('HasCollectionSpecimenSpecs',          require('./study/HasCollectionSpecimenSpecs'));
   module.factory('ProcessingTypeViewer',                require('./study/ProcessingTypeViewer'));
   module.factory('SpcLinkTypeViewer',                   require('./study/SpcLinkTypeViewer'));
   module.factory('SpecimenGroup',                       require('./study/SpecimenGroup'));

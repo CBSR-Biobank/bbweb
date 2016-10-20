@@ -31,7 +31,7 @@ define(['lodash'], function(_) {
                                  _funutils_,
                                  _AnnotationValueType_,
                                  _AnnotationMaxValueCount_,
-                                serverReplyMixin) {
+                                ServerReplyMixin) {
         _.extend(this, ServerReplyMixin.prototype);
         httpBackend                  = $httpBackend;
         funutils                     = _funutils_;
@@ -215,9 +215,9 @@ define(['lodash'], function(_) {
         expect(annotationType.options).toBeArrayOfSize(0);
 
         annotationType.valueType = AnnotationValueType.SELECT;
-        annotationType.maxValueCount = AnnotationMaxValueCount.SELECT_SINGLE();
+        annotationType.maxValueCount = AnnotationMaxValueCount.SELECT_SINGLE;
         annotationType.valueTypeChanged();
-        expect(annotationType.maxValueCount).toBe(AnnotationMaxValueCount.SELECT_SINGLE());
+        expect(annotationType.maxValueCount).toBe(AnnotationMaxValueCount.SELECT_SINGLE);
         expect(annotationType.options).toBeArrayOfSize(0);
 
         annotationType.options.push('test');

@@ -42,6 +42,7 @@ define([
                               '$compile',
                               'AnnotationType',
                               'AnnotationValueType',
+                              'AnnotationMaxValueCount',
                               'factory');
 
       self.putHtmlTemplates(
@@ -62,16 +63,16 @@ define([
 
       this.controller.annotationType.valueType = this.AnnotationValueType.SELECT;
 
-      this.controller.annotationType.maxValueCount = 0;
+      this.controller.annotationType.maxValueCount = this.AnnotationMaxValueCount.NONE;
       expect(this.controller.maxValueCountRequired()).toBe(true);
 
-      this.controller.annotationType.maxValueCount = 3;
+      this.controller.annotationType.maxValueCount = this.factory.stringNext();
       expect(this.controller.maxValueCountRequired()).toBe(true);
 
-      this.controller.annotationType.maxValueCount = 1;
+      this.controller.annotationType.maxValueCount = this.AnnotationMaxValueCount.SELECT_SINGLE;
       expect(this.controller.maxValueCountRequired()).toBe(false);
 
-      this.controller.annotationType.maxValueCount = 2;
+      this.controller.annotationType.maxValueCount = this.AnnotationMaxValueCount.SELECT_MULTIPLE;
       expect(this.controller.maxValueCountRequired()).toBe(false);
     });
 

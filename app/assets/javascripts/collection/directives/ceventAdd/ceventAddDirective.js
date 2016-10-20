@@ -60,7 +60,7 @@ define(['lodash'], function(_) {
     // --
 
     function submit() {
-      vm.collectionEvent.timeCompleted = timeService.dateToUtcString(vm.timeCompleted);
+      vm.collectionEvent.timeCompleted = timeService.dateAndTimeToUtcString(vm.timeCompleted);
       vm.collectionEvent.add()
         .then(submitSuccess)
         .catch(submitError);

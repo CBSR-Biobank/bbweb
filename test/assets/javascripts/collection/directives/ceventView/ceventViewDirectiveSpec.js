@@ -84,6 +84,7 @@ define(function(require) {
                               'CollectionEvent',
                               'CollectionEventType',
                               'AnnotationValueType',
+                              'AnnotationMaxValueCount',
                               'Specimen',
                               'domainNotificationService',
                               'modalService',
@@ -224,7 +225,8 @@ define(function(require) {
 
         beforeEach(inject(function () {
           var self = this,
-              collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT, 1);
+              collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
+                                                                   this.AnnotationMaxValueCount.SELECT_SINGLE);
 
           context.createDirective          = createDirective;
           context.controllerUpdateFuncName = 'editAnnotation';
@@ -245,7 +247,8 @@ define(function(require) {
 
         beforeEach(inject(function () {
           var self = this,
-              collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT, 2);
+              collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
+                                                                   this.AnnotationMaxValueCount.SELECT_MULTIPLE);
 
           context.createDirective          = createDirective;
           context.controllerUpdateFuncName = 'editAnnotation';

@@ -14,7 +14,6 @@ define(function(require) {
   'use strict';
 
   var angular    = require('angular'),
-      toastr     = require('toastr'),
       admin      = require('admin'),
       centres    = require('centres'),
       common     = require('common'),

@@ -86,6 +86,7 @@ define(function(require) {
                               'Study',
                               'Participant',
                               'AnnotationValueType',
+                              'AnnotationMaxValueCount',
                               'factory');
 
       this.putHtmlTemplates(
@@ -208,7 +209,8 @@ define(function(require) {
 
         beforeEach(inject(function () {
           var self = this,
-              participant = self.participantWithAnnotation(self.AnnotationValueType.SELECT, 1);
+              participant = self.participantWithAnnotation(self.AnnotationValueType.SELECT,
+                                                           self.AnnotationMaxValueCount.SELECT_SINGLE);
 
           context.createDirective           = createDirective;
           context.controllerUpdateFuncName = 'editAnnotation';
@@ -229,7 +231,8 @@ define(function(require) {
 
         beforeEach(inject(function () {
           var self = this,
-              participant = self.participantWithAnnotation(self.AnnotationValueType.SELECT, 2);
+              participant = self.participantWithAnnotation(self.AnnotationValueType.SELECT,
+                                                           self.AnnotationMaxValueCount.SELECT_MULTIPLE);
 
           context.createDirective           = createDirective;
           context.controllerUpdateFuncName = 'editAnnotation';

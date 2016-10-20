@@ -81,7 +81,7 @@ define(function (require) {
                           vm.collectionEvent.timeCompleted,
                           { required: true })
         .result.then(function (timeCompleted) {
-          vm.collectionEvent.updateTimeCompleted(timeService.dateToUtcString(timeCompleted))
+          vm.collectionEvent.updateTimeCompleted(timeService.dateAndTimeToUtcString(timeCompleted))
             .then(postUpdate(gettextCatalog.getString('Time completed updated successfully.'),
                              gettextCatalog.getString('Change successful'),
                              1500))

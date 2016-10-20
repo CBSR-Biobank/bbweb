@@ -5,7 +5,8 @@
 define(['lodash'], function(_) {
   'use strict';
 
-  hasAnnotationTypesFactory.$inject = [
+  HasAnnotationTypesFactory.$inject = [
+    '$q',
     'biobankApi',
     'AnnotationType',
     'DomainError'
@@ -16,20 +17,14 @@ define(['lodash'], function(_) {
    *
    * This is a mixin.
    */
-  function hasAnnotationTypesFactory(biobankApi,
+  function HasAnnotationTypesFactory($q,
+                                     biobankApi,
                                      AnnotationType,
                                      DomainError) {
 
-    var mixins = {
-      validAnnotationTypes: validAnnotationTypes,
-      removeAnnotationType: removeAnnotationType
-    };
+    function HasAnnotationTypes() {}
 
-    return mixins;
-
-    //--
-
-    function validAnnotationTypes(annotationTypes) {
+    HasAnnotationTypes.prototype.validAnnotationTypes = function (annotationTypes) {
       var result;
 
       if (_.isUndefined(annotationTypes) || (annotationTypes.length <= 0)) {
@@ -41,18 +36,17 @@ define(['lodash'], function(_) {
       });
 
       return _.isUndefined(result);
-    }
+    };
 
     /**
      * The entity that includes this mixin needs to implement 'asyncCreate'.
      */
-    function removeAnnotationType(annotationType, url) {
-      /* jshint validthis:true */
+    HasAnnotationTypes.prototype.removeAnnotationType = function (annotationType, url) {
       var self = this,
           found = _.find(self.annotationTypes,  { uniqueId: annotationType.uniqueId });
 
       if (!found) {
-        throw new DomainError('annotation type with ID not present: ' + annotationType.uniqueId);
+        return $q.reject('annotation type with ID not present: ' + annotationType.uniqueId);
       }
 
       return biobankApi.del(url).then(function () {
@@ -64,10 +58,10 @@ define(['lodash'], function(_) {
             })
           }));
       });
-    }
+    };
 
-
+    return HasAnnotationTypes;
   }
 
-  return hasAnnotationTypesFactory;
+  return HasAnnotationTypesFactory;
 });

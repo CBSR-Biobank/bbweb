@@ -123,7 +123,7 @@ define(function (require) {
           inventoryId:      vm.inventoryId,
           originLocationId: vm.selectedLocationId,
           locationId:       vm.selectedLocationId,
-          timeCreated:      timeService.dateToUtcString(vm.timeCollected),
+          timeCreated:      timeService.dateAndTimeToUtcString(vm.timeCollected),
           amount:           vm.amount
         },
         vm.selectedSpecimenSpec);

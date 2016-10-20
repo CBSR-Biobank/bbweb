@@ -17,18 +17,15 @@ define(['moment'], function(moment) {
    */
   function timeService(bbwebConfig) {
     var service = {
-      dateToUtcString:            dateToUtcString,
-      dateAndTimeToUtcString:     dateAndTimeToUtcString,
-      dateToDisplayString:        dateToDisplayString
+      dateAndTimeToUtcString: dateAndTimeToUtcString,
+      dateToDisplayString:    dateToDisplayString
     };
     return service;
 
     //-------
 
-    /**
-     * @function common.timeService.dateToLocal
-     *
-     * @description Converts date to local time, with seconds and milliseconds set to zero, and returns it as
+    /*
+     * Converts date to local time, with seconds and milliseconds set to zero, and returns it as
      * a moment.
      *
      * @param {Date} date - the date to convert to local time.
@@ -51,10 +48,8 @@ define(['moment'], function(moment) {
       return datetime.local();
     }
 
-    /**
-     * @function common.timeService.dateTimeToLocal
-     *
-     * @description Converts the date part of <code>date</code> and the time part in <code>time</code> to
+    /*
+     * Converts the date part of <code>date</code> and the time part in <code>time</code> to
      * local time in a string.
      *
      * @param {Date} date - the date part comes from this parameter. If <code>time</code> is used, the time
@@ -85,24 +80,6 @@ define(['moment'], function(moment) {
         'hour':        momentTime.hours()
       });
       return datetime.local();
-    }
-
-    /**
-     * @function common.timeService.dateToUtcString
-     *
-     * @description Converts the date to a UTC time in a string.
-     *
-     * @param {Date} date - the date to be converted.
-     *
-     * @return {String} The date as UTC time in a string, or if the date is undefined an empty string.
-     *
-     * @throws An error if date is undefined.
-     */
-    function dateToUtcString(date) {
-      if (!date) {
-        return '';
-      }
-      return dateToLocal(date).format();
     }
 
     /**

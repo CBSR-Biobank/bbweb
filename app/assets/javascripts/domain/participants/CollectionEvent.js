@@ -13,7 +13,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     'DomainError',
     'Annotation',
     'biobankApi',
-    'hasAnnotations',
+    'HasAnnotations',
     'annotationFactory'
   ];
 
@@ -27,7 +27,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                                   DomainError,
                                   Annotation,
                                   biobankApi,
-                                  hasAnnotations,
+                                  HasAnnotations,
                                   annotationFactory) {
 
     /**
@@ -124,7 +124,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     }
 
     CollectionEvent.prototype = Object.create(ConcurrencySafeEntity.prototype);
-    _.extend(CollectionEvent.prototype, hasAnnotations);
+    _.extend(CollectionEvent.prototype, HasAnnotations.prototype);
     CollectionEvent.prototype.constructor = CollectionEvent;
 
     CollectionEvent.isValid = function(obj) {

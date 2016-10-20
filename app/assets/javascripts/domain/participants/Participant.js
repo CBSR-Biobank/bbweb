@@ -12,7 +12,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     'ConcurrencySafeEntity',
     'DomainError',
     'biobankApi',
-    'hasAnnotations'
+    'HasAnnotations'
   ];
 
   /**
@@ -24,7 +24,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                               ConcurrencySafeEntity,
                               DomainError,
                               biobankApi,
-                              hasAnnotations) {
+                              HasAnnotations) {
 
     var schema = {
       'id': 'Participant',
@@ -94,7 +94,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     }
 
     Participant.prototype = Object.create(ConcurrencySafeEntity.prototype);
-    _.extend(Participant.prototype, hasAnnotations);
+    _.extend(Participant.prototype, HasAnnotations.prototype);
     Participant.prototype.constructor = Participant;
 
     /**
@@ -113,7 +113,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
 
       obj.annotations = obj.annotations || {};
 
-      if (!hasAnnotations.validAnnotations(obj.annotations)) {
+      if (!HasAnnotations.prototype.validAnnotations(obj.annotations)) {
         return { valid: false, message : 'invalid object from server: bad annotation types' + tv4.error };
       }
 
@@ -264,7 +264,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                                 uri('annot', this.id),
                                 this.version,
                                 annotation.annotationTypeId);
-      return hasAnnotations.removeAnnotation.call(this, annotation, url);
+      return HasAnnotations.prototype.removeAnnotation.call(this, annotation, url);
     };
 
     function uri(/* path, participantId */) {

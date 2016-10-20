@@ -18,11 +18,14 @@ define(function(require) {
 
     beforeEach(inject(function(EntityTestSuiteMixin,
                                ServerReplyMixin,
-                               hasAnnotationsEntityTestSuite,
+                               AnnotationsEntityTestSuiteMixin,
                                extendedDomainEntities) {
       var self = this;
 
-      _.extend(this, EntityTestSuiteMixin.prototype, ServerReplyMixin.prototype, hasAnnotationsEntityTestSuite);
+      _.extend(this,
+               EntityTestSuiteMixin.prototype,
+               ServerReplyMixin.prototype,
+               AnnotationsEntityTestSuiteMixin.prototype);
 
       self.injectDependencies('$q',
                               '$httpBackend',

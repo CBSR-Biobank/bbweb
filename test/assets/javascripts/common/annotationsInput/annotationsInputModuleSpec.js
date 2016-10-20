@@ -50,6 +50,7 @@ define([
                               'annotationFactory',
                               'AnnotationType',
                               'AnnotationValueType',
+                              'AnnotationMaxValueCount',
                               'factory');
 
       self.putHtmlTemplates(
@@ -113,14 +114,14 @@ define([
       expect(this.scope.form.annotationSubForm.dateTimePickerSubForm.$valid).toBe(true);
     });
 
-    it('works for a SELECT single annotation annotation', function() {
+    it('works for a SELECT single annotation', function() {
       var self = this,
           annotationType, annotations;
 
       annotationType = new self.AnnotationType(
         self.factory.annotationType({
           valueType:     self.AnnotationValueType.SELECT,
-          maxValueCount: 1,
+          maxValueCount: self.AnnotationMaxValueCount.SELECT_SINGLE,
           options:       [ 'option1', 'option2' ],
           required:      true
         }));
@@ -147,7 +148,7 @@ define([
       annotationType = new this.AnnotationType(
         this.factory.annotationType({
           valueType: this.AnnotationValueType.SELECT,
-          maxValueCount: 2,
+          maxValueCount: this.AnnotationMaxValueCount.SELECT_MULTIPLE,
           options: [ 'option1', 'option2', 'option3' ],
           required: true }));
 
@@ -172,7 +173,7 @@ define([
           annotationType = new self.AnnotationType(
             self.factory.annotationType({
               valueType:     self.AnnotationValueType.SELECT,
-              maxValueCount: 2,
+              maxValueCount: self.AnnotationMaxValueCount.SELECT_MULTIPLE,
               options:       [ 'option1', 'option2', 'option3' ],
               required:      true
             }));

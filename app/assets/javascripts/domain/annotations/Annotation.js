@@ -6,20 +6,21 @@ define(['moment', 'lodash', 'tv4'], function(moment, _, tv4) {
   'use strict';
 
   AnnotationFactory.$inject = [
+    '$log',
     'AnnotationValueType',
     'DomainError'
   ];
 
-  function AnnotationFactory(AnnotationValueType, DomainError) {
+  function AnnotationFactory($log, AnnotationValueType, DomainError) {
 
     var schema = {
       'id': 'Annotation',
       'type': 'object',
       'properties': {
-        'annotationType': { 'type': 'string' },
-        'stringValue':    { 'type': [ 'string', 'null' ] },
-        'numberValue':    { 'type': [ 'string', 'null' ] },
-        'selectedValues': { 'type': 'array' }
+        'annotationTypeId': { 'type': 'string' },
+        'stringValue':      { 'type': [ 'string', 'null' ] },
+        'numberValue':      { 'type': [ 'string', 'null' ] },
+        'selectedValues':   { 'type': 'array' }
       },
       'required': [ 'annotationTypeId', 'selectedValues' ]
     };
@@ -48,7 +49,7 @@ define(['moment', 'lodash', 'tv4'], function(moment, _, tv4) {
         }
 
         if (_.isUndefined(annotationType.required)) {
-          throw new DomainError('required not assigned');
+          throw new DomainError('required not defined');
         }
 
         self.required = annotationType.required;
@@ -79,8 +80,8 @@ define(['moment', 'lodash', 'tv4'], function(moment, _, tv4) {
     };
 
     Annotation.create = function (obj) {
-      if (!Annotation.validate(obj)) {
-        console.error('invalid object to create from: ' + tv4.error);
+      if (!Annotation.isValid(obj)) {
+        $log.error('invalid object to create from: ' + tv4.error);
         throw new DomainError('invalid object to create from: ' + tv4.error);
       }
       return new Annotation(obj);

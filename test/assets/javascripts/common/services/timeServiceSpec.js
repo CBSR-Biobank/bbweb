@@ -11,19 +11,7 @@ define(function (require) {
       _      = require('lodash'),
       moment = require('moment');
 
-  function SuiteMixinFactory(TestSuiteMixin, ServerReplyMixin) {
-
-    function SuiteMixin() {
-      TestSuiteMixin.call(this);
-    }
-
-    SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
-
-    return SuiteMixin;
-  }
-
-  fdescribe('timeService', function() {
+  describe('timeService', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -34,7 +22,7 @@ define(function (require) {
 
     describe('dateAndTimeToUtcString', function() {
 
-      fit('converts a date and time to a string', function() {
+      it('converts a date and time to a string', function() {
         var date = new Date(Date.parse('Jan 1, 2000')),
             time = new Date(Date.parse('Wed, 31 Dec 1980 07:11:00 GMT')),
             datestr = this.timeService.dateAndTimeToUtcString(date, time);
@@ -42,8 +30,21 @@ define(function (require) {
         expect(datestr).toContain('T07:11:00Z');
       });
 
-    });
+      it('calling with undefined parameters throws an error', function() {
+        var self = this;
+        expect(function () {
+          self.timeService.dateAndTimeToUtcString(undefined, undefined);
+        }).toThrowError('date or time is invalid');
+      });
 
+      it('calling with undefined time returns date as UTC string', function() {
+        var date = new Date(Date.parse('Wed, 31 Dec 1980 07:11:00 GMT')),
+            datestr = this.timeService.dateAndTimeToUtcString(date);
+        expect(datestr).toContain('1980-12-31');
+        expect(datestr).toContain('T07:11:00Z');
+      });
+
+    });
 
     describe('dateToDisplayString', function() {
 

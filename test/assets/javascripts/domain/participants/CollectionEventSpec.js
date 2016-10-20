@@ -20,12 +20,15 @@ define([
 
     beforeEach(inject(function(EntityTestSuiteMixin,
                                ServerReplyMixin,
-                               hasAnnotationsEntityTestSuite,
+                               AnnotationsEntityTestSuiteMixin,
                                testUtils,
                                extendedDomainEntities) {
       var self = this;
 
-      _.extend(self, EntityTestSuiteMixin.prototype, ServerReplyMixin.prototype, hasAnnotationsEntityTestSuite);
+      _.extend(self,
+               EntityTestSuiteMixin.prototype,
+               ServerReplyMixin.prototype,
+               AnnotationsEntityTestSuiteMixin.prototype);
 
       self.injectDependencies('$httpBackend',
                               'Participant',
