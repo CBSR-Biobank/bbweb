@@ -78,23 +78,23 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   cache,
   filters,
-  ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.4.9" % "compile" ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
-  "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.9",
-  "com.typesafe.akka"           %% "akka-remote"                         % "2.4.9"             % "compile",
-  "com.typesafe.akka"           %% "akka-slf4j"                          % "2.4.9"             % "compile",
+  ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.4.11" % "compile" ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
+  "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.11",
+  "com.typesafe.akka"           %% "akka-remote"                         % "2.4.11"             % "compile",
+  "com.typesafe.akka"           %% "akka-slf4j"                          % "2.4.11"             % "compile",
   "org.scala-stm"               %% "scala-stm"                           % "0.7"               % "compile",
-  "org.scalaz"                  %% "scalaz-core"                         % "7.2.5"             % "compile",
+  "org.scalaz"                  %% "scalaz-core"                         % "7.2.6"             % "compile",
   "com.okumin"                  %% "akka-persistence-sql-async"          % "0.3.1",
   "com.github.mauricio"         %% "mysql-async"                         % "0.2.16",
   "com.github.t3hnar"           %% "scala-bcrypt"                        % "2.6",
   "com.github.ancane"           %% "hashids-scala"                       % "1.2",
   "com.typesafe.play"           %% "play-mailer"                         % "5.0.0",
-  "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.4.0",
-  "com.github.nscala-time"      %% "nscala-time"                         % "2.12.0",
+  "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.5.0",
+  "com.github.nscala-time"      %% "nscala-time"                         % "2.14.0",
   // WebJars infrastructure
   ( "org.webjars"               %% "webjars-play"                        % "2.5.0").exclude("org.webjars", "requirejs"),
   // WebJars dependencies
-  "org.webjars"                 %  "requirejs"                           % "2.2.0",
+  "org.webjars"                 %  "requirejs"                           % "2.3.2",
   "org.webjars"                 %  "lodash"                              % "4.15.0",
   "org.webjars"                 %  "jquery"                              % "2.2.4",
   ( "org.webjars"               %  "bootstrap"                           % "3.3.7"  ).excludeAll(ExclusionRule(organization="org.webjars")),
@@ -104,18 +104,18 @@ libraryDependencies ++= Seq(
   "org.webjars"                 %  "smart-table"                         % "2.1.3-1",
   ( "org.webjars"               %  "toastr"                              % "2.1.2"  ).exclude("org.webjars", "jquery"),
   ( "org.webjars"               %  "angular-sanitize"                    % "1.3.11" ).exclude("org.webjars", "angularjs"),
-  "org.webjars"                 %  "momentjs"                            % "2.14.1",
+  "org.webjars"                 %  "momentjs"                            % "2.15.0",
   "org.webjars"                 %  "sprintf.js"                          % "1.0.0",
   "org.webjars"                 %  "tv4"                                 % "1.0.17-1",
   "org.webjars.bower"           %  "angular-utils-ui-breadcrumbs"        % "0.2.2",
   "org.webjars.bower"           %  "bootstrap-ui-datetime-picker"        % "2.4.3",
   "org.webjars.bower"           %  "angular-gettext"                     % "2.2.1",
   // Testing
-  "com.github.dnvriend"         %% "akka-persistence-inmemory"           % "1.3.7"              % "test",
-  "com.typesafe.akka"           %% "akka-testkit"                        % "2.4.9"              % "test",
+  "com.github.dnvriend"         %% "akka-persistence-inmemory"           % "1.3.10"             % "test",
+  "com.typesafe.akka"           %% "akka-testkit"                        % "2.4.11"              % "test",
   "org.scalatestplus"           %% "play"                                % "1.4.0"              % "test",
   "org.pegdown"                 %  "pegdown"                             % "1.6.0"              % "test",
-  "org.codehaus.janino"         %  "janino"                              % "3.0.1"              % "test"
+  "org.codehaus.janino"         %  "janino"                              % "3.0.6"              % "test"
   )
 
 incOptions := incOptions.value.withNameHashing(true)
@@ -141,7 +141,7 @@ pipelineStages := Seq(rjs, digest, gzip)
 
 PB.flatPackage in PB.protobufConfig := true
 
-PB.scalapbVersion := "0.5.40"
+PB.scalapbVersion := "0.5.43"
 PB.protobufSettings
 
 // Protocol buffers compiler - used by ScalaPB
