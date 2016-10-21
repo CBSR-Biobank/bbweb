@@ -734,15 +734,17 @@ define(function (require) {
       });
 
       it('throws an exception if select options are not provided ', function() {
+        var err = new Error('select options not provided');
         this.modalInput.selectMultiple('', '', '', { });
         this.$rootScope.$digest();
-        expect(this.$exceptionHandler.errors[0]).toEqual(Error('select options not provided'));
+        expect(this.$exceptionHandler.errors[0]).toEqual(err);
       });
 
       it('throws an exception if default value is not an array', function() {
+        var err = new Error('defaultValue is not an array');
         this.modalInput.selectMultiple('', '', '', { selectOptions: this.options });
         this.$rootScope.$digest();
-        expect(this.$exceptionHandler.errors[1]).toEqual(Error('defaultValue is not an array'));
+        expect(this.$exceptionHandler.errors[1]).toEqual(err);
       });
 
     });
