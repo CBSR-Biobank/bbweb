@@ -78,13 +78,12 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   cache,
   filters,
-  ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.4.11" % "compile" ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
-  "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.11",
-  "com.typesafe.akka"           %% "akka-remote"                         % "2.4.11"             % "compile",
-  "com.typesafe.akka"           %% "akka-slf4j"                          % "2.4.11"             % "compile",
-  "org.scala-stm"               %% "scala-stm"                           % "0.7"               % "compile",
-  "org.scalaz"                  %% "scalaz-core"                         % "7.2.6"             % "compile",
-  "com.okumin"                  %% "akka-persistence-sql-async"          % "0.3.1",
+  ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.4.10"  % "compile"  ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
+  "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.10"  % "compile",
+  "com.typesafe.akka"           %% "akka-remote"                         % "2.4.10"  % "compile",
+  ( "com.okumin"                %% "akka-persistence-sql-async"          % "0.3.1"   % "compile"  ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
+  "org.scala-stm"               %% "scala-stm"                           % "0.7"     % "compile",
+  "org.scalaz"                  %% "scalaz-core"                         % "7.2.6"   % "compile",
   "com.github.mauricio"         %% "mysql-async"                         % "0.2.16",
   "com.github.t3hnar"           %% "scala-bcrypt"                        % "2.6",
   "com.github.ancane"           %% "hashids-scala"                       % "1.2",
@@ -99,9 +98,9 @@ libraryDependencies ++= Seq(
   "org.webjars"                 %  "jquery"                              % "2.2.4",
   ( "org.webjars"               %  "bootstrap"                           % "3.3.7"  ).excludeAll(ExclusionRule(organization="org.webjars")),
   ( "org.webjars"               %  "angularjs"                           % "1.5.8"  ).exclude("org.webjars", "jquery"),
-  ( "org.webjars"               %  "angular-ui-bootstrap"                % "1.3.3" ).exclude("org.webjars", "angularjs"),
+  ( "org.webjars"               %  "angular-ui-bootstrap"                % "1.3.3"  ).exclude("org.webjars", "angularjs"),
   ( "org.webjars"               %  "angular-ui-router"                   % "0.2.18" ).exclude("org.webjars", "angularjs"),
-  "org.webjars"                 %  "smart-table"                         % "2.1.3-1",
+  ( "org.webjars"               %  "smart-table"                         % "2.1.3-1").exclude("org.webjars", "angularjs"),
   ( "org.webjars"               %  "toastr"                              % "2.1.2"  ).exclude("org.webjars", "jquery"),
   ( "org.webjars"               %  "angular-sanitize"                    % "1.3.11" ).exclude("org.webjars", "angularjs"),
   "org.webjars"                 %  "momentjs"                            % "2.15.0",
@@ -111,11 +110,11 @@ libraryDependencies ++= Seq(
   "org.webjars.bower"           %  "bootstrap-ui-datetime-picker"        % "2.4.3",
   "org.webjars.bower"           %  "angular-gettext"                     % "2.2.1",
   // Testing
-  "com.github.dnvriend"         %% "akka-persistence-inmemory"           % "1.3.10"             % "test",
-  "com.typesafe.akka"           %% "akka-testkit"                        % "2.4.11"              % "test",
-  "org.scalatestplus"           %% "play"                                % "1.4.0"              % "test",
-  "org.pegdown"                 %  "pegdown"                             % "1.6.0"              % "test",
-  "org.codehaus.janino"         %  "janino"                              % "3.0.6"              % "test"
+  ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "1.3.10"  % "test" ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
+  "com.typesafe.akka"           %% "akka-testkit"                        % "2.4.10"  % "test",
+  "org.scalatestplus"           %% "play"                                % "1.4.0"   % "test",
+  "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
+  "org.codehaus.janino"         %  "janino"                              % "3.0.6"   % "test"
   )
 
 incOptions := incOptions.value.withNameHashing(true)
