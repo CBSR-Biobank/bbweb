@@ -5,7 +5,7 @@
 define(['moment'], function(moment) {
   'use strict';
 
-  timeService.$inject = ['bbwebConfig'];
+  timeService.$inject = ['AppConfig'];
 
   /**
    * @class common.timeService
@@ -15,7 +15,7 @@ define(['moment'], function(moment) {
    * strings.
    *
    */
-  function timeService(bbwebConfig) {
+  function timeService(AppConfig) {
     var service = {
       dateAndTimeToUtcString: dateAndTimeToUtcString,
       dateToDisplayString:    dateToDisplayString
@@ -124,7 +124,7 @@ define(['moment'], function(moment) {
       if (!date) {
         return '';
       }
-      return dateToLocal(date).format(bbwebConfig.dateTimeFormat);
+      return dateToLocal(date).format(AppConfig.dateTimeFormat);
     }
 
   }

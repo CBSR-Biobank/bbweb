@@ -84,7 +84,7 @@ define(function (require) {
     return directive;
   }
 
-  function AnnotationsInputCtrl(bbwebConfig) {
+  function AnnotationsInputCtrl(AppConfig) {
 
   }
 

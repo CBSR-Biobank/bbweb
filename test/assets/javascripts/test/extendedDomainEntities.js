@@ -8,7 +8,7 @@ define(['angular', 'lodash', 'moment'], function(angular, _, moment) {
   'use strict';
 
   extendedDomainEntities.$inject = [
-    'bbwebConfig',
+    'AppConfig',
     'ConcurrencySafeEntity',
     'AnnotationType',
     'Annotation',
@@ -33,7 +33,7 @@ define(['angular', 'lodash', 'moment'], function(angular, _, moment) {
    * Extends domain entities by adding a 'compareToJsonEntity' that can be called from test code to compare
    * a javascript domain object and a response from the server (for the same domain entity).
    */
-  function extendedDomainEntities(bbwebConfig,
+  function extendedDomainEntities(AppConfig,
                                   ConcurrencySafeEntity,
                                   AnnotationType,
                                   Annotation,

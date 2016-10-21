@@ -22,6 +22,7 @@ define(function(require) {
       home       = require('home'),
       studies    = require('studies'),
       users      = require('users'),
+      AppConfig  = require('./AppConfig'),
       app;
 
   require('jquery');
@@ -38,40 +39,30 @@ define(function(require) {
 
   // We must already declare most dependencies here (except for common), or the submodules' routes
   // will not be resolved
-  app = angular.module('biobankApp', [
-    'ui.bootstrap',
-    'ui.router',
-    'ngSanitize',
-    'ngCookies',
-    'ngMessages',
-    'smart-table',
-    'angularUtils.directives.uiBreadcrumbs',
-    'ui.bootstrap.datetimepicker',
-    'gettext',
-    admin.name,
-    centres.name,
-    common.name,
-    collection.name,
-    domain.name,
-    home.name,
-    studies.name,
-    users.name,
-  ]);
+  angular.module('biobankApp', ['ui.bootstrap',
+                                 'ui.router',
+                                 'ngSanitize',
+                                 'ngCookies',
+                                 'ngMessages',
+                                 'smart-table',
+                                 'angularUtils.directives.uiBreadcrumbs',
+                                 'ui.bootstrap.datetimepicker',
+                                 'gettext',
+                                 admin.name,
+                                 centres.name,
+                                 common.name,
+                                 collection.name,
+                                 domain.name,
+                                 home.name,
+                                 studies.name,
+                                 users.name])
 
-  app.run(['languageService', function (languageService) {
-    languageService.initLanguage({ debug: true });
-  }]);
+    .run(['languageService', function (languageService) {
+      languageService.initLanguage({ debug: true });
+    }])
 
-  // For debugging
-  //
-  app.run(debugFunc);
-
-  app.constant('bbwebConfig',
-               {
-                 dateFormat:       'YYYY-MM-DD',
-                 dateTimeFormat:   'YYYY-MM-DD HH:mm',
-                 datepickerFormat: 'yyyy-MM-dd HH:mm'
-               });
+    .run(debugFunc) // For debugging
+    .provider('AppConfig', AppConfig)
 
   // see http://blog.thoughtram.io/angularjs/2014/12/22/exploring-angular-1.3-disabling-debug-info.html
   //
@@ -79,9 +70,9 @@ define(function(require) {
   //   $compileProvider.debugInfoEnabled(false);
   // }]);
 
-  //app.config(exceptionConfig);
-  app.config(loggingConfig);
-  app.config(httpInterceptorConfig);
+  //.config(exceptionConfig)
+    .config(loggingConfig)
+    .config(httpInterceptorConfig);
 
   //--
 

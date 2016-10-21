@@ -80,7 +80,7 @@ define(function(require) {
     beforeEach(inject(function(EntityTestSuiteMixin, testUtils, extendedDomainEntities) {
       var SuiteMixin = new SuiteMixinFactory(EntityTestSuiteMixin);
       _.extend(this, SuiteMixin.prototype);
-      this.injectDependencies('bbwebConfig',
+      this.injectDependencies('AppConfig',
                               'Study',
                               'AnnotationType',
                               'annotationFactory',

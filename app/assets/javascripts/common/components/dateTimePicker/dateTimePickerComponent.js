@@ -19,12 +19,12 @@ define(function () {
     }
   };
 
-  DateTimePickerController.$inject = ['bbwebConfig'];
+  DateTimePickerController.$inject = ['AppConfig'];
 
   /**
    *
    */
-  function DateTimePickerController(bbwebConfig) {
+  function DateTimePickerController(AppConfig) {
     var vm = this;
 
     vm.value                = vm.defaultValue;
@@ -32,7 +32,7 @@ define(function () {
     vm.inputCols            = vm.inputCols || 'col-sm-10';
     vm.open                 = false;
     vm.openCalendar         = openCalendar;
-    vm.datetimePickerFormat = bbwebConfig.datepickerFormat;
+    vm.datetimePickerFormat = AppConfig.datepickerFormat;
     vm.timepickerOptions    = { readonlyInput: false, showMeridian: false };
     vm.onChange             = onChange;
 

@@ -27,7 +27,7 @@ define(['lodash'], function(_) {
   CollectionAddCtrl.$inject = [
     '$state',
     'gettextCatalog',
-    'bbwebConfig',
+    'AppConfig',
     'notificationsService',
     'domainNotificationService',
     'timeService',
@@ -39,7 +39,7 @@ define(['lodash'], function(_) {
    */
   function CollectionAddCtrl($state,
                              gettextCatalog,
-                             bbwebConfig,
+                             AppConfig,
                              notificationsService,
                              domainNotificationService,
                              timeService,

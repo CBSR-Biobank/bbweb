@@ -104,7 +104,7 @@ define(function (require) {
       var modal;
 
       ModalController.$inject = [
-        'bbwebConfig',
+        'AppConfig',
         'timeService'
       ];
 
@@ -121,7 +121,7 @@ define(function (require) {
 
       //--
 
-      function ModalController(bbwebConfig,
+      function ModalController(AppConfig,
                                timeService) {
         var vm = this;
 

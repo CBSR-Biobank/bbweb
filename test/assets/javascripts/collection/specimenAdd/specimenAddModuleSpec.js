@@ -29,7 +29,7 @@ define([
       $window:           this.$window,
       $timeout:          this.$timeout,
       $uibModalInstance: this.modalInstance,
-      bbwebConfig:       this.bbwebConfig,
+      AppConfig:       this.AppConfig,
       Specimen:          this.Specimen,
       timeService:       this.timeService,
       centreLocations:   centreLocations,
@@ -98,7 +98,7 @@ define([
                                 '$window',
                                 '$timeout',
                                 '$compile',
-                                'bbwebConfig',
+                                'AppConfig',
                                 'Specimen',
                                 'timeService',
                                 'factory');

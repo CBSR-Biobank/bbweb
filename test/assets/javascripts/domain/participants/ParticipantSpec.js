@@ -39,7 +39,7 @@ define(function(require) {
                               'TextAnnotation',
                               'AnnotationValueType',
                               'AnnotationType',
-                              'bbwebConfig',
+                              'AppConfig',
                               'factory',
                               'testUtils');
 

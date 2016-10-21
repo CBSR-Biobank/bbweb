@@ -24,7 +24,7 @@ define([
     'UserStatus',
     'ShipmentState',
     'ShipmentItemState',
-    'bbwebConfig'
+    'AppConfig'
   ];
 
   /**
@@ -44,7 +44,7 @@ define([
                    UserStatus,
                    ShipmentState,
                    ShipmentItemState,
-                   bbwebConfig) {
+                   AppConfig) {
 
     var defaultEntities = {},
         entityCount = 0,

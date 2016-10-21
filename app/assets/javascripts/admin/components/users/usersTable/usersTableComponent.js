@@ -15,7 +15,7 @@ define(['lodash'], function(_) {
   };
 
   UsersTableController.$inject = [
-    'bbwebConfig',
+    'AppConfig',
     'User',
     'UserCounts',
     'UserStatus',
@@ -27,7 +27,7 @@ define(['lodash'], function(_) {
   /**
    *
    */
-  function UsersTableController(bbwebConfig,
+  function UsersTableController(AppConfig,
                                 User,
                                 UserCounts,
                                 UserStatus,
