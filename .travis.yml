@@ -27,6 +27,7 @@ jdk:
   - oraclejdk8
 
 script:
+  - cp conf/logback-test.xml.template conf/logback-test.xml
   - sbt ++$TRAVIS_SCALA_VERSION -Dfile.encoding=UTF8 -J-XX:ReservedCodeCacheSize=256M test:compile
   - npm install
   - sbt ++$TRAVIS_SCALA_VERSION -Dfile.encoding=UTF8 -J-XX:ReservedCodeCacheSize=256M test
