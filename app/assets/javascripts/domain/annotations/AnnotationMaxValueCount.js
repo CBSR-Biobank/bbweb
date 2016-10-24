@@ -11,9 +11,9 @@ define(function () {
    *
    */
   var AnnotationMaxValueCount = {
-    NONE: 'none',
-    SELECT_SINGLE: 'select_single',
-    SELECT_MULTIPLE: 'select_multiple'
+    NONE: 0,
+    SELECT_SINGLE: 1,
+    SELECT_MULTIPLE: 2
   };
 
   return AnnotationMaxValueCount;

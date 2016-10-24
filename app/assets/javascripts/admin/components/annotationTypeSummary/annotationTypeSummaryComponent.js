@@ -25,7 +25,8 @@ define(function () {
   function AnnotationTypeSummaryController(gettextCatalog) {
     var vm = this;
 
-    vm.requiredLabel = vm.annotationType.required ? gettextCatalog.getString('Yes') : gettextCatalog.getString('No');
+    vm.requiredLabel = vm.annotationType.required ?
+      gettextCatalog.getString('Yes') : gettextCatalog.getString('No');
   }
 
   return component;

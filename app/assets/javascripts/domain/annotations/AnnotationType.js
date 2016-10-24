@@ -32,7 +32,7 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
         'name':            { 'type': 'string'  },
         'description':     { 'type': [ 'string', 'null' ] },
         'valueType':       { 'type': 'string'  },
-        'maxValueCount':   { 'type': [ 'string', 'null' ] },
+        'maxValueCount':   { 'type': [ 'number', 'null' ] },
         'options':         { 'type': 'array'   },
         'required':        { 'type': 'boolean' }
       },
