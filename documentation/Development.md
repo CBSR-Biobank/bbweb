@@ -1,12 +1,20 @@
 # Development
 
+# Snapshot Migration
+
+Snapshots can be considered a pure performance optimization and are not important from a functional point of
+view for a successful recovery of application state. That is why it might be a valid alternative to do without
+custom serializers and backwards compatibility in case of snapshots. Incompatible snapshots could simply be
+deleted in case of an upgrade. Of course this results in a longer recovery time for the first restart after an
+upgrade.
+
 ## Libraries and Frameworks
 
 ### Protocol Buffers
 
-Google [protobuf](https://github.com/google/protobuf/) is used to save events to the Akka Persistence
-journal. By using protobuf it is easier to modify the events as the system grows. If an event is changed an
-old database can still be used with the application.
+Google [protobuf](https://github.com/google/protobuf/) is used to save events to the Akka Persistence journal.
+By using protobuf it is easier to modify the events as the system grows. If an event is changed an old
+database can still be used with the application.
 
 See the installation page for instructions on how to install on your computer.
 

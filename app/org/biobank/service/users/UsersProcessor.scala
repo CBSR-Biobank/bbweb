@@ -56,6 +56,8 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
       snapshot.users.foreach(i => userRepository.put(i))
 
     case event: RecoveryCompleted =>
+      testData.createDefaultUser
+      testData.addMultipleUsers
 
     case event => log.error(s"event not handled: $event")
   }

@@ -204,11 +204,9 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
     if (loadTestData) {
       Logger.debug("addMultipleCentres")
 
-      val hashids = Hashids("test-data-centres")
-
       centreData.zipWithIndex.foreach { case ((name, description), index) =>
         val centre: Centre = DisabledCentre(
-            id           = CentreId(hashids.encode(index.toLong)),
+            id           = CentreId(name),
             version      = 0L,
             timeAdded    = DateTime.now,
             timeModified = None,
@@ -220,11 +218,11 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
       }
 
       centreRepository.getValues
-        .find { s => s.name == "100-Calgary AB"}
+        .find { c => c.name == "100-Calgary AB"}
         .foreach { calgary =>
         calgary match {
           case c: DisabledCentre => {
-            val location = Location(uniqueId       = "test-data-calgary-location",
+            val location = Location(uniqueId       = s"${c.name}:Primary",
                                     name           = "Primary",
                                     street         = "1403 29 St NW",
                                     city           = "Calgary",
@@ -232,9 +230,11 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
                                     postalCode     = "T2N 2T9",
                                     poBoxNumber    = None,
                                     countryIsoCode = "CA")
-            c.copy(locations = Set(location)).enable.foreach { centre =>
-              centreRepository.put(centre)
-            }
+            c.copy(locations = Set(location), studyIds = Set(StudyId("BBPSP"))).
+              enable.
+              foreach { centre =>
+                centreRepository.put(centre)
+              }
           }
           case s =>
         }
@@ -245,7 +245,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
         .foreach { london =>
         london match {
           case c: DisabledCentre => {
-            val location = Location(uniqueId       = "test-data-london-location",
+            val location = Location(uniqueId       = s"${c.name}:Primary",
                                     name           = "Primary",
                                     street         = "London Health Sciences Center, University Hospital, Rm A3-222B, 339 Windermere Road",
                                     city           = "London",
@@ -253,9 +253,10 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
                                     postalCode     = "N0L 1W0",
                                     poBoxNumber    = None,
                                     countryIsoCode = "CA")
-            c.copy(locations = Set(location)).enable.foreach { centre =>
-              centreRepository.put(centre)
-            }
+            c.copy(locations = Set(location), studyIds = Set(StudyId("BBPSP"))).
+              enable.foreach { centre =>
+                centreRepository.put(centre)
+              }
           }
           case s =>
         }
@@ -267,13 +268,11 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
     if (loadTestData) {
       Logger.debug("addMultipleStudies")
 
-      val hashids = Hashids("test-data-studies")
-
       studyData.zipWithIndex.foreach { case ((name, description), index) =>
         val descMaybe = if (name == "AHFEM") Some(s"$description\n\n$ahfemDescription")
                         else Some(description)
 
-        val study: Study = DisabledStudy(id              = StudyId(hashids.encode(index.toLong)),
+        val study: Study = DisabledStudy(id              = StudyId(name),
                                          version         = 0L,
                                          timeAdded       = DateTime.now,
                                          timeModified    = None,
@@ -510,15 +509,15 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
     def addSpecimen(id:           SpecimenId,
                     inventoryId:  String,
                     specimenSpec: CollectionSpecimenSpec,
-                    location:     Location) =
+                    locationId:   String) =
       UsableSpecimen(id               = id,
                      inventoryId      = inventoryId,
                      specimenSpecId   = specimenSpec.uniqueId,
                      version          = 0L,
                      timeAdded        = DateTime.now,
                      timeModified     = None,
-                     originLocationId = location.uniqueId,
-                     locationId       = location.uniqueId,
+                     originLocationId = locationId,
+                     locationId       = locationId,
                      containerId      = None,
                      positionId       = None,
                      timeCreated      = DateTime.now.minusDays(1),
@@ -528,38 +527,29 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
     if (loadSpecimenTestData) {
       studyRepository.getValues.find(s => s.name == "BBPSP").foreach { bbpsp =>
 
-        val centreNames = List("100-Calgary AB", "101-London ON")
+        val centreIds = List("100-Calgary AB", "101-London ON")
 
-        centreNames.zipWithIndex.foreach { case (centreName, centreIndex) =>
-          centreRepository.getValues.find(c => c.name == centreName).foreach { centre =>
-            centre match {
-              case c: EnabledCentre => {
-                centreRepository.put(c.copy(studyIds = Set(bbpsp.id)))
+        centreIds.zipWithIndex.foreach { case (centreId, centreIndex) =>
+          val hashids = Hashids("bbpsp-specimens")
+          participantRepository.allForStudy(bbpsp.id)
+            .zipWithIndex.foreach { case (participant, pIndex) =>
+              collectionEventRepository.allForParticipant(participant.id)
+                .zipWithIndex.foreach {
+                case (cevent, ceventIndex) =>
+                  collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
+                    .foreach { cventType =>
+                    val uniqueId = 100 * centreIndex + 10 * pIndex + ceventIndex
+                    val inventoryId = f"A$uniqueId%05d"
+                    val specimen = addSpecimen(SpecimenId(hashids.encode(uniqueId.toLong)),
+                                               inventoryId,
+                                               cventType.specimenSpecs.head,
+                                               s"${centreId}:Primary")
+                    specimenRepository.put(specimen)
+                    ceventSpecimenRepository.put(CeventSpecimen(cevent.id, specimen.id))
 
-                val hashids = Hashids("bbpsp-specimens")
-                participantRepository.allForStudy(bbpsp.id)
-                  .zipWithIndex.foreach { case (participant, pIndex) =>
-                    collectionEventRepository.allForParticipant(participant.id)
-                      .zipWithIndex.foreach {
-                      case (cevent, ceventIndex) =>
-                        collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
-                          .foreach { cventType =>
-                          val uniqueId = 100 * centreIndex + 10 * pIndex + ceventIndex
-                          val inventoryId = f"A$uniqueId%05d"
-                          val specimen = addSpecimen(SpecimenId(hashids.encode(uniqueId.toLong)),
-                                                     inventoryId,
-                                                     cventType.specimenSpecs.head,
-                                                     centre.locations.head)
-                          specimenRepository.put(specimen)
-                          ceventSpecimenRepository.put(CeventSpecimen(cevent.id, specimen.id))
-
-                          log.info(s"added specimen: invId: $inventoryId, participant: ${participant.uniqueId}, visitNum: ${cevent.visitNumber}, centre: $centreName")
-                        }
+                    log.info(s"added specimen: invId: $inventoryId, participant: ${participant.uniqueId}, visitNum: ${cevent.visitNumber}, centreId: $centreId")
+                  }
                     }
-                }
-              }
-              case _ =>
-            }
           }
         }
       }
@@ -594,7 +584,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
   /**
    * For debug only in development mode - password is "testuser"
    */
-  private  def createDefaultUser(): Unit = {
+  def createDefaultUser(): Unit = {
     if (loadTestData) {
       log.debug("createDefaultUser")
       userRepository.put(
@@ -610,13 +600,4 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
       ()
     }
   }
-
-  createDefaultUser
-  addMultipleUsers
-  addMultipleCentres
-  addMultipleStudies
-  addCollectionEventTypes
-  addBbpspParticipants
-  addBbpspCevents
-  addBbpspSpecimens
 }

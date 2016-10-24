@@ -3,6 +3,7 @@ package org.biobank.service.studies
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
 import javax.inject._
+import org.biobank.TestData
 import org.biobank.domain.study._
 import org.biobank.domain.{AnnotationType, AnnotationValueType}
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
@@ -37,7 +38,8 @@ class StudiesProcessor @javax.inject.Inject() (
   val studyRepository:                                            StudyRepository,
   val processingTypeRepository:                                   ProcessingTypeRepository,
   val specimenGroupRepository:                                    SpecimenGroupRepository,
-  val collectionEventTypeRepository:                              CollectionEventTypeRepository)
+  val collectionEventTypeRepository:                              CollectionEventTypeRepository,
+  val testData:                                                   TestData)
     extends Processor {
   import org.biobank.CommonValidations._
 
@@ -67,7 +69,13 @@ class StudiesProcessor @javax.inject.Inject() (
     case SnapshotOffer(_, snapshot: SnapshotState) =>
       snapshot.studies.foreach(studyRepository.put)
 
-    case RecoveryCompleted => log.debug(s"recovery completed")
+    case RecoveryCompleted =>
+      testData.addMultipleStudies
+      testData.addCollectionEventTypes
+      testData.addBbpspParticipants
+      testData.addBbpspCevents
+      testData.addBbpspSpecimens
+      log.debug(s"recovery completed")
 
   }
 
