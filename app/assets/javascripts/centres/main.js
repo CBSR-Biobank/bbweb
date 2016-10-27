@@ -9,9 +9,10 @@ define(function (require) {
 
   var angular = require('angular'),
       name = 'biobank.centres',
+      shipmentSpecimensTablesModule = require('./modules/shipmentSpecimensTables/shipmentSpecimensTablesModule'),
       module;
 
-  module = angular.module(name, [])
+  module = angular.module(name, [shipmentSpecimensTablesModule.name])
     .config(require('./states'))
     .constant('shipmentSendProgressItems', [
       'Shipping information',
@@ -23,6 +24,9 @@ define(function (require) {
       'Receive',
       'Unpack'
     ])
+
+    .controller('ShipmentSpecimenController', require('./controllers/ShipmentSpecimensController'))
+
     .component('centreShipments',      require('./components/centreShipments/centreShipmentsComponent'))
     .component('shippingHome',         require('./components/shippingHome/shippingHomeComponent'))
     .component('selectCentre',         require('./components/selectCentre/selectCentreComponent'))
@@ -33,19 +37,20 @@ define(function (require) {
     .component('shipmentViewPacked',   require('./components/shipmentViewPacked/shipmentViewPackedComponent'))
     .component('shipmentViewSent',     require('./components/shipmentViewSent/shipmentViewSentComponent'))
     .component(
-      'shipmentSpecimensTable',
-      require('./components/shipmentSpecimensTable/shipmentSpecimensTableComponent'))
-    .component(
       'shipmentViewReceived',
       require('./components/shipmentViewReceived/shipmentViewReceivedComponent'))
     .component('shipmentUnpack',       require('./components/shipmentUnpack/shipmentUnpackComponent'))
     .component('shipmentsTable',       require('./components/shipmentsTable/shipmentsTableComponent'))
+    .component(
+      'shipmentSpecimensAdd',
+      require('./components/shipmentSpecimensAdd/shipmentSpecimensAddComponent'))
     .component(
       'shipmentSpecimensView',
       require('./components/shipmentSpecimensView/shipmentSpecimensViewComponent'))
     .component(
       'shipmentSpecimensPanel',
       require('./components/shipmentSpecimensPanel/shipmentSpecimensPanelComponent'))
+
     .service('centreStatusLabel', require('./services/centreStatusLabelService'))
     .service(
       'centreLocationsModalService',

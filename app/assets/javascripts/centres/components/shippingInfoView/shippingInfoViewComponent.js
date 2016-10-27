@@ -11,8 +11,7 @@ define(function (require) {
     controllerAs: 'vm',
     bindings: {
       shipment: '<',
-      readOnly: '<',
-      collapsable: '<'
+      readOnly: '<'
     }
   };
 
@@ -37,19 +36,13 @@ define(function (require) {
     var vm = this;
 
     vm.notificationTimeout = 1500;
-    vm.panelOpen = true;
 
     vm.editCourierName    = editCourierName;
     vm.editTrackingNumber = editTrackingNumber;
     vm.editFromLocation   = editFromLocation;
     vm.editToLocation     = editToLocation;
-    vm.panelButtonClicked = panelButtonClicked;
 
     //--
-
-    function panelButtonClicked() {
-      vm.panelOpen = !vm.panelOpen;
-    }
 
     function postUpdate(property, message, title, timeout) {
       timeout = timeout || vm.notificationTimeout;

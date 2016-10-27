@@ -258,6 +258,87 @@ class ShipmentSpecimensControllerSpec
 
     }
 
+    "GET /shipments/specimens/canadd/:shId/:invId" must {
+
+      "can add a specimen inventory Id" in {
+        val f = specimensFixture(1)
+        shipmentRepository.put(f.shipment)
+        val specimen = f.specimens.head
+        specimenRepository.put(specimen)
+
+        val originLocationName = f.fromCentre.locationName(specimen.originLocationId).
+          fold(e => "error", n => n)
+        val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
+                                                    specimen.originLocationId,
+                                                    originLocationName)
+        val specimenDto =
+          specimen.createDto(f.cevent, f.specimenSpec, centreLocationInfo, centreLocationInfo)
+
+
+        val url = uri(f.shipment, "specimens/canadd") + s"/${specimen.inventoryId}"
+        val reply = makeRequest(GET, url)
+
+        (reply \ "status").as[String] must include ("success")
+
+        val jsonObj = (reply \ "data").as[JsObject]
+        compareObj(jsonObj, specimenDto)
+      }
+
+      "fail when adding a specimen inventory Id already in the shipment" in {
+        val f = shipmentSpecimensFixture(1)
+        val specimen = f.shipmentSpecimenMap.values.head._1
+
+        val url = uri(f.shipment, "specimens/canadd") + s"/${specimen.inventoryId}"
+        val reply = makeRequest(GET, url, BAD_REQUEST)
+
+        (reply \ "status").as[String] must include ("error")
+
+        (reply \ "message").as[String] must include ("specimen already in shipment")
+      }
+
+      "cannot add an specimen inventory Id that does not exist" in {
+        val f = createdShipmentFixture
+        shipmentRepository.put(f.shipment)
+
+        val invalidInventoryId = nameGenerator.next[Specimen]
+        val url = uri(f.shipment, "specimens/canadd") + s"/$invalidInventoryId"
+        val reply = makeRequest(GET, url, NOT_FOUND)
+
+        (reply \ "status").as[String] must include ("error")
+
+        (reply \ "message").as[String] must include (
+          "EntityCriteriaError: specimen with inventory ID not found")
+      }
+
+      "cannot add a specimen inventory Id that not present at shipment's from centre" in {
+        val f = specimensFixture(1)
+        val specimen = f.specimens.head.copy(locationId = f.toCentre.locations.head.uniqueId)
+        specimenRepository.put(specimen)
+
+        val url = uri(f.shipment, "specimens/canadd") + s"/${specimen.inventoryId}"
+        val reply = makeRequest(GET, url, BAD_REQUEST)
+
+        (reply \ "status").as[String] must include ("error")
+
+        (reply \ "message").as[String] must include ("specimen not at shipment's from location")
+      }
+
+      "fails for a specimen already in another active shipment" in {
+        val f = shipmentSpecimensFixture(1)
+        val specimen = f.shipmentSpecimenMap.values.head._1
+        val newShipment = factory.createShipment(f.fromCentre, f.toCentre)
+        shipmentRepository.put(newShipment)
+
+        val url = uri(newShipment, "specimens/canadd") + s"/${specimen.inventoryId}"
+        val reply = makeRequest(GET, url, BAD_REQUEST)
+
+        (reply \ "status").as[String] must include ("error")
+
+        (reply \ "message").as[String] must include (
+          "EntityCriteriaError: specimen is already in active shipment")
+      }
+    }
+
     "POST /shipments/specimens/:id" must {
 
       "add a specimen to a shipment" in {

@@ -120,6 +120,11 @@ class ShipmentsController @Inject() (val env:              Environment,
       )
     }
 
+  def canAddSpecimen(shipmentId: String, specimenInventoryId: String) =
+    AuthAction(parse.empty) { (token, userId, request) =>
+      validationReply(shipmentsService.shipmentCanAddSpecimen(shipmentId, specimenInventoryId))
+    }
+
   def getSpecimen(shipmentId: String, shipmentSpecimenId: String) =
     AuthAction(parse.empty) { (token, userId, request) =>
       validationReply(shipmentsService.getShipmentSpecimen(shipmentId, shipmentSpecimenId))

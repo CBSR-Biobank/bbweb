@@ -6,14 +6,12 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl : '/assets/javascripts/centres/components/shipmentSpecimensPanel/shipmentSpecimensPanel.html',
+    templateUrl: '/assets/javascripts/centres/components/shipmentSpecimensPanel/shipmentSpecimensPanel.html',
+    transclude: true,
     controller: ShipmentSpecimensPanelController,
     controllerAs: 'vm',
     bindings: {
-      heading:            '@',
-      onGetSpecimens:     '&',
-      noSpecimensMessage: '@',
-      refresh:            '<'
+      heading: '@'
     }
   };
 
@@ -26,18 +24,12 @@ define(function () {
     var vm = this;
 
     vm.panelOpen = true;
-
     vm.panelButtonClicked = panelButtonClicked;
-    vm.getSpecimens = getSpecimens;
 
     //---
 
     function panelButtonClicked() {
       vm.panelOpen = ! vm.panelOpen;
-    }
-
-    function getSpecimens(options) {
-      return vm.onGetSpecimens()(options);
     }
   }
 

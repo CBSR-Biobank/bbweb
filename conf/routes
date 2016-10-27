@@ -152,6 +152,7 @@ POST    /shipments/tolocation/:id                     org.biobank.controllers.ce
 POST    /shipments/state/skip-to-sent/:id             org.biobank.controllers.centres.ShipmentsController.skipStateSent(id)
 POST    /shipments/state/skip-to-unpacked/:id         org.biobank.controllers.centres.ShipmentsController.skipStateUnpacked(id)
 POST    /shipments/state/:id                          org.biobank.controllers.centres.ShipmentsController.changeState(id)
+GET     /shipments/specimens/canadd/:shId/:invId      org.biobank.controllers.centres.ShipmentsController.canAddSpecimen(shId, invId)
 GET     /shipments/specimens/:shId/:shSpcId           org.biobank.controllers.centres.ShipmentsController.getSpecimen(shId, shSpcId)
 GET     /shipments/specimens/:id                      org.biobank.controllers.centres.ShipmentsController.listSpecimens(id, stateFilter: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
 GET     /shipments/:id                                org.biobank.controllers.centres.ShipmentsController.get(id)

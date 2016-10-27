@@ -6,8 +6,9 @@ import akka.util.Timeout
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
 import org.biobank.domain.centre._
-import org.biobank.domain.participants.{CeventSpecimenRepository, CollectionEventRepository, SpecimenRepository}
+import org.biobank.domain.participants.{CeventSpecimenRepository, CollectionEventRepository, Specimen, SpecimenRepository}
 import org.biobank.domain.study.CollectionEventTypeRepository
+import org.biobank.dto.SpecimenDto
 import org.biobank.dto.{CentreLocationInfo, ShipmentDto, ShipmentSpecimenDto}
 import org.biobank.infrastructure.command.ShipmentCommands._
 import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
@@ -15,13 +16,14 @@ import org.biobank.infrastructure.event.ShipmentEvents._
 import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
 import org.biobank.infrastructure.{AscendingOrder, SortOrder}
 import org.biobank.service.{ServiceError, ServiceValidation}
+import org.biobank.service.participants.SpecimensService
 import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.concurrent.duration._
+import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
-
 
 @ImplementedBy(classOf[ShipmentsServiceImpl])
 trait ShipmentsService {
@@ -39,6 +41,9 @@ trait ShipmentsService {
                            state:      String,
                            sortBy:     String,
                            order:      SortOrder): ServiceValidation[Seq[ShipmentSpecimenDto]]
+
+  def shipmentCanAddSpecimen(shipmentId: String, shipmentSpecimenId: String)
+      : ServiceValidation[SpecimenDto]
 
   def getShipmentSpecimen(shipmentId: String, shipmentSpecimenId: String)
       : ServiceValidation[ShipmentSpecimenDto]
@@ -63,8 +68,10 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
                                       val specimenRepository:            SpecimenRepository,
                                       val ceventSpecimenRepository:      CeventSpecimenRepository,
                                       val collectionEventRepository:     CollectionEventRepository,
-                                      val collectionEventTypeRepository: CollectionEventTypeRepository)
-    extends ShipmentsService {
+                                      val collectionEventTypeRepository: CollectionEventTypeRepository,
+                                      val specimensService:              SpecimensService)
+    extends ShipmentsService
+    with ShipmentConstraints {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -125,6 +132,25 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
 
   def getShipment(id: String): ServiceValidation[ShipmentDto] = {
     shipmentRepository.getByKey(ShipmentId(id)).flatMap(getShipmentDto)
+  }
+
+  def shipmentCanAddSpecimen(shipmentId: String, specimenInventoryId: String)
+      : ServiceValidation[SpecimenDto] = {
+    for {
+        shipment     <- shipmentRepository.getByKey(ShipmentId(shipmentId))
+        specimen     <- specimenRepository.getByInventoryId(specimenInventoryId)
+        sameLocation <- {
+          if (shipment.fromLocationId == specimen.locationId) {
+            specimen.successNel[ServiceError]
+          } else {
+            ServiceError(s"specimen not at shipment's from location").failureNel[Specimen]
+          }
+        }
+        canBeAdded <- specimenNotPresentInShipment(shipmentRepository,
+                                                   shipmentSpecimenRepository,
+                                                   specimen.id)
+        specimenDto  <- specimensService.get(specimen.id.id)
+      } yield specimenDto
   }
 
   def getShipmentSpecimens(shipmentId:  String,
@@ -194,26 +220,9 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
 
   private def getShipmentSpecimenDto(shipmentSpecimen: ShipmentSpecimen)
       : ServiceValidation[ShipmentSpecimenDto] = {
-    for {
-      specimen           <- specimenRepository.getByKey(shipmentSpecimen.specimenId)
-      ceventSpecimen     <- ceventSpecimenRepository.withSpecimenId(specimen.id)
-      cevent             <- collectionEventRepository.getByKey(ceventSpecimen.ceventId)
-      ceventType         <- collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
-      specimenSpec       <- ceventType.specimenSpec(specimen.specimenSpecId)
-      originCentre       <- centreRepository.getByLocationId(specimen.originLocationId)
-      originLocationName <- originCentre.locationName(specimen.originLocationId)
-      centre             <- centreRepository.getByLocationId(specimen.locationId)
-      locationName       <- centre.locationName(specimen.locationId)
-    } yield {
-      val originLocationInfo = CentreLocationInfo(originCentre.id.id,
-                                                  specimen.originLocationId,
-                                                  originLocationName)
-      val locationInfo = CentreLocationInfo(centre.id.id,
-                                            specimen.locationId,
-                                            locationName)
-      val specimenDto = specimen.createDto(cevent, specimenSpec, originLocationInfo, locationInfo)
+    specimensService.getSpecimenDto(shipmentSpecimen.specimenId).map { specimenDto =>
       shipmentSpecimen.createDto(specimenDto)
-      }
+    }
   }
 
   def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[ShipmentDto]] = {

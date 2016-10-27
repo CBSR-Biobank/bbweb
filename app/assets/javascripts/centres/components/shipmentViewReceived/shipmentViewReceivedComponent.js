@@ -61,7 +61,8 @@ define(function (require) {
                                  vm.timeUnpacked,
                                  { required: true }).result
         .then(function (timeUnpacked) {
-          return vm.shipment.unpacked(timeService.dateAndTimeToUtcString(timeUnpacked));
+          return vm.shipment.changeState(ShipmentState.UNPACKED,
+                                         timeService.dateAndTimeToUtcString(timeUnpacked));
         })
         .then(function (shipment) {
           return $state.go('home.shipping.unpack', { shipmentId: shipment.id });

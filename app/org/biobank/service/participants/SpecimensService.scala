@@ -36,6 +36,8 @@ trait SpecimensService {
 
   def processRemoveCommand(cmd: SpecimenCommand): Future[ServiceValidation[Boolean]]
 
+
+  def getSpecimenDto(id: SpecimenId): ServiceValidation[SpecimenDto]
 }
 
 class SpecimensServiceImpl @Inject() (
@@ -51,6 +53,20 @@ class SpecimensServiceImpl @Inject() (
   val log = LoggerFactory.getLogger(this.getClass)
 
   implicit val timeout: Timeout = 5.seconds
+
+  def getSpecimenDto(id: SpecimenId): ServiceValidation[SpecimenDto] = {
+    for {
+      specimen <- specimenRepository.getByKey(id)
+      dto      <- convertToDto(specimen)
+    } yield dto
+  }
+
+  def get(specimenId: String): ServiceValidation[SpecimenDto] = {
+    for {
+      specimen <- specimenRepository.getByKey(SpecimenId(specimenId))
+      dto      <- convertToDto(specimen)
+    } yield dto
+  }
 
   private def convertToDto(specimen: Specimen): ServiceValidation[SpecimenDto] = {
     for {
@@ -71,13 +87,6 @@ class SpecimensServiceImpl @Inject() (
                                             locationName)
       specimen.createDto(cevent, specimenSpec, originLocationInfo, locationInfo)
     }
-  }
-
-  def get(specimenId: String): ServiceValidation[SpecimenDto] = {
-    for {
-      specimen <- specimenRepository.getByKey(SpecimenId(specimenId))
-      dto      <- convertToDto(specimen)
-    } yield dto
   }
 
   def getByInventoryId(inventoryId: String): ServiceValidation[SpecimenDto] = {

@@ -16,7 +16,8 @@ define(function (require) {
     'DomainError',
     'ShipmentState',
     'biobankApi',
-    'centreLocationInfoSchema'
+    'centreLocationInfoSchema',
+    'Specimen'
   ];
 
   function ShipmentFactory($q,
@@ -25,7 +26,8 @@ define(function (require) {
                            DomainError,
                            ShipmentState,
                            biobankApi,
-                           centreLocationInfoSchema) {
+                           centreLocationInfoSchema,
+                           Specimen) {
 
     var schema = {
       'id': 'Shipment',
@@ -449,6 +451,28 @@ define(function (require) {
      */
     Shipment.prototype.isNotCreatedNorUnpacked = function () {
       return (this.state !== ShipmentState.CREATED) && (this.state !== ShipmentState.UNPACKED);
+    };
+
+    /**
+     * Checks if a specimen inventory ID can be added to a shipment. It can be added if:
+     *
+     *  - it belongs to a valid specimen
+     *  - the specimen is located at the same location that the shipment is coming from
+     *  - the specimen is not already part of the shipment
+     *
+     *  @param {string} specimenInventoryId - the inventory ID of the specimen.
+     *
+     * @returns {Promise} The promise resolves to "true" if the specimen can be added to the shipment..
+     */
+    Shipment.prototype.canAddInventoryId = function (specimenInventoryId) {
+      if (!specimenInventoryId) {
+        throw new DomainError('specimen inventory id not specified');
+      }
+
+      return biobankApi.get(uri('specimens/canadd', this.id) + '/' + specimenInventoryId)
+        .then(function (reply) {
+          return Specimen.asyncCreate(reply);
+        });
     };
 
     function uri(/* path, shipmentId */) {

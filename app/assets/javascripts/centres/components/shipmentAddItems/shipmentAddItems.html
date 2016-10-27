@@ -27,17 +27,13 @@
 
 <shipping-info-view
    shipment="vm.shipment"
-   read-only="false"
-   collapsable="true">
+   read-only="false">
 </shipping-info-view>
 
-<shipment-specimens-view shipment="vm.shipment"></shipment-specimens-view>
+<shipment-specimens-add shipment="vm.shipment"></shipment-specimens-add>
 
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title" translate>Containers in this shipment</h3>
+<collapsable-panel heading="{{'Containers in this shipment'|translate}}">
+  <div class="panel panel-warning">
+    <div class="panel-heading" translate>No containers in this shipment</div>
   </div>
-
-  <ul class="list-group">
-  </ul>
-</div>
+</collapsable-panel>

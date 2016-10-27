@@ -1,0 +1,34 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      <translate>Specimens in this shipment</translate>
+      <span class="pull-right">
+        <button class="btn btn-xs btn-primary"
+                title="{{'Add a specimen to this shipment'|translate}}"
+                ng-click="vm.addSpecimen()"
+                ng-if="!vm.readOnly">
+          <translate>Add specimen</translate>
+          <i class="glyphicon glyphicon-plus"></i>
+        </button>
+        <a data-toggle="collapse"
+           href="#collapseSpecimens"
+           class="btn btn-xs btn-default"
+           ng-click="vm.panelButtonClicked()">
+          <i class="glyphicon"
+             ng-class="vm.panelOpen ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
+        </a>
+      </span>
+    </h3>
+  </div>
+
+  <div id="collapseSpecimens" class="panel-collapse collapse in" aria-expanded="true">
+    <shipment-specimens-actions-table
+      default-sort-field="inventoryId"
+      refresh="vm.refreshSpecimensTable"
+      on-get-specimens="vm.getSpecimens"
+      no-specimens-message="{{'No specimens added yet.'|translate}}"
+      actions="vm.actions"
+      on-action-selected="vm.removeShipmentSpecimen">
+    </shipment-specimens-actions-table>
+  </div>
+</div>

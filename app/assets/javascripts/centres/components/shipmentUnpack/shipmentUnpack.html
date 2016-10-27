@@ -4,7 +4,8 @@
 </progress-tracker>
 <div class="page-header">
   <h1>
-    <translate>Unpack shipment</translate>
+    {{vm.shipment.courierName}}<small>: {{vm.shipment.trackingNumber}}
+      <br/> {{'Unpack shipment'|translate}}</small>
     <div class="pull-right">
       <button class="btn btn-xs btn-warning"
               title="{{'Return shipment to received'|translate}}"
@@ -15,10 +16,8 @@
     </div>
   </h1>
 </div>
-<shipping-info-view shipment="vm.shipment"
-                    read-only="true"
-                    collapsable="true">
-</shipping-info-view>
+
+<shipping-info-view shipment="vm.shipment" read-only="true"> </shipping-info-view>
 
 <div class="row">
   <div class="col-lg-12">
@@ -49,20 +48,29 @@
 
 <div class="row">
   <div class="col-lg-12">
-    <shipment-specimens-panel heading="{{'Specimens in Shipment'|translate}}"
-                              on-get-specimens="vm.getPresentSpecimens"
-                              no-specimens-message="{{'No specimens present in shipment'|translate}}"
-                              refresh="vm.refresh">
-    </shipment-specimens-panel>
+    <collapsable-panel heading="{{'Specimens in shipment'|translate}}">
+      <shipment-specimens-view-table
+        default-sort-field="inventoryId"
+        on-get-specimens="vm.getPresentSpecimens"
+        no-specimens-message="{{'No specimens present in shipment'|translate}}">
+      </shipment-specimens-view-table>
+    </collapsable-panel>
   </div>
 </div>
 
 <div class="row">
   <div class="col-lg-12">
-    <shipment-specimens-panel heading="{{'Received specimens'|translate}}"
-                              on-get-specimens="vm.getReceivedSpecimens"
-                              no-specimens-message="{{'No specimens marked as received'|translate}}"
-                              refresh="vm.refresh">
-    </shipment-specimens-panel>
+    <collapsable-panel heading="{{'Received specimens'|translate}}">
+      <shipment-specimens-actions-table
+        default-sort-field="inventoryId"
+        refresh="vm.refresh"
+        on-get-specimens="vm.getReceivedSpecimens"
+        no-specimens-message="{{'No specimens marked as received'|translate}}"
+        action-type="add-items"
+        action-button-title="{{'Repack specimen'|translate}}"
+        action-icon="glyphicon-remove"
+        on-action-selected="vm.repackSpecimen">
+      </shipment-specimens-actions-table>
+    </collapsable-panel>
   </div>
 </div>

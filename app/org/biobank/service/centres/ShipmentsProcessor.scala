@@ -29,7 +29,8 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                                     val centreRepository:           CentreRepository,
                                     val specimenRepository:         SpecimenRepository)
     extends Processor
-    with ShipmentValidations {
+    with ShipmentValidations
+    with ShipmentConstraints {
   import org.biobank.CommonValidations._
 
   override def persistenceId = "shipments-processor-id"
@@ -271,7 +272,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       specimen   <- specimenRepository.getByKey(specimenId)
       shipment   <- shipmentRepository.getByKey(shipmentId)
       isCreated  <- shipment.isCreated
-      canBeAdded <- specimenNotInActiveShipment(specimenId)
+      canBeAdded <- specimenNotPresentInShipment(shipmentRepository,
+                                                shipmentSpecimenRepository,
+                                                specimenId)
       atCentre   <- {
         if (specimen.locationId == shipment.fromLocationId) true.successNel[String]
         else EntityCriteriaError("specimen not present at shipment's originating centre").failureNel[Boolean]
@@ -632,23 +635,6 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
         }
       )
     }
-  }
-
-  /**
-   * Checks that a specimen is not already in an active shipment.
-   *
-   * An active shipment is one that is not in Unpacked state.
-   */
-  private def specimenNotInActiveShipment(specimenId: SpecimenId): ServiceValidation[Boolean] = {
-    shipmentSpecimenRepository.allForSpecimen(specimenId)
-      .map { ss => shipmentRepository.getByKey(ss.shipmentId) }
-      .toList
-      .sequenceU
-      .map { list => list.filter(shipment => shipment.isUnpacked.isFailure) }
-      .flatMap { list =>
-        if (list.isEmpty) true.successNel[String]
-        else EntityCriteriaError(s"specimen is already in active shipment").failureNel[Boolean]
-      }
   }
 
 }

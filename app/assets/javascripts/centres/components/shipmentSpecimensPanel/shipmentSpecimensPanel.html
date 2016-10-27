@@ -13,11 +13,6 @@
       </span>
     </h3>
   </div>
-  <div id="collapseSpecimenInfo" class="panel-collapse collapse in" aria-expanded="true">
-    <shipment-specimens-table on-get-specimens="vm.getSpecimens"
-                              read-only="true"
-                              no-specimens-message="{{vm.noSpecimensMessage}}"
-                              refresh="vm.refresh">
-    </shipment-specimens-table>
+  <div id="collapseSpecimenInfo" class="panel-collapse collapse in" aria-expanded="true" ng-transclude>
   </div>
 </div>

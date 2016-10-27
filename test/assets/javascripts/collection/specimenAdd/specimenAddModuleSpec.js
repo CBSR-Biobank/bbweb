@@ -29,7 +29,7 @@ define([
       $window:           this.$window,
       $timeout:          this.$timeout,
       $uibModalInstance: this.modalInstance,
-      AppConfig:       this.AppConfig,
+      AppConfig:         this.AppConfig,
       Specimen:          this.Specimen,
       timeService:       this.timeService,
       centreLocations:   centreLocations,

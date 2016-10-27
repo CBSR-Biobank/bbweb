@@ -17,11 +17,11 @@
       <td>{{ss.specimen.specimenSpecName}}</td>
       <td>{{ss.specimen.timeCreated| localTime}}</td>
       <td ng-if="!vm.readOnly">
-        <button class="btn btn-xs btn-warning"
-                ng-click="vm.removeSpecimen(ss)"
-                title="{{'Remove specimen'|translate}}">
-          <i class="glyphicon glyphicon-remove"></i>
-        </button>
+        <specimen-table-action
+          action="action"
+          on-action-selected="vm.actionSelected(ss, action.id)"
+          ng-repeat="action in vm.actions">
+        </specimen-table-action>
       </td>
     </tr>
   </tbody>

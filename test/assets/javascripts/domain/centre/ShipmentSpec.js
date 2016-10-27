@@ -93,7 +93,8 @@ define(function (require) {
     describe('when getting a single shipment', function() {
 
       it('can retrieve a single shipment', function() {
-        var self = this, shipment = self.factory.shipment();
+        var self = this,
+            shipment = self.factory.shipment();
 
         self.$httpBackend.whenGET(uri(shipment.id)).respond(this.reply(shipment));
 
@@ -468,6 +469,25 @@ define(function (require) {
       });
 
     });
+
+    it('can add specimen', function() {
+        var self = this,
+            shipment = new self.Shipment(self.factory.shipment()),
+            inventoryId = self.factory.stringNext();
+
+      self.$httpBackend.whenGET(uri('specimens/canadd', shipment.id) + '/' + inventoryId)
+        .respond(this.reply(true));
+
+      shipment.canAddInventoryId(inventoryId)
+        .then(checkReply)
+        .catch(failTest);
+      self.$httpBackend.flush();
+
+      function checkReply(reply) {
+        expect(reply).toBeTrue();
+      }
+    });
+
 
     /**
      * @param {domain.centres.ShipmentState} context.state - the new state to change to.

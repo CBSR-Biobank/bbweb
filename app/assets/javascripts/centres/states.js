@@ -83,7 +83,7 @@ define(function () {
         }
       },
       data: {
-        displayName: 'Items to ship: {{shipment.courierName}} - {{shipment.trackingNumber}}'
+        displayName: '{{shipment.courierName}} - {{shipment.trackingNumber}}: Items to ship'
       }
     });
 

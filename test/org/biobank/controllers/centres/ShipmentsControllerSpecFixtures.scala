@@ -143,11 +143,12 @@ private[centres] trait ShipmentsControllerSpecFixtures extends ControllerFixture
     val _cevent = factory.createCollectionEvent
     val _specimens = (1 to numSpecimens).map { _ =>
         factory.createUsableSpecimen.copy(originLocationId = f.fromCentre.locations.head.uniqueId,
-                                          locationId = f.fromCentre.locations.head.uniqueId)
+               locationId = f.fromCentre.locations.head.uniqueId)
       }.toList
 
     centreRepository.put(f.fromCentre)
     centreRepository.put(f.toCentre)
+
     studyRepository.put(_study)
     collectionEventTypeRepository.put(_ceventType)
     participantRepository.put(_participant)
