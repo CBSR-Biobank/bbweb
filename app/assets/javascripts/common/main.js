@@ -8,49 +8,50 @@
 define(function (require) {
   'use strict';
 
-  var angular = require('angular'),
-      name = 'biobank.common',
-      module,
+  var angular                = require('angular'),
       annotationsInputModule = require('./annotationsInput/annotationsInputModule'),
-      modalInputModule = require('./modalInput/modalInputModule');
+      modalInputModule       = require('./modalInput/modalInputModule'),
+      name                   = 'biobank.common',
+      module;
 
-  module = angular.module('biobank.common', [ modalInputModule.name, annotationsInputModule.name ]);
+  module = angular.module('biobank.common', [ modalInputModule.name, annotationsInputModule.name ])
 
-  module.component('dateTimePicker',  require('./components/dateTimePicker/dateTimePickerComponent'));
-  module.component('progressTracker', require('./components/progressTracker/progressTrackerComponent'));
+    .component('dateTimePicker',          require('./components/dateTimePicker/dateTimePickerComponent'))
+    .component('collapsablePanel',        require('./components/collapsablePanel/collapsablePanelComponent'))
+    .component('progressTracker',         require('./components/progressTracker/progressTrackerComponent'))
 
-  module.directive('focusMe',                 require('./directives/focusMeDirective'));
-  module.directive('infoUpdateRemoveButtons', require('./directives/infoUpdateRemoveButtonsDirective'));
-  module.directive('integer',                 require('./directives/integerDirective'));
-  module.directive('panelButtons',            require('./directives/panelButtonsDirective'));
-  module.directive('smartFloat',              require('./directives/smartFloatDirective'));
-  module.directive('str2integer',             require('./directives/str2integerDirective'));
-  module.directive('updateRemoveButtons',     require('./directives/updateRemoveButtonsDirective'));
-  module.directive('pageSelect',              require('./directives/pageSelectDirective'));
-  module.directive('pagedItemsList',          require('./directives/pagedItemsList/pagedItemsListDirective'));
-  module.directive('positiveFloat',           require('./directives/positiveFloat/positiveFloatDirective'));
-  module.directive('naturalNumber',           require('./directives/naturalNumber/naturalNumberDirective'));
-  module.directive('statusLine',              require('./directives/statusLine/statusLineDirective'));
-  module.directive('truncateToggle',          require('./directives/truncateToggle/truncateToggleDirective'));
+    .directive('focusMe',                 require('./directives/focusMeDirective'))
+    .directive('infoUpdateRemoveButtons', require('./directives/infoUpdateRemoveButtonsDirective'))
+    .directive('integer',                 require('./directives/integerDirective'))
+    .directive('panelButtons',            require('./directives/panelButtonsDirective'))
+    .directive('smartFloat',              require('./directives/smartFloatDirective'))
+    .directive('str2integer',             require('./directives/str2integerDirective'))
+    .directive('updateRemoveButtons',     require('./directives/updateRemoveButtonsDirective'))
+    .directive('pageSelect',              require('./directives/pageSelectDirective'))
+    .directive('pagedItemsList',          require('./directives/pagedItemsList/pagedItemsListDirective'))
+    .directive('positiveFloat',           require('./directives/positiveFloat/positiveFloatDirective'))
+    .directive('naturalNumber',           require('./directives/naturalNumber/naturalNumberDirective'))
+    .directive('statusLine',              require('./directives/statusLine/statusLineDirective'))
+    .directive('truncateToggle',          require('./directives/truncateToggle/truncateToggleDirective'))
 
-  module.filter('localTime',                  require('./filters/localTimeFilter'));
-  module.filter('nl2br',                      require('./filters/nl2brFilter'));
-  module.filter('timeago',                    require('./filters/timeagoFilter'));
-  module.filter('truncate',                   require('./filters/truncateFilter'));
+    .filter('localTime',                  require('./filters/localTimeFilter'))
+    .filter('nl2br',                      require('./filters/nl2brFilter'))
+    .filter('timeago',                    require('./filters/timeagoFilter'))
+    .filter('truncate',                   require('./filters/truncateFilter'))
 
-  module.service('Panel',                     require('./services/Panel'));
-  module.service('annotationUpdate',          require('./services/annotationUpdateService'));
-  module.service('biobankApi',                require('./services/biobankApiService'));
-  module.service('funutils',                  require('./services/funutils'));
-  module.service('modalService',              require('./services/modalService/modalService'));
-  module.service('notificationsService',      require('./services/notificationsService'));
-  module.service('stateHelper',               require('./services/stateHelperService'));
-  module.service('timeService',               require('./services/timeService'));
-  module.service('validationService',         require('./services/validationService'));
-  module.service('domainNotificationService', require('./services/domainNotification/domainNotificationService') );
-  module.service('languageService',           require('./services/languageService'));
+    .service('Panel',                     require('./services/Panel'))
+    .service('annotationUpdate',          require('./services/annotationUpdateService'))
+    .service('biobankApi',                require('./services/biobankApiService'))
+    .service('funutils',                  require('./services/funutils'))
+    .service('modalService',              require('./services/modalService/modalService'))
+    .service('notificationsService',      require('./services/notificationsService'))
+    .service('stateHelper',               require('./services/stateHelperService'))
+    .service('timeService',               require('./services/timeService'))
+    .service('validationService',         require('./services/validationService'))
+    .service('domainNotificationService', require('./services/domainNotification/domainNotificationService') )
+    .service('languageService',           require('./services/languageService'))
 
-  module.factory('BbwebError',                require('./BbwebError'));
+    .factory('BbwebError',                require('./BbwebError'));
 
   return {
     name: name,
