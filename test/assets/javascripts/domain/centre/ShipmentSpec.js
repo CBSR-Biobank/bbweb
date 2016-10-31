@@ -29,6 +29,7 @@ define(function (require) {
       self.injectDependencies('$httpBackend',
                               'Shipment',
                               'ShipmentState',
+                              'Specimen',
                               'funutils',
                               'testUtils',
                               'factory');
@@ -471,12 +472,13 @@ define(function (require) {
     });
 
     it('can add specimen', function() {
-        var self = this,
-            shipment = new self.Shipment(self.factory.shipment()),
-            inventoryId = self.factory.stringNext();
+      var self = this,
+          jsonSpecimen = self.factory.specimen(),
+          shipment = new self.Shipment(self.factory.shipment()),
+          inventoryId = self.factory.stringNext();
 
       self.$httpBackend.whenGET(uri('specimens/canadd', shipment.id) + '/' + inventoryId)
-        .respond(this.reply(true));
+        .respond(this.reply(jsonSpecimen));
 
       shipment.canAddInventoryId(inventoryId)
         .then(checkReply)
@@ -484,7 +486,7 @@ define(function (require) {
       self.$httpBackend.flush();
 
       function checkReply(reply) {
-        expect(reply).toBeTrue();
+        expect(reply).toEqual(jasmine.any(self.Specimen));
       }
     });
 

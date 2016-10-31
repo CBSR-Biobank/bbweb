@@ -85,7 +85,7 @@ define(function (require) {
         toHaveModalBody: function(util, customEqualityTesters) {
           return {
             compare: function(actual, expected) {
-              var element = actual.find('.modal-body'),
+              var element = actual.find('.modal-body > div'),
                   pass    = util.equals(element.text(), expected, customEqualityTesters),
                   message = sprintf('Expected "%s" %s have be "%s"',
                                     angular.mock.dump(element),
