@@ -105,82 +105,14 @@ POST    /participants/uniqueId/:id                org.biobank.controllers.partic
 POST    /participants/annot/:id                   org.biobank.controllers.participants.ParticipantsController.addAnnotation(id)
 DELETE  /participants/annot/:id/:annotTypeId/:ver org.biobank.controllers.participants.ParticipantsController.removeAnnotation(id, annotTypeId, ver: Long)
 
-#
-# --- CENTRE LOCATION ---
-#
-POST    /centres/locations/:centreId                   org.biobank.controllers.centres.CentresController.addLocation(centreId)
-POST    /centres/locations/:centreId/:locationId       org.biobank.controllers.centres.CentresController.updateLocation(centreId, locationId)
-DELETE  /centres/locations/:centreId/:ver/:locationId  org.biobank.controllers.centres.CentresController.removeLocation(centreId, ver: Long, locationId)
-
-#
-# --- CENTRE TO STUDY LINK ---
-#
-POST    /centres/studies/:centreId               org.biobank.controllers.centres.CentresController.addStudy(centreId)
-DELETE  /centres/studies/:centreId/:ver/:studyId org.biobank.controllers.centres.CentresController.removeStudy(centreId, ver: Long, studyId)
-
-#
-# --- CENTRE DTOs ---
-#
-GET     /centres/names                          org.biobank.controllers.centres.CentresController.listNames(filter: Option[String], order: Option[String])
-POST    /centres/locations                      org.biobank.controllers.centres.CentresController.searchLocations()
-
-#
 # --- CENTRES ---
-#
-GET     /centres/counts                         org.biobank.controllers.centres.CentresController.centreCounts()
-GET     /centres/:id                            org.biobank.controllers.centres.CentresController.query(id)
-GET     /centres                                org.biobank.controllers.centres.CentresController.list(filter: Option[String], status: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
-POST    /centres                                org.biobank.controllers.centres.CentresController.add
-POST    /centres/name/:id                       org.biobank.controllers.centres.CentresController.updateName(id)
-POST    /centres/description/:id                org.biobank.controllers.centres.CentresController.updateDescription(id)
-POST    /centres/studies/:id                    org.biobank.controllers.centres.CentresController.addStudy(id)
-POST    /centres/locations/:id                  org.biobank.controllers.centres.CentresController.addLocation(id)
-POST    /centres/enable/:id                     org.biobank.controllers.centres.CentresController.enable(id)
-POST    /centres/disable/:id                    org.biobank.controllers.centres.CentresController.disable(id)
-DELETE  /centres/studies/:id/:ver/:studyId      org.biobank.controllers.centres.CentresController.removeStudy(id, ver: Long, studyId)
-DELETE  /centres/locations/:id/:ver/:uniqueId   org.biobank.controllers.centres.CentresController.removeLocation(id, ver: Long, uniqueId)
+->      /centres        org.biobank.controllers.centres.CentresRouter
 
-#
 # --- SHIPMENTS ---
-#
-POST    /shipments                                    org.biobank.controllers.centres.ShipmentsController.add
-GET     /shipments/list/:centreId                     org.biobank.controllers.centres.ShipmentsController.list(centreId: String, courierFilter: Option[String], trackingNumberFilter: Option[String], stateFilter: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
-POST    /shipments/courier/:id                        org.biobank.controllers.centres.ShipmentsController.updateCourier(id)
-POST    /shipments/trackingnumber/:id                 org.biobank.controllers.centres.ShipmentsController.updateTrackingNumber(id)
-POST    /shipments/fromlocation/:id                   org.biobank.controllers.centres.ShipmentsController.updateFromLocation(id)
-POST    /shipments/tolocation/:id                     org.biobank.controllers.centres.ShipmentsController.updateToLocation(id)
-POST    /shipments/state/skip-to-sent/:id             org.biobank.controllers.centres.ShipmentsController.skipStateSent(id)
-POST    /shipments/state/skip-to-unpacked/:id         org.biobank.controllers.centres.ShipmentsController.skipStateUnpacked(id)
-POST    /shipments/state/:id                          org.biobank.controllers.centres.ShipmentsController.changeState(id)
-GET     /shipments/specimens/canadd/:shId/:invId      org.biobank.controllers.centres.ShipmentsController.canAddSpecimen(shId, invId)
-GET     /shipments/specimens/:shId/:shSpcId           org.biobank.controllers.centres.ShipmentsController.getSpecimen(shId, shSpcId)
-GET     /shipments/specimens/:id                      org.biobank.controllers.centres.ShipmentsController.listSpecimens(id, stateFilter: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
-GET     /shipments/:id                                org.biobank.controllers.centres.ShipmentsController.get(id)
-POST    /shipments/specimens/container/:shId/:shSpcId org.biobank.controllers.centres.ShipmentsController.specimenContainer(shId, shSpcId)
-POST    /shipments/specimens/received/:shId/:shSpcId  org.biobank.controllers.centres.ShipmentsController.specimenReceived(shId, shSpcId)
-POST    /shipments/specimens/missing/:shId/:shSpcId   org.biobank.controllers.centres.ShipmentsController.specimenMissing(shId, shSpcId)
-POST    /shipments/specimens/extra/:shId/:shSpcId     org.biobank.controllers.centres.ShipmentsController.specimenExtra(shId, shSpcId)
-POST    /shipments/specimens/:id                      org.biobank.controllers.centres.ShipmentsController.addSpecimen(id)
-DELETE  /shipments/:id/:ver                           org.biobank.controllers.centres.ShipmentsController.remove(id, ver: Long)
-DELETE  /shipments/specimens/:shId/:shSpcId/:ver      org.biobank.controllers.centres.ShipmentsController.removeSpecimen(shId, shSpcId, ver: Long)
+->      /shipments      org.biobank.controllers.centres.ShipmentsRouter
 
-#
 # --- USERS ---
-#
-GET     /users/counts                           org.biobank.controllers.users.UsersController.userCounts()
-GET     /users                                  org.biobank.controllers.users.UsersController.list(nameFilter: Option[String], emailFilter: Option[String], status: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
-GET     /users/:id                              org.biobank.controllers.users.UsersController.user(id)
-POST    /users                                  org.biobank.controllers.users.UsersController.registerUser
-POST    /users/name/:id                         org.biobank.controllers.users.UsersController.updateName(id)
-POST    /users/email/:id                        org.biobank.controllers.users.UsersController.updateEmail(id)
-POST    /users/password/:id                     org.biobank.controllers.users.UsersController.updatePassword(id)
-POST    /users/avatarurl/:id                    org.biobank.controllers.users.UsersController.updateAvatarUrl(id)
-POST    /users/activate/:id                     org.biobank.controllers.users.UsersController.activateUser(id)
-POST    /users/lock/:id                         org.biobank.controllers.users.UsersController.lockUser(id)
-POST    /users/unlock/:id                       org.biobank.controllers.users.UsersController.unlockUser(id)
-
-GET     /users/studies/:id                      org.biobank.controllers.users.UsersController.userStudies(id, query: Option[String], sort: Option[String], order: Option[String])
-
+->      /users         org.biobank.controllers.users.UsersRouter
 #
 # --- AUTHENTICATION ---
 #

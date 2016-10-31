@@ -18,11 +18,11 @@ import scala.language.reflectiveCalls
 class CentresControllerSpec extends ControllerFixture with JsonHelper {
   import org.biobank.TestUtils._
 
-  def uri(): String = "/centres"
+  def uri(): String = "/centres/"
 
-  def uri(path: String): String = uri + s"/$path"
+  def uri(path: String): String = uri + s"$path"
 
-  def uri(centre: Centre): String = uri + s"/${centre.id.id}"
+  def uri(centre: Centre): String = uri + s"${centre.id.id}"
 
   def uri(centre: Centre, path: String): String = uri(path) + s"/${centre.id.id}"
 
@@ -320,7 +320,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
     "GET /centres/counts" must {
 
       "return empty counts" in {
-        val json = makeRequest(GET, uri + "/counts")
+        val json = makeRequest(GET, uri("counts"))
         (json \ "status").as[String] must include ("success")
         (json \ "data" \ "total").as[Long] must be (0)
         (json \ "data" \ "disabledCount").as[Long] must be (0)
@@ -332,7 +332,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
                            factory.createDisabledCentre,
                            factory.createEnabledCentre)
         centres.foreach(centreRepository.put)
-        val json = makeRequest(GET, uri + "/counts")
+        val json = makeRequest(GET, uri("counts"))
         (json \ "status").as[String] must include ("success")
         (json \ "data" \ "total").as[Long] must be (3)
         (json \ "data" \ "disabledCount").as[Long] must be (2)
@@ -961,7 +961,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
           val f = createFixture
           val nameDtos = f.nameDtos.sortWith { (a, b) => (a.name compareToIgnoreCase b.name) < 0 }
 
-          val json = makeRequest(GET, uri + "/names")
+          val json = makeRequest(GET, uri("names"))
 
           (json \ "status").as[String] must include ("success")
 
@@ -977,7 +977,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
           val f = createFixture
           val nameDtos = f.nameDtos.sortWith { (a, b) => (a.name compareToIgnoreCase b.name) > 0 }
 
-          val json = makeRequest(GET, uri + "/names?order=desc")
+          val json = makeRequest(GET, uri("names") + "?order=desc")
 
           (json \ "status").as[String] must include ("success")
 
@@ -995,7 +995,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centres.foreach(centreRepository.put)
         val centre = centres.head
 
-        val json = makeRequest(GET, uri + s"/names?filter=${centre.name}")
+        val json = makeRequest(GET, uri("names") + s"?filter=${centre.name}")
 
         (json \ "status").as[String] must include ("success")
 
@@ -1015,7 +1015,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centreRepository.put(centre)
 
         val reqJson = Json.obj("filter" -> "", "maxResults" -> 10)
-        val reply = makeRequest(POST, uri + "/locations", reqJson)
+        val reply = makeRequest(POST, uri("locations"), reqJson)
 
         (reply \ "status").as[String] must include ("success")
 
@@ -1035,7 +1035,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centres.foreach(centreRepository.put)
 
         val reqJson = Json.obj("filter" -> location.name, "maxResults" -> 10)
-        val reply = makeRequest(POST, uri + "/locations", reqJson)
+        val reply = makeRequest(POST, uri("locations"), reqJson)
 
         (reply \ "status").as[String] must include ("success")
 
@@ -1062,7 +1062,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
           toList
 
         val reqJson = Json.obj("filter" -> "", "maxResults" -> 10)
-        val reply = makeRequest(POST, uri + "/locations", reqJson)
+        val reply = makeRequest(POST, uri("locations"), reqJson)
 
         (reply \ "status").as[String] must include ("success")
 

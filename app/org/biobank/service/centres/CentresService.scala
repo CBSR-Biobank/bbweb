@@ -34,7 +34,7 @@ trait CentresService {
 
   def getCentreNames(filter: String, order: SortOrder): Seq[NameDto]
 
-  def getCentre(id: String): ServiceValidation[Centre]
+  def getCentre(id: CentreId): ServiceValidation[Centre]
 
   def processCommand(cmd: CentreCommand): Future[ServiceValidation[Centre]]
 }
@@ -146,8 +146,8 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
     }
   }
 
-  def getCentre(id: String): ServiceValidation[Centre] = {
-    centreRepository.getByKey(CentreId(id))
+  def getCentre(id: CentreId): ServiceValidation[Centre] = {
+    centreRepository.getByKey(id)
   }
 
   def processCommand(cmd: CentreCommand): Future[ServiceValidation[Centre]] =

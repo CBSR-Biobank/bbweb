@@ -28,24 +28,24 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[ShipmentsServiceImpl])
 trait ShipmentsService {
 
-  def getShipments(centreId:             String,
+  def getShipments(centreId:             CentreId,
                    courierFilter:        String,
                    trackingNumberFilter: String,
                    stateFilter:          String,
                    sortBy:               String,
                    order:                SortOrder): ServiceValidation[List[ShipmentDto]]
 
-  def getShipment(id: String): ServiceValidation[ShipmentDto]
+  def getShipment(id: ShipmentId): ServiceValidation[ShipmentDto]
 
-  def getShipmentSpecimens(shipmentId: String,
+  def getShipmentSpecimens(shipmentId: ShipmentId,
                            state:      String,
                            sortBy:     String,
                            order:      SortOrder): ServiceValidation[Seq[ShipmentSpecimenDto]]
 
-  def shipmentCanAddSpecimen(shipmentId: String, shipmentSpecimenId: String)
+  def shipmentCanAddSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String)
       : ServiceValidation[SpecimenDto]
 
-  def getShipmentSpecimen(shipmentId: String, shipmentSpecimenId: String)
+  def getShipmentSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String)
       : ServiceValidation[ShipmentSpecimenDto]
 
   def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[ShipmentDto]]
@@ -77,7 +77,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
 
   implicit val timeout: Timeout = 5.seconds
 
-  def getShipments(centreId:             String,
+  def getShipments(centreId:             CentreId,
                    courierFilter:        String,
                    trackingNumberFilter: String,
                    stateFilter:          String,
@@ -88,7 +88,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
       toSuccessNel(ServiceError(s"invalid sort field: $sortBy")).
       flatMap { sortFunc =>
 
-        val centreShipments = shipmentRepository.withCentre(CentreId(centreId))
+        val centreShipments = shipmentRepository.withCentre(centreId)
 
         val shipmentsFilteredByCourier = if (!courierFilter.isEmpty) {
             val courierLowerCase = courierFilter.toLowerCase
@@ -130,14 +130,14 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
       }
   }
 
-  def getShipment(id: String): ServiceValidation[ShipmentDto] = {
-    shipmentRepository.getByKey(ShipmentId(id)).flatMap(getShipmentDto)
+  def getShipment(id: ShipmentId): ServiceValidation[ShipmentDto] = {
+    shipmentRepository.getByKey(id).flatMap(getShipmentDto)
   }
 
-  def shipmentCanAddSpecimen(shipmentId: String, specimenInventoryId: String)
+  def shipmentCanAddSpecimen(shipmentId: ShipmentId, specimenInventoryId: String)
       : ServiceValidation[SpecimenDto] = {
     for {
-        shipment     <- shipmentRepository.getByKey(ShipmentId(shipmentId))
+        shipment     <- shipmentRepository.getByKey(shipmentId)
         specimen     <- specimenRepository.getByInventoryId(specimenInventoryId)
         sameLocation <- {
           if (shipment.fromLocationId == specimen.locationId) {
@@ -153,7 +153,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
       } yield specimenDto
   }
 
-  def getShipmentSpecimens(shipmentId:  String,
+  def getShipmentSpecimens(shipmentId:  ShipmentId,
                            stateFilter: String,
                            sortBy:      String,
                            order:       SortOrder): ServiceValidation[List[ShipmentSpecimenDto]] = {
@@ -161,7 +161,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
       toSuccessNel(ServiceError(s"invalid sort field: $sortBy")).
       flatMap { sortFunc =>
 
-        val shipmentSpecimens = shipmentSpecimenRepository.allForShipment(ShipmentId(shipmentId))
+        val shipmentSpecimens = shipmentSpecimenRepository.allForShipment(shipmentId)
 
         val stateFilterValidation = if (stateFilter.isEmpty) {
             shipmentSpecimens.successNel[String]
@@ -189,10 +189,10 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
       }
   }
 
-  def getShipmentSpecimen(shipmentId: String, shipmentSpecimenId: String)
+  def getShipmentSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String)
       : ServiceValidation[ShipmentSpecimenDto] = {
     for {
-      shipment <- shipmentRepository.getByKey(ShipmentId(shipmentId))
+      shipment <- shipmentRepository.getByKey(shipmentId)
       ss       <- shipmentSpecimenRepository.getByKey(ShipmentSpecimenId(shipmentSpecimenId))
       dto      <- getShipmentSpecimenDto(ss)
     } yield dto

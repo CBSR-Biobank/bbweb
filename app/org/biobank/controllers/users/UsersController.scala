@@ -79,7 +79,7 @@ class UsersController @Inject() (val env:            Environment,
   /** Retrieves the user associated with the token, if it is valid.
     */
   def authenticateUser() = AuthAction(parse.empty) { (token, userId, request) =>
-    usersService.getUser(userId.id).fold(
+    usersService.getUser(userId).fold(
       err  => BadRequest(err.list.toList.mkString(", ")),
       user => Ok(user)
     )
@@ -148,7 +148,7 @@ class UsersController @Inject() (val env:            Environment,
     }
 
   /** Retrieves the user for the given id as JSON */
-  def user(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
+  def user(id: UserId) = AuthAction(parse.empty) { (token, userId, request) =>
     validationReply(usersService.getUser(id))
   }
 
@@ -157,42 +157,42 @@ class UsersController @Inject() (val env:            Environment,
       processCommand(cmd)
     }
 
-  def updateName(id: String) =
+  def updateName(id: UserId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserNameCmd =>
       processCommand(cmd)
     }
 
-  def updateEmail(id: String) =
+  def updateEmail(id: UserId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserEmailCmd =>
       processCommand(cmd)
   }
 
-  def updatePassword(id: String) =
+  def updatePassword(id: UserId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserPasswordCmd =>
       processCommand(cmd)
   }
 
-  def updateAvatarUrl(id: String) =
+  def updateAvatarUrl(id: UserId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserAvatarUrlCmd =>
       processCommand(cmd)
   }
 
-  def activateUser(id: String) =
+  def activateUser(id: UserId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd: ActivateUserCmd =>
       processCommand(cmd)
   }
 
-  def lockUser(id: String) =
+  def lockUser(id: UserId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd: LockUserCmd =>
       processCommand(cmd)
   }
 
-  def unlockUser(id: String) =
+  def unlockUser(id: UserId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd: UnlockUserCmd =>
       processCommand(cmd)
   }
 
-  def userStudies(id: String, query: Option[String], sort: Option[String], order: Option[String]) =
+  def userStudies(id: UserId, query: Option[String], sort: Option[String], order: Option[String]) =
     AuthAction(parse.empty) { (token, userId, request) =>
       // FIXME this should return only the studies this user has access to
       //

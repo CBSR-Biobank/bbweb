@@ -34,7 +34,7 @@ trait UsersService {
                           order:       SortOrder)
       : ServiceValidation[Seq[User]]
 
-  def getUser(id: String): ServiceValidation[User]
+  def getUser(id: UserId): ServiceValidation[User]
 
   def getByEmail(email: String): ServiceValidation[User]
 
@@ -118,8 +118,8 @@ class UsersServiceImpl @javax.inject.Inject() (
     }
   }
 
-  def getUser(id: String): ServiceValidation[User] = {
-    userRepository.getByKey(UserId(id))
+  def getUser(id: UserId): ServiceValidation[User] = {
+    userRepository.getByKey(id)
       .leftMap(_ => IdNotFound(s"user with id does not exist: $id").nel)
   }
 

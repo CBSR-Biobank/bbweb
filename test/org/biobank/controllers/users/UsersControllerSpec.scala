@@ -1,6 +1,7 @@
-package org.biobank.controllers
+package org.biobank.controllers.users
 
 import com.github.nscala_time.time.Imports._
+import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.user._
 import org.biobank.fixture.ControllerFixture
@@ -15,11 +16,13 @@ import play.api.test._
 class UsersControllerSpec extends ControllerFixture with JsonHelper {
   import org.biobank.TestUtils._
 
-  def uri: String = "/users"
+  def uri: String = "/users/"
 
-  def uri(user: User): String = uri + s"/${user.id.id}"
+  def uri(user: User): String = uri + s"${user.id.id}"
 
-  def updateUri(user: User, path: String): String = uri + s"/$path/${user.id.id}"
+  def uri(path: String): String = uri + s"$path"
+
+  def updateUri(user: User, path: String): String = uri(path) + s"/${user.id.id}"
 
   def createRegisteredUserInRepository(plainPassword: String): RegisteredUser = {
     val salt = passwordHasher.generateSalt
@@ -270,7 +273,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "return empty counts" in {
-        val json = makeRequest(GET, uri + "/counts")
+        val json = makeRequest(GET, uri("counts"))
         (json \ "status").as[String] must include ("success")
         checkCounts(json            = (json \ "data").get,
                     registeredCount = 0,
@@ -287,7 +290,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
                          factory.createLockedUser)
         users.foreach { c => userRepository.put(c) }
 
-        val json = makeRequest(GET, uri + "/counts")
+        val json = makeRequest(GET, uri("counts"))
         (json \ "status").as[String] must include ("success")
         checkCounts(json            = (json \ "data").get,
                     registeredCount = 3,
@@ -558,8 +561,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       "return not found for an invalid user" in {
-        val userId = nameGenerator.next[User]
-        val json = makeRequest(GET, uri + s"/$userId", NOT_FOUND)
+        val user = factory.createActiveUser
+        val json = makeRequest(GET, uri(user), NOT_FOUND)
         (json \ "status").as[String] must be ("error")
         (json \ "message").as[String] must include("IdNotFound")
       }

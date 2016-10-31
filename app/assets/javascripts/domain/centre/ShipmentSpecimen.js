@@ -9,7 +9,7 @@ define(function (require) {
       tv4     = require('tv4'),
       sprintf = require('sprintf').sprintf;
 
-  ShipmentFactory.$inject = [
+  ShipmentSpecimenFactory.$inject = [
     '$q',
     '$log',
     'ConcurrencySafeEntity',
@@ -20,14 +20,14 @@ define(function (require) {
     'centreLocationInfoSchema'
   ];
 
-  function ShipmentFactory($q,
-                           $log,
-                           ConcurrencySafeEntity,
-                           DomainError,
-                           ShipmentItemState,
-                           Specimen,
-                           biobankApi,
-                           centreLocationInfoSchema) {
+  function ShipmentSpecimenFactory($q,
+                                   $log,
+                                   ConcurrencySafeEntity,
+                                   DomainError,
+                                   ShipmentItemState,
+                                   Specimen,
+                                   biobankApi,
+                                   centreLocationInfoSchema) {
 
     var schema = {
       'id': 'Shipment',
@@ -356,12 +356,12 @@ define(function (require) {
       var path,
           shipmentId,
           shipmentSpecimenId,
-          result = '/shipments/specimens',
+          result = '/shipments/specimens/',
           args = _.toArray(arguments);
 
       if (args.length > 0) {
         path = args.shift();
-        result += '/' + path;
+        result += path;
       }
 
       if (args.length > 0) {
@@ -380,5 +380,5 @@ define(function (require) {
     return ShipmentSpecimen;
   }
 
-  return ShipmentFactory;
+  return ShipmentSpecimenFactory;
 });

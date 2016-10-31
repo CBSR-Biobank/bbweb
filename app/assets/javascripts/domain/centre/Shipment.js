@@ -477,13 +477,13 @@ define(function (require) {
 
     function uri(/* path, shipmentId */) {
       var shipmentId,
-          result = '/shipments',
+          result = '/shipments/',
           args = _.toArray(arguments),
           path;
 
       if (args.length > 0) {
         path = args.shift();
-        result += '/' + path;
+        result += path;
       }
 
       if (args.length > 0) {

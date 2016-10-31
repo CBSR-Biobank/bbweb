@@ -532,11 +532,11 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
           centreId,
           path;
 
-      var result = '/centres';
+      var result = '/centres/';
 
       if (args.length > 0) {
         path = args.shift();
-        result += '/' + path;
+        result += path;
       }
 
       if (args.length > 0) {

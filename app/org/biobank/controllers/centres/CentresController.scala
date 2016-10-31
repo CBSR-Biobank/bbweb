@@ -1,6 +1,7 @@
 package org.biobank.controllers.centres
 
 import org.biobank.controllers._
+import org.biobank.domain.centre.CentreId
 import org.biobank.service._
 import org.biobank.service.users.UsersService
 import org.biobank.service.centres.CentresService
@@ -90,44 +91,44 @@ class CentresController @Inject() (val env:            Environment,
       Ok(centresService.searchLocations(cmd))
     }
 
-  def query(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
+  def query(id: CentreId) = AuthAction(parse.empty) { (token, userId, request) =>
     validationReply(centresService.getCentre(id))
   }
 
   def add() = commandActionAsync { cmd: AddCentreCmd => processCommand(cmd) }
 
-  def updateName(id: String) =
+  def updateName(id: CentreId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateCentreNameCmd => processCommand(cmd) }
 
-  def updateDescription(id: String) =
+  def updateDescription(id: CentreId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateCentreDescriptionCmd => processCommand(cmd) }
 
-  def addStudy(centreId: String) =
+  def addStudy(centreId: CentreId) =
     commandActionAsync(Json.obj("id" -> centreId)) { cmd : AddStudyToCentreCmd => processCommand(cmd) }
 
-  def removeStudy(centreId: String, ver: Long, studyId: String) =
+  def removeStudy(centreId: CentreId, ver: Long, studyId: String) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      processCommand(RemoveStudyFromCentreCmd(userId.id, centreId, ver, studyId))
+      processCommand(RemoveStudyFromCentreCmd(userId.id, centreId.id, ver, studyId))
     }
 
-  def addLocation(id: String) =
+  def addLocation(id: CentreId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd : AddCentreLocationCmd => processCommand(cmd) }
 
-  def updateLocation(id: String, locationId: String) =
+  def updateLocation(id: CentreId, locationId: String) =
     commandActionAsync(Json.obj("id"         -> id,
                            "locationId" -> locationId)) { cmd : UpdateCentreLocationCmd =>
       processCommand(cmd)
     }
 
-  def removeLocation(centreId: String, ver: Long, locationId: String) =
+  def removeLocation(centreId: CentreId, ver: Long, locationId: String) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      processCommand(RemoveCentreLocationCmd(userId.id, centreId, ver, locationId))
+      processCommand(RemoveCentreLocationCmd(userId.id, centreId.id, ver, locationId))
     }
 
-  def enable(id: String) =
+  def enable(id: CentreId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd : EnableCentreCmd => processCommand(cmd) }
 
-  def disable(id: String) =
+  def disable(id: CentreId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd : DisableCentreCmd => processCommand(cmd) }
 
   private def processCommand(cmd: CentreCommand) = {

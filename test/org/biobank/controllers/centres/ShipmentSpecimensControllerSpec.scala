@@ -293,7 +293,7 @@ class ShipmentSpecimensControllerSpec
 
         (reply \ "status").as[String] must include ("error")
 
-        (reply \ "message").as[String] must include ("specimen already in shipment")
+        (reply \ "message").as[String] must include ("specimen is already in active shipment")
       }
 
       "cannot add an specimen inventory Id that does not exist" in {

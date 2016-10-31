@@ -319,12 +319,12 @@ define([
       var path,
           shipmentId,
           shipmentSpecimenId,
-          result = '/shipments/specimens',
+          result = '/shipments/specimens/',
           args = _.toArray(arguments);
 
       if (args.length > 0) {
         path = args.shift();
-        result += '/' + path;
+        result += path;
       }
 
       if (args.length > 0) {

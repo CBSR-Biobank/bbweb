@@ -527,14 +527,14 @@ define(function (require) {
     }
 
     function uri(/* path, shipmentId */) {
-      var result = '/shipments',
+      var result = '/shipments/',
           args = _.toArray(arguments),
           shipmentId,
           path;
 
       if (args.length > 0) {
         path = args.shift();
-        result += '/' + path;
+        result += path;
       }
 
       if (args.length > 0) {
@@ -546,7 +546,7 @@ define(function (require) {
     }
 
     function listUri(centreId) {
-      return uri() +'/list/' + centreId;
+      return uri() +'list/' + centreId;
     }
   });
 

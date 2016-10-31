@@ -340,14 +340,14 @@ define([
     }
 
     function updateUri(/* path, userId */) {
-      var result = '/users',
+      var result = '/users/',
           args = _.toArray(arguments),
           path,
           userId;
 
       if (args.length > 0) {
         path = args.shift();
-        result += '/' + path;
+        result += path;
       }
 
       if (args.length > 0) {

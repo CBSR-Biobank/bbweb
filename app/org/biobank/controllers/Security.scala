@@ -66,7 +66,7 @@ trait Security { self: Controller =>
     } else {
       for {
         userId     <- authToken.getUserId(token)
-        user       <- usersService.getUser(userId.id)
+        user       <- usersService.getUser(userId)
         activeUser <- UserHelper.isUserActive(user)
         auth       <- AuthenticationInfo(token, userId).successNel
       } yield auth

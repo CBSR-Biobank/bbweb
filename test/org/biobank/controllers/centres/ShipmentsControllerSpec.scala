@@ -887,7 +887,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "111 fails when skipping to UNPACKED state from state" in {
+      "fails when skipping to UNPACKED state from state" in {
         val f = allShipmentsFixture
 
         List(ShipmentState.Created,

@@ -9,16 +9,16 @@ import play.api.libs.json._
 private[centres] trait ShipmentsControllerSpecUtils extends JsonHelper {
   import org.biobank.TestUtils._
 
-  def uri(): String = "/shipments"
+  def uri(): String = "/shipments/"
 
-  def uri(shipment: Shipment): String = uri + s"/${shipment.id.id}"
+  def uri(shipment: Shipment): String = uri + s"${shipment.id.id}"
 
-  def uri(path: String): String = uri + s"/$path"
+  def uri(path: String): String = uri + s"$path"
 
   def uri(shipment: Shipment, path: String): String = uri(path) + s"/${shipment.id.id}"
 
   def listUri(centre: Centre): String =
-    uri + s"/list/${centre.id.id}"
+    uri("list") + s"/${centre.id.id}"
 
   def compareObjs(jsonList: List[JsObject], shipmentsMap: Map[ShipmentId, Shipment]) = {
     jsonList.foreach { jsonObj =>

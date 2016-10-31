@@ -72,7 +72,8 @@ define(['lodash'], function (_) {
         throw new Error('invalid status: ' + status);
       }
 
-      modalService.modalOkCancel(gettextCatalog.getString('Confirm status change on centre', statusChangeMsg))
+      modalService.modalOkCancel(gettextCatalog.getString('Confirm status change on centre'),
+                                 statusChangeMsg)
         .then(function () {
           _.bind(changeStatusFn, vm.centre)().then(function (centre) {
             vm.centre = centre;
