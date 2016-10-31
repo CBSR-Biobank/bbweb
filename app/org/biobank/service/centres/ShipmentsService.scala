@@ -149,7 +149,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
         canBeAdded <- specimenNotPresentInShipment(shipmentRepository,
                                                    shipmentSpecimenRepository,
                                                    specimen.id)
-        specimenDto  <- specimensService.get(specimen.id.id)
+        specimenDto  <- specimensService.get(specimen.id)
       } yield specimenDto
   }
 

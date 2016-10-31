@@ -23,11 +23,11 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[SpecimensServiceImpl])
 trait SpecimensService {
 
-  def get(specimenId: String): ServiceValidation[SpecimenDto]
+  def get(id: SpecimenId): ServiceValidation[SpecimenDto]
 
   def getByInventoryId(inventoryId: String): ServiceValidation[SpecimenDto]
 
-  def list(collectionEventId: String,
+  def list(collectionEventId: CollectionEventId,
            sortFunc:          (Specimen, Specimen) => Boolean,
            order:             SortOrder)
       : ServiceValidation[Seq[SpecimenDto]]
@@ -61,9 +61,9 @@ class SpecimensServiceImpl @Inject() (
     } yield dto
   }
 
-  def get(specimenId: String): ServiceValidation[SpecimenDto] = {
+  def get(id: SpecimenId): ServiceValidation[SpecimenDto] = {
     for {
-      specimen <- specimenRepository.getByKey(SpecimenId(specimenId))
+      specimen <- specimenRepository.getByKey(id)
       dto      <- convertToDto(specimen)
     } yield dto
   }
@@ -96,7 +96,7 @@ class SpecimensServiceImpl @Inject() (
     } yield dto
   }
 
-  def list(collectionEventId: String,
+  def list(collectionEventId: CollectionEventId,
            sortFunc:          (Specimen, Specimen) => Boolean,
            order:             SortOrder)
       : ServiceValidation[Seq[SpecimenDto]] = {
@@ -134,10 +134,10 @@ class SpecimensServiceImpl @Inject() (
       } yield result
     }
 
-  private def validCevent[T](ceventId: String)(fn: CollectionEvent => ServiceValidation[T])
+  private def validCevent[T](ceventId: CollectionEventId)(fn: CollectionEvent => ServiceValidation[T])
       : ServiceValidation[T] = {
     for {
-      cevent <- collectionEventRepository.getByKey(CollectionEventId(ceventId))
+      cevent <- collectionEventRepository.getByKey(ceventId)
       result <- fn(cevent)
     } yield result
   }

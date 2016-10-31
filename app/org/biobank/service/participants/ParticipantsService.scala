@@ -20,9 +20,9 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[ParticipantsServiceImpl])
 trait ParticipantsService {
 
-  def get(studyId: String, participantId: String): ServiceValidation[Participant]
+  def get(studyId: StudyId, participantId: ParticipantId): ServiceValidation[Participant]
 
-  def getByUniqueId(studyId: String, uniqueId: String): ServiceValidation[Participant]
+  def getByUniqueId(studyId: StudyId, uniqueId: String): ServiceValidation[Participant]
 
   def processCommand(cmd: ParticipantCommand): Future[ServiceValidation[Participant]]
 
@@ -40,12 +40,12 @@ class ParticipantsServiceImpl @Inject() (
 
   implicit val timeout: Timeout = 5.seconds
 
-  def get(studyId: String, participantId: String): ServiceValidation[Participant] = {
-    participantRepository.withId(StudyId(studyId), ParticipantId(participantId))
+  def get(studyId: StudyId, participantId: ParticipantId): ServiceValidation[Participant] = {
+    participantRepository.withId(studyId, participantId)
   }
 
-  def getByUniqueId(studyId: String, uniqueId: String): ServiceValidation[Participant] = {
-    participantRepository.withUniqueId(StudyId(studyId), uniqueId)
+  def getByUniqueId(studyId: StudyId, uniqueId: String): ServiceValidation[Participant] = {
+    participantRepository.withUniqueId(studyId, uniqueId)
   }
 
   def processCommand(cmd: ParticipantCommand): Future[ServiceValidation[Participant]] =

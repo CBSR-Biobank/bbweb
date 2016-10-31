@@ -2,7 +2,7 @@ package org.biobank.controllers.participants
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
-import org.biobank.domain.participants.Specimen
+import org.biobank.domain.participants.{CollectionEventId, Specimen, SpecimenId}
 import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
 import org.biobank.service.participants.SpecimensService
 import org.biobank.service.users.UsersService
@@ -28,7 +28,7 @@ class SpecimensController @Inject() (val env:          Environment,
   /**
    * Returns the specimen with the given ID.
    */
-  def get(id: String) =
+  def get(id: SpecimenId) =
     AuthAction(parse.empty) { (token, userId, request) =>
       validationReply(service.get(id))
     }
@@ -38,7 +38,7 @@ class SpecimensController @Inject() (val env:          Environment,
       validationReply(service.getByInventoryId(invId))
     }
 
-  def list(ceventId:      String,
+  def list(ceventId:      CollectionEventId,
            sortMaybe:     Option[String],
            pageMaybe:     Option[Int],
            pageSizeMaybe: Option[Int],
@@ -70,18 +70,18 @@ class SpecimensController @Inject() (val env:          Environment,
       )
     }
 
-  def addSpecimens(ceventId: String) =
+  def addSpecimens(ceventId: CollectionEventId) =
     commandActionAsync(Json.obj("collectionEventId" -> ceventId)) { cmd: AddSpecimensCmd =>
       val future = service.processCommand(cmd)
       validationReply(future)
     }
 
-  def removeSpecimen(ceventId: String, spcId: String, ver: Long) =
+  def removeSpecimen(ceventId: CollectionEventId, spcId: SpecimenId, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveSpecimenCmd(
           userId                = userId.id,
-          id                    = spcId,
-          collectionEventId     = ceventId,
+          id                    = spcId.id,
+          collectionEventId     = ceventId.id,
           expectedVersion       = ver)
       val future = service.processRemoveCommand(cmd)
       validationReply(future)

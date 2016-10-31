@@ -73,46 +73,13 @@ POST    /studies/retire/:id                     org.biobank.controllers.study.St
 POST    /studies/unretire/:id                   org.biobank.controllers.study.StudiesController.unretire(id)
 GET     /studies/centres/:id                    org.biobank.controllers.study.StudiesController.centresForStudy(id)
 
-#
-# --- COLLECTION EVENTS --- order matters: this section must be before participants
-#
-GET     /participants/cevents/list/:participantId               org.biobank.controllers.participants.CollectionEventsController.list(participantId, sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
-GET     /participants/cevents/visitNumber/:participantId/:vn    org.biobank.controllers.participants.CollectionEventsController.getByVisitNumber(participantId, vn: Int)
-GET     /participants/cevents/:ceventId                         org.biobank.controllers.participants.CollectionEventsController.get(ceventId)
-POST    /participants/cevents/:participantId                    org.biobank.controllers.participants.CollectionEventsController.add(participantId)
-POST    /participants/cevents/visitNumber/:ceventId             org.biobank.controllers.participants.CollectionEventsController.updateVisitNumber(ceventId)
-POST    /participants/cevents/timeCompleted/:ceventId           org.biobank.controllers.participants.CollectionEventsController.updateTimeCompleted(ceventId)
-POST    /participants/cevents/annot/:ceventId                   org.biobank.controllers.participants.CollectionEventsController.addAnnotation(ceventId)
-DELETE  /participants/cevents/annot/:ceventId/:annotTypeId/:ver org.biobank.controllers.participants.CollectionEventsController.removeAnnotation(ceventId, annotTypeId, ver: Long)
-DELETE  /participants/cevents/:participantId/:ceventId/:ver     org.biobank.controllers.participants.CollectionEventsController.remove(participantId, ceventId, ver: Long)
+->      /centres                                org.biobank.controllers.centres.CentresRouter
+->      /shipments                              org.biobank.controllers.centres.ShipmentsRouter
+->      /users                                  org.biobank.controllers.users.UsersRouter
+->      /participants/cevents/spcs              org.biobank.controllers.participants.SpecimensRouter
+->      /participants/cevents                   org.biobank.controllers.participants.CollectionEventsRouter
+->      /participants                           org.biobank.controllers.participants.ParticipantsRouter
 
-#
-# --- SPECIMENS ---
-#
-GET     /participants/cevents/spcs/get/:spcId                   org.biobank.controllers.participants.SpecimensController.get(spcId)
-GET     /participants/cevents/spcs/invid/:invId                 org.biobank.controllers.participants.SpecimensController.getByInventoryId(invId)
-GET     /participants/cevents/spcs/:ceventId                    org.biobank.controllers.participants.SpecimensController.list(ceventId, sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
-POST    /participants/cevents/spcs/:ceventId                    org.biobank.controllers.participants.SpecimensController.addSpecimens(ceventId)
-DELETE  /participants/cevents/spcs/:ceventId/:spcId/:ver        org.biobank.controllers.participants.SpecimensController.removeSpecimen(ceventId, spcId, ver: Long)
-
-#
-# --- PARTICIPANTS ---
-#
-GET     /participants/uniqueId/:studyId/:id       org.biobank.controllers.participants.ParticipantsController.getByUniqueId(studyId, id)
-GET     /participants/:studyId/:id                org.biobank.controllers.participants.ParticipantsController.get(studyId, id)
-POST    /participants/:studyId                    org.biobank.controllers.participants.ParticipantsController.add(studyId)
-POST    /participants/uniqueId/:id                org.biobank.controllers.participants.ParticipantsController.updateUniqueId(id)
-POST    /participants/annot/:id                   org.biobank.controllers.participants.ParticipantsController.addAnnotation(id)
-DELETE  /participants/annot/:id/:annotTypeId/:ver org.biobank.controllers.participants.ParticipantsController.removeAnnotation(id, annotTypeId, ver: Long)
-
-# --- CENTRES ---
-->      /centres        org.biobank.controllers.centres.CentresRouter
-
-# --- SHIPMENTS ---
-->      /shipments      org.biobank.controllers.centres.ShipmentsRouter
-
-# --- USERS ---
-->      /users         org.biobank.controllers.users.UsersRouter
 #
 # --- AUTHENTICATION ---
 #

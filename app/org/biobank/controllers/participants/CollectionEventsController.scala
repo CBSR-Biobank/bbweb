@@ -2,7 +2,7 @@ package org.biobank.controllers.participants
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
-import org.biobank.domain.participants.CollectionEvent
+import org.biobank.domain.participants.{ParticipantId, CollectionEvent, CollectionEventId}
 import org.biobank.infrastructure.command.CollectionEventCommands._
 import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
 import org.biobank.service.participants.CollectionEventsService
@@ -30,7 +30,7 @@ class CollectionEventsController @Inject() (val env:          Environment,
       validationReply(service.get(ceventId))
     }
 
-  def list(participantId: String,
+  def list(participantId: ParticipantId,
            sortMaybe:     Option[String],
            pageMaybe:     Option[Int],
            pageSizeMaybe: Option[Int],
@@ -62,47 +62,47 @@ class CollectionEventsController @Inject() (val env:          Environment,
       )
     }
 
-  def getByVisitNumber(participantId: String, visitNumber: Int) =
+  def getByVisitNumber(participantId: ParticipantId, visitNumber: Int) =
     AuthAction(parse.empty) { (token, userId, request) =>
       validationReply(service.getByVisitNumber(participantId, visitNumber))
     }
 
-  def add(participantId: String) =
+  def add(participantId: ParticipantId) =
     commandActionAsync(Json.obj("participantId" -> participantId)) { cmd: AddCollectionEventCmd =>
       processCommand(cmd)
     }
 
-  def updateVisitNumber(ceventId: String) =
+  def updateVisitNumber(ceventId: CollectionEventId) =
     commandActionAsync(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventVisitNumberCmd =>
       processCommand(cmd)
     }
 
-  def updateTimeCompleted(ceventId: String) =
+  def updateTimeCompleted(ceventId: CollectionEventId) =
     commandActionAsync(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventTimeCompletedCmd =>
       processCommand(cmd)
     }
 
-  def addAnnotation(ceventId: String) =
+  def addAnnotation(ceventId: CollectionEventId) =
     commandActionAsync(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventAnnotationCmd =>
       processCommand(cmd)
     }
 
-  def removeAnnotation(ceventId:      String,
+  def removeAnnotation(ceventId: CollectionEventId,
                        annotTypeId:   String,
                        ver:           Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveCollectionEventAnnotationCmd(userId           = userId.id,
-                                                   id               = ceventId,
+                                                   id               = ceventId.id,
                                                    expectedVersion  = ver,
                                                    annotationTypeId = annotTypeId)
       processCommand(cmd)
     }
 
-  def remove(participantId: String, ceventId: String, ver: Long) =
+  def remove(participantId: ParticipantId, ceventId: CollectionEventId, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
       val cmd = RemoveCollectionEventCmd(userId          = userId.id,
-                                         id              = ceventId,
-                                         participantId   = participantId,
+                                         id              = ceventId.id,
+                                         participantId   = participantId.id,
                                          expectedVersion = ver)
       val future = service.processRemoveCommand(cmd)
       validationReply(future)

@@ -23,12 +23,12 @@ trait CollectionEventsService {
 
   def get(collectionEventId: String): ServiceValidation[CollectionEvent]
 
-  def list(participantId: String,
+  def list(participantId: ParticipantId,
            sortFunc: (CollectionEvent, CollectionEvent) => Boolean,
            order:    SortOrder)
       : ServiceValidation[Seq[CollectionEvent]]
 
-  def getByVisitNumber(participantId: String, visitNumber: Int): ServiceValidation[CollectionEvent]
+  def getByVisitNumber(participantId: ParticipantId, visitNumber: Int): ServiceValidation[CollectionEvent]
 
   def processCommand(cmd: CollectionEventCommand): Future[ServiceValidation[CollectionEvent]]
 
@@ -52,13 +52,13 @@ class CollectionEventsServiceImpl @Inject() (
       ServiceError(s"collection event id is invalid: $collectionEventId")).toValidationNel
   }
 
-  def list(participantId: String,
+  def list(participantId: ParticipantId,
            sortFunc:      (CollectionEvent, CollectionEvent) => Boolean,
            order:         SortOrder)
       : ServiceValidation[Seq[CollectionEvent]] = {
     validParticipantId(participantId) { participant =>
       val result = collectionEventRepository
-        .allForParticipant(ParticipantId(participantId))
+        .allForParticipant(participantId)
         .toSeq
         .sortWith(sortFunc)
 
@@ -70,17 +70,17 @@ class CollectionEventsServiceImpl @Inject() (
     }
   }
 
-  def getByVisitNumber(participantId: String, visitNumber: Int)
+  def getByVisitNumber(participantId: ParticipantId, visitNumber: Int)
       : ServiceValidation[CollectionEvent] = {
     validParticipantId(participantId) { participant =>
-      collectionEventRepository.withVisitNumber(ParticipantId(participantId), visitNumber)
+      collectionEventRepository.withVisitNumber(participantId, visitNumber)
     }
   }
 
-  private def validParticipantId[T](participantId: String)(fn: Participant => ServiceValidation[T])
+  private def validParticipantId[T](participantId: ParticipantId)(fn: Participant => ServiceValidation[T])
       : ServiceValidation[T] = {
     for {
-      participant <- participantRepository.getByKey(ParticipantId(participantId))
+      participant <- participantRepository.getByKey(participantId)
       study       <- studyRepository.getByKey(participant.studyId)
       result      <- fn(participant)
     } yield result
