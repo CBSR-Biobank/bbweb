@@ -39,37 +39,38 @@ trait StudiesService {
 
   def getStudyNames(filter: String, order: SortOrder): Seq[NameDto]
 
-  def getStudy(id: String): ServiceValidation[Study]
+  def getStudy(id: StudyId): ServiceValidation[Study]
 
-  def getCentresForStudy(studyId: String): Set[CentreLocation]
+  def getCentresForStudy(studyId: StudyId): Set[CentreLocation]
 
-  def specimenGroupWithId(studyId: String, specimenGroupId: String)
+  def specimenGroupWithId(studyId: StudyId, specimenGroupId: String)
       : ServiceValidation[SpecimenGroup]
 
-  def specimenGroupsForStudy(studyId: String): ServiceValidation[Set[SpecimenGroup]]
+  def specimenGroupsForStudy(studyId: StudyId): ServiceValidation[Set[SpecimenGroup]]
 
-  def specimenGroupsInUse(studyId: String): ServiceValidation[Set[SpecimenGroupId]]
+  def specimenGroupsInUse(studyId: StudyId): ServiceValidation[Set[SpecimenGroupId]]
 
-  def collectionEventTypeWithId(studyId: String, collectionEventTypeId: String)
+  def collectionEventTypeWithId(studyId: StudyId, collectionEventTypeId: CollectionEventTypeId)
       : ServiceValidation[CollectionEventType]
 
-  def collectionEventTypeInUse(collectionEventTypeId: String)
+  def collectionEventTypeInUse(collectionEventTypeId: CollectionEventTypeId)
       : ServiceValidation[Boolean]
 
-  def collectionEventTypesForStudy(studyId: String): ServiceValidation[Set[CollectionEventType]]
+  def collectionEventTypesForStudy(studyId: StudyId): ServiceValidation[Set[CollectionEventType]]
 
-  def processingTypeWithId(Id: String, processingTypeId: String)
+  def processingTypeWithId(studyId: StudyId, processingTypeId: ProcessingTypeId)
       : ServiceValidation[ProcessingType]
 
-  def processingTypesForStudy(studyId: String): ServiceValidation[Set[ProcessingType]]
+  def processingTypesForStudy(studyId: StudyId): ServiceValidation[Set[ProcessingType]]
 
-  def specimenLinkTypeWithId(processingTypeId: String, specimenLinkTypeId: String)
+  def specimenLinkTypeWithId(processingTypeId: ProcessingTypeId,
+                             specimenLinkTypeId: SpecimenLinkTypeId)
       : ServiceValidation[SpecimenLinkType]
 
-  def specimenLinkTypesForProcessingType(processingTypeId: String)
+  def specimenLinkTypesForProcessingType(processingTypeId: ProcessingTypeId)
       : ServiceValidation[Set[SpecimenLinkType]]
 
-  def getProcessingDto(studyId: String): ServiceValidation[ProcessingDto]
+  def getProcessingDto(studyId: StudyId): ServiceValidation[ProcessingDto]
 
   def processCommand(cmd: StudyCommand): Future[ServiceValidation[Study]]
 
@@ -185,32 +186,32 @@ class StudiesServiceImpl @javax.inject.Inject() (
     }
   }
 
-  def getStudy(id: String) : ServiceValidation[Study] = {
-    studyRepository.getByKey(StudyId(id))
+  def getStudy(id: StudyId) : ServiceValidation[Study] = {
+    studyRepository.getByKey(id)
   }
 
-  def getCentresForStudy(studyId: String): Set[CentreLocation] = {
-    centreRepository.withStudy(StudyId(studyId)).flatMap { centre =>
+  def getCentresForStudy(studyId: StudyId): Set[CentreLocation] = {
+    centreRepository.withStudy(studyId).flatMap { centre =>
       centre.locations.map { location =>
         CentreLocation(centre.id.id, location.uniqueId, centre.name, location.name)
       }
     }
   }
 
-  def specimenGroupWithId(studyId: String, specimenGroupId: String)
+  def specimenGroupWithId(studyId: StudyId, specimenGroupId: String)
       : ServiceValidation[SpecimenGroup] = {
     validStudyId(studyId) { study =>
       specimenGroupRepository.withId(study.id, SpecimenGroupId(specimenGroupId))
     }
   }
 
-  def specimenGroupsForStudy(studyId: String) : ServiceValidation[Set[SpecimenGroup]] = {
+  def specimenGroupsForStudy(studyId: StudyId) : ServiceValidation[Set[SpecimenGroup]] = {
     validStudyId(studyId) { study =>
       specimenGroupRepository.allForStudy(study.id).successNel
     }
   }
 
-  def specimenGroupsInUse(studyId: String): ServiceValidation[Set[SpecimenGroupId]] = {
+  def specimenGroupsInUse(studyId: StudyId): ServiceValidation[Set[SpecimenGroupId]] = {
     ???
     // validStudyId(studyId) { study =>
     //     val cetSpecimenGroupIds = for {
@@ -228,71 +229,72 @@ class StudiesServiceImpl @javax.inject.Inject() (
     //   }
   }
 
-  def collectionEventTypeWithId(studyId: String, collectionEventTypeId: String)
+  def collectionEventTypeWithId(studyId: StudyId, collectionEventTypeId: CollectionEventTypeId)
       : ServiceValidation[CollectionEventType] = {
     validStudyId(studyId) { study =>
-      collectionEventTypeRepository.withId(study.id, CollectionEventTypeId(collectionEventTypeId))
+      collectionEventTypeRepository.withId(study.id, collectionEventTypeId)
     }
   }
 
-  def collectionEventTypeInUse(collectionEventTypeId: String): ServiceValidation[Boolean] = {
-    val id = CollectionEventTypeId(collectionEventTypeId)
+  def collectionEventTypeInUse(id: CollectionEventTypeId): ServiceValidation[Boolean] = {
     collectionEventTypeRepository.getByKey(id).map { ceventType =>
       collectionEventRepository.collectionEventTypeInUse(id)
     }
   }
 
-  def collectionEventTypesForStudy(studyId: String)
+  def collectionEventTypesForStudy(studyId: StudyId)
       : ServiceValidation[Set[CollectionEventType]] = {
     validStudyId(studyId) { study =>
       collectionEventTypeRepository.allForStudy(study.id).successNel[String]
     }
   }
 
-  def processingTypeWithId(studyId: String, processingTypeId: String)
+  def processingTypeWithId(studyId: StudyId, processingTypeId: ProcessingTypeId)
       : ServiceValidation[ProcessingType] = {
     validStudyId(studyId) { study =>
-      processingTypeRepository.withId(study.id, ProcessingTypeId(processingTypeId))
+      processingTypeRepository.withId(study.id, processingTypeId)
     }
   }
 
-  def processingTypesForStudy(studyId: String)
+  def processingTypesForStudy(studyId: StudyId)
       : ServiceValidation[Set[ProcessingType]] = {
     validStudyId(studyId) { study =>
       processingTypeRepository.allForStudy(study.id).successNel[String]
     }
   }
 
-  def specimenLinkTypeWithId(processingTypeId: String, specimenLinkTypeId: String)
+  def specimenLinkTypeWithId(processingTypeId: ProcessingTypeId,
+                             specimenLinkTypeId: SpecimenLinkTypeId)
       : ServiceValidation[SpecimenLinkType] = {
     validProcessingTypeId(processingTypeId) { processingType =>
-      specimenLinkTypeRepository.withId(processingType.id, SpecimenLinkTypeId(specimenLinkTypeId))
+      specimenLinkTypeRepository.withId(processingType.id, specimenLinkTypeId)
     }
   }
 
-  def specimenLinkTypesForProcessingType(processingTypeId: String)
+  def specimenLinkTypesForProcessingType(processingTypeId: ProcessingTypeId)
       : ServiceValidation[Set[SpecimenLinkType]] = {
     validProcessingTypeId(processingTypeId) { processingType =>
       specimenLinkTypeRepository.allForProcessingType(processingType.id).successNel[String]
     }
   }
 
-  def getProcessingDto(studyId: String): ServiceValidation[ProcessingDto] = {
+  def getProcessingDto(studyId: StudyId): ServiceValidation[ProcessingDto] = {
     "deprectated: annot type refactor".failureNel[ProcessingDto]
   }
 
-  private def validStudyId[T](studyId: String)(fn: Study => ServiceValidation[T])
+  private def validStudyId[T](studyId: StudyId)(fn: Study => ServiceValidation[T])
       : ServiceValidation[T] = {
     for {
-      study <- studyRepository.getByKey(StudyId(studyId))
+      study <- studyRepository.getByKey(studyId)
       result <- fn(study)
     } yield result
   }
 
-  private def validProcessingTypeId[T](processingTypeId: String)(fn: ProcessingType => ServiceValidation[T])
+  private def validProcessingTypeId[T](processingTypeId: ProcessingTypeId)
+                                   (fn: ProcessingType => ServiceValidation[T])
       : ServiceValidation[T] = {
     for {
-      pt <- processingTypeRepository.getByKey(ProcessingTypeId(processingTypeId))
+      pt <- processingTypeRepository.getByKey(processingTypeId)
       study <- studyRepository.getByKey(pt.studyId)
       result <- fn(pt)
     } yield result

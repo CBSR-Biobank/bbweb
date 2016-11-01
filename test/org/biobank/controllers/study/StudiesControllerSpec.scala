@@ -15,11 +15,11 @@ import play.api.test.Helpers._
 class StudiesControllerSpec extends ControllerFixture with JsonHelper {
   import org.biobank.TestUtils._
 
-  def uri(): String = "/studies"
+  def uri(): String = "/studies/"
 
-  def uri(path: String): String = uri + s"/$path"
+  def uri(path: String): String = uri + s"$path"
 
-  def uri(study: Study): String = uri + s"/${study.id.id}"
+  def uri(study: Study): String = uri + s"${study.id.id}"
 
   def uri(study: Study, path: String): String = uri(path) + s"/${study.id.id}"
 
@@ -154,7 +154,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         compareObjs(jsonItems, expectedStudies)
       }
 
-      "list enabled studies when filtered by status" in {
+      "111 list enabled studies when filtered by status" in {
         val studies = List(factory.createDisabledStudy,
                            factory.createDisabledStudy,
                            factory.createEnabledStudy,
@@ -298,7 +298,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val cmdJson = Json.obj(
             "name" -> study.name,
             "description" -> study.description)
-        val json = makeRequest(POST, "/studies", json = cmdJson)
+        val json = makeRequest(POST, uri, json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -326,7 +326,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.put(study)
 
         val json = makeRequest(POST,
-                               "/studies",
+                               uri,
                                BAD_REQUEST,
                                Json.obj("name"        -> study.name,
                                         "description" -> study.description))
@@ -338,7 +338,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
       "not add add a new study with a name less than 2 characters" in {
         val json = makeRequest(POST,
-                               "/studies",
+                               uri,
                                BAD_REQUEST,
                                Json.obj("name" -> "a"))
 
@@ -840,7 +840,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
     "GET /studies/counts" must {
 
       "return empty counts" in {
-        val json = makeRequest(GET, uri + "/counts")
+        val json = makeRequest(GET, uri("counts"))
 
         (json \ "status").as[String] must include ("success")
 
@@ -863,7 +863,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
         studies.foreach { c => studyRepository.put(c) }
 
-        val json = makeRequest(GET, uri + "/counts")
+        val json = makeRequest(GET, uri("counts"))
 
         (json \ "status").as[String] must include ("success")
 
@@ -880,7 +880,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     "GET /studies/valuetypes" must {
       "list all" in {
-        val json = makeRequest(GET, uri + "/valuetypes")
+        val json = makeRequest(GET, uri("valuetypes"))
         val values = (json \ "data").as[List[String]]
         values.size must be > 0
       }
@@ -888,7 +888,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     "GET /studies/anatomicalsrctypes" must {
       "list all" in {
-        val json = makeRequest(GET, uri + "/anatomicalsrctypes")
+        val json = makeRequest(GET, uri("anatomicalsrctypes"))
         val values = (json \ "data").as[List[String]]
         values.size must be > 0
       }
@@ -896,7 +896,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     "GET /studies/specimentypes" must {
       "list all" in {
-        val json = makeRequest(GET, uri + "/specimentypes")
+        val json = makeRequest(GET, uri("specimentypes"))
         val values = (json \ "data").as[List[String]]
         values.size must be > 0
       }
@@ -904,7 +904,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     "GET /studies/preservtypes" must {
       "list all" in {
-        val json = makeRequest(GET, uri + "/preservtypes")
+        val json = makeRequest(GET, uri("preservtypes"))
         val values = (json \ "data").as[List[String]]
         values.size must be > 0
       }
@@ -912,7 +912,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     "GET /studies/preservtemptypes " must {
       "list all" in {
-        val json = makeRequest(GET, uri + "/preservtemptypes")
+        val json = makeRequest(GET, uri("preservtemptypes"))
         val values = (json \ "data").as[List[String]]
         values.size must be > 0
       }
@@ -920,7 +920,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     "GET /studies/sgvaluetypes " must {
       "list all" in {
-        val json = makeRequest(GET, uri + "/sgvaluetypes")
+        val json = makeRequest(GET, uri("sgvaluetypes"))
         val jsonObj = (json \ "data").as[JsObject]
           (jsonObj \ "anatomicalSourceType").as[List[String]].size        must be > 0
           (jsonObj \ "preservationType").as[List[String]].size            must be > 0
@@ -940,7 +940,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.removeAll
         studies.map(study => studyRepository.put(study))
 
-        val json = makeRequest(GET, "/studies/names?order=asc")
+        val json = makeRequest(GET, uri("names") + "?order=asc")
                               (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size studies.size.toLong
@@ -957,7 +957,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.removeAll
         studies.map(study => studyRepository.put(study))
 
-        val json = makeRequest(GET, "/studies/names?filter=ABC")
+        val json = makeRequest(GET, uri("names") + "?filter=ABC")
                               (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
@@ -973,7 +973,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.removeAll
         studies.map(study => studyRepository.put(study))
 
-        val json = makeRequest(GET, "/studies/names?filter=xxx")
+        val json = makeRequest(GET, uri("names") + "?filter=xxx")
                               (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
@@ -987,7 +987,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.removeAll
         studies.map(study => studyRepository.put(study))
 
-        val json = makeRequest(GET, "/studies/names?order=xxxx", BAD_REQUEST)
+        val json = makeRequest(GET, uri("names") + "?order=xxxx", BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
 
@@ -1006,7 +1006,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.put(study)
         centreRepository.put(centre)
 
-        val json = makeRequest(GET, s"/studies/centres/${study.id}")
+        val json = makeRequest(GET, uri("centres") + s"/${study.id}")
 
         (json \ "status").as[String] must include ("success")
 

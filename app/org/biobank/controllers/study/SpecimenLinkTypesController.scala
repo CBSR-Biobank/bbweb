@@ -2,6 +2,7 @@ package org.biobank.controllers.study
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
+import org.biobank.domain.study.{ProcessingTypeId, SpecimenLinkTypeId}
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service.AuthToken
 import org.biobank.service.studies.StudiesService
@@ -11,16 +12,16 @@ import play.api.libs.json._
 import play.api.{ Environment, Logger }
 
 @Singleton
-class SpecimenLinkTypeController @Inject() (val env:            Environment,
-                                            val authToken:      AuthToken,
-                                            val usersService:   UsersService,
-                                            val studiesService: StudiesService)
+class SpecimenLinkTypesController @Inject() (val env:            Environment,
+                                             val authToken:      AuthToken,
+                                             val usersService:   UsersService,
+                                             val studiesService: StudiesService)
     extends CommandController
     with JsonController {
 
   val log = Logger(this.getClass)
 
-  def get(processingTypeId: String, slTypeId: Option[String]) =
+  def get(processingTypeId: ProcessingTypeId, slTypeId: Option[SpecimenLinkTypeId]) =
     AuthAction(parse.empty) { (token, userId, request) =>
       log.debug(s"SpecimenLinkTypeController.get: processingTypeId: $processingTypeId, slTypeId: $slTypeId")
 
@@ -32,21 +33,22 @@ class SpecimenLinkTypeController @Inject() (val env:            Environment,
       }
     }
 
-  def addSpecimenLinkType(procTypeId: String) =
-    commandActionAsync(Json.obj("processingTypeId" -> procTypeId)) { cmd: AddSpecimenLinkTypeCmd =>
+  def addSpecimenLinkType(processingTypeId: ProcessingTypeId) =
+    commandActionAsync(Json.obj("processingTypeId" -> processingTypeId)) { cmd: AddSpecimenLinkTypeCmd =>
       val future = studiesService.processCommand(cmd)
       validationReply(future)
     }
 
-  def updateSpecimenLinkType(procTypeId: String, id: String) =
-    commandActionAsync(Json.obj("processingTypeId" -> procTypeId, "id" -> id)) { cmd: UpdateSpecimenLinkTypeCmd =>
+  def updateSpecimenLinkType(processingTypeId: ProcessingTypeId, id: SpecimenLinkTypeId) =
+    commandActionAsync(Json.obj("processingTypeId" -> processingTypeId, "id" -> id)) {
+      cmd: UpdateSpecimenLinkTypeCmd =>
       val future = studiesService.processCommand(cmd)
       validationReply(future)
     }
 
-  def removeSpecimenLinkType(processingTypeId: String, id: String, ver: Long) =
+  def removeSpecimenLinkType(processingTypeId: ProcessingTypeId, id: SpecimenLinkTypeId, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = RemoveSpecimenLinkTypeCmd(Some(userId.id), processingTypeId, id, ver)
+      val cmd = RemoveSpecimenLinkTypeCmd(Some(userId.id), processingTypeId.id, id.id, ver)
       val future = studiesService.processCommand(cmd)
       validationReply(future)
     }

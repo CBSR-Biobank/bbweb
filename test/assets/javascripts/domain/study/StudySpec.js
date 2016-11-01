@@ -33,11 +33,11 @@ define([
           studyId,
           path;
 
-      var result = '/studies';
+      var result = '/studies/';
 
       if (args.length > 0) {
         path = args.shift();
-        result += '/' + path;
+        result += path;
       }
 
       if (args.length > 0) {

@@ -2,6 +2,7 @@ package org.biobank.controllers.study
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
+import org.biobank.domain.study.{StudyId, ProcessingTypeId}
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service.AuthToken
 import org.biobank.service.studies.StudiesService
@@ -10,14 +11,14 @@ import play.api.libs.json._
 import play.api.Environment
 
 @Singleton
-class ProcessingTypeController @Inject() (val env:            Environment,
-                                          val authToken:      AuthToken,
-                                          val usersService:   UsersService,
-                                          val studiesService: StudiesService)
+class ProcessingTypesController @Inject() (val env:            Environment,
+                                           val authToken:      AuthToken,
+                                           val usersService:   UsersService,
+                                           val studiesService: StudiesService)
     extends CommandController
     with JsonController {
 
-  def get(studyId: String, procTypeId: Option[String]) =
+  def get(studyId: StudyId, procTypeId: Option[ProcessingTypeId]) =
     AuthAction(parse.empty) { (token, userId, request) =>
       procTypeId.fold {
         validationReply(studiesService.processingTypesForStudy(studyId).map(_.toList))
@@ -26,19 +27,19 @@ class ProcessingTypeController @Inject() (val env:            Environment,
       }
     }
 
-  def addProcessingType(studyId: String) =
+  def addProcessingType(studyId: StudyId) =
     commandActionAsync(Json.obj("studyId" -> studyId)) { cmd: AddProcessingTypeCmd =>
       processCommand(cmd)
     }
 
-  def updateProcessingType(studyId: String, id: String) =
+  def updateProcessingType(studyId: StudyId, id: ProcessingTypeId) =
     commandActionAsync(Json.obj("studyId" -> studyId, "id" -> id)) { cmd: UpdateProcessingTypeCmd =>
       processCommand(cmd)
     }
 
-  def removeProcessingType(studyId: String, id: String, ver: Long) =
+  def removeProcessingType(studyId: StudyId, id: ProcessingTypeId, ver: Long) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = RemoveProcessingTypeCmd(Some(userId.id), studyId, id, ver)
+      val cmd = RemoveProcessingTypeCmd(Some(userId.id), studyId.id, id.id, ver)
       val future = studiesService.processRemoveProcessingTypeCommand(cmd)
       validationReply(future)
     }

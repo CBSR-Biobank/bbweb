@@ -5,80 +5,18 @@
 # ~~~~
 
 # Home page
-GET     /                                      org.biobank.controllers.Application.index
+GET     /                                       org.biobank.controllers.Application.index
 
-#
-# --- VALUE OBJECTS ---
-#
-GET     /studies/counts                        org.biobank.controllers.study.StudiesController.studyCounts()
-GET     /studies/valuetypes                    org.biobank.controllers.study.StudiesController.valueTypes
-GET     /studies/anatomicalsrctypes            org.biobank.controllers.study.StudiesController.anatomicalSourceTypes
-GET     /studies/specimentypes                 org.biobank.controllers.study.StudiesController.specimenTypes
-GET     /studies/preservtypes                  org.biobank.controllers.study.StudiesController.preservTypes
-GET     /studies/preservtemptypes              org.biobank.controllers.study.StudiesController.preservTempTypes
-GET     /studies/sgvaluetypes                  org.biobank.controllers.study.StudiesController.specimenGroupValueTypes
-
-#
-# --- COLLECTION EVENT TYPES ---
-#
-GET     /studies/cetypes/:studyId                              org.biobank.controllers.study.CeventTypeController.get(studyId, cetId: Option[String])
-POST    /studies/cetypes/:studyId                              org.biobank.controllers.study.CeventTypeController.add(studyId)
-DELETE  /studies/cetypes/:studyId/:id/:ver                     org.biobank.controllers.study.CeventTypeController.remove(studyId, id, ver: Long)
-GET     /studies/cetypes/inuse/:id                             org.biobank.controllers.study.CeventTypeController.inUse(id)
-POST    /studies/cetypes/name/:id                              org.biobank.controllers.study.CeventTypeController.updateName(id)
-POST    /studies/cetypes/description/:id                       org.biobank.controllers.study.CeventTypeController.updateDescription(id)
-POST    /studies/cetypes/recurring/:id                         org.biobank.controllers.study.CeventTypeController.updateRecurring(id)
-POST    /studies/cetypes/spcspec/:id                           org.biobank.controllers.study.CeventTypeController.addSpecimenSpec(id)
-POST    /studies/cetypes/spcspec/:id/:uniqueId                 org.biobank.controllers.study.CeventTypeController.updateSpecimenSpec(id, uniqueId)
-DELETE  /studies/cetypes/spcspec/:studyId/:id/:ver/:uniqueId   org.biobank.controllers.study.CeventTypeController.removeSpecimenSpec(studyId, id, ver: Long, uniqueId)
-POST    /studies/cetypes/annottype/:id                         org.biobank.controllers.study.CeventTypeController.addAnnotationType(id)
-POST    /studies/cetypes/annottype/:id/:uniqueId               org.biobank.controllers.study.CeventTypeController.updateAnnotationType(id, uniqueId)
-DELETE  /studies/cetypes/annottype/:studyId/:id/:ver/:uniqueId org.biobank.controllers.study.CeventTypeController.removeAnnotationType(studyId, id, ver: Long, uniqueId)
-
-#
-# --- PROCESSING TYPES ---
-#
-GET     /studies/proctypes/:studyId             org.biobank.controllers.study.ProcessingTypeController.get(studyId, procTypeId: Option[String])
-POST    /studies/proctypes/:studyId             org.biobank.controllers.study.ProcessingTypeController.addProcessingType(studyId)
-PUT     /studies/proctypes/:studyId/:id         org.biobank.controllers.study.ProcessingTypeController.updateProcessingType(studyId, id)
-DELETE  /studies/proctypes/:studyId/:id/:ver    org.biobank.controllers.study.ProcessingTypeController.removeProcessingType(studyId, id, ver: Long)
-
-#
-# --- SPECIMEN LINK TYPES ---
-#
-GET     /studies/proctypes/sltypes/:procTypeId            org.biobank.controllers.study.SpecimenLinkTypeController.get(procTypeId, slTypeId: Option[String])
-POST    /studies/proctypes/sltypes/:procTypeId            org.biobank.controllers.study.SpecimenLinkTypeController.addSpecimenLinkType(procTypeId)
-PUT     /studies/proctypes/sltypes/:procTypeId/:id        org.biobank.controllers.study.SpecimenLinkTypeController.updateSpecimenLinkType(procTypeId, id)
-DELETE  /studies/proctypes/sltypes/:procTypeId/:id/:ver   org.biobank.controllers.study.SpecimenLinkTypeController.removeSpecimenLinkType(procTypeId, id, ver: Long)
-
-#
-# --- STUDY DTOs ---
-#
-GET     /studies/names                          org.biobank.controllers.study.StudiesController.listNames(filter: Option[String], order: Option[String])
-
-#
-# --- STUDIES ---
-#
-GET     /studies                                org.biobank.controllers.study.StudiesController.list(filter: Option[String], status: Option[String], sort: Option[String], page: Option[Int], pageSize: Option[Int], order: Option[String])
-POST    /studies                                org.biobank.controllers.study.StudiesController.add
-GET     /studies/:id                            org.biobank.controllers.study.StudiesController.get(id)
-POST    /studies/name/:id                       org.biobank.controllers.study.StudiesController.updateName(id)
-POST    /studies/description/:id                org.biobank.controllers.study.StudiesController.updateDescription(id)
-POST    /studies/pannottype/:id                 org.biobank.controllers.study.StudiesController.addAnnotationType(id)
-POST    /studies/pannottype/:id/:uniqueId       org.biobank.controllers.study.StudiesController.updateAnnotationType(id, uniqueId)
-DELETE  /studies/pannottype/:id/:ver/:uniqueId  org.biobank.controllers.study.StudiesController.removeAnnotationType(id, ver: Long, uniqueId)
-POST    /studies/enable/:id                     org.biobank.controllers.study.StudiesController.enable(id)
-POST    /studies/disable/:id                    org.biobank.controllers.study.StudiesController.disable(id)
-POST    /studies/retire/:id                     org.biobank.controllers.study.StudiesController.retire(id)
-POST    /studies/unretire/:id                   org.biobank.controllers.study.StudiesController.unretire(id)
-GET     /studies/centres/:id                    org.biobank.controllers.study.StudiesController.centresForStudy(id)
-
-->      /centres                                org.biobank.controllers.centres.CentresRouter
-->      /shipments                              org.biobank.controllers.centres.ShipmentsRouter
-->      /users                                  org.biobank.controllers.users.UsersRouter
+->      /studies/cetypes                        org.biobank.controllers.study.CeventTypesRouter
+->      /studies/proctypes                      org.biobank.controllers.study.ProcessingTypesRouter
+->      /studies/proctypes/sltypes              org.biobank.controllers.study.SpecimenLinkTypesRouter
+->      /studies                                org.biobank.controllers.study.StudiesRouter
 ->      /participants/cevents/spcs              org.biobank.controllers.participants.SpecimensRouter
 ->      /participants/cevents                   org.biobank.controllers.participants.CollectionEventsRouter
 ->      /participants                           org.biobank.controllers.participants.ParticipantsRouter
+->      /centres                                org.biobank.controllers.centres.CentresRouter
+->      /shipments                              org.biobank.controllers.centres.ShipmentsRouter
+->      /users                                  org.biobank.controllers.users.UsersRouter
 
 #
 # --- AUTHENTICATION ---

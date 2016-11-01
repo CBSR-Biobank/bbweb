@@ -10,7 +10,7 @@ import play.api.test.Helpers._
 import play.api.libs.json._
 import org.joda.time.DateTime
 
-class CeventTypeControllerSpec extends ControllerFixture with JsonHelper {
+class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
   import org.biobank.TestUtils._
 
   def uri(): String = "/studies/cetypes"

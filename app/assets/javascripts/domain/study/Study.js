@@ -467,11 +467,11 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
       var args = _.toArray(arguments),
           studyId,
           path,
-          result = '/studies';
+          result = '/studies/';
 
       if (args.length > 0) {
         path = args.shift();
-        result += '/' + path;
+        result += path;
       }
 
       if (args.length > 0) {

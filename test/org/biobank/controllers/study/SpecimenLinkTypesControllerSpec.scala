@@ -9,7 +9,7 @@ import play.api.libs.json._
 import play.api.test.Helpers._
 
 @org.scalatest.Ignore
-class SpecimenLinkTypeControllerSpec extends ControllerFixture with JsonHelper {
+class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper {
 
   def uri(procType: ProcessingType): String = s"/studies/proctypes/sltypes/${procType.id.id}"
 

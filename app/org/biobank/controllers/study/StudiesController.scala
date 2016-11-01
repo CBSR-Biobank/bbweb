@@ -84,11 +84,11 @@ class StudiesController @Inject() (val env:            Environment,
       )
     }
 
-  def get(id: String) = AuthAction(parse.empty) { (token, userId, request) =>
+  def get(id: StudyId) = AuthAction(parse.empty) { (token, userId, request) =>
       validationReply(studiesService.getStudy(id))
     }
 
-  def centresForStudy(studyId: String) = AuthAction(parse.empty) { (token, userId, request) =>
+  def centresForStudy(studyId: StudyId) = AuthAction(parse.empty) { (token, userId, request) =>
       Ok(studiesService.getCentresForStudy(studyId))
     }
 
@@ -96,36 +96,36 @@ class StudiesController @Inject() (val env:            Environment,
       processCommand(cmd)
     }
 
-  def updateName(id: String) =
+  def updateName(id: StudyId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateStudyNameCmd => processCommand(cmd) }
 
-  def updateDescription(id: String) =
+  def updateDescription(id: StudyId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateStudyDescriptionCmd => processCommand(cmd) }
 
-  def addAnnotationType(id: String) =
+  def addAnnotationType(id: StudyId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd : StudyAddParticipantAnnotationTypeCmd => processCommand(cmd) }
 
-  def updateAnnotationType(id: String, uniqueId: String) =
+  def updateAnnotationType(id: StudyId, uniqueId: String) =
     commandActionAsync(Json.obj("id" -> id, "uniqueId" -> uniqueId)) {
       cmd : StudyUpdateParticipantAnnotationTypeCmd => processCommand(cmd)
     }
 
-  def removeAnnotationType(studyId: String, ver: Long, uniqueId: String) =
+  def removeAnnotationType(studyId: StudyId, ver: Long, uniqueId: String) =
     AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = UpdateStudyRemoveAnnotationTypeCmd(Some(userId.id), studyId, ver, uniqueId)
+      val cmd = UpdateStudyRemoveAnnotationTypeCmd(Some(userId.id), studyId.id, ver, uniqueId)
       processCommand(cmd)
     }
 
-  def enable(id: String) =
+  def enable(id: StudyId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd: EnableStudyCmd => processCommand(cmd) }
 
-  def disable(id: String) =
+  def disable(id: StudyId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd: DisableStudyCmd => processCommand(cmd) }
 
-  def retire(id: String) =
+  def retire(id: StudyId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd: RetireStudyCmd => processCommand(cmd) }
 
-  def unretire(id: String) =
+  def unretire(id: StudyId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd: UnretireStudyCmd => processCommand(cmd) }
 
   def valueTypes = Action(parse.empty) { request =>
