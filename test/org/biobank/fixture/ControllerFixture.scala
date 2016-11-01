@@ -82,7 +82,7 @@ abstract class ControllerFixture
 
   def doLogin(email: String = Global.DefaultUserEmail, password: String = "testuser") = {
     val request = Json.obj("email" -> email, "password" -> password)
-    route(app, FakeRequest(POST, "/login").withJsonBody(request)).fold {
+    route(app, FakeRequest(POST, "/users/login").withJsonBody(request)).fold {
         cancel("login failed")
     } { result =>
         status(result) mustBe (OK)

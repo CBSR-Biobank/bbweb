@@ -18,8 +18,17 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
   val userId = new PathBindableExtractor[UserId]
 
   override def routes: Routes = {
+
+    case GET(p"/authenticate") =>
+      controller.authenticateUser
+
     case GET(p"/counts") =>
       controller.userCounts()
+
+    case GET(p"/studies/${userId(id)}" ?  q_o"query=$query"
+               & q_o"sort=$sort"
+               & q_o"order=$order") =>
+      controller.userStudies(id, query, sort, order)
 
     case GET(p"/" ? q_o"nameFilter=$nameFilter"
                & q_o"emailFilter=$emailFilter"
@@ -57,10 +66,13 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
     case POST(p"/unlock/${userId(id)}") =>
       controller.unlockUser(id)
 
-    case GET(p"/studies/${userId(id)}" ?  q_o"query=$query"
-               & q_o"sort=$sort"
-               & q_o"order=$order") =>
-      controller.userStudies(id, query, sort, order)
+    case POST(p"/login") =>
+      controller.login
 
+    case POST(p"/logout") =>
+      controller.logout
+
+    case POST(p"/passreset") =>
+      controller.passwordReset
   }
 }

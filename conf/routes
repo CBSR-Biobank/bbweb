@@ -5,8 +5,6 @@
 # ~~~~
 
 # Home page
-GET     /                                       org.biobank.controllers.Application.index
-
 ->      /studies/cetypes                        org.biobank.controllers.study.CeventTypesRouter
 ->      /studies/proctypes                      org.biobank.controllers.study.ProcessingTypesRouter
 ->      /studies/proctypes/sltypes              org.biobank.controllers.study.SpecimenLinkTypesRouter
@@ -17,19 +15,6 @@ GET     /                                       org.biobank.controllers.Applicat
 ->      /centres                                org.biobank.controllers.centres.CentresRouter
 ->      /shipments                              org.biobank.controllers.centres.ShipmentsRouter
 ->      /users                                  org.biobank.controllers.users.UsersRouter
+->      /                                       org.biobank.controllers.ApplicationRouter
 
-#
-# --- AUTHENTICATION ---
-#
-GET     /authenticate                           org.biobank.controllers.users.UsersController.authenticateUser
-POST    /login                                  org.biobank.controllers.users.UsersController.login
-POST    /logout                                 org.biobank.controllers.users.UsersController.logout
-POST    /passreset                              org.biobank.controllers.users.UsersController.passwordReset
-
-#
-# --- DTOs ---
-#
-GET     /counts                                 org.biobank.controllers.Application.aggregateCounts
-
-# Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                           controllers.Assets.versioned(path="/public", file)

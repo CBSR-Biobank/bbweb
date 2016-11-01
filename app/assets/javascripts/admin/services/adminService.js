@@ -15,7 +15,7 @@ define(function () {
 
     // FIXME: move this to the domain layer?
     function aggregateCounts() {
-      return biobankApi.get('/counts');
+      return biobankApi.get('/dtos/counts');
     }
   }
 

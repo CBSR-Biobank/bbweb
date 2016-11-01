@@ -209,13 +209,12 @@ define(['lodash', 'tv4'], function(_, tv4) {
                         'pageSize',
                         'order'
                       ],
-          url = uri(),
           params;
 
       options = options || {};
       params = _.pick(options, validKeys);
 
-      return biobankApi.get(url, params).then(function(reply) {
+      return biobankApi.get(uri(), params).then(function(reply) {
         // reply is a paged result
         var deferred = $q.defer();
         try {
@@ -328,9 +327,9 @@ define(['lodash', 'tv4'], function(_, tv4) {
     }
 
     function uri(userId) {
-      var result = '/users';
+      var result = '/users/';
       if (arguments.length > 0) {
-        result += '/' + userId;
+        result += userId;
       }
       return result;
     }

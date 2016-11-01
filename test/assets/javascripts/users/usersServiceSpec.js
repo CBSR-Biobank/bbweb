@@ -41,7 +41,7 @@ define([
         var usersService;
 
         this.$cookies.put('XSRF-TOKEN', this.factory.stringNext());
-        this.$httpBackend.expectGET('/authenticate').respond(this.reply(this.user));
+        this.$httpBackend.expectGET('/users/authenticate').respond(this.reply(this.user));
 
         usersService = this.$injector.get('usersService');
         this.$httpBackend.flush();
@@ -58,7 +58,7 @@ define([
         this.$injector.get('modalService').modalOk = jasmine.createSpy().and.returnValue(this.$q.when('OK'));
 
         this.$cookies.put('XSRF-TOKEN', this.factory.stringNext());
-        this.$httpBackend.expectGET('/authenticate').respond(401, this.errorReply('simulated auth failure'));
+        this.$httpBackend.expectGET('/users/authenticate').respond(401, this.errorReply('simulated auth failure'));
 
         usersService = this.$injector.get('usersService');
         this.$httpBackend.flush();
@@ -75,7 +75,7 @@ define([
       it('should return the user that is logged in after a session timeout', function() {
         var self = this;
 
-        this.$httpBackend.expectGET('/authenticate').respond(this.reply(this.user));
+        this.$httpBackend.expectGET('/users/authenticate').respond(this.reply(this.user));
         self.usersService.sessionTimeout();
         self.usersService.requestCurrentUser().then(function (reply) {
           expect(reply).toEqual(self.user);
@@ -90,8 +90,8 @@ define([
             email: 'test@test.com',
             password: 'test'
           };
-          this.$httpBackend.expectPOST('/login', credentials).respond(201, token);
-          this.$httpBackend.whenGET('/authenticate').respond(this.reply(this.user));
+          this.$httpBackend.expectPOST('/users/login', credentials).respond(201, token);
+          this.$httpBackend.whenGET('/users/authenticate').respond(this.reply(this.user));
 
           this.usersService.login(credentials).then(function(reply) {
             expect(_.isEqual(reply, user));
@@ -117,13 +117,14 @@ define([
       });
 
       it('show allow a user to logout', function() {
-        this.$httpBackend.expectPOST('/logout').respond(this.reply('success'));
+        this.$httpBackend.expectPOST('/users/logout').respond(this.reply('success'));
         this.usersService.logout();
         this.$httpBackend.flush();
       });
 
       it('should allow changing a password', function() {
-        this.$httpBackend.expectPOST('/passreset', {email: this.user.email}).respond(this.reply('success'));
+        this.$httpBackend.expectPOST('/users/passreset', {email: this.user.email})
+          .respond(this.reply('success'));
         this.usersService.passwordReset(this.user.email).then(function(reply) {
           expect(reply).toBe('success');
         });

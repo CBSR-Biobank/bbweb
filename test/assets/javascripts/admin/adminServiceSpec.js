@@ -9,7 +9,7 @@ define([
   'angularMocks',
   'lodash',
   'biobankApp'
-], function(angular, mocks, _) {
+], function(angula, mocks, _) {
   'use strict';
 
   describe('adminService', function() {
@@ -27,7 +27,7 @@ define([
                      users: 3
                    };
 
-      this.$httpBackend.whenGET('/counts').respond({
+      this.$httpBackend.whenGET('/dtos/counts').respond({
         status: 'success',
         data: counts
       });

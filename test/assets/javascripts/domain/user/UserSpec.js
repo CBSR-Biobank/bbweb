@@ -332,9 +332,9 @@ define([
     });
 
     function uri(userId) {
-      var result = '/users';
+      var result = '/users/';
       if (arguments.length > 0) {
-        result += '/' + userId;
+        result += userId;
       }
       return result;
     }

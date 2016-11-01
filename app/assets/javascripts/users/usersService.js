@@ -37,7 +37,7 @@ define(['lodash'], function(_) {
 
       if (!token) { return; }
 
-      biobankApi.get('/authenticate')
+      biobankApi.get('/users/authenticate')
         .then(function(user) {
           currentUser = user;
           $log.info('Welcome back, ' + currentUser.name);
@@ -56,7 +56,7 @@ define(['lodash'], function(_) {
         return $q.when(currentUser);
       }
 
-      return biobankApi.get('/authenticate').then(function(user) {
+      return biobankApi.get('/users/authenticate').then(function(user) {
         currentUser = user;
         return currentUser;
       });
@@ -71,9 +71,9 @@ define(['lodash'], function(_) {
     }
 
     function login(credentials) {
-      return biobankApi.post('/login', credentials)
+      return biobankApi.post('/users/login', credentials)
         .then(function(reply) {
-          return biobankApi.get('/authenticate');
+          return biobankApi.get('/users/authenticate');
         })
         .then(function(user) {
           currentUser = user;
@@ -83,7 +83,7 @@ define(['lodash'], function(_) {
     }
 
     function logout() {
-      return biobankApi.post('/logout').then(function() {
+      return biobankApi.post('/users/logout').then(function() {
         $log.info('Good bye');
         $cookies.remove('XSRF-TOKEN');
         currentUser = undefined;
@@ -96,7 +96,7 @@ define(['lodash'], function(_) {
     }
 
     function passwordReset(email) {
-      return biobankApi.post('/passreset', { email: email });
+      return biobankApi.post('/users/passreset', { email: email });
     }
 
   }
