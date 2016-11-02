@@ -14,7 +14,8 @@ import scala.language.reflectiveCalls
   * Controller for the main page, and also the about and contact us pages.
  */
 @Singleton
-class Application @Inject() (val env:                   Environment,
+class Application @Inject() (val action:                BbwebAction,
+                             val env:                   Environment,
                              val authToken:             AuthToken,
                              val usersService:          UsersService,
                              val studiesService:        StudiesService,
@@ -30,7 +31,7 @@ class Application @Inject() (val env:                   Environment,
     Results.Ok(views.html.index())
   }
 
-  def aggregateCounts = AuthAction(parse.empty) { (token, userId, request) =>
+  def aggregateCounts = action(parse.empty) { implicit request =>
     Ok(AggregateCountsDto(
       studiesService.getStudyCount,
       centresService.getCentresCount,

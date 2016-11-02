@@ -1,29 +1,32 @@
 package org.biobank.controllers.centres
 
-import org.biobank.controllers._
-import org.biobank.domain.centre.CentreId
-import org.biobank.service._
-import org.biobank.service.users.UsersService
-import org.biobank.service.centres.CentresService
-import org.biobank.infrastructure.command.CentreCommands._
-import org.biobank.infrastructure.SortOrder
-import org.biobank.domain.centre.Centre
-
 import javax.inject.{Inject, Singleton}
-import play.api.{ Environment, Logger }
+import org.biobank.controllers._
+import org.biobank.domain.centre.Centre
+import org.biobank.domain.centre.CentreId
+import org.biobank.infrastructure.SortOrder
+import org.biobank.infrastructure.command.CentreCommands._
+import org.biobank.service._
+import org.biobank.service.centres.CentresService
+import org.biobank.service.users.UsersService
 import play.api.libs.json._
+import play.api.mvc._
+import play.api.{ Environment, Logger }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 /**
-  *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
-  */
+ *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
+ */
 @Singleton
-class CentresController @Inject() (val env:            Environment,
+class CentresController @Inject() (val action:         BbwebAction,
+                                   val env:            Environment,
                                    val authToken:      AuthToken,
                                    val usersService:   UsersService,
                                    val centresService: CentresService)
+                               (implicit ec: ExecutionContext)
     extends CommandController
     with JsonController {
 
@@ -31,8 +34,8 @@ class CentresController @Inject() (val env:            Environment,
 
   private val PageSizeMax = 10
 
-  def centreCounts() =
-    AuthAction(parse.empty) { (token, userId, request) =>
+  def centreCounts(): Action[Unit] =
+    action(parse.empty) { implicit request =>
       Ok(centresService.getCountsByStatus)
     }
 
@@ -41,59 +44,60 @@ class CentresController @Inject() (val env:            Environment,
            sortMaybe:     Option[String],
            pageMaybe:     Option[Int],
            pageSizeMaybe: Option[Int],
-           orderMaybe:    Option[String]) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+           orderMaybe:    Option[String]): Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      Future {
+        val filter   = filterMaybe.fold { "" } { f => f }
+        val status   = statusMaybe.fold { "all" } { s => s }
+        val sort     = sortMaybe.fold { "name" } { s => s }
+        val page     = pageMaybe.fold { 1 } { p => p }
+        val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
+        val order    = orderMaybe.fold { "asc" } { o => o }
 
-      val filter   = filterMaybe.fold { "" } { f => f }
-      val status   = statusMaybe.fold { "all" } { s => s }
-      val sort     = sortMaybe.fold { "name" } { s => s }
-      val page     = pageMaybe.fold { 1 } { p => p }
-      val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
-      val order    = orderMaybe.fold { "asc" } { o => o }
+        val pagedQuery = PagedQuery(page, pageSize, order)
 
-      log.debug(s"""|CentresController:list: filter/$filter, status/$status, sort/$sort,
-                    | page/$page, pageSize/$pageSize, order/$order""".stripMargin)
+        val validation = for {
+            sortFunc    <- Centre.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
+            sortOrder   <- pagedQuery.getSortOrder
+            centres     <- centresService.getCentres[Centre](filter, status, sortFunc, sortOrder)
+            page        <- pagedQuery.getPage(PageSizeMax, centres.size)
+            pageSize    <- pagedQuery.getPageSize(PageSizeMax)
+            results     <- PagedResults.create(centres, page, pageSize)
+          } yield results
 
-      val pagedQuery = PagedQuery(page, pageSize, order)
-
-      val validation = for {
-          sortFunc    <- Centre.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
-          sortOrder   <- pagedQuery.getSortOrder
-          centres     <- centresService.getCentres[Centre](filter, status, sortFunc, sortOrder)
-          page        <- pagedQuery.getPage(PageSizeMax, centres.size)
-          pageSize    <- pagedQuery.getPageSize(PageSizeMax)
-          results     <- PagedResults.create(centres, page, pageSize)
-        } yield results
-
-      validation.fold(
-        err => BadRequest(err.list.toList.mkString),
-        results =>  Ok(results)
-      )
+        validation.fold(
+          err     => BadRequest(err.list.toList.mkString),
+          results => Ok(results)
+        )
+      }
     }
 
   def listNames(filterMaybe: Option[String], orderMaybe: Option[String]) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action.async(parse.empty) { implicit request =>
+      Future {
+        val filter = filterMaybe.fold { "" } { f => f }
+        val order = orderMaybe.fold { "asc" } { o => o }
 
-      val filter = filterMaybe.fold { "" } { f => f }
-      val order = orderMaybe.fold { "asc" } { o => o }
-
-      SortOrder.fromString(order).fold(
-        err => BadRequest(err.list.toList.mkString),
-        so  => Ok(centresService.getCentreNames(filter, so))
-      )
+        SortOrder.fromString(order).fold(
+          err => BadRequest(err.list.toList.mkString),
+          so  => Ok(centresService.getCentreNames(filter, so))
+        )
+      }
     }
 
-  // def locations() = AuthAction(parse.empty) { (token, userId, request) =>
+  // def locations() = action(parse.empty) { implicit request =>
   //     Ok(centresService.centreLocations)
   // }
 
-  def searchLocations() = commandAction { cmd: SearchCentreLocationsCmd =>
+  def searchLocations() =
+    commandAction { cmd: SearchCentreLocationsCmd =>
       Ok(centresService.searchLocations(cmd))
     }
 
-  def query(id: CentreId) = AuthAction(parse.empty) { (token, userId, request) =>
-    validationReply(centresService.getCentre(id))
-  }
+  def query(id: CentreId) =
+    action(parse.empty) { implicit request =>
+      validationReply(centresService.getCentre(id))
+    }
 
   def add() = commandActionAsync { cmd: AddCentreCmd => processCommand(cmd) }
 
@@ -107,8 +111,8 @@ class CentresController @Inject() (val env:            Environment,
     commandActionAsync(Json.obj("id" -> centreId)) { cmd : AddStudyToCentreCmd => processCommand(cmd) }
 
   def removeStudy(centreId: CentreId, ver: Long, studyId: String) =
-    AuthActionAsync(parse.empty) { (token, userId, request) =>
-      processCommand(RemoveStudyFromCentreCmd(userId.id, centreId.id, ver, studyId))
+    action.async(parse.empty) { implicit request =>
+      processCommand(RemoveStudyFromCentreCmd(request.authInfo.userId.id, centreId.id, ver, studyId))
     }
 
   def addLocation(id: CentreId) =
@@ -116,13 +120,13 @@ class CentresController @Inject() (val env:            Environment,
 
   def updateLocation(id: CentreId, locationId: String) =
     commandActionAsync(Json.obj("id"         -> id,
-                           "locationId" -> locationId)) { cmd : UpdateCentreLocationCmd =>
+                                "locationId" -> locationId)) { cmd : UpdateCentreLocationCmd =>
       processCommand(cmd)
     }
 
   def removeLocation(centreId: CentreId, ver: Long, locationId: String) =
-    AuthActionAsync(parse.empty) { (token, userId, request) =>
-      processCommand(RemoveCentreLocationCmd(userId.id, centreId.id, ver, locationId))
+    action.async(parse.empty) { implicit request =>
+      processCommand(RemoveCentreLocationCmd(request.authInfo.userId.id, centreId.id, ver, locationId))
     }
 
   def enable(id: CentreId) =

@@ -3,20 +3,14 @@ package org.biobank.controllers
 import org.biobank.domain.user.{ UserId, UserHelper }
 import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
-import play.api.libs.json._
 import play.api.mvc._
-import play.api.{ Environment, Logger, Mode }
-import scala.concurrent.Future
+import play.api.{ Environment, Mode }
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
-/**
-  * Security actions that should be used by all controllers that need to protect their actions.
-  * Can be composed to fine-tune access control.
- */
-trait Security { self: Controller =>
+final case class AuthenticationInfo(token: String, userId: UserId)
 
-  private val log: Logger = Logger(this.getClass)
+trait Security {
 
   val env: Environment
 
@@ -25,11 +19,9 @@ trait Security { self: Controller =>
   val AuthTokenUrlKey = "auth"
   val TestAuthToken = "bbweb-test-token"
 
-  implicit val authToken: AuthToken
+  val usersService: UsersService
 
-  implicit val usersService: UsersService
-
-  sealed case class AuthenticationInfo(token: String, userId: UserId)
+  val authToken: AuthToken
 
   /*
    * Checks that the token is:
@@ -48,7 +40,7 @@ trait Security { self: Controller =>
           .map(_.value)
       }
       headerXsrfToken <- {
-        request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey))
+ request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey))
           .toSuccessNel(ControllerError("No token"))
       }
       matchingTokens <- {
@@ -84,43 +76,11 @@ trait Security { self: Controller =>
    *
    * Note: there is special behaviour if the code is running in TEST mode.
    */
-  private def validateToken[A](request: Request[A]): ControllerValidation[AuthenticationInfo] = {
+  def validateToken[A](request: Request[A]): ControllerValidation[AuthenticationInfo] = {
     for {
       token <- validRequestToken(request)
       auth <- getAuthInfo(token)
     } yield auth
   }
-
-  /**
-    * Ensures that the request has the proper authorization.
-    *
-   */
-  @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
-  def AuthAction[A](p: BodyParser[A] = parse.anyContent)
-                (f: (String, UserId,  Request[A]) => Result): Action[A] =
-    Action(p) { implicit request =>
-      validateToken(request).fold(
-        err => Unauthorized(Json.obj("status"  -> "error",
-                                     "message" -> err.list.toList.mkString(", "))),
-        authInfo => f(authInfo.token, authInfo.userId, request))
-    }
-
-  /**
-    * Ensures that the request has the proper authorization.
-    *
-    */
-  @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
-  def AuthActionAsync[A](p: BodyParser[A] = parse.anyContent)
-                     (f: (String, UserId, Request[A]) => Future[Result]): Action[A] =
-    Action.async(p) { implicit request =>
-      validateToken(request).fold(
-        err => {
-          log.error(s"AuthActionAsync: $err")
-          Future.successful(Unauthorized(Json.obj("status"  ->"error",
-                                                  "message" -> err.list.toList.mkString(", "))))
-        },
-        authInfo => f(authInfo.token, authInfo.userId, request)
-      )
-    }
 
 }

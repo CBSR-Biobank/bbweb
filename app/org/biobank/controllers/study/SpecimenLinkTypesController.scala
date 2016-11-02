@@ -12,7 +12,8 @@ import play.api.libs.json._
 import play.api.{ Environment, Logger }
 
 @Singleton
-class SpecimenLinkTypesController @Inject() (val env:            Environment,
+class SpecimenLinkTypesController @Inject() (val action:         BbwebAction,
+                                             val env:            Environment,
                                              val authToken:      AuthToken,
                                              val usersService:   UsersService,
                                              val studiesService: StudiesService)
@@ -22,7 +23,7 @@ class SpecimenLinkTypesController @Inject() (val env:            Environment,
   val log = Logger(this.getClass)
 
   def get(processingTypeId: ProcessingTypeId, slTypeId: Option[SpecimenLinkTypeId]) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action(parse.empty) { implicit request =>
       log.debug(s"SpecimenLinkTypeController.get: processingTypeId: $processingTypeId, slTypeId: $slTypeId")
 
       slTypeId.fold {
@@ -47,8 +48,8 @@ class SpecimenLinkTypesController @Inject() (val env:            Environment,
     }
 
   def removeSpecimenLinkType(processingTypeId: ProcessingTypeId, id: SpecimenLinkTypeId, ver: Long) =
-    AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = RemoveSpecimenLinkTypeCmd(Some(userId.id), processingTypeId.id, id.id, ver)
+    action.async(parse.empty) { implicit request =>
+      val cmd = RemoveSpecimenLinkTypeCmd(Some(request.authInfo.userId.id), processingTypeId.id, id.id, ver)
       val future = studiesService.processCommand(cmd)
       validationReply(future)
     }

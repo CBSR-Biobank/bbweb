@@ -13,9 +13,10 @@ import play.api.{ Environment, Logger }
 import play.api.libs.json._
 
 @Singleton
-class ParticipantsController @Inject() (val env:            Environment,
-                                        val authToken:      AuthToken,
-                                        val usersService:   UsersService,
+class ParticipantsController @Inject() (val action:              BbwebAction,
+                                        val env:                 Environment,
+                                        val authToken:           AuthToken,
+                                        val usersService:        UsersService,
                                         val participantsService: ParticipantsService)
     extends CommandController
     with JsonController {
@@ -23,13 +24,13 @@ class ParticipantsController @Inject() (val env:            Environment,
   val log = Logger(this.getClass)
 
   def get(studyId: StudyId, participantId: ParticipantId) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action(parse.empty) { implicit request =>
       log.debug(s"ParticipantsController.get: studyId: $studyId, participantId: $participantId")
       validationReply(participantsService.get(studyId, participantId))
     }
 
   def getByUniqueId(studyId: StudyId, uniqueId: String) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action(parse.empty) { implicit request =>
       log.debug(s"ParticipantsController.getByUniqueId: studyId: $studyId, uniqueId: $uniqueId")
       validationReply(participantsService.getByUniqueId(studyId, uniqueId))
     }
@@ -44,8 +45,8 @@ class ParticipantsController @Inject() (val env:            Environment,
     commandActionAsync(Json.obj("id" -> id)) { cmd: ParticipantAddAnnotationCmd => processCommand(cmd) }
 
   def removeAnnotation(participantId: ParticipantId, annotTypeId: String, ver: Long) =
-    AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = ParticipantRemoveAnnotationCmd(userId           = userId.id,
+    action.async(parse.empty) { implicit request =>
+      val cmd = ParticipantRemoveAnnotationCmd(userId           = request.authInfo.userId.id,
                                                id               = participantId.id,
                                                expectedVersion  = ver,
                                                annotationTypeId = annotTypeId)

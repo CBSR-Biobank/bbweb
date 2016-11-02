@@ -12,7 +12,8 @@ import play.api.libs.json._
 import play.api.{ Environment, Logger }
 
 @Singleton
-class CeventTypesController @Inject() (val env:            Environment,
+class CeventTypesController @Inject() (val action:         BbwebAction,
+                                       val env:            Environment,
                                        val authToken:      AuthToken,
                                        val usersService:   UsersService,
                                        val studiesService: StudiesService)
@@ -22,7 +23,7 @@ class CeventTypesController @Inject() (val env:            Environment,
   val log = Logger(this.getClass)
 
   def get(studyId: StudyId, ceventTypeId: Option[CollectionEventTypeId]) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action(parse.empty) { implicit request =>
       log.debug(s"CeventTypeController.list: studyId: $studyId, ceventTypeId: $ceventTypeId")
 
       ceventTypeId.fold {
@@ -39,8 +40,8 @@ class CeventTypesController @Inject() (val env:            Environment,
   def remove(studyId: StudyId,
              id: CollectionEventTypeId,
              ver: Long) =
-    AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = RemoveCollectionEventTypeCmd(Some(userId.id), studyId.id, id.id, ver)
+    action.async(parse.empty) { implicit request =>
+      val cmd = RemoveCollectionEventTypeCmd(Some(request.authInfo.userId.id), studyId.id, id.id, ver)
       val future = studiesService.processRemoveCollectionEventTypeCommand(cmd)
       validationReply(future)
   }
@@ -66,9 +67,9 @@ class CeventTypesController @Inject() (val env:            Environment,
         cmd: CollectionEventTypeUpdateAnnotationTypeCmd => processCommand(cmd) }
 
   def removeAnnotationType(studyId: StudyId, id: CollectionEventTypeId, ver: Long, uniqueId: String) =
-    AuthActionAsync(parse.empty) { (token, userId, request) =>
+    action.async(parse.empty) { implicit request =>
       val cmd = RemoveCollectionEventTypeAnnotationTypeCmd(
-          userId                = Some(userId.id),
+          userId                = Some(request.authInfo.userId.id),
           studyId               = studyId.id,
           id                    = id.id,
           expectedVersion       = ver,
@@ -85,9 +86,9 @@ class CeventTypesController @Inject() (val env:            Environment,
       cmd: UpdateCollectionSpecimenSpecCmd => processCommand(cmd) }
 
   def removeSpecimenSpec(studyId: StudyId, id: CollectionEventTypeId, ver: Long, uniqueId: String) =
-    AuthActionAsync(parse.empty) { (token, userId, request) =>
+    action.async(parse.empty) { implicit request =>
       val cmd = RemoveCollectionSpecimenSpecCmd(
-          userId                = Some(userId.id),
+          userId                = Some(request.authInfo.userId.id),
           studyId               = studyId.id,
           id                    = id.id,
           expectedVersion       = ver,
@@ -96,7 +97,7 @@ class CeventTypesController @Inject() (val env:            Environment,
     }
 
   def inUse(id: CollectionEventTypeId) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action(parse.empty) { implicit request =>
       validationReply(studiesService.collectionEventTypeInUse(id))
     }
 

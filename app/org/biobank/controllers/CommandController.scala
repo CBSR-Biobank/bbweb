@@ -14,6 +14,8 @@ import scala.language.reflectiveCalls
 @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
 trait CommandController extends Controller with Security {
 
+  val action: BbwebAction
+
   implicit val authToken: AuthToken
 
   implicit val usersService: UsersService
@@ -26,8 +28,8 @@ trait CommandController extends Controller with Security {
 
   def commandAction[T <: Command](additionalJson: JsValue)(func: T => Result)
                    (implicit reads: Reads[T]): Action[JsValue] =
-    AuthAction(parse.json) { (token, userId, request) =>
-      commandFromJson(request.body, additionalJson, userId).validate[T].fold(
+    action(parse.json) { implicit request =>
+      commandFromJson(request.body, additionalJson, request.authInfo.userId).validate[T].fold(
         errors => BadRequest(Json.obj("status" ->"error", "message" -> JsError.toJson(errors))),
         cmd => func(cmd)
       )
@@ -36,18 +38,20 @@ trait CommandController extends Controller with Security {
   def commandAction[T <: Command](func: T => Result)(implicit reads: Reads[T]): Action[JsValue] =
     commandAction(JsNull)(func)
 
-  def commandActionAsync[T <: Command](additionalJson: JsValue)(func: T => Future[Result])
-                   (implicit reads: Reads[T]): Action[JsValue] =
-    AuthActionAsync(parse.json) { (token, userId, request) =>
-      commandFromJson(request.body, additionalJson, userId).validate[T].fold(
+  def commandActionAsync[T <: Command](additionalJson: JsValue)
+                        (func: T => Future[Result])
+                        (implicit reads: Reads[T]):
+      Action[JsValue] =
+    action.async(parse.json) { implicit request =>
+      commandFromJson(request.body, additionalJson, request.authInfo.userId).validate[T].fold(
         errors => Future.successful(BadRequest(Json.obj("status" ->"error",
                                                         "message" -> JsError.toJson(errors)))),
         cmd => func(cmd)
       )
     }
 
-  def commandActionAsync[T <: Command](func: T => Future[Result])
-                   (implicit reads: Reads[T]): Action[JsValue] =
+  def commandActionAsync[T <: Command](func: T => Future[Result])(implicit reads: Reads[T]):
+      Action[JsValue] =
     commandActionAsync(JsNull)(func)
 
 }

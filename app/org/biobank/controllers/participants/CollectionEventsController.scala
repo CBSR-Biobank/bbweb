@@ -10,14 +10,17 @@ import org.biobank.service.users.UsersService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
 import scala.language.reflectiveCalls
+import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 @Singleton
-class CollectionEventsController @Inject() (val env:          Environment,
+class CollectionEventsController @Inject() (val action:         BbwebAction,
+                                            val env:          Environment,
                                             val authToken:    AuthToken,
                                             val usersService: UsersService,
                                             val service:      CollectionEventsService)
+                                        (implicit ec: ExecutionContext)
     extends CommandController
     with JsonController {
 
@@ -26,7 +29,7 @@ class CollectionEventsController @Inject() (val env:          Environment,
   private val PageSizeMax = 10
 
   def get(ceventId: String) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action(parse.empty) { implicit request =>
       validationReply(service.get(ceventId))
     }
 
@@ -35,35 +38,36 @@ class CollectionEventsController @Inject() (val env:          Environment,
            pageMaybe:     Option[Int],
            pageSizeMaybe: Option[Int],
            orderMaybe:    Option[String]) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action.async(parse.empty) { implicit request =>
+      Future {
+        val sort     = sortMaybe.fold { "visitNumber" } { s => s }
+        val page     = pageMaybe.fold { 1 } { p => p }
+        val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
+        val order    = orderMaybe.fold { "asc" } { o => o }
 
-      val sort     = sortMaybe.fold { "visitNumber" } { s => s }
-      val page     = pageMaybe.fold { 1 } { p => p }
-      val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
-      val order    = orderMaybe.fold { "asc" } { o => o }
+        log.debug(s"""|CollectionEventsController:list: participantId/$participantId,
+                      |  sort/$sort, page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
-      log.debug(s"""|CollectionEventsController:list: participantId/$participantId,
-                    |  sort/$sort, page/$page, pageSize/$pageSize, order/$order""".stripMargin)
+        val pagedQuery = PagedQuery(page, pageSize, order)
 
-      val pagedQuery = PagedQuery(page, pageSize, order)
+        val validation = for {
+            sortFunc    <- CollectionEvent.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
+            sortOrder   <- pagedQuery.getSortOrder
+            cevents     <- service.list(participantId, sortFunc, sortOrder)
+            page        <- pagedQuery.getPage(PageSizeMax, cevents.size)
+            pageSize    <- pagedQuery.getPageSize(PageSizeMax)
+            results     <- PagedResults.create(cevents, page, pageSize)
+          } yield results
 
-      val validation = for {
-          sortFunc    <- CollectionEvent.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
-          sortOrder   <- pagedQuery.getSortOrder
-          cevents     <- service.list(participantId, sortFunc, sortOrder)
-          page        <- pagedQuery.getPage(PageSizeMax, cevents.size)
-          pageSize    <- pagedQuery.getPageSize(PageSizeMax)
-          results     <- PagedResults.create(cevents, page, pageSize)
-        } yield results
-
-      validation.fold(
-        err     => BadRequest(err.list.toList.mkString),
-        results =>  Ok(results)
-      )
+        validation.fold(
+          err     => BadRequest(err.list.toList.mkString),
+          results =>  Ok(results)
+        )
+      }
     }
 
   def getByVisitNumber(participantId: ParticipantId, visitNumber: Int) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action(parse.empty) { implicit request =>
       validationReply(service.getByVisitNumber(participantId, visitNumber))
     }
 
@@ -90,8 +94,8 @@ class CollectionEventsController @Inject() (val env:          Environment,
   def removeAnnotation(ceventId: CollectionEventId,
                        annotTypeId:   String,
                        ver:           Long) =
-    AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = RemoveCollectionEventAnnotationCmd(userId           = userId.id,
+    action.async(parse.empty) { implicit request =>
+      val cmd = RemoveCollectionEventAnnotationCmd(userId           = request.authInfo.userId.id,
                                                    id               = ceventId.id,
                                                    expectedVersion  = ver,
                                                    annotationTypeId = annotTypeId)
@@ -99,8 +103,8 @@ class CollectionEventsController @Inject() (val env:          Environment,
     }
 
   def remove(participantId: ParticipantId, ceventId: CollectionEventId, ver: Long) =
-    AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = RemoveCollectionEventCmd(userId          = userId.id,
+    action.async(parse.empty) { implicit request =>
+      val cmd = RemoveCollectionEventCmd(userId          = request.authInfo.userId.id,
                                          id              = ceventId.id,
                                          participantId   = participantId.id,
                                          expectedVersion = ver)

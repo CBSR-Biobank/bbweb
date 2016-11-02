@@ -1,13 +1,14 @@
 package org.biobank.controllers.centres
 
 import javax.inject.{Inject, Singleton}
-import org.biobank.controllers.{CommandController, JsonController}
+import org.biobank.controllers.{BbwebAction, CommandController, JsonController}
 import org.biobank.domain.centre.{CentreId, ShipmentId}
 import org.biobank.service.centres.ShipmentsService
 import org.biobank.service.users.UsersService
 import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
 import play.api.libs.json._
 import play.api.{Environment, Logger}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -16,10 +17,12 @@ import scalaz.Validation.FlatMap._
  *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
  */
 @Singleton
-class ShipmentsController @Inject() (val env:              Environment,
+class ShipmentsController @Inject() (val action:           BbwebAction,
+                                     val env:              Environment,
                                      val authToken:        AuthToken,
                                      val usersService:     UsersService,
                                      val shipmentsService: ShipmentsService)
+                                 (implicit ec: ExecutionContext)
     extends CommandController
     with JsonController {
 
@@ -38,50 +41,52 @@ class ShipmentsController @Inject() (val env:              Environment,
            pageMaybe:                 Option[Int],
            pageSizeMaybe:             Option[Int],
            orderMaybe:                Option[String]) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action.async(parse.empty) { implicit request =>
+      Future {
+        val courierFilter        = courierFilterMaybe.fold { "" } { cn => cn }
+        val trackingNumberFilter = trackingNumberFilterMaybe.fold { "" } { tn => tn }
+        val stateFilter          = stateFilterMaybe.fold { "" } { st => st }
+        val sort                 = sortMaybe.fold { "courierName" } { s => s }
+        val page                 = pageMaybe.fold { 1 } { p => p }
+        val pageSize             = pageSizeMaybe.fold { 5 } { ps => ps }
+        val order                = orderMaybe.fold { "asc" } { o => o }
 
-      val courierFilter        = courierFilterMaybe.fold { "" } { cn => cn }
-      val trackingNumberFilter = trackingNumberFilterMaybe.fold { "" } { tn => tn }
-      val stateFilter          = stateFilterMaybe.fold { "" } { st => st }
-      val sort                 = sortMaybe.fold { "courierName" } { s => s }
-      val page                 = pageMaybe.fold { 1 } { p => p }
-      val pageSize             = pageSizeMaybe.fold { 5 } { ps => ps }
-      val order                = orderMaybe.fold { "asc" } { o => o }
+        log.debug(
+          s"""|ShipmentsController:list:
+              | courierFilter:        $courierFilter,
+              | trackingNumberFilter: $trackingNumberFilter,
+              | stateFilter:          $stateFilter,
+              | sort:                 $sort,
+              | page:                 $page,
+              | pageSize:             $pageSize,
+              | order:                $order""".stripMargin)
 
-      log.debug(
-        s"""|ShipmentsController:list:
-            | courierFilter:        $courierFilter,
-            | trackingNumberFilter: $trackingNumberFilter,
-            | stateFilter:          $stateFilter,
-            | sort:                 $sort,
-            | page:                 $page,
-            | pageSize:             $pageSize,
-            | order:                $order""".stripMargin)
+        val pagedQuery = PagedQuery(page, pageSize, order)
 
-      val pagedQuery = PagedQuery(page, pageSize, order)
+        val validation = for {
+            sortOrder   <- pagedQuery.getSortOrder
+            shipments   <- shipmentsService.getShipments(centreId,
+                                                         courierFilter,
+                                                         trackingNumberFilter,
+                                                         stateFilter,
+                                                         sort,
+                                                         sortOrder)
+            page        <- pagedQuery.getPage(PageSizeMax, shipments.size)
+            pageSize    <- pagedQuery.getPageSize(PageSizeMax)
+            results     <- PagedResults.create(shipments, page, pageSize)
+          } yield results
 
-      val validation = for {
-          sortOrder   <- pagedQuery.getSortOrder
-          shipments   <- shipmentsService.getShipments(centreId,
-                                                       courierFilter,
-                                                       trackingNumberFilter,
-                                                       stateFilter,
-                                                       sort,
-                                                       sortOrder)
-          page        <- pagedQuery.getPage(PageSizeMax, shipments.size)
-          pageSize    <- pagedQuery.getPageSize(PageSizeMax)
-          results     <- PagedResults.create(shipments, page, pageSize)
-        } yield results
-
-      validation.fold(
-        err =>     BadRequest(err.toList.mkString),
-        results => Ok(results)
-      )
+        validation.fold(
+          err =>     BadRequest(err.toList.mkString),
+          results => Ok(results)
+        )
+      }
     }
 
-  def get(id: ShipmentId) = AuthAction(parse.empty) { (token, userId, request) =>
-    validationReply(shipmentsService.getShipment(id))
-  }
+  def get(id: ShipmentId) =
+    action(parse.empty) { implicit request =>
+      validationReply(shipmentsService.getShipment(id))
+    }
 
   def listSpecimens(shipmentId:       ShipmentId,
                     stateFilterMaybe: Option[String],
@@ -89,53 +94,54 @@ class ShipmentsController @Inject() (val env:              Environment,
                     pageMaybe:        Option[Int],
                     pageSizeMaybe:    Option[Int],
                     orderMaybe:       Option[String]) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action.async(parse.empty) { implicit request =>
+      Future {
+        val stateFilter = stateFilterMaybe.fold { "" } { s => s }
+        val sort        = sortMaybe.fold { "inventoryId" } { s => s }
+        val page        = pageMaybe.fold { 1 } { p => p }
+        val pageSize    = pageSizeMaybe.fold { 5 } { ps => ps }
+        val order       = orderMaybe.fold { "asc" } { o => o }
 
-      val stateFilter = stateFilterMaybe.fold { "" } { s => s }
-      val sort        = sortMaybe.fold { "inventoryId" } { s => s }
-      val page        = pageMaybe.fold { 1 } { p => p }
-      val pageSize    = pageSizeMaybe.fold { 5 } { ps => ps }
-      val order       = orderMaybe.fold { "asc" } { o => o }
+        log.debug(s"""|ShipmentsController:listSpecimens:
+                      | shipmentId:  $shipmentId,
+                      | stateFilter: $stateFilter,
+                      | sort:        $sort,
+                      | page:        $page,
+                      | pageSize:    $pageSize,
+                      | order:       $order""".stripMargin)
 
-      log.debug(s"""|ShipmentsController:listSpecimens:
-                    | shipmentId:  $shipmentId,
-                    | stateFilter: $stateFilter,
-                    | sort:        $sort,
-                    | page:        $page,
-                    | pageSize:    $pageSize,
-                    | order:       $order""".stripMargin)
+        val pagedQuery = PagedQuery(page, pageSize, order)
 
-      val pagedQuery = PagedQuery(page, pageSize, order)
+        val validation = for {
+            sortOrder         <- pagedQuery.getSortOrder
+            shipmentSpecimens <- shipmentsService.getShipmentSpecimens(shipmentId, stateFilter, sort, sortOrder)
+            page              <- pagedQuery.getPage(PageSizeMax, shipmentSpecimens.size)
+            pageSize          <- pagedQuery.getPageSize(PageSizeMax)
+            results           <- PagedResults.create(shipmentSpecimens, page, pageSize)
+          } yield results
 
-      val validation = for {
-          sortOrder         <- pagedQuery.getSortOrder
-          shipmentSpecimens <- shipmentsService.getShipmentSpecimens(shipmentId, stateFilter, sort, sortOrder)
-          page              <- pagedQuery.getPage(PageSizeMax, shipmentSpecimens.size)
-          pageSize          <- pagedQuery.getPageSize(PageSizeMax)
-          results           <- PagedResults.create(shipmentSpecimens, page, pageSize)
-        } yield results
-
-      validation.fold(
-        err =>     BadRequest(err.list.toList.mkString),
-        results => Ok(results)
-      )
+        validation.fold(
+          err =>     BadRequest(err.list.toList.mkString),
+          results => Ok(results)
+        )
+      }
     }
 
   def canAddSpecimen(shipmentId: ShipmentId, specimenInventoryId: String) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action(parse.empty) { implicit request =>
       validationReply(shipmentsService.shipmentCanAddSpecimen(shipmentId, specimenInventoryId))
     }
 
   def getSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action(parse.empty) { implicit request =>
       validationReply(shipmentsService.getShipmentSpecimen(shipmentId, shipmentSpecimenId))
     }
 
   def add() = commandActionAsync { cmd: AddShipmentCmd => processCommand(cmd) }
 
   def remove(shipmentId: ShipmentId, version: Long) =
-    AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = ShipmentRemoveCmd(userId          = userId.id,
+    action.async(parse.empty) { implicit request =>
+      val cmd = ShipmentRemoveCmd(userId          = request.authInfo.userId.id,
                                   id              = shipmentId.id,
                                   expectedVersion = version)
       val future = shipmentsService.removeShipment(cmd)
@@ -174,8 +180,8 @@ class ShipmentsController @Inject() (val env:              Environment,
     }
 
   def removeSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String, version: Long) =
-    AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = ShipmentSpecimenRemoveCmd(userId          = userId.id,
+    action.async(parse.empty) { implicit request =>
+      val cmd = ShipmentSpecimenRemoveCmd(userId          = request.authInfo.userId.id,
                                           shipmentId      = shipmentId.id,
                                           id              = shipmentSpecimenId,
                                           expectedVersion = version)

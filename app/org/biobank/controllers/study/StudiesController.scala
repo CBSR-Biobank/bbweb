@@ -1,7 +1,7 @@
 package org.biobank.controllers.study
 
 import javax.inject.{Inject, Singleton}
-import org.biobank.controllers.{CommandController, ControllerError, JsonController}
+import org.biobank.controllers.{BbwebAction, CommandController, ControllerError, JsonController}
 import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.infrastructure._
@@ -13,6 +13,7 @@ import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.{ Environment, Logger }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -21,10 +22,12 @@ import scalaz.Validation.FlatMap._
  *
  */
 @Singleton
-class StudiesController @Inject() (val env:            Environment,
+class StudiesController @Inject() (val action:         BbwebAction,
+                                   val env:            Environment,
                                    val authToken:      AuthToken,
                                    val usersService:   UsersService,
                                    val studiesService: StudiesService)
+                               (implicit ec: ExecutionContext)
     extends CommandController
     with JsonController {
 
@@ -33,7 +36,7 @@ class StudiesController @Inject() (val env:            Environment,
   private val PageSizeMax = 10
 
   def studyCounts() =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action(parse.empty) { implicit request =>
       Ok(studiesService.getCountsByStatus)
     }
 
@@ -43,52 +46,54 @@ class StudiesController @Inject() (val env:            Environment,
            pageMaybe:     Option[Int],
            pageSizeMaybe: Option[Int],
            orderMaybe:    Option[String]) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action.async(parse.empty) { implicit request =>
+      Future {
+        val filter   = filterMaybe.fold { "" } { f => f }
+        val status   = statusMaybe.fold { "all" } { s => s }
+        val sort     = sortMaybe.fold { "name" } { s => s }
+        val page     = pageMaybe.fold { 1 } { p => p }
+        val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
+        val order    = orderMaybe.fold { "asc" } { o => o }
 
-      val filter   = filterMaybe.fold { "" } { f => f }
-      val status   = statusMaybe.fold { "all" } { s => s }
-      val sort     = sortMaybe.fold { "name" } { s => s }
-      val page     = pageMaybe.fold { 1 } { p => p }
-      val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
-      val order    = orderMaybe.fold { "asc" } { o => o }
+        log.debug(s"""|StudiesController:list: filter/$filter, status/$status, sort/$sort,
+                      |  page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
-      log.debug(s"""|StudiesController:list: filter/$filter, status/$status, sort/$sort,
-                    |  page/$page, pageSize/$pageSize, order/$order""".stripMargin)
+        val pagedQuery = PagedQuery(page, pageSize, order)
 
-      val pagedQuery = PagedQuery(page, pageSize, order)
+        val validation = for {
+            sortFunc    <- Study.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
+            sortOrder   <- pagedQuery.getSortOrder
+            studies     <- studiesService.getStudies(filter, status, sortFunc, sortOrder)
+            page        <- pagedQuery.getPage(PageSizeMax, studies.size)
+            pageSize    <- pagedQuery.getPageSize(PageSizeMax)
+            results     <- PagedResults.create(studies, page, pageSize)
+          } yield results
 
-      val validation = for {
-          sortFunc    <- Study.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
-          sortOrder   <- pagedQuery.getSortOrder
-          studies     <- studiesService.getStudies(filter, status, sortFunc, sortOrder)
-          page        <- pagedQuery.getPage(PageSizeMax, studies.size)
-          pageSize    <- pagedQuery.getPageSize(PageSizeMax)
-          results     <- PagedResults.create(studies, page, pageSize)
-        } yield results
-
-      validation.fold(
-        err => BadRequest(err.list.toList.mkString),
-        results =>  Ok(results)
-      )
+        validation.fold(
+          err => BadRequest(err.list.toList.mkString),
+          results =>  Ok(results)
+        )
+      }
     }
 
   def listNames(filterMaybe: Option[String], orderMaybe:  Option[String]) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action.async(parse.empty) { implicit request =>
+      Future {
+        val filter = filterMaybe.fold { "" } { f => f }
+        val order  = orderMaybe.fold { "asc" } { o => o }
 
-      val filter = filterMaybe.fold { "" } { f => f }
-      val order  = orderMaybe.fold { "asc" } { o => o }
-
-      SortOrder.fromString(order).fold(
-        err => BadRequest(err.list.toList.mkString),
-        so  => Ok(studiesService.getStudyNames(filter, so))
-      )
+        SortOrder.fromString(order).fold(
+          err => BadRequest(err.list.toList.mkString),
+          so  => Ok(studiesService.getStudyNames(filter, so))
+        )
+      }
     }
 
-  def get(id: StudyId) = AuthAction(parse.empty) { (token, userId, request) =>
+  def get(id: StudyId) = action(parse.empty) { implicit request =>
       validationReply(studiesService.getStudy(id))
     }
 
-  def centresForStudy(studyId: StudyId) = AuthAction(parse.empty) { (token, userId, request) =>
+  def centresForStudy(studyId: StudyId) = action(parse.empty) { implicit request =>
       Ok(studiesService.getCentresForStudy(studyId))
     }
 
@@ -111,8 +116,8 @@ class StudiesController @Inject() (val env:            Environment,
     }
 
   def removeAnnotationType(studyId: StudyId, ver: Long, uniqueId: String) =
-    AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = UpdateStudyRemoveAnnotationTypeCmd(Some(userId.id), studyId.id, ver, uniqueId)
+    action.async(parse.empty) { implicit request =>
+      val cmd = UpdateStudyRemoveAnnotationTypeCmd(Some(request.authInfo.userId.id), studyId.id, ver, uniqueId)
       processCommand(cmd)
     }
 

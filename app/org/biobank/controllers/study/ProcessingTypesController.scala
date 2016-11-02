@@ -11,7 +11,8 @@ import play.api.libs.json._
 import play.api.Environment
 
 @Singleton
-class ProcessingTypesController @Inject() (val env:            Environment,
+class ProcessingTypesController @Inject() (val action:         BbwebAction,
+                                           val env:            Environment,
                                            val authToken:      AuthToken,
                                            val usersService:   UsersService,
                                            val studiesService: StudiesService)
@@ -19,7 +20,7 @@ class ProcessingTypesController @Inject() (val env:            Environment,
     with JsonController {
 
   def get(studyId: StudyId, procTypeId: Option[ProcessingTypeId]) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action(parse.empty) { implicit request =>
       procTypeId.fold {
         validationReply(studiesService.processingTypesForStudy(studyId).map(_.toList))
       } { id =>
@@ -38,8 +39,8 @@ class ProcessingTypesController @Inject() (val env:            Environment,
     }
 
   def removeProcessingType(studyId: StudyId, id: ProcessingTypeId, ver: Long) =
-    AuthActionAsync(parse.empty) { (token, userId, request) =>
-      val cmd = RemoveProcessingTypeCmd(Some(userId.id), studyId.id, id.id, ver)
+    action.async(parse.empty) { implicit request =>
+      val cmd = RemoveProcessingTypeCmd(Some(request.authInfo.userId.id), studyId.id, id.id, ver)
       val future = studiesService.processRemoveProcessingTypeCommand(cmd)
       validationReply(future)
     }

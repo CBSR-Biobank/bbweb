@@ -8,15 +8,18 @@ import org.biobank.service.participants.SpecimensService
 import org.biobank.service.users.UsersService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 @Singleton
-class SpecimensController @Inject() (val env:          Environment,
+class SpecimensController @Inject() (val action:       BbwebAction,
+                                     val env:          Environment,
                                      val authToken:    AuthToken,
                                      val usersService: UsersService,
                                      val service:      SpecimensService)
+                                 (implicit ec: ExecutionContext)
     extends CommandController
     with JsonController {
   import org.biobank.infrastructure.command.SpecimenCommands._
@@ -29,12 +32,12 @@ class SpecimensController @Inject() (val env:          Environment,
    * Returns the specimen with the given ID.
    */
   def get(id: SpecimenId) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action(parse.empty) { implicit request =>
       validationReply(service.get(id))
     }
 
   def getByInventoryId(invId: String) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action(parse.empty) { implicit request =>
       validationReply(service.getByInventoryId(invId))
     }
 
@@ -43,31 +46,32 @@ class SpecimensController @Inject() (val env:          Environment,
            pageMaybe:     Option[Int],
            pageSizeMaybe: Option[Int],
            orderMaybe:    Option[String]) =
-    AuthAction(parse.empty) { (token, userId, request) =>
+    action.async(parse.empty) { implicit request =>
+      Future {
+        val sort     = sortMaybe.fold { "inventoryId" } { s => s }
+        val page     = pageMaybe.fold { 1 } { p => p }
+        val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
+        val order    = orderMaybe.fold { "asc" } { o => o }
 
-      val sort     = sortMaybe.fold { "inventoryId" } { s => s }
-      val page     = pageMaybe.fold { 1 } { p => p }
-      val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
-      val order    = orderMaybe.fold { "asc" } { o => o }
+        log.debug(s"""|SpecimensController:list: ceventId/$ceventId, sort/$sort,
+                      |  page/$page, pageSize/$pageSize, order/$order""".stripMargin)
 
-      log.debug(s"""|SpecimensController:list: ceventId/$ceventId, sort/$sort,
-                    |  page/$page, pageSize/$pageSize, order/$order""".stripMargin)
+        val pagedQuery = PagedQuery(page, pageSize, order)
 
-      val pagedQuery = PagedQuery(page, pageSize, order)
+        val validation = for {
+            sortFunc    <- Specimen.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
+            sortOrder   <- pagedQuery.getSortOrder
+            specimens   <- service.list(ceventId, sortFunc, sortOrder)
+            page        <- pagedQuery.getPage(PageSizeMax, specimens.size)
+            pageSize    <- pagedQuery.getPageSize(PageSizeMax)
+            results     <- PagedResults.create(specimens, page, pageSize)
+          } yield results
 
-      val validation = for {
-          sortFunc    <- Specimen.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
-          sortOrder   <- pagedQuery.getSortOrder
-          specimens   <- service.list(ceventId, sortFunc, sortOrder)
-          page        <- pagedQuery.getPage(PageSizeMax, specimens.size)
-          pageSize    <- pagedQuery.getPageSize(PageSizeMax)
-          results     <- PagedResults.create(specimens, page, pageSize)
-        } yield results
-
-      validation.fold(
-        err     => BadRequest(err.list.toList.mkString),
-        results => Ok(results)
-      )
+        validation.fold(
+          err     => BadRequest(err.list.toList.mkString),
+          results => Ok(results)
+        )
+      }
     }
 
   def addSpecimens(ceventId: CollectionEventId) =
@@ -77,9 +81,9 @@ class SpecimensController @Inject() (val env:          Environment,
     }
 
   def removeSpecimen(ceventId: CollectionEventId, spcId: SpecimenId, ver: Long) =
-    AuthActionAsync(parse.empty) { (token, userId, request) =>
+    action.async(parse.empty) { implicit request =>
       val cmd = RemoveSpecimenCmd(
-          userId                = userId.id,
+          userId                = request.authInfo.userId.id,
           id                    = spcId.id,
           collectionEventId     = ceventId.id,
           expectedVersion       = ver)
