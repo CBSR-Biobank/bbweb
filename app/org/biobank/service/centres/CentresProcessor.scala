@@ -54,8 +54,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     case SnapshotOffer(_, snapshot: SnapshotState) =>
       snapshot.centres.foreach{ centre => centreRepository.put(centre) }
 
-    case event: RecoveryCompleted =>
-      testData.addMultipleCentres
+    case RecoveryCompleted =>
 
     case cmd => log.error(s"CentresProcessor: message not handled: $cmd")
   }

@@ -1,28 +1,22 @@
 package org.biobank
 
-import akka.actor.ActorSystem
-import com.github.nscala_time.time.Imports._
 import javax.inject.{ Inject, Singleton }
 import org.biobank.domain._
 import org.biobank.domain.centre._
+import org.biobank.domain.centre.ShipmentState._
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
 import org.biobank.domain.user._
 import org.biobank.service.PasswordHasher
 import org.hashids.Hashids
 import org.joda.time.DateTime
-import org.slf4j.LoggerFactory
-import play.api.Logger
+import play.api.{ Configuration, Environment, Logger, Mode }
 import scalaz.Scalaz._
 
 /**
  * Provides initial data to test with.
  */
 object TestData {
-
-  val configPath = "application.testData.load"
-
-  val configLoadSpecimensPath = "application.testData.loadSpecimens"
 
   val centreData = List(
       ("CL1-Foothills", "CL1-Foothills"),
@@ -154,59 +148,90 @@ object TestData {
     )
 
   val ahfemDescription =
-      s"""|Magnis turpis mollis. Duis commodo libero. Turpis magnis massa morbi cras non mollis, maecenas
-          |dictumst venenatis augue, rhoncus id non eros nec odio. Ut wisi ullamcorper elit parturient,
-          |venenatis libero et, pellentesque sed, purus erat nonummy diam. Hendrerit porro lobortis.
-          |
-          |Eget proin ligula blandit ante magna aenean. Purus et maecenas, venenatis nonummy dolor quam
-          |dictumst. Auctor etiam, ligula eu, senectus iaculis ante. Sed urna, viverra pellentesque
-          |scelerisque libero vel, vitae neque nascetur nibh turpis, ridiculus pede maecenas rutrum per
-          |cubilia ultrices. Lacus sapien odio per ac nulla lectus. Morbi vitae a laoreet vehicula lectus,
-          |rutrum convallis diam, arcu ipsum egestas facilis eleifend, tellus neque rutrum ut wisi in. Sit
-          |velit sociis placerat neque id, imperdiet ut a urna ac, sed accumsan, fusce nunc dolor, et donec
-          |orci quis. Magnis vestibulum dapibus leo consectetuer blandit, ac eget, porta tempor semper urna
-          |tempor diam.
-          |""".stripMargin
+    s"""|Magnis turpis mollis. Duis commodo libero. Turpis magnis massa morbi cras non mollis, maecenas
+        |dictumst venenatis augue, rhoncus id non eros nec odio. Ut wisi ullamcorper elit parturient,
+        |venenatis libero et, pellentesque sed, purus erat nonummy diam. Hendrerit porro lobortis.
+        |
+        |Eget proin ligula blandit ante magna aenean. Purus et maecenas, venenatis nonummy dolor quam
+        |dictumst. Auctor etiam, ligula eu, senectus iaculis ante. Sed urna, viverra pellentesque
+        |scelerisque libero vel, vitae neque nascetur nibh turpis, ridiculus pede maecenas rutrum per
+        |cubilia ultrices. Lacus sapien odio per ac nulla lectus. Morbi vitae a laoreet vehicula lectus,
+        |rutrum convallis diam, arcu ipsum egestas facilis eleifend, tellus neque rutrum ut wisi in. Sit
+        |velit sociis placerat neque id, imperdiet ut a urna ac, sed accumsan, fusce nunc dolor, et donec
+        |orci quis. Magnis vestibulum dapibus leo consectetuer blandit, ac eget, porta tempor semper urna
+        |tempor diam.
+        |""".stripMargin
 
 }
 
 /**
- * Provides initial data to test with. Ideally these methods should only be called for developemnt builds.
+ * Provides initial data to test with. Ideally these methods should only be called for development builds.
  */
 @Singleton
-class TestData @Inject() (val actorSystem:                   ActorSystem,
-                          val passwordHasher:                PasswordHasher,
-                          val collectionEventTypeRepository: CollectionEventTypeRepository,
-                          val processingTypeRepository:      ProcessingTypeRepository,
-                          val specimenGroupRepository:       SpecimenGroupRepository,
-                          val specimenLinkTypeRepository:    SpecimenLinkTypeRepository,
-                          val studyRepository:               StudyRepository,
-                          val participantRepository:         ParticipantRepository,
-                          val collectionEventRepository:     CollectionEventRepository,
-                          val userRepository:                UserRepository,
-                          val centreRepository:              CentreRepository,
-                          val specimenRepository:            SpecimenRepository,
-                          val ceventSpecimenRepository:      CeventSpecimenRepository) {
+class TestData @Inject() (config:                        Configuration,
+                          env:                           Environment,
+                          passwordHasher:                PasswordHasher,
+                          collectionEventTypeRepository: CollectionEventTypeRepository,
+                          processingTypeRepository:      ProcessingTypeRepository,
+                          specimenGroupRepository:       SpecimenGroupRepository,
+                          specimenLinkTypeRepository:    SpecimenLinkTypeRepository,
+                          studyRepository:               StudyRepository,
+                          participantRepository:         ParticipantRepository,
+                          collectionEventRepository:     CollectionEventRepository,
+                          userRepository:                UserRepository,
+                          centreRepository:              CentreRepository,
+                          specimenRepository:            SpecimenRepository,
+                          ceventSpecimenRepository:      CeventSpecimenRepository,
+                          shipmentRepository:            ShipmentRepository,
+                          shipmentSpecimenRepository:    ShipmentSpecimenRepository) {
+
   import TestData._
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  val log = Logger(this.getClass)
 
-  private val loadTestData = (actorSystem.settings.config.hasPath(configPath)
-                                && actorSystem.settings.config.getBoolean(configPath))
+  private val loadTestData =
+    (env.mode == Mode.Dev) && config.getBoolean("application.testData.load").getOrElse(false)
 
   private val loadSpecimenTestData =
-    (actorSystem.settings.config.hasPath(configLoadSpecimensPath)
-       && actorSystem.settings.config.getBoolean(configLoadSpecimensPath))
+    (env.mode == Mode.Dev) && config.getBoolean("application.testData.loadSpecimens").getOrElse(false)
 
-  log.debug(s"TEST DATA: loadTestData: $loadTestData, loadSpecimenTestData: $loadSpecimenTestData")
+  private val loadShipmentTestData =
+    (env.mode == Mode.Dev) && config.getBoolean("application.testData.load").getOrElse(false)
+
+  def addMultipleUsers() = {
+    if (loadTestData) {
+      log.debug("addMultipleUsers")
+
+      val plainPassword = "testuser"
+      val salt = passwordHasher.generateSalt
+      val hashids = Hashids("test-data-users")
+
+      userData.zipWithIndex.foreach { case((name, email), index) =>
+        val user: User = ActiveUser(
+            id           = UserId(hashids.encode(index.toLong)),
+            version      = 0L,
+            timeAdded    = DateTime.now,
+            timeModified = None,
+            name         = name,
+            email        = email,
+            password     = passwordHasher.encrypt(plainPassword, salt),
+            salt         = salt,
+            avatarUrl    = None
+          )
+        userRepository.put(user)
+      }
+    }
+  }
 
   def addMultipleCentres(): Unit = {
     if (loadTestData) {
-      Logger.debug("addMultipleCentres")
+      log.debug("addMultipleCentres")
+
+      val hashids = Hashids("test-data-centres")
 
       centreData.zipWithIndex.foreach { case ((name, description), index) =>
         val centre: Centre = DisabledCentre(
-            id           = CentreId(name),
+            id           = CentreId(hashids.encode(index.toLong)),
             version      = 0L,
             timeAdded    = DateTime.now,
             timeModified = None,
@@ -217,62 +242,59 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
         centreRepository.put(centre)
       }
 
-      centreRepository.getValues
-        .find { c => c.name == "100-Calgary AB"}
-        .foreach { calgary =>
-        calgary match {
-          case c: DisabledCentre => {
-            val location = Location(uniqueId       = s"${c.name}:Primary",
-                                    name           = "Primary",
-                                    street         = "1403 29 St NW",
-                                    city           = "Calgary",
-                                    province       = "Alberta",
-                                    postalCode     = "T2N 2T9",
-                                    poBoxNumber    = None,
-                                    countryIsoCode = "CA")
-            c.copy(locations = Set(location), studyIds = Set(StudyId("BBPSP"))).
-              enable.
-              foreach { centre =>
-                centreRepository.put(centre)
-              }
+      // enable and add locations for the following centres
+      val v = List("100-Calgary AB", "101-London ON").
+        map { name =>
+          centreRepository.getValues.find(_.name == name).toSuccessNel(s"centre not found")
+        }.
+        sequenceU
+
+      v.foreach { centres =>
+        centres.foreach { centre =>
+          val location = if (centre.name == "100-Calgary AB") {
+              Location(uniqueId       = s"${centre.name}:Primary",
+                       name           = "Primary",
+                       street         = "1403 29 St NW",
+                       city           = "Calgary",
+                       province       = "Alberta",
+                       postalCode     = "T2N 2T9",
+                       poBoxNumber    = None,
+                       countryIsoCode = "CA")
+            } else {
+              Location(uniqueId       = s"${centre.name}:Primary",
+                       name           = "Primary",
+                       street         = "London Health Sciences Center, University Hospital, Rm A3-222B, 339 Windermere Road",
+                       city           = "London",
+                       province       = "Ontario",
+                       postalCode     = "N0L 1W0",
+                       poBoxNumber    = None,
+                       countryIsoCode = "CA")
+            }
+          centre match {
+            case c: DisabledCentre =>
+              c.copy(locations = Set(location)).enable.foreach(centreRepository.put)
+            case _ =>
           }
-          case s =>
         }
       }
 
-      centreRepository.getValues
-        .find { s => s.name == "101-London ON"}
-        .foreach { london =>
-        london match {
-          case c: DisabledCentre => {
-            val location = Location(uniqueId       = s"${c.name}:Primary",
-                                    name           = "Primary",
-                                    street         = "London Health Sciences Center, University Hospital, Rm A3-222B, 339 Windermere Road",
-                                    city           = "London",
-                                    province       = "Ontario",
-                                    postalCode     = "N0L 1W0",
-                                    poBoxNumber    = None,
-                                    countryIsoCode = "CA")
-            c.copy(locations = Set(location), studyIds = Set(StudyId("BBPSP"))).
-              enable.foreach { centre =>
-                centreRepository.put(centre)
-              }
-          }
-          case s =>
-        }
+      if (v.isFailure) {
+        log.error("could not set centre locations")
       }
     }
   }
 
   def addMultipleStudies(): Unit = {
     if (loadTestData) {
-      Logger.debug("addMultipleStudies")
+      log.debug("addMultipleStudies")
+
+      val hashids = Hashids("test-data-studies")
 
       studyData.zipWithIndex.foreach { case ((name, description), index) =>
         val descMaybe = if (name == "AHFEM") Some(s"$description\n\n$ahfemDescription")
                         else Some(description)
 
-        val study: Study = DisabledStudy(id              = StudyId(name),
+        val study: Study = DisabledStudy(id              = StudyId(hashids.encode(index.toLong)),
                                          version         = 0L,
                                          timeAdded       = DateTime.now,
                                          timeModified    = None,
@@ -282,7 +304,22 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
         studyRepository.put(study)
       }
 
-      addCollectionEventTypes
+      // add study to centres
+      studyRepository.getValues.find(s => s.name == "BBPSP").foreach { bbpsp =>
+        List("100-Calgary AB", "101-London ON").
+          map { name =>
+            centreRepository.getValues.find(_.name == name).toSuccessNel(s"centre not found")
+          }.
+          sequenceU.
+          map { centres =>
+            centres.foreach { centre =>
+              centre match {
+                case c: DisabledCentre => centreRepository.put(c.copy(studyIds = Set(bbpsp.id)))
+                case _ =>
+              }
+            }
+          }
+      }
 
       if (loadSpecimenTestData) {
         studyRepository.getValues.find { s => s.name == "BBPSP"}.foreach { bbpsp =>
@@ -298,7 +335,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
   def addCollectionEventTypes(): Unit = {
     val hashids = Hashids("test-data-cevent-types")
 
-    Logger.debug("addCollectionEventTypes")
+    log.debug("addCollectionEventTypes")
 
     studyRepository.getValues
       .find { s => s.name == "BBPSP"}
@@ -328,9 +365,7 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
                                  annotationTypes    = Set.empty))
 
       ceventTypes.foreach { cet => collectionEventTypeRepository.put(cet) }
-      ()
     }
-    ()
   }
 
   def getBbpspSpecimenSpecs() = {
@@ -359,51 +394,51 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
           maxCount                    = 1,
           amount                      = Some(10))
           //,
-        // CollectionSpecimenSpec(
-        //   uniqueId                    = hashids.encode(3),
-        //   name                        = "3mL Lavender top EDTA tube",
-        //   description                 = None,
-        //   units                       = "mL",
-        //   anatomicalSourceType        = AnatomicalSourceType.Blood,
-        //   preservationType            = PreservationType.FreshSpecimen,
-        //   preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
-        //   specimenType                = SpecimenType.WholeBloodEdta,
-        //   maxCount                    = 1,
-        //   amount                      = Some(3)),
-        // CollectionSpecimenSpec(
-        //   uniqueId                    = hashids.encode(4),
-        //   name                        = "4ml lavender top EDTA tube",
-        //   description                 = None,
-        //   units                       = "mL",
-        //   anatomicalSourceType        = AnatomicalSourceType.Blood,
-        //   preservationType            = PreservationType.FreshSpecimen,
-        //   preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
-        //   specimenType                = SpecimenType.WholeBloodEdta,
-        //   maxCount                    = 1,
-        //   amount                      = Some(4)),
-        // CollectionSpecimenSpec(
-        //   uniqueId                    = hashids.encode(5),
-        //   name                        = "9ml CPDA yellow top tube",
-        //   description                 = None,
-        //   units                       = "mL",
-        //   anatomicalSourceType        = AnatomicalSourceType.Blood,
-        //   preservationType            = PreservationType.FreshSpecimen,
-        //   preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
-        //   specimenType                = SpecimenType.WholeBloodEdta,
-        //   maxCount                    = 1,
-        //   amount                      = Some(9)),
-        // CollectionSpecimenSpec(
-        //   uniqueId                    = hashids.encode(6),
-        //   name                        = "Urine cup",
-        //   description                 = None,
-        //   units                       = "mL",
-        //   anatomicalSourceType        = AnatomicalSourceType.Urine,
-        //   preservationType            = PreservationType.FreshSpecimen,
-        //   preservationTemperatureType = PreservationTemperatureType.Plus4celcius,
-        //   specimenType                = SpecimenType.CdpaPlasma,
-        //   maxCount                    = 1,
-        // amount                      = Some(15)
-        //)
+          // CollectionSpecimenSpec(
+          //   uniqueId                    = hashids.encode(3),
+          //   name                        = "3mL Lavender top EDTA tube",
+          //   description                 = None,
+          //   units                       = "mL",
+          //   anatomicalSourceType        = AnatomicalSourceType.Blood,
+          //   preservationType            = PreservationType.FreshSpecimen,
+          //   preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
+          //   specimenType                = SpecimenType.WholeBloodEdta,
+          //   maxCount                    = 1,
+          //   amount                      = Some(3)),
+          // CollectionSpecimenSpec(
+          //   uniqueId                    = hashids.encode(4),
+          //   name                        = "4ml lavender top EDTA tube",
+          //   description                 = None,
+          //   units                       = "mL",
+          //   anatomicalSourceType        = AnatomicalSourceType.Blood,
+          //   preservationType            = PreservationType.FreshSpecimen,
+          //   preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
+          //   specimenType                = SpecimenType.WholeBloodEdta,
+          //   maxCount                    = 1,
+          //   amount                      = Some(4)),
+          // CollectionSpecimenSpec(
+          //   uniqueId                    = hashids.encode(5),
+          //   name                        = "9ml CPDA yellow top tube",
+          //   description                 = None,
+          //   units                       = "mL",
+          //   anatomicalSourceType        = AnatomicalSourceType.Blood,
+          //   preservationType            = PreservationType.FreshSpecimen,
+          //   preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
+          //   specimenType                = SpecimenType.WholeBloodEdta,
+          //   maxCount                    = 1,
+          //   amount                      = Some(9)),
+          // CollectionSpecimenSpec(
+          //   uniqueId                    = hashids.encode(6),
+          //   name                        = "Urine cup",
+          //   description                 = None,
+          //   units                       = "mL",
+          //   anatomicalSourceType        = AnatomicalSourceType.Urine,
+          //   preservationType            = PreservationType.FreshSpecimen,
+          //   preservationTemperatureType = PreservationTemperatureType.Plus4celcius,
+          //   specimenType                = SpecimenType.CdpaPlasma,
+          //   maxCount                    = 1,
+          // amount                      = Some(15)
+          //)
     )
   }
 
@@ -451,6 +486,8 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
 
   def addBbpspParticipants() = {
     if (loadSpecimenTestData) {
+      log.debug("addBbpspParticipants")
+
       val hashids = Hashids("bbpsp-participants")
 
       studyRepository.getValues
@@ -472,15 +509,14 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
   }
 
   def addBbpspCevents() = {
-    log.debug(s"addBbpspCevents")
-
     if (loadSpecimenTestData) {
       val hashids = Hashids("bbpsp-collection-events")
+
+      log.debug(s"addBbpspCevents")
 
       studyRepository.getValues
         .find { s => s.name == "BBPSP"}
         .foreach { bbpsp =>
-
         participantRepository.allForStudy(bbpsp.id).zipWithIndex.foreach {
           case (participant, pIndex) =>
             collectionEventTypeRepository.allForStudy(bbpsp.id).zipWithIndex.foreach {
@@ -509,15 +545,15 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
     def addSpecimen(id:           SpecimenId,
                     inventoryId:  String,
                     specimenSpec: CollectionSpecimenSpec,
-                    locationId:   String) =
+                    location:     Location) =
       UsableSpecimen(id               = id,
                      inventoryId      = inventoryId,
                      specimenSpecId   = specimenSpec.uniqueId,
                      version          = 0L,
                      timeAdded        = DateTime.now,
                      timeModified     = None,
-                     originLocationId = locationId,
-                     locationId       = locationId,
+                     originLocationId = location.uniqueId,
+                     locationId       = location.uniqueId,
                      containerId      = None,
                      positionId       = None,
                      timeCreated      = DateTime.now.minusDays(1),
@@ -525,79 +561,163 @@ class TestData @Inject() (val actorSystem:                   ActorSystem,
 
 
     if (loadSpecimenTestData) {
+      log.debug(s"addBbpspSpecimens")
+
       studyRepository.getValues.find(s => s.name == "BBPSP").foreach { bbpsp =>
 
-        val centreIds = List("100-Calgary AB", "101-London ON")
+        val centreNames = List("100-Calgary AB", "101-London ON")
 
-        centreIds.zipWithIndex.foreach { case (centreId, centreIndex) =>
-          val hashids = Hashids("bbpsp-specimens")
-          participantRepository.allForStudy(bbpsp.id)
-            .zipWithIndex.foreach { case (participant, pIndex) =>
-              collectionEventRepository.allForParticipant(participant.id)
-                .zipWithIndex.foreach {
-                case (cevent, ceventIndex) =>
-                  collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
-                    .foreach { cventType =>
-                    val uniqueId = 100 * centreIndex + 10 * pIndex + ceventIndex
-                    val inventoryId = f"A$uniqueId%05d"
-                    val specimen = addSpecimen(SpecimenId(hashids.encode(uniqueId.toLong)),
-                                               inventoryId,
-                                               cventType.specimenSpecs.head,
-                                               s"${centreId}:Primary")
-                    specimenRepository.put(specimen)
-                    ceventSpecimenRepository.put(CeventSpecimen(cevent.id, specimen.id))
+        centreNames.zipWithIndex.foreach { case (centreName, centreIndex) =>
+          centreRepository.getValues.find(_.name == centreName).foreach { centre =>
+            centre match {
+              case c: EnabledCentre => {
+                centreRepository.put(c.copy(studyIds = Set(bbpsp.id)))
 
-                    log.info(s"added specimen: invId: $inventoryId, participant: ${participant.uniqueId}, visitNum: ${cevent.visitNumber}, centreId: $centreId")
+                val hashids = Hashids("bbpsp-specimens")
+                participantRepository.allForStudy(bbpsp.id).zipWithIndex.
+                  foreach { case (participant, pIndex) =>
+                    collectionEventRepository.allForParticipant(participant.id).zipWithIndex.
+                      foreach {
+                        case (cevent, ceventIndex) =>
+                          collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId).
+                            foreach { cventType =>
+
+                              (0 to 5).foreach { id =>
+                                val uniqueId = 1000 * centreIndex + 100 * pIndex + 10 * ceventIndex + id
+                                val inventoryId = f"A$uniqueId%05d"
+                                val location = centre.locations.head
+                                val specimen = addSpecimen(SpecimenId(hashids.encode(uniqueId.toLong)),
+                                                           inventoryId,
+                                                           cventType.specimenSpecs.head,
+                                                           location)
+                                specimenRepository.put(specimen)
+                                ceventSpecimenRepository.put(CeventSpecimen(cevent.id, specimen.id))
+
+                                log.debug(s"added specimen: invId: $inventoryId, participant: ${participant.uniqueId}, visitNum: ${cevent.visitNumber}, locationId: ${location.uniqueId}")
+                              }
+                            }
+                      }
                   }
-                    }
+              }
+              case _ =>
+            }
           }
         }
       }
     }
   }
 
-  def addMultipleUsers() = {
-    if (loadTestData) {
-      Logger.debug("addMultipleUsers")
+  @SuppressWarnings(Array("org.wartremover.warts.MutableDataStructures",
+                          "org.wartremover.warts.Var"))
+  def addBbpspShipments() = {
 
-      val plainPassword = "testuser"
-      val salt = passwordHasher.generateSalt
-      val hashids = Hashids("test-data-users")
+    def createShipment(courierName:    String,
+                       trackingNumber: String,
+                       state:          ShipmentState,
+                       fromCentre:     Centre,
+                       toCentre:       Centre) =
+      Shipment(id             = ShipmentId(s"$courierName:$trackingNumber"),
+               version        = 0,
+               timeAdded      = DateTime.now,
+               timeModified   = None,
+               state          = state,
+               courierName    = courierName,
+               trackingNumber = trackingNumber,
+               fromCentreId   = fromCentre.id,
+               fromLocationId = fromCentre.locations.head.uniqueId,
+               toCentreId     = toCentre.id,
+               toLocationId   = toCentre.locations.head.uniqueId,
+               timePacked     = None,
+               timeSent       = None,
+               timeReceived   = None,
+               timeUnpacked   = None)
 
-      userData.zipWithIndex.foreach { case((name, email), index) =>
-        val user: User = ActiveUser(
-            id           = UserId(hashids.encode(index.toLong)),
-            version      = 0L,
-            timeAdded    = DateTime.now,
-            timeModified = None,
-            name         = name,
-            email        = email,
-            password     = passwordHasher.encrypt(plainPassword, salt),
-            salt         = salt,
-            avatarUrl    = None
-          )
-        userRepository.put(user)
+    if (loadShipmentTestData) {
+      log.debug(s"addBbpspShipments")
+
+      /**
+       * - creates 3 shipments, each in a different state,
+       *
+       * - takes all the specimens at the first centre, splits them in to and assigns the first half to the
+       *   shipment in CREATED state, and the second half to the shipment in UNPACKED state
+       *
+       * - takes all the specimens at the second centre and assigns them to the shipment in PACKED state
+       */
+      studyRepository.getValues.find(s => s.name == "BBPSP").foreach { bbpsp =>
+        val v = List("100-Calgary AB", "101-London ON").
+          map { name =>
+            centreRepository.getValues.
+              find { c =>
+                (c.name == name) && (c.locations.size > 0)
+              }.
+              toSuccessNel(s"centre not found or centre has no locaion")
+          }.
+          sequenceU
+
+        v.foreach { centres =>
+          val shipments = List(
+              createShipment("FedEx", "TN1", ShipmentState.Created, centres(0), centres(1)),
+              createShipment("FedEx", "TN2", ShipmentState.Packed, centres(1), centres(0)).
+                copy(timePacked = Some(DateTime.now)),
+              createShipment("FedEx", "TN3", ShipmentState.Unpacked, centres(0), centres(1)).
+                copy(timePacked   = Some(DateTime.now),
+                     timeSent     = Some(DateTime.now),
+                     timeReceived = Some(DateTime.now),
+                     timeUnpacked = Some(DateTime.now))
+            )
+
+          shipments.foreach(shipmentRepository.put)
+          val shipmentMap = shipments.map(s => s.state -> s).toMap
+
+          centres.foreach { centre =>
+            val locationId = centre.locations.head.uniqueId
+            val specimens = specimenRepository.getValues.filter(_.locationId == locationId)
+            val halfSpecimenCount = specimens.size / 2
+
+            specimens.zipWithIndex.foreach { case (spc, index) =>
+              val shipment =
+                if (locationId == centres(0).locations.head.uniqueId) {
+                  if (index < halfSpecimenCount) {
+                    shipmentMap(ShipmentState.Created)
+                  } else {
+                    shipmentMap(ShipmentState.Unpacked)
+                  }
+                } else {
+                  shipmentMap(ShipmentState.Packed)
+                }
+              log.debug(s"adding specimen to shipment: specimen: $index, ${specimens.size}, ${spc.inventoryId}, ${shipment.trackingNumber}")
+              val ss = ShipmentSpecimen(id                  = ShipmentSpecimenId(spc.id.id),
+                                        version             = 0L,
+                                        timeAdded           = DateTime.now,
+                                        timeModified        = None,
+                                        shipmentId          = shipment.id,
+                                        specimenId          = spc.id,
+                                        state               = ShipmentItemState.Present,
+                                        shipmentContainerId = None)
+              shipmentSpecimenRepository.put(ss)
+            }
+          }
+        }
+
+        if (v.isFailure) {
+          log.error("could not add shipments and / or shipment specimens")
+        }
       }
     }
   }
 
-  /**
-   * For debug only in development mode - password is "testuser"
-   */
-  def createDefaultUser(): Unit = {
-    if (loadTestData) {
-      log.debug("createDefaultUser")
-      userRepository.put(
-        ActiveUser(id           = org.biobank.Global.DefaultUserId,
-                   version      = 0L,
-                   timeAdded    = DateTime.now,
-                   timeModified = None,
-                   name         = "Administrator",
-                   email        = org.biobank.Global.DefaultUserEmail,
-                   password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
-                   salt         =  "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
-                   avatarUrl    = None))
-      ()
-    }
-  }
+  log.debug(s"""|TEST DATA:
+                |  mode: ${env.mode}
+                |  loadTestData: $loadTestData,
+                |  loadSpecimenTestData: $loadSpecimenTestData,
+                |  loadShipmentTestData: $loadShipmentTestData""".stripMargin)
+
+  addMultipleUsers
+  addMultipleCentres
+  addMultipleStudies
+  addCollectionEventTypes
+  addBbpspParticipants
+  addBbpspCevents
+  addBbpspSpecimens
+  addBbpspShipments
 }

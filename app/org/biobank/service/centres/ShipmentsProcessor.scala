@@ -1,8 +1,9 @@
 package org.biobank.service.centres
 
 import akka.actor._
-import akka.persistence.{ SnapshotOffer }
+import akka.persistence.{RecoveryCompleted, SnapshotOffer}
 import javax.inject.Inject
+import org.biobank.TestData
 import org.biobank.domain.centre._
 import org.biobank.domain.participants.{SpecimenId, SpecimenRepository}
 import org.biobank.infrastructure.command.ShipmentCommands._
@@ -27,7 +28,8 @@ object ShipmentsProcessor {
 class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepository,
                                     val shipmentSpecimenRepository: ShipmentSpecimenRepository,
                                     val centreRepository:           CentreRepository,
-                                    val specimenRepository:         SpecimenRepository)
+                                    val specimenRepository:         SpecimenRepository,
+                                    val testData:                   TestData)
     extends Processor
     with ShipmentValidations
     with ShipmentConstraints {
@@ -69,6 +71,8 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     case SnapshotOffer(_, snapshot: SnapshotState) =>
       snapshot.shipments.foreach{ shipmentRepository.put(_) }
       snapshot.shipmentSpecimens.foreach{ shipmentSpecimenRepository.put(_) }
+
+    case RecoveryCompleted =>
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))

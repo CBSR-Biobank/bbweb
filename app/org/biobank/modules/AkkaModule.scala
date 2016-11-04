@@ -1,11 +1,11 @@
 package org.biobank.modules
 
-import org.biobank.service.centres._
-import org.biobank.service.studies._
-import org.biobank.service.participants._
-import org.biobank.service.users._
-
 import com.google.inject.AbstractModule
+import org.biobank.TestData
+import org.biobank.service.centres._
+import org.biobank.service.participants._
+import org.biobank.service.studies._
+import org.biobank.service.users._
 import play.api.libs.concurrent.AkkaGuiceSupport
 
 class AkkaModule extends AbstractModule with AkkaGuiceSupport {
@@ -24,6 +24,8 @@ class AkkaModule extends AbstractModule with AkkaGuiceSupport {
     bindActor[CollectionEventTypeProcessor]("collectionEventType")
     bindActor[ProcessingTypeProcessor]("processingType")
     bindActor[SpecimenLinkTypeProcessor]("specimenLinkType")
+
+    bind(classOf[TestData]).asEagerSingleton
   }
 
 }

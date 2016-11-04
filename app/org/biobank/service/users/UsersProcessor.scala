@@ -2,7 +2,8 @@ package org.biobank.service.users
 
 import akka.actor._
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
-import org.biobank.TestData
+import javax.inject.Inject
+import play.api.{Environment, Mode}
 import org.biobank.domain.user._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
@@ -21,10 +22,10 @@ object UsersProcessor {
 /**
  * Handles the commands to configure users.
  */
-class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
-                                             val passwordHasher: PasswordHasher,
-                                             val emailService:   EmailService,
-                                             val testData:       TestData)
+class UsersProcessor @Inject() (val userRepository: UserRepository,
+                                val passwordHasher: PasswordHasher,
+                                val emailService:   EmailService,
+                                val env:            Environment)
     extends Processor {
   import org.biobank.CommonValidations._
 
@@ -56,8 +57,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
       snapshot.users.foreach(i => userRepository.put(i))
 
     case event: RecoveryCompleted =>
-      testData.createDefaultUser
-      testData.addMultipleUsers
+      createDefaultUser
 
     case event => log.error(s"event not handled: $event")
   }
@@ -123,7 +123,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   private def activateCmdToEvent(cmd:  ActivateUserCmd,
-                                  user: RegisteredUser): ServiceValidation[UserEvent] = {
+                                 user: RegisteredUser): ServiceValidation[UserEvent] = {
     user.activate.map { _ =>
       UserEvent(user.id.id).update(
         _.optionalUserId    := cmd.userId,
@@ -133,7 +133,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   private def updateNameCmdToEvent(cmd:  UpdateUserNameCmd,
-                                    user: ActiveUser): ServiceValidation[UserEvent] = {
+                                   user: ActiveUser): ServiceValidation[UserEvent] = {
     user.withName(cmd.name).map { _ =>
       UserEvent(user.id.id).update(
         _.optionalUserId      := cmd.userId,
@@ -144,7 +144,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   private def updateEmailCmdToEvent(cmd:  UpdateUserEmailCmd,
-                                     user: ActiveUser): ServiceValidation[UserEvent] = {
+                                    user: ActiveUser): ServiceValidation[UserEvent] = {
     for {
       emailAvailable <- emailAvailable(cmd.email, user.id)
       updatedUser    <- user.withEmail(cmd.email)
@@ -156,7 +156,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   private def updatePasswordCmdToEvent(cmd:  UpdateUserPasswordCmd,
-                                        user: ActiveUser): ServiceValidation[UserEvent] = {
+                                       user: ActiveUser): ServiceValidation[UserEvent] = {
     if (passwordHasher.valid(user.password, user.salt, cmd.currentPassword)) {
       val passwordInfo = encryptPassword(user, cmd.newPassword)
       user.withPassword(passwordInfo.password, passwordInfo.salt).map { user =>
@@ -173,7 +173,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   private def updateAvatarUrlCmdToEvent(cmd:  UpdateUserAvatarUrlCmd,
-                                         user: ActiveUser): ServiceValidation[UserEvent] = {
+                                        user: ActiveUser): ServiceValidation[UserEvent] = {
     user.withAvatarUrl(cmd.avatarUrl).map { _ =>
       UserEvent(user.id.id).update(
         _.optionalUserId                     := cmd.userId,
@@ -208,7 +208,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   private def lockUserCmdToEvent(cmd:  LockUserCmd,
-                                  user: ActiveUser): ServiceValidation[UserEvent] = {
+                                 user: ActiveUser): ServiceValidation[UserEvent] = {
     user.lock.map { _ =>
       UserEvent(user.id.id).update(
         _.optionalUserId := cmd.userId,
@@ -218,7 +218,7 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   }
 
   private def unlockUserCmdToEvent(cmd: UnlockUserCmd,
-                                    user: LockedUser): ServiceValidation[UserEvent] = {
+                                   user: LockedUser): ServiceValidation[UserEvent] = {
     user.unlock.map { _ =>
       UserEvent(user.id.id).update(
         _.optionalUserId := cmd.userId,
@@ -367,8 +367,8 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
   private def onValidEventLockedUserAndVersion(event: UserEvent,
                                                eventType: Boolean,
                                                eventVersion: Long)
-                                                  (applyEvent: (LockedUser,
-                                                                DateTime) => ServiceValidation[Boolean])
+                                              (applyEvent: (LockedUser,
+                                                            DateTime) => ServiceValidation[Boolean])
       : Unit = {
     onValidEventUserAndVersion(event, eventType, eventVersion) { (user, eventTime) =>
       user match {
@@ -489,5 +489,25 @@ class UsersProcessor @javax.inject.Inject() (val userRepository: UserRepository,
     val newSalt = passwordHasher.generateSalt
     val newPwd = passwordHasher.encrypt(newPlainPassword, newSalt)
     PasswordInfo(newPwd, newSalt)
+  }
+
+  /**
+   * For debug only in development mode - password is "testuser"
+   */
+  private def createDefaultUser(): Unit = {
+    if ((env.mode == Mode.Dev)) {
+      log.debug("createDefaultUser")
+      userRepository.put(
+        ActiveUser(id           = org.biobank.Global.DefaultUserId,
+                   version      = 0L,
+                   timeAdded    = DateTime.now,
+                   timeModified = None,
+                   name         = "Administrator",
+                   email        = org.biobank.Global.DefaultUserEmail,
+                   password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
+                   salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
+                   avatarUrl    = None))
+    }
+    ()
   }
 }

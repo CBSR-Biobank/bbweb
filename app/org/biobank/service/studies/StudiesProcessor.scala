@@ -70,11 +70,6 @@ class StudiesProcessor @javax.inject.Inject() (
       snapshot.studies.foreach(studyRepository.put)
 
     case RecoveryCompleted =>
-      testData.addMultipleStudies
-      testData.addCollectionEventTypes
-      testData.addBbpspParticipants
-      testData.addBbpspCevents
-      testData.addBbpspSpecimens
       log.debug(s"recovery completed")
 
   }
