@@ -7,6 +7,7 @@
       <th translate>Amount</th>
       <th st-sort="specName" translate>Type</th>
       <th st-sort="timeCreated" translate>Time created</th>
+      <th ng-if="vm.showItemState">State</th>
       <th ng-if="!vm.readOnly" translate>Action</th>
     </tr>
   </thead>
@@ -16,18 +17,18 @@
       <td>{{ss.specimen.amount}} {{ss.specimen.units}}</td>
       <td>{{ss.specimen.specimenSpecName}}</td>
       <td>{{ss.specimen.timeCreated| localTime}}</td>
-      <td ng-if="!vm.readOnly">
-        <specimen-table-action
-          action="action"
-          on-action-selected="vm.actionSelected(ss, action.id)"
-          ng-repeat="action in vm.actions">
-        </specimen-table-action>
+      <td ng-if="vm.showItemState">
+        <span class="badge">{{ss.state}}</span>
       </td>
-    </tr>
-  </tbody>
-  <tbody ng-if="vm.tableDataLoading">
-    <tr>
-      <td colspan="5" class="text-center" translate>Loading ...</td>
+      <td ng-if="!vm.readOnly">
+        <div class="btn-toolbar">
+          <specimen-table-action
+            action="action"
+            on-action-selected="vm.actionSelected(ss, action.id)"
+            ng-repeat="action in vm.actions">
+          </specimen-table-action>
+        </div>
+      </td>
     </tr>
   </tbody>
   <tbody ng-if="!vm.tableDataLoading && (vm.shipmentSpecimens.length <= 0)">
@@ -37,6 +38,11 @@
           <div class="panel-heading">{{vm.noSpecimensMessage}}</div>
         </div>
       </td>
+    </tr>
+  </tbody>
+  <tbody ng-if="vm.tableDataLoading">
+    <tr>
+      <td colspan="5" class="text-center" translate>Loading ...</td>
     </tr>
   </tbody>
   <tfoot ng-if="!vm.tableDataLoading && (vm.shipmentSpecimens.length > 0)">

@@ -260,7 +260,7 @@ define(function (require) {
      * @return A promise. If the promise succeeds then a paged result is returned.
      */
     Shipment.list = function (centreId, options) {
-      var url = uri() + '/list/' + centreId,
+      var url = uri() + 'list/' + centreId,
           params,
           validKeys = [
             'courierFilter',

@@ -14,12 +14,13 @@ define(function () {
 
   function config($urlRouterProvider, $stateProvider) {
 
-    resolveShipment.$inject = ['Shipment', '$stateParams'];
-    function resolveShipment(Shipment, $stateParams) {
-      return Shipment.get($stateParams.shipmentId);
+    resolveShipment.$inject = ['Shipment', '$stateParams', '$state'];
+    function resolveShipment(Shipment, $stateParams, $state) {
+      return Shipment.get($stateParams.shipmentId)
+        .catch(function (error) {
+          $state.go('404', null, { location: false });
+        });
     }
-
-    $urlRouterProvider.otherwise('/');
 
     $stateProvider.state('home.shipping', {
       url: 'shipping',
@@ -31,95 +32,90 @@ define(function () {
       data: {
         displayName: 'Shipping'
       }
-    });
-
-    $stateProvider.state('home.shipping.centre', {
-      url: '/centres/{centreId}',
-      resolve: {
-        centre: ['Centre', '$stateParams', function (Centre, $stateParams) {
-          return Centre.get($stateParams.centreId);
-        }]
-      },
-      views: {
-        'main@': {
-          template: [
-            '<centre-shipments',
-            '  centre="vm.centre">',
-            '</centre-shipments>'
-          ].join(''),
-          controller: [ 'centre', function (centre) {
-            this.centre = centre;
-          }],
-          controllerAs: 'vm'
+    })
+      .state('home.shipping.centre', {
+        url: '/centres/{centreId}',
+        resolve: {
+          centre: ['Centre', '$stateParams', function (Centre, $stateParams) {
+            return Centre.get($stateParams.centreId);
+          }]
+        },
+        views: {
+          'main@': {
+            template: [
+              '<centre-shipments',
+              '  centre="vm.centre">',
+              '</centre-shipments>'
+            ].join(''),
+            controller: [ 'centre', function (centre) {
+              this.centre = centre;
+            }],
+            controllerAs: 'vm'
+          }
+        },
+        data: {
+          displayName: '{{centre.name}}'
         }
-      },
-      data: {
-        displayName: '{{centre.name}}'
-      }
-    });
-
-    $stateProvider.state('home.shipping.add', {
-      url: '/add',
-      views: {
-        'main@': {
-          template: '<shipment-add></shipment-add>'
+      })
+      .state('home.shipping.add', {
+        url: '/add',
+        views: {
+          'main@': {
+            template: '<shipment-add></shipment-add>'
+          }
+        },
+        data: {
+          displayName: 'Add'
         }
-      },
-      data: {
-        displayName: 'Add'
-      }
-    });
-
-    $stateProvider.state('home.shipping.addItems', {
-      url: '/additems/{shipmentId}',
-      resolve: {
-        shipment: resolveShipment
-      },
-      views: {
-        'main@': {
-          template: '<shipment-add-items shipment="vm.shipment"></shipment-add-items>',
-          controller: ShipmentController,
-          controllerAs: 'vm'
+      })
+      .state('home.shipping.addItems', {
+        url: '/additems/{shipmentId}',
+        resolve: {
+          shipment: resolveShipment
+        },
+        views: {
+          'main@': {
+            template: '<shipment-add-items shipment="vm.shipment"></shipment-add-items>',
+            controller: ShipmentController,
+            controllerAs: 'vm'
+          }
+        },
+        data: {
+          displayName: '{{shipment.courierName}} - {{shipment.trackingNumber}}: Items to ship'
         }
-      },
-      data: {
-        displayName: '{{shipment.courierName}} - {{shipment.trackingNumber}}: Items to ship'
-      }
-    });
-
-    $stateProvider.state('home.shipping.shipment', {
-      url: '/{shipmentId}',
-      resolve: {
-        shipment: resolveShipment
-      },
-      views: {
-        'main@': {
-          template: '<shipment-view shipment="vm.shipment"></shipment-view>',
-          controller: ShipmentController,
-          controllerAs: 'vm'
+      })
+      .state('home.shipping.shipment', {
+        url: '/{shipmentId}',
+        resolve: {
+          shipment: resolveShipment
+        },
+        views: {
+          'main@': {
+            template: '<shipment-view shipment="vm.shipment"></shipment-view>',
+            controller: ShipmentController,
+            controllerAs: 'vm'
+          }
+        },
+        data: {
+          displayName: 'Shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
         }
-      },
-      data: {
-        displayName: 'Shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
-      }
-    });
-
-    $stateProvider.state('home.shipping.unpack', {
-      url: '/unpack/{shipmentId}',
-      resolve: {
-        shipment: resolveShipment
-      },
-      views: {
-        'main@': {
-          template: '<shipment-unpack shipment="vm.shipment"></shipment-unpack>',
-          controller: ShipmentController,
-          controllerAs: 'vm'
+      })
+      .state('home.shipping.unpack', {
+        url: '/unpack/{shipmentId}',
+        resolve: {
+          shipment: resolveShipment
+        },
+        views: {
+          'main@': {
+            template: '<shipment-unpack shipment="vm.shipment"></shipment-unpack>',
+            controller: ShipmentController,
+            controllerAs: 'vm'
+          }
+        },
+        data: {
+          displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
         }
-      },
-      data: {
-        displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
-      }
-    });
+      });
 
     ShipmentController.$inject = ['shipment'];
 

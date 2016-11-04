@@ -66,8 +66,8 @@ define(function (require) {
     bindings: {
       defaultSortField:   '@',
       refresh:            '<',
+      showItemState:      '<',
       onGetSpecimens:     '&',
-      onRemoveSpecimen:   '&',
       noSpecimensMessage: '@',
       actions:        '<',
       onActionSelected:   '&'
@@ -92,6 +92,7 @@ define(function (require) {
     vm.tableController   = undefined;
     vm.getTableData      = getTableData;
     vm.removeSpecimen    = removeSpecimen;
+    vm.tableDataLoading  = true;
 
     //---
 

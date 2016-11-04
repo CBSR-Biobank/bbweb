@@ -49,10 +49,14 @@
 <div class="row">
   <div class="col-lg-12">
     <collapsable-panel heading="{{'Specimens in shipment'|translate}}">
-      <shipment-specimens-view-table
+      <shipment-specimens-actions-table
         default-sort-field="inventoryId"
+        refresh="vm.refreshNonReceivedSpecimensTable"
+        show-item-state="true"
         on-get-specimens="vm.getPresentSpecimens"
-        no-specimens-message="{{'No specimens present in shipment'|translate}}">
+        no-specimens-message="{{'No specimens present in shipment'|translate}}"
+        actions="vm.actions"
+        on-action-selected="vm.nonReceivedSpecimensTableActionSelected">
       </shipment-specimens-view-table>
     </collapsable-panel>
   </div>

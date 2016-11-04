@@ -8,7 +8,7 @@ define(function (require) {
   var _ = require('lodash');
 
   var component = {
-    templateUrl : '/assets/javascripts/centres/components/shipmentUnpack/shipmentUnpack.html',
+    templateUrl: '/assets/javascripts/centres/components/shipmentUnpack/shipmentUnpack.html',
     controller: ShipmentUnpackController,
     controllerAs: 'vm',
     bindings: {
@@ -46,6 +46,29 @@ define(function (require) {
 
     vm.$onInit = onInit;
     vm.inventoryId = '';
+    vm.refreshNonReceivedSpecimensTable = 0;
+
+    vm.actions =  [
+      {
+        id:    'tag-as-received',
+        class: 'btn-primary',
+        title: gettextCatalog.getString('Tag as received'),
+        icon:  'glyphicon-saved'
+      }, {
+        id:    'tag-as-extra',
+        class: 'btn-warning',
+        title: gettextCatalog.getString('Tag as extra'),
+        icon:  'glyphicon-question-sign'
+      }, {
+        id:    'tag-as-missing',
+        class: 'btn-warning',
+        title: gettextCatalog.getString('Tag as missing'),
+        icon:  'glyphicon-cloud'
+      }
+    ];
+
+    vm.nonReceivedSpecimensTableActionSelected = nonReceivedSpecimensTableActionSelected;
+
     vm.returnToReceivedState = returnToReceivedState;
     vm.getPresentSpecimens = getPresentSpecimens;
     vm.getReceivedSpecimens = getReceivedSpecimens;
@@ -60,9 +83,13 @@ define(function (require) {
 
     function onInit() {
       // reload the shipment
-      Shipment.get(vm.shipment.id).then(function (shipment) {
-        vm.shipment = shipment;
-      });
+      Shipment.get(vm.shipment.id)
+        .then(function (shipment) {
+          vm.shipment = shipment;
+        })
+        .catch(function (error) {
+          $state.go('404', null, { location: false });
+        });
     }
 
     function returnToReceivedState() {
@@ -107,6 +134,10 @@ define(function (require) {
     function onInventoryIdSubmit() {
       console.log(vm.inventoryId);
       vm.inventoryId = '';
+    }
+
+    function nonReceivedSpecimensTableActionSelected(shipmentSpecimen, action) {
+      console.log('nonReceivedSpecimensTableActionSelected', shipmentSpecimen.id, action);
     }
   }
 

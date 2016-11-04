@@ -52,6 +52,9 @@ define(['angular'], function(angular) {
         data: {
           displayName: 'Contact Us'
         }
+      })
+      .state('404', {
+        template: '<div>error</div>'
       });
   }
 
