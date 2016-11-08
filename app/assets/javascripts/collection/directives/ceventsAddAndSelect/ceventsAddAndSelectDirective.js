@@ -52,7 +52,7 @@ define(['lodash'], function(_) {
 
     vm.pagerOptions = {
       page:      1,
-      pageSize:  5,
+      limit:  5,
       sortField: 'visitNumber'
     };
 

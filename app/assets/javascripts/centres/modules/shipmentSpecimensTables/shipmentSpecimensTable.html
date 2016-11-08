@@ -48,7 +48,7 @@
   <tfoot ng-if="!vm.tableDataLoading && (vm.shipmentSpecimens.length > 0)">
     <tr>
       <td colspan="6" class="text-center">
-        <div st-items-by-page="vm.pageSize"
+        <div st-items-by-page="vm.limit"
              st-pagination=""
              st-template="/assets/javascripts/common/directives/pagination.html">
         </div>

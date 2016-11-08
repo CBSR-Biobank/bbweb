@@ -106,7 +106,7 @@ class ShipmentSpecimensControllerSpec
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
             uri         = uri(f.shipment, "specimens"),
-            queryParams = Map("pageSize" -> "1"),
+            queryParams = Map("limit" -> "1"),
             total       = numSpecimens.toLong,
             maybeNext   = Some(2))
 
@@ -156,7 +156,7 @@ class ShipmentSpecimensControllerSpec
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
             uri         = uri(f.shipment, "specimens"),
-            queryParams = Map("pageSize" -> "1"),
+            queryParams = Map("limit" -> "1"),
             total       = numSpecimens.toLong,
             maybeNext   = Some(2))
 
@@ -170,7 +170,7 @@ class ShipmentSpecimensControllerSpec
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
             uri         = uri(f.shipment, "specimens"),
-            queryParams = Map("page" -> "2", "pageSize" -> "1"),
+            queryParams = Map("page" -> "2", "limit" -> "1"),
             total       = numSpecimens.toLong,
             offset      = 1,
             maybeNext   = None,

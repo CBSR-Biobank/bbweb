@@ -12,9 +12,9 @@ class CollectionEventsRouter @Inject()(controller: CollectionEventsController) e
 
     case GET(p"/list/${participantId(id)}" ? q_o"sort=$sort"
                & q_o"page=${int(page)}"
-               & q_o"pageSize=${int(pageSize)}"
+               & q_o"limit=${int(limit)}"
                & q_o"order=$order") =>
-      controller.list(id, sort, page, pageSize, order)
+      controller.list(id, sort, page, limit, order)
 
     case GET(p"/visitNumber/${participantId(id)}/${int(vn)}") =>
       controller.getByVisitNumber(id, vn)

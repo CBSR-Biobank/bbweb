@@ -177,7 +177,7 @@ define([
             optionList = [
               { sort: 'inventoryId' },
               { page: 2 },
-              { pageSize: 10 },
+              { limit: 10 },
               { order: 'desc' }
             ];
 

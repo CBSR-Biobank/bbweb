@@ -14,7 +14,7 @@ define(['lodash'], function(_) {
       scope:{},
       bindToController: {
         counts:                       '=',
-        pageSize:                     '=',
+        limit:                     '=',
         possibleStatuses:             '=',
         messageNoItems:               '@',
         messageNoResults:             '@',
@@ -55,7 +55,7 @@ define(['lodash'], function(_) {
       filter:     '',
       status:     vm.possibleStatuses[0].id,
       page:       1,
-      pageSize:   vm.pageSize,
+      limit:   vm.limit,
       sort:       'name' // must be lower case
     };
 

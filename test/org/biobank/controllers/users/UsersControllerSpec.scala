@@ -247,7 +247,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
           uri = uri,
-          queryParams = Map("sort" -> "email", "pageSize" -> "1"),
+          queryParams = Map("sort" -> "email", "limit" -> "1"),
           total = users.size.toLong,
           maybeNext = Some(2))
 

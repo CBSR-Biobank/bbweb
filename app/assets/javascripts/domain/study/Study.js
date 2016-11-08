@@ -210,10 +210,10 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
      * @param {string} [options.sortField=name] Studies can be sorted by <code>name</code> or by
      * <code>status</code>. Values other than these two yield an error.
      *
-     * @param {int} [options.page=1] If the total results are longer than pageSize, then page selects which
+     * @param {int} [options.page=1] If the total results are longer than limit, then page selects which
      * studies should be returned. If an invalid value is used then the response is an error.
      *
-     * @param {int} [options.pageSize=10] The total number of studies to return per page. The maximum page size is
+     * @param {int} [options.limit=10] The total number of studies to return per page. The maximum page size is
      * 10. If a value larger than 10 is used then the response is an error.
      *
      * @param {string} [options.order=asc] - The order to list studies by. One of: <code>asc</code> for
@@ -230,7 +230,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
             'status',
             'sort',
             'page',
-            'pageSize',
+            'limit',
             'order'
           ];
 

@@ -309,7 +309,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
             uri         = uri(e.cevent),
-            queryParams = Map("sort" -> "inventoryId", "pageSize" -> "1"),
+            queryParams = Map("sort" -> "inventoryId", "limit" -> "1"),
             offset      = 0,
             total       = specimens.size.toLong,
             maybeNext   = Some(2))
@@ -332,7 +332,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
             uri         = uri(e.cevent),
-            queryParams = Map("sort" -> "inventoryId", "page" -> "2", "pageSize" -> "1"),
+            queryParams = Map("sort" -> "inventoryId", "page" -> "2", "limit" -> "1"),
             offset      = 1,
             total       = specimens.size.toLong,
             maybeNext   = None,

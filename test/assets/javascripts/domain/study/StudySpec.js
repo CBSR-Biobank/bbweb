@@ -198,7 +198,7 @@ define([
             { status: 'DisabledStudy' },
             { sort: 'status' },
             { page: 2 },
-            { pageSize: 10 },
+            { limit: 10 },
             { order: 'desc' }
           ];
 

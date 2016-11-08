@@ -145,12 +145,12 @@ define([
       var self = this,
           cevent = self.factory.collectionEvent(),
           reply = self.factory.pagedResult([]),
-          pageSize = 2;
+          limit = 2;
 
-      self.$httpBackend.whenGET(uri(cevent.id) + '?pageSize=' + pageSize)
+      self.$httpBackend.whenGET(uri(cevent.id) + '?limit=' + limit)
         .respond(this.reply(reply));
 
-      self.Specimen.list(cevent.id, { pageSize: pageSize }).then(function (pagedResult) {
+      self.Specimen.list(cevent.id, { limit: limit }).then(function (pagedResult) {
         expect(pagedResult.items).toBeEmptyArray();
       });
       self.$httpBackend.flush();

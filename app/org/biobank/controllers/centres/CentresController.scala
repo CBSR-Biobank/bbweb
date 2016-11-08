@@ -43,7 +43,7 @@ class CentresController @Inject() (val action:         BbwebAction,
            statusMaybe:   Option[String],
            sortMaybe:     Option[String],
            pageMaybe:     Option[Int],
-           pageSizeMaybe: Option[Int],
+           limitMaybe: Option[Int],
            orderMaybe:    Option[String]): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       Future {
@@ -51,18 +51,18 @@ class CentresController @Inject() (val action:         BbwebAction,
         val status   = statusMaybe.fold { "all" } { s => s }
         val sort     = sortMaybe.fold { "name" } { s => s }
         val page     = pageMaybe.fold { 1 } { p => p }
-        val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
+        val limit = limitMaybe.fold { 5 } { ps => ps }
         val order    = orderMaybe.fold { "asc" } { o => o }
 
-        val pagedQuery = PagedQuery(page, pageSize, order)
+        val pagedQuery = PagedQuery(page, limit, order)
 
         val validation = for {
             sortFunc    <- Centre.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
             sortOrder   <- pagedQuery.getSortOrder
             centres     <- centresService.getCentres[Centre](filter, status, sortFunc, sortOrder)
             page        <- pagedQuery.getPage(PageSizeMax, centres.size)
-            pageSize    <- pagedQuery.getPageSize(PageSizeMax)
-            results     <- PagedResults.create(centres, page, pageSize)
+            limit    <- pagedQuery.getPageSize(PageSizeMax)
+            results     <- PagedResults.create(centres, page, limit)
           } yield results
 
         validation.fold(

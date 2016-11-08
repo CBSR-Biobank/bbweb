@@ -195,7 +195,7 @@ define(function (require) {
               { trackingNumberFilter: 'ABC' },
               { sort: 'state' },
               { page: 2 },
-              { pageSize: 10 },
+              { limit: 10 },
               { order: 'desc' }
             ];
 

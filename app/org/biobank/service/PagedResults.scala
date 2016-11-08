@@ -11,16 +11,16 @@ import scalaz.Scalaz._
   * @param page page number. Starts at page 1.
   * @param offset page offset. Starts at 0.
   * @param total total elements
-  * @param pageSize max elements in a page
+  * @param limit max elements in a page
   *
   * Borrowed from:
   *
   * https://github.com/pvillega/Play-Modules/blob/master/app/models/Pagination.scala
   */
-final case class PagedResults[+T](items: Seq[T], page: Int, pageSize: Int, offset: Long, total: Long) {
+final case class PagedResults[+T](items: Seq[T], page: Int, limit: Int, offset: Long, total: Long) {
   lazy val prev = Option(page - 1).filter(_ > 0)
   lazy val next = Option(page + 1).filter(_ => (offset + items.size) < total)
-  lazy val maxPages = (total.toDouble/pageSize).ceil.toInt
+  lazy val maxPages = (total.toDouble/limit).ceil.toInt
 }
 
 
@@ -28,28 +28,28 @@ object PagedResults {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  def create[T](items: Seq[T], page: Int, pageSize: Int): ServiceValidation[PagedResults[T]]= {
+  def create[T](items: Seq[T], page: Int, limit: Int): ServiceValidation[PagedResults[T]]= {
     if (items.isEmpty) {
-      PagedResults.createEmpty[T](page, pageSize).successNel[String]
+      PagedResults.createEmpty[T](page, limit).successNel[String]
     } else {
-      val offset = pageSize * (page - 1)
+      val offset = limit * (page - 1)
       if ((offset > 0) && (offset >= items.size)) {
         ServiceError(s"invalid page requested: ${page}").failureNel[PagedResults[T]]
       } else {
-        log.debug(s"PagedResults.create: page:$page, pageSize: $pageSize, offset: $offset")
-        PagedResults(items    = items.drop(offset).take(pageSize),
+        log.debug(s"PagedResults.create: page:$page, limit: $limit, offset: $offset")
+        PagedResults(items    = items.drop(offset).take(limit),
                      page     = page,
-                     pageSize = pageSize,
+                     limit = limit,
                      offset   = offset.toLong,
                      total    = items.size.toLong).successNel[String]
       }
     }
   }
 
-  def createEmpty[T](page: Int, pageSize: Int): PagedResults[T] = PagedResults(
+  def createEmpty[T](page: Int, limit: Int): PagedResults[T] = PagedResults(
     items    = Seq.empty[T],
     page     = page,
-    pageSize = pageSize,
+    limit = limit,
     offset   = 0,
     total    = 0
   )
@@ -61,7 +61,7 @@ object PagedResults {
         "page"            -> pr.page,
         "offset"          -> pr.offset,
         "total"           -> pr.total,
-        "pageSize"        -> pr.pageSize,
+        "limit"        -> pr.limit,
         "prev"            -> pr.prev,
         "next"            -> pr.next,
         "maxPages"        -> pr.maxPages

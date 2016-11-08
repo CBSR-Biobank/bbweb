@@ -70,7 +70,7 @@ case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers 
   }
 
   def failWithNegativePageNumber(uri: String) = {
-    val json = fakeApp.makeRequest(GET, uri + "?page=-1&pageSize=1", BAD_REQUEST)
+    val json = fakeApp.makeRequest(GET, uri + "?page=-1&limit=1", BAD_REQUEST)
     (json \ "status").as[String] must include ("error")
     (json \ "message").as[String] must include ("page is invalid")
   }
@@ -83,13 +83,13 @@ case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers 
   }
 
   def failWithNegativePageSize(uri: String) = {
-    val json = fakeApp.makeRequest(GET, uri + "?pageSize=-1", BAD_REQUEST)
+    val json = fakeApp.makeRequest(GET, uri + "?limit=-1", BAD_REQUEST)
     (json \ "status").as[String] must include ("error")
     (json \ "message").as[String] must include ("page size is invalid")
   }
 
-  def failWithInvalidPageSize(uri: String, pageSize: Int) = {
-    val json = fakeApp.makeRequest(GET, uri + "?pageSize=" + pageSize, BAD_REQUEST)
+  def failWithInvalidPageSize(uri: String, limit: Int) = {
+    val json = fakeApp.makeRequest(GET, uri + "?limit=" + limit, BAD_REQUEST)
     (json \ "status").as[String] must include ("error")
     (json \ "message").as[String] must include ("page size exceeds maximum")
   }

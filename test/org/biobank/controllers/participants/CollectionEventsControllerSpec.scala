@@ -415,7 +415,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
           val jsonItem = PagedResultsSpec(this).singleItemResult(
               uri         = listUri(participant.id),
-              queryParams = Map("sort" -> "timeCompleted", "pageSize" -> "1"),
+              queryParams = Map("sort" -> "timeCompleted", "limit" -> "1"),
               total       = cevents.size.toLong,
               maybeNext   = Some(2))
 
@@ -435,7 +435,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
           val jsonItem = PagedResultsSpec(this).singleItemResult(
               uri         = listUri(participant.id),
-              queryParams = Map("sort" -> "timeCompleted", "page" -> "4", "pageSize" -> "1"),
+              queryParams = Map("sort" -> "timeCompleted", "page" -> "4", "limit" -> "1"),
               total       = cevents.size.toLong,
               offset      = 3,
               maybeNext   = None,

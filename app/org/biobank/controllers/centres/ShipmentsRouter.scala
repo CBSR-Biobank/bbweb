@@ -18,9 +18,9 @@ class ShipmentsRouter @Inject()(controller: ShipmentsController) extends SimpleR
                & q_o"stateFilter=$stateFilter"
                & q_o"sort=$sort"
                & q_o"page=${int(page)}"
-               & q_o"pageSize=${int(pageSize)}"
+               & q_o"limit=${int(limit)}"
                & q_o"order=$order") =>
-      controller.list(cId, courierFilter, trackingNumberFilter, stateFilter, sort, page, pageSize, order)
+      controller.list(cId, courierFilter, trackingNumberFilter, stateFilter, sort, page, limit, order)
 
     case POST(p"/courier/${shipmentId(id)}") =>
       controller.updateCourier(id)
@@ -52,9 +52,9 @@ class ShipmentsRouter @Inject()(controller: ShipmentsController) extends SimpleR
     case GET(p"/specimens/${shipmentId(id)}" ? q_o"stateFilter=$stateFilter"
                & q_o"sort=$sort"
                & q_o"page=${int(page)}"
-               & q_o"pageSize=${int(pageSize)}"
+               & q_o"limit=${int(limit)}"
                & q_o"order=$order") =>
-      controller.listSpecimens(id, stateFilter, sort, page, pageSize, order)
+      controller.listSpecimens(id, stateFilter, sort, page, limit, order)
 
     case GET(p"/${shipmentId(id)}") =>
       controller.get(id)

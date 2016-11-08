@@ -22,7 +22,7 @@
  *
  * @property {int} page - The page these results correspond to.
  *
- * @property {int} pageSize - The number of items in this result set.
+ * @property {int} limit - The number of items in this result set.
  *
  * @property {int} offset - The page offset. Starts at 0.
  *

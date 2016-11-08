@@ -200,7 +200,7 @@ class ShipmentsControllerSpec
         shipments.foreach(shipmentRepository.put)
         val jsonItem = PagedResultsSpec(this)
           .singleItemResult(uri       = listUri(f.fromCentre),
-                            queryParams = Map("sort" -> "courierName", "pageSize" -> "1"),
+                            queryParams = Map("sort" -> "courierName", "limit" -> "1"),
                             total     = shipments.size.toLong,
                             maybeNext = Some(2))
         compareObj(jsonItem, shipments(2))
@@ -215,7 +215,7 @@ class ShipmentsControllerSpec
         shipments.foreach(shipmentRepository.put)
         val jsonItem = PagedResultsSpec(this)
           .singleItemResult(uri       = listUri(f.fromCentre),
-                            queryParams = Map("sort" -> "courierName", "page" -> "3", "pageSize" -> "1"),
+                            queryParams = Map("sort" -> "courierName", "page" -> "3", "limit" -> "1"),
                             total     = shipments.size.toLong,
                             offset    = 2,
                             maybeNext = None,

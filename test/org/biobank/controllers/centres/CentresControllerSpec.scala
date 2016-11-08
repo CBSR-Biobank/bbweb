@@ -286,7 +286,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
           uri = uri,
-          queryParams = Map("sort" -> "name", "pageSize" -> "1"),
+          queryParams = Map("sort" -> "name", "limit" -> "1"),
           total = centres.size.toLong,
           maybeNext = Some(2))
 
@@ -302,7 +302,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
           uri = uri,
-          queryParams = Map("sort" -> "name", "page" -> "4", "pageSize" -> "1"),
+          queryParams = Map("sort" -> "name", "page" -> "4", "limit" -> "1"),
           total = 4,
           offset = 3,
           maybeNext = None,

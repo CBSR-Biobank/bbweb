@@ -44,27 +44,27 @@ class SpecimensController @Inject() (val action:       BbwebAction,
   def list(ceventId:      CollectionEventId,
            sortMaybe:     Option[String],
            pageMaybe:     Option[Int],
-           pageSizeMaybe: Option[Int],
+           limitMaybe: Option[Int],
            orderMaybe:    Option[String]) =
     action.async(parse.empty) { implicit request =>
       Future {
         val sort     = sortMaybe.fold { "inventoryId" } { s => s }
         val page     = pageMaybe.fold { 1 } { p => p }
-        val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
+        val limit = limitMaybe.fold { 5 } { ps => ps }
         val order    = orderMaybe.fold { "asc" } { o => o }
 
         log.debug(s"""|SpecimensController:list: ceventId/$ceventId, sort/$sort,
-                      |  page/$page, pageSize/$pageSize, order/$order""".stripMargin)
+                      |  page/$page, limit/$limit, order/$order""".stripMargin)
 
-        val pagedQuery = PagedQuery(page, pageSize, order)
+        val pagedQuery = PagedQuery(page, limit, order)
 
         val validation = for {
             sortFunc    <- Specimen.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
             sortOrder   <- pagedQuery.getSortOrder
             specimens   <- service.list(ceventId, sortFunc, sortOrder)
             page        <- pagedQuery.getPage(PageSizeMax, specimens.size)
-            pageSize    <- pagedQuery.getPageSize(PageSizeMax)
-            results     <- PagedResults.create(specimens, page, pageSize)
+            limit    <- pagedQuery.getPageSize(PageSizeMax)
+            results     <- PagedResults.create(specimens, page, limit)
           } yield results
 
         validation.fold(

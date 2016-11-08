@@ -44,7 +44,7 @@ class StudiesController @Inject() (val action:         BbwebAction,
            statusMaybe:   Option[String],
            sortMaybe:     Option[String],
            pageMaybe:     Option[Int],
-           pageSizeMaybe: Option[Int],
+           limitMaybe: Option[Int],
            orderMaybe:    Option[String]) =
     action.async(parse.empty) { implicit request =>
       Future {
@@ -52,21 +52,21 @@ class StudiesController @Inject() (val action:         BbwebAction,
         val status   = statusMaybe.fold { "all" } { s => s }
         val sort     = sortMaybe.fold { "name" } { s => s }
         val page     = pageMaybe.fold { 1 } { p => p }
-        val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
+        val limit = limitMaybe.fold { 5 } { ps => ps }
         val order    = orderMaybe.fold { "asc" } { o => o }
 
         log.debug(s"""|StudiesController:list: filter/$filter, status/$status, sort/$sort,
-                      |  page/$page, pageSize/$pageSize, order/$order""".stripMargin)
+                      |  page/$page, limit/$limit, order/$order""".stripMargin)
 
-        val pagedQuery = PagedQuery(page, pageSize, order)
+        val pagedQuery = PagedQuery(page, limit, order)
 
         val validation = for {
             sortFunc    <- Study.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
             sortOrder   <- pagedQuery.getSortOrder
             studies     <- studiesService.getStudies(filter, status, sortFunc, sortOrder)
             page        <- pagedQuery.getPage(PageSizeMax, studies.size)
-            pageSize    <- pagedQuery.getPageSize(PageSizeMax)
-            results     <- PagedResults.create(studies, page, pageSize)
+            limit    <- pagedQuery.getPageSize(PageSizeMax)
+            results     <- PagedResults.create(studies, page, limit)
           } yield results
 
         validation.fold(

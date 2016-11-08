@@ -40,7 +40,7 @@ define([
         context.entities                     = disabledCentres.concat(enabledCentres);
         context.counts                       = createCounts(disabledCentres.length,
                                                             enabledCentres.length);
-        context.pageSize                     = disabledCentres.length;
+        context.limit                     = disabledCentres.length;
         context.messageNoItems               = 'No items present';
         context.messageNoResults             = 'No items match the criteria';
         context.entityNavigateState          = 'home.admin.centres.centre.summary';
@@ -82,7 +82,7 @@ define([
         context.counts                       = createCounts(disabledStudies.length,
                                                             enabledStudies.length,
                                                             retiredStudies.length);
-        context.pageSize                     = disabledStudies.length;
+        context.limit                     = disabledStudies.length;
         context.messageNoItems               = 'No items present';
         context.messageNoResults             = 'No items match the criteria';
         context.entityNavigateState          = 'home.admin.studies.study.summary';
@@ -106,7 +106,7 @@ define([
               element = angular.element([
                 '<paged-items-list',
                 '  counts="vm.counts"',
-                '  page-size="vm.pageSize"',
+                '  page-size="vm.limit"',
                 '  possible-statuses="vm.possibleStatuses"',
                 '  message-no-items="' + context.messageNoItems + '"',
                 '  message-no-results="' + context.messageNoResults + '"',
@@ -123,7 +123,7 @@ define([
           self.scope = self.$rootScope.$new();
           self.scope.vm = {
             counts:           context.counts,
-            pageSize:         context.pageSize,
+            limit:         context.limit,
             possibleStatuses: context.possibleStatuses,
             getItems:         getItemsFunc,
             getItemIcon:      getItemIconFunc
@@ -136,9 +136,9 @@ define([
           function getItemsFuncDefault (options) {
             self.getItemsSpy(options);
             return self.$q.when({
-              items:    context.entities.slice(0, self.pageSize),
+              items:    context.entities.slice(0, self.limit),
               page:     options.page,
-              pageSize: self.pageSize,
+              limit: self.limit,
               offset:   0,
               total:    context.entities.length
             });
@@ -169,7 +169,7 @@ define([
 
           expect(this.controller.pagerOptions.filter).toBeEmptyString();
           expect(this.controller.pagerOptions.status).toBe(this.context.possibleStatuses[0].id);
-          expect(this.controller.pagerOptions.pageSize).toBe(this.context.pageSize);
+          expect(this.controller.pagerOptions.limit).toBe(this.context.limit);
           expect(this.controller.pagerOptions.sort).toBe('name');
         });
 
@@ -197,7 +197,7 @@ define([
             filter: nameFilterValue,
             status: this.context.possibleStatuses[0].id,
             page: 1,
-            pageSize: this.context.pageSize,
+            limit: this.context.limit,
             sort: 'name'
           });
         });
@@ -213,7 +213,7 @@ define([
             filter: '',
             status: statusFilterValue,
             page: 1,
-            pageSize: this.context.pageSize,
+            limit: this.context.limit,
             sort: this.controller.sortFields[0].toLowerCase()
           });
         });
@@ -239,7 +239,7 @@ define([
             filter: '',
             status: this.context.possibleStatuses[0].id,
             page: 1,
-            pageSize: this.context.pageSize,
+            limit: this.context.limit,
             sort: sortFieldValue.toLowerCase()
           });
         });
@@ -255,7 +255,7 @@ define([
             filter: '',
             status: this.context.possibleStatuses[0].id,
             page: page,
-            pageSize: this.context.pageSize,
+            limit: this.context.limit,
             sort: this.controller.sortFields[0].toLowerCase()
           });
         });
@@ -271,7 +271,7 @@ define([
             return self.$q.when({
               items:    [],
               page:     options.page,
-              pageSize: context.pageSize,
+              limit: context.limit,
               offset:   0,
               total:    0
             });
@@ -287,9 +287,9 @@ define([
           function getItemsWrapper(options) {
             self.getItemsSpy(options);
             return self.$q.when({
-              items:    context.entities.slice(0, context.pageSize),
+              items:    context.entities.slice(0, context.limit),
               page:     options.page,
-              pageSize: context.pageSize,
+              limit: context.limit,
               offset:   0,
               total:    context.entities.length + 1
             });

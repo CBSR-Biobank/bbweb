@@ -41,7 +41,7 @@ define(['lodash'], function(_) {
     vm.status              = 'all';
     vm.getTableData        = getTableData;
     vm.tableDataLoading    = true;
-    vm.pageSize            = 10;
+    vm.limit            = 10;
 
     vm.userInformation     = userInformation;
     vm.activate            = activate;
@@ -67,8 +67,8 @@ define(['lodash'], function(_) {
             emailFilter: searchPredicateObject.email || '',
             status:      vm.status,
             sort:        sortPredicate,
-            page:        1 + (pagination.start / vm.pageSize),
-            pageSize:    vm.pageSize,
+            page:        1 + (pagination.start / vm.limit),
+            limit:    vm.limit,
             order:       sortOrder ? 'desc' : 'asc'
           };
 

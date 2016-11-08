@@ -15,7 +15,7 @@ define(['lodash'], function(_) {
       bindToController: {
         getHeader:              '&',
         getStudies:             '&',
-        pageSize:               '=',
+        limit:               '=',
         messageNoResults:       '@',
         icon:                   '@',
         navigateStateName:      '@',
@@ -53,7 +53,7 @@ define(['lodash'], function(_) {
       filter:    '',
       status:    'EnabledStudy',
       page:      1,
-      pageSize:  vm.pageSize,
+      limit:  vm.limit,
       sortField: 'name' // must be lower case
     };
 

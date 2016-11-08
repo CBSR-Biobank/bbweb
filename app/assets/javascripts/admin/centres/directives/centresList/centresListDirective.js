@@ -34,7 +34,7 @@ define(['lodash'], function(_) {
     var vm = this;
 
     vm.centreCounts     = {};
-    vm.pageSize         = 5;
+    vm.limit         = 5;
     vm.updateCentres    = Centre.list;
     vm.getCentreIcon    = getCentreIcon;
     vm.possibleStatuses = [{ id: 'all', label: 'All' }];

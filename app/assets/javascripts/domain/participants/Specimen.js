@@ -279,9 +279,9 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      * <code>timeCreated</code>, <code>status</code>.
      *
      * @param {number} options.page - The page to retrieve when there are more than
-     * <code>options.pageSize</code> specimens.
+     * <code>options.limit</code> specimens.
      *
-     * @param {number} options.pageSize - The maximum number of specimens returned per page.
+     * @param {number} options.limit - The maximum number of specimens returned per page.
      *
      * @param {string} options.order - The order to list specimens by. One of: <code>asc</code> for ascending
      * order, or <code>desc</code> for descending order.
@@ -294,7 +294,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
           validKeys = [
             'sort',
             'page',
-            'pageSize',
+            'limit',
             'order'
           ];
 

@@ -188,10 +188,10 @@ define(['lodash', 'tv4'], function(_, tv4) {
      * @param {string} options.sortField Users can be sorted by 'name', 'email' or by 'status'. Values other
      * than these yield an error.
      *
-     * @param {int} options.page If the total results are longer than pageSize, then page selects which
+     * @param {int} options.page If the total results are longer than limit, then page selects which
      * users should be returned. If an invalid value is used then the response is an error.
      *
-     * @param {int} options.pageSize The total number of users to return per page. The maximum page size is
+     * @param {int} options.limit The total number of users to return per page. The maximum page size is
      * 10. If a value larger than 10 is used then the response is an error.
      *
      * @param {string} options.order One of 'asc' or 'desc'. If an invalid value is used then
@@ -206,7 +206,7 @@ define(['lodash', 'tv4'], function(_, tv4) {
                         'status',
                         'sort',
                         'page',
-                        'pageSize',
+                        'limit',
                         'order'
                       ],
           params;

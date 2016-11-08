@@ -71,7 +71,7 @@ define([
       createController.call(self, counts);
 
       expect(self.controller.centreCounts).toEqual(counts);
-      expect(self.controller.pageSize).toBeDefined();
+      expect(self.controller.limit).toBeDefined();
 
       _.each(allStatuses, function(status) {
         expect(self.controller.possibleStatuses).toContain({

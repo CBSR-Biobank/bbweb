@@ -88,7 +88,7 @@ define(function (require) {
     vm.$onChanges        = onChanges;
     vm.shipmentSpecimens = [];
     vm.readOnly          = true;
-    vm.pageSize          = 10;
+    vm.limit          = 10;
     vm.tableController   = undefined;
     vm.getTableData      = getTableData;
     vm.removeSpecimen    = removeSpecimen;
@@ -108,8 +108,8 @@ define(function (require) {
           sortOrder     = tableState.sort.reverse || false,
           options = {
             sort:     sortPredicate,
-            page:     1 + (pagination.start / vm.pageSize),
-            pageSize: vm.pageSize,
+            page:     1 + (pagination.start / vm.limit),
+            limit: vm.limit,
             order:    sortOrder ? 'desc' : 'asc'
           };
 

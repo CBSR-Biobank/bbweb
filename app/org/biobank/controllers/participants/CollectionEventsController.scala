@@ -36,27 +36,27 @@ class CollectionEventsController @Inject() (val action:         BbwebAction,
   def list(participantId: ParticipantId,
            sortMaybe:     Option[String],
            pageMaybe:     Option[Int],
-           pageSizeMaybe: Option[Int],
+           limitMaybe: Option[Int],
            orderMaybe:    Option[String]) =
     action.async(parse.empty) { implicit request =>
       Future {
         val sort     = sortMaybe.fold { "visitNumber" } { s => s }
         val page     = pageMaybe.fold { 1 } { p => p }
-        val pageSize = pageSizeMaybe.fold { 5 } { ps => ps }
+        val limit = limitMaybe.fold { 5 } { ps => ps }
         val order    = orderMaybe.fold { "asc" } { o => o }
 
         log.debug(s"""|CollectionEventsController:list: participantId/$participantId,
-                      |  sort/$sort, page/$page, pageSize/$pageSize, order/$order""".stripMargin)
+                      |  sort/$sort, page/$page, limit/$limit, order/$order""".stripMargin)
 
-        val pagedQuery = PagedQuery(page, pageSize, order)
+        val pagedQuery = PagedQuery(page, limit, order)
 
         val validation = for {
             sortFunc    <- CollectionEvent.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
             sortOrder   <- pagedQuery.getSortOrder
             cevents     <- service.list(participantId, sortFunc, sortOrder)
             page        <- pagedQuery.getPage(PageSizeMax, cevents.size)
-            pageSize    <- pagedQuery.getPageSize(PageSizeMax)
-            results     <- PagedResults.create(cevents, page, pageSize)
+            limit    <- pagedQuery.getPageSize(PageSizeMax)
+            results     <- PagedResults.create(cevents, page, limit)
           } yield results
 
         validation.fold(

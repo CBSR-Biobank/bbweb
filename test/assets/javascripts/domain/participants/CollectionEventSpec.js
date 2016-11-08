@@ -315,12 +315,12 @@ define([
           study = self.factory.study(),
           participant = self.factory.participant({ studyId: study.id }),
           reply = self.factory.pagedResult([]),
-          pageSize = 2;
+          limit = 2;
 
-      self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?pageSize=' + pageSize)
+      self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?limit=' + limit)
         .respond(this.reply(reply));
 
-      self.CollectionEvent.list(participant.id, { pageSize: pageSize }).then(function (pagedResult) {
+      self.CollectionEvent.list(participant.id, { limit: limit }).then(function (pagedResult) {
         expect(pagedResult.items).toBeEmptyArray();
       });
       self.$httpBackend.flush();

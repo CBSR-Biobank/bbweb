@@ -13,7 +13,7 @@ define(function () {
       panelHeader:      '@',
       getCentres:       '&',
       onCentreSelected: '&',
-      pageSize:         '<',
+      limit:         '<',
       messageNoResults: '@',
       icon:             '@'
 
@@ -46,7 +46,7 @@ define(function () {
       filter:    '',
       status:    'EnabledCentre',
       page:      1,
-      pageSize:  vm.pageSize,
+      limit:  vm.limit,
       sortField: 'name' // must be lower case
     };
 

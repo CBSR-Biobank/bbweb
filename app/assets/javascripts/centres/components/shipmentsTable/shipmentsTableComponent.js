@@ -31,7 +31,7 @@ define(['lodash'], function (_) {
     vm.stateFilter      = '';
     vm.centreLocations  = _.keyBy(vm.centreLocations, 'locationId');
     vm.tableDataLoading = true;
-    vm.pageSize         = 5;
+    vm.limit         = 5;
 
     vm.getTableData        = getTableData;
     vm.shipmentInformation = shipmentInformation;
@@ -54,8 +54,8 @@ define(['lodash'], function (_) {
             trackingNumberFilter: searchPredicateObject.trackingNumber || '',
             stateFilter:          vm.stateFilter,
             sort:                 sortPredicate,
-            page:                 1 + (pagination.start / vm.pageSize),
-            pageSize:             vm.pageSize,
+            page:                 1 + (pagination.start / vm.limit),
+            limit:             vm.limit,
             order:                sortOrder ? 'desc' : 'asc'
           };
 

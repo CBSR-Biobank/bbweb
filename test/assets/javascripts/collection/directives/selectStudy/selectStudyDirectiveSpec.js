@@ -27,7 +27,7 @@ define([
         '<select-study get-header="model.getHeader"',
         '              get-studies="model.getStudies"',
         '              icon="glyphicon-ok-circle"',
-        '              page-size="model.pageSize"',
+        '              page-size="model.limit"',
         '              message-no-results="No results match the criteria."',
         '              navigate-state-name="' + navigateStateName + '"',
         '              navigate-state-param-name="' + navigateStateParamName + '">',
@@ -46,12 +46,12 @@ define([
 
       function getStudies (pagerOptions) {
         return self.$q.when({
-          items:    studies.slice(0, pagerOptions.pageSize),
+          items:    studies.slice(0, pagerOptions.limit),
           page:     0,
           offset:   0,
           total:    studies.length,
-          pageSize: pagerOptions.pageSize,
-          maxPages: studies.length / pagerOptions.pageSize
+          limit: pagerOptions.limit,
+          maxPages: studies.length / pagerOptions.limit
         });
       }
     };
@@ -69,27 +69,27 @@ define([
     it('displays the list of studies', function() {
       var self = this,
           studies = _.map(_.range(20), function () { return self.factory.study(); }),
-          pageSize = studies.length / 2;
+          limit = studies.length / 2;
 
       createScope.call(this,
                        {
                          getStudies: createGetStudiesFn.call(self, studies),
-                         pageSize: pageSize
+                         limit: limit
                        });
 
-      expect(self.element.find('li.list-group-item').length).toBe(pageSize);
+      expect(self.element.find('li.list-group-item').length).toBe(limit);
       expect(self.element.find('input').length).toBe(1);
     });
 
     it('displays the pannel header correctly', function() {
       var self = this,
           studies = _.map(_.range(20), function () { return self.factory.study(); }),
-          pageSize = studies.length / 2;
+          limit = studies.length / 2;
 
       createScope.call(this,
                        {
                          getStudies: createGetStudiesFn.call(this, studies),
-                         pageSize: pageSize
+                         limit: limit
                        });
       expect(self.element.find('h3').text()).toBe(panelHeader);
     });
@@ -101,7 +101,7 @@ define([
       createScope.call(this,
                        {
                          getStudies: createGetStudiesFn.call(self, studies),
-                         pageSize: studies.length
+                         limit: studies.length
                        });
       expect(self.element.find('input').length).toBe(1);
     });
@@ -109,12 +109,12 @@ define([
     it('displays pagination controls', function() {
       var self = this,
           studies = _.map(_.range(20), function () { return self.factory.study(); }),
-          pageSize = studies.length / 2;
+          limit = studies.length / 2;
 
       createScope.call(this,
                        {
                          getStudies: createGetStudiesFn.call(self, studies),
-                         pageSize: pageSize
+                         limit: limit
                        });
 
       expect(self.controller.showPagination).toBe(true);
@@ -124,12 +124,12 @@ define([
     it('updates to name filter cause studies to be re-loaded', function() {
       var self = this,
           studies = _.map(_.range(20), function () { return self.factory.study(); }),
-          pageSize = studies.length / 2;
+          limit = studies.length / 2;
 
       createScope.call(this,
                        {
                          getStudies: createGetStudiesFn.call(self, studies),
-                         pageSize: pageSize
+                         limit: limit
                        });
       spyOn(self.scope.model, 'getStudies').and.callThrough();
       self.controller.nameFilterUpdated();
@@ -139,12 +139,12 @@ define([
     it('page change causes studies to be re-loaded', function() {
       var self = this,
           studies = _.map(_.range(20), function () { return self.factory.study(); }),
-          pageSize = studies.length / 2;
+          limit = studies.length / 2;
 
       createScope.call(this,
                        {
                          getStudies: createGetStudiesFn.call(self, studies),
-                         pageSize: pageSize
+                         limit: limit
                        });
 
       spyOn(self.scope.model, 'getStudies').and.callThrough();
@@ -155,12 +155,12 @@ define([
     it('clear filter causes studies to be re-loaded', function() {
       var self = this,
           studies = _.map(_.range(20), function () { return self.factory.study(); }),
-          pageSize = studies.length / 2;
+          limit = studies.length / 2;
 
       createScope.call(this,
                        {
                          getStudies: createGetStudiesFn.call(self, studies),
-                         pageSize: pageSize
+                         limit: limit
                        });
 
       spyOn(self.scope.model, 'getStudies').and.callThrough();
@@ -171,13 +171,13 @@ define([
     it('studyGlyphicon returns valid image tag', function() {
       var self = this,
           studies = _.map(_.range(20), function () { return self.factory.study(); }),
-          pageSize = studies.length / 2,
+          limit = studies.length / 2,
           studyToNavigateTo = studies[0];
 
       createScope.call(this,
                        {
                          getStudies: createGetStudiesFn.call(this, studies),
-                         pageSize: pageSize
+                         limit: limit
                        });
 
       expect(self.controller.studyGlyphicon(studyToNavigateTo))

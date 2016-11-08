@@ -39,7 +39,7 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
            stateFilterMaybe:          Option[String],
            sortMaybe:                 Option[String],
            pageMaybe:                 Option[Int],
-           pageSizeMaybe:             Option[Int],
+           limitMaybe:             Option[Int],
            orderMaybe:                Option[String]) =
     action.async(parse.empty) { implicit request =>
       Future {
@@ -48,7 +48,7 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
         val stateFilter          = stateFilterMaybe.fold { "" } { st => st }
         val sort                 = sortMaybe.fold { "courierName" } { s => s }
         val page                 = pageMaybe.fold { 1 } { p => p }
-        val pageSize             = pageSizeMaybe.fold { 5 } { ps => ps }
+        val limit             = limitMaybe.fold { 5 } { ps => ps }
         val order                = orderMaybe.fold { "asc" } { o => o }
 
         log.debug(
@@ -58,10 +58,10 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
               | stateFilter:          $stateFilter,
               | sort:                 $sort,
               | page:                 $page,
-              | pageSize:             $pageSize,
+              | limit:             $limit,
               | order:                $order""".stripMargin)
 
-        val pagedQuery = PagedQuery(page, pageSize, order)
+        val pagedQuery = PagedQuery(page, limit, order)
 
         val validation = for {
             sortOrder   <- pagedQuery.getSortOrder
@@ -72,8 +72,8 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
                                                          sort,
                                                          sortOrder)
             page        <- pagedQuery.getPage(PageSizeMax, shipments.size)
-            pageSize    <- pagedQuery.getPageSize(PageSizeMax)
-            results     <- PagedResults.create(shipments, page, pageSize)
+            limit    <- pagedQuery.getPageSize(PageSizeMax)
+            results     <- PagedResults.create(shipments, page, limit)
           } yield results
 
         validation.fold(
@@ -92,14 +92,14 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
                     stateFilterMaybe: Option[String],
                     sortMaybe:        Option[String],
                     pageMaybe:        Option[Int],
-                    pageSizeMaybe:    Option[Int],
+                    limitMaybe:    Option[Int],
                     orderMaybe:       Option[String]) =
     action.async(parse.empty) { implicit request =>
       Future {
         val stateFilter = stateFilterMaybe.fold { "" } { s => s }
         val sort        = sortMaybe.fold { "inventoryId" } { s => s }
         val page        = pageMaybe.fold { 1 } { p => p }
-        val pageSize    = pageSizeMaybe.fold { 5 } { ps => ps }
+        val limit    = limitMaybe.fold { 5 } { ps => ps }
         val order       = orderMaybe.fold { "asc" } { o => o }
 
         log.debug(s"""|ShipmentsController:listSpecimens:
@@ -107,17 +107,17 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
                       | stateFilter: $stateFilter,
                       | sort:        $sort,
                       | page:        $page,
-                      | pageSize:    $pageSize,
+                      | limit:    $limit,
                       | order:       $order""".stripMargin)
 
-        val pagedQuery = PagedQuery(page, pageSize, order)
+        val pagedQuery = PagedQuery(page, limit, order)
 
         val validation = for {
             sortOrder         <- pagedQuery.getSortOrder
             shipmentSpecimens <- shipmentsService.getShipmentSpecimens(shipmentId, stateFilter, sort, sortOrder)
             page              <- pagedQuery.getPage(PageSizeMax, shipmentSpecimens.size)
-            pageSize          <- pagedQuery.getPageSize(PageSizeMax)
-            results           <- PagedResults.create(shipmentSpecimens, page, pageSize)
+            limit          <- pagedQuery.getPageSize(PageSizeMax)
+            results           <- PagedResults.create(shipmentSpecimens, page, limit)
           } yield results
 
         validation.fold(

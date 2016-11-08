@@ -198,7 +198,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
           validKeys = [
             'sort',
             'page',
-            'pageSize',
+            'limit',
             'order'
           ];
 

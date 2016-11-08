@@ -41,7 +41,7 @@ define(['lodash'], function(_) {
     var vm = this;
 
     vm.studyCounts      = {};
-    vm.pageSize         = 5;
+    vm.limit         = 5;
     vm.updateStudies    = Study.list;
     vm.getStudyIcon     = getStudyIcon;
 

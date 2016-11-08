@@ -26,7 +26,7 @@ define([
         '<select-centre panel-header="{{model.panelHeader}}"',
         '               get-centres="model.getCentres"',
         '               on-centre-selected="model.onCentreSelected"',
-        '               page-size="model.pageSize"',
+        '               page-size="model.limit"',
         '               message-no-results="No results match the criteria."',
         '               icon="glyphicon-ok-circle">',
         '</select-centre>'
@@ -44,12 +44,12 @@ define([
 
       function getCentres (pagerOptions) {
         return self.$q.when({
-          items:    centres.slice(0, pagerOptions.pageSize),
+          items:    centres.slice(0, pagerOptions.limit),
           page:     0,
           offset:   0,
           total:    centres.length,
-          pageSize: pagerOptions.pageSize,
-          maxPages: centres.length / pagerOptions.pageSize
+          limit: pagerOptions.limit,
+          maxPages: centres.length / pagerOptions.limit
         });
       }
     };
@@ -72,26 +72,26 @@ define([
     it('displays the list of centres', function() {
       var self = this,
           centres = _.map(_.range(20), function () { return self.factory.centre(); }),
-          pageSize = centres.length / 2;
+          limit = centres.length / 2;
 
-      self.createScope({ getCentres: self.createGetCentresFn(centres), pageSize: pageSize });
+      self.createScope({ getCentres: self.createGetCentresFn(centres), limit: limit });
 
-      expect(self.element.find('li.list-group-item').length).toBe(pageSize);
+      expect(self.element.find('li.list-group-item').length).toBe(limit);
       expect(self.element.find('input').length).toBe(1);
     });
 
     it('displays the pannel header correctly', function() {
       var self = this,
           centres = _.map(_.range(20), function () { return self.factory.centre(); }),
-          pageSize = centres.length / 2;
+          limit = centres.length / 2;
 
-      self.createScope({ getCentres: self.createGetCentresFn(centres), pageSize: pageSize });
+      self.createScope({ getCentres: self.createGetCentresFn(centres), limit: limit });
       expect(self.element.find('h3').text()).toBe(panelHeader);
     });
 
     it('has a name filter', function() {
       var centres = [ this.factory.centre() ];
-      this.createScope({ getCentres: this.createGetCentresFn(centres), pageSize: centres.length });
+      this.createScope({ getCentres: this.createGetCentresFn(centres), limit: centres.length });
       expect(this.element.find('input').length).toBe(1);
     });
 
@@ -99,9 +99,9 @@ define([
     it('displays pagination controls', function() {
       var self = this,
           centres = _.map(_.range(20), function () { return self.factory.centre(); }),
-          pageSize = centres.length / 2;
+          limit = centres.length / 2;
 
-      self.createScope({ getCentres: self.createGetCentresFn(centres), pageSize: pageSize });
+      self.createScope({ getCentres: self.createGetCentresFn(centres), limit: limit });
       expect(self.controller.showPagination).toBe(true);
       expect(self.element.find('ul.pagination').length).toBe(1);
     });
@@ -109,9 +109,9 @@ define([
     it('updates to name filter cause studies to be re-loaded', function() {
       var self = this,
           centres = _.map(_.range(8), function () { return self.factory.centre(); }),
-          pageSize = centres.length / 2;
+          limit = centres.length / 2;
 
-      self.createScope({ getCentres: self.createGetCentresFn(centres), pageSize: pageSize });
+      self.createScope({ getCentres: self.createGetCentresFn(centres), limit: limit });
 
       spyOn(self.scope.model, 'getCentres').and.callThrough();
       self.controller.nameFilterUpdated();
@@ -121,9 +121,9 @@ define([
     it('page change causes centres to be re-loaded', function() {
       var self = this,
           centres = _.map(_.range(8), function () { return self.factory.centre(); }),
-          pageSize = centres.length / 2;
+          limit = centres.length / 2;
 
-      self.createScope({ getCentres: self.createGetCentresFn(centres), pageSize: pageSize });
+      self.createScope({ getCentres: self.createGetCentresFn(centres), limit: limit });
       spyOn(self.scope.model, 'getCentres').and.callThrough();
       self.controller.pageChanged();
       expect(self.scope.model.getCentres).toHaveBeenCalled();
@@ -132,9 +132,9 @@ define([
     it('clear filter causes centres to be re-loaded', function() {
       var self = this,
           centres = _.map(_.range(8), function () { return self.factory.centre(); }),
-          pageSize = centres.length / 2;
+          limit = centres.length / 2;
 
-      self.createScope({ getCentres: self.createGetCentresFn(centres), pageSize: pageSize });
+      self.createScope({ getCentres: self.createGetCentresFn(centres), limit: limit });
       spyOn(self.scope.model, 'getCentres').and.callThrough();
       self.controller.clearFilter();
       expect(self.scope.model.getCentres).toHaveBeenCalled();
@@ -143,9 +143,9 @@ define([
     it('studyGlyphicon returns valid image tag', function() {
       var self = this,
           centres = _.map(_.range(8), function () { return self.factory.centre(); }),
-          pageSize = centres.length / 2;
+          limit = centres.length / 2;
 
-      self.createScope({ getCentres: self.createGetCentresFn(centres), pageSize: pageSize });
+      self.createScope({ getCentres: self.createGetCentresFn(centres), limit: limit });
       expect(self.controller.centreGlyphicon())
         .toEqual('<i class="glyphicon glyphicon-ok-circle"></i>');
     });

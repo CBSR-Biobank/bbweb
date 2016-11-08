@@ -723,7 +723,7 @@ define([
         page:     1,
         offset:   0,
         total:    entities.length,
-        pageSize: 5,
+        limit: 5,
         next:     2,
         maxPages: 4
       };

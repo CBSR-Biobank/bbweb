@@ -39,9 +39,9 @@ class StudiesRouter @Inject()(controller: StudiesController) extends SimpleRoute
                & q_o"status=$status"
                & q_o"sort=$sort"
                & q_o"page=${int(page)}"
-               & q_o"pageSize=${int(pageSize)}"
+               & q_o"limit=${int(limit)}"
                & q_o"order=$order") =>
-      controller.list(filter, status, sort, page, pageSize, order)
+      controller.list(filter, status, sort, page, limit, order)
 
     case POST(p"/") =>
       controller.add
