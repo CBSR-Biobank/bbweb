@@ -15,7 +15,7 @@ import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
 import org.biobank.infrastructure.event.ShipmentEvents._
 import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
 import org.biobank.infrastructure.{AscendingOrder, SortOrder}
-import org.biobank.service.{ServiceError, ServiceValidation}
+import org.biobank.service.{QuerySortParser, ServiceError, ServiceValidation}
 import org.biobank.service.participants.SpecimensService
 import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -28,12 +28,7 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[ShipmentsServiceImpl])
 trait ShipmentsService {
 
-  def getShipments(centreId:             CentreId,
-                   courierFilter:        String,
-                   trackingNumberFilter: String,
-                   stateFilter:          String,
-                   sortBy:               String,
-                   order:                SortOrder): ServiceValidation[List[ShipmentDto]]
+  def getShipments(centreId: CentreId, filter: String, sort: String): ServiceValidation[List[ShipmentDto]]
 
   def getShipment(id: ShipmentId): ServiceValidation[ShipmentDto]
 
@@ -71,63 +66,58 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
                                       val collectionEventTypeRepository: CollectionEventTypeRepository,
                                       val specimensService:              SpecimensService)
     extends ShipmentsService
-    with ShipmentConstraints {
+    with ShipmentConstraints
+    with ShipmentPredicateConverter {
+
+  import org.biobank.service.QueryFilterParserGrammar._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
   implicit val timeout: Timeout = 5.seconds
 
-  def getShipments(centreId:             CentreId,
-                   courierFilter:        String,
-                   trackingNumberFilter: String,
-                   stateFilter:          String,
-                   sortBy:               String,
-                   order:                SortOrder)
-      : ServiceValidation[List[ShipmentDto]] = {
-    ShipmentDto.sort2Compare.get(sortBy).
-      toSuccessNel(ServiceError(s"invalid sort field: $sortBy")).
-      flatMap { sortFunc =>
+  /**
+   * See:
+   *
+   * - http://stackoverflow.com/questions/17791933/filter-over-list-with-dynamic-filter-parameter
+   *
+   * -http://danielwestheide.com/blog/2013/01/23/the-neophytes-guide-to-scala-part-10-staying-dry-with-higher-order-functions.html
+   *
+   */
+  def getShipments(centreId: CentreId, filter: String, sort: String):
+      ServiceValidation[List[ShipmentDto]] = {
 
-        val centreShipments = shipmentRepository.withCentre(centreId)
+    val centreShipments = shipmentRepository.withCentre(centreId)
 
-        val shipmentsFilteredByCourier = if (!courierFilter.isEmpty) {
-            val courierLowerCase = courierFilter.toLowerCase
-            centreShipments.filter { _.courierName.toLowerCase.contains(courierLowerCase)}
-          } else {
-            centreShipments
-          }
-
-        val shipmentsFilteredByTrackingNumber: Set[Shipment] =
-          if (!trackingNumberFilter.isEmpty) {
-            val trackingNumLowerCase = trackingNumberFilter.toLowerCase
-            shipmentsFilteredByCourier.filter { _.trackingNumber.toLowerCase.contains(trackingNumLowerCase)}
-          } else {
-            shipmentsFilteredByCourier
-          }
-
-        val stateFilterValidation = if (stateFilter.isEmpty) {
-            shipmentsFilteredByTrackingNumber.successNel[String]
-          } else {
-            val stateFilterLowercase = stateFilter.toLowerCase
-            ShipmentState.values.find(_.toString == stateFilterLowercase) match {
-              case Some(state) =>
-                shipmentsFilteredByTrackingNumber.filter(_.state == state).successNel[String]
-              case None =>
-                ServiceError(s"invalid shipment state: $stateFilter").failureNel[Set[Shipment]]
-            }
-          }
-
-        stateFilterValidation.flatMap {
-            _.map(getShipmentDto).
-              toList.
-              sequenceU.
-              map { list =>
-                val result = list.sortWith(sortFunc)
-                if (order == AscendingOrder) result
-                else result.reverse
-              }
+    val filteredShipments: ServiceValidation[Set[Shipment]] = parseFilter(filter).
+      flatMap { filterExpression =>
+        filterExpression match {
+          case None =>
+            centreShipments.successNel[String]
+          case Some(c: Comparison) =>
+            comparisonToPredicates(c).map(centreShipments.filter)
+          case Some(e: AndExpression) =>
+            comparisonToPredicates(e).map(centreShipments.filter)
+          case Some(e: OrExpression) =>
+            comparisonToPredicates(e).map(centreShipments.filter)
+          case _ =>
+            ServiceError(s"bad filter expression: $filterExpression").failureNel[Set[Shipment]]
         }
       }
+
+    for {
+      sortExpressions <- {
+        QuerySortParser(sort).toSuccessNel(ServiceError(s"could not parse sort expression: $sort"))
+      }
+      sortFunc <- {
+        ShipmentDto.sort2Compare.get(sortExpressions(0).name).
+          toSuccessNel(ServiceError(s"invalid sort field: ${sortExpressions(0).name}"))
+      }
+      shipments <- filteredShipments.flatMap(_.map(getShipmentDto).toList.sequenceU)
+    } yield {
+      val result = shipments.sortWith(sortFunc)
+      if (sortExpressions(0).order == AscendingOrder) result
+      else result.reverse
+    }
   }
 
   def getShipment(id: ShipmentId): ServiceValidation[ShipmentDto] = {

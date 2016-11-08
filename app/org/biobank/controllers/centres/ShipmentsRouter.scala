@@ -1,10 +1,10 @@
 package org.biobank.controllers.centres
 
 import javax.inject.Inject
+import org.biobank.controllers.Pagination
 import play.api.routing.Router.Routes
 import play.api.routing.SimpleRouter
 import play.api.routing.sird._
-
 
 class ShipmentsRouter @Inject()(controller: ShipmentsController) extends SimpleRouter {
   import CentreRouting._
@@ -13,14 +13,8 @@ class ShipmentsRouter @Inject()(controller: ShipmentsController) extends SimpleR
     case POST(p"/") =>
       controller.add
 
-    case GET(p"/list/${centreId(cId)}" ? q_o"courierFilter=$courierFilter"
-               & q_o"trackingNumberFilter=$trackingNumberFilter"
-               & q_o"stateFilter=$stateFilter"
-               & q_o"sort=$sort"
-               & q_o"page=${int(page)}"
-               & q_o"limit=${int(limit)}"
-               & q_o"order=$order") =>
-      controller.list(cId, courierFilter, trackingNumberFilter, stateFilter, sort, page, limit, order)
+    case GET(p"/list/${centreId(cId)}") =>
+      controller.list(cId)
 
     case POST(p"/courier/${shipmentId(id)}") =>
       controller.updateCourier(id)

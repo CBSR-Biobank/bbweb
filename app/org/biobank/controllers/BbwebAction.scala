@@ -28,7 +28,7 @@ class BbwebAction @Inject()(val env:          Environment,
 
   override def invokeBlock[A](request: Request[A], block: BbwebRequestBlock[A]):
       Future[Result] = {
-    if (logger.isTraceEnabled()) {
+    if (logger.isTraceEnabled) {
       logger.trace(s"invokeBlock: request = $request")
     }
 

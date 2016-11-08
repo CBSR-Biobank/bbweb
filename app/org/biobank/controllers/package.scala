@@ -9,7 +9,6 @@ package object controllers {
 
   /** Contains an error messsage when an invalid condition happens. */
   type ControllerError = String
-
 }
 
 package controllers {
@@ -18,5 +17,7 @@ package controllers {
   object ControllerError {
     def apply(msg: String): ControllerError = msg
   }
+
+  final case class Pagination(filter: String, sort: String, page: Int, limit: Int)
 
 }

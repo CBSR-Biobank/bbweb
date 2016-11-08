@@ -154,7 +154,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         compareObjs(jsonItems, expectedStudies)
       }
 
-      "111 list enabled studies when filtered by status" in {
+      "list enabled studies when filtered by status" in {
         val studies = List(factory.createDisabledStudy,
                            factory.createDisabledStudy,
                            factory.createEnabledStudy,

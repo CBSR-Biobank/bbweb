@@ -2,9 +2,10 @@ package org.biobank.controllers.centres
 
 import com.github.nscala_time.time.Imports._
 import org.biobank.controllers.PagedResultsSpec
-import org.biobank.domain.centre._
 import org.biobank.domain.centre.ShipmentState._
+import org.biobank.domain.centre._
 import org.joda.time.DateTime
+import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
 import scala.language.reflectiveCalls
@@ -83,113 +84,161 @@ class ShipmentsControllerSpec
         ShipmentState.values.foreach { state =>
           info(s"$state shipment")
           val jsonItem = PagedResultsSpec(this)
-            .singleItemResult(listUri(f.fromCentre), Map("stateFilter" -> state.toString))
+            .singleItemResult(listUri(f.fromCentre), Map("filter" -> s"state::$state"))
           compareObj(jsonItem, f.shipments.get(state).value)
         }
+      }
+
+      "fail when using an invalid filter string" in {
+        val f = centresFixture
+        val invalidFilterString = "xxx"
+        val reply = makeRequest(GET, listUri(f.fromCentre) + s"?filter=$invalidFilterString", BAD_REQUEST)
+
+        (reply \ "status").as[String] must include ("error")
+
+        (reply \ "message").as[String] must include regex ("could not parse filter expression:")
       }
 
       "fail when using an invalid state filter" in {
         val f = centresFixture
         val invalidStateName = nameGenerator.next[Shipment]
 
-        val reply = makeRequest(GET, listUri(f.fromCentre) + s"?stateFilter=$invalidStateName", BAD_REQUEST)
+        val reply = makeRequest(GET, listUri(f.fromCentre) + s"?filter=state::$invalidStateName", BAD_REQUEST)
 
         (reply \ "status").as[String] must include ("error")
 
-        (reply \ "message").as[String] must include regex ("invalid shipment state")
+        (reply \ "message").as[String] must include regex ("shipment state does not exist:")
       }
 
       "list a single shipment when filtered by courier name" in {
         val f = createdShipmentFixture(2)
         f.shipmentMap.values.foreach(shipmentRepository.put)
         val shipment = f.shipmentMap.values.head
+        val uri = s"courierName::${shipment.courierName}"
         val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(listUri(f.fromCentre), Map("courierFilter" -> shipment.courierName))
+          .singleItemResult(listUri(f.fromCentre), Map("filter" -> uri))
         compareObj(jsonItem, shipment)
+      }
+
+      "list multiple shipments when filtered by courier name" in {
+        val numShipments = 2
+        val f = createdShipmentFixture(numShipments)
+        val shipments = f.shipmentMap.values.toList
+        val courierNames = shipments.map(_.courierName)
+
+        shipments.foreach(shipmentRepository.put)
+        val uri = s"""courierName:in:(${courierNames.mkString(",")})"""
+
+        val jsonItems =
+          PagedResultsSpec(this).multipleItemsResult(uri         = listUri(f.fromCentre),
+                                                     queryParams = Map("filter" -> uri),
+                                                     offset      = 0,
+                                                     total       = numShipments.toLong,
+                                                     maybeNext   = None,
+                                                     maybePrev   = None)
+        jsonItems must have size numShipments.toLong
+        compareObj(jsonItems(0), shipments(0))
+        compareObj(jsonItems(1), shipments(1))
       }
 
       "list a single shipment when filtered by tracking number" in {
         val f = createdShipmentFixture(2)
         f.shipmentMap.values.foreach(shipmentRepository.put)
         val shipment = f.shipmentMap.values.head
-        val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(listUri(f.fromCentre), Map("trackingNumberFilter" -> shipment.trackingNumber))
+        val jsonItem = PagedResultsSpec(this).singleItemResult(
+            listUri(f.fromCentre),
+            Map("filter" -> s"trackingNumber::${shipment.trackingNumber}"))
         compareObj(jsonItem, shipment)
       }
 
-      "list shipments sorted by courier name" must {
+      "111 list a single shipment when filtered with a logical expression" in {
+        val numShipments = 2
+        val f = createdShipmentFixture(numShipments)
+        val shipments = f.shipmentMap.values.toList
+        val shipment = shipments(0)
 
-        def requestShipments(order: String) = {
-          val f = centresFixture
-          val shipments = List("FedEx", "UPS", "Canada Post").map { name =>
-              factory.createShipment(f.fromCentre, f.toCentre).copy(courierName = name)
-            }.toList
-          shipments.foreach(shipmentRepository.put)
+        val expressions = Table(
+            "expression",
+            s"""courierName::${shipment.courierName};trackingNumber::${shipment.trackingNumber}""",
+            s"""courierName::${shipment.courierName},trackingNumber::${shipment.trackingNumber}"""
+          )
+
+        forAll(expressions) { expression =>
+        shipments.foreach(shipmentRepository.put)
+          val jsonItem =
+            PagedResultsSpec(this).singleItemResult(uri         = listUri(f.fromCentre),
+                                                    queryParams = Map("filter" -> expression))
+          compareObj(jsonItem, shipment)
+        }
+      }
+
+      "list shipments sorted by courier name" in {
+        val f = centresFixture
+        val shipments = List("FedEx", "UPS", "Canada Post").
+          map { name =>
+            factory.createShipment(f.fromCentre, f.toCentre).copy(courierName = name)
+          }.
+          toList
+        shipments.foreach(shipmentRepository.put)
+
+        val orders = Table("order", "asc", "desc")
+        forAll(orders) { order =>
+          val sortExpression = if (order == "asc") "courierName"
+                               else "-courierName"
           val jsonItems = PagedResultsSpec(this)
             .multipleItemsResult(uri       = listUri(f.fromCentre),
-                                 queryParams = Map("sort" -> "courierName",
-                                                   "order" -> order),
+                                 queryParams = Map("sort" -> sortExpression),
                                  offset    = 0,
                                  total     = shipments.size.toLong,
                                  maybeNext = None,
                                  maybePrev = None)
-          (shipments, jsonItems)
-        }
 
-        "in ascending order" in {
-          val (shipments, jsonItems) = requestShipments("asc")
           jsonItems must have size shipments.size.toLong
-          compareObj(jsonItems(0), shipments(2))
-          compareObj(jsonItems(1), shipments(0))
-          compareObj(jsonItems(2), shipments(1))
-        }
-
-        "in descending order" in {
-          val (shipments, jsonItems) = requestShipments("desc")
-          jsonItems must have size shipments.size.toLong
-          compareObj(jsonItems(0), shipments(1))
-          compareObj(jsonItems(1), shipments(0))
-          compareObj(jsonItems(2), shipments(2))
+          if (order == "asc") {
+            compareObj(jsonItems(0), shipments(2))
+            compareObj(jsonItems(1), shipments(0))
+            compareObj(jsonItems(2), shipments(1))
+          } else {
+            compareObj(jsonItems(0), shipments(1))
+            compareObj(jsonItems(1), shipments(0))
+            compareObj(jsonItems(2), shipments(2))
+          }
         }
       }
 
-      "list shipments sorted by tracking number" must {
+      "list shipments sorted by tracking number" in {
+        val f = centresFixture
+        val shipments = List("TN2", "TN3", "TN1")
+          .map { trackingNumber =>
+            factory.createShipment(f.fromCentre, f.toCentre).copy(trackingNumber = trackingNumber)
+          }.toList
+        shipments.foreach(shipmentRepository.put)
 
-        def requestShipments(order: String) = {
-          val f = centresFixture
-          val shipments = List("TN2", "TN3", "TN1")
-            .map { trackingNumber =>
-              factory.createShipment(f.fromCentre, f.toCentre).copy(trackingNumber = trackingNumber)
-            }.toList
-          shipments.foreach(shipmentRepository.put)
+        val orders = Table("order", "asc", "desc")
+        forAll(orders) { order =>
+          val sortExpression = if (order == "asc") "trackingNumber"
+                               else "-trackingNumber"
+
           val jsonItems = PagedResultsSpec(this)
             .multipleItemsResult(uri       = listUri(f.fromCentre),
-                                 queryParams = Map("sort" -> "trackingNumber",
-                                                   "order" -> order),
+                                 queryParams = Map("sort" -> sortExpression),
                                  offset    = 0,
                                  total     = shipments.size.toLong,
                                  maybeNext = None,
                                  maybePrev = None)
-          (shipments, jsonItems)
-        }
 
-        "in ascending order" in {
-          val (shipments, jsonItems) = requestShipments("asc")
           jsonItems must have size shipments.size.toLong
-          compareObj(jsonItems(0), shipments(2))
-          compareObj(jsonItems(1), shipments(0))
-          compareObj(jsonItems(2), shipments(1))
-        }
-
-        "in descending order" in {
-          val (shipments, jsonItems) = requestShipments("desc")
-          jsonItems must have size shipments.size.toLong
-          compareObj(jsonItems(0), shipments(1))
-          compareObj(jsonItems(1), shipments(0))
-          compareObj(jsonItems(2), shipments(2))
+          if (order == "asc") {
+            compareObj(jsonItems(0), shipments(2))
+            compareObj(jsonItems(1), shipments(0))
+            compareObj(jsonItems(2), shipments(1))
+          } else {
+            compareObj(jsonItems(0), shipments(1))
+            compareObj(jsonItems(1), shipments(0))
+            compareObj(jsonItems(2), shipments(2))
+          }
         }
       }
-
 
       "list a single shipment when using paged query" in {
         val f = centresFixture
@@ -687,10 +736,11 @@ class ShipmentsControllerSpec
           val f = allShipmentsFixture
           val timePacked = DateTime.now.minusDays(10)
 
-          List(ShipmentState.Created, ShipmentState.Sent).foreach { state =>
-            info(s"from $state state")
+          val fromStates = Table("fromStates", ShipmentState.Created, ShipmentState.Sent)
+          forAll(fromStates) { fromState =>
+            info(s"$fromState state")
 
-            val shipment = f.shipments(state)
+            val shipment = f.shipments(fromState)
             changeStateCommon(shipment, ShipmentState.Packed, Some(timePacked))
             shipmentRepository.getByKey(shipment.id) mustSucceed { repoShipment =>
               compareTimestamps(repoShipment,
@@ -709,9 +759,10 @@ class ShipmentsControllerSpec
         "change to SENT state from" in {
           val f = allShipmentsFixture
 
-          List(ShipmentState.Packed, ShipmentState.Received).foreach { state =>
-            info(s"$state state")
-            val shipment =  f.shipments(state)
+          val fromStates = Table("fromStates", ShipmentState.Packed, ShipmentState.Received)
+          forAll(fromStates) { fromState =>
+            info(s"$fromState state")
+            val shipment =  f.shipments(fromState)
             val time = shipment.timePacked.get.plusDays(1)
 
             changeStateCommon(shipment, ShipmentState.Sent, Some(time))
@@ -746,9 +797,10 @@ class ShipmentsControllerSpec
         "change to RECEIVED state from" in {
           val f = allShipmentsFixture
 
-          List(ShipmentState.Sent, ShipmentState.Unpacked).foreach { state =>
-            info(s"$state state")
-            val shipment =  f.shipments(state)
+          val fromStates = Table("fromStates", ShipmentState.Sent, ShipmentState.Unpacked)
+          forAll(fromStates) { fromState =>
+            info(s"$fromState state")
+            val shipment =  f.shipments(fromState)
             val time = shipment.timeSent.get.plusDays(1)
 
             changeStateCommon(shipment, ShipmentState.Received, Some(time))
@@ -846,13 +898,15 @@ class ShipmentsControllerSpec
       "fails when skipping to SENT state from state" in {
         val f = allShipmentsFixture
 
-        List(ShipmentState.Packed,
-             ShipmentState.Sent,
-             ShipmentState.Received,
-             ShipmentState.Unpacked,
-             ShipmentState.Lost).foreach { state =>
-          info(s"$state")
-          val shipment =  f.shipments(state)
+        val fromStates = Table("from states",
+                               ShipmentState.Packed,
+                               ShipmentState.Sent,
+                               ShipmentState.Received,
+                               ShipmentState.Unpacked,
+                               ShipmentState.Lost)
+        forAll(fromStates) { fromState =>
+          info(s"$fromState")
+          val shipment =  f.shipments(fromState)
           val time = DateTime.now.minusDays(10)
           val updateJson = Json.obj("expectedVersion" -> shipment.version,
                                     "timePacked"      -> time,
@@ -890,13 +944,15 @@ class ShipmentsControllerSpec
       "fails when skipping to UNPACKED state from state" in {
         val f = allShipmentsFixture
 
-        List(ShipmentState.Created,
-             ShipmentState.Packed,
-             ShipmentState.Received,
-             ShipmentState.Unpacked,
-             ShipmentState.Lost).foreach { state =>
-          info(s"$state")
-          val shipment =  f.shipments(state)
+        val fromStates = Table("from states",
+                               ShipmentState.Created,
+                               ShipmentState.Packed,
+                               ShipmentState.Received,
+                               ShipmentState.Unpacked,
+                               ShipmentState.Lost)
+        forAll(fromStates) { fromState =>
+          info(s"$fromState")
+          val shipment =  f.shipments(fromState)
           val time = shipment.timeSent.fold { DateTime.now } { t => t }
           val updateJson = Json.obj("expectedVersion" -> shipment.version,
                                     "timeReceived"    -> time,

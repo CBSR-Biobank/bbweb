@@ -26,6 +26,20 @@ object ShipmentId {
 
 }
 
+trait ShipmentPredicates {
+  type ShipmentFilter = Shipment => Boolean
+
+  val courierNameIsOneOf: Set[String] => ShipmentFilter =
+    courierNames => shipment => courierNames.contains(shipment.courierName)
+
+  val trackingNumberIsOneOf: Set[String] => ShipmentFilter =
+    trackingNumbers => shipment => trackingNumbers.contains(shipment.trackingNumber)
+
+  val stateIsOneOf: Set[ShipmentState] => ShipmentFilter =
+    states => shipment => states.contains(shipment.state)
+
+}
+
 trait ShipmentValidations {
 
   case object CourierNameInvalid extends ValidationKey

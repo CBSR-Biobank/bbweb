@@ -1,13 +1,13 @@
 package org.biobank.controllers.centres
 
 import javax.inject.{Inject, Singleton}
-import org.biobank.controllers.{BbwebAction, CommandController, JsonController}
+import play.api.libs.json._
+import play.api.{Environment, Logger}
+import org.biobank.controllers.{BbwebAction, CommandController, JsonController, Pagination}
 import org.biobank.domain.centre.{CentreId, ShipmentId}
 import org.biobank.service.centres.ShipmentsService
 import org.biobank.service.users.UsersService
 import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
-import play.api.libs.json._
-import play.api.{Environment, Logger}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.reflectiveCalls
 import scalaz.Scalaz._
@@ -33,47 +33,18 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
 
   private val PageSizeMax = 10
 
-  def list(centreId:                  CentreId,
-           courierFilterMaybe:        Option[String],
-           trackingNumberFilterMaybe: Option[String],
-           stateFilterMaybe:          Option[String],
-           sortMaybe:                 Option[String],
-           pageMaybe:                 Option[Int],
-           limitMaybe:             Option[Int],
-           orderMaybe:                Option[String]) =
+  def list(centreId: CentreId) =
     action.async(parse.empty) { implicit request =>
+      val pagination = Pagination("", "courierName", 1, 5)
+      log.info(s"--------> ${request.rawQueryString}")
       Future {
-        val courierFilter        = courierFilterMaybe.fold { "" } { cn => cn }
-        val trackingNumberFilter = trackingNumberFilterMaybe.fold { "" } { tn => tn }
-        val stateFilter          = stateFilterMaybe.fold { "" } { st => st }
-        val sort                 = sortMaybe.fold { "courierName" } { s => s }
-        val page                 = pageMaybe.fold { 1 } { p => p }
-        val limit             = limitMaybe.fold { 5 } { ps => ps }
-        val order                = orderMaybe.fold { "asc" } { o => o }
-
-        log.debug(
-          s"""|ShipmentsController:list:
-              | courierFilter:        $courierFilter,
-              | trackingNumberFilter: $trackingNumberFilter,
-              | stateFilter:          $stateFilter,
-              | sort:                 $sort,
-              | page:                 $page,
-              | limit:             $limit,
-              | order:                $order""".stripMargin)
-
-        val pagedQuery = PagedQuery(page, limit, order)
+        val pagedQuery = PagedQuery(pagination.page, pagination.limit, pagination.sort)
 
         val validation = for {
-            sortOrder   <- pagedQuery.getSortOrder
-            shipments   <- shipmentsService.getShipments(centreId,
-                                                         courierFilter,
-                                                         trackingNumberFilter,
-                                                         stateFilter,
-                                                         sort,
-                                                         sortOrder)
-            page        <- pagedQuery.getPage(PageSizeMax, shipments.size)
-            limit    <- pagedQuery.getPageSize(PageSizeMax)
-            results     <- PagedResults.create(shipments, page, limit)
+            shipments        <- shipmentsService.getShipments(centreId, pagination.filter, pagination.sort)
+            page             <- pagedQuery.getPage(PageSizeMax, shipments.size)
+            limit            <- pagedQuery.getPageSize(PageSizeMax)
+            results          <- PagedResults.create(shipments, page, limit)
           } yield results
 
         validation.fold(
@@ -92,7 +63,7 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
                     stateFilterMaybe: Option[String],
                     sortMaybe:        Option[String],
                     pageMaybe:        Option[Int],
-                    limitMaybe:    Option[Int],
+                    limitMaybe:       Option[Int],
                     orderMaybe:       Option[String]) =
     action.async(parse.empty) { implicit request =>
       Future {
