@@ -1,7 +1,6 @@
 package org.biobank.controllers.centres
 
 import javax.inject.Inject
-import org.biobank.controllers.Pagination
 import play.api.routing.Router.Routes
 import play.api.routing.SimpleRouter
 import play.api.routing.sird._
@@ -28,14 +27,29 @@ class ShipmentsRouter @Inject()(controller: ShipmentsController) extends SimpleR
     case POST(p"/tolocation/${shipmentId(id)}") =>
       controller.updateToLocation(id)
 
+    case POST(p"/state/created/${shipmentId(id)}") =>
+      controller.created(id)
+
+    case POST(p"/state/packed/${shipmentId(id)}") =>
+      controller.packed(id)
+
+    case POST(p"/state/sent/${shipmentId(id)}") =>
+      controller.sent(id)
+
+    case POST(p"/state/received/${shipmentId(id)}") =>
+      controller.received(id)
+
+    case POST(p"/state/unpacked/${shipmentId(id)}") =>
+      controller.unpacked(id)
+
+    case POST(p"/state/lost/${shipmentId(id)}") =>
+      controller.lost(id)
+
     case POST(p"/state/skip-to-sent/${shipmentId(id)}") =>
       controller.skipStateSent(id)
 
     case POST(p"/state/skip-to-unpacked/${shipmentId(id)}") =>
       controller.skipStateUnpacked(id)
-
-    case POST(p"/state/${shipmentId(id)}") =>
-      controller.changeState(id)
 
     case GET(p"/specimens/canadd/${shipmentId(shId)}/$invId") =>
       controller.canAddSpecimen(shId, invId)
@@ -43,12 +57,9 @@ class ShipmentsRouter @Inject()(controller: ShipmentsController) extends SimpleR
     case GET(p"/specimens/${shipmentId(shId)}/$shSpcId") =>
       controller.getSpecimen(shId, shSpcId)
 
-    case GET(p"/specimens/${shipmentId(id)}" ? q_o"stateFilter=$stateFilter"
-               & q_o"sort=$sort"
-               & q_o"page=${int(page)}"
-               & q_o"limit=${int(limit)}"
-               & q_o"order=$order") =>
-      controller.listSpecimens(id, stateFilter, sort, page, limit, order)
+    case GET(p"/specimens/${shipmentId(id)}") =>
+      // this action extracts parameters from the query string
+      controller.listSpecimens(id)
 
     case GET(p"/${shipmentId(id)}") =>
       controller.get(id)

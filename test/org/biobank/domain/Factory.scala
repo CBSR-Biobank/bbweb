@@ -414,22 +414,21 @@ class Factory {
   def createShipment(fromCentre:   Centre,
                      fromLocation: Location,
                      toCentre:     Centre,
-                     toLocation:   Location): Shipment = {
-    val shipment = Shipment(id             = ShipmentId(nameGenerator.next[Shipment]),
-                            version        = 0L,
-                            timeAdded      = DateTime.now,
-                            timeModified   = None,
-                            state          = ShipmentState.Created,
-                            courierName    = nameGenerator.next[Shipment],
-                            trackingNumber = nameGenerator.next[Shipment],
-                            fromCentreId   = fromCentre.id,
-                            fromLocationId = fromLocation.uniqueId,
-                            toCentreId     = toCentre.id,
-                            toLocationId   = toLocation.uniqueId,
-                            timePacked     = None,
-                            timeSent       = None,
-                            timeReceived   = None,
-                            timeUnpacked   = None)
+                     toLocation:   Location): CreatedShipment = {
+    val shipment = CreatedShipment(id             = ShipmentId(nameGenerator.next[Shipment]),
+                                   version        = 0L,
+                                   timeAdded      = DateTime.now,
+                                   timeModified   = None,
+                                   courierName    = nameGenerator.next[Shipment],
+                                   trackingNumber = nameGenerator.next[Shipment],
+                                   fromCentreId   = fromCentre.id,
+                                   fromLocationId = fromLocation.uniqueId,
+                                   toCentreId     = toCentre.id,
+                                   toLocationId   = toLocation.uniqueId,
+                                   timePacked     = None,
+                                   timeSent       = None,
+                                   timeReceived   = None,
+                                   timeUnpacked   = None)
     domainObjects = domainObjects + (classOf[Shipment] -> shipment)
     shipment
   }
@@ -437,40 +436,46 @@ class Factory {
   /**
    * Assumes fromCentre and toCentre have at least one location and use the first locations.
    */
-  def createShipment(fromCentre: Centre, toCentre: Centre): Shipment = {
+  def createShipment(fromCentre: Centre, toCentre: Centre): CreatedShipment = {
     createShipment(fromCentre, fromCentre.locations.head, toCentre, toCentre.locations.head)
   }
-  def createShipment(): Shipment = {
+
+  def createShipment: CreatedShipment = {
     val centre = defaultEnabledCentre
     val location = defaultLocation
     createShipment(centre, location, centre, location)
   }
 
-  def createPackedShipment(fromCentre: Centre, toCentre: Centre): Shipment = {
-    createShipment(fromCentre, toCentre).copy(state = ShipmentState.Packed,
-                                              timePacked = Some(DateTime.now.minusDays(10)))
+  def createPackedShipment(fromCentre: Centre, toCentre: Centre): PackedShipment = {
+    createShipment(fromCentre, toCentre).pack(DateTime.now.minusDays(10))
   }
 
-  def createSentShipment(fromCentre: Centre, toCentre: Centre): Shipment = {
+  def createSentShipment(fromCentre: Centre, toCentre: Centre): SentShipment = {
     val shipment = createPackedShipment(fromCentre, toCentre)
-    shipment.copy(state = ShipmentState.Sent,
-                  timeSent = Some(shipment.timePacked.get.plusDays(1)))
+    shipment.send(shipment.timePacked.get.plusDays(1)).fold(
+      err => sys.error("failed to create a sent shipment"),
+      s   => s
+    )
   }
 
-  def createReceivedShipment(fromCentre: Centre, toCentre: Centre): Shipment = {
+  def createReceivedShipment(fromCentre: Centre, toCentre: Centre): ReceivedShipment = {
     val shipment = createSentShipment(fromCentre, toCentre)
-    shipment.copy(state = ShipmentState.Received,
-                  timeReceived = Some(shipment.timeSent.get.plusDays(1)))
+    shipment.receive(shipment.timeSent.get.plusDays(1)).fold(
+      err => sys.error("failed to create a received shipment"),
+      s   => s
+    )
   }
 
-  def createUnpackedShipment(fromCentre: Centre, toCentre: Centre): Shipment = {
+  def createUnpackedShipment(fromCentre: Centre, toCentre: Centre): UnpackedShipment = {
     val shipment = createReceivedShipment(fromCentre, toCentre)
-      shipment.copy(state = ShipmentState.Unpacked,
-                    timeUnpacked = Some(shipment.timeReceived.get.plusDays(1)))
+    shipment.unpack(shipment.timeReceived.get.plusDays(1)).fold(
+      err => sys.error("failed to create a unpacked shipment"),
+      s   => s
+    )
   }
 
-  def createLostShipment(fromCentre: Centre, toCentre: Centre): Shipment = {
-    createSentShipment(fromCentre, toCentre).copy(state = ShipmentState.Lost)
+  def createLostShipment(fromCentre: Centre, toCentre: Centre): LostShipment = {
+    createSentShipment(fromCentre, toCentre).lost
   }
 
   def createShipmentSpecimen(): ShipmentSpecimen = {

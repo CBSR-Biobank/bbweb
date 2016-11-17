@@ -129,7 +129,7 @@ class ShipmentSpecimensControllerSpec
         shipmentSpecimensMap.foreach { case (itemState, shipmentSpecimen, shipmentSpecimenDto ) =>
           val jsonItem = PagedResultsSpec(this).singleItemResult(
               uri         = uri(f.shipment, "specimens"),
-              queryParams = Map("stateFilter" -> itemState.toString),
+              queryParams = Map("filter" -> s"state::$itemState"),
               total       = 1,
               maybeNext   = None)
 
@@ -139,15 +139,16 @@ class ShipmentSpecimensControllerSpec
 
       "fail for an invalid item state for a shipment specimen" in {
         val f = createdShipmentFixture
-        val invalidStateName = nameGenerator.next[ShipmentSpecimen]
+        val invalidStateName = "state::" + nameGenerator.next[ShipmentSpecimen]
 
         val reply = makeRequest(GET,
-                                uri(f.shipment, "specimens") + s"?stateFilter=$invalidStateName",
+                                uri(f.shipment, "specimens") + s"?filter=$invalidStateName",
                                 BAD_REQUEST)
 
         (reply \ "status").as[String] must include ("error")
 
-        (reply \ "message").as[String] must include regex ("invalid shipment item state")
+        (reply \ "message").as[String] must include regex (
+          "InvalidState.shipment specimen state does not exist")
       }
 
       "list a single specimen when using paged query" in {
@@ -203,7 +204,7 @@ class ShipmentSpecimensControllerSpec
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
             uri         = uri(f.shipment, "specimens"),
-            queryParams = Map("sort" -> "state", "order" -> "desc"),
+            queryParams = Map("sort" -> "-state"),
             offset      = 0,
             total       = shipmentSpecimensMap.size.toLong,
             maybeNext   = None,
@@ -388,7 +389,7 @@ class ShipmentSpecimensControllerSpec
 
           (reply \ "status").as[String] must include ("error")
 
-          (reply \ "message").as[String] must include regex ("EntityCriteriaError.*not in created state")
+          (reply \ "message").as[String] must include regex ("InvalidState.*shipment not created")
         }
 
         val f = specimensFixture(1)
@@ -483,8 +484,7 @@ class ShipmentSpecimensControllerSpec
 
           (reply \ "status").as[String] must include ("error")
 
-          (reply \ "message").as[String] must include (
-            "EntityCriteriaError: shipment is not in unpacked state")
+          (reply \ "message").as[String] must include regex ("InvalidState.shipment not unpacked")
         }
 
         val f = specimensFixture(1)
@@ -603,8 +603,7 @@ class ShipmentSpecimensControllerSpec
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include regex (
-            "EntityCriteriaError.*shipment is not in created state")
+          (json \ "message").as[String] must include regex ("InvalidState.shipment not created")
 
           shipmentSpecimenRepository.getByKey(shipmentSpecimen.id).leftMap { _ =>
             fail("should still be in repository")

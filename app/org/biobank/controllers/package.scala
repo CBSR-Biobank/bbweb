@@ -18,6 +18,4 @@ package controllers {
     def apply(msg: String): ControllerError = msg
   }
 
-  final case class Pagination(filter: String, sort: String, page: Int, limit: Int)
-
 }

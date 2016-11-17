@@ -11,9 +11,11 @@ class QueryStringParserSpec extends FreeSpec with MustMatchers {
 
   "QueryStringParser" - {
 
-    "must fail for an empty string" in {
+    "must not fail for an empty string" in {
       val result = QueryStringParser("")
-      result mustBe None
+      inside (result) { case Some(expressions) =>
+        expressions must have size (0)
+      }
     }
 
     "must parse a single expression" in {
@@ -21,6 +23,19 @@ class QueryStringParserSpec extends FreeSpec with MustMatchers {
       inside (result) { case Some(expressions) =>
         expressions must have size (1)
         expressions("foo") must be ("bar")
+      }
+    }
+
+    "must parse a single empty expression" in {
+      val testStrings = Table("expression",
+                              s"""foo=''""",
+                              s"""foo=""""")
+      forAll(testStrings) { testString =>
+        val result = QueryStringParser(testString)
+        inside (result) { case Some(expressions) =>
+          expressions must have size (1)
+          expressions("foo") must be ("")
+        }
       }
     }
 
@@ -47,7 +62,7 @@ class QueryStringParserSpec extends FreeSpec with MustMatchers {
       }
     }
 
-    "111 must parse multiple RSQL expressions" in {
+    "must parse multiple RSQL expressions" in {
       val result = QueryStringParser(s"a=foo1::bar1,foo2::bar2&b=foo3:in:(bar1,bar2)")
       log.info(s"----> $result")
 

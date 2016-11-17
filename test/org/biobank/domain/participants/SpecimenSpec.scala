@@ -262,10 +262,10 @@ class SpecimenSpec extends DomainFreeSpec {
       Specimen.compareByTimeCreated(specimen2, specimen1) mustBe false
     }
 
-    "by status" in {
+    "by state" in {
       val (specimen1, specimen2) = (factory.createUnusableSpecimen, factory.createUsableSpecimen)
-      Specimen.compareByStatus(specimen1, specimen2) mustBe true
-      Specimen.compareByStatus(specimen2, specimen1) mustBe false
+      Specimen.compareByState(specimen1, specimen2) mustBe true
+      Specimen.compareByState(specimen2, specimen1) mustBe false
     }
   }
 }

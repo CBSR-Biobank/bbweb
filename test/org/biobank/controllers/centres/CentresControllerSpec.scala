@@ -164,24 +164,26 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
       "list a single centre when filtered by name" in {
         val centres = List(factory.createDisabledCentre, factory.createEnabledCentre)
+        val centre = centres(0)
         centres.foreach(centreRepository.put)
 
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri, Map("filter" -> centres(0).name))
+        val jsonItem = PagedResultsSpec(this).
+          singleItemResult(uri, Map("filter" -> s"name::${centre.name}"))
         compareObj(jsonItem, centres(0))
       }
 
-      "list a single disabled centre when filtered by status" in {
+      "list a single disabled centre when filtered by state" in {
         val centres = List(factory.createDisabledCentre,
                            factory.createEnabledCentre,
                            factory.createEnabledCentre)
         centres.foreach(centreRepository.put)
 
         val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri, Map("status" -> "DisabledCentre"))
+          .singleItemResult(uri, Map("filter" -> "state::disabled"))
         compareObj(jsonItem, centres(0))
       }
 
-      "list disabled centres when filtered by status" in {
+      "list disabled centres when filtered by state" in {
         val centres = List(factory.createDisabledCentre,
                            factory.createDisabledCentre,
                            factory.createEnabledCentre,
@@ -191,7 +193,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val expectedCentres = List(centres(0), centres(1))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
-          queryParams = Map("status" -> "DisabledCentre"),
+          queryParams = Map("filter" -> "state::disabled"),
           offset = 0,
           total = expectedCentres.size.toLong,
           maybeNext = None,
@@ -211,7 +213,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val expectedCentres = List(centres(2), centres(3))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
-          queryParams = Map("status" -> "EnabledCentre"),
+          queryParams = Map("filter" -> "state::enabled"),
           offset = 0,
           total = expectedCentres.size.toLong,
           maybeNext = None,
@@ -243,13 +245,13 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         compareObj(jsonItems(3), centres(0))
       }
 
-      "list centres sorted by status" in {
+      "list centres sorted by state" in {
         val centres = List(factory.createEnabledCentre, factory.createDisabledCentre)
         centres.foreach(centreRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
-          queryParams = Map("sort" -> "status"),
+          queryParams = Map("sort" -> "state"),
           offset = 0,
           total = centres.size.toLong,
           maybeNext = None,
@@ -266,7 +268,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
-          queryParams = Map("sort" -> "status", "order" -> "desc"),
+          queryParams = Map("sort" -> "-state"),
           offset = 0,
           total = centres.size.toLong,
           maybeNext = None,
@@ -275,6 +277,18 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         jsonItems must have size centres.size.toLong
         compareObj(jsonItems(0), centres(0))
         compareObj(jsonItems(1), centres(1))
+      }
+
+      "fail on attempt to list centres filtered by an invalid state name" in {
+        val invalidStateName = "state::" + nameGenerator.next[Study]
+        val reply = makeRequest(GET,
+                                uri + s"?filter=$invalidStateName",
+                                BAD_REQUEST)
+
+        (reply \ "status").as[String] must include ("error")
+
+        (reply \ "message").as[String] must include regex (
+          "InvalidState.centre state does not exist")
       }
 
       "list a single centre when using paged query" in {

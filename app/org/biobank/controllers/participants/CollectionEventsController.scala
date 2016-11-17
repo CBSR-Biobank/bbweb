@@ -2,9 +2,9 @@ package org.biobank.controllers.participants
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
-import org.biobank.domain.participants.{ParticipantId, CollectionEvent, CollectionEventId}
+import org.biobank.domain.participants.{ParticipantId, CollectionEventId}
 import org.biobank.infrastructure.command.CollectionEventCommands._
-import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
+import org.biobank.service.{AuthToken, PagedResults}
 import org.biobank.service.participants.CollectionEventsService
 import org.biobank.service.users.UsersService
 import play.api.libs.json._
@@ -15,7 +15,7 @@ import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 @Singleton
-class CollectionEventsController @Inject() (val action:         BbwebAction,
+class CollectionEventsController @Inject() (val action:       BbwebAction,
                                             val env:          Environment,
                                             val authToken:    AuthToken,
                                             val usersService: UsersService,
@@ -33,30 +33,14 @@ class CollectionEventsController @Inject() (val action:         BbwebAction,
       validationReply(service.get(ceventId))
     }
 
-  def list(participantId: ParticipantId,
-           sortMaybe:     Option[String],
-           pageMaybe:     Option[Int],
-           limitMaybe: Option[Int],
-           orderMaybe:    Option[String]) =
+  def list(participantId: ParticipantId) =
     action.async(parse.empty) { implicit request =>
       Future {
-        val sort     = sortMaybe.fold { "visitNumber" } { s => s }
-        val page     = pageMaybe.fold { 1 } { p => p }
-        val limit = limitMaybe.fold { 5 } { ps => ps }
-        val order    = orderMaybe.fold { "asc" } { o => o }
-
-        log.debug(s"""|CollectionEventsController:list: participantId/$participantId,
-                      |  sort/$sort, page/$page, limit/$limit, order/$order""".stripMargin)
-
-        val pagedQuery = PagedQuery(page, limit, order)
-
         val validation = for {
-            sortFunc    <- CollectionEvent.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
-            sortOrder   <- pagedQuery.getSortOrder
-            cevents     <- service.list(participantId, sortFunc, sortOrder)
-            page        <- pagedQuery.getPage(PageSizeMax, cevents.size)
-            limit    <- pagedQuery.getPageSize(PageSizeMax)
-            results     <- PagedResults.create(cevents, page, limit)
+            pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
+            cevents    <- service.list(participantId, pagedQuery.sort)
+            validPage  <- pagedQuery.validPage(cevents.size)
+            results    <- PagedResults.create(cevents, pagedQuery.page, pagedQuery.limit)
           } yield results
 
         validation.fold(

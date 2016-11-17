@@ -12,12 +12,13 @@ import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
 
-/** The subject for which a set of specimens were collected from. The subject can be human or non human.
- * A participant belongs to a single study.
+/**
+ * The subject for which a set of specimens were collected from. The subject can be human or non human. A
+ * participant belongs to a single study.
  *
- * @param uniqueId A participant has a unique identifier that is used to identify the participant in
- *        the system. This identifier is not the same as the ParticipantId value object
- *        used by the domain model.
+ * @param uniqueId A participant has a unique identifier that is used to identify the participant in the
+ *                 system. This identifier is not the same as the ParticipantId value object used by the
+ *                 domain model.
  */
 final case class Participant(id:           ParticipantId,
                              studyId:      StudyId,

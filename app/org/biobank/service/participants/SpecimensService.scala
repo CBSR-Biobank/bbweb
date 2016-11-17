@@ -9,10 +9,10 @@ import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
 import org.biobank.dto.{CentreLocationInfo, SpecimenDto}
+import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.SpecimenCommands._
 import org.biobank.infrastructure.event.SpecimenEvents._
-import org.biobank.infrastructure.{ SortOrder, AscendingOrder }
-import org.biobank.service.ServiceValidation
+import org.biobank.service._
 import org.slf4j.LoggerFactory
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
@@ -27,9 +27,7 @@ trait SpecimensService {
 
   def getByInventoryId(inventoryId: String): ServiceValidation[SpecimenDto]
 
-  def list(collectionEventId: CollectionEventId,
-           sortFunc:          (Specimen, Specimen) => Boolean,
-           order:             SortOrder)
+  def list(collectionEventId: CollectionEventId, sort: SortString)
       : ServiceValidation[Seq[SpecimenDto]]
 
   def processCommand(cmd: SpecimenCommand): Future[ServiceValidation[CollectionEvent]]
@@ -96,20 +94,26 @@ class SpecimensServiceImpl @Inject() (
     } yield dto
   }
 
-  def list(collectionEventId: CollectionEventId,
-           sortFunc:          (Specimen, Specimen) => Boolean,
-           order:             SortOrder)
+  def list(collectionEventId: CollectionEventId, sort: SortString)
       : ServiceValidation[Seq[SpecimenDto]] = {
 
     def getSpecimens(ceventId: CollectionEventId): ServiceValidation[List[Specimen]] = {
-      ceventSpecimenRepository.withCeventId(ceventId)
-        .map { cs => specimenRepository.getByKey(cs.specimenId) }
-        .toList
-        .sequenceU
-        .map { list => {
-                val result = list.sortWith(sortFunc)
-                if (order == AscendingOrder) result else result.reverse
-              }
+      val sortStr = if (sort.expression.isEmpty) new SortString("inventoryId")
+                    else sort
+
+      for {
+        specimens       <- { ceventSpecimenRepository.withCeventId(ceventId)
+                              .map { cs => specimenRepository.getByKey(cs.specimenId) }
+                              .toList
+                              .sequenceU }
+        sortExpressions <- { QuerySortParser(sortStr).
+                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
+        sortFunc        <- { Specimen.sort2Compare.get(sortExpressions(0).name).
+                              toSuccessNel(ServiceError(s"invalid sort field: ${sortExpressions(0).name}")) }
+      } yield {
+        val result = specimens.sortWith(sortFunc)
+        if (sortExpressions(0).order == AscendingOrder) result
+        else result.reverse
       }
     }
 

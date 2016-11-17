@@ -38,14 +38,13 @@ object QueryStringParser extends RegexParsers {
     """'[^\"=!~<>&]*'""".r ^^ { case v => Value(v.substring(1, v.size - 1))}
 
   def doubleQuotedValue =
-    """\"[^'=!~<>&]*\"""".r ^^ { case v => Value(v.substring(1, v.size - 1))}
+    """"[^'=!~<>&]*"""".r ^^ { case v => Value(v.substring(1, v.size - 1))}
 
   def unquotedValue =
     """[^'\"\=!~<>&]+""".r ^^ { case v => Value(v) }
 
   def value: Parser[Value] =
     (unquotedValue | singleQuotedValue | doubleQuotedValue) ^^ { case v => v }
-
 
   def name: Parser[Name] =
     """[_a-zA-Z]+[_a-zA-Z0-9.]*""".r ^^ { case n => Name(n) }
@@ -54,7 +53,7 @@ object QueryStringParser extends RegexParsers {
     name ~ "=" ~ value ^^ { case n ~ _ ~ v => Expression(n.name, v.name)}
 
   def expressions: Parser[List[Expression]] =
-      repsep(expression, "&")
+    repsep(expression, "&")
 
   def apply(str: String): Option[Map[String, String]] = {
     if (str.trim.isEmpty) {

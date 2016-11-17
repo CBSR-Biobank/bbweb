@@ -14,6 +14,14 @@ package object service {
 
 package service {
 
+  class FilterString(val expression: String) extends AnyVal {
+    override def toString = expression
+  }
+
+  class SortString(val expression: String) extends AnyVal {
+    override def toString = expression
+  }
+
   /** Factory object to create a domain error. */
   object ServiceError {
     def apply(msg: String): ServiceError = msg

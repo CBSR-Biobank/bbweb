@@ -29,8 +29,7 @@ message ShipmentEvent {
 
    message StateUpdated {
       optional int64  version         = 1;
-      optional string stateName       = 2;
-      optional string stateChangeTime = 3;
+      optional string stateChangeTime = 2;
    }
 
    message SkippedToSentState {
@@ -60,9 +59,14 @@ message ShipmentEvent {
       TrackingNumberUpdated  trackingNumberUpdated  = 6;
       LocationUpdated        fromLocationUpdated    = 7;
       LocationUpdated        toLocationUpdated      = 8;
-      StateUpdated           stateChanged           = 9;
-      WithVersion            removed                = 10;
-      SkippedToSentState     skippedToSentState     = 11;
-      SkippedToUnpackedState skippedToUnpackedState = 12;
+      StateUpdated           created                = 9;
+      StateUpdated           packed                 = 10;
+      StateUpdated           sent                   = 11;
+      StateUpdated           received               = 12;
+      StateUpdated           unpacked               = 13;
+      StateUpdated           lost                   = 14;
+      WithVersion            removed                = 15;
+      SkippedToSentState     skippedToSentState     = 16;
+      SkippedToUnpackedState skippedToUnpackedState = 17;
    }
 }

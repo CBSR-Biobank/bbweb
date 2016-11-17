@@ -30,6 +30,10 @@ package biobank {
       override val toString = s"InvalidStatus($msg)"
     }
 
+    final case class InvalidState(msg: String) extends ValidationMsgKey {
+      override val toString = s"InvalidState($msg)"
+    }
+
     case object InvalidToken extends ValidationKey {
       override val toString = "InvalidToken"
     }

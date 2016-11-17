@@ -10,11 +10,9 @@ class CollectionEventsRouter @Inject()(controller: CollectionEventsController) e
 
   override def routes: Routes = {
 
-    case GET(p"/list/${participantId(id)}" ? q_o"sort=$sort"
-               & q_o"page=${int(page)}"
-               & q_o"limit=${int(limit)}"
-               & q_o"order=$order") =>
-      controller.list(id, sort, page, limit, order)
+    case GET(p"/list/${participantId(id)}") =>
+      // this action extracts parameters from the query string
+      controller.list(id)
 
     case GET(p"/visitNumber/${participantId(id)}/${int(vn)}") =>
       controller.getByVisitNumber(id, vn)

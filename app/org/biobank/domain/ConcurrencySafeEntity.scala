@@ -1,5 +1,6 @@
 package org.biobank.domain
 
+import play.api.libs.json._
 import org.joda.time.DateTime
 import scalaz.Scalaz._
 
@@ -29,6 +30,21 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
   def requireVersion(expectedVersion: Long): DomainValidation[Boolean] = {
     if (this.version != expectedVersion) invalidVersion(expectedVersion).failureNel[Boolean]
     else true.successNel[String]
+  }
+
+}
+
+object ConcurrencySafeEntity {
+  import org.biobank.infrastructure.JsonUtils._
+
+  @SuppressWarnings(Array("org.wartremover.warts.Option2Iterable"))
+  def toJson[T <: ConcurrencySafeEntity[_]](entity: T): JsObject = {
+    Json.obj("id"           -> entity.id.toString,
+             "version"      -> entity.version,
+             "timeAdded"    -> entity.timeAdded) ++
+    JsObject(
+      Seq[(String, JsValue)]() ++
+        entity.timeModified.map("timeModified" -> Json.toJson(_)))
   }
 
 }

@@ -3,7 +3,6 @@ package org.biobank
 import javax.inject.{ Inject, Singleton }
 import org.biobank.domain._
 import org.biobank.domain.centre._
-import org.biobank.domain.centre.ShipmentState._
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
 import org.biobank.domain.user._
@@ -613,24 +612,22 @@ class TestData @Inject() (config:                        Configuration,
 
     def createShipment(courierName:    String,
                        trackingNumber: String,
-                       state:          ShipmentState,
                        fromCentre:     Centre,
                        toCentre:       Centre) =
-      Shipment(id             = ShipmentId(s"$courierName:$trackingNumber"),
-               version        = 0,
-               timeAdded      = DateTime.now,
-               timeModified   = None,
-               state          = state,
-               courierName    = courierName,
-               trackingNumber = trackingNumber,
-               fromCentreId   = fromCentre.id,
-               fromLocationId = fromCentre.locations.head.uniqueId,
-               toCentreId     = toCentre.id,
-               toLocationId   = toCentre.locations.head.uniqueId,
-               timePacked     = None,
-               timeSent       = None,
-               timeReceived   = None,
-               timeUnpacked   = None)
+      CreatedShipment(id             = ShipmentId(s"$courierName:$trackingNumber"),
+                      version        = 0,
+                      timeAdded      = DateTime.now,
+                      timeModified   = None,
+                      courierName    = courierName,
+                      trackingNumber = trackingNumber,
+                      fromCentreId   = fromCentre.id,
+                      fromLocationId = fromCentre.locations.head.uniqueId,
+                      toCentreId     = toCentre.id,
+                      toLocationId   = toCentre.locations.head.uniqueId,
+                      timePacked     = None,
+                      timeSent       = None,
+                      timeReceived   = None,
+                      timeUnpacked   = None)
 
     if (loadShipmentTestData) {
       log.debug(s"addBbpspShipments")
@@ -655,19 +652,13 @@ class TestData @Inject() (config:                        Configuration,
           sequenceU
 
         v.foreach { centres =>
-          val shipments = List(
-              createShipment("FedEx", "TN1", ShipmentState.Created, centres(0), centres(1)),
-              createShipment("FedEx", "TN2", ShipmentState.Packed, centres(1), centres(0)).
-                copy(timePacked = Some(DateTime.now)),
-              createShipment("FedEx", "TN3", ShipmentState.Unpacked, centres(0), centres(1)).
-                copy(timePacked   = Some(DateTime.now),
-                     timeSent     = Some(DateTime.now),
-                     timeReceived = Some(DateTime.now),
-                     timeUnpacked = Some(DateTime.now))
+          val shipmentMap = Map(
+              ( "created"  -> createShipment("FedEx", "TN1", centres(0), centres(1))),
+              ( "packed"   -> createShipment("FedEx", "TN2", centres(1), centres(0))),
+              ( "unpacked" -> createShipment("FedEx", "TN3", centres(0), centres(1)))
             )
 
-          shipments.foreach(shipmentRepository.put)
-          val shipmentMap = shipments.map(s => s.state -> s).toMap
+          shipmentMap.values.foreach(shipmentRepository.put)
 
           centres.foreach { centre =>
             val locationId = centre.locations.head.uniqueId
@@ -678,12 +669,12 @@ class TestData @Inject() (config:                        Configuration,
               val shipment =
                 if (locationId == centres(0).locations.head.uniqueId) {
                   if (index < halfSpecimenCount) {
-                    shipmentMap(ShipmentState.Created)
+                    shipmentMap("created")
                   } else {
-                    shipmentMap(ShipmentState.Unpacked)
+                    shipmentMap("unpacked")
                   }
                 } else {
-                  shipmentMap(ShipmentState.Packed)
+                  shipmentMap("packed")
                 }
               log.debug(s"adding specimen to shipment: specimen: $index, ${specimens.size}, ${spc.inventoryId}, ${shipment.trackingNumber}")
               val ss = ShipmentSpecimen(id                  = ShipmentSpecimenId(spc.id.id),

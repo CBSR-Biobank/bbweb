@@ -1,5 +1,8 @@
 package org.biobank
 
+import org.biobank.domain.centre.Shipment
+import org.biobank.domain.centre.ShipmentState._
+import org.biobank.domain.participants.SpecimenState._
 import org.biobank.infrastructure.JsonUtils._
 import org.joda.time.DateTime
 import play.api.libs.json._
@@ -44,7 +47,7 @@ package dto {
               locationId: String,
               centreName: String,
               locationName: String): CentreLocationInfo =
-        CentreLocationInfo(centreId, locationId, s"$centreName: $locationName")
+      CentreLocationInfo(centreId, locationId, s"$centreName: $locationName")
 
     implicit val centreLocationInfoWriter: Writes[CentreLocationInfo] = Json.writes[CentreLocationInfo]
 
@@ -75,6 +78,7 @@ package dto {
   }
 
   final case class SpecimenDto(id:                 String,
+                               state:              SpecimenState,
                                inventoryId:        String,
                                collectionEventId:  String,
                                specimenSpecId:     String,
@@ -88,8 +92,7 @@ package dto {
                                positionId:         Option[String],
                                timeCreated:        DateTime,
                                amount:             BigDecimal,
-                               units:              String,
-                               status:             String)
+                               units:              String)
 
   object SpecimenDto {
 
@@ -101,7 +104,7 @@ package dto {
                                version:          Long,
                                timeAdded:        DateTime,
                                timeModified:     Option[DateTime],
-                               state:            String,
+                               state:            ShipmentState,
                                courierName:      String,
                                trackingNumber:   String,
                                fromLocationInfo: CentreLocationInfo,
@@ -115,12 +118,34 @@ package dto {
 
   object ShipmentDto {
 
-  val sort2Compare = Map[String, (ShipmentDto, ShipmentDto) => Boolean](
-      "courierName"      -> compareByCourier,
-      "trackingNumber"   -> compareByTrackingNumber,
-      "state"            -> compareByState,
-      "fromLocationName" -> compareByFromLocation,
-      "toLocationName"   -> compareByToLocation)
+    val sort2Compare = Map[String, (ShipmentDto, ShipmentDto) => Boolean](
+        "courierName"      -> compareByCourier,
+        "trackingNumber"   -> compareByTrackingNumber,
+        "state"            -> compareByState,
+        "fromLocationName" -> compareByFromLocation,
+        "toLocationName"   -> compareByToLocation)
+
+
+    def create(shipment:         Shipment,
+               fromLocationInfo: CentreLocationInfo,
+               toLocationInfo:   CentreLocationInfo,
+               specimenCount:    Int,
+               containerCount:   Int) =
+      ShipmentDto(id               = shipment.id.id,
+                  version          = shipment.version,
+                  timeAdded        = shipment.timeAdded,
+                  timeModified     = shipment.timeModified,
+                  courierName      = shipment.courierName,
+                  trackingNumber   = shipment.trackingNumber,
+                  fromLocationInfo = fromLocationInfo,
+                  toLocationInfo   = toLocationInfo,
+                  timePacked       = shipment.timePacked,
+                  timeSent         = shipment.timeSent,
+                  timeReceived     = shipment.timeReceived,
+                  timeUnpacked     = shipment.timeUnpacked,
+                  specimenCount    = specimenCount,
+                  containerCount   = containerCount,
+                  state            = shipment.state)
 
     def compareByCourier(a: ShipmentDto, b: ShipmentDto) =
       (a.courierName compareToIgnoreCase b.courierName) < 0
@@ -129,7 +154,7 @@ package dto {
       (a.trackingNumber compareToIgnoreCase b.trackingNumber) < 0
 
     def compareByState(a: ShipmentDto, b: ShipmentDto) =
-      (a.state compareToIgnoreCase b.state) < 0
+      (a.state.toString compareToIgnoreCase b.state.toString) < 0
 
     def compareByFromLocation(a: ShipmentDto, b: ShipmentDto) =
       (a.fromLocationInfo.name compareToIgnoreCase b.fromLocationInfo.name) < 0
@@ -152,11 +177,11 @@ package dto {
 
   object ShipmentSpecimenDto {
 
-  val sort2Compare = Map[String, (ShipmentSpecimenDto, ShipmentSpecimenDto) => Boolean](
-      "inventoryId" -> compareByInventoryId,
-      "state"       -> compareByState,
-      "specName"    -> compareBySpecName,
-      "timeCreated" -> compareByTimeCreated)
+    val sort2Compare = Map[String, (ShipmentSpecimenDto, ShipmentSpecimenDto) => Boolean](
+        "inventoryId" -> compareByInventoryId,
+        "state"       -> compareByState,
+        "specName"    -> compareBySpecName,
+        "timeCreated" -> compareByTimeCreated)
 
     def compareByInventoryId(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto) =
       (a.specimen.inventoryId compareTo b.specimen.inventoryId) < 0

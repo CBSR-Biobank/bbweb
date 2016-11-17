@@ -2,7 +2,6 @@ package org.biobank.controllers.centres
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
-import org.biobank.domain.centre.Centre
 import org.biobank.domain.centre.CentreId
 import org.biobank.infrastructure.SortOrder
 import org.biobank.infrastructure.command.CentreCommands._
@@ -39,30 +38,14 @@ class CentresController @Inject() (val action:         BbwebAction,
       Ok(centresService.getCountsByStatus)
     }
 
-  def list(filterMaybe:   Option[String],
-           statusMaybe:   Option[String],
-           sortMaybe:     Option[String],
-           pageMaybe:     Option[Int],
-           limitMaybe: Option[Int],
-           orderMaybe:    Option[String]): Action[Unit] =
+  def list: Action[Unit] =
     action.async(parse.empty) { implicit request =>
       Future {
-        val filter   = filterMaybe.fold { "" } { f => f }
-        val status   = statusMaybe.fold { "all" } { s => s }
-        val sort     = sortMaybe.fold { "name" } { s => s }
-        val page     = pageMaybe.fold { 1 } { p => p }
-        val limit = limitMaybe.fold { 5 } { ps => ps }
-        val order    = orderMaybe.fold { "asc" } { o => o }
-
-        val pagedQuery = PagedQuery(page, limit, order)
-
         val validation = for {
-            sortFunc    <- Centre.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
-            sortOrder   <- pagedQuery.getSortOrder
-            centres     <- centresService.getCentres[Centre](filter, status, sortFunc, sortOrder)
-            page        <- pagedQuery.getPage(PageSizeMax, centres.size)
-            limit    <- pagedQuery.getPageSize(PageSizeMax)
-            results     <- PagedResults.create(centres, page, limit)
+            pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
+            centres    <- centresService.getCentres(pagedQuery.filter, pagedQuery.sort)
+            validPage  <- pagedQuery.validPage(centres.size)
+            results    <- PagedResults.create(centres, pagedQuery.page, pagedQuery.limit)
           } yield results
 
         validation.fold(

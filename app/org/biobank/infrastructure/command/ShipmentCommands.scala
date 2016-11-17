@@ -1,6 +1,5 @@
 package org.biobank.infrastructure.command
 
-import org.biobank.domain.centre.ShipmentState._
 import org.biobank.infrastructure.command.Commands._
 import org.joda.time.DateTime
 import play.api.libs.json._
@@ -46,11 +45,38 @@ object ShipmentCommands {
                                                locationId:      String)
       extends ShipmentModifyCommand
 
-  final case class ShipmentChangeStateCmd(userId:          String,
-                                          id:              String, // shipment ID
-                                          expectedVersion: Long,
-                                          newState:        ShipmentState,
-                                          datetime:        Option[DateTime])
+  final case class CreatedShipmentCmd(userId:          String,
+                                      id:              String, // shipment ID
+                                      expectedVersion: Long)
+      extends ShipmentModifyCommand
+
+  final case class PackShipmentCmd(userId:          String,
+                                   id:              String, // shipment ID
+                                   expectedVersion: Long,
+                                   datetime:        DateTime)
+      extends ShipmentModifyCommand
+
+  final case class SendShipmentCmd(userId:          String,
+                                   id:              String, // shipment ID
+                                   expectedVersion: Long,
+                                   datetime:        DateTime)
+      extends ShipmentModifyCommand
+
+  final case class ReceiveShipmentCmd(userId:       String,
+                                   id:              String, // shipment ID
+                                   expectedVersion: Long,
+                                   datetime:        DateTime)
+      extends ShipmentModifyCommand
+
+  final case class UnpackShipmentCmd(userId:          String,
+                                     id:              String, // shipment ID
+                                     expectedVersion: Long,
+                                     datetime:        DateTime)
+      extends ShipmentModifyCommand
+
+  final case class LostShipmentCmd(userId:          String,
+                                   id:              String, // shipment ID
+                                   expectedVersion: Long)
       extends ShipmentModifyCommand
 
   final case class ShipmentSkipStateToSentCmd(userId:          String,
@@ -87,8 +113,23 @@ object ShipmentCommands {
   implicit val updateShipmentToLocationCmdReads: Reads[UpdateShipmentToLocationCmd] =
     Json.reads[UpdateShipmentToLocationCmd]
 
-  implicit val shipmentChangeStateCmdReads: Reads[ShipmentChangeStateCmd] =
-    Json.reads[ShipmentChangeStateCmd]
+  implicit val createdShipmentCmdReads: Reads[CreatedShipmentCmd] =
+    Json.reads[CreatedShipmentCmd]
+
+  implicit val packShipmentCmdReads: Reads[PackShipmentCmd] =
+    Json.reads[PackShipmentCmd]
+
+  implicit val sendShipmentCmdReads: Reads[SendShipmentCmd] =
+    Json.reads[SendShipmentCmd]
+
+  implicit val receiveShipmentCmdReads: Reads[ReceiveShipmentCmd] =
+    Json.reads[ReceiveShipmentCmd]
+
+  implicit val unpackShipmentCmdReads: Reads[UnpackShipmentCmd] =
+    Json.reads[UnpackShipmentCmd]
+
+  implicit val lostShipmentCmdReads: Reads[LostShipmentCmd] =
+    Json.reads[LostShipmentCmd]
 
   implicit val shipmentSkipStateToSentCmdReads: Reads[ShipmentSkipStateToSentCmd] =
     Json.reads[ShipmentSkipStateToSentCmd]

@@ -38,13 +38,9 @@ class CentresRouter @Inject()(controller: CentresController) extends SimpleRoute
     case GET(p"/counts") =>
       controller.centreCounts
 
-    case GET(p"/" ? q_o"filter=$filter"
-               & q_o"status=$status"
-               & q_o"sort=$sort"
-               & q_o"page=${int(page)}"
-               & q_o"limit=${int(limit)}"
-               & q_o"order=$order")  =>
-      controller.list(filter, status, sort, page, limit, order)
+    case GET(p"/")  =>
+      // this action extracts parameters from the query string
+      controller.list
 
     case GET(p"/${centreId(id)}")  =>
       controller.query(id)

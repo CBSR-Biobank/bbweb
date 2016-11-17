@@ -80,7 +80,7 @@ class CollectionEventRepositoryImpl
   }
 
   def allForParticipant(participantId: ParticipantId): Set[CollectionEvent] = {
-    getValues.filter { x => x.participantId == participantId }.toSet
+    getValues.filter { _.participantId == participantId }.toSet
   }
 
 }

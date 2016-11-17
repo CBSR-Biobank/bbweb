@@ -61,14 +61,6 @@ case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers 
     (json \ "data" \ "items").as[List[JsObject]]
   }
 
-  def failWithInvalidStatus(uri: String) = {
-    val json = fakeApp.makeRequest(GET, uri + "?status=" + nameGenerator.next[String], BAD_REQUEST)
-
-    (json \ "status").as[String] must include ("error")
-
-    (json \ "message").as[String] must include ("InvalidStatus")
-  }
-
   def failWithNegativePageNumber(uri: String) = {
     val json = fakeApp.makeRequest(GET, uri + "?page=-1&limit=1", BAD_REQUEST)
     (json \ "status").as[String] must include ("error")
@@ -101,7 +93,6 @@ case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers 
   }
 
   def failWithInvalidParams(uri: String, invalidPageSize: Int = 100) =  {
-    failWithInvalidStatus(uri)
     failWithNegativePageNumber(uri)
     failWithInvalidPageNumber(uri)
     failWithNegativePageSize(uri)

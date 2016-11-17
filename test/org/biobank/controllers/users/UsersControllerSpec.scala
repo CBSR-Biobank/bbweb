@@ -5,6 +5,7 @@ import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.user._
 import org.biobank.fixture.ControllerFixture
+import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.mvc.Cookie
 import play.api.test.Helpers._
@@ -97,31 +98,34 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
       "list a single user when filtered by name" in {
         val users = List(factory.createRegisteredUser.copy(name = "user1"),
                          factory.createRegisteredUser.copy(name = "user2"))
+        val user = users(0)
         users.foreach(userRepository.put)
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri, Map("nameFilter" -> users(0).name))
+        val jsonItem = PagedResultsSpec(this)
+          .singleItemResult(uri, Map("filter" -> s"name::${user.name}"))
         compareObj(jsonItem, users(0))
       }
 
       "list a single user when filtered by email" in {
         val users = List(factory.createRegisteredUser.copy(email = "user1@test.com"),
                          factory.createRegisteredUser.copy(email = "user2@test.com"))
+        val user = users(0)
         users.foreach(userRepository.put)
 
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri, Map("emailFilter" -> users(0).email))
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri, Map("filter" -> s"email::${user.email}"))
         compareObj(jsonItem, users(0))
       }
 
-      "list a single registered user when filtered by status" in {
+      "list a single registered user when filtered by state" in {
         val users = List(factory.createRegisteredUser.copy(email = "user1@test.com"),
                          factory.createActiveUser.copy(email = "user2@test.com"),
                          factory.createActiveUser.copy(email = "user3@test.com"))
         users.foreach(userRepository.put)
 
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri, Map("status" -> "RegisteredUser"))
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri, Map("filter" -> "state::registered"))
         compareObj(jsonItem, users(0))
       }
 
-      "list active users when filtered by status" in {
+      "list active users when filtered by state" in {
         val users = List(factory.createRegisteredUser.copy(email = "user1@test.com"),
                          factory.createActiveUser.copy(email = "user2@test.com"),
                          factory.createActiveUser.copy(email = "user3@test.com"))
@@ -130,7 +134,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val expectedUsers = List(users(1), users(2))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
-          queryParams = Map("status" -> "ActiveUser"),
+          queryParams = Map("filter" -> "state::active"),
           offset = 0,
           total = expectedUsers.size.toLong,
           maybeNext = None,
@@ -140,7 +144,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         compareObjs(jsonItems, expectedUsers)
       }
 
-      "list locked users when filtered by status" in {
+      "list locked users when filtered by state" in {
         val users = List(factory.createActiveUser.copy(email = "user1@test.com"),
                          factory.createLockedUser.copy(email = "user2@test.com"),
                          factory.createLockedUser.copy(email = "user3@test.com"))
@@ -149,7 +153,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val expectedUsers = List(users(1), users(2))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
           uri = uri,
-          queryParams = Map("status" -> "LockedUser"),
+          queryParams = Map("filter" -> "state::locked"),
           offset = 0,
           total = expectedUsers.size.toLong,
           maybeNext = None,
@@ -165,18 +169,27 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
                          factory.createRegisteredUser.copy(name = "user1"))
         users.foreach(userRepository.put)
 
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri,
-          queryParams = Map("sort" -> "name"),
-          offset = 0,
-          total = users.size.toLong,
-          maybeNext = None,
-          maybePrev = None)
+        val sortExprs = Table("sort by", "name", "-name")
+        forAll(sortExprs) { sortExpr =>
+          val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+              uri = uri,
+              queryParams = Map("sort" -> sortExpr),
+              offset = 0,
+              total = users.size.toLong,
+              maybeNext = None,
+              maybePrev = None)
 
-        jsonItems must have size users.size.toLong
-        compareObj(jsonItems(0), users(2))
-        compareObj(jsonItems(1), users(1))
-        compareObj(jsonItems(2), users(0))
+          jsonItems must have size users.size.toLong
+          if (sortExpr == sortExprs(0)) {
+            compareObj(jsonItems(0), users(2))
+            compareObj(jsonItems(1), users(1))
+            compareObj(jsonItems(2), users(0))
+          } else {
+            compareObj(jsonItems(0), users(0))
+            compareObj(jsonItems(1), users(1))
+            compareObj(jsonItems(2), users(2))
+          }
+        }
       }
 
       "list users sorted by email" in {
@@ -185,58 +198,56 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
                          factory.createActiveUser.copy(email = "user1@test.com"))
         users.foreach(userRepository.put)
 
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri,
-          queryParams = Map("sort" -> "email"),
-          offset = 0,
-          total = users.size.toLong,
-          maybeNext = None,
-          maybePrev = None)
+        val sortExprs = Table("sort by", "email", "-email")
+        forAll(sortExprs) { sortExpr =>
+          val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+              uri = uri,
+              queryParams = Map("sort" -> sortExpr),
+              offset = 0,
+              total = users.size.toLong,
+              maybeNext = None,
+              maybePrev = None)
 
-        jsonItems must have size users.size.toLong
-        compareObj(jsonItems(0), users(2))
-        compareObj(jsonItems(1), users(1))
-        compareObj(jsonItems(2), users(0))
+          jsonItems must have size users.size.toLong
+          if (sortExpr == sortExprs(0)) {
+            compareObj(jsonItems(0), users(2))
+            compareObj(jsonItems(1), users(1))
+            compareObj(jsonItems(2), users(0))
+          } else {
+            compareObj(jsonItems(0), users(0))
+            compareObj(jsonItems(1), users(1))
+            compareObj(jsonItems(2), users(2))
+          }
+        }
       }
 
-      "list users sorted by status" in {
+      "list users sorted by state" in {
         val users = List(factory.createRegisteredUser.copy(email = "user3@test.com"),
                          factory.createLockedUser.copy(email = "user2@test.com"),
                          factory.createActiveUser.copy(email = "user1@test.com"))
         users.foreach(userRepository.put)
 
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri,
-          queryParams = Map("sort" -> "status"),
-          offset = 0,
-          total = users.size.toLong,
-          maybeNext = None,
-          maybePrev = None)
+        val sortExprs = Table("sort by", "state", "-state")
+        forAll(sortExprs) { sortExpr =>
+          val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+              uri = uri,
+              queryParams = Map("sort" -> sortExpr),
+              offset = 0,
+              total = users.size.toLong,
+              maybeNext = None,
+              maybePrev = None)
 
-        jsonItems must have size users.size.toLong
-        compareObj(jsonItems(0), users(2))
-        compareObj(jsonItems(1), users(1))
-        compareObj(jsonItems(2), users(0))
-      }
-
-      "list users sorted by status in descending order" in {
-        val users = List(factory.createRegisteredUser.copy(email = "user3@test.com"),
-                         factory.createLockedUser.copy(email = "user2@test.com"),
-                         factory.createActiveUser.copy(email = "user1@test.com"))
-        users.foreach(userRepository.put)
-
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri,
-          queryParams = Map("sort" -> "status", "order" -> "desc"),
-          offset = 0,
-          total = users.size.toLong,
-          maybeNext = None,
-          maybePrev = None)
-
-        jsonItems must have size users.size.toLong
-        compareObj(jsonItems(0), users(0))
-        compareObj(jsonItems(1), users(1))
-        compareObj(jsonItems(2), users(2))
+          jsonItems must have size users.size.toLong
+          if (sortExpr == sortExprs(0)) {
+            compareObj(jsonItems(0), users(2))
+            compareObj(jsonItems(1), users(1))
+            compareObj(jsonItems(2), users(0))
+          } else {
+            compareObj(jsonItems(0), users(0))
+            compareObj(jsonItems(1), users(1))
+            compareObj(jsonItems(2), users(2))
+          }
+        }
       }
 
       "list a single user when using paged query" in {

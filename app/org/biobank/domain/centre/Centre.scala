@@ -4,11 +4,43 @@ import org.biobank.ValidationKey
 import org.biobank.dto.NameDto
 import org.biobank.domain._
 import org.biobank.domain.study.StudyId
-import org.biobank.infrastructure.JsonUtils._
+import org.biobank.infrastructure.EnumUtils._
 
 import play.api.libs.json._
 import org.joda.time.DateTime
 import scalaz.Scalaz._
+
+/**
+ * Possible states for a centre.
+ */
+@SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
+object CentreState extends Enumeration {
+  type CentreState = Value
+  val Disabled = Value("disabled")
+  val Enabled  = Value("enabled")
+
+  implicit val centreStateFormat: Format[CentreState] = enumFormat(CentreState)
+
+}
+
+
+
+/**
+ * Predicates that can be used to filter collections of centres.
+ *
+ */
+trait CentrePredicates {
+  import CentreState._
+
+  type CentreFilter = Centre => Boolean
+
+  val nameIsOneOf: Set[String] => CentreFilter =
+    names => centre => names.contains(centre.name)
+
+  val stateIsOneOf: Set[CentreState] => CentreFilter =
+    states => centre => states.contains(centre.state)
+
+}
 
 /**
   * A Centre can be one or a combination of the following:
@@ -28,6 +60,9 @@ sealed trait Centre
     extends ConcurrencySafeEntity[CentreId]
     with HasUniqueName
     with HasDescriptionOption {
+  import CentreState._
+
+  val state: CentreState
 
   val studyIds: Set[StudyId]
 
@@ -60,33 +95,30 @@ sealed trait Centre
 
 object Centre {
 
+  @SuppressWarnings(Array("org.wartremover.warts.Option2Iterable"))
   implicit val centreWrites: Writes[Centre] = new Writes[Centre] {
       def writes(centre: Centre) = {
-        Json.obj("id"           -> centre.id,
-                 "version"      -> centre.version,
-                 "timeAdded"    -> centre.timeAdded,
-                 "timeModified" -> centre.timeModified,
-                 "name"         -> centre.name,
-                 "description"  -> centre.description,
-                 "studyIds"     -> centre.studyIds,
-                 "locations"    -> centre.locations,
-                 "status"       -> centre.getClass.getSimpleName)
+        ConcurrencySafeEntity.toJson(centre) ++
+        Json.obj("name"      -> centre.name,
+                 "studyIds"  -> centre.studyIds,
+                 "locations" -> centre.locations,
+                 "state"     -> centre.state) ++
+        JsObject(
+          Seq[(String, JsValue)]() ++
+            centre.description.map("description" -> Json.toJson(_)))
       }
     }
 
   val sort2Compare = Map[String, (Centre, Centre) => Boolean](
-      "name"   -> Centre.compareByName,
-      "status" -> Centre.compareByStatus)
+      "name"  -> Centre.compareByName,
+      "state" -> Centre.compareByState)
 
   def compareByName(a: Centre, b: Centre) = (a.name compareToIgnoreCase b.name) < 0
 
-  def compareByStatus(a: Centre, b: Centre) = {
-    val statusCompare = a.getClass.getSimpleName compare b.getClass.getSimpleName
-    if (statusCompare == 0) {
-      compareByName(a, b)
-    } else {
-      statusCompare < 0
-    }
+  def compareByState(a: Centre, b: Centre) = {
+    val statusCompare = a.state.toString compare b.state.toString
+    if (statusCompare == 0) compareByName(a, b)
+    else statusCompare < 0
   }
 }
 
@@ -115,7 +147,9 @@ final case class DisabledCentre(id:           CentreId,
                                 description:  Option[String],
                                 studyIds:     Set[StudyId],
                                 locations:    Set[Location])
-    extends Centre with CentreValidations {
+    extends { val state = CentreState.Disabled }
+    with Centre
+    with CentreValidations {
   import org.biobank.CommonValidations._
   import org.biobank.domain.CommonValidations._
 
@@ -243,7 +277,8 @@ final case class EnabledCentre(id:           CentreId,
                                description:  Option[String],
                                studyIds:     Set[StudyId],
                                locations:    Set[Location])
-    extends Centre {
+    extends { val state = CentreState.Enabled }
+    with Centre {
 
   def disable(): DomainValidation[DisabledCentre] = {
     DisabledCentre(id           = this.id,

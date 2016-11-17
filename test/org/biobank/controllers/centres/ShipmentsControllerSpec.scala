@@ -2,13 +2,13 @@ package org.biobank.controllers.centres
 
 import com.github.nscala_time.time.Imports._
 import org.biobank.controllers.PagedResultsSpec
-import org.biobank.domain.centre.ShipmentState._
 import org.biobank.domain.centre._
 import org.joda.time.DateTime
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
 import scala.language.reflectiveCalls
+import ShipmentState._
 
 /**
  * Tests the REST API for [[Shipment]]s.
@@ -21,8 +21,15 @@ class ShipmentsControllerSpec
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.JsonUtils._
 
+  val states = Table("state",
+                     ShipmentState.Created,
+                     ShipmentState.Packed,
+                     ShipmentState.Sent,
+                     ShipmentState.Received,
+                     ShipmentState.Unpacked,
+                     ShipmentState.Lost)
+
   def skipStateCommon(shipment:   Shipment,
-                      newState:   ShipmentState,
                       uriPath:    String,
                       updateJson: JsValue) = {
 
@@ -37,7 +44,6 @@ class ShipmentsControllerSpec
       repoShipment must have (
         'id             (shipment.id),
         'version        (shipment.version + 1),
-        'state          (newState),
         'courierName    (shipment.courierName),
         'trackingNumber (shipment.trackingNumber),
         'fromLocationId (shipment.fromLocationId),
@@ -81,7 +87,8 @@ class ShipmentsControllerSpec
       "list a single shipment when filtered by state" in {
         val f = allShipmentsFixture
         f.shipments.values.foreach(shipmentRepository.put)
-        ShipmentState.values.foreach { state =>
+
+        forAll(states) { state =>
           info(s"$state shipment")
           val jsonItem = PagedResultsSpec(this)
             .singleItemResult(listUri(f.fromCentre), Map("filter" -> s"state::$state"))
@@ -151,7 +158,7 @@ class ShipmentsControllerSpec
         compareObj(jsonItem, shipment)
       }
 
-      "111 list a single shipment when filtered with a logical expression" in {
+      "list a single shipment when filtered with a logical expression" in {
         val numShipments = 2
         val f = createdShipmentFixture(numShipments)
         val shipments = f.shipmentMap.values.toList
@@ -174,27 +181,23 @@ class ShipmentsControllerSpec
 
       "list shipments sorted by courier name" in {
         val f = centresFixture
-        val shipments = List("FedEx", "UPS", "Canada Post").
-          map { name =>
+        val shipments = List("FedEx", "UPS", "Canada Post").map { name =>
             factory.createShipment(f.fromCentre, f.toCentre).copy(courierName = name)
-          }.
-          toList
+          }.toList
         shipments.foreach(shipmentRepository.put)
 
-        val orders = Table("order", "asc", "desc")
-        forAll(orders) { order =>
-          val sortExpression = if (order == "asc") "courierName"
-                               else "-courierName"
+        val sortExprs = Table("sort by", "courierName", "-courierName")
+        forAll(sortExprs) { sortExpr =>
           val jsonItems = PagedResultsSpec(this)
             .multipleItemsResult(uri       = listUri(f.fromCentre),
-                                 queryParams = Map("sort" -> sortExpression),
+                                 queryParams = Map("sort" -> sortExpr),
                                  offset    = 0,
                                  total     = shipments.size.toLong,
                                  maybeNext = None,
                                  maybePrev = None)
 
           jsonItems must have size shipments.size.toLong
-          if (order == "asc") {
+          if (sortExpr == sortExprs(0)) {
             compareObj(jsonItems(0), shipments(2))
             compareObj(jsonItems(1), shipments(0))
             compareObj(jsonItems(2), shipments(1))
@@ -214,21 +217,17 @@ class ShipmentsControllerSpec
           }.toList
         shipments.foreach(shipmentRepository.put)
 
-        val orders = Table("order", "asc", "desc")
-        forAll(orders) { order =>
-          val sortExpression = if (order == "asc") "trackingNumber"
-                               else "-trackingNumber"
-
+        val sortExprs = Table("sort by", "trackingNumber", "-trackingNumber")
+        forAll(sortExprs) { sortExpr =>
           val jsonItems = PagedResultsSpec(this)
             .multipleItemsResult(uri       = listUri(f.fromCentre),
-                                 queryParams = Map("sort" -> sortExpression),
+                                 queryParams = Map("sort" -> sortExpr),
                                  offset    = 0,
                                  total     = shipments.size.toLong,
                                  maybeNext = None,
                                  maybePrev = None)
-
           jsonItems must have size shipments.size.toLong
-          if (order == "asc") {
+          if (sortExpr == sortExprs(0)) {
             compareObj(jsonItems(0), shipments(2))
             compareObj(jsonItems(1), shipments(0))
             compareObj(jsonItems(2), shipments(1))
@@ -327,12 +326,12 @@ class ShipmentsControllerSpec
         jsonId.length must be > 0
 
         shipmentRepository.getByKey(shipmentId) mustSucceed { repoShipment =>
+          repoShipment mustBe a[CreatedShipment]
           compareObj((json \ "data").as[JsObject], repoShipment)
 
           repoShipment must have (
             'id             (shipmentId),
             'version        (0L),
-            'state          (f.shipment.state),
             'courierName    (f.shipment.courierName),
             'trackingNumber (f.shipment.trackingNumber),
             'fromLocationId (f.shipment.fromLocationId),
@@ -394,12 +393,12 @@ class ShipmentsControllerSpec
                               (json \ "status").as[String] must include ("success")
 
         shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
+          repoShipment mustBe a[CreatedShipment]
           compareObj((json \ "data").as[JsObject], repoShipment)
 
           repoShipment must have (
             'id             (f.shipment.id),
             'version        (f.shipment.version + 1),
-            'state          (f.shipment.state),
             'courierName    (newCourier),
             'trackingNumber (f.shipment.trackingNumber),
             'fromLocationId (f.shipment.fromLocationId),
@@ -435,7 +434,7 @@ class ShipmentsControllerSpec
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include ("shipment is not in created state")
+          (json \ "message").as[String] must include regex ("InvalidState.shipment not created")
         }
       }
 
@@ -453,12 +452,12 @@ class ShipmentsControllerSpec
                               (json \ "status").as[String] must include ("success")
 
         shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
+          repoShipment mustBe a[CreatedShipment]
           compareObj((json \ "data").as[JsObject], repoShipment)
 
           repoShipment must have (
             'id             (f.shipment.id),
             'version        (f.shipment.version + 1),
-            'state          (f.shipment.state),
             'courierName    (f.shipment.courierName),
             'trackingNumber (newTrackingNumber),
             'fromLocationId (f.shipment.fromLocationId),
@@ -494,7 +493,7 @@ class ShipmentsControllerSpec
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include ("shipment is not in created state")
+          (json \ "message").as[String] must include regex ("InvalidState.shipment not created")
         }
       }
 
@@ -516,12 +515,12 @@ class ShipmentsControllerSpec
                               (json \ "status").as[String] must include ("success")
 
         shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
+          repoShipment mustBe a[CreatedShipment]
           compareObj((json \ "data").as[JsObject], repoShipment)
 
           repoShipment must have (
             'id             (f.shipment.id),
             'version        (f.shipment.version + 1),
-            'state          (f.shipment.state),
             'courierName    (f.shipment.courierName),
             'trackingNumber (f.shipment.trackingNumber),
             'fromLocationId (newLocation.uniqueId),
@@ -573,7 +572,7 @@ class ShipmentsControllerSpec
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include ("shipment is not in created state")
+          (json \ "message").as[String] must include regex ("InvalidState.shipment not created")
         }
       }
 
@@ -595,12 +594,12 @@ class ShipmentsControllerSpec
                               (json \ "status").as[String] must include ("success")
 
         shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
+          repoShipment mustBe a[CreatedShipment]
           compareObj((json \ "data").as[JsObject], repoShipment)
 
           repoShipment must have (
             'id             (f.shipment.id),
             'version        (f.shipment.version + 1),
-            'state          (f.shipment.state),
             'courierName    (f.shipment.courierName),
             'trackingNumber (f.shipment.trackingNumber),
             'fromLocationId (f.shipment.fromLocationId),
@@ -652,7 +651,7 @@ class ShipmentsControllerSpec
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include ("shipment is not in created state")
+          (json \ "message").as[String] must include regex ("InvalidState.shipment not created")
         }
       }
 
@@ -660,17 +659,15 @@ class ShipmentsControllerSpec
 
     "POST /shipments/state/:id" must {
 
-      def changeStateCommon(shipment: Shipment,
-                            newState: ShipmentState,
-                            timeMaybe:     Option[DateTime]) = {
+      def changeStateCommon(shipment:  Shipment,
+                            newState:  ShipmentState,
+                            timeMaybe: Option[DateTime]) = {
         shipmentRepository.put(shipment)
-        val baseJson = Json.obj("expectedVersion" -> shipment.version,
-                                "newState"        -> newState)
-
+        val baseJson = Json.obj("expectedVersion" -> shipment.version)
         val updateJson = timeMaybe.fold { baseJson } { time =>
             baseJson ++ Json.obj("datetime" -> time) }
 
-        val json = makeRequest(POST, uri(shipment, "state"), updateJson)
+        val json = makeRequest(POST, uri(shipment, s"state/$newState"), updateJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -680,7 +677,6 @@ class ShipmentsControllerSpec
           repoShipment must have (
             'id             (shipment.id),
             'version        (shipment.version + 1),
-            'state          (newState),
             'courierName    (shipment.courierName),
             'trackingNumber (shipment.trackingNumber),
             'fromLocationId (shipment.fromLocationId),
@@ -696,20 +692,16 @@ class ShipmentsControllerSpec
           val f = createdShipmentFixture
           val time = DateTime.now.minusDays(10)
 
-          ShipmentState.values.foreach { state =>
+          forAll(states) { state =>
             info(s"for $state state")
-
             val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
-                                      "newState"        -> state,
                                       "datetime"        -> time)
-
-            val json = makeRequest(POST, uri(f.shipment, "state"), NOT_FOUND, updateJson)
+            val json = makeRequest(POST, uri(f.shipment, s"state/$state"), NOT_FOUND, updateJson)
 
             (json \ "status").as[String] must include ("error")
 
             (json \ "message").as[String] must include regex ("IdNotFound.*shipment.*")
           }
-
         }
 
       }
@@ -721,6 +713,7 @@ class ShipmentsControllerSpec
 
           changeStateCommon(f.shipment, ShipmentState.Created, None)
           shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
+            repoShipment mustBe a[CreatedShipment]
             compareTimestamps(shipment     = repoShipment,
                               timePacked   = None,
                               timeSent     = None,
@@ -730,28 +723,26 @@ class ShipmentsControllerSpec
         }
       }
 
-      "for PACKED state" should {
+      "change to PACKED state from other valid states" in {
+        val f = allShipmentsFixture
+        val testStates = Table("state", ShipmentState.Created, ShipmentState.Sent)
 
-        "change to SENT state from" in {
-          val f = allShipmentsFixture
-          val timePacked = DateTime.now.minusDays(10)
+        forAll(testStates) { state =>
+          info(s"change to $state state")
 
-          val fromStates = Table("fromStates", ShipmentState.Created, ShipmentState.Sent)
-          forAll(fromStates) { fromState =>
-            info(s"$fromState state")
+          val stateChangeTime = DateTime.now.minusDays(10)
 
-            val shipment = f.shipments(fromState)
-            changeStateCommon(shipment, ShipmentState.Packed, Some(timePacked))
-            shipmentRepository.getByKey(shipment.id) mustSucceed { repoShipment =>
-              compareTimestamps(repoShipment,
-                                Some(timePacked),
-                                None,
-                                None,
-                                None)
-            }
+          val shipment = f.shipments(state)
+          changeStateCommon(shipment, ShipmentState.Packed, Some(stateChangeTime))
+          shipmentRepository.getByKey(shipment.id) mustSucceed { repoShipment =>
+            repoShipment mustBe a[PackedShipment]
+            compareTimestamps(repoShipment,
+                              Some(stateChangeTime),
+                              None,
+                              None,
+                              None)
           }
         }
-
       }
 
       "for SENT state" must {
@@ -759,14 +750,18 @@ class ShipmentsControllerSpec
         "change to SENT state from" in {
           val f = allShipmentsFixture
 
-          val fromStates = Table("fromStates", ShipmentState.Packed, ShipmentState.Received)
-          forAll(fromStates) { fromState =>
-            info(s"$fromState state")
-            val shipment =  f.shipments(fromState)
+          val testStates = Table("state name",
+                                 ShipmentState.Packed,
+                                 ShipmentState.Received)
+
+          forAll(testStates) { state =>
+            info(s"$state state")
+            val shipment =  f.shipments(state)
             val time = shipment.timePacked.get.plusDays(1)
 
             changeStateCommon(shipment, ShipmentState.Sent, Some(time))
             shipmentRepository.getByKey(shipment.id) mustSucceed { repoShipment =>
+              repoShipment mustBe a[SentShipment]
               compareTimestamps(repoShipment,
                                 shipment.timePacked,
                                 Some(time),
@@ -780,10 +775,9 @@ class ShipmentsControllerSpec
           val f = packedShipmentFixture
           shipmentRepository.put(f.shipment)
           val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
-                                    "newState"        -> ShipmentState.Sent,
                                     "datetime"        -> f.shipment.timePacked.get.minusDays(1))
 
-          val json = makeRequest(POST, uri(f.shipment, "state"), BAD_REQUEST, updateJson)
+          val json = makeRequest(POST, uri(f.shipment, "state/sent"), BAD_REQUEST, updateJson)
 
           (json \ "status").as[String] must include ("error")
 
@@ -797,14 +791,18 @@ class ShipmentsControllerSpec
         "change to RECEIVED state from" in {
           val f = allShipmentsFixture
 
-          val fromStates = Table("fromStates", ShipmentState.Sent, ShipmentState.Unpacked)
-          forAll(fromStates) { fromState =>
-            info(s"$fromState state")
-            val shipment =  f.shipments(fromState)
+          val testStates = Table("state name",
+                                 ShipmentState.Sent,
+                                 ShipmentState.Unpacked)
+
+          forAll(testStates) { state =>
+            info(s"$state state")
+            val shipment =  f.shipments(state)
             val time = shipment.timeSent.get.plusDays(1)
 
             changeStateCommon(shipment, ShipmentState.Received, Some(time))
             shipmentRepository.getByKey(shipment.id) mustSucceed { repoShipment =>
+              repoShipment mustBe a[ReceivedShipment]
               compareTimestamps(repoShipment,
                                 shipment.timePacked,
                                 shipment.timeSent,
@@ -818,10 +816,9 @@ class ShipmentsControllerSpec
           val f = sentShipmentFixture
           shipmentRepository.put(f.shipment)
           val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
-                                    "newState"        -> ShipmentState.Received,
                                     "datetime"        -> f.shipment.timeSent.get.minusDays(1))
 
-          val json = makeRequest(POST, uri(f.shipment, "state"), BAD_REQUEST, updateJson)
+          val json = makeRequest(POST, uri(f.shipment, "state/received"), BAD_REQUEST, updateJson)
 
           (json \ "status").as[String] must include ("error")
 
@@ -838,26 +835,13 @@ class ShipmentsControllerSpec
 
           changeStateCommon(f.shipment, ShipmentState.Unpacked, Some(timeUnpacked))
           shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
+            repoShipment mustBe a[UnpackedShipment]
             compareTimestamps(repoShipment,
                               f.shipment.timePacked,
                               f.shipment.timeSent,
                               f.shipment.timeReceived,
                               Some(timeUnpacked))
           }
-        }
-
-        "fail for updating state to RECEIVED where time is less than sent time" in {
-          val f = receivedShipmentFixture
-          shipmentRepository.put(f.shipment)
-          val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
-                                    "newState"        -> ShipmentState.Unpacked,
-                                    "datetime"        -> f.shipment.timeReceived.get.minusDays(1))
-
-          val json = makeRequest(POST, uri(f.shipment, "state"), BAD_REQUEST, updateJson)
-
-          (json \ "status").as[String] must include ("error")
-
-          (json \ "message").as[String] must include ("TimeUnpackedBeforeReceived")
         }
       }
 
@@ -868,6 +852,7 @@ class ShipmentsControllerSpec
 
           changeStateCommon(f.shipment, ShipmentState.Lost, None)
           shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
+            repoShipment mustBe a[LostShipment]
             compareTimestamps(f.shipment, repoShipment)
           }
         }
@@ -885,8 +870,9 @@ class ShipmentsControllerSpec
                                   "timePacked"      -> timePacked,
                                   "timeSent"        -> timeSent)
 
-        skipStateCommon(f.shipment, ShipmentState.Sent, "state/skip-to-sent", updateJson)
+        skipStateCommon(f.shipment, "state/skip-to-sent", updateJson)
         shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
+          repoShipment mustBe a[SentShipment]
           compareTimestamps(shipment     = repoShipment,
                             timePacked   = Some(timePacked),
                             timeSent     = Some(timeSent),
@@ -916,7 +902,7 @@ class ShipmentsControllerSpec
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include regex ("InvalidStateTransition.*SENT")
+          (json \ "message").as[String] must include regex ("InvalidState.*shipment not created")
         }
       }
 
@@ -931,7 +917,7 @@ class ShipmentsControllerSpec
         val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
                                   "timeReceived"    -> timeReceived,
                                   "timeUnpacked"    -> timeUnpacked)
-        skipStateCommon(f.shipment, ShipmentState.Unpacked, "state/skip-to-unpacked", updateJson)
+        skipStateCommon(f.shipment, "state/skip-to-unpacked", updateJson)
         shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
           compareTimestamps(shipment     = repoShipment,
                             timePacked   = f.shipment.timePacked,
@@ -962,7 +948,7 @@ class ShipmentsControllerSpec
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include regex ("InvalidStateTransition.*UNPACKED")
+          (json \ "message").as[String] must include regex ("InvalidState.shipment not sent")
         }
       }
 
@@ -1002,7 +988,7 @@ class ShipmentsControllerSpec
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include ("shipment is not in created state")
+          (json \ "message").as[String] must include regex ("InvalidState.shipment not created")
         }
       }
 

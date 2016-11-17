@@ -26,6 +26,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
   def compareObj(json: JsValue, user: User) = {
     compareEntity(json, user)
+    (json \ "state").as[String] mustBe (user.state.toString)
     (json \ "name").as[String] mustBe (user.name)
     (json \ "email").as[String] mustBe (user.email)
     (json \ "avatarUrl").asOpt[String] mustBe (user.avatarUrl)
@@ -38,7 +39,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
     (json \ "description").asOpt[String] mustBe (study.description)
 
-    (json \ "status").as[String] mustBe (study.getClass.getSimpleName)
+    (json \ "state").as[String] mustBe (study.state.toString)
 
     val jsonAnnotationTypes = (json \ "annotationTypes").as[List[JsObject]]
 
@@ -199,7 +200,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
     (json \ "name").as[String] mustBe (centre.name)
     (json \ "description").asOpt[String] mustBe (centre.description)
-    (json \ "status").as[String] mustBe (centre.getClass.getSimpleName)
+    (json \ "state").as[String] mustBe (centre.state.toString)
 
     (json \ "studyIds").as[List[String]].foreach { jsStudyId =>
       centre.studyIds must contain (StudyId(jsStudyId))
@@ -230,6 +231,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
     (json \ "trackingNumber").as[String] mustBe (shipment.trackingNumber)
     (json \ "fromLocationInfo" \ "locationId").as[String] mustBe (shipment.fromLocationId)
     (json \ "toLocationInfo" \ "locationId").as[String] mustBe (shipment.toLocationId)
+    (json \ "state").as[String] mustBe (shipment.state.toString)
 
     TestUtils.checkOpionalTime((json \ "timePacked").asOpt[DateTime], shipment.timePacked)
     TestUtils.checkOpionalTime((json \ "timeSent").asOpt[DateTime], shipment.timeSent)
@@ -296,7 +298,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
     (json \ "amount").as[BigDecimal]       mustBe (specimenDto.amount)
 
-    (json \ "status").as[String]           mustBe (specimenDto.status)
+    (json \ "state").as[String]            mustBe (specimenDto.state.toString)
 
     ((json \ "timeCreated").as[DateTime] to specimenDto.timeCreated).millis must be < 1000L
   }

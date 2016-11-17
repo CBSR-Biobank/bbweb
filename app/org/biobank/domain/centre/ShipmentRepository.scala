@@ -4,6 +4,7 @@ import com.google.inject.ImplementedBy
 import javax.inject.Singleton
 import org.biobank.domain._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 import org.slf4j.LoggerFactory
 
@@ -14,6 +15,10 @@ trait ShipmentRepository extends ReadWriteRepository[ShipmentId, Shipment] {
    * Returns all shipments either being sent to or being received at the centre with centreId.
    */
   def withCentre(centreId: CentreId): Set[Shipment]
+
+  def getCreated(id: ShipmentId): DomainValidation[CreatedShipment]
+
+  def getUnpacked(id: ShipmentId): DomainValidation[UnpackedShipment]
 
 }
 
@@ -35,5 +40,19 @@ class ShipmentRepositoryImpl
 
   def withCentre(centreId: CentreId): Set[Shipment] = {
     getValues.filter { s => (s.fromCentreId == centreId) || (s.toCentreId == centreId) }.toSet
+  }
+
+  def getCreated(id: ShipmentId): DomainValidation[CreatedShipment] = {
+    for {
+      shipment <- getByKey(id)
+      created <- shipment.isCreated
+    } yield created
+  }
+
+  def getUnpacked(id: ShipmentId): DomainValidation[UnpackedShipment] = {
+    for {
+      shipment <- getByKey(id)
+      unpacked <- shipment.isUnpacked
+    } yield unpacked
   }
 }

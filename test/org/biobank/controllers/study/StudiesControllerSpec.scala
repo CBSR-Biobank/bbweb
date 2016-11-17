@@ -116,11 +116,12 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
       "list a single study when filtered by name" in {
         val studies = List(factory.createDisabledStudy, factory.createEnabledStudy)
+        val study = studies(0)
         studies.foreach(studyRepository.put)
 
         val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri, Map("filter" -> studies(0).name))
-        compareObj(jsonItem, studies(0))
+          .singleItemResult(uri, Map("filter" -> s"name::${study.name}"))
+        compareObj(jsonItem, study)
       }
 
       "list a single disabled study when filtered by status" in {
@@ -130,11 +131,11 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studies.foreach(studyRepository.put)
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri, Map("status" -> "DisabledStudy"))
+            uri, Map("filter" -> "state::disabled"))
         compareObj(jsonItem, studies(0))
       }
 
-      "list disabled studies when filtered by status" in {
+      "list disabled studies when filtered by state" in {
         val studies = List(factory.createDisabledStudy,
                            factory.createDisabledStudy,
                            factory.createEnabledStudy,
@@ -144,7 +145,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val expectedStudies = List(studies(0), studies(1))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
             uri = uri,
-            queryParams = Map("status" -> "DisabledStudy"),
+            queryParams = Map("filter" -> "state::disabled"),
             offset = 0,
             total = expectedStudies.size.toLong,
             maybeNext = None,
@@ -154,7 +155,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         compareObjs(jsonItems, expectedStudies)
       }
 
-      "list enabled studies when filtered by status" in {
+      "list enabled studies when filtered by state" in {
         val studies = List(factory.createDisabledStudy,
                            factory.createDisabledStudy,
                            factory.createEnabledStudy,
@@ -164,7 +165,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val expectedStudies = List(studies(2), studies(3))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
             uri = uri,
-            queryParams = Map("status" -> "EnabledStudy"),
+            queryParams = Map("filter" -> "state::enabled"),
             offset = 0,
             total = expectedStudies.size.toLong,
             maybeNext = None,
@@ -172,6 +173,18 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
         jsonItems must have size expectedStudies.size.toLong
         compareObjs(jsonItems, expectedStudies)
+      }
+
+      "fail on attempt to list studies filtered by an invalid state name" in {
+        val invalidStateName = "state::" + nameGenerator.next[Study]
+        val reply = makeRequest(GET,
+                                uri + s"?filter=$invalidStateName",
+                                BAD_REQUEST)
+
+        (reply \ "status").as[String] must include ("error")
+
+        (reply \ "message").as[String] must include regex (
+          "InvalidState.study state does not exist")
       }
 
       "list studies sorted by name" in {
@@ -196,13 +209,13 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         compareObj(jsonItems(3), studies(0))
       }
 
-      "list studies sorted by status" in {
+      "list studies sorted by state" in {
         val studies = List(factory.createEnabledStudy,
                            factory.createDisabledStudy)
         studies.foreach(studyRepository.put)
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
             uri         = uri,
-            queryParams = Map("sort" -> "status"),
+            queryParams = Map("sort" -> "state"),
             offset      = 0,
             total       = studies.size.toLong,
             maybeNext   = None,
@@ -213,14 +226,14 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         compareObj(jsonItems(1), studies(0))
       }
 
-      "list studies sorted by status in descending order" in {
+      "list studies sorted by state in descending order" in {
         val studies = List(factory.createEnabledStudy,
                            factory.createDisabledStudy)
         studies.foreach(studyRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
             uri = uri,
-            queryParams = Map("sort" -> "status", "order" -> "desc"),
+            queryParams = Map("sort" -> "-state"),
             offset = 0,
             total = studies.size.toLong,
             maybeNext = None,
@@ -229,6 +242,17 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         jsonItems must have size studies.size.toLong
         compareObj(jsonItems(0), studies(0))
         compareObj(jsonItems(1), studies(1))
+      }
+
+      "fail on attempt to list studies sorted by an invalid state name" in {
+        val invalidStateName = nameGenerator.next[Study]
+        val reply = makeRequest(GET,
+                                uri + s"?sort=$invalidStateName",
+                                BAD_REQUEST)
+
+        (reply \ "status").as[String] must include ("error")
+
+        (reply \ "message").as[String] must include ("could not parse sort expression")
       }
 
       "list a single study when using paged query" in {

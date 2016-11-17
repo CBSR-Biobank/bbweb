@@ -7,10 +7,10 @@ import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
+import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.CollectionEventCommands._
 import org.biobank.infrastructure.event.CollectionEventEvents._
-import org.biobank.infrastructure.{ SortOrder, AscendingOrder }
-import org.biobank.service.{ServiceError, ServiceValidation}
+import org.biobank.service._
 import org.slf4j.LoggerFactory
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
@@ -23,9 +23,7 @@ trait CollectionEventsService {
 
   def get(collectionEventId: String): ServiceValidation[CollectionEvent]
 
-  def list(participantId: ParticipantId,
-           sortFunc: (CollectionEvent, CollectionEvent) => Boolean,
-           order:    SortOrder)
+  def list(participantId: ParticipantId, sort: SortString)
       : ServiceValidation[Seq[CollectionEvent]]
 
   def getByVisitNumber(participantId: ParticipantId, visitNumber: Int): ServiceValidation[CollectionEvent]
@@ -52,20 +50,25 @@ class CollectionEventsServiceImpl @Inject() (
       ServiceError(s"collection event id is invalid: $collectionEventId")).toValidationNel
   }
 
-  def list(participantId: ParticipantId,
-           sortFunc:      (CollectionEvent, CollectionEvent) => Boolean,
-           order:         SortOrder)
+  def list(participantId: ParticipantId, sort: SortString)
       : ServiceValidation[Seq[CollectionEvent]] = {
-    validParticipantId(participantId) { participant =>
-      val result = collectionEventRepository
-        .allForParticipant(participantId)
-        .toSeq
-        .sortWith(sortFunc)
+    val sortStr = if (sort.expression.isEmpty) new SortString("visitNumber")
+                  else sort
 
-      if (order == AscendingOrder) {
-        result.successNel[String]
-      } else {
-        result.reverse.successNel[String]
+    validParticipantId(participantId) { participant =>
+      val cevents = collectionEventRepository.allForParticipant(participantId).toSeq
+
+      for {
+        sortExpressions <- { QuerySortParser(sortStr).
+                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
+        firstSort       <- { sortExpressions.headOption.
+                              toSuccessNel(ServiceError("at least one sort expression is required")) }
+        sortFunc        <- { CollectionEvent.sort2Compare.get(firstSort.name).
+                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+      } yield {
+        val result = cevents.sortWith(sortFunc)
+        if (firstSort.order == AscendingOrder) result
+        else result.reverse
       }
     }
   }

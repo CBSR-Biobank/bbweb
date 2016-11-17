@@ -48,4 +48,12 @@ package infrastructure {
 
   }
 
+  object Util {
+    def toInt(s : String) : Option[Int] =
+      try {
+        Some(s.toInt)
+      } catch {
+        case _ : java.lang.NumberFormatException => None
+      }
+  }
 }

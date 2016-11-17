@@ -11,7 +11,7 @@ import org.biobank.dto._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
-import org.biobank.service.ServiceValidation
+import org.biobank.service._
 import org.slf4j.LoggerFactory
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
@@ -22,13 +22,18 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[CentresServiceImpl])
 trait CentresService {
 
+  /**
+   * Returns a set of studies. The entities can be filtered and or sorted using expressions.
+   *
+   * @param filter the string representation of the filter expression to use to filter the studies.
+   *
+   * @param sort the string representation of the sort expression to use when sorting the studies.
+   */
   def getCentresCount(): Int
 
   def searchLocations(cmd: SearchCentreLocationsCmd): Set[CentreLocationInfo]
 
-  def getCentres[T <: Centre]
-    (filter: String, status: String, sortFunc: (Centre, Centre) => Boolean, order: SortOrder)
-      : ServiceValidation[Seq[Centre]]
+  def getCentres(filter: FilterString, sort: SortString): ServiceValidation[Seq[Centre]]
 
   def getCountsByStatus(): CentreCountsByStatus
 
@@ -52,7 +57,6 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
                                     val centreRepository:          CentreRepository,
                                     val studyRepository:           StudyRepository)
     extends CentresService {
-  import org.biobank.CommonValidations._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -92,35 +96,23 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
     )
   }
 
-  def getCentres[T <: Centre](filter: String,
-                              status: String,
-                              sortFunc: (Centre, Centre) => Boolean,
-                              order: SortOrder)
-      : ServiceValidation[Seq[Centre]] =  {
-    val allCentres = centreRepository.getValues
+  def getCentres(filter: FilterString, sort: SortString):ServiceValidation[Seq[Centre]] =  {
+    val allCentres = centreRepository.getValues.toSet
+    val sortStr = if (sort.expression.isEmpty) new SortString("name")
+                  else sort
 
-    val centresFilteredByName = if (!filter.isEmpty) {
-        val filterLowerCase = filter.toLowerCase
-        allCentres.filter { centre => centre.name.toLowerCase.contains(filterLowerCase) }
-      } else {
-        allCentres
+    for {
+      centres <- CentreFilter.filterCentres(allCentres, filter)
+      sortExpressions <- {
+        QuerySortParser(sortStr).toSuccessNel(ServiceError(s"could not parse sort expression: $sort"))
       }
-
-    val centresFilteredByStatus = status match {
-      case "all" =>
-        centresFilteredByName.successNel[String]
-      case "DisabledCentre" =>
-        centresFilteredByName.collect { case s: DisabledCentre => s }.successNel[String]
-      case "EnabledCentre" =>
-        centresFilteredByName.collect { case s: EnabledCentre => s }.successNel[String]
-      case _ =>
-        InvalidStatus(s"centre: $status").failureNel[Seq[Centre]]
-    }
-
-    centresFilteredByStatus.map { centres =>
+      sortFunc <- {
+        Centre.sort2Compare.get(sortExpressions(0).name).
+          toSuccessNel(ServiceError(s"invalid sort field: ${sortExpressions(0).name}"))
+      }
+    } yield {
       val result = centres.toSeq.sortWith(sortFunc)
-
-      if (order == AscendingOrder) result
+      if (sortExpressions(0).order == AscendingOrder) result
       else result.reverse
     }
   }

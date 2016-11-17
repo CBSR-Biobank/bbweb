@@ -3,11 +3,11 @@ package org.biobank.controllers.centres
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json._
 import play.api.{Environment, Logger}
-import org.biobank.controllers.{BbwebAction, CommandController, JsonController, Pagination}
+import org.biobank.controllers.{BbwebAction, CommandController, JsonController, PagedQuery}
 import org.biobank.domain.centre.{CentreId, ShipmentId}
 import org.biobank.service.centres.ShipmentsService
 import org.biobank.service.users.UsersService
-import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
+import org.biobank.service.{AuthToken, PagedResults}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.reflectiveCalls
 import scalaz.Scalaz._
@@ -35,16 +35,12 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
 
   def list(centreId: CentreId) =
     action.async(parse.empty) { implicit request =>
-      val pagination = Pagination("", "courierName", 1, 5)
-      log.info(s"--------> ${request.rawQueryString}")
       Future {
-        val pagedQuery = PagedQuery(pagination.page, pagination.limit, pagination.sort)
-
         val validation = for {
-            shipments        <- shipmentsService.getShipments(centreId, pagination.filter, pagination.sort)
-            page             <- pagedQuery.getPage(PageSizeMax, shipments.size)
-            limit            <- pagedQuery.getPageSize(PageSizeMax)
-            results          <- PagedResults.create(shipments, page, limit)
+            pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
+            shipments  <- shipmentsService.getShipments(centreId, pagedQuery.filter, pagedQuery.sort)
+            validPage  <- pagedQuery.validPage(shipments.size)
+            results    <- PagedResults.create(shipments, pagedQuery.page, pagedQuery.limit)
           } yield results
 
         validation.fold(
@@ -59,36 +55,18 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
       validationReply(shipmentsService.getShipment(id))
     }
 
-  def listSpecimens(shipmentId:       ShipmentId,
-                    stateFilterMaybe: Option[String],
-                    sortMaybe:        Option[String],
-                    pageMaybe:        Option[Int],
-                    limitMaybe:       Option[Int],
-                    orderMaybe:       Option[String]) =
+  def listSpecimens(shipmentId: ShipmentId) =
     action.async(parse.empty) { implicit request =>
       Future {
-        val stateFilter = stateFilterMaybe.fold { "" } { s => s }
-        val sort        = sortMaybe.fold { "inventoryId" } { s => s }
-        val page        = pageMaybe.fold { 1 } { p => p }
-        val limit    = limitMaybe.fold { 5 } { ps => ps }
-        val order       = orderMaybe.fold { "asc" } { o => o }
-
-        log.debug(s"""|ShipmentsController:listSpecimens:
-                      | shipmentId:  $shipmentId,
-                      | stateFilter: $stateFilter,
-                      | sort:        $sort,
-                      | page:        $page,
-                      | limit:    $limit,
-                      | order:       $order""".stripMargin)
-
-        val pagedQuery = PagedQuery(page, limit, order)
-
         val validation = for {
-            sortOrder         <- pagedQuery.getSortOrder
-            shipmentSpecimens <- shipmentsService.getShipmentSpecimens(shipmentId, stateFilter, sort, sortOrder)
-            page              <- pagedQuery.getPage(PageSizeMax, shipmentSpecimens.size)
-            limit          <- pagedQuery.getPageSize(PageSizeMax)
-            results           <- PagedResults.create(shipmentSpecimens, page, limit)
+            pagedQuery        <- PagedQuery.create(request.rawQueryString, PageSizeMax)
+            shipmentSpecimens <- shipmentsService.getShipmentSpecimens(shipmentId,
+                                                                       pagedQuery.filter,
+                                                                       pagedQuery.sort)
+            validPage         <- pagedQuery.validPage(shipmentSpecimens.size)
+            results           <- PagedResults.create(shipmentSpecimens,
+                                                     pagedQuery.page,
+                                                     pagedQuery.limit)
           } yield results
 
         validation.fold(
@@ -131,6 +109,24 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
   def updateToLocation(id: ShipmentId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateShipmentToLocationCmd => processCommand(cmd) }
 
+  def created(id: ShipmentId) =
+    commandActionAsync(Json.obj("id" -> id)) { cmd : CreatedShipmentCmd => processCommand(cmd) }
+
+  def packed(id: ShipmentId) =
+    commandActionAsync(Json.obj("id" -> id)) { cmd : PackShipmentCmd => processCommand(cmd) }
+
+  def sent(id: ShipmentId) =
+    commandActionAsync(Json.obj("id" -> id)) { cmd : SendShipmentCmd => processCommand(cmd) }
+
+  def received(id: ShipmentId) =
+    commandActionAsync(Json.obj("id" -> id)) { cmd : ReceiveShipmentCmd => processCommand(cmd) }
+
+  def unpacked(id: ShipmentId) =
+    commandActionAsync(Json.obj("id" -> id)) { cmd : UnpackShipmentCmd => processCommand(cmd) }
+
+  def lost(id: ShipmentId) =
+    commandActionAsync(Json.obj("id" -> id)) { cmd : LostShipmentCmd => processCommand(cmd) }
+
   /**
    * Changes the state of a shipment from CREATED to SENT (skipping the PACKED state)
    */
@@ -142,9 +138,6 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
    */
   def skipStateUnpacked(id: ShipmentId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentSkipStateToUnpackedCmd => processCommand(cmd) }
-
-  def changeState(id: ShipmentId) =
-    commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentChangeStateCmd => processCommand(cmd) }
 
   def addSpecimen(shipmentId: ShipmentId) = commandActionAsync(Json.obj("shipmentId" -> shipmentId)) {
       cmd: ShipmentSpecimenAddCmd => processSpecimenCommand(cmd)

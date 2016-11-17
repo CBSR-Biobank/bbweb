@@ -78,7 +78,7 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
   "QueryFilterParser" - {
 
     "must fail for an empty string" in {
-      val result = QueryFilterParser("")
+      val result = QueryFilterParser(new FilterString(""))
       result mustBe None
     }
 
@@ -86,7 +86,7 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
       forAll(comparisons) { comparator =>
         val selector = "foo"
         val value = "bar"
-        val result = QueryFilterParser(s"$selector$comparator$value")
+        val result = QueryFilterParser(new FilterString(s"$selector$comparator$value"))
         result.value must beComparison(selector, comparator, value)
       }
     }
@@ -98,7 +98,7 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
         val selector = "foo"
         val args = List("bar1", "bar2", "bar3")
         val stringToParse = s"""$selector$comparator(${args.mkString(",")})"""
-        val result = QueryFilterParser(stringToParse)
+        val result = QueryFilterParser(new FilterString(stringToParse))
         result.value must beComparison(selector, comparator, args)
       }
     }
@@ -110,7 +110,7 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
         val selector = "foo"
         val args = List("bar1", "bar2", "bar3")
         val stringToParse = s"""foo::bar,$selector$comparator(${args.mkString(",")})"""
-        val result = QueryFilterParser(stringToParse)
+        val result = QueryFilterParser(new FilterString(stringToParse))
         inside(result.value) { case OrExpression(expressions) =>
           expressions must have length (2)
           expressions(1) must beComparison(selector, comparator, args)
@@ -125,7 +125,7 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
         val selector = "foo"
         val args = List("bar1", "bar2", "bar3")
         val stringToParse = s"""foo::bar;$selector$comparator(${args.mkString(",")})"""
-        val result = QueryFilterParser(stringToParse)
+        val result = QueryFilterParser(new FilterString(stringToParse))
         inside(result.value) { case AndExpression(expressions) =>
           expressions must have length (2)
           expressions(1) must beComparison(selector, comparator, args)
@@ -139,7 +139,7 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
 
       forAll(comparisons) { (comparator) =>
         val stringToParse = s"${selectors(0)}$comparator${values(0)};${selectors(1)}$comparator${values(1)}"
-        val result = QueryFilterParser(stringToParse)
+        val result = QueryFilterParser(new FilterString(stringToParse))
         inside (result.value) { case AndExpression(expressions) =>
           expressions must have length (2)
           expressions.zipWithIndex.foreach { case (comparison, index) =>
@@ -155,7 +155,7 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
 
       forAll(comparisons) { (comparator) =>
         val stringToParse = s"${selectors(0)}$comparator${values(0)},${selectors(1)}$comparator${values(1)}"
-        val result = QueryFilterParser(stringToParse)
+        val result = QueryFilterParser(new FilterString(stringToParse))
         inside (result.value) { case OrExpression(expressions) =>
           expressions must have length (2)
           expressions.zipWithIndex.foreach { case (comparison, index) =>
@@ -167,7 +167,7 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
 
     "must parse an AND expression within an OR expresssion" in {
       val stringToParse = s"(foo1::bar1;foo2::bar2),(foo3::bar3;foo4::bar4)"
-      val result = QueryFilterParser(stringToParse)
+      val result = QueryFilterParser(new FilterString(stringToParse))
       //log.info(s"-------> $result")
       inside (result.value) { case OrExpression(expressions) =>
         expressions must have length (2)
@@ -185,7 +185,7 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
 
     "must parse an OR expression within an AND expresssion" in {
       val stringToParse = s"(foo1::bar1,foo2::bar2);(foo3::bar3,foo4::bar4)"
-      val result = QueryFilterParser(stringToParse)
+      val result = QueryFilterParser(new FilterString(stringToParse))
       inside (result.value) { case AndExpression(expressions) =>
         expressions must have length (2)
         expressions.zipWithIndex.foreach { case (orExpression, andIndex) =>

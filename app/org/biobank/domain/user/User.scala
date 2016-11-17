@@ -1,21 +1,54 @@
 package org.biobank.domain.user
 
 import org.biobank.ValidationKey
-import org.biobank.domain.{
-  CommonValidations,
-  ConcurrencySafeEntity,
-  DomainValidation,
-  DomainError
-}
+import org.biobank.domain.{CommonValidations, ConcurrencySafeEntity, DomainValidation, DomainError}
+import org.biobank.infrastructure.EnumUtils._
 import org.joda.time.DateTime
-import org.biobank.infrastructure.JsonUtils._
-
 import play.api.libs.json._
 import scalaz.Scalaz._
 
-/** A user of the system.
-  */
+/**
+ * Possible states for a user.
+ */
+@SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
+object UserState extends Enumeration {
+  type UserState = Value
+  val Registered = Value("registered")
+  val Active = Value("active")
+  val Locked = Value("locked")
+
+  implicit val userStateFormat: Format[UserState] = enumFormat(UserState)
+
+}
+
+/**
+ * Predicates that can be used to filter collections of users.
+ *
+ */
+trait UserPredicates {
+  import UserState._
+
+  type UserFilter = User => Boolean
+
+  val nameIsOneOf: Set[String] => UserFilter =
+    names => user => names.contains(user.name)
+
+  val emailIsOneOf: Set[String] => UserFilter =
+    emails => user => emails.contains(user.email)
+
+  val stateIsOneOf: Set[UserState] => UserFilter =
+    states => user => states.contains(user.state)
+
+}
+
+/**
+ * A user of the system.
+ */
 sealed trait User extends ConcurrencySafeEntity[UserId] {
+  import UserState._
+
+  /** the user's current state */
+  val state: UserState
 
   /** The user's full name. */
   val name: String
@@ -46,6 +79,7 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
         |  version: $version,
         |  timeAdded: $timeAdded,
         |  timeModified: $timeModified,
+        |  state: $state,
         |  name: $name,
         |  email: $email,
         |  password: $password,
@@ -56,45 +90,38 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
 
 object User {
 
+  @SuppressWarnings(Array("org.wartremover.warts.Option2Iterable"))
   implicit val userWrites: Writes[User] = new Writes[User] {
     def writes(user: User) = {
+      ConcurrencySafeEntity.toJson(user) ++
       Json.obj(
-        "id"           -> user.id,
-        "version"      -> user.version,
-        "timeAdded"    -> user.timeAdded,
-        "timeModified" -> user.timeModified,
         "name"         -> user.name,
         "email"        -> user.email,
-        "avatarUrl"    -> user.avatarUrl,
-        "status"       -> user.getClass.getSimpleName
-      )
+        "state"        -> user.state) ++
+      JsObject(
+        Seq[(String, JsValue)]() ++
+          user.avatarUrl.map("avatarUrl" -> Json.toJson(_)))
     }
   }
 
   val sort2Compare = Map[String, (User, User) => Boolean](
-      "name"   -> compareByName,
-      "email"  -> compareByEmail,
-      "status" -> compareByStatus)
+      "name"  -> compareByName,
+      "email" -> compareByEmail,
+      "state" -> compareByState)
 
   // users with duplicate emails are not allowed
   def compareByEmail(a: User, b: User) = (a.email compareToIgnoreCase b.email) < 0
 
   def compareByName(a: User, b: User) = {
     val nameCompare = a.name compareToIgnoreCase b.name
-    if (nameCompare == 0) {
-      compareByEmail(a, b)
-    } else {
-      nameCompare < 0
-    }
+    if (nameCompare == 0) compareByEmail(a, b)
+    else nameCompare < 0
   }
 
-  def compareByStatus(a: User, b: User) = {
-    val statusCompare = a.getClass.getSimpleName compare b.getClass.getSimpleName
-    if (statusCompare == 0) {
-      compareByName(a, b)
-    } else {
-      statusCompare < 0
-    }
+  def compareByState(a: User, b: User) = {
+    val stateCompare = a.state.toString compare b.state.toString
+    if (stateCompare == 0) compareByName(a, b)
+    else stateCompare < 0
   }
 }
 
@@ -143,7 +170,10 @@ final case class RegisteredUser(id:           UserId,
                                 email:        String,
                                 password:     String,
                                 salt:         String,
-                                avatarUrl:    Option[String]) extends User with UserValidations {
+                                avatarUrl:    Option[String])
+    extends { val state = UserState.Registered }
+    with User
+    with UserValidations {
 
   /* Activates a registered user. */
   def activate(): DomainValidation[ActiveUser] = {
@@ -197,7 +227,8 @@ final case class ActiveUser(id:           UserId,
                             password:     String,
                             salt:         String,
                             avatarUrl:    Option[String])
-    extends User
+    extends { val state = UserState.Active }
+    with User
     with UserValidations {
   import CommonValidations._
 
@@ -255,7 +286,8 @@ final case class LockedUser(id:           UserId,
                             password:     String,
                             salt:         String,
                             avatarUrl:    Option[String])
-    extends User {
+    extends { val state = UserState.Locked }
+    with User {
 
   /** Unlocks a locked user. */
   def unlock(): DomainValidation[ActiveUser] = {

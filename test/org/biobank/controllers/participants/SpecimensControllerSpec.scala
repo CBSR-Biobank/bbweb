@@ -8,6 +8,7 @@ import org.biobank.domain.processing.{ProcessingEventId, ProcessingEventInputSpe
 import org.biobank.domain.study.CollectionSpecimenSpec
 import org.biobank.dto.{CentreLocationInfo, SpecimenDto}
 import org.biobank.fixture.ControllerFixture
+import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
 import scala.language.reflectiveCalls
@@ -207,17 +208,18 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
 
         storeSpecimens(e.cevent, specimens)
 
-        List("asc", "desc").foreach { ordering =>
+        val sortExprs = Table("sort expressions", "inventoryId", "-inventoryId")
+        forAll(sortExprs) { sortExpr =>
           val jsonItems = PagedResultsSpec(this).multipleItemsResult(
               uri         = uri(e.cevent),
-              queryParams = Map("sort" -> "inventoryId", "order" -> ordering),
+              queryParams = Map("sort" -> sortExpr),
               offset      = 0,
               total       = specimens.size.toLong,
               maybeNext   = None,
               maybePrev   = None)
 
           jsonItems must have size specimens.size.toLong
-          if (ordering == "asc") {
+          if (sortExpr == sortExprs(0)) {
             compareObj(jsonItems(0), specimenDtos(0))
             compareObj(jsonItems(1), specimenDtos(1))
           } else {
@@ -241,17 +243,18 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
                                            e.centreLocationInfo,
                                            e.centreLocationInfo)
 
-        List("asc", "desc").foreach { ordering =>
+        val sortExprs = Table("sort expressions", "timeCreated", "-timeCreated")
+        forAll(sortExprs) { sortExpr =>
           val jsonItems = PagedResultsSpec(this).multipleItemsResult(
               uri         = uri(e.cevent),
-              queryParams = Map("sort" -> "timeCreated", "order" -> ordering),
+              queryParams = Map("sort" -> sortExpr),
               offset      = 0,
               total       = specimens.size.toLong,
               maybeNext   = None,
               maybePrev   = None)
 
           jsonItems must have size specimens.size.toLong
-          if (ordering == "asc") {
+          if (sortExpr == sortExprs(0)) {
             compareObj(jsonItems(0), specimenDtos(0))
             compareObj(jsonItems(1), specimenDtos(1))
           } else {
@@ -261,7 +264,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "list specimens sorted by status" in {
+      "list specimens sorted by state" in {
         val e = createEntities
         val specimens: List[Specimen] = List(factory.createUsableSpecimen,
                                              factory.createUnusableSpecimen)
@@ -274,17 +277,18 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
                                            e.centreLocationInfo,
                                            e.centreLocationInfo)
 
-        List("asc", "desc").foreach{ ordering =>
+        val sortExprs = Table("sort expressions", "state", "-state")
+        forAll(sortExprs) { sortExpr =>
           val jsonItems = PagedResultsSpec(this).multipleItemsResult(
               uri         = uri(e.cevent),
-              queryParams = Map("sort" -> "status", "order" -> ordering),
+              queryParams = Map("sort" -> sortExpr),
               offset      = 0,
               total       = specimens.size.toLong,
               maybeNext   = None,
               maybePrev   = None)
 
           jsonItems must have size specimens.size.toLong
-          if (ordering == "asc") {
+          if (sortExpr == sortExprs(0)) {
             compareObj(jsonItems(0), specimenDtos(1))
             compareObj(jsonItems(1), specimenDtos(0))
           } else {

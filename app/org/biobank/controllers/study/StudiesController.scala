@@ -1,12 +1,12 @@
 package org.biobank.controllers.study
 
 import javax.inject.{Inject, Singleton}
-import org.biobank.controllers.{BbwebAction, CommandController, ControllerError, JsonController}
+import org.biobank.controllers._
 import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
+import org.biobank.service._
 import org.biobank.service.studies.StudiesService
 import org.biobank.service.users.UsersService
 import play.api.Logger
@@ -40,33 +40,14 @@ class StudiesController @Inject() (val action:         BbwebAction,
       Ok(studiesService.getCountsByStatus)
     }
 
-  def list(filterMaybe:   Option[String],
-           statusMaybe:   Option[String],
-           sortMaybe:     Option[String],
-           pageMaybe:     Option[Int],
-           limitMaybe: Option[Int],
-           orderMaybe:    Option[String]) =
+  def list =
     action.async(parse.empty) { implicit request =>
       Future {
-        val filter   = filterMaybe.fold { "" } { f => f }
-        val status   = statusMaybe.fold { "all" } { s => s }
-        val sort     = sortMaybe.fold { "name" } { s => s }
-        val page     = pageMaybe.fold { 1 } { p => p }
-        val limit = limitMaybe.fold { 5 } { ps => ps }
-        val order    = orderMaybe.fold { "asc" } { o => o }
-
-        log.debug(s"""|StudiesController:list: filter/$filter, status/$status, sort/$sort,
-                      |  page/$page, limit/$limit, order/$order""".stripMargin)
-
-        val pagedQuery = PagedQuery(page, limit, order)
-
         val validation = for {
-            sortFunc    <- Study.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
-            sortOrder   <- pagedQuery.getSortOrder
-            studies     <- studiesService.getStudies(filter, status, sortFunc, sortOrder)
-            page        <- pagedQuery.getPage(PageSizeMax, studies.size)
-            limit    <- pagedQuery.getPageSize(PageSizeMax)
-            results     <- PagedResults.create(studies, page, limit)
+            pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
+            studies    <- studiesService.getStudies(pagedQuery.filter, pagedQuery.sort)
+            validPage  <- pagedQuery.validPage(studies.size)
+            results    <- PagedResults.create(studies, pagedQuery.page, pagedQuery.limit)
           } yield results
 
         validation.fold(

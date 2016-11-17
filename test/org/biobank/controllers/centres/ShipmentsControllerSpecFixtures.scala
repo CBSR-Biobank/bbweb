@@ -27,28 +27,27 @@ private[centres] trait ShipmentsControllerSpecFixtures extends ControllerFixture
     }
   }
 
-  def makePackedShipment(shipment: Shipment): Shipment = {
-    shipment.packed(DateTime.now).fold(err => fail("could not make a packed shipment"), s => s)
+  def makePackedShipment(shipment: CreatedShipment): PackedShipment = {
+    shipment.pack(DateTime.now)
   }
 
-  def makeSentShipment(shipment: Shipment): Shipment = {
-    makePackedShipment(shipment).sent(DateTime.now).fold(
+  def makeSentShipment(shipment: CreatedShipment): SentShipment = {
+    makePackedShipment(shipment).send(DateTime.now).fold(
       err => fail("could not make a sent shipment"), s => s)
   }
 
-  def makeReceivedShipment(shipment: Shipment): Shipment = {
-    makeSentShipment(shipment).received(DateTime.now).fold(
+  def makeReceivedShipment(shipment: CreatedShipment): ReceivedShipment = {
+    makeSentShipment(shipment).receive(DateTime.now).fold(
       err => fail("could not make a received shipment"), s => s)
   }
 
-  def makeUnpackedShipment(shipment: Shipment): Shipment = {
-    makeReceivedShipment(shipment).unpacked(DateTime.now).fold(
+  def makeUnpackedShipment(shipment: CreatedShipment): UnpackedShipment = {
+    makeReceivedShipment(shipment).unpack(DateTime.now).fold(
       err => fail("could not make a unpacked shipment"), s => s)
   }
 
-  def makeLostShipment(shipment: Shipment): Shipment = {
-    makeSentShipment(shipment).lost.fold(
-      err => fail("could not make a lost shipment"), s => s)
+  def makeLostShipment(shipment: CreatedShipment): LostShipment = {
+    makeSentShipment(shipment).lost
   }
 
   def createdShipmentFixture = {

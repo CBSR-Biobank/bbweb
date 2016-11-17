@@ -1,6 +1,7 @@
 package org.biobank.service
 
 import scala.util.parsing.combinator.RegexParsers
+import scalaz.Scalaz._
 
 /**
  * Parser for filter strings that use RSQL (https://github.com/jirutka/rsql-parser) grammar.
@@ -130,8 +131,21 @@ object QueryFilterParser extends RegexParsers {
       else OrExpression(l)
     }
 
-  def apply(str: String) = parseAll(or, str) match {
+  def apply(filter: FilterString) = parseAll(or, filter.expression) match {
       case Success(result, _) => Some(result)
       case NoSuccess(_, _) => None
     }
+
+  def expressions(filter: FilterString):ServiceValidation[Option[Expression]] = {
+    if (filter.expression.trim.isEmpty) {
+        None.successNel[String]
+    } else {
+      val parseResult = QueryFilterParser(filter)
+      if (parseResult.isEmpty) {
+        s"could not parse filter expression: $filter".failureNel[Option[Expression]]
+      } else {
+        parseResult.successNel[String]
+      }
+    }
+  }
 }

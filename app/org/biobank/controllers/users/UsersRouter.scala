@@ -30,14 +30,9 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
                & q_o"order=$order") =>
       controller.userStudies(id, query, sort, order)
 
-    case GET(p"/" ? q_o"nameFilter=$nameFilter"
-               & q_o"emailFilter=$emailFilter"
-               & q_o"status=$status"
-               & q_o"sort=$sort"
-               & q_o"page=${int(page)}"
-               & q_o"limit=${int(limit)}"
-               & q_o"order=$order") =>
-      controller.list(nameFilter, emailFilter, status, sort, page, limit, order)
+    case GET(p"/") =>
+      // this action extracts parameters from the query string
+      controller.list
 
     case GET(p"/${userId(id)}") =>
       controller.user(id)

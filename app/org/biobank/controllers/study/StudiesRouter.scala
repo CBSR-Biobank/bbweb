@@ -35,13 +35,9 @@ class StudiesRouter @Inject()(controller: StudiesController) extends SimpleRoute
     case GET(p"/sgvaluetypes") =>
       controller.specimenGroupValueTypes
 
-    case GET(p"/" ? q_o"filter=$filter"
-               & q_o"status=$status"
-               & q_o"sort=$sort"
-               & q_o"page=${int(page)}"
-               & q_o"limit=${int(limit)}"
-               & q_o"order=$order") =>
-      controller.list(filter, status, sort, page, limit, order)
+    case GET(p"/") =>
+      // this action extracts parameters from the query string
+      controller.list
 
     case POST(p"/") =>
       controller.add

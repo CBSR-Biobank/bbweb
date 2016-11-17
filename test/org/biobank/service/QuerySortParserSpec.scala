@@ -14,12 +14,14 @@ class QuerySortParserSpec extends FreeSpec with MustMatchers {
   "QuerySortParserSpec" - {
 
     "must fail for an empty string" in {
-      val result = QuerySortParser("")
-      result mustBe None
+      val result = QuerySortParser(new SortString(""))
+      inside (result) { case Some(expressions) =>
+        expressions must have size (0)
+      }
     }
 
     "must parse a single sort field" in {
-      val result = QuerySortParser("foo")
+      val result = QuerySortParser(new SortString("foo"))
       result.value must have length (1)
       inside (result.value(0)) { case SortExpression(name, sortOrder) =>
         name must be ("foo")
@@ -28,7 +30,7 @@ class QuerySortParserSpec extends FreeSpec with MustMatchers {
     }
 
     "must parse a single sort field with descending order" in {
-      val result = QuerySortParser("-bar")
+      val result = QuerySortParser(new SortString("-bar"))
       result.value must have length (1)
       inside (result.value(0)) { case SortExpression(name, sortOrder) =>
         name must be ("bar")
@@ -38,7 +40,7 @@ class QuerySortParserSpec extends FreeSpec with MustMatchers {
 
     "must parse multiple fields" in {
       val values = List("foo", "bar")
-      val result = QuerySortParser(s"${values(0)}|-${values(1)}")
+      val result = QuerySortParser(new SortString(s"${values(0)}|-${values(1)}"))
       result.value must have length (2)
       result.value.zipWithIndex.foreach { case (expression, index) =>
         inside (expression) { case SortExpression(name, sortOrder) =>
@@ -49,7 +51,7 @@ class QuerySortParserSpec extends FreeSpec with MustMatchers {
     }
 
     "must fail for invalid input" in {
-      val result = QuerySortParser("foo,bar")
+      val result = QuerySortParser(new SortString("foo,bar"))
       result mustBe None
     }
  }

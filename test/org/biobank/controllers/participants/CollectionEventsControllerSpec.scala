@@ -7,6 +7,7 @@ import org.biobank.domain.study._
 import org.biobank.domain.{ Annotation, AnnotationType, AnnotationValueType, DomainValidation }
 import org.biobank.infrastructure.JsonUtils._
 import org.joda.time.DateTime
+import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
 import scalaz.Validation.FlatMap._
@@ -341,29 +342,32 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
               cevent
             }
 
-          List("asc", "desc").foreach{ ordering =>
-            val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-                uri         = listUri(participant.id),
-                queryParams = Map("sort" -> "visitNumber", "order" -> ordering),
-                offset      = 0,
-                total       = cevents.size.toLong,
-                maybeNext   = None,
-                maybePrev   = None)
+          val sortExprs = Table("sort expressions", "visitNumber", "-visitNumber")
+          forAll(sortExprs) { sortExpr =>
+            List("asc", "desc").foreach{ ordering =>
+              val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+                  uri         = listUri(participant.id),
+                  queryParams = Map("sort" -> sortExpr),
+                  offset      = 0,
+                  total       = cevents.size.toLong,
+                  maybeNext   = None,
+                  maybePrev   = None)
 
-            jsonItems must have size cevents.size.toLong
-            if (ordering == "asc") {
-              compareObj(jsonItems(0), cevents(0))
-              compareObj(jsonItems(1), cevents(1))
-              compareObj(jsonItems(2), cevents(2))
-              compareObj(jsonItems(3), cevents(3))
-            } else {
-              compareObj(jsonItems(0), cevents(3))
-              compareObj(jsonItems(1), cevents(2))
-              compareObj(jsonItems(2), cevents(1))
-              compareObj(jsonItems(3), cevents(0))
+              jsonItems must have size cevents.size.toLong
+              if (sortExpr == sortExprs(0)) {
+                compareObj(jsonItems(0), cevents(0))
+                compareObj(jsonItems(1), cevents(1))
+                compareObj(jsonItems(2), cevents(2))
+                compareObj(jsonItems(3), cevents(3))
+              } else {
+                compareObj(jsonItems(0), cevents(3))
+                compareObj(jsonItems(1), cevents(2))
+                compareObj(jsonItems(2), cevents(1))
+                compareObj(jsonItems(3), cevents(0))
+              }
             }
-          }
 
+          }
         }
       }
 
@@ -377,17 +381,18 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
               cevent
             }
 
-          List("asc", "desc").foreach{ ordering =>
+          val sortExprs = Table("sort expressions", "timeCompleted", "-timeCompleted")
+          forAll(sortExprs) { sortExpr =>
             val jsonItems = PagedResultsSpec(this).multipleItemsResult(
                 uri         = listUri(participant.id),
-                queryParams = Map("sort" -> "timeCompleted", "order" -> ordering),
+                queryParams = Map("sort" -> sortExpr),
                 offset      = 0,
                 total       = cevents.size.toLong,
                 maybeNext   = None,
                 maybePrev   = None)
 
             jsonItems must have size cevents.size.toLong
-            if (ordering == "asc") {
+            if (sortExpr == sortExprs(0)) {
               compareObj(jsonItems(0), cevents(0))
               compareObj(jsonItems(1), cevents(1))
               compareObj(jsonItems(2), cevents(2))

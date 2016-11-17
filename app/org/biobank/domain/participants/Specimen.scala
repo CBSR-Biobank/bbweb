@@ -5,9 +5,23 @@ import org.biobank.dto.{CentreLocationInfo, SpecimenDto}
 import org.biobank.domain.containers.{ContainerId, ContainerSchemaPositionId}
 import org.biobank.domain.study.{CollectionSpecimenSpec, StudyValidations}
 import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation, Location}
+import org.biobank.infrastructure.EnumUtils._
 import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
+
+/**
+ * Possible states for a specimen.
+ */
+@SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
+object SpecimenState extends Enumeration {
+  type SpecimenState = Value
+  val Usable = Value("usable")
+  val Unusable = Value("unusable")
+
+  implicit val specimenStateFormat: Format[SpecimenState] = enumFormat(SpecimenState)
+
+}
 
 /**
  * Represents something that was obtained from a [[Participant]] in a [[study.Study]].
@@ -18,6 +32,10 @@ import scalaz.Scalaz._
  */
 sealed trait Specimen
     extends ConcurrencySafeEntity[SpecimenId] {
+
+  import SpecimenState._
+
+  val state: SpecimenState
 
   /** The inventory ID assigned to this specimen. */
   val inventoryId: String
@@ -52,6 +70,7 @@ sealed trait Specimen
                 originLocationInfo: CentreLocationInfo,
                 locationInfo:       CentreLocationInfo): SpecimenDto =
     SpecimenDto(id                 = this.id.id,
+                state              = this.state,
                 inventoryId        = this.inventoryId,
                 collectionEventId  = collectionEvent.id.id,
                 specimenSpecId     = this.specimenSpecId,
@@ -65,8 +84,7 @@ sealed trait Specimen
                 positionId         = this.positionId.map(_.id),
                 timeCreated        = this.timeCreated,
                 amount             = this.amount,
-                units              = specimenSpec.units,
-                status             = this.getClass.getSimpleName)
+                units              = specimenSpec.units)
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {
@@ -89,8 +107,10 @@ object Specimen {
   import org.biobank.infrastructure.JsonUtils._
 
   implicit val specimenWrites: Writes[Specimen] = new Writes[Specimen] {
-      def writes(specimen: Specimen) = Json.obj(
-          "id"               -> specimen.id,
+      def writes(specimen: Specimen) =
+        ConcurrencySafeEntity.toJson(specimen) ++
+        Json.obj(
+          "state"            -> specimen.state,
           "inventoryId"      -> specimen.inventoryId,
           "specimenSpecId"   -> specimen.specimenSpecId,
           "originLocationId" -> specimen.originLocationId,
@@ -98,18 +118,15 @@ object Specimen {
           "containerId"      -> specimen.containerId,
           "positionId"       -> specimen.positionId,
           "version"          -> specimen.version,
-          "timeAdded"        -> specimen.timeAdded,
-          "timeModified"     -> specimen.timeModified,
           "timeCreated"      -> specimen.timeCreated,
-          "amount"           -> specimen.amount,
-          "status"           -> specimen.getClass.getSimpleName
+          "amount"           -> specimen.amount
         )
     }
 
   val sort2Compare = Map[String, (Specimen, Specimen) => Boolean](
       "inventoryId" -> compareByInventoryId,
       "timeCreated" -> compareByTimeCreated,
-      "status"      -> compareByStatus)
+      "state"       -> compareByState)
 
   def compareById(a: Specimen, b: Specimen) =
     (a.id.id compareTo b.id.id) < 0
@@ -120,8 +137,8 @@ object Specimen {
   def compareByTimeCreated(a: Specimen, b: Specimen) =
     (a.timeCreated compareTo b.timeCreated) < 0
 
-  def compareByStatus(a: Specimen, b: Specimen) =
-    (a.getClass.getSimpleName compareTo b.getClass.getSimpleName) < 0
+  def compareByState(a: Specimen, b: Specimen) =
+    (a.state.toString compareTo b.state.toString) < 0
 }
 
 trait SpecimenValidations {
@@ -147,7 +164,8 @@ final case class UsableSpecimen(id:               SpecimenId,
                                 positionId:       Option[ContainerSchemaPositionId],
                                 timeCreated:      DateTime,
                                 amount:           BigDecimal)
-    extends Specimen
+    extends { val state = SpecimenState.Usable }
+    with Specimen
     with SpecimenValidations
     with ParticipantValidations
     with StudyValidations {
@@ -303,7 +321,8 @@ final case class UnusableSpecimen(id:               SpecimenId,
                                   positionId:       Option[ContainerSchemaPositionId],
                                   timeCreated:      DateTime,
                                   amount:           BigDecimal)
-    extends Specimen {
+    extends { val state = SpecimenState.Unusable }
+    with Specimen {
 
   def makeUsable(): DomainValidation[UsableSpecimen] = {
     UsableSpecimen(id               = this.id,

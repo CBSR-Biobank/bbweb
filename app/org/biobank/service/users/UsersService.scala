@@ -8,7 +8,7 @@ import javax.inject._
 import org.biobank.ValidationKey
 import org.biobank.domain.user._
 import org.biobank.dto._
-import org.biobank.infrastructure._
+import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.service._
@@ -27,12 +27,14 @@ trait UsersService {
 
   def getCountsByStatus(): UserCountsByStatus
 
-  def getUsers[T <: User](nameFilter:  String,
-                          emailFilter: String,
-                          status:      String,
-                          sortFunc:    (User, User) => Boolean,
-                          order:       SortOrder)
-      : ServiceValidation[Seq[User]]
+  /**
+   * Returns a set of users. The entities can be filtered and or sorted using expressions.
+   *
+   * @param filter the string representation of the filter expression to use to filter the users.
+   *
+   * @param sort the string representation of the sort expression to use when sorting the users.
+   */
+  def getUsers(filter: FilterString, sort: SortString): ServiceValidation[Seq[User]]
 
   def getUser(id: UserId): ServiceValidation[User]
 
@@ -72,49 +74,22 @@ class UsersServiceImpl @javax.inject.Inject() (
       )
   }
 
-  def getUsers[T <: User](nameFilter:  String,
-                          emailFilter: String,
-                          status:      String,
-                          sortFunc:    (User, User) => Boolean,
-                          order:       SortOrder)
-      : ServiceValidation[Seq[User]] = {
-    val allUsers = userRepository.getValues
-
-    val usersFilteredByName = if (!nameFilter.isEmpty) {
-      val nameFilterLowerCase = nameFilter.toLowerCase
-      allUsers.filter { _.name.toLowerCase.contains(nameFilterLowerCase) }
-    } else {
-      allUsers
-    }
-
-    val usersFilteredByEmail = if (!emailFilter.isEmpty) {
-      val emailFilterLowerCase = emailFilter.toLowerCase
-      usersFilteredByName.filter { _.email.toLowerCase.contains(emailFilterLowerCase) }
-    } else {
-      usersFilteredByName
-    }
-
-    val usersFilteredByStatus = status match {
-      case "all" =>
-        usersFilteredByEmail.successNel[String]
-      case "RegisteredUser" =>
-        usersFilteredByEmail.collect { case u: RegisteredUser => u }.successNel[String]
-      case "ActiveUser" =>
-        usersFilteredByEmail.collect { case u: ActiveUser => u }.successNel[String]
-      case "LockedUser" =>
-        usersFilteredByEmail.collect { case u: LockedUser => u }.successNel[String]
-      case _ =>
-        InvalidStatus(status).failureNel[Seq[User]]
-    }
-
-    usersFilteredByStatus.map { users =>
+  def getUsers(filter: FilterString, sort: SortString): ServiceValidation[Seq[User]] = {
+    val allUsers = userRepository.getValues.toSet
+    val sortStr = if (sort.expression.isEmpty) new SortString("email")
+                  else sort
+    for {
+      users           <- UserFilter.filterUsers(allUsers, filter)
+      sortExpressions <- { QuerySortParser(sortStr).
+                            toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
+      firstSort       <- { sortExpressions.headOption.
+                            toSuccessNel(ServiceError("at least one sort expression is required")) }
+      sortFunc        <- { User.sort2Compare.get(firstSort.name).
+                            toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+    } yield {
       val result = users.toSeq.sortWith(sortFunc)
-
-      if (order == AscendingOrder) {
-        result
-      } else {
-        result.reverse
-      }
+      if (firstSort.order == AscendingOrder) result
+      else result.reverse
     }
   }
 

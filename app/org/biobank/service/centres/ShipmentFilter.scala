@@ -1,37 +1,38 @@
 package org.biobank.service.centres
 
-import org.biobank.service.{QueryFilterParser, QueryFilterParserGrammar}
+import org.biobank.service._
 import org.biobank.service.Comparator._
 import org.biobank.service.QueryFilterParserGrammar._
-import org.biobank.domain.centre.ShipmentState
 import org.biobank.service.{ServiceValidation, ServiceError}
 import org.biobank.domain.PredicateHelper
-import org.biobank.domain.centre.ShipmentPredicates
+import org.biobank.domain.centre.{Shipment, ShipmentState, ShipmentPredicates}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 /**
- * Functions that convert QueryFilterParser expressions to predicates that can be used to filter a collection
- * of Shipments.
+ * Functions that filter a set of shipments from an expression contained in a filter string.
  *
  */
-trait ShipmentPredicateConverter extends PredicateHelper with ShipmentPredicates {
+object ShipmentFilter extends PredicateHelper with ShipmentPredicates {
 
-  def parseFilter(filter: String):
-      ServiceValidation[Option[QueryFilterParserGrammar.Expression]] = {
-    if (filter.trim.isEmpty) {
-        None.successNel[String]
-    } else {
-      val parseResult = QueryFilterParser(filter)
-      if (parseResult.isEmpty) {
-        s"could not parse filter expression: $filter".failureNel[Option[Expression]]
-      } else {
-        parseResult.successNel[String]
+  def filterShipments(shipments: Set[Shipment], filter: FilterString):ServiceValidation[Set[Shipment]] = {
+    QueryFilterParser.expressions(filter).flatMap { filterExpression =>
+      filterExpression match {
+        case None =>
+          shipments.successNel[String]
+        case Some(c: Comparison) =>
+          comparisonToPredicates(c).map(shipments.filter)
+        case Some(e: AndExpression) =>
+          comparisonToPredicates(e).map(shipments.filter)
+        case Some(e: OrExpression) =>
+          comparisonToPredicates(e).map(shipments.filter)
+        case _ =>
+          ServiceError(s"bad filter expression: $filterExpression").failureNel[Set[Shipment]]
       }
     }
   }
 
-  def comparisonToPredicates(expression: Expression): ServiceValidation[ShipmentFilter] = {
+  private def comparisonToPredicates(expression: Expression): ServiceValidation[ShipmentFilter] = {
     expression match {
       case Comparison(selector, comparator, args) =>
         selector match {

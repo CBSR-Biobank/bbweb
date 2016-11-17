@@ -16,7 +16,7 @@ import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.CollectionEventTypeEvents._
 import org.biobank.infrastructure.event.ProcessingTypeEvents._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.service.{ServiceError, ServiceValidation}
+import org.biobank.service._
 import org.slf4j.LoggerFactory
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
@@ -31,11 +31,14 @@ trait StudiesService {
 
   def getCountsByStatus(): StudyCountsByStatus
 
-  def getStudies(filter:   String,
-                 status:   String,
-                 sortFunc: (Study, Study) => Boolean,
-                 order:    SortOrder)
-      : ServiceValidation[Seq[Study]]
+  /**
+   * Returns a set of studies. The entities can be filtered and or sorted using expressions.
+   *
+   * @param filter the string representation of the filter expression to use to filter the studies.
+   *
+   * @param sort the string representation of the sort expression to use when sorting the studies.
+   */
+  def getStudies(filter: FilterString, sort: SortString): ServiceValidation[Seq[Study]]
 
   def getStudyNames(filter: String, order: SortOrder): Seq[NameDto]
 
@@ -107,7 +110,6 @@ class StudiesServiceImpl @javax.inject.Inject() (
   val collectionEventRepository:                         CollectionEventRepository,
   val specimenLinkTypeRepository:                        SpecimenLinkTypeRepository)
     extends StudiesService {
-  import org.biobank.CommonValidations._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -128,40 +130,24 @@ class StudiesServiceImpl @javax.inject.Inject() (
     )
   }
 
-  def getStudies(filter:   String,
-                 status:   String,
-                 sortFunc: (Study, Study) => Boolean,
-                 order:    SortOrder)
-      : ServiceValidation[Seq[Study]] = {
-    val allStudies = studyRepository.getValues
+  def getStudies(filter: FilterString, sort: SortString): ServiceValidation[Seq[Study]] = {
+    val allStudies = studyRepository.getValues.toSet
+    val sortStr = if (sort.expression.isEmpty) new SortString("name")
+                  else sort
 
-    val studiesFilteredByName = if (!filter.isEmpty) {
-      val filterLowerCase = filter.toLowerCase
-      allStudies.filter { study => study.name.toLowerCase.contains(filterLowerCase) }
-    } else {
-      allStudies
-    }
-
-    val studiesFilteredByStatus = status match {
-      case "all" =>
-        studiesFilteredByName.successNel[String]
-      case "DisabledStudy" =>
-        studiesFilteredByName.collect { case s: DisabledStudy => s }.successNel[String]
-      case "EnabledStudy" =>
-        studiesFilteredByName.collect { case s: EnabledStudy => s }.successNel[String]
-      case "RetiredStudy" =>
-        studiesFilteredByName.collect { case s: RetiredStudy => s }.successNel[String]
-      case _ => InvalidStatus(status).failureNel[Seq[Study]]
-    }
-
-    studiesFilteredByStatus.map { studies =>
-      val result = studies.toSeq.sortWith(sortFunc)
-
-      if (order == AscendingOrder) {
-        result
-      } else {
-        result.reverse
+    for {
+      studies <- StudyFilter.filterStudies(allStudies, filter)
+      sortExpressions <- {
+        QuerySortParser(sortStr).toSuccessNel(ServiceError(s"could not parse sort expression: $sort"))
       }
+      sortFunc <- {
+        Study.sort2Compare.get(sortExpressions(0).name).
+          toSuccessNel(ServiceError(s"invalid sort field: ${sortExpressions(0).name}"))
+      }
+    } yield {
+      val result = studies.toSeq.sortWith(sortFunc)
+      if (sortExpressions(0).order == AscendingOrder) result
+      else result.reverse
     }
   }
 

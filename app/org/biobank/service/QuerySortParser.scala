@@ -38,11 +38,11 @@ object QuerySortParser extends RegexParsers {
   def sortExpressions: Parser[List[SortExpression]] =
     rep1sep(sortExpression, "|") ^^ { case e => e }
 
-  def apply(str: String): Option[List[SortExpression]] = {
-    if (str.trim.isEmpty) {
+  def apply(sort: org.biobank.service.SortString): Option[List[SortExpression]] = {
+    if (sort.expression.trim.isEmpty) {
       Some(List[SortExpression]())
     } else {
-      parseAll(sortExpressions, str) match {
+      parseAll(sortExpressions, sort.expression) match {
         case Success(result, _) => Some(result)
         case NoSuccess(_, _) => None
       }

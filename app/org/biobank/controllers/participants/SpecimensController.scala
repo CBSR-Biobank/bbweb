@@ -2,8 +2,8 @@ package org.biobank.controllers.participants
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
-import org.biobank.domain.participants.{CollectionEventId, Specimen, SpecimenId}
-import org.biobank.service.{AuthToken, PagedQuery, PagedResults}
+import org.biobank.domain.participants.{CollectionEventId, SpecimenId}
+import org.biobank.service._
 import org.biobank.service.participants.SpecimensService
 import org.biobank.service.users.UsersService
 import play.api.libs.json._
@@ -41,30 +41,14 @@ class SpecimensController @Inject() (val action:       BbwebAction,
       validationReply(service.getByInventoryId(invId))
     }
 
-  def list(ceventId:      CollectionEventId,
-           sortMaybe:     Option[String],
-           pageMaybe:     Option[Int],
-           limitMaybe: Option[Int],
-           orderMaybe:    Option[String]) =
+  def list(ceventId: CollectionEventId) =
     action.async(parse.empty) { implicit request =>
       Future {
-        val sort     = sortMaybe.fold { "inventoryId" } { s => s }
-        val page     = pageMaybe.fold { 1 } { p => p }
-        val limit = limitMaybe.fold { 5 } { ps => ps }
-        val order    = orderMaybe.fold { "asc" } { o => o }
-
-        log.debug(s"""|SpecimensController:list: ceventId/$ceventId, sort/$sort,
-                      |  page/$page, limit/$limit, order/$order""".stripMargin)
-
-        val pagedQuery = PagedQuery(page, limit, order)
-
         val validation = for {
-            sortFunc    <- Specimen.sort2Compare.get(sort).toSuccessNel(ControllerError(s"invalid sort field: $sort"))
-            sortOrder   <- pagedQuery.getSortOrder
-            specimens   <- service.list(ceventId, sortFunc, sortOrder)
-            page        <- pagedQuery.getPage(PageSizeMax, specimens.size)
-            limit    <- pagedQuery.getPageSize(PageSizeMax)
-            results     <- PagedResults.create(specimens, page, limit)
+            pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
+            specimens  <- service.list(ceventId, pagedQuery.sort)
+            validPage  <- pagedQuery.validPage(specimens.size)
+            results    <- PagedResults.create(specimens, pagedQuery.page, pagedQuery.limit)
           } yield results
 
         validation.fold(
