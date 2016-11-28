@@ -45,7 +45,7 @@ class CeventSpecimenRepositoryImpl
       DomainError(s"cevent specimen repository: more than one entry found for scpecimen: ${specimenId.id}")
         .failureNel[CeventSpecimen]
     } else {
-      ceventSpecimens.head.successNel[String]
+      ceventSpecimens.headOption.toSuccessNel("list not expected to be empty")
     }
   }
 

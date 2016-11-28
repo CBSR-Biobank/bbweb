@@ -539,6 +539,7 @@ class TestData @Inject() (config:                        Configuration,
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
   def addBbpspSpecimens() = {
 
     def addSpecimen(id:           SpecimenId,
@@ -607,7 +608,8 @@ class TestData @Inject() (config:                        Configuration,
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.MutableDataStructures",
-                          "org.wartremover.warts.Var"))
+                          "org.wartremover.warts.Var",
+                          "org.wartremover.warts.TraversableOps"))
   def addBbpspShipments() = {
 
     def createShipment(courierName:    String,

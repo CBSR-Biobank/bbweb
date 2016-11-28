@@ -1,3 +1,5 @@
+syntax = "proto2";
+
 package org.biobank.infrastructure.event;
 
 message ShipmentEvent {

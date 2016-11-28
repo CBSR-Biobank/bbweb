@@ -65,7 +65,7 @@ class CentreRepositoryImpl
     } else if (centres.size > 1){
       EntityCriteriaError(s"multiple centres with location id: $uniqueId").failureNel[Centre]
     } else {
-      centres.head.successNel[String]
+      centres.headOption.toSuccessNel("list not expected to be empty")
     }
   }
 
