@@ -3,7 +3,6 @@ package org.biobank.controllers.centres
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.centre.CentreId
-import org.biobank.infrastructure.SortOrder
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.service._
 import org.biobank.service.centres.CentresService
@@ -55,15 +54,17 @@ class CentresController @Inject() (val action:         BbwebAction,
       }
     }
 
-  def listNames(filterMaybe: Option[String], orderMaybe: Option[String]) =
+  def listNames =
     action.async(parse.empty) { implicit request =>
       Future {
-        val filter = filterMaybe.fold { "" } { f => f }
-        val order = orderMaybe.fold { "asc" } { o => o }
+        val validation = for {
+            filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
+            centreNames    <- centresService.getCentreNames(filterAndSort.filter, filterAndSort.sort)
+          } yield centreNames
 
-        SortOrder.fromString(order).fold(
+        validation.fold(
           err => BadRequest(err.list.toList.mkString),
-          so  => Ok(centresService.getCentreNames(filter, so))
+          results =>  Ok(results)
         )
       }
     }

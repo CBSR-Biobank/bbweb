@@ -26,7 +26,7 @@ final case class ContainerSchema(id:           ContainerSchemaId,
                                  shared:       Boolean)
     extends ConcurrencySafeEntity[ContainerSchemaId]
     with HasUniqueName
-    with HasDescriptionOption
+    with HasOptionalDescription
     with ContainerSchemaValidations {
   import CommonValidations._
 

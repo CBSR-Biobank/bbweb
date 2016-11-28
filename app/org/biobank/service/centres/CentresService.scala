@@ -37,7 +37,7 @@ trait CentresService {
 
   def getCountsByStatus(): CentreCountsByStatus
 
-  def getCentreNames(filter: String, order: SortOrder): Seq[NameDto]
+  def getCentreNames(filter: FilterString, sort: SortString): ServiceValidation[Seq[NameDto]]
 
   def getCentre(id: CentreId): ServiceValidation[Centre]
 
@@ -117,25 +117,8 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
     }
   }
 
-  def getCentreNames(filter: String, order: SortOrder): Seq[NameDto] = {
-    val centres = centreRepository.getValues
-
-    val filteredCentres = if (filter.isEmpty) {
-      centres
-    } else {
-      centres.filter { s => s.name.contains(filter) }
-    }
-
-    val orderedCentres = filteredCentres.toSeq
-    val result = orderedCentres.map { s =>
-      NameDto(s.id.id, s.name, s.getClass.getSimpleName)
-    } sortWith(NameDto.compareByName)
-
-    if (order == AscendingOrder) {
-      result
-    } else {
-      result.reverse
-    }
+  def getCentreNames(filter: FilterString, sort: SortString): ServiceValidation[Seq[NameDto]] = {
+    getCentres(filter, sort).map(_.map(s => NameDto(s.id.id, s.name, s.state.id)))
   }
 
   def getCentre(id: CentreId): ServiceValidation[Centre] = {

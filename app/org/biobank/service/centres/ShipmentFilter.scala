@@ -5,7 +5,7 @@ import org.biobank.service.Comparator._
 import org.biobank.service.QueryFilterParserGrammar._
 import org.biobank.service.{ServiceValidation, ServiceError}
 import org.biobank.domain.PredicateHelper
-import org.biobank.domain.centre.{Shipment, ShipmentState, ShipmentPredicates}
+import org.biobank.domain.centre.{Shipment, ShipmentPredicates}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -78,7 +78,7 @@ object ShipmentFilter extends PredicateHelper with ShipmentPredicates {
   private def stateFilter(comparator: Comparator, stateNames: List[String]) = {
     stateNames.
       map { str =>
-        ShipmentState.values.find(_.toString == str).toSuccessNel(s"shipment state does not exist: $str")
+        Shipment.shipmentStates.find(_.id == str).toSuccessNel(s"shipment state does not exist: $str")
       }.
       toList.
       sequenceU.

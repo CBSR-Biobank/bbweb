@@ -2,13 +2,13 @@ package org.biobank.controllers.centres
 
 import com.github.nscala_time.time.Imports._
 import org.biobank.controllers.PagedResultsSpec
+import org.biobank.domain.EntityState
 import org.biobank.domain.centre._
 import org.joda.time.DateTime
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
 import scala.language.reflectiveCalls
-import ShipmentState._
 
 /**
  * Tests the REST API for [[Shipment]]s.
@@ -22,12 +22,12 @@ class ShipmentsControllerSpec
   import org.biobank.infrastructure.JsonUtils._
 
   val states = Table("state",
-                     ShipmentState.Created,
-                     ShipmentState.Packed,
-                     ShipmentState.Sent,
-                     ShipmentState.Received,
-                     ShipmentState.Unpacked,
-                     ShipmentState.Lost)
+                     Shipment.createdState,
+                     Shipment.packedState,
+                     Shipment.sentState,
+                     Shipment.receivedState,
+                     Shipment.unpackedState,
+                     Shipment.lostState)
 
   def skipStateCommon(shipment:   Shipment,
                       uriPath:    String,
@@ -96,6 +96,25 @@ class ShipmentsControllerSpec
         }
       }
 
+      "list multiple shipments when filtered by states" in {
+        val shipmentStates = List(Shipment.createdState, Shipment.unpackedState)
+        val f = allShipmentsFixture
+        f.shipments.values.foreach(shipmentRepository.put)
+
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+            uri         = listUri(f.fromCentre),
+            queryParams = Map("filter" -> s"""state:in:(${shipmentStates.mkString(",")})""",
+                              "sort"   -> "state"),
+            offset      = 0,
+            total       = shipmentStates.size.toLong,
+            maybeNext   = None,
+            maybePrev   = None)
+
+        jsonItems must have size shipmentStates.size.toLong
+        compareObj(jsonItems(0), f.shipments(Shipment.createdState))
+        compareObj(jsonItems(1), f.shipments(Shipment.unpackedState))
+      }
+
       "fail when using an invalid filter string" in {
         val f = centresFixture
         val invalidFilterString = "xxx"
@@ -110,7 +129,9 @@ class ShipmentsControllerSpec
         val f = centresFixture
         val invalidStateName = nameGenerator.next[Shipment]
 
-        val reply = makeRequest(GET, listUri(f.fromCentre) + s"?filter=state::$invalidStateName", BAD_REQUEST)
+        val reply = makeRequest(GET,
+                                listUri(f.fromCentre) + s"?filter=state::$invalidStateName",
+                                BAD_REQUEST)
 
         (reply \ "status").as[String] must include ("error")
 
@@ -660,7 +681,7 @@ class ShipmentsControllerSpec
     "POST /shipments/state/:id" must {
 
       def changeStateCommon(shipment:  Shipment,
-                            newState:  ShipmentState,
+                            newState:  EntityState,
                             timeMaybe: Option[DateTime]) = {
         shipmentRepository.put(shipment)
         val baseJson = Json.obj("expectedVersion" -> shipment.version)
@@ -711,7 +732,7 @@ class ShipmentsControllerSpec
         "change to CREATED state from PACKED state" in {
           val f = packedShipmentFixture
 
-          changeStateCommon(f.shipment, ShipmentState.Created, None)
+          changeStateCommon(f.shipment, Shipment.createdState, None)
           shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
             repoShipment mustBe a[CreatedShipment]
             compareTimestamps(shipment     = repoShipment,
@@ -725,7 +746,7 @@ class ShipmentsControllerSpec
 
       "change to PACKED state from other valid states" in {
         val f = allShipmentsFixture
-        val testStates = Table("state", ShipmentState.Created, ShipmentState.Sent)
+        val testStates = Table("state", Shipment.createdState, Shipment.sentState)
 
         forAll(testStates) { state =>
           info(s"change to $state state")
@@ -733,7 +754,7 @@ class ShipmentsControllerSpec
           val stateChangeTime = DateTime.now.minusDays(10)
 
           val shipment = f.shipments(state)
-          changeStateCommon(shipment, ShipmentState.Packed, Some(stateChangeTime))
+          changeStateCommon(shipment, Shipment.packedState, Some(stateChangeTime))
           shipmentRepository.getByKey(shipment.id) mustSucceed { repoShipment =>
             repoShipment mustBe a[PackedShipment]
             compareTimestamps(repoShipment,
@@ -751,15 +772,15 @@ class ShipmentsControllerSpec
           val f = allShipmentsFixture
 
           val testStates = Table("state name",
-                                 ShipmentState.Packed,
-                                 ShipmentState.Received)
+                                 Shipment.packedState,
+                                 Shipment.receivedState)
 
           forAll(testStates) { state =>
             info(s"$state state")
             val shipment =  f.shipments(state)
             val time = shipment.timePacked.get.plusDays(1)
 
-            changeStateCommon(shipment, ShipmentState.Sent, Some(time))
+            changeStateCommon(shipment, Shipment.sentState, Some(time))
             shipmentRepository.getByKey(shipment.id) mustSucceed { repoShipment =>
               repoShipment mustBe a[SentShipment]
               compareTimestamps(repoShipment,
@@ -792,15 +813,15 @@ class ShipmentsControllerSpec
           val f = allShipmentsFixture
 
           val testStates = Table("state name",
-                                 ShipmentState.Sent,
-                                 ShipmentState.Unpacked)
+                                 Shipment.sentState,
+                                 Shipment.unpackedState)
 
           forAll(testStates) { state =>
             info(s"$state state")
             val shipment =  f.shipments(state)
             val time = shipment.timeSent.get.plusDays(1)
 
-            changeStateCommon(shipment, ShipmentState.Received, Some(time))
+            changeStateCommon(shipment, Shipment.receivedState, Some(time))
             shipmentRepository.getByKey(shipment.id) mustSucceed { repoShipment =>
               repoShipment mustBe a[ReceivedShipment]
               compareTimestamps(repoShipment,
@@ -833,7 +854,7 @@ class ShipmentsControllerSpec
           val f = receivedShipmentFixture
           val timeUnpacked = f.shipment.timeReceived.get.plusDays(1)
 
-          changeStateCommon(f.shipment, ShipmentState.Unpacked, Some(timeUnpacked))
+          changeStateCommon(f.shipment, Shipment.unpackedState, Some(timeUnpacked))
           shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
             repoShipment mustBe a[UnpackedShipment]
             compareTimestamps(repoShipment,
@@ -850,7 +871,7 @@ class ShipmentsControllerSpec
         "allow setting a shipment's state to LOST" in {
           val f = sentShipmentFixture
 
-          changeStateCommon(f.shipment, ShipmentState.Lost, None)
+          changeStateCommon(f.shipment, Shipment.lostState, None)
           shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
             repoShipment mustBe a[LostShipment]
             compareTimestamps(f.shipment, repoShipment)
@@ -885,11 +906,11 @@ class ShipmentsControllerSpec
         val f = allShipmentsFixture
 
         val fromStates = Table("from states",
-                               ShipmentState.Packed,
-                               ShipmentState.Sent,
-                               ShipmentState.Received,
-                               ShipmentState.Unpacked,
-                               ShipmentState.Lost)
+                               Shipment.packedState,
+                               Shipment.sentState,
+                               Shipment.receivedState,
+                               Shipment.unpackedState,
+                               Shipment.lostState)
         forAll(fromStates) { fromState =>
           info(s"$fromState")
           val shipment =  f.shipments(fromState)
@@ -931,11 +952,11 @@ class ShipmentsControllerSpec
         val f = allShipmentsFixture
 
         val fromStates = Table("from states",
-                               ShipmentState.Created,
-                               ShipmentState.Packed,
-                               ShipmentState.Received,
-                               ShipmentState.Unpacked,
-                               ShipmentState.Lost)
+                               Shipment.createdState,
+                               Shipment.packedState,
+                               Shipment.receivedState,
+                               Shipment.unpackedState,
+                               Shipment.lostState)
         forAll(fromStates) { fromState =>
           info(s"$fromState")
           val shipment =  f.shipments(fromState)

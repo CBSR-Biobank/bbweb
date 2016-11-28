@@ -4,7 +4,6 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain._
 import org.biobank.domain.study._
-import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service._
 import org.biobank.service.studies.StudiesService
@@ -57,15 +56,17 @@ class StudiesController @Inject() (val action:         BbwebAction,
       }
     }
 
-  def listNames(filterMaybe: Option[String], orderMaybe:  Option[String]) =
+  def listNames =
     action.async(parse.empty) { implicit request =>
       Future {
-        val filter = filterMaybe.fold { "" } { f => f }
-        val order  = orderMaybe.fold { "asc" } { o => o }
+        val validation = for {
+            filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
+            studyNames    <- studiesService.getStudyNames(filterAndSort.filter, filterAndSort.sort)
+          } yield studyNames
 
-        SortOrder.fromString(order).fold(
+        validation.fold(
           err => BadRequest(err.list.toList.mkString),
-          so  => Ok(studiesService.getStudyNames(filter, so))
+          results =>  Ok(results)
         )
       }
     }

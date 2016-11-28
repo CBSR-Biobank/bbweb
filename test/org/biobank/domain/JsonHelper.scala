@@ -26,7 +26,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
   def compareObj(json: JsValue, user: User) = {
     compareEntity(json, user)
-    (json \ "state").as[String] mustBe (user.state.toString)
+    (json \ "state").as[String] mustBe (user.state.id)
     (json \ "name").as[String] mustBe (user.name)
     (json \ "email").as[String] mustBe (user.email)
     (json \ "avatarUrl").asOpt[String] mustBe (user.avatarUrl)
@@ -39,7 +39,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
     (json \ "description").asOpt[String] mustBe (study.description)
 
-    (json \ "state").as[String] mustBe (study.state.toString)
+    (json \ "state").as[String] mustBe (study.state.id)
 
     val jsonAnnotationTypes = (json \ "annotationTypes").as[List[JsObject]]
 
@@ -60,7 +60,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
     (json \ "name").as[String] mustBe (nameDto.name)
 
-    (json \ "status").as[String] mustBe (nameDto.status)
+    (json \ "state").as[String] mustBe (nameDto.state)
   }
 
   def compareObj(json: JsValue, specimenGroup: SpecimenGroup) = {
@@ -198,9 +198,11 @@ trait JsonHelper extends MustMatchers with OptionValues {
   def compareObj(json: JsValue, centre: Centre) = {
     compareEntity(json, centre)
 
+    (json \ "state").as[String] mustBe (centre.state.id)
+
     (json \ "name").as[String] mustBe (centre.name)
+
     (json \ "description").asOpt[String] mustBe (centre.description)
-    (json \ "state").as[String] mustBe (centre.state.toString)
 
     (json \ "studyIds").as[List[String]].foreach { jsStudyId =>
       centre.studyIds must contain (StudyId(jsStudyId))

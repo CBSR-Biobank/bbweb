@@ -9,6 +9,10 @@ package object controllers {
 
   /** Contains an error messsage when an invalid condition happens. */
   type ControllerError = String
+
+  /** Used to parse expressions in raw query strings. */
+  type QueryStringExpressions = Map[String, String]
+
 }
 
 package controllers {

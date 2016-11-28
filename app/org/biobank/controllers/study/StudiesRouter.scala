@@ -10,9 +10,9 @@ class StudiesRouter @Inject()(controller: StudiesController) extends SimpleRoute
 
   override def routes: Routes = {
 
-    case GET(p"/names" ? q_o"filter=$filter"
-               & q_o"order=$order") =>
-      controller.listNames(filter, order)
+    case GET(p"/names") =>
+      // this action extracts parameters from the raw query string
+      controller.listNames
 
     case GET(p"/counts") =>
       controller.studyCounts
@@ -36,7 +36,7 @@ class StudiesRouter @Inject()(controller: StudiesController) extends SimpleRoute
       controller.specimenGroupValueTypes
 
     case GET(p"/") =>
-      // this action extracts parameters from the query string
+      // this action extracts parameters from the raw query string
       controller.list
 
     case POST(p"/") =>

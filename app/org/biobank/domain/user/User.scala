@@ -1,54 +1,35 @@
 package org.biobank.domain.user
 
 import org.biobank.ValidationKey
-import org.biobank.domain.{CommonValidations, ConcurrencySafeEntity, DomainValidation, DomainError}
+import org.biobank.domain._
 import org.biobank.infrastructure.EnumUtils._
 import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
 
 /**
- * Possible states for a user.
- */
-@SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
-object UserState extends Enumeration {
-  type UserState = Value
-  val Registered = Value("registered")
-  val Active = Value("active")
-  val Locked = Value("locked")
-
-  implicit val userStateFormat: Format[UserState] = enumFormat(UserState)
-
-}
-
-/**
  * Predicates that can be used to filter collections of users.
  *
  */
-trait UserPredicates {
-  import UserState._
+trait UserPredicates extends HasNamePredicates[User] {
 
   type UserFilter = User => Boolean
-
-  val nameIsOneOf: Set[String] => UserFilter =
-    names => user => names.contains(user.name)
 
   val emailIsOneOf: Set[String] => UserFilter =
     emails => user => emails.contains(user.email)
 
-  val stateIsOneOf: Set[UserState] => UserFilter =
-    states => user => states.contains(user.state)
+  val emailContains: String => UserFilter =
+    email => entity => entity.email.contains(email.replaceAll("[\\*]", ""))
 
 }
 
 /**
  * A user of the system.
  */
-sealed trait User extends ConcurrencySafeEntity[UserId] {
-  import UserState._
+sealed trait User extends ConcurrencySafeEntity[UserId] with HasState with HasName {
 
   /** the user's current state */
-  val state: UserState
+  val state: EntityState
 
   /** The user's full name. */
   val name: String
@@ -90,14 +71,17 @@ sealed trait User extends ConcurrencySafeEntity[UserId] {
 
 object User {
 
+  val userStates: List[EntityState] = List(new EntityState("registered"),
+                                           new EntityState("active"),
+                                           new EntityState("locked"))
+
   @SuppressWarnings(Array("org.wartremover.warts.Option2Iterable"))
   implicit val userWrites: Writes[User] = new Writes[User] {
     def writes(user: User) = {
       ConcurrencySafeEntity.toJson(user) ++
-      Json.obj(
-        "name"         -> user.name,
-        "email"        -> user.email,
-        "state"        -> user.state) ++
+      Json.obj("state"        -> user.state.id,
+               "name"         -> user.name,
+               "email"        -> user.email) ++
       JsObject(
         Seq[(String, JsValue)]() ++
           user.avatarUrl.map("avatarUrl" -> Json.toJson(_)))
@@ -171,7 +155,7 @@ final case class RegisteredUser(id:           UserId,
                                 password:     String,
                                 salt:         String,
                                 avatarUrl:    Option[String])
-    extends { val state = UserState.Registered }
+    extends { val state = new EntityState("registered") }
     with User
     with UserValidations {
 
@@ -227,7 +211,7 @@ final case class ActiveUser(id:           UserId,
                             password:     String,
                             salt:         String,
                             avatarUrl:    Option[String])
-    extends { val state = UserState.Active }
+    extends { val state = new EntityState("active") }
     with User
     with UserValidations {
   import CommonValidations._
@@ -286,7 +270,7 @@ final case class LockedUser(id:           UserId,
                             password:     String,
                             salt:         String,
                             avatarUrl:    Option[String])
-    extends { val state = UserState.Locked }
+    extends { val state = new EntityState("locked") }
     with User {
 
   /** Unlocks a locked user. */

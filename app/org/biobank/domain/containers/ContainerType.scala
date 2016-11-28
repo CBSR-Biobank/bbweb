@@ -22,7 +22,7 @@ trait ContainerTypeValidations {
 sealed trait ContainerType
     extends ConcurrencySafeEntity[ContainerTypeId]
     with HasUniqueName
-    with HasDescriptionOption
+    with HasOptionalDescription
     with ContainerValidations {
   import org.biobank.domain.CommonValidations._
 

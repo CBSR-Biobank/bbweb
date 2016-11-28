@@ -40,7 +40,7 @@ trait StudiesService {
    */
   def getStudies(filter: FilterString, sort: SortString): ServiceValidation[Seq[Study]]
 
-  def getStudyNames(filter: String, order: SortOrder): Seq[NameDto]
+  def getStudyNames(filter: FilterString, sort: SortString): ServiceValidation[Seq[NameDto]]
 
   def getStudy(id: StudyId): ServiceValidation[Study]
 
@@ -151,25 +151,8 @@ class StudiesServiceImpl @javax.inject.Inject() (
     }
   }
 
-  def getStudyNames(filter: String, order: SortOrder): Seq[NameDto] = {
-    val studies = studyRepository.getValues
-
-    val filteredStudies = if (filter.isEmpty) {
-      studies
-    } else {
-      studies.filter { s => s.name.contains(filter) }
-    }
-
-    val orderedStudies = filteredStudies.toSeq
-    val result = orderedStudies.map { s =>
-      NameDto(s.id.id, s.name, s.getClass.getSimpleName)
-    } sortWith(NameDto.compareByName)
-
-    if (order == AscendingOrder) {
-      result
-    } else {
-      result.reverse
-    }
+  def getStudyNames(filter: FilterString, sort: SortString): ServiceValidation[Seq[NameDto]] = {
+    getStudies(filter, sort).map(_.map(s => NameDto(s.id.id, s.name, s.state.id)))
   }
 
   def getStudy(id: StudyId) : ServiceValidation[Study] = {

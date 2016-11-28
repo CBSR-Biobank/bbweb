@@ -25,12 +25,13 @@ object PagedQuery {
 
   def create(rawQueryString: String, maxPageSize: Int): ControllerValidation[PagedQuery] = {
     for {
-        expressions <- {
+        qsExpressions <- {
           QueryStringParser(rawQueryString).
             toSuccessNel(s"could not parse query string: $rawQueryString")
         }
+        filterAndSort <- FilterAndSortQuery.createFromExpressions(qsExpressions).successNel[String]
         page <- {
-          Util.toInt(expressions.get("page").getOrElse("1")).
+          Util.toInt(qsExpressions.get("page").getOrElse("1")).
             toSuccessNel(s"page is not a number: $rawQueryString")
         }
         validPage <- {
@@ -38,15 +39,15 @@ object PagedQuery {
           else ControllerError(s"page is invalid: $page").failureNel[Int]
         }
         limit <- {
-          Util.toInt(expressions.get("limit").getOrElse("5")).
+          Util.toInt(qsExpressions.get("limit").getOrElse("5")).
             toSuccessNel(s"limit is not a number: $rawQueryString")
         }
         validLimit <- validLimit(limit, maxPageSize)
       } yield {
-        PagedQuery(filter      = new FilterString(expressions.get("filter").getOrElse("")),
-                   sort        = new SortString(expressions.get("sort").getOrElse("")),
-                   page        = page,
-                   limit       = limit)
+        PagedQuery(filter = filterAndSort.filter,
+                   sort   = filterAndSort.sort,
+                   page   = page,
+                   limit  = limit)
     }
   }
 

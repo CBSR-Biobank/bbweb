@@ -55,7 +55,7 @@ object QueryStringParser extends RegexParsers {
   def expressions: Parser[List[Expression]] =
     repsep(expression, "&")
 
-  def apply(str: String): Option[Map[String, String]] = {
+  def apply(str: String): Option[QueryStringExpressions] = {
     if (str.trim.isEmpty) {
       Some(Map[String, String]())
     } else {

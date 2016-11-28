@@ -10,7 +10,6 @@ import play.api.libs.json.Reads._
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
-import ShipmentState._
 
 final case class ShipmentId(id: String) extends IdentifiedValueObject[String]
 
@@ -35,7 +34,7 @@ trait ShipmentPredicates {
   val trackingNumberIsOneOf: Set[String] => ShipmentFilter =
     trackingNumbers => shipment => trackingNumbers.contains(shipment.trackingNumber)
 
-  val stateIsOneOf: Set[ShipmentState] => ShipmentFilter =
+  val stateIsOneOf: Set[EntityState] => ShipmentFilter =
     states => shipment => states.contains(shipment.state)
 
 }
@@ -48,12 +47,12 @@ trait ShipmentPredicates {
  * @see org.biobank.domain.centre.ShipmentContainer
  */
 sealed trait Shipment
-    extends ConcurrencySafeEntity[ShipmentId] {
+    extends ConcurrencySafeEntity[ShipmentId]
+    with HasState {
   import org.biobank.CommonValidations._
 
   protected val log = LoggerFactory.getLogger(this.getClass)
 
-  val state:          ShipmentState
   val courierName:    String
   val trackingNumber: String
   val fromCentreId:   CentreId
@@ -167,17 +166,31 @@ trait ShipmentValidations {
 
 object Shipment extends ShipmentValidations {
 
+  val createdState  = new EntityState("created")
+  val packedState   = new EntityState("packed")
+  val sentState     = new EntityState("sent")
+  val receivedState = new EntityState("received")
+  val unpackedState = new EntityState("unpacked")
+  val lostState     = new EntityState("lost")
+
+  val shipmentStates: List[EntityState] = List(createdState,
+                                               packedState,
+                                               sentState,
+                                               receivedState,
+                                               unpackedState,
+                                               lostState)
+
   @SuppressWarnings(Array("org.wartremover.warts.Option2Iterable"))
   implicit val shipmentWrites: Writes[Shipment] = new Writes[Shipment] {
       def writes(shipment: Shipment): JsValue = {
         ConcurrencySafeEntity.toJson(shipment) ++
-        Json.obj("courierName"    -> shipment.courierName,
+        Json.obj("state"          -> shipment.state.id,
+                 "courierName"    -> shipment.courierName,
                  "trackingNumber" -> shipment.trackingNumber,
                  "fromCentreId"   -> shipment.fromCentreId,
                  "fromLocationId" -> shipment.fromLocationId,
                  "toCentreId"     -> shipment.toCentreId,
-                 "toLocationId"   -> shipment.toLocationId,
-                 "state"          -> shipment.state) ++
+                 "toLocationId"   -> shipment.toLocationId) ++
         JsObject(
           Seq[(String, JsValue)]() ++
             shipment.timePacked.map("timePacked" -> Json.toJson(_)) ++
@@ -204,7 +217,7 @@ final case class CreatedShipment(id:             ShipmentId,
                                  timeSent:       Option[DateTime],
                                  timeReceived:   Option[DateTime],
                                  timeUnpacked:   Option[DateTime])
-    extends { val state = ShipmentState.Created }
+    extends { val state = Shipment.createdState }
     with Shipment
     with ShipmentValidations {
 
@@ -360,7 +373,7 @@ final case class PackedShipment(id:             ShipmentId,
                                 timeSent:       Option[DateTime],
                                 timeReceived:   Option[DateTime],
                                 timeUnpacked:   Option[DateTime])
-    extends { val state = ShipmentState.Packed }
+    extends { val state = Shipment.packedState }
     with Shipment
     with ShipmentValidations {
 
@@ -425,7 +438,7 @@ final case class SentShipment(id:             ShipmentId,
                               timeSent:       Option[DateTime],
                               timeReceived:   Option[DateTime],
                               timeUnpacked:   Option[DateTime])
-    extends { val state = ShipmentState.Sent }
+    extends { val state = Shipment.sentState }
     with Shipment
     with ShipmentValidations {
 
@@ -524,7 +537,7 @@ final case class ReceivedShipment(id:             ShipmentId,
                                   timeSent:       Option[DateTime],
                                   timeReceived:   Option[DateTime],
                                   timeUnpacked:   Option[DateTime])
-    extends { val state = ShipmentState.Received }
+    extends { val state = Shipment.receivedState }
     with Shipment
     with ShipmentValidations {
 
@@ -586,7 +599,7 @@ final case class UnpackedShipment(id:             ShipmentId,
                                   timeSent:       Option[DateTime],
                                   timeReceived:   Option[DateTime],
                                   timeUnpacked:   Option[DateTime])
-    extends { val state = ShipmentState.Unpacked }
+    extends { val state = Shipment.unpackedState }
     with Shipment
     with ShipmentValidations {
 
@@ -623,6 +636,6 @@ final case class LostShipment(id:             ShipmentId,
                               timeSent:       Option[DateTime],
                               timeReceived:   Option[DateTime],
                               timeUnpacked:   Option[DateTime])
-    extends { val state = ShipmentState.Lost }
+    extends { val state = Shipment.lostState }
     with Shipment
     with ShipmentValidations

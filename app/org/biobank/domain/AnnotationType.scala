@@ -33,7 +33,7 @@ final case class AnnotationType(uniqueId:      String,
                                 options:       Seq[String],
                                 required:      Boolean)
     extends HasName
-    with HasDescriptionOption
+    with HasOptionalDescription
     with AnnotationTypeValidations {
 
   override def equals(that: Any): Boolean = {

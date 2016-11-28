@@ -28,8 +28,9 @@ class CentresRouter @Inject()(controller: CentresController) extends SimpleRoute
       controller.removeStudy(centreId, ver, studyId)
 
     // --- CENTRE DTOs ---
-    case GET(p"/names" ? q_o"filter=$filter" & q_o"order=$order") =>
-      controller.listNames(filter, order)
+    case GET(p"/names") =>
+      // this action extracts parameters from the raw query string
+      controller.listNames
 
     case POST(p"/locations") =>
       controller.searchLocations
@@ -39,7 +40,7 @@ class CentresRouter @Inject()(controller: CentresController) extends SimpleRoute
       controller.centreCounts
 
     case GET(p"/")  =>
-      // this action extracts parameters from the query string
+      // this action extracts parameters from the raw query string
       controller.list
 
     case GET(p"/${centreId(id)}")  =>

@@ -4,7 +4,7 @@ import org.biobank.domain.{
   ConcurrencySafeEntity,
   DomainValidation,
   HasUniqueName,
-  HasDescriptionOption
+  HasOptionalDescription
 }
 import org.biobank.infrastructure.JsonUtils._
 import org.joda.time.DateTime
@@ -33,7 +33,7 @@ final case class ProcessingType(studyId:      StudyId,
                                 enabled:      Boolean)
     extends ConcurrencySafeEntity[ProcessingTypeId]
     with HasUniqueName
-    with HasDescriptionOption
+    with HasOptionalDescription
     with HasStudyId {
 
   /** Updates a processing type with new values.

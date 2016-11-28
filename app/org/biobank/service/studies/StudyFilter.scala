@@ -4,8 +4,7 @@ import org.biobank.service._
 import org.biobank.service.Comparator._
 import org.biobank.service.QueryFilterParserGrammar._
 import org.biobank.service.{ServiceValidation, ServiceError}
-import org.biobank.domain.PredicateHelper
-import org.biobank.domain.study.{Study, StudyState, StudyPredicates}
+import org.biobank.domain.study.{Study, StudyPredicates}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -13,8 +12,10 @@ import scalaz.Validation.FlatMap._
  * Functions that filter a set of studys from an expression contained in a filter string.
  *
  */
-object StudyFilter extends PredicateHelper with StudyPredicates {
-  import org.biobank.CommonValidations._
+object StudyFilter
+    extends EntityNameFilter[Study]
+    with EntityStateFilter[Study]
+    with StudyPredicates {
 
   def filterStudies(studies: Set[Study], filter: FilterString):ServiceValidation[Set[Study]] = {
     QueryFilterParser.expressions(filter).flatMap { filterExpression =>
@@ -51,38 +52,10 @@ object StudyFilter extends PredicateHelper with StudyPredicates {
     }
   }
 
-  private def nameFilter(comparator: Comparator, names: List[String]) = { //
-    val nameSet = names.toSet
-    comparator match {
-      case Equal | In =>
-        nameIsOneOf(nameSet).successNel[String]
-      case NotEqualTo | NotIn =>
-        complement(nameIsOneOf(nameSet)).successNel[String]
-      case _ =>
-        ServiceError(s"invalid filter on courier name: $comparator").failureNel[StudyFilter]
-    }
-  }
-
-  private def stateFilter(comparator: Comparator, stateNames: List[String]) = {
-    stateNames.
-      map { str =>
-        StudyState.values.find(_.toString == str).toSuccessNel(
-          InvalidState(s"study state does not exist: $str").toString)
-      }.
-      toList.
-      sequenceU.
-      flatMap { states =>
-        val stateSet = states.toSet
-
-        comparator match {
-          case Equal | In =>
-            stateIsOneOf(stateSet).successNel[String]
-          case NotEqualTo | NotIn =>
-            complement(stateIsOneOf(stateSet)).successNel[String]
-          case _ =>
-          ServiceError(s"invalid filter on state: $comparator").failureNel[StudyFilter]
-        }
-      }
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
+  protected def stateFilter(comparator: Comparator, stateNames: List[String]):
+      ServiceValidation[EntityStateFilter] = {
+    stateFilter(comparator, stateNames, Study.studyStates)
   }
 
 }

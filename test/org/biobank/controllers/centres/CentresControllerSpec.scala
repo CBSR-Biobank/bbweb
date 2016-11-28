@@ -288,7 +288,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         (reply \ "status").as[String] must include ("error")
 
         (reply \ "message").as[String] must include regex (
-          "InvalidState.centre state does not exist")
+          "InvalidState.*state does not exist")
       }
 
       "list a single centre when using paged query" in {
@@ -991,7 +991,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
           val f = createFixture
           val nameDtos = f.nameDtos.sortWith { (a, b) => (a.name compareToIgnoreCase b.name) > 0 }
 
-          val json = makeRequest(GET, uri("names") + "?order=desc")
+          val json = makeRequest(GET, uri("names") + "?sort=-name")
 
           (json \ "status").as[String] must include ("success")
 
@@ -1009,7 +1009,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centres.foreach(centreRepository.put)
         val centre = centres.head
 
-        val json = makeRequest(GET, uri("names") + s"?filter=${centre.name}")
+        val json = makeRequest(GET, uri("names") + s"?filter=name::${centre.name}")
 
         (json \ "status").as[String] must include ("success")
 
@@ -1023,12 +1023,12 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     "POST /centres/locations" must {
 
-      "must return centre locations" in {
+      "111 must return centre locations" in {
         val location = factory.createLocation
         val centre = factory.createDisabledCentre.copy(locations = Set(location))
         centreRepository.put(centre)
 
-        val reqJson = Json.obj("filter" -> "", "maxResults" -> 10)
+        val reqJson = Json.obj("filter" -> "", "limit" -> 10)
         val reply = makeRequest(POST, uri("locations"), reqJson)
 
         (reply \ "status").as[String] must include ("success")
@@ -1048,7 +1048,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val location = centre.locations.head
         centres.foreach(centreRepository.put)
 
-        val reqJson = Json.obj("filter" -> location.name, "maxResults" -> 10)
+        val reqJson = Json.obj("filter" -> location.name, "limit" -> 10)
         val reply = makeRequest(POST, uri("locations"), reqJson)
 
         (reply \ "status").as[String] must include ("success")
@@ -1075,7 +1075,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
           sortWith { (a, b) => (a.name compareToIgnoreCase b.name) < 0 }.
           toList
 
-        val reqJson = Json.obj("filter" -> "", "maxResults" -> 10)
+        val reqJson = Json.obj("filter" -> "", "limit" -> 10)
         val reply = makeRequest(POST, uri("locations"), reqJson)
 
         (reply \ "status").as[String] must include ("success")

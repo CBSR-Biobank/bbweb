@@ -9,11 +9,11 @@ import scala.language.reflectiveCalls
 
 private[centres] trait ShipmentsControllerSpecFixtures extends ControllerFixture {
 
-  val nonCreatedStates = List(ShipmentState.Packed,
-                              ShipmentState.Sent,
-                              ShipmentState.Received,
-                              ShipmentState.Unpacked,
-                              ShipmentState.Lost)
+  val nonCreatedStates = List(Shipment.packedState,
+                              Shipment.sentState,
+                              Shipment.receivedState,
+                              Shipment.unpackedState,
+                              Shipment.lostState)
 
   def centresFixture = {
     val centres = (1 to 2).map { _ =>
@@ -122,12 +122,12 @@ private[centres] trait ShipmentsControllerSpecFixtures extends ControllerFixture
       val fromCentre = centres.fromCentre
       val toCentre = centres.toCentre
       val shipments = Map(
-          ShipmentState.Created  -> factory.createShipment(fromCentre, toCentre),
-          ShipmentState.Packed   -> factory.createPackedShipment(fromCentre, toCentre),
-          ShipmentState.Sent     -> factory.createSentShipment(fromCentre, toCentre),
-          ShipmentState.Received -> factory.createReceivedShipment(fromCentre, toCentre),
-          ShipmentState.Unpacked -> factory.createUnpackedShipment(fromCentre, toCentre),
-          ShipmentState.Lost     -> factory.createLostShipment(fromCentre, toCentre))
+          Shipment.createdState  -> factory.createShipment(fromCentre, toCentre),
+          Shipment.packedState   -> factory.createPackedShipment(fromCentre, toCentre),
+          Shipment.sentState     -> factory.createSentShipment(fromCentre, toCentre),
+          Shipment.receivedState -> factory.createReceivedShipment(fromCentre, toCentre),
+          Shipment.unpackedState -> factory.createUnpackedShipment(fromCentre, toCentre),
+          Shipment.lostState     -> factory.createLostShipment(fromCentre, toCentre))
     }
   }
 

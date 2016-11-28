@@ -7,7 +7,7 @@ import org.biobank.domain.{
   DomainError,
   DomainValidation,
   HasName,
-  HasDescriptionOption,
+  HasOptionalDescription,
   HasAnnotationTypes
 }
 import org.biobank.infrastructure.JsonUtils._
@@ -58,7 +58,7 @@ final case class CollectionEventType(studyId:            StudyId,
                                      annotationTypes:    Set[AnnotationType])
     extends ConcurrencySafeEntity[CollectionEventTypeId]
     with HasName
-    with HasDescriptionOption
+    with HasOptionalDescription
     with HasStudyId
     with HasAnnotationTypes {
   import org.biobank.domain.CommonValidations._

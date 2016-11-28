@@ -18,43 +18,43 @@ object UserCommands {
                                    avatarUrl: Option[String])
       extends UserCommand
 
-  final case class UpdateUserNameCmd(userId:    Option[String],
-                                     id: String,
+  final case class UpdateUserNameCmd(userId:          Option[String],
+                                     id:              String,
                                      expectedVersion: Long,
-                                     name: String)
+                                     name:            String)
       extends UserModifyCommand
 
-  final case class UpdateUserEmailCmd(userId:    Option[String],
-                                      id: String,
+  final case class UpdateUserEmailCmd(userId:          Option[String],
+                                      id:              String,
                                       expectedVersion: Long,
-                                      email: String)
+                                      email:           String)
       extends UserModifyCommand
 
-  final case class UpdateUserPasswordCmd(userId:    Option[String],
-                                         id: String,
+  final case class UpdateUserPasswordCmd(userId:          Option[String],
+                                         id:              String,
                                          expectedVersion: Long,
                                          currentPassword: String,
-                                         newPassword: String)
+                                         newPassword:     String)
       extends UserModifyCommand
 
-  final case class UpdateUserAvatarUrlCmd(userId:    Option[String],
-                                          id: String,
+  final case class UpdateUserAvatarUrlCmd(userId:          Option[String],
+                                          id:              String,
                                           expectedVersion: Long,
-                                          avatarUrl: Option[String])
+                                          avatarUrl:       Option[String])
       extends UserModifyCommand
 
-  final case class ActivateUserCmd(userId:    Option[String],
-                                   id: String,
+  final case class ActivateUserCmd(userId:          Option[String],
+                                   id:              String,
                                    expectedVersion: Long)
       extends UserModifyCommand
 
-  final case class LockUserCmd(userId:    Option[String],
-                               id: String,
+  final case class LockUserCmd(userId:          Option[String],
+                               id:              String,
                                expectedVersion: Long)
       extends UserModifyCommand
 
-  final case class UnlockUserCmd(userId:    Option[String],
-                                 id: String,
+  final case class UnlockUserCmd(userId:          Option[String],
+                                 id:              String,
                                  expectedVersion: Long)
       extends UserModifyCommand
 

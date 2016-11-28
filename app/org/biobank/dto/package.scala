@@ -1,7 +1,6 @@
 package org.biobank
 
 import org.biobank.domain.centre.Shipment
-import org.biobank.domain.centre.ShipmentState._
 import org.biobank.domain.participants.SpecimenState._
 import org.biobank.infrastructure.JsonUtils._
 import org.joda.time.DateTime
@@ -17,7 +16,7 @@ package dto {
 
   }
 
-  final case class NameDto(id: String, name: String, status: String)
+  final case class NameDto(id: String, name: String, state: String)
 
   object NameDto {
     def compareByName(a: NameDto, b: NameDto) = (a.name compareToIgnoreCase b.name) < 0
@@ -104,7 +103,7 @@ package dto {
                                version:          Long,
                                timeAdded:        DateTime,
                                timeModified:     Option[DateTime],
-                               state:            ShipmentState,
+                               state:            String,
                                courierName:      String,
                                trackingNumber:   String,
                                fromLocationInfo: CentreLocationInfo,
@@ -145,7 +144,7 @@ package dto {
                   timeUnpacked     = shipment.timeUnpacked,
                   specimenCount    = specimenCount,
                   containerCount   = containerCount,
-                  state            = shipment.state)
+                  state            = shipment.state.id)
 
     def compareByCourier(a: ShipmentDto, b: ShipmentDto) =
       (a.courierName compareToIgnoreCase b.courierName) < 0
@@ -162,7 +161,7 @@ package dto {
     def compareByToLocation(a: ShipmentDto, b: ShipmentDto) =
       (a.toLocationInfo.name compareToIgnoreCase b.toLocationInfo.name) < 0
 
-    implicit val shipmentDtooDtoWriter: Writes[ShipmentDto] = Json.writes[ShipmentDto]
+    implicit val shipmentDtoWriter: Writes[ShipmentDto] = Json.writes[ShipmentDto]
 
   }
 

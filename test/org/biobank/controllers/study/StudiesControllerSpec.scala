@@ -24,7 +24,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
   def uri(study: Study, path: String): String = uri(path) + s"/${study.id.id}"
 
   def compareNameDto(json: JsValue, study: Study) {
-    compareObj(json, NameDto(study.id.id, study.name, study.getClass.getSimpleName))
+    compareObj(json, NameDto(study.id.id, study.name, study.state.id))
   }
 
   def compareObjs(jsonList: List[JsObject], studies: List[Study]) = {
@@ -129,7 +129,6 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
                            factory.createEnabledStudy,
                            factory.createRetiredStudy)
         studies.foreach(studyRepository.put)
-
         val jsonItem = PagedResultsSpec(this).singleItemResult(
             uri, Map("filter" -> "state::disabled"))
         compareObj(jsonItem, studies(0))
@@ -184,7 +183,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         (reply \ "status").as[String] must include ("error")
 
         (reply \ "message").as[String] must include regex (
-          "InvalidState.study state does not exist")
+          "InvalidState.*state does not exist")
       }
 
       "list studies sorted by name" in {
@@ -981,7 +980,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.removeAll
         studies.map(study => studyRepository.put(study))
 
-        val json = makeRequest(GET, uri("names") + "?filter=ABC")
+        val json = makeRequest(GET, uri("names") + "?filter=name::ABC")
                               (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
@@ -989,7 +988,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         compareNameDto(jsonList(0), study1)
       }
 
-      "list nothing when using an invalid filter" in {
+      "list nothing when using a name filter for name not in system" in {
         val study1 = factory.createDisabledStudy.copy(name = "ABC")
         val study2 = factory.createDisabledStudy.copy(name = "DEF")
 
@@ -997,13 +996,13 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.removeAll
         studies.map(study => studyRepository.put(study))
 
-        val json = makeRequest(GET, uri("names") + "?filter=xxx")
+        val json = makeRequest(GET, uri("names") + "?filter=name::xxx")
                               (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 0
       }
 
-      "fail for invalid order parameter" in {
+      "fail for invalid sort field" in {
         val study1 = factory.createDisabledStudy.copy(name = "ST1")
         val study2 = factory.createDisabledStudy.copy(name = "ST2")
 
@@ -1011,11 +1010,11 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.removeAll
         studies.map(study => studyRepository.put(study))
 
-        val json = makeRequest(GET, uri("names") + "?order=xxxx", BAD_REQUEST)
+        val json = makeRequest(GET, uri("names") + "?sort=xxxx", BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include ("invalid order requested")
+        (json \ "message").as[String] must include ("invalid sort field")
       }
 
     }

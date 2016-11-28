@@ -11,34 +11,12 @@ import org.joda.time.DateTime
 import scalaz.Scalaz._
 
 /**
- * Possible states for a centre.
- */
-@SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
-object CentreState extends Enumeration {
-  type CentreState = Value
-  val Disabled = Value("disabled")
-  val Enabled  = Value("enabled")
-
-  implicit val centreStateFormat: Format[CentreState] = enumFormat(CentreState)
-
-}
-
-
-
-/**
  * Predicates that can be used to filter collections of centres.
  *
  */
-trait CentrePredicates {
-  import CentreState._
+trait CentrePredicates extends HasNamePredicates[Centre] {
 
   type CentreFilter = Centre => Boolean
-
-  val nameIsOneOf: Set[String] => CentreFilter =
-    names => centre => names.contains(centre.name)
-
-  val stateIsOneOf: Set[CentreState] => CentreFilter =
-    states => centre => states.contains(centre.state)
 
 }
 
@@ -58,11 +36,11 @@ trait CentrePredicates {
   */
 sealed trait Centre
     extends ConcurrencySafeEntity[CentreId]
+    with HasState
     with HasUniqueName
-    with HasDescriptionOption {
-  import CentreState._
+    with HasOptionalDescription {
 
-  val state: CentreState
+  val state: EntityState
 
   val studyIds: Set[StudyId]
 
@@ -77,7 +55,7 @@ sealed trait Centre
     locationWithId(locationId).map(loc => s"${this.name}: ${loc.name}")
   }
 
-  def nameDto(): NameDto = NameDto(id.id, name, this.getClass.getSimpleName)
+  def nameDto(): NameDto = NameDto(id.id, name, state.id)
 
   override def toString =
     s"""|${this.getClass.getSimpleName}: {
@@ -85,6 +63,7 @@ sealed trait Centre
         |  version:      $version,
         |  timeAdded:    $timeAdded,
         |  timeModified: $timeModified,
+        |  state:        $state
         |  name:         $name,
         |  description:  $description,
         |  studyIds:     $studyIds,
@@ -95,14 +74,19 @@ sealed trait Centre
 
 object Centre {
 
+  val disabledState = new EntityState("disabled")
+  val enabledState = new EntityState("enabled")
+
+  val centreStates: List[EntityState] = List(disabledState, enabledState)
+
   @SuppressWarnings(Array("org.wartremover.warts.Option2Iterable"))
   implicit val centreWrites: Writes[Centre] = new Writes[Centre] {
       def writes(centre: Centre) = {
         ConcurrencySafeEntity.toJson(centre) ++
-        Json.obj("name"      -> centre.name,
+        Json.obj("state"     -> centre.state.id,
+                 "name"      -> centre.name,
                  "studyIds"  -> centre.studyIds,
-                 "locations" -> centre.locations,
-                 "state"     -> centre.state) ++
+                 "locations" -> centre.locations) ++
         JsObject(
           Seq[(String, JsValue)]() ++
             centre.description.map("description" -> Json.toJson(_)))
@@ -116,7 +100,7 @@ object Centre {
   def compareByName(a: Centre, b: Centre) = (a.name compareToIgnoreCase b.name) < 0
 
   def compareByState(a: Centre, b: Centre) = {
-    val statusCompare = a.state.toString compare b.state.toString
+    val statusCompare = a.state.id compare b.state.id
     if (statusCompare == 0) compareByName(a, b)
     else statusCompare < 0
   }
@@ -147,7 +131,7 @@ final case class DisabledCentre(id:           CentreId,
                                 description:  Option[String],
                                 studyIds:     Set[StudyId],
                                 locations:    Set[Location])
-    extends { val state = CentreState.Disabled }
+    extends { val state = Centre.disabledState }
     with Centre
     with CentreValidations {
   import org.biobank.CommonValidations._
@@ -277,7 +261,7 @@ final case class EnabledCentre(id:           CentreId,
                                description:  Option[String],
                                studyIds:     Set[StudyId],
                                locations:    Set[Location])
-    extends { val state = CentreState.Enabled }
+    extends { val state = Centre.enabledState }
     with Centre {
 
   def disable(): DomainValidation[DisabledCentre] = {

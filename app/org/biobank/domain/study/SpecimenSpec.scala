@@ -5,7 +5,7 @@ import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.SpecimenType._
-import org.biobank.domain.{DomainValidation, HasUniqueName, HasDescriptionOption}
+import org.biobank.domain.{DomainValidation, HasUniqueName, HasOptionalDescription}
 import play.api.libs.json._
 import scalaz.Scalaz._
 
@@ -18,7 +18,7 @@ import scalaz.Scalaz._
  * This class has a private constructor and instances of this class can only be created using
  * the [[SpecimenSpec.create]] method on the factory object.
  */
-trait SpecimenSpec extends HasUniqueName with HasDescriptionOption {
+trait SpecimenSpec extends HasUniqueName with HasOptionalDescription {
 
   /** The unique ID for this object. */
   val uniqueId: String

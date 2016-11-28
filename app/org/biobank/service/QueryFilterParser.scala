@@ -142,7 +142,7 @@ object QueryFilterParser extends RegexParsers {
     } else {
       val parseResult = QueryFilterParser(filter)
       if (parseResult.isEmpty) {
-        s"could not parse filter expression: $filter".failureNel[Option[Expression]]
+        s"could not parse filter expression: ${filter.expression}".failureNel[Option[Expression]]
       } else {
         parseResult.successNel[String]
       }

@@ -5,7 +5,7 @@ import org.biobank.domain.{
   ConcurrencySafeEntity,
   DomainValidation,
   HasUniqueName,
-  HasDescriptionOption
+  HasOptionalDescription
 }
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
@@ -54,7 +54,7 @@ final case class SpecimenGroup(studyId:                     StudyId,
                                specimenType:                SpecimenType)
     extends ConcurrencySafeEntity[SpecimenGroupId]
     with HasUniqueName
-    with HasDescriptionOption
+    with HasOptionalDescription
     with HasStudyId {
 
   override def toString: String =
