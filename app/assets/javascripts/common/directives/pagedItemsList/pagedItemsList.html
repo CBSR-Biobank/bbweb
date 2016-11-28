@@ -1,21 +1,21 @@
 <div>
   <form class="form-inline" name="filters" style="margin-bottom: 20px;">
     <div class="form-group">
-      <label for="status" class="small">Name filter:</label>
+      <label class="small">Name filter:</label>
       <input type="text"
              class="form-control input-sm"
              name="nameFilter"
-             ng-model="vm.pagerOptions.filter"
+             ng-model="vm.nameFilter"
              ng-model-options="{ debounce: 500 }"
              ng-change="vm.nameFilterUpdated()">
     </div>
     <div class="form-group">
-      <label for="status" class="small">Status filter:</label>
+      <label for="state" class="small">State filter:</label>
       <select class="form-control input-sm"
-              name="status"
-              ng-model="vm.pagerOptions.status"
-              ng-options="status.id as status.label for status in vm.possibleStatuses track by status.id"
-              ng-change="vm.statusFilterUpdated()">
+              name="state"
+              ng-model="vm.selectedState"
+              ng-options="state.id as state.label for state in vm.possibleStates"
+              ng-change="vm.stateFilterUpdated()">
       </select>
     </div>
     <div class="form-group">
@@ -75,7 +75,7 @@
       <div class="row">
         <div class="col-md-5">
           <small class="text-info">
-            <strong translate>Status:</strong> {{ entity.statusLabel }}
+            <strong translate>State:</strong> {{ entity.state.toUpperCase() }}
           </small>
         </div>
         <div class="col-md-3">
@@ -95,14 +95,13 @@
 </div>
 
 <uib-pagination class="pagination-sm"
-                boundary-links="true"
                 total-items="vm.pagedResult.total"
                 ng-model="vm.pagerOptions.page"
-                items-per-page="vm.pagerOptions.limit"
                 ng-change="vm.pageChanged()"
-                num-pages="vm.paginationNumPages"
+                items-per-page="vm.pagerOptions.limit"
                 max-size="5"
                 rotate="false"
+                boundary-links="true"
                 previous-text="&lsaquo;"
                 next-text="&rsaquo;"
                 first-text="&laquo;"

@@ -43,7 +43,7 @@ define([
                               '$q',
                               'CentreCounts',
                               'Centre',
-                              'CentreStatus',
+                              'CentreState',
                               'factory');
 
       spyOn(self.Centre, 'list').and.callFake(function () {
@@ -59,27 +59,25 @@ define([
 
     it('scope is valid on startup', function() {
       var self = this,
-          CentreStatus = self.$injector.get('CentreStatus'),
-          centreStatusLabel = self.$injector.get('centreStatusLabel'),
-          allStatuses = _.values(CentreStatus),
-          counts = createCentreCounts.call(self, 1, 2, 3);
+          CentreState = self.$injector.get('CentreState'),
+          allStates = _.values(CentreState),
+          counts = createCentreCounts.call(self, 1, 2, 3),
+          nonHashedPossibleStates;
 
       spyOn(self.CentreCounts, 'get').and.callFake(function () {
         return self.$q.when(counts);
       });
 
       createController.call(self, counts);
+      nonHashedPossibleStates = angular.copy(self.controller.possibleStates);
 
       expect(self.controller.centreCounts).toEqual(counts);
       expect(self.controller.limit).toBeDefined();
 
-      _.each(allStatuses, function(status) {
-        expect(self.controller.possibleStatuses).toContain({
-          id: status,
-          label: centreStatusLabel.statusToLabel(status)
-        });
+      _.each(allStates, function(state) {
+        expect(nonHashedPossibleStates).toContain({ id: state, label: state.toUpperCase() });
       });
-      expect(self.controller.possibleStatuses).toContain({ id: 'all', label: 'All'});
+      expect(nonHashedPossibleStates).toContain({ id: 'all', label: 'All'});
     });
 
     it('updateCentres retrieves new list of centres', function() {

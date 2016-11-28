@@ -11,10 +11,10 @@ define(function () {
    * @enum {string}
    * @memberOf domain.centres
    */
-  var CentreStatus = {
-    DISABLED: 'DisabledCentre',
-    ENABLED:  'EnabledCentre'
+  var CentreState = {
+    DISABLED: 'disabled',
+    ENABLED:  'enabled'
   };
 
-  return CentreStatus;
+  return CentreState;
 });

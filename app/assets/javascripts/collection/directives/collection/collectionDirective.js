@@ -41,6 +41,7 @@ define(function () {
 
     //---
 
+    // invoked by the SelectStudy directive
     function updateEnabledStudies(options) {
       return Study.list(options);
     }

@@ -11,11 +11,11 @@ define(function () {
    * @enum {string}
    * @memberOf domain.users
    */
-  var UserStatus = {
-    REGISTERED: 'RegisteredUser',
-    ACTIVE:     'ActiveUser',
-    LOCKED:     'LockedUser'
+  var UserState = {
+    REGISTERED: 'registered',
+    ACTIVE:     'active',
+    LOCKED:     'locked'
   };
 
-  return UserStatus;
+  return UserState;
 });

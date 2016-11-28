@@ -25,22 +25,21 @@ define(['lodash'], function(_) {
   CentresListCtrl.$inject = [
     '$scope',
     'Centre',
-    'CentreStatus',
-    'centreStatusLabel',
+    'CentreState',
     'CentreCounts'
   ];
 
-  function CentresListCtrl($scope, Centre, CentreStatus, centreStatusLabel, CentreCounts) {
+  function CentresListCtrl($scope, Centre, CentreState, CentreCounts) {
     var vm = this;
 
-    vm.centreCounts     = {};
-    vm.limit         = 5;
-    vm.updateCentres    = Centre.list;
-    vm.getCentreIcon    = getCentreIcon;
-    vm.possibleStatuses = [{ id: 'all', label: 'All' }];
+    vm.centreCounts   = {};
+    vm.limit          = 5;
+    vm.updateCentres  = Centre.list;
+    vm.getCentreIcon  = getCentreIcon;
+    vm.possibleStates = [{ id: 'all', label: 'All' }];
 
-    _.each(_.values(CentreStatus), function(status) {
-      vm.possibleStatuses.push({id: status, label: centreStatusLabel.statusToLabel(status)});
+    _.each(_.values(CentreState), function(state) {
+      vm.possibleStates.push({ id: state, label: state.toUpperCase() });
     });
 
     init();

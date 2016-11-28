@@ -119,9 +119,9 @@ define([
     });
 
     it('cannot update a processing type if study is not disabled', function() {
-      var StudyStatus = this.$injector.get('StudyStatus'),
+      var StudyState = this.$injector.get('StudyState'),
           entities = createEntities(),
-          statuses = [StudyStatus.ENABLED, StudyStatus.RETIRED];
+          statuses = [StudyState.ENABLED, StudyState.RETIRED];
 
       _.each(statuses, function (status) {
         entities.study.status = status;
@@ -146,9 +146,9 @@ define([
     });
 
     it('cannot update a processing type if study is not disabled', function() {
-      var StudyStatus = this.$injector.get('StudyStatus'),
+      var StudyState = this.$injector.get('StudyState'),
           entities = createEntities(),
-          statuses = [StudyStatus.ENABLED, StudyStatus.RETIRED];
+          statuses = [StudyState.ENABLED, StudyState.RETIRED];
 
       _.each(statuses, function (status) {
         entities.study.status = status;

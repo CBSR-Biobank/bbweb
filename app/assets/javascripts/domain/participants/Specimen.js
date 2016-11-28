@@ -33,9 +33,9 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
                            centreLocationInfoSchema) {
 
     /**
-     * Use this contructor to create new Specimens to be persited on the server. Use
-     * [create()]{@link domain.participants.Specimen.create} or [asyncCreate()]{@link
-     * domain.participants.Specimen.asyncCreate} to create objects returned by the server.
+     * Use this contructor to create new Specimens to be persited on the server. Use [create()]{@link
+     * domain.participants.Specimen.create} or [asyncCreate()]{@link domain.participants.Specimen.asyncCreate}
+     * to create objects returned by the server.
      *
      * @classdesc Represents something that was obtained from a {@link domain.participant.Participant} in a
      * {@link domain.study.Study}.
@@ -45,10 +45,10 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      * @extends domain.ConcurrencySafeEntity
      *
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
-     * this class. Objects of this type are usually returned by the server's REST API.
+     *        this class. Objects of this type are usually returned by the server's REST API.
      *
-     * @param {domain.studies.CollectionSpecimenSpec} [specimenSpec] - The specimen
-     * spec from the collection event type this specimen represents. An Undefined value is also valid.
+     * @param {domain.studies.CollectionSpecimenSpec} [specimenSpec] - The specimen spec from the collection
+     *        event type this specimen represents. An Undefined value is also valid.
      *
      */
     function Specimen(obj, specimenSpec) {
@@ -117,11 +117,11 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
       this.amount = null;
 
       /**
-       * The status for this specimen. One of: Usable or Unusable.
-       * @name domain.participants.Specimen#status.
+       * The state for this specimen. One of: Usable or Unusable.
+       * @name domain.participants.Specimen#state.
        * @type {string}
        */
-      this.status = null;
+      this.state = null;
 
       obj = obj || {};
       ConcurrencySafeEntity.call(this, obj);
@@ -160,7 +160,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
         'postitionId':      { 'type': [ 'string', 'null' ] },
         'timeCreated':      { 'type': 'string' },
         'amount':           { 'type': 'number' },
-        'status':           { 'type': 'string' }
+        'state':            { 'type': 'string' }
       },
       'required': [
         'id',
@@ -168,7 +168,7 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
         'specimenSpecId',
         'version',
         'timeCreated',
-        'status',
+        'state',
         'originLocationInfo',
         'locationInfo'
       ]
@@ -276,29 +276,28 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
      * @param {object} options - The options to use to list specimens.
      *
      * @param {string} options.sort - The field to sort the specimens by: one of: <code>id</code>,
-     * <code>timeCreated</code>, <code>status</code>.
+     *        <code>timeCreated</code>, <code>state</code>. Use a minus sign prefix to sort in descending
+     *        order.
      *
-     * @param {number} options.page - The page to retrieve when there are more than
-     * <code>options.limit</code> specimens.
+     * @param {number} options.page - The page to retrieve when there are more than <code>options.limit</code>
+     *        specimens.
      *
      * @param {number} options.limit - The maximum number of specimens returned per page.
      *
-     * @param {string} options.order - The order to list specimens by. One of: <code>asc</code> for ascending
-     * order, or <code>desc</code> for descending order.
-     *
      * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type [Specimen]{@link
-     * domain.Specimen}.
+     *          domain.Specimen}.
      */
     Specimen.list = function (ceventId, options) {
       var params,
           validKeys = [
             'sort',
             'page',
-            'limit',
-            'order'
+            'limit'
           ];
 
-      params = _.extend({}, _.pick(options, validKeys));
+      params = _.omitBy(_.pick(options, validKeys), function (value) {
+        return value === '';
+      });
       return biobankApi.get(uri(ceventId), params).then(function(reply) {
         // reply is a paged result
         var deferred = $q.defer();

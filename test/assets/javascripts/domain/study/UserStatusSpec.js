@@ -11,12 +11,12 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('UserStatus', function() {
+  describe('UserState', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    it('should have values', inject(function (UserStatus) {
-      expect(_.keys(UserStatus)).not.toBeEmptyArray();
+    it('should have values', inject(function (UserState) {
+      expect(_.keys(UserState)).not.toBeEmptyArray();
     }));
   });
 

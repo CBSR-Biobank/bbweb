@@ -2,15 +2,12 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'jquery',
-  'lodash',
-  'sprintf',
-  'biobankApp'
-], function(angular, mocks, $, _, sprintf) {
+define(function (require) {
   'use strict';
+
+  var mocks   = require('angularMocks'),
+      _       = require('lodash'),
+      sprintf = require('sprintf').sprintf;
 
   function SuiteMixinFactory(EntityTestSuiteMixin, ServerReplyMixin) {
 
@@ -64,8 +61,9 @@ define([
       _.extend(self, SuiteMixin.prototype);
 
       self.injectDependencies('$httpBackend',
+                              '$httpParamSerializer',
                               'Study',
-                              'StudyStatus',
+                              'StudyState',
                               'funutils',
                               'factory',
                               'testUtils');
@@ -93,7 +91,7 @@ define([
       expect(study.timeAdded).toBeNull();
       expect(study.timeModified).toBeNull();
       expect(study.name).toBeEmptyString();
-      expect(study.status).toBe(this.StudyStatus.DISABLED);
+      expect(study.state).toBe(this.StudyState.DISABLED);
     });
 
     describe('when creating', function() {
@@ -121,13 +119,13 @@ define([
 
     });
 
-    it('status predicates return valid results', function() {
+    it('state predicates return valid results', function() {
       var self = this;
-      _.each(_.values(self.StudyStatus), function(status) {
-        var study = new self.Study(self.factory.study({ status: status }));
-        expect(study.isDisabled()).toBe(status === self.StudyStatus.DISABLED);
-        expect(study.isEnabled()).toBe(status === self.StudyStatus.ENABLED);
-        expect(study.isRetired()).toBe(status === self.StudyStatus.RETIRED);
+      _.each(_.values(self.StudyState), function(state) {
+        var study = new self.Study(self.factory.study({ state: state }));
+        expect(study.isDisabled()).toBe(state === self.StudyState.DISABLED);
+        expect(study.isEnabled()).toBe(state === self.StudyState.ENABLED);
+        expect(study.isRetired()).toBe(state === self.StudyState.RETIRED);
       });
     });
 
@@ -194,18 +192,16 @@ define([
     it('can list studies using options', function() {
       var self = this,
           optionList = [
-            { filter: 'name' },
-            { status: 'DisabledStudy' },
-            { sort: 'status' },
+            { filter: 'name::test' },
+            { sort: 'state' },
             { page: 2 },
-            { limit: 10 },
-            { order: 'desc' }
-          ];
+            { limit: 10 }
+          ],
+          studies = [ self.jsonStudy ],
+          reply   = self.factory.pagedResult(studies);
 
       _.each(optionList, function (options) {
-        var studies = [ self.jsonStudy ],
-            reply   = self.factory.pagedResult(studies),
-            url     = sprintf.sprintf('%s?%s', self.uri(), $.param(options, true));
+        var url = sprintf('%s?%s', self.uri(), self.$httpParamSerializer(options, true));
 
         self.$httpBackend.whenGET(url).respond(self.reply(reply));
 
@@ -219,6 +215,25 @@ define([
           });
         }
       });
+    });
+
+    it('when listing studies, omits empty options', function() {
+      var self = this,
+          options = { filter: ''},
+          studies = [ self.jsonStudy ],
+          reply   = self.factory.pagedResult(studies);
+
+      self.$httpBackend.whenGET(self.uri()).respond(self.reply(reply));
+
+      self.Study.list(options).then(testStudy).catch(self.failTest);
+      self.$httpBackend.flush();
+
+      function testStudy(pagedResult) {
+        expect(pagedResult.items).toBeArrayOfSize(studies.length);
+        _.each(pagedResult.items, function (study) {
+          expect(study).toEqual(jasmine.any(self.Study));
+        });
+      }
     });
 
     it('fails when list returns an invalid study', function() {
@@ -315,7 +330,7 @@ define([
                                this.study,
                                'updateAnnotationType',
                                this.annotationType,
-                               sprintf.sprintf('%s/%s',
+                               sprintf('%s/%s',
                                                this.uri('pannottype', this.study.id),
                                                this.annotationType.uniqueId),
                                this.annotationType,
@@ -325,7 +340,7 @@ define([
       });
 
       it('can remove an annotation on a study', function() {
-        var url = sprintf.sprintf('%s/%d/%s',
+        var url = sprintf('%s/%d/%s',
                                   this.uri('pannottype', this.study.id),
                                   this.study.version,
                                   this.annotationType.uniqueId);
@@ -341,16 +356,16 @@ define([
       var context = {};
 
       beforeEach(function() {
-        context.jsonStudy = this.factory.study({ status: this.StudyStatus.ENABLED });
+        context.jsonStudy = this.factory.study({ state: this.StudyState.ENABLED });
         context.action = 'disable';
-        context.status = this.StudyStatus.DISABLED;
+        context.state = this.StudyState.DISABLED;
       });
 
       changeStatusBehaviour(context);
     });
 
     it('throws an error when disabling a study and it is already disabled', function() {
-      var study = new this.Study(this.factory.study({ status: this.StudyStatus.DISABLED }));
+      var study = new this.Study(this.factory.study({ state: this.StudyState.DISABLED }));
       expect(function () { study.disable(); })
         .toThrowError('already disabled');
     });
@@ -359,16 +374,16 @@ define([
       var context = {};
 
       beforeEach(function() {
-        context.jsonStudy = this.factory.study({ status: this.StudyStatus.DISABLED });
+        context.jsonStudy = this.factory.study({ state: this.StudyState.DISABLED });
         context.action = 'enable';
-        context.status = this.StudyStatus.ENABLED;
+        context.state = this.StudyState.ENABLED;
       });
 
       changeStatusBehaviour(context);
     });
 
     it('throws an error when enabling a study and it is already enabled', function() {
-      var study = new this.Study(this.factory.study({ status: this.StudyStatus.ENABLED }));
+      var study = new this.Study(this.factory.study({ state: this.StudyState.ENABLED }));
       expect(function () { study.enable(); })
         .toThrowError('already enabled');
     });
@@ -377,16 +392,16 @@ define([
       var context = {};
 
       beforeEach(function() {
-        context.jsonStudy = this.factory.study({ status: this.StudyStatus.DISABLED });
+        context.jsonStudy = this.factory.study({ state: this.StudyState.DISABLED });
         context.action = 'retire';
-        context.status = this.StudyStatus.RETIRED;
+        context.state = this.StudyState.RETIRED;
       });
 
       changeStatusBehaviour(context);
     });
 
     it('throws an error when retiring a study and it is already retired', function() {
-      var study = new this.Study(this.factory.study({ status: this.StudyStatus.RETIRED }));
+      var study = new this.Study(this.factory.study({ state: this.StudyState.RETIRED }));
       expect(function () { study.retire(); })
         .toThrowError('already retired');
     });
@@ -395,20 +410,20 @@ define([
       var context = {};
 
       beforeEach(function() {
-        context.jsonStudy = this.factory.study({ status: this.StudyStatus.RETIRED });
+        context.jsonStudy = this.factory.study({ state: this.StudyState.RETIRED });
         context.action = 'unretire';
-        context.status = this.StudyStatus.DISABLED;
+        context.state = this.StudyState.DISABLED;
       });
 
       changeStatusBehaviour(context);
     });
 
     it('throws an error when unretiring a study and it is not retired', function() {
-      var study = new this.Study(this.factory.study({ status: this.StudyStatus.DISABLED }));
+      var study = new this.Study(this.factory.study({ state: this.StudyState.DISABLED }));
       expect(function () { study.unretire(); })
         .toThrowError('not retired');
 
-      study = new this.Study(this.factory.study({ status: this.StudyStatus.ENABLED }));
+      study = new this.Study(this.factory.study({ state: this.StudyState.ENABLED }));
       expect(function () { study.unretire(); })
         .toThrowError('not retired');
     });
@@ -444,13 +459,13 @@ define([
 
     function changeStatusBehaviour(context) {
 
-      describe('change status shared behaviour', function() {
+      describe('change state shared behaviour', function() {
 
-        it('change status', function() {
+        it('change state', function() {
           var self  = this,
               study = new self.Study(context.jsonStudy),
               json =  { expectedVersion: study.version },
-              reply = replyStudy(context.jsonStudy, { status: context.status });
+              reply = replyStudy(context.jsonStudy, { state: context.state });
 
           self.$httpBackend.expectPOST(self.uri(context.action, study.id), json).respond(self.reply(reply));
           expect(study[context.action]).toBeFunction();
@@ -459,7 +474,7 @@ define([
 
           function checkStudy(replyStudy) {
             expect(replyStudy).toEqual(jasmine.any(self.Study));
-            expect(replyStudy.status).toBe(context.status);
+            expect(replyStudy.state).toBe(context.state);
           }
         });
 

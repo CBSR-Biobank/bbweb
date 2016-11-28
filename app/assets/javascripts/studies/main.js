@@ -21,7 +21,5 @@ define(function (require) {
   module.service('annotationValueTypeLabelService',
                  require('./services/annotationValueTypeLabelService'));
 
-  module.service('studyStatusLabel', require('./services/studyStatusLabelService'));
-
   return module;
 });

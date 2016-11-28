@@ -50,7 +50,7 @@ define(function (require) {
                               '$compile',
                               '$q',
                               'Centre',
-                              'CentreStatus',
+                              'CentreState',
                               'notificationsService',
                               'factory');
       this.centre = new this.Centre(this.factory.centre());
@@ -116,7 +116,7 @@ define(function (require) {
 
     });
 
-    describe('centre status ', function() {
+    describe('centre state ', function() {
 
       describe('enabling a centre', function() {
         var context = {};
@@ -127,7 +127,7 @@ define(function (require) {
 
           context.createController = createController;
           context.centre           = centre;
-          context.status           = 'enable';
+          context.state           = 'enable';
           context.entity           = self.Centre;
 
           function createController() {
@@ -135,7 +135,7 @@ define(function (require) {
           }
         }));
 
-        sharedCentreStatusBehaviour(context);
+        sharedCentreStateBehaviour(context);
       });
 
       describe('disabling a centre', function() {
@@ -143,11 +143,11 @@ define(function (require) {
 
         beforeEach(inject(function () {
           var self = this,
-              centre = new self.Centre(self.factory.centre({ status: self.CentreStatus.ENABLED }));
+              centre = new self.Centre(self.factory.centre({ state: self.CentreState.ENABLED }));
 
           context.createController = createController;
           context.centre           = centre;
-          context.status           = 'disable';
+          context.state           = 'disable';
           context.entity           = this.Centre;
 
           function createController() {
@@ -155,30 +155,30 @@ define(function (require) {
           }
         }));
 
-        sharedCentreStatusBehaviour(context);
+        sharedCentreStateBehaviour(context);
       });
 
-      it('changing status to an invalid value causes an exception', function() {
+      it('changing state to an invalid value causes an exception', function() {
         var self = this,
-            invalidStatus = self.factory.stringNext();
+            invalidState = self.factory.stringNext();
         self.createController();
-        expect(function () { self.controller.changeStatus(invalidStatus); })
-          .toThrowError(/invalid status/);
+        expect(function () { self.controller.changeState(invalidState); })
+          .toThrowError(/invalid state/);
       });
 
     });
 
-    function sharedCentreStatusBehaviour(context) {
+    function sharedCentreStateBehaviour(context) {
 
-      describe('(shared) study status', function () {
+      describe('(shared) study state', function () {
 
-        it('change status', function () {
-          spyOn(context.entity.prototype, context.status).and.returnValue(this.$q.when(context.centre));
+        it('change state', function () {
+          spyOn(context.entity.prototype, context.state).and.returnValue(this.$q.when(context.centre));
 
           context.createController();
-          this.controller.changeStatus(context.status);
+          this.controller.changeState(context.state);
           this.scope.$digest();
-          expect(context.entity.prototype[context.status]).toHaveBeenCalled();
+          expect(context.entity.prototype[context.state]).toHaveBeenCalled();
           expect(this.scope.vm.centre).toBe(context.centre);
         });
 

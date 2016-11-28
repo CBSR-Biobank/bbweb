@@ -4,15 +4,12 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  'faker',
-  'moment',
-  'sprintf'
-], function(angular, mocks, _, faker, moment, sprintf) {
+define(function (require) {
   'use strict';
+
+  var mocks   = require('angularMocks'),
+      _       = require('lodash'),
+      sprintf = require('sprintf').sprintf;
 
   describe('CollectionEvent', function() {
 
@@ -31,6 +28,7 @@ define([
                AnnotationsEntityTestSuiteMixin.prototype);
 
       self.injectDependencies('$httpBackend',
+                              '$httpParamSerializer',
                               'Participant',
                               'CollectionEventType',
                               'CollectionEvent',
@@ -350,13 +348,16 @@ define([
       var self = this,
           participant = self.factory.participant(),
           reply = self.factory.pagedResult([]),
-          orderingTypes = [ 'asc', 'desc'];
+          sortExprs = [
+            { sort: 'visitNumber' },
+            { sort: '-visitNumber' }
+          ];
 
-      _.each(orderingTypes, function (orderingType) {
-        self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?order=' + orderingType)
-          .respond(self.reply(reply));
+      _.each(sortExprs, function (sortExpr) {
+        var url = sprintf('%s?%s', uriWithPath('list', participant.id), self.$httpParamSerializer(sortExpr));
+        self.$httpBackend.whenGET(url).respond(self.reply(reply));
 
-        self.CollectionEvent.list(participant.id, { order: orderingType }).then(function (pagedResult) {
+        self.CollectionEvent.list(participant.id, sortExpr).then(function (pagedResult) {
           expect(pagedResult.items).toBeEmptyArray();
         });
         self.$httpBackend.flush();

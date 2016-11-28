@@ -2,15 +2,12 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  'jquery',
-  'sprintf',
-  'biobankApp'
-], function(angular, mocks, _, $, sprintf) {
+define(function (require) {
   'use strict';
+
+  var mocks   = require('angularMocks'),
+      _       = require('lodash'),
+      sprintf = require('sprintf').sprintf;
 
   /**
    * For now these tests test the interaction between the class and the server.
@@ -29,8 +26,9 @@ define([
       _.extend(this, EntityTestSuiteMixin.prototype, ServerReplyMixin.prototype);
 
       this.injectDependencies('$httpBackend',
+                              '$httpParamSerializer',
                               'Centre',
-                              'CentreStatus',
+                              'CentreState',
                               'Location',
                               'funutils',
                               'testUtils',
@@ -45,7 +43,7 @@ define([
     });
 
     it('constructor with no parameters has default values', function() {
-      var centre = new this.Centre();
+       var centre = new this.Centre();
 
       expect(centre.id).toBeNull();
       expect(centre.version).toBe(0);
@@ -55,7 +53,7 @@ define([
       expect(centre.description).toBeNull();
       expect(centre.locations).toBeEmptyArray();
       expect(centre.studyIds).toBeEmptyArray();
-      expect(centre.status).toBe(this.CentreStatus.DISABLED);
+      expect(centre.state).toBe(this.CentreState.DISABLED);
     });
 
     it('fails when creating from a non object', function() {
@@ -82,12 +80,12 @@ define([
         .toThrowError(/invalid object from server/);
     });
 
-    it('status predicates return valid results', function() {
+    it('state predicates return valid results', function() {
       var self = this;
-      _.each(_.values(self.CentreStatus), function(status) {
-        var centre = new self.Centre(self.factory.centre({ status: status }));
-        expect(centre.isDisabled()).toBe(status === self.CentreStatus.DISABLED);
-        expect(centre.isEnabled()).toBe(status === self.CentreStatus.ENABLED);
+      _.each(_.values(self.CentreState), function(state) {
+        var centre = new self.Centre(self.factory.centre({ state: state }));
+        expect(centre.isDisabled()).toBe(state === self.CentreState.DISABLED);
+        expect(centre.isEnabled()).toBe(state === self.CentreState.ENABLED);
       });
     });
 
@@ -181,18 +179,16 @@ define([
     it('can list centres using options', function() {
       var self = this,
           optionList = [
-            { filter: 'name' },
-            { status: 'DisabledCentre' },
-            { sort: 'status' },
+            { filter: 'name::test' },
+            { sort: 'state' },
             { page: 2 },
-            { limit: 10 },
-            { order: 'desc' }
-          ];
+            { limit: 10 }
+          ],
+          centres = [ self.factory.centre() ],
+          reply   = self.factory.pagedResult(centres);
 
       _.each(optionList, function (options) {
-        var centres = [ self.factory.centre() ],
-            reply   = self.factory.pagedResult(centres),
-            url     = sprintf.sprintf('%s?%s', uri(), $.param(options, true));
+        var url = sprintf('%s?%s', uri(), self.$httpParamSerializer(options));
 
         self.$httpBackend.whenGET(url).respond(self.reply(reply));
 
@@ -286,23 +282,23 @@ define([
     });
 
     it('can disable a centre', function() {
-      var jsonCentre = this.factory.centre({ status: this.CentreStatus.ENABLED });
-      changeStatusShared.call(this, jsonCentre, 'disable', this.CentreStatus.DISABLED);
+      var jsonCentre = this.factory.centre({ state: this.CentreState.ENABLED });
+      changeStatusShared.call(this, jsonCentre, 'disable', this.CentreState.DISABLED);
     });
 
     it('throws an error when disabling a centre and it is already disabled', function() {
-      var centre = new this.Centre(this.factory.centre({ status: this.CentreStatus.DISABLED }));
+      var centre = new this.Centre(this.factory.centre({ state: this.CentreState.DISABLED }));
       expect(function () { centre.disable(); })
         .toThrowError('already disabled');
     });
 
     it('can enable a centre', function() {
-      var jsonCentre = this.factory.centre({ status: this.CentreStatus.DISABLED });
-      changeStatusShared.call(this, jsonCentre, 'enable', this.CentreStatus.ENABLED);
+      var jsonCentre = this.factory.centre({ state: this.CentreState.DISABLED });
+      changeStatusShared.call(this, jsonCentre, 'enable', this.CentreState.ENABLED);
     });
 
     it('throws an error when enabling a centre and it is already enabled', function() {
-      var centre = new this.Centre(this.factory.centre({ status: this.CentreStatus.ENABLED }));
+      var centre = new this.Centre(this.factory.centre({ state: this.CentreState.ENABLED }));
       expect(function () { centre.enable(); })
         .toThrowError('already enabled');
     });
@@ -356,10 +352,10 @@ define([
             jsonLocation = new self.Location(self.factory.location()),
             jsonCentre   = self.factory.centre({ locations: [ jsonLocation ]}),
             centre       = new self.Centre(jsonCentre),
-            url          = sprintf.sprintf('%s/%d/%s',
-                                           uri('locations', centre.id),
-                                           centre.version,
-                                           jsonLocation.uniqueId);
+            url          = sprintf('%s/%d/%s',
+                                   uri('locations', centre.id),
+                                   centre.version,
+                                   jsonLocation.uniqueId);
 
         self.$httpBackend.expectDELETE(url).respond(this.reply(true));
         centre.removeLocation(jsonLocation).then(checkCentre).catch(failTest);
@@ -397,7 +393,7 @@ define([
             jsonStudy  = self.factory.study(),
             jsonCentre = self.factory.centre({ studyIds: [ jsonStudy.id ]}),
             centre     = new self.Centre(jsonCentre),
-            url        = sprintf.sprintf('%s/%d/%s',
+            url        = sprintf('%s/%d/%s',
                                          uri('studies', centre.id),
                                          centre.version,
                                          jsonStudy.id);
@@ -439,12 +435,12 @@ define([
       return _.extend({}, centre, newValues, {version: centre.version + 1});
     }
 
-    function changeStatusShared(jsonCentre, action, status) {
+    function changeStatusShared(jsonCentre, action, state) {
       /* jshint validthis:true */
       var self       = this,
           centre     = new self.Centre(jsonCentre),
           json       = { expectedVersion: centre.version },
-          reply      = replyCentre(jsonCentre, { status: status });
+          reply      = replyCentre(jsonCentre, { state: state });
 
       self.$httpBackend.expectPOST(uri(action, centre.id), json).respond(this.reply(reply));
       expect(centre[action]).toBeFunction();
@@ -455,7 +451,7 @@ define([
         expect(reply).toEqual(jasmine.any(self.Centre));
         expect(reply.id).toEqual(centre.id);
         expect(reply.version).toEqual(centre.version + 1);
-        expect(reply.status).toBe(status);
+        expect(reply.state).toBe(state);
       }
     }
 

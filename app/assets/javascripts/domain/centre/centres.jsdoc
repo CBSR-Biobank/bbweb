@@ -7,7 +7,7 @@
  *
  * @property {string} name - the centre's name.
  *
- * @property {domain.centre.CentreStatus} status - the centre's status.
+ * @property {domain.centre.CentreState} status - the centre's status.
  */
 
 /**

@@ -113,69 +113,69 @@ define(function (require) {
       var context = {};
 
       beforeEach(inject(function () {
-        context.status = 'enable';
+        context.state = 'enable';
       }));
 
-      sharedStudyStatusBehaviour(context);
+      sharedStudyStateBehaviour(context);
     });
 
     describe('disabling a study', function() {
       var context = {};
 
       beforeEach(inject(function () {
-        context.status = 'disable';
+        context.state = 'disable';
       }));
 
-      sharedStudyStatusBehaviour(context);
+      sharedStudyStateBehaviour(context);
     });
 
     describe('retiring a study', function() {
       var context = {};
 
       beforeEach(inject(function () {
-        context.status = 'retire';
+        context.state = 'retire';
       }));
 
-      sharedStudyStatusBehaviour(context);
+      sharedStudyStateBehaviour(context);
     });
 
     describe('unretiring a study', function() {
       var context = {};
 
       beforeEach(inject(function () {
-        context.status = 'unretire';
+        context.state = 'unretire';
       }));
 
-      sharedStudyStatusBehaviour(context);
+      sharedStudyStateBehaviour(context);
     });
 
 
-    function sharedStudyStatusBehaviour(context) {
+    function sharedStudyStateBehaviour(context) {
 
-      describe('(shared) study status', function () {
+      describe('(shared) study state', function () {
 
-        it('change status', function () {
+        it('change state', function () {
           spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('ok'));
           spyOn(this.Study, 'get').and.returnValue(this.$q.when(this.study));
-          spyOn(this.Study.prototype, context.status).and.returnValue(this.$q.when(this.study));
+          spyOn(this.Study.prototype, context.state).and.returnValue(this.$q.when(this.study));
 
           createController.call(this);
-          this.controller.changeStatus(context.status);
+          this.controller.changeState(context.state);
           this.scope.$digest();
-          expect(this.Study.prototype[context.status]).toHaveBeenCalled();
+          expect(this.Study.prototype[context.state]).toHaveBeenCalled();
         });
 
       });
     }
 
-    it('should throw error for when trying to change to an invalid status', function () {
+    it('should throw error for when trying to change to an invalid state', function () {
       var self = this,
-          badStatus = 'xxx';
+          badState = 'xxx';
 
       createController.call(this);
       expect(function () {
-        self.controller.changeStatus(badStatus);
-      }).toThrow(new Error('invalid status: ' + badStatus));
+        self.controller.changeState(badState);
+      }).toThrow(new Error('invalid state: ' + badState));
     });
   });
 

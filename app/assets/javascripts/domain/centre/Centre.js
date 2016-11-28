@@ -11,8 +11,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
     'biobankApi',
     'ConcurrencySafeEntity',
     'DomainError',
-    'CentreStatus',
-    'centreStatusLabel',
+    'CentreState',
     'Location'
   ];
 
@@ -25,10 +24,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
    *
    * @param {ConcurrencySafeEntity} ConcurrencySafeEntity - Base class for domain objects.
    *
-   * @param {CentreStatus} CenterStatus - The enumerated type for the status of a centre.
-   *
-   * @param {Service} centreStatusLabel - The service that converts a center's status to a label that can be
-   * shown in the UI.
+   * @param {CentreState} CenterState - The enumerated type for the state of a centre.
    *
    * @param {Location} Location -
    *
@@ -39,8 +35,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
                          biobankApi,
                          ConcurrencySafeEntity,
                          DomainError,
-                         CentreStatus,
-                         centreStatusLabel,
+                         CentreState,
                          Location) {
 
     /**
@@ -58,9 +53,9 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
         'description':  { 'type': [ 'string', 'null' ] },
         'studyIds':     { 'type': 'array'},
         'locations':    { 'type': 'array'},
-        'status':       { 'type': 'string'}
+        'state':        { 'type': 'string'}
       },
-      'required': [ 'id', 'version', 'timeAdded', 'name', 'status' ]
+      'required': [ 'id', 'version', 'timeAdded', 'name', 'state' ]
     };
 
     /**
@@ -106,10 +101,10 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
       this.description = null;
 
       /**
-       * When a centre is {@link domain.centres.CentreStatus.ENABLED ENABLED} it is ready to collect / store
+       * When a centre is {@link domain.centres.CentreState.ENABLED ENABLED} it is ready to collect / store
        * specimens.
        */
-      this.status = CentreStatus.DISABLED;
+      this.state = CentreState.DISABLED;
 
       /** The studies associated with this centre. */
       this.studyIds = [];
@@ -120,7 +115,6 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
       ConcurrencySafeEntity.call(this, obj);
       obj =  obj || {};
       _.extend(this, _.pick(obj, _.keys(this)));
-      this.statusLabel = centreStatusLabel.statusToLabel(this.status);
     }
 
     Centre.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -234,23 +228,18 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
      *
      * @param {object} options - The options to use to list centres.
      *
-     * @param {string} options.filter The filter to use on centre names. Default is empty string.
+     * @param {string} options.filter The filter to use on centres. Default is empty string.
      *
-     * @param {string} options.status Returns centres filtered by status. The following are valid: 'all' to
-     * return all centres, 'disabled' to return only disabled centres, 'enabled' to reutrn only enable
-     * centres, and 'retired' to return only retired centres. For any other values the response is an error.
+     * @param {string} options.sort Centres can be sorted by <code>name</code> or by
+     *                              <code>state</code>. Values other than these two yield an error.
+     *                              Use a minus sign prefix to sort in descending order.
      *
-     * @param {string} options.sortField Centres can be sorted by 'name' or by 'status'. Values other than
-     * these two yield an error.
+     * @param {int} options.page If the total results are longer than limit, then page selects which centres
+     *                           should be returned. If an invalid value is used then the response is an
+     *                           error.
      *
-     * @param {int} options.page If the total results are longer than limit, then page selects which
-     * centres should be returned. If an invalid value is used then the response is an error.
-     *
-     * @param {int} options.limit The total number of centres to return per page. The maximum page size is
-     * 10. If a value larger than 10 is used then the response is an error.
-     *
-     * @param {string} options.order One of 'asc' or 'desc'. If an invalid value is used then
-     * the response is an error.
+     * @param {int} options.limit The total number of centres to return per page. The maximum page size is 10.
+     *                            If a value larger than 10 is used then the response is an error.
      *
      * @return A promise. If the promise succeeds then a paged result is returned.
      */
@@ -259,15 +248,15 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
           params,
           validKeys = [
             'filter',
-            'status',
             'sort',
             'page',
-            'limit',
-            'order'
+            'limit'
           ];
 
       options = options || {};
-      params = _.pick(options, validKeys);
+      params = _.omitBy(_.pick(options, validKeys), function (value) {
+        return value === '';
+      });
 
       return biobankApi.get(url, params).then(function(reply) {
         var deferred = $q.defer();
@@ -448,14 +437,14 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
      * @returns {boolean} True if the centre is disabled.
      */
     Centre.prototype.isDisabled = function () {
-      return this.status === CentreStatus.DISABLED;
+      return this.state === CentreState.DISABLED;
     };
 
     /**
      * @returns {boolean} True if the centre is enabled.
      */
     Centre.prototype.isEnabled = function () {
-      return this.status === CentreStatus.ENABLED;
+      return this.state === CentreState.ENABLED;
     };
 
     /**
@@ -463,7 +452,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
      *
      * @throws an error if the centre is already disabled.
      *
-     * @returns {Promise} A copy of this centre, but with status of disabled.
+     * @returns {Promise} A copy of this centre, but with state of disabled.
      */
     Centre.prototype.disable = function () {
       if (this.isDisabled()) {
@@ -477,7 +466,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
      *
      * @throws an error if the centre is already enabled.
      *
-     * @returns {Promise} A copy of this centre, but with status of enabled.
+     * @returns {Promise} A copy of this centre, but with state of enabled.
      */
     Centre.prototype.enable = function () {
        if (this.isEnabled()) {
@@ -486,9 +475,9 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
      return changeState(this, 'enable');
     };
 
-    function changeState(centre, status) {
+    function changeState(centre, state) {
       var json = { expectedVersion: centre.version };
-      return biobankApi.post(uri(status, centre.id), json).then(function (reply) {
+      return biobankApi.post(uri(state, centre.id), json).then(function (reply) {
         return Centre.asyncCreate(reply);
       });
     }

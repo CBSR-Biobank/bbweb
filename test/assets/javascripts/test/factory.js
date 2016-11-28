@@ -19,9 +19,10 @@ define([
     'PreservationTemperatureType',
     'PreservationType',
     'SpecimenType',
-    'StudyStatus',
-    'CentreStatus',
-    'UserStatus',
+    'StudyState',
+    'CentreState',
+    'UserState',
+    'SpecimenState',
     'ShipmentState',
     'ShipmentItemState',
     'AppConfig'
@@ -39,9 +40,10 @@ define([
                    PreservationTemperatureType,
                    PreservationType,
                    SpecimenType,
-                   StudyStatus,
-                   CentreStatus,
-                   UserStatus,
+                   StudyState,
+                   CentreState,
+                   UserState,
+                   SpecimenState,
                    ShipmentState,
                    ShipmentItemState,
                    AppConfig) {
@@ -299,7 +301,7 @@ define([
                         name:            stringNext(),
                         description:     faker.lorem.sentences(4),
                         annotationTypes: [],
-                        status:          StudyStatus.DISABLED
+                        state:          StudyState.DISABLED
                       },
           validKeys = commonFieldNames.concat(_.keys(defaults)),
           s = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
@@ -313,7 +315,7 @@ define([
 
     function studyNameDto() {
       var study = defaultStudy();
-      return _.pick(study, ['id', 'name', 'status']);
+      return _.pick(study, ['id', 'name', 'state']);
     }
 
     /**
@@ -420,7 +422,7 @@ define([
             locationInfo:        null,
             timeCreated:         moment(faker.date.recent(10)).format(),
             amount:              1,
-            status:              'UsableSpecimen'
+            state:               SpecimenState.USABLE
           },
           validKeys = commonFieldNames.concat(_.keys(defaults)),
           spc;
@@ -449,7 +451,7 @@ define([
       var defaults = { id:          domainEntityNameNext(ENTITY_NAME_CENTRE()),
                        name:        stringNext(),
                        description: stringNext(),
-                       status:      CentreStatus.DISABLED,
+                       state:      CentreState.DISABLED,
                        studyIds:    [],
                        locations:   []
                      },
@@ -512,7 +514,7 @@ define([
                        name:      stringNext(),
                        email:     stringNext(),
                        avatarUrl: null,
-                       status:    UserStatus.REGISTERED
+                       state:     UserState.REGISTERED
                      },
           validKeys = commonFieldNames.concat(_.keys(defaults)),
           u = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));

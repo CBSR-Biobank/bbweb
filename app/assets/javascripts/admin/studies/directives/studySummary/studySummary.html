@@ -4,7 +4,7 @@
       {{vm.study.name}}
       <span class="btn-group pull-right">
         <button class="btn btn-xs btn-success"
-                ng-click="vm.changeStatus('enable')"
+                ng-click="vm.changeState('enable')"
                 title="{{'Enable'|translate}}"
                 ng-if="vm.study.isDisabled()"
                 ng-disabled="!vm.hasSpecimenSpecs">
@@ -12,21 +12,21 @@
         </button>
 
         <button class="btn btn-xs btn-danger"
-                ng-click="vm.changeStatus('disable')"
+                ng-click="vm.changeState('disable')"
                 title="{{'Disable'|translate}}"
                 ng-if="vm.study.isEnabled()">
           <i class="glyphicon glyphicon-cog"></i>
         </button>
 
         <button class="btn btn-xs btn-danger"
-                ng-click="vm.changeStatus('retire')"
+                ng-click="vm.changeState('retire')"
                 title="{{'Retire'|translate}}"
                 ng-if="vm.study.isDisabled()">
           <i class="glyphicon glyphicon-arrow-down"></i>
         </button>
 
         <button class="btn btn-xs btn-danger"
-                ng-click="vm.changeStatus('unretire')"
+                ng-click="vm.changeState('unretire')"
                 title="{{'Unretire'|translate}}"
                 ng-if="vm.study.isRetired()">
           <i class="glyphicon glyphicon-arrow-up"></i>

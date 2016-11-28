@@ -28,6 +28,7 @@ define(function (require) {
   module.constant('ShipmentState',                      require('./centre/ShipmentState'));
   module.constant('ShipmentItemState',                  require('./centre/ShipmentItemState'));
   module.constant('centreLocationInfoSchema',           require('./centre/centreLocationInfoSchema'));
+  module.constant('SpecimenState',                      require('./participants/SpecimenState'));
 
   module.constant('AnnotationValueType',                require('./AnnotationValueType'));
   module.constant('AnnotationMaxValueCount',            require('./annotations/AnnotationMaxValueCount'));
@@ -75,9 +76,9 @@ define(function (require) {
   module.factory('UserViewer',                          require('./user/UserViewer'));
   module.service('UserCounts',                          require('./user/UserCounts'));
 
-  module.constant('UserStatus',                         require('./user/UserStatus'));
-  module.constant('StudyStatus',                        require('./study/StudyStatus'));
-  module.constant('CentreStatus',                       require('./centre/CentreStatus'));
+  module.constant('UserState',                         require('./user/UserState'));
+  module.constant('StudyState',                        require('./study/StudyState'));
+  module.constant('CentreState',                       require('./centre/CentreState'));
 
   return {
     name: name,

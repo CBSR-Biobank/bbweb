@@ -13,7 +13,7 @@ define(function () {
       panelHeader:      '@',
       getCentres:       '&',
       onCentreSelected: '&',
-      limit:         '<',
+      limit:            '<',
       messageNoResults: '@',
       icon:             '@'
 
@@ -43,11 +43,10 @@ define(function () {
     vm.showPagination    = getShowPagination();
 
     vm.pagerOptions = {
-      filter:    '',
-      status:    'EnabledCentre',
-      page:      1,
-      limit:  vm.limit,
-      sortField: 'name' // must be lower case
+      filter: '',
+      sort:   'name', // must be lower case
+      page:   1,
+      limit:  vm.limit
     };
 
     updateCentres();

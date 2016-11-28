@@ -29,9 +29,14 @@ define(['lodash'], function(_) {
     return directive;
   }
 
-  SelectStudyCtr.$inject = ['$state', 'gettextCatalog', 'modalService'];
+  SelectStudyCtr.$inject = [
+    '$state',
+    'gettextCatalog',
+    'modalService',
+    'filterExpression'
+  ];
 
-  function SelectStudyCtr($state, gettextCatalog, modalService) {
+  function SelectStudyCtr($state, gettextCatalog, modalService, filterExpression) {
     var vm = this;
 
     vm.displayStates = {
@@ -39,6 +44,7 @@ define(['lodash'], function(_) {
       HAVE_RESULTS: 1
     };
 
+    vm.nameFilter        = '';
     vm.updateStudies     = updateStudies;
     vm.pagedResult       = {};
     vm.nameFilterUpdated = nameFilterUpdated;
@@ -50,11 +56,10 @@ define(['lodash'], function(_) {
     vm.showPagination    = getShowPagination();
 
     vm.pagerOptions = {
-      filter:    '',
-      status:    'EnabledStudy',
-      page:      1,
-      limit:  vm.limit,
-      sortField: 'name' // must be lower case
+      filter: '',
+      sort:   'name', // must be lower case
+      page:   1,
+      limit:  vm.limit
     };
 
     updateStudies();
@@ -66,6 +71,13 @@ define(['lodash'], function(_) {
     }
 
     function updateStudies() {
+      var filterElements = [
+            { key: 'name',  value: vm.nameFilterWildcard },
+            { key: 'state', value: 'enabled' }
+          ];
+
+      _.extend(vm.pagerOptions, { filter: filterExpression.create(filterElements) });
+
       vm.getStudies()(vm.pagerOptions).then(function (pagedResult) {
         vm.pagedResult = pagedResult;
         vm.displayState = getDisplayState();
@@ -77,6 +89,11 @@ define(['lodash'], function(_) {
      * Called when user enters text into the 'name filter'.
      */
     function nameFilterUpdated() {
+      if (!_.isUndefined(vm.nameFilter) && (vm.nameFilter !== '')) {
+        vm.nameFilterWildcard = '*' + vm.nameFilter + '*';
+      } else {
+        vm.nameFilterWildcard = '';
+      }
       vm.pagerOptions.page = 1;
       updateStudies();
     }
@@ -86,6 +103,8 @@ define(['lodash'], function(_) {
     }
 
     function clearFilter() {
+      vm.nameFilter = '';
+      vm.nameFilterWildcard = '';
       vm.pagerOptions.filter = null;
       updateStudies();
     }

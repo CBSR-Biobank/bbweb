@@ -26,8 +26,6 @@ define(function (require) {
 
   module.service('usersService',    require('./usersService'));
 
-  module.service('userStatusLabel', require('./services/userStatusLabelService'));
-
   return {
     name: name,
     module: module

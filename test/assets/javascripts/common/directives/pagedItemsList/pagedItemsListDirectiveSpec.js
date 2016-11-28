@@ -23,7 +23,7 @@ define([
     describe('Centres', function () {
       var context = {};
 
-      beforeEach(inject(function ($q, Centre, CentreStatus, centreStatusLabel) {
+      beforeEach(inject(function ($q, Centre, CentreState) {
         var self = this,
             disabledCentres,
             enabledCentres;
@@ -33,22 +33,22 @@ define([
         });
         enabledCentres = _.map(_.range(3), function() {
           var centre = new self.factory.centre();
-          centre.status = CentreStatus.ENABLED;
+          centre.state = CentreState.ENABLED;
           return centre;
         });
 
         context.entities                     = disabledCentres.concat(enabledCentres);
         context.counts                       = createCounts(disabledCentres.length,
                                                             enabledCentres.length);
-        context.limit                     = disabledCentres.length;
+        context.limit                        = disabledCentres.length;
         context.messageNoItems               = 'No items present';
         context.messageNoResults             = 'No items match the criteria';
         context.entityNavigateState          = 'home.admin.centres.centre.summary';
         context.entityNavigateStateParamName = 'centreId';
 
-        context.possibleStatuses = [{ id: 'all', name: 'all' }].concat(
-          _.map(_.values(CentreStatus), function (status) {
-            return { id: status, name: centreStatusLabel.statusToLabel(status) };
+        context.possibleStates = [{ id: 'all', name: 'all' }].concat(
+          _.map(_.values(CentreState), function (state) {
+            return { id: state, name: state.toUpperCase() };
           }));
       }));
 
@@ -58,7 +58,7 @@ define([
     describe('Studies', function () {
       var context = {};
 
-      beforeEach(inject(function ($q, Study, StudyStatus, studyStatusLabel) {
+      beforeEach(inject(function ($q, Study, StudyState) {
         var self = this,
             disabledStudies,
             enabledStudies,
@@ -69,12 +69,12 @@ define([
         });
         enabledStudies = _.map(_.range(3), function() {
           var study = new self.factory.study();
-          study.status = StudyStatus.ENABLED;
+          study.state = StudyState.ENABLED;
           return study;
         });
         retiredStudies = _.map(_.range(3), function() {
           var study = new self.factory.study();
-          study.status = StudyStatus.RETIRED;
+          study.state = StudyState.RETIRED;
           return study;
         });
 
@@ -82,15 +82,15 @@ define([
         context.counts                       = createCounts(disabledStudies.length,
                                                             enabledStudies.length,
                                                             retiredStudies.length);
-        context.limit                     = disabledStudies.length;
+        context.limit                        = disabledStudies.length;
         context.messageNoItems               = 'No items present';
         context.messageNoResults             = 'No items match the criteria';
         context.entityNavigateState          = 'home.admin.studies.study.summary';
         context.entityNavigateStateParamName = 'studyId';
 
-        context.possibleStatuses = [{ id: 'all', name: 'all' }].concat(
-          _.map(_.values(StudyStatus), function (status) {
-            return { id: status, name: studyStatusLabel.statusToLabel(status) };
+        context.possibleStates = [{ id: 'all', name: 'all' }].concat(
+          _.map(_.values(StudyState), function (state) {
+            return { id: state, name: state.toUpperCase() };
           }));
       }));
 
@@ -106,8 +106,8 @@ define([
               element = angular.element([
                 '<paged-items-list',
                 '  counts="vm.counts"',
-                '  page-size="vm.limit"',
-                '  possible-statuses="vm.possibleStatuses"',
+                '  limit="vm.limit"',
+                '  possible-states="vm.possibleStates"',
                 '  message-no-items="' + context.messageNoItems + '"',
                 '  message-no-results="' + context.messageNoResults + '"',
                 '  get-items="vm.getItems"',
@@ -122,11 +122,11 @@ define([
 
           self.scope = self.$rootScope.$new();
           self.scope.vm = {
-            counts:           context.counts,
-            limit:         context.limit,
-            possibleStatuses: context.possibleStatuses,
-            getItems:         getItemsFunc,
-            getItemIcon:      getItemIconFunc
+            counts:         context.counts,
+            limit:          context.limit,
+            possibleStates: context.possibleStates,
+            getItems:       getItemsFunc,
+            getItemIcon:    getItemIconFunc
           };
 
           self.$compile(element)(self.scope);
@@ -164,11 +164,11 @@ define([
           createController.call(this);
 
           expect(this.controller.counts).toBe(this.context.counts);
-          expect(this.controller.possibleStatuses).toBe(this.context.possibleStatuses);
-          expect(this.controller.sortFields).toContainAll(['Name', 'Status']);
+          expect(this.controller.possibleStates).toBe(this.context.possibleStates);
+          expect(this.controller.sortFields).toContainAll(['Name', 'State']);
 
-          expect(this.controller.pagerOptions.filter).toBeEmptyString();
-          expect(this.controller.pagerOptions.status).toBe(this.context.possibleStatuses[0].id);
+          expect(this.controller.nameFilter).toBeEmptyString();
+          expect(this.controller.selectedState).toBe('all');
           expect(this.controller.pagerOptions.limit).toBe(this.context.limit);
           expect(this.controller.pagerOptions.sort).toBe('name');
         });
@@ -178,9 +178,9 @@ define([
 
           createController.call(self);
 
-          _.each(context.possibleStatuses, function (status) {
-            if (status.id !== 'all') {
-              expect(self.controller.panelHeading).toContain(status.name);
+          _.each(context.possibleStates, function (state) {
+            if (state.id !== 'all') {
+              expect(self.controller.panelHeading.toLowerCase()).toContain(state.name.toLowerCase());
             }
           });
         });
@@ -190,28 +190,27 @@ define([
 
           createController.call(this);
 
-          this.controller.pagerOptions.filter = nameFilterValue;
+          this.controller.nameFilter = nameFilterValue;
           this.controller.nameFilterUpdated();
           this.scope.$digest();
           expect(this.getItemsSpy.calls.mostRecent().args[0]).toEqual({
-            filter: nameFilterValue,
-            status: this.context.possibleStatuses[0].id,
+            filter: 'name::*' + nameFilterValue + '*',
+            sort: 'name',
             page: 1,
-            limit: this.context.limit,
-            sort: 'name'
+            limit: this.context.limit
           });
         });
 
-        it('updates items when name status filter is updated', function() {
-          var statusFilterValue = this.context.possibleStatuses[1];
+        it('updates items when name state filter is updated', function() {
+          var statusFilterValue = this.context.possibleStates[1];
 
           createController.call(this);
-          this.controller.pagerOptions.status = statusFilterValue;
-          this.controller.statusFilterUpdated();
+          this.controller.pagerOptions.state = statusFilterValue;
+          this.controller.stateFilterUpdated();
           this.scope.$digest();
           expect(this.getItemsSpy.calls.mostRecent().args[0]).toEqual({
             filter: '',
-            status: statusFilterValue,
+            state: statusFilterValue,
             page: 1,
             limit: this.context.limit,
             sort: this.controller.sortFields[0].toLowerCase()
@@ -221,11 +220,10 @@ define([
         it('clears filters', function() {
           createController.call(this);
           this.controller.pagerOptions.filter = 'test';
-          this.controller.pagerOptions.status = this.context.possibleStatuses[1];
+          this.controller.pagerOptions.state = this.context.possibleStates[1];
           this.controller.clearFilters();
           this.scope.$digest();
-          expect(this.controller.pagerOptions.filter).toBeNull();
-          expect(this.controller.pagerOptions.status).toBe(this.context.possibleStatuses[0]);
+          expect(this.controller.pagerOptions.filter).toBeEmptyString();
         });
 
         it('updates items when name sort field is updated', function() {
@@ -237,10 +235,9 @@ define([
           this.scope.$digest();
           expect(this.getItemsSpy.calls.mostRecent().args[0]).toEqual({
             filter: '',
-            status: this.context.possibleStatuses[0].id,
+            sort: sortFieldValue.toLowerCase(),
             page: 1,
-            limit: this.context.limit,
-            sort: sortFieldValue.toLowerCase()
+            limit: this.context.limit
           });
         });
 
@@ -253,10 +250,9 @@ define([
           this.scope.$digest();
           expect(this.getItemsSpy.calls.mostRecent().args[0]).toEqual({
             filter: '',
-            status: this.context.possibleStatuses[0].id,
+            sort: this.controller.sortFields[0].toLowerCase(),
             page: page,
-            limit: this.context.limit,
-            sort: this.controller.sortFields[0].toLowerCase()
+            limit: this.context.limit
           });
         });
 

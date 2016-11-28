@@ -54,11 +54,11 @@ define([
     }));
 
     it('scope is valid on startup', function() {
-      var self             = this,
-          StudyStatus      = this.$injector.get('StudyStatus'),
-          studyStatusLabel = this.$injector.get('studyStatusLabel'),
-          allStatuses      = _.values(StudyStatus),
-          counts           = createStudyCounts.call(this, 1, 2, 3);
+      var self       = this,
+          StudyState = this.$injector.get('StudyState'),
+          allStates  = _.values(StudyState),
+          counts     = createStudyCounts.call(this, 1, 2, 3),
+          nonHashedPossibleStates;
 
       spyOn(self.StudyCounts, 'get').and.callFake(function () {
         return self.$q.when(counts);
@@ -69,15 +69,16 @@ define([
       });
 
       createController.call(self);
+      nonHashedPossibleStates = angular.copy(self.controller.possibleStates);
 
       expect(self.controller.studyCounts).toEqual(counts);
       expect(self.controller.limit).toBeDefined();
 
-      _.each(allStatuses, function(status) {
-        expect(self.controller.possibleStatuses)
-          .toContain({ id: status, label: studyStatusLabel.statusToLabel(status)});
+      _.each(allStates, function(state) {
+        expect(nonHashedPossibleStates)
+          .toContain({ id: state, label: state.toUpperCase() });
       });
-      expect(self.controller.possibleStatuses).toContain({ id: 'all', label: 'All'});
+      expect(nonHashedPossibleStates).toContain({ id: 'all', label: 'All'});
     });
 
     it('updateStudies retrieves new list of studies', function() {

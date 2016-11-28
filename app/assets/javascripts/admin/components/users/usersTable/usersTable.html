@@ -6,7 +6,7 @@
       <th st-sort="email" translate>Email</th>
       <th st-sort="name" translate>Name</th>
       <th translate>Added</th>
-      <th translate>Status</th>
+      <th translate>State</th>
       <th translate>Action</th>
     </tr>
     <tr>
@@ -25,10 +25,10 @@
       <th></th>
       <th>
         <select class="form-control input-sm"
-                st-search="status"
-                name="status"
-                ng-model="vm.status"
-                ng-options="status.id as status.title for status in vm.possibleStatuses">
+                st-search="state"
+                name="state"
+                ng-model="vm.state"
+                ng-options="state.id as state.title for state in vm.possibleStates">
         </select>
       </th>
     </tr>
@@ -49,7 +49,7 @@
         </a>
       </td>
       <td>
-        <span class="badge">{{user.statusLabel}}</span>
+        <span class="badge">{{user.state}}</span>
       </td>
 
       <!-- BUTTONS -->

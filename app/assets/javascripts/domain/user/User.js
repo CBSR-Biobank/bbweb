@@ -11,9 +11,8 @@ define(['lodash', 'tv4'], function(_, tv4) {
     'biobankApi',
     'ConcurrencySafeEntity',
     'DomainError',
-    'UserStatus',
-    'usersService',
-    'userStatusLabel'
+    'UserState',
+    'usersService'
   ];
 
   /**
@@ -24,24 +23,23 @@ define(['lodash', 'tv4'], function(_, tv4) {
                        biobankApi,
                        ConcurrencySafeEntity,
                        DomainError,
-                       UserStatus,
-                       usersService,
-                       userStatusLabel) {
+                       UserState,
+                       usersService) {
 
     var schema = {
       'id': 'User',
       'type': 'object',
       'properties': {
-        'id':              { 'type': 'string' },
-        'version':         { 'type': 'integer', 'minimum': 0 },
-        'timeAdded':       { 'type': 'string' },
-        'timeModified':    { 'type': [ 'string', 'null' ] },
-        'name':            { 'type': 'string' },
-        'email':           { 'type': 'string' },
-        'avatarUrl':       { 'type': [ 'string', 'null' ] },
-        'status':          { 'type': 'string' }
+        'id':           { 'type': 'string' },
+        'version':      { 'type': 'integer', 'minimum': 0 },
+        'timeAdded':    { 'type': 'string' },
+        'timeModified': { 'type': [ 'string', 'null' ] },
+        'name':         { 'type': 'string' },
+        'email':        { 'type': 'string' },
+        'avatarUrl':    { 'type': [ 'string', 'null' ] },
+        'state':        { 'type': 'string' }
       },
-      'required': [ 'id', 'version', 'timeAdded', 'name', 'email', 'status' ]
+      'required': [ 'id', 'version', 'timeAdded', 'name', 'email', 'state' ]
     };
 
     /**
@@ -83,17 +81,16 @@ define(['lodash', 'tv4'], function(_, tv4) {
        */
 
       /**
-       * The status can be one of: registered, active or locked.
+       * The state can be one of: registered, active or locked.
        *
-       * @name domain.users.User#status
-       * @type {domain.users.UserStatus}
+       * @name domain.users.User#state
+       * @type {domain.users.UserState}
        */
-      this.status = UserStatus.REGISTERED;
+      this.state = UserState.REGISTERED;
 
       ConcurrencySafeEntity.call(this);
       obj = obj || {};
       _.extend(this, obj);
-      this.statusLabel = userStatusLabel.statusToLabel(this.status);
     }
 
     User.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -177,16 +174,10 @@ define(['lodash', 'tv4'], function(_, tv4) {
      *
      * @param {object} options - The options to use to list studies.
      *
-     * @param {string} options.nameFilter The filter to use on user names. Default is empty string.
+     * @param {string} options.filter The filter expression to use on user to refine the list.
      *
-     * @param {string} options.emailFilter The filter to use on user emails. Default is empty string.
-     *
-     * @param {string} options.status Returns users filtered by status. The following are valid: 'all' to
-     * return all users, 'retired' to return only retired users, 'active' to reutrn only active
-     * users, and 'locked' to return only locked users. For any other values the response is an error.
-     *
-     * @param {string} options.sortField Users can be sorted by 'name', 'email' or by 'status'. Values other
-     * than these yield an error.
+     * @param {string} options.sor Users can be sorted by 'name', 'email' or by 'state'. Values other
+     * than these yield an error. Use a minus sign prefix to sort in descending order.
      *
      * @param {int} options.page If the total results are longer than limit, then page selects which
      * users should be returned. If an invalid value is used then the response is an error.
@@ -194,25 +185,21 @@ define(['lodash', 'tv4'], function(_, tv4) {
      * @param {int} options.limit The total number of users to return per page. The maximum page size is
      * 10. If a value larger than 10 is used then the response is an error.
      *
-     * @param {string} options.order One of 'asc' or 'desc'. If an invalid value is used then
-     * the response is an error.
-     *
      * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
      * domain.users.User}.
      */
     User.list = function(options) {
-      var validKeys = [ 'nameFilter',
-                        'emailFilter',
-                        'status',
+      var validKeys = [ 'filter',
                         'sort',
                         'page',
-                        'limit',
-                        'order'
+                        'limit'
                       ],
           params;
 
       options = options || {};
-      params = _.pick(options, validKeys);
+      params = _.omitBy(_.pick(options, validKeys), function (value) {
+        return value === '';
+      });
 
       return biobankApi.get(uri(), params).then(function(reply) {
         // reply is a paged result
@@ -278,8 +265,8 @@ define(['lodash', 'tv4'], function(_, tv4) {
     User.prototype.activate = function () {
       var self = this;
 
-      if (self.status !== UserStatus.REGISTERED) {
-        throw new DomainError('user status is not registered: ' + self.status);
+      if (self.state !== UserState.REGISTERED) {
+        throw new DomainError('user state is not registered: ' + self.state);
       }
 
       return changeStatus(this, 'activate');
@@ -288,8 +275,8 @@ define(['lodash', 'tv4'], function(_, tv4) {
     User.prototype.lock = function () {
       var self = this;
 
-      if (self.status !== UserStatus.ACTIVE) {
-        throw new DomainError('user status is not active: ' + self.status);
+      if (self.state !== UserState.ACTIVE) {
+        throw new DomainError('user state is not active: ' + self.state);
       }
 
       return changeStatus(this, 'lock');
@@ -298,31 +285,31 @@ define(['lodash', 'tv4'], function(_, tv4) {
     User.prototype.unlock = function () {
       var self = this;
 
-      if (self.status !== UserStatus.LOCKED) {
-        throw new DomainError('user status is not locked: ' + self.status);
+      if (self.state !== UserState.LOCKED) {
+        throw new DomainError('user state is not locked: ' + self.state);
       }
 
       return changeStatus(this, 'unlock');
     };
 
     User.prototype.isRegistered = function () {
-      return (this.status === UserStatus.REGISTERED);
+      return (this.state === UserState.REGISTERED);
     };
 
     User.prototype.isActive = function () {
-      return (this.status === UserStatus.ACTIVE);
+      return (this.state === UserState.ACTIVE);
     };
 
     User.prototype.isLocked = function () {
-      return (this.status === UserStatus.LOCKED);
+      return (this.state === UserState.LOCKED);
     };
 
-    function changeStatus(user, status) {
+    function changeStatus(user, state) {
       var json = {
         id:              user.id,
         expectedVersion: user.version
       };
-      return biobankApi.post(updateUri(status, user.id), json)
+      return biobankApi.post(updateUri(state, user.id), json)
         .then(User.prototype.asyncCreate);
     }
 

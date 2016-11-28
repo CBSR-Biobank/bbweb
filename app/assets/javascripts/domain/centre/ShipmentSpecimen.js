@@ -246,7 +246,9 @@ define(function (require) {
           ];
 
       options = options || {};
-      params = _.pick(options, validKeys);
+      params = _.omitBy(_.pick(options, validKeys), function (value) {
+        return value === '';
+      });
 
       return biobankApi.get(url, params).then(function(reply) {
         var deferred = $q.defer();

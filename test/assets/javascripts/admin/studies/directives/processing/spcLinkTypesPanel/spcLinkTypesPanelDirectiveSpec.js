@@ -205,9 +205,9 @@ define([
     });
 
     it('cannot update a specimen link type if study is not disabled', function() {
-      var StudyStatus = this.$injector.get('StudyStatus'),
+      var StudyState = this.$injector.get('StudyState'),
           entities    = createEntities(),
-          statuses    = [StudyStatus.ENABLED, StudyStatus.RETIRED];
+          statuses    = [StudyState.ENABLED, StudyState.RETIRED];
 
       createController(entities);
       _.each(statuses, function (status) {
@@ -235,9 +235,9 @@ define([
     });
 
     it('cannot remove a specimen link type if study is not disabled', function() {
-      var StudyStatus = this.$injector.get('StudyStatus'),
+      var StudyState = this.$injector.get('StudyState'),
           entities    = createEntities(),
-          statuses    = [StudyStatus.ENABLED, StudyStatus.RETIRED];
+          statuses    = [StudyState.ENABLED, StudyState.RETIRED];
 
       scope = createController(entities);
       _.each(statuses, function (status) {

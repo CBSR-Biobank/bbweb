@@ -51,7 +51,6 @@ define(function (require) {
       'shipmentSpecimensPanel',
       require('./components/shipmentSpecimensPanel/shipmentSpecimensPanelComponent'))
 
-    .service('centreStatusLabel', require('./services/centreStatusLabelService'))
     .service(
       'centreLocationsModalService',
       require('./services/centreLocationsModal/centreLocationsModalService'))

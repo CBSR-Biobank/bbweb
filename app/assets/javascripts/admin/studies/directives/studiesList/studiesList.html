@@ -12,8 +12,8 @@
 
 <div class="clearfix">
   <paged-items-list counts="vm.studyCounts"
-                    page-size="vm.limit"
-                    possible-statuses="vm.possibleStatuses"
+                    limit="vm.limit"
+                    possible-states="vm.possibleStates"
                     message-no-items="{{'No studies have been added yet.'|translate}}"
                     message-no-results="{{'No studies match the criteria.'|translate}}"
                     get-items="vm.updateStudies"

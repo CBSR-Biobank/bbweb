@@ -16,10 +16,9 @@ define([
 
     var studyNameDto = function (study) {
       return {
-        id:          study.id,
-        name:        study.name,
-        status:      study.status,
-        statusLabel: this.studyStatusLabel.statusToLabel(study.status)
+        id:    study.id,
+        name:  study.name,
+        state: study.state
       };
     };
 
@@ -82,7 +81,6 @@ define([
                               'Study',
                               'EntityViewer',
                               'modalService',
-                              'studyStatusLabel',
                               'factory');
 
       testUtils.addCustomMatchers();

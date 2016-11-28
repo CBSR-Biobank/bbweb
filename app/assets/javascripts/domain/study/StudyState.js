@@ -11,11 +11,11 @@ define(function () {
    * @enum {string}
    * @memberOf domain.studies
    */
-  var StudyStatus = {
-    DISABLED: 'DisabledStudy',
-    ENABLED:  'EnabledStudy',
-    RETIRED:  'RetiredStudy'
+  var StudyState = {
+    DISABLED: 'disabled',
+    ENABLED:  'enabled',
+    RETIRED:  'retired'
   };
 
-  return StudyStatus;
+  return StudyState;
 });

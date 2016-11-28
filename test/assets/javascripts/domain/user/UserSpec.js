@@ -2,13 +2,12 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  'jquery'
-], function(angular, mocks, _, $) {
+define(function (require) {
   'use strict';
+
+  var mocks   = require('angularMocks'),
+      _       = require('lodash'),
+      sprintf = require('sprintf').sprintf;
 
   describe('User', function() {
 
@@ -21,7 +20,7 @@ define([
 
       self.injectDependencies('$httpBackend',
                               'User',
-                              'UserStatus',
+                              'UserState',
                               'factory');
 
       self.statusChangeShared = statusChangeShared;
@@ -50,7 +49,7 @@ define([
       expect(user.timeModified).toBeNull();
       expect(user.name).toBeEmptyString();
       expect(user.email).toBeEmptyString();
-      expect(user.status).toBe(this.UserStatus.REGISTERED);
+      expect(user.state).toBe(this.UserState.REGISTERED);
     });
 
     it('creating a user with an object does not modify object', function() {
@@ -70,7 +69,7 @@ define([
     it('fails when creating from object with missing required keys', function() {
       var self = this,
           obj = this.factory.user(),
-          requiredKeys = ['id', 'name', 'email', 'status'];
+          requiredKeys = ['id', 'name', 'email', 'state'];
 
       _.each(requiredKeys, function (key) {
         var badObj = _.omit(obj, key);
@@ -83,36 +82,32 @@ define([
 
     describe('when listing multiple users', function() {
 
-      it('can list using name filter parameter only', function() {
+      it('can list using when filtering by name only', function() {
         var self = this,
-            nameFilter = 'test',
+            filter = 'name::test',
+            url = uri() + '?filter=' + filter,
             jsonUser = self.factory.user(),
             reply = self.factory.pagedResult([ jsonUser ]);
 
-        self.$httpBackend.whenGET(uri() + '?' + $.param({ nameFilter: nameFilter })).respond({
-          status: 'success',
-          data: reply
-        });
+        self.$httpBackend.whenGET(url).respond(this.reply(reply));
 
-        self.User.list({nameFilter: nameFilter}).then(function(pagedResult) {
+        self.User.list({ filter: filter }).then(function(pagedResult) {
           expect(pagedResult.items).toBeArrayOfSize(1);
           expect(pagedResult.items[0]).toEqual(jasmine.any(self.User));
         });
         self.$httpBackend.flush();
       });
 
-      it('can list using email filter parameter only', function() {
+      it('can list when using filtering by email only', function() {
         var self = this,
-            emailFilter = 'test',
+            filter = 'email::test',
+            url = uri() + '?filter=' + filter,
             jsonUser = self.factory.user(),
             reply = self.factory.pagedResult([ jsonUser ]);
 
-        this.$httpBackend.whenGET(uri() + '?' + $.param({emailFilter: emailFilter})).respond({
-          status: 'success',
-          data: reply
-        });
+        this.$httpBackend.whenGET(url).respond(this.reply(reply));
 
-        self.User.list({emailFilter: emailFilter}).then(function(pagedResult) {
+        self.User.list({ filter: filter }).then(function(pagedResult) {
           expect(pagedResult.items).toBeArrayOfSize(1);
           expect(pagedResult.items[0]).toEqual(jasmine.any(self.User));
         });
@@ -121,16 +116,14 @@ define([
 
       it('can list using sort parameter only', function() {
         var self = this,
-            sort = 'asc',
+            sort = 'name',
+            url = uri() + '?sort=' + sort,
             jsonUser = self.factory.user(),
             reply = self.factory.pagedResult([ jsonUser ]);
 
-        this.$httpBackend.whenGET(uri() + '?' + $.param({sort: sort})).respond({
-          status: 'success',
-          data: reply
-        });
+        this.$httpBackend.whenGET(url).respond(this.reply(reply));
 
-        self.User.list({sort: sort}).then(function(pagedResult) {
+        self.User.list({ sort: sort }).then(function(pagedResult) {
           expect(pagedResult.items).toBeArrayOfSize(1);
           expect(pagedResult.items[0]).toEqual(jasmine.any(self.User));
         });
@@ -138,18 +131,16 @@ define([
       });
 
       it('should query for multiple users', function() {
-        var self        = this,
-            emailFilter = 'test',
-            sort        = 'email',
-            order       = 'desc',
-            jsonUser    = self.factory.user(),
-            reply       = self.factory.pagedResult([ jsonUser ]);
+        var self     = this,
+            filter   = 'email::test',
+            sort     = '-email',
+            url      = sprintf('%s?filter=%s&sort=%s', uri(), filter, sort),
+            jsonUser = self.factory.user(),
+            reply    = self.factory.pagedResult([ jsonUser ]);
 
-        this.$httpBackend.whenGET(
-          uri() + '?' + $.param({emailFilter: emailFilter, order: 'desc', sort: sort}))
-          .respond({ status: 'success', data: reply });
+        this.$httpBackend.whenGET(url).respond(this.reply(reply));
 
-        self.User.list({emailFilter: emailFilter, sort: sort, order: order}).then(function(pagedResult) {
+        self.User.list({ filter: filter, sort: sort }).then(function(pagedResult) {
           expect(pagedResult.items).toBeArrayOfSize(1);
           expect(pagedResult.items[0]).toEqual(jasmine.any(self.User));
         });
@@ -159,7 +150,7 @@ define([
       it('should handle an invalid response', function() {
         var reply = this.factory.pagedResult([ { 'a': 1 } ]);
 
-        this.$httpBackend.whenGET(uri()).respond({ status: 'success', data: reply });
+        this.$httpBackend.whenGET(uri()).respond(this.reply(reply));
 
         this.User.list().then(testFail).catch(checkError);
         this.$httpBackend.flush();
@@ -175,7 +166,7 @@ define([
 
     });
 
-    it('can retrieve a single user', function(done) {
+    it('can retrieve a single user', function() {
       var self = this,
           user = this.factory.user();
 
@@ -184,7 +175,6 @@ define([
       self.User.get(user.id).then(function (reply) {
         expect(reply).toEqual(jasmine.any(self.User));
         reply.compareToJsonEntity(user);
-        done();
       });
       self.$httpBackend.flush();
     });
@@ -270,64 +260,64 @@ define([
 
     it('can activate a registered user', function() {
       var user = new this.User(this.factory.user());
-      this.statusChangeShared(user, 'activate', 'activate', this.UserStatus.ACTIVE);
+      this.statusChangeShared(user, 'activate', 'activate', this.UserState.ACTIVE);
     });
 
     it('can lock an active user', function() {
-      var user = new this.User(_.extend(this.factory.user(), { status: this.UserStatus.ACTIVE }));
-      this.statusChangeShared(user, 'lock', 'lock', this.UserStatus.LOCKED);
+      var user = new this.User(_.extend(this.factory.user(), { state: this.UserState.ACTIVE }));
+      this.statusChangeShared(user, 'lock', 'lock', this.UserState.LOCKED);
     });
 
     it('can unlock a locked user', function() {
-      var user = new this.User(_.extend(this.factory.user(), { status: this.UserStatus.LOCKED }));
-      this.statusChangeShared(user, 'unlock', 'unlock', this.UserStatus.ACTIVE);
+      var user = new this.User(_.extend(this.factory.user(), { state: this.UserState.LOCKED }));
+      this.statusChangeShared(user, 'unlock', 'unlock', this.UserState.ACTIVE);
     });
 
     it('fails when calling activate and the user is not registered', function() {
       var self = this,
-          statuses = [ self.UserStatus.ACTIVE, self.UserStatus.LOCKED ];
+          statuses = [ self.UserState.ACTIVE, self.UserState.LOCKED ];
 
-      _.each(statuses, function (status) {
-        var user = new self.User(_.extend(self.factory.user(), { status: status }));
+      _.each(statuses, function (state) {
+        var user = new self.User(_.extend(self.factory.user(), { state: state }));
 
         expect(function () { user.activate(); })
-          .toThrow(new Error('user status is not registered: ' + status));
+          .toThrow(new Error('user state is not registered: ' + state));
       });
     });
 
     it('fails when calling lock and the user is not active', function() {
       var self = this,
-          statuses = [ self.UserStatus.REGISTERED, self.UserStatus.LOCKED ];
+          statuses = [ self.UserState.REGISTERED, self.UserState.LOCKED ];
 
-      _.each(statuses, function (status) {
-        var user = new self.User(_.extend(self.factory.user(), { status: status }));
+      _.each(statuses, function (state) {
+        var user = new self.User(_.extend(self.factory.user(), { state: state }));
 
         expect(function () { user.lock(); })
-          .toThrowError(/user status is not active/);
+          .toThrowError(/user state is not active/);
       });
     });
 
     it('fails when calling unlock and the user is not locked', function() {
       var self = this,
-          statuses = [ self.UserStatus.REGISTERED, self.UserStatus.ACTIVE ];
+          statuses = [ self.UserState.REGISTERED, self.UserState.ACTIVE ];
 
-      _.each(statuses, function (status) {
-        var user = new self.User(_.extend(self.factory.user(), { status: status }));
+      _.each(statuses, function (state) {
+        var user = new self.User(_.extend(self.factory.user(), { state: state }));
 
         expect(function () { user.unlock(); })
-          .toThrow(new Error('user status is not locked: ' + status));
+          .toThrow(new Error('user state is not locked: ' + state));
       });
     });
 
-    it('status predicates are valid valid', function() {
+    it('state predicates are valid valid', function() {
       var self = this;
-      _.each(_.values(self.UserStatus), function (status) {
-        var jsonUser = self.factory.user({ status: status }),
+      _.each(_.values(self.UserState), function (state) {
+        var jsonUser = self.factory.user({ state: state }),
             user     = new self.User(jsonUser);
 
-        expect(user.isRegistered()).toBe(status === self.UserStatus.REGISTERED);
-        expect(user.isActive()).toBe(status === self.UserStatus.ACTIVE);
-        expect(user.isLocked()).toBe(status === self.UserStatus.LOCKED);
+        expect(user.isRegistered()).toBe(state === self.UserState.REGISTERED);
+        expect(user.isActive()).toBe(state === self.UserState.ACTIVE);
+        expect(user.isLocked()).toBe(state === self.UserState.LOCKED);
       });
     });
 

@@ -6,7 +6,14 @@ define(['lodash'], function(_) {
   'use strict';
 
   /**
-   * Displays items in a panel list. Can only be used for studies and centres.
+   * Displays items in a panel list. Can only be used for collections {@link domain.study.Study} and {@link
+   * domain.cnetres.Centres}.
+   *
+   * @param {Array} possibleStates - an array of objects, where each object has 2 keys: <code>id</code> and
+   *        <code>name</code>. The value for the <code>id</code> key is a status for the entities being
+   *        displayed, and used with the $scope.getItems function. The value for the <code>name</code> key is
+   *        what is displayed in the 'State' drop down box. The first item of the array should be <code>{ id:
+   *        'all', name: 'All' }</code> so that all items are displayed.
    */
   function pagedItemsListDirective() {
     var directive = {
@@ -14,8 +21,8 @@ define(['lodash'], function(_) {
       scope:{},
       bindToController: {
         counts:                       '=',
-        limit:                     '=',
-        possibleStatuses:             '=',
+        limit:                        '=',
+        possibleStates:               '=',
         messageNoItems:               '@',
         messageNoResults:             '@',
         getItems:                     '&',
@@ -31,32 +38,29 @@ define(['lodash'], function(_) {
     return directive;
   }
 
-  PagedItemsListCtrl.$inject = ['$scope', 'gettextCatalog'];
+  PagedItemsListCtrl.$inject = ['$scope', 'gettextCatalog', 'filterExpression'];
 
   /**
-   * @param {Array} $scope.possibleStatuses - an array of objects, where each object has 2 keys: 'id' and
-   * 'name'. The value for the 'id' key is a status for the entities being displayed, and used with the
-   * $scope.getItems function. The value for the 'Name' key is what is displayed in the 'Status' drop down
-   * box. The first item of the array should be { id: 'all', name: 'All' } so that all items are displayed.
    */
-  function PagedItemsListCtrl($scope, gettextCatalog) {
+  function PagedItemsListCtrl($scope, gettextCatalog, filterExpression) {
     var vm = this;
 
-    vm.pagedResult                  = { total: vm.counts.total };
-    vm.paginationNumPages           = 5;
-    vm.sortFields                   = [ gettextCatalog.getString('Name'), gettextCatalog.getString('Status') ];
-    vm.nameFilterUpdated            = nameFilterUpdated;
-    vm.statusFilterUpdated          = statusFilterUpdated;
-    vm.pageChanged                  = pageChanged;
-    vm.sortFieldSelected            = sortFieldSelected;
-    vm.clearFilters                 = clearFilters;
+    vm.nameFilter         = '';
+    vm.nameFilterWildcard = '';
+    vm.selectedState      = 'all';
+    vm.pagedResult        = { total: vm.counts.total };
+    vm.sortFields         = [ gettextCatalog.getString('Name'), gettextCatalog.getString('State') ];
+    vm.nameFilterUpdated  = nameFilterUpdated;
+    vm.stateFilterUpdated = stateFilterUpdated;
+    vm.pageChanged        = pageChanged;
+    vm.sortFieldSelected  = sortFieldSelected;
+    vm.clearFilters       = clearFilters;
 
     vm.pagerOptions = {
-      filter:     '',
-      status:     vm.possibleStatuses[0].id,
-      page:       1,
-      limit:   vm.limit,
-      sort:       'name' // must be lower case
+      filter: '',
+      sort:   'name', // must be lower case
+      page:   1,
+      limit:  vm.limit
     };
 
     vm.displayStates = {
@@ -107,6 +111,13 @@ define(['lodash'], function(_) {
     }
 
     function updateItems() {
+      var filterElements = [
+            { key: 'name',  value: vm.nameFilterWildcard },
+            { key: 'state', value: vm.stateFilter }
+          ];
+
+      _.extend(vm.pagerOptions, { filter: filterExpression.create(filterElements) });
+
       vm.getItems()(vm.pagerOptions).then(function (pagedResult) {
         vm.pagedResult = pagedResult;
         vm.pagedResult.items = _.map(vm.pagedResult.items, function (entity) {
@@ -121,15 +132,27 @@ define(['lodash'], function(_) {
      * Called when user enters text into the 'name filter'.
      */
     function nameFilterUpdated() {
+      if (!_.isUndefined(vm.nameFilter) && (vm.nameFilter !== '')) {
+        vm.nameFilterWildcard = '*' + vm.nameFilter + '*';
+      } else {
+        vm.nameFilterWildcard = '';
+      }
       vm.pagerOptions.page = 1;
       updateItems();
     }
 
     /**
-     * Called when user selects a status from the 'status filter' select.
+     * Called when user selects a state from the 'state filter' select.
      */
-    function statusFilterUpdated() {
+    function stateFilterUpdated() {
+      vm.stateFilter = (vm.selectedState !== 'all') ? vm.selectedState : '';
       vm.pagerOptions.page = 1;
+      updateItems();
+    }
+
+    function sortFieldSelected(sortField) {
+      vm.pagerOptions.page = 1;
+      vm.pagerOptions.sort = sortField.toLowerCase(); // must be lower case
       updateItems();
     }
 
@@ -138,14 +161,8 @@ define(['lodash'], function(_) {
     }
 
     function clearFilters() {
-      vm.pagerOptions.filter = null;
-      vm.pagerOptions.status = vm.possibleStatuses[0];
-      updateItems();
-    }
-
-    function sortFieldSelected(sortField) {
-      vm.pagerOptions.page = 1;
-      vm.pagerOptions.sort = sortField.toLowerCase(); // must be lower case
+      vm.nameFilter = '';
+      vm.sortSelectedState = 'all';
       updateItems();
     }
   }

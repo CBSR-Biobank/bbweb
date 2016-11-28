@@ -42,6 +42,7 @@ define(function (require) {
     .service('Panel',                     require('./services/Panel'))
     .service('annotationUpdate',          require('./services/annotationUpdateService'))
     .service('biobankApi',                require('./services/biobankApiService'))
+    .service('filterExpression',          require('./services/filterExpressionService'))
     .service('funutils',                  require('./services/funutils'))
     .service('modalService',              require('./services/modalService/modalService'))
     .service('notificationsService',      require('./services/notificationsService'))

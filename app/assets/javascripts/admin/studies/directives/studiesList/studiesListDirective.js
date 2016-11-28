@@ -24,8 +24,7 @@ define(['lodash'], function(_) {
   StudiesListCtrl.$inject = [
     'gettextCatalog',
     'Study',
-    'StudyStatus',
-    'studyStatusLabel',
+    'StudyState',
     'StudyCounts'
   ];
 
@@ -35,8 +34,7 @@ define(['lodash'], function(_) {
    */
   function StudiesListCtrl(gettextCatalog,
                            Study,
-                           StudyStatus,
-                           studyStatusLabel,
+                           StudyState,
                            StudyCounts) {
     var vm = this;
 
@@ -45,11 +43,10 @@ define(['lodash'], function(_) {
     vm.updateStudies    = Study.list;
     vm.getStudyIcon     = getStudyIcon;
 
-    vm.possibleStatuses = [ { id: 'all', label: gettextCatalog.getString('All') } ];
-
-    _.each(_.values(StudyStatus), function (status) {
-      vm.possibleStatuses.push({id: status, label: studyStatusLabel.statusToLabel(status)});
-    });
+    vm.possibleStates = [ { id: 'all', label: gettextCatalog.getString('All') } ].concat(
+      _.map(_.values(StudyState), function (state) {
+        return { id: state, label: state.toUpperCase() };
+      }));
 
     init();
 

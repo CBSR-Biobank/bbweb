@@ -18,10 +18,10 @@ define(['lodash'], function(_) {
     'AppConfig',
     'User',
     'UserCounts',
-    'UserStatus',
+    'UserState',
     'UserViewer',
-    'userStatusLabel',
-    'modalService'
+    'modalService',
+    'filterExpression'
   ];
 
   /**
@@ -30,30 +30,30 @@ define(['lodash'], function(_) {
   function UsersTableController(AppConfig,
                                 User,
                                 UserCounts,
-                                UserStatus,
+                                UserState,
                                 UserViewer,
-                                userStatusLabel,
-                                modalService) {
+                                modalService,
+                                filterExpression) {
     var vm = this;
 
-    vm.users               = [];
-    vm.possibleStatuses    = getPossibleStatuses();
-    vm.status              = 'all';
-    vm.getTableData        = getTableData;
-    vm.tableDataLoading    = true;
+    vm.users            = [];
+    vm.possibleStates   = getPossibleStates();
+    vm.state            = 'all';
+    vm.getTableData     = getTableData;
+    vm.tableDataLoading = true;
     vm.limit            = 10;
 
-    vm.userInformation     = userInformation;
-    vm.activate            = activate;
-    vm.lock                = lock;
-    vm.unlock              = unlock;
+    vm.userInformation  = userInformation;
+    vm.activate         = activate;
+    vm.lock             = lock;
+    vm.unlock           = unlock;
 
     //--
 
-    function getPossibleStatuses() {
+    function getPossibleStates() {
       return [ { id: 'all', title: 'All' } ].concat(
-        _.map(_.values(UserStatus), function(status) {
-          return { id: status, title: userStatusLabel.statusToLabel(status) };
+        _.map(_.values(UserState), function(state) {
+          return { id: state, title: state.toUpperCase() };
         }));
     }
 
@@ -62,14 +62,19 @@ define(['lodash'], function(_) {
           searchPredicateObject = tableState.search.predicateObject || {},
           sortPredicate         = tableState.sort.predicate || 'email',
           sortOrder             = tableState.sort.reverse || false,
+          nameFilter            = searchPredicateObject.name ? '*' + searchPredicateObject.name + '*': '',
+          emailFilter           = searchPredicateObject.email ? '*' + searchPredicateObject.email + '*' : '',
           options = {
-            nameFilter:  searchPredicateObject.name || '',
-            emailFilter: searchPredicateObject.email || '',
-            status:      vm.status,
-            sort:        sortPredicate,
+            filter: filterExpression.create(
+              [
+                { key: 'name', value: nameFilter },
+                { key: 'email', value: emailFilter },
+                { key: 'state', value: (vm.state !== 'all') ? vm.state : ''
+                }
+              ]),
+            sort:        (sortOrder ? '-' : '') + sortPredicate,
             page:        1 + (pagination.start / vm.limit),
-            limit:    vm.limit,
-            order:       sortOrder ? 'desc' : 'asc'
+            limit:       vm.limit
           };
 
       vm.tableDataLoading = true;
@@ -82,13 +87,13 @@ define(['lodash'], function(_) {
       });
     }
 
-    function changeStatus(user, method, status) {
+    function changeState(user, method, state) {
       var index = vm.users.indexOf(user),
           modalOptions = {
             closeButtonText: 'Cancel',
             actionButtonText: 'OK',
-            headerHtml: 'Change user status',
-            bodyHtml: 'Please confirm that you want to ' + status + ' user "' + user.name + '"?'
+            headerHtml: 'Change user state',
+            bodyHtml: 'Please confirm that you want to ' + state + ' user "' + user.name + '"?'
           };
 
       modalService.showModal({}, modalOptions)
@@ -104,15 +109,15 @@ define(['lodash'], function(_) {
     }
 
     function activate(user) {
-      changeStatus(user, 'activate', 'activate');
+      changeState(user, 'activate', 'activate');
     }
 
     function lock(user) {
-      changeStatus(user, 'lock', 'lock');
+      changeState(user, 'lock', 'lock');
     }
 
     function unlock(user) {
-      changeStatus(user, 'unlock', 'unlock');
+      changeState(user, 'unlock', 'unlock');
     }
 
     function userInformation(user) {

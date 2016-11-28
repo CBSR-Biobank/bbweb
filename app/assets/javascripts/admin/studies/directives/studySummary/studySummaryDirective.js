@@ -6,7 +6,7 @@ define(['lodash'], function(_) {
   'use strict';
 
   /**
-   * Displays the study name and description and allows the user to change the status of the study.
+   * Displays the study name and description and allows the user to change the state of the study.
    */
   function studySummaryDirective() {
     var directive = {
@@ -44,7 +44,7 @@ define(['lodash'], function(_) {
     var vm = this;
 
     vm.descriptionToggleLength = 100;
-    vm.changeStatus            = changeStatus;
+    vm.changeState             = changeState;
     vm.editName                = editName;
     vm.editDescription         = editDescription;
 
@@ -62,10 +62,10 @@ define(['lodash'], function(_) {
       });
     }
 
-    function changeStatus(statusAction) {
+    function changeState(stateAction) {
       var body;
 
-      switch (statusAction) {
+      switch (stateAction) {
       case 'disable':
         body = gettextCatalog.getString('Are you sure you want to disable study {{name}}',
                                         { name: vm.study.name });
@@ -83,17 +83,17 @@ define(['lodash'], function(_) {
                                          { name: vm.study.name });
         break;
       default:
-        throw new Error('invalid status: ' + statusAction);
+        throw new Error('invalid state: ' + stateAction);
       }
 
-      body += statusAction + ' study ' + vm.study.name + '?';
+      body += stateAction + ' study ' + vm.study.name + '?';
 
-      modalService.modalOkCancel(gettextCatalog.getString('Confirm study status change'), body)
+      modalService.modalOkCancel(gettextCatalog.getString('Confirm study state change'), body)
         .then(function () {
-          return vm.study[statusAction]();
+          return vm.study[stateAction]();
         }).then(function (study) {
           vm.study = study;
-          notificationsService.success('The study\'s status has been updated.', null, 2000);
+          notificationsService.success('The study\'s state has been updated.', null, 2000);
         });
     }
 

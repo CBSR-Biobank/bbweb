@@ -11,8 +11,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
     'biobankApi',
     'ConcurrencySafeEntity',
     'DomainError',
-    'StudyStatus',
-    'studyStatusLabel',
+    'StudyState',
     'AnnotationType',
     'HasAnnotationTypes'
   ];
@@ -25,8 +24,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
                         biobankApi,
                         ConcurrencySafeEntity,
                         DomainError,
-                        StudyStatus,
-                        studyStatusLabel,
+                        StudyState,
                         AnnotationType,
                         HasAnnotationTypes) {
 
@@ -44,9 +42,9 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
         'name':            { 'type': 'string' },
         'description':     { 'type': [ 'string', 'null' ] },
         'annotationTypes': { 'type': 'array' },
-        'status':          { 'type': 'string' }
+        'state':          { 'type': 'string' }
       },
-      'required': [ 'id', 'version', 'timeAdded', 'name', 'status' ]
+      'required': [ 'id', 'version', 'timeAdded', 'name', 'state' ]
     };
 
     /**
@@ -91,17 +89,16 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
       this.annotationTypes = [];
 
       /**
-       * The status can be one of: enabled, disabled, or retired.
+       * The state can be one of: enabled, disabled, or retired.
        *
-       * @name domain.studies.Study#status
-       * @type {domain.studies.StudyStatus}
+       * @name domain.studies.Study#state
+       * @type {domain.studies.StudyState}
        */
-      this.status = StudyStatus.DISABLED;
+      this.state = StudyState.DISABLED;
 
       obj = obj || {};
       ConcurrencySafeEntity.call(this);
       _.extend(this, obj);
-      this.statusLabel = studyStatusLabel.statusToLabel(this.status);
 
       this.annotationTypes = _.map(this.annotationTypes, function (annotationType) {
         return new AnnotationType(annotationType);
@@ -200,42 +197,35 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
      *
      * @param {object} options - The options to use to list studies.
      *
-     * @param {string} [options.filter] The filter to use on study names.
+     * @param {string} [options.filter] The filter to use on study names. Default is empty string.
      *
-     * @param {string} [options.status=all] Returns studies filtered by status. The following are valid:
-     * <code>all</code> to return all studies, <code>disabled</code> to only return disabled studies,
-     * <code>enabled</code> to only return enabled studies, and <code>retired</code> to only return retired
-     * studies. For any other values the response is an error.
-     *
-     * @param {string} [options.sortField=name] Studies can be sorted by <code>name</code> or by
-     * <code>status</code>. Values other than these two yield an error.
+     * @param {string} [options.sort=name] Studies can be sorted by <code>name</code> or by
+     *        <code>state</code>. Values other than these two yield an error. Use a minus sign prefix to sort
+     *        in descending order.
      *
      * @param {int} [options.page=1] If the total results are longer than limit, then page selects which
-     * studies should be returned. If an invalid value is used then the response is an error.
+     *        studies should be returned. If an invalid value is used then the response is an error.
      *
-     * @param {int} [options.limit=10] The total number of studies to return per page. The maximum page size is
-     * 10. If a value larger than 10 is used then the response is an error.
-     *
-     * @param {string} [options.order=asc] - The order to list studies by. One of: <code>asc</code> for
-     * ascending order, or <code>desc</code> for descending order.
+     * @param {int} [options.limit=10] The total number of studies to return per page. The maximum page size
+     *        is 10. If a value larger than 10 is used then the response is an error.
      *
      * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
-     * domain.studies.Study}.
+     *          domain.studies.Study}.
      */
     Study.list = function (options) {
       var url = uri(),
           params,
           validKeys = [
             'filter',
-            'status',
             'sort',
             'page',
-            'limit',
-            'order'
+            'limit'
           ];
 
       options = options || {};
-      params = _.extend({}, _.pick(options, validKeys));
+      params = _.omitBy(_.pick(options, validKeys), function (value) {
+        return value === '';
+      });
 
       return biobankApi.get(url, params).then(function(reply) {
         // reply is a paged result
@@ -257,7 +247,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
      * @type object
      * @property {String} id - the study's identity
      * @property {String} name - the study's name
-     * @property {String} status - the study's status
+     * @property {String} state - the study's state
      */
 
     /**
@@ -364,7 +354,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
      *
      * @throws An error if the study is already disabled.
      *
-     * @returns {Promise<domain.studies.Study>} A promise containing the study with the new status.
+     * @returns {Promise<domain.studies.Study>} A promise containing the study with the new state.
      */
     Study.prototype.disable = function () {
       if (this.isDisabled()) {
@@ -378,7 +368,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
      *
      * @throws An error if the study is already enabled.
      *
-     * @returns {Promise<domain.studies.Study>} A promise containing the study with the new status.
+     * @returns {Promise<domain.studies.Study>} A promise containing the study with the new state.
      */
     Study.prototype.enable = function () {
       if (this.isEnabled()) {
@@ -392,7 +382,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
      *
      * @throws An error if the study is already retired.
      *
-     * @returns {Promise<domain.studies.Study>} A promise containing the study with the new status.
+     * @returns {Promise<domain.studies.Study>} A promise containing the study with the new state.
      */
     Study.prototype.retire = function () {
       if (this.isRetired()) {
@@ -406,7 +396,7 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
      *
      * @throws An error if the study is not retired.
      *
-     * @returns {Promise<domain.studies.Study>} A promise containing the study with the new status.
+     * @returns {Promise<domain.studies.Study>} A promise containing the study with the new state.
      */
     Study.prototype.unretire = function () {
       if (!this.isRetired()) {
@@ -416,30 +406,30 @@ define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv
     };
 
     /**
-     * Used to query the study's current status.
+     * Used to query the study's current state.
      *
      * @returns {boolean} <code>true</code> if the study is in <code>disabled</code> state.
      */
     Study.prototype.isDisabled = function () {
-      return (this.status === StudyStatus.DISABLED);
+      return (this.state === StudyState.DISABLED);
     };
 
     /**
-     * Used to query the study's current status.
+     * Used to query the study's current state.
      *
      * @returns {boolean} <code>true</code> if the study is in <code>enabled</code> state.
      */
     Study.prototype.isEnabled = function () {
-      return (this.status === StudyStatus.ENABLED);
+      return (this.state === StudyState.ENABLED);
     };
 
     /**
-     * Used to query the study's current status.
+     * Used to query the study's current state.
      *
      * @returns {boolean} <code>true</code> if the study is in <code>retired</code> state.
      */
     Study.prototype.isRetired = function () {
-      return (this.status === StudyStatus.RETIRED);
+      return (this.state === StudyState.RETIRED);
     };
 
     /**

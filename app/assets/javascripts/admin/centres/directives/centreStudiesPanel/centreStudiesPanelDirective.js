@@ -31,8 +31,7 @@ define(['angular', 'lodash'], function(angular, _) {
     'Panel',
     'Study',
     'StudyViewer',
-    'modalService',
-    'studyStatusLabel'
+    'modalService'
   ];
 
   /**
@@ -44,8 +43,7 @@ define(['angular', 'lodash'], function(angular, _) {
                                   Panel,
                                   Study,
                                   StudyViewer,
-                                  modalService,
-                                  studyStatusLabel) {
+                                  modalService) {
 
     var vm = this;
 
@@ -77,7 +75,6 @@ define(['angular', 'lodash'], function(angular, _) {
 
       _.each(vm.centre.studyIds, function (studyId) {
         var study = vm.studyNamesById[studyId];
-        study.statusLabel = studyStatusLabel.statusToLabel(study.status);
         vm.studyCollection.push(study);
       });
     }
@@ -96,7 +93,6 @@ define(['angular', 'lodash'], function(angular, _) {
 
       function addSuccessful(centre) {
         var study = vm.studyNamesById[item.id];
-        study.statusLabel = studyStatusLabel.statusToLabel(study.status);
         vm.centre = centre;
         vm.studyCollection.push(study);
       }

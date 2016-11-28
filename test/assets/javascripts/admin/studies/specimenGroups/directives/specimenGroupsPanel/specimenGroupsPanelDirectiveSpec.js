@@ -124,9 +124,9 @@ define([
     });
 
     it('cannot update a specimen group if study is not disabled', function() {
-      var StudyStatus = this.$injector.get('StudyStatus'),
+      var StudyState = this.$injector.get('StudyState'),
           entities    = createEntities(),
-          statuses    = [StudyStatus.ENABLED, StudyStatus.RETIRED];
+          statuses    = [StudyState.ENABLED, StudyState.RETIRED];
 
       createController(entities);
       _.each(statuses, function (status) {
@@ -162,9 +162,9 @@ define([
     });
 
     it('cannot remove a specimen group if study is not disabled', function() {
-      var StudyStatus = this.$injector.get('StudyStatus'),
+      var StudyState = this.$injector.get('StudyState'),
           entities    = createEntities(),
-          statuses    = [StudyStatus.ENABLED, StudyStatus.RETIRED];
+          statuses    = [StudyState.ENABLED, StudyState.RETIRED];
 
       createController(entities);
       _.each(statuses, function (status) {

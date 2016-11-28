@@ -190,7 +190,24 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
     };
 
     /**
-     * @eturn a paged result.
+     * Used to list Collection Events.
+     *
+     * <p>A paged API is used to list Collection Events. See below for more details.</p>
+     *
+     * @param {object} options - The options to use to list studies.
+     *
+     * @param {string} [options.sort=visitNumber] Collection Events can be sorted by <code>visitNumber</code>
+     *        or by <code>timeCompleted</code>. Values other than these two yield an error. Use a minus sign
+     *        prefix to sort in descending order.
+     *
+     * @param {int} [options.page=1] If the total results are longer than limit, then page selects which
+     *        Collection Events should be returned. If an invalid value is used then the response is an error.
+     *
+     * @param {int} [options.limit=10] The total number of Collection Events to return per page. The maximum
+     *        page size is 10. If a value larger than 10 is used then the response is an error.
+     *
+     * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
+     *          domain.participants.CollectionEvent}.
      */
     CollectionEvent.list = function (participantId, options) {
       var url = uriWithPath('list', participantId),
@@ -198,12 +215,13 @@ define(['lodash', 'tv4', 'sprintf'], function(_, tv4, sprintf) {
           validKeys = [
             'sort',
             'page',
-            'limit',
-            'order'
+            'limit'
           ];
 
       options = options || {};
-      params = _.pick(options, validKeys);
+      params = _.omitBy(_.pick(options, validKeys), function (value) {
+        return value === '';
+      });
 
       return biobankApi.get(url, params).then(function(reply) {
         // reply is a paged result

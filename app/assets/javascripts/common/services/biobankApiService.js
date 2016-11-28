@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular'], function (angular) {
+define(['angular', 'jquery'], function (angular, $) {
   'use strict';
 
   biobankApiService.$inject = ['$http', '$q', '$log'];

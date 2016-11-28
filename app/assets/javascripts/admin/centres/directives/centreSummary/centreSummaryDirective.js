@@ -44,7 +44,7 @@ define(['lodash'], function (_) {
     vm.descriptionToggleState   = true;
     vm.descriptionToggleLength  = 100;
 
-    vm.changeStatus    = changeStatus;
+    vm.changeState    = changeState;
     vm.editName        = editName;
     vm.editDescription = editDescription;
 
@@ -57,25 +57,25 @@ define(['lodash'], function (_) {
       $scope.$emit('centre-view', 'centre-summary-selected');
     }
 
-    function changeStatus(status) {
-      var changeStatusFn, statusChangeMsg;
+    function changeState(state) {
+      var changeStateFn, stateChangeMsg;
 
-      if (status === 'enable') {
-        changeStatusFn = vm.centre.enable;
-        statusChangeMsg = gettextCatalog.getString('Are you sure you want to enable centre {{name}}?',
+      if (state === 'enable') {
+        changeStateFn = vm.centre.enable;
+        stateChangeMsg = gettextCatalog.getString('Are you sure you want to enable centre {{name}}?',
                                                    { name: vm.centre.name });
-      } else if (status === 'disable') {
-        changeStatusFn = vm.centre.disable;
-        statusChangeMsg = gettextCatalog.getString('Are you sure you want to disable centre {{name}}?',
+      } else if (state === 'disable') {
+        changeStateFn = vm.centre.disable;
+        stateChangeMsg = gettextCatalog.getString('Are you sure you want to disable centre {{name}}?',
                                                    { name: vm.centre.name });
       } else {
-        throw new Error('invalid status: ' + status);
+        throw new Error('invalid state: ' + state);
       }
 
-      modalService.modalOkCancel(gettextCatalog.getString('Confirm status change on centre'),
-                                 statusChangeMsg)
+      modalService.modalOkCancel(gettextCatalog.getString('Confirm state change on centre'),
+                                 stateChangeMsg)
         .then(function () {
-          _.bind(changeStatusFn, vm.centre)().then(function (centre) {
+          _.bind(changeStateFn, vm.centre)().then(function (centre) {
             vm.centre = centre;
           });
       });

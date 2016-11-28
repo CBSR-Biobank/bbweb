@@ -11,8 +11,8 @@
 </div>
 <div class="clearfix">
   <paged-items-list counts="vm.centreCounts"
-                    page-size="vm.limit"
-                    possible-statuses="vm.possibleStatuses"
+                    limit="vm.limit"
+                    possible-states="vm.possibleStates"
                     message-no-items="{{'No centres have been added yet.'|translate}}"
                     message-no-results="{{'No centres match the criteria.'|translate}}"
                     get-items="vm.updateCentres"

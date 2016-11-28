@@ -14,18 +14,21 @@ define(function (require) {
 
   describe('ceventTypeViewDirective', function() {
 
-    var createController = function () {
-        this.element = angular.element(
-          '<cevent-type-view study="vm.study" cevent-type="vm.ceventType"></cevent-type-view>');
+    var createController = function (study, collectionEventType) {
+      study = study || this.study;
+      collectionEventType = collectionEventType || this.collectionEventType;
 
-        this.scope = this.$rootScope.$new();
-        this.scope.vm = {
-          study: this.study,
-          ceventType: this.collectionEventType
-        };
-        this.$compile(this.element)(this.scope);
-        this.scope.$digest();
-        this.controller = this.element.controller('ceventTypeView');
+      this.element = angular.element(
+        '<cevent-type-view study="vm.study" cevent-type="vm.ceventType"></cevent-type-view>');
+
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = {
+        study:      study,
+        ceventType: collectionEventType
+      };
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller('ceventTypeView');
     };
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
@@ -40,7 +43,7 @@ define(function (require) {
                               '$compile',
                               '$state',
                               'Study',
-                              'StudyStatus',
+                              'StudyState',
                               'CollectionEventType',
                               'CollectionSpecimenSpec',
                               'AnnotationType',
@@ -187,8 +190,8 @@ define(function (require) {
 
         spyOn(self.domainNotificationService, 'removeEntity').and.returnValue(self.$q.when('OK'));
 
-        _([self.StudyStatus.ENABLED, self.StudyStatus.RETIRED]).forEach(function (status) {
-          self.study.status = status;
+        _([self.StudyState.ENABLED, self.StudyState.RETIRED]).forEach(function (state) {
+          self.study.state = state;
           createController.call(self);
           expect(function () {
             self.controller.removeSpecimenSpec(specimenSpec);
@@ -237,9 +240,9 @@ define(function (require) {
 
         spyOn(self.domainNotificationService, 'removeEntity').and.returnValue(self.$q.when('OK'));
 
-        _([self.StudyStatus.ENABLED, self.StudyStatus.RETIRED]).forEach(function (status) {
+        _([self.StudyState.ENABLED, self.StudyState.RETIRED]).forEach(function (state) {
           createController.call(self);
-          self.study.status = status;
+          self.study.state = state;
 
           expect(function () {
             self.controller.removeAnnotationType(annotationType);

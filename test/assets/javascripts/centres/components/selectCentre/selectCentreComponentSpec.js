@@ -26,7 +26,7 @@ define([
         '<select-centre panel-header="{{model.panelHeader}}"',
         '               get-centres="model.getCentres"',
         '               on-centre-selected="model.onCentreSelected"',
-        '               page-size="model.limit"',
+        '               limit="model.limit"',
         '               message-no-results="No results match the criteria."',
         '               icon="glyphicon-ok-circle">',
         '</select-centre>'
@@ -48,7 +48,7 @@ define([
           page:     0,
           offset:   0,
           total:    centres.length,
-          limit: pagerOptions.limit,
+          limit:    pagerOptions.limit,
           maxPages: centres.length / pagerOptions.limit
         });
       }

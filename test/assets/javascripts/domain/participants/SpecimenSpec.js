@@ -73,7 +73,7 @@ define([
       expect(specimen.timeModified).toBeNull();
       expect(specimen.timeCreated).toBeNull();
       expect(specimen.amount).toBeNull();
-      expect(specimen.status).toBeNull();
+      expect(specimen.state).toBeNull();
     });
 
     it('constructor with specimen spec has valid values', function() {
@@ -113,7 +113,7 @@ define([
       var self = this,
           cevent = self.factory.collectionEvent(),
           reply = self.factory.pagedResult([]),
-          sortingTypes = [ 'id', 'timeCreated', 'status' ];
+          sortingTypes = [ 'id', '-timeCreated', 'state' ];
 
       _.each(sortingTypes, function (sortingType) {
         self.$httpBackend.whenGET(uri(cevent.id) + '?sort=' + sortingType)
@@ -154,23 +154,6 @@ define([
         expect(pagedResult.items).toBeEmptyArray();
       });
       self.$httpBackend.flush();
-    });
-
-    it('can list specimens using ordering', function() {
-      var self = this,
-          cevent = self.factory.collectionEvent(),
-          reply = self.factory.pagedResult([]),
-          orderingTypes = [ 'asc', 'desc'];
-
-      _.each(orderingTypes, function (orderingType) {
-        self.$httpBackend.whenGET(uri(cevent.id) + '?order=' + orderingType)
-          .respond(self.reply(reply));
-
-        self.Specimen.list(cevent.id, { order: orderingType }).then(function (pagedResult) {
-          expect(pagedResult.items).toBeEmptyArray();
-        });
-        self.$httpBackend.flush();
-      });
     });
 
     it('can add specimens', function() {

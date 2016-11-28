@@ -27,7 +27,7 @@ define([
         '<select-study get-header="model.getHeader"',
         '              get-studies="model.getStudies"',
         '              icon="glyphicon-ok-circle"',
-        '              page-size="model.limit"',
+        '              limit="model.limit"',
         '              message-no-results="No results match the criteria."',
         '              navigate-state-name="' + navigateStateName + '"',
         '              navigate-state-param-name="' + navigateStateParamName + '">',
