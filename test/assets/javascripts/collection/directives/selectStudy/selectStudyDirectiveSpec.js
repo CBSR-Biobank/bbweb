@@ -118,7 +118,7 @@ define([
                        });
 
       expect(self.controller.showPagination).toBe(true);
-      expect(self.element.find('ul.pagination').length).toBe(1);
+      expect(self.element.find('uib-pagination').length).toBe(1);
     });
 
     it('updates to name filter cause studies to be re-loaded', function() {

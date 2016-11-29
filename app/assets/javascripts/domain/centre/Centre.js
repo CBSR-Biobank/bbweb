@@ -202,7 +202,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprint
       return biobankApi.post('/centres/locations',
                              {
                                filter: filter,
-                               maxResults: 10
+                               limit: 10
                              });
     };
 

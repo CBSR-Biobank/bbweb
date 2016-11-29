@@ -10,6 +10,8 @@ define(function () {
    *
    * @enum {string}
    * @memberOf domain.studies
+   *
+   * FIXME: translations are required
    */
   var StudyState = {
     DISABLED: 'disabled',

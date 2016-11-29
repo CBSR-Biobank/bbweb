@@ -20,7 +20,6 @@ define(function (require) {
   module.factory('DomainError',                         require('./DomainError'));
   module.factory('EntityViewer',                        require('./EntityViewer'));
   module.factory('Location',                            require('./Location'));
-  module.factory('LocationViewer',                      require('./LocationViewer'));
 
   module.constant('AnatomicalSourceType',               require('./AnatomicalSourceType'));
   module.constant('PreservationType',                   require('./PreservationType'));

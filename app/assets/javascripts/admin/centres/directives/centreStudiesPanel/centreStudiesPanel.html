@@ -20,7 +20,7 @@
          ng-if="vm.studyCollection.length > 0">
     <thead>
       <th st-sort="name" translate>Name</th>
-      <th st-sort="status" translate>Status</th>
+      <th st-sort="state" translate>State</th>
       <th></th>
     </thead>
 
@@ -31,9 +31,11 @@
             <a href>{{study.name}}</a>
           </span>
         </td>
-        <td>{{study.statusLabel}}</td>
         <td>
-          <!-- FIXME studies should only be removed if no centre is not storing specimens for it  -->
+          <span class="badge">{{study.state.toUpperCase()}}</span>
+        </td>
+        <td>
+          <!-- FIXME studies should only be removed if no centre is storing specimens for it  -->
           <div class="btn-group pull-right">
             <button class="btn btn-xs btn-warning"
                     ng-click="vm.remove(study.id)"

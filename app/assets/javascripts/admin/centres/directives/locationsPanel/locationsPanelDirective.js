@@ -27,7 +27,6 @@ define(['lodash'], function(_) {
     '$scope',
     '$state',
     'gettextCatalog',
-    'LocationViewer',
     'domainNotificationService'
   ];
 
@@ -37,7 +36,6 @@ define(['lodash'], function(_) {
   function LocationsPanelCtrl($scope,
                               $state,
                               gettextCatalog,
-                              LocationViewer,
                               domainNotificationService) {
     var vm = this;
 

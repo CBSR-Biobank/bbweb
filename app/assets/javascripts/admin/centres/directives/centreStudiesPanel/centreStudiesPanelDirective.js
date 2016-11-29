@@ -47,15 +47,12 @@ define(['angular', 'lodash'], function(angular, _) {
 
     var vm = this;
 
-    var panel = new Panel('centre.panel.studies');
-
     vm.studyNamesById = [];
     vm.tableStudies   = [];
     vm.studyCollection = [];
 
     vm.remove         = remove;
     vm.information    = information;
-    vm.panelOpen      = panel.getPanelOpenState();
 
     vm.selected = undefined;
     vm.onSelect = onSelect;
@@ -67,9 +64,6 @@ define(['angular', 'lodash'], function(angular, _) {
     function init() {
       // updates the selected tab in 'centreViewDirective' which is the parent directive
       $scope.$emit('centre-view', 'studies-panel-selected');
-
-      $scope.$watch(angular.bind(vm, function() { return vm.panelOpen; }),
-                    angular.bind(panel, panel.watchPanelOpenChangeFunc));
 
       vm.studyNamesById = _.keyBy(vm.studyNames, 'id');
 

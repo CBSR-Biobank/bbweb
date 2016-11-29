@@ -67,8 +67,8 @@ define([
         case 'Description':
           expect(attr.value).toBe($filter('truncate')(study.description, 60));
           break;
-        case 'Status':
-          expect(attr.value).toBe(study.statusLabel);
+        case 'State':
+          expect(attr.value).toBe(study.state.toUpperCase());
           break;
         default:
           jasmine.getEnv().fail('label is invalid: ' + attr.label);

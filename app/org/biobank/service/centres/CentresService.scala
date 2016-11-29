@@ -82,7 +82,7 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
     filteredLocationInfos.
       toSeq.
       sortWith { (a, b) => (a.name compareToIgnoreCase b.name) < 0 }.
-      take(cmd.maxResults).
+      take(cmd.limit).
       toSet
   }
 

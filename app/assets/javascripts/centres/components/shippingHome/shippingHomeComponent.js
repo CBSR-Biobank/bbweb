@@ -2,8 +2,10 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function () {
+define(function (require) {
   'use strict';
+
+  var _ = require('lodash');
 
   var component = {
     templateUrl : '/assets/javascripts/centres/components/shippingHome/shippingHome.html',
@@ -46,7 +48,12 @@ define(function () {
     }
 
     function updateCentres(options) {
-      return Centre.list(options);
+      var optCopy = _.extend({}, options);
+      if (optCopy.filter !== '') {
+        optCopy.filter += ';';
+      }
+      optCopy.filter += 'state::enabled';
+      return Centre.list(optCopy);
     }
 
     function centreSelected(centre) {

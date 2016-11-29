@@ -14,7 +14,7 @@ define(function () {
       replace: true,
       scope: {
         item: '=',
-        showStatus: '='
+        showState: '='
       },
       templateUrl : '/assets/javascripts/common/directives/statusLine/statusLine.html'
     };

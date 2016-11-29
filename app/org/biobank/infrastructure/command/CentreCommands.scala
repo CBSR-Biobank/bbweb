@@ -85,7 +85,7 @@ object CentreCommands {
                                             studyId:         String)
       extends CentreModifyCommand
 
-  final case class SearchCentreLocationsCmd(filter: String, maxResults: Int)
+  final case class SearchCentreLocationsCmd(filter: String, limit: Int)
       extends Command
 
   implicit val addCentreCmdReads: Reads[AddCentreCmd] =

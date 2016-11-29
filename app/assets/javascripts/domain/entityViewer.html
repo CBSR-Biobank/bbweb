@@ -17,6 +17,9 @@
         </div>
       </li>
     </ul>
-    <status-line item="modalOptions.entityViewer" ng-if="entity.timeAdded"></status-line>
+    <status-line item="modalOptions.entityViewer.entity"
+                 show-state="false"
+                 ng-if="modalOptions.entityViewer.entity.timeAdded">
+    </status-line>
   </div>
 </div>

@@ -23,15 +23,14 @@
      ng-if="vm.hasValidCentres"
      ng-cloak>
   <div class="col-md-6">
-    <select-centre
-       panel-header="{{vm.panelHeader}}"
-       get-centres="vm.updateCentres"
-       on-centre-selected="vm.centreSelected"
-       icon="{{vm.centreIcon}}"
-       page-size="4"
-       message-no-results="{{'No results match the criteria.'|translate}}"
-       navigate-state-name="home.shipments.table"
-       navigate-state-param-name="centreId">
+    <select-centre panel-header="{{vm.panelHeader}}"
+                   get-centres="vm.updateCentres"
+                   on-centre-selected="vm.centreSelected"
+                   icon="{{vm.centreIcon}}"
+                   limit="4"
+                   message-no-results="{{'No results match the criteria.'|translate}}"
+                   navigate-state-name="home.shipments.table"
+                   navigate-state-param-name="centreId">
     </select-centre>
   </div>
 </div>

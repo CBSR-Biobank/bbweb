@@ -5,19 +5,19 @@
 define(function () {
   'use strict';
 
-  UserViewerFactory.$inject = ['EntityViewer'];
+  UserViewerFactory.$inject = ['EntityViewer', 'gettextCatalog'];
 
   /**
    * Displays a study annotation type in a modal.
    *
    */
-  function UserViewerFactory(EntityViewer) {
+  function UserViewerFactory(EntityViewer, gettextCatalog) {
 
     function UserViewer(user) {
       this.ev = new EntityViewer(user, 'User');
-      this.ev.addAttribute('Name', user.name);
-      this.ev.addAttribute('Email',  user.email);
-      this.ev.addAttribute('Status', user.statusLabel);
+      this.ev.addAttribute(gettextCatalog.getString('Name'),  user.name);
+      this.ev.addAttribute(gettextCatalog.getString('Email'), user.email);
+      this.ev.addAttribute(gettextCatalog.getString('State'), user.state.toUpperCase());
 
       this.ev.showModal();
     }

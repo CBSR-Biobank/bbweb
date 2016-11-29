@@ -2,8 +2,10 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function () {
+define(function (require) {
   'use strict';
+
+  var _ = require('lodash');
 
   var component = {
     templateUrl : '/assets/javascripts/centres/components/selectCentre/selectCentre.html',
@@ -33,14 +35,16 @@ define(function () {
       HAVE_RESULTS: 1
     };
 
-    vm.updateCentres     = updateCentres;
-    vm.pagedResult       = {};
-    vm.nameFilterUpdated = nameFilterUpdated;
-    vm.pageChanged       = pageChanged;
-    vm.clearFilter       = clearFilter;
-    vm.displayState      = getDisplayState();
-    vm.centreGlyphicon   = centreGlyphicon;
-    vm.showPagination    = getShowPagination();
+    vm.nameFilter         = '';
+    vm.nameFilterWildcard = '';
+    vm.updateCentres      = updateCentres;
+    vm.pagedResult        = {};
+    vm.nameFilterUpdated  = nameFilterUpdated;
+    vm.pageChanged        = pageChanged;
+    vm.clearFilter        = clearFilter;
+    vm.displayState       = getDisplayState();
+    vm.centreGlyphicon    = centreGlyphicon;
+    vm.showPagination     = getShowPagination();
 
     vm.pagerOptions = {
       filter: '',
@@ -58,6 +62,9 @@ define(function () {
     }
 
     function updateCentres() {
+
+      vm.pagerOptions.filter = (vm.nameFilterWildcard !== '') ?
+        'name::' + vm.nameFilterWildcard : '';
       vm.getCentres()(vm.pagerOptions).then(function (pagedResult) {
         vm.pagedResult = pagedResult;
         vm.displayState = getDisplayState();
@@ -69,6 +76,11 @@ define(function () {
      * Called when user enters text into the 'name filter'.
      */
     function nameFilterUpdated() {
+      if (!_.isUndefined(vm.nameFilter) && (vm.nameFilter !== '')) {
+        vm.nameFilterWildcard = '*' + vm.nameFilter + '*';
+      } else {
+        vm.nameFilterWildcard = '';
+      }
       vm.pagerOptions.page = 1;
       updateCentres();
     }
