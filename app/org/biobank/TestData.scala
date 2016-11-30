@@ -611,26 +611,6 @@ class TestData @Inject() (config:                        Configuration,
                           "org.wartremover.warts.Var",
                           "org.wartremover.warts.TraversableOps"))
   def addBbpspShipments() = {
-
-    def createShipment(courierName:    String,
-                       trackingNumber: String,
-                       fromCentre:     Centre,
-                       toCentre:       Centre) =
-      CreatedShipment(id             = ShipmentId(s"$courierName:$trackingNumber"),
-                      version        = 0,
-                      timeAdded      = DateTime.now,
-                      timeModified   = None,
-                      courierName    = courierName,
-                      trackingNumber = trackingNumber,
-                      fromCentreId   = fromCentre.id,
-                      fromLocationId = fromCentre.locations.head.uniqueId,
-                      toCentreId     = toCentre.id,
-                      toLocationId   = toCentre.locations.head.uniqueId,
-                      timePacked     = None,
-                      timeSent       = None,
-                      timeReceived   = None,
-                      timeUnpacked   = None)
-
     if (loadShipmentTestData) {
       log.debug(s"addBbpspShipments")
 
@@ -654,11 +634,54 @@ class TestData @Inject() (config:                        Configuration,
           sequenceU
 
         v.foreach { centres =>
-          val shipmentMap = Map(
-              ( "created"  -> createShipment("FedEx", "TN1", centres(0), centres(1))),
-              ( "packed"   -> createShipment("FedEx", "TN2", centres(1), centres(0))),
-              ( "unpacked" -> createShipment("FedEx", "TN3", centres(0), centres(1)))
-            )
+          val fromCentre = centres(0)
+          val toCentre = centres(1)
+          val shipmentMap = Map[EntityState, Shipment](
+              ( Shipment.createdState  ->
+                 CreatedShipment(id             = ShipmentId(s"test-shipment-1"),
+                                 version        = 0,
+                                 timeAdded      = DateTime.now,
+                                 timeModified   = None,
+                                 courierName    = "FedEx",
+                                 trackingNumber = "TN1",
+                                 fromCentreId   = fromCentre.id,
+                                 fromLocationId = fromCentre.locations.head.uniqueId,
+                                 toCentreId     = toCentre.id,
+                                 toLocationId   = toCentre.locations.head.uniqueId,
+                                 timePacked     = None,
+                                 timeSent       = None,
+                                 timeReceived   = None,
+                                 timeUnpacked   = None)),
+              ( Shipment.packedState ->
+                 PackedShipment(id             = ShipmentId(s"test-shipment-2"),
+                                version        = 0,
+                                timeAdded      = DateTime.now,
+                                timeModified   = None,
+                                courierName    = "FedEx",
+                                trackingNumber = "TN2",
+                                fromCentreId   = fromCentre.id,
+                                fromLocationId = fromCentre.locations.head.uniqueId,
+                                toCentreId     = toCentre.id,
+                                toLocationId   = toCentre.locations.head.uniqueId,
+                                timePacked     = Some(DateTime.now),
+                                timeSent       = None,
+                                timeReceived   = None,
+                                timeUnpacked   = None)),
+              ( Shipment.unpackedState ->
+                 UnpackedShipment(id             = ShipmentId(s"test-shipment-3"),
+                                  version        = 0,
+                                  timeAdded      = DateTime.now,
+                                  timeModified   = None,
+                                  courierName    = "FedEx",
+                                  trackingNumber = "TN1",
+                                  fromCentreId   = fromCentre.id,
+                                  fromLocationId = fromCentre.locations.head.uniqueId,
+                                  toCentreId     = toCentre.id,
+                                  toLocationId   = toCentre.locations.head.uniqueId,
+                                  timePacked     = Some(DateTime.now),
+                                  timeSent       = Some(DateTime.now),
+                                  timeReceived   = Some(DateTime.now),
+                                  timeUnpacked   = Some(DateTime.now))))
 
           shipmentMap.values.foreach(shipmentRepository.put)
 
@@ -671,12 +694,12 @@ class TestData @Inject() (config:                        Configuration,
               val shipment =
                 if (locationId == centres(0).locations.head.uniqueId) {
                   if (index < halfSpecimenCount) {
-                    shipmentMap("created")
+                    shipmentMap(Shipment.createdState)
                   } else {
-                    shipmentMap("unpacked")
+                    shipmentMap(Shipment.unpackedState)
                   }
                 } else {
-                  shipmentMap("packed")
+                  shipmentMap(Shipment.packedState)
                 }
               log.debug(s"adding specimen to shipment: specimen: $index, ${specimens.size}, ${spc.inventoryId}, ${shipment.trackingNumber}")
               val ss = ShipmentSpecimen(id                  = ShipmentSpecimenId(spc.id.id),
