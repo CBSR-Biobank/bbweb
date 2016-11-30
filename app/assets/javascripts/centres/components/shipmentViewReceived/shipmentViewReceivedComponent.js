@@ -61,8 +61,7 @@ define(function (require) {
                                  vm.timeUnpacked,
                                  { required: true }).result
         .then(function (timeUnpacked) {
-          return vm.shipment.changeState(ShipmentState.UNPACKED,
-                                         timeService.dateAndTimeToUtcString(timeUnpacked));
+          return vm.shipment.unpack(timeService.dateAndTimeToUtcString(timeUnpacked));
         })
         .then(function (shipment) {
           return $state.go('home.shipping.unpack', { shipmentId: shipment.id });
@@ -75,7 +74,7 @@ define(function (require) {
         gettextCatalog.getString('Please confirm'),
         gettextCatalog.getString('Are you sure you want to place this shipment in <b>sent</b> state?'))
         .then(function () {
-          return vm.shipment.changeState(ShipmentState.SENT, vm.shipment.timeSent)
+          return vm.shipment.send(vm.shipment.timeSent)
             .then(stateHelper.reloadAndReinit)
             .catch(notificationsService.updateError);
         });

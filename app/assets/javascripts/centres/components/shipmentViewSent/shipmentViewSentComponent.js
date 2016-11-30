@@ -60,7 +60,7 @@ define(function (require) {
         gettextCatalog.getString('Please confirm'),
         gettextCatalog.getString('Are you sure you want to place this shipment in <b>packed</b> state?'))
         .then(function () {
-          return vm.shipment.changeState(ShipmentState.PACKED, vm.shipment.timePacked)
+          return vm.shipment.pack(vm.shipment.timePacked)
             .then(stateHelper.reloadAndReinit)
             .catch(notificationsService.updateError);
         });
@@ -75,7 +75,7 @@ define(function (require) {
                                  vm.timeReceived,
                                  { required: true }).result
         .then(function (timeReceived) {
-          return vm.shipment.changeState(ShipmentState.RECEIVED, timeService.dateAndTimeToUtcString(timeReceived))
+          return vm.shipment.receive(timeService.dateAndTimeToUtcString(timeReceived))
             .then(stateHelper.reloadAndReinit)
             .catch(notificationsService.updateError);
         });

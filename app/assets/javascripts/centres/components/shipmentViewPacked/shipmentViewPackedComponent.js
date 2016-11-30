@@ -59,7 +59,7 @@ define(function (require) {
                                  vm.timeSent,
                                  { required: true }).result
         .then(function (timeSent) {
-          return vm.shipment.sent(timeService.dateAndTimeToUtcString(timeSent))
+          return vm.shipment.send(timeService.dateAndTimeToUtcString(timeSent))
             .then(function (shipment) {
               return $state.go('home.shipping');
             })
@@ -72,7 +72,7 @@ define(function (require) {
         gettextCatalog.getString('Please confirm'),
         gettextCatalog.getString('Are you sure you want to add more items to this shipment?'))
         .then(function () {
-          return vm.shipment.changeState(ShipmentState.CREATED)
+          return vm.shipment.created()
             .then(function () {
               $state.go('home.shipping.addItems', { shipmentId: vm.shipment.id });
             })

@@ -374,21 +374,88 @@ define(function (require) {
     };
 
     /**
-     * Changes the state of this shipment.
+     * Reverts a shipment to CREATED state.
      *
-     * @param {ShipmentState|domain.centres.ShipmentState} the new state.
+     * It's possible that the user tagged a shipment as PACKED, and then decided to modify the shipment. To
+     * modify the shipment, the state needs to be reverted back to CREATED state. Only shipments in PACKED
+     * state can be reverted to CREATED state.
      *
-     * @param {Date} [datetime] - the date and time this shipment took this state. Only required for the
-     * following states: Packed, Sent, Received, Unpacked.
-     *
-     * @returns {Promise} A copy of this shipment, but with the state set to Created.
+     * @returns {Promise} A copy of this shipment, but with the state set to PACKED.
      */
-    Shipment.prototype.changeState = function (state, datetime) {
-      var json = { newState: state };
-      if (datetime) {
-        _.extend(json, { datetime: datetime });
-      }
-      return this.update.call(this, uri('state', this.id), json);
+    Shipment.prototype.created = function () {
+      return this.update.call(this, uri('state/created', this.id));
+    };
+
+    /**
+     * Tags a shipment as PACKED.
+     *
+     * Only shipments in CREATED or SENT state can be assigned to PACKED state.
+     *
+     * It's possible that the user tagged a shipment as SENT by mistake and then wants to revert it back to
+     * PACKED state.
+     *
+     * @param {Date} [datetime] - the date and time this shipment was packed.
+     *
+     * @returns {Promise} A copy of this shipment, but with the state set to PACKED.
+     */
+    Shipment.prototype.pack = function (datetime) {
+      return this.update.call(this, uri('state/packed', this.id), { datetime: datetime });
+    };
+
+    /**
+     * Tags a shipment as SENT.
+     *
+     * Only shipments in PACKED, RECEIVED, and LOST state can be assigned to SENT state.
+     *
+     * It's possible that the user tagged a shipment as RECEIVED or LOST by mistake and then wants to revert
+     * it back to SENT state.
+     *
+     * @param {Date} [datetime] - the date and time this shipment was sent.
+     *
+     * @returns {Promise} A copy of this shipment, but with the state set to SENT.
+     */
+    Shipment.prototype.send = function (datetime) {
+      return this.update.call(this, uri('state/sent', this.id), { datetime: datetime });
+    };
+
+    /**
+     * Tags a shipment as RECEIVED.
+     *
+     * Only shipments in SENT or UNPACKED state can be assigned to RECEIVED state.
+     *
+     * It's possible that the user tagged a shipment as UNPACKED by mistake and then wants to revert it back
+     * to RECEIVED state.
+     *
+     * @param {Date} [datetime] - the date and time this shipment was received.
+     *
+     * @returns {Promise} A copy of this shipment, but with the state set to RECEIVED.
+     */
+    Shipment.prototype.receive = function (datetime) {
+      return this.update.call(this, uri('state/received', this.id), { datetime: datetime });
+    };
+
+    /**
+     * Tags a shipment as UNPACKED.
+     *
+     * Only shipments in RECEIVED state can be assigned to UNPACKED state.
+     *
+     * @param {Date} [datetime] - the date and time this shipment was unpacked.
+     *
+     * @returns {Promise} A copy of this shipment, but with the state set to UNPACKED.
+     */
+    Shipment.prototype.unpack = function (datetime) {
+      return this.update.call(this, uri('state/unpacked', this.id), { datetime: datetime });
+    };
+
+    /**
+     * Tags a shipment as RECEIVED.
+     *
+     * Only shipments in SENT state can be assigned to LOST state.
+     *
+     * @returns {Promise} A copy of this shipment, but with the state set to RECEIVED.
+     */
+    Shipment.prototype.lost = function () {
+      return this.update.call(this, uri('state/lost', this.id));
     };
 
     /**

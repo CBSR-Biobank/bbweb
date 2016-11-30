@@ -84,7 +84,7 @@ define(function (require) {
                                    vm.timePacked,
                                    { required: true }).result
           .then(function (timePacked) {
-            return vm.shipment.changeState(ShipmentState.PACKED, timeService.dateAndTimeToUtcString(timePacked))
+            return vm.shipment.pack(timeService.dateAndTimeToUtcString(timePacked))
               .then(function (shipment) {
                 return $state.go('home.shipping.shipment', { shipmentId: shipment.id});
               })

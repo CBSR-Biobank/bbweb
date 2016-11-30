@@ -15,7 +15,7 @@ define(function (require) {
   require('angular');
 
   /**
-   *
+   * Test suite for shipment domain entity.
    */
   describe('Shipment domain object:', function() {
 
@@ -337,11 +337,13 @@ define(function (require) {
         beforeEach(inject(function () {
           context.jsonShipment = this.factory.shipment();
           context.expectedShipment = this.expectShipment;
+          context.stateChangeTime = undefined;
         }));
 
         describe('to created state', function() {
 
           beforeEach(inject(function () {
+            context.stateChangeFuncName = 'created';
             context.state = this.ShipmentState.CREATED;
           }));
 
@@ -352,7 +354,9 @@ define(function (require) {
         describe('to packed state', function() {
 
           beforeEach(inject(function () {
+            context.stateChangeFuncName = 'pack';
             context.state = this.ShipmentState.PACKED;
+            context.stateChangeTime = moment(faker.date.recent(10)).format();
           }));
 
           changeStateSharedBehaviour(context);
@@ -362,7 +366,9 @@ define(function (require) {
         describe('to sent state', function() {
 
           beforeEach(inject(function () {
+            context.stateChangeFuncName = 'send';
             context.state = this.ShipmentState.SENT;
+            context.stateChangeTime = moment(faker.date.recent(10)).format();
           }));
 
           changeStateSharedBehaviour(context);
@@ -372,7 +378,9 @@ define(function (require) {
         describe('to received state', function() {
 
           beforeEach(inject(function () {
+            context.stateChangeFuncName = 'receive';
             context.state = this.ShipmentState.RECEIVED;
+            context.stateChangeTime = moment(faker.date.recent(10)).format();
           }));
 
           changeStateSharedBehaviour(context);
@@ -382,7 +390,9 @@ define(function (require) {
         describe('to unpacked state', function() {
 
           beforeEach(inject(function () {
+            context.stateChangeFuncName = 'unpack';
             context.state = this.ShipmentState.UNPACKED;
+            context.stateChangeTime = moment(faker.date.recent(10)).format();
           }));
 
           changeStateSharedBehaviour(context);
@@ -392,6 +402,7 @@ define(function (require) {
         describe('to lost state', function() {
 
           beforeEach(inject(function () {
+            context.stateChangeFuncName = 'lost';
             context.state = this.ShipmentState.LOST;
           }));
 
@@ -492,9 +503,13 @@ define(function (require) {
 
 
     /**
-     * @param {domain.centres.ShipmentState} context.state - the new state to change to.
+     * @param {String} context.stateChangeFuncName - the function to call to change the state.
+     *
+     * @param {String} context.state - the new state to change to.
      *
      * @param {Object} context.jsonShipment - A Json object representing the shipment.
+     *
+     * @param {Object} [context.stateChangeTime] - An optional time for when the state change happened.
      *
      * @param {domain.centres.Shipment} context.expectedShipment - The Shipment object that should be returned
      * from the update request.
@@ -504,18 +519,23 @@ define(function (require) {
       describe('shared state change behaviour', function () {
 
         it('can change state', function() {
-          var time         = moment(faker.date.recent(10)).format(),
-              shipment     = new this.Shipment(context.jsonShipment);
+          var updateParams = [],
+              json    = {},
+              shipment = new this.Shipment(context.jsonShipment);
 
-          this.updateEntity.call(this,
-                                 shipment,
-                                 'changeState',
-                                 [ context.state, time ],
-                                 uri('state', shipment.id ),
-                                 { newState: context.state, datetime: time },
-                                 context.jsonShipment,
-                                 context.expectShipment,
-                                 failTest);
+          if (context.stateChangeTime) {
+            updateParams.push(context.stateChangeTime);
+            json = _.extend(json, { datetime: context.stateChangeTime });
+          }
+
+          this.updateEntity(shipment,
+                            context.stateChangeFuncName,
+                            updateParams,
+                            uri('state/' + context.state, shipment.id ),
+                            json,
+                            context.jsonShipment,
+                            context.expectShipment,
+                            failTest);
         });
 
       });

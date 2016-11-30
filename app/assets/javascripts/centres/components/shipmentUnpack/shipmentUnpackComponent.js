@@ -97,7 +97,7 @@ define(function (require) {
         gettextCatalog.getString('Please confirm'),
         gettextCatalog.getString('Are you sure you want to place this shipment in <b>received</b> state?'))
         .then(function () {
-          return vm.shipment.changeState(ShipmentState.RECEIVED, vm.shipment.timeReceived)
+          return vm.shipment.receive(vm.shipment.timeReceived)
             .then(function () {
               $state.go('home.shipping.shipment', { shipmentId: vm.shipment.id }, { reload: true });
             })
