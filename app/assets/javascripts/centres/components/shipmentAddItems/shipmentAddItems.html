@@ -1,39 +1,56 @@
-<progress-tracker
-   items="vm.progressInfo.items"
-   current="vm.progressInfo.current">
-</progress-tracker>
-<div class="page-header">
-  <h1>
-    <translate>Add items to ship</translate>
-    <div class="pull-right">
-      <button class="btn btn-xs btn-warning"
-              title="{{'Remove this shipment'|translate}}"
-              ng-click="vm.removeShipment()">
-        <translate>Remove</translate>
-      </button>
-      <button class="btn btn-xs btn-primary"
-              title="{{'All items added, ready to tag as packed'|translate}}"
-              ng-click="vm.tagAsPacked()">
-        <translate>Tag as packed</translate>
-      </button>
-      <button class="btn btn-xs btn-primary"
-              title="{{'All items added, ready to tag as sent'|translate}}"
-              ng-click="vm.tagAsSent()">
-        <translate>Tag as sent</translate>
-      </button>
+<div ng-if="vm.shipment.isCreated()">
+  <progress-tracker
+    items="vm.progressInfo.items"
+    current="vm.progressInfo.current">
+    </progress-tracker>
+  <div class="page-header">
+    <h1>
+      {{vm.shipment.courierName}}<small>: {{vm.shipment.trackingNumber}}
+      <br/> {{'Add items to ship'|translate}}</small>
+      <div class="pull-right">
+        <button class="btn btn-xs btn-warning"
+                title="{{'Remove this shipment'|translate}}"
+                ng-click="vm.removeShipment()">
+          <translate>Remove</translate>
+        </button>
+        <button class="btn btn-xs btn-primary"
+                title="{{'All items added, ready to tag as packed'|translate}}"
+                ng-click="vm.tagAsPacked()">
+          <translate>Tag as packed</translate>
+        </button>
+        <button class="btn btn-xs btn-primary"
+                title="{{'All items added, ready to tag as sent'|translate}}"
+                ng-click="vm.tagAsSent()">
+          <translate>Tag as sent</translate>
+        </button>
+      </div>
+    </h1>
+  </div>
+
+  <shipping-info-view
+      shipment="vm.shipment"
+      read-only="false">
+  </shipping-info-view>
+
+  <shipment-specimens-add shipment="vm.shipment"></shipment-specimens-add>
+
+  <collapsable-panel heading="{{'Containers in this shipment'|translate}}">
+    <div class="panel panel-warning">
+      <div class="panel-heading" translate>No containers in this shipment</div>
     </div>
-  </h1>
+  </collapsable-panel>
 </div>
 
-<shipping-info-view
-   shipment="vm.shipment"
-   read-only="false">
-</shipping-info-view>
-
-<shipment-specimens-add shipment="vm.shipment"></shipment-specimens-add>
-
-<collapsable-panel heading="{{'Containers in this shipment'|translate}}">
-  <div class="panel panel-warning">
-    <div class="panel-heading" translate>No containers in this shipment</div>
+<div ng-if="!vm.shipment.isCreated()">
+  <div class="page-header">
+    <h1>
+      <translate>Add items to ship</translate>
+    </h1>
   </div>
-</collapsable-panel>
+  <div class="panel panel-warning">
+    <div class="panel-heading" translate>
+      Cannot add items to shipment <em>{{vm.shipment.courierName}}: {{vm.shipment.trackingNumber}}</em> since
+      it is in the wrong state.
+    </div>
+  </div>
+</div>

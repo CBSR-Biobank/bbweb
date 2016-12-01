@@ -4,7 +4,8 @@
 </progress-tracker>
 <div class="page-header">
   <h1>
-    <translate>Received shipment</translate>
+    {{vm.shipment.courierName}}<small>: {{vm.shipment.trackingNumber}}
+    <br/> {{'Received shipment'|translate}}</small>
     <div class="pull-right">
       <button class="btn btn-xs btn-warning"
               title="{{'Return shipment to sent state'|translate}}"
@@ -13,7 +14,7 @@
         <translate>Previous step</translate>
       </button>
       <button class="btn btn-xs btn-primary"
-              title="{{'Record items unpacked from shipment'|translate}}"
+              title="{{'Tag shipment as unpacked and unpack items'|translate}}"
               ng-click="vm.unpackShipment()"
               translate>
         <translate>Next step</translate>

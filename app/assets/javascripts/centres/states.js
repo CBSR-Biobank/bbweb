@@ -22,17 +22,18 @@ define(function () {
         });
     }
 
-    $stateProvider.state('home.shipping', {
-      url: 'shipping',
-      views: {
-        'main@': {
-          template: '<shipping-home></shipping-home>'
+    $stateProvider
+      .state('home.shipping', {
+        url: 'shipping',
+        views: {
+          'main@': {
+            template: '<shipping-home></shipping-home>'
+          }
+        },
+        data: {
+          displayName: 'Shipping'
         }
-      },
-      data: {
-        displayName: 'Shipping'
-      }
-    })
+      })
       .state('home.shipping.centre', {
         url: '/centres/{centreId}',
         resolve: {

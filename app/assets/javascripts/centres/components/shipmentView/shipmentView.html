@@ -1,14 +1,27 @@
-<div ng-switch="vm.shipment.state">
-  <shipment-view-packed   ng-switch-when="packed"   shipment="vm.shipment"></shipment-view-packed>
-  <shipment-view-sent     ng-switch-when="sent"     shipment="vm.shipment"></shipment-view-sent>
-  <shipment-view-received ng-switch-when="received" shipment="vm.shipment"></shipment-view-received>
+<div ng-if="vm.shipment.isNotCreatedNorUnpacked()">
+  <div ng-switch="vm.shipment.state">
+    <shipment-view-packed   ng-switch-when="packed"   shipment="vm.shipment"></shipment-view-packed>
+    <shipment-view-sent     ng-switch-when="sent"     shipment="vm.shipment"></shipment-view-sent>
+    <shipment-view-received ng-switch-when="received" shipment="vm.shipment"></shipment-view-received>
+  </div>
+  <shipping-info-view shipment="vm.shipment"
+                      read-only="true"
+                      collapsable="false">
+  </shipping-info-view>
+  <shipment-specimens-view shipment="vm.shipment"
+                           read-only="true"
+                           ng-if="vm.shipment.specimenCount > 0">
+  </shipment-specimens-view>
 </div>
-<shipping-info-view shipment="vm.shipment"
-                    read-only="true"
-                    collapsable="false">
-</shipping-info-view>
-<shipment-specimens-view
-  shipment="vm.shipment"
-  read-only="true"
-  ng-if="vm.shipment.specimenCount > 0">
-</shipment-specimens-view>
+<div ng-if="!vm.shipment.isNotCreatedNorUnpacked()">
+  <div class="page-header">
+    <h1>
+      {{vm.shipment.courierName}}<small>: {{vm.shipment.trackingNumber}}
+      <br/>{{vm.pageHeader}}</small>
+    </h1>
+  </div>
+  <div class="panel panel-warning">
+    <div class="panel-heading" translate>
+      Cannot display information for shipment <em>{{vm.shipment.courierName}}: {{vm.shipment.trackingNumber}}</em> since
+      it is in the wrong state. </div> </div>
+</div>

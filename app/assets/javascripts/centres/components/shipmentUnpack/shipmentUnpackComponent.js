@@ -50,11 +50,6 @@ define(function (require) {
 
     vm.actions =  [
       {
-        id:    'tag-as-received',
-        class: 'btn-primary',
-        title: gettextCatalog.getString('Tag as received'),
-        icon:  'glyphicon-saved'
-      }, {
         id:    'tag-as-extra',
         class: 'btn-warning',
         title: gettextCatalog.getString('Tag as extra'),

@@ -88,7 +88,7 @@ define(function (require) {
     vm.$onChanges        = onChanges;
     vm.shipmentSpecimens = [];
     vm.readOnly          = true;
-    vm.limit          = 10;
+    vm.limit             = 10;
     vm.tableController   = undefined;
     vm.getTableData      = getTableData;
     vm.removeSpecimen    = removeSpecimen;
@@ -107,10 +107,10 @@ define(function (require) {
           sortPredicate = tableState.sort.predicate || vm.defaultSortField,
           sortOrder     = tableState.sort.reverse || false,
           options = {
-            sort:     sortPredicate,
-            page:     1 + (pagination.start / vm.limit),
+            sort:  sortPredicate,
+            page:  1 + (pagination.start / vm.limit),
             limit: vm.limit,
-            order:    sortOrder ? 'desc' : 'asc'
+            order: sortOrder ? 'desc' : 'asc'
           };
 
       if (!vm.tableController && controller) {

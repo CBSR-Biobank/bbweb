@@ -514,6 +514,15 @@ define(function (require) {
     };
 
     /**
+     * A predicate to test if the shipment's state is UNPACKED.
+     *
+     * @returns {boolean} TRUE if the state is UNPACKED.
+     */
+    Shipment.prototype.isUnpacked = function () {
+      return this.state === ShipmentState.UNPACKED;
+    };
+
+    /**
      * A predicate to test if the shipment's state is NOT CREATED or UNPACKED.
      *
      * @returns {boolean} TRUE if the state is NOT CREATED or UNPACKED.

@@ -1,80 +1,76 @@
-<progress-tracker
-  items="vm.progressInfo.items"
-  current="vm.progressInfo.current">
-</progress-tracker>
-<div class="page-header">
-  <h1>
-    {{vm.shipment.courierName}}<small>: {{vm.shipment.trackingNumber}}
+<div ng-if="vm.shipment.isUnpacked()">
+  <progress-tracker
+      items="vm.progressInfo.items"
+      current="vm.progressInfo.current">
+  </progress-tracker>
+  <div class="page-header">
+    <h1>
+      {{vm.shipment.courierName}}<small>: {{vm.shipment.trackingNumber}}
       <br/> {{'Unpack shipment'|translate}}</small>
-    <div class="pull-right">
-      <button class="btn btn-xs btn-warning"
-              title="{{'Return shipment to received'|translate}}"
-              ng-click="vm.returnToReceivedState()">
-        <i class="glyphicon glyphicon-chevron-left"></i>
-        <translate>Previous step</translate>
-      </button>
-    </div>
-  </h1>
-</div>
-
-<shipping-info-view shipment="vm.shipment" read-only="true"> </shipping-info-view>
-
-<div class="row">
-  <div class="col-lg-12">
-    <div class="panel panel-primary">
-      <div class="panel-heading">
-        <h3 class="panel-title" translate>Receive items</h3>
+      <div class="pull-right">
+        <button class="btn btn-xs btn-warning"
+                title="{{'Return shipment to received'|translate}}"
+                ng-click="vm.returnToReceivedState()">
+          <i class="glyphicon glyphicon-chevron-left"></i>
+          <translate>Previous step</translate>
+        </button>
       </div>
-      <div class="panel-body">
-        <form class="form-inline" name="UniqueId">
-          <div class="form-group">
-            <label for="nameFilter" translate>Enter the specimen inventory ID to receive:</label>
-            <input type="text"
-                   class="form-control"
-                   name="inventoryId"
-                   ng-model="vm.inventoryId"
-                   placeholder="{{'inventory id'|translate}}">
-          </div>
-          <button type="submit"
-                  class="btn btn-sm btn-primary"
-                  ng-click="vm.onInventoryIdSubmit()">
-            <i class="glyphicon glyphicon-plus"></i>
-          </button>
-        </form>
+    </h1>
+  </div>
+
+  <shipping-info-view shipment="vm.shipment" read-only="true"> </shipping-info-view>
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          <h3 class="panel-title" translate>Receive items</h3>
+        </div>
+        <div class="panel-body">
+          <form class="form-inline" name="UniqueId">
+            <div class="form-group">
+              <label for="nameFilter" translate>Enter one or more specimen inventory IDs to receive (comma separated):</label>
+              <input type="text"
+                     class="form-control"
+                     name="inventoryId"
+                     ng-model="vm.inventoryId"
+                     placeholder="{{'inventory id(s)'|translate}}">
+            </div>
+            <button type="submit"
+                    class="btn btn-sm btn-primary"
+                    ng-click="vm.onInventoryIdSubmit()">
+              <i class="glyphicon glyphicon-plus"></i>
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<div class="row">
-  <div class="col-lg-12">
-    <collapsable-panel heading="{{'Specimens in shipment'|translate}}">
-      <shipment-specimens-actions-table
-        default-sort-field="inventoryId"
-        refresh="vm.refreshNonReceivedSpecimensTable"
-        show-item-state="true"
-        on-get-specimens="vm.getPresentSpecimens"
-        no-specimens-message="{{'No specimens present in shipment'|translate}}"
-        actions="vm.actions"
-        on-action-selected="vm.nonReceivedSpecimensTableActionSelected">
-      </shipment-specimens-view-table>
-    </collapsable-panel>
+  <div class="row">
+    <div class="col-lg-12">
+      <collapsable-panel heading="{{'Unpacked specimens'|translate}}">
+        <shipment-specimens-actions-table
+            default-sort-field="inventoryId"
+            refresh="vm.refreshNonReceivedSpecimensTable"
+            show-item-state="true"
+            on-get-specimens="vm.getPresentSpecimens"
+            no-specimens-message="{{'No specimens present in shipment'|translate}}"
+            actions="vm.actions"
+            on-action-selected="vm.nonReceivedSpecimensTableActionSelected">
+        </shipment-specimens-actions-table>
+      </collapsable-panel>
+    </div>
   </div>
 </div>
-
-<div class="row">
-  <div class="col-lg-12">
-    <collapsable-panel heading="{{'Received specimens'|translate}}">
-      <shipment-specimens-actions-table
-        default-sort-field="inventoryId"
-        refresh="vm.refresh"
-        on-get-specimens="vm.getReceivedSpecimens"
-        no-specimens-message="{{'No specimens marked as received'|translate}}"
-        action-type="add-items"
-        action-button-title="{{'Repack specimen'|translate}}"
-        action-icon="glyphicon-remove"
-        on-action-selected="vm.repackSpecimen">
-      </shipment-specimens-actions-table>
-    </collapsable-panel>
+<div ng-if="!vm.shipment.isUnpacked()">
+  <div class="page-header">
+    <h1>
+      {{vm.shipment.courierName}}<small>: {{vm.shipment.trackingNumber}}
+      <br/> {{'Unpack shipment'|translate}}</small>
+    </h1>
   </div>
+  <div class="panel panel-warning">
+    <div class="panel-heading" translate>
+      Cannot add unpack items from shipment <em>{{vm.shipment.courierName}}: {{vm.shipment.trackingNumber}}</em> since
+      it is in the wrong state. </div> </div>
 </div>
