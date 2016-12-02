@@ -19,9 +19,9 @@ message AnnotationTypeRemoved {
 
 message Annotation {
    optional string annotationTypeId = 1;
-   optional string stringValue            = 2;
-   optional string numberValue            = 3;
-   repeated string selectedValues         = 4;
+   optional string stringValue      = 2;
+   optional string numberValue      = 3;
+   repeated string selectedValues   = 4;
 }
 
 message Location {

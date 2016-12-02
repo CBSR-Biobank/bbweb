@@ -162,7 +162,7 @@ class StudiesServiceImpl @javax.inject.Inject() (
   def getCentresForStudy(studyId: StudyId): Set[CentreLocation] = {
     centreRepository.withStudy(studyId).flatMap { centre =>
       centre.locations.map { location =>
-        CentreLocation(centre.id.id, location.uniqueId, centre.name, location.name)
+        CentreLocation(centre.id.id, location.uniqueId.id, centre.name, location.name)
       }
     }
   }

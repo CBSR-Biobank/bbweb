@@ -41,7 +41,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
 
     val _centreLocationInfo =
       CentreLocationInfo(_centre.id.id,
-                         _centre.locations.head.uniqueId,
+                         _centre.locations.head.uniqueId.id,
                          _centre.name,
                          _centre.locations.head.name)
 
@@ -108,7 +108,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
             "inventoryId"    -> specimen.inventoryId,
             "specimenSpecId" -> specimen.specimenSpecId,
             "timeCreated"    -> specimen.timeCreated,
-            "locationId"     -> specimen.locationId,
+            "locationId"     -> specimen.locationId.id,
             "amount"         -> specimen.amount)
         }
       )
@@ -390,8 +390,8 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
             'inventoryId       (specimen.inventoryId),
             'specimenSpecId    (specimen.specimenSpecId),
             'version           (specimen.version),
-            'originLocationId  (specimen.originLocationId),
-            'locationId        (specimen.locationId),
+            'originLocationId  (specimen.originLocationId.id),
+            'locationId        (specimen.locationId.id),
             'containerId       (specimen.containerId),
             'positionId        (specimen.positionId),
             'amount            (specimen.amount)

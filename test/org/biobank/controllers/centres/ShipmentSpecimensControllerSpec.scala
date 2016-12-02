@@ -4,8 +4,8 @@ import org.biobank.TestUtils
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.dto.{CentreLocationInfo}
 import org.biobank.domain.centre._
-import org.biobank.domain.centre.ShipmentItemState._
 import org.biobank.domain.participants._
+import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
 import scala.language.reflectiveCalls
@@ -60,7 +60,7 @@ class ShipmentSpecimensControllerSpec
         val originLocationName = f.fromCentre.locationName(specimen.originLocationId)
           .fold(e => "error", n => n)
         val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
-                                                    specimen.originLocationId,
+                                                    specimen.originLocationId.id,
                                                     originLocationName)
 
         val dto = shipmentSpecimen.createDto(
@@ -92,7 +92,7 @@ class ShipmentSpecimensControllerSpec
             .fold(e => "error", n => n)
 
           val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
-                                                      specimen.originLocationId,
+                                                      specimen.originLocationId.id,
                                                       originLocationName)
           val dto = shipmentSpecimen.createDto(
               specimen.createDto(f.cevent, f.specimenSpec, centreLocationInfo, centreLocationInfo))
@@ -270,7 +270,7 @@ class ShipmentSpecimensControllerSpec
         val originLocationName = f.fromCentre.locationName(specimen.originLocationId).
           fold(e => "error", n => n)
         val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
-                                                    specimen.originLocationId,
+                                                    specimen.originLocationId.id,
                                                     originLocationName)
         val specimenDto =
           specimen.createDto(f.cevent, f.specimenSpec, centreLocationInfo, centreLocationInfo)
@@ -294,7 +294,7 @@ class ShipmentSpecimensControllerSpec
 
         (reply \ "status").as[String] must include ("error")
 
-        (reply \ "message").as[String] must include ("specimen is already in active shipment")
+        (reply \ "message").as[String] must include ("specimens are already in an active shipment")
       }
 
       "cannot add an specimen inventory Id that does not exist" in {
@@ -336,7 +336,7 @@ class ShipmentSpecimensControllerSpec
         (reply \ "status").as[String] must include ("error")
 
         (reply \ "message").as[String] must include (
-          "EntityCriteriaError: specimen is already in active shipment")
+          "EntityCriteriaError: specimens are already in an active shipment")
       }
     }
 
@@ -345,33 +345,33 @@ class ShipmentSpecimensControllerSpec
       "add a specimen to a shipment" in {
         val f = specimensFixture(1)
         val specimen = f.specimens.head
-        val addJson = Json.obj("shipmentId" -> f.shipment.id.id, "specimenId" -> specimen.id.id)
+        val addJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
         val reply = makeRequest(POST, uri(f.shipment), addJson)
 
         (reply \ "status").as[String] must include ("success")
 
-        val replyId = ShipmentSpecimenId((reply \ "data" \ "id").as[String])
+        val replyShipmentId = ShipmentId((reply \ "data" \ "id").as[String])
 
-        shipmentSpecimenRepository.getByKey(replyId) mustSucceed { repoSs =>
+        val repoShipmentSpecimens = shipmentSpecimenRepository.allForShipment(replyShipmentId)
+        repoShipmentSpecimens must have size (1)
 
-          repoSs must have (
-            'id         (replyId),
-            'version    (0L),
-            'shipmentId (f.shipment.id),
-            'specimenId (specimen.id),
-            'state      (ShipmentItemState.Present)
-          )
+        val repoSs = repoShipmentSpecimens.headOption.value
+        repoSs must have (
+          'version    (0L),
+          'shipmentId (f.shipment.id),
+          'specimenId (specimen.id),
+          'state      (ShipmentItemState.Present)
+        )
 
-          TestUtils.checkTimeStamps(repoSs.timeAdded, DateTime.now)
-          TestUtils.checkOpionalTime(repoSs.timeModified, None)
-        }
+        TestUtils.checkTimeStamps(repoSs.timeAdded, DateTime.now)
+        TestUtils.checkOpionalTime(repoSs.timeModified, None)
       }
 
       "not add a specimen to a shipment which is not in the system" in {
         val f = specimensFixture(1)
         val shipment = factory.createShipment
         val specimen = f.specimens.head
-        val addJson = Json.obj("shipmentId" -> shipment.id.id, "specimenId" -> specimen.id.id)
+        val addJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
         val reply = makeRequest(POST, uri(shipment), NOT_FOUND, addJson)
 
         (reply \ "status").as[String] must include ("error")
@@ -380,8 +380,20 @@ class ShipmentSpecimensControllerSpec
       }
 
       "not add a specimen to a shipment not in created state" in {
-        def tryAddOnBadShipment(shipment: Shipment, specimen: UsableSpecimen): Unit = {
-          val addJson = Json.obj("shipmentId" -> shipment.id.id, "specimenId" -> specimen.id.id)
+        val f = specimensFixture(1)
+        val specimen = f.specimens.head
+
+        val nonCreatedShipments = Table("non created shipments",
+                                        makePackedShipment(f.shipment),
+                                        makeSentShipment(f.shipment),
+                                        makeReceivedShipment(f.shipment),
+                                        makeUnpackedShipment(f.shipment),
+                                        makeLostShipment(f.shipment))
+
+        forAll(nonCreatedShipments) { shipment =>
+          info(s"${shipment.state} shipment")
+
+          val addJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
 
           shipmentRepository.put(shipment)
 
@@ -391,20 +403,6 @@ class ShipmentSpecimensControllerSpec
 
           (reply \ "message").as[String] must include regex ("InvalidState.*shipment not created")
         }
-
-        val f = specimensFixture(1)
-        val specimen = f.specimens.head
-
-        info("packed shipment")
-        tryAddOnBadShipment(makePackedShipment(f.shipment), specimen)
-        info("sent shipment")
-        tryAddOnBadShipment(makeSentShipment(f.shipment), specimen)
-        info("received shipment")
-        tryAddOnBadShipment(makeReceivedShipment(f.shipment), specimen)
-        info("unpacked shipment")
-        tryAddOnBadShipment(makeUnpackedShipment(f.shipment), specimen)
-        info("lost shipment")
-        tryAddOnBadShipment(makeLostShipment(f.shipment), specimen)
       }
 
       "not add a specimen from a different centre to a shipment" in {
@@ -413,48 +411,56 @@ class ShipmentSpecimensControllerSpec
         val specimen = f.specimens.head.copy(locationId = f.toCentre.locations.head.uniqueId)
         specimenRepository.put(specimen)
 
-        val addJson = Json.obj("shipmentId" -> f.shipment.id.id, "specimenId" -> specimen.id.id)
+        val addJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
         val reply = makeRequest(POST, uri(f.shipment), BAD_REQUEST, addJson)
 
         (reply \ "status").as[String] must include ("error")
 
         (reply \ "message").as[String] must include (
-          "EntityCriteriaError: specimen not present at shipment's originating centre")
+          "EntityCriteriaError: invalid centre for specimen inventory IDs")
       }
     }
 
-    "adding specimens to shipments" must {
+    "alter specimens in shipments" must {
 
-      val stateToUrl = Map(ShipmentItemState.Received -> "received",
-                           ShipmentItemState.Missing  -> "missing",
-                           ShipmentItemState.Extra    -> "extra")
+      val stateData = Table(
+          ("shipment specimen states", "url path"),
+          (ShipmentItemState.Received, "received"),
+          (ShipmentItemState.Missing,  "missing"),
+          (ShipmentItemState.Extra,    "extra")
+        )
 
-      def changeShipmentSpecimenState(state: ShipmentItemState): Unit = {
+      "change state on a shipment specimen" in {
         val f = specimensFixture(1)
 
         val shipment = makeUnpackedShipment(f.shipment)
         shipmentRepository.put(shipment)
 
         val specimen = f.specimens.head
-        val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id,
-                                                                   specimenId = specimen.id)
-        shipmentSpecimenRepository.put(shipmentSpecimen)
-        val url = uri(f.shipment, shipmentSpecimen, stateToUrl(state))
+        val shipmentSpecimen: ShipmentSpecimen =
+          factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id, specimenId = specimen.id)
 
-        val updateJson = Json.obj("shipmentId"      -> shipment.id.id,
-                                  "id"              -> shipmentSpecimen.id.id,
-                                  "expectedVersion" -> shipmentSpecimen.version)
+        forAll(stateData) { case (state, urlPath) =>
+          shipmentSpecimenRepository.put(shipmentSpecimen)
 
-        val reply = makeRequest(POST, url, updateJson)
+          val url = uri(f.shipment, shipmentSpecimen, urlPath)
 
-        (reply \ "status").as[String] must include ("success")
+          val updateJson = Json.obj("shipmentSpecimenData" -> Json.arr(
+                                      Json.obj(
+                                        "shipmentSpecimenId" -> shipmentSpecimen.id.id,
+                                        "expectedVersion"    -> shipmentSpecimen.version)))
 
-        val ssId = ShipmentSpecimenId((reply \ "data" \ "id").as[String])
+          val reply = makeRequest(POST, url, updateJson)
 
-        shipmentSpecimenRepository.getByKey(ssId) mustSucceed { repoSs =>
+          (reply \ "status").as[String] must include ("success")
 
+          val replyShipmentId = ShipmentId((reply \ "data" \ "id").as[String])
+
+          val repoShipmentSpecimens = shipmentSpecimenRepository.allForShipment(replyShipmentId)
+          repoShipmentSpecimens must have size (1)
+
+          val repoSs = repoShipmentSpecimens.headOption.value
           repoSs must have (
-            'id         (ssId),
             'version    (shipmentSpecimen.version + 1),
             'shipmentId (shipment.id),
             'specimenId (specimen.id),
@@ -466,111 +472,64 @@ class ShipmentSpecimensControllerSpec
         }
       }
 
-      def changeShipmentSpecimenStateNotUnpacked(state: ShipmentItemState) = {
-
-        def attemptStateChange(shipment: Shipment, specimen: Specimen) = {
-          shipmentRepository.put(shipment)
-
+      "cannot change a shipment specimen's state if shipment is not PACKED" in {
+        val f = specimensFixture(1)
+        val shipments = Table("shipment",
+                              f.shipment,
+                              makePackedShipment(f.shipment),
+                              makeSentShipment(f.shipment),
+                              makeReceivedShipment(f.shipment))
+        forAll(shipments) { shipment =>
+          val specimen = f.specimens.headOption.value
           val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = shipment.id,
                                                                      specimenId = specimen.id)
-          shipmentSpecimenRepository.put(shipmentSpecimen)
-          val url = uri(shipment, shipmentSpecimen, stateToUrl(state))
 
-          val updateJson = Json.obj("shipmentId"      -> shipment.id.id,
-                                    "id"              -> shipmentSpecimen.id.id,
-                                    "expectedVersion" -> shipmentSpecimen.version)
+          forAll(stateData) { case (state, urlPath) =>
+            shipmentRepository.put(shipment)
+            shipmentSpecimenRepository.put(shipmentSpecimen)
 
-          val reply = makeRequest(POST, url, BAD_REQUEST, updateJson)
+            val url = uri(shipment, shipmentSpecimen, urlPath)
+
+            val updateJson = Json.obj("shipmentSpecimenData" -> Json.arr(
+                                        Json.obj(
+                                          "shipmentSpecimenId" -> shipmentSpecimen.id.id,
+                                          "expectedVersion"    -> shipmentSpecimen.version)))
+
+            val reply = makeRequest(POST, url, BAD_REQUEST, updateJson)
+
+            (reply \ "status").as[String] must include ("error")
+
+            (reply \ "message").as[String] must include regex ("InvalidState.shipment not unpacked")
+          }
+        }
+      }
+
+      "cannot change a shipment specimen's state if it's not in the system" in {
+        val f = specimensFixture(1)
+        val shipment = makeUnpackedShipment(f.shipment)
+        val specimen = f.specimens.headOption.value
+        val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = shipment.id,
+                                                                   specimenId = specimen.id)
+
+        shipmentRepository.put(shipment)
+        forAll(stateData) { case (state, urlPath) =>
+
+          val url = uri(shipment, shipmentSpecimen, urlPath)
+
+          val updateJson = Json.obj("shipmentSpecimenData" -> Json.arr(
+                                      Json.obj(
+                                        "shipmentSpecimenId" -> shipmentSpecimen.id.id,
+                                        "expectedVersion"    -> shipmentSpecimen.version)))
+
+          val reply = makeRequest(POST, url, NOT_FOUND, updateJson)
 
           (reply \ "status").as[String] must include ("error")
 
-          (reply \ "message").as[String] must include regex ("InvalidState.shipment not unpacked")
+          (reply \ "message").as[String] must include ("IdNotFound: shipment specimen id")
         }
-
-        val f = specimensFixture(1)
-
-        attemptStateChange(f.shipment, f.specimens.head)
-
-        val packedShipment = makePackedShipment(f.shipment)
-        attemptStateChange(packedShipment, f.specimens.head)
-
-        val sentShipment = makeSentShipment(f.shipment)
-        attemptStateChange(sentShipment, f.specimens.head)
-
-        val receivedShipment = makeReceivedShipment(f.shipment)
-        attemptStateChange(receivedShipment, f.specimens.head)
-
-        val lostShipment = makeLostShipment(f.shipment)
-        attemptStateChange(lostShipment, f.specimens.head)
-      }
-
-      def changeShipmentSpecimenStateInvalidId(state: ShipmentItemState) = {
-        val f = specimensFixture(1)
-        val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id,
-                                                                   specimenId = f.specimens.head.id)
-        val url = uri(f.shipment, shipmentSpecimen, stateToUrl(state))
-
-        val updateJson = Json.obj("shipmentId"      -> f.shipment.id.id,
-                                  "id"              -> shipmentSpecimen.id.id,
-                                  "expectedVersion" -> shipmentSpecimen.version)
-
-        val reply = makeRequest(POST, url, NOT_FOUND, updateJson)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include ("IdNotFound: shipment specimen id")
-      }
-
-      "POST /shipments/specimens/received/:shId/:shSpcId" must {
-
-        "change the status on a shipment specimen" in {
-          changeShipmentSpecimenState(ShipmentItemState.Received)
-        }
-
-        "fails for a shipment not in unpacked state" in {
-          changeShipmentSpecimenStateNotUnpacked(ShipmentItemState.Received)
-        }
-
-        "fails for a shipment specimen not in the system" in {
-          changeShipmentSpecimenStateInvalidId(ShipmentItemState.Received)
-        }
-
-      }
-
-      "POST /shipments/specimens/missing/:shId/:shSpcId" must {
-
-        "change the status on a shipment specimen" in {
-          changeShipmentSpecimenState(ShipmentItemState.Missing)
-        }
-
-        "fails for a shipment not in packed state" in {
-          changeShipmentSpecimenStateNotUnpacked(ShipmentItemState.Missing)
-        }
-
-        "fails for a shipment not in the system" in {
-          changeShipmentSpecimenStateInvalidId(ShipmentItemState.Missing)
-        }
-
-      }
-
-      "POST /shipments/specimens/extra/:shId/:shSpcId"  must {
-
-        "change the status on a shipment specimen" in {
-          changeShipmentSpecimenState(ShipmentItemState.Extra)
-        }
-
-        "fails for a shipment not in packed state" in {
-          changeShipmentSpecimenStateNotUnpacked(ShipmentItemState.Extra)
-        }
-
-        "fails for a shipment not in the system" in {
-          changeShipmentSpecimenStateInvalidId(ShipmentItemState.Extra)
-        }
-
       }
 
     }
-
 
     "DELETE /shipments/specimens/:shId/:shSpcId/:ver" must {
 

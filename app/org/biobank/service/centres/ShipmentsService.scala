@@ -65,7 +65,7 @@ trait ShipmentsService {
   def removeShipment(cmd: ShipmentRemoveCmd): Future[ServiceValidation[Boolean]]
 
   def processShipmentSpecimenCommand(cmd: ShipmentSpecimenCommand):
-      Future[ServiceValidation[ShipmentSpecimenDto]]
+      Future[ServiceValidation[ShipmentDto]]
 
   def removeShipmentSpecimen(cmd: ShipmentSpecimenRemoveCmd): Future[ServiceValidation[Boolean]]
 }
@@ -94,7 +94,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
    *
    * - http://stackoverflow.com/questions/17791933/filter-over-list-with-dynamic-filter-parameter
    *
-   * -http://danielwestheide.com/blog/2013/01/23/the-neophytes-guide-to-scala-part-10-staying-dry-with-higher-order-functions.html
+   * - http://danielwestheide.com/blog/2013/01/23/the-neophytes-guide-to-scala-part-10-staying-dry-with-higher-order-functions.html
    *
    */
   def getShipments(centreId: CentreId, filter: FilterString, sort: SortString):
@@ -137,9 +137,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
             ServiceError(s"specimen not at shipment's from location").failureNel[Specimen]
           }
         }
-        canBeAdded <- specimenNotPresentInShipment(shipmentRepository,
-                                                   shipmentSpecimenRepository,
-                                                   specimen.id)
+        canBeAdded <- specimenNotPresentInShipment(specimen)
         specimenDto  <- specimensService.get(specimen.id)
       } yield specimenDto
   }
@@ -185,10 +183,10 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
       toLocationName   <- toCentre.locationName(shipment.toLocationId)
     } yield {
       val fromLocationInfo = CentreLocationInfo(fromCentre.id.id,
-                                                shipment.fromLocationId,
+                                                shipment.fromLocationId.id,
                                                 fromLocationName)
       val toLocationInfo = CentreLocationInfo(toCentre.id.id,
-                                              shipment.toLocationId,
+                                              shipment.toLocationId.id,
                                               toLocationName)
       val specimens = shipmentSpecimenRepository.allForShipment(shipment.id)
 
@@ -221,12 +219,12 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
   }
 
   def processShipmentSpecimenCommand(cmd: ShipmentSpecimenCommand)
-      : Future[ServiceValidation[ShipmentSpecimenDto]] = {
+      : Future[ServiceValidation[ShipmentDto]] = {
     ask(processor, cmd).mapTo[ServiceValidation[ShipmentSpecimenEvent]].map { validation =>
       for {
-        event            <- validation
-        shipmentSpecimen <- shipmentSpecimenRepository.getByKey(ShipmentSpecimenId(event.id))
-        dto              <- getShipmentSpecimenDto(shipmentSpecimen)
+        event    <- validation
+        shipment <- shipmentRepository.getByKey(ShipmentId(event.shipmentId))
+        dto      <- getShipmentDto(shipment)
       } yield dto
     }
   }

@@ -39,7 +39,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
   }
 
   def centreLocationToUpdateJson(centre: Centre, location: Location): JsObject = {
-    centreLocationToJson(centre, location) ++ Json.obj("locationId" -> location.uniqueId)
+    centreLocationToJson(centre, location) ++ Json.obj("locationId" -> location.uniqueId.id)
   }
 
   def compareObjs(jsonList: List[JsObject], centres: List[Centre]) = {
@@ -581,7 +581,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     "POST /centres/disable/:id" must {
 
-      "disable a centre" in {
+      "111 disable a centre" in {
         val centre = factory.createEnabledCentre
         centreRepository.put(centre)
 
@@ -659,7 +659,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
           val repoLocation = repoCentre.locations.head
 
-          repoLocation.uniqueId.length must be > 0
+          repoLocation.uniqueId.id.length must be > 0
           repoLocation must have (
             'name           (location.name),
             'street         (location.street),
@@ -729,7 +729,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
           checkTimeStamps(repoCentre, centre.timeAdded, DateTime.now)
 
           repoCentre.locations.head must have (
-            'uniqueId       (locationWithNewName.uniqueId),
+            'uniqueId       (locationWithNewName.uniqueId.id),
             'name           (locationWithNewName.name),
             'street         (locationWithNewName.street),
             'city           (locationWithNewName.city),
@@ -1023,7 +1023,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     "POST /centres/locations" must {
 
-      "111 must return centre locations" in {
+      "return centre locations" in {
         val location = factory.createLocation
         val centre = factory.createDisabledCentre.copy(locations = Set(location))
         centreRepository.put(centre)
@@ -1037,10 +1037,10 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
         jsonObjs.size must be (1)
         compareObj(jsonObjs(0),
-                   CentreLocationInfo(centre.id.id, location.uniqueId, centre.name, location.name))
+                   CentreLocationInfo(centre.id.id, location.uniqueId.id, centre.name, location.name))
       }
 
-      "must return centre locations filtered by name" in {
+      "return centre locations filtered by name" in {
         val centres = (1 to 2).map {_ =>
             factory.createDisabledCentre.copy(locations = Set(factory.createLocation))
           }
@@ -1057,10 +1057,10 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
         jsonObjs.size must be (1)
         compareObj(jsonObjs(0),
-                   CentreLocationInfo(centre.id.id, location.uniqueId, centre.name, location.name))
+                   CentreLocationInfo(centre.id.id, location.uniqueId.id, centre.name, location.name))
       }
 
-      "must return centre locations sorted by name" in {
+      "return centre locations sorted by name" in {
         val centres = (1 to 2).map {_ =>
             factory.createDisabledCentre.copy(locations = Set(factory.createLocation))
           }
@@ -1069,7 +1069,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val centreLocationsByName = centres.
           map { centre =>
             val location = centre.locations.head
-            CentreLocationInfo(centre.id.id, location.uniqueId, centre.name, location.name)
+            CentreLocationInfo(centre.id.id, location.uniqueId.id, centre.name, location.name)
           }.
           toSeq.
           sortWith { (a, b) => (a.name compareToIgnoreCase b.name) < 0 }.

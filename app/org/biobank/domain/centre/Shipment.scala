@@ -56,9 +56,9 @@ sealed trait Shipment
   val courierName:    String
   val trackingNumber: String
   val fromCentreId:   CentreId
-  val fromLocationId: String
+  val fromLocationId: LocationId
   val toCentreId:     CentreId
-  val toLocationId:   String
+  val toLocationId:   LocationId
   val timePacked:     Option[DateTime]
   val timeSent:       Option[DateTime]
   val timeReceived:   Option[DateTime]
@@ -188,9 +188,9 @@ object Shipment extends ShipmentValidations {
                  "courierName"    -> shipment.courierName,
                  "trackingNumber" -> shipment.trackingNumber,
                  "fromCentreId"   -> shipment.fromCentreId,
-                 "fromLocationId" -> shipment.fromLocationId,
+                 "fromLocationId" -> shipment.fromLocationId.id,
                  "toCentreId"     -> shipment.toCentreId,
-                 "toLocationId"   -> shipment.toLocationId) ++
+                 "toLocationId"   -> shipment.toLocationId.id) ++
         JsObject(
           Seq[(String, JsValue)]() ++
             shipment.timePacked.map("timePacked" -> Json.toJson(_)) ++
@@ -210,9 +210,9 @@ final case class CreatedShipment(id:             ShipmentId,
                                  courierName:    String,
                                  trackingNumber: String,
                                  fromCentreId:   CentreId,
-                                 fromLocationId: String,
+                                 fromLocationId: LocationId,
                                  toCentreId:     CentreId,
-                                 toLocationId:   String,
+                                 toLocationId:   LocationId,
                                  timePacked:     Option[DateTime],
                                  timeSent:       Option[DateTime],
                                  timeReceived:   Option[DateTime],
@@ -241,9 +241,9 @@ final case class CreatedShipment(id:             ShipmentId,
   /**
    * Must be a centre's location.
    */
-  def withFromLocation(centreId: CentreId, locationId: String): DomainValidation[CreatedShipment] =
+  def withFromLocation(centreId: CentreId, locationId: LocationId): DomainValidation[CreatedShipment] =
     (validateString(centreId.id, FromCentreIdInvalid) |@|
-       validateString(locationId, LocationIdInvalid)) { case (_, _) =>
+       validateString(locationId.id, LocationIdInvalid)) { case (_, _) =>
         copy(fromCentreId   = centreId,
              fromLocationId = locationId,
              version        = version + 1,
@@ -253,9 +253,9 @@ final case class CreatedShipment(id:             ShipmentId,
   /**
    * Must be a centre's location.
    */
-  def withToLocation(centreId: CentreId, locationId: String): DomainValidation[CreatedShipment] =
+  def withToLocation(centreId: CentreId, locationId: LocationId): DomainValidation[CreatedShipment] =
     (validateString(centreId.id, ToCentreIdInvalid) |@|
-       validateString(locationId, LocationIdInvalid)) { case (_, _) =>
+       validateString(locationId.id, LocationIdInvalid)) { case (_, _) =>
         copy(toCentreId   = centreId,
              toLocationId = locationId,
              version      = version + 1,
@@ -310,9 +310,9 @@ object CreatedShipment extends ShipmentValidations {
              courierName:    String,
              trackingNumber: String,
              fromCentreId:   CentreId,
-             fromLocationId: String,
+             fromLocationId: LocationId,
              toCentreId:     CentreId,
-             toLocationId:   String): DomainValidation[CreatedShipment] = {
+             toLocationId:   LocationId): DomainValidation[CreatedShipment] = {
     validate(id,
              version,
              courierName,
@@ -341,17 +341,17 @@ object CreatedShipment extends ShipmentValidations {
                courierName:    String,
                trackingNumber: String,
                fromCentreId:   CentreId,
-               fromLocationId: String,
+               fromLocationId: LocationId,
                toCentreId:     CentreId,
-               toLocationId:   String): DomainValidation[Boolean] = {
+               toLocationId:   LocationId): DomainValidation[Boolean] = {
     (validateId(id) |@|
        validateVersion(version) |@|
        validateString(courierName, CourierNameInvalid) |@|
        validateString(trackingNumber, TrackingNumberInvalid) |@|
        validateId(fromCentreId, FromCentreIdInvalid) |@|
-       validateString(fromLocationId, FromLocationIdInvalid) |@|
+       validateString(fromLocationId.id, FromLocationIdInvalid) |@|
        validateId(toCentreId, ToCentreIdInvalid) |@|
-       validateString(toLocationId, ToLocationIdInvalid)) {
+       validateString(toLocationId.id, ToLocationIdInvalid)) {
       case (_, _, _, _, _, _, _, _) => true
     }
 
@@ -366,9 +366,9 @@ final case class PackedShipment(id:             ShipmentId,
                                 courierName:    String,
                                 trackingNumber: String,
                                 fromCentreId:   CentreId,
-                                fromLocationId: String,
+                                fromLocationId: LocationId,
                                 toCentreId:     CentreId,
-                                toLocationId:   String,
+                                toLocationId:   LocationId,
                                 timePacked:     Option[DateTime],
                                 timeSent:       Option[DateTime],
                                 timeReceived:   Option[DateTime],
@@ -431,9 +431,9 @@ final case class SentShipment(id:             ShipmentId,
                               courierName:    String,
                               trackingNumber: String,
                               fromCentreId:   CentreId,
-                              fromLocationId: String,
+                              fromLocationId: LocationId,
                               toCentreId:     CentreId,
-                              toLocationId:   String,
+                              toLocationId:   LocationId,
                               timePacked:     Option[DateTime],
                               timeSent:       Option[DateTime],
                               timeReceived:   Option[DateTime],
@@ -530,9 +530,9 @@ final case class ReceivedShipment(id:             ShipmentId,
                                   courierName:    String,
                                   trackingNumber: String,
                                   fromCentreId:   CentreId,
-                                  fromLocationId: String,
+                                  fromLocationId: LocationId,
                                   toCentreId:     CentreId,
-                                  toLocationId:   String,
+                                  toLocationId:   LocationId,
                                   timePacked:     Option[DateTime],
                                   timeSent:       Option[DateTime],
                                   timeReceived:   Option[DateTime],
@@ -592,9 +592,9 @@ final case class UnpackedShipment(id:             ShipmentId,
                                   courierName:    String,
                                   trackingNumber: String,
                                   fromCentreId:   CentreId,
-                                  fromLocationId: String,
+                                  fromLocationId: LocationId,
                                   toCentreId:     CentreId,
-                                  toLocationId:   String,
+                                  toLocationId:   LocationId,
                                   timePacked:     Option[DateTime],
                                   timeSent:       Option[DateTime],
                                   timeReceived:   Option[DateTime],
@@ -629,9 +629,9 @@ final case class LostShipment(id:             ShipmentId,
                               courierName:    String,
                               trackingNumber: String,
                               fromCentreId:   CentreId,
-                              fromLocationId: String,
+                              fromLocationId: LocationId,
                               toCentreId:     CentreId,
-                              toLocationId:   String,
+                              toLocationId:   LocationId,
                               timePacked:     Option[DateTime],
                               timeSent:       Option[DateTime],
                               timeReceived:   Option[DateTime],

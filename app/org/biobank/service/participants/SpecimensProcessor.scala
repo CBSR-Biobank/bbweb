@@ -3,6 +3,7 @@ package org.biobank.service.participants
 import akka.actor._
 import akka.persistence.SnapshotOffer
 import javax.inject.{Inject, Singleton}
+import org.biobank.domain.LocationId
 import org.biobank.domain.participants._
 import org.biobank.domain.processing.ProcessingEventInputSpecimenRepository
 import org.biobank.domain.study.{CollectionEventType, CollectionEventTypeRepository}
@@ -155,8 +156,8 @@ class SpecimensProcessor @Inject() (
                                   inventoryId      = info.getInventoryId,
                                   specimenSpecId   = info.getSpecimenSpecId,
                                   version          = 0L,
-                                  originLocationId = info.getLocationId,
-                                  locationId       = info.getLocationId,
+                                  originLocationId = LocationId(info.getLocationId),
+                                  locationId       = LocationId(info.getLocationId),
                                   containerId      = None,
                                   positionId       = None,
                                   timeCreated      = ISODateTimeParser.parseDateTime(info.getTimeCreated),

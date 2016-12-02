@@ -76,7 +76,7 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
       }
     }
 
-  def canAddSpecimen(shipmentId: ShipmentId, specimenInventoryId: String) =
+  def canAddSpecimens(shipmentId: ShipmentId, specimenInventoryId: String) =
     action(parse.empty) { implicit request =>
       validationReply(shipmentsService.shipmentCanAddSpecimen(shipmentId, specimenInventoryId))
     }
@@ -140,15 +140,15 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
     commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentSkipStateToUnpackedCmd => processCommand(cmd) }
 
   def addSpecimen(shipmentId: ShipmentId) = commandActionAsync(Json.obj("shipmentId" -> shipmentId)) {
-      cmd: ShipmentSpecimenAddCmd => processSpecimenCommand(cmd)
+      cmd: ShipmentAddSpecimensCmd => processSpecimenCommand(cmd)
     }
 
   def removeSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String, version: Long) =
     action.async(parse.empty) { implicit request =>
-      val cmd = ShipmentSpecimenRemoveCmd(userId          = request.authInfo.userId.id,
-                                          shipmentId      = shipmentId.id,
-                                          id              = shipmentSpecimenId,
-                                          expectedVersion = version)
+      val cmd = ShipmentSpecimenRemoveCmd(userId             = request.authInfo.userId.id,
+                                          shipmentId         = shipmentId.id,
+                                          expectedVersion    = version,
+                                          shipmentSpecimenId = shipmentSpecimenId)
       val future = shipmentsService.removeShipmentSpecimen(cmd)
       validationReply(future)
     }
@@ -160,7 +160,7 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
 
   def specimenReceived(shipmentId: ShipmentId, shipmentSpecimenId: String) =
     commandActionAsync(Json.obj("shipmentId" -> shipmentId, "id" -> shipmentSpecimenId)) {
-      cmd: ShipmentSpecimenReceivedCmd => processSpecimenCommand(cmd)
+      cmd: ShipmentReceiveSpecimensCmd => processSpecimenCommand(cmd)
     }
 
   def specimenMissing(shipmentId: ShipmentId, shipmentSpecimenId: String) =

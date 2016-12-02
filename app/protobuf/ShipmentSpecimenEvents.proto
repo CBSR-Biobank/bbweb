@@ -4,31 +4,45 @@ package org.biobank.infrastructure.event;
 
 message ShipmentSpecimenEvent {
 
-   message Added {
-      optional string shipmentId          = 1;
-      optional string specimenId          = 2;
-      optional string shipmentContainerId = 3;
-   }
+  message ShipmentSpecimenAddInfo {
+    optional string specimenId         = 1;
+    optional string shipmentSpecimenId = 2;
+  }
 
-   message ContainerUpdated {
-      optional int64  version             = 1;
-      optional string shipmentContainerId = 2;
-   }
+  message ShipmentSpecimenInfo {
+    optional int64  version            = 1;
+    optional string shipmentSpecimenId = 2;
+  }
 
-   message WithVersion {
-      optional int64  version   = 1;
-   }
+  message Added {
+    optional string                  shipmentContainerId     = 1;
+    repeated ShipmentSpecimenAddInfo shipmentSpecimenAddData = 2;
+  }
 
-   required string id     = 1;
-   optional string userId = 2;
-   optional string time   = 3;
+  message ContainerUpdated {
+    optional string               shipmentContainerId  = 1;
+    repeated ShipmentSpecimenInfo shipmentSpecimenData = 2;
+  }
 
-   oneof event_type {
-      Added            added            = 5;
-      ContainerUpdated containerUpdated = 6;
-      WithVersion      received         = 8;
-      WithVersion      missing          = 9;
-      WithVersion      extra            = 10;
-      WithVersion      removed          = 11;
-   }
+  message WithShipmentSpecimenInfo {
+    repeated ShipmentSpecimenInfo shipmentSpecimenData = 1;
+  }
+
+  message Removed {
+    optional int64  version            = 1;
+    optional string shipmentSpecimenId = 2;
+  }
+
+  required string shipmentId = 1;
+  optional string userId     = 2;
+  optional string time       = 3;
+
+  oneof event_type {
+    Added                    added            = 4;
+    ContainerUpdated         containerUpdated = 5;
+    WithShipmentSpecimenInfo received         = 6;
+    WithShipmentSpecimenInfo missing          = 7;
+    WithShipmentSpecimenInfo extra            = 8;
+    Removed                  removed          = 9;
+  }
 }

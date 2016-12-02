@@ -10,53 +10,54 @@ object ShipmentSpecimenCommands {
   trait ShipmentSpecimenCommand extends ShipmentCommand with HasShipmentIdentity
 
   trait ShipmentSpecimenModifyCommand extends ShipmentSpecimenCommand
-      with HasIdentity with HasExpectedVersion
 
-  final case class ShipmentSpecimenAddCmd(userId:              String,
-                                          shipmentId:          String,
-                                          specimenId:          String,
-                                          shipmentContainerId: Option[String])
+  final case class ShipmentSpecimenInfo(shipmentSpecimenId: String, expectedVersion: Long)
+      extends HasExpectedVersion
+
+  final case class ShipmentAddSpecimensCmd(userId:               String,
+                                           shipmentId:           String,
+                                           shipmentContainerId:  Option[String],
+                                           specimenInventoryIds: List[String])
       extends ShipmentSpecimenCommand
 
-  final case class ShipmentSpecimenRemoveCmd(userId:          String,
-                                             shipmentId:      String,
-                                             id:              String, // shipment specimen ID
-                                             expectedVersion: Long)
+  final case class ShipmentSpecimenRemoveCmd(userId:             String,
+                                             shipmentId:         String,
+                                             expectedVersion:    Long,
+                                             shipmentSpecimenId: String)
       extends ShipmentSpecimenModifyCommand
 
-  final case class ShipmentSpecimenUpdateContainerCmd(userId:              String,
-                                                      shipmentId:          String,
-                                                      id:                  String, // shipment specimen ID
-                                                      expectedVersion:     Long,
-                                                      shipmentContainerId: Option[String])
+  final case class ShipmentSpecimenUpdateContainerCmd(userId:               String,
+                                                      shipmentId:           String,
+                                                      shipmentContainerId:  Option[String],
+                                                      shipmentSpecimenData: List[ShipmentSpecimenInfo])
       extends ShipmentSpecimenModifyCommand
 
-  final case class ShipmentSpecimenReceivedCmd(userId:          String,
-                                               shipmentId:      String,
-                                               id:              String, // shipment specimen ID
-                                               expectedVersion: Long)
+  final case class ShipmentReceiveSpecimensCmd(userId:               String,
+                                               shipmentId:           String,
+                                               shipmentSpecimenData: List[ShipmentSpecimenInfo])
       extends ShipmentSpecimenModifyCommand
 
-  final case class ShipmentSpecimenMissingCmd(userId:          String,
-                                              shipmentId:      String,
-                                              id:              String, // shipment specimen ID
-                                              expectedVersion: Long)
+  final case class ShipmentSpecimenMissingCmd(userId:               String,
+                                              shipmentId:           String,
+                                              shipmentSpecimenData: List[ShipmentSpecimenInfo])
       extends ShipmentSpecimenModifyCommand
 
-  final case class ShipmentSpecimenExtraCmd(userId:          String,
-                                            shipmentId:      String,
-                                            id:              String, // shipment specimen ID
-                                            expectedVersion: Long)
+  final case class ShipmentSpecimenExtraCmd(userId:               String,
+                                            shipmentId:           String,
+                                            shipmentSpecimenData: List[ShipmentSpecimenInfo])
       extends ShipmentSpecimenModifyCommand
 
-  implicit val shipmentAddSpecimenCmdReads: Reads[ShipmentSpecimenAddCmd] =
-    Json.reads[ShipmentSpecimenAddCmd]
+  implicit val shipmentSpecimenInfoReads: Reads[ShipmentSpecimenInfo] =
+    Json.reads[ShipmentSpecimenInfo]
+
+  implicit val shipmentAddSpecimenCmdReads: Reads[ShipmentAddSpecimensCmd] =
+    Json.reads[ShipmentAddSpecimensCmd]
 
   implicit val shipmentSpecimenUpdateContainerCmdReads: Reads[ShipmentSpecimenUpdateContainerCmd] =
     Json.reads[ShipmentSpecimenUpdateContainerCmd]
 
-  implicit val shipmentSpecimenReceivedCmdReads: Reads[ShipmentSpecimenReceivedCmd] =
-    Json.reads[ShipmentSpecimenReceivedCmd]
+  implicit val shipmentSpecimenReceivedCmdReads: Reads[ShipmentReceiveSpecimensCmd] =
+    Json.reads[ShipmentReceiveSpecimensCmd]
 
   implicit val shipmentSpecimenMissingCmdReads: Reads[ShipmentSpecimenMissingCmd] =
     Json.reads[ShipmentSpecimenMissingCmd]

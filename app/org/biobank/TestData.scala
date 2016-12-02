@@ -251,7 +251,7 @@ class TestData @Inject() (config:                        Configuration,
       v.foreach { centres =>
         centres.foreach { centre =>
           val location = if (centre.name == "100-Calgary AB") {
-              Location(uniqueId       = s"${centre.name}:Primary",
+              Location(uniqueId       = LocationId(s"${centre.name}:Primary"),
                        name           = "Primary",
                        street         = "1403 29 St NW",
                        city           = "Calgary",
@@ -260,7 +260,7 @@ class TestData @Inject() (config:                        Configuration,
                        poBoxNumber    = None,
                        countryIsoCode = "CA")
             } else {
-              Location(uniqueId       = s"${centre.name}:Primary",
+              Location(uniqueId       = LocationId(s"${centre.name}:Primary"),
                        name           = "Primary",
                        street         = "London Health Sciences Center, University Hospital, Rm A3-222B, 339 Windermere Road",
                        city           = "London",

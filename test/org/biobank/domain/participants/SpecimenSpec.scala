@@ -37,8 +37,8 @@ class SpecimenSpec extends DomainFreeSpec {
             'inventoryId     (specimen.inventoryId),
             'specimenSpecId  (specimen.specimenSpecId),
             'version         (0),
-            'originLocationId(specimen.originLocationId),
-            'locationId      (specimen.locationId),
+            'originLocationId(specimen.originLocationId.id),
+            'locationId      (specimen.locationId.id),
             'containerId     (specimen.containerId),
             'positionId      (specimen.positionId),
             'amount          (specimen.amount)
@@ -146,12 +146,12 @@ class SpecimenSpec extends DomainFreeSpec {
       }
 
       "with an empty origin location id" in {
-        val specimen = factory.createUsableSpecimen.copy(originLocationId = "")
+        val specimen = factory.createUsableSpecimen.copy(originLocationId = LocationId(""))
         createFrom(specimen) mustFail "OriginLocationIdInvalid"
       }
 
       "with an empty location id" in {
-        val specimen = factory.createUsableSpecimen.copy(locationId = "")
+        val specimen = factory.createUsableSpecimen.copy(locationId = LocationId(""))
         createFrom(specimen) mustFail "LocationIdInvalid"
       }
 
@@ -188,13 +188,13 @@ class SpecimenSpec extends DomainFreeSpec {
 
     "with an invalid origin location" in {
       val specimen = factory.createUsableSpecimen
-      val newLocation = factory.createLocation.copy(uniqueId = "")
+      val newLocation = factory.createLocation.copy(uniqueId = LocationId(""))
       specimen.withOriginLocation(newLocation) mustFail "LocationIdInvalid"
     }
 
     "with an invalid location" in {
       val specimen = factory.createUsableSpecimen
-      val newLocation = factory.createLocation.copy(uniqueId = "")
+      val newLocation = factory.createLocation.copy(uniqueId = LocationId(""))
       specimen.withLocation(newLocation) mustFail "LocationIdInvalid"
     }
 

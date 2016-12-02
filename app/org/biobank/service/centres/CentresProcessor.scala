@@ -4,6 +4,7 @@ import akka.actor._
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import javax.inject.{Inject}
 import org.biobank.TestData
+import org.biobank.domain.LocationId
 import org.biobank.domain.centre._
 import org.biobank.domain.study.{StudyId, StudyRepository}
 import org.biobank.domain.Location
@@ -177,7 +178,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       _.userId                                     := cmd.userId,
       _.time                                       := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.locationAdded.version                      := cmd.expectedVersion,
-      _.locationAdded.location.locationId          := location.uniqueId,
+      _.locationAdded.location.locationId          := location.uniqueId.id,
       _.locationAdded.location.name                := cmd.name,
       _.locationAdded.location.street              := cmd.street,
       _.locationAdded.location.city                := cmd.city,
@@ -195,7 +196,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     for {
       location <- {
         // need to call Location.create so that a new uniqueId is generated
-        Location(uniqueId       = cmd.locationId,
+        Location(uniqueId       = LocationId(cmd.locationId),
                  name           = cmd.name,
                  street         = cmd.street,
                  city           = cmd.city,
@@ -224,7 +225,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
    */
   private def removeLocationCmdToEvent(cmd:    RemoveCentreLocationCmd,
                                        centre: DisabledCentre): ServiceValidation[CentreEvent] = {
-    centre.removeLocation(cmd.locationId) map { _ =>
+    centre.removeLocation(LocationId(cmd.locationId)) map { _ =>
       CentreEvent(centre.id.id).update(
         _.userId                     := cmd.userId,
         _.time                       := ISODateTimeFormat.dateTime.print(DateTime.now),
@@ -388,15 +389,16 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                          event.eventType.isLocationAdded,
                                          event.getLocationAdded.getVersion) { (centre, _, eventTime) =>
       val locationAddedEvent = event.getLocationAdded
+      val eventLocation = locationAddedEvent.getLocation
 
-      val v = centre.withLocation(Location(uniqueId       = locationAddedEvent.getLocation.getLocationId,
-                                           name           = locationAddedEvent.getLocation.getName,
-                                           street         = locationAddedEvent.getLocation.getStreet,
-                                           city           = locationAddedEvent.getLocation.getCity,
-                                           province       = locationAddedEvent.getLocation.getProvince,
-                                           postalCode     = locationAddedEvent.getLocation.getPostalCode,
-                                           poBoxNumber    = locationAddedEvent.getLocation.poBoxNumber,
-                                           countryIsoCode = locationAddedEvent.getLocation.getCountryIsoCode))
+      val v = centre.withLocation(Location(uniqueId       = LocationId(eventLocation.getLocationId),
+                                           name           = eventLocation.getName,
+                                           street         = eventLocation.getStreet,
+                                           city           = eventLocation.getCity,
+                                           province       = eventLocation.getProvince,
+                                           postalCode     = eventLocation.getPostalCode,
+                                           poBoxNumber    = eventLocation.poBoxNumber,
+                   countryIsoCode = eventLocation.getCountryIsoCode))
       v.foreach { c => centreRepository.put(c.copy(timeModified = Some(eventTime))) }
       v
     }
@@ -407,14 +409,16 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                          event.eventType.isLocationUpdated,
                                          event.getLocationUpdated.getVersion) { (centre, _, eventTime) =>
       val locationUpdatedEvent = event.getLocationUpdated
-      val v = centre.withLocation(Location(uniqueId       = locationUpdatedEvent.getLocation.getLocationId,
-                                           name           = locationUpdatedEvent.getLocation.getName,
-                                           street         = locationUpdatedEvent.getLocation.getStreet,
-                                           city           = locationUpdatedEvent.getLocation.getCity,
-                                           province       = locationUpdatedEvent.getLocation.getProvince,
-                                           postalCode     = locationUpdatedEvent.getLocation.getPostalCode,
-                                           poBoxNumber    = locationUpdatedEvent.getLocation.poBoxNumber,
-                                           countryIsoCode = locationUpdatedEvent.getLocation.getCountryIsoCode))
+      val eventLocation = locationUpdatedEvent.getLocation
+      val v = centre.withLocation(
+          Location(uniqueId       = LocationId(eventLocation.getLocationId),
+                   name           = eventLocation.getName,
+                   street         = eventLocation.getStreet,
+                   city           = eventLocation.getCity,
+                   province       = eventLocation.getProvince,
+                   postalCode     = eventLocation.getPostalCode,
+                   poBoxNumber    = eventLocation.poBoxNumber,
+                   countryIsoCode = eventLocation.getCountryIsoCode))
       v.foreach { c => centreRepository.put(c.copy(timeModified = Some(eventTime))) }
       v
     }
@@ -424,7 +428,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     onValidEventDisabledCentreAndVersion(event,
                                          event.eventType.isLocationRemoved,
                                          event.getLocationRemoved.getVersion) { (centre, _, eventTime) =>
-      val v = centre.removeLocation(event.getLocationRemoved.getLocationId)
+      val v = centre.removeLocation(LocationId(event.getLocationRemoved.getLocationId))
       v.foreach { c => centreRepository.put(c.copy(timeModified = Some(eventTime))) }
       v
     }

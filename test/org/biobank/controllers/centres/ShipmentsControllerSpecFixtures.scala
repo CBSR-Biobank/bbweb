@@ -182,7 +182,7 @@ private[centres] trait ShipmentsControllerSpecFixtures extends ControllerFixture
         val originLocationName = f.fromCentre.locationName(specimen.originLocationId).
           fold(e => "error", n => n)
         val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
-                                                    specimen.originLocationId,
+                                                    specimen.originLocationId.id,
                                                     originLocationName)
         val specimenDto =
           specimen.createDto(f.cevent, f.specimenSpec, centreLocationInfo, centreLocationInfo)

@@ -210,14 +210,14 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
     (json \ "locations").as[List[JsObject]].foreach { jsLocation =>
       val jsLocationId = (jsLocation \ "uniqueId").as[String]
-      centre.locations.find { x => x.uniqueId == jsLocationId }
+      centre.locations.find { x => x.uniqueId == LocationId(jsLocationId) }
         .fold { fail(s"annotation with id not found on centre: $jsLocationId")
       } { location => compareLocation(jsLocation, location) }
     }
   }
 
   def compareLocation(json: JsValue, location: Location): Unit = {
-    (json \ "uniqueId").as[String]       mustBe (location.uniqueId)
+    (json \ "uniqueId").as[String]       mustBe (location.uniqueId.id)
     (json \ "name").as[String]           mustBe (location.name)
     (json \ "street").as[String]         mustBe (location.street)
     (json \ "city").as[String]           mustBe (location.city)
@@ -231,8 +231,8 @@ trait JsonHelper extends MustMatchers with OptionValues {
     compareEntity(json, shipment)
     (json \ "courierName").as[String] mustBe (shipment.courierName)
     (json \ "trackingNumber").as[String] mustBe (shipment.trackingNumber)
-    (json \ "fromLocationInfo" \ "locationId").as[String] mustBe (shipment.fromLocationId)
-    (json \ "toLocationInfo" \ "locationId").as[String] mustBe (shipment.toLocationId)
+    (json \ "fromLocationInfo" \ "locationId").as[String] mustBe (shipment.fromLocationId.id)
+    (json \ "toLocationInfo" \ "locationId").as[String] mustBe (shipment.toLocationId.id)
     (json \ "state").as[String] mustBe (shipment.state.toString)
 
     TestUtils.checkOpionalTime((json \ "timePacked").asOpt[DateTime], shipment.timePacked)

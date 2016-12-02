@@ -1,6 +1,7 @@
 package org.biobank.infrastructure.event
 
 import org.biobank.infrastructure.command.SpecimenCommands.SpecimenInfo
+import org.biobank.infrastructure.command.ShipmentSpecimenCommands
 import org.biobank.infrastructure.event.CommonEvents. {
   AnnotationType => EventAnnotationType
 }
@@ -14,6 +15,7 @@ import org.biobank.domain.{
   PreservationTemperatureType,
   SpecimenType
 }
+import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
 import org.biobank.domain.study.CollectionSpecimenSpec
 import org.biobank.domain.participants.SpecimenId
 import org.joda.time._
@@ -103,6 +105,14 @@ object EventUtils {
       _.timeCreated    := ISODateTimeFormatter.print(specimenInfo.timeCreated),
       _.locationId     := specimenInfo.locationId,
       _.amount         := specimenInfo.amount.doubleValue
+    )
+  }
+
+  def shipmentSpecimenInfoToEvent(info: ShipmentSpecimenCommands.ShipmentSpecimenInfo)
+      : ShipmentSpecimenEvent.ShipmentSpecimenInfo = {
+    ShipmentSpecimenEvent.ShipmentSpecimenInfo().update(
+      _.shipmentSpecimenId := info.shipmentSpecimenId,
+      _.version            := info.expectedVersion
     )
   }
 

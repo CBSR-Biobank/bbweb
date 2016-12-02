@@ -46,12 +46,12 @@ sealed trait Centre
 
   val locations: Set[Location]
 
-  def locationWithId(locationId: String): DomainValidation[Location] = {
+  def locationWithId(locationId: LocationId): DomainValidation[Location] = {
     locations.find(_.uniqueId == locationId)
       .toSuccessNel(s"invalid location id: $locationId")
   }
 
-  def locationName(locationId: String): DomainValidation[String] = {
+  def locationName(locationId: LocationId): DomainValidation[String] = {
     locationWithId(locationId).map(loc => s"${this.name}: ${loc.name}")
   }
 
@@ -73,6 +73,7 @@ sealed trait Centre
 }
 
 object Centre {
+  import org.biobank.domain.Location._
 
   val disabledState = new EntityState("disabled")
   val enabledState = new EntityState("enabled")
@@ -187,7 +188,7 @@ final case class DisabledCentre(id:           CentreId,
   }
 
   /** removes a location from this centre. */
-  def removeLocation(locationUniqueId: String): DomainValidation[DisabledCentre] = {
+  def removeLocation(locationUniqueId: LocationId): DomainValidation[DisabledCentre] = {
     locations.find { x => x.uniqueId == locationUniqueId }.fold {
       DomainError(s"location does not exist: $locationUniqueId")
         .failureNel[DisabledCentre]

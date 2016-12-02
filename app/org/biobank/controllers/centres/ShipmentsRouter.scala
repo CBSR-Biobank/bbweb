@@ -52,7 +52,7 @@ class ShipmentsRouter @Inject()(controller: ShipmentsController) extends SimpleR
       controller.skipStateUnpacked(id)
 
     case GET(p"/specimens/canadd/${shipmentId(shId)}/$invId") =>
-      controller.canAddSpecimen(shId, invId)
+      controller.canAddSpecimens(shId, invId)
 
     case GET(p"/specimens/${shipmentId(shId)}/$shSpcId") =>
       controller.getSpecimen(shId, shSpcId)

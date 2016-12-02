@@ -65,7 +65,7 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
     }
   }
 
-  def received(): DomainValidation[ShipmentSpecimen] = {
+  def received: DomainValidation[ShipmentSpecimen] = {
     if (state != ShipmentItemState.Present) {
       DomainError(s"cannot change state to RECEIVED: invalid state: $state").failureNel[ShipmentSpecimen]
     } else {
@@ -75,7 +75,7 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
     }
   }
 
-  def missing(): DomainValidation[ShipmentSpecimen] = {
+  def missing: DomainValidation[ShipmentSpecimen] = {
     if (state != ShipmentItemState.Present) {
       DomainError(s"cannot change state to MISSING: invalid state: $state").failureNel[ShipmentSpecimen]
     } else {
@@ -85,7 +85,7 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
     }
   }
 
-  def extra(): DomainValidation[ShipmentSpecimen] = {
+  def extra: DomainValidation[ShipmentSpecimen] = {
     if (state != ShipmentItemState.Present) {
       DomainError(s"cannot change state to EXTRA: invalid state: $state").failureNel[ShipmentSpecimen]
     } else {

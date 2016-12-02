@@ -35,8 +35,8 @@ trait Processor extends PersistentActor with ActorLogging {
     )
   }
 
-  protected def validNewIdentity[I <: IdentifiedValueObject[_], R <: ReadWriteRepository[I,_]](
-    id: I, repository: R): ServiceValidation[I] = {
+  protected def validNewIdentity[I <: IdentifiedValueObject[_], R <: ReadWriteRepository[I,_]]
+    (id: I, repository: R): ServiceValidation[I] = {
     if (repository.getByKey(id).isSuccess) {
       ServiceError(s"could not generate a unique ID: $id").failureNel[I]
     } else {

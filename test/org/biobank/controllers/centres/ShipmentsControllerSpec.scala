@@ -2,7 +2,7 @@ package org.biobank.controllers.centres
 
 import com.github.nscala_time.time.Imports._
 import org.biobank.controllers.PagedResultsSpec
-import org.biobank.domain.EntityState
+import org.biobank.domain.{EntityState, LocationId}
 import org.biobank.domain.centre._
 import org.joda.time.DateTime
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -46,8 +46,8 @@ class ShipmentsControllerSpec
         'version        (shipment.version + 1),
         'courierName    (shipment.courierName),
         'trackingNumber (shipment.trackingNumber),
-        'fromLocationId (shipment.fromLocationId),
-        'toLocationId   (shipment.toLocationId))
+        'fromLocationId (shipment.fromLocationId.id),
+        'toLocationId   (shipment.toLocationId.id))
 
       checkTimeStamps(repoShipment, shipment.timeAdded, DateTime.now)
     }
@@ -331,8 +331,8 @@ class ShipmentsControllerSpec
       def shipmentToAddJson(shipment: Shipment) =
         Json.obj("courierName"    -> shipment.courierName,
                  "trackingNumber" -> shipment.trackingNumber,
-                 "fromLocationId" -> shipment.fromLocationId,
-                 "toLocationId"   -> shipment.toLocationId,
+                 "fromLocationId" -> shipment.fromLocationId.id,
+                 "toLocationId"   -> shipment.toLocationId.id,
                  "timePacked"     -> shipment.timePacked)
 
       "add a shipment" in {
@@ -355,8 +355,8 @@ class ShipmentsControllerSpec
             'version        (0L),
             'courierName    (f.shipment.courierName),
             'trackingNumber (f.shipment.trackingNumber),
-            'fromLocationId (f.shipment.fromLocationId),
-            'toLocationId   (f.shipment.toLocationId))
+            'fromLocationId (f.shipment.fromLocationId.id),
+            'toLocationId   (f.shipment.toLocationId.id))
 
           checkTimeStamps(repoShipment, DateTime.now, None)
           compareTimestamps(repoShipment, f.shipment)
@@ -382,7 +382,7 @@ class ShipmentsControllerSpec
       }
 
       "fail when adding a shipment with no FROM location id" in {
-        val shipment = createdShipmentFixture.shipment.copy(fromLocationId = "")
+        val shipment = createdShipmentFixture.shipment.copy(fromLocationId = LocationId(""))
         val json = makeRequest(POST, uri, NOT_FOUND, shipmentToAddJson(shipment))
 
         (json \ "status").as[String] must include ("error")
@@ -391,7 +391,7 @@ class ShipmentsControllerSpec
       }
 
       "fail when adding a shipment with no TO location id" in {
-        val shipment = createdShipmentFixture.shipment.copy(toLocationId = "")
+        val shipment = createdShipmentFixture.shipment.copy(toLocationId = LocationId(""))
         val json = makeRequest(POST, uri, NOT_FOUND, shipmentToAddJson(shipment))
 
         (json \ "status").as[String] must include ("error")
@@ -422,8 +422,8 @@ class ShipmentsControllerSpec
             'version        (f.shipment.version + 1),
             'courierName    (newCourier),
             'trackingNumber (f.shipment.trackingNumber),
-            'fromLocationId (f.shipment.fromLocationId),
-            'toLocationId   (f.shipment.toLocationId))
+            'fromLocationId (f.shipment.fromLocationId.id),
+            'toLocationId   (f.shipment.toLocationId.id))
 
           checkTimeStamps(repoShipment, f.shipment.timeAdded, DateTime.now)
           compareTimestamps(repoShipment, f.shipment)
@@ -481,8 +481,8 @@ class ShipmentsControllerSpec
             'version        (f.shipment.version + 1),
             'courierName    (f.shipment.courierName),
             'trackingNumber (newTrackingNumber),
-            'fromLocationId (f.shipment.fromLocationId),
-            'toLocationId   (f.shipment.toLocationId))
+            'fromLocationId (f.shipment.fromLocationId.id),
+            'toLocationId   (f.shipment.toLocationId.id))
 
           checkTimeStamps(repoShipment, f.shipment.timeAdded, DateTime.now)
           compareTimestamps(repoShipment, f.shipment)
@@ -531,7 +531,7 @@ class ShipmentsControllerSpec
         centreRepository.put(centre)
 
         val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
-                                  "locationId"      -> newLocation.uniqueId)
+                                  "locationId"      -> newLocation.uniqueId.id)
         val json = makeRequest(POST, uri(f.shipment, "fromlocation"), updateJson)
                               (json \ "status").as[String] must include ("success")
 
@@ -544,8 +544,8 @@ class ShipmentsControllerSpec
             'version        (f.shipment.version + 1),
             'courierName    (f.shipment.courierName),
             'trackingNumber (f.shipment.trackingNumber),
-            'fromLocationId (newLocation.uniqueId),
-            'toLocationId   (f.shipment.toLocationId))
+            'fromLocationId (newLocation.uniqueId.id),
+            'toLocationId   (f.shipment.toLocationId.id))
 
           checkTimeStamps(repoShipment, f.shipment.timeAdded, DateTime.now)
           compareTimestamps(repoShipment, f.shipment)
@@ -571,7 +571,7 @@ class ShipmentsControllerSpec
         val badLocation = factory.createLocation
 
         val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
-                                  "locationId"      -> badLocation.uniqueId)
+                                  "locationId"      -> badLocation.uniqueId.id)
         val json = makeRequest(POST, uri(f.shipment, "fromlocation"), NOT_FOUND, updateJson)
 
         (json \ "status").as[String] must include ("error")
@@ -587,7 +587,7 @@ class ShipmentsControllerSpec
           val shipment = f.shipments(state)
           shipmentRepository.put(shipment)
           val updateJson = Json.obj("expectedVersion" -> shipment.version,
-                                    "locationId"      -> badLocation.uniqueId)
+                                    "locationId"      -> badLocation.uniqueId.id)
 
           val json = makeRequest(POST, uri(shipment, "fromlocation"), BAD_REQUEST, updateJson)
 
@@ -610,7 +610,7 @@ class ShipmentsControllerSpec
         centreRepository.put(centre)
 
         val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
-                                  "locationId"      -> newLocation.uniqueId)
+                                  "locationId"      -> newLocation.uniqueId.id)
         val json = makeRequest(POST, uri(f.shipment, "tolocation"), updateJson)
                               (json \ "status").as[String] must include ("success")
 
@@ -623,8 +623,8 @@ class ShipmentsControllerSpec
             'version        (f.shipment.version + 1),
             'courierName    (f.shipment.courierName),
             'trackingNumber (f.shipment.trackingNumber),
-            'fromLocationId (f.shipment.fromLocationId),
-            'toLocationId   (newLocation.uniqueId))
+            'fromLocationId (f.shipment.fromLocationId.id),
+            'toLocationId   (newLocation.uniqueId.id))
 
           checkTimeStamps(repoShipment, f.shipment.timeAdded, DateTime.now)
           compareTimestamps(repoShipment, f.shipment)
@@ -650,7 +650,7 @@ class ShipmentsControllerSpec
         val badLocation = factory.createLocation
 
         val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
-                                  "locationId"      -> badLocation.uniqueId)
+                                  "locationId"      -> badLocation.uniqueId.id)
         val json = makeRequest(POST, uri(f.shipment, "tolocation"), NOT_FOUND, updateJson)
 
         (json \ "status").as[String] must include ("error")
@@ -666,7 +666,7 @@ class ShipmentsControllerSpec
           val shipment = f.shipments(state)
           shipmentRepository.put(shipment)
           val updateJson = Json.obj("expectedVersion" -> shipment.version,
-                                    "locationId"      -> badLocation.uniqueId)
+                                    "locationId"      -> badLocation.uniqueId.id)
 
           val json = makeRequest(POST, uri(shipment, "tolocation"), BAD_REQUEST, updateJson)
 
@@ -700,8 +700,8 @@ class ShipmentsControllerSpec
             'version        (shipment.version + 1),
             'courierName    (shipment.courierName),
             'trackingNumber (shipment.trackingNumber),
-            'fromLocationId (shipment.fromLocationId),
-            'toLocationId   (shipment.toLocationId))
+            'fromLocationId (shipment.fromLocationId.id),
+            'toLocationId   (shipment.toLocationId.id))
 
           checkTimeStamps(repoShipment, shipment.timeAdded, DateTime.now)
         }

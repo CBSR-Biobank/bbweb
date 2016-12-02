@@ -386,7 +386,7 @@ class Factory {
   }
 
   def createLocation(): Location = {
-    val location = Location(uniqueId       = nameGenerator.next[Location],
+    val location = Location(uniqueId       = LocationId(nameGenerator.next[Location]),
                             name           = nameGenerator.next[Location],
                             street         = nameGenerator.next[Location],
                             city           = nameGenerator.next[Location],

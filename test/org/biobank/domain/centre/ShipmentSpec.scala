@@ -1,7 +1,7 @@
 package org.biobank.domain.centre
 
 import com.github.nscala_time.time.Imports._
-import org.biobank.domain.{ DomainFreeSpec, DomainValidation }
+import org.biobank.domain.{ DomainFreeSpec, DomainValidation, LocationId }
 import org.biobank.fixture.NameGenerator
 import org.slf4j.LoggerFactory
 import scalaz.Scalaz._
@@ -66,9 +66,9 @@ class ShipmentSpec extends DomainFreeSpec {
             'courierName    (shipment.courierName),
             'trackingNumber (shipment.trackingNumber),
             'fromCentreId   (shipment.fromCentreId),
-            'fromLocationId (shipment.fromLocationId),
+            'fromLocationId (shipment.fromLocationId.id),
             'toCentreId     (shipment.toCentreId),
-            'toLocationId   (shipment.toLocationId),
+            'toLocationId   (shipment.toLocationId.id),
             'timePacked     (shipment.timePacked),
             'timeSent       (shipment.timeSent),
             'timeReceived   (shipment.timeReceived),
@@ -196,12 +196,12 @@ class ShipmentSpec extends DomainFreeSpec {
       }
 
       "with an invalid from location" in {
-        val shipment = factory.createShipment.copy(fromLocationId = "")
+        val shipment = factory.createShipment.copy(fromLocationId = LocationId(""))
         createFrom(shipment) mustFail "FromLocationIdInvalid"
       }
 
       "with an invalid to location" in {
-        val shipment = factory.createShipment.copy(toLocationId = "")
+        val shipment = factory.createShipment.copy(toLocationId = LocationId(""))
         createFrom(shipment) mustFail "ToLocationIdInvalid"
       }
 

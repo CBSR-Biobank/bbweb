@@ -78,10 +78,10 @@ class SpecimensServiceImpl @Inject() (
       locationName       <- centre.locationName(specimen.locationId)
     } yield {
       val originLocationInfo = CentreLocationInfo(originCentre.id.id,
-                                                  specimen.originLocationId,
+                                                  specimen.originLocationId.id,
                                                   originLocationName)
       val locationInfo = CentreLocationInfo(centre.id.id,
-                                            specimen.locationId,
+                                            specimen.locationId.id,
                                             locationName)
       specimen.createDto(cevent, specimenSpec, originLocationInfo, locationInfo)
     }

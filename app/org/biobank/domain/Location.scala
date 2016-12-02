@@ -2,6 +2,11 @@ package org.biobank.domain
 
 import play.api.libs.json._
 
+final case class LocationId(val id: String) extends AnyVal {
+  override def toString = id
+}
+
+
 /**
  * A Location is a street address.
  *
@@ -23,7 +28,7 @@ import play.api.libs.json._
  *
  * @param countryIsoCode the ISO country code for the country the location is in.
  */
-final case class Location(uniqueId:       String,
+final case class Location(uniqueId:       LocationId,
                           name:           String,
                           street:         String,
                           city:           String,
@@ -35,19 +40,21 @@ final case class Location(uniqueId:       String,
 
   override def equals(that: Any): Boolean = {
     that match {
-      case that: Location => this.uniqueId.equalsIgnoreCase(that.uniqueId)
+      case that: Location => this.uniqueId.id.equalsIgnoreCase(that.uniqueId.id)
       case _ => false
     }
   }
 
   override def hashCode:Int = {
-    uniqueId.toUpperCase.hashCode
+    uniqueId.id.toUpperCase.hashCode
   }
 }
 
 object Location {
   import org.biobank.domain.CommonValidations._
 
+  implicit val locationIdReader: Reads[LocationId] = (__).read[String].map( new LocationId(_) )
+  implicit val locationIdWriter: Writes[LocationId] = Writes{ (id: LocationId) => JsString(id.id) }
   implicit val locationWriter: Writes[Location] = Json.writes[Location]
 
   def create(name:           String,
@@ -58,7 +65,7 @@ object Location {
              poBoxNumber:    Option[String],
              countryIsoCode: String) = {
     validate(name, street, city, province, postalCode, poBoxNumber,countryIsoCode).map { _ =>
-      val uniqueId = java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase
+      val uniqueId = LocationId(java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase)
       Location(uniqueId, name, street, city, province, postalCode, poBoxNumber, countryIsoCode)
     }
   }
