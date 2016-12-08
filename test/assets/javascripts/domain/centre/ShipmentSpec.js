@@ -28,6 +28,7 @@ define(function (require) {
 
       self.injectDependencies('$httpBackend',
                               'Shipment',
+                              'ShipmentSpecimen',
                               'ShipmentState',
                               'Specimen',
                               'funutils',
@@ -271,15 +272,14 @@ define(function (require) {
             jsonShipment = self.factory.shipment(),
             shipment     = new self.Shipment(jsonShipment);
 
-        this.updateEntity.call(this,
-                               shipment,
-                               'updateCourierName',
-                               shipment.courierName,
-                               uri('courier', shipment.id),
-                               { courierName: shipment.courierName },
-                               jsonShipment,
-                               this.expectShipment,
-                               failTest);
+        this.updateEntity(shipment,
+                          'updateCourierName',
+                          shipment.courierName,
+                          uri('courier', shipment.id),
+                          { courierName: shipment.courierName },
+                          jsonShipment,
+                          this.expectShipment,
+                          failTest);
       });
 
       it('can update the tracking number on a shipment', function() {
@@ -287,47 +287,44 @@ define(function (require) {
             jsonShipment = self.factory.shipment(),
             shipment     = new self.Shipment(jsonShipment);
 
-        this.updateEntity.call(this,
-                               shipment,
-                               'updateTrackingNumber',
-                               shipment.trackingNumber,
-                               uri('trackingnumber', shipment.id),
-                               { trackingNumber: shipment.trackingNumber },
-                               jsonShipment,
-                               this.expectShipment,
-                               failTest);
+        this.updateEntity(shipment,
+                          'updateTrackingNumber',
+                          shipment.trackingNumber,
+                          uri('trackingnumber', shipment.id),
+                          { trackingNumber: shipment.trackingNumber },
+                          jsonShipment,
+                          this.expectShipment,
+                          failTest);
       });
 
       it('can update the FROM location on a shipment', function() {
         var self         = this,
-            jsonShipment = self.factory.shipment(),
-            shipment     = new self.Shipment(jsonShipment);
+        jsonShipment = self.factory.shipment(),
+        shipment     = new self.Shipment(jsonShipment);
 
-        this.updateEntity.call(this,
-                               shipment,
-                               'updateFromLocation',
-                               shipment.fromLocationId,
-                               uri('fromlocation', shipment.id),
-                               { locationId: shipment.fromLocationId },
-                               jsonShipment,
-                               this.expectShipment,
-                               failTest);
+        this.updateEntity(shipment,
+                          'updateFromLocation',
+                          shipment.fromLocationId,
+                          uri('fromlocation', shipment.id),
+                          { locationId: shipment.fromLocationId },
+                          jsonShipment,
+                          this.expectShipment,
+                          failTest);
       });
 
       it('can update the TO location on a shipment', function() {
         var self         = this,
-            jsonShipment = self.factory.shipment(),
-            shipment     = new self.Shipment(jsonShipment);
+        jsonShipment = self.factory.shipment(),
+        shipment     = new self.Shipment(jsonShipment);
 
-        this.updateEntity.call(this,
-                               shipment,
-                               'updateToLocation',
-                               shipment.toLocationId,
-                               uri('tolocation', shipment.id),
-                               { locationId: shipment.toLocationId },
-                               jsonShipment,
-                               this.expectShipment,
-                               failTest);
+        this.updateEntity(shipment,
+                          'updateToLocation',
+                          shipment.toLocationId,
+                          uri('tolocation', shipment.id),
+                          { locationId: shipment.toLocationId },
+                          jsonShipment,
+                          this.expectShipment,
+                          failTest);
       });
 
       describe('can change state on a shipment', function() {
@@ -421,27 +418,25 @@ define(function (require) {
         });
 
         it('can skip state to SENT', function() {
-          this.updateEntity.call(this,
-                                 this.shipment,
-                                 'skipToStateSent',
-                                 [ this.time, this.time ],
-                                 uri('state/skip-to-sent', this.shipment.id ),
-                                 { timePacked: this.time, timeSent: this.time },
-                                 this.jsonShipment,
-                                 this.expectShipment,
-                                 failTest);
+          this.updateEntity(this.shipment,
+                            'skipToStateSent',
+                            [ this.time, this.time ],
+                            uri('state/skip-to-sent', this.shipment.id ),
+                            { timePacked: this.time, timeSent: this.time },
+                            this.jsonShipment,
+                            this.expectShipment,
+                            failTest);
         });
 
         it('can skip state to UNPACKED', function() {
-          this.updateEntity.call(this,
-                                 this.shipment,
-                                 'skipToStateUnpacked',
-                                 [ this.time, this.time ],
-                                 uri('state/skip-to-unpacked', this.shipment.id ),
-                                 { timeReceived: this.time, timeUnpacked: this.time },
-                                 this.jsonShipment,
-                                 this.expectShipment,
-                                 failTest);
+          this.updateEntity(this.shipment,
+                            'skipToStateUnpacked',
+                            [ this.time, this.time ],
+                            uri('state/skip-to-unpacked', this.shipment.id ),
+                            { timeReceived: this.time, timeUnpacked: this.time },
+                            this.jsonShipment,
+                            this.expectShipment,
+                            failTest);
         });
 
 
@@ -484,9 +479,9 @@ define(function (require) {
 
     it('can add specimen', function() {
       var self = this,
-          jsonSpecimen = self.factory.specimen(),
-          shipment = new self.Shipment(self.factory.shipment()),
-          inventoryId = self.factory.stringNext();
+      jsonSpecimen = self.factory.specimen(),
+      shipment = new self.Shipment(self.factory.shipment()),
+      inventoryId = self.factory.stringNext();
 
       self.$httpBackend.whenGET(uri('specimens/canadd', shipment.id) + '/' + inventoryId)
         .respond(this.reply(jsonSpecimen));
@@ -502,10 +497,105 @@ define(function (require) {
     });
 
 
+
+
+    describe('when adding shipment specimens', function() {
+
+      it('can add a shipment', function() {
+        var self   = this,
+        jsonSpecimen = self.factory.specimen(),
+        jsonShipment = self.factory.shipment(),
+        shipment = new self.Shipment(jsonShipment);
+
+
+        self.$httpBackend.expectPOST(uri('specimens', shipment.id)).respond(this.reply(jsonShipment));
+
+        shipment.addSpecimens([ jsonSpecimen.id ]).then(checkReply).catch(failTest);
+        self.$httpBackend.flush();
+
+        function checkReply(reply) {
+          expect(reply).toEqual(jasmine.any(self.Shipment));
+        }
+      });
+
+      xit('can add specimens in containers to shipments', function () {
+        fail('needs to be implemented');
+      });
+
+    });
+
+    describe('when updating a shipment specimen', function() {
+
+      it('can update the shipment container on a shipment specimen', function() {
+        var self   = this,
+            jsonSs = self.factory.shipmentSpecimen(),
+            ss     = new self.ShipmentSpecimen(jsonSs),
+            jsonShipment = self.factory.shipment(),
+            shipment = new self.Shipment(jsonShipment),
+            reqJson = {
+              shipmentContainerId: ss.shipmentContainerId,
+              shipmentSpecimenData: [{
+                shipmentSpecimenId: ss.id,
+                expectedVersion: ss.version
+              }]
+            };
+
+        this.updateEntity(shipment,
+                          'updateShipmentContainerOnSpecimens',
+                          [ [ ss ], ss.shipmentContainerId],
+                          uri('specimens/container', shipment.id),
+                          reqJson,
+                          jsonShipment,
+                          this.expectShipment,
+                          failTest,
+                          false);
+      });
+
+      describe('can update the shipment specimen to RECEIVED state', function() {
+
+        var context = {};
+
+        beforeEach(inject(function (ShipmentItemState) {
+          context.stateChangeFuncName = 'tagSpecimensAsReceived';
+          context.shipmentSepcimenState = ShipmentItemState.RECEIVED;
+        }));
+
+        changeShipmentSpecimenStateSharedBehaviour(context);
+
+      });
+
+      describe('can update the shipment specimen to MISSING state', function() {
+
+        var context = {};
+
+        beforeEach(inject(function (ShipmentItemState) {
+          context.stateChangeFuncName = 'tagSpecimensAsMissing';
+          context.shipmentSepcimenState = ShipmentItemState.MISSING;
+        }));
+
+        changeShipmentSpecimenStateSharedBehaviour(context);
+
+      });
+
+      describe('can update the shipment specimen to EXTRA state', function() {
+
+        var context = {};
+
+        beforeEach(inject(function (ShipmentItemState) {
+          context.stateChangeFuncName = 'tagSpecimensAsExtra';
+          context.shipmentSepcimenState = ShipmentItemState.EXTRA;
+        }));
+
+        changeShipmentSpecimenStateSharedBehaviour(context);
+
+      });
+
+    });
+
     /**
-     * @param {String} context.stateChangeFuncName - the function to call to change the state.
+     * @param {string} context.stateChangeFuncName - the function to call to change the state.
      *
-     * @param {String} context.state - the new state to change to.
+     * @param {string} context.state - the new state to change to.
      *
      * @param {Object} context.jsonShipment - A Json object representing the shipment.
      *
@@ -520,8 +610,8 @@ define(function (require) {
 
         it('can change state', function() {
           var updateParams = [],
-              json    = {},
-              shipment = new this.Shipment(context.jsonShipment);
+          json    = {},
+          shipment = new this.Shipment(context.jsonShipment);
 
           if (context.stateChangeTime) {
             updateParams.push(context.stateChangeTime);
@@ -541,6 +631,43 @@ define(function (require) {
       });
     }
 
+    /**
+     * @param {string} context.stateChangeFuncName - the function to call to change the state.
+     *
+     * @param {string} context.shipmentSepcimenState - the new state to change to.
+     *
+     */
+    function changeShipmentSpecimenStateSharedBehaviour(context) {
+
+      it('can change state on a shipment specimen', function() {
+        var self   = this,
+            jsonSs = self.factory.shipmentSpecimen(),
+            ss     = new self.ShipmentSpecimen(jsonSs),
+            jsonShipment = self.factory.shipment(),
+            shipment = new self.Shipment(jsonShipment),
+            reqJson = {
+              shipmentSpecimenData: [{
+                shipmentSpecimenId: ss.id,
+                expectedVersion: ss.version
+              }]
+            };
+
+        expect(context.shipmentSepcimenState).toBeDefined();
+
+        this.updateEntity(shipment,
+                          context.stateChangeFuncName,
+                          [ [ ss ] ],
+                          uri('specimens/' + context.shipmentSepcimenState, shipment.id),
+                          reqJson,
+                          jsonShipment,
+                          this.expectShipment,
+                          failTest,
+                          false);
+
+      });
+
+    }
+
     // used by promise tests
     function failTest(error) {
       expect(error).toBeUndefined();
@@ -548,9 +675,9 @@ define(function (require) {
 
     function uri(/* path, shipmentId */) {
       var result = '/shipments/',
-          args = _.toArray(arguments),
-          shipmentId,
-          path;
+      args = _.toArray(arguments),
+      shipmentId,
+      path;
 
       if (args.length > 0) {
         path = args.shift();

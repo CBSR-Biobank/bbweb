@@ -37,7 +37,7 @@ define(['lodash'], function (_) {
      *
      * @param {string} url - the URL on the server where the request will be POSTed to.
      *
-     * @param {string} json - the JSON to pass along with the POST request.
+     * @param {string} reqJson - the JSON to pass along with the POST request.
      *
      * @param {object} reply - The mocked reply from the server.
      *
@@ -45,17 +45,24 @@ define(['lodash'], function (_) {
      * successfull.
      *
      * @param {function(string)} catchFunc the fail function to be called if the update to the entity fails.
+     *
+     * @param {boolean} [appendExpectedVersion] - If TRUE, the 'expectedVersion' field is added to the request
+     *        JSON. Default value is TRUE.
      */
     EntityTestSuiteMixin.prototype.updateEntity = function (entity,
                                                             updateFuncName,
                                                             updateParams,
                                                             url,
-                                                            json,
+                                                            reqJson,
                                                             reply,
                                                             thenFunc,
-                                                            catchFunc) {
-      _.extend(json, { expectedVersion: 0 });
-      $httpBackend.expectPOST(url, json).respond(201, { status: 'success', data: reply });
+                                                            catchFunc,
+                                                            appendExpectedVersion) {
+      appendExpectedVersion = _.isBoolean(appendExpectedVersion) ? appendExpectedVersion : true;
+      if (appendExpectedVersion) {
+        _.extend(reqJson, { expectedVersion: 0 });
+      }
+      $httpBackend.expectPOST(url, reqJson).respond(201, { status: 'success', data: reply });
       expect(entity[updateFuncName]).toBeFunction();
 
       if (!Array.isArray(updateParams)) {

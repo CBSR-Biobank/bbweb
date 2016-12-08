@@ -266,27 +266,6 @@ define(function (require) {
     };
 
     /**
-     * Adds a shipment specimen to the system.
-     *
-     * @param {string} shipmentId - the shipment this ShipmentSpecimen will belong to.
-     *
-     * @param {string} specimenId - the specimen to be added to the shipment.
-     *
-     * @param {string} shipmentContainerId - the container this specimen will be found in the shipment.
-     *
-     * @returns {Promise} The added shipment wrapped in a promise.
-     */
-    ShipmentSpecimen.add = function (shipmentId, specimenId, shipmentContainerId) {
-      var json = { shipmentId: shipmentId, specimenId: specimenId };
-      if (shipmentContainerId) {
-        _.extend(json, { shipmentContainerId: shipmentContainerId });
-      }
-      return biobankApi.post(uri(shipmentId), json).then(function(reply) {
-        return ShipmentSpecimen.asyncCreate(reply);
-      });
-    };
-
-    /**
      * Creates a Shipment Specimen from a server reply but first validates that it has a valid schema.
      *
      * <p>A wrapper for {@link domian.centres.Shipment#asyncCreate}.</p>
@@ -307,51 +286,6 @@ define(function (require) {
     ShipmentSpecimen.prototype.remove = function () {
       var url = sprintf('%s/%s/%d', uri(this.shipmentId), this.id, this.version);
       return biobankApi.del(url);
-    };
-
-    /**
-     * Updates the shipment container that holds this specimen.
-     *
-     * @param {String} shipmentContainerId - the ID of the shipment container that holds this
-     * specimen.
-     *
-     * @returns {Promise} A copy of this shipment, but with the state set to Lost.
-     */
-    ShipmentSpecimen.prototype.updateShipmentContainer = function (shipmentContainerId) {
-      return this.update.call(this, uri('container', this.shipmentId, this.id), {});
-    };
-
-    /**
-     * Updates the state of this shipment specimen to be RECEIVED.
-     *
-     * <p>Note that only specimens in unpacked shipments can have the state updated.
-     *
-     * @returns {Promise} A copy of this shipment, but with the state set to Lost.
-     */
-    ShipmentSpecimen.prototype.received = function () {
-      return this.update.call(this, uri('received', this.shipmentId, this.id), {});
-    };
-
-    /**
-     * Updates the state of this shipment specimen to be MISSING.
-     *
-     * <p>Note that only specimens in unpacked shipments can have the state updated.
-     *
-     * @returns {Promise} A copy of this shipment, but with the state set to Lost.
-     */
-    ShipmentSpecimen.prototype.missing = function () {
-      return this.update.call(this, uri('missing', this.shipmentId, this.id), {});
-    };
-
-    /**
-     * Updates the state of this shipment specimen to be EXTRA.
-     *
-     * <p>Note that only specimens in unpacked shipments can have the state updated.
-     *
-     * @returns {Promise} A copy of this shipment, but with the state set to Lost.
-     */
-    ShipmentSpecimen.prototype.extra = function () {
-      return this.update.call(this, uri('extra', this.shipmentId, this.id), {});
     };
 
     function uri(/* path, shipmentId, shipmentSpecimenId */) {

@@ -69,6 +69,8 @@ define(function (require) {
      * [create()]{@link domain.centres.Shipment.create} or [asyncCreate()]{@link
      * domain.centres.Shipment.asyncCreate} to create objects returned by the server.
      *
+     * Use [addSpecimens()]{@link domain.centres.Shipment.addSpecimens} to add specimens to a shipment.
+     *
      * @classdesc Represents a transfer of {@link domain.participants.Specimen Specimens} and / or {@link
      * domain.containers.Container Containers} from one {@link domain.centres.Centre Centre} to another.
      *
@@ -538,7 +540,7 @@ define(function (require) {
      *  - the specimen is located at the same location that the shipment is coming from
      *  - the specimen is not already part of the shipment
      *
-     *  @param {string} specimenInventoryId - the inventory ID of the specimen.
+     * @param {string} specimenInventoryId - the inventory ID of the specimen.
      *
      * @returns {Promise} The promise resolves to "true" if the specimen can be added to the shipment..
      */
@@ -551,6 +553,125 @@ define(function (require) {
         .then(function (reply) {
           return Specimen.asyncCreate(reply);
         });
+    };
+
+    /**
+     * Adds specimens to a shipment.
+     *
+     * @param {string[]} specimenInventoryIds - The inventory IDs for the specimens to be added to the
+     * shipment. Note that the location for each specimen must be the same as the location the shipment is
+     * coming from.
+     *
+     * @param {string} [shipmentContainerId] - the container this specimen will be found in the shipment.
+     *
+     * @returns {Promise} A copy of this shipment.
+     */
+    Shipment.prototype.addSpecimens = function (specimenInventoryIds, shipmentContainerId) {
+      if (!Array.isArray(specimenInventoryIds)) {
+        throw new DomainError('specimenInventoryIds should be an array');
+      }
+      var reqJson = { specimenIds: specimenInventoryIds };
+      if (shipmentContainerId) {
+        _.extend(reqJson, { shipmentContainerId: shipmentContainerId });
+      }
+      return biobankApi.post(uri('specimens', this.id), reqJson).then(function(reply) {
+        return Shipment.asyncCreate(reply);
+      });
+    };
+
+    /**
+     * Assigns a container to specimens contained in a shipment.
+     *
+     * @param {domain.centres.ShipmentSpecimen[]} shipmentSpecimens - The shipment specimens to be
+     * associated with the container.
+     *
+     * @param {String} [shipmentContainerId] - the ID of the shipment container that holds this specimen. If
+     * this parameter is not defined, then the container is removed from the shipment specimens.
+     *
+     * @returns {Promise} A copy of this shipment.
+     */
+    Shipment.prototype.updateShipmentContainerOnSpecimens = function (shipmentSpecimens, shipmentContainerId) {
+      var reqJson;
+
+      if (!Array.isArray(shipmentSpecimens)) {
+        throw new DomainError('shipmentSpecimens should be an array');
+      }
+      reqJson =  {
+        shipmentSpecimenData: _.map(shipmentSpecimens, function (ss) {
+          return {
+            shipmentSpecimenId: ss.id,
+            expectedVersion: ss.version
+          };
+        })
+      };
+      if (shipmentContainerId) {
+        _.extend(reqJson, { shipmentContainerId: shipmentContainerId });
+      }
+      return biobankApi.post(uri('specimens/container', this.id), reqJson).then(function(reply) {
+        return Shipment.asyncCreate(reply);
+      });
+    };
+
+    function tagSpecimens(shipmentSpecimens, urlPath) {
+      /*jshint validthis:true */
+      var reqJson;
+
+      if (!Array.isArray(shipmentSpecimens)) {
+        throw new DomainError('shipmentSpecimens should be an array');
+      }
+      reqJson =  {
+        shipmentSpecimenData: _.map(shipmentSpecimens, function (ss) {
+          return {
+            shipmentSpecimenId: ss.id,
+            expectedVersion: ss.version
+          };
+        })
+      };
+      return biobankApi.post(uri('specimens/' + urlPath, this.id), reqJson).then(function(reply) {
+        return Shipment.asyncCreate(reply);
+      });
+    }
+
+    /**
+     * Updates the state of shipment specimens to be RECEIVED.
+     *
+     * <p>Note that only specimens in unpacked shipments can have the state updated.
+     *
+     * @param {domain.centres.ShipmentSpecimen[]} shipmentSpecimens - The shipment specimens to be
+     * marked as RECEIVED.
+     *
+     * @returns {Promise} A copy of this shipment.
+     */
+    Shipment.prototype.tagSpecimensAsReceived = function (shipmentSpecimens) {
+      return tagSpecimens.call(this, shipmentSpecimens, 'received');
+    };
+
+    /**
+     * Updates the state of shipment specimens to be MISSING.
+     *
+     * <p>Note that only specimens in unpacked shipments can have the state updated.
+     *
+     * @param {domain.centres.ShipmentSpecimen[]} shipmentSpecimens - The shipment specimens to be
+     * marked as MISSING.
+     *
+     * @returns {Promise} A copy of this shipment.
+     */
+    Shipment.prototype.tagSpecimensAsMissing = function (shipmentSpecimens) {
+      return tagSpecimens.call(this, shipmentSpecimens, 'missing');
+    };
+
+    /**
+     * Updates the state of shipment specimens to be EXTRA.
+     *
+     * <p>Note that only specimens in unpacked shipments can have the state updated.
+     *
+     * @param {domain.centres.ShipmentSpecimen[]} shipmentSpecimens - The shipment specimens to be
+     * marked as EXTRA.
+     *
+     * @returns {Promise} A copy of this shipment.
+     */
+    Shipment.prototype.tagSpecimensAsExtra = function (shipmentSpecimens) {
+      return tagSpecimens.call(this, shipmentSpecimens, 'extra');
     };
 
     function uri(/* path, shipmentId */) {
