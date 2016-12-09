@@ -570,7 +570,7 @@ define(function (require) {
       if (!Array.isArray(specimenInventoryIds)) {
         throw new DomainError('specimenInventoryIds should be an array');
       }
-      var reqJson = { specimenIds: specimenInventoryIds };
+      var reqJson = { specimenInventoryIds: specimenInventoryIds };
       if (shipmentContainerId) {
         _.extend(reqJson, { shipmentContainerId: shipmentContainerId });
       }

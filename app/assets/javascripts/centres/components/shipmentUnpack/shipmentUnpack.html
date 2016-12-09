@@ -17,39 +17,62 @@
       </div>
     </h1>
   </div>
+  <div class="row">
+    <div class="col-md-12">
+      <uib-tabset active="vm.active">
+        <uib-tab ng-repeat="tab in vm.tabs"
+          heading="{{tab.heading}}"
+          ui-sref="{{tab.sref}}"
+          ui-sref-opts="{reload: true}"
+          active="tab.active"></uib-tab>
+        </uib-tabset>
+    </div>
+  </div>
+
+  <div ui-view="unpackedShipmentDetails" style="margin-top: 10px;"></div>
 
   <shipping-info-view shipment="vm.shipment" read-only="true"> </shipping-info-view>
-  <div class="row">
-    <div class="col-lg-12">
-      <div class="panel panel-primary">
-        <div class="panel-heading">
-          <h3 class="panel-title" translate>Receive items</h3>
-        </div>
-        <div class="panel-body">
-          <form class="form-inline" name="UniqueId">
-            <div class="form-group">
-              <label for="nameFilter" translate>Enter one or more specimen inventory IDs to receive (comma separated):</label>
-              <input type="text"
-                     class="form-control"
-                     name="inventoryId"
-                     ng-model="vm.inventoryId"
-                     placeholder="{{'inventory id(s)'|translate}}">
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title" translate>Receive items</h3>
+    </div>
+    <div class="panel-body">
+      <form name="receiveSpecimens">
+        <div class="form-group">
+          <div class="row">
+            <div class="col-lg-12">
+              <label for="nameFilter" translate>
+                Enter one or more specimen inventory IDs to receive:
+              </label>
             </div>
-            <button type="submit"
-                    class="btn btn-sm btn-primary"
-                    ng-click="vm.onInventoryIdSubmit()">
-              <i class="glyphicon glyphicon-plus"></i>
-            </button>
-          </form>
+          </div>
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="input-group">
+                <input type="text"
+                       class="form-control"
+                       name="inventoryId"
+                       ng-model="vm.inventoryId"
+                       placeholder="{{'inventory ids (comma separated)'|translate}}">
+                <span class="input-group-btn">
+                  <button type="submit"
+                          class="btn btn-primary"
+                          ng-click="vm.onInventoryIdSubmit()">
+                    <i class="glyphicon glyphicon-plus"></i>
+                  </button>
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </form>
     </div>
   </div>
 
   <div class="row">
     <div class="col-lg-12">
       <collapsable-panel heading="{{'Unpacked specimens'|translate}}">
-        <shipment-specimens-actions-table
+        <ss-specimens-paged-table
             default-sort-field="inventoryId"
             refresh="vm.refreshNonReceivedSpecimensTable"
             show-item-state="true"
@@ -57,7 +80,7 @@
             no-specimens-message="{{'No specimens present in shipment'|translate}}"
             actions="vm.actions"
             on-action-selected="vm.nonReceivedSpecimensTableActionSelected">
-        </shipment-specimens-actions-table>
+        </ss-specimens-paged-table>
       </collapsable-panel>
     </div>
   </div>

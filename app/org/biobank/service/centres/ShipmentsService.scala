@@ -137,7 +137,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
             ServiceError(s"specimen not at shipment's from location").failureNel[Specimen]
           }
         }
-        canBeAdded <- specimenNotPresentInShipment(specimen)
+        canBeAdded   <- specimensNotPresentInShipment(specimen)
         specimenDto  <- specimensService.get(specimen.id)
       } yield specimenDto
   }

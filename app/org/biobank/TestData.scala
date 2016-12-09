@@ -195,7 +195,7 @@ class TestData @Inject() (config:                        Configuration,
     (env.mode == Mode.Dev) && config.getBoolean("application.testData.loadSpecimens").getOrElse(false)
 
   private val loadShipmentTestData =
-    (env.mode == Mode.Dev) && config.getBoolean("application.testData.load").getOrElse(false)
+    (env.mode == Mode.Dev) && config.getBoolean("application.testData.loadShipments").getOrElse(false)
 
   def addMultipleUsers() = {
     if (loadTestData) {

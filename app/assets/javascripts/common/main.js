@@ -16,6 +16,8 @@ define(function (require) {
 
   module = angular.module('biobank.common', [ modalInputModule.name, annotationsInputModule.name ])
 
+    .controller('TabbedPageController',   require('./controllers/TabbedPageController'))
+
     .component('dateTimePicker',          require('./components/dateTimePicker/dateTimePickerComponent'))
     .component('collapsablePanel',        require('./components/collapsablePanel/collapsablePanelComponent'))
     .component('progressTracker',         require('./components/progressTracker/progressTrackerComponent'))

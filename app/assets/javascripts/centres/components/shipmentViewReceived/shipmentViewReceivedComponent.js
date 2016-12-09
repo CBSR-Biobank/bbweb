@@ -64,7 +64,7 @@ define(function (require) {
           return vm.shipment.unpack(timeService.dateAndTimeToUtcString(timeUnpacked));
         })
         .then(function (shipment) {
-          return $state.go('home.shipping.unpack', { shipmentId: shipment.id });
+          return $state.go('home.shipping.unpack.info', { shipmentId: shipment.id });
         })
         .catch(notificationsService.updateError);
     }

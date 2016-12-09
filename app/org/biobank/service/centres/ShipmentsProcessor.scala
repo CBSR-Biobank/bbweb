@@ -15,6 +15,7 @@ import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
 import org.biobank.service.{Processor, ServiceError, ServiceValidation}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
+import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -902,21 +903,25 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
 
   private def createShipmentSpecimens(shipment:             Shipment,
                                       shipmentContainerId:  Option[ShipmentContainerId],
-                                      specimenInventoryIds: String*): ServiceValidation[Seq[ShipmentSpecimen]] = {
-    specimenInventoryIds.map { inventoryId =>
-      for {
-        specimen   <- specimenRepository.getByInventoryId(inventoryId)
-        canBeAdded <- specimenNotPresentInShipment(specimen)
-        atCentre   <- validCentreLocation(shipment, specimen)
-        id         <- validNewIdentity(shipmentSpecimenRepository.nextIdentity, shipmentSpecimenRepository)
-        ss         <- ShipmentSpecimen.create(id                  = id,
-                                              version             = 0L,
-                                              shipmentId          = shipment.id,
-                                              specimenId          = specimen.id,
-                                              state               = ShipmentItemState.Present,
-                                              shipmentContainerId = shipmentContainerId)
-      } yield ss
-    }.toList.sequenceU
+                                      specimenInventoryIds: String*):
+      ServiceValidation[Seq[ShipmentSpecimen]] = {
+
+    for {
+      specimens         <- inventoryIdsToSpecimens(specimenInventoryIds:_*)
+      validCentres      <- specimensAtCentre(shipment.fromLocationId, specimens:_*)
+      canBeAdded        <- specimensNotPresentInShipment(specimens:_*)
+      shipmentSpecimens <- specimens.map { specimen =>
+        for {
+          id <- validNewIdentity(shipmentSpecimenRepository.nextIdentity, shipmentSpecimenRepository)
+          ss <- ShipmentSpecimen.create(id                  = id,
+                                        version             = 0L,
+                                        shipmentId          = shipment.id,
+                                        specimenId          = specimen.id,
+                                        state               = ShipmentItemState.Present,
+                                        shipmentContainerId = shipmentContainerId)
+        } yield ss
+      }.sequenceU
+    } yield shipmentSpecimens
   }
 
 }

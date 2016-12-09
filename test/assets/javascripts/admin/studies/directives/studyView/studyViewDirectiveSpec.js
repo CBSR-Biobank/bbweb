@@ -82,7 +82,7 @@ define([
         self.$state.current.name = state;
         createController.call(self);
         childScope = self.element.isolateScope().$new();
-        childScope.$emit('study-view');
+        childScope.$emit('tabbed-page-update');
         self.scope.$digest();
         tab = _.find(self.controller.tabs, { sref: state });
         expect(tab.active).toBeTrue();

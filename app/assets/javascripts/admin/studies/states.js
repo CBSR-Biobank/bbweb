@@ -53,12 +53,7 @@ define(function () {
       views: {
         'main@': {
           template: '<study-add study="vm.study"></study-add>',
-          controller: [
-            'study',
-            function (study) {
-              this.study = study;
-            }
-          ],
+          controller: StudyController,
           controllerAs: 'vm'
         }
       },
@@ -79,12 +74,7 @@ define(function () {
       views: {
         'main@': {
           template: '<study-view study="vm.study"></study-view>',
-          controller: [
-            'study',
-            function (study) {
-              this.study = study;
-            }
-          ],
+          controller: StudyController,
           controllerAs: 'vm'
         }
       },
@@ -101,12 +91,7 @@ define(function () {
       views: {
         'studyDetails': {
           template: '<study-summary study="vm.study"></study-summary>',
-          controller: [
-            'study',
-            function (study) {
-              this.study = study;
-            }
-          ],
+          controller: StudyController,
           controllerAs: 'vm'
         }
       },
@@ -123,12 +108,7 @@ define(function () {
       views: {
         'studyDetails': {
           template: '<study-participants-tab study="vm.study"></study-participants-tab>',
-          controller: [
-            'study',
-            function(study) {
-              this.study = study;
-            }
-          ],
+          controller: StudyController,
           controllerAs: 'vm'
         }
       },
@@ -145,12 +125,7 @@ define(function () {
       views: {
         'studyDetails': {
           template: '<study-collection study="vm.study"></study-collection>',
-          controller: [
-            'study',
-            function(study) {
-              this.study = study;
-            }
-          ],
+          controller: StudyController,
           controllerAs: 'vm'
         }
       },
@@ -182,6 +157,12 @@ define(function () {
         displayName: '{{study.name}}'
       }
     });
+
+    StudyController.$inject = ['study'];
+
+    function StudyController(study) {
+      this.study = study;
+    }
   }
 
   return config;

@@ -24,14 +24,23 @@ define(['lodash'], function (_) {
   }
 
   StudyViewCtrl.$inject = [
+    '$controller',
     '$scope',
     '$window',
     '$state',
     'gettextCatalog'
   ];
 
-  function StudyViewCtrl($scope, $window, $state, gettextCatalog) {
+  function StudyViewCtrl($controller,$scope, $window, $state, gettextCatalog) {
     var vm = this;
+
+    // initialize this controller's base class
+    $controller('TabbedPageController',
+                {
+                  vm:     vm,
+                  $scope: $scope,
+                  $state: $state
+                });
 
     vm.tabs = [
       {
@@ -55,7 +64,6 @@ define(['lodash'], function (_) {
         active: false
       }
     ];
-    vm.activeTabUpdate = activeTabUpdate;
 
     init();
 
@@ -65,8 +73,6 @@ define(['lodash'], function (_) {
      * Initialize the panels to open state when viewing a new study.
      */
     function init() {
-      $scope.$on('study-view', activeTabUpdate);
-
       if (vm.study.id !== $window.localStorage.getItem('study.panel.studyId')) {
         // this way when the user selects a new study, the panels always default to open
         $window.localStorage.setItem('study.panel.processingTypes',                true);
@@ -76,29 +82,6 @@ define(['lodash'], function (_) {
         // remember the last viewed study
         $window.localStorage.setItem('study.panel.studyId', vm.study.id);
       }
-    }
-
-    /**
-     * Updates the selected tab.
-     *
-     * This function is called when event 'study-view' is emitted by child scopes.
-     *
-     * This event is emitted by the following child directives:
-     * <ul>
-     *   <li>studySummaryDirective</li>
-     *   <li>studyParticipantsTabDirective</li>
-     *   <li>studyCollectionDirective</li>
-     *   <li>processingTypesPanelDirective</li>
-     * </ul>
-     */
-    function activeTabUpdate(event) {
-      event.stopPropagation();
-      _.each(vm.tabs, function (tab, index) {
-        tab.active = ($state.current.name.indexOf(tab.sref) >= 0);
-        if (tab.active) {
-          vm.active = index;
-        }
-      });
     }
   }
 

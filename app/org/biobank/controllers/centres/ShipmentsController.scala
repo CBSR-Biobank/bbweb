@@ -154,7 +154,7 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
     }
 
   def specimenContainer(shipmentId: ShipmentId) =
-    commandActionAsync(Json.obj("shipmentId" -> shipmentId, "id" -> shipmentSpecimenId)) {
+    commandActionAsync(Json.obj("shipmentId" -> shipmentId)) {
       cmd: ShipmentSpecimenUpdateContainerCmd => processSpecimenCommand(cmd)
     }
 

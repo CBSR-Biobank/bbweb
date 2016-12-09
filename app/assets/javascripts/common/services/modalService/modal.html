@@ -3,13 +3,21 @@
           class="close"
           data-dismiss="modal"
           aria-hidden="true"
-          ng-click="modalOptions.close()">&times;</button>
+          ng-click="modalOptions.close()">
+    &times;
+  </button>
   <h3 class="modal-title" ng-bind-html="modalOptions.headerHtml"></h3>
 </div>
 <div class="modal-body">
   <div ng-bind-html="modalOptions.bodyHtml"></div>
 </div>
 <div class="modal-footer">
-  <button class="btn" ng-click="modalOptions.close()">{{modalOptions.closeButtonText}}</button>
-  <button class="btn btn-primary" ng-click="modalOptions.ok()">{{modalOptions.actionButtonText}}</button>
+  <button class="btn" ng-click="modalOptions.close()">
+    {{modalOptions.closeButtonText}}
+  </button>
+  <button class="btn btn-primary"
+          ng-click="modalOptions.ok()"
+          autofocus>
+    {{modalOptions.actionButtonText}}
+  </button>
 </div>

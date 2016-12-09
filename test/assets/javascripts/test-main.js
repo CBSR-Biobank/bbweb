@@ -48,6 +48,7 @@
       'collection',
       'domain',
       'home',
+      'shipmentSpecimens',
       'studies',
       'users'
     ],

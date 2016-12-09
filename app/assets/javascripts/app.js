@@ -13,16 +13,17 @@
 define(function(require) {
   'use strict';
 
-  var angular    = require('angular'),
-      admin      = require('admin'),
-      centres    = require('centres'),
-      common     = require('common'),
-      collection = require('collection'),
-      domain     = require('domain'),
-      home       = require('home'),
-      studies    = require('studies'),
-      users      = require('users'),
-      AppConfig  = require('./AppConfig'),
+  var angular           = require('angular'),
+      admin             = require('admin'),
+      centres           = require('centres'),
+      common            = require('common'),
+      collection        = require('collection'),
+      domain            = require('domain'),
+      home              = require('home'),
+      shipmentSpecimens = require('shipmentSpecimens'),
+      studies           = require('studies'),
+      users             = require('users'),
+      AppConfig         = require('./AppConfig'),
       app;
 
   require('jquery');
@@ -39,23 +40,27 @@ define(function(require) {
 
   // We must already declare most dependencies here (except for common), or the submodules' routes
   // will not be resolved
-  angular.module('biobankApp', ['ui.bootstrap',
-                                 'ui.router',
-                                 'ngSanitize',
-                                 'ngCookies',
-                                 'ngMessages',
-                                 'smart-table',
-                                 'angularUtils.directives.uiBreadcrumbs',
-                                 'ui.bootstrap.datetimepicker',
-                                 'gettext',
-                                 admin.name,
-                                 centres.name,
-                                 common.name,
-                                 collection.name,
-                                 domain.name,
-                                 home.name,
-                                 studies.name,
-                                 users.name])
+  angular.module('biobankApp',
+                 [
+                   'ui.bootstrap',
+                   'ui.router',
+                   'ngSanitize',
+                   'ngCookies',
+                   'ngMessages',
+                   'smart-table',
+                   'angularUtils.directives.uiBreadcrumbs',
+                   'ui.bootstrap.datetimepicker',
+                   'gettext',
+                   admin.name,
+                   centres.name,
+                   common.name,
+                   collection.name,
+                   domain.name,
+                   home.name,
+                   shipmentSpecimens.name,
+                   studies.name,
+                   users.name
+                 ])
 
     .run(['languageService', function (languageService) {
       languageService.initLanguage({ debug: true });

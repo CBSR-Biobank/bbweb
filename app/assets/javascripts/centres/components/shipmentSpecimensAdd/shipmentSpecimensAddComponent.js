@@ -5,6 +5,8 @@
 define(function (require) {
   'use strict';
 
+  var _ = require('lodash');
+
   var component = {
     templateUrl : '/assets/javascripts/centres/components/shipmentSpecimensAdd/shipmentSpecimensAdd.html',
     controller: ShipmentSpecimensAddController,
@@ -29,7 +31,7 @@ define(function (require) {
   ];
 
   /**
-   *
+   * This controller subclasses {@link ShipmentSpecimenController}.
    */
   function ShipmentSpecimensAddController($q,
                                           $controller,
@@ -42,6 +44,8 @@ define(function (require) {
                                           Specimen,
                                           ShipmentSpecimen) {
     var vm = this;
+
+    // initialize this controller's base class
     $controller('ShipmentSpecimenController',
                 {
                   vm:               vm,
@@ -49,8 +53,9 @@ define(function (require) {
                   ShipmentSpecimen: ShipmentSpecimen
                 });
 
+    vm.inventoryIds           = [];
     vm.refreshSpecimensTable  = 0;
-    vm.addSpecimen            = addSpecimen;
+    vm.addSpecimens           = addSpecimens;
     vm.removeShipmentSpecimen = removeShipmentSpecimen;
 
     vm.actions =  [{
@@ -62,54 +67,52 @@ define(function (require) {
 
     //---
 
-    function addSpecimen() {
-      modalInput.text(gettextCatalog.getString('Add specimen to ship'),
-                      gettextCatalog.getString('Inventory ID'),
-                      vm.inventoryId,
-                      { required: true, minLength: 2 }).result
-        .then(function (inventoryId) {
-          return vm.shipment.canAddInventoryId(inventoryId)
-            .then(function (specimen) {
-              ShipmentSpecimen.add(vm.shipment.id, specimen.id)
-                .then(specimenAddConfirm)
-                .catch(function (error) {
-                  modalService.modalOk(gettextCatalog.getString('Specimen error'),
-                                       JSON.stringify(error));
-                });
-            })
-            .catch(function (error) {
-              var header = gettextCatalog.getString('Specimen cannot be added to shipment'),
-                  body;
+    function addSpecimens() {
+      var inventoryIdsArr;
 
-              if (error.data && error.data.message) {
-                  if (error.data.message.match(/inventory ID not found/)) {
-                    body = gettextCatalog.getString(
-                      'Specimen with inventory ID <b>{{id}}</b> is not present in the system.',
-                      { id: inventoryId });
-                  } else if (error.data.message.match(/specimen is already in active shipment/)) {
-                    body = gettextCatalog.getString(
-                      'Specimen with inventory ID <b>{{id}}</b> is already in this shipment or another shipment.',
-                      { id: inventoryId });
-                  } else if (error.data.message.match(/specimen not at shipment's from location/)) {
-                    body = gettextCatalog.getString(
-                      'Specimen with inventory ID <b>{{id}}</b> is at a different location than' +
-                        'where shipment is coming from.',
-                      { id: inventoryId });
-                  } else {
-                    body = error.data.message;
-                  }
-              } else {
-                body = JSON.stringify(error);
-              }
+      if (!_.isString(vm.inventoryIds)) {
+        // nothing to do
+        return;
+      }
 
-              modalService.modalOk(header, body);
-            });
+      inventoryIdsArr = vm.inventoryIds.split(',');
+      vm.shipment.addSpecimens(inventoryIdsArr)
+        .then(specimenAddConfirm)
+        .catch(function (error) {
+          var header = gettextCatalog.getString('Specimens cannot be added to shipment'),
+              body,
+              inventoryIds;
+
+          if (error.data && error.data.message) {
+            inventoryIds = error.data.message.split(': ');
+
+            if (error.data.message.match(/invalid specimen inventory IDs/)) {
+              body = gettextCatalog.getString(
+                'Inventory IDs not present in the system:<br><b>{{ids}}</b>',
+                { ids: inventoryIds[2] });
+            } else if (error.data.message.match(/specimens are already in an active shipment/)) {
+              body = gettextCatalog.getString(
+                'Inventory IDs already in this shipment or another shipment:<br><b>{{ids}}</b>',
+                { ids: inventoryIds[2] });
+            } else if (error.data.message.match(/invalid centre for specimen inventory IDs/)) {
+              body = gettextCatalog.getString(
+                'Inventory IDs at a different location than where shipment is coming from:<br><b>{{ids}}</b> ',
+                { ids: inventoryIds[2] });
+            } else {
+              body = error.data.message;
+            }
+          } else {
+            body = JSON.stringify(error);
+          }
+
+          modalService.modalOk(header, body);
         });
     }
 
     function specimenAddConfirm() {
-      notificationsService.success(gettextCatalog.getString('Specimen added'));
+      notificationsService.success(gettextCatalog.getString('Specimens added'));
       refreshSpecimensTable();
+      vm.inventoryIds = '';
     }
 
     function refreshSpecimensTable() {

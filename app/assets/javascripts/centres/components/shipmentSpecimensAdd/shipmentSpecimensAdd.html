@@ -1,15 +1,44 @@
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h3 class="panel-title" translate>Add specimens</h3>
+  </div>
+  <div class="panel-body">
+    <form name="addSpecimens">
+      <div class="form-group">
+        <div class="row">
+          <div class="col-lg-12">
+            <label for="inventoryIds" translate>
+              Enter one or more specimen inventory IDs to add:
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="input-group">
+            <input type="text"
+                   class="form-control"
+                   name="inventoryIds"
+                   ng-model="vm.inventoryIds"
+                   placeholder="{{'inventory ids (comma separated)'|translate}}">
+            <span class="input-group-btn">
+              <button type="submit"
+                class="btn btn-primary"
+                ng-click="vm.addSpecimens()">
+                <i class="glyphicon glyphicon-plus"></i>
+                </button>
+                </span>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">
       <translate>Specimens in this shipment</translate>
       <span class="pull-right">
-        <button class="btn btn-xs btn-primary"
-                title="{{'Add a specimen to this shipment'|translate}}"
-                ng-click="vm.addSpecimen()"
-                ng-if="!vm.readOnly">
-          <translate>Add specimen</translate>
-          <i class="glyphicon glyphicon-plus"></i>
-        </button>
         <a data-toggle="collapse"
            href="#collapseSpecimens"
            class="btn btn-xs btn-default"
@@ -22,13 +51,12 @@
   </div>
 
   <div id="collapseSpecimens" class="panel-collapse collapse in" aria-expanded="true">
-    <shipment-specimens-actions-table
-      default-sort-field="inventoryId"
-      refresh="vm.refreshSpecimensTable"
-      on-get-specimens="vm.getSpecimens"
-      no-specimens-message="{{'No specimens added yet.'|translate}}"
-      actions="vm.actions"
-      on-action-selected="vm.removeShipmentSpecimen">
-    </shipment-specimens-actions-table>
+    <ss-specimens-paged-table default-sort-field="inventoryId"
+                              refresh="vm.refreshSpecimensTable"
+                              on-get-specimens="vm.getSpecimens"
+                              no-specimens-message="{{'No specimens added yet.'|translate}}"
+                              actions="vm.actions"
+                              on-action-selected="vm.removeShipmentSpecimen">
+    </ss-specimens-paged-table>
   </div>
 </div>

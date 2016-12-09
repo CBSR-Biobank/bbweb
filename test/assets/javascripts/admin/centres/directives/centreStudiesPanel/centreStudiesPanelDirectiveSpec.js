@@ -60,7 +60,7 @@ define([
       };
 
       this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
-      this.scope.$on('centre-view', this.eventRxFunc);
+      this.scope.$on('tabbed-page-update', this.eventRxFunc);
 
       this.$compile(element)(this.scope);
       this.scope.$digest();

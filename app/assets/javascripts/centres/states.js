@@ -102,13 +102,40 @@ define(function () {
         }
       })
       .state('home.shipping.unpack', {
+        abstract: true,
         url: '/unpack/{shipmentId}',
         resolve: {
           shipment: resolveShipment
         },
         views: {
           'main@': {
-            template: '<shipment-unpack shipment="vm.shipment"></shipment-unpack>',
+            template: '<unpacked-shipment-view shipment="vm.shipment"></unpacked-shipment-view>',
+            controller: ShipmentController,
+            controllerAs: 'vm'
+          }
+        },
+        data: {
+          breadcrumProxy: 'home.shipping.unpack.info'
+        }
+      })
+      .state('home.shipping.unpack.info', {
+        url: '/information',
+        views: {
+          'unpackedShipmentDetails': {
+            template: '<unpacked-shipment-info shipment="vm.shipment"></unpacked-shipment-info>',
+            controller: ShipmentController,
+            controllerAs: 'vm'
+          }
+        },
+        data: {
+          displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
+        }
+      })
+      .state('home.shipping.unpack.receive', {
+        url: '/receive',
+        views: {
+          'unpackedShipmentDetails': {
+            template: '<unpacked-shipment-receive shipment="vm.shipment"></unpacked-shipment-receive>',
             controller: ShipmentController,
             controllerAs: 'vm'
           }

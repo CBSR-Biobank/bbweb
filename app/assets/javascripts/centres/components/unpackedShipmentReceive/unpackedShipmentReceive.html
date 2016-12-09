@@ -1,0 +1,50 @@
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h3 class="panel-title" translate>Receive items</h3>
+  </div>
+  <div class="panel-body">
+    <form name="receiveSpecimens">
+      <div class="form-group">
+        <div class="row">
+          <div class="col-lg-12">
+            <label for="nameFilter" translate>
+              Enter one or more specimen inventory IDs to receive:
+            </label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="input-group">
+              <input type="text"
+                     class="form-control"
+                     name="inventoryIds"
+                     ng-model="vm.inventoryIds"
+                     placeholder="{{'inventory ids (comma separated)'|translate}}">
+              <span class="input-group-btn">
+                <button type="submit"
+                        class="btn btn-primary"
+                        ng-click="vm.onInventoryIdsSubmit()">
+                  <i class="glyphicon glyphicon-plus"></i>
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="row">
+  <div class="col-lg-12">
+    <collapsable-panel heading="{{'Unpacked specimens'|translate}}">
+      <ss-specimens-paged-table default-sort-field="inventoryId"
+                                refresh="vm.refreshNonReceivedSpecimensTable"
+                                show-item-state="true"
+                                on-get-specimens="vm.getPresentSpecimens"
+                                no-specimens-message="{{'No specimens present in shipment'|translate}}"
+                                actions="vm.actions"
+                                on-action-selected="vm.nonReceivedSpecimensTableActionSelected">
+      </ss-specimens-paged-table>
+    </collapsable-panel>
+  </div>
+</div>

@@ -47,7 +47,7 @@ define(['lodash'], function (_) {
 
     function init() {
       // updates the selected tab in 'studyViewDirective' which is the parent directive
-      $scope.$emit('study-view', 'participants-tab-selected');
+      $scope.$emit('tabbed-page-update', 'participants-tab-selected');
     }
 
     function add() {

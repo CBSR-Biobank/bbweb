@@ -9,10 +9,9 @@ define(function (require) {
 
   var angular = require('angular'),
       name = 'biobank.centres',
-      shipmentSpecimensTablesModule = require('./modules/shipmentSpecimensTables/shipmentSpecimensTablesModule'),
       module;
 
-  module = angular.module(name, [shipmentSpecimensTablesModule.name])
+  module = angular.module(name, [])
     .config(require('./states'))
     .constant('shipmentSendProgressItems', [
       'Shipping information',
@@ -22,7 +21,8 @@ define(function (require) {
     .constant('shipmentReceiveProgressItems', [
       'Sent',
       'Receive',
-      'Unpack'
+      'Unpack',
+      'Items Received'
     ])
 
     .controller('ShipmentSpecimenController', require('./controllers/ShipmentSpecimensController'))
@@ -50,6 +50,15 @@ define(function (require) {
     .component(
       'shipmentSpecimensPanel',
       require('./components/shipmentSpecimensPanel/shipmentSpecimensPanelComponent'))
+    .component(
+      'unpackedShipmentView',
+      require('./components/unpackedShipmentView/unpackedShipmentViewComponent'))
+    .component(
+      'unpackedShipmentInfo',
+      require('./components/unpackedShipmentInfo/unpackedShipmentInfoComponent'))
+    .component(
+      'unpackedShipmentReceive',
+      require('./components/unpackedShipmentReceive/unpackedShipmentReceiveComponent'))
 
     .service(
       'centreLocationsModalService',

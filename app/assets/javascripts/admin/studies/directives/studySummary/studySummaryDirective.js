@@ -54,7 +54,7 @@ define(['lodash'], function(_) {
 
     function init() {
       // updates the selected tab in 'studyViewDirective' which is the parent directive
-      $scope.$emit('study-view', 'study-summary-selected');
+      $scope.$emit('tabbed-page-update', 'study-summary-selected');
 
       CollectionEventType.list(vm.study.id).then(function (ceTypes) {
         var specimenSpecs = _.flatMap(ceTypes, function(ceType) { return ceType.specimenSpecs; });

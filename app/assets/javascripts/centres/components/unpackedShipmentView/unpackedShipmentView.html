@@ -1,0 +1,45 @@
+<div ng-if="vm.shipment.isUnpacked()">
+  <progress-tracker
+      items="vm.progressInfo.items"
+      current="vm.progressInfo.current">
+  </progress-tracker>
+  <div class="page-header">
+    <h1>
+      {{vm.shipment.courierName}}<small>: {{vm.shipment.trackingNumber}}
+      <br/> {{'Unpack shipment'|translate}}</small>
+      <div class="pull-right">
+        <button class="btn btn-xs btn-warning"
+                title="{{'Return shipment to received'|translate}}"
+                ng-click="vm.returnToReceivedState()">
+          <i class="glyphicon glyphicon-chevron-left"></i>
+          <translate>Previous step</translate>
+        </button>
+      </div>
+    </h1>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <uib-tabset active="vm.active">
+        <uib-tab ng-repeat="tab in vm.tabs"
+                 heading="{{tab.heading}}"
+                 ui-sref="{{tab.sref}}"
+                 ui-sref-opts="{reload: true}"
+                 active="tab.active"></uib-tab>
+        </uib-tabset>
+    </div>
+  </div>
+
+  <div ui-view="unpackedShipmentDetails" style="margin-top: 10px;"></div>
+</div>
+<div ng-if="!vm.shipment.isUnpacked()">
+  <div class="page-header">
+    <h1>
+      {{vm.shipment.courierName}}<small>: {{vm.shipment.trackingNumber}}
+      <br/> {{'Unpack shipment'|translate}}</small>
+    </h1>
+  </div>
+  <div class="panel panel-warning">
+    <div class="panel-heading" translate>
+      Cannot unpack items from shipment <em>{{vm.shipment.courierName}}: {{vm.shipment.trackingNumber}}</em> since
+      it is in the wrong state. </div> </div>
+</div>

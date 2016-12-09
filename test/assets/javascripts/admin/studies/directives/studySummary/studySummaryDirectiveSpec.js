@@ -20,7 +20,7 @@ define(function (require) {
       this.scope.vm = { study: this.study };
 
       this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
-      this.scope.$on('study-view', this.eventRxFunc);
+      this.scope.$on('tabbed-page-update', this.eventRxFunc);
 
       this.$compile(this.element)(this.scope);
       this.scope.$digest();
