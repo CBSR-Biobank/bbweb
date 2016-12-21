@@ -2,7 +2,8 @@
   "ecmaVersion": 5,
   "libs": [
     "browser",
-    "jquery"
+    "jquery",
+    "underscore"
   ],
   "loadEagerly": [
     "app/assets/javascripts/**/*.js",
@@ -11,9 +12,10 @@
   "plugins": {
     "jasmine": {},
     "jasminematchers": {},
-    "angular": "./target/web/web-modules/main/webjars/lib/angularjs",
+    "node": {},
+    "angular": {},
     "requirejs": {
-      "baseURL": "./",
+      "baseURL": "app",
       "paths":   {}
     }
   }
