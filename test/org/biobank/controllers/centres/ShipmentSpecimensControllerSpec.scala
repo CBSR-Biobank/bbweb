@@ -445,12 +445,9 @@ class ShipmentSpecimensControllerSpec
 
           val url = uri(f.shipment, shipmentSpecimen, urlPath)
 
-          val updateJson = Json.obj("shipmentSpecimenData" -> Json.arr(
-                                      Json.obj(
-                                        "shipmentSpecimenId" -> shipmentSpecimen.id.id,
-                                        "expectedVersion"    -> shipmentSpecimen.version)))
+          val reqJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
 
-          val reply = makeRequest(POST, url, updateJson)
+          val reply = makeRequest(POST, url, reqJson)
 
           (reply \ "status").as[String] must include ("success")
 
@@ -490,12 +487,9 @@ class ShipmentSpecimensControllerSpec
 
             val url = uri(shipment, shipmentSpecimen, urlPath)
 
-            val updateJson = Json.obj("shipmentSpecimenData" -> Json.arr(
-                                        Json.obj(
-                                          "shipmentSpecimenId" -> shipmentSpecimen.id.id,
-                                          "expectedVersion"    -> shipmentSpecimen.version)))
+            val reqJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
 
-            val reply = makeRequest(POST, url, BAD_REQUEST, updateJson)
+            val reply = makeRequest(POST, url, BAD_REQUEST, reqJson)
 
             (reply \ "status").as[String] must include ("error")
 
@@ -516,16 +510,13 @@ class ShipmentSpecimensControllerSpec
 
           val url = uri(shipment, shipmentSpecimen, urlPath)
 
-          val updateJson = Json.obj("shipmentSpecimenData" -> Json.arr(
-                                      Json.obj(
-                                        "shipmentSpecimenId" -> shipmentSpecimen.id.id,
-                                        "expectedVersion"    -> shipmentSpecimen.version)))
+            val reqJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
 
-          val reply = makeRequest(POST, url, NOT_FOUND, updateJson)
+          val reply = makeRequest(POST, url, NOT_FOUND, reqJson)
 
           (reply \ "status").as[String] must include ("error")
 
-          (reply \ "message").as[String] must include ("IdNotFound: shipment specimen id")
+          (reply \ "message").as[String] must include regex ("specimen with inventory ID not found")
         }
       }
 

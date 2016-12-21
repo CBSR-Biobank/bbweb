@@ -640,23 +640,19 @@ define(function (require) {
     function changeShipmentSpecimenStateSharedBehaviour(context) {
 
       it('can change state on a shipment specimen', function() {
-        var self   = this,
-            jsonSs = self.factory.shipmentSpecimen(),
-            ss     = new self.ShipmentSpecimen(jsonSs),
+        var self         = this,
+            jsonSs       = self.factory.shipmentSpecimen(),
+            ss           = new self.ShipmentSpecimen(jsonSs),
             jsonShipment = self.factory.shipment(),
-            shipment = new self.Shipment(jsonShipment),
-            reqJson = {
-              shipmentSpecimenData: [{
-                shipmentSpecimenId: ss.id,
-                expectedVersion: ss.version
-              }]
-            };
+            shipment     = new self.Shipment(jsonShipment),
+            inventoryIds = [ ss.specimen.inventoryId ],
+            reqJson      = { inventoryIds: inventoryIds };
 
         expect(context.shipmentSepcimenState).toBeDefined();
 
         this.updateEntity(shipment,
                           context.stateChangeFuncName,
-                          [ [ ss ] ],
+                          [ inventoryIds ],
                           uri('specimens/' + context.shipmentSepcimenState, shipment.id),
                           reqJson,
                           jsonShipment,

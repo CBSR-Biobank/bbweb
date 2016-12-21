@@ -612,21 +612,14 @@ define(function (require) {
       });
     };
 
-    function tagSpecimens(shipmentSpecimens, urlPath) {
+    function tagSpecimens(inventoryIds, urlPath) {
       /*jshint validthis:true */
       var reqJson;
 
-      if (!Array.isArray(shipmentSpecimens)) {
-        throw new DomainError('shipmentSpecimens should be an array');
+      if (!Array.isArray(inventoryIds)) {
+        throw new DomainError('inventoryIds should be an array');
       }
-      reqJson =  {
-        shipmentSpecimenData: _.map(shipmentSpecimens, function (ss) {
-          return {
-            shipmentSpecimenId: ss.id,
-            expectedVersion: ss.version
-          };
-        })
-      };
+      reqJson =  { inventoryIds: inventoryIds };
       return biobankApi.post(uri('specimens/' + urlPath, this.id), reqJson).then(function(reply) {
         return Shipment.asyncCreate(reply);
       });
@@ -637,13 +630,12 @@ define(function (require) {
      *
      * <p>Note that only specimens in unpacked shipments can have the state updated.
      *
-     * @param {domain.centres.ShipmentSpecimen[]} shipmentSpecimens - The shipment specimens to be
-     * marked as RECEIVED.
+     * @param {string[]} inventoryIds - The specimen inventory IDs to be marked as RECEIVED.
      *
      * @returns {Promise} A copy of this shipment.
      */
-    Shipment.prototype.tagSpecimensAsReceived = function (shipmentSpecimens) {
-      return tagSpecimens.call(this, shipmentSpecimens, 'received');
+    Shipment.prototype.tagSpecimensAsReceived = function (inventoryIds) {
+      return tagSpecimens.call(this, inventoryIds, 'received');
     };
 
     /**
@@ -651,13 +643,12 @@ define(function (require) {
      *
      * <p>Note that only specimens in unpacked shipments can have the state updated.
      *
-     * @param {domain.centres.ShipmentSpecimen[]} shipmentSpecimens - The shipment specimens to be
-     * marked as MISSING.
+     * @param {string[]} inventoryIds - The specimen inventory IDs to be marked as MISSING.
      *
      * @returns {Promise} A copy of this shipment.
      */
-    Shipment.prototype.tagSpecimensAsMissing = function (shipmentSpecimens) {
-      return tagSpecimens.call(this, shipmentSpecimens, 'missing');
+    Shipment.prototype.tagSpecimensAsMissing = function (inventoryIds) {
+      return tagSpecimens.call(this, inventoryIds, 'missing');
     };
 
     /**
@@ -665,13 +656,12 @@ define(function (require) {
      *
      * <p>Note that only specimens in unpacked shipments can have the state updated.
      *
-     * @param {domain.centres.ShipmentSpecimen[]} shipmentSpecimens - The shipment specimens to be
-     * marked as EXTRA.
+     * @param {string[]} inventoryIds - The specimen inventory IDs to be marked as EXTRA.
      *
      * @returns {Promise} A copy of this shipment.
      */
-    Shipment.prototype.tagSpecimensAsExtra = function (shipmentSpecimens) {
-      return tagSpecimens.call(this, shipmentSpecimens, 'extra');
+    Shipment.prototype.tagSpecimensAsExtra = function (inventoryIds) {
+      return tagSpecimens.call(this, inventoryIds, 'extra');
     };
 
     function uri(/* path, shipmentId */) {

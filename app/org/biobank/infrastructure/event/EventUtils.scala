@@ -1,7 +1,6 @@
 package org.biobank.infrastructure.event
 
 import org.biobank.infrastructure.command.SpecimenCommands.SpecimenInfo
-import org.biobank.infrastructure.command.ShipmentSpecimenCommands
 import org.biobank.infrastructure.event.CommonEvents. {
   AnnotationType => EventAnnotationType
 }
@@ -18,6 +17,7 @@ import org.biobank.domain.{
 import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
 import org.biobank.domain.study.CollectionSpecimenSpec
 import org.biobank.domain.participants.SpecimenId
+import org.biobank.domain.centre.ShipmentSpecimen
 import org.joda.time._
 import org.joda.time.format.ISODateTimeFormat
 
@@ -108,11 +108,11 @@ object EventUtils {
     )
   }
 
-  def shipmentSpecimenInfoToEvent(info: ShipmentSpecimenCommands.ShipmentSpecimenInfo)
+  def shipmentSpecimenInfoToEvent(shipmentSpecimen: ShipmentSpecimen)
       : ShipmentSpecimenEvent.ShipmentSpecimenInfo = {
     ShipmentSpecimenEvent.ShipmentSpecimenInfo().update(
-      _.shipmentSpecimenId := info.shipmentSpecimenId,
-      _.version            := info.expectedVersion
+      _.shipmentSpecimenId := shipmentSpecimen.id.id,
+      _.version            := shipmentSpecimen.version
     )
   }
 

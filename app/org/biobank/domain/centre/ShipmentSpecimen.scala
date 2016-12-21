@@ -37,6 +37,8 @@ trait ShipmentSpecimenValidations {
 
   case object ShipmentContainerIdInvalid extends ValidationKey
 
+  case object ShipmentSpecimenNotPresent extends ValidationKey
+
 }
 
 /**

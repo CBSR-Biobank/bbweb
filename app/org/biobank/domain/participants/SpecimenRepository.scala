@@ -25,7 +25,7 @@ class SpecimenRepositoryImpl
   def notFound(id: SpecimenId) = IdNotFound(s"specimen id: $id")
 
   def inventoryIdCriteriaError(inventoryId: String) =
-    EntityCriteriaError(s"specimen with inventory ID not found: $inventoryId")
+    EntityCriteriaError(s"specimen with inventory ID not found: $inventoryId").toString
 
   override def getByKey(id: SpecimenId): DomainValidation[Specimen] = {
     getMap.get(id).toSuccessNel(notFound(id).toString)

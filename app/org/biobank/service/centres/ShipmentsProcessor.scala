@@ -6,7 +6,7 @@ import javax.inject.Inject
 import org.biobank.TestData
 import org.biobank.domain.LocationId
 import org.biobank.domain.centre._
-import org.biobank.domain.participants.{SpecimenId, SpecimenRepository}
+import org.biobank.domain.participants.{Specimen, SpecimenId, SpecimenRepository}
 import org.biobank.infrastructure.command.ShipmentCommands._
 import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
 import org.biobank.infrastructure.event.EventUtils
@@ -392,10 +392,25 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     } yield shipmentSpecimen
   }
 
-  private def validShipmentSpecimens(shipmentSpecimenData: List[ShipmentSpecimenInfo])
+  private def shipmentSpecimensPresent(shipmentId: ShipmentId, specimenInventoryIds: String*)
       : ServiceValidation[List[ShipmentSpecimen]] = {
-    shipmentSpecimenData.
-      map { ssInfo => validShipmentSpecimen(ssInfo.shipmentSpecimenId, ssInfo.expectedVersion) }.
+
+    def isPresent(specimen: Specimen, shipmentSpecimen: ShipmentSpecimen) = {
+      shipmentSpecimen.isStatePresent.leftMap { err =>
+        EntityCriteriaError(
+          s"shipment specimen with inventory ID not in PRESENT state: ${specimen.inventoryId}").nel
+      }
+    }
+
+    specimenInventoryIds.
+      map { inventoryId =>
+        for {
+          specimen         <- specimenRepository.getByInventoryId(inventoryId)
+          shipmentSpecimen <- shipmentSpecimenRepository.getBySpecimen(shipmentId, specimen)
+          present          <- isPresent(specimen, shipmentSpecimen)
+        } yield shipmentSpecimen
+      }.
+      toList.
       sequenceU
   }
 
@@ -420,10 +435,10 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
 
     for {
       shipment          <- shipmentRepository.getCreated(ShipmentId(cmd.shipmentId))
-      shipmentSpecimens <- validShipmentSpecimens(cmd.shipmentSpecimenData)
+      shipmentSpecimens <- shipmentSpecimensPresent(shipment.id, cmd.specimenInventoryIds:_*)
       container         <- s"shipping specimens with containers has not been implemented yet".failureNel[Boolean]
     } yield {
-      val shipmentSpecimenData = cmd.shipmentSpecimenData.map(EventUtils.shipmentSpecimenInfoToEvent)
+      val shipmentSpecimenData = shipmentSpecimens.map(EventUtils.shipmentSpecimenInfoToEvent).toSeq
       ShipmentSpecimenEvent(cmd.shipmentId).update(
         _.userId                                       := cmd.userId,
         _.time                                         := ISODateTimeFormat.dateTime.print(DateTime.now),
@@ -436,10 +451,10 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       : ServiceValidation[ShipmentSpecimenEvent] = {
     for {
       isUnpacked        <- shipment.isUnpacked
-      shipmentSpecimens <- validShipmentSpecimens(cmd.shipmentSpecimenData)
+      shipmentSpecimens <- shipmentSpecimensPresent(shipment.id, cmd.specimenInventoryIds:_*)
       canReceive        <- shipmentSpecimens.map(_.received).sequenceU
     } yield {
-      val shipmentSpecimenData = cmd.shipmentSpecimenData.map(EventUtils.shipmentSpecimenInfoToEvent)
+      val shipmentSpecimenData = shipmentSpecimens.map(EventUtils.shipmentSpecimenInfoToEvent).toSeq
       ShipmentSpecimenEvent(cmd.shipmentId).update(
         _.userId                        := cmd.userId,
         _.time                          := ISODateTimeFormat.dateTime.print(DateTime.now),
@@ -451,10 +466,10 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       : ServiceValidation[ShipmentSpecimenEvent] = {
     for {
       isUnpacked        <- shipment.isUnpacked
-      shipmentSpecimens <- validShipmentSpecimens(cmd.shipmentSpecimenData)
+      shipmentSpecimens <- shipmentSpecimensPresent(shipment.id, cmd.specimenInventoryIds:_*)
       canMakeMissing    <- shipmentSpecimens.map(_.missing).sequenceU
     } yield {
-      val shipmentSpecimenData = cmd.shipmentSpecimenData.map(EventUtils.shipmentSpecimenInfoToEvent)
+      val shipmentSpecimenData = shipmentSpecimens.map(EventUtils.shipmentSpecimenInfoToEvent).toSeq
       ShipmentSpecimenEvent(cmd.shipmentId).update(
         _.userId                       := cmd.userId,
         _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
@@ -466,10 +481,10 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       : ServiceValidation[ShipmentSpecimenEvent] = {
     for {
       isUnpacked        <- shipment.isUnpacked
-      shipmentSpecimens <- validShipmentSpecimens(cmd.shipmentSpecimenData)
+      shipmentSpecimens <- shipmentSpecimensPresent(shipment.id, cmd.specimenInventoryIds:_*)
       canMakeExtra      <- shipmentSpecimens.map(_.extra).sequenceU
     } yield {
-      val shipmentSpecimenData = cmd.shipmentSpecimenData.map(EventUtils.shipmentSpecimenInfoToEvent)
+      val shipmentSpecimenData = shipmentSpecimens.map(EventUtils.shipmentSpecimenInfoToEvent).toSeq
       ShipmentSpecimenEvent(cmd.shipmentId).update(
         _.userId                     := cmd.userId,
         _.time                       := ISODateTimeFormat.dateTime.print(DateTime.now),
