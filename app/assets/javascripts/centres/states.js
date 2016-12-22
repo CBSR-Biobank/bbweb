@@ -143,6 +143,19 @@ define(function () {
         data: {
           displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
         }
+      })
+      .state('home.shipping.unpack.unpacked', {
+        url: '/unpacked',
+        views: {
+          'unpackedShipmentDetails': {
+            template: '<unpacked-shipment-unpacked shipment="vm.shipment"></unpacked-shipment-unpacked>',
+            controller: ShipmentController,
+            controllerAs: 'vm'
+          }
+        },
+        data: {
+          displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
+        }
       });
 
     ShipmentController.$inject = ['shipment'];

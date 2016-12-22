@@ -81,9 +81,9 @@ define(function (require) {
     function getTableData(tableState, controller) {
       var pagination    = tableState.pagination,
           sortPredicate = tableState.sort.predicate || vm.defaultSortField,
-          sortOrder     = tableState.sort.reverse || false,
+          revSortOrder  = tableState.sort.reverse || false,
           options = {
-            sort:  (sortOrder ? '' : '-') + sortPredicate,
+            sort:  (revSortOrder ? '-' : '') + sortPredicate,
             page:  1 + (pagination.start / vm.limit),
             limit: vm.limit
           };

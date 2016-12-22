@@ -619,7 +619,7 @@ define(function (require) {
       if (!Array.isArray(inventoryIds)) {
         throw new DomainError('inventoryIds should be an array');
       }
-      reqJson =  { inventoryIds: inventoryIds };
+      reqJson =  { specimenInventoryIds: inventoryIds };
       return biobankApi.post(uri('specimens/' + urlPath, this.id), reqJson).then(function(reply) {
         return Shipment.asyncCreate(reply);
       });

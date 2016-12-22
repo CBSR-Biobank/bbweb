@@ -58,7 +58,7 @@ define(function () {
       },
       {
         heading: gettextCatalog.getString('Unpacked specimens'),
-        sref: 'home.shipping.unpack.processed',
+        sref: 'home.shipping.unpack.unpacked',
         active: false
       }
     ];

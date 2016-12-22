@@ -59,6 +59,9 @@ define(function (require) {
     .component(
       'unpackedShipmentReceive',
       require('./components/unpackedShipmentReceive/unpackedShipmentReceiveComponent'))
+    .component(
+      'unpackedShipmentUnpacked',
+      require('./components/unpackedShipmentUnpacked/unpackedShipmentUnpackedComponent'))
 
     .service(
       'centreLocationsModalService',

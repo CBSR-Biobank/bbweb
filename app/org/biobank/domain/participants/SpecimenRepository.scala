@@ -33,7 +33,7 @@ class SpecimenRepositoryImpl
 
   def getByInventoryId(inventoryId: String): DomainValidation[Specimen] = {
     getValues.find(s => s.inventoryId == inventoryId)
-      .toSuccessNel(inventoryIdCriteriaError(inventoryId).toString)
+      .toSuccessNel(inventoryIdCriteriaError(inventoryId))
   }
 
 }

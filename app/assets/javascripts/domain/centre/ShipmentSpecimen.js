@@ -238,7 +238,7 @@ define(function (require) {
       var url = uri(shipmentId),
           params,
           validKeys = [
-            'stateFilter',
+            'filter',
             'sort',
             'page',
             'limit',

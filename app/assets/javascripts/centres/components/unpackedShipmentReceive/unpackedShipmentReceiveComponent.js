@@ -22,18 +22,22 @@ define(function (require) {
     'Shipment',
     'ShipmentSpecimen',
     'ShipmentItemState',
-    'gettextCatalog'
+    'gettextCatalog',
+    'modalService'
   ];
 
   /**
-   * Loads all Shipment Specimens in PRESENT state.
+   * Allows user to interact with Shipment Specimens in PRESENT state.
+   *
+   * The user can receive the specimens, mark them as EXTRA or MISSING.
    */
   function UnpackedShipmentReceiveController($q,
                                              $scope,
                                              Shipment,
                                              ShipmentSpecimen,
                                              ShipmentItemState,
-                                             gettextCatalog) {
+                                             gettextCatalog,
+                                             modalService) {
     var vm = this;
 
     vm.$onInit = onInit;
@@ -53,20 +57,20 @@ define(function (require) {
       }
     ];
 
-    vm.getPresentSpecimens = getPresentSpecimens;
+    vm.getPresentSpecimens  = getPresentSpecimens;
     vm.onInventoryIdsSubmit = onInventoryIdsSubmit;
-    vm.nonReceivedSpecimensTableActionSelected = nonReceivedSpecimensTableActionSelected;
+    vm.tableActionSelected  = tableActionSelected;
 
     //----
 
     function onInit() {
-      $scope.$emit('tabbed-page-update', 'shipment-present-selected');
+      $scope.$emit('tabbed-page-update', 'shipment-receive-selected');
     }
 
     function getPresentSpecimens(options) {
       if (!vm.shipment) { return $q.when({ items: [], maxPages: 0 }); }
 
-      _.extend(options, { stateFilter: ShipmentItemState.PRESENT });
+      _.extend(options, { filter: 'state:in:' + ShipmentItemState.PRESENT });
 
       return ShipmentSpecimen.list(vm.shipment.id, options)
         .then(function (paginatedResult) {
@@ -81,11 +85,49 @@ define(function (require) {
       var inventoryIds = _.map(vm.inventoryIds.split(','), function (nonTrimmedInventoryId) {
         return nonTrimmedInventoryId.trim();
       });
-      return Shipment.tagSpecimensAsReceived(inventoryIds);
+      return vm.shipment.tagSpecimensAsReceived(inventoryIds)
+        .then(function () {
+          vm.inventoryIds = '';
+          vm.refreshNonReceivedSpecimensTable++;
+        })
+        .catch(function (err) {
+          var errors;
+          if (err.data.message) {
+            errors = err.data.message.split(', ');
+            console.log(errors);
+          }
+        });
     }
 
-    function nonReceivedSpecimensTableActionSelected(shipmentSpecimen, action) {
-      console.log('nonReceivedSpecimensTableActionSelected', shipmentSpecimen.id, action);
+    // function specimensNotPresent(errMsg) {
+    //   return modalService.modalOk(
+    //     gettextCatalog.getString(''),
+    //     gettextCatalog.getString(
+    //       'Unique ID <strong>{{id}}</strong> is already in use by a participant ' +
+    //         'in another study. Please use a diffent one.',
+    //       { id: vm.uniqueId }))
+    //     .then(function () {
+    //       vm.uniqueId = '';
+    //     });
+    // }
+
+    function tableActionSelected(shipmentSpecimen, action) {
+      var tagFunction;
+      switch (action) {
+      case 'tag-as-extra':
+        tagFunction = vm.shipment.tagSpecimensAsExtra;
+        break;
+      case 'tag-as-missing':
+        tagFunction = vm.shipment.tagSpecimensAsMissing;
+        break;
+      default:
+        throw new Error('invalid action from table selection:' + action);
+      }
+
+      return tagFunction.call(vm.shipment, [ shipmentSpecimen.specimen.inventoryId ])
+        .then(function () {
+          vm.refreshNonReceivedSpecimensTable++;
+        });
     }
 
   }
