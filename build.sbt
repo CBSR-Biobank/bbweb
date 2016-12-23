@@ -14,6 +14,16 @@ lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
   .settings(libraryDependencies ~= (_.map(excludeSpecs2)))
 
+lazy val copy_node_modules = taskKey[Unit]("Copies the NPM modules to the target directory")
+
+copy_node_modules := {
+  val node_modules = new File("node_modules")
+  val target = new File("target/web/public/main/lib/")
+  IO.copyDirectory(node_modules, target, true, true)
+}
+
+addCommandAlias("npm_install", ";web-assets:jseNpmNodeModules;copy_node_modules")
+
 scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.8")
 
 scalacOptions in Compile ++= Seq(
@@ -94,21 +104,6 @@ libraryDependencies ++= Seq(
   ( "org.webjars"               %% "webjars-play"                        % "2.5.0").exclude("org.webjars", "requirejs"),
   // WebJars dependencies
   "org.webjars"                 %  "requirejs"                           % "2.3.2",
-  "org.webjars"                 %  "lodash"                              % "4.15.0",
-  "org.webjars"                 %  "jquery"                              % "3.1.1",
-  ( "org.webjars"               %  "bootstrap"                           % "3.3.7"  ).excludeAll(ExclusionRule(organization="org.webjars")),
-  ( "org.webjars"               %  "angularjs"                           % "1.5.8"  ).exclude("org.webjars", "jquery"),
-  ( "org.webjars"               %  "angular-ui-bootstrap"                % "2.2.0"  ).exclude("org.webjars", "angularjs"),
-  ( "org.webjars"               %  "angular-ui-router"                   % "0.2.18" ).exclude("org.webjars", "angularjs"),
-  ( "org.webjars"               %  "smart-table"                         % "2.1.3-1").exclude("org.webjars", "angularjs"),
-  ( "org.webjars"               %  "toastr"                              % "2.1.2"  ).exclude("org.webjars", "jquery"),
-  ( "org.webjars"               %  "angular-sanitize"                    % "1.3.11" ).exclude("org.webjars", "angularjs"),
-  "org.webjars"                 %  "momentjs"                            % "2.16.0",
-  "org.webjars"                 %  "sprintf.js"                          % "1.0.0",
-  "org.webjars"                 %  "tv4"                                 % "1.0.17-1",
-  "org.webjars.bower"           %  "angular-utils-ui-breadcrumbs"        % "0.2.2",
-  "org.webjars.bower"           %  "bootstrap-ui-datetime-picker"        % "2.4.3",
-  "org.webjars.bower"           %  "angular-gettext"                     % "2.2.1",
   // Testing
   ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "1.3.16"  % "test" ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
   "com.typesafe.akka"           %% "akka-testkit"                        % akkaVer   % "test",

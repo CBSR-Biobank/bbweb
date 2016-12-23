@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'lodash', 'tv4', 'sprintf'], function(angular, _, tv4, sprintf) {
+define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, sprintf) {
   'use strict';
 
   CentreFactory.$inject = [

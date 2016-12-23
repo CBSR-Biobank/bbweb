@@ -7,7 +7,7 @@ define(function (require) {
 
   var mocks   = require('angularMocks'),
       _       = require('lodash'),
-      sprintf = require('sprintf').sprintf;
+      sprintf = require('sprintf-js').sprintf;
 
   /**
    * For now these tests test the interaction between the class and the server.

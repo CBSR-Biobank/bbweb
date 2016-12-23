@@ -35,24 +35,24 @@
     ],
 
     paths: {
-      'requirejs':                    '../lib/requirejs/require',
-      'jquery':                       '../lib/jquery/jquery',
-      'toastr':                       '../lib/toastr/toastr',
-      'lodash':                       '../lib/lodash/lodash',
-      'moment':                       '../lib/momentjs/moment',
-      'bootstrap':                    '../lib/bootstrap/js/bootstrap',
-      'angular':                      '../lib/angularjs/angular',
-      'angular-cookies':              '../lib/angularjs/angular-cookies',
-      'angular-messages':             '../lib/angularjs/angular-messages',
-      'angular-ui-router':            '../lib/angular-ui-router/angular-ui-router',
+      'angular':                      '../lib/angular/angular',
+      'angular-cookies':              '../lib/angular-cookies/angular-cookies',
+      'angular-gettext':              '../lib/angular-gettext/dist/angular-gettext',
+      'angular-messages':             '../lib/angular-messages/angular-messages',
       'angular-sanitize':             '../lib/angular-sanitize/angular-sanitize',
+      'angular-ui-router':            '../lib/angular-ui-router/release/angular-ui-router',
       'angular-utils-ui-breadcrumbs': '../lib/angular-utils-ui-breadcrumbs/uiBreadcrumbs',
-      'ui-bootstrap':                 '../lib/angular-ui-bootstrap/ui-bootstrap-tpls',
-      'smart-table':                  '../lib/smart-table/smart-table',
-      'sprintf':                      '../lib/sprintf.js/sprintf.min',
-      'tv4':                          '../lib/tv4/tv4',
+      'bootstrap':                    '../lib/bootstrap/dist/js/bootstrap',
       'bootstrap-ui-datetime-picker': '../lib/bootstrap-ui-datetime-picker/dist/datetime-picker',
-      'angular-gettext':              '../lib/angular-gettext/dist/angular-gettext'
+      'jquery':                       '../lib/jquery/dist/jquery',
+      'lodash':                       '../lib/lodash/lodash',
+      'moment':                       '../lib/moment/moment',
+      'requirejs':                    '../lib/requirejs/require',
+      'smart-table':                  '../lib/angular-smart-table/dist/smart-table',
+      'sprintf-js':                   '../lib/sprintf-js/dist/sprintf.min',
+      'toastr':                       '../lib/angular-toastr/dist/angular-toastr',
+      'tv4':                          '../lib/tv4/tv4',
+      'ui-bootstrap':                 '../lib/angular-ui-bootstrap/dist/ui-bootstrap-tpls'
     },
 
     shim: {
@@ -63,16 +63,17 @@
       'lodash': {
         exports: '_'
       },
-      'bootstrap':                    ['jquery'],
       'angular-cookies':              ['angular'],
       'angular-messages':             ['angular'],
       'angular-sanitize':             ['angular'],
       'angular-ui-router':            ['angular'],
       'angular-utils-ui-breadcrumbs': ['angular'],
-      'smart-table':                  ['angular'],
-      'ui-bootstrap':                 ['angular'],
+      'angular-gettext':              ['angular'],
+      'bootstrap':                    ['jquery'],
       'bootstrap-ui-datetime-picker': ['angular'],
-      'angular-gettext':              ['angular']
+      'smart-table':                  ['angular'],
+      'toastr':                       ['angular'],
+      'ui-bootstrap':                 ['angular']
     }
   });
 

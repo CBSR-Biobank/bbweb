@@ -9,7 +9,7 @@ define(function(require) {
 
   var mocks                           = require('angularMocks'),
       _                               = require('lodash'),
-      sprintf                         = require('sprintf'),
+      sprintf                         = require('sprintf-js'),
       entityWithAnnotationsSharedSpec = require('../../test/entityWithAnnotationsSharedSpec');
 
   describe('Participant', function() {

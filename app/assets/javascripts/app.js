@@ -26,31 +26,33 @@ define(function(require) {
       AppConfig         = require('./AppConfig'),
       app;
 
-  require('jquery');
-  require('bootstrap');
-  require('ui-bootstrap');
-  require('angular-ui-router');
-  require('angular-sanitize');
   require('angular-cookies');
-  require('angular-messages');
-  require('smart-table');
-  require('angular-utils-ui-breadcrumbs');
-  require('bootstrap-ui-datetime-picker');
   require('angular-gettext');
+  require('angular-messages');
+  require('angular-sanitize');
+  require('angular-ui-router');
+  require('angular-utils-ui-breadcrumbs');
+  require('bootstrap');
+  require('bootstrap-ui-datetime-picker');
+  require('jquery');
+  require('smart-table');
+  require('toastr');
+  require('ui-bootstrap');
 
   // We must already declare most dependencies here (except for common), or the submodules' routes
   // will not be resolved
   angular.module('biobankApp',
                  [
-                   'ui.bootstrap',
-                   'ui.router',
-                   'ngSanitize',
+                   'angularUtils.directives.uiBreadcrumbs',
+                   'gettext',
                    'ngCookies',
                    'ngMessages',
+                   'ngSanitize',
                    'smart-table',
-                   'angularUtils.directives.uiBreadcrumbs',
+                   'toastr',
+                   'ui.bootstrap',
                    'ui.bootstrap.datetimepicker',
-                   'gettext',
+                   'ui.router',
                    admin.name,
                    centres.name,
                    common.name,
@@ -77,9 +79,18 @@ define(function(require) {
 
   //.config(exceptionConfig)
     .config(loggingConfig)
-    .config(httpInterceptorConfig);
+    .config(httpInterceptorConfig)
+    .config(configToastr);
 
   //--
+
+  configToastr.$inject = ['toastrConfig'];
+  function configToastr(toastrConfig) {
+    angular.extend(toastrConfig, {
+        positionClass: 'toast-bottom-right'
+    });
+
+  }
 
   debugFunc.$inject = ['$rootScope'];
 

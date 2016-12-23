@@ -9,7 +9,7 @@ define(function (require) {
 
   var mocks   = require('angularMocks'),
       _       = require('lodash'),
-      sprintf = require('sprintf').sprintf;
+      sprintf = require('sprintf-js').sprintf;
 
   describe('CollectionEvent', function() {
 

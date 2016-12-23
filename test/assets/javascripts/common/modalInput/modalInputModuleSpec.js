@@ -12,7 +12,7 @@ define(function (require) {
       _       = require('lodash'),
       moment  = require('moment'),
       faker   = require('faker'),
-      sprintf = require('sprintf').sprintf;
+      sprintf = require('sprintf-js').sprintf;
 
   function SuiteMixinFactory(ModalTestSuiteMixin) {
 

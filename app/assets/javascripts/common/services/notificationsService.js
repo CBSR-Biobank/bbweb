@@ -2,15 +2,15 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['toastr'], function(toastr) {
+define(function() {
   'use strict';
 
-  notificationsService.$inject = ['gettextCatalog'];
+  notificationsService.$inject = ['gettextCatalog', 'toastr'];
 
   /**
    *
    */
-  function notificationsService(gettextCatalog) {
+  function notificationsService(gettextCatalog, toastr) {
     var service = {
       submitSuccess: submitSuccess,
       success:       success,
@@ -22,7 +22,6 @@ define(['toastr'], function(toastr) {
     //-------
 
     function submitSuccess() {
-      toastr.options.positionClass = 'toast-bottom-right';
       toastr.success('Your changes were saved.');
     }
 
@@ -30,8 +29,7 @@ define(['toastr'], function(toastr) {
       var options = {
         closeButton: true,
         timeOut:  timeout || 1500,
-        extendedTimeOut: 0,
-        positionClass: 'toast-bottom-right'
+        extendedTimeOut: 0
       };
 
       toastr.success(message, title, options);

@@ -6,7 +6,7 @@ define(function (require) {
   'use strict';
 
   var angular = require('angular'),
-      sprintf = require('sprintf').sprintf;
+      sprintf = require('sprintf-js').sprintf;
 
   ModalTestSuiteMixinFactory.$inject = [
     '$rootScope',

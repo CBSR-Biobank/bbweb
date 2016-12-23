@@ -7,7 +7,7 @@ define(function (require) {
 
   var _       = require('lodash'),
       tv4     = require('tv4'),
-      sprintf = require('sprintf').sprintf;
+      sprintf = require('sprintf-js').sprintf;
 
   ShipmentFactory.$inject = [
     '$q',

@@ -10,7 +10,7 @@ define(function (require) {
       _       = require('lodash'),
       faker   = require('faker'),
       moment  = require('moment'),
-      sprintf = require('sprintf').sprintf;
+      sprintf = require('sprintf-js').sprintf;
 
   require('angular');
 
@@ -646,7 +646,7 @@ define(function (require) {
             jsonShipment = self.factory.shipment(),
             shipment     = new self.Shipment(jsonShipment),
             inventoryIds = [ ss.specimen.inventoryId ],
-            reqJson      = { inventoryIds: inventoryIds };
+            reqJson      = { specimenInventoryIds: inventoryIds };
 
         expect(context.shipmentSepcimenState).toBeDefined();
 

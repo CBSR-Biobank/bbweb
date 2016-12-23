@@ -7,7 +7,7 @@ define([
   'angularMocks',
   'jquery',
   'lodash',
-  'sprintf',
+  'sprintf-js',
   'faker',
   'moment'
 ], function(angular, mocks, $, _, sprintf, faker, moment) {

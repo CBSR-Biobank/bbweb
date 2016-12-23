@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'lodash', 'sprintf', 'tv4'], function(angular, _, sprintf, tv4) {
+define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf, tv4) {
   'use strict';
 
   StudyFactory.$inject = [
