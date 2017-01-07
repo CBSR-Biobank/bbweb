@@ -54,7 +54,7 @@ define(function (require) {
 
     beforeEach(inject(function(EntityTestSuiteMixin,
                                ServerReplyMixin,
-                               extendedDomainEntities) {
+                               testDomainEntities) {
       var self = this,
           SuiteMixin = new SuiteMixinFactory(EntityTestSuiteMixin, ServerReplyMixin);
 
@@ -71,6 +71,7 @@ define(function (require) {
       self.testUtils.addCustomMatchers();
       self.jsonStudy = self.factory.study();
       self.expectStudy = expectStudy;
+      testDomainEntities.extend();
 
       // used by promise tests
       function expectStudy(entity) {

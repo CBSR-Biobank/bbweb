@@ -1,10 +1,12 @@
 {
   "plugins": [
-    "requirejs"
+    "requirejs",
+    "jasmine"
   ],
   "env": {
     "browser": true,
-    "amd": true
+    "amd": true,
+    "jasmine": true
   },
   "extends": "eslint:recommended",
   "rules": {
@@ -79,7 +81,7 @@
     "max-nested-callbacks": "error",
     "max-params": "off",
     "max-statements": "off",
-    "max-statements-per-line": "error",
+    "max-statements-per-line": ["error", {"max": 2} ],
     "new-parens": "error",
     "newline-after-var": "off",
     "newline-before-return": "off",

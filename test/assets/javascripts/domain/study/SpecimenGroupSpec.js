@@ -24,14 +24,15 @@ define([
     beforeEach(inject(function($httpBackend,
                                _funutils_,
                                _SpecimenGroup_,
-                               factory,
+                               _factory_,
                                ServerReplyMixin,
-                               extendedDomainEntities) {
+                               testDomainEntities) {
       _.extend(this, ServerReplyMixin.prototype);
       httpBackend   = $httpBackend;
       funutils      = _funutils_;
       SpecimenGroup = _SpecimenGroup_;
-      factory  = factory;
+      factory       = _factory_;
+      testDomainEntities.extend();
     }));
 
     function uri(/* studyId, specimenGroupId, version */) {

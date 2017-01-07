@@ -19,7 +19,7 @@ define([
                                ServerReplyMixin,
                                AnnotationsEntityTestSuiteMixin,
                                testUtils,
-                               extendedDomainEntities) {
+                               testDomainEntities) {
       var self = this;
 
       _.extend(self,
@@ -41,6 +41,7 @@ define([
 
       self.expectSpecimen = expectSpecimen;
       self.failTest = failTest;
+      testDomainEntities.extend();
 
       //--
 
@@ -84,16 +85,16 @@ define([
 
     it('can list specimens for a collection event', function() {
       var self = this,
-          centre,
           specimenSpec,
-          ceventType,
           cevent,
           specimens,
           reply;
 
-      centre       = self.factory.centre({ locations: [ self.factory.location() ]});
+      self.factory.centre({ locations: [ self.factory.location() ]});
+
       specimenSpec = self.factory.collectionSpecimenSpec();
-      ceventType   = this.factory.collectionEventType({ specimenSpecs: [ specimenSpec ]});
+      self.factory.collectionEventType({ specimenSpecs: [ specimenSpec ]});
+
       cevent       = self.factory.collectionEvent();
       specimens    = _.map(_.range(3), function () { return self.factory.specimen(); });
       reply        = self.factory.pagedResult(specimens);
@@ -158,18 +159,16 @@ define([
 
     it('can add specimens', function() {
       var self = this,
-          centre,
           specimenSpec,
-          ceventType,
           cevent,
           jsonCevent,
           jsonSpecimens,
           specimens,
           json;
 
-      centre        = self.factory.centre({ locations: [ self.factory.location() ]});
+      self.factory.centre({ locations: [ self.factory.location() ]});
       specimenSpec  = self.factory.collectionSpecimenSpec();
-      ceventType    = this.factory.collectionEventType({ specimenSpecs: [ specimenSpec ]});
+      this.factory.collectionEventType({ specimenSpecs: [ specimenSpec ]});
       jsonCevent    = self.factory.collectionEvent();
       jsonSpecimens = _.map(_.range(3), function () { return self.factory.specimen(); });
       specimens     = _.map(jsonSpecimens, function (json) { return new self.Specimen(json); });

@@ -44,7 +44,7 @@ define(function(require) {
       };
     };
 
-    /**
+    /*
      * Creates annotation type options to create an annotation of each type of object.
      */
     SuiteMixin.prototype.getAnnotationTypeOptionsForAll = function () {
@@ -59,7 +59,7 @@ define(function(require) {
       return result;
     };
 
-    /**
+    /*
      * Creates a set of annotation type, server annotation and annotation object for each type
      * of annotation.
      */
@@ -77,7 +77,7 @@ define(function(require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(EntityTestSuiteMixin, testUtils, extendedDomainEntities) {
+    beforeEach(inject(function(EntityTestSuiteMixin, testUtils, testDomainEntities) {
       var SuiteMixin = new SuiteMixinFactory(EntityTestSuiteMixin);
       _.extend(this, SuiteMixin.prototype);
       this.injectDependencies('AppConfig',
@@ -91,36 +91,40 @@ define(function(require) {
                               'factory');
 
       testUtils.addCustomMatchers();
+      testDomainEntities.extend();
     }));
 
     it('constructor throws error for an invalid annotation value type', function() {
       var self = this,
-          annotationType = self.createAnnotationType({ valueType: self.factory.stringNext() }),
-          annotation;
+          annotationType = self.createAnnotationType({ valueType: self.factory.stringNext() });
 
       expect(function () {
-        annotation = new self.Annotation({}, annotationType);
+        /*eslint-disable no-unused-vars*/
+        var annotation = new self.Annotation({}, annotationType);
+        /*eslint-enable no-unused-vars*/
       }).toThrowError(/value type is invalid:/);
     });
 
     it('constructor throws error if annotation type is missing the required attribute', function() {
       var self = this,
-          annotationType = _.omit(self.createAnnotationType(), 'required'),
-          annotation;
+          annotationType = _.omit(self.createAnnotationType(), 'required');
 
       expect(function () {
-        annotation = new self.Annotation({}, annotationType);
+        /*eslint-disable no-unused-vars*/
+        var annotation = new self.Annotation({}, annotationType);
+        /*eslint-enable no-unused-vars*/
       }).toThrowError(/required not defined/);
     });
 
     it('constructor throws error for select annotation type and is not multiple or single select', function() {
       var self = this,
           annotationType = _.omit(self.createAnnotationType({ valueType: self.AnnotationValueType.SELECT }),
-                                  'maxValueCount'),
-          annotation;
+                                  'maxValueCount');
 
       expect(function () {
-        annotation = new self.Annotation({}, annotationType);
+        /*eslint-disable no-unused-vars*/
+        var annotation = new self.Annotation({}, annotationType);
+        /*eslint-enable no-unused-vars*/
       }).toThrowError(/invalid value for max count/);
     });
 

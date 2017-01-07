@@ -13,7 +13,7 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(EntityTestSuiteMixin, ServerReplyMixin, extendedDomainEntities) {
+    beforeEach(inject(function(EntityTestSuiteMixin, ServerReplyMixin, testDomainEntities) {
       var self = this;
 
       _.extend(self, EntityTestSuiteMixin.prototype, ServerReplyMixin.prototype);
@@ -24,6 +24,7 @@ define(function (require) {
                               'factory');
 
       self.statusChangeShared = statusChangeShared;
+      testDomainEntities.extend();
 
       //--
 

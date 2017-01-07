@@ -19,7 +19,7 @@ define(function(require) {
     beforeEach(inject(function(EntityTestSuiteMixin,
                                ServerReplyMixin,
                                AnnotationsEntityTestSuiteMixin,
-                               extendedDomainEntities) {
+                               testDomainEntities) {
       var self = this;
 
       _.extend(this,
@@ -49,6 +49,9 @@ define(function(require) {
       self.generateJsonAnnotationTypesAndAnnotations = generateJsonAnnotationTypesAndAnnotations;
       self.expectParticipant = expectParticipant;
       self.failTest = failTest;
+      testDomainEntities.extend();
+
+      //---
 
       function getParticipantEntities(isNew) {
         var jsonAnnotationTypes = self.factory.allAnnotationTypes(),
@@ -303,7 +306,7 @@ define(function(require) {
         participant.add().then(failTest).catch(checkErrorMsg);
       });
 
-      function failTest(participant) {
+      function failTest() {
         fail('should not be called');
       }
 

@@ -19,7 +19,7 @@ define(function (require) {
                                ServerReplyMixin,
                                AnnotationsEntityTestSuiteMixin,
                                testUtils,
-                               extendedDomainEntities) {
+                               testDomainEntities) {
       var self = this;
 
       _.extend(self,
@@ -46,6 +46,7 @@ define(function (require) {
       self.getCollectionEventEntities = getCollectionEventEntities;
       self.expectCevent = expectCevent;
       self.failTest = failTest;
+      testDomainEntities.extend();
 
       //--
 
@@ -244,7 +245,7 @@ define(function (require) {
         .respond(404, { status: 'error', message: 'invalid id' });
 
       self.CollectionEvent.get(collectionEventId)
-        .then(function (reply) { fail('should not be called'); })
+        .then(function () { fail('should not be called'); })
         .catch(function (err) { expect(err.data.message).toContain('invalid id'); });
       self.$httpBackend.flush();
     });

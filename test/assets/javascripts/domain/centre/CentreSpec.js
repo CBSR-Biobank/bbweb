@@ -22,7 +22,7 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (ServerReplyMixin, EntityTestSuiteMixin, extendedDomainEntities) {
+    beforeEach(inject(function (ServerReplyMixin, EntityTestSuiteMixin, testDomainEntities) {
       _.extend(this, EntityTestSuiteMixin.prototype, ServerReplyMixin.prototype);
 
       this.injectDependencies('$httpBackend',
@@ -33,6 +33,7 @@ define(function (require) {
                               'funutils',
                               'testUtils',
                               'factory');
+      testDomainEntities.extend();
 
       Centre = this.Centre;
     }));

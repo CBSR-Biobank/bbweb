@@ -24,11 +24,12 @@ define([
                                _ProcessingType_,
                                _factory_,
                                ServerReplyMixin,
-                               extendedDomainEntities) {
+                               testDomainEntities) {
       _.extend(this, ServerReplyMixin.prototype);
       httpBackend    = $httpBackend;
       ProcessingType = _ProcessingType_;
-      factory   = _factory_;
+      factory        = _factory_;
+      testDomainEntities.extend();
     }));
 
     function uri(/* studyId, processingTypeId, version */) {

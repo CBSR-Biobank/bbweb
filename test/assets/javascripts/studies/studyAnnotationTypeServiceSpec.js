@@ -17,7 +17,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  /**
+  /*
    * Suite for ceventAnnotationTypesService
    */
   xdescribe('service: studyAnnotationTypesService', function () {
@@ -28,23 +28,24 @@ define([
 
     beforeEach(inject(function ($httpBackend,
                                 factory,
-                                extendedDomainEntities,
+                                testDomainEntities,
                                 CollectionEventAnnotationType,
                                 ceventAnnotationTypesService) {
-      context.httpBackend            = $httpBackend;
-      context.annotationTypeType     = CollectionEventAnnotationType;
+      context.httpBackend                 = $httpBackend;
+      context.annotationTypeType          = CollectionEventAnnotationType;
       context.studyAnnotationTypesService = ceventAnnotationTypesService;
-      context.study                  = factory.study();
+      context.study                       = factory.study();
       context.annotationTypeUriPart       = 'ceannottypes';
 
       //context.serverAnnotationType = factory.studyAnnotationType(context.study, { required: false });
       context.serverAnnotationType = factory.studyAnnotationType(context.study);
+      testDomainEntities.extend();
     }));
 
     sharedBehaviourForStudyAnnotationTypes(context);
   });
 
-  /**
+  /*
    * Suite for spcLinkAnnotationTypesService
    */
   xdescribe('service: spcLinkAnnotationTypesService', function () {
@@ -55,7 +56,7 @@ define([
 
     beforeEach(inject(function ($httpBackend,
                                 factory,
-                                extendedDomainEntities,
+                                testDomainEntities,
                                 SpecimenLinkAnnotationType,
                                 spcLinkAnnotationTypesService) {
       context.httpBackend            = $httpBackend;
@@ -66,6 +67,7 @@ define([
 
       //context.serverAnnotationType = factory.studyAnnotationType(context.study, { required: false });
       context.serverAnnotationType = factory.studyAnnotationType(context.study);
+      testDomainEntities.extend();
     }));
 
     sharedBehaviourForStudyAnnotationTypes(context);
@@ -82,7 +84,7 @@ define([
 
     beforeEach(inject(function ($httpBackend,
                                 factory,
-                                extendedDomainEntities,
+                                testDomainEntities,
                                 ParticipantAnnotationType,
                                 participantAnnotationTypesService) {
       context.httpBackend            = $httpBackend;
@@ -92,20 +94,24 @@ define([
       context.annotationTypeUriPart       = 'pannottypes';
 
       context.serverAnnotationType = factory.studyAnnotationType(context.study, { required: true });
+      testDomainEntities.extend();
     }));
 
     sharedBehaviourForStudyAnnotationTypes(context);
   });
 
-  /**
+  /*
    * Shared spec for all 3 services listed above.
    */
   function sharedBehaviourForStudyAnnotationTypes(context) {
 
     describe('(shared)', function() {
 
-      var httpBackend, studyAnnotationTypesService, AnnotationTypeType;
-      var study, serverAnnotationType, serverAnnotationTypeNoId;
+      var httpBackend,
+          studyAnnotationTypesService,
+          AnnotationTypeType,
+          serverAnnotationType,
+          serverAnnotationTypeNoId;
 
       function uri(annotationTypeId, version) {
         var result = '/studies/' + context.study.id + '/' + context.annotationTypeUriPart;
@@ -119,10 +125,9 @@ define([
       }
 
       beforeEach(function () {
-        httpBackend            = context.httpBackend;
+        httpBackend                 = context.httpBackend;
         studyAnnotationTypesService = context.studyAnnotationTypesService;
-        AnnotationTypeType     = context.annotationTypeType;
-        study                  = context.study;
+        AnnotationTypeType          = context.annotationTypeType;
         serverAnnotationType        = context.serverAnnotationType;
         serverAnnotationTypeNoId    = _.omit(context.serverAnnotationType, 'id', 'version');
       });

@@ -21,13 +21,14 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(ServerReplyMixin, testUtils, extendedDomainEntities) {
+    beforeEach(inject(function(ServerReplyMixin, testUtils, testDomainEntities) {
       _.extend(this, ServerReplyMixin.prototype);
       httpBackend      = this.$injector.get('$httpBackend');
       funutils         = this.$injector.get('funutils');
       SpecimenLinkType = this.$injector.get('SpecimenLinkType');
-      factory     = this.$injector.get('factory');
+      factory          = this.$injector.get('factory');
       testUtils.addCustomMatchers();
+      testDomainEntities.extend();
     }));
 
     function createEntities() {
@@ -57,7 +58,7 @@ define([
       };
     }
 
-    /**
+    /*
      * Creates a {@link SpecimenLinkType} linked to specimen groups and annotation types.
      */
     function entitiesWithLinkedSpecimenLinkType() {

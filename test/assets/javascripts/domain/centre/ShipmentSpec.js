@@ -21,7 +21,7 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (ServerReplyMixin, EntityTestSuiteMixin, extendedDomainEntities) {
+    beforeEach(inject(function (ServerReplyMixin, EntityTestSuiteMixin, testDomainEntities) {
       var self = this;
 
       _.extend(self, EntityTestSuiteMixin.prototype, ServerReplyMixin.prototype);
@@ -36,6 +36,7 @@ define(function (require) {
                               'factory');
 
       self.expectShipment = expectShipment;
+      testDomainEntities.extend();
 
       //---
 
@@ -118,7 +119,7 @@ define(function (require) {
         self.Shipment.get(shipment.id).then(shouldNotFail).catch(shouldFail);
         self.$httpBackend.flush();
 
-        function shouldNotFail(reply) {
+        function shouldNotFail() {
           fail('function should not be called');
         }
 
@@ -136,7 +137,7 @@ define(function (require) {
         self.Shipment.get(shipment.id).then(shouldNotFail).catch(shouldFail);
         self.$httpBackend.flush();
 
-        function shouldNotFail(reply) {
+        function shouldNotFail() {
           fail('function should not be called');
         }
 
@@ -154,7 +155,7 @@ define(function (require) {
         self.Shipment.get(shipment.id).then(shouldNotFail).catch(shouldFail);
         self.$httpBackend.flush();
 
-        function shouldNotFail(reply) {
+        function shouldNotFail() {
           fail('function should not be called');
         }
 
@@ -230,7 +231,7 @@ define(function (require) {
         self.Shipment.list(centre.id).then(listFail).catch(shouldFail);
         self.$httpBackend.flush();
 
-        function listFail(reply) {
+        function listFail() {
           fail('function should not be called');
         }
 
@@ -496,9 +497,6 @@ define(function (require) {
       }
     });
 
-
-
-
     describe('when adding shipment specimens', function() {
 
       it('can add a shipment', function() {
@@ -573,7 +571,7 @@ define(function (require) {
           context.shipmentSepcimenState = ShipmentItemState.MISSING;
         }));
 
-        changeShipmentSpecimenStateSharedBehaviour(context);
+         changeShipmentSpecimenStateSharedBehaviour(context);
 
       });
 
@@ -593,6 +591,8 @@ define(function (require) {
     });
 
     /**
+     * @param {object} context - The configuration for this shared behaviour. See below.
+     *
      * @param {string} context.stateChangeFuncName - the function to call to change the state.
      *
      * @param {string} context.state - the new state to change to.
@@ -603,6 +603,8 @@ define(function (require) {
      *
      * @param {domain.centres.Shipment} context.expectedShipment - The Shipment object that should be returned
      * from the update request.
+     *
+     * @returns {undefined}
      */
     function changeStateSharedBehaviour(context) {
 
@@ -632,10 +634,13 @@ define(function (require) {
     }
 
     /**
+     * @param {object} context - The configuration for this shared behaviour. See below.
+     *
      * @param {string} context.stateChangeFuncName - the function to call to change the state.
      *
      * @param {string} context.shipmentSepcimenState - the new state to change to.
      *
+     * @returns {undefined}
      */
     function changeShipmentSpecimenStateSharedBehaviour(context) {
 

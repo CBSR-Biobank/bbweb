@@ -84,7 +84,7 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(EntityTestSuiteMixin, ServerReplyMixin, extendedDomainEntities) {
+    beforeEach(inject(function(EntityTestSuiteMixin, ServerReplyMixin, testDomainEntities) {
       var SuiteMixin = new SuiteMixinFactory(EntityTestSuiteMixin, ServerReplyMixin);
       _.extend(this, SuiteMixin.prototype);
 
@@ -98,6 +98,7 @@ define(function (require) {
       this.jsonStudy = this.factory.defaultStudy();
 
       this.testUtils.addCustomMatchers();
+      testDomainEntities.extend();
       CollectionEventType = this.CollectionEventType;
     }));
 

@@ -11,12 +11,13 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin, extendedDomainEntities) {
+    beforeEach(inject(function(TestSuiteMixin, testDomainEntities) {
       _.extend(this, TestSuiteMixin.prototype);
       this.injectDependencies('AnnotationType',
                               'AnnotationValueType',
                               'AnnotationMaxValueCount',
                               'factory');
+      testDomainEntities.extend();
     }));
 
     it('invalid objects are reported', function () {

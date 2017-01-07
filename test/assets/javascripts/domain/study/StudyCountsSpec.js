@@ -17,13 +17,14 @@ define([
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(EntityTestSuiteMixin,
-                               extendedDomainEntities,
+                               testDomainEntities,
                                ServerReplyMixin) {
       var self = this;
 
       _.extend(self, EntityTestSuiteMixin.prototype, ServerReplyMixin.prototype);
 
       self.injectDependencies('StudyCounts', '$httpBackend');
+      testDomainEntities.extend();
     }));
 
     afterEach(function() {

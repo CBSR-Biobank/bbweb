@@ -8,9 +8,7 @@ define([
   'jquery',
   'lodash',
   'sprintf-js',
-  'faker',
-  'moment'
-], function(angular, mocks, $, _, sprintf, faker, moment) {
+], function(angular, mocks, $, _, sprintf) {
   'use strict';
 
   /**
@@ -20,7 +18,7 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (ServerReplyMixin, EntityTestSuiteMixin, extendedDomainEntities) {
+    beforeEach(inject(function (ServerReplyMixin, EntityTestSuiteMixin, testDomainEntities) {
       var self = this;
 
       _.extend(self, EntityTestSuiteMixin.prototype, ServerReplyMixin.prototype);
@@ -33,6 +31,7 @@ define([
                               'factory');
 
       self.expectShipmentSpecimen = expectShipmentSpecimen;
+      testDomainEntities.extend();
 
       //---
 
@@ -143,7 +142,7 @@ define([
           }
         });
 
-        function shouldNotFail(reply) {
+        function shouldNotFail() {
           fail('function should not be called');
         }
       });
@@ -212,7 +211,7 @@ define([
         self.ShipmentSpecimen.list(shipmentId).then(listFail).catch(shouldFail);
         self.$httpBackend.flush();
 
-        function listFail(reply) {
+        function listFail() {
           fail('function should not be called');
         }
 
