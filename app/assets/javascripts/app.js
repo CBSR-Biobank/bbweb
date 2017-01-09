@@ -26,17 +26,18 @@ define(function(require) {
       AppConfig         = require('./AppConfig'),
       app;
 
+  require('angular-animate');
   require('angular-cookies');
   require('angular-gettext');
   require('angular-messages');
   require('angular-sanitize');
+  require('angular-toastr');
   require('angular-ui-router');
   require('angular-utils-ui-breadcrumbs');
   require('bootstrap');
   require('bootstrap-ui-datetime-picker');
   require('jquery');
   require('smart-table');
-  require('toastr');
   require('ui-bootstrap');
 
   // We must already declare most dependencies here (except for common), or the submodules' routes
@@ -45,6 +46,7 @@ define(function(require) {
                  [
                    'angularUtils.directives.uiBreadcrumbs',
                    'gettext',
+                   'ngAnimate',
                    'ngCookies',
                    'ngMessages',
                    'ngSanitize',

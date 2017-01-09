@@ -36,10 +36,12 @@
 
     paths: {
       'angular':                      '../lib/angular/angular',
+      'angular-animate':              '../lib/angular-animate/angular-animate',
       'angular-cookies':              '../lib/angular-cookies/angular-cookies',
       'angular-gettext':              '../lib/angular-gettext/dist/angular-gettext',
       'angular-messages':             '../lib/angular-messages/angular-messages',
       'angular-sanitize':             '../lib/angular-sanitize/angular-sanitize',
+      'angular-toastr':               '../lib/angular-toastr/dist/angular-toastr.tpls',
       'angular-ui-router':            '../lib/angular-ui-router/release/angular-ui-router',
       'angular-utils-ui-breadcrumbs': '../lib/angular-utils-ui-breadcrumbs/uiBreadcrumbs',
       'bootstrap':                    '../lib/bootstrap/dist/js/bootstrap',
@@ -50,7 +52,6 @@
       'requirejs':                    '../lib/requirejs/require',
       'smart-table':                  '../lib/angular-smart-table/dist/smart-table',
       'sprintf-js':                   '../lib/sprintf-js/dist/sprintf.min',
-      'toastr':                       '../lib/angular-toastr/dist/angular-toastr',
       'tv4':                          '../lib/tv4/tv4',
       'ui-bootstrap':                 '../lib/angular-ui-bootstrap/dist/ui-bootstrap-tpls'
     },
@@ -63,16 +64,17 @@
       'lodash': {
         exports: '_'
       },
+      'angular-animate':              ['angular'],
       'angular-cookies':              ['angular'],
+      'angular-gettext':              ['angular'],
       'angular-messages':             ['angular'],
       'angular-sanitize':             ['angular'],
+      'angular-toastr':               { deps: ['angular'], exports: 'toastr' },
       'angular-ui-router':            ['angular'],
       'angular-utils-ui-breadcrumbs': ['angular'],
-      'angular-gettext':              ['angular'],
       'bootstrap':                    ['jquery'],
       'bootstrap-ui-datetime-picker': ['angular'],
       'smart-table':                  ['angular'],
-      'toastr':                       ['angular'],
       'ui-bootstrap':                 ['angular']
     }
   });

@@ -26,6 +26,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       { pattern: 'target/web/public/main/lib/angular/angular.js', included: false },
+      { pattern: 'target/web/public/main/lib/angular-animate/**/*.js', included: false },
       { pattern: 'target/web/public/main/lib/angular-cookies/**/*.js', included: false },
       { pattern: 'target/web/public/main/lib/angular-gettext/**/*.js', included: false },
       { pattern: 'target/web/public/main/lib/angular-messages/**/*.js', included: false },

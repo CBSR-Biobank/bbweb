@@ -6,6 +6,7 @@
   "private": true,
   "dependencies": {
     "angular": "1.5.9",
+    "angular-animate": "1.5.9",
     "angular-cookies": "1.5.9",
     "angular-gettext": "^2.3.8",
     "angular-messages": "1.5.9",
@@ -56,6 +57,7 @@
     "karma-phantomjs-launcher": "^1.0.2",
     "karma-requirejs": "^1.1.0",
     "karma-spec-reporter": "0.0.26",
-    "matchdep": "~1.0.1"
+    "matchdep": "~1.0.1",
+    "requirejs": "^2.3.2"
   }
 }
