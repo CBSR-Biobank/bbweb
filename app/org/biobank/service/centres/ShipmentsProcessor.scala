@@ -275,8 +275,17 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   private def receiveCmdToEvent(cmd: ReceiveShipmentCmd, shipment: Shipment):
       ServiceValidation[ShipmentEvent] = {
     val valid = shipment match {
-        case ss: SentShipment =>     ss.receive(cmd.datetime)
-        case us: UnpackedShipment => us.backToReceived.successNel[String]
+        case ss: SentShipment =>
+          ss.receive(cmd.datetime)
+        case us: UnpackedShipment =>
+          // all items must be in present state to allow this state transition
+          val nonPresentExist = shipmentSpecimenRepository.allForShipment(us.id).
+            exists { ss => ss.state != ShipmentItemState.Present }
+          if (nonPresentExist)
+            InvalidState(s"cannot change to received state, items have already been processed: ${us.id}").
+              failureNel[Shipment]
+          else
+            us.backToReceived.successNel[String]
         case _ =>
           InvalidState(s"cannot change to received state: ${shipment.id}").failureNel[Shipment]
       }

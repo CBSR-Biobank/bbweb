@@ -23,6 +23,9 @@ class ShipmentSpecimensControllerSpec
   override def uri(shipment: Shipment): String =
     s"/shipments/specimens/${shipment.id.id}"
 
+  override def uri(shipment: Shipment, path: String): String =
+    s"/shipments/specimens/$path/${shipment.id.id}"
+
   def uri(shipment: Shipment, shipmentSpecimen: ShipmentSpecimen, path: String): String =
     s"/shipments/specimens/$path/${shipment.id.id}/${shipmentSpecimen.id.id}"
 
@@ -38,7 +41,7 @@ class ShipmentSpecimensControllerSpec
         shipmentRepository.put(f.shipment)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri       = uri(f.shipment, "specimens"),
+            uri       = uri(f.shipment),
             offset    = 0,
             total     = 0,
             maybeNext = None,
@@ -55,7 +58,7 @@ class ShipmentSpecimensControllerSpec
 
         shipmentSpecimenRepository.put(shipmentSpecimen)
 
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri(f.shipment, "specimens"))
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri(f.shipment))
 
         val originLocationName = f.fromCentre.locationName(specimen.originLocationId)
           .fold(e => "error", n => n)
@@ -81,7 +84,7 @@ class ShipmentSpecimensControllerSpec
         shipmentSpecimenMap.values.foreach(shipmentSpecimenRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri       = uri(f.shipment, "specimens"),
+            uri       = uri(f.shipment),
             offset    = 0,
             total     = numSpecimens.toLong,
             maybeNext = None,
@@ -105,7 +108,7 @@ class ShipmentSpecimensControllerSpec
         val f = shipmentSpecimensFixture(numSpecimens)
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uri(f.shipment, "specimens"),
+            uri         = uri(f.shipment),
             queryParams = Map("limit" -> "1"),
             total       = numSpecimens.toLong,
             maybeNext   = Some(2))
@@ -128,7 +131,7 @@ class ShipmentSpecimensControllerSpec
 
         shipmentSpecimensMap.foreach { case (itemState, shipmentSpecimen, shipmentSpecimenDto ) =>
           val jsonItem = PagedResultsSpec(this).singleItemResult(
-              uri         = uri(f.shipment, "specimens"),
+              uri         = uri(f.shipment),
               queryParams = Map("filter" -> s"state::$itemState"),
               total       = 1,
               maybeNext   = None)
@@ -142,7 +145,7 @@ class ShipmentSpecimensControllerSpec
         val invalidStateName = "state::" + nameGenerator.next[ShipmentSpecimen]
 
         val reply = makeRequest(GET,
-                                uri(f.shipment, "specimens") + s"?filter=$invalidStateName",
+                                uri(f.shipment) + s"?filter=$invalidStateName",
                                 BAD_REQUEST)
 
         (reply \ "status").as[String] must include ("error")
@@ -156,7 +159,7 @@ class ShipmentSpecimensControllerSpec
         val f = shipmentSpecimensFixture(numSpecimens)
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uri(f.shipment, "specimens"),
+            uri         = uri(f.shipment),
             queryParams = Map("limit" -> "1"),
             total       = numSpecimens.toLong,
             maybeNext   = Some(2))
@@ -170,7 +173,7 @@ class ShipmentSpecimensControllerSpec
         val f = shipmentSpecimensFixture(numSpecimens)
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uri(f.shipment, "specimens"),
+            uri         = uri(f.shipment),
             queryParams = Map("page" -> "2", "limit" -> "1"),
             total       = numSpecimens.toLong,
             offset      = 1,
@@ -182,7 +185,7 @@ class ShipmentSpecimensControllerSpec
 
       "fail when using an invalid query parameters" in {
         val f = shipmentSpecimensFixture(2)
-        val url = uri(f.shipment, "specimens")
+        val url = uri(f.shipment)
         PagedResultsSpec(this).failWithNegativePageNumber(url)
         PagedResultsSpec(this).failWithInvalidPageNumber(url)
         PagedResultsSpec(this).failWithNegativePageSize(url)
@@ -203,7 +206,7 @@ class ShipmentSpecimensControllerSpec
           }.toMap
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri         = uri(f.shipment, "specimens"),
+            uri         = uri(f.shipment),
             queryParams = Map("sort" -> "-state"),
             offset      = 0,
             total       = shipmentSpecimensMap.size.toLong,
@@ -224,7 +227,7 @@ class ShipmentSpecimensControllerSpec
         val shipmentSpecimen = f.shipmentSpecimenMap.values.head._3
         val dto = f.shipmentSpecimenMap.values.head._4
 
-        val json = makeRequest(GET, uri(f.shipment, "specimens") + s"/${shipmentSpecimen.id}")
+        val json = makeRequest(GET, uri(f.shipment) + s"/${shipmentSpecimen.id}")
 
         (json \ "status").as[String] must include ("success")
 
@@ -239,22 +242,11 @@ class ShipmentSpecimensControllerSpec
 
         val badShipment = factory.createShipment
 
-        val json = makeRequest(GET, uri(badShipment, "specimens") + s"/${shipmentSpecimen.id}", NOT_FOUND)
+        val json = makeRequest(GET, uri(badShipment) + s"/${shipmentSpecimen.id}", NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
         (json \ "message").as[String] must include regex ("IdNotFound.*shipment id")
-      }
-
-      "fails for an invalid shipment specimen id" in {
-        val f = shipmentSpecimensFixture(1)
-        val badShipmentSpecimen = factory.createShipmentSpecimen
-
-        val json = makeRequest(GET, uri(f.shipment, "specimens") + s"/${badShipmentSpecimen.id}", NOT_FOUND)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex ("IdNotFound.*shipment specimen id")
       }
 
     }
@@ -275,8 +267,7 @@ class ShipmentSpecimensControllerSpec
         val specimenDto =
           specimen.createDto(f.cevent, f.specimenSpec, centreLocationInfo, centreLocationInfo)
 
-
-        val url = uri(f.shipment, "specimens/canadd") + s"/${specimen.inventoryId}"
+        val url = uri(f.shipment, "canadd") + s"/${specimen.inventoryId}"
         val reply = makeRequest(GET, url)
 
         (reply \ "status").as[String] must include ("success")
@@ -289,7 +280,7 @@ class ShipmentSpecimensControllerSpec
         val f = shipmentSpecimensFixture(1)
         val specimen = f.shipmentSpecimenMap.values.head._1
 
-        val url = uri(f.shipment, "specimens/canadd") + s"/${specimen.inventoryId}"
+        val url = uri(f.shipment, "canadd") + s"/${specimen.inventoryId}"
         val reply = makeRequest(GET, url, BAD_REQUEST)
 
         (reply \ "status").as[String] must include ("error")
@@ -297,12 +288,12 @@ class ShipmentSpecimensControllerSpec
         (reply \ "message").as[String] must include ("specimens are already in an active shipment")
       }
 
-      "cannot add an specimen inventory Id that does not exist" in {
+      "not add a specimen inventory Id that does not exist" in {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
 
         val invalidInventoryId = nameGenerator.next[Specimen]
-        val url = uri(f.shipment, "specimens/canadd") + s"/$invalidInventoryId"
+        val url = uri(f.shipment, "canadd") + s"/$invalidInventoryId"
         val reply = makeRequest(GET, url, NOT_FOUND)
 
         (reply \ "status").as[String] must include ("error")
@@ -311,12 +302,12 @@ class ShipmentSpecimensControllerSpec
           "EntityCriteriaError: specimen with inventory ID not found")
       }
 
-      "cannot add a specimen inventory Id that not present at shipment's from centre" in {
+      "not add a specimen inventory Id that not present at shipment's from centre" in {
         val f = specimensFixture(1)
         val specimen = f.specimens.head.copy(locationId = f.toCentre.locations.head.uniqueId)
         specimenRepository.put(specimen)
 
-        val url = uri(f.shipment, "specimens/canadd") + s"/${specimen.inventoryId}"
+        val url = uri(f.shipment, "canadd") + s"/${specimen.inventoryId}"
         val reply = makeRequest(GET, url, BAD_REQUEST)
 
         (reply \ "status").as[String] must include ("error")
@@ -330,7 +321,7 @@ class ShipmentSpecimensControllerSpec
         val newShipment = factory.createShipment(f.fromCentre, f.toCentre)
         shipmentRepository.put(newShipment)
 
-        val url = uri(newShipment, "specimens/canadd") + s"/${specimen.inventoryId}"
+        val url = uri(newShipment, "canadd") + s"/${specimen.inventoryId}"
         val reply = makeRequest(GET, url, BAD_REQUEST)
 
         (reply \ "status").as[String] must include ("error")
@@ -443,7 +434,7 @@ class ShipmentSpecimensControllerSpec
         forAll(stateData) { case (state, urlPath) =>
           shipmentSpecimenRepository.put(shipmentSpecimen)
 
-          val url = uri(f.shipment, shipmentSpecimen, urlPath)
+          val url = uri(f.shipment, urlPath)
 
           val reqJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
 
@@ -485,7 +476,7 @@ class ShipmentSpecimensControllerSpec
             shipmentRepository.put(shipment)
             shipmentSpecimenRepository.put(shipmentSpecimen)
 
-            val url = uri(shipment, shipmentSpecimen, urlPath)
+            val url = uri(shipment, urlPath)
 
             val reqJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
 
@@ -502,13 +493,11 @@ class ShipmentSpecimensControllerSpec
         val f = specimensFixture(1)
         val shipment = makeUnpackedShipment(f.shipment)
         val specimen = f.specimens.headOption.value
-        val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = shipment.id,
-                                                                   specimenId = specimen.id)
 
         shipmentRepository.put(shipment)
         forAll(stateData) { case (state, urlPath) =>
 
-          val url = uri(shipment, shipmentSpecimen, urlPath)
+          val url = uri(shipment, urlPath)
 
             val reqJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
 

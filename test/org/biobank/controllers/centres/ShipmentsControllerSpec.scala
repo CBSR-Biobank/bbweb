@@ -846,6 +846,32 @@ class ShipmentsControllerSpec
           (json \ "message").as[String] must include ("TimeReceivedBeforeSent")
         }
 
+        "111 fail to change from UNPACKED to RECEIVED if some specimens are not in PRESENT state" in {
+          val f = specimensFixture(1)
+
+          val shipment = makeUnpackedShipment(f.shipment)
+          shipmentRepository.put(shipment)
+
+          val specimen = f.specimens.head
+          val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id,
+                                                                     specimenId = specimen.id,
+                                                                     state      = ShipmentItemState.Received)
+          shipmentSpecimenRepository.put(shipmentSpecimen)
+
+          val updateJson = Json.obj("expectedVersion" -> shipment.version,
+                                    "datetime"        -> shipment.timeReceived)
+
+          val json = makeRequest(POST, uri(f.shipment, "state/received"), BAD_REQUEST, updateJson)
+
+          (json \ "status").as[String] must include ("error")
+
+          (json \ "message").as[String] must include (
+            "InvalidState(cannot change to received state, items have already been processed")
+        }
+
+        "111 fail to change from UNPACKED to RECEIVED if some containers are not in PRESENT state" ignore {
+          fail("needs implementation")
+        }
       }
 
       "for UNPACKED state" must {
@@ -864,6 +890,7 @@ class ShipmentsControllerSpec
                               Some(timeUnpacked))
           }
         }
+
       }
 
       "for LOST state" must {

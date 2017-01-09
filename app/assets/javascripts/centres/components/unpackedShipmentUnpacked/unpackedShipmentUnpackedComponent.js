@@ -44,7 +44,7 @@ define(function (require) {
         id:    'tag-as-extra',
         class: 'btn-warning',
         title: gettextCatalog.getString('Tag as present'),
-        icon:  'glyphicon-arrow-down'
+        icon:  'glyphicon-arrow-left'
       }
     ];
 

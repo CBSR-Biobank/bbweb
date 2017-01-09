@@ -99,9 +99,8 @@ define(function(require) {
           annotationType = self.createAnnotationType({ valueType: self.factory.stringNext() });
 
       expect(function () {
-        /*eslint-disable no-unused-vars*/
         var annotation = new self.Annotation({}, annotationType);
-        /*eslint-enable no-unused-vars*/
+        expect(annotation).not.toBeNull();
       }).toThrowError(/value type is invalid:/);
     });
 
@@ -110,9 +109,8 @@ define(function(require) {
           annotationType = _.omit(self.createAnnotationType(), 'required');
 
       expect(function () {
-        /*eslint-disable no-unused-vars*/
         var annotation = new self.Annotation({}, annotationType);
-        /*eslint-enable no-unused-vars*/
+        expect(annotation).not.toBeNull();
       }).toThrowError(/required not defined/);
     });
 
@@ -122,9 +120,8 @@ define(function(require) {
                                   'maxValueCount');
 
       expect(function () {
-        /*eslint-disable no-unused-vars*/
         var annotation = new self.Annotation({}, annotationType);
-        /*eslint-enable no-unused-vars*/
+        expect(annotation).not.toBeNull();
       }).toThrowError(/invalid value for max count/);
     });
 
