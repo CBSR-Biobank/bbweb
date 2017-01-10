@@ -145,14 +145,6 @@ SBT command to create Eclipse IDE project files:
 
     sbt 'eclipse with-source=true'
 
-### Git
-
-Delete remote branch:
-
-```bash
-git branch -d -r origin/__branch_name__
-```
-
 #### Squash Commits
 
 Using your own forked GitHub repository for the BBweb project. In this example the forked remote is
@@ -162,40 +154,6 @@ named `nelson`, and the topic branch is named `nelson-dev`.
 git rebase -i HEAD~6
 git push nelson +nelson-dev
 ```
-
-### Emacs
-
-### Ensime
-
-http://www.47deg.com/blog/scala-development-with-emacs
-
-#### Gtags
-
-Using helm-gtags in Emacs. To generate a tags file the following is required:
-
-1. Install [GNU Global](http://www.gnu.org/software/global/download.html) from source (in `/usr/local/src`).
-1. Install exuberant-ctags:
-
-    ```bash
-    sudo apt-get install exuberant-ctags
-    ```
-
-1. Add the following line to `/usr/local/share/gtags/gtags.conf` in the `exuberant-ctags` section.
-
-    ```
-    :langmap=Scala\:.scala:\
-    ```
-
-1. Create the tags files (at the project root):
-
-    ```bash
-    find app -type f -print > /tmp/bbwebfiles \
-    && find test -type f -print >> /tmp/bbwebfiles \
-    && find jstest -type f -print >> /tmp/bbwebfiles
-    gtags -v -f /tmp/bbwebfiles --gtagslabel ctags
-    ```
-
-See: https://gist.github.com/tsdeng/8451067
 
 ### GitHub Markdown
 
@@ -221,17 +179,6 @@ to disk. This must be disabled for the production server (see [conf/ehcache.xml]
 * The Akka logging configuration for the web application is in [conf/application.conf]
   (../conf/application.conf). It is in [conf/reference.conf] (../conf/reference.conf) for the testing
   environment.
-
-## H2 in Memory Database
-
-Use the `h2-browser` sbt command to create and connect to the H2 database prior to starting the
-web application.
-
-Use `run -Dbbweb.query.db.load=true` sbt command to reload an empty query database.
-
-Use `run -Dbbweb.query.db.load=false` sbt command to use an already loaded query database.
-
-Use `run -DapplyEvolutions.default=true` sbt command to automatically apply database evolutions.
 
 ## Scalatest
 
