@@ -1,17 +1,19 @@
-<uib-accordion-group is-open="vm.panelOpen" style="margin-top: 10px;">
-  <uib-accordion-heading>
-    Processing Types
-    <panel-buttons on-add="vm.add(study)"
-                   add-button-title="add processing type"
-                   add-button-enabled="vm.modificationsAllowed"
-                   panel-open="vm.panelOpen">
-    </panel-buttons>
-  </uib-accordion-heading>
-  <p>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      Processing Types
+    </h3>
+  </div>
+  <div class="panel-body">
     A Processing Type describes a regularly performed specimen processing procedure with a unique name (unique
     to this study). There should be one or more associated Specimen Link Types that (1) further define legal
     procedures and (2) allow recording of procedures performed on different types of Specimens.
-  </p>
+    <div class="panel panel-danger">
+      <div class="panel-heading" translate>
+        This section is incomplete.
+      </div>
+    </div>
+  </div>
   <div class="panel panel-warning" ng-if="vm.processingTypes.length == 0">
     <div class="panel-heading">
       Processing types have not been defined for this study yet.
@@ -54,4 +56,4 @@
       </tr>
     </tbody>
   </table>
-</uib-accordion-group>
+</div>

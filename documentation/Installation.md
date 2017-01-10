@@ -33,7 +33,7 @@ sudo apt-get install -y mongodb-org
 
 ### NodeJS
 
-Install NodeJS following these instructions:
+Install NodeJS using NVM following these instructions:
 
 ```
 https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-an-ubuntu-14-04-server

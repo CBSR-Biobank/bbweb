@@ -7,12 +7,12 @@
                 title="{{'Enable'|translate}}"
                 ng-disabled="!vm.centre.hasLocations()"
                 ng-if="vm.centre.isDisabled()"
-                ng-click="vm.changeStatus('enable')">
+                ng-click="vm.changeState('enable')">
           <i class="glyphicon glyphicon-ok-circle"></i>
         </button>
 
         <button class="btn btn-xs btn-danger"
-                ng-click="vm.changeStatus('disable')"
+                ng-click="vm.changeState('disable')"
                 title="{{'Disable'|translate}}"
                 ng-if="vm.centre.isEnabled()">
           <i class="glyphicon glyphicon-cog"></i>
