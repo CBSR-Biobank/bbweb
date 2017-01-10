@@ -48,20 +48,21 @@
   <div class="panel-footer text-center"
        style="padding:5px 10px;"
        ng-if="vm.showPagination">
-    <uib-pagination class="pagination-sm"
-                    style="margin:0;"
-                    boundary-links="true"
-                    total-items="vm.collectionEventsPagedResult.total"
-                    items-per-page="vm.pagerOptions.limit"
-                    ng-model="vm.pagerOptions.page"
-                    ng-change="vm.pageChanged()"
-                    max-size="5"
-                    rotate="false"
-                    previous-text="&lsaquo;"
-                    next-text="&rsaquo;"
-                    first-text="&laquo;"
-                    last-text="&raquo;">
-    </uib-pagination>
+    <ul uib-pagination
+        class="pagination-sm"
+        style="margin:0;"
+        boundary-links="true"
+        total-items="vm.collectionEventsPagedResult.total"
+        items-per-page="vm.pagerOptions.limit"
+        ng-model="vm.pagerOptions.page"
+        ng-change="vm.pageChanged()"
+        max-size="5"
+        rotate="false"
+        previous-text="&lsaquo;"
+        next-text="&rsaquo;"
+        first-text="&laquo;"
+        last-text="&raquo;">
+    </ul>
   </div>
 
   <div class="panel-footer"

@@ -94,17 +94,18 @@
 
 </div>
 
-<uib-pagination class="pagination-sm"
-                total-items="vm.pagedResult.total"
-                ng-model="vm.pagerOptions.page"
-                ng-change="vm.pageChanged()"
-                items-per-page="vm.pagerOptions.limit"
-                max-size="5"
-                rotate="false"
-                boundary-links="true"
-                previous-text="&lsaquo;"
-                next-text="&rsaquo;"
-                first-text="&laquo;"
-                last-text="&raquo;"
-                ng-if="vm.displayState === vm.displayStates.HAVE_RESULTS">
-</uib-pagination>
+<ul uib-pagination
+    class="pagination-sm"
+    total-items="vm.pagedResult.total"
+    ng-model="vm.pagerOptions.page"
+    ng-change="vm.pageChanged()"
+    items-per-page="vm.pagerOptions.limit"
+    max-size="5"
+    rotate="false"
+    boundary-links="true"
+    previous-text="&lsaquo;"
+    next-text="&rsaquo;"
+    first-text="&laquo;"
+    last-text="&raquo;"
+    ng-if="vm.displayState === vm.displayStates.HAVE_RESULTS">
+</ul>
