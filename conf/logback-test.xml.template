@@ -23,7 +23,6 @@
   <logger name="org.biobank.controllers.centres" level="INFO" />
 
   <!--
-       <logger name="com.gargoylesoftware.htmlunit" level="INFO" />
        <logger name="com.google" level="INFO" />
        <logger name="play" level="INFO" />
        <logger name="net.sf.ehcache" level="INFO" />
@@ -32,6 +31,7 @@
 
   <logger name="application" level="WARN" />
   <logger name="akka.event.slf4j" level="WARN" />
+  <logger name="com.gargoylesoftware.htmlunit" level="WANR" />
 
   <root level="INFO">
     <appender-ref ref="STDOUT" />
