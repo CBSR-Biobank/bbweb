@@ -13,7 +13,7 @@ object TestUtils extends MustMatchers with OptionValues {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  val TimeCoparisonMillis = 1500L
+  val TimeCoparisonMillis = 2000L
 
   def checkOpionalTime(expectedTimeMaybe: Option[DateTime], actualTimeMaybe: Option[DateTime]): Unit = {
     expectedTimeMaybe match {
