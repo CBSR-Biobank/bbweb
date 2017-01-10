@@ -93,19 +93,19 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka"           %% "akka-remote"                         % akkaVer   % "compile",
   ( "com.okumin"                %% "akka-persistence-sql-async"          % "0.4.0"   % "compile"  ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
   "org.scala-stm"               %% "scala-stm"                           % "0.8"     % "compile",
-  "org.scalaz"                  %% "scalaz-core"                         % "7.2.7"   % "compile",
-  "com.github.mauricio"         %% "mysql-async"                         % "0.2.20",
+  "org.scalaz"                  %% "scalaz-core"                         % "7.2.8"   % "compile",
+  "com.github.mauricio"         %% "mysql-async"                         % "0.2.21",
   "com.github.t3hnar"           %% "scala-bcrypt"                        % "3.0",
   "com.github.ancane"           %% "hashids-scala"                       % "1.2",
   "com.typesafe.play"           %% "play-mailer"                         % "5.0.0",
   "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.5.0",
-  "com.github.nscala-time"      %% "nscala-time"                         % "2.14.0",
+  "com.github.nscala-time"      %% "nscala-time"                         % "2.16.0",
   // WebJars infrastructure
   ( "org.webjars"               %% "webjars-play"                        % "2.5.0").exclude("org.webjars", "requirejs"),
   // WebJars dependencies
   "org.webjars"                 %  "requirejs"                           % "2.3.2",
   // Testing
-  ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "1.3.16"  % "test" ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
+  ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "1.3.18"  % "test" ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
   "com.typesafe.akka"           %% "akka-testkit"                        % akkaVer   % "test",
   "org.scalatestplus"           %% "play"                                % "1.4.0"   % "test",
   "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
