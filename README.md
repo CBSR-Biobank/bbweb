@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/cbsrbiobank/bbweb.svg?branch=master)](https://travis-ci.org/cbsrbiobank/bbweb)
+[![Coverage Status](https://coveralls.io/repos/github/cbsrbiobank/bbweb/badge.svg?branch=master)](https://coveralls.io/github/cbsrbiobank/bbweb?branch=master)
 
 # Biobank Web Application
 
