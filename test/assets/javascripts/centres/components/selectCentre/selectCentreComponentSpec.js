@@ -103,7 +103,7 @@ define([
 
       self.createScope({ getCentres: self.createGetCentresFn(centres), limit: limit });
       expect(self.controller.showPagination).toBe(true);
-      expect(self.element.find('uib-pagination').length).toBe(1);
+      expect(self.element.find('ul.pagination-sm').length).toBe(1);
     });
 
     it('updates to name filter cause studies to be re-loaded', function() {
