@@ -6,6 +6,7 @@ import akka.persistence.inmemory.extension.{ InMemoryJournalStorage, InMemorySna
 import akka.testkit.TestProbe
 import akka.util.Timeout
 import javax.inject.{ Inject, Named }
+import org.biobank.controllers.FixedEhCache
 import org.biobank.domain._
 import org.biobank.domain.centre._
 import org.biobank.domain.participants._
@@ -16,6 +17,8 @@ import org.biobank.service._
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time._
+import play.api.cache.{ CacheApi /* , EhCacheModule */ }
+import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import scala.concurrent.duration._
 
@@ -44,7 +47,9 @@ trait TestFixture
     with BeforeAndAfterAll
     with TestDbConfiguration {
 
-  val app = new GuiceApplicationBuilder().build
+  val app = new GuiceApplicationBuilder().
+    overrides(bind[CacheApi].to[FixedEhCache]).
+    build
 
   implicit val system = ActorSystem("bbweb-test", TestDbConfiguration.config())
 
