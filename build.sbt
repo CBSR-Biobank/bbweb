@@ -12,7 +12,6 @@ def excludeSpecs2(module: ModuleID): ModuleID =
     .exclude("com.novocode", "junit-interface")
 
 lazy val root = (project in file("."))
-  .enablePlugins(SbtWeb)
   .enablePlugins(PlayScala)
   .settings(libraryDependencies ~= (_.map(excludeSpecs2)))
 
