@@ -46,7 +46,7 @@
       'angular-utils-ui-breadcrumbs': '../lib/angular-utils-ui-breadcrumbs/uiBreadcrumbs',
       'bootstrap':                    '../lib/bootstrap/dist/js/bootstrap',
       'bootstrap-ui-datetime-picker': '../lib/bootstrap-ui-datetime-picker/dist/datetime-picker',
-      'jquery':                       '../lib/jquery/dist/jquery',
+      'jquery':                       '../lib/jquery/jquery',
       'lodash':                       '../lib/lodash/lodash',
       'moment':                       '../lib/moment/moment',
       'requirejs':                    '../lib/requirejs/require',

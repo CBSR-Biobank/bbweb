@@ -42,7 +42,7 @@ https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-an-ub
 ### To Start the Application
 
 ```bash
-play clean stage
+sbt clean stage
 target/universal/stage/bin/bbweb
 ```
 

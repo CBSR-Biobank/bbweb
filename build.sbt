@@ -1,4 +1,5 @@
 val akkaVer = "2.4.12"
+val angularVer = "1.5.9"
 
 name := "bbweb"
 
@@ -11,25 +12,16 @@ def excludeSpecs2(module: ModuleID): ModuleID =
     .exclude("com.novocode", "junit-interface")
 
 lazy val root = (project in file("."))
+  .enablePlugins(SbtWeb)
   .enablePlugins(PlayScala)
   .settings(libraryDependencies ~= (_.map(excludeSpecs2)))
-
-lazy val copy_node_modules = taskKey[Unit]("Copies the NPM modules to the target directory")
-
-copy_node_modules := {
-  val node_modules = new File("node_modules")
-  val target = new File("target/web/public/main/lib/")
-  IO.copyDirectory(node_modules, target, true, true)
-}
-
-addCommandAlias("npm_install", ";web-assets:jseNpmNodeModules;copy_node_modules")
 
 scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.8")
 
 scalacOptions in Compile ++= Seq(
   "-target:jvm-1.8",
   "-encoding", "UTF-8",
-  "deprecation",        // warning and location for usages of deprecated APIs
+  "-deprecation",       // warning and location for usages of deprecated APIs
   "-feature",           // warning and location for usages of features that should be imported explicitly
   "-language:implicitConversions",
   "-language:higherKinds",
@@ -104,6 +96,24 @@ libraryDependencies ++= Seq(
   ( "org.webjars"               %% "webjars-play"                        % "2.5.0").exclude("org.webjars", "requirejs"),
   // WebJars dependencies
   "org.webjars"                 %  "requirejs"                           % "2.3.2",
+  "org.webjars.npm"             %  "angular"                             % angularVer,
+  "org.webjars.npm"             %  "angular-animate"                     % angularVer,
+  "org.webjars.npm"             %  "angular-cookies"                     % angularVer,
+  ( "org.webjars.bower"         %  "angular-gettext"                     % "2.2.1" ).exclude("org.webjars.npm", "angular"),
+  "org.webjars.npm"             %  "angular-messages"                    % angularVer,
+  "org.webjars.npm"             %  "angular-sanitize"                    % angularVer,
+  "org.webjars.npm"             %  "angular-smart-table"                 % "2.1.6",
+  "org.webjars.npm"             %  "angular-toastr"                      % "1.7.0",
+  "org.webjars.npm"             %  "angular-ui-bootstrap"                % "2.3.1",
+  ( "org.webjars.npm"           %  "angular-ui-router"                   % "0.3.2" ).exclude("org.webjars.npm", "angular"),
+  "org.webjars.bower"           %  "angular-utils-ui-breadcrumbs"        % "0.2.2",
+  "org.webjars.npm"             %  "bootstrap"                           % "3.3.7",
+  "org.webjars.bower"           %  "bootstrap-ui-datetime-picker"        % "2.4.3",
+  "org.webjars"                 %  "jquery"                              % "3.1.1-1",
+  "org.webjars.npm"             %  "lodash"                              % "4.17.3",
+  "org.webjars.npm"             %  "moment"                              % "2.17.1",
+  "org.webjars.npm"             %  "sprintf-js"                          % "1.0.3",
+  "org.webjars.npm"             %  "tv4"                                 % "1.2.7",
   // Testing
   ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "1.3.18"  % "test" ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
   "com.typesafe.akka"           %% "akka-testkit"                        % akkaVer   % "test",
