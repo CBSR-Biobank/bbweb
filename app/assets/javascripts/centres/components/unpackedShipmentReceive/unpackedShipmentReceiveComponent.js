@@ -26,7 +26,7 @@ define(function (require) {
     'modalService'
   ];
 
-  /**
+  /*
    * Allows user to interact with Shipment Specimens in PRESENT state.
    *
    * The user can receive the specimens, mark them as EXTRA or MISSING.
@@ -78,7 +78,7 @@ define(function (require) {
         });
     }
 
-    /**
+    /*
      * Inventory IDs entered by the user
      */
     function onInventoryIdsSubmit() {
@@ -88,28 +88,60 @@ define(function (require) {
       return vm.shipment.tagSpecimensAsReceived(inventoryIds)
         .then(function () {
           vm.inventoryIds = '';
-          vm.refreshNonReceivedSpecimensTable++;
+          vm.refreshNonReceivedSpecimensTable += 1;
         })
         .catch(function (err) {
-          var errors;
+          var modalMsg;
+
           if (err.data.message) {
-            errors = err.data.message.split(', ');
-            console.log(errors);
+            modalMsg = errorIsInvalidInventoryIds(err.data.message);
+            if (_.isUndefined(modalMsg)) {
+              modalMsg = errorIsShipSpecimensNotInShipment(err.data.message);
+            }
+            if (_.isUndefined(modalMsg)) {
+              modalMsg = errorIsShipSpecimensNotPresent(err.data.message);
+            }
           }
+
+          if (_.isUndefined(modalMsg)) {
+            throw new Error('could not parse error message');
+          }
+
+          modalService.modalOk(gettextCatalog.getString('Invalid inventory IDs'), modalMsg);
         });
     }
 
-    // function specimensNotPresent(errMsg) {
-    //   return modalService.modalOk(
-    //     gettextCatalog.getString(''),
-    //     gettextCatalog.getString(
-    //       'Unique ID <strong>{{id}}</strong> is already in use by a participant ' +
-    //         'in another study. Please use a diffent one.',
-    //       { id: vm.uniqueId }))
-    //     .then(function () {
-    //       vm.uniqueId = '';
-    //     });
-    // }
+    function errorIsInvalidInventoryIds(errMsg) {
+      var regex = /EntityCriteriaError: invalid inventory Ids: (.*)/g,
+          match = regex.exec(errMsg);
+      if (match) {
+        return gettextCatalog.getString('The following inventory IDs are invalid:<br>{{ids}}',
+                                        { ids: match[1] });
+      }
+      return undefined;
+    }
+
+    function errorIsShipSpecimensNotInShipment(errMsg) {
+      var regex = /EntityCriteriaError: specimens not in this shipment: (.*)/g,
+          match = regex.exec(errMsg);
+      if (match) {
+        return gettextCatalog.getString(
+          'The following inventory IDs are for specimens not present in this shipment:<br>{{ids}}',
+          { ids: match[1] });
+      }
+      return undefined;
+    }
+
+    function errorIsShipSpecimensNotPresent(errMsg) {
+      var regex = /EntityCriteriaError: shipment specimens not present: (.*)/g,
+          match = regex.exec(errMsg);
+      if (match) {
+        return gettextCatalog.getString(
+          'The following inventory IDs are for have already been unpacked:<br>{{ids}}',
+          { ids: match[1] });
+      }
+      return undefined;
+    }
 
     function tableActionSelected(shipmentSpecimen, action) {
       var tagFunction;

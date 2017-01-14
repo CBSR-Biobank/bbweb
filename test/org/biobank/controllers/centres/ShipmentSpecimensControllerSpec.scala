@@ -489,7 +489,7 @@ class ShipmentSpecimensControllerSpec
         }
       }
 
-      "cannot change a shipment specimen's state if it's not in the system" in {
+      "cannot change a shipment specimen's state if it's not in the shipment" in {
         val f = specimensFixture(1)
         val shipment = makeUnpackedShipment(f.shipment)
         val specimen = f.specimens.headOption.value
@@ -498,14 +498,55 @@ class ShipmentSpecimensControllerSpec
         forAll(stateData) { case (state, urlPath) =>
 
           val url = uri(shipment, urlPath)
+          val reqJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
 
-            val reqJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
-
-          val reply = makeRequest(POST, url, NOT_FOUND, reqJson)
+          val reply = makeRequest(POST, url, BAD_REQUEST, reqJson)
 
           (reply \ "status").as[String] must include ("error")
 
-          (reply \ "message").as[String] must include regex ("specimen with inventory ID not found")
+          (reply \ "message").as[String] must include ("EntityCriteriaError: specimens not in this shipment:")
+        }
+      }
+
+      "cannot change a shipment specimen's state if the specimen not in the system" in {
+        val f = specimensFixture(1)
+        val shipment = makeUnpackedShipment(f.shipment)
+        val specimen = f.specimens.headOption.value
+
+        shipmentRepository.put(shipment)
+        specimenRepository.remove(specimen)
+        forAll(stateData) { case (state, urlPath) =>
+
+          val url = uri(shipment, urlPath)
+          val reqJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
+
+          val reply = makeRequest(POST, url, BAD_REQUEST, reqJson)
+
+          (reply \ "status").as[String] must include ("error")
+
+          (reply \ "message").as[String] must include ("EntityCriteriaError: invalid inventory Ids:")
+        }
+      }
+
+      "111 cannot change a shipment specimen's state if shipment specimen's state is not present" in {
+        val f = specimensFixture(1)
+        val shipment = makeUnpackedShipment(f.shipment)
+        val specimen = f.specimens.headOption.value
+        val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = shipment.id,
+                                                                   specimenId = specimen.id)
+
+        shipmentRepository.put(shipment)
+        forAll(stateData) { case (state, urlPath) =>
+          shipmentSpecimenRepository.put(shipmentSpecimen.copy(state = state))
+
+          val url = uri(shipment, urlPath)
+          val reqJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
+
+          val reply = makeRequest(POST, url, BAD_REQUEST, reqJson)
+
+          (reply \ "status").as[String] must include ("error")
+
+          (reply \ "message").as[String] must include ("EntityCriteriaError: shipment specimens not present:")
         }
       }
 

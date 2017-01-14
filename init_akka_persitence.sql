@@ -1,4 +1,4 @@
 drop database bbweb;
 create database bbweb;
 use bbweb;
-source akka_persistance_schema.sql
+source akka_persistence_schema.sql

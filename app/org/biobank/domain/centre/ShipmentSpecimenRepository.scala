@@ -33,7 +33,7 @@ class ShipmentSpecimenRepositoryImpl
     IdNotFound(s"shipment id: $shipmentId, specimen id: $specimenId")
 
   def specimenNotFound(specimen: Specimen) =
-    EntityCriteriaError(s"specimen with inventory ID not found: ${specimen.inventoryId}").toString
+    EntityCriteriaError(s"shipment specimen with inventory ID not found: ${specimen.inventoryId}").toString
 
 
   override def getByKey(id: ShipmentSpecimenId): DomainValidation[ShipmentSpecimen] = {
