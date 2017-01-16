@@ -46,15 +46,16 @@ to download the modules.
 
 OR: `web-assets:web-node-modules`
 
-##### ng-annotate
+##### npm packages
 
-ng-annotate adds and removes AngularJS dependency injection annotations.
+Install the following packages globally (npm install -g <pacakge_name>):
 
-```sh
-cd app/assets/javascripts
-find . -name \*.js -exec echo "/usr/local/bin/ng-annotate --add {} -o {}.new && mv {}.new {}" \; | sed 's/\.\///g'  > tmp.sh
-sh tmp.sh
-```
+* eslint
+* eslint-plugin-requirejs
+* eslint-plugin-jasmine
+* grunt-cli
+* karma-cli
+* npm-check-updates
 
 ##### Client Tests
 

@@ -149,7 +149,7 @@ PB.targets in Compile := Seq(
 // the application is run
 com.jamesward.play.BrowserNotifierKeys.shouldOpenBrowser := false
 
-coverageExcludedPackages := "<empty>;Reverse.*"
+coverageExcludedPackages := "<empty>;router.*;views.html.*;Reverse.*;org.biobank.infrastructure.event.*;org.biobank.TestData"
 
 wartremoverErrors in (Compile, compile) ++= Warts.allBut(Wart.NoNeedForMonad, Wart.Equals, Wart.ToString)
 
