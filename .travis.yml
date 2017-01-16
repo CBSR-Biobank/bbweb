@@ -21,7 +21,7 @@ scala:
   - 2.11.8
 
 node_js:
-  - 6.1
+  - "6.9.4"
 
 jdk:
   - oraclejdk8

@@ -11,7 +11,7 @@ See page [Installing Java](InstallJava.md) for full instructions.
 Intalling the Play Framework standalone distribution is optional. It is not required since
 all commands can be done through SBT.
 
-See [Installing Play](http://www.playframework.com/documentation/2.2.x/Installing).
+See [Installing Play](https://www.playframework.com/documentation/2.5.x/Installing).
 
 ### SBT
 
@@ -35,9 +35,7 @@ sudo apt-get install -y mongodb-org
 
 Install NodeJS using NVM following these instructions:
 
-```
-https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-an-ubuntu-14-04-server
-```
+* https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-an-ubuntu-14-04-server
 
 ### To Start the Application
 

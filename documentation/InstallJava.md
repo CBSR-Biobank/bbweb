@@ -1,12 +1,10 @@
-## Installing Java ##
+# Installing Java
 
 Oracle's Java SE is not included in the official Linux repositories due to license problems created by
 Oracle. However, it can still be installed on Linux.
 
-1. Download Sun/Oracle Java JDK from here (current version is JDK 8 Update 45) :
-    ```
-    http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
-    ```
+1. Download Sun/Oracle Java JDK from here (current version is JDK 8 Update 111) :
+    * http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 
     and move the file to the `/usr/lib/jvm` directory.
 
@@ -15,14 +13,14 @@ Oracle. However, it can still be installed on Linux.
 1. Extract the tarball (replace the `*` with the proper text):
     ```
     cd /usr/lib/jvm
-    sudo tar zxvf jdk-8u45-linux-*.tag.gz
+    sudo tar zxvf jdk-8u111-linux-*.tag.gz
     ```
 
     There will be a newly created folder on the same path with the extracted files
 
 1. Create a soft link to have a more generic name:
     ```
-    sudo ln -s jdk1.8.0_45 java-8-oracle
+    sudo ln -s jdk1.8.0_111 java-8-oracle
     ```
 
 1. Add the new version of java, javac and javaws as an system alternative and give it priority 1
@@ -49,14 +47,14 @@ Oracle. However, it can still be installed on Linux.
 
 1. Test your newly added *java* and *javac*. The `java -version` command should return:
     ```
-    java version "1.8.0_45"
-    Java(TM) SE Runtime Environment (build 1.8.0_45-b14)
-    Java HotSpot(TM) 64-Bit Server VM (build 25.45-b02, mixed mode)
+    java version "1.8.0_111"
+    Java(TM) SE Runtime Environment (build 1.8.0_111-b14)
+    Java HotSpot(TM) 64-Bit Server VM (build 25.111-b02, mixed mode)
     ```
 
     and the `javac -version` command should return:
     ```
-    javac 1.8.0_45
+    javac 1.8.0_111
     ```
 
 1. [Optional] Update system paths. Open `/etc/profile` with you favorite text editor, ie:
