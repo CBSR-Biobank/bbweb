@@ -39,6 +39,12 @@ Shutdown the mongo server             | `mongo admin --eval "db.shutdownServer({
 
 The code uses the style guide proposed by John Papa: [AngularJS Style Guide](https://github.com/johnpapa/angularjs-styleguide).
 
+### NodeJS
+
+Install NodeJS using NVM following these instructions:
+
+* https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-an-ubuntu-14-04-server
+
 #### NPM
 
 Add dependencies to `package.json` in the root directory. Use command `web-assets:jseNpmNodeModules`
