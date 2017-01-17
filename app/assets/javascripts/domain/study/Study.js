@@ -16,7 +16,7 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
     'HasAnnotationTypes'
   ];
 
-  /**
+  /*
    * Angular factory for Studies.
    */
   function StudyFactory($q,
@@ -275,6 +275,10 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
      * Creates a Study from a server reply but first validates that it has a valid schema.
      *
      * <p>A wrapper for {@link domian.studies.Study#asyncCreate}.</p>
+     *
+     * @param {object} obj - the object to take initial values from.
+     *
+     * @returns {domain.studies.Study} A new Study object.
      *
      * @see {@link domain.ConcurrencySafeEntity#update}
      */

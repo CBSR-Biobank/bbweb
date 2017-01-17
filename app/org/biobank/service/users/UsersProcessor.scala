@@ -3,7 +3,7 @@ package org.biobank.service.users
 import akka.actor._
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import javax.inject.Inject
-import play.api.{Environment, Mode}
+import play.api.{Configuration, Environment, Mode}
 import org.biobank.domain.user._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
@@ -22,7 +22,8 @@ object UsersProcessor {
 /**
  * Handles the commands to configure users.
  */
-class UsersProcessor @Inject() (val userRepository: UserRepository,
+class UsersProcessor @Inject() (val config:         Configuration,
+                                val userRepository: UserRepository,
                                 val passwordHasher: PasswordHasher,
                                 val emailService:   EmailService,
                                 val env:            Environment)
@@ -492,18 +493,27 @@ class UsersProcessor @Inject() (val userRepository: UserRepository,
   }
 
   /**
-   * For debug only in development mode - password is "testuser"
+   * For new installations startup only:
+   *
+   * - password is "testuser"
+   * - for production servers, the password should be changed as soon as possible
    */
   private def createDefaultUser(): Unit = {
-    if ((env.mode == Mode.Dev)) {
-      log.debug("createDefaultUser")
+    val adminEmail = if (env.mode == Mode.Dev) org.biobank.Global.DefaultUserEmail
+                     else config.getString("admin.email").getOrElse(org.biobank.Global.DefaultUserEmail)
+
+    if (env.mode == Mode.Prod) {
+      log.info(s"createDefaultUser: $adminEmail")
+    }
+
+    if ((env.mode == Mode.Dev) || (env.mode == Mode.Prod)) {
       userRepository.put(
         ActiveUser(id           = org.biobank.Global.DefaultUserId,
                    version      = 0L,
                    timeAdded    = DateTime.now,
                    timeModified = None,
                    name         = "Administrator",
-                   email        = org.biobank.Global.DefaultUserEmail,
+                   email        = adminEmail,
                    password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
                    salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
                    avatarUrl    = None))

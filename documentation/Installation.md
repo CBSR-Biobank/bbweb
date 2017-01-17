@@ -39,15 +39,25 @@ Install NodeJS using NVM following these instructions:
 
 ### To Start the Application
 
+First, create the application and generate an *application secret*.
+
 ```bash
 sbt clean stage
-target/universal/stage/bin/bbweb
+sbt playGenerateSecret
 ```
+
+Use `APPLICATION_SECRET` environment variable to start the server:
+
+```bash
+APPLICATION_SECRET="__value_generated_above__" target/universal/stage/bin/bbweb
+```
+
+Replace `__value_generated_above__` with the value generated from the `sbt playGenerateSecret` command.
 
 To use an HTTPS:
 
 ```bash
-target/universal/stage/bin/bbweb -Dhttps.port=9443 -Dhttp.port=disabled
+APPLICATION_SECRET="__value_generated_above__" target/universal/stage/bin/bbweb -Dhttps.port=9443 -Dhttp.port=disabled
 ```
 
 ---

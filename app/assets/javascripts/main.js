@@ -46,7 +46,7 @@
       'angular-utils-ui-breadcrumbs': '../lib/angular-utils-ui-breadcrumbs/uiBreadcrumbs',
       'bootstrap':                    '../lib/bootstrap/dist/js/bootstrap',
       'bootstrap-ui-datetime-picker': '../lib/bootstrap-ui-datetime-picker/dist/datetime-picker',
-      'jquery':                       '../lib/jquery/jquery',
+      'jquery':                       '../lib/jquery/dist/jquery',
       'lodash':                       '../lib/lodash/lodash',
       'moment':                       '../lib/moment/moment',
       'requirejs':                    '../lib/requirejs/require',
@@ -72,7 +72,7 @@
       'angular-toastr':               { deps: ['angular'], exports: 'toastr' },
       'angular-ui-router':            ['angular'],
       'angular-utils-ui-breadcrumbs': ['angular'],
-      'bootstrap':                    ['jquery'],
+      'bootstrap':                    { deps: ['jquery'] },
       'bootstrap-ui-datetime-picker': ['angular'],
       'smart-table':                  ['angular'],
       'ui-bootstrap':                 ['angular']

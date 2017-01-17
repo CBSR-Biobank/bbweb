@@ -107,7 +107,7 @@ libraryDependencies ++= Seq(
   "org.webjars.bower"           %  "angular-utils-ui-breadcrumbs"        % "0.2.2",
   "org.webjars.npm"             %  "bootstrap"                           % "3.3.7",
   ( "org.webjars.bower"         %  "bootstrap-ui-datetime-picker"        % "2.4.3" ).exclude("org.webjars.bower", "angular"),
-  "org.webjars"                 %  "jquery"                              % "3.1.1-1",
+  "org.webjars.npm"             %  "jquery"                              % "3.1.1",
   "org.webjars.npm"             %  "lodash"                              % "4.17.3",
   "org.webjars.npm"             %  "moment"                              % "2.17.1",
   "org.webjars.npm"             %  "sprintf-js"                          % "1.0.3",
