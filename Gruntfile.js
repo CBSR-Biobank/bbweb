@@ -59,7 +59,7 @@ module.exports = function(grunt) {
       files: ['app/assets/javascripts/**/*.js', 'test/assets/javascripts/**/*.js'],
       options: {
         jshintrc: '.jshintrc',
-        reporter: './node_modules/grunt-contrib-jshint/node_modules/jshint/src/reporters/unix'
+        reporter: require('jshint-stylish')
       }
     },
 
