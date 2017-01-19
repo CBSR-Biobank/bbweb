@@ -151,7 +151,7 @@ class ShipmentSpecimensControllerSpec
         (reply \ "status").as[String] must include ("error")
 
         (reply \ "message").as[String] must include regex (
-          "InvalidState.shipment specimen state does not exist")
+          "InvalidState: shipment specimen state does not exist")
       }
 
       "list a single specimen when using paged query" in {
@@ -392,7 +392,7 @@ class ShipmentSpecimensControllerSpec
 
           (reply \ "status").as[String] must include ("error")
 
-          (reply \ "message").as[String] must include regex ("InvalidState.*shipment not created")
+          (reply \ "message").as[String] must include regex ("InvalidState: shipment not created")
         }
       }
 
@@ -484,7 +484,7 @@ class ShipmentSpecimensControllerSpec
 
             (reply \ "status").as[String] must include ("error")
 
-            (reply \ "message").as[String] must include regex ("InvalidState.shipment not unpacked")
+            (reply \ "message").as[String] must include regex ("InvalidState: shipment not unpacked")
           }
         }
       }
@@ -542,7 +542,7 @@ class ShipmentSpecimensControllerSpec
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include regex ("InvalidState.shipment not created")
+          (json \ "message").as[String] must include regex ("InvalidState: shipment not created")
 
           shipmentSpecimenRepository.getByKey(shipmentSpecimen.id).leftMap { _ =>
             fail("should still be in repository")

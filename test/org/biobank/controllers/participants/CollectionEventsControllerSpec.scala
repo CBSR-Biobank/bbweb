@@ -167,7 +167,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include regex ("InvalidStatus.*study not enabled")
+    (json \ "message").as[String] must include regex ("InvalidStatus: study not enabled")
   }
 
   def updateOnNonEnabledStudy(study:       Study,
@@ -189,7 +189,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include regex("InvalidStatus.*study not enabled")
+    (json \ "message").as[String] must include regex("InvalidStatus: study not enabled")
   }
 
   def updateWithInvalidVersion(participant: Participant,
@@ -235,7 +235,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include regex("InvalidStatus.*study not enabled")
+    (json \ "message").as[String] must include regex("InvalidStatus: study not enabled")
   }
 
   "Collection Event REST API" when {

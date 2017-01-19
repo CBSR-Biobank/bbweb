@@ -64,7 +64,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include regex("InvalidStatus.*study not disabled")
+    (json \ "message").as[String] must include regex("InvalidStatus: study not disabled")
   }
 
   def updateWithInvalidVersion(path: String, jsonField: JsObject) {
@@ -116,7 +116,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
+    (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
   }
 
   def removeOnNonDisabledStudy(study: Study) {
@@ -132,7 +132,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
+    (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
   }
 
   "Collection Event Type REST API" when {
@@ -776,7 +776,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
+          (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
         }
       }
 
@@ -972,7 +972,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
+          (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
         }
       }
 

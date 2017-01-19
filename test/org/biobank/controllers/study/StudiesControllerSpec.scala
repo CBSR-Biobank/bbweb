@@ -81,7 +81,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include regex("InvalidStatus.*study not disabled")
+    (json \ "message").as[String] must include regex("InvalidStatus: study not disabled")
   }
 
   "Study REST API" when {
@@ -183,7 +183,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         (reply \ "status").as[String] must include ("error")
 
         (reply \ "message").as[String] must include regex (
-          "InvalidState.*state does not exist")
+          "InvalidState: entity state does not exist")
       }
 
       "list studies sorted by name" in {
@@ -655,7 +655,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include regex("InvalidStatus.*study not disabled")
+          (json \ "message").as[String] must include regex("InvalidStatus: study not disabled")
         }
       }
 

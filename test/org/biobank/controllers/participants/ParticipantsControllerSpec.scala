@@ -94,7 +94,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include regex("InvalidStatus.*study not enabled")
+    (json \ "message").as[String] must include regex("InvalidStatus: study not enabled")
   }
 
   def updateOnNonEnabledStudy(study:       Study,
@@ -115,7 +115,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include regex("InvalidStatus.*study not enabled")
+    (json \ "message").as[String] must include regex("InvalidStatus: study not enabled")
   }
 
   /**

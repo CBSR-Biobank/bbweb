@@ -455,7 +455,7 @@ class ShipmentsControllerSpec
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include regex ("InvalidState.shipment not created")
+          (json \ "message").as[String] must include regex ("InvalidState: shipment not created")
         }
       }
 
@@ -514,7 +514,7 @@ class ShipmentsControllerSpec
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include regex ("InvalidState.shipment not created")
+          (json \ "message").as[String] must include regex ("InvalidState: shipment not created")
         }
       }
 
@@ -593,7 +593,7 @@ class ShipmentsControllerSpec
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include regex ("InvalidState.shipment not created")
+          (json \ "message").as[String] must include regex ("InvalidState: shipment not created")
         }
       }
 
@@ -672,7 +672,7 @@ class ShipmentsControllerSpec
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include regex ("InvalidState.shipment not created")
+          (json \ "message").as[String] must include regex ("InvalidState: shipment not created")
         }
       }
 
@@ -761,7 +761,7 @@ class ShipmentsControllerSpec
 
             (json \ "status").as[String] must include ("error")
 
-            (json \ "message").as[String] must include ("InvalidState(shipment is not packed")
+            (json \ "message").as[String] must include ("InvalidState: shipment is not packed")
           }
         }
       }
@@ -809,7 +809,7 @@ class ShipmentsControllerSpec
 
             (json \ "status").as[String] must include ("error")
 
-            (json \ "message").as[String] must include ("InvalidState(cannot change to packed state")
+            (json \ "message").as[String] must include ("InvalidState: cannot change to packed state")
           }
         }
       }
@@ -872,7 +872,7 @@ class ShipmentsControllerSpec
 
             (json \ "status").as[String] must include ("error")
 
-            (json \ "message").as[String] must include ("InvalidState(cannot change to sent state")
+            (json \ "message").as[String] must include ("InvalidState: cannot change to sent state")
           }
         }
 
@@ -923,7 +923,7 @@ class ShipmentsControllerSpec
 
             (json \ "status").as[String] must include ("error")
 
-            (json \ "message").as[String] must include ("InvalidState(cannot change to received state")
+            (json \ "message").as[String] must include ("InvalidState: cannot change to received state")
           }
         }
 
@@ -960,7 +960,7 @@ class ShipmentsControllerSpec
           (json \ "status").as[String] must include ("error")
 
           (json \ "message").as[String] must include (
-            "InvalidState(cannot change to received state, items have already been processed")
+            "InvalidState: cannot change to received state, items have already been processed")
         }
 
         "fail to change from UNPACKED to RECEIVED if some containers are not in PRESENT state" ignore {
@@ -1004,7 +1004,7 @@ class ShipmentsControllerSpec
 
             (json \ "status").as[String] must include ("error")
 
-            (json \ "message").as[String] must include ("InvalidState(cannot change to unpacked state")
+            (json \ "message").as[String] must include ("InvalidState: cannot change to unpacked state")
           }
         }
 
@@ -1041,7 +1041,7 @@ class ShipmentsControllerSpec
 
             (json \ "status").as[String] must include ("error")
 
-            (json \ "message").as[String] must include ("InvalidState(cannot change to lost state")
+            (json \ "message").as[String] must include ("InvalidState: cannot change to lost state")
           }
         }
       }
@@ -1090,7 +1090,7 @@ class ShipmentsControllerSpec
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include regex ("InvalidState.*shipment not created")
+          (json \ "message").as[String] must include regex ("InvalidState: shipment not created")
         }
       }
 
@@ -1136,7 +1136,7 @@ class ShipmentsControllerSpec
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include regex ("InvalidState.shipment not sent")
+          (json \ "message").as[String] must include regex ("InvalidState: shipment not sent")
         }
       }
 
@@ -1176,7 +1176,7 @@ class ShipmentsControllerSpec
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include regex ("InvalidState.shipment not created")
+          (json \ "message").as[String] must include regex ("InvalidState: shipment not created")
         }
       }
 

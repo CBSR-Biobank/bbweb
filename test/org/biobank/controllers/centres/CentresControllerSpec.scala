@@ -288,7 +288,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         (reply \ "status").as[String] must include ("error")
 
         (reply \ "message").as[String] must include regex (
-          "InvalidState.*state does not exist")
+          "InvalidState: entity state does not exist")
       }
 
       "list a single centre when using paged query" in {

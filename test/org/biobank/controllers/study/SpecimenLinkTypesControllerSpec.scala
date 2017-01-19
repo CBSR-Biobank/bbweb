@@ -66,7 +66,7 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
+    (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
   }
 
   def updateOnNonDisabledStudy(study: Study, procType: ProcessingType) = {
@@ -88,7 +88,7 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
+    (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
   }
 
   def removeOnNonDisabledStudy(study: Study, procType: ProcessingType) = {
@@ -104,7 +104,7 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
 
     (json \ "status").as[String] must include ("error")
 
-    (json \ "message").as[String] must include regex ("InvalidStatus.*study not disabled")
+    (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
   }
 
   def createEntities()(fn: (Study, ProcessingType) => Unit): Unit = {
