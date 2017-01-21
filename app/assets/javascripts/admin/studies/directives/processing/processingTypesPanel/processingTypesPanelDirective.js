@@ -61,7 +61,7 @@ define(['angular', 'lodash'], function(angular, _) {
 
     function init() {
       // updates the selected tab in 'studyViewDirective' which is the parent directive
-      $scope.$emit('tabbed-page-update', 'processing-tab-selected');
+      $scope.$emit('tabbed-page-update', 'tab-selected');
     }
 
     function add() {

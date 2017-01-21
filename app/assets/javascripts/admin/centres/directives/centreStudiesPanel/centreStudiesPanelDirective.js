@@ -63,7 +63,7 @@ define(['angular', 'lodash'], function(angular, _) {
 
     function init() {
       // updates the selected tab in 'centreViewDirective' which is the parent directive
-      $scope.$emit('tabbed-page-update', 'studies-panel-selected');
+      $scope.$emit('tabbed-page-update', 'tab-selected');
 
       vm.studyNamesById = _.keyBy(vm.studyNames, 'id');
 

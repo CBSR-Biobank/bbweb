@@ -18,8 +18,8 @@ define(function () {
     '$scope'
   ];
 
-  /**
-   *
+  /*
+   * The controller for this component.
    */
   function UnpackedShipmentInfoController($scope) {
     var vm = this;
@@ -29,7 +29,7 @@ define(function () {
     //----
 
     function onInit() {
-      $scope.$emit('tabbed-page-update', 'shipment-info-selected');
+      $scope.$emit('tabbed-page-update', 'tab-selected');
     }
   }
 

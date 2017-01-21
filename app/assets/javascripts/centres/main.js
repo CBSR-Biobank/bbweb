@@ -57,11 +57,11 @@ define(function (require) {
       'unpackedShipmentInfo',
       require('./components/unpackedShipmentInfo/unpackedShipmentInfoComponent'))
     .component(
-      'unpackedShipmentReceive',
-      require('./components/unpackedShipmentReceive/unpackedShipmentReceiveComponent'))
+      'unpackedShipmentUnpack',
+      require('./components/unpackedShipmentUnpack/unpackedShipmentUnpackComponent'))
     .component(
-      'unpackedShipmentUnpacked',
-      require('./components/unpackedShipmentUnpacked/unpackedShipmentUnpackedComponent'))
+      'unpackedShipmentItems',
+      require('./components/unpackedShipmentItems/unpackedShipmentItemsComponent'))
 
     .service(
       'centreLocationsModalService',

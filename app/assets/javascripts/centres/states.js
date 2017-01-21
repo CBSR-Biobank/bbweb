@@ -17,7 +17,7 @@ define(function () {
     resolveShipment.$inject = ['Shipment', '$stateParams', '$state'];
     function resolveShipment(Shipment, $stateParams, $state) {
       return Shipment.get($stateParams.shipmentId)
-        .catch(function (error) {
+        .catch(function () {
           $state.go('404', null, { location: false });
         });
     }
@@ -131,11 +131,11 @@ define(function () {
           displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
         }
       })
-      .state('home.shipping.unpack.receive', {
-        url: '/receive',
+      .state('home.shipping.unpack.unpack', {
+        url: '/unpack',
         views: {
           'unpackedShipmentDetails': {
-            template: '<unpacked-shipment-receive shipment="vm.shipment"></unpacked-shipment-receive>',
+            template: '<unpacked-shipment-unpack shipment="vm.shipment"></unpacked-shipment-unpack>',
             controller: ShipmentController,
             controllerAs: 'vm'
           }
@@ -144,11 +144,61 @@ define(function () {
           displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
         }
       })
-      .state('home.shipping.unpack.unpacked', {
-        url: '/unpacked',
+      .state('home.shipping.unpack.received', {
+        url: '/received',
         views: {
           'unpackedShipmentDetails': {
-            template: '<unpacked-shipment-unpacked shipment="vm.shipment"></unpacked-shipment-unpacked>',
+            template: [
+              '<unpacked-shipment-items ',
+              '  shipment="vm.shipment"',
+              '  item-state="{{vm.itemState}}">',
+              '</unpacked-shipment-items>'
+            ].join(''),
+            controller: [
+              'shipment',
+              'ShipmentItemState',
+              function (shipment, ShipmentItemState) {
+                this.shipment = shipment;
+                this.itemState = ShipmentItemState.RECEIVED;
+              }
+            ],
+            controllerAs: 'vm'
+          }
+        },
+        data: {
+          displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
+        }
+      })
+      .state('home.shipping.unpack.missing', {
+        url: '/missing',
+        views: {
+          'unpackedShipmentDetails': {
+            template: [
+              '<unpacked-shipment-items ',
+              '  shipment="vm.shipment"',
+              '  item-state="{{vm.itemState}}">',
+              '</unpacked-shipment-items>'
+            ].join(''),
+            controller: [
+              'shipment',
+              'ShipmentItemState',
+              function (shipment, ShipmentItemState) {
+                this.shipment = shipment;
+                this.itemState = ShipmentItemState.MISSING;
+              }
+            ],
+            controllerAs: 'vm'
+          }
+        },
+        data: {
+          displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
+        }
+      })
+      .state('home.shipping.unpack.extra', {
+        url: '/extra',
+        views: {
+          'unpackedShipmentDetails': {
+            template: '<unpacked-shipment-extra shipment="vm.shipment"></unpacked-shipment-extra>',
             controller: ShipmentController,
             controllerAs: 'vm'
           }

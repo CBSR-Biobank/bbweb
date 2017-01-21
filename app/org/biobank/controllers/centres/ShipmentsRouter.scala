@@ -70,6 +70,9 @@ class ShipmentsRouter @Inject()(controller: ShipmentsController) extends SimpleR
     case POST(p"/specimens/container/${shipmentId(shId)}") =>
       controller.specimenContainer(shId)
 
+    case POST(p"/specimens/present/${shipmentId(shId)}") =>
+      controller.specimenPresent(shId)
+
     case POST(p"/specimens/received/${shipmentId(shId)}") =>
       controller.specimenReceived(shId)
 

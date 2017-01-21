@@ -528,7 +528,7 @@ class ShipmentSpecimensControllerSpec
         }
       }
 
-      "111 cannot change a shipment specimen's state if shipment specimen's state is not present" in {
+      "cannot change a shipment specimen's state if shipment specimen's state is not present" in {
         val f = specimensFixture(1)
         val shipment = makeUnpackedShipment(f.shipment)
         val specimen = f.specimens.headOption.value
@@ -548,6 +548,62 @@ class ShipmentSpecimensControllerSpec
 
           (reply \ "message").as[String] must include ("EntityCriteriaError: shipment specimens not present:")
         }
+      }
+
+      "change a shipment specimen's state to PRESENT from another state" in {
+        val f = specimensFixture(1)
+        val shipment = makeUnpackedShipment(f.shipment)
+        val specimen = f.specimens.headOption.value
+        val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = shipment.id,
+                                                                   specimenId = specimen.id)
+
+        shipmentRepository.put(shipment)
+        forAll(stateData) { case (state, urlPath) =>
+          shipmentSpecimenRepository.put(shipmentSpecimen.copy(state = state))
+
+          val url = uri(shipment, "present")
+          val reqJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
+
+          val reply = makeRequest(POST, url, reqJson)
+
+          (reply \ "status").as[String] must include ("success")
+
+          val replyShipmentId = ShipmentId((reply \ "data" \ "id").as[String])
+
+          val repoShipmentSpecimens = shipmentSpecimenRepository.allForShipment(replyShipmentId)
+          repoShipmentSpecimens must have size (1)
+
+          val repoSs = repoShipmentSpecimens.headOption.value
+          repoSs must have (
+            'version    (shipmentSpecimen.version + 1),
+            'shipmentId (shipment.id),
+            'specimenId (specimen.id),
+            'state      (ShipmentItemState.Present)
+          )
+
+          TestUtils.checkTimeStamps(repoSs.timeAdded, shipmentSpecimen.timeAdded)
+          TestUtils.checkOpionalTime(repoSs.timeModified, Some(DateTime.now))
+        }
+      }
+
+      "111 fail when changing a shipment specimen's state to PRESENT when it is already PRESENT" in {
+        val f = specimensFixture(1)
+        val shipment = makeUnpackedShipment(f.shipment)
+        val specimen = f.specimens.headOption.value
+        val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = shipment.id,
+                                                                   specimenId = specimen.id)
+
+        shipmentRepository.put(shipment)
+        shipmentSpecimenRepository.put(shipmentSpecimen.copy(state = ShipmentItemState.Present))
+
+        val url = uri(shipment, "present")
+        val reqJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
+
+        val reply = makeRequest(POST, url, BAD_REQUEST, reqJson)
+
+        (reply \ "status").as[String] must include ("error")
+
+        (reply \ "message").as[String] must include ("EntityCriteriaError: shipment specimens are present:")
       }
 
     }

@@ -52,13 +52,23 @@ define(function () {
         active: true
       },
       {
-        heading: gettextCatalog.getString('Receive specimens'),
-        sref: 'home.shipping.unpack.receive',
+        heading: gettextCatalog.getString('Unpack specimens'),
+        sref: 'home.shipping.unpack.unpack',
         active: false
       },
       {
-        heading: gettextCatalog.getString('Unpacked specimens'),
-        sref: 'home.shipping.unpack.unpacked',
+        heading: gettextCatalog.getString('Received specimens'),
+        sref: 'home.shipping.unpack.received',
+        active: false
+      },
+      {
+        heading: gettextCatalog.getString('Missing specimens'),
+        sref: 'home.shipping.unpack.missing',
+        active: false
+      },
+      {
+        heading: gettextCatalog.getString('Extra specimens'),
+        sref: 'home.shipping.unpack.extra',
         active: false
       }
     ];

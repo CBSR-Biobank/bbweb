@@ -18,19 +18,24 @@ define(function (require) {
    *
    * Controller members:
    *
-   *  - vm.tabs: the tab objects that contain the tab information.
-   *
-   *  - vm.active: the index of the tab selected by the user.
-   *
    * @param {Object} vm - the controller's 'this' value.
    *
+   * @param {object} vm.tabs - the tab objects that contain the tab information.
+   *
+   * @param {int} vm.active - the index of the tab selected by the user.
+   *
+   * @param {object} $scope - the scope object this controller inherits from.
+   *
+   * @param {object} $state - the UI Router state object.
+   *
+   * @returns an object of this type.
    */
   function TabbedPageController(vm, $scope, $state) {
     $scope.$on('tabbed-page-update', activeTabUpdate);
 
     //---
 
-    /**
+    /*
      * Updates the selected tab.
      *
      * This function is called when event 'tabbed-page-update' is emitted by child scopes.

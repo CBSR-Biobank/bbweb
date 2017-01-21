@@ -158,9 +158,14 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
       cmd: ShipmentSpecimenUpdateContainerCmd => processSpecimenCommand(cmd)
     }
 
+  def specimenPresent(shipmentId: ShipmentId) =
+    commandActionAsync(Json.obj("shipmentId" -> shipmentId)) {
+      cmd: ShipmentSpecimensPresentCmd => processSpecimenCommand(cmd)
+    }
+
   def specimenReceived(shipmentId: ShipmentId) =
     commandActionAsync(Json.obj("shipmentId" -> shipmentId)) {
-      cmd: ShipmentReceiveSpecimensCmd => processSpecimenCommand(cmd)
+      cmd: ShipmentSpecimensReceiveCmd => processSpecimenCommand(cmd)
     }
 
   def specimenMissing(shipmentId: ShipmentId) =

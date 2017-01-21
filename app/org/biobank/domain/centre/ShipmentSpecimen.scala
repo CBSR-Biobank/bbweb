@@ -67,6 +67,16 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
     }
   }
 
+  def present: DomainValidation[ShipmentSpecimen] = {
+    if (state == ShipmentItemState.Present) {
+      DomainError("cannot change state to PRESENT from PRESENT state").failureNel[ShipmentSpecimen]
+    } else {
+      copy(state        = ShipmentItemState.Present,
+           version      = version + 1,
+           timeModified = Some(DateTime.now)).successNel[String]
+    }
+  }
+
   def received: DomainValidation[ShipmentSpecimen] = {
     if (state != ShipmentItemState.Present) {
       DomainError(s"cannot change state to RECEIVED: invalid state: $state").failureNel[ShipmentSpecimen]
@@ -100,6 +110,11 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
   def isStatePresent(): DomainValidation[Boolean] = {
     if (state == ShipmentItemState.Present) true.successNel[String]
     else DomainError(s"shipment specimen is not in present state").failureNel[Boolean]
+  }
+
+  def isStateNotPresent(): DomainValidation[Boolean] = {
+    if (state != ShipmentItemState.Present) true.successNel[String]
+    else DomainError(s"shipment specimen in present state").failureNel[Boolean]
   }
 
   def createDto(specimenDto: SpecimenDto): ShipmentSpecimenDto =

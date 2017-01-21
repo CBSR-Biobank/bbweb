@@ -40,9 +40,10 @@ message ShipmentSpecimenEvent {
   oneof event_type {
     Added                    added            = 4;
     ContainerUpdated         containerUpdated = 5;
-    WithShipmentSpecimenInfo received         = 6;
-    WithShipmentSpecimenInfo missing          = 7;
-    WithShipmentSpecimenInfo extra            = 8;
-    Removed                  removed          = 9;
+    WithShipmentSpecimenInfo present          = 6;
+    WithShipmentSpecimenInfo received         = 7;
+    WithShipmentSpecimenInfo missing          = 8;
+    WithShipmentSpecimenInfo extra            = 9;
+    Removed                  removed          = 10;
   }
 }

@@ -15,6 +15,7 @@ define(function (require) {
     'ConcurrencySafeEntity',
     'DomainError',
     'ShipmentState',
+    'ShipmentItemState',
     'biobankApi',
     'centreLocationInfoSchema',
     'Specimen'
@@ -25,6 +26,7 @@ define(function (require) {
                            ConcurrencySafeEntity,
                            DomainError,
                            ShipmentState,
+                           ShipmentItemState,
                            biobankApi,
                            centreLocationInfoSchema,
                            Specimen) {
@@ -158,7 +160,7 @@ define(function (require) {
     Shipment.prototype = Object.create(ConcurrencySafeEntity.prototype);
     Shipment.prototype.constructor = Shipment;
 
-    /**
+    /*
      * @private
      */
     Shipment.isValid = function(obj) {
@@ -259,7 +261,7 @@ define(function (require) {
      * @param {string} options.order One of 'asc' or 'desc'. If an invalid value is used then
      * the response is an error.
      *
-     * @return A promise. If the promise succeeds then a paged result is returned.
+     * @return {Promise} A promise. If the promise succeeds then a paged result is returned.
      */
     Shipment.list = function (centreId, options) {
       var url = uri() + 'list/' + centreId,
@@ -299,6 +301,10 @@ define(function (require) {
      *
      * <p>A wrapper for {@link domian.centres.Shipment#asyncCreate}.</p>
      *
+     * @param {object} obj - The object containing the initial values for this specimen.
+     *
+     * @returns {domain.centre.Shipment} A new shipment.
+     *
      * @see domain.ConcurrencySafeEntity.update
      */
     Shipment.prototype.asyncCreate = function (obj) {
@@ -324,7 +330,7 @@ define(function (require) {
     /**
      * Removes this shipment from the system.
      *
-     * @returns ???
+     * @returns {Promise} The promise is successful if the shipment is deleted successfully.
      */
     Shipment.prototype.remove = function () {
       var url = sprintf('%s/%d', uri(this.id), this.version);
@@ -626,6 +632,19 @@ define(function (require) {
     }
 
     /**
+     * Updates the state of shipment specimens to be PRESENT.
+     *
+     * <p>Note that only specimens in unpacked shipments can have the state updated.
+     *
+     * @param {string[]} inventoryIds - The specimen inventory IDs to be marked as PRESENT.
+     *
+     * @returns {Promise} A copy of this shipment.
+     */
+    Shipment.prototype.tagSpecimensAsPresent = function (inventoryIds) {
+      return tagSpecimens.call(this, inventoryIds, ShipmentItemState.PRESENT);
+    };
+
+    /**
      * Updates the state of shipment specimens to be RECEIVED.
      *
      * <p>Note that only specimens in unpacked shipments can have the state updated.
@@ -635,7 +654,7 @@ define(function (require) {
      * @returns {Promise} A copy of this shipment.
      */
     Shipment.prototype.tagSpecimensAsReceived = function (inventoryIds) {
-      return tagSpecimens.call(this, inventoryIds, 'received');
+      return tagSpecimens.call(this, inventoryIds, ShipmentItemState.RECEIVED);
     };
 
     /**
@@ -648,7 +667,7 @@ define(function (require) {
      * @returns {Promise} A copy of this shipment.
      */
     Shipment.prototype.tagSpecimensAsMissing = function (inventoryIds) {
-      return tagSpecimens.call(this, inventoryIds, 'missing');
+      return tagSpecimens.call(this, inventoryIds, ShipmentItemState.MISSING);
     };
 
     /**
@@ -661,7 +680,7 @@ define(function (require) {
      * @returns {Promise} A copy of this shipment.
      */
     Shipment.prototype.tagSpecimensAsExtra = function (inventoryIds) {
-      return tagSpecimens.call(this, inventoryIds, 'extra');
+      return tagSpecimens.call(this, inventoryIds, ShipmentItemState.EXTRA);
     };
 
     function uri(/* path, shipmentId */) {

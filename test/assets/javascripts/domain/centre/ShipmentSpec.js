@@ -525,12 +525,12 @@ define(function (require) {
     describe('when updating a shipment specimen', function() {
 
       it('can update the shipment container on a shipment specimen', function() {
-        var self   = this,
-            jsonSs = self.factory.shipmentSpecimen(),
-            ss     = new self.ShipmentSpecimen(jsonSs),
+        var self         = this,
+            jsonSs       = self.factory.shipmentSpecimen(),
+            ss           = new self.ShipmentSpecimen(jsonSs),
             jsonShipment = self.factory.shipment(),
-            shipment = new self.Shipment(jsonShipment),
-            reqJson = {
+            shipment     = new self.Shipment(jsonShipment),
+            reqJson      = {
               shipmentContainerId: ss.shipmentContainerId,
               shipmentSpecimenData: [{
                 shipmentSpecimenId: ss.id,
@@ -547,6 +547,19 @@ define(function (require) {
                           this.expectShipment,
                           failTest,
                           false);
+      });
+
+      describe('can update the shipment specimen to PRESENT state', function() {
+
+        var context = {};
+
+        beforeEach(inject(function (ShipmentItemState) {
+          context.stateChangeFuncName = 'tagSpecimensAsPresent';
+          context.shipmentSepcimenState = ShipmentItemState.PRESENT;
+        }));
+
+        changeShipmentSpecimenStateSharedBehaviour(context);
+
       });
 
       describe('can update the shipment specimen to RECEIVED state', function() {

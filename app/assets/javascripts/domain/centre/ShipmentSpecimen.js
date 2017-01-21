@@ -71,7 +71,7 @@ define(function (require) {
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
      */
-    function ShipmentSpecimen(obj, shipment) {
+    function ShipmentSpecimen(obj) {
 
       /**
        * The state this shipment specimen is in.
@@ -116,7 +116,7 @@ define(function (require) {
     ShipmentSpecimen.prototype = Object.create(ConcurrencySafeEntity.prototype);
     ShipmentSpecimen.prototype.constructor = ShipmentSpecimen;
 
-    /**
+    /*
      * @private
      */
     ShipmentSpecimen.isValid = function(obj) {
@@ -215,6 +215,8 @@ define(function (require) {
      *
      * <p>A paged API is used to list these specimen. See below for more details.</p>
      *
+     * @param {string} shipmentId - The ID of the shipment these specimen shipments belong to.
+     *
      * @param {object} options - The options to use to list shipments.
      *
      * @param {domain.centres.ShipmentItemState} options.stateFilter - The shipment item state to filter
@@ -232,7 +234,7 @@ define(function (require) {
      * @param {string} options.order One of 'asc' or 'desc'. If an invalid value is used then
      * the response is an error.
      *
-     * @return A promise. If the promise succeeds then a paged result is returned.
+     * @return {Promise} A promise. If the promise succeeds then a paged result is returned.
      */
     ShipmentSpecimen.list = function (shipmentId, options) {
       var url = uri(shipmentId),
@@ -269,6 +271,10 @@ define(function (require) {
      * Creates a Shipment Specimen from a server reply but first validates that it has a valid schema.
      *
      * <p>A wrapper for {@link domian.centres.Shipment#asyncCreate}.</p>
+     *
+     * @param {object} obj - The object containing the initial values for this shipment specimen.
+     *
+     * @returns {domain.centre.ShipmentSpecimen} A new shipment specimen.
      *
      * @see domain.ConcurrencySafeEntity.update
      */

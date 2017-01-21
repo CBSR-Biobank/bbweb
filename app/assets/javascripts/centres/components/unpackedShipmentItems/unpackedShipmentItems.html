@@ -2,12 +2,12 @@
   <div class="col-lg-12">
     <collapsable-panel heading="{{'Unpacked specimens'|translate}}">
       <ss-specimens-paged-table default-sort-field="inventoryId"
-                                refresh="vm.refreshNonReceivedSpecimensTable"
+                                refresh="vm.refreshSpecimensTable"
                                 show-item-state="true"
                                 on-get-specimens="vm.getPresentSpecimens"
-                                no-specimens-message="{{'No specimens present in shipment'|translate}}"
+                                no-specimens-message="{{vm.noSpecimensMessage}}"
                                 actions="vm.actions"
-                                on-action-selected="vm.nonReceivedSpecimensTableActionSelected">
+                                on-action-selected="vm.tableActionSelected">
       </ss-specimens-paged-table>
     </collapsable-panel>
   </div>

@@ -68,6 +68,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       case et: ShipmentSpecimenEvent.EventType.Added            => applySpecimenAddedEvent(event)
       case et: ShipmentSpecimenEvent.EventType.Removed          => applySpecimenRemovedEvent(event)
       case et: ShipmentSpecimenEvent.EventType.ContainerUpdated => applySpecimenContainerAddedEvent(event)
+      case et: ShipmentSpecimenEvent.EventType.Present          => applySpecimenPresentEvent(event)
       case et: ShipmentSpecimenEvent.EventType.Received         => applySpecimenReceivedEvent(event)
       case et: ShipmentSpecimenEvent.EventType.Missing          => applySpecimenMissingEvent(event)
       case et: ShipmentSpecimenEvent.EventType.Extra            => applySpecimenExtraEvent(event)
@@ -137,7 +138,10 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     case cmd: ShipmentSpecimenUpdateContainerCmd =>
       processSpecimenUpdateCmd(cmd, updateSpecimenContainerCmdToEvent, applySpecimenContainerAddedEvent)
 
-    case cmd: ShipmentReceiveSpecimensCmd =>
+    case cmd: ShipmentSpecimensPresentCmd =>
+      processSpecimenUpdateCmd(cmd, presentSpecimensCmdToEvent, applySpecimenPresentEvent)
+
+    case cmd: ShipmentSpecimensReceiveCmd =>
       processSpecimenUpdateCmd(cmd, receiveSpecimensCmdToEvent, applySpecimenReceivedEvent)
 
     case cmd: ShipmentSpecimenMissingCmd =>
@@ -401,71 +405,103 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     } yield shipmentSpecimen
   }
 
+  private def getSpecimens(specimenInventoryIds: String*): ServiceValidation[List[Specimen]] = {
+    val specimenMap = specimenInventoryIds.map { inventoryId =>
+        (inventoryId -> specimenRepository.getByInventoryId(inventoryId))
+      }
+
+    val invalidInventoryIds = specimenMap.filter { case (_, v) => v.isFailure }.map { case (k, _) => k }
+
+    if (invalidInventoryIds.isEmpty) {
+      specimenMap.map { case (_, v) => v }.toList.sequenceU
+    } else {
+      EntityCriteriaError("invalid inventory Ids: " + invalidInventoryIds.mkString(",")).
+        failureNel[List[Specimen]]
+    }
+  }
+
+  /**
+   *
+   * @param shipSpecimenMap map of inventory ID to Shipment Specimen.
+   *
+   */
+  private def getShipmentSpecimens(shipmentId: ShipmentId, specimens: List[Specimen])
+      : ServiceValidation[List[(String, ShipmentSpecimen)]] = {
+    val shipSpecimens = specimens.map { specimen =>
+        (specimen.inventoryId -> shipmentSpecimenRepository.getBySpecimen(shipmentId, specimen))
+      }
+
+    val notInShipment = shipSpecimens.filter { case (_, v) => v.isFailure }.map { case (k, _) => k }
+
+    if (notInShipment.isEmpty) {
+      shipSpecimens.map { case (k, v) => v.map { x => (k, x) } }.toList.sequenceU
+    } else {
+      EntityCriteriaError("specimens not in this shipment: " + notInShipment.mkString(",")).
+        failureNel[List[(String, ShipmentSpecimen)]]
+    }
+  }
+
+  /**
+   *
+   * @param shipSpecimenMap map of inventory ID to Shipment Specimen.
+   *
+   */
+  def getPackedShipmentSpecimens(shipSpecimenMap: List[(String, ShipmentSpecimen)])
+      : ServiceValidation[List[ShipmentSpecimen]] = {
+    val presentShipSpecimens = shipSpecimenMap.map { case (k, v) =>
+        (k -> v.isStatePresent.map { x => v })
+      }
+
+    val notPresent = presentShipSpecimens.filter { case (_, v) => v.isFailure }.map { case (k, _) => k }
+
+    if (notPresent.isEmpty) {
+      presentShipSpecimens.map { case (k, v) => v }.toList.sequenceU
+    } else {
+      EntityCriteriaError("shipment specimens not present: " + notPresent.mkString(",")).
+        failureNel[List[ShipmentSpecimen]]
+    }
+  }
+
+  /**
+   *
+   * @param shipSpecimenMap map of inventory ID to Shipment Specimen.
+   *
+   */
+  def getNonPackedShipmentSpecimens(shipSpecimenMap: List[(String, ShipmentSpecimen)])
+      : ServiceValidation[List[ShipmentSpecimen]] = {
+    val presentShipSpecimens = shipSpecimenMap.map { case (k, v) =>
+        (k -> v.isStateNotPresent.map { x => v })
+      }
+
+    val arePresent = presentShipSpecimens.filter { case (_, v) => v.isFailure }.map { case (k, _) => k }
+
+    if (arePresent.isEmpty) {
+      presentShipSpecimens.map { case (k, v) => v }.toList.sequenceU
+    } else {
+      EntityCriteriaError("shipment specimens are present: " + arePresent.mkString(",")).
+        failureNel[List[ShipmentSpecimen]]
+    }
+  }
+
   private def shipmentSpecimensPresent(shipmentId: ShipmentId, specimenInventoryIds: String*)
       : ServiceValidation[List[ShipmentSpecimen]] = {
 
-    def getSpecimens(specimenInventoryIds: String*): ServiceValidation[List[Specimen]] = {
-      val specimenMap = specimenInventoryIds.map { inventoryId =>
-          (inventoryId -> specimenRepository.getByInventoryId(inventoryId))
-        }
-
-      val invalidInventoryIds = specimenMap.filter { case (_, v) => v.isFailure }.map { case (k, _) => k }
-
-      if (invalidInventoryIds.isEmpty) {
-        specimenMap.map { case (_, v) => v }.toList.sequenceU
-      } else {
-        EntityCriteriaError("invalid inventory Ids: " + invalidInventoryIds.mkString(",")).
-          failureNel[List[Specimen]]
-      }
-    }
-
-    /**
-     *
-     * @param shipSpecimenMap map of inventory ID to Shipment Specimen.
-     *
-     */
-    def getShipmentSpecimens(specimens: List[Specimen])
-        : ServiceValidation[List[(String, ShipmentSpecimen)]] = {
-      val shipSpecimens = specimens.map { specimen =>
-          (specimen.inventoryId -> shipmentSpecimenRepository.getBySpecimen(shipmentId, specimen))
-        }
-
-      val notInShipment = shipSpecimens.filter { case (_, v) => v.isFailure }.map { case (k, _) => k }
-
-      if (notInShipment.isEmpty) {
-        shipSpecimens.map { case (k, v) => v.map { x => (k, x) } }.toList.sequenceU
-      } else {
-        EntityCriteriaError("specimens not in this shipment: " + notInShipment.mkString(",")).
-          failureNel[List[(String, ShipmentSpecimen)]]
-      }
-    }
-
-    /**
-     *
-     * @param shipSpecimenMap map of inventory ID to Shipment Specimen.
-     *
-     */
-    def getPackeedShipmentSpecimens(shipSpecimenMap: List[(String, ShipmentSpecimen)])
-        : ServiceValidation[List[ShipmentSpecimen]] = {
-      val presentShipSpecimens = shipSpecimenMap.map { case (k, v) =>
-          (k -> v.isStatePresent.map { x => v })
-        }
-
-      val notPresent = presentShipSpecimens.filter { case (_, v) => v.isFailure }.map { case (k, _) => k }
-
-      if (notPresent.isEmpty) {
-        presentShipSpecimens.map { case (k, v) => v }.toList.sequenceU
-      } else {
-        EntityCriteriaError("shipment specimens not present: " + notPresent.mkString(",")).
-          failureNel[List[ShipmentSpecimen]]
-      }
-    }
-
     for {
       specimens           <- getSpecimens(specimenInventoryIds:_*)
-      shipSpecimens       <- getShipmentSpecimens(specimens)
-      packedShipSpecimens <- getPackeedShipmentSpecimens(shipSpecimens)
+      shipSpecimens       <- getShipmentSpecimens(shipmentId, specimens)
+      packedShipSpecimens <- getPackedShipmentSpecimens(shipSpecimens)
     } yield packedShipSpecimens
+
+  }
+
+  private def shipmentSpecimensNotPresent(shipmentId: ShipmentId, specimenInventoryIds: String*)
+      : ServiceValidation[List[ShipmentSpecimen]] = {
+
+    for {
+      specimens              <- getSpecimens(specimenInventoryIds:_*)
+      shipSpecimens          <- getShipmentSpecimens(shipmentId, specimens)
+      nonPackedShipSpecimens <- getNonPackedShipmentSpecimens(shipSpecimens)
+    } yield nonPackedShipSpecimens
 
   }
 
@@ -502,7 +538,22 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     }
   }
 
-  private def receiveSpecimensCmdToEvent(cmd: ShipmentReceiveSpecimensCmd, shipment: Shipment)
+  private def presentSpecimensCmdToEvent(cmd: ShipmentSpecimensPresentCmd, shipment: Shipment)
+      : ServiceValidation[ShipmentSpecimenEvent] = {
+    for {
+      isUnpacked        <- shipment.isUnpacked
+      shipmentSpecimens <- shipmentSpecimensNotPresent(shipment.id, cmd.specimenInventoryIds:_*)
+      canMakePresent    <- shipmentSpecimens.map(_.present).sequenceU
+    } yield {
+      val shipmentSpecimenData = shipmentSpecimens.map(EventUtils.shipmentSpecimenInfoToEvent).toSeq
+      ShipmentSpecimenEvent(cmd.shipmentId).update(
+        _.userId                       := cmd.userId,
+        _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.present.shipmentSpecimenData := shipmentSpecimenData)
+    }
+  }
+
+  private def receiveSpecimensCmdToEvent(cmd: ShipmentSpecimensReceiveCmd, shipment: Shipment)
       : ServiceValidation[ShipmentSpecimenEvent] = {
     for {
       isUnpacked        <- shipment.isUnpacked
@@ -856,6 +907,14 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
 
       v.foreach(_.foreach(shipmentSpecimenRepository.put))
       v.map(_ => true)
+    }
+  }
+
+  private def applySpecimenPresentEvent(event: ShipmentSpecimenEvent): Unit = {
+    onValidSpecimenEventAndVersion(event, event.eventType.isPresent) { (shipment, _, time) =>
+      specimenStateUpdate(event.getPresent.shipmentSpecimenData, time) { shipmentSpecimen =>
+        shipmentSpecimen.present
+      }
     }
   }
 

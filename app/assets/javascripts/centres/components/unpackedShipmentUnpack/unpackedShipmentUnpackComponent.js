@@ -8,15 +8,15 @@ define(function (require) {
   var _ = require('lodash');
 
   var component = {
-    templateUrl: '/assets/javascripts/centres/components/unpackedShipmentReceive/unpackedShipmentReceive.html',
-    controller: UnpackedShipmentReceiveController,
+    templateUrl: '/assets/javascripts/centres/components/unpackedShipmentUnpack/unpackedShipmentUnpack.html',
+    controller: UnpackedShipmentUnpackController,
     controllerAs: 'vm',
     bindings: {
       shipment: '<'
     }
   };
 
-  UnpackedShipmentReceiveController.$inject = [
+  UnpackedShipmentUnpackController.$inject = [
     '$q',
     '$scope',
     'Shipment',
@@ -31,13 +31,13 @@ define(function (require) {
    *
    * The user can receive the specimens, mark them as EXTRA or MISSING.
    */
-  function UnpackedShipmentReceiveController($q,
-                                             $scope,
-                                             Shipment,
-                                             ShipmentSpecimen,
-                                             ShipmentItemState,
-                                             gettextCatalog,
-                                             modalService) {
+  function UnpackedShipmentUnpackController($q,
+                                            $scope,
+                                            Shipment,
+                                            ShipmentSpecimen,
+                                            ShipmentItemState,
+                                            gettextCatalog,
+                                            modalService) {
     var vm = this;
 
     vm.$onInit = onInit;
@@ -45,11 +45,6 @@ define(function (require) {
 
     vm.actions =  [
       {
-        id:    'tag-as-extra',
-        class: 'btn-warning',
-        title: gettextCatalog.getString('Tag as extra'),
-        icon:  'glyphicon-question-sign'
-      }, {
         id:    'tag-as-missing',
         class: 'btn-warning',
         title: gettextCatalog.getString('Tag as missing'),
@@ -64,7 +59,7 @@ define(function (require) {
     //----
 
     function onInit() {
-      $scope.$emit('tabbed-page-update', 'shipment-receive-selected');
+      $scope.$emit('tabbed-page-update', 'tab-selected');
     }
 
     function getPresentSpecimens(options) {

@@ -29,7 +29,12 @@ object ShipmentSpecimenCommands {
                                                       specimenInventoryIds: List[String])
       extends ShipmentSpecimenModifyCommand
 
-  final case class ShipmentReceiveSpecimensCmd(userId:               String,
+  final case class ShipmentSpecimensPresentCmd(userId:               String,
+                                               shipmentId:           String,
+                                               specimenInventoryIds: List[String])
+      extends ShipmentSpecimenModifyCommand
+
+  final case class ShipmentSpecimensReceiveCmd(userId:               String,
                                                shipmentId:           String,
                                                specimenInventoryIds: List[String])
       extends ShipmentSpecimenModifyCommand
@@ -50,13 +55,16 @@ object ShipmentSpecimenCommands {
   implicit val shipmentSpecimenUpdateContainerCmdReads: Reads[ShipmentSpecimenUpdateContainerCmd] =
     Json.reads[ShipmentSpecimenUpdateContainerCmd]
 
-  implicit val shipmentSpecimenReceivedCmdReads: Reads[ShipmentReceiveSpecimensCmd] =
-    Json.reads[ShipmentReceiveSpecimensCmd]
+  implicit val shipmentSpecimensPresentCmdReads: Reads[ShipmentSpecimensPresentCmd] =
+    Json.reads[ShipmentSpecimensPresentCmd]
 
-  implicit val shipmentSpecimenMissingCmdReads: Reads[ShipmentSpecimenMissingCmd] =
+  implicit val shipmentSpecimensReceivedCmdReads: Reads[ShipmentSpecimensReceiveCmd] =
+    Json.reads[ShipmentSpecimensReceiveCmd]
+
+  implicit val shipmentSpecimensMissingCmdReads: Reads[ShipmentSpecimenMissingCmd] =
     Json.reads[ShipmentSpecimenMissingCmd]
 
-  implicit val shipmentSpecimenExtraCmdReads: Reads[ShipmentSpecimenExtraCmd] =
+  implicit val shipmentSpecimensExtraCmdReads: Reads[ShipmentSpecimenExtraCmd] =
     Json.reads[ShipmentSpecimenExtraCmd]
 
 }

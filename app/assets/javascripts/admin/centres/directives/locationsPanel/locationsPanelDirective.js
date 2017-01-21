@@ -49,7 +49,7 @@ define(['lodash'], function(_) {
 
     function init() {
       // updates the selected tab in 'centreViewDirective' which is the parent directive
-      $scope.$emit('tabbed-page-update', 'locations-panel-selected');
+      $scope.$emit('tabbed-page-update', 'tab-selected');
     }
 
     function add() {
