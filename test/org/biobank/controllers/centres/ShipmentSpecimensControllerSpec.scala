@@ -417,8 +417,7 @@ class ShipmentSpecimensControllerSpec
       val stateData = Table(
           ("shipment specimen states", "url path"),
           (ShipmentItemState.Received, "received"),
-          (ShipmentItemState.Missing,  "missing"),
-          (ShipmentItemState.Extra,    "extra")
+          (ShipmentItemState.Missing,  "missing")
         )
 
       "change state on a shipment specimen" in {
@@ -586,7 +585,7 @@ class ShipmentSpecimensControllerSpec
         }
       }
 
-      "111 fail when changing a shipment specimen's state to PRESENT when it is already PRESENT" in {
+      "fail when changing a shipment specimen's state to PRESENT when it is already PRESENT" in {
         val f = specimensFixture(1)
         val shipment = makeUnpackedShipment(f.shipment)
         val specimen = f.specimens.headOption.value
@@ -606,11 +605,102 @@ class ShipmentSpecimensControllerSpec
         (reply \ "message").as[String] must include ("EntityCriteriaError: shipment specimens are present:")
       }
 
+      "add a shipment specimen as EXTRA to a shipment" in {
+        val f = specimensFixture(1)
+        val shipment = makeUnpackedShipment(f.shipment)
+        val specimen = f.specimens.headOption.value
+
+        shipmentRepository.put(shipment)
+        val url = uri(shipment, "extra")
+        val reqJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
+
+        val reply = makeRequest(POST, url, reqJson)
+
+        (reply \ "status").as[String] must include ("success")
+
+        val replyShipmentId = ShipmentId((reply \ "data" \ "id").as[String])
+
+        val repoShipmentSpecimens = shipmentSpecimenRepository.allForShipment(replyShipmentId)
+        repoShipmentSpecimens must have size (1)
+
+        val repoSs = repoShipmentSpecimens.headOption.value
+        repoSs must have (
+          'version    (0),
+          'shipmentId (shipment.id),
+          'specimenId (specimen.id),
+          'state      (ShipmentItemState.Extra)
+        )
+
+        TestUtils.checkTimeStamps(repoSs.timeAdded, DateTime.now)
+        TestUtils.checkOpionalTime(repoSs.timeModified, None)
+      }
+
+      "not add an EXTRA shipment specimen to a shipment if it is present in another shipment" in {
+        val f = specimensFixture(1)
+        val f2 = createdShipmentFixture
+        val shipment = makeUnpackedShipment(f.shipment)
+        shipmentRepository.put(shipment)
+        val specimen = f.specimens.headOption.value
+        specimenRepository.put(specimen)
+
+        // this shipment specimen belongs to a different shipment
+        val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f2.shipment.id,
+                                                                   specimenId = specimen.id,
+                                                                   state      = ShipmentItemState.Present)
+        shipmentSpecimenRepository.put(shipmentSpecimen)
+        val url = uri(shipment, "extra")
+        val reqJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
+        val reply = makeRequest(POST, url, BAD_REQUEST, reqJson)
+
+        (reply \ "status").as[String] must include ("error")
+
+        (reply \ "message").as[String] must include (
+          "EntityCriteriaError: specimens are already in an active shipment")
+      }
+
+      "not add an EXTRA shipment specimen to a shipment if it is already part of the shipment" in {
+        val f = specimensFixture(1)
+        val shipment = makeUnpackedShipment(f.shipment)
+        shipmentRepository.put(shipment)
+        val specimen = f.specimens.headOption.value
+        specimenRepository.put(specimen)
+        val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = shipment.id,
+                                                                   specimenId = specimen.id)
+        forAll(stateData) { case (state, urlPath) =>
+          shipmentSpecimenRepository.put(shipmentSpecimen.copy(state = state))
+          val url = uri(shipment, "extra")
+          val reqJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
+          val reply = makeRequest(POST, url, BAD_REQUEST, reqJson)
+
+          (reply \ "status").as[String] must include ("error")
+
+          (reply \ "message").as[String] must include (
+            "EntityCriteriaError: specimen inventory IDs already in this shipment: ")
+        }
+      }
+
+      "not add an EXTRA shipment specimen to a shipment if specimen at a different centre" in {
+        val f = specimensFixture(1)
+        val shipment = makeUnpackedShipment(f.shipment)
+        shipmentRepository.put(shipment)
+        val specimen = f.specimens.headOption.value.copy(locationId = f.toCentre.locations.head.uniqueId)
+        specimenRepository.put(specimen)
+
+        val url = uri(shipment, "extra")
+        val reqJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
+        val reply = makeRequest(POST, url, BAD_REQUEST, reqJson)
+
+        (reply \ "status").as[String] must include ("error")
+
+        (reply \ "message").as[String] must include (
+          "EntityCriteriaError: invalid centre for specimen inventory IDs")
+      }
+
     }
 
     "DELETE /shipments/specimens/:shId/:shSpcId/:ver" must {
 
-      "must delete a specimen from shipment in created state" in {
+      "must remove a specimen from shipment in created state" in {
         val f = specimensFixture(1)
 
         val specimen = f.specimens.head
@@ -626,40 +716,61 @@ class ShipmentSpecimensControllerSpec
         shipmentSpecimenRepository.getByKey(shipmentSpecimen.id) mustFail "IdNotFound.*shipment specimen.*"
       }
 
-      "must not delete a specimen from a shipment not in created state" in {
-        def removeShipment(shipment: Shipment, specimen: Specimen): Unit = {
-          shipmentRepository.put(shipment)
-          val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = shipment.id,
-                                                                     specimenId = specimen.id)
+      "111 must remove an extra specimen from shipment in unpacked state" in {
+        val f = specimensFixture(1)
+        val shipment = makeUnpackedShipment(f.shipment)
+        val specimen = f.specimens.head
+        val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id,
+                                                                   specimenId = specimen.id,
+                                                                   state      = ShipmentItemState.Extra)
+        shipmentRepository.put(shipment)
+        shipmentSpecimenRepository.put(shipmentSpecimen)
+        val url = uri(f.shipment, shipmentSpecimen) + s"/${shipmentSpecimen.version}"
 
-          val url = uri(shipment, shipmentSpecimen) + s"/${shipmentSpecimen.version}"
-          shipmentSpecimenRepository.put(shipmentSpecimen)
+        val json = makeRequest(DELETE, url)
 
-          val json = makeRequest(DELETE, url, BAD_REQUEST)
+        (json \ "status").as[String] must include ("success")
 
-          (json \ "status").as[String] must include ("error")
+        shipmentSpecimenRepository.getByKey(shipmentSpecimen.id) mustFail "IdNotFound.*shipment specimen.*"
+      }
 
-          (json \ "message").as[String] must include regex ("InvalidState: shipment not created")
-
-          shipmentSpecimenRepository.getByKey(shipmentSpecimen.id).leftMap { _ =>
-            fail("should still be in repository")
-          }
-          ()
-        }
-
+      "must not delete a specimen from a shipment not in created or unpacked state" in {
         val f = specimensFixture(1)
         val specimen = f.specimens.head
+        val shipments = Table("shipment",
+                              makePackedShipment(f.shipment),
+                              makeSentShipment(f.shipment),
+                              makeReceivedShipment(f.shipment),
+                              makeLostShipment(f.shipment))
+        val stateData = Table(
+            "shipment specimen states",
+            ShipmentItemState.Received,
+            ShipmentItemState.Missing)
 
-        info("packed shipment")
-        removeShipment(makePackedShipment(f.shipment), specimen)
-        info("sent shipment")
-        removeShipment(makeSentShipment(f.shipment), specimen)
-        info("received shipment")
-        removeShipment(makeReceivedShipment(f.shipment), specimen)
-        info("unpacked shipment")
-        removeShipment(makeUnpackedShipment(f.shipment), specimen)
-        info("lost shipment")
-        removeShipment(makeLostShipment(f.shipment), specimen)
+        forAll(shipments) { shipment =>
+          forAll(stateData) { shipSpecimenState =>
+            info(s"shipment state: ${shipment.state}, shipment specimen state: $shipSpecimenState")
+            shipmentRepository.put(shipment)
+            val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = shipment.id,
+                                                                       specimenId = specimen.id,
+                                                                       state      = shipSpecimenState)
+
+            val url = uri(shipment, shipmentSpecimen) + s"/${shipmentSpecimen.version}"
+            shipmentSpecimenRepository.put(shipmentSpecimen)
+
+            val json = makeRequest(DELETE, url, BAD_REQUEST)
+
+            (json \ "status").as[String] must include ("error")
+
+            (json \ "message").as[String] must include (
+              "EntityCriteriaError: cannot remove, shipment specimen state is invalid")
+
+            shipmentSpecimenRepository.getByKey(shipmentSpecimen.id).leftMap { _ =>
+              fail("should still be in repository")
+            }
+            ()
+          }
+        }
       }
 
     }

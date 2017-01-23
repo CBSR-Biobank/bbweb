@@ -117,6 +117,11 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
     else DomainError(s"shipment specimen in present state").failureNel[Boolean]
   }
 
+  def isStateExtra(): DomainValidation[Boolean] = {
+    if (state == ShipmentItemState.Extra) true.successNel[String]
+    else DomainError(s"shipment specimen is not in extra state").failureNel[Boolean]
+  }
+
   def createDto(specimenDto: SpecimenDto): ShipmentSpecimenDto =
     ShipmentSpecimenDto(id                  = this.id.id,
                         version             = this.version,

@@ -20,9 +20,10 @@
   <logger name="org.biobank.domain" level="INFO" />
   <logger name="org.biobank.service" level="INFO" />
   <logger name="org.biobank.fixture" level="INFO" />
-  <logger name="org.biobank.controllers.centres" level="INFO" />
+  <logger name="org.biobank.controllers" level="INFO" />
 
   <!--
+  <logger name="org.biobank.controllers.centres" level="DEBUG" />
        <logger name="com.google" level="INFO" />
        <logger name="play" level="INFO" />
        <logger name="net.sf.ehcache" level="INFO" />

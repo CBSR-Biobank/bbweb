@@ -28,6 +28,10 @@ message ShipmentSpecimenEvent {
     repeated ShipmentSpecimenInfo shipmentSpecimenData = 1;
   }
 
+  message WithShipmentSpecimenExtraInfo {
+    repeated ShipmentSpecimenAddInfo shipmentSpecimenData = 1;
+  }
+
   message Removed {
     optional int64  version            = 1;
     optional string shipmentSpecimenId = 2;
@@ -38,12 +42,12 @@ message ShipmentSpecimenEvent {
   optional string time       = 3;
 
   oneof event_type {
-    Added                    added            = 4;
-    ContainerUpdated         containerUpdated = 5;
-    WithShipmentSpecimenInfo present          = 6;
-    WithShipmentSpecimenInfo received         = 7;
-    WithShipmentSpecimenInfo missing          = 8;
-    WithShipmentSpecimenInfo extra            = 9;
-    Removed                  removed          = 10;
+    Added                         added            = 4;
+    ContainerUpdated              containerUpdated = 5;
+    WithShipmentSpecimenInfo      present          = 6;
+    WithShipmentSpecimenInfo      received         = 7;
+    WithShipmentSpecimenInfo      missing          = 8;
+    WithShipmentSpecimenExtraInfo extra            = 9;
+    Removed                       removed          = 10;
   }
 }

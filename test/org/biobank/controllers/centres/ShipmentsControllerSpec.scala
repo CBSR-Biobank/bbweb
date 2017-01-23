@@ -1022,7 +1022,7 @@ class ShipmentsControllerSpec
           }
         }
 
-        "111 not change to LOST state from an invalid state" in {
+        "not change to LOST state from an invalid state" in {
           val f = allShipmentsFixture
           f.shipments.values.foreach(shipmentRepository.put)
 

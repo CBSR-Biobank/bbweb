@@ -581,7 +581,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     "POST /centres/disable/:id" must {
 
-      "111 disable a centre" in {
+      "disable a centre" in {
         val centre = factory.createEnabledCentre
         centreRepository.put(centre)
 

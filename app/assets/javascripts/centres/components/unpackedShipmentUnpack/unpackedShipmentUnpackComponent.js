@@ -41,7 +41,7 @@ define(function (require) {
     var vm = this;
 
     vm.$onInit = onInit;
-    vm.refreshNonReceivedSpecimensTable = 0;
+    vm.refreshTable = 0;
 
     vm.actions =  [
       {
@@ -138,22 +138,10 @@ define(function (require) {
       return undefined;
     }
 
-    function tableActionSelected(shipmentSpecimen, action) {
-      var tagFunction;
-      switch (action) {
-      case 'tag-as-extra':
-        tagFunction = vm.shipment.tagSpecimensAsExtra;
-        break;
-      case 'tag-as-missing':
-        tagFunction = vm.shipment.tagSpecimensAsMissing;
-        break;
-      default:
-        throw new Error('invalid action from table selection:' + action);
-      }
-
-      return tagFunction.call(vm.shipment, [ shipmentSpecimen.specimen.inventoryId ])
+    function tableActionSelected(shipmentSpecimen) {
+      return vm.shipment.tagSpecimensAsMissing([ shipmentSpecimen.specimen.inventoryId ])
         .then(function () {
-          vm.refreshNonReceivedSpecimensTable++;
+          vm.refreshTable += 1;
         });
     }
 

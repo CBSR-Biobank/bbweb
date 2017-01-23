@@ -51,6 +51,9 @@ define(function (require) {
       'shipmentSpecimensPanel',
       require('./components/shipmentSpecimensPanel/shipmentSpecimensPanelComponent'))
     .component(
+      'unpackedShipmentExtra',
+      require('./components/unpackedShipmentExtra/unpackedShipmentExtraComponent'))
+    .component(
       'unpackedShipmentView',
       require('./components/unpackedShipmentView/unpackedShipmentViewComponent'))
     .component(

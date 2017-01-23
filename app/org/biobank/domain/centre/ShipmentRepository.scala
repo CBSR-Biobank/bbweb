@@ -45,7 +45,7 @@ class ShipmentRepositoryImpl
   def getCreated(id: ShipmentId): DomainValidation[CreatedShipment] = {
     for {
       shipment <- getByKey(id)
-      created <- shipment.isCreated
+      created  <- shipment.isCreated
     } yield created
   }
 

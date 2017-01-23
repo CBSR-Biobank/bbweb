@@ -6,7 +6,6 @@ define(function (require) {
   'use strict';
 
   var mocks   = require('angularMocks'),
-      $       = require('jquery'),
       _       = require('lodash'),
       faker   = require('faker'),
       moment  = require('moment'),
@@ -27,6 +26,7 @@ define(function (require) {
       _.extend(self, EntityTestSuiteMixin.prototype, ServerReplyMixin.prototype);
 
       self.injectDependencies('$httpBackend',
+                              '$httpParamSerializer',
                               'Shipment',
                               'ShipmentSpecimen',
                               'ShipmentState',
@@ -193,8 +193,8 @@ define(function (require) {
         var self = this,
             centre = self.factory.centre(),
             optionList = [
-              { courierFilter: 'Fedex' },
-              { trackingNumberFilter: 'ABC' },
+              { filter: 'courierName:like:Fedex' },
+              { filter: 'trackingNumber::ABC' },
               { sort: 'state' },
               { page: 2 },
               { limit: 10 },
@@ -204,7 +204,7 @@ define(function (require) {
         _.each(optionList, function (options) {
           var shipments = [ self.factory.shipment() ],
               reply   = self.factory.pagedResult(shipments),
-              url     = sprintf('%s?%s', listUri(centre.id), $.param(options, true));
+              url     = sprintf('%s?%s', listUri(centre.id), self.$httpParamSerializer(options));
 
           self.$httpBackend.whenGET(url).respond(self.reply(reply));
 
