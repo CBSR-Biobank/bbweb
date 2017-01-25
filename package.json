@@ -29,6 +29,7 @@
     "karma-phantomjs-launcher": "^1.0.2",
     "karma-requirejs": "^1.1.0",
     "karma-spec-reporter": "0.0.26",
+    "lodash": "^4.17.4",
     "requirejs": "^2.3.2"
   }
 }
