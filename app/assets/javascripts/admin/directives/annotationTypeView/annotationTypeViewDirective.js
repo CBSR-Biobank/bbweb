@@ -33,28 +33,24 @@ define(['lodash'], function (_) {
     '$state',
     'gettextCatalog',
     'modalInput',
-    'notificationsService',
-    'annotationValueTypeLabelService',
-    'AnnotationType'
+    'annotationTypeUpdateModal'
   ];
 
   function AnnotationTypeViewCtrl($state,
                                   gettextCatalog,
                                   modalInput,
-                                  notificationsService,
-                                  annotationValueTypeLabelService,
-                                  AnnotationType) {
+                                  annotationTypeUpdateModal) {
     var vm = this;
 
-    vm.annotationTypeValueTypeLabel =
-      annotationValueTypeLabelService.valueTypeToLabel(vm.annotationType.getType());
-    vm.requiredLabel = vm.annotationType.required ? gettextCatalog.getString('Yes') : gettextCatalog.getString('No');
+    vm.annotationTypeValueTypeLabel = vm.annotationType.getValueTypeLabel();
+    vm.requiredLabel = vm.annotationType.required ?
+      gettextCatalog.getString('Yes') : gettextCatalog.getString('No');
 
-    vm.editName            = editName;
-    vm.editRequired        = editRequired;
-    vm.editDescription     = editDescription;
-    vm.addSelectionOptions = addSelectionOptions;
-    vm.back                = back;
+    vm.editName             = editName;
+    vm.editRequired         = editRequired;
+    vm.editDescription      = editDescription;
+    vm.editSelectionOptions = editSelectionOptions;
+    vm.back                 = back;
 
     //--
 
@@ -90,17 +86,11 @@ define(['lodash'], function (_) {
         });
     }
 
-    function addSelectionOptions() {
-      // FIXME: if selections are in use they cannot be modified
-      modalInput.selectMultiple(gettextCatalog.getString('Edit Annotation Type selections'),
-                                gettextCatalog.getString('Add selections'),
-                                {
-                                  required: vm.annotationType.required,
-                                  selectOptions:  vm.annotationType.options}).result
-        .then(function (selections) {
-          var annotationType = _.extend({}, vm.annotationType, { options: selections.split(/[ ,]+/) });
-          vm.onUpdate()(annotationType);
-        });
+    function editSelectionOptions() {
+      annotationTypeUpdateModal.openModal(vm.annotationType).result.then(function (options) {
+        var annotationType = _.extend({}, vm.annotationType, { options: options });
+        vm.onUpdate()(annotationType);
+      });
     }
 
     function back() {

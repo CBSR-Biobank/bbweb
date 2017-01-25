@@ -12,9 +12,19 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('annotationTypeViewDirective', function() {
+  function SuiteMixinFactory(TestSuiteMixin) {
 
-    var createController = function () {
+    function SuiteMixin() {
+    }
+
+    SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
+    SuiteMixin.prototype.constructor = SuiteMixin;
+
+    SuiteMixin.prototype.createScope = function (options) {
+      options = options || {};
+      options.study = options.study || this.study;
+      options.annotationType = options.annotationType || this.annotationType;
+
       this.element = angular.element([
         '<annotation-type-view ',
         '  study="vm.study"',
@@ -26,8 +36,8 @@ define([
 
       this.scope = this.$rootScope.$new();
       this.scope.vm = {
-        study:          this.study,
-        annotationType: this.annotationType,
+        study:          options.study,
+        annotationType: options.annotationType,
         returnState:    this.returnState,
         onUpdate:       this.onUpdate
       };
@@ -37,34 +47,42 @@ define([
       this.controller = this.element.controller('annotationTypeView');
     };
 
+    return SuiteMixin;
+  }
+
+  describe('annotationTypeViewDirective', function() {
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (TestSuiteMixin, testUtils) {
-      var self = this;
+    beforeEach(inject(function (TestSuiteMixin) {
+      var SuiteMixin = new SuiteMixinFactory(TestSuiteMixin);
+      _.extend(this, SuiteMixin.prototype);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$q',
+      this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
                               '$state',
                               'Study',
                               'AnnotationType',
+                              'AnnotationValueType',
+                              'AnnotationMaxValueCount',
+                              'modalInput',
+                              'notificationsService',
                               'factory');
 
-      self.putHtmlTemplates(
+      this.putHtmlTemplates(
         '/assets/javascripts/admin/directives/annotationTypeView/annotationTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
 
-      self.returnState      = 'my-return-state';
-      self.study            = new self.Study(self.factory.study());
-      self.annotationType   = new self.AnnotationType(self.factory.annotationType());
-      self.onUpdate         = jasmine.createSpy('onUpdate').and.returnValue(self.$q.when(self.study));
+      this.returnState      = 'my-return-state';
+      this.study            = new this.Study(this.factory.study());
+      this.annotationType   = new this.AnnotationType(this.factory.annotationType());
+      this.onUpdate         = jasmine.createSpy('onUpdate').and.returnValue(this.$q.when(this.study));
     }));
 
     it('should have valid scope', function() {
-      createController.call(this, this.study, this.annotationType);
+      this.createScope();
       expect(this.controller.annotationType).toBe(this.annotationType);
       expect(this.controller.returnState).toBe(this.returnState);
       expect(this.controller.onUpdate).toBeFunction();
@@ -73,7 +91,7 @@ define([
     it('call to back function returns to valid state', function() {
       spyOn(this.$state, 'go').and.returnValue(0);
 
-      createController.call(this, this.study, this.annotationType);
+      this.createScope();
       this.controller.back();
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith(this.returnState, {}, { reload: true });
@@ -118,24 +136,47 @@ define([
 
     });
 
-    describe('add selections', function () {
+    describe('updates to selections', function () {
 
-      var context = {};
+      it('can edit selections on a single select', inject(function (annotationTypeUpdateModal) {
+        var annotationType = new this.AnnotationType(
+          this.factory.annotationType({
+            valueType:     this.AnnotationValueType.SELECT,
+            maxValueCount: this.AnnotationMaxValueCount.SELECT_SINGLE,
+            options:       [ 'option1', 'option2' ],
+            required:      true
+          }));
+        spyOn(annotationTypeUpdateModal, 'openModal').and.returnValue({ result: this.$q.when([]) });
 
-      beforeEach(inject(function () {
-        context.controllerFuncName = 'addSelectionOptions';
-        context.modalInputFuncName = 'selectMultiple';
+        this.createScope({ study: undefined, annotationType: annotationType });
+        this.controller.editSelectionOptions();
+        this.scope.$digest();
+        expect(annotationTypeUpdateModal.openModal).toHaveBeenCalled();
       }));
 
-      sharedUpdateBehaviour(context);
+      it('an exception is thrown for annotation types that are not select', function () {
+        var self = this,
+            annotationTypes = _.chain(self.factory.allAnnotationTypes())
+            .filter(function (json) {
+              return (json.valueType !== self.AnnotationValueType.SELECT);
+            })
+            .map(function (json) {
+              var result = new self.AnnotationType(json);
+              return result;
+            })
+            .value();
+
+        _.each(annotationTypes, function (annotationType) {
+          expect(function () {
+            self.createScope({ study: undefined, annotationType: annotationType });
+            self.controller.editSelectionOptions();
+          }).toThrowError(/invalid annotation type:/);
+        });
+      });
 
     });
 
     function sharedUpdateBehaviour(context) {
-
-      beforeEach(inject(function () {
-        this.injectDependencies('modalInput', 'notificationsService');
-      }));
 
       describe('(shared) update functions', function () {
 
@@ -145,7 +186,7 @@ define([
           spyOn(this.modalInput, context.modalInputFuncName).and.returnValue(
             { result: this.$q.when(newValue)});
 
-          createController.call(this);
+          this.createScope();
           expect(this.controller[context.controllerFuncName]).toBeFunction();
           this.controller[context.controllerFuncName]();
           this.scope.$digest();

@@ -63,7 +63,7 @@ define(function(require) {
      * Creates a set of annotation type, server annotation and annotation object for each type
      * of annotation.
      */
-    SuiteMixin.prototype.getAnnotationAndTypeForAllValueTypes  =function() {
+    SuiteMixin.prototype.getAnnotationAndTypeForAllValueTypes = function() {
       var self = this;
       return _.map(self.getAnnotationTypeOptionsForAll(), function (annotationTypeOptions) {
         return self.getAnnotationAndType(annotationTypeOptions);

@@ -46,11 +46,14 @@ package domain {
 
     type EntityNameFilter = A => Boolean
 
-    val nameContains: String => EntityNameFilter =
-      name => entity => entity.name.contains(name.replaceAll("[\\*]", ""))
-
     val nameIsOneOf: Set[String] => EntityNameFilter =
       names => entity => names.contains(entity.name)
+
+    val nameIsLike: Set[String] => EntityNameFilter =
+      names => entity => {
+        val lc = entity.name.toLowerCase
+        names.forall(n => lc.contains(n.toLowerCase))
+      }
 
   }
 

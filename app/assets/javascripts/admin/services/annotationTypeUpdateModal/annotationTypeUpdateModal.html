@@ -1,0 +1,70 @@
+<div class="modal-header">
+  <button type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-hidden="true"
+          ng-click="modalOptions.close()">
+    &times;
+  </button>
+  <h3 class="modal-title" translate>Edit Annotation Type selections</h3>
+</div>
+<div class="modal-body">
+
+  <form class="form-horizontal"
+        name="annotationTypeForm"
+        novalidate>
+
+    <!-- SELECTION OPTIONS -->
+    <div class="form-group"
+         ng-repeat="opt in vm.options track by $index"
+         ng-class="{ 'has-error' : subForm.option.$invalid && !subForm.option.$pristine }">
+      <ng-form name="subForm">
+        <label class="col-md-2 form-control-label" translate>Option {{$index + 1}}</label>
+        <div class="col-md-8">
+          <input type="text"
+                 name="option"
+                 class="form-control"
+                 ng-model="vm.options[$index]"
+                 placeholder="{{'Enter an option'|translate}}"
+                 required />
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-sm btn-warning"
+                  ng-click="vm.optionRemove($index)"
+                  ng-disabled="vm.removeButtonDisabled()">
+            <i class="glyphicon glyphicon-remove"></i>
+            <translate>Remove</translate>
+          </button>
+        </div>
+        <div class="col-md-offset-2 col-md-10"
+             ng-messages="subForm.option.$error"
+             ng-if="subForm.option.$dirty"
+             role="alert">
+          <div ng-message="required" class="help-block" translate>A value is required</div>
+        </div>
+      </ng-form>
+    </div>
+
+    <!-- ADD SELECTION OPTION -->
+    <div class="form-group">
+      <div class="col-md-2">
+        <button class="btn btn-sm btn-primary"
+                ng-click="vm.optionAdd()">
+          <translate>Add option</translate>
+          <i class="glyphicon glyphicon-plus"></i>
+        </button>
+      </div>
+    </div>
+  </form>
+
+</div>
+
+<div class="modal-footer">
+  <button class="btn" ng-click="vm.closePressed()" translate>Cancel</button>
+  <button class="btn btn-primary"
+          ng-click="vm.okPressed()"
+          ng-disabled="annotationTypeForm.$invalid"
+          translate>
+    OK
+  </button>
+</div>

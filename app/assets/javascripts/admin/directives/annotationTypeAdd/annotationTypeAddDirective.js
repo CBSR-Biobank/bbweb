@@ -10,6 +10,8 @@ define(['lodash'], function (_) {
    * annotation types.
    *
    * Property 'onSubmit' is the function that is called when the user submits the form.
+   *
+   * @return {object} An AngularJS directive.
    */
   function annotationTypeAddDirective() {
     var directive = {
@@ -32,6 +34,9 @@ define(['lodash'], function (_) {
     'AnnotationValueType'
   ];
 
+  /*
+   * The controller for this directive.
+   */
   function AnnotationTypeAddCtrl(AnnotationType,
                                  AnnotationValueType) {
     var vm = this;
@@ -49,14 +54,14 @@ define(['lodash'], function (_) {
 
     //--
 
-    /**
+    /*
      * Called when the user changes the annotation type's value type.
      */
     function valueTypeChange() {
       vm.annotationType.valueTypeChanged();
     }
 
-    /**
+    /*
      * Used to disable the submit button if the user has not entered a value for the type
      * of selection: either single selection or multiple selections.
      */
@@ -64,21 +69,21 @@ define(['lodash'], function (_) {
       return ! vm.annotationType.isMaxValueCountValid();
     }
 
-    /**
+    /*
      * Used to add an option. Should only be called when the value type is 'Select'.
      */
     function optionAdd() {
       vm.annotationType.addOption();
     }
 
-    /**
+    /*
      * Used to remove an option. Should only be called when the value type is 'Select'.
      */
-    function optionRemove($index) {
-      vm.annotationType.removeOption($index);
+    function optionRemove(index) {
+      vm.annotationType.removeOption(index);
     }
 
-    /**
+    /*
      * Determines if the remove button for an option is disabled.
      *
      * It is disabled only when there is a single option available.
@@ -87,7 +92,7 @@ define(['lodash'], function (_) {
       return (vm.annotationType.options.length <= 1);
     }
 
-    /**
+    /*
      * Called when the user presses the submit button on the form.
      */
     function submit(annotationType) {
@@ -95,7 +100,7 @@ define(['lodash'], function (_) {
       vm.onSubmit()(annotationType);
     }
 
-    /**
+    /*
      * Called when the user presses the cancel button on the form.
      */
     function cancel() {

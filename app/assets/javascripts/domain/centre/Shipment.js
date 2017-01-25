@@ -267,9 +267,7 @@ define(function (require) {
       var url = uri() + 'list/' + centreId,
           params,
           validKeys = [
-            'courierFilter',
-            'trackingNumberFilter',
-            'stateFilter',
+            'filter',
             'sort',
             'page',
             'limit',

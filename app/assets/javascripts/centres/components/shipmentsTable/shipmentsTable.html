@@ -7,6 +7,7 @@
       <th st-sort="trackingNumber" translate>Tracking#</th>
       <th st-sort="fromLocationName" translate>From</th>
       <th st-sort="toLocationName" translate>To</th>
+      <th>Date</th>
       <th>State</th>
     </tr>
     <tr>
@@ -22,6 +23,7 @@
                class="input-sm form-control"
                type="search"/>
       </th>
+      <th></th>
       <th></th>
       <th></th>
       <th>
@@ -40,8 +42,9 @@
         <a href ng-click="vm.shipmentInformation(shipment)">{{shipment.courierName}}</a>
       </td>
       <td>{{shipment.trackingNumber}}</td>
-      <td>{{shipment.fromLocationInfo.name}}</td>
-      <td>{{shipment.toLocationInfo.name}}</td>
+      <td><small>{{shipment.fromLocationInfo.name}}</small></td>
+      <td><small>{{shipment.toLocationInfo.name}}</small></td>
+      <td><small>{{vm.shipmentDates[shipment.id]}}</small></td>
       <td>
         <span class="badge">{{shipment.state}}</span>
       </td>

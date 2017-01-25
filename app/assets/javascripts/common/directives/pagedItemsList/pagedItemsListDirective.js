@@ -14,6 +14,8 @@ define(['lodash'], function(_) {
    *        displayed, and used with the $scope.getItems function. The value for the <code>name</code> key is
    *        what is displayed in the 'State' drop down box. The first item of the array should be <code>{ id:
    *        'all', name: 'All' }</code> so that all items are displayed.
+   *
+   * @return {object} An AngularJS directive.
    */
   function pagedItemsListDirective() {
     var directive = {
@@ -38,15 +40,14 @@ define(['lodash'], function(_) {
     return directive;
   }
 
-  PagedItemsListCtrl.$inject = ['$scope', 'gettextCatalog', 'filterExpression'];
+  PagedItemsListCtrl.$inject = ['$scope', 'gettextCatalog'];
 
   /**
    */
-  function PagedItemsListCtrl($scope, gettextCatalog, filterExpression) {
+  function PagedItemsListCtrl($scope, gettextCatalog) {
     var vm = this;
 
     vm.nameFilter         = '';
-    vm.nameFilterWildcard = '';
     vm.selectedState      = 'all';
     vm.pagedResult        = { total: vm.counts.total };
     vm.sortFields         = [ gettextCatalog.getString('Name'), gettextCatalog.getString('State') ];
@@ -111,12 +112,17 @@ define(['lodash'], function(_) {
     }
 
     function updateItems() {
-      var filterElements = [
-            { key: 'name',  value: vm.nameFilterWildcard },
-            { key: 'state', value: vm.stateFilter }
-          ];
+      var filters = [];
 
-      _.extend(vm.pagerOptions, { filter: filterExpression.create(filterElements) });
+      if (vm.nameFilter !== '') {
+        filters.push('name:like:' + vm.nameFilter);
+      }
+
+      if (vm.stateFilter && (vm.stateFilter !== '')) {
+        filters.push('state::' + vm.stateFilter);
+      }
+
+      _.extend(vm.pagerOptions, { filter: filters.join(';') });
 
       vm.getItems()(vm.pagerOptions).then(function (pagedResult) {
         vm.pagedResult = pagedResult;

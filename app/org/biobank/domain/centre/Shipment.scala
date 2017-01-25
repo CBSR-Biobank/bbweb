@@ -37,6 +37,18 @@ trait ShipmentPredicates {
   val stateIsOneOf: Set[EntityState] => ShipmentFilter =
     states => shipment => states.contains(shipment.state)
 
+  val courierNameIsLike: Set[String] => ShipmentFilter =
+    courierNames => shipment => {
+      val lc = shipment.courierName.toLowerCase
+      courierNames.forall(n => lc.contains(n.toLowerCase))
+    }
+
+  val trackingNumberIsLike: Set[String] => ShipmentFilter =
+    trackingNumbers => shipment => {
+      val lc = shipment.trackingNumber.toLowerCase
+      trackingNumbers.forall(n => lc.contains(n.toLowerCase))
+    }
+
 }
 
 /**

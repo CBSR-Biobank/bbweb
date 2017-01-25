@@ -94,7 +94,7 @@ define([
             break;
 
           case 'Type':
-            expect(attr.value).toBe(annotationType.getType());
+            expect(attr.value).toBe(annotationType.getValueTypeLabel());
             break;
 
           case 'Required':

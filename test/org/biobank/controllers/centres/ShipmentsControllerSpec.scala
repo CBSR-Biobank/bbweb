@@ -148,6 +148,20 @@ class ShipmentsControllerSpec
         compareObj(jsonItem, shipment)
       }
 
+      "list a single shipment when using a 'like' filter on courier name" in {
+        val f = createdShipmentFixture(2)
+        val shipments = f.shipmentMap.values.toList
+
+        val shipment = shipments(0).copy(courierName = "ABC")
+        shipmentRepository.put(shipment)
+        shipmentRepository.put(shipments(1).copy(courierName = "DEF"))
+
+        val uri = s"courierName:like:b"
+        val jsonItem = PagedResultsSpec(this)
+          .singleItemResult(listUri(f.fromCentre), Map("filter" -> uri))
+        compareObj(jsonItem, shipment)
+      }
+
       "list multiple shipments when filtered by courier name" in {
         val numShipments = 2
         val f = createdShipmentFixture(numShipments)
@@ -290,6 +304,20 @@ class ShipmentsControllerSpec
                             maybeNext = None,
                             maybePrev = Some(2))
         compareObj(jsonItem, shipments(1))
+      }
+
+      "list a single shipment when using a 'like' filter on tracking number" in {
+        val f = createdShipmentFixture(2)
+        val shipments = f.shipmentMap.values.toList
+
+        val shipment = shipments(0).copy(trackingNumber = "ABC")
+        shipmentRepository.put(shipment)
+        shipmentRepository.put(shipments(1).copy(trackingNumber = "DEF"))
+
+        val uri = s"trackingNumber:like:b"
+        val jsonItem = PagedResultsSpec(this)
+          .singleItemResult(listUri(f.fromCentre), Map("filter" -> uri))
+        compareObj(jsonItem, shipment)
       }
 
       "fail when using an invalid query parameters" in {

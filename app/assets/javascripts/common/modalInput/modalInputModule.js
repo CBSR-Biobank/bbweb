@@ -36,7 +36,7 @@ define(function (require) {
   module.service('modalInput', modalInputService);
   init();
 
-  /**
+  /*
    * Creates the required directives.
    */
   function init() {
@@ -103,11 +103,6 @@ define(function (require) {
     function modalInput(type, title, label, defaultValue, options) {
       var modal;
 
-      ModalController.$inject = [
-        'AppConfig',
-        'timeService'
-      ];
-
       modal = $uibModal.open({
         templateUrl: '/assets/javascripts/common/modalInput/modalInput.html',
         controller: ModalController,
@@ -121,8 +116,7 @@ define(function (require) {
 
       //--
 
-      function ModalController(AppConfig,
-                               timeService) {
+      function ModalController() {
         var vm = this;
 
         vm.defaultValue = defaultValue;

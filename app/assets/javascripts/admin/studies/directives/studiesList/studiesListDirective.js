@@ -6,7 +6,9 @@ define(['lodash'], function(_) {
   'use strict';
 
   /**
+   * An AngularJS directive that displays a list of studies.
    *
+   * @return {object} An AngularJS directive.
    */
   function studiesListDirective() {
     var directive = {
@@ -31,6 +33,16 @@ define(['lodash'], function(_) {
   /**
    * Displays a list of studies with each in its own mini-panel.
    *
+   * @param {AngularJs_Service} gettextCatalog - the service that provides string translations functions.
+   *
+   * @param {domain.studies.Study} Study - The class that can create a study.
+   *
+   * @param {AngularJs_Constant} StudyState - A constant that enumerates a study's possible states.
+   *
+   * @param {AngularJs_Factory} StudyCounts - The service that can query the server for the studies in
+   * different states.
+   *
+   * @return {object} An AngularJS controller for this directive.
    */
   function StudiesListCtrl(gettextCatalog,
                            Study,
@@ -38,10 +50,10 @@ define(['lodash'], function(_) {
                            StudyCounts) {
     var vm = this;
 
-    vm.studyCounts      = {};
+    vm.studyCounts   = {};
     vm.limit         = 5;
-    vm.updateStudies    = Study.list;
-    vm.getStudyIcon     = getStudyIcon;
+    vm.updateStudies = Study.list;
+    vm.getStudyIcon  = getStudyIcon;
 
     vm.possibleStates = [ { id: 'all', label: gettextCatalog.getString('All') } ].concat(
       _.map(_.values(StudyState), function (state) {

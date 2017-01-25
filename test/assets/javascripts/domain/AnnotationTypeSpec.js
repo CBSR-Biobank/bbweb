@@ -198,24 +198,24 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
       expect(annotationType.options[0]).toContain(options[1]);
     });
 
-    describe('getType', function() {
+    describe('getValueTypeLabel', function() {
 
       it('returns valid type for value type TEXT', function() {
         var annotationType = new this.AnnotationType(this.factory.annotationType(
           { valueType: this.AnnotationValueType.TEXT }));
-        expect(annotationType.getType()).toBe(this.AnnotationValueType.TEXT);
+        expect(annotationType.getValueTypeLabel()).toBe(this.AnnotationValueType.TEXT);
       });
 
       it('returns valid type for value type NUMBER', function() {
         var annotationType = new this.AnnotationType(this.factory.annotationType(
           { valueType: this.AnnotationValueType.NUMBER }));
-        expect(annotationType.getType()).toBe(this.AnnotationValueType.NUMBER);
+        expect(annotationType.getValueTypeLabel()).toBe(this.AnnotationValueType.NUMBER);
       });
 
       it('returns valid type for value type DATE_TIME', function() {
         var annotationType = new this.AnnotationType(this.factory.annotationType(
           { valueType: this.AnnotationValueType.DATE_TIME }));
-        expect(annotationType.getType()).toBe(this.AnnotationValueType.DATE_TIME);
+        expect(annotationType.getValueTypeLabel()).toBe('Date and time');
       });
 
       it('returns valid type for value type SINGLE SELECT', function() {
@@ -224,7 +224,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
             valueType: this.AnnotationValueType.SELECT,
             maxValueCount: this.AnnotationMaxValueCount.SELECT_SINGLE
           }));
-        expect(annotationType.getType()).toBe('Single Select');
+        expect(annotationType.getValueTypeLabel()).toBe('Single Select');
       });
 
       it('returns valid type for value type MULTIPLE SELECT', function() {
@@ -233,16 +233,16 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
             valueType: this.AnnotationValueType.SELECT,
             maxValueCount: this.AnnotationMaxValueCount.SELECT_MULTIPLE
           }));
-        expect(annotationType.getType()).toBe('Multiple Select');
+        expect(annotationType.getValueTypeLabel()).toBe('Multiple Select');
       });
 
       it('throws exception for invalid value type', function() {
         var self = this,
             annotationType = new self.AnnotationType(self.factory.annotationType(
-              { valueType: self.factory.stringNext }));
+              { valueType: self.factory.stringNext() }));
         expect(function () {
-          annotationType.getType();
-        }).toThrowError(/invalid type for annotation type/);
+          annotationType.getValueTypeLabel();
+        }).toThrowError(/invalid annotation value type:/);
       });
 
     });

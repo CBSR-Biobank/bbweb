@@ -22,6 +22,7 @@ object Comparator extends Enumeration {
   val NotIn                = Value(":out:")
   val NotEqualTo           = Value(":ne:")
   val Equal                = Value("::")
+  val Like                 = Value(":like:")
 }
 
 import Comparator._
@@ -81,7 +82,8 @@ object QueryFilterParser extends RegexParsers {
                         | Comparator.In.toString ^^^ Comparator.In
                         | Comparator.NotIn.toString ^^^ Comparator.NotIn
                         | Comparator.NotEqualTo.toString ^^^ Comparator.NotEqualTo
-                        | Comparator.Equal.toString ^^^ Comparator.Equal)
+                        | Comparator.Equal.toString ^^^ Comparator.Equal
+                        | Comparator.Like.toString ^^^ Comparator.Like)
 
   def singleQuotedValue =
     """'[^\"\(\);,=!~<>]*'""".r ^^ { case v => Value(v.substring(1, v.size - 1))}

@@ -14,6 +14,8 @@ define(['moment'], function(moment) {
    * @description An Anuglar service that converts dates to strings. Dates are converted to local time and UTC
    * strings.
    *
+   * @param {object} AppConfig - This application's configuration object.
+   *
    */
   function timeService(AppConfig) {
     var service = {
@@ -118,7 +120,7 @@ define(['moment'], function(moment) {
      * @param {Date} [date] - the date to be converted to a string. If it is undefined, then a blank string is
      * returned.
      *
-     * @return The date as a string, or if date is undefined a blank string.
+     * @return {string} The date as a string, or if date is undefined a blank string.
      */
     function dateToDisplayString(date) {
       if (!date) {

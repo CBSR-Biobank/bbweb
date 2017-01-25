@@ -11,7 +11,8 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
     'ConcurrencySafeEntity',
     'DomainError',
     'AnnotationValueType',
-    'AnnotationMaxValueCount'
+    'AnnotationMaxValueCount',
+    'annotationValueTypeLabelService'
   ];
 
   /**
@@ -22,7 +23,8 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
                                  ConcurrencySafeEntity,
                                  DomainError,
                                  AnnotationValueType,
-                                 AnnotationMaxValueCount) {
+                                 AnnotationMaxValueCount,
+                                 annotationValueTypeLabelService) {
 
     var schema = {
       'id': 'AnnotationType',
@@ -67,20 +69,8 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
     };
 
     // returns a string that can be displayed to the user
-    AnnotationType.prototype.getType = function () {
-      switch (this.valueType) {
-      case AnnotationValueType.TEXT:      return AnnotationValueType.TEXT;
-      case AnnotationValueType.NUMBER:    return AnnotationValueType.NUMBER;
-      case AnnotationValueType.DATE_TIME: return AnnotationValueType.DATE_TIME;
-
-      case AnnotationValueType.SELECT:
-        if (this.isSingleSelect()) {
-          return 'Single Select';
-        }
-        return 'Multiple Select';
-      }
-
-      throw new DomainError('invalid type for annotation type: ' + this.valueType);
+    AnnotationType.prototype.getValueTypeLabel = function () {
+      return annotationValueTypeLabelService.valueTypeToLabel(this.valueType, this.isSingleSelect());
     };
 
     AnnotationType.prototype.isValueTypeText = function () {

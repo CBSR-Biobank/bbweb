@@ -58,6 +58,8 @@ object ShipmentFilter extends PredicateHelper with ShipmentPredicates {
         courierNameIsOneOf(nameSet).successNel[String]
       case NotEqualTo | NotIn =>
         complement(courierNameIsOneOf(nameSet)).successNel[String]
+      case Like =>
+        courierNameIsLike(nameSet).successNel[String]
       case _ =>
         ServiceError(s"invalid filter on courier name: $comparator").failureNel[ShipmentFilter]
     }
@@ -70,6 +72,8 @@ object ShipmentFilter extends PredicateHelper with ShipmentPredicates {
         trackingNumberIsOneOf(trackingNumberSet).successNel[String]
       case NotEqualTo | NotIn =>
         complement(trackingNumberIsOneOf(trackingNumberSet)).successNel[String]
+      case Like =>
+        trackingNumberIsLike(trackingNumberSet).successNel[String]
       case _ =>
         ServiceError(s"invalid filter on tracking number: $comparator").failureNel[ShipmentFilter]
     }
