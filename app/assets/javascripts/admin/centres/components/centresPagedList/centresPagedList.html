@@ -1,37 +1,16 @@
-<div>
-  <form class="form-inline" name="filters" style="margin-bottom: 20px;">
-    <div class="form-group">
-      <label class="small">Name filter:</label>
-      <input type="text"
-             class="form-control input-sm"
-             name="nameFilter"
-             ng-model="vm.nameFilter"
-             ng-model-options="{ debounce: 500 }"
-             ng-change="vm.nameFilterUpdated()">
-    </div>
-    <div class="form-group">
-      <label for="state" class="small">State filter:</label>
-      <select class="form-control input-sm"
-              name="state"
-              ng-model="vm.selectedState"
-              ng-options="state.id as state.label for state in vm.possibleStates"
-              ng-change="vm.stateFilterUpdated()">
-      </select>
-    </div>
-    <div class="form-group">
-      <button class="btn btn-sm"
-              ng-click="vm.clearFilters()">
-        <translate>Clear filters</translate>
-        <i class="glyphicon glyphicon-erase"></i>
-      </button>
-    </div>
-  </form>
+<div style="margin-bottom: 20px;">
+  <name-and-state-filters
+      state-data="vm.stateData"
+      on-name-filter-updated="vm.nameFilterUpdated"
+      on-state-filter-updated="vm.stateFilterUpdated"
+      on-filters-cleared="vm.filtersCleared">
+  </name-and-state-filters>
 </div>
 
 <div class="panel panel-default">
   <div class="panel-heading">
-    <span ng-bind-html="vm.panelHeading"></span>
-
+    <i class="glyphicon glyphicon-cog"></i> {{vm.counts.disabled}} {{'Disabled'|translate}},
+    <i class="glyphicon glyphicon-ok-circle"></i> {{vm.counts.enabled}} {{'Enabled'|translate}},
     <div class="dropdown pull-right">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown">
         <small class="text-muted"><translate>Sort</translate> <b class="caret"></b></small>
@@ -45,10 +24,11 @@
     </div>
   </div>
 
-  <ul class="list-group" ng-if="vm.displayState === vm.displayStates.NO_STUDIES">
+  <ul class="list-group" ng-if="vm.displayState === vm.displayStates.NO_ENTITIES">
     <li class="list-group-item">
       <p class="alert alert-warning" role="alert">
-        <span class="glyphicon glyphicon-warning-sign"></span> {{vm.messageNoItems}}
+        <span class="glyphicon glyphicon-warning-sign"></span>
+        {{'No centres have been added yet.'|translate}}
       </p>
     </li>
   </ul>
@@ -56,7 +36,8 @@
   <ul class="list-group" ng-if="vm.displayState === vm.displayStates.NO_RESULTS">
     <li class="list-group-item">
       <p class="alert alert-warning" role="alert">
-        <span class="glyphicon glyphicon-warning-sign"></span> {{vm.messageNoResults}}
+        <span class="glyphicon glyphicon-warning-sign"></span>
+        {{'No centres match the criteria.'|translate}}
       </p>
     </li>
   </ul>
@@ -66,8 +47,10 @@
       <div class="row">
         <div class="col-md-12">
           <i class="glyphicon glyphicon-cog" ng-class="entity.icon"></i>
-          <strong><a ui-sref="{{vm.entityNavigateState}}( { {{vm.entityNavigateStateParamName}}: entity.id} )">
-              {{entity.name}}</a>
+          <strong>
+            <a ui-sref="home.admin.centres.centre.summary({ centreId: entity.id })">
+              {{entity.name}}
+            </a>
           </strong>
           <p>{{entity.description === null ? "" : entity.description | truncate:100}}</p>
         </div>

@@ -25,7 +25,9 @@ define(function (require) {
     'biobank.users'
   ]);
 
-  module.directive('studiesList',             require('./directives/studiesList/studiesListDirective'));
+  module.component('studiesPagedList',        require('./components/studiesPagedList/studiesPagedListComponent'));
+
+  module.directive('studiesAdmin',            require('./directives/studiesAdmin/studiesAdminDirective'));
   module.directive('studyAdd',                require('./directives/studyAdd/studyAddDirective'));
   module.directive('studyCollection',         require('./directives/studyCollection/studyCollectionDirective'));
   module.directive('studyParticipantsTab',    require('./directives/studyParticipantsTab/studyParticipantsTabDirective'));

@@ -28,7 +28,7 @@ define(['lodash'], function (_) {
       url: '/centres',
       views: {
         'main@': {
-          template: '<centres-list></centres-list>'
+          template: '<centres-admin></centres-admin>'
         }
       },
       data: {

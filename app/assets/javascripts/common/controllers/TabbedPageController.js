@@ -28,7 +28,7 @@ define(function (require) {
    *
    * @param {object} $state - the UI Router state object.
    *
-   * @returns an object of this type.
+   * @returns {object} an object of this type.
    */
   function TabbedPageController(vm, $scope, $state) {
     $scope.$on('tabbed-page-update', activeTabUpdate);

@@ -17,9 +17,11 @@ define(function (require) {
   module = angular.module('biobank.common', [ modalInputModule.name, annotationsInputModule.name ])
 
     .controller('TabbedPageController',   require('./controllers/TabbedPageController'))
+    .controller('PagedListController',    require('./controllers/PagedListController'))
 
     .component('dateTimePicker',          require('./components/dateTimePicker/dateTimePickerComponent'))
     .component('collapsablePanel',        require('./components/collapsablePanel/collapsablePanelComponent'))
+    .component('nameAndStateFilters',     require('./components/nameAndStateFilters/nameAndStateFiltersComponent'))
     .component('progressTracker',         require('./components/progressTracker/progressTrackerComponent'))
 
     .directive('focusMe',                 require('./directives/focusMeDirective'))
@@ -30,7 +32,6 @@ define(function (require) {
     .directive('str2integer',             require('./directives/str2integerDirective'))
     .directive('updateRemoveButtons',     require('./directives/updateRemoveButtonsDirective'))
     .directive('pageSelect',              require('./directives/pageSelectDirective'))
-    .directive('pagedItemsList',          require('./directives/pagedItemsList/pagedItemsListDirective'))
     .directive('positiveFloat',           require('./directives/positiveFloat/positiveFloatDirective'))
     .directive('naturalNumber',           require('./directives/naturalNumber/naturalNumberDirective'))
     .directive('statusLine',              require('./directives/statusLine/statusLineDirective'))

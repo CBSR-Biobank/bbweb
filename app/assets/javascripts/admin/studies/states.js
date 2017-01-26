@@ -32,7 +32,7 @@ define(function () {
       url: '/studies',
       views: {
         'main@': {
-          template: '<studies-list></studies-list>'
+          template: '<studies-admin></studies-admin>'
         }
       },
       data: {

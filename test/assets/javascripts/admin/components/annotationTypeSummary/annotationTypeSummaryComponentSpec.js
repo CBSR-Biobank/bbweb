@@ -16,7 +16,7 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (TestSuiteMixin, testUtils) {
+    beforeEach(inject(function (TestSuiteMixin) {
       var self = this;
 
       _.extend(self, TestSuiteMixin.prototype);
