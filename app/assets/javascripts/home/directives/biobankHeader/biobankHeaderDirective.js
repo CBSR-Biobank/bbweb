@@ -20,7 +20,6 @@ define(function () {
   }
 
   BiobankHeaderCtrl.$inject = [
-    '$window',
     '$scope',
     '$state',
     '$log',
@@ -28,8 +27,7 @@ define(function () {
     'usersService'
   ];
 
-  function BiobankHeaderCtrl($window,
-                             $scope,
+  function BiobankHeaderCtrl($scope,
                              $state,
                              $log,
                              languageService,

@@ -22,7 +22,8 @@ define(['angular'], function(angular) {
         views: {
           'main@': {
             template: '<home user="vm.user"></home>',
-            controller: [function () {
+            controller: [ 'user', function (user) {
+              this.user = user;
             }],
             controllerAs: 'vm'
           }

@@ -40,7 +40,7 @@ trait Security {
           .map(_.value)
       }
       headerXsrfToken <- {
- request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey))
+        request.headers.get(AuthTokenHeader).orElse(request.getQueryString(AuthTokenUrlKey))
           .toSuccessNel(ControllerError("No token"))
       }
       matchingTokens <- {

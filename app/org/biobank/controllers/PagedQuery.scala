@@ -1,7 +1,9 @@
 package org.biobank.controllers
 
+import java.nio.charset.{StandardCharsets => SC}
 import org.biobank.infrastructure._
 import org.biobank.service.{FilterString, SortString}
+import play.utils.UriEncoding
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -26,7 +28,7 @@ object PagedQuery {
   def create(rawQueryString: String, maxPageSize: Int): ControllerValidation[PagedQuery] = {
     for {
         qsExpressions <- {
-          QueryStringParser(rawQueryString).
+          QueryStringParser(UriEncoding.decodePath(rawQueryString, SC.US_ASCII.name)).
             toSuccessNel(s"could not parse query string: $rawQueryString")
         }
         filterAndSort <- FilterAndSortQuery.createFromExpressions(qsExpressions).successNel[String]

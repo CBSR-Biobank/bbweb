@@ -1,14 +1,18 @@
 <div class="page-header">
-  <h1>{{vm.centre.name}}: <small translate>Shipping</small></h1>
+  <h1>
+    <translate>
+      Shipments: <small>To / from <strong>{{vm.centre.name}}</strong></small>
+    </translate>
+  </h1>
 </div>
-<div class="row">
-  <div class="col-md-12">
-    <h4>
-      <translate>Shipments to / from</translate>
-      <strong>{{vm.centre.name}}</strong>:
-    </h4>
-  </div>
+
+<div class="well well-sm">
+  <shipment-states-selector
+      selected-states="vm.selectedShipmentStates"
+      on-selection="vm.stateSelectionChanged">
+  </shipment-states-selector>
 </div>
+
 <div class="row" ng-if="!vm.hasShipments">
   <div class="col-md-12">
     <div class="alert alert-warning" role="alert">
@@ -20,4 +24,7 @@
     </div>
   </div>
 </div>
-<shipments-table centre="vm.centre" ng-if="vm.hasShipments"></shipments-table>
+<shipments-table centre="vm.centre"
+                 ng-if="vm.hasShipments"
+                 shipment-states-filter="vm.selectedShipmentStates">
+</shipments-table>

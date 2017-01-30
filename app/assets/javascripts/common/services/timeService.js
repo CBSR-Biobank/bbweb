@@ -11,7 +11,7 @@ define(['moment'], function(moment) {
    * @class common.timeService
    * @memberof common
    *
-   * @description An Anuglar service that converts dates to strings. Dates are converted to local time and UTC
+   * @description An AnuglarJS service that converts dates to strings. Dates are converted to local time and UTC
    * strings.
    *
    * @param {object} AppConfig - This application's configuration object.

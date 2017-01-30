@@ -13,9 +13,7 @@ define(function () {
     var config = {
       dateFormat:       'YYYY-MM-DD',
       dateTimeFormat:   'YYYY-MM-DD HH:mm',
-      datepickerFormat: 'yyyy-MM-dd HH:mm',
-
-
+      datepickerFormat: 'yyyy-MM-dd HH:mm'
     };
 
     return {

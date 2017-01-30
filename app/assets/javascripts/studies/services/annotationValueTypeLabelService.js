@@ -23,10 +23,10 @@ define(['lodash'], function (_) {
   function annotationValueTypeLabelService(gettextCatalog, AnnotationValueType) {
     var labels = {};
 
-    labels[AnnotationValueType.TEXT]            = gettextCatalog.getString('Text');
-    labels[AnnotationValueType.NUMBER]          = gettextCatalog.getString('Number');
-    labels[AnnotationValueType.DATE_TIME]       = gettextCatalog.getString('Date and time');
-    labels[AnnotationValueType.SELECT]          = gettextCatalog.getString('Select');
+    labels[AnnotationValueType.TEXT]      = gettextCatalog.getString('Text');
+    labels[AnnotationValueType.NUMBER]    = gettextCatalog.getString('Number');
+    labels[AnnotationValueType.DATE_TIME] = gettextCatalog.getString('Date and time');
+    labels[AnnotationValueType.SELECT]    = gettextCatalog.getString('Select');
 
     var service = {
       valueTypeToLabel: valueTypeToLabel

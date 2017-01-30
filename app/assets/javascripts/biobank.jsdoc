@@ -22,3 +22,13 @@
  * Domain entities related to centres.
  * @namespace domain.centres
  */
+
+/**
+ * AngularJS objects related to centres.
+ * @namespace centres
+ */
+
+/**
+ * AngularJS components related to centres.
+ * @namespace centres.components
+ */

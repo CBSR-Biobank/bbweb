@@ -27,15 +27,15 @@ define(function (require) {
 
     .controller('ShipmentSpecimenController', require('./controllers/ShipmentSpecimensController'))
 
-    .component('centreShipments',      require('./components/centreShipments/centreShipmentsComponent'))
-    .component('shippingHome',         require('./components/shippingHome/shippingHomeComponent'))
-    .component('selectCentre',         require('./components/selectCentre/selectCentreComponent'))
-    .component('shipmentAdd',          require('./components/shipmentAdd/shipmentAddComponent'))
-    .component('shippingInfoView',     require('./components/shippingInfoView/shippingInfoViewComponent'))
-    .component('shipmentAddItems',     require('./components/shipmentAddItems/shipmentAddItemsComponent'))
-    .component('shipmentView',         require('./components/shipmentView/shipmentViewComponent'))
-    .component('shipmentViewPacked',   require('./components/shipmentViewPacked/shipmentViewPackedComponent'))
-    .component('shipmentViewSent',     require('./components/shipmentViewSent/shipmentViewSentComponent'))
+    .component('centreShipments',        require('./components/centreShipments/centreShipmentsComponent'))
+    .component('shippingHome',           require('./components/shippingHome/shippingHomeComponent'))
+    .component('selectCentre',           require('./components/selectCentre/selectCentreComponent'))
+    .component('shipmentAdd',            require('./components/shipmentAdd/shipmentAddComponent'))
+    .component('shippingInfoView',       require('./components/shippingInfoView/shippingInfoViewComponent'))
+    .component('shipmentAddItems',       require('./components/shipmentAddItems/shipmentAddItemsComponent'))
+    .component('shipmentView',           require('./components/shipmentView/shipmentViewComponent'))
+    .component('shipmentViewPacked',     require('./components/shipmentViewPacked/shipmentViewPackedComponent'))
+    .component('shipmentViewSent',       require('./components/shipmentViewSent/shipmentViewSentComponent'))
     .component(
       'shipmentViewReceived',
       require('./components/shipmentViewReceived/shipmentViewReceivedComponent'))
@@ -50,6 +50,9 @@ define(function (require) {
     .component(
       'shipmentSpecimensPanel',
       require('./components/shipmentSpecimensPanel/shipmentSpecimensPanelComponent'))
+    .component(
+      'shipmentStateSelector',
+      require('./components/shipmentStatesSelector/shipmentStatesSelectorComponent'))
     .component(
       'unpackedShipmentExtra',
       require('./components/unpackedShipmentExtra/unpackedShipmentExtraComponent'))
@@ -72,6 +75,9 @@ define(function (require) {
     .service(
       'shipmentSkipToSentModalService',
       require('./services/shipmentSkipToSentModal/shipmentSkipToSentModalService'))
+    .service(
+      'shipmentStateLabelService',
+      require('./services/shipmentStateLabelService'))
     .service(
       'shipmentSkipToUnpackedModalService',
       require('./services/shipmentSkipToUnpackedModal/shipmentSkipToUnpackedModalService'));

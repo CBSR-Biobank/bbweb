@@ -11,7 +11,6 @@ module.exports = function(grunt) {
     jsdoc : {
       dist : {
         src: ['app/assets/javascripts/**/*.js', 'app/assets/javascripts/**/*.jsdoc'],
-        jsdoc: '/usr/bin/jsdoc',
         options: {
           destination: 'documentation/js',
           nocolor: true,
@@ -51,15 +50,14 @@ module.exports = function(grunt) {
       all: [ 'app/assets/javascripts/**/*.js' ],
       options: {
         dest: 'docs',
-        scripts: ['../app.min.js'],
+        scripts: ['../app.min.js']
       }
     },
 
     jshint: {
       files: ['app/assets/javascripts/**/*.js', 'test/assets/javascripts/**/*.js'],
       options: {
-        jshintrc: '.jshintrc',
-        reporter: require('jshint-stylish')
+        jshintrc: '.jshintrc'
       }
     },
 
