@@ -33,6 +33,7 @@ define(function () {
                              languageService,
                              usersService) {
     var vm = this;
+    vm.navCollapsed = true;
     vm.logout = logout;
     vm.user = undefined;
     vm.changeLanguage = changeLanguage;

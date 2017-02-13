@@ -1,62 +1,67 @@
-<header class="navbar navbar-inverse navbar-fixed-top basics-nav">
-  <div class="container">
-    <a href="#/" class="navbar-brand">Biobank</a>
-    <div  ng-if="!!vm.user" ng-cloak>
-      <ul class="nav navbar-nav navbar-right">
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
-            <span class="glyphicon glyphicon-user"></span> {{vm.user.name}}
-            <b class="caret"></b>
-          </a>
-          <ul class="dropdown-menu" role="menu">
-            <li>
-              <a href="#/profile">
-                <span class="glyphicon glyphicon-cog"></span>
-                <translate>Profile</translate>
-              </a>
-            </li>
-            <li class="divider"></li>
-            <li>
-              <a href ng-click="vm.logout()">
-                <span class="glyphicon glyphicon-off"></span>
-                <translate>Logout</translate>
-              </a>
-            </li>
-          </ul>
-        </li>
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
-            <translate>Language</translate>
-            <b class="caret"></b>
-          </a>
-          <ul class="dropdown-menu" role="menu">
-            <li>
-              <a href ng-click="vm.changeLanguage('en')">
-                <span class="glyphicon glyphicon-cog"></span>
-                <translate>English</translate>
-              </a>
-            </li>
-            <li>
-              <a href ng-click="vm.changeLanguage('es_419')">
-                <span class="glyphicon glyphicon-cog"></span>
-                <translate>Spanish</translate>
-              </a>
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </div>
-    <ul class="nav navbar-nav pull-right" ng-if="!vm.user" ng-cloak>
-      <li><a href="#/login" translate>Login</a></li>
+<nav class="navbar navbar-inverse" role="navigation">
+  <div class="navbar-header">
+    <!-- note the ng-click here: -->
+    <button type="button"
+            class="navbar-toggle"
+            ng-click="vm.navCollapsed = !vm.navCollapsed">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="#">Biobank</a>
+  </div>
+
+  <div class="collapse navbar-collapse" uib-collapse="vm.navCollapsed">
+    <ul class="nav navbar-nav navbar-right">
+      <li class="dropdown" uib-dropdown ng-if="vm.user">
+        <a href="#" id="lang-dropdown" class="dropdown-toggle" uib-dropdown-toggle>
+          <translate>Language</translate>
+          <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu" role="menu">
+          <li>
+            <a href ng-click="vm.changeLanguage('en')">
+              <span class="glyphicon glyphicon-cog"></span>
+              <translate>English</translate>
+            </a>
+          </li>
+          <li>
+            <a href ng-click="vm.changeLanguage('es_419')">
+              <span class="glyphicon glyphicon-cog"></span>
+              <translate>Spanish</translate>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li class="dropdown" dropdown="" uib-dropdown ng-if="vm.user">
+        <a href="#" id="user-dropdown" class="dropdown-toggle" uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-user"></span> {{vm.user.name}}<b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="user-dropdown">
+          <li>
+            <a href="#/profile">
+              <span class="glyphicon glyphicon-cog"></span>
+              <translate>Profile</translate>
+            </a>
+          </li>
+          <li class="divider"></li>
+          <li>
+            <a href ng-click="vm.logout()">
+              <span class="glyphicon glyphicon-off"></span>
+              <translate>Logout</translate>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li><a href="#/login" ng-if="!vm.user" translate>Login</a></li>
     </ul>
   </div>
-</header>
+</nav>
 <div ng-if="!!vm.user">
   <ui-breadcrumbs
-     displayname-property="data.displayName"
-     template-url="/assets/javascripts/common/directives/uiBreadcrumbs.tpl.html"
-     abstract-proxy-property="data.breadcrumbProxy">
+      displayname-property="data.displayName"
+      template-url="/assets/javascripts/common/directives/uiBreadcrumbs.tpl.html"
+      abstract-proxy-property="data.breadcrumbProxy">
   </ui-breadcrumbs>
 </div>

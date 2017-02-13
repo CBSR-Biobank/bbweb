@@ -12,7 +12,7 @@ define(function (require) {
     'Centre'
   ];
 
-  /**
+  /*
    * Opens a modal that allows the user to select a centre location.
    */
   function centreLocationsModalService($uibModal,
@@ -30,10 +30,7 @@ define(function (require) {
             return locInfo.locationId;
           });
 
-      ModalController.$inject = [
-        'AppConfig',
-        'timeService'
-      ];
+      ModalController.$inject = [];
 
       modal = $uibModal.open({
         templateUrl: '/assets/javascripts/centres/services/centreLocationsModal/centreLocationsModal.html',
@@ -48,8 +45,7 @@ define(function (require) {
 
       //--
 
-      function ModalController(AppConfig,
-                               timeService) {
+      function ModalController() {
         var vm = this;
 
         vm.heading               = heading;
