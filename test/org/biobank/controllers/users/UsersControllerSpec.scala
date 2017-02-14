@@ -631,17 +631,17 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
                                "password" -> plainPassword)
         val json = makeRequest(POST, uri("login"), json = reqJson)
 
-        (json \ "data").as[String].length must be > 0
+        (json \ "status").as[String] must be ("success")
+
+        (json \ "data" \ "email").as[String] must be (user.email)
       }
 
       "prevent an invalid user from logging in" in {
         val invalidUser = nameGenerator.nextEmail[String]
         val reqJson = Json.obj("email" -> invalidUser,
                                "password" -> nameGenerator.next[String])
-        val json = makeRequest(POST, uri("login"), FORBIDDEN, json = reqJson)
-
-        (json \ "status").as[String] must be ("error")
-        (json \ "message").as[String] must include("invalid email")
+        val json = makeRequest(POST, uri("login"), UNAUTHORIZED, json = reqJson)
+        json must be (JsNull)
       }
 
       "prevent a user logging in with bad password" in {
@@ -649,11 +649,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val invalidPassword = nameGenerator.next[String]
         val reqJson = Json.obj("email" -> user.email,
                                "password" -> invalidPassword)
-        val json = makeRequest(POST, uri("login"), FORBIDDEN, json = reqJson)
-
-        (json \ "status").as[String] must be ("error")
-
-        (json \ "message").as[String] must include("InvalidPassword")
+        val json = makeRequest(POST, uri("login"), UNAUTHORIZED, json = reqJson)
+        json must be (JsNull)
       }
 
       "not allow a locked user to log in" in {
@@ -662,11 +659,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
         val reqJson = Json.obj("email" -> lockedUser.email,
                                "password" -> plainPassword)
-        val json = makeRequest(POST, uri("login"), FORBIDDEN, json = reqJson)
-
-        (json \ "status").as[String] must be ("error")
-
-        (json \ "message").as[String] must include regex("InvalidStatus.*locked")
+        val json = makeRequest(POST, uri("login"), UNAUTHORIZED, json = reqJson)
+        json must be (JsNull)
       }
 
       "not allow a request with an invalid token" in {
@@ -679,10 +673,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         resp must not be (None)
         resp.map { result =>
           status(result) mustBe (UNAUTHORIZED)
-          contentType(result) mustBe (Some("application/json"))
-          val json = Json.parse(contentAsString(result))
-          (json \ "status").as[String] must be ("error")
-          (json \ "message").as[String] must include("InvalidToken")
+          val body = contentAsString(result)
+          body mustBe empty
         }
         ()
       }
@@ -701,10 +693,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         resp must not be (None)
         resp.map { result =>
           status(result) mustBe (UNAUTHORIZED)
-          contentType(result) mustBe (Some("application/json"))
-          val json = Json.parse(contentAsString(result))
-          (json \ "status").as[String] must be ("error")
-          (json \ "message").as[String] must include("tokens did not match")
+          val body = contentAsString(result)
+          body mustBe empty
         }
         ()
       }
@@ -731,10 +721,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         resp.map { result =>
           // log.info(s"makeRequest: status: ${status(result)}, result: ${contentAsString(result)}")
           status(result) mustBe (UNAUTHORIZED)
-          contentType(result) mustBe (Some("application/json"))
-          val json = Json.parse(contentAsString(result))
-          (json \ "status").as[String] must be ("error")
-          (json \ "message").as[String] must include("tokens did not match")
+          val body = contentAsString(result)
+          body mustBe empty
         }
         ()
       }
@@ -744,10 +732,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         resp must not be (None)
         resp.map { result =>
           status(result) mustBe (UNAUTHORIZED)
-          contentType(result) mustBe (Some("application/json"))
-          val json = Json.parse(contentAsString(result))
-          (json \ "status").as[String] must be ("error")
-          (json \ "message").as[String] must include("Invalid XSRF Token cookie")
+          val body = contentAsString(result)
+          body mustBe empty
         }
         ()
       }
@@ -761,10 +747,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         resp must not be (None)
         resp.map { result =>
           status(result) mustBe (UNAUTHORIZED)
-          contentType(result) mustBe (Some("application/json"))
-          val json = Json.parse(contentAsString(result))
-          (json \ "status").as[String] must be ("error")
-          (json \ "message").as[String] must include("No token")
+          val body = contentAsString(result)
+          body mustBe empty
         }
         ()
       }
@@ -788,9 +772,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
         // the following request must fail
         json = makeRequest(GET, uri, UNAUTHORIZED, JsNull, token)
-
-        (json \ "status").as[String] must be ("error")
-        (json \ "message").as[String] must include("InvalidToken")
+        json must be (JsNull)
       }
     }
 
@@ -840,14 +822,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
       "allow a user to authenticate" in {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
+        val token = doLogin(user.email, plainPassword)
 
-        val reqJson = Json.obj("email" -> user.email,
-                               "password" -> plainPassword)
-        val json = makeRequest(POST, uri("login"), json = reqJson)
-        val tk = (json \ "data").as[String]
-        tk.length must be > 0
-
-        val authReplyJson = makeRequest(GET, uri("authenticate"), OK, JsNull, token = tk)
+        val authReplyJson = makeRequest(GET, uri("authenticate"), OK, JsNull, token = token)
         (authReplyJson \ "status").as[String] must be ("success")
         (authReplyJson \ "data" \ "email").as[String] must be (user.email)
       }
@@ -855,36 +832,23 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
       "not allow a registered user to authenticate" in {
         val plainPassword = nameGenerator.next[String]
         val user = createRegisteredUserInRepository(plainPassword)
+        val token = doLogin(user.email, plainPassword)
 
-        val reqJson = Json.obj("email" -> user.email,
-                               "password" -> plainPassword)
-        val json = makeRequest(POST, uri("login"), json = reqJson)
-        val tk = (json \ "data").as[String]
-        tk.length must be > 0
-
-        val authReplyJson = makeRequest(GET, uri("authenticate"), UNAUTHORIZED, JsNull, token = tk)
-
-        (authReplyJson \ "status").as[String] must be ("error")
-
-        (authReplyJson \ "message").as[String] must include regex("InvalidStatus.*not active")
+        val reply = makeRequest(GET, uri("authenticate"), UNAUTHORIZED, JsNull, token = token)
+        reply must be (JsNull)
       }
 
       "not allow a locked user to authenticate" in {
         val plainPassword = nameGenerator.next[String]
         val activeUser = createActiveUserInRepository(plainPassword)
-
-        val reqJson = Json.obj("email" -> activeUser.email,
-                               "password" -> plainPassword)
-        val json = makeRequest(POST, uri("login"), json = reqJson)
-        val tk = (json \ "data").as[String]
-        tk.length must be > 0
+        val token = doLogin(activeUser.email, plainPassword)
+        token.length must be > 0
 
         val lockedUser = activeUser.lock | fail
         userRepository.put(lockedUser)
 
-        val authReplyJson = makeRequest(GET, uri("authenticate"), UNAUTHORIZED, JsNull, token = tk)
-        (authReplyJson \ "status").as[String] must be ("error")
-        (authReplyJson \ "message").as[String] must include regex("InvalidStatus.*not active")
+        val reply = makeRequest(GET, uri("authenticate"), UNAUTHORIZED, JsNull, token = token)
+        reply must be (JsNull)
       }
     }
 

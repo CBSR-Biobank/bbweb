@@ -72,9 +72,6 @@ define(['lodash'], function(_) {
 
     function login(credentials) {
       return biobankApi.post('/users/login', credentials)
-        .then(function(reply) {
-          return biobankApi.get('/users/authenticate');
-        })
         .then(function(user) {
           currentUser = user;
           $log.info('Welcome ' + currentUser.name);

@@ -56,34 +56,26 @@ class UsersController @Inject() (val action:         BbwebAction,
         loginCredentials => {
           usersService.validatePassword(loginCredentials.email, loginCredentials.password).fold(
             err => {
-              val errStr = err.list.toList.mkString(", ")
               // FIXME: what if user attempts multiple failed logins? lock the account after 3 attempts?
               // how long to lock the account?
-              if (errStr.contains("InvalidPassword")) {
-                Forbidden(errStr)
-              } else if (errStr.contains("not found")) {
-                Forbidden("invalid email")
-              } else if (errStr.contains("not active") || errStr.contains("is locked")) {
-                Forbidden(err.list.toList.mkString(", "))
-              } else {
-                NotFound(err.list.toList.mkString(", "))
-              }
+              Unauthorized
             },
             user => {
               val token = authToken.newToken(user.id)
               log.debug(s"user logged in: ${user.email}, token: $token")
-              Ok(token).withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
+              Ok(user).withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
             }
           )
         }
       )
     }
 
-  /** Retrieves the user associated with the token, if it is valid.
+  /**
+   * Retrieves the user associated with the token, if it is valid.
    */
   def authenticateUser() = action(parse.empty) { implicit request =>
       usersService.getUser(request.authInfo.userId).fold(
-        err  => BadRequest(err.list.toList.mkString(", ")),
+        err  => Unauthorized,
         user => Ok(user)
       )
     }

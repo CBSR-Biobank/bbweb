@@ -5,7 +5,6 @@ import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import play.api.Environment
 import play.api.http.HttpVerbs
-import play.api.libs.json._
 import play.api.mvc._
 import play.api.mvc.Results.Unauthorized
 
@@ -34,8 +33,7 @@ class BbwebAction @Inject()(val env:          Environment,
 
     validateToken(request).fold(
       err => {
-        val json = Json.obj("status" -> "error", "message" -> err.list.toList.mkString(", "))
-        Future.successful(Unauthorized(json))
+        Future.successful(Unauthorized)
       },
       authInfo => {
         val future = block(new BbwebRequest(request, authInfo))

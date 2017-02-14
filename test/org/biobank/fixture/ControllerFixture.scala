@@ -83,14 +83,22 @@ abstract class ControllerFixture
   def doLogin(email: String = Global.DefaultUserEmail, password: String = "testuser") = {
     val request = Json.obj("email" -> email, "password" -> password)
     route(app, FakeRequest(POST, "/users/login").withJsonBody(request)).fold {
-        cancel("login failed")
+      cancel("login failed")
     } { result =>
-        status(result) mustBe (OK)
-        contentType(result) mustBe Some("application/json")
-        val json = Json.parse(contentAsString(result))
-        adminToken = (json \ "data").as[String]
-        adminToken
+      status(result) mustBe (OK)
+      contentType(result) mustBe Some("application/json")
+      val json = Json.parse(contentAsString(result))
+
+      (json \ "data" \ "email").as[String] must be (email)
+
+      getTokenFromHeader(headers(result))
     }
+  }
+
+  private def getTokenFromHeader(headers: Map[String, String]) = {
+    val cookie = headers("Set-Cookie")
+    cookie must include ("XSRF-TOKEN")
+    cookie.split("; ")(0).split("=")(1)
   }
 
   def makeRequest(method:         String,
@@ -114,10 +122,15 @@ abstract class ControllerFixture
     } { result =>
       status(result) match {
         case `expectedStatus` =>
-          val jsonResult = contentAsJson(result)
-          contentType(result) mustBe Some("application/json")
-          log.debug(s"reply: status: $result,\nresult: ${Json.prettyPrint(jsonResult)}")
-          jsonResult
+          val bodyText = contentAsString(result)
+          if (bodyText.isEmpty) {
+            JsNull
+          } else {
+            contentType(result) mustBe Some("application/json")
+            val jsonResult = contentAsJson(result)
+            log.debug(s"reply: status: $result,\nresult: ${Json.prettyPrint(jsonResult)}")
+            jsonResult
+          }
         case code =>
           contentType(result) match {
             case Some("application/json") => log.debug("reply: " + Json.prettyPrint(contentAsJson(result)))
