@@ -13,16 +13,16 @@ define(function () {
    */
   var AnnotationValueType = {
     /** The annotation contains a text value. */
-    TEXT:      'Text',
+    TEXT:      'text',
 
     /** The annotation contains a number value (whole, floating point, etc). */
-    NUMBER:    'Number',
+    NUMBER:    'number',
 
     /** The annotation contains a date and time value. */
-    DATE_TIME: 'DateTime',
+    DATE_TIME: 'datetime',
 
     /** The annotation contains a predefined set of value(s) to select from. */
-    SELECT:    'Select'
+    SELECT:    'select'
   };
 
   return AnnotationValueType;

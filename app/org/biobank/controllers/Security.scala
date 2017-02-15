@@ -4,7 +4,7 @@ import org.biobank.domain.user.{ UserId, UserHelper }
 import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import play.api.mvc._
-import play.api.{ Environment, Mode }
+import play.api.{ Environment, Mode, Logger }
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -45,8 +45,11 @@ trait Security {
       }
       matchingTokens <- {
         if (cookieXsrfToken == headerXsrfToken) headerXsrfToken.successNel[String]
-        else ControllerError(s"tokens did not match: cookie/$cookieXsrfToken, header/$headerXsrfToken")
-          .failureNel[String]
+        else {
+          Logger.error(s"tokens did not match: cookie/$cookieXsrfToken, header/$headerXsrfToken")
+          ControllerError(s"tokens did not match: cookie/$cookieXsrfToken, header/$headerXsrfToken")
+            .failureNel[String]
+        }
       }
     } yield headerXsrfToken
   }

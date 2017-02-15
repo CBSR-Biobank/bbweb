@@ -232,7 +232,7 @@ class StudiesProcessor @javax.inject.Inject() (
                               cmd.valueType,
                               cmd.maxValueCount,
                               cmd.options,
-                                  cmd.required)
+                              cmd.required)
       }
       updatedStudy <- study.withParticipantAnnotationType(annotationType)
     } yield StudyEvent(study.id.id).update(
