@@ -380,7 +380,7 @@ class TestData @Inject() (config:                        Configuration,
           preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
           specimenType                = SpecimenType.WholeBloodEdta,
           maxCount                    = 2, // set to 2 for testing form, set back to 1 for demo
-          amount                      = Some(10)),
+          amount                      = 10.0),
         CollectionSpecimenSpec(
           uniqueId                    = hashids.encode(2),
           name                        = "10 mL Orange top PAXgene tube",
@@ -391,7 +391,7 @@ class TestData @Inject() (config:                        Configuration,
           preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
           specimenType                = SpecimenType.Paxgene,
           maxCount                    = 1,
-          amount                      = Some(10))
+          amount                      = 10.0)
           //,
           // CollectionSpecimenSpec(
           //   uniqueId                    = hashids.encode(3),

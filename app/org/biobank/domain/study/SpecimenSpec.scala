@@ -124,7 +124,7 @@ final case class CollectionSpecimenSpec(uniqueId:                    String,
                                         preservationTemperatureType: PreservationTemperatureType,
                                         specimenType:                SpecimenType,
                                         maxCount:                    Int,
-                                        amount:                      Option[BigDecimal])
+                                        amount:                      BigDecimal)
     extends SpecimenSpec
 
 object CollectionSpecimenSpec extends SpecimenSpecValidations {
@@ -144,7 +144,7 @@ object CollectionSpecimenSpec extends SpecimenSpecValidations {
              preservationTemperatureType: PreservationTemperatureType,
              specimenType:                SpecimenType,
              maxCount:                    Int,
-             amount:                      Option[BigDecimal])
+             amount:                      BigDecimal)
       : DomainValidation[CollectionSpecimenSpec] = {
     validate(name,
              description,
@@ -178,7 +178,7 @@ object CollectionSpecimenSpec extends SpecimenSpecValidations {
                preservationTemperatureType: PreservationTemperatureType,
                specimenType:                SpecimenType,
                maxCount:                    Int,
-               amount:                      Option[BigDecimal])
+               amount:                      BigDecimal)
       : DomainValidation[Boolean] = {
     (validate(name,
               description,
@@ -188,7 +188,7 @@ object CollectionSpecimenSpec extends SpecimenSpecValidations {
               preservationTemperatureType,
               specimenType) |@|
         validatePositiveNumber(maxCount, MaxCountInvalid) |@|
-       validatePositiveNumberOption(amount, AmountInvalid)) {
+       validatePositiveNumber(amount, AmountInvalid)) {
       case (_, _, _) => true
     }
   }

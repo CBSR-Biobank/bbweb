@@ -78,7 +78,7 @@ object EventUtils {
       _.preservationTemperatureType := specimenSpec.preservationTemperatureType.toString,
       _.specimenType                := specimenSpec.specimenType.toString,
       _.maxCount                    := specimenSpec.maxCount,
-      _.optionalAmount              := specimenSpec.amount.map(_.doubleValue)
+      _.amount                      := specimenSpec.amount.doubleValue
     )
   }
 
@@ -93,7 +93,7 @@ object EventUtils {
       preservationTemperatureType = PreservationTemperatureType.withName(event.getPreservationTemperatureType),
       specimenType                = SpecimenType.withName(event.getSpecimenType),
       maxCount                    = event.getMaxCount,
-      amount                      = event.amount.map(BigDecimal(_))
+      amount                      = event.getAmount
     )
   }
 

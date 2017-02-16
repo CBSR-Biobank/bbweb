@@ -142,7 +142,7 @@ class Factory {
         preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
         specimenType                = SpecimenType.FilteredUrine,
         maxCount                    = 1,
-        amount                      = Some(BigDecimal(0.5)))
+        amount                      = BigDecimal(0.5))
     domainObjects = domainObjects + (classOf[CollectionSpecimenSpec] -> specimenSpec)
     specimenSpec
   }

@@ -716,7 +716,7 @@ class ShipmentSpecimensControllerSpec
         shipmentSpecimenRepository.getByKey(shipmentSpecimen.id) mustFail "IdNotFound.*shipment specimen.*"
       }
 
-      "111 must remove an extra specimen from shipment in unpacked state" in {
+      "must remove an extra specimen from shipment in unpacked state" in {
         val f = specimensFixture(1)
         val shipment = makeUnpackedShipment(f.shipment)
         val specimen = f.specimens.head

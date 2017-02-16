@@ -81,7 +81,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
   def compareCollectionSpecimenSpec(json: JsValue, specimenSpec: CollectionSpecimenSpec): Unit = {
     compareSpecimenSpec(json, specimenSpec)
     (json \ "maxCount").as[Int]         mustBe (specimenSpec.maxCount)
-    (json \ "amount").asOpt[BigDecimal] mustBe (specimenSpec.amount)
+    (json \ "amount").as[BigDecimal] mustBe (specimenSpec.amount)
   }
 
   def compareAnnotData(json: JsValue, annotationTypeData: AnnotationTypeData) = {

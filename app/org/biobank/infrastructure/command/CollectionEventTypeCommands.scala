@@ -96,7 +96,7 @@ object CollectionEventTypeCommands {
                                                 preservationTemperatureType: PreservationTemperatureType,
                                                 specimenType:                SpecimenType,
                                                 maxCount:                    Int,
-                                                amount:                      Option[BigDecimal])
+                                                amount:                      BigDecimal)
       extends CollectionEventTypeModifyCommand
 
   final case class UpdateCollectionSpecimenSpecCmd(userId:                      Option[String],
@@ -112,7 +112,7 @@ object CollectionEventTypeCommands {
                                                    preservationTemperatureType: PreservationTemperatureType,
                                                    specimenType:                SpecimenType,
                                                    maxCount:                    Int,
-                                                   amount:                      Option[BigDecimal])
+                                                   amount:                      BigDecimal)
       extends CollectionEventTypeModifyCommand
 
   final case class RemoveCollectionSpecimenSpecCmd(userId:          Option[String],
