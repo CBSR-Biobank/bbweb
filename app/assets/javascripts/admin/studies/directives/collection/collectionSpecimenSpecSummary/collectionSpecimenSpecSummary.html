@@ -6,37 +6,57 @@
   </div>
 </div>
 <div class="row">
-  <div class="col-md-6">
+  <div class="col-md-3">
     <small class="text-muted">
       <translate>Anatomical source:</translate>
+    </small>
+  </div>
+  <div class="col-md-3">
+    <small class="text-muted">
       <strong>{{ specimenSpec.anatomicalSourceType }}</strong>
     </small>
   </div>
-  <div class="col-md-6">
+  <div class="col-md-3">
     <small class="text-muted">
       <translate>Type:</translate>
+    </small>
+  </div>
+  <div class="col-md-3">
+    <small class="text-muted">
       <strong>{{ specimenSpec.specimenType }}</strong>
     </small>
   </div>
 </div>
 <div class="row">
-  <div class="col-md-12">
+  <div class="col-md-3">
     <small class="text-muted">
       <translate>Preservation Type:</translate>
-      <strong>{{ specimenSpec.preservationType }}</strong>
+    </small>
+  </div>
+  <div class="col-md-9">
+    <small class="text-muted">
+      <strong>{{ specimenSpec.preservationType }}: {{ specimenSpec.preservationTemperatureType }}</strong>
     </small>
   </div>
 </div>
 <div class="row">
-  <div class="col-md-6">
+  <div class="col-md-3">
     <small class="text-info">
       <translate>Amount:</translate>
+    </small>
+  </div>
+  <div class="col-md-3">
+    <small class="text-info">
       <strong>{{ specimenSpec.amount }} {{ specimenSpec.units }}</strong>
     </small>
   </div>
-  <div class="col-md-6">
+  <div class="col-md-3">
     <small class="text-info">
       <translate>Max Count:</translate>
+    </small>
+  </div>
+  <div class="col-md-3">
+    <small class="text-info">
       <strong>{{ specimenSpec.maxCount }}</strong>
     </small>
   </div>
