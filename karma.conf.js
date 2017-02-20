@@ -26,25 +26,25 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       { pattern: 'target/web/web-modules/main/webjars/lib/angular/angular.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/angular-animate/**/*.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/angular-cookies/**/*.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/angular-gettext/**/*.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/angular-messages/**/*.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/angular-sanitize/**/*.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/angular-smart-table/dist/**/*.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/angular-toastr/dist/**/*.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/dist/**/*.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/angular-ui-router/**/*.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/angular-utils-ui-breadcrumbs/**/*.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/bootstrap/**/*.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/bootstrap-ui-datetime-picker/**/*.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/jquery/**/*.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/lodash/**/*.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/moment/**/*.js', included: false },
+      { pattern: 'target/web/web-modules/main/webjars/lib/angular-animate/angular-animate.js', included: false },
+      { pattern: 'target/web/web-modules/main/webjars/lib/angular-cookies/angular-cookies.js', included: false },
+      { pattern: 'target/web/web-modules/main/webjars/lib/angular-gettext/dist/angular-gettext.js', included: false },
+      { pattern: 'target/web/web-modules/main/webjars/lib/angular-messages/angular-messages.js', included: false },
+      { pattern: 'target/web/web-modules/main/webjars/lib/angular-sanitize/angular-sanitize.js', included: false },
+      { pattern: 'target/web/web-modules/main/webjars/lib/angular-smart-table/dist/smart-table.js', included: false },
+      { pattern: 'target/web/web-modules/main/webjars/lib/angular-toastr/dist/angular-toastr.tpls.js', included: false },
+      { pattern: 'target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js', included: false },
+      { pattern: 'target/web/web-modules/main/webjars/lib/angular-ui-router/release/angular-ui-router.js', included: false },
+      { pattern: 'target/web/web-modules/main/webjars/lib/angular-utils-ui-breadcrumbs/uiBreadcrumbs.js', included: false },
+      { pattern: 'target/web/web-modules/main/webjars/lib/bootstrap/dist/js/bootstrap.js', included: false },
+      { pattern: 'target/web/web-modules/main/webjars/lib/bootstrap-ui-datetime-picker/dist/datetime-picker.js', included: false },
+      { pattern: 'target/web/web-modules/main/webjars/lib/jquery/dist/jquery.js', included: false },
+      { pattern: 'target/web/web-modules/main/webjars/lib/lodash/lodash.js', included: false },
+      { pattern: 'target/web/web-modules/main/webjars/lib/moment/moment.js', included: false },
       { pattern: 'target/web/web-modules/main/webjars/lib/sprintf-js/src/sprintf.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/tv4/**/*.js', included: false },
-      { pattern: 'node_modules/angular-mocks/**/*.js', included: false },
-      { pattern: 'node_modules/faker/**/*.js', included: false },
+      { pattern: 'target/web/web-modules/main/webjars/lib/tv4/tv4.js', included: false },
+      { pattern: 'node_modules/angular-mocks/angular-mocks.js', included: false },
+      { pattern: 'node_modules/faker/build/build/faker.js', included: false },
       { pattern: 'app/assets/javascripts/**/*.js', included: false },
       { pattern: 'test/assets/javascripts/**/*Spec.js', included: false },
       { pattern: 'test/assets/javascripts/test/**/*.js', included: false },
@@ -55,9 +55,7 @@ module.exports = function(config) {
 
     // list of files to exclude
     exclude: [
-      'app/assets/javascripts/main.js',
-      'target/web/web-modules/main/webjars/lib/angularjs/angular-*.min.js',
-      'target/web/web-modules/main/webjars/lib/angularjs/angular-scenario.js'
+      'app/assets/javascripts/main.js'
     ],
 
     // preprocess matching files before serving them to the browser

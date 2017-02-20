@@ -56,6 +56,8 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
       _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
     }
 
+    Location.prototype.constructor = Location;
+
     Location.valid = function(obj) {
       return tv4.validate(obj, schema);
     };
