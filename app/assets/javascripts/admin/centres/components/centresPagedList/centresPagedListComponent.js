@@ -44,7 +44,7 @@ define(function (require) {
     vm.$onInit     = onInit;
     vm.counts      = {};
     vm.limit       = 5;
-    vm.getItems    = Centre.list;
+    vm.getItems    = getItems;
     vm.getItemIcon = getItemIcon;
 
     vm.stateData = _.map(_.values(CentreState), function (state) {
@@ -64,6 +64,14 @@ define(function (require) {
     function onInit() {
       CentreCounts.get().then(function (counts) {
         vm.counts = counts;
+      });
+    }
+
+    function getItems(options) {
+      // KLUDGE: for now, fix after Entity Pagers have been implemented
+      return CentreCounts.get().then(function (counts) {
+        vm.counts = counts;
+        return Centre.list(options);
       });
     }
 

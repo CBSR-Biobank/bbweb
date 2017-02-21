@@ -64,9 +64,8 @@ define(function (require) {
         } else {
           return vm.displayStates.NO_RESULTS;
         }
-      } else {
-        return vm.displayStates.NO_ENTITIES;
       }
+      return vm.displayStates.NO_ENTITIES;
     }
 
     function updateItems() {
@@ -89,6 +88,7 @@ define(function (require) {
           return entity;
         });
         vm.displayState = displayState();
+        console.log('display state:', vm.displayState, vm.pagedResult.total, vm.counts);
       });
     }
 

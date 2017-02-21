@@ -43,7 +43,7 @@ define(function (require) {
     vm.$onInit     = onInit;
     vm.counts      = {};
     vm.limit       = 5;
-    vm.getItems    = Study.list;
+    vm.getItems    = getItems;
     vm.getItemIcon = getItemIcon;
 
     vm.stateData = _.map(_.values(StudyState), function (state) {
@@ -61,8 +61,16 @@ define(function (require) {
     //--
 
     function onInit() {
-      StudyCounts.get().then(function (counts) {
+      return StudyCounts.get().then(function (counts) {
         vm.counts = counts;
+      });
+    }
+
+    function getItems(options) {
+      // KLUDGE: for now, fix after Entity Pagers have been implemented
+      return StudyCounts.get().then(function (counts) {
+        vm.counts = counts;
+        return Study.list(options);
       });
     }
 
