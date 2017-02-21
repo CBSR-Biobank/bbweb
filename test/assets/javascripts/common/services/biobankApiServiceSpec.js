@@ -45,7 +45,7 @@ define([
       this.$httpBackend.whenGET(url).respond(400, this.errorReply(errmsg));
 
       this.biobankApi.get(url).catch(function(err) {
-        expect(err.data.message).toEqual(errmsg);
+        expect(err.message).toEqual(errmsg);
       });
       this.$httpBackend.flush();
     });
@@ -71,7 +71,7 @@ define([
       this.$httpBackend.expectPOST(url, json).respond(400, this.errorReply(errmsg));
 
       this.biobankApi.post(url, json).catch(function(err) {
-        expect(err.data.message).toEqual(errmsg);
+        expect(err.message).toEqual(errmsg);
       });
       this.$httpBackend.flush();
     });
@@ -97,7 +97,7 @@ define([
       this.$httpBackend.expectPUT(url, cmd).respond(400, this.errorReply(errmsg));
 
       this.biobankApi.put(url, cmd).catch(function(err) {
-        expect(err.data.message).toEqual(errmsg);
+        expect(err.message).toEqual(errmsg);
       });
       this.$httpBackend.flush();
     });
@@ -121,7 +121,7 @@ define([
       this.$httpBackend.whenDELETE(url).respond(400, this.errorReply(errmsg));
 
       this.biobankApi.del(url).catch(function(err) {
-        expect(err.data.message).toEqual(errmsg);
+        expect(err.message).toEqual(errmsg);
       });
       this.$httpBackend.flush();
     });

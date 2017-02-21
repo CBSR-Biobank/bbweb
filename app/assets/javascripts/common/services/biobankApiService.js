@@ -23,25 +23,28 @@ define(['angular', 'jquery'], function (angular, $) {
     //-------------
 
     function call(method, url, config) {
-      var deferred = $q.defer();
-
       config = config || {};
       angular.extend(config, { method: method, url: url });
 
-      $http(config)
+      return $http(config)
         .then(function(response) {
           // TODO: check status here and log it if it not 'success'
-          if (method === 'DELETE') {
-            deferred.resolve(response.data);
-          } else {
-            deferred.resolve(response.data.data);
+          if (response.data) {
+            if (method === 'DELETE') {
+              return $q.when(response.data);
+            } else {
+              return $q.when(response.data.data);
+            }
           }
+          return $q.when({});
         })
         .catch(function(response) {
           $log.error(response);
-          deferred.reject(response);
+          if (response.data) {
+            return $q.reject(new Error(response.data.message));
+          }
+          return $q.reject(new Error(response));
         });
-      return deferred.promise;
     }
 
     function get(url, params) {

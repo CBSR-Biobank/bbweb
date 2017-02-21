@@ -90,7 +90,7 @@ define([
     it('calling optionAdd appends to the options array', function() {
       createController.call(this);
 
-      this.controller.annotationType.valueType = 'Select';
+      this.controller.annotationType.valueType = 'select';
       this.controller.annotationType.maxValueCount = 1;
       this.controller.annotationType.valueTypeChanged();
 

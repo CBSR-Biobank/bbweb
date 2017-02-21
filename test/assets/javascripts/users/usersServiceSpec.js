@@ -90,8 +90,7 @@ define([
             email: 'test@test.com',
             password: 'test'
           };
-          this.$httpBackend.expectPOST('/users/login', credentials).respond(201, token);
-          this.$httpBackend.whenGET('/users/authenticate').respond(this.reply(this.user));
+          this.$httpBackend.expectPOST('/users/login', credentials).respond(this.reply(this.user));
 
           this.usersService.login(credentials).then(function(reply) {
             expect(_.isEqual(reply, user));

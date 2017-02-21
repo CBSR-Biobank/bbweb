@@ -203,13 +203,13 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
       it('returns valid type for value type TEXT', function() {
         var annotationType = new this.AnnotationType(this.factory.annotationType(
           { valueType: this.AnnotationValueType.TEXT }));
-        expect(annotationType.getValueTypeLabel()).toBe(this.AnnotationValueType.TEXT);
+        expect(annotationType.getValueTypeLabel().toLowerCase()).toBe(this.AnnotationValueType.TEXT);
       });
 
       it('returns valid type for value type NUMBER', function() {
         var annotationType = new this.AnnotationType(this.factory.annotationType(
           { valueType: this.AnnotationValueType.NUMBER }));
-        expect(annotationType.getValueTypeLabel()).toBe(this.AnnotationValueType.NUMBER);
+        expect(annotationType.getValueTypeLabel().toLowerCase()).toBe(this.AnnotationValueType.NUMBER);
       });
 
       it('returns valid type for value type DATE_TIME', function() {
