@@ -247,7 +247,7 @@ define(function (require) {
       self.CollectionEvent.get(collectionEventId)
         .then(function () { fail('should not be called'); })
         .catch(function (err) {
-          expect(err.message).toContain('invalid id');
+          expect(err.data.message).toContain('invalid id');
         });
       self.$httpBackend.flush();
     });

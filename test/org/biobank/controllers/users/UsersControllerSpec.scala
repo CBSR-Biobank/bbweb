@@ -354,7 +354,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must be ("error")
 
-        (json \ "message").as[String] must include regex("EmailNotAvailable.*already exists")
+        (json \ "message").as[String] must include regex("email already registered")
       }
     }
 

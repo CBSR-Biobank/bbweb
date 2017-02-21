@@ -502,10 +502,6 @@ class UsersProcessor @Inject() (val config:         Configuration,
     val adminEmail = if (env.mode == Mode.Dev) org.biobank.Global.DefaultUserEmail
                      else config.getString("admin.email").getOrElse(org.biobank.Global.DefaultUserEmail)
 
-    if (env.mode == Mode.Prod) {
-      log.info(s"createDefaultUser: $adminEmail")
-    }
-
     if ((env.mode == Mode.Dev) || (env.mode == Mode.Prod)) {
       userRepository.put(
         ActiveUser(id           = org.biobank.Global.DefaultUserId,
@@ -517,6 +513,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
                    password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
                    salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
                    avatarUrl    = None))
+      log.info(s"created default user: $adminEmail")
     }
     ()
   }

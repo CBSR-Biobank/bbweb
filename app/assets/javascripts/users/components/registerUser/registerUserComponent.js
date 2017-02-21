@@ -56,8 +56,10 @@ define(function () {
       var message;
       if ((err.status === 403) && (err.data.message === 'already registered')) {
         message = gettextCatalog.getString('That email address is already registered.');
-      } else {
+      } else if (err.data) {
         message = err.data.message;
+      } else {
+        message = 'Registration failed';
       }
 
       // registration failed

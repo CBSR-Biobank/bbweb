@@ -42,6 +42,8 @@ trait UsersService {
 
   def validatePassword(email: String, enteredPwd: String): ServiceValidation[User]
 
+  def register(cmd: RegisterUserCmd): Future[ServiceValidation[User]]
+
   def processCommand(cmd: UserCommand): Future[ServiceValidation[User]]
 
 }
@@ -111,6 +113,10 @@ class UsersServiceImpl @javax.inject.Inject() (
       }
       notLocked <- UserHelper.isUserNotLocked(user)
     } yield user
+  }
+
+  def register(cmd: RegisterUserCmd): Future[ServiceValidation[User]] = {
+    processCommand(cmd)
   }
 
   def processCommand(cmd: UserCommand): Future[ServiceValidation[User]] = {

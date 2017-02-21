@@ -39,11 +39,12 @@ define(['angular', 'jquery'], function (angular, $) {
           return $q.when({});
         })
         .catch(function(response) {
-          $log.error(response);
           if (response.data) {
-            return $q.reject(new Error(response.data.message));
+            $log.error(response.status, response.data.message);
+          } else {
+            $log.error(response.status, response.config.method, response.config.url);
           }
-          return $q.reject(new Error(response));
+          return $q.reject(response);
         });
     }
 

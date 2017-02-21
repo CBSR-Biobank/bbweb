@@ -126,10 +126,30 @@ class UsersController @Inject() (val action:         BbwebAction,
       validationReply(usersService.getUser(id))
     }
 
-  def registerUser() =
-    commandActionAsync { cmd: RegisterUserCmd =>
-      processCommand(cmd)
-    }
+  def registerUser() = Action.async(parse.json) { implicit request =>
+    request.body.validate[RegisterUserCmd].fold(
+      errors => {
+        Future.successful(BadRequest(JsError.toJson(errors)))
+      },
+      cmd => {
+        Logger.debug(s"registerUser: cmd: $cmd")
+        val future = usersService.register(cmd)
+        future.map { validation =>
+          validation.fold(
+            err   => {
+              val errs = err.list.toList.mkString(", ")
+              if (errs.contains("exists")) {
+                Forbidden("email already registered")
+              } else {
+                BadRequest(errs)
+              }
+            },
+            user => Ok(user)
+          )
+        }
+      }
+    )
+  }
 
   def updateName(id: UserId) =
     commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserNameCmd =>
