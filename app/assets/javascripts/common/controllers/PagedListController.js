@@ -88,7 +88,6 @@ define(function (require) {
           return entity;
         });
         vm.displayState = displayState();
-        console.log('display state:', vm.displayState, vm.pagedResult.total, vm.counts);
       });
     }
 
