@@ -1,0 +1,7 @@
+play.mailer {
+  host=""
+  port=587
+  ssl=yes
+  user=""
+  password=""
+}
