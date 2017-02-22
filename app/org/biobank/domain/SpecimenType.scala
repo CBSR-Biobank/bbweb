@@ -26,6 +26,7 @@ object SpecimenType extends Enumeration {
   val Jejunum                   = Value("Jejunum")
   val LithiumHeparinPlasma      = Value("Lithium Heparin Plasma")
   val MeconiumBaby              = Value("Meconium - BABY")
+  val NaN3Urine                 = Value("NaN3 Urine")
   val Paxgene                   = Value("Paxgene")
   val PeritonealDialysate       = Value("Peritoneal Dialysate")
   val PlasmaNaHeparinDad        = Value("Plasma (Na Heparin) - DAD")
@@ -37,9 +38,14 @@ object SpecimenType extends Enumeration {
   val Serum                     = Value("Serum")
   val SodiumAzideUrine          = Value("SodiumAzideUrine")
   val SourceWater               = Value("Source Water")
+  val Stool                     = Value("Stool")
   val TapWater                  = Value("Tap Water")
+  val Urine                     = Value("Urine")
   val TransverseColon           = Value("Transverse Colon")
+  val WholeBlood                = Value("Whole Blood")
+  val WholeBloodCpda            = Value("Whole Blood CPDA")
   val WholeBloodEdta            = Value("Whole Blood EDTA")
+  val WholeBloodLiHep           = Value("Whole Blood Li Hep")
 
   implicit val specimenTypeReads: Format[SpecimenType] = enumFormat(SpecimenType)
 }
