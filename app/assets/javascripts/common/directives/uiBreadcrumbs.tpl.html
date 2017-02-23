@@ -1,8 +1,10 @@
-<ol class="breadcrumb" style="top-margin: 20px;">
+<ol class="breadcrumb">
   <li ng-repeat="crumb in breadcrumbs"
       ng-class="{ active: $last }"
       ng-cloak>
-    <a ui-sref="{{ crumb.route }}" ui-sref-opts="{reload: true}" ng-if="!$last">{{ crumb.displayName }}&nbsp;</a>
+    <a ui-sref="{{ crumb.route }}" ui-sref-opts="{reload: true}" ng-if="!$last">
+      {{ crumb.displayName }}&nbsp;
+    </a>
     <span ng-show="$last">{{ crumb.displayName }}</span>
   </li>
 </ol>

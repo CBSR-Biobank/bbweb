@@ -113,7 +113,7 @@ define(function () {
         }
       },
       data: {
-        displayName: '{{study.name}}'
+        displayName: '{{study.name}}: Participants'
       }
     });
 
@@ -130,7 +130,7 @@ define(function () {
         }
       },
       data: {
-        displayName: '{{study.name}}'
+        displayName: '{{study.name}}: Collection'
       }
     });
 
@@ -154,7 +154,7 @@ define(function () {
         }
       },
       data: {
-        displayName: '{{study.name}}'
+        displayName: '{{study.name}}: Processing'
       }
     });
 

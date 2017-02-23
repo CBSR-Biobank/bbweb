@@ -15,7 +15,7 @@ define(['lodash'], function (_) {
     $urlRouterProvider.otherwise('/');
 
     $stateProvider.state('home.admin.studies.study.collection.ceventType', {
-      url: '/cetype/{ceventTypeId}',
+      url: '/event/{ceventTypeId}',
       resolve: {
         ceventType: [
           '$stateParams',
