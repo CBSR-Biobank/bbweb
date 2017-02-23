@@ -54,12 +54,15 @@ class UsersController @Inject() (val action:         BbwebAction,
           BadRequest(JsError.toJson(errors))
         },
         loginCredentials => {
-          usersService.validatePassword(loginCredentials.email, loginCredentials.password).fold(
-            err => {
-              // FIXME: what if user attempts multiple failed logins? lock the account after 3 attempts?
-              // how long to lock the account?
-              Unauthorized
-            },
+          val v = for {
+              user  <- usersService.validatePassword(loginCredentials.email, loginCredentials.password)
+              valid <- usersService.allowLogin(user)
+            } yield user
+
+          // FIXME: what if user attempts multiple failed logins? lock the account after 3 attempts?
+          // how long to lock the account?
+          v.fold(
+            err => Unauthorized,
             user => {
               val token = authToken.newToken(user.id)
               log.debug(s"user logged in: ${user.email}, token: $token")
@@ -91,12 +94,6 @@ class UsersController @Inject() (val action:         BbwebAction,
       Ok("user has been logged out")
         .discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
         .withNewSession
-    }
-
-  /** Resets the user's password.
-   */
-  def passwordReset() = commandActionAsync { cmd: ResetUserPasswordCmd =>
-      processCommand(cmd)
     }
 
   def userCounts() =
@@ -145,6 +142,25 @@ class UsersController @Inject() (val action:         BbwebAction,
               }
             },
             user => Ok(user)
+          )
+        }
+      }
+    )
+  }
+
+  /** Resets the user's password.
+   */
+  def passwordReset() = Action.async(parse.json) { implicit request =>
+    request.body.validate[ResetUserPasswordCmd].fold(
+      errors => {
+        Future.successful(BadRequest(JsError.toJson(errors)))
+      },
+      cmd => {
+        val future = usersService.resetPassword(cmd)
+        future.map { validation =>
+          validation.fold(
+            err   => Unauthorized,
+            event => Ok("password has been reset")
           )
         }
       }

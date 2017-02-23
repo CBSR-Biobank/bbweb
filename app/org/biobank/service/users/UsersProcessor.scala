@@ -201,9 +201,9 @@ class UsersProcessor @Inject() (val config:         Configuration,
       updatedUser  <- activeUser.withPassword(passwordInfo.password, passwordInfo.salt)
       emailSent    <- emailService.passwordResetEmail(updatedUser.email, plainPassword).successNel[String]
     } yield UserEvent(user.id.id).update(
-      _.optionalUserId         := cmd.userId,
+      _.userId                 := "",
       _.time                   := ISODateTimeFormat.dateTime.print(DateTime.now),
-      _.passwordReset.version  := cmd.expectedVersion,
+      _.passwordReset.version  := user.version,
       _.passwordReset.password := passwordInfo.password,
       _.passwordReset.salt     := passwordInfo.salt)
   }

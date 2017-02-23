@@ -1,7 +1,8 @@
 play.mailer {
   host=""
   port=587
-  ssl=yes
+  tls=yes
+  ssl=no
   user=""
   password=""
 }

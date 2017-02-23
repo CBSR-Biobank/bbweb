@@ -56,6 +56,24 @@ Assign value `admin.email` in `confg/application.conf` to your administrator's e
 email address to use to log into the application for the first time. The password is `testuser`. Change the
 pasword for this user after the application is started.
 
+### Email notifications
+
+Copy the file `config/email.conf.template` to `config/email.conf` and then edit `config/email.conf` and supply
+your own settings. These settings are:
+
+| Setting                | Description                                                      |
+|------------------------|------------------------------------------------------------------|
+| `play.mailer.host`     | The DNS name of the SMTP server.                                 |
+| `play.mailer.port`     | The port number used by the SMTP server.                         |
+| `play.mailer.tls`      | Should be `yes` if the SMTP server uses TLS, and 'no' otherwise. |
+| `play.mailer.ssl`      | Should be `yes` if the SMTP server uses SSL, and 'no' otherwise. |
+| `play.mailer.user`     | The user name on the SMTP server.                                |
+| `play.mailer.password` | The user's password.                                             |
+
+Note: if you are using a Gmail SMTP server, the Google account must have *Access for less secure apps* turned
+*on*. Log into your google account and then go to this link to turn it on:
+https://www.google.com/settings/security/lesssecureapps
+
 ### To Start the Application
 
 First, create the application and generate an *application secret*.

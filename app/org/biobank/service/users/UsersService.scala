@@ -42,7 +42,11 @@ trait UsersService {
 
   def validatePassword(email: String, enteredPwd: String): ServiceValidation[User]
 
+  def allowLogin(user: User): ServiceValidation[Boolean]
+
   def register(cmd: RegisterUserCmd): Future[ServiceValidation[User]]
+
+  def resetPassword(cmd: ResetUserPasswordCmd): Future[ServiceValidation[User]]
 
   def processCommand(cmd: UserCommand): Future[ServiceValidation[User]]
 
@@ -115,9 +119,21 @@ class UsersServiceImpl @javax.inject.Inject() (
     } yield user
   }
 
+  def allowLogin(user: User): ServiceValidation[Boolean] = {
+    user match {
+      case u: ActiveUser => true.successNel[String]
+      case _ =>             ServiceError("user not active").failureNel[Boolean]
+    }
+  }
+
   def register(cmd: RegisterUserCmd): Future[ServiceValidation[User]] = {
     processCommand(cmd)
   }
+
+  def resetPassword(cmd: ResetUserPasswordCmd): Future[ServiceValidation[User]] = {
+    processCommand(cmd)
+  }
+
 
   def processCommand(cmd: UserCommand): Future[ServiceValidation[User]] = {
     log.debug(s"processCommand: cmd: $cmd")

@@ -72,30 +72,12 @@ define(function () {
       if (!error.hasOwnProperty('data') || (error.data === null)) {
         header = gettextCatalog.getString('Login error');
         body = gettextCatalog.getString('Cannot login: server is not reachable.');
-      } else {
-        switch (error.data.message)  {
-        case 'invalid email':
-        case 'InvalidPassword':
-          header = gettextCatalog.getString('Invalid login credentials');
+      } else if (error.status === 401) {
+          header = gettextCatalog.getString('Cannot log in');
           body = gettextCatalog.getString('The email and / or password you entered are invalid.');
-          break;
-
-        case 'the user is not active':
-          header = gettextCatalog.getString('Login not active');
-          body = gettextCatalog.getString('Your login is not active yet. ' +
-                                          'Please contact your system admnistrator for more information.');
-          break;
-
-        case 'the user is locked':
-          header = gettextCatalog.getString('Login is locked');
-          body = gettextCatalog.getString('Your login is locked. ' +
-                                          'Please contact your system admnistrator for more information.');
-          break;
-
-        default:
-          header = gettextCatalog.getString('Login error');
-          body = gettextCatalog.getString('Cannot login: ') + error.data.message;
-        }
+      } else {
+          header = gettextCatalog.getString('Cannot log in');
+          body = gettextCatalog.getString('Server error.');
       }
 
       return modalService.modalOk(header, body)

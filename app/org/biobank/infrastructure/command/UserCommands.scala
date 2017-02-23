@@ -58,18 +58,8 @@ object UserCommands {
                                  expectedVersion: Long)
       extends UserModifyCommand
 
-  final case class ResetUserPasswordCmd(userId:          Option[String],
-                                        id:              String,
-                                        expectedVersion: Long,
-                                        email:           String)
-      extends UserModifyCommand
-
-  // The id and expectedVersion fields are don't care in ResetUserPasswordCmd
-  // use this object to create this command
-  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  object ResetUserPasswordCmd {
-    def apply(email: String): ResetUserPasswordCmd = ResetUserPasswordCmd(None, "", 0L, email)
-  }
+  final case class ResetUserPasswordCmd(email: String)
+      extends UserCommand
 
   implicit val registerUserCmdReads: Reads[RegisterUserCmd] =
     Json.reads[RegisterUserCmd]
