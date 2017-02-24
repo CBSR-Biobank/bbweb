@@ -160,6 +160,7 @@ class SpecimensProcessor @Inject() (
                                   locationId       = LocationId(info.getLocationId),
                                   containerId      = None,
                                   positionId       = None,
+                                  timeAdded        = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
                                   timeCreated      = ISODateTimeParser.parseDateTime(info.getTimeCreated),
                                   amount           = BigDecimal(info.getAmount))
           }

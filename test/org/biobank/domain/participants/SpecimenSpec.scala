@@ -18,6 +18,7 @@ class SpecimenSpec extends DomainFreeSpec {
                           inventoryId      = specimen.inventoryId,
                           specimenSpecId   = specimen.specimenSpecId,
                           version          = specimen.version,
+                          timeAdded        = DateTime.now,
                           timeCreated      = specimen.timeCreated,
                           originLocationId = specimen.originLocationId,
                           locationId       = specimen.locationId,

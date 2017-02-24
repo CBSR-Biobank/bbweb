@@ -79,15 +79,15 @@ object Participant extends ParticipantValidations {
              id:          ParticipantId,
              version:     Long,
              uniqueId:    String,
-             annotations: Set[Annotation])
+             annotations: Set[Annotation],
+             timeAdded:   DateTime)
       : DomainValidation[Participant] = {
     (validateId(id) |@|
        validateId(studyId) |@|
        validateVersion(version) |@|
        validateString(uniqueId, UniqueIdRequired) |@|
        annotations.toList.traverseU(Annotation.validate)) {
-      case (_, _, _, _, _) =>
-        Participant(id, studyId, version, DateTime.now, None, uniqueId, annotations)
+      case _ => Participant(id, studyId, version, timeAdded, None, uniqueId, annotations)
     }
   }
 

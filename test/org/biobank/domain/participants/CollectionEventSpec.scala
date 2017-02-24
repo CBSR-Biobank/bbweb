@@ -18,6 +18,7 @@ class CollectionEventSpec extends DomainFreeSpec {
                            participantId          = collectionEvent.participantId,
                            collectionEventTypeId  = collectionEvent.collectionEventTypeId,
                            version                = collectionEvent.version,
+                           timeAdded              = DateTime.now,
                            timeCompleted          = collectionEvent.timeCompleted,
                            visitNumber            = collectionEvent.visitNumber,
                            annotations            = collectionEvent.annotations)

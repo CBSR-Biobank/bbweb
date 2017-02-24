@@ -92,7 +92,8 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
                                               participantId,
                                               0L,
                                               cmd.uniqueId,
-                                              cmd.annotations.toSet)
+                                              cmd.annotations.toSet,
+                                              DateTime.now)
     } yield ParticipantEvent(newParticipant.id.id).update(
       _.userId            := cmd.userId,
       _.time              := ISODateTimeFormat.dateTime.print(DateTime.now),
@@ -178,7 +179,8 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
                                  id           = ParticipantId(event.id),
                                  version      = 0L,
                                  uniqueId     = addedEvent.getUniqueId,
-                                 annotations  = addedEvent.annotations.map(annotationFromEvent).toSet)
+                                 annotations  = addedEvent.annotations.map(annotationFromEvent).toSet,
+                                 timeAdded    = ISODateTimeFormat.dateTime.parseDateTime(event.getTime))
 
       if (v.isFailure) {
         log.error(s"could not add collection event from event: $v, $event")

@@ -252,6 +252,7 @@ object UsableSpecimen
              locationId:       LocationId,
              containerId:      Option[ContainerId],
              positionId:       Option[ContainerSchemaPositionId],
+             timeAdded:        DateTime,
              timeCreated:      DateTime,
              amount:           BigDecimal)
       : DomainValidation[UsableSpecimen] = {
@@ -269,7 +270,7 @@ object UsableSpecimen
                                inventoryId,
                                specimenSpecId,
                                version,
-                               DateTime.now,
+                               timeAdded,
                                None,
                                originLocationId,
                                locationId,

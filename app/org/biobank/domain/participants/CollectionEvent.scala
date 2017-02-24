@@ -96,6 +96,7 @@ object CollectionEvent
              participantId:         ParticipantId,
              collectionEventTypeId: CollectionEventTypeId,
              version:               Long,
+             timeAdded:             DateTime,
              timeCompleted:         DateTime,
              visitNumber:           Int,
              annotations:           Set[Annotation])
@@ -110,7 +111,7 @@ object CollectionEvent
                                                  participantId,
                                                  collectionEventTypeId,
                                                  version,
-                                                 DateTime.now,
+                                                 timeAdded,
                                                  None,
                                                  timeCompleted,
                                                  visitNumber,

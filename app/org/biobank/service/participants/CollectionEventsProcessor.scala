@@ -110,6 +110,7 @@ class CollectionEventsProcessor @Inject() (
                                                      participantId,
                                                      collectionEventTypeId,
                                                      0L,
+                                                     DateTime.now,
                                                      cmd.timeCompleted,
                                                      cmd.visitNumber,
                                                      annotationsSet)
@@ -253,6 +254,7 @@ class CollectionEventsProcessor @Inject() (
           collectionEventTypeId = CollectionEventTypeId(event.getCollectionEventTypeId),
           participantId         = ParticipantId(event.getParticipantId),
           version               = 0L,
+          timeAdded             = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
           timeCompleted         = ISODateTimeParser.parseDateTime(addedEvent.getTimeCompleted),
           visitNumber           = addedEvent.getVisitNumber,
           annotations           = addedEvent.annotations.map { annotationFromEvent(_) }.toSet)
@@ -261,9 +263,7 @@ class CollectionEventsProcessor @Inject() (
         log.error(s"could not add collection event from event: $v, $event")
       }
 
-      v.foreach { ce =>
-        collectionEventRepository.put(ce)
-      }
+      v.foreach { ce => collectionEventRepository.put(ce) }
     }
   }
 

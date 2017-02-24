@@ -18,7 +18,8 @@ class ParticipantSpec extends DomainFreeSpec {
                        studyId      = participant.studyId,
                        version      = participant.version,
                        uniqueId     = participant.uniqueId,
-                       annotations  = participant.annotations)
+                       annotations  = participant.annotations,
+                       timeAdded    = DateTime.now)
 
   "A participant" - {
 
