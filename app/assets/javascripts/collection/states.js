@@ -183,6 +183,30 @@ define(['lodash'], function(_) {
         data: {
           displayName: 'Visit # {{ collectionEvent.visitNumber }}'
         }
+      })
+      .state('home.collection.study.participant.cevents.details.specimen', {
+        url: '/{inventoryId}',
+        resolve: {
+          specimen: resolveSpecimen
+        },
+        views: {
+          'main@': {
+            template: [
+              '<specimen-view',
+              '  study="vm.study"',
+              '  participant="vm.participant"',
+              '  collection-event-type="vm.collectionEventType"',
+              '  collection-event="vm.collectionEvent"',
+              '  specimen="vm.specimen">',
+              '</specimen-view>'
+            ].join(''),
+            controller: CeventSpecimenCtrl,
+            controllerAs: 'vm'
+          }
+        },
+        data: {
+          displayName: '{{specimen.inventoryId}}'
+        }
       });
 
     resolveStudyCounts.$inject = ['StudyCounts'];
@@ -267,7 +291,12 @@ define(['lodash'], function(_) {
           }
           return deferred.promise;
         });
+    }
 
+    resolveSpecimen.$inject = [ '$stateParams', 'Specimen' ];
+
+    function resolveSpecimen($stateParams, Specimen) {
+      return Specimen.getByInventoryId($stateParams.inventoryId);
     }
 
     CollectionCtrl.$inject = [ 'studyCounts', 'centreCounts' ];
@@ -329,16 +358,21 @@ define(['lodash'], function(_) {
       'collectionEvent'
     ];
 
+    function findCollectionEventType(collectionEventTypes, id) {
+      var collectionEventType = _.find(collectionEventTypes, { id: id });
+      if (_.isUndefined(collectionEventType)) {
+        throw new Error('could not find collection event type');
+      }
+      return collectionEventType;
+    }
+
     function CeventAddCtrl($stateParams, study, participant, collectionEventTypes, collectionEvent) {
       this.study = study;
       this.participant = participant;
       this.collectionEvent = collectionEvent;
 
-      this.collectionEventType = _.find(collectionEventTypes,
-                                      { id: $stateParams.collectionEventTypeId});
-      if (_.isUndefined(this.collectionEventType)) {
-        throw new Error('could not find collection event type');
-      }
+      this.collectionEventType = findCollectionEventType(collectionEventTypes,
+                                                         $stateParams.collectionEventTypeId);
     }
 
     CeventDetailsCtrl.$inject = [
@@ -351,6 +385,24 @@ define(['lodash'], function(_) {
       this.study = study;
       this.collectionEventTypes = collectionEventTypes;
       this.collectionEvent = collectionEvent;
+    }
+
+    CeventSpecimenCtrl.$inject = [
+      'study',
+      'participant',
+      'collectionEventTypes',
+      'collectionEvent',
+      'specimen'
+    ];
+
+    function CeventSpecimenCtrl(study, participant, collectionEventTypes, collectionEvent, specimen) {
+      this.study           = study;
+      this.participant     = participant;
+      this.collectionEvent = collectionEvent;
+      this.specimen        = specimen;
+
+      this.collectionEventType = findCollectionEventType(collectionEventTypes,
+                                                         collectionEvent.collectionEventTypeId);
     }
   }
 

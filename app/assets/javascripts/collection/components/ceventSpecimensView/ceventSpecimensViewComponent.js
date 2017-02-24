@@ -17,6 +17,7 @@ define(function () {
 
   CeventSpecimensViewController.$inject = [
     '$q',
+    '$state',
     'gettextCatalog',
     'Specimen',
     'Centre',
@@ -29,6 +30,7 @@ define(function () {
    *
    */
   function CeventSpecimensViewController($q,
+                                         $state,
                                          gettextCatalog,
                                          Specimen,
                                          Centre,
@@ -104,7 +106,8 @@ define(function () {
     }
 
     function viewSpecimen(specimen) {
-
+      $state.go('home.collection.study.participant.cevents.details.specimen',
+                { inventoryId: specimen.inventoryId });
     }
 
     function removeSpecimen(specimen) {

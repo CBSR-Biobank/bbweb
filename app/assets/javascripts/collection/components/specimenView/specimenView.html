@@ -1,0 +1,125 @@
+<div class="page-header">
+  <h1>
+    {{vm.study.name}}
+    <small>
+      <translate>Participant</translate> {{vm.participant.uniqueId}}:
+      <translate>Specimen</translate> {{vm.specimen.inventoryId}}
+    </small>
+  </h1>
+</div>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title" translate>Specimen {{vm.specimen.inventoryId}}</h3>
+  </div>
+
+  <ul class="list-group">
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong translate>Study</strong>
+        </div>
+        <div class="col-md-7">
+          {{vm.study.name}}
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong translate>Participant ID</strong>
+        </div>
+        <div class="col-md-7">
+          {{vm.participant.uniqueId}}
+        </div>
+        <div class="col-md-2">
+          <!--
+
+          TODO: moving a specimen to another patient needs to be implemented
+
+          <button class="btn btn-xs btn-primary pull-right"
+                  title="{{'Update participant'|translate}}"
+                  ng-click="vm.editParticipant()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+          -->
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong translate>Visit</strong>
+        </div>
+        <div class="col-md-7">
+          {{vm.collectionEventType.name}}
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong translate>Specimen Type</strong>
+        </div>
+        <div class="col-md-7">
+          {{vm.specimenSpec.name}}
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong translate>Created</strong>
+        </div>
+        <div class="col-md-7">
+          {{vm.specimen.timeCreated | localTime}}
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong translate>Amount</strong>
+        </div>
+        <div class="col-md-7">
+          {{vm.specimen.amount}} {{vm.specimenSpec.units}}
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong translate>State</strong>
+        </div>
+        <div class="col-md-7">
+          {{vm.specimen.state}}
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong translate>Origin location</strong>
+        </div>
+        <div class="col-md-7">
+          {{vm.specimen.originLocationInfo.name}}
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong translate>Current location</strong>
+        </div>
+        <div class="col-md-7">
+          {{vm.specimen.locationInfo.name}}
+        </div>
+      </div>
+    </li>
+  </ul>
+  <status-line item="vm.specimen"></status-line>
+</div>
+<div class="row">
+  <div class="col-md-1">
+    <button class="btn btn-primary" ng-click="vm.back()" translate>Back</button>
+  </div>
+</div>

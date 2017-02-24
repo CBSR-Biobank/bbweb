@@ -16,6 +16,11 @@ define(function (require) {
 
     .config(require('./states'))
 
+    .component('ceventSpecimensView',
+               require('./components/ceventSpecimensView/ceventSpecimensViewComponent'))
+
+    .component('specimenView',        require('./components/specimenView/specimenViewComponent'))
+
     .service('specimenAddModal',      require('./services/specimenAddModal/specimenAddModalService'))
 
     .directive('collection',          require('./directives/collection/collectionDirective'))
@@ -33,10 +38,7 @@ define(function (require) {
     .directive('ceventView',          require('./directives/ceventView/ceventViewDirective'))
     .directive('ceventsAddAndSelect',
                require('./directives/ceventsAddAndSelect/ceventsAddAndSelectDirective'))
-    .directive('ceventsList',         require('./directives/ceventsList/ceventsListDirective'))
-
-    .component('ceventSpecimensView',
-               require('./components/ceventSpecimensView/ceventSpecimensViewComponent'));
+    .directive('ceventsList',         require('./directives/ceventsList/ceventsListDirective'));
 
   return {
     name: name,
