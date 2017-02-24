@@ -14,7 +14,7 @@ define(['angular'], function(angular) {
 
   function config($urlRouterProvider, $stateProvider) {
 
-    $urlRouterProvider.otherwise('/index');
+    $urlRouterProvider.otherwise('/#');
 
     $stateProvider
       .state('home', {
