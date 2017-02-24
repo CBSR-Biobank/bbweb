@@ -9,33 +9,34 @@ define(function (require) {
 
   var angular = require('angular'),
       name = 'biobank.collection',
-      specimenAddModule = require('./specimenAdd/specimenAddModule'),
       module;
 
-  module = angular.module(name, [
-    'biobank.users',
-    specimenAddModule.name
-  ]);
+  module = angular
+    .module(name, [ 'biobank.users' ])
 
-  module.config(require('./states'));
+    .config(require('./states'))
 
-  module.directive('collection',          require('./directives/collection/collectionDirective'));
-  module.directive('selectStudy',         require('./directives/selectStudy/selectStudyDirective'));
+    .service('specimenAddModal',      require('./services/specimenAddModal/specimenAddModalService'))
 
-  module.directive('participantAdd',      require('./directives/participantAdd/participantAddDirective'));
-  module.directive('participantGet',      require('./directives/participantGet/participantGetDirective'));
-  module.directive('participantSummary',
-                   require('./directives/participantSummary/participantSummaryDirective'));
-  module.directive('participantView',     require('./directives/participantView/participantViewDirective'));
+    .directive('collection',          require('./directives/collection/collectionDirective'))
+    .directive('selectStudy',         require('./directives/selectStudy/selectStudyDirective'))
 
-  module.directive('ceventAdd',           require('./directives/ceventAdd/ceventAddDirective'));
-  module.directive('ceventGetType',       require('./directives/ceventGetType/ceventGetTypeDirective'));
-  module.directive('ceventView',          require('./directives/ceventView/ceventViewDirective'));
-  module.directive('ceventsAddAndSelect',
-                   require('./directives/ceventsAddAndSelect/ceventsAddAndSelectDirective'));
-  module.directive('ceventsList',         require('./directives/ceventsList/ceventsListDirective'));
+    .directive('participantAdd',      require('./directives/participantAdd/participantAddDirective'))
+    .directive('participantGet',      require('./directives/participantGet/participantGetDirective'))
+    .directive('participantSummary',
+               require('./directives/participantSummary/participantSummaryDirective'))
 
-  module.component('ceventSpecimensView',     require('./components/ceventSpecimensView/ceventSpecimensViewComponent'));
+    .directive('participantView',     require('./directives/participantView/participantViewDirective'))
+
+    .directive('ceventAdd',           require('./directives/ceventAdd/ceventAddDirective'))
+    .directive('ceventGetType',       require('./directives/ceventGetType/ceventGetTypeDirective'))
+    .directive('ceventView',          require('./directives/ceventView/ceventViewDirective'))
+    .directive('ceventsAddAndSelect',
+               require('./directives/ceventsAddAndSelect/ceventsAddAndSelectDirective'))
+    .directive('ceventsList',         require('./directives/ceventsList/ceventsListDirective'))
+
+    .component('ceventSpecimensView',
+               require('./components/ceventSpecimensView/ceventSpecimensViewComponent'));
 
   return {
     name: name,

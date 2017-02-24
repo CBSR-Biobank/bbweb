@@ -59,8 +59,7 @@ define(function (require) {
             compare: function(actual, expected) {
               var modalDomEls = actual.find('body > div.modal'),
                   pass        = util.equals(modalDomEls.length, expected, customEqualityTesters),
-                  message     = sprintf('Expected "%s" %s have "%s" modals opened.',
-                                        angular.mock.dump(modalDomEls),
+                  message     = sprintf('Expected document %s have "%s" modals opened.',
                                         pass ? 'not to' : 'to',
                                         expected);
 

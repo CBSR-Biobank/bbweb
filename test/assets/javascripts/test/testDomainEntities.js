@@ -236,9 +236,7 @@ define(['angular', 'lodash', 'moment'], function(angular, _, moment) {
       };
 
       NumberAnnotation.prototype.compareToJsonEntity = function (serverEntity) {
-        if (_.isNull(serverEntity.numberValue)) {
-          expect(this.value).toBeNaN();
-        } else {
+        if (serverEntity.numberValue) {
           expect(this.value.toString()).toEqual(serverEntity.numberValue.toString());
         }
       };

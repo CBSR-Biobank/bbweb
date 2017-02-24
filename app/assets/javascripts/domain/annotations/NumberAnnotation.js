@@ -17,7 +17,7 @@ define(['lodash'], function(_) {
       Annotation.call(this, obj, annotationType);
 
       // convert number to a float
-      if (!_.isUndefined(obj.numberValue) && (obj.numberValue.length > 0)) {
+      if (obj.numberValue && (obj.numberValue.length > 0)) {
         this.value = parseFloat(obj.numberValue);
       }
 
