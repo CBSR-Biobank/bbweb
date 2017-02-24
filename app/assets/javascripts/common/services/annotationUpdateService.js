@@ -55,7 +55,7 @@ define(['lodash'], function (_) {
       } else if (annotation instanceof NumberAnnotation) {
         return modalInput.number(title,
                                  annotation.annotationType.name,
-                                 annotation.numberValue,
+                                 annotation.getValue(),
                                  { required: annotation.required }
         ).result.then(assignNewValue);
       } else if (annotation instanceof SingleSelectAnnotation) {

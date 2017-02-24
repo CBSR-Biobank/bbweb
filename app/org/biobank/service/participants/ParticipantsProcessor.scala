@@ -40,14 +40,16 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
    */
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveRecover: Receive = {
-    case event: ParticipantEvent => event.eventType match {
-      case et: EventType.Added             => applyAddedEvent(event)
-      case et: EventType.UniqueIdUpdated   => applyUniqueIdUpdatedEvent(event)
-      case et: EventType.AnnotationAdded   => applyAnnotationAddedEvent(event)
-      case et: EventType.AnnotationRemoved => applyAnnotationRemovedEvent(event)
+    case event: ParticipantEvent =>
+      log.info(s"PrticipantsProcessor: $event")
+      event.eventType match {
+        case et: EventType.Added             => applyAddedEvent(event)
+        case et: EventType.UniqueIdUpdated   => applyUniqueIdUpdatedEvent(event)
+        case et: EventType.AnnotationAdded   => applyAnnotationAddedEvent(event)
+        case et: EventType.AnnotationRemoved => applyAnnotationRemovedEvent(event)
 
-      case event => log.error(s"event not handled: $event")
-    }
+        case event => log.error(s"event not handled: $event")
+      }
 
     case SnapshotOffer(_, snapshot: SnapshotState) =>
       snapshot.participants.foreach{ participant => participantRepository.put(participant) }

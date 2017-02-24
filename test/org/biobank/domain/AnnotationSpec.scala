@@ -70,6 +70,26 @@ class AnnotationSpec extends DomainSpec {
       }
     }
 
+    "when number value is empty" in {
+      val annotationTypeId = nameGenerator.next[String]
+      val stringValue      = None
+      val numberValue      = Some("")
+      val selectedValues   = Set.empty[String]
+
+      val v = Annotation.create(annotationTypeId = annotationTypeId,
+                                stringValue      = stringValue,
+                                numberValue      = numberValue,
+                                selectedValues   = selectedValues)
+      v mustSucceed { annotation =>
+        annotation must have (
+          'annotationTypeId  (annotationTypeId),
+          'stringValue       (stringValue),
+          'numberValue       (numberValue),
+          'selectedValues    (selectedValues)
+        )
+      }
+    }
+
   }
 
   "not be created" when {
@@ -88,14 +108,6 @@ class AnnotationSpec extends DomainSpec {
                                 numberValue      = None,
                                 selectedValues   = Set.empty)
       v mustFail "NonEmptyStringOption"
-    }
-
-    "number value is empty" in {
-      val v = Annotation.create(annotationTypeId = nameGenerator.next[String],
-                         stringValue      = None,
-                                numberValue      = Some(""),
-                                selectedValues   = Set.empty)
-      v mustFail "InvalidNumberString"
     }
 
     "number value is not a number string" in {

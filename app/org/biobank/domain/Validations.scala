@@ -45,13 +45,17 @@ object CommonValidations {
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def validateNumberString(str: String): DomainValidation[String] = {
-    for {
-      valid <- validateString(str, InvalidNumberString)
-      number <- {
-        catching[String](classOf[NumberFormatException]).opt(str.toFloat)
-          .toSuccessNel(InvalidNumberString.toString)
-      }
-    } yield valid
+    if (str.isEmpty) {
+      str.successNel[String]
+    } else {
+      for {
+        valid <- validateString(str, 0, InvalidNumberString)
+        number <- {
+          catching[String](classOf[NumberFormatException]).opt(str.toFloat)
+            .toSuccessNel(InvalidNumberString.toString)
+        }
+      } yield valid
+    }
   }
 
   def validateNumberStringOption(maybeString: Option[String]): DomainValidation[Option[String]] = {

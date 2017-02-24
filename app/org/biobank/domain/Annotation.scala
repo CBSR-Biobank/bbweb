@@ -49,9 +49,9 @@ object Annotation {
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validate(annotationTypeId: String,
-               stringValue:            Option[String],
-               numberValue:            Option[String],
-               selectedValues:         Set[String])
+               stringValue:      Option[String],
+               numberValue:      Option[String],
+               selectedValues:   Set[String])
       : DomainValidation[Boolean] = {
 
     def validateAnnotationOption(opt: String) = {

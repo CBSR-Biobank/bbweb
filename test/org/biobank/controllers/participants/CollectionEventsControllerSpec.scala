@@ -567,7 +567,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "add a collection event with annotation types" in {
+      "add a collection event with annotations" in {
         createEntities { (study, participant, ceventType) =>
           val annotTypes = createAnnotationsAndTypes
           val annotations = annotTypes.values.toList
@@ -592,6 +592,34 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
                 x.annotationTypeId == jsonAnnotationTypeId)
             annotation mustBe defined
             compareAnnotation(jsonAnnotation, annotation.value)
+          }
+        }
+      }
+
+      "be able to add a collection event with an empty, non required, number annotation" in {
+        createEntities { (study, participant, ceventType) =>
+          val annotType = factory
+            .createAnnotationType(AnnotationValueType.Number, None, Seq.empty)
+            .copy(required = false)
+          val annotation = factory.createAnnotation.copy(numberValue = Some(""))
+
+          log.info(s"----------------> $annotation")
+
+          collectionEventTypeRepository.put(ceventType.copy(annotationTypes = Set(annotType)))
+
+          val cevent = factory.createCollectionEvent
+          val json = makeRequest(POST,
+                                 uri(participant),
+                                 collectionEventToAddJson(cevent, List(annotation)))
+
+          (json \ "status").as[String] must include ("success")
+
+          (json \ "data" \ "annotations").as[List[JsObject]] must have size 1
+          val jsonAnnotations = (json \ "data" \ "annotations").as[List[JsObject]]
+          jsonAnnotations must have size 1
+
+          jsonAnnotations.foreach { jsonAnnotation =>
+            compareAnnotation(jsonAnnotation, annotation)
           }
         }
       }

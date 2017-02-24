@@ -17,7 +17,7 @@ define(['lodash'], function(_) {
       Annotation.call(this, obj, annotationType);
 
       // convert number to a float
-      if (!_.isUndefined(obj.numberValue)) {
+      if (!_.isUndefined(obj.numberValue) && (obj.numberValue.length > 0)) {
         this.value = parseFloat(obj.numberValue);
       }
 
@@ -31,14 +31,7 @@ define(['lodash'], function(_) {
     };
 
     NumberAnnotation.prototype.getServerAnnotation = function () {
-      var value;
-
-      if (!_.isUndefined(this.value) && !_.isNaN(this.value)) {
-        value = this.value.toString();
-      } else {
-        value = '';
-      }
-
+      var value = (this.value) ? this.value.toString() : '';
       return {
         annotationTypeId: this.getAnnotationTypeId(),
         numberValue:      value,
@@ -47,7 +40,15 @@ define(['lodash'], function(_) {
     };
 
     NumberAnnotation.prototype.isValueValid = function () {
-      return !(_.isNaN(this.value) || _.isUndefined(this.value));
+      if (this.required) {
+        return !(_.isNaN(this.value) || _.isUndefined(this.value));
+      }
+
+      if (_.isUndefined(this.value)) {
+        return true;
+      }
+
+      return ! _.isNaN(this.value);
     };
 
     return NumberAnnotation;
