@@ -37,7 +37,7 @@ define(function () {
 
     //----
 
-    function submit(user) {
+    function submit() {
       vm.user.register(vm.password)
         .then(registerSuccess)
         .catch(registerFailure);

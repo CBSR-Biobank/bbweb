@@ -8,7 +8,7 @@ import org.biobank.domain.PredicateHelper
 import org.biobank.domain.centre.{ShipmentItemState, ShipmentSpecimen, ShipmentSpecimenPredicates}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 /**
  * Functions that filter a set of shipment specimens from an expression contained in a filter string.
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 object ShipmentSpecimenFilter extends PredicateHelper with ShipmentSpecimenPredicates {
   import org.biobank.CommonValidations._
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   def filterShipmentSpecimens(shipmentSpecimens: Set[ShipmentSpecimen],
                               filter:            FilterString):ServiceValidation[Set[ShipmentSpecimen]] = {

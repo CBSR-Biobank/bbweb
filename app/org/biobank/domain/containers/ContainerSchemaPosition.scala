@@ -8,7 +8,7 @@ import scalaz.Scalaz._
 
 trait ContainerSchemaPositionValidations {
 
-  val LabelMinLength = 2L
+  val LabelMinLength: Long = 2L
 
   case object InvalidContainerSchemaId extends ValidationKey
 

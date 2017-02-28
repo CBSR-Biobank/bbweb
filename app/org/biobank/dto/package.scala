@@ -1,7 +1,7 @@
 package org.biobank
 
+import org.biobank.domain.EntityState
 import org.biobank.domain.centre.Shipment
-import org.biobank.domain.participants.SpecimenState._
 import org.biobank.infrastructure.JsonUtils._
 import org.joda.time.DateTime
 import play.api.libs.json._
@@ -19,7 +19,7 @@ package dto {
   final case class NameDto(id: String, name: String, state: String)
 
   object NameDto {
-    def compareByName(a: NameDto, b: NameDto) = (a.name compareToIgnoreCase b.name) < 0
+    def compareByName(a: NameDto, b: NameDto): Boolean = (a.name compareToIgnoreCase b.name) < 0
 
     implicit val nameDtoWriter: Writes[NameDto] = Json.writes[NameDto]
   }
@@ -77,7 +77,7 @@ package dto {
   }
 
   final case class SpecimenDto(id:                 String,
-                               state:              SpecimenState,
+                               state:              EntityState,
                                inventoryId:        String,
                                collectionEventId:  String,
                                specimenSpecId:     String,
@@ -117,7 +117,8 @@ package dto {
 
   object ShipmentDto {
 
-    val sort2Compare = Map[String, (ShipmentDto, ShipmentDto) => Boolean](
+    val sort2Compare: Map[String, (ShipmentDto, ShipmentDto) => Boolean] =
+      Map[String, (ShipmentDto, ShipmentDto) => Boolean](
         "courierName"      -> compareByCourier,
         "trackingNumber"   -> compareByTrackingNumber,
         "state"            -> compareByState,
@@ -129,7 +130,7 @@ package dto {
                fromLocationInfo: CentreLocationInfo,
                toLocationInfo:   CentreLocationInfo,
                specimenCount:    Int,
-               containerCount:   Int) =
+               containerCount:   Int): ShipmentDto =
       ShipmentDto(id               = shipment.id.id,
                   version          = shipment.version,
                   timeAdded        = shipment.timeAdded,
@@ -146,19 +147,19 @@ package dto {
                   containerCount   = containerCount,
                   state            = shipment.state.id)
 
-    def compareByCourier(a: ShipmentDto, b: ShipmentDto) =
+    def compareByCourier(a: ShipmentDto, b: ShipmentDto): Boolean =
       (a.courierName compareToIgnoreCase b.courierName) < 0
 
-    def compareByTrackingNumber(a: ShipmentDto, b: ShipmentDto) =
+    def compareByTrackingNumber(a: ShipmentDto, b: ShipmentDto): Boolean =
       (a.trackingNumber compareToIgnoreCase b.trackingNumber) < 0
 
-    def compareByState(a: ShipmentDto, b: ShipmentDto) =
+    def compareByState(a: ShipmentDto, b: ShipmentDto): Boolean =
       (a.state.toString compareToIgnoreCase b.state.toString) < 0
 
-    def compareByFromLocation(a: ShipmentDto, b: ShipmentDto) =
+    def compareByFromLocation(a: ShipmentDto, b: ShipmentDto): Boolean =
       (a.fromLocationInfo.name compareToIgnoreCase b.fromLocationInfo.name) < 0
 
-    def compareByToLocation(a: ShipmentDto, b: ShipmentDto) =
+    def compareByToLocation(a: ShipmentDto, b: ShipmentDto): Boolean =
       (a.toLocationInfo.name compareToIgnoreCase b.toLocationInfo.name) < 0
 
     implicit val shipmentDtoWriter: Writes[ShipmentDto] = Json.writes[ShipmentDto]
@@ -176,21 +177,23 @@ package dto {
 
   object ShipmentSpecimenDto {
 
-    val sort2Compare = Map[String, (ShipmentSpecimenDto, ShipmentSpecimenDto) => Boolean](
+    val sort2Compare: Map[String, (ShipmentSpecimenDto, ShipmentSpecimenDto) => Boolean] =
+      Map[String, (ShipmentSpecimenDto, ShipmentSpecimenDto) => Boolean](
         "inventoryId" -> compareByInventoryId,
         "state"       -> compareByState,
         "specName"    -> compareBySpecName,
         "timeCreated" -> compareByTimeCreated)
 
-    def compareByInventoryId(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto) =
+    def compareByInventoryId(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto): Boolean =
       (a.specimen.inventoryId compareTo b.specimen.inventoryId) < 0
 
-    def compareByState(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto) = (a.state compareTo b.state) < 0
+    def compareByState(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto): Boolean =
+      (a.state compareTo b.state) < 0
 
-    def compareBySpecName(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto) =
+    def compareBySpecName(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto): Boolean =
       (a.specimen.specimenSpecName compareTo b.specimen.specimenSpecName) < 0
 
-    def compareByTimeCreated(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto) =
+    def compareByTimeCreated(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto): Boolean =
       (a.specimen.timeCreated compareTo b.specimen.timeCreated) < 0
 
     implicit val shipmentSpecimenDtoWriter: Writes[ShipmentSpecimenDto] = Json.writes[ShipmentSpecimenDto]

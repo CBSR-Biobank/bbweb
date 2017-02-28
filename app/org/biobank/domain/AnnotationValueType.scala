@@ -10,10 +10,10 @@ import play.api.libs.json._
 object AnnotationValueType extends Enumeration {
 
   type AnnotationValueType = Value
-  val Text     = Value("text")
-  val Number   = Value("number")
-  val DateTime = Value("datetime")
-  val Select   = Value("select")
+  val Text: Value     = Value("text")
+  val Number: Value   = Value("number")
+  val DateTime: Value = Value("datetime")
+  val Select: Value   = Value("select")
 
   implicit val annotationValueTypeFormat: Format[AnnotationValueType] =
     enumFormat(AnnotationValueType)

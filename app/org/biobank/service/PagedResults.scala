@@ -1,7 +1,7 @@
 package org.biobank.service
 
 import play.api.libs.json._
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import scalaz.Scalaz._
 
 /**
@@ -18,15 +18,14 @@ import scalaz.Scalaz._
   * https://github.com/pvillega/Play-Modules/blob/master/app/models/Pagination.scala
   */
 final case class PagedResults[+T](items: Seq[T], page: Int, limit: Int, offset: Long, total: Long) {
-  lazy val prev = Option(page - 1).filter(_ > 0)
-  lazy val next = Option(page + 1).filter(_ => (offset + items.size) < total)
-  lazy val maxPages = (total.toDouble/limit).ceil.toInt
+  lazy val prev: Option[Int] = Option(page - 1).filter(_ > 0)
+  lazy val next: Option[Int] = Option(page + 1).filter(_ => (offset + items.size) < total)
+  lazy val maxPages: Int = (total.toDouble/limit).ceil.toInt
 }
-
 
 object PagedResults {
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   def create[T](items: Seq[T], page: Int, limit: Int): ServiceValidation[PagedResults[T]]= {
     if (items.isEmpty) {
@@ -56,7 +55,7 @@ object PagedResults {
 
   implicit def pagedResultsWrites[T](implicit fmt: Writes[T]) : Writes[PagedResults[T]] =
     new Writes[PagedResults[T]] {
-      def writes(pr: PagedResults[T]) = Json.obj(
+      def writes(pr: PagedResults[T]): JsValue = Json.obj(
         "items"           -> pr.items,
         "page"            -> pr.page,
         "offset"          -> pr.offset,

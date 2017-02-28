@@ -21,7 +21,7 @@ import scalaz.Validation.FlatMap._
 
 object ShipmentsProcessor {
 
-  def props = Props[ShipmentsProcessor]
+  def props: Props = Props[ShipmentsProcessor]
 
 }
 
@@ -38,12 +38,12 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     with ShipmentConstraints {
   import org.biobank.CommonValidations._
 
-  override def persistenceId = "shipments-processor-id"
+  override def persistenceId: String = "shipments-processor-id"
 
   case class SnapshotState(shipments: Set[Shipment],
                            shipmentSpecimens: Set[ShipmentSpecimen])
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveRecover: Receive = {
     case event: ShipmentEvent => event.eventType match {
       case et: ShipmentEvent.EventType.Added                  => applyAddedEvent(event)
@@ -84,7 +84,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     case RecoveryCompleted =>
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveCommand: Receive = {
 
     case cmd: AddShipmentCmd =>

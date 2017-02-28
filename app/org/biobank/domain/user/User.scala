@@ -5,6 +5,7 @@ import org.biobank.domain._
 import org.biobank.infrastructure.EnumUtils._
 import org.joda.time.DateTime
 import play.api.libs.json._
+import scala.util.matching.Regex
 import scalaz.Scalaz._
 
 /**
@@ -54,7 +55,7 @@ sealed trait User extends ConcurrencySafeEntity[UserId] with HasState with HasNa
     else DomainError("authentication failure").failureNel[User]
   }
 
-  override def toString =
+  override def toString: String =
     s"""|${this.getClass.getSimpleName}: {
         |  id: $id,
         |  version: $version,
@@ -77,7 +78,7 @@ object User {
 
   @SuppressWarnings(Array("org.wartremover.warts.Option2Iterable"))
   implicit val userWrites: Writes[User] = new Writes[User] {
-    def writes(user: User) = {
+    def writes(user: User): JsValue = {
       ConcurrencySafeEntity.toJson(user) ++
       Json.obj("state"        -> user.state.id,
                "name"         -> user.name,
@@ -88,21 +89,23 @@ object User {
     }
   }
 
-  val sort2Compare = Map[String, (User, User) => Boolean](
+  val sort2Compare: Map[String, (User, User) => Boolean] =
+    Map[String, (User, User) => Boolean](
       "name"  -> compareByName,
       "email" -> compareByEmail,
       "state" -> compareByState)
 
   // users with duplicate emails are not allowed
-  def compareByEmail(a: User, b: User) = (a.email compareToIgnoreCase b.email) < 0
+  def compareByEmail(a: User, b: User): Boolean =
+    (a.email compareToIgnoreCase b.email) < 0
 
-  def compareByName(a: User, b: User) = {
+  def compareByName(a: User, b: User): Boolean = {
     val nameCompare = a.name compareToIgnoreCase b.name
     if (nameCompare == 0) compareByEmail(a, b)
     else nameCompare < 0
   }
 
-  def compareByState(a: User, b: User) = {
+  def compareByState(a: User, b: User): Boolean = {
     val stateCompare = a.state.toString compare b.state.toString
     if (stateCompare == 0) compareByName(a, b)
     else stateCompare < 0
@@ -110,7 +113,7 @@ object User {
 }
 
 trait UserValidations {
-  val NameMinLength = 2L
+  val NameMinLength: Long = 2L
 
   case object PasswordRequired extends ValidationKey
 
@@ -122,8 +125,11 @@ trait UserValidations {
 
   case object InvalidUrl extends ValidationKey
 
-  val emailRegex = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?".r
-  val urlRegex = "^((https?|ftp)://|(www|ftp)\\.)[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?$".r
+  val emailRegex: Regex =
+    "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?".r
+
+  val urlRegex: Regex =
+    "^((https?|ftp)://|(www|ftp)\\.)[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?$".r
 
   def validateEmail(email: String): DomainValidation[String] = {
     emailRegex.findFirstIn(email).fold { InvalidEmail.failureNel[String] } { e => email.successNel }
@@ -155,7 +161,7 @@ final case class RegisteredUser(id:           UserId,
                                 password:     String,
                                 salt:         String,
                                 avatarUrl:    Option[String])
-    extends { val state = new EntityState("registered") }
+    extends { val state: EntityState = new EntityState("registered") }
     with User
     with UserValidations {
 
@@ -211,7 +217,7 @@ final case class ActiveUser(id:           UserId,
                             password:     String,
                             salt:         String,
                             avatarUrl:    Option[String])
-    extends { val state = new EntityState("active") }
+    extends { val state: EntityState = new EntityState("active") }
     with User
     with UserValidations {
   import CommonValidations._
@@ -270,7 +276,7 @@ final case class LockedUser(id:           UserId,
                             password:     String,
                             salt:         String,
                             avatarUrl:    Option[String])
-    extends { val state = new EntityState("locked") }
+    extends { val state: EntityState = new EntityState("locked") }
     with User {
 
   /** Unlocks a locked user. */

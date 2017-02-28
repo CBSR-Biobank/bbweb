@@ -14,15 +14,15 @@ import scalaz.Scalaz._
 object Comparator extends Enumeration {
   type Comparator = Value
 
-  val LessThan             = Value(":lt:")
-  val GreaterThan          = Value(":gt:")
-  val LessThanOrEqualTo    = Value(":le:")
-  val GreaterThanOrEqualTo = Value(":ge:")
-  val In                   = Value(":in:")
-  val NotIn                = Value(":out:")
-  val NotEqualTo           = Value(":ne:")
-  val Equal                = Value("::")
-  val Like                 = Value(":like:")
+  val LessThan: Value             = Value(":lt:")
+  val GreaterThan: Value          = Value(":gt:")
+  val LessThanOrEqualTo: Value    = Value(":le:")
+  val GreaterThanOrEqualTo: Value = Value(":ge:")
+  val In: Value                   = Value(":in:")
+  val NotIn: Value                = Value(":out:")
+  val NotEqualTo: Value           = Value(":ne:")
+  val Equal: Value                = Value("::")
+  val Like: Value                 = Value(":like:")
 }
 
 import Comparator._
@@ -36,38 +36,38 @@ object QueryFilterParserGrammar {
   trait Expression
 
   final case class Value(name: String) extends Argument {
-    override def toString = s"Value: $name"
+    override def toString: String = s"Value: $name"
   }
 
   final case class Arguments(arguments: List[String]) extends Argument {
-    override def toString = "Arguments: '" + arguments.mkString(", ") + "'"
+    override def toString: String = "Arguments: '" + arguments.mkString(", ") + "'"
   }
 
   final case class Selector(name: String) {
-    override def toString = name
+    override def toString: String = name
   }
 
   final case class Comparison(selector:   String,
                               comparator: Comparator,
                               arguments:  List[String]) extends Expression {
-    override def toString =
+    override def toString: String =
       s"""Comparison: ($selector $comparator ${arguments.mkString(", ")})"""
   }
 
   final case class Constraint(expression: Expression) extends Expression {
-    override def toString = s"Constraint: ($expression)"
+    override def toString: String = s"Constraint: ($expression)"
   }
 
   final case class Group(orExpression: OrExpression) extends Expression {
-    override def toString = orExpression.toString
+    override def toString: String = orExpression.toString
   }
 
   final case class AndExpression(expressions: List[Expression]) extends Expression {
-    override def toString = "And: (" + expressions.mkString("; ") + ")"
+    override def toString: String = "And: (" + expressions.mkString("; ") + ")"
   }
 
   final case class OrExpression(expressions: List[Expression]) extends Expression {
-    override def toString = "Or: (" + expressions.mkString(", ") + ")"
+    override def toString: String = "Or: (" + expressions.mkString(", ") + ")"
   }
 
 }
@@ -75,23 +75,24 @@ object QueryFilterParserGrammar {
 object QueryFilterParser extends RegexParsers {
   import QueryFilterParserGrammar._
 
-  def comparisonOp = (Comparator.LessThan.toString ^^^ Comparator.LessThan
-                        | Comparator.GreaterThan.toString ^^^ Comparator.GreaterThan
-                        | Comparator.LessThanOrEqualTo.toString ^^^ Comparator.LessThanOrEqualTo
-                        | Comparator.GreaterThanOrEqualTo.toString ^^^ Comparator.GreaterThanOrEqualTo
-                        | Comparator.In.toString ^^^ Comparator.In
-                        | Comparator.NotIn.toString ^^^ Comparator.NotIn
-                        | Comparator.NotEqualTo.toString ^^^ Comparator.NotEqualTo
-                        | Comparator.Equal.toString ^^^ Comparator.Equal
-                        | Comparator.Like.toString ^^^ Comparator.Like)
+  def comparisonOp: Parser[Comparator.Value] =
+    (Comparator.LessThan.toString ^^^ Comparator.LessThan
+       | Comparator.GreaterThan.toString ^^^ Comparator.GreaterThan
+       | Comparator.LessThanOrEqualTo.toString ^^^ Comparator.LessThanOrEqualTo
+       | Comparator.GreaterThanOrEqualTo.toString ^^^ Comparator.GreaterThanOrEqualTo
+       | Comparator.In.toString ^^^ Comparator.In
+       | Comparator.NotIn.toString ^^^ Comparator.NotIn
+       | Comparator.NotEqualTo.toString ^^^ Comparator.NotEqualTo
+       | Comparator.Equal.toString ^^^ Comparator.Equal
+       | Comparator.Like.toString ^^^ Comparator.Like)
 
-  def singleQuotedValue =
+  def singleQuotedValue: Parser[Value] =
     """'[^\"\(\);,=!~<>]*'""".r ^^ { case v => Value(v.substring(1, v.size - 1))}
 
-  def doubleQuotedValue =
+  def doubleQuotedValue: Parser[Value] =
     """\"[^'\(\);,=!~<>]*\"""".r ^^ { case v => Value(v.substring(1, v.size - 1))}
 
-  def unquotedValue =
+  def unquotedValue: Parser[Value] =
     """[^\(\);,=!~<>]+""".r ^^ { case v => Value(v) }
 
   def value: Parser[Value] =
@@ -133,7 +134,7 @@ object QueryFilterParser extends RegexParsers {
       else OrExpression(l)
     }
 
-  def apply(filter: FilterString) = parseAll(or, filter.expression) match {
+  def apply(filter: FilterString): Option[Expression] = parseAll(or, filter.expression) match {
       case Success(result, _) => Some(result)
       case NoSuccess(_, _) => None
     }

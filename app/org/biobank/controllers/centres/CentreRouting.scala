@@ -18,7 +18,7 @@ object CentreRouting {
     (key: String, e: Exception) => s"$key is not a valid shipment Id"
   )
 
-  val centreId   = new PathBindableExtractor[CentreId]
-  val shipmentId = new PathBindableExtractor[ShipmentId]
+  val centreId: PathBindableExtractor[CentreId]   = new PathBindableExtractor[CentreId]
+  val shipmentId: PathBindableExtractor[ShipmentId] = new PathBindableExtractor[ShipmentId]
 
 }

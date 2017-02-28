@@ -28,7 +28,7 @@ class ParticipantRepositoryImpl
 
   def nextIdentity: ParticipantId = new ParticipantId(nextIdentityAsString)
 
-  def notFound(id: ParticipantId) = IdNotFound(s"participant id: $id")
+  def notFound(id: ParticipantId): IdNotFound = IdNotFound(s"participant id: $id")
 
   override def getByKey(id: ParticipantId): DomainValidation[Participant] = {
     getMap.get(id).toSuccessNel(notFound(id).toString)

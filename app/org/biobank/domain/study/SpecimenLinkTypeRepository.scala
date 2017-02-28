@@ -26,7 +26,7 @@ class SpecimenLinkTypeRepositoryImpl
 
   def nextIdentity: SpecimenLinkTypeId = new SpecimenLinkTypeId(nextIdentityAsString)
 
-  def notFound(id: SpecimenLinkTypeId) = IdNotFound(s"specimen link type id: $id")
+  def notFound(id: SpecimenLinkTypeId): IdNotFound = IdNotFound(s"specimen link type id: $id")
 
   override def getByKey(id: SpecimenLinkTypeId): DomainValidation[SpecimenLinkType] = {
     getMap.get(id).toSuccessNel(notFound(id).toString)

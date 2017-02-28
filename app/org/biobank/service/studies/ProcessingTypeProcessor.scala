@@ -12,7 +12,7 @@ import scalaz.Validation.FlatMap._
 
 object ProcessingTypeProcessor {
 
-  def props = Props[ProcessingTypeProcessor]
+  def props: Props = Props[ProcessingTypeProcessor]
 
 }
 
@@ -31,7 +31,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
   import org.biobank.infrastructure.event.StudyEventsUtil._
   import StudyEventOld.EventType
 
-  override def persistenceId = "processing-type-processor-id"
+  override def persistenceId: String = "processing-type-processor-id"
 
   case class SnapshotState(processingTypes: Set[ProcessingType])
 
@@ -39,7 +39,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
     * These are the events that are recovered during journal recovery. They cannot fail and must be
     * processed to recreate the current state of the aggregate.
     */
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveRecover: Receive = {
     case event: StudyEventOld => event.eventType match {
       case et: EventType.ProcessingTypeAdded   => applyProcessingTypeAddedEvent(event)
@@ -60,7 +60,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
     * These are the commands that are requested. A command can fail, and will send the failure as a response
     * back to the user. Each valid command generates one or more events and is journaled.
     */
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveCommand: Receive = {
     case cmd: AddProcessingTypeCmd    => processAddProcessingTypeCmd(cmd)
     case cmd: UpdateProcessingTypeCmd => processUpdateProcessingTypeCmd(cmd)
@@ -188,7 +188,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
     }
   }
 
-  val ErrMsgNameExists = "processing type with name already exists"
+  val ErrMsgNameExists: String = "processing type with name already exists"
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   private def nameAvailable(name: String, studyId: StudyId): ServiceValidation[Boolean] = {

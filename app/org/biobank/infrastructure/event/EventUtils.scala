@@ -1,25 +1,16 @@
 package org.biobank.infrastructure.event
 
 import org.biobank.infrastructure.command.SpecimenCommands.SpecimenInfo
-import org.biobank.infrastructure.event.CommonEvents. {
-  AnnotationType => EventAnnotationType
-}
+import org.biobank.infrastructure.event.CommonEvents.{AnnotationType => EventAnnotationType}
 import org.biobank.infrastructure.event.CollectionEventTypeEvents._
 import org.biobank.infrastructure.event.SpecimenEvents._
-import org.biobank.domain.{
-  AnnotationType,
-  AnnotationValueType,
-  AnatomicalSourceType,
-  PreservationType,
-  PreservationTemperatureType,
-  SpecimenType
-}
+import org.biobank.domain.{AnatomicalSourceType, AnnotationType, AnnotationValueType, PreservationTemperatureType, PreservationType, SpecimenType}
 import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
 import org.biobank.domain.study.CollectionSpecimenSpec
 import org.biobank.domain.participants.SpecimenId
 import org.biobank.domain.centre.ShipmentSpecimen
 import org.joda.time._
-import org.joda.time.format.ISODateTimeFormat
+import org.joda.time.format.{DateTimeFormatter, ISODateTimeFormat}
 
 object EventUtils {
 
@@ -116,7 +107,7 @@ object EventUtils {
     )
   }
 
-  lazy val ISODateTimeFormatter    = ISODateTimeFormat.dateTime.withZone(DateTimeZone.UTC)
-  lazy val ISODateTimeParser       = ISODateTimeFormat.dateTimeParser
+  lazy val ISODateTimeFormatter: DateTimeFormatter = ISODateTimeFormat.dateTime.withZone(DateTimeZone.UTC)
+  lazy val ISODateTimeParser: DateTimeFormatter = ISODateTimeFormat.dateTimeParser
 
 }

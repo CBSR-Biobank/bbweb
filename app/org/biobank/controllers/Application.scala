@@ -8,7 +8,6 @@ import org.biobank.service.studies.StudiesService
 import org.biobank.service.users.UsersService
 import play.api.Environment
 import play.api.mvc._
-import scala.language.reflectiveCalls
 
 /**
   * Controller for the main page, and also the about and contact us pages.
@@ -26,12 +25,12 @@ class Application @Inject() (val action:                BbwebAction,
     with Security
     with JsonController {
 
-  def index = Action {
+  def index: Action[AnyContent] = Action {
     // does not return a JSON object, but HTML content
     Results.Ok(views.html.index())
   }
 
-  def aggregateCounts = action(parse.empty) { implicit request =>
+  def aggregateCounts: Action[Unit] = action(parse.empty) { implicit request =>
     Ok(AggregateCountsDto(
       studiesService.getStudyCount,
       centresService.getCentresCount,

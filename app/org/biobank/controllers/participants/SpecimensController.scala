@@ -8,11 +8,12 @@ import org.biobank.service.participants.SpecimensService
 import org.biobank.service.users.UsersService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
+import play.api.mvc.Action
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
+@SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
 class SpecimensController @Inject() (val action:       BbwebAction,
                                      val env:          Environment,
@@ -24,24 +25,24 @@ class SpecimensController @Inject() (val action:       BbwebAction,
     with JsonController {
   import org.biobank.infrastructure.command.SpecimenCommands._
 
-  val log = Logger(this.getClass)
+  val log: Logger = Logger(this.getClass)
 
   private val PageSizeMax = 10
 
   /**
    * Returns the specimen with the given ID.
    */
-  def get(id: SpecimenId) =
+  def get(id: SpecimenId): Action[Unit] =
     action(parse.empty) { implicit request =>
       validationReply(service.get(id))
     }
 
-  def getByInventoryId(invId: String) =
+  def getByInventoryId(invId: String): Action[Unit] =
     action(parse.empty) { implicit request =>
       validationReply(service.getByInventoryId(invId))
     }
 
-  def list(ceventId: CollectionEventId) =
+  def list(ceventId: CollectionEventId): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       Future {
         val validation = for {
@@ -58,13 +59,13 @@ class SpecimensController @Inject() (val action:       BbwebAction,
       }
     }
 
-  def addSpecimens(ceventId: CollectionEventId) =
+  def addSpecimens(ceventId: CollectionEventId): Action[JsValue] =
     commandActionAsync(Json.obj("collectionEventId" -> ceventId)) { cmd: AddSpecimensCmd =>
       val future = service.processCommand(cmd)
       validationReply(future)
     }
 
-  def removeSpecimen(ceventId: CollectionEventId, spcId: SpecimenId, ver: Long) =
+  def removeSpecimen(ceventId: CollectionEventId, spcId: SpecimenId, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       val cmd = RemoveSpecimenCmd(
           userId                = request.authInfo.userId.id,

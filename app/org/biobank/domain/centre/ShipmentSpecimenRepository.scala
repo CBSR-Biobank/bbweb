@@ -27,12 +27,12 @@ class ShipmentSpecimenRepositoryImpl
 
   def nextIdentity: ShipmentSpecimenId = new ShipmentSpecimenId(nextIdentityAsString)
 
-  def notFound(id: ShipmentSpecimenId) = IdNotFound(s"shipment specimen id: $id")
+  def notFound(id: ShipmentSpecimenId): IdNotFound = IdNotFound(s"shipment specimen id: $id")
 
-  def shipmentAndSpecimenNotFound(shipmentId: ShipmentId, specimenId: SpecimenId) =
+  def shipmentAndSpecimenNotFound(shipmentId: ShipmentId, specimenId: SpecimenId): IdNotFound =
     IdNotFound(s"shipment id: $shipmentId, specimen id: $specimenId")
 
-  def specimenNotFound(specimen: Specimen) =
+  def specimenNotFound(specimen: Specimen): String =
     EntityCriteriaError(s"shipment specimen with inventory ID not found: ${specimen.inventoryId}").toString
 
 

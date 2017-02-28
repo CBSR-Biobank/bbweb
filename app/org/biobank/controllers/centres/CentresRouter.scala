@@ -8,6 +8,7 @@ import play.api.routing.sird._
 class CentresRouter @Inject()(controller: CentresController) extends SimpleRouter {
   import CentreRouting._
 
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   override def routes: Routes = {
 
     // --- CENTRE LOCATIONS ---

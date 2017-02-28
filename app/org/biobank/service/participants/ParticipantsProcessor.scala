@@ -16,7 +16,7 @@ import scalaz.Validation.FlatMap._
 
 object ParticipantsProcessor {
 
-  def props = Props[ParticipantsProcessor]
+  def props: Props = Props[ParticipantsProcessor]
 
 }
 
@@ -30,7 +30,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
   import ParticipantEvent.EventType
   import org.biobank.infrastructure.event.EventUtils._
 
-  override def persistenceId = "participant-processor-id"
+  override def persistenceId: String = "participant-processor-id"
 
   case class SnapshotState(participants: Set[Participant])
 
@@ -38,7 +38,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
    * These are the events that are recovered during journal recovery. They cannot fail and must be
    * processed to recreate the current state of the aggregate.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveRecover: Receive = {
     case event: ParticipantEvent =>
       log.info(s"PrticipantsProcessor: $event")
@@ -59,7 +59,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
    * These are the commands that are requested. A command can fail, and will send the failure as a response
    * back to the user. Each valid command generates one or more events and is journaled.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveCommand: Receive = {
     case cmd: AddParticipantCmd =>
       process(addCmdToEvent(cmd))(applyAddedEvent)
@@ -80,7 +80,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
     case cmd => log.error(s"ParticipantsProcessor: message not handled: $cmd")
   }
 
-  val ErrMsgUniqueIdExists = "participant with unique ID already exists"
+  val ErrMsgUniqueIdExists: String = "participant with unique ID already exists"
 
   private def addCmdToEvent(cmd: AddParticipantCmd): ServiceValidation[ParticipantEvent] = {
     for {

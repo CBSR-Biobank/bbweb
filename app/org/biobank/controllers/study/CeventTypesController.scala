@@ -7,9 +7,10 @@ import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.service.AuthToken
 import org.biobank.service.studies.StudiesService
 import org.biobank.service.users.UsersService
-import play.api.Logger
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
+import play.api.mvc.{Action, Result}
+import scala.concurrent.Future
 
 @Singleton
 class CeventTypesController @Inject() (val action:         BbwebAction,
@@ -20,9 +21,9 @@ class CeventTypesController @Inject() (val action:         BbwebAction,
     extends CommandController
     with JsonController {
 
-  val log = Logger(this.getClass)
+  val log: Logger = Logger(this.getClass)
 
-  def get(studyId: StudyId, ceventTypeId: Option[CollectionEventTypeId]) =
+  def get(studyId: StudyId, ceventTypeId: Option[CollectionEventTypeId]): Action[Unit] =
     action(parse.empty) { implicit request =>
       log.debug(s"CeventTypeController.list: studyId: $studyId, ceventTypeId: $ceventTypeId")
 
@@ -33,40 +34,39 @@ class CeventTypesController @Inject() (val action:         BbwebAction,
       }
     }
 
-  def add(studyId: StudyId) =
+  def add(studyId: StudyId): Action[JsValue] =
     commandActionAsync(Json.obj("studyId" -> studyId)) {
       cmd: AddCollectionEventTypeCmd => processCommand(cmd) }
 
-  def remove(studyId: StudyId,
-             id: CollectionEventTypeId,
-             ver: Long) =
+  def remove(studyId: StudyId, id: CollectionEventTypeId, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       val cmd = RemoveCollectionEventTypeCmd(Some(request.authInfo.userId.id), studyId.id, id.id, ver)
       val future = studiesService.processRemoveCollectionEventTypeCommand(cmd)
       validationReply(future)
   }
 
-  def updateName(id: CollectionEventTypeId) =
+  def updateName(id: CollectionEventTypeId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) {
       cmd: UpdateCollectionEventTypeNameCmd => processCommand(cmd) }
 
-  def updateDescription(id: CollectionEventTypeId) =
+  def updateDescription(id: CollectionEventTypeId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) {
       cmd: UpdateCollectionEventTypeDescriptionCmd => processCommand(cmd) }
 
-  def updateRecurring(id: CollectionEventTypeId) =
+  def updateRecurring(id: CollectionEventTypeId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) {
       cmd: UpdateCollectionEventTypeRecurringCmd => processCommand(cmd) }
 
-  def addAnnotationType(id: CollectionEventTypeId) =
+  def addAnnotationType(id: CollectionEventTypeId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) {
         cmd: CollectionEventTypeAddAnnotationTypeCmd => processCommand(cmd) }
 
-  def updateAnnotationType(id: CollectionEventTypeId, uniqueId: String) =
+  def updateAnnotationType(id: CollectionEventTypeId, uniqueId: String): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id, "uniqueId" -> uniqueId)) {
         cmd: CollectionEventTypeUpdateAnnotationTypeCmd => processCommand(cmd) }
 
-  def removeAnnotationType(studyId: StudyId, id: CollectionEventTypeId, ver: Long, uniqueId: String) =
+  def removeAnnotationType(studyId: StudyId, id: CollectionEventTypeId, ver: Long, uniqueId: String)
+      : Action[Unit]=
     action.async(parse.empty) { implicit request =>
       val cmd = RemoveCollectionEventTypeAnnotationTypeCmd(
           userId                = Some(request.authInfo.userId.id),
@@ -77,15 +77,16 @@ class CeventTypesController @Inject() (val action:         BbwebAction,
       processCommand(cmd)
     }
 
-  def addSpecimenSpec(id: CollectionEventTypeId) =
+  def addSpecimenSpec(id: CollectionEventTypeId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) {
       cmd: AddCollectionSpecimenSpecCmd => processCommand(cmd) }
 
-  def updateSpecimenSpec(id: CollectionEventTypeId, uniqueId: String) =
+  def updateSpecimenSpec(id: CollectionEventTypeId, uniqueId: String): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id, "uniqueId" -> uniqueId)) {
       cmd: UpdateCollectionSpecimenSpecCmd => processCommand(cmd) }
 
-  def removeSpecimenSpec(studyId: StudyId, id: CollectionEventTypeId, ver: Long, uniqueId: String) =
+  def removeSpecimenSpec(studyId: StudyId, id: CollectionEventTypeId, ver: Long, uniqueId: String)
+      : Action[Unit]=
     action.async(parse.empty) { implicit request =>
       val cmd = RemoveCollectionSpecimenSpecCmd(
           userId                = Some(request.authInfo.userId.id),
@@ -96,12 +97,12 @@ class CeventTypesController @Inject() (val action:         BbwebAction,
       processCommand(cmd)
     }
 
-  def inUse(id: CollectionEventTypeId) =
+  def inUse(id: CollectionEventTypeId): Action[Unit] =
     action(parse.empty) { implicit request =>
       validationReply(studiesService.collectionEventTypeInUse(id))
     }
 
-  private def processCommand(cmd: CollectionEventTypeCommand) = {
+  private def processCommand(cmd: CollectionEventTypeCommand): Future[Result] = {
     val future = studiesService.processCollectionEventTypeCommand(cmd)
     validationReply(future)
   }

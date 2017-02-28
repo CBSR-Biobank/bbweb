@@ -22,7 +22,7 @@ object CommonValidations {
   case object NonEmptyStringOption extends ValidationKey
 
   case object InvalidNumberString extends ValidationKey {
-      override val toString = "InvalidNumberString"
+      override val toString: String = "InvalidNumberString"
     }
 
   case object CentreIdRequired extends ValidationKey

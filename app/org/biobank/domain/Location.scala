@@ -3,7 +3,7 @@ package org.biobank.domain
 import play.api.libs.json._
 
 final case class LocationId(val id: String) extends AnyVal {
-  override def toString = id
+  override def toString: String = id
 }
 
 
@@ -63,7 +63,7 @@ object Location {
              province:       String,
              postalCode:     String,
              poBoxNumber:    Option[String],
-             countryIsoCode: String) = {
+             countryIsoCode: String): DomainValidation[Location] = {
     validate(name, street, city, province, postalCode, poBoxNumber,countryIsoCode).map { _ =>
       val uniqueId = LocationId(java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase)
       Location(uniqueId, name, street, city, province, postalCode, poBoxNumber, countryIsoCode)

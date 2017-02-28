@@ -35,7 +35,7 @@ sealed trait Study
   /** The annotation types associated with participants of this study. */
   val annotationTypes: Set[AnnotationType]
 
-  override def toString =
+  override def toString: String =
     s"""|${this.getClass.getSimpleName}: {
         |  id:              $id,
         |  version:         $version,
@@ -51,22 +51,23 @@ sealed trait Study
 
 object Study {
 
-  val disabledState = new EntityState("disabled")
-  val enabledState = new EntityState("enabled")
-  val retiredState = new EntityState("retired")
+  val disabledState: EntityState = new EntityState("disabled")
+  val enabledState: EntityState  = new EntityState("enabled")
+  val retiredState: EntityState  = new EntityState("retired")
 
   val studyStates: List[EntityState] = List(disabledState,
                                             enabledState,
                                             retiredState)
 
 
-  val sort2Compare = Map[String, (Study, Study) => Boolean](
+  val sort2Compare: Map[String, (Study, Study) => Boolean] =
+    Map[String, (Study, Study) => Boolean](
       "name"  -> compareByName,
       "state" -> compareByState)
 
   @SuppressWarnings(Array("org.wartremover.warts.Option2Iterable"))
   implicit val studyWrites: Writes[Study] = new Writes[Study] {
-      def writes(study: Study) = {
+      def writes(study: Study): JsValue = {
         ConcurrencySafeEntity.toJson(study) ++
         Json.obj("state"           -> study.state.id,
                  "name"            -> study.name,
@@ -78,9 +79,10 @@ object Study {
 
     }
 
-  def compareByName(a: Study, b: Study) = (a.name compareToIgnoreCase b.name) < 0
+  def compareByName(a: Study, b: Study): Boolean =
+    (a.name compareToIgnoreCase b.name) < 0
 
-  def compareByState(a: Study, b: Study) = {
+  def compareByState(a: Study, b: Study): Boolean = {
     val stateCompare = a.state.id compare b.state.id
     if (stateCompare == 0) compareByName(a, b)
     else stateCompare < 0
@@ -89,7 +91,7 @@ object Study {
 
 trait StudyValidations {
 
-  val NameMinLength = 2L
+  val NameMinLength: Long = 2L
 
   case object InvalidStudyId extends ValidationKey
 
@@ -113,7 +115,7 @@ final case class DisabledStudy(id:                         StudyId,
                                name:                       String,
                                description:                Option[String],
                                annotationTypes: Set[AnnotationType])
-    extends { val state = Study.disabledState }
+    extends { val state: EntityState = Study.disabledState }
     with Study
     with StudyValidations
     with AnnotationTypeValidations
@@ -227,7 +229,7 @@ final case class EnabledStudy(id:                         StudyId,
                               name:                       String,
                               description:                Option[String],
                               annotationTypes: Set[AnnotationType])
-    extends { val state = Study.enabledState }
+    extends { val state: EntityState = Study.enabledState }
     with Study {
 
   def disable(): DomainValidation[DisabledStudy] = {
@@ -254,7 +256,7 @@ final case class RetiredStudy(id:                         StudyId,
                               name:                       String,
                               description:                Option[String],
                               annotationTypes: Set[AnnotationType])
-    extends { val state = Study.retiredState }
+    extends { val state: EntityState = Study.retiredState }
     with Study {
 
   def unretire(): DomainValidation[DisabledStudy] = {

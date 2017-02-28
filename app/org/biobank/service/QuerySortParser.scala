@@ -14,11 +14,11 @@ import scala.util.parsing.combinator.RegexParsers
 object QuerySortParserGrammar {
 
   final case class Selector(name: String) {
-    override def toString = name
+    override def toString: String = name
   }
 
   final case class SortExpression(name: String, order: SortOrder) {
-    override def toString = s"$name, $order"
+    override def toString: String = s"$name, $order"
   }
 
 }

@@ -16,7 +16,7 @@ import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.service.participants.SpecimensService
 import org.biobank.service._
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -85,7 +85,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
     extends ShipmentsService
     with ShipmentConstraints {
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   implicit val timeout: Timeout = 5.seconds
 

@@ -30,9 +30,16 @@ object StudiesRouting {
     (key: String, e: Exception) => s"$key is not a valid study Id"
   )
 
-  val studyId      = new PathBindableExtractor[StudyId]
-  val ceventTypeId = new PathBindableExtractor[CollectionEventTypeId]
-  val procTypeId   = new PathBindableExtractor[ProcessingTypeId]
-  val slTypeId     = new PathBindableExtractor[SpecimenLinkTypeId]
+  val studyId: PathBindableExtractor[StudyId] =
+    new PathBindableExtractor[StudyId]
+
+  val ceventTypeId: PathBindableExtractor[CollectionEventTypeId] =
+    new PathBindableExtractor[CollectionEventTypeId]
+
+  val procTypeId: PathBindableExtractor[ProcessingTypeId] =
+    new PathBindableExtractor[ProcessingTypeId]
+
+  val slTypeId: PathBindableExtractor[SpecimenLinkTypeId] =
+    new PathBindableExtractor[SpecimenLinkTypeId]
 
 }

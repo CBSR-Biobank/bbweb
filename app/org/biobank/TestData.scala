@@ -17,7 +17,7 @@ import scalaz.Scalaz._
  */
 object TestData {
 
-  val centreData = List(
+  val centreData: List[Tuple2[String, String]] = List(
       ("CL1-Foothills", "CL1-Foothills"),
       ("CL1-Heritage", "CL1-Heritage"),
       ("CL1-Sunridge", "CL1-Sunridge"),
@@ -62,7 +62,7 @@ object TestData {
       ("KIDNI CL1", "KIDNI Calgary")
     )
 
-  val studyData = List(
+  val studyData: List[Tuple2[String, String]] = List(
       ("AHFEM", "Acute Heart Failure-Emergency Management"),
       ("AKI", "Acute Kidney Injury"),
       ("Asthma", "Asthma"),
@@ -111,7 +111,7 @@ object TestData {
       ("iGenoMed", "iGenoMed")
     )
 
-  val userData = List(
+  val userData: List[Tuple2[String, String]] = List(
       ("Nelson Loyola", "loyola@ualberta.ca"),
       ("Luisa Franco", "lfrancor@ucalgary.ca"),
       ("Corazon Oballo", "coballo@ucalgary.ca"),
@@ -146,7 +146,7 @@ object TestData {
       ("Paivi Koski", "paivi.koski@ppshp.fi")
     )
 
-  val ahfemDescription =
+  val ahfemDescription: String =
     s"""|Magnis turpis mollis. Duis commodo libero. Turpis magnis massa morbi cras non mollis, maecenas
         |dictumst venenatis augue, rhoncus id non eros nec odio. Ut wisi ullamcorper elit parturient,
         |venenatis libero et, pellentesque sed, purus erat nonummy diam. Hendrerit porro lobortis.
@@ -186,7 +186,7 @@ class TestData @Inject() (config:                        Configuration,
 
   import TestData._
 
-  val log = Logger(this.getClass)
+  val log: Logger = Logger(this.getClass)
 
   private val loadTestData =
     (env.mode == Mode.Dev) && config.getBoolean("application.testData.load").getOrElse(false)
@@ -197,7 +197,7 @@ class TestData @Inject() (config:                        Configuration,
   private val loadShipmentTestData =
     (env.mode == Mode.Dev) && config.getBoolean("application.testData.loadShipments").getOrElse(false)
 
-  def addMultipleUsers() = {
+  def addMultipleUsers(): Unit = {
     if (loadTestData) {
       log.debug("addMultipleUsers")
 
@@ -226,7 +226,7 @@ class TestData @Inject() (config:                        Configuration,
     if (loadTestData) {
       log.debug("addMultipleCentres")
 
-      val hashids = Hashids("test-data-centres")
+      val hashids: Hashids = Hashids("test-data-centres")
 
       centreData.zipWithIndex.foreach { case ((name, description), index) =>
         val centre: Centre = DisabledCentre(
@@ -367,7 +367,7 @@ class TestData @Inject() (config:                        Configuration,
     }
   }
 
-  def getBbpspSpecimenSpecs() = {
+  def getBbpspSpecimenSpecs(): Set[CollectionSpecimenSpec] = {
     val hashids = Hashids("bbpsp-specimen-specs")
 
     Set(CollectionSpecimenSpec(
@@ -441,7 +441,7 @@ class TestData @Inject() (config:                        Configuration,
     )
   }
 
-  def getBbpspParticipantAnnotationTypes() = {
+  def getBbpspParticipantAnnotationTypes(): Set[AnnotationType] = {
     val hashids = Hashids("bbpsp-participant-annotation-types")
 
     Set(AnnotationType(
@@ -462,7 +462,7 @@ class TestData @Inject() (config:                        Configuration,
           required      = true))
   }
 
-  def getBbpspCeventAnnotationTypes() = {
+  def getBbpspCeventAnnotationTypes(): Set[AnnotationType] = {
     val hashids = Hashids("bbpsp-collection-event-annotation-types")
 
     Set(AnnotationType(
@@ -483,7 +483,7 @@ class TestData @Inject() (config:                        Configuration,
           required      = true))
   }
 
-  def addBbpspParticipants() = {
+  def addBbpspParticipants(): Unit = {
     if (loadSpecimenTestData) {
       log.debug("addBbpspParticipants")
 
@@ -507,7 +507,7 @@ class TestData @Inject() (config:                        Configuration,
     }
   }
 
-  def addBbpspCevents() = {
+  def addBbpspCevents(): Unit = {
     if (loadSpecimenTestData) {
       val hashids = Hashids("bbpsp-collection-events")
 
@@ -540,7 +540,7 @@ class TestData @Inject() (config:                        Configuration,
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.TraversableOps"))
-  def addBbpspSpecimens() = {
+  def addBbpspSpecimens(): Unit = {
 
     def addSpecimen(id:           SpecimenId,
                     inventoryId:  String,
@@ -610,7 +610,7 @@ class TestData @Inject() (config:                        Configuration,
   @SuppressWarnings(Array("org.wartremover.warts.MutableDataStructures",
                           "org.wartremover.warts.Var",
                           "org.wartremover.warts.TraversableOps"))
-  def addBbpspShipments() = {
+  def addBbpspShipments(): Unit = {
     if (loadShipmentTestData) {
       log.debug(s"addBbpspShipments")
 

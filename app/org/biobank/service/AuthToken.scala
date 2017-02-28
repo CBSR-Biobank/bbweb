@@ -6,6 +6,7 @@ import org.biobank.domain.user.UserId
 import play.api.Environment
 import play.api.cache.CacheApi
 import scala.concurrent.duration._
+import scala.util.Random
 import scalaz.Scalaz._
 
 /**
@@ -33,9 +34,9 @@ class AuthTokenImpl @Inject() (val env: Environment, val cacheApi: CacheApi)
     extends AuthToken {
   import org.biobank.CommonValidations._
 
-  val random = new scala.util.Random(new java.security.SecureRandom())
+  val random: Random = new Random(new java.security.SecureRandom())
 
-  val tokenExpirationTime =
+  val tokenExpirationTime: FiniteDuration =
     if (env.mode == play.api.Mode.Prod) 15.minutes
     else 60.minutes
   //else 5.seconds

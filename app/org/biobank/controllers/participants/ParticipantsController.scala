@@ -1,5 +1,6 @@
 package org.biobank.controllers.participants
 
+import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.study.StudyId
 import org.biobank.domain.participants.ParticipantId
@@ -7,10 +8,9 @@ import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.service.AuthToken
 import org.biobank.service.users.UsersService
 import org.biobank.service.participants._
-
-import javax.inject.{Inject, Singleton}
 import play.api.{ Environment, Logger }
 import play.api.libs.json._
+import play.api.mvc.Action
 
 @Singleton
 class ParticipantsController @Inject() (val action:              BbwebAction,
@@ -21,30 +21,30 @@ class ParticipantsController @Inject() (val action:              BbwebAction,
     extends CommandController
     with JsonController {
 
-  val log = Logger(this.getClass)
+  val log: Logger = Logger(this.getClass)
 
-  def get(studyId: StudyId, participantId: ParticipantId) =
+  def get(studyId: StudyId, participantId: ParticipantId): Action[Unit] =
     action(parse.empty) { implicit request =>
       log.debug(s"ParticipantsController.get: studyId: $studyId, participantId: $participantId")
       validationReply(participantsService.get(studyId, participantId))
     }
 
-  def getByUniqueId(studyId: StudyId, uniqueId: String) =
+  def getByUniqueId(studyId: StudyId, uniqueId: String): Action[Unit] =
     action(parse.empty) { implicit request =>
       log.debug(s"ParticipantsController.getByUniqueId: studyId: $studyId, uniqueId: $uniqueId")
       validationReply(participantsService.getByUniqueId(studyId, uniqueId))
     }
 
-  def add(studyId: StudyId) =
+  def add(studyId: StudyId): Action[JsValue] =
     commandActionAsync(Json.obj("studyId" -> studyId)) { cmd : AddParticipantCmd => processCommand(cmd) }
 
-  def updateUniqueId(id: ParticipantId) =
+  def updateUniqueId(id: ParticipantId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateParticipantUniqueIdCmd => processCommand(cmd) }
 
-  def addAnnotation(id: ParticipantId) =
+  def addAnnotation(id: ParticipantId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd: ParticipantAddAnnotationCmd => processCommand(cmd) }
 
-  def removeAnnotation(participantId: ParticipantId, annotTypeId: String, ver: Long) =
+  def removeAnnotation(participantId: ParticipantId, annotTypeId: String, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       val cmd = ParticipantRemoveAnnotationCmd(userId           = request.authInfo.userId.id,
                                                id               = participantId.id,

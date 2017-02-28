@@ -18,7 +18,7 @@ import scalaz.Validation.FlatMap._
 
 object StudiesProcessor {
 
-  def props = Props[StudiesProcessor]
+  def props: Props = Props[StudiesProcessor]
 
 }
 
@@ -43,13 +43,13 @@ class StudiesProcessor @javax.inject.Inject() (
     extends Processor {
   import org.biobank.CommonValidations._
 
-  override def persistenceId = "studies-processor-id"
+  override def persistenceId: String = "studies-processor-id"
 
   /**
    * These are the events that are recovered during journal recovery. They cannot fail and must be
    * processed to recreate the current state of the aggregate.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveRecover: Receive = {
     case event: StudyEvent => event.eventType match {
       case et: StudyEvent.EventType.Added                 => applyAddedEvent(event)
@@ -89,7 +89,9 @@ class StudiesProcessor @javax.inject.Inject() (
    *  - [[StudiesProcessor]]
    *  - [[StudyAnnotationTypeProcessor]]
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Throw"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any",
+                          "org.wartremover.warts.PublicInference",
+                          "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {
     case cmd: StudyCommandWithStudyId => validateAndForward(cmd)
     case cmd: SpecimenLinkTypeCommand => validateAndForward(cmd)
@@ -574,7 +576,7 @@ class StudiesProcessor @javax.inject.Inject() (
     }
   }
 
-  val ErrMsgNameExists = "name already used"
+  val ErrMsgNameExists: String = "name already used"
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   private def nameAvailable(name: String): ServiceValidation[Boolean] = {

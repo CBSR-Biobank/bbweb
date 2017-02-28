@@ -22,9 +22,9 @@ class SpecimenRepositoryImpl
 
   def nextIdentity: SpecimenId = new SpecimenId(nextIdentityAsString)
 
-  def notFound(id: SpecimenId) = IdNotFound(s"specimen id: $id")
+  def notFound(id: SpecimenId): IdNotFound = IdNotFound(s"specimen id: $id")
 
-  def inventoryIdCriteriaError(inventoryId: String) =
+  def inventoryIdCriteriaError(inventoryId: String): String =
     EntityCriteriaError(s"specimen with inventory ID not found: $inventoryId").toString
 
   override def getByKey(id: SpecimenId): DomainValidation[Specimen] = {

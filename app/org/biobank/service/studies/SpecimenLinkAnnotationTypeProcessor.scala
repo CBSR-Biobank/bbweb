@@ -16,7 +16,7 @@
 
 // object SpecimenLinkAnnotationTypeProcessor {
 
-//   def props = Props[SpecimenLinkAnnotationTypeProcessor]
+//   def props: Props = Props[SpecimenLinkAnnotationTypeProcessor]
 
 // }
 
@@ -36,7 +36,7 @@
 //   import org.biobank.infrastructure.event.StudyEventsUtil._
 //   import StudyEventOld.EventType
 
-//   override def persistenceId = "specimen-link-annotation-type-processor-id"
+//   override def persistenceId: String = "specimen-link-annotation-type-processor-id"
 
 //   case class SnapshotState(annotationTypes: Set[SpecimenLinkAnnotationType])
 

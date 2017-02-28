@@ -3,7 +3,7 @@ package org.biobank.domain
 import org.biobank.ValidationKey
 import play.api.libs.json._
 import play.api.libs.json.Reads._
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -32,7 +32,7 @@ final case class Annotation(annotationTypeId: String,
 object Annotation {
   import org.biobank.domain.CommonValidations._
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   case object AnnotationTypeIdRequired extends ValidationKey
 

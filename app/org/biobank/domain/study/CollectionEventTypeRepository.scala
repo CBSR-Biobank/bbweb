@@ -31,7 +31,7 @@ class CollectionEventTypeRepositoryImpl
 
   def nextIdentity: CollectionEventTypeId = new CollectionEventTypeId(nextIdentityAsString)
 
-  def notFound(id: CollectionEventTypeId) = IdNotFound(s"collection event type: $id")
+  def notFound(id: CollectionEventTypeId): IdNotFound = IdNotFound(s"collection event type: $id")
 
   override def getByKey(id: CollectionEventTypeId): DomainValidation[CollectionEventType] = {
     getMap.get(id).toSuccessNel(notFound(id).toString)

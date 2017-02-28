@@ -5,7 +5,7 @@ import org.biobank.domain._
 import org.biobank.infrastructure.JsonUtils._
 import org.biobank.ValidationKey
 import org.joda.time.DateTime
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import scalaz.Scalaz._
@@ -63,7 +63,7 @@ sealed trait Shipment
     with HasState {
   import org.biobank.CommonValidations._
 
-  protected val log = LoggerFactory.getLogger(this.getClass)
+  protected val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   val courierName:    String
   val trackingNumber: String
@@ -178,12 +178,12 @@ trait ShipmentValidations {
 
 object Shipment extends ShipmentValidations {
 
-  val createdState  = new EntityState("created")
-  val packedState   = new EntityState("packed")
-  val sentState     = new EntityState("sent")
-  val receivedState = new EntityState("received")
-  val unpackedState = new EntityState("unpacked")
-  val lostState     = new EntityState("lost")
+  val createdState: EntityState  = new EntityState("created")
+  val packedState: EntityState   = new EntityState("packed")
+  val sentState: EntityState     = new EntityState("sent")
+  val receivedState: EntityState = new EntityState("received")
+  val unpackedState: EntityState = new EntityState("unpacked")
+  val lostState: EntityState     = new EntityState("lost")
 
   val shipmentStates: List[EntityState] = List(createdState,
                                                packedState,
@@ -229,7 +229,7 @@ final case class CreatedShipment(id:             ShipmentId,
                                  timeSent:       Option[DateTime],
                                  timeReceived:   Option[DateTime],
                                  timeUnpacked:   Option[DateTime])
-    extends { val state = Shipment.createdState }
+    extends { val state: EntityState = Shipment.createdState }
     with Shipment
     with ShipmentValidations {
 
@@ -385,7 +385,7 @@ final case class PackedShipment(id:             ShipmentId,
                                 timeSent:       Option[DateTime],
                                 timeReceived:   Option[DateTime],
                                 timeUnpacked:   Option[DateTime])
-    extends { val state = Shipment.packedState }
+    extends { val state: EntityState = Shipment.packedState }
     with Shipment
     with ShipmentValidations {
 
@@ -450,7 +450,7 @@ final case class SentShipment(id:             ShipmentId,
                               timeSent:       Option[DateTime],
                               timeReceived:   Option[DateTime],
                               timeUnpacked:   Option[DateTime])
-    extends { val state = Shipment.sentState }
+    extends { val state: EntityState = Shipment.sentState }
     with Shipment
     with ShipmentValidations {
 
@@ -517,7 +517,7 @@ final case class SentShipment(id:             ShipmentId,
     }
   }
 
-  def lost() = {
+  def lost: LostShipment = {
     LostShipment(id             = this.id,
                  version        = this.version + 1,
                  timeAdded      = this.timeAdded,
@@ -549,7 +549,7 @@ final case class ReceivedShipment(id:             ShipmentId,
                                   timeSent:       Option[DateTime],
                                   timeReceived:   Option[DateTime],
                                   timeUnpacked:   Option[DateTime])
-    extends { val state = Shipment.receivedState }
+    extends { val state: EntityState = Shipment.receivedState }
     with Shipment
     with ShipmentValidations {
 
@@ -611,7 +611,7 @@ final case class UnpackedShipment(id:             ShipmentId,
                                   timeSent:       Option[DateTime],
                                   timeReceived:   Option[DateTime],
                                   timeUnpacked:   Option[DateTime])
-    extends { val state = Shipment.unpackedState }
+    extends { val state: EntityState = Shipment.unpackedState }
     with Shipment
     with ShipmentValidations {
 
@@ -648,6 +648,6 @@ final case class LostShipment(id:             ShipmentId,
                               timeSent:       Option[DateTime],
                               timeReceived:   Option[DateTime],
                               timeUnpacked:   Option[DateTime])
-    extends { val state = Shipment.lostState }
+    extends { val state: EntityState = Shipment.lostState }
     with Shipment
     with ShipmentValidations

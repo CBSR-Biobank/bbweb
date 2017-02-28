@@ -133,7 +133,7 @@ object CollectionSpecimenSpec extends SpecimenSpecValidations {
   implicit val collectionSpecimenSpecWrites: Writes[CollectionSpecimenSpec] =
     Json.writes[CollectionSpecimenSpec]
 
-  val hashidsSalt = "biobank-collection-event-types"
+  val hashidsSalt: String = "biobank-collection-event-types"
 
 
   def create(name:                        String,

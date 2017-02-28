@@ -9,7 +9,7 @@ import org.biobank.service.users._
 import play.api.libs.concurrent.AkkaGuiceSupport
 
 class AkkaModule extends AbstractModule with AkkaGuiceSupport {
-  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading", "org.wartremover.warts.PublicInference"))
   def configure() = {
 
     bindActor[CentresProcessor]("centresProcessor")

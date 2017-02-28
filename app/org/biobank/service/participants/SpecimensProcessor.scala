@@ -17,7 +17,7 @@ import scalaz.Validation.FlatMap._
 
 object SpecimensProcessor {
 
-  def props = Props[SpecimensProcessor]
+  def props: Props = Props[SpecimensProcessor]
 
 }
 
@@ -39,17 +39,17 @@ class SpecimensProcessor @Inject() (
   import org.biobank.infrastructure.event.EventUtils._
   import org.biobank.CommonValidations._
 
-  override def persistenceId = "specimens-processor-id"
+  override def persistenceId: String = "specimens-processor-id"
 
   case class SnapshotState(specimens: Set[Specimen])
 
-  def specimenSpecNotFound(id: String) = IdNotFound(s"collection specimen spec id: $id")
+  def specimenSpecNotFound(id: String): IdNotFound = IdNotFound(s"collection specimen spec id: $id")
 
   /**
    * These are the events that are recovered during journal recovery. They cannot fail and must be
    * processed to recreate the current state of the aggregate.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveRecover: Receive = {
     case event: SpecimenEvent => event.eventType match {
       case et: EventType.Added              => applyAddedEvent(event)
@@ -70,7 +70,7 @@ class SpecimensProcessor @Inject() (
    * These are the commands that are requested. A command can fail, and will send the failure as a response
    * back to the user. Each valid command generates one or more events and is journaled.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveCommand: Receive = {
     case cmd: AddSpecimensCmd =>
       process(addCmdToEvent(cmd))(applyAddedEvent)

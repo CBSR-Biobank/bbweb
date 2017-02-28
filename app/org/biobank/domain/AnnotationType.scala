@@ -187,7 +187,7 @@ object AnnotationType extends AnnotationTypeValidations {
              valueType:     AnnotationValueType,
              maxValueCount: Option[Int],
              options:       Seq[String],
-             required:      Boolean) = {
+             required:      Boolean): DomainValidation[AnnotationType] = {
     (validateString(name, NameRequired) |@|
        validateNonEmptyOption(description, InvalidDescription) |@|
        validateMaxValueCount(maxValueCount) |@|

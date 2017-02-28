@@ -28,7 +28,7 @@ class StudyRepositoryImpl
 
   def nextIdentity: StudyId = new StudyId(nextIdentityAsString)
 
-  def studyNotFound(id: StudyId) = IdNotFound(s"study id: $id")
+  def studyNotFound(id: StudyId): IdNotFound = IdNotFound(s"study id: $id")
 
   override def getByKey(id: StudyId): DomainValidation[Study] = {
     getMap.get(id).toSuccessNel(studyNotFound(id).toString)

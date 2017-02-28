@@ -15,8 +15,9 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
     (key: String, e: Exception) => s"$key is not a valid user Id"
   )
 
-  val userId = new PathBindableExtractor[UserId]
+  val userId: PathBindableExtractor[UserId] = new PathBindableExtractor[UserId]
 
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   override def routes: Routes = {
 
     case GET(p"/authenticate") =>

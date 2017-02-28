@@ -3,10 +3,9 @@ package org.biobank.domain.centre
 import com.google.inject.ImplementedBy
 import javax.inject.Singleton
 import org.biobank.domain._
+import org.slf4j.{Logger, LoggerFactory}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
-
-import org.slf4j.LoggerFactory
 
 @ImplementedBy(classOf[ShipmentRepositoryImpl])
 trait ShipmentRepository extends ReadWriteRepository[ShipmentId, Shipment] {
@@ -28,11 +27,11 @@ class ShipmentRepositoryImpl
     with ShipmentRepository {
   import org.biobank.CommonValidations._
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   def nextIdentity: ShipmentId = new ShipmentId(nextIdentityAsString)
 
-  def notFound(id: ShipmentId) = IdNotFound(s"shipment id: $id")
+  def notFound(id: ShipmentId): IdNotFound = IdNotFound(s"shipment id: $id")
 
   override def getByKey(id: ShipmentId): DomainValidation[Shipment] = {
     getMap.get(id).toSuccessNel(notFound(id).toString)

@@ -1,4 +1,4 @@
-val akkaVer = "2.4.12"
+val akkaVer = "2.4.14"
 val angularVer = "1.5.9"
 
 name := "bbweb"
@@ -83,7 +83,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka"           %% "akka-persistence-query-experimental" % akkaVer   % "compile",
   "com.typesafe.akka"           %% "akka-remote"                         % akkaVer   % "compile",
   ( "com.okumin"                %% "akka-persistence-sql-async"          % "0.4.0"   % "compile"  ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
-  "org.scalaz"                  %% "scalaz-core"                         % "7.2.8"   % "compile",
+  "org.scalaz"                  %% "scalaz-core"                         % "7.2.9"   % "compile",
   "com.github.mauricio"         %% "mysql-async"                         % "0.2.21",
   "com.github.t3hnar"           %% "scala-bcrypt"                        % "3.0",
   "com.github.ancane"           %% "hashids-scala"                       % "1.2",
@@ -102,18 +102,18 @@ libraryDependencies ++= Seq(
   "org.webjars.npm"             %  "angular-sanitize"                    % angularVer,
   "org.webjars.npm"             %  "angular-smart-table"                 % "2.1.6",
   "org.webjars.npm"             %  "angular-toastr"                      % "1.7.0",
-  "org.webjars.npm"             %  "angular-ui-bootstrap"                % "2.3.1",
-  ( "org.webjars.npm"           %  "angular-ui-router"                   % "0.3.2" ).exclude("org.webjars.npm", "angular"),
+  "org.webjars.npm"             %  "angular-ui-bootstrap"                % "2.5.0",
+  ( "org.webjars.npm"           %  "angular-ui-router"                   % "0.4.2" ).exclude("org.webjars.npm", "angular"),
   "org.webjars.bower"           %  "angular-utils-ui-breadcrumbs"        % "0.2.2",
   "org.webjars.npm"             %  "bootstrap"                           % "3.3.7",
   ( "org.webjars.bower"         %  "bootstrap-ui-datetime-picker"        % "2.4.3" ).exclude("org.webjars.bower", "angular"),
   "org.webjars.npm"             %  "jquery"                              % "3.1.1",
-  "org.webjars.npm"             %  "lodash"                              % "4.17.3",
+  "org.webjars.npm"             %  "lodash"                              % "4.17.4",
   "org.webjars.npm"             %  "moment"                              % "2.17.1",
   "org.webjars.npm"             %  "sprintf-js"                          % "1.0.3",
   "org.webjars.npm"             %  "tv4"                                 % "1.2.7",
   // Testing
-  ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "1.3.18"  % "test" ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
+  ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "2.4.17.3"  % "test" ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
   "com.typesafe.akka"           %% "akka-testkit"                        % akkaVer   % "test",
   "org.scalatestplus"           %% "play"                                % "1.4.0"   % "test",
   "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
@@ -151,7 +151,7 @@ com.jamesward.play.BrowserNotifierKeys.shouldOpenBrowser := false
 
 coverageExcludedPackages := "<empty>;router.*;views.html.*;Reverse.*;org.biobank.infrastructure.event.*;org.biobank.TestData"
 
-wartremoverErrors in (Compile, compile) ++= Warts.allBut(Wart.NoNeedForMonad, Wart.Equals, Wart.ToString)
+wartremoverErrors in (Compile, compile) ++= Warts.allBut(Wart.Equals, Wart.ToString)
 
 wartremoverExcluded += crossTarget.value / "routes" / "main" / "router" / "Routes.scala"
 wartremoverExcluded += crossTarget.value / "routes" / "main" / "router" / "RoutesPrefix.scala"

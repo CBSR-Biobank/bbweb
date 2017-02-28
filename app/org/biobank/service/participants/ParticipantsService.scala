@@ -10,7 +10,7 @@ import org.biobank.domain.study._
 import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.infrastructure.event.ParticipantEvents._
 import org.biobank.service.ServiceValidation
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -36,7 +36,7 @@ class ParticipantsServiceImpl @Inject() (
   val collectionEventRepository:                 CollectionEventRepository)
     extends ParticipantsService {
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   implicit val timeout: Timeout = 5.seconds
 

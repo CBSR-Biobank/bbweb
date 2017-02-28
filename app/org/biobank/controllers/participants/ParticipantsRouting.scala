@@ -24,8 +24,13 @@ object ParticipantsRouting {
     (key: String, e: Exception) => s"$key is not a valid specimen Id"
   )
 
-  val participantId     = new PathBindableExtractor[ParticipantId]
-  val collectionEventId = new PathBindableExtractor[CollectionEventId]
-  val specimenId        = new PathBindableExtractor[SpecimenId]
+  val participantId: PathBindableExtractor[ParticipantId] =
+    new PathBindableExtractor[ParticipantId]
+
+  val collectionEventId: PathBindableExtractor[CollectionEventId] =
+    new PathBindableExtractor[CollectionEventId]
+
+  val specimenId: PathBindableExtractor[SpecimenId]=
+    new PathBindableExtractor[SpecimenId]
 
 }

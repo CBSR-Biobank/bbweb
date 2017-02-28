@@ -8,14 +8,14 @@ package org.biobank.domain
  */
 trait PredicateHelper {
 
-  def complement[A](predicate: A => Boolean) = (a: A) => !predicate(a)
+  def complement[A](predicate: A => Boolean): A => Boolean = (a: A) => !predicate(a)
 
   def any[A](predicates: (A => Boolean)*): A => Boolean =
     a => predicates.exists(pred => pred(a))
 
-  def none[A](predicates: (A => Boolean)*) = complement(any(predicates: _*))
+  def none[A](predicates: (A => Boolean)*): A => Boolean = complement(any(predicates: _*))
 
   @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Nothing"))
-  def every[A](predicates: (A => Boolean)*) = none(predicates.view.map(complement(_)): _*)
+  def every[A](predicates: (A => Boolean)*): A => Boolean = none(predicates.view.map(complement(_)): _*)
 
 }

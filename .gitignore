@@ -43,4 +43,4 @@ documentation/js/
 /app/assets/languages/
 /po
 logback-test.xml
-
+/.metadata/

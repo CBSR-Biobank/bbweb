@@ -11,15 +11,15 @@ import play.api.Logger
 import play.api.cache.CacheApi
 import play.api.libs.json.Reads._
 import play.api.libs.json._
-import play.api.mvc._
+import play.api.mvc.{Action, Cookie, DiscardingCookie}
 import play.api.{Environment, Logger}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 import scalaz._
 
 @Singleton
+@SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 class UsersController @Inject() (val action:         BbwebAction,
                                  val env:            Environment,
                                  val cacheApi:       CacheApi,
@@ -30,7 +30,7 @@ class UsersController @Inject() (val action:         BbwebAction,
     extends CommandController
     with JsonController {
 
-  val log = Logger(this.getClass)
+  val log: Logger = Logger(this.getClass)
 
   private val PageSizeMax = 20
 
@@ -48,7 +48,7 @@ class UsersController @Inject() (val action:         BbwebAction,
    *
    * @return The token needed for subsequent requests
    */
-  def login() = Action(parse.json) { implicit request =>
+  def login(): Action[JsValue] = Action(parse.json) { implicit request =>
       request.body.validate[LoginCredentials].fold(
         errors => {
           BadRequest(JsError.toJson(errors))
@@ -76,7 +76,7 @@ class UsersController @Inject() (val action:         BbwebAction,
   /**
    * Retrieves the user associated with the token, if it is valid.
    */
-  def authenticateUser() = action(parse.empty) { implicit request =>
+  def authenticateUser(): Action[Unit] = action(parse.empty) { implicit request =>
       usersService.getUser(request.authInfo.userId).fold(
         err  => Unauthorized,
         user => Ok(user)
@@ -89,19 +89,19 @@ class UsersController @Inject() (val action:         BbwebAction,
    * Discard the cookie [[AuthTokenCookieKey]] to have AngularJS no longer set the
    * X-XSRF-TOKEN in HTTP header.
    */
-  def logout() = action(parse.empty) { implicit request =>
+  def logout(): Action[Unit] = action(parse.empty) { implicit request =>
       cacheApi.remove(request.authInfo.token)
       Ok("user has been logged out")
         .discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
         .withNewSession
     }
 
-  def userCounts() =
+  def userCounts(): Action[Unit] =
     action(parse.empty) { implicit request =>
       Ok(usersService.getCountsByStatus)
     }
 
-  def list =
+  def list: Action[Unit] =
     action.async(parse.empty) { implicit request =>
       Future {
         val validation = for {
@@ -119,11 +119,11 @@ class UsersController @Inject() (val action:         BbwebAction,
     }
 
   /** Retrieves the user for the given id as JSON */
-  def user(id: UserId) = action(parse.empty) { implicit request =>
+  def user(id: UserId): Action[Unit] = action(parse.empty) { implicit request =>
       validationReply(usersService.getUser(id))
     }
 
-  def registerUser() = Action.async(parse.json) { implicit request =>
+  def registerUser(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body.validate[RegisterUserCmd].fold(
       errors => {
         Future.successful(BadRequest(JsError.toJson(errors)))
@@ -150,7 +150,7 @@ class UsersController @Inject() (val action:         BbwebAction,
 
   /** Resets the user's password.
    */
-  def passwordReset() = Action.async(parse.json) { implicit request =>
+  def passwordReset(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body.validate[ResetUserPasswordCmd].fold(
       errors => {
         Future.successful(BadRequest(JsError.toJson(errors)))
@@ -167,42 +167,43 @@ class UsersController @Inject() (val action:         BbwebAction,
     )
   }
 
-  def updateName(id: UserId) =
+  def updateName(id: UserId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserNameCmd =>
       processCommand(cmd)
     }
 
-  def updateEmail(id: UserId) =
+  def updateEmail(id: UserId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserEmailCmd =>
       processCommand(cmd)
     }
 
-  def updatePassword(id: UserId) =
+  def updatePassword(id: UserId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserPasswordCmd =>
       processCommand(cmd)
     }
 
-  def updateAvatarUrl(id: UserId) =
+  def updateAvatarUrl(id: UserId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserAvatarUrlCmd =>
       processCommand(cmd)
     }
 
-  def activateUser(id: UserId) =
+  def activateUser(id: UserId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd: ActivateUserCmd =>
       processCommand(cmd)
     }
 
-  def lockUser(id: UserId) =
+  def lockUser(id: UserId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd: LockUserCmd =>
       processCommand(cmd)
     }
 
-  def unlockUser(id: UserId) =
+  def unlockUser(id: UserId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd: UnlockUserCmd =>
       processCommand(cmd)
     }
 
-  def userStudies(id: UserId, query: Option[String], sort: Option[String], order: Option[String]) =
+  def userStudies(id: UserId, query: Option[String], sort: Option[String], order: Option[String])
+      : Action[Unit] =
     action(parse.empty) { implicit request =>
       // FIXME this should return only the studies this user has access to
       //

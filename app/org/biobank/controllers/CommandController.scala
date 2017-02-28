@@ -7,9 +7,7 @@ import org.biobank.service.{AuthToken, ServiceValidation}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json._
 import play.api.mvc._
-import play.mvc.Http
 import scala.concurrent.Future
-import scala.language.reflectiveCalls
 
 @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
 trait CommandController extends Controller with Security {
@@ -59,34 +57,20 @@ trait CommandController extends Controller with Security {
 /**
  *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
  */
-@SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Nothing"))
+@SuppressWarnings(Array("org.wartremover.warts.Overloading"))
 trait JsonController extends Controller {
 
-  def errorReplyJson(message: String) = Json.obj("status" -> "error", "message" -> message)
+  def errorReplyJson(message: String): JsValue = Json.obj("status" -> "error", "message" -> message)
 
-  override val BadRequest = new Status(Http.Status.BAD_REQUEST) {
-      @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-      def apply(message: String): Result = Results.BadRequest(errorReplyJson(message))
-    }
+  def BadReques(message:String): Result = Results.BadRequest(errorReplyJson(message))
 
-  override val Forbidden = new Status(Http.Status.FORBIDDEN) {
-      @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-      def apply(message: String): Result = Results.Forbidden(errorReplyJson(message))
-    }
+  def Forbidden(message: String): Result = Results.Forbidden(errorReplyJson(message))
 
-  override val NotFound = new Status(Http.Status.NOT_FOUND) {
-      @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-      def apply(message: String): Result = Results.NotFound(errorReplyJson(message))
-    }
+  def NotFound(message: String): Result = Results.NotFound(errorReplyJson(message))
 
-  // Wart Remover complains about Any and Nothing here
-  override val Ok = new Status(Http.Status.OK) {
-      @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-      def apply[T](content: T)(implicit writes: Writes[T]): Result =
-        Results.Ok(Json.obj("status" ->"success", "data" -> Json.toJson[T](content)))
-    }
+  def Ok[T](data: T)(implicit writes: Writes[T]): Result =
+    Results.Ok(Json.obj("status" ->"success", "data" -> Json.toJson[T](data)))
 
-  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   protected def validationReply[T](validation: ServiceValidation[T])
                                (implicit writes: Writes[T]): Result = {
     validation.fold(
@@ -109,7 +93,6 @@ trait JsonController extends Controller {
     )
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   protected def validationReply[T](future: Future[ServiceValidation[T]])
                                (implicit writes: Writes[T]): Future[Result] =
     future.map { validation => validationReply(validation) }

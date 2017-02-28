@@ -15,7 +15,7 @@ import scalaz.Validation.FlatMap._
 
 object UsersProcessor {
 
-  def props = Props[UsersProcessor]
+  def props: Props = Props[UsersProcessor]
 
 }
 
@@ -36,9 +36,9 @@ class UsersProcessor @Inject() (val config:         Configuration,
 
   case class SnapshotState(users: Set[User])
 
-  override def persistenceId = "user-processor-id"
+  override def persistenceId: String = "user-processor-id"
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveRecover: Receive = {
     case event: UserEvent => event.eventType match {
       case et: EventType.Registered       => applyRegisteredEvent(event)
@@ -63,7 +63,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
     case event => log.error(s"event not handled: $event")
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveCommand: Receive = {
     case cmd: RegisterUserCmd =>
       process(registerUserCmdToEvent(cmd))(applyRegisteredEvent)

@@ -35,7 +35,7 @@ class UserRepositoryImpl
 
   def nextIdentity: UserId = new UserId(nextIdentityAsString)
 
-  def notFound(id: UserId) = IdNotFound(s"user id: $id")
+  def notFound(id: UserId): IdNotFound = IdNotFound(s"user id: $id")
 
   def allUsers(): Set[User] = getValues.toSet
 
@@ -55,7 +55,7 @@ class UserRepositoryImpl
     } yield registered
   }
 
-  def getActive(id: UserId) = {
+  def getActive(id: UserId): DomainValidation[ActiveUser] = {
     for {
       user <- getByKey(id)
       active <- {
@@ -67,7 +67,7 @@ class UserRepositoryImpl
     } yield active
   }
 
-  def getLocked(id: UserId) = {
+  def getLocked(id: UserId): DomainValidation[LockedUser] = {
     for {
       user <- getByKey(id)
       locked <- {

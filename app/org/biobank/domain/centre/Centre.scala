@@ -57,7 +57,7 @@ sealed trait Centre
 
   def nameDto(): NameDto = NameDto(id.id, name, state.id)
 
-  override def toString =
+  override def toString: String =
     s"""|${this.getClass.getSimpleName}: {
         |  id:           $id,
         |  version:      $version,
@@ -75,14 +75,14 @@ sealed trait Centre
 object Centre {
   import org.biobank.domain.Location._
 
-  val disabledState = new EntityState("disabled")
-  val enabledState = new EntityState("enabled")
+  val disabledState: EntityState = new EntityState("disabled")
+  val enabledState: EntityState = new EntityState("enabled")
 
   val centreStates: List[EntityState] = List(disabledState, enabledState)
 
   @SuppressWarnings(Array("org.wartremover.warts.Option2Iterable"))
   implicit val centreWrites: Writes[Centre] = new Writes[Centre] {
-      def writes(centre: Centre) = {
+      def writes(centre: Centre): JsValue = {
         ConcurrencySafeEntity.toJson(centre) ++
         Json.obj("state"     -> centre.state.id,
                  "name"      -> centre.name,
@@ -94,13 +94,17 @@ object Centre {
       }
     }
 
-  val sort2Compare = Map[String, (Centre, Centre) => Boolean](
+  type CentresCompare = (Centre, Centre) => Boolean
+
+  val sort2Compare: Map[String, CentresCompare] = Map[String, CentresCompare](
       "name"  -> Centre.compareByName,
-      "state" -> Centre.compareByState)
+      "state" -> Centre.compareByState
+    )
 
-  def compareByName(a: Centre, b: Centre) = (a.name compareToIgnoreCase b.name) < 0
+  def compareByName(a: Centre, b: Centre): Boolean =
+    (a.name compareToIgnoreCase b.name) < 0
 
-  def compareByState(a: Centre, b: Centre) = {
+  def compareByState(a: Centre, b: Centre): Boolean = {
     val statusCompare = a.state.id compare b.state.id
     if (statusCompare == 0) compareByName(a, b)
     else statusCompare < 0
@@ -109,7 +113,7 @@ object Centre {
 
 trait CentreValidations {
 
-  val NameMinLength = 2L
+  val NameMinLength: Long = 2L
 
   case object InvalidName extends ValidationKey
 
@@ -132,7 +136,7 @@ final case class DisabledCentre(id:           CentreId,
                                 description:  Option[String],
                                 studyIds:     Set[StudyId],
                                 locations:    Set[Location])
-    extends { val state = Centre.disabledState }
+    extends { val state: EntityState = Centre.disabledState }
     with Centre
     with CentreValidations {
   import org.biobank.CommonValidations._
@@ -262,7 +266,7 @@ final case class EnabledCentre(id:           CentreId,
                                description:  Option[String],
                                studyIds:     Set[StudyId],
                                locations:    Set[Location])
-    extends { val state = Centre.enabledState }
+    extends { val state: EntityState = Centre.enabledState }
     with Centre {
 
   def disable(): DomainValidation[DisabledCentre] = {

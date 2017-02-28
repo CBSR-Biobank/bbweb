@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 import play.api.libs.json._
 
 trait ContainerValidations {
-  val NameMinLength = 2L
+  val NameMinLength: Long = 2L
 
   case object ContainerSchemaIdInvalid extends ValidationKey
 
@@ -43,7 +43,7 @@ trait Container[T <: ContainerType]
 object Container {
 
   implicit val containerWrites: Writes[Container[_]] = new Writes[Container[_]] {
-    def writes(container: Container[_]) = Json.obj(
+    def writes(container: Container[_]): JsValue = Json.obj(
       "id"              -> container.id,
       "containerTypeId" -> container.containerTypeId,
       "parentId"        -> container.parentId,

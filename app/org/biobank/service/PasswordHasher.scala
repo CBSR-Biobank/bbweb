@@ -2,7 +2,7 @@ package org.biobank.service
 
 import com.google.inject.ImplementedBy
 import com.github.t3hnar.bcrypt._
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 @ImplementedBy(classOf[PasswordHasherImpl])
 trait PasswordHasher {
@@ -15,7 +15,7 @@ trait PasswordHasher {
 
 class PasswordHasherImpl extends PasswordHasher {
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   def encrypt(password: String, salt: String): String = {
     password.bcrypt(salt)
@@ -30,4 +30,3 @@ class PasswordHasherImpl extends PasswordHasher {
     encryptedPwd == encryptedEnteredPwd
   }
 }
-

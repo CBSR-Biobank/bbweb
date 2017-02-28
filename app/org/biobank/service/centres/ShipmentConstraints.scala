@@ -14,7 +14,7 @@ trait ShipmentConstraints {
 
   import org.biobank.CommonValidations._
 
-  //private val log = LoggerFactory.getLogger(this.getClass)
+  //private val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   val shipmentRepository: ShipmentRepository
 

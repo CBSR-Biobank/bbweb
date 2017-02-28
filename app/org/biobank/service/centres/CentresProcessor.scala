@@ -18,7 +18,7 @@ import scalaz.Validation.FlatMap._
 
 object CentresProcessor {
 
-  def props = Props[CentresProcessor]
+  def props: Props = Props[CentresProcessor]
 
 }
 
@@ -29,13 +29,13 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
   import org.biobank.CommonValidations._
   import CentreEvent.EventType
 
-  override def persistenceId = "centre-processor-id"
+  override def persistenceId: String = "centre-processor-id"
 
   case class SnapshotState(centres: Set[Centre])
 
-  val ErrMsgNameExists = "centre with name already exists"
+  val ErrMsgNameExists: String = "centre with name already exists"
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveRecover: Receive = {
     case event: CentreEvent => event.eventType match {
       case et: EventType.Added              => applyAddedEvent(event)
@@ -60,7 +60,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     case cmd => log.error(s"CentresProcessor: message not handled: $cmd")
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveCommand: Receive = {
     case cmd: AddCentreCmd =>
       process(addCentreCmdToEvent(cmd))(applyAddedEvent)

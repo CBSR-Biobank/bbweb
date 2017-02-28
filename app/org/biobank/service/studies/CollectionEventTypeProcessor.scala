@@ -15,7 +15,7 @@ import scalaz.Validation.FlatMap._
 
 object CollectionEventTypeProcessor {
 
-  def props = Props[CollectionEventTypeProcessor]
+  def props: Props = Props[CollectionEventTypeProcessor]
 
 }
 
@@ -37,7 +37,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
   import org.biobank.infrastructure.event.CollectionEventTypeEvents._
   import org.biobank.infrastructure.event.CollectionEventTypeEvents.CollectionEventTypeEvent.EventType
 
-  override def persistenceId = "collection-event-processor-id"
+  override def persistenceId: String = "collection-event-processor-id"
 
   case class SnapshotState(collectionEventTypes: Set[CollectionEventType])
 
@@ -45,7 +45,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
    * These are the events that are recovered during journal recovery. They cannot fail and must be
    * processed to recreate the current state of the aggregate.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   override def receiveRecover: Receive = {
     case event: CollectionEventTypeEvent =>
       event.eventType match {
@@ -78,7 +78,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
    * These are the commands that are requested. A command can fail, and will send the failure as a response
    * back to the user. Each valid command generates one or more events and is journaled.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   override def receiveCommand: Receive = {
     case cmd: AddCollectionEventTypeCmd =>
       process(addCmdToEvent(cmd))(applyAddedEvent)
@@ -440,7 +440,7 @@ private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotat
     }
   }
 
-  val ErrMsgNameExists = "collection event type with name already exists"
+  val ErrMsgNameExists: String = "collection event type with name already exists"
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   private def nameAvailable(name: String, studyId: StudyId): ServiceValidation[Boolean] = {

@@ -9,7 +9,7 @@ import play.api.libs.json._
 import scalaz.Scalaz._
 
 trait ContainerTypeValidations {
-  val NameMinLength = 2L
+  val NameMinLength: Long = 2L
 
   case object ContainerSchemaIdInvalid extends ValidationKey
 
@@ -76,7 +76,7 @@ sealed trait ContainerType
 object ContainerType {
 
   implicit val containerTypeWrites: Writes[ContainerType] = new Writes[ContainerType] {
-    def writes(containerType: ContainerType) = Json.obj(
+    def writes(containerType: ContainerType): JsValue = Json.obj(
       "id"           -> containerType.id,
       "centreId"     -> containerType.centreId,
       "schemaId"     -> containerType.schemaId,
@@ -137,7 +137,7 @@ object StorageContainerType extends ContainerValidations {
              name:        String,
              description: Option[String],
              shared:      Boolean,
-             enabled:     Boolean) = {
+             enabled:     Boolean): DomainValidation[StorageContainerType] = {
     (validateId(id) |@|
       validateId(centreId, CentreIdRequired) |@|
       validateId(schemaId, ContainerSchemaIdInvalid) |@|

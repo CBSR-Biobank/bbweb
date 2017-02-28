@@ -12,17 +12,18 @@ import play.api.{Configuration}
  * This is a trait so that it can be used by tests also.
  */
 @Singleton
-@SuppressWarnings(Array("org.wartremover.warts.Throw"))
+@SuppressWarnings(Array("org.wartremover.warts.Throw", "org.wartremover.warts.ImplicitParameter"))
 class Global @Inject()(implicit val mat: Materializer,
                        configuration: Configuration) {
 
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   val filter = new GzipFilter(shouldGzip = (request, response) => {
                                   response.body.contentType.exists(_.startsWith("text/html"))
                    })
   checkEmailConfig
   createSqlDdlScripts
 
-  def checkEmailConfig() = {
+  def checkEmailConfig(): Unit = {
     if (configuration.getString("play.mailer.host").isEmpty) {
       throw new RuntimeException("smtp server information needs to be set in email.conf")
     }
@@ -68,8 +69,8 @@ class Global @Inject()(implicit val mat: Materializer,
 
 object Global {
 
-  val DefaultUserEmail = "admin@admin.com"
+  val DefaultUserEmail: String = "admin@admin.com"
 
-  val DefaultUserId = UserId(DefaultUserEmail)
+  val DefaultUserId: UserId = UserId(DefaultUserEmail)
 
 }

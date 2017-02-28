@@ -1,5 +1,6 @@
 package org.biobank
 
+import play.api.libs.json._
 import scalaz._
 
 package domain {
@@ -10,7 +11,7 @@ package domain {
   }
 
   class EntityState(val id: String) extends AnyVal {
-    override def toString = id
+    override def toString: String = id
   }
 
   trait HasState {
@@ -76,5 +77,8 @@ package object domain {
 
   /** Contains an error messsage when an invalid condition happens. */
   type DomainError = String
+
+  implicit val entityStateWriter: Writes[EntityState] =
+    Writes{ (state: EntityState) => JsString(state.id) }
 
 }

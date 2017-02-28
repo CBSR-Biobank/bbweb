@@ -13,7 +13,7 @@ import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.SpecimenCommands._
 import org.biobank.infrastructure.event.SpecimenEvents._
 import org.biobank.service._
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -48,7 +48,7 @@ class SpecimensServiceImpl @Inject() (
   val centreRepository:                       CentreRepository)
     extends SpecimensService {
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   implicit val timeout: Timeout = 5.seconds
 

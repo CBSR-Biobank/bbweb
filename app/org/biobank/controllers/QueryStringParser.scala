@@ -11,15 +11,15 @@ import scala.util.parsing.combinator.RegexParsers
 object QueryStringParserGrammar {
 
   final case class Value(name: String) {
-    override def toString = s"Value: $name"
+    override def toString: String = s"Value: $name"
   }
 
   final case class Name(name: String) {
-    override def toString = s"Name: $name"
+    override def toString: String = s"Name: $name"
   }
 
   final case class Expression(name: String, value: String) {
-    override def toString = s"Expression: $name = $value"
+    override def toString: String = s"Expression: $name = $value"
   }
 }
 
@@ -34,13 +34,13 @@ object QueryStringParserGrammar {
 object QueryStringParser extends RegexParsers {
   import QueryStringParserGrammar._
 
-  def singleQuotedValue =
+  def singleQuotedValue: Parser[Value] =
     """'[^\"=!~<>&]*'""".r ^^ { case v => Value(v.substring(1, v.size - 1))}
 
-  def doubleQuotedValue =
+  def doubleQuotedValue: Parser[Value] =
     """"[^'=!~<>&]*"""".r ^^ { case v => Value(v.substring(1, v.size - 1))}
 
-  def unquotedValue =
+  def unquotedValue: Parser[Value] =
     """[^'\"\=!~<>&]+""".r ^^ { case v => Value(v) }
 
   def value: Parser[Value] =

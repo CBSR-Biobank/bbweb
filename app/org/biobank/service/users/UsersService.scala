@@ -12,7 +12,7 @@ import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.service._
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -61,7 +61,7 @@ class UsersServiceImpl @javax.inject.Inject() (
 
   case object InvalidPassword extends ValidationKey
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   implicit val timeout: Timeout = 5.seconds
 
@@ -69,6 +69,7 @@ class UsersServiceImpl @javax.inject.Inject() (
     userRepository.allUsers
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   def getCountsByStatus(): UserCountsByStatus = {
     // FIXME should be replaced by DTO query to the database
     val users = userRepository.getValues

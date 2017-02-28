@@ -13,6 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class BbwebRequest[A](request: Request[A], val authInfo: AuthenticationInfo)
     extends WrappedRequest(request)
 
+@SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 class BbwebAction @Inject()(val env:          Environment,
                             val usersService: UsersService,
                             val authToken:    AuthToken)

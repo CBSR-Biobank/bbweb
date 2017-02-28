@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 
 object JsonUtils {
 
-  val dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ" // ISO time format
+  val dateFormat: String = "yyyy-MM-dd'T'HH:mm:ssZ" // ISO time format
 
   implicit val jodaDateTimeReads: Reads[DateTime] = Reads.jodaDateReads(dateFormat)
   implicit val jodaDateTimeWrites: Writes[DateTime] = Writes.jodaDateWrites(dateFormat)

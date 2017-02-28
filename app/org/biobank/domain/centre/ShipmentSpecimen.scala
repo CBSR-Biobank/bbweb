@@ -132,7 +132,7 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
                         state               = this.state.toString,
                         specimen            = specimenDto)
 
-  override def toString =
+  override def toString: String =
     s"""|${this.getClass.getSimpleName}: {
         |  id:                  $id,
         |  version:             $version,
@@ -151,7 +151,7 @@ object ShipmentSpecimen extends ShipmentSpecimenValidations {
 
   implicit val shipmentSpecimenWrites: Writes[ShipmentSpecimen] = Json.writes[ShipmentSpecimen]
 
-  def compareByState(a: ShipmentSpecimen, b: ShipmentSpecimen) = (a.state compareTo b.state) < 0
+  def compareByState(a: ShipmentSpecimen, b: ShipmentSpecimen): Boolean = (a.state compareTo b.state) < 0
 
   def create(id:                  ShipmentSpecimenId,
              version:             Long,

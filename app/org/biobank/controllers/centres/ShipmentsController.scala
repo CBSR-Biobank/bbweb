@@ -3,19 +3,20 @@ package org.biobank.controllers.centres
 import javax.inject.{Inject, Singleton}
 import play.api.libs.json._
 import play.api.{Environment, Logger}
+import play.api.mvc._
 import org.biobank.controllers.{BbwebAction, CommandController, JsonController, PagedQuery}
 import org.biobank.domain.centre.{CentreId, ShipmentId}
 import org.biobank.service.centres.ShipmentsService
 import org.biobank.service.users.UsersService
 import org.biobank.service.{AuthToken, PagedResults}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 /**
  *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
  */
+@SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
 class ShipmentsController @Inject() (val action:           BbwebAction,
                                      val env:              Environment,
@@ -29,11 +30,11 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
   import org.biobank.infrastructure.command.ShipmentCommands._
   import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
 
-  val log = Logger(this.getClass)
+  val log: Logger = Logger(this.getClass)
 
   private val PageSizeMax = 10
 
-  def list(centreId: CentreId) =
+  def list(centreId: CentreId): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       Future {
         val validation = for {
@@ -50,12 +51,12 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
       }
     }
 
-  def get(id: ShipmentId) =
+  def get(id: ShipmentId): Action[Unit] =
     action(parse.empty) { implicit request =>
       validationReply(shipmentsService.getShipment(id))
     }
 
-  def listSpecimens(shipmentId: ShipmentId) =
+  def listSpecimens(shipmentId: ShipmentId): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       Future {
         val validation = for {
@@ -76,19 +77,19 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
       }
     }
 
-  def canAddSpecimens(shipmentId: ShipmentId, specimenInventoryId: String) =
+  def canAddSpecimens(shipmentId: ShipmentId, specimenInventoryId: String): Action[Unit] =
     action(parse.empty) { implicit request =>
       validationReply(shipmentsService.shipmentCanAddSpecimen(shipmentId, specimenInventoryId))
     }
 
-  def getSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String) =
+  def getSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String): Action[Unit] =
     action(parse.empty) { implicit request =>
       validationReply(shipmentsService.getShipmentSpecimen(shipmentId, shipmentSpecimenId))
     }
 
-  def add() = commandActionAsync { cmd: AddShipmentCmd => processCommand(cmd) }
+  def add(): Action[JsValue] = commandActionAsync { cmd: AddShipmentCmd => processCommand(cmd) }
 
-  def remove(shipmentId: ShipmentId, version: Long) =
+  def remove(shipmentId: ShipmentId, version: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       val cmd = ShipmentRemoveCmd(userId          = request.authInfo.userId.id,
                                   id              = shipmentId.id,
@@ -97,53 +98,54 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
       validationReply(future)
     }
 
-  def updateCourier(id: ShipmentId) =
+  def updateCourier(id: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateShipmentCourierNameCmd => processCommand(cmd) }
 
-  def updateTrackingNumber(id: ShipmentId) =
+  def updateTrackingNumber(id: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateShipmentTrackingNumberCmd => processCommand(cmd) }
 
-  def updateFromLocation(id: ShipmentId) =
+  def updateFromLocation(id: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateShipmentFromLocationCmd => processCommand(cmd) }
 
-  def updateToLocation(id: ShipmentId) =
+  def updateToLocation(id: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateShipmentToLocationCmd => processCommand(cmd) }
 
-  def created(id: ShipmentId) =
+  def created(id: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd : CreatedShipmentCmd => processCommand(cmd) }
 
-  def packed(id: ShipmentId) =
+  def packed(id: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd : PackShipmentCmd => processCommand(cmd) }
 
-  def sent(id: ShipmentId) =
+  def sent(id: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd : SendShipmentCmd => processCommand(cmd) }
 
-  def received(id: ShipmentId) =
+  def received(id: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd : ReceiveShipmentCmd => processCommand(cmd) }
 
-  def unpacked(id: ShipmentId) =
+  def unpacked(id: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd : UnpackShipmentCmd => processCommand(cmd) }
 
-  def lost(id: ShipmentId) =
+  def lost(id: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd : LostShipmentCmd => processCommand(cmd) }
 
   /**
    * Changes the state of a shipment from CREATED to SENT (skipping the PACKED state)
    */
-  def skipStateSent(id: ShipmentId) =
+  def skipStateSent(id: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentSkipStateToSentCmd => processCommand(cmd) }
 
   /**
    * Changes the state of a shipment from SENT to UNPACKED (skipping the RECEVIED state)
    */
-  def skipStateUnpacked(id: ShipmentId) =
+  def skipStateUnpacked(id: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd : ShipmentSkipStateToUnpackedCmd => processCommand(cmd) }
 
-  def addSpecimen(shipmentId: ShipmentId) = commandActionAsync(Json.obj("shipmentId" -> shipmentId)) {
+  def addSpecimen(shipmentId: ShipmentId): Action[JsValue] =
+    commandActionAsync(Json.obj("shipmentId" -> shipmentId)) {
       cmd: ShipmentAddSpecimensCmd => processSpecimenCommand(cmd)
     }
 
-  def removeSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String, version: Long) =
+  def removeSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String, version: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       val cmd = ShipmentSpecimenRemoveCmd(userId             = request.authInfo.userId.id,
                                           shipmentId         = shipmentId.id,
@@ -153,37 +155,37 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
       validationReply(future)
     }
 
-  def specimenContainer(shipmentId: ShipmentId) =
+  def specimenContainer(shipmentId: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("shipmentId" -> shipmentId)) {
       cmd: ShipmentSpecimenUpdateContainerCmd => processSpecimenCommand(cmd)
     }
 
-  def specimenPresent(shipmentId: ShipmentId) =
+  def specimenPresent(shipmentId: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("shipmentId" -> shipmentId)) {
       cmd: ShipmentSpecimensPresentCmd => processSpecimenCommand(cmd)
     }
 
-  def specimenReceived(shipmentId: ShipmentId) =
+  def specimenReceived(shipmentId: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("shipmentId" -> shipmentId)) {
       cmd: ShipmentSpecimensReceiveCmd => processSpecimenCommand(cmd)
     }
 
-  def specimenMissing(shipmentId: ShipmentId) =
+  def specimenMissing(shipmentId: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("shipmentId" -> shipmentId)) {
       cmd: ShipmentSpecimenMissingCmd => processSpecimenCommand(cmd)
     }
 
-  def specimenExtra(shipmentId: ShipmentId) =
+  def specimenExtra(shipmentId: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("shipmentId" -> shipmentId)) {
       cmd: ShipmentSpecimenExtraCmd => processSpecimenCommand(cmd)
     }
 
-  private def processCommand(cmd: ShipmentCommand) = {
+  private def processCommand(cmd: ShipmentCommand): Future[Result] = {
     val future = shipmentsService.processCommand(cmd)
     validationReply(future)
   }
 
-  private def processSpecimenCommand(cmd: ShipmentSpecimenCommand) = {
+  private def processSpecimenCommand(cmd: ShipmentSpecimenCommand): Future[Result] = {
     val future = shipmentsService.processShipmentSpecimenCommand(cmd)
     validationReply(future)
   }

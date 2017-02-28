@@ -9,12 +9,13 @@ import org.biobank.service.participants.CollectionEventsService
 import org.biobank.service.users.UsersService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
-import scala.language.reflectiveCalls
+import play.api.mvc.{Action, Result}
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 @Singleton
+@SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 class CollectionEventsController @Inject() (val action:       BbwebAction,
                                             val env:          Environment,
                                             val authToken:    AuthToken,
@@ -24,16 +25,16 @@ class CollectionEventsController @Inject() (val action:       BbwebAction,
     extends CommandController
     with JsonController {
 
-  val log = Logger(this.getClass)
+  val log: Logger = Logger(this.getClass)
 
   private val PageSizeMax = 10
 
-  def get(ceventId: String) =
+  def get(ceventId: String): Action[Unit] =
     action(parse.empty) { implicit request =>
       validationReply(service.get(ceventId))
     }
 
-  def list(participantId: ParticipantId) =
+  def list(participantId: ParticipantId): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       Future {
         val validation = for {
@@ -50,34 +51,34 @@ class CollectionEventsController @Inject() (val action:       BbwebAction,
       }
     }
 
-  def getByVisitNumber(participantId: ParticipantId, visitNumber: Int) =
+  def getByVisitNumber(participantId: ParticipantId, visitNumber: Int): Action[Unit] =
     action(parse.empty) { implicit request =>
       validationReply(service.getByVisitNumber(participantId, visitNumber))
     }
 
-  def add(participantId: ParticipantId) =
+  def add(participantId: ParticipantId): Action[JsValue] =
     commandActionAsync(Json.obj("participantId" -> participantId)) { cmd: AddCollectionEventCmd =>
       processCommand(cmd)
     }
 
-  def updateVisitNumber(ceventId: CollectionEventId) =
+  def updateVisitNumber(ceventId: CollectionEventId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventVisitNumberCmd =>
       processCommand(cmd)
     }
 
-  def updateTimeCompleted(ceventId: CollectionEventId) =
+  def updateTimeCompleted(ceventId: CollectionEventId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventTimeCompletedCmd =>
       processCommand(cmd)
     }
 
-  def addAnnotation(ceventId: CollectionEventId) =
+  def addAnnotation(ceventId: CollectionEventId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventAnnotationCmd =>
       processCommand(cmd)
     }
 
   def removeAnnotation(ceventId: CollectionEventId,
                        annotTypeId:   String,
-                       ver:           Long) =
+                       ver:           Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       val cmd = RemoveCollectionEventAnnotationCmd(userId           = request.authInfo.userId.id,
                                                    id               = ceventId.id,
@@ -86,7 +87,7 @@ class CollectionEventsController @Inject() (val action:       BbwebAction,
       processCommand(cmd)
     }
 
-  def remove(participantId: ParticipantId, ceventId: CollectionEventId, ver: Long) =
+  def remove(participantId: ParticipantId, ceventId: CollectionEventId, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       val cmd = RemoveCollectionEventCmd(userId          = request.authInfo.userId.id,
                                          id              = ceventId.id,
@@ -96,7 +97,7 @@ class CollectionEventsController @Inject() (val action:       BbwebAction,
       validationReply(future)
     }
 
-  private def processCommand(cmd: CollectionEventCommand) = {
+  private def processCommand(cmd: CollectionEventCommand): Future[Result] = {
     val future = service.processCommand(cmd)
     validationReply(future)
   }

@@ -28,7 +28,7 @@ class CentreRepositoryImpl
 
   def nextIdentity: CentreId = new CentreId(nextIdentityAsString)
 
-  def notFound(id: CentreId) = IdNotFound(s"centre id: $id")
+  def notFound(id: CentreId): IdNotFound = IdNotFound(s"centre id: $id")
 
   override def getByKey(id: CentreId): DomainValidation[Centre] = {
     getMap.get(id).toSuccessNel(notFound(id).toString)

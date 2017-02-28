@@ -12,7 +12,7 @@ import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
 import org.biobank.service._
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -58,7 +58,7 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
                                     val studyRepository:           StudyRepository)
     extends CentresService {
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   implicit val timeout: Timeout = 5.seconds
 
@@ -86,6 +86,7 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
       toSet
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   def getCountsByStatus(): CentreCountsByStatus = {
     // FIXME should be replaced by DTO query to the database
     val centres = centreRepository.getValues

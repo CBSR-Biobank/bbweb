@@ -16,7 +16,7 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
   val version: Long
 
   /** The version converted to a Option. */
-  val versionOption = if (version < 0) None else Some(version)
+  val versionOption: Option[Long] = if (version < 0) None else Some(version)
 
   /** The date and time when this entity was added to the system. */
   val timeAdded: DateTime

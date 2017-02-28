@@ -8,6 +8,7 @@ import play.api.routing.sird._
 class StudiesRouter @Inject()(controller: StudiesController) extends SimpleRouter {
   import StudiesRouting._
 
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   override def routes: Routes = {
 
     case GET(p"/names") =>

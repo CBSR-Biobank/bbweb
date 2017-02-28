@@ -10,6 +10,7 @@ import org.biobank.service.users.UsersService
 import play.api.Logger
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
+import play.api.mvc.Action
 
 @Singleton
 class SpecimenLinkTypesController @Inject() (val action:         BbwebAction,
@@ -20,9 +21,9 @@ class SpecimenLinkTypesController @Inject() (val action:         BbwebAction,
     extends CommandController
     with JsonController {
 
-  val log = Logger(this.getClass)
+  val log: Logger = Logger(this.getClass)
 
-  def get(processingTypeId: ProcessingTypeId, slTypeId: Option[SpecimenLinkTypeId]) =
+  def get(processingTypeId: ProcessingTypeId, slTypeId: Option[SpecimenLinkTypeId]): Action[Unit] =
     action(parse.empty) { implicit request =>
       log.debug(s"SpecimenLinkTypeController.get: processingTypeId: $processingTypeId, slTypeId: $slTypeId")
 
@@ -34,20 +35,21 @@ class SpecimenLinkTypesController @Inject() (val action:         BbwebAction,
       }
     }
 
-  def addSpecimenLinkType(processingTypeId: ProcessingTypeId) =
+  def addSpecimenLinkType(processingTypeId: ProcessingTypeId): Action[JsValue] =
     commandActionAsync(Json.obj("processingTypeId" -> processingTypeId)) { cmd: AddSpecimenLinkTypeCmd =>
       val future = studiesService.processCommand(cmd)
       validationReply(future)
     }
 
-  def updateSpecimenLinkType(processingTypeId: ProcessingTypeId, id: SpecimenLinkTypeId) =
+  def updateSpecimenLinkType(processingTypeId: ProcessingTypeId, id: SpecimenLinkTypeId): Action[JsValue] =
     commandActionAsync(Json.obj("processingTypeId" -> processingTypeId, "id" -> id)) {
       cmd: UpdateSpecimenLinkTypeCmd =>
       val future = studiesService.processCommand(cmd)
       validationReply(future)
     }
 
-  def removeSpecimenLinkType(processingTypeId: ProcessingTypeId, id: SpecimenLinkTypeId, ver: Long) =
+  def removeSpecimenLinkType(processingTypeId: ProcessingTypeId, id: SpecimenLinkTypeId, ver: Long)
+      : Action[Unit] =
     action.async(parse.empty) { implicit request =>
       val cmd = RemoveSpecimenLinkTypeCmd(Some(request.authInfo.userId.id), processingTypeId.id, id.id, ver)
       val future = studiesService.processCommand(cmd)

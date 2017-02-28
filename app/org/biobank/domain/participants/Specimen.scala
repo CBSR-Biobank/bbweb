@@ -2,7 +2,7 @@ package org.biobank.domain.participants
 
 import org.biobank.ValidationKey
 import org.biobank.dto.{CentreLocationInfo, SpecimenDto}
-import org.biobank.domain.LocationId
+import org.biobank.domain._
 import org.biobank.domain.containers.{ContainerId, ContainerSchemaPositionId}
 import org.biobank.domain.study.{CollectionSpecimenSpec, StudyValidations}
 import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation, Location}
@@ -10,19 +10,6 @@ import org.biobank.infrastructure.EnumUtils._
 import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
-
-/**
- * Possible states for a specimen.
- */
-@SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
-object SpecimenState extends Enumeration {
-  type SpecimenState = Value
-  val Usable = Value("usable")
-  val Unusable = Value("unusable")
-
-  implicit val specimenStateFormat: Format[SpecimenState] = enumFormat(SpecimenState)
-
-}
 
 /**
  * Represents something that was obtained from a [[Participant]] in a [[study.Study]].
@@ -34,9 +21,7 @@ object SpecimenState extends Enumeration {
 sealed trait Specimen
     extends ConcurrencySafeEntity[SpecimenId] {
 
-  import SpecimenState._
-
-  val state: SpecimenState
+  val state: EntityState
 
   /** The inventory ID assigned to this specimen. */
   val inventoryId: String
@@ -107,11 +92,14 @@ sealed trait Specimen
 object Specimen {
   import org.biobank.infrastructure.JsonUtils._
 
+  val usableState: EntityState = new EntityState("usable")
+  val unusableState: EntityState = new EntityState("unusable")
+
   implicit val specimenWrites: Writes[Specimen] = new Writes[Specimen] {
-      def writes(specimen: Specimen) =
+      def writes(specimen: Specimen): JsValue =
         ConcurrencySafeEntity.toJson(specimen) ++
         Json.obj(
-          "state"            -> specimen.state,
+          "state"            -> specimen.state.id,
           "inventoryId"      -> specimen.inventoryId,
           "specimenSpecId"   -> specimen.specimenSpecId,
           "originLocationId" -> specimen.originLocationId.id,
@@ -124,21 +112,22 @@ object Specimen {
         )
     }
 
-  val sort2Compare = Map[String, (Specimen, Specimen) => Boolean](
+  val sort2Compare: Map[String, (Specimen, Specimen) => Boolean] =
+    Map[String, (Specimen, Specimen) => Boolean](
       "inventoryId" -> compareByInventoryId,
       "timeCreated" -> compareByTimeCreated,
       "state"       -> compareByState)
 
-  def compareById(a: Specimen, b: Specimen) =
+  def compareById(a: Specimen, b: Specimen): Boolean =
     (a.id.id compareTo b.id.id) < 0
 
-  def compareByInventoryId(a: Specimen, b: Specimen) =
+  def compareByInventoryId(a: Specimen, b: Specimen): Boolean =
     (a.inventoryId compareTo b.inventoryId) < 0
 
-  def compareByTimeCreated(a: Specimen, b: Specimen) =
+  def compareByTimeCreated(a: Specimen, b: Specimen): Boolean =
     (a.timeCreated compareTo b.timeCreated) < 0
 
-  def compareByState(a: Specimen, b: Specimen) =
+  def compareByState(a: Specimen, b: Specimen): Boolean =
     (a.state.toString compareTo b.state.toString) < 0
 }
 
@@ -165,7 +154,7 @@ final case class UsableSpecimen(id:               SpecimenId,
                                 positionId:       Option[ContainerSchemaPositionId],
                                 timeCreated:      DateTime,
                                 amount:           BigDecimal)
-    extends { val state = SpecimenState.Usable }
+    extends { val state: EntityState = Specimen.usableState }
     with Specimen
     with SpecimenValidations
     with ParticipantValidations
@@ -323,7 +312,7 @@ final case class UnusableSpecimen(id:               SpecimenId,
                                   positionId:       Option[ContainerSchemaPositionId],
                                   timeCreated:      DateTime,
                                   amount:           BigDecimal)
-    extends { val state = SpecimenState.Unusable }
+    extends { val state: EntityState = Specimen.unusableState }
     with Specimen {
 
   def makeUsable(): DomainValidation[UsableSpecimen] = {

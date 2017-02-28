@@ -17,7 +17,7 @@ import scalaz.Validation.FlatMap._
 
 object CollectionEventsProcessor {
 
-  def props = Props[CollectionEventsProcessor]
+  def props: Props = Props[CollectionEventsProcessor]
 
 }
 
@@ -35,7 +35,7 @@ class CollectionEventsProcessor @Inject() (
   import CollectionEventEvent.EventType
   import org.biobank.infrastructure.event.EventUtils._
 
-  override def persistenceId = "collection-events-processor-id"
+  override def persistenceId: String = "collection-events-processor-id"
 
   case class SnapshotState(collectionEvents: Set[CollectionEvent])
 
@@ -43,7 +43,7 @@ class CollectionEventsProcessor @Inject() (
    * These are the events that are recovered during journal recovery. They cannot fail and must be
    * processed to recreate the current state of the aggregate.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveRecover: Receive = {
     case event: CollectionEventEvent => event.eventType match {
       case et: EventType.Added                => applyAddedEvent(event)
@@ -64,7 +64,7 @@ class CollectionEventsProcessor @Inject() (
    * These are the commands that are requested. A command can fail, and will send the failure as a response
    * back to the user. Each valid command generates one or more events and is journaled.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveCommand: Receive = {
     case cmd: AddCollectionEventCmd =>
       process(addCmdToEvent(cmd))(applyAddedEvent)
@@ -361,7 +361,7 @@ class CollectionEventsProcessor @Inject() (
     }
   }
 
-  val errMsgVisitNumberExists = "a collection event with this visit number already exists"
+  val errMsgVisitNumberExists: String = "a collection event with this visit number already exists"
 
   /**
    *  Searches the repository for a matching item.

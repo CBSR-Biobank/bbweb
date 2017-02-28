@@ -14,10 +14,10 @@ trait Security {
 
   val env: Environment
 
-  val AuthTokenCookieKey = "XSRF-TOKEN"
-  val AuthTokenHeader = "X-XSRF-TOKEN"
-  val AuthTokenUrlKey = "auth"
-  val TestAuthToken = "bbweb-test-token"
+  val AuthTokenCookieKey: String = "XSRF-TOKEN"
+  val AuthTokenHeader: String    = "X-XSRF-TOKEN"
+  val AuthTokenUrlKey: String    = "auth"
+  val TestAuthToken: String      = "bbweb-test-token"
 
   val usersService: UsersService
 

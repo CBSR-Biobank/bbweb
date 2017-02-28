@@ -119,14 +119,15 @@ object CollectionEvent
     }
   }
 
-  val sort2Compare = Map[String, (CollectionEvent, CollectionEvent) => Boolean](
+  val sort2Compare: Map[String, (CollectionEvent, CollectionEvent) => Boolean] =
+    Map[String, (CollectionEvent, CollectionEvent) => Boolean](
       "visitNumber"   -> compareByVisitNumber,
       "timeCompleted" -> compareByTimeCompleted)
 
-  def compareByVisitNumber(a: CollectionEvent, b: CollectionEvent) =
+  def compareByVisitNumber(a: CollectionEvent, b: CollectionEvent): Boolean =
     (a.visitNumber compareTo b.visitNumber) < 0
 
-  def compareByTimeCompleted(a: CollectionEvent, b: CollectionEvent) =
+  def compareByTimeCompleted(a: CollectionEvent, b: CollectionEvent): Boolean =
     (a.timeCompleted compareTo b.timeCompleted) < 0
 
   implicit val collectionEventWrites: Writes[CollectionEvent] = Json.writes[CollectionEvent]
