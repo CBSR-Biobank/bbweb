@@ -50,10 +50,7 @@ define(function (require) {
                           annotationUpdate) {
     var vm = this;
 
-    vm.canUpdateVisitType = (vm.collectionEventTypes.length > 1);
-    vm.panelOpen          = true;
-
-    vm.editVisitType                  = editVisitType;
+    vm.panelOpen                      = true;
     vm.editTimeCompleted              = editTimeCompleted;
     vm.editAnnotation                 = editAnnotation;
     vm.panelButtonClicked             = panelButtonClicked;
@@ -67,12 +64,6 @@ define(function (require) {
         vm.collectionEvent = cevent;
         notificationsService.success(message, title, timeout);
       };
-    }
-
-    function editVisitType() {
-      if (vm.collectionEventTypes.length <= 1) {
-        throw new Error('only a single collection event type is defined for this study');
-      }
     }
 
     function editTimeCompleted() {
