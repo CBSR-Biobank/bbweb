@@ -64,15 +64,6 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
     )
   }
 
-  /** Converts a participant into an Update command.
-   */
-  def participantToUpdateCmd(participant: Participant) = {
-    participantToAddJson(participant) ++ Json.obj(
-      "id"              -> participant.id.id,
-      "expectedVersion" -> Some(participant.version)
-    )
-  }
-
   def createAnnotationType() = {
     AnnotationType(
       uniqueId      = nameGenerator.next[AnnotationType],
