@@ -61,7 +61,7 @@ define(function () {
     }
 
     function participantGetError(error) {
-      var studyMismatchRe = /EntityCriteriaError.participant not in study/i;
+      var studyMismatchRe = /EntityCriteriaError: participant not in study/i;
       if (error.status === 404) {
         createParticipantModal(vm.uniqueId);
       } else if ((error.status === 400) && error.data.message.match(studyMismatchRe)) {
@@ -69,7 +69,7 @@ define(function () {
           gettextCatalog.getString('Duplicate unique ID'),
           gettextCatalog.getString(
           'Unique ID <strong>{{id}}</strong> is already in use by a participant ' +
-              'in another study. Please use a diffent one.',
+              'in another study. Please use a different one.',
             { id: vm.uniqueId }))
           .then(function () {
             vm.uniqueId = '';
