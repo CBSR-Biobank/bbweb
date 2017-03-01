@@ -12,8 +12,14 @@ def excludeSpecs2(module: ModuleID): ModuleID =
     .exclude("com.novocode", "junit-interface")
 
 lazy val root = (project in file("."))
-  .enablePlugins(PlayScala)
+  .enablePlugins(PlayScala, DebianPlugin)
   .settings(libraryDependencies ~= (_.map(excludeSpecs2)))
+
+maintainer in Linux := "Canadian BioSample Repository <tech@biosample.ca>"
+
+packageSummary in Linux := "Biorepository application for tracking biospecimens."
+
+packageDescription := "Biorepository application for tracking biospecimens."
 
 scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.8")
 
