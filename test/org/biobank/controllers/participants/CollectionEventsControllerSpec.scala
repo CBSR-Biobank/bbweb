@@ -464,7 +464,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
       "fail for invalid participant id" in {
         val participant = factory.createParticipant
-        val json = makeRequest(GET, listUri(participant.id), BAD_REQUEST)
+        val json = makeRequest(GET, listUri(participant.id), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 

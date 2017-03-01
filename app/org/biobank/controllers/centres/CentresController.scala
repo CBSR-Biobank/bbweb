@@ -39,34 +39,28 @@ class CentresController @Inject() (val action:         BbwebAction,
 
   def list: Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      Future {
-        val validation = for {
+      validationReply(
+        Future {
+          for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
             centres    <- centresService.getCentres(pagedQuery.filter, pagedQuery.sort)
             validPage  <- pagedQuery.validPage(centres.size)
             results    <- PagedResults.create(centres, pagedQuery.page, pagedQuery.limit)
           } yield results
-
-        validation.fold(
-          err     => BadRequest(err.list.toList.mkString),
-          results => Ok(results)
-        )
-      }
+        }
+      )
     }
 
   def listNames: Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      Future {
-        val validation = for {
+      validationReply(
+        Future {
+          for {
             filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
             centreNames    <- centresService.getCentreNames(filterAndSort.filter, filterAndSort.sort)
           } yield centreNames
-
-        validation.fold(
-          err => BadRequest(err.list.toList.mkString),
-          results =>  Ok(results)
-        )
-      }
+        }
+      )
     }
 
   // def locations() = action(parse.empty) { implicit request =>

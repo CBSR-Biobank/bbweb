@@ -36,19 +36,16 @@ class CollectionEventsController @Inject() (val action:       BbwebAction,
 
   def list(participantId: ParticipantId): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      Future {
-        val validation = for {
+      validationReply(
+        Future {
+          for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
             cevents    <- service.list(participantId, pagedQuery.sort)
             validPage  <- pagedQuery.validPage(cevents.size)
             results    <- PagedResults.create(cevents, pagedQuery.page, pagedQuery.limit)
           } yield results
-
-        validation.fold(
-          err     => BadRequest(err.list.toList.mkString),
-          results =>  Ok(results)
-        )
-      }
+        }
+      )
     }
 
   def getByVisitNumber(participantId: ParticipantId, visitNumber: Int): Action[Unit] =

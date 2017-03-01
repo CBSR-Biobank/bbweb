@@ -36,19 +36,16 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
 
   def list(centreId: CentreId): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      Future {
-        val validation = for {
+      validationReply(
+        Future {
+          for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
             shipments  <- shipmentsService.getShipments(centreId, pagedQuery.filter, pagedQuery.sort)
             validPage  <- pagedQuery.validPage(shipments.size)
             results    <- PagedResults.create(shipments, pagedQuery.page, pagedQuery.limit)
           } yield results
-
-        validation.fold(
-          err =>     BadRequest(err.toList.mkString),
-          results => Ok(results)
-        )
-      }
+        }
+      )
     }
 
   def get(id: ShipmentId): Action[Unit] =
@@ -58,8 +55,9 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
 
   def listSpecimens(shipmentId: ShipmentId): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      Future {
-        val validation = for {
+      validationReply(
+        Future {
+          for {
             pagedQuery        <- PagedQuery.create(request.rawQueryString, PageSizeMax)
             shipmentSpecimens <- shipmentsService.getShipmentSpecimens(shipmentId,
                                                                        pagedQuery.filter,
@@ -69,12 +67,8 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
                                                      pagedQuery.page,
                                                      pagedQuery.limit)
           } yield results
-
-        validation.fold(
-          err =>     BadRequest(err.list.toList.mkString),
-          results => Ok(results)
-        )
-      }
+        }
+      )
     }
 
   def canAddSpecimens(shipmentId: ShipmentId, specimenInventoryId: String): Action[Unit] =

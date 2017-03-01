@@ -44,19 +44,15 @@ class SpecimensController @Inject() (val action:       BbwebAction,
 
   def list(ceventId: CollectionEventId): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      Future {
-        val validation = for {
+      validationReply(
+        Future {
+          for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
             specimens  <- service.list(ceventId, pagedQuery.sort)
             validPage  <- pagedQuery.validPage(specimens.size)
             results    <- PagedResults.create(specimens, pagedQuery.page, pagedQuery.limit)
           } yield results
-
-        validation.fold(
-          err     => BadRequest(err.list.toList.mkString),
-          results => Ok(results)
-        )
-      }
+        })
     }
 
   def addSpecimens(ceventId: CollectionEventId): Action[JsValue] =

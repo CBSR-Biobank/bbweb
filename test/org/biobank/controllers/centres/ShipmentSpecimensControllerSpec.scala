@@ -140,13 +140,13 @@ class ShipmentSpecimensControllerSpec
         }
       }
 
-      "fail for an invalid item state for a shipment specimen" in {
+      "111 fail for an invalid item state for a shipment specimen" in {
         val f = createdShipmentFixture
         val invalidStateName = "state::" + nameGenerator.next[ShipmentSpecimen]
 
         val reply = makeRequest(GET,
                                 uri(f.shipment) + s"?filter=$invalidStateName",
-                                BAD_REQUEST)
+                                NOT_FOUND)
 
         (reply \ "status").as[String] must include ("error")
 

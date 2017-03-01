@@ -103,19 +103,16 @@ class UsersController @Inject() (val action:         BbwebAction,
 
   def list: Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      Future {
-        val validation = for {
+      validationReply(
+        Future {
+          for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
             users      <- usersService.getUsers(pagedQuery.filter, pagedQuery.sort)
             validPage  <- pagedQuery.validPage(users.size)
             results    <- PagedResults.create(users, pagedQuery.page, pagedQuery.limit)
           } yield results
-
-        validation.fold(
-          err => BadRequest(err.list.toList.mkString),
-          results =>  Ok(results)
-        )
-      }
+        }
+      )
     }
 
   /** Retrieves the user for the given id as JSON */

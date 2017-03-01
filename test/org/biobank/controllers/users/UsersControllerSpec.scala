@@ -786,7 +786,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must be ("success")
       }
 
-      "111 not allow a registered user to reset his/her password" in {
+      "not allow a registered user to reset his/her password" in {
         val user = createRegisteredUserInRepository(nameGenerator.next[String])
         val reqJson = Json.obj("email" -> user.email)
         val json = makeRequest(POST, uri("passreset"), UNAUTHORIZED, reqJson)

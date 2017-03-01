@@ -62,7 +62,7 @@ trait JsonController extends Controller {
 
   def errorReplyJson(message: String): JsValue = Json.obj("status" -> "error", "message" -> message)
 
-  def BadReques(message:String): Result = Results.BadRequest(errorReplyJson(message))
+  def BadRequest(message:String): Result = Results.BadRequest(errorReplyJson(message))
 
   def Forbidden(message: String): Result = Results.Forbidden(errorReplyJson(message))
 

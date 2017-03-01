@@ -358,7 +358,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper {
 
       "fail for invalid collection event id" in {
         val cevent = factory.createCollectionEvent
-        val json = makeRequest(GET, uri(cevent), BAD_REQUEST)
+        val json = makeRequest(GET, uri(cevent), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 

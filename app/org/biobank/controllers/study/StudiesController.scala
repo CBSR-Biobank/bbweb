@@ -41,34 +41,28 @@ class StudiesController @Inject() (val action:         BbwebAction,
 
   def list: Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      Future {
-        val validation = for {
+      validationReply(
+        Future {
+          for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
             studies    <- studiesService.getStudies(pagedQuery.filter, pagedQuery.sort)
             validPage  <- pagedQuery.validPage(studies.size)
             results    <- PagedResults.create(studies, pagedQuery.page, pagedQuery.limit)
           } yield results
-
-        validation.fold(
-          err => BadRequest(err.list.toList.mkString),
-          results =>  Ok(results)
-        )
-      }
+        }
+      )
     }
 
   def listNames: Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      Future {
-        val validation = for {
+      validationReply(
+        Future {
+          for {
             filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
             studyNames    <- studiesService.getStudyNames(filterAndSort.filter, filterAndSort.sort)
           } yield studyNames
-
-        validation.fold(
-          err => BadRequest(err.list.toList.mkString),
-          results =>  Ok(results)
-        )
-      }
+        }
+      )
     }
 
   def get(id: StudyId): Action[Unit] = action(parse.empty) { implicit request =>

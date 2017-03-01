@@ -131,7 +131,7 @@ class ShipmentsControllerSpec
 
         val reply = makeRequest(GET,
                                 listUri(f.fromCentre) + s"?filter=state::$invalidStateName",
-                                BAD_REQUEST)
+                                NOT_FOUND)
 
         (reply \ "status").as[String] must include ("error")
 

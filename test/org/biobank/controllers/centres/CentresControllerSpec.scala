@@ -283,7 +283,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val invalidStateName = "state::" + nameGenerator.next[Study]
         val reply = makeRequest(GET,
                                 uri + s"?filter=$invalidStateName",
-                                BAD_REQUEST)
+                                NOT_FOUND)
 
         (reply \ "status").as[String] must include ("error")
 
