@@ -213,6 +213,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
       var url = uriWithPath('list', participantId),
           params,
           validKeys = [
+            'filter',
             'sort',
             'page',
             'limit'

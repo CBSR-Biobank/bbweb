@@ -40,7 +40,7 @@ class CollectionEventsController @Inject() (val action:       BbwebAction,
         Future {
           for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            cevents    <- service.list(participantId, pagedQuery.sort)
+            cevents    <- service.list(participantId, pagedQuery.filter, pagedQuery.sort)
             validPage  <- pagedQuery.validPage(cevents.size)
             results    <- PagedResults.create(cevents, pagedQuery.page, pagedQuery.limit)
           } yield results

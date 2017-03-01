@@ -23,8 +23,9 @@ trait CollectionEventsService {
 
   def get(collectionEventId: String): ServiceValidation[CollectionEvent]
 
-  def list(participantId: ParticipantId, sort: SortString)
-      : ServiceValidation[Seq[CollectionEvent]]
+  def list(participantId: ParticipantId,
+           filter:        FilterString,
+           sort:          SortString): ServiceValidation[Seq[CollectionEvent]]
 
   def getByVisitNumber(participantId: ParticipantId, visitNumber: Int): ServiceValidation[CollectionEvent]
 
@@ -50,15 +51,17 @@ class CollectionEventsServiceImpl @Inject() (
       ServiceError(s"collection event id is invalid: $collectionEventId")).toValidationNel
   }
 
-  def list(participantId: ParticipantId, sort: SortString)
-      : ServiceValidation[Seq[CollectionEvent]] = {
+  def list(participantId: ParticipantId,
+           filter:        FilterString,
+           sort:          SortString): ServiceValidation[Seq[CollectionEvent]] = {
     val sortStr = if (sort.expression.isEmpty) new SortString("visitNumber")
                   else sort
 
     validParticipantId(participantId) { participant =>
-      val cevents = collectionEventRepository.allForParticipant(participantId).toSeq
+      val allCevents = collectionEventRepository.allForParticipant(participantId).toSet
 
       for {
+        cevents         <- CollectionEventFilter.filterCollectionEvents(allCevents, filter)
         sortExpressions <- { QuerySortParser(sortStr).
                               toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
         firstSort       <- { sortExpressions.headOption.
@@ -66,7 +69,7 @@ class CollectionEventsServiceImpl @Inject() (
         sortFunc        <- { CollectionEvent.sort2Compare.get(firstSort.name).
                               toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
       } yield {
-        val result = cevents.sortWith(sortFunc)
+        val result = cevents.toSeq.sortWith(sortFunc)
         if (firstSort.order == AscendingOrder) result
         else result.reverse
       }

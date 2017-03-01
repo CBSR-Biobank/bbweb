@@ -47,6 +47,7 @@ define(['lodash'], function(_) {
     };
 
     vm.collectionEvents = setCollectionEventType(vm.collectionEventsPagedResult.items);
+    vm.visitNumberFilter = '';
     vm.displayState     = getDisplayState();
     vm.showPagination   = getShowPagination();
 
@@ -59,6 +60,7 @@ define(['lodash'], function(_) {
     vm.pageChanged          = pageChanged;
     vm.add                  = add;
     vm.eventInformation     = eventInformation;
+    vm.visitFilterUpdated   = visitFilterUpdated;
 
     // --
 
@@ -110,6 +112,15 @@ define(['lodash'], function(_) {
     function eventInformation(cevent) {
       $state.go('home.collection.study.participant.cevents.details',
                 { collectionEventId: cevent.id });
+    }
+
+    function visitFilterUpdated() {
+      if (vm.visitNumberFilter) {
+        vm.pagerOptions.filter = 'visitNumber::' + vm.visitNumberFilter;
+      } else {
+        vm.pagerOptions.filter = '';
+      }
+      updateCollectionEvents();
     }
   }
 

@@ -13,6 +13,19 @@ import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
 
+/**
+ * Predicates that can be used to filter collections of studies.
+ *
+ */
+trait CollectionEventPredicates {
+
+  type CollectionEventFilter = CollectionEvent => Boolean
+
+  val visitNumberIsOneOf: Set[String] => CollectionEventFilter =
+    visitNumbers => cevent => visitNumbers.contains(cevent.visitNumber.toString)
+
+}
+
 trait CollectionEventValidations extends ParticipantValidations {
 
   case object VisitNumberInvalid extends ValidationKey
