@@ -50,6 +50,11 @@ See file `akka_persistence_schema.sql` in the root directory of this project for
 create the required database tables. Modify the table names used in this script to match the settings you
 chose for the settings listed above.
 
+### Server URL
+
+Assign value `admin.url` in `confg/application.conf` to be the URL for the server. This URL is used in
+emails sent to users to confirm registration.
+
 ### Administrator Email
 
 Assign value `admin.email` in `confg/application.conf` to your administrator's email address. This will be the

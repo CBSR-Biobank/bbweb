@@ -113,19 +113,25 @@ class UsersProcessor @Inject() (val config:         Configuration,
                                               encryptedPwd,
                                               salt,
                                               cmd.avatarUrl)
-    } yield UserEvent(user.id.id).update(
-      _.optionalUserId               := cmd.userId,
-      _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
-      _.registered.name              := cmd.name,
-      _.registered.email             := cmd.email,
-      _.registered.password          := encryptedPwd,
-      _.registered.salt              := salt,
-      _.registered.optionalAvatarUrl := cmd.avatarUrl)
+    } yield {
+      emailService.userRegisteredEmail(cmd.name, cmd.email)
+
+      UserEvent(user.id.id).update(
+        _.optionalUserId               := cmd.userId,
+        _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.registered.name              := cmd.name,
+        _.registered.email             := cmd.email,
+        _.registered.password          := encryptedPwd,
+        _.registered.salt              := salt,
+        _.registered.optionalAvatarUrl := cmd.avatarUrl)
+    }
   }
 
   private def activateCmdToEvent(cmd:  ActivateUserCmd,
                                  user: RegisteredUser): ServiceValidation[UserEvent] = {
-    user.activate.map { _ =>
+    user.activate.map { u =>
+      emailService.userActivatedEmail(u.email)
+
       UserEvent(user.id.id).update(
         _.optionalUserId    := cmd.userId,
         _.time              := ISODateTimeFormat.dateTime.print(DateTime.now),
@@ -199,13 +205,16 @@ class UsersProcessor @Inject() (val config:         Configuration,
       }
       passwordInfo <- encryptPassword(activeUser, plainPassword).successNel[String]
       updatedUser  <- activeUser.withPassword(passwordInfo.password, passwordInfo.salt)
-      emailSent    <- emailService.passwordResetEmail(updatedUser.email, plainPassword).successNel[String]
-    } yield UserEvent(user.id.id).update(
-      _.userId                 := "",
-      _.time                   := ISODateTimeFormat.dateTime.print(DateTime.now),
-      _.passwordReset.version  := user.version,
-      _.passwordReset.password := passwordInfo.password,
-      _.passwordReset.salt     := passwordInfo.salt)
+    } yield {
+      emailService.passwordResetEmail(updatedUser.email, plainPassword)
+
+      UserEvent(user.id.id).update(
+        _.userId                 := "",
+        _.time                   := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.passwordReset.version  := user.version,
+        _.passwordReset.password := passwordInfo.password,
+        _.passwordReset.salt     := passwordInfo.salt)
+    }
   }
 
   private def lockUserCmdToEvent(cmd:  LockUserCmd,
