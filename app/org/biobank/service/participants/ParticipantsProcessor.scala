@@ -41,7 +41,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
   @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveRecover: Receive = {
     case event: ParticipantEvent =>
-      log.info(s"PrticipantsProcessor: $event")
+      log.debug(s"ParticipantsProcessor: receiveRecover: $event")
       event.eventType match {
         case et: EventType.Added             => applyAddedEvent(event)
         case et: EventType.UniqueIdUpdated   => applyUniqueIdUpdatedEvent(event)

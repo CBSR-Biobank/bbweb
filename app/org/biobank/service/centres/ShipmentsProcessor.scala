@@ -1,8 +1,10 @@
 package org.biobank.service.centres
 
 import akka.actor._
+import akka.event.{Logging, LoggingAdapter}
 import akka.persistence.{RecoveryCompleted, SnapshotOffer}
 import javax.inject.Inject
+
 import org.biobank.TestData
 import org.biobank.domain.LocationId
 import org.biobank.domain.centre._
@@ -15,6 +17,7 @@ import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
 import org.biobank.service.{Processor, ServiceError, ServiceValidation}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
+
 import scalaz._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -38,6 +41,8 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     with ShipmentConstraints {
   import org.biobank.CommonValidations._
 
+  override val log: LoggingAdapter = Logging(context.system, this)
+
   override def persistenceId: String = "shipments-processor-id"
 
   case class SnapshotState(shipments: Set[Shipment],
@@ -45,24 +50,26 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
 
   @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveRecover: Receive = {
-    case event: ShipmentEvent => event.eventType match {
-      case et: ShipmentEvent.EventType.Added                  => applyAddedEvent(event)
-      case et: ShipmentEvent.EventType.CourierNameUpdated     => applyCourierNameUpdatedEvent(event)
-      case et: ShipmentEvent.EventType.TrackingNumberUpdated  => applyTrackingNumberUpdatedEvent(event)
-      case et: ShipmentEvent.EventType.FromLocationUpdated    => applyFromLocationUpdatedEvent(event)
-      case et: ShipmentEvent.EventType.ToLocationUpdated      => applyToLocationUpdatedEvent(event)
-      case et: ShipmentEvent.EventType.Created                => applyCreatedEvent(event)
-      case et: ShipmentEvent.EventType.Packed                 => applyPackedEvent(event)
-      case et: ShipmentEvent.EventType.Sent                   => applySentEvent(event)
-      case et: ShipmentEvent.EventType.Received               => applyReceivedEvent(event)
-      case et: ShipmentEvent.EventType.Unpacked               => applyUnpackedEvent(event)
-      case et: ShipmentEvent.EventType.Lost                   => applyLostEvent(event)
-      case et: ShipmentEvent.EventType.Removed                => applyRemovedEvent(event)
-      case et: ShipmentEvent.EventType.SkippedToSentState     => applySkippedToSentStateEvent(event)
-      case et: ShipmentEvent.EventType.SkippedToUnpackedState => applySkippedToUnpackedStateEvent(event)
+    case event: ShipmentEvent =>
+      log.info(s"ShipmentsProcessor: receiveRecover: $event")
+      event.eventType match {
+        case et: ShipmentEvent.EventType.Added                  => applyAddedEvent(event)
+        case et: ShipmentEvent.EventType.CourierNameUpdated     => applyCourierNameUpdatedEvent(event)
+        case et: ShipmentEvent.EventType.TrackingNumberUpdated  => applyTrackingNumberUpdatedEvent(event)
+        case et: ShipmentEvent.EventType.FromLocationUpdated    => applyFromLocationUpdatedEvent(event)
+        case et: ShipmentEvent.EventType.ToLocationUpdated      => applyToLocationUpdatedEvent(event)
+        case et: ShipmentEvent.EventType.Created                => applyCreatedEvent(event)
+        case et: ShipmentEvent.EventType.Packed                 => applyPackedEvent(event)
+        case et: ShipmentEvent.EventType.Sent                   => applySentEvent(event)
+        case et: ShipmentEvent.EventType.Received               => applyReceivedEvent(event)
+        case et: ShipmentEvent.EventType.Unpacked               => applyUnpackedEvent(event)
+        case et: ShipmentEvent.EventType.Lost                   => applyLostEvent(event)
+        case et: ShipmentEvent.EventType.Removed                => applyRemovedEvent(event)
+        case et: ShipmentEvent.EventType.SkippedToSentState     => applySkippedToSentStateEvent(event)
+        case et: ShipmentEvent.EventType.SkippedToUnpackedState => applySkippedToUnpackedStateEvent(event)
 
-      case event => log.error(s"event not handled: $event")
-    }
+        case event => log.error(s"event not handled: $event")
+      }
 
     case event: ShipmentSpecimenEvent => event.eventType match {
       case et: ShipmentSpecimenEvent.EventType.Added            => applySpecimenAddedEvent(event)
