@@ -21,10 +21,11 @@ define([
     SuiteMixin.prototype = Object.create(ModalTestSuiteMixin.prototype);
     SuiteMixin.prototype.constructor = SuiteMixin;
 
-    SuiteMixin.prototype.openModal = function (centreLocations, specimenSpecs) {
+    SuiteMixin.prototype.openModal = function (centreLocations, specimenSpecs, defaultDatetime) {
       centreLocations = centreLocations || [];
       specimenSpecs = specimenSpecs || [];
-      this.modal = this.specimenAddModal.open(centreLocations, specimenSpecs);
+      defaultDatetime = defaultDatetime || new Date();
+      this.modal = this.specimenAddModal.open(centreLocations, specimenSpecs, defaultDatetime);
       this.$rootScope.$digest();
       this.modalElement = this.modalElementFind();
       this.scope = this.modalElement.scope();
@@ -65,7 +66,7 @@ define([
       _.extend(this, SuiteMixin.prototype);
 
       this.putHtmlTemplates(
-        '/assets/javascripts/collection/services/specimenAdd/specimenAdd.html',
+        '/assets/javascripts/collection/services/specimenAddModal/specimenAddModal.html',
         '/assets/javascripts/common/components/dateTimePicker/dateTimePicker.html');
 
       this.injectDependencies('$uibModal',

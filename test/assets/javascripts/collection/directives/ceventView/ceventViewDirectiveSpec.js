@@ -114,7 +114,6 @@ define(function(require) {
       expect(this.controller.collectionEvent).toBe(this.collectionEvent);
       expect(this.controller.panelOpen).toBeTrue();
 
-      expect(this.controller.editVisitType).toBeFunction();
       expect(this.controller.editTimeCompleted).toBeFunction();
       expect(this.controller.editAnnotation).toBeFunction();
       expect(this.controller.panelButtonClicked).toBeFunction();

@@ -120,8 +120,13 @@ define([
       });
 
       it('on a 404 response, when patient with unique id already exists, modal is shown to user', function() {
-        spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject(
-          { status: 400, data: { message: 'EntityCriteriaError(participant not in study' }}));
+        spyOn(this.Participant, 'getByUniqueId').and.returnValue(
+          this.$q.reject({
+            status: 400,
+            data: {
+              message: 'EntityCriteriaError: participant not in study'
+            }
+          }));
         spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('Ok'));
 
         createDirective.call(this);
