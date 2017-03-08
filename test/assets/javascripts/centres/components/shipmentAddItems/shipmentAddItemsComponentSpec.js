@@ -1,0 +1,194 @@
+/**
+ * Jasmine test suite
+ *
+ */
+define(function (require) {
+  'use strict';
+
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
+
+  describe('shipmentAddItemsComponent', function() {
+
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+
+    beforeEach(inject(function(ShippingComponentTestSuiteMixin, testUtils) {
+      _.extend(this, ShippingComponentTestSuiteMixin.prototype);
+      this.putHtmlTemplates(
+        '/assets/javascripts/centres/components/shipmentAddItems/shipmentAddItems.html',
+        '/assets/javascripts/common/components/progressTracker/progressTracker.html',
+        '/assets/javascripts/centres/components/shippingInfoView/shippingInfoView.html',
+        '/assets/javascripts/centres/components/shipmentSpecimensAdd/shipmentSpecimensAdd.html',
+        '/assets/javascripts/common/components/collapsablePanel/collapsablePanel.html',
+        '/assets/javascripts/shipmentSpecimens/components/ssSpecimensPagedTable/ssSpecimensPagedTable.html',
+        '/assets/javascripts/common/directives/statusLine/statusLine.html');
+
+      this.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              '$state',
+                              'Shipment',
+                              'SHIPMENT_SEND_PROGRESS_ITEMS',
+                              'modalInput',
+                              'modalService',
+                              'shipmentSkipToSentModalService',
+                              'domainNotificationService',
+                              'notificationsService',
+                              'factory');
+      testUtils.addCustomMatchers();
+
+      this.createScope = function (shipment) {
+        ShippingComponentTestSuiteMixin.prototype.createScope.call(
+          this,
+          '<shipment-add-items shipment="vm.shipment"></shipment-add-items',
+          { shipment: shipment },
+          'shipmentAddItems');
+      };
+    }));
+
+    it('should have valid scope', function() {
+      var shipment = this.createShipment();
+      this.createScope(shipment);
+      expect(this.controller.shipment).toBe(shipment);
+      expect(this.controller.progressInfo).toBeDefined();
+      expect(this.controller.progressInfo.items).toBeArrayOfSize(this.SHIPMENT_SEND_PROGRESS_ITEMS.length);
+      expect(this.controller.progressInfo.items).toContainAll(this.SHIPMENT_SEND_PROGRESS_ITEMS);
+      expect(this.controller.progressInfo.current).toBe(2);
+      expect(this.controller.tagAsPacked).toBeFunction();
+      expect(this.controller.tagAsSent).toBeFunction();
+      expect(this.controller.removeShipment).toBeFunction();
+    });
+
+    describe('can change state on shipment', function() {
+
+      beforeEach(function() {
+        this.shipment = this.createShipmentWithSpecimens(1);
+
+        spyOn(this.Shipment, 'get').and.returnValue(this.$q.when(this.shipment));
+        spyOn(this.$state, 'go').and.returnValue(null);
+      });
+
+      it('can tag a shipment as packed', function() {
+        var self = this,
+            promiseSuccess;
+
+        spyOn(this.Shipment.prototype, 'pack').and.returnValue(this.$q.when(this.shipment));
+        spyOn(this.modalInput, 'dateTime').and.returnValue({ result: this.$q.when(new Date()) });
+
+        this.createScope(this.shipment);
+        this.controller.tagAsPacked().then(function () {
+          expect(self.Shipment.prototype.pack).toHaveBeenCalled();
+          expect(self.$state.go).toHaveBeenCalledWith('home.shipping.shipment',
+                                                      { shipmentId: self.shipment.id});
+          promiseSuccess = true;
+        });
+        this.scope.$digest();
+        expect(promiseSuccess).toBeTrue();
+      });
+
+      it('can tag a shipment as sent', function() {
+        var self = this,
+            promiseSuccess;
+
+        spyOn(this.Shipment.prototype, 'skipToStateSent').and.returnValue(this.$q.when(this.shipment));
+        spyOn(this.shipmentSkipToSentModalService, 'open').and
+          .returnValue({
+            result: this.$q.when({
+              timePacked: new Date(),
+              timeSent: new Date()
+            })
+          });
+
+        this.createScope(this.shipment);
+        this.controller.tagAsSent().then(function () {
+          expect(self.Shipment.prototype.skipToStateSent).toHaveBeenCalled();
+          expect(self.$state.go).toHaveBeenCalledWith('home.shipping.shipment',
+                                                      { shipmentId: self.shipment.id});
+          promiseSuccess = true;
+        });
+        this.scope.$digest();
+        expect(promiseSuccess).toBeTrue();
+      });
+
+    });
+
+    describe('not allowed to change state', function() {
+
+      beforeEach(function() {
+        this.shipment = this.createShipmentWithSpecimens(0);
+        spyOn(this.Shipment, 'get').and.returnValue(this.$q.when(this.shipment));
+        spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
+        this.createScope(this.shipment);
+      });
+
+
+      it('to packed when no specimens in shipment', function() {
+        var self = this,
+            promiseFailed;
+
+        this.controller.tagAsPacked().catch(function () {
+          expect(self.modalService.modalOk).toHaveBeenCalled();
+          promiseFailed = true;
+        });
+        this.scope.$digest();
+        expect(promiseFailed).toBeTrue();
+      });
+
+      it('to sent when no specimens in shipment', function() {
+        var self = this,
+            promiseFailed;
+
+        this.controller.tagAsSent().catch(function () {
+          expect(self.modalService.modalOk).toHaveBeenCalled();
+          promiseFailed = true;
+        });
+        this.scope.$digest();
+        expect(promiseFailed).toBeTrue();
+      });
+
+    });
+
+    it('can remove a shipment', function() {
+      var shipment = this.createShipment();
+
+      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
+      spyOn(this.Shipment.prototype, 'remove').and.returnValue(this.$q.when(true));
+      spyOn(this.notificationsService, 'success').and.returnValue(null);
+      spyOn(this.$state, 'go').and.returnValue(null);
+
+      this.createScope(shipment);
+      this.controller.removeShipment();
+      this.scope.$digest();
+
+      expect(this.Shipment.prototype.remove).toHaveBeenCalled();
+      expect(this.notificationsService.success).toHaveBeenCalled();
+      expect(this.$state.go).toHaveBeenCalledWith('home.shipping');
+    });
+
+    it('removal of a shipment can be cancelled', function() {
+      var shipment = this.createShipment();
+
+      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
+      spyOn(this.Shipment.prototype, 'remove').and.returnValue(this.$q.when(true));
+
+      this.createScope(shipment);
+      this.controller.removeShipment();
+      this.scope.$digest();
+
+      expect(this.Shipment.prototype.remove).not.toHaveBeenCalled();
+    });
+
+    it('removeShipment does nothing if shipment is not defined', function() {
+      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
+      spyOn(this.Shipment.prototype, 'remove').and.returnValue(this.$q.when(true));
+
+      this.createScope();
+      this.controller.removeShipment();
+      this.scope.$digest();
+
+      expect(this.Shipment.prototype.remove).not.toHaveBeenCalled();
+    });
+
+  });
+
+});

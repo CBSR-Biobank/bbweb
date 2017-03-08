@@ -27,5 +27,9 @@ define(function (require) {
     .factory('ServerReplyMixin',
              require('../../../test/assets/javascripts/test/ServerReplyMixin'))
     .factory('AnnotationsEntityTestSuiteMixin',
-             require('../../../test/assets/javascripts/test/AnnotationsEntityTestSuiteMixin'));
+             require('../../../test/assets/javascripts/test/AnnotationsEntityTestSuiteMixin'))
+    .factory('ComponentTestSuiteMixin',
+             require('../../../test/assets/javascripts/test/ComponentTestSuiteMixin'))
+    .factory('ShippingComponentTestSuiteMixin',
+             require('../../../test/assets/javascripts/test/ShippingComponentTestSuiteMixin'));
 });

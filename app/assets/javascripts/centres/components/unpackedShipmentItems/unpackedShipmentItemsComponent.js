@@ -51,8 +51,7 @@ define(function (require) {
       }
     ];
 
-    vm.getPresentSpecimens  = getPresentSpecimens;
-    vm.onInventoryIdsSubmit = onInventoryIdsSubmit;
+    vm.getSpecimens         = getSpecimens;
     vm.tableActionSelected  = tableActionSelected;
 
     //----
@@ -61,15 +60,17 @@ define(function (require) {
       $scope.$emit('tabbed-page-update', 'tab-selected');
 
       if (vm.itemState === ShipmentItemState.RECEIVED) {
+        vm.panelHeading = gettextCatalog.getString('Received specimens in this shipment');
         vm.noSpecimensMessage = gettextCatalog.getString('No received specimens present in this shipment');
       } else if (vm.itemState === ShipmentItemState.MISSING) {
+        vm.panelHeading = gettextCatalog.getString('Missing specimens in this shipment');
         vm.noSpecimensMessage = gettextCatalog.getString('No missing specimens present in this shipment');
       } else {
         throw new Error('invalid item state: ' + vm.itemState);
       }
     }
 
-    function getPresentSpecimens(options) {
+    function getSpecimens(options) {
       if (!vm.shipment) { return $q.when({ items: [], maxPages: 0 }); }
 
       _.extend(options, { filter: 'state:in:' + vm.itemState });
@@ -78,16 +79,6 @@ define(function (require) {
         .then(function (paginatedResult) {
           return { items: paginatedResult.items, maxPages: paginatedResult.maxPages };
         });
-    }
-
-    /*
-     * Inventory IDs entered by the user
-     */
-    function onInventoryIdsSubmit() {
-      var inventoryIds = _.map(vm.inventoryIds.split(','), function (nonTrimmedInventoryId) {
-        return nonTrimmedInventoryId.trim();
-      });
-      return vm.shipment.tagSpecimensAsReceived(inventoryIds);
     }
 
     function tableActionSelected(shipmentSpecimen) {

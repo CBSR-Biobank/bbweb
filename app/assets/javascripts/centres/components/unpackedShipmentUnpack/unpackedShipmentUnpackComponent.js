@@ -65,6 +65,7 @@ define(function (require) {
     function getPresentSpecimens(options) {
       if (!vm.shipment) { return $q.when({ items: [], maxPages: 0 }); }
 
+      options = options || {};
       _.extend(options, { filter: 'state:in:' + ShipmentItemState.PRESENT });
 
       return ShipmentSpecimen.list(vm.shipment.id, options)
@@ -83,26 +84,27 @@ define(function (require) {
       return vm.shipment.tagSpecimensAsReceived(inventoryIds)
         .then(function () {
           vm.inventoryIds = '';
-          vm.refreshNonReceivedSpecimensTable += 1;
+          vm.refreshTable += 1;
         })
         .catch(function (err) {
           var modalMsg;
 
-          if (err.data.message) {
-            modalMsg = errorIsInvalidInventoryIds(err.data.message);
+          if (err.message) {
+            modalMsg = errorIsInvalidInventoryIds(err.message);
             if (_.isUndefined(modalMsg)) {
-              modalMsg = errorIsShipSpecimensNotInShipment(err.data.message);
+              modalMsg = errorIsShipSpecimensNotInShipment(err.message);
             }
             if (_.isUndefined(modalMsg)) {
-              modalMsg = errorIsShipSpecimensNotPresent(err.data.message);
+              modalMsg = errorIsShipSpecimensNotPresent(err.message);
             }
           }
 
-          if (_.isUndefined(modalMsg)) {
-            throw new Error('could not parse error message');
+          if (modalMsg) {
+            modalService.modalOk(gettextCatalog.getString('Invalid inventory IDs'), modalMsg);
+            return;
           }
 
-          modalService.modalOk(gettextCatalog.getString('Invalid inventory IDs'), modalMsg);
+          modalService.modalOk(gettextCatalog.getString('Server error'), JSON.stringify(err));
         });
     }
 

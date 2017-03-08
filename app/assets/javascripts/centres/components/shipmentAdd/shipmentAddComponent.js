@@ -19,7 +19,7 @@ define(['lodash'], function (_) {
     'Shipment',
     'domainNotificationService',
     'notificationsService',
-    'shipmentSendProgressItems'
+    'SHIPMENT_SEND_PROGRESS_ITEMS'
   ];
 
   /**
@@ -31,11 +31,11 @@ define(['lodash'], function (_) {
                                  Shipment,
                                  domainNotificationService,
                                  notificationsService,
-                                 shipmentSendProgressItems) {
+                                 SHIPMENT_SEND_PROGRESS_ITEMS) {
     var vm = this;
 
     vm.progressInfo = {
-      items: shipmentSendProgressItems,
+      items: SHIPMENT_SEND_PROGRESS_ITEMS,
       current: 1
     };
 
@@ -50,12 +50,12 @@ define(['lodash'], function (_) {
     //--
 
     function onInit() {
-      return Centre.locationsSearch('').then(function (results) {
+      return Centre.locationsSearch().then(function (results) {
         vm.hasValidCentres = (results.length > 1);
       });
     }
 
-    function submit(specimenSpec) {
+    function submit() {
       vm.shipment.add().then(onAddSuccessful).catch(onAddFailed);
 
       function onAddSuccessful(shipment) {

@@ -23,7 +23,7 @@ define(function (require) {
     'modalService',
     'gettextCatalog',
     'notificationsService',
-    'shipmentReceiveProgressItems',
+    'SHIPMENT_RECEIVE_PROGRESS_ITEMS',
     'ShipmentState',
     'ShipmentSpecimen',
     'ShipmentItemState'
@@ -38,7 +38,7 @@ define(function (require) {
                                     modalService,
                                     gettextCatalog,
                                     notificationsService,
-                                    shipmentReceiveProgressItems,
+                                    SHIPMENT_RECEIVE_PROGRESS_ITEMS,
                                     ShipmentState,
                                     ShipmentSpecimen,
                                     ShipmentItemState) {
@@ -70,7 +70,7 @@ define(function (require) {
     vm.onInventoryIdSubmit = onInventoryIdSubmit;
 
     vm.progressInfo = {
-      items: shipmentReceiveProgressItems,
+      items: SHIPMENT_RECEIVE_PROGRESS_ITEMS,
       current: 3
     };
 
@@ -82,7 +82,8 @@ define(function (require) {
         .then(function (shipment) {
           vm.shipment = shipment;
         })
-        .catch(function (error) {
+        .catch(function () {
+          // TODO: instead display message that shipment does not exist
           $state.go('404', null, { location: false });
         });
     }
@@ -114,24 +115,21 @@ define(function (require) {
     }
 
     function getPresentSpecimens(options) {
-      console.log('getPresentSpecimens');
       return getSpecimensByItemState(ShipmentItemState.PRESENT, options);
     }
 
     function getReceivedSpecimens(options) {
-      console.log('getReceivedSpecimens');
       return getSpecimensByItemState(ShipmentItemState.RECEIVED, options);
     }
 
-    /**
-     * Inventory ID entered by the user
-     */
+    // Inventory ID entered by the user
     function onInventoryIdSubmit() {
-      console.log(vm.inventoryId);
+      // TODO: finish this implementation
       vm.inventoryId = '';
     }
 
     function nonReceivedSpecimensTableActionSelected(shipmentSpecimen, action) {
+      // TODO: finish this implementation
       console.log('nonReceivedSpecimensTableActionSelected', shipmentSpecimen.id, action);
     }
   }

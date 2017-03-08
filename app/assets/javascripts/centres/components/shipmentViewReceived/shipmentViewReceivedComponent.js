@@ -5,8 +5,6 @@
 define(function (require) {
   'use strict';
 
-  var _ = require('lodash');
-
   var component = {
     templateUrl : '/assets/javascripts/centres/components/shipmentViewReceived/shipmentViewReceived.html',
     controller: ShipmentViewReceivedController,
@@ -24,8 +22,7 @@ define(function (require) {
     'timeService',
     'modalService',
     'stateHelper',
-    'shipmentReceiveProgressItems',
-    'ShipmentState'
+    'SHIPMENT_RECEIVE_PROGRESS_ITEMS'
   ];
 
   /**
@@ -38,35 +35,31 @@ define(function (require) {
                                           timeService,
                                           modalService,
                                           stateHelper,
-                                          shipmentReceiveProgressItems,
-                                          ShipmentState) {
+                                          SHIPMENT_RECEIVE_PROGRESS_ITEMS) {
     var vm = this;
 
     vm.unpackShipment       = unpackShipment;
     vm.returnToSentState = returnToSentState;
 
     vm.progressInfo = {
-      items: shipmentReceiveProgressItems,
+      items: SHIPMENT_RECEIVE_PROGRESS_ITEMS,
       current: 2
     };
 
     //----
 
     function unpackShipment() {
-      if (_.isUndefined(vm.timeUnpacked)) {
-        vm.timeUnpacked = new Date();
-      }
-      return modalInput.dateTime(gettextCatalog.getString('Date and time shipment was unpacked'),
-                                 gettextCatalog.getString('Time unpacked'),
-                                 vm.timeUnpacked,
-                                 { required: true }).result
+      modalInput.dateTime(gettextCatalog.getString('Date and time shipment was unpacked'),
+                          gettextCatalog.getString('Time unpacked'),
+                          vm.timeUnpacked,
+                          { required: true }).result
         .then(function (timeUnpacked) {
-          return vm.shipment.unpack(timeService.dateAndTimeToUtcString(timeUnpacked));
+          return vm.shipment.unpack(timeService.dateAndTimeToUtcString(timeUnpacked))
+            .catch(notificationsService.updateErrorAndReject);
         })
         .then(function (shipment) {
-          return $state.go('home.shipping.unpack.info', { shipmentId: shipment.id });
-        })
-        .catch(notificationsService.updateError);
+          $state.go('home.shipping.unpack.info', { shipmentId: shipment.id });
+        });
     }
 
     function returnToSentState() {
@@ -75,9 +68,9 @@ define(function (require) {
         gettextCatalog.getString('Are you sure you want to place this shipment in <b>sent</b> state?'))
         .then(function () {
           return vm.shipment.send(vm.shipment.timeSent)
-            .then(stateHelper.reloadAndReinit)
-            .catch(notificationsService.updateError);
-        });
+            .catch(notificationsService.updateErrorAndReject);
+        })
+        .then(stateHelper.reloadAndReinit);
     }
   }
 

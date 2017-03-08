@@ -53,7 +53,7 @@ define(function (require) {
       return {
         id: key,
         label: shipmentStateLabelService.stateToLabel(key),
-        checked: vm.selectedStates.includes(key)
+        checked: _.includes(vm.selectedStates, key)
       };
     });
 
@@ -81,21 +81,17 @@ define(function (require) {
 
     function checkFromStates() {
       _.each(vm.states, function (state) {
-        state.checked = [
-          ShipmentState.CREATED,
-          ShipmentState.PACKED,
-          ShipmentState.SENT,
-        ].includes(state.id);
+        state.checked =
+          (state.id === ShipmentState.CREATED) ||
+          (state.id === ShipmentState.PACKED) ||
+          (state.id === ShipmentState.SENT);
       });
       selectionChanged();
     }
 
     function checkToStates() {
       _.each(vm.states, function (state) {
-        state.checked = [
-          ShipmentState.RECEIVED,
-          ShipmentState.UNPACKED
-        ].includes(state.id);
+        state.checked = (state.id === ShipmentState.RECEIVED) || (state.id === ShipmentState.UNPACKED);
       });
       selectionChanged();
     }

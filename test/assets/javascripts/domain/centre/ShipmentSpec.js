@@ -480,9 +480,9 @@ define(function (require) {
 
     it('can add specimen', function() {
       var self = this,
-      jsonSpecimen = self.factory.specimen(),
-      shipment = new self.Shipment(self.factory.shipment()),
-      inventoryId = self.factory.stringNext();
+          jsonSpecimen = self.factory.specimen(),
+          shipment = new self.Shipment(self.factory.shipment()),
+          inventoryId = self.factory.stringNext();
 
       self.$httpBackend.whenGET(uri('specimens/canadd', shipment.id) + '/' + inventoryId)
         .respond(this.reply(jsonSpecimen));

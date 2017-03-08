@@ -16,9 +16,6 @@ define(function (require) {
 
   ShipmentViewController.$inject = ['gettextCatalog', 'ShipmentState'];
 
-  /**
-   *
-   */
   function ShipmentViewController(gettextCatalog, ShipmentState) {
     var vm = this;
 

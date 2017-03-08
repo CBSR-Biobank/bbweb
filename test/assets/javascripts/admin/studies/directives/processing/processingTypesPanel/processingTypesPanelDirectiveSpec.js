@@ -126,8 +126,8 @@ define([
       _.each(statuses, function (status) {
         entities.study.status = status;
         createController(entities.study, entities.processingTypes);
-        expect(function () { controller.update(entities.processingTypes[0]); }).
-          toThrow(new Error('study is not disabled'));
+        expect(function () { controller.update(entities.processingTypes[0]); })
+          .toThrow(new Error('study is not disabled'));
       });
     });
 
@@ -153,8 +153,8 @@ define([
       _.each(statuses, function (status) {
         entities.study.status = status;
         createController(entities.study, entities.processingTypes);
-        expect(function () { controller.remove(entities.processingTypes[0]); }).
-          toThrow(new Error('study is not disabled'));
+        expect(function () { controller.remove(entities.processingTypes[0]); })
+          .toThrow(new Error('study is not disabled'));
       });
     });
 
@@ -165,9 +165,7 @@ define([
           ptToRemove          = entities.processingTypes[1];
 
       createController(entities.study, entities.processingTypes);
-      spyOn(domainNotificationService, 'removeEntity').and.callFake(function () {
-        return q.when('OK');
-      });
+      spyOn(domainNotificationService, 'removeEntity').and.returnValue(q.when('OK'));
       controller.remove(ptToRemove);
       scope.$digest();
       expect(domainNotificationService.removeEntity).toHaveBeenCalled();

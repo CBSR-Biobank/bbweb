@@ -18,7 +18,7 @@ define(function (require) {
     };
 
     ServerReplyMixin.prototype.errorReply = function(message) {
-      return { status: 'error', message: message || 'error'};
+       return { status: 'error', message: message || 'error'};
     };
 
     return ServerReplyMixin;

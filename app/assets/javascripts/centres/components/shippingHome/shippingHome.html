@@ -23,7 +23,7 @@
      ng-if="vm.hasValidCentres"
      ng-cloak>
   <div class="col-md-6">
-    <select-centre panel-header="{{vm.panelHeader}}"
+    <select-centre panel-header="{{'Select a centre to view its shipping information' | translate}}"
                    get-centres="vm.updateCentres"
                    on-centre-selected="vm.centreSelected"
                    icon="{{vm.centreIcon}}"

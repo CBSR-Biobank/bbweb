@@ -145,7 +145,7 @@ define([
     describe('modalOk', function() {
 
       it('can open a modal and close it with the OK button', function() {
-        var modalInfo,
+        var modalInfo,                                // eslint-disable-line no-unused-vars
             header = this.factory.stringNext(),
             body = this.factory.stringNext();
 
@@ -158,7 +158,7 @@ define([
       });
 
       it('has valid header and body', function() {
-        var modalInfo,
+        var modalInfo,                                // eslint-disable-line no-unused-vars
             header = this.factory.stringNext(),
             body = this.factory.stringNext();
 
@@ -178,7 +178,7 @@ define([
     describe('modalOkCancel', function() {
 
       it('can open a modal and close it with the OK button', function() {
-        var modalInfo,
+        var modalInfo,                                // eslint-disable-line no-unused-vars
             header = this.factory.stringNext(),
             body = this.factory.stringNext();
 
@@ -191,7 +191,7 @@ define([
       });
 
       it('can open a modal and close it with the CANCEL button', function() {
-        var modalInfo,
+        var modalInfo,                                // eslint-disable-line no-unused-vars
             header = this.factory.stringNext(),
             body = this.factory.stringNext();
 
@@ -204,7 +204,7 @@ define([
       });
 
       it('has valid header and body', function() {
-        var modalInfo,
+        var modalInfo,                                // eslint-disable-line no-unused-vars
             header = this.factory.stringNext(),
             body = this.factory.stringNext();
 

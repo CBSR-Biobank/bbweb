@@ -37,11 +37,11 @@ define(['lodash'], function (_) {
 
     vm.$onChanges       = onChanges;
     vm.states           = initStates();
-    vm.centreLocations  = _.keyBy(vm.centreLocations, 'locationId');
     vm.tableDataLoading = true;
     vm.limit            = 5;
     vm.shipmentDates    = {};
     vm.tableController  = null;
+    vm.shipmentStatesFilter = [];
 
     vm.getTableData        = getTableData;
     vm.shipmentInformation = shipmentInformation;
@@ -49,16 +49,17 @@ define(['lodash'], function (_) {
     //--
 
     function onChanges(changesObj) {
-      if (changesObj.shipmentStatesFilter) {
+      if (changesObj.shipmentStatesFilter && changesObj.shipmentStatesFilter.currentValue) {
         vm.shipmentStatesFilter = changesObj.shipmentStatesFilter.currentValue;
         reloadTableData();
       }
     }
 
     function initStates() {
-      return _.concat({ label: 'Any',  value: '' }, _.map(ShipmentState, function (state) {
-        return { label: state, value: state.toLowerCase() };
-      }));
+      return [{ label: 'Any',  value: '' }].concat(
+        _.map(ShipmentState, function (state) {
+          return { label: state, value: state.toLowerCase() };
+        }));
     }
 
     function getTableData(tableState, controller) {
@@ -106,7 +107,7 @@ define(['lodash'], function (_) {
 
         vm.shipmentDates = {};
         _.each(vm.shipments, function (shipment) {
-          if (shipment.isCreated) {
+          if (shipment.isCreated()) {
             vm.shipmentDates[shipment.id] = timeService.dateToDisplayString(shipment.timeAdded);
           } else {
             vm.shipmentDates[shipment.id] = timeService.dateToDisplayString(shipment.timePacked);

@@ -479,7 +479,8 @@ define([
             courierName:      stringNext(),
             trackingNumber:   stringNext(),
             fromLocationInfo: locationInfo,
-            toLocationInfo:   locationInfo
+            toLocationInfo:   locationInfo,
+            specimenCount:    0
           },
           validKeys = commonFieldNames.concat(_.keys(defaults)),
           s = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
@@ -725,7 +726,7 @@ define([
         page:     1,
         offset:   0,
         total:    entities.length,
-        limit: 5,
+        limit:    5,
         next:     2,
         maxPages: 4
       };

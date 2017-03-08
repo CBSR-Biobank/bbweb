@@ -5,8 +5,6 @@
 define(function (require) {
   'use strict';
 
-  var _ = require('lodash');
-
   var component = {
     templateUrl : '/assets/javascripts/centres/components/shipmentViewPacked/shipmentViewPacked.html',
     controller: ShipmentViewPackedController,
@@ -17,53 +15,50 @@ define(function (require) {
   };
 
   ShipmentViewPackedController.$inject = [
+    '$q',
     '$state',
     'gettextCatalog',
-    'shipmentSendProgressItems',
+    'SHIPMENT_SEND_PROGRESS_ITEMS',
     'modalInput',
     'notificationsService',
     'timeService',
-    'modalService',
-    'ShipmentState'
+    'modalService'
   ];
 
   /**
    *
    */
-  function ShipmentViewPackedController($state,
+  function ShipmentViewPackedController($q,
+                                        $state,
                                         gettextCatalog,
-                                        shipmentSendProgressItems,
+                                        SHIPMENT_SEND_PROGRESS_ITEMS,
                                         modalInput,
                                         notificationsService,
                                         timeService,
-                                        modalService,
-                                        ShipmentState) {
+                                        modalService) {
     var vm = this;
 
     vm.sendShipment = sendShipment;
     vm.addMoreItems = addMoreItems;
 
     vm.progressInfo = {
-      items: shipmentSendProgressItems,
+      items: SHIPMENT_SEND_PROGRESS_ITEMS,
       current: 3
     };
 
     //---
 
     function sendShipment() {
-      if (_.isUndefined(vm.timeSent)) {
-        vm.timeSent = new Date();
-      }
-      return modalInput.dateTime(gettextCatalog.getString('Date and time shipment was sent'),
-                                 gettextCatalog.getString('Time sent'),
-                                 vm.timeSent,
-                                 { required: true }).result
+      modalInput.dateTime(gettextCatalog.getString('Date and time shipment was sent'),
+                          gettextCatalog.getString('Time sent'),
+                          new Date(),
+                          { required: true }).result
         .then(function (timeSent) {
           return vm.shipment.send(timeService.dateAndTimeToUtcString(timeSent))
-            .then(function (shipment) {
-              return $state.go('home.shipping');
-            })
-            .catch(notificationsService.updateError);
+            .catch(notificationsService.updateErrorAndReject);
+        })
+        .then(function () {
+          $state.go('home.shipping');
         });
     }
 
@@ -73,10 +68,10 @@ define(function (require) {
         gettextCatalog.getString('Are you sure you want to add more items to this shipment?'))
         .then(function () {
           return vm.shipment.created()
-            .then(function () {
-              $state.go('home.shipping.addItems', { shipmentId: vm.shipment.id });
-            })
-            .catch(notificationsService.updateError);
+            .catch(notificationsService.updateErrorAndReject);
+        })
+        .then(function () {
+          $state.go('home.shipping.addItems', { shipmentId: vm.shipment.id });
         });
     }
   }

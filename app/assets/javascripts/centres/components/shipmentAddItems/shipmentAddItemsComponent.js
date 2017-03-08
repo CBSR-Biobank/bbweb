@@ -20,7 +20,7 @@ define(function (require) {
     '$q',
     '$state',
     'gettextCatalog' ,
-    'shipmentSendProgressItems',
+    'SHIPMENT_SEND_PROGRESS_ITEMS',
     'Shipment',
     'ShipmentState',
     'modalInput',
@@ -39,7 +39,7 @@ define(function (require) {
   function ShipmentAddItemsController($q,
                                       $state,
                                       gettextCatalog,
-                                      shipmentSendProgressItems,
+                                      SHIPMENT_SEND_PROGRESS_ITEMS,
                                       Shipment,
                                       ShipmentState,
                                       modalInput,
@@ -55,7 +55,7 @@ define(function (require) {
     vm.removeShipment = removeShipment;
 
     vm.progressInfo = {
-      items: shipmentSendProgressItems,
+      items: SHIPMENT_SEND_PROGRESS_ITEMS,
       current: 2
     };
 

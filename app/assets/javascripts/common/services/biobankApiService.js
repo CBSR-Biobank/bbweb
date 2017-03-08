@@ -30,10 +30,10 @@ define(['angular', 'jquery'], function (angular, $) {
         .then(function(response) {
           // TODO: check status here and log it if it not 'success'
           if (response.data) {
-            if (method === 'DELETE') {
-              return $q.when(response.data);
-            } else {
+            if (response.data.status === 'success'){
               return $q.when(response.data.data);
+            } else {
+              return $q.when(response.data);
             }
           }
           return $q.when({});
@@ -41,9 +41,10 @@ define(['angular', 'jquery'], function (angular, $) {
         .catch(function(response) {
           if (response.data) {
             $log.error(response.status, response.data.message);
-          } else {
-            $log.error(response.status, response.config.method, response.config.url);
+            return $q.reject(response.data);
           }
+
+          $log.error(response.status, response.config.method, response.config.url);
           return $q.reject(response);
         });
     }

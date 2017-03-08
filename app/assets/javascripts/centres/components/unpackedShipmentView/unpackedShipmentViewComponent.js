@@ -20,7 +20,7 @@ define(function () {
     '$state',
     'modalService',
     'notificationsService',
-    'shipmentReceiveProgressItems',
+    'SHIPMENT_RECEIVE_PROGRESS_ITEMS',
     'gettextCatalog'
   ];
 
@@ -32,7 +32,7 @@ define(function () {
                                           $state,
                                           modalService,
                                           notificationsService,
-                                          shipmentReceiveProgressItems,
+                                          SHIPMENT_RECEIVE_PROGRESS_ITEMS,
                                           gettextCatalog) {
     var vm = this;
 
@@ -74,7 +74,7 @@ define(function () {
     ];
 
     vm.progressInfo = {
-      items: shipmentReceiveProgressItems,
+      items: SHIPMENT_RECEIVE_PROGRESS_ITEMS,
       current: 3
     };
 
@@ -88,10 +88,10 @@ define(function () {
         gettextCatalog.getString('Are you sure you want to place this shipment in <b>received</b> state?'))
         .then(function () {
           return vm.shipment.receive(vm.shipment.timeReceived)
-            .then(function () {
-              $state.go('home.shipping.shipment', { shipmentId: vm.shipment.id }, { reload: true });
-            })
-            .catch(notificationsService.updateError);
+            .catch(notificationsService.updateErrorAndReject);
+        })
+        .then(function () {
+          $state.go('home.shipping.shipment', { shipmentId: vm.shipment.id }, { reload: true });
         });
 
     }

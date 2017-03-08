@@ -10,8 +10,7 @@ define(function (require) {
     controller: ShippingInfoViewController,
     controllerAs: 'vm',
     bindings: {
-      shipment: '<',
-      readOnly: '<'
+      shipment: '<'
     }
   };
 
@@ -35,8 +34,6 @@ define(function (require) {
                                       centreLocationsModalService) {
     var vm = this;
 
-    vm.notificationTimeout = 1500;
-
     vm.editCourierName    = editCourierName;
     vm.editTrackingNumber = editTrackingNumber;
     vm.editFromLocation   = editFromLocation;
@@ -44,11 +41,10 @@ define(function (require) {
 
     //--
 
-    function postUpdate(property, message, title, timeout) {
-      timeout = timeout || vm.notificationTimeout;
+    function postUpdate(property, message, title) {
       return function (shipment) {
         vm.shipment = shipment;
-        notificationsService.success(message, title, timeout);
+        notificationsService.success(message, title);
       };
     }
 
@@ -59,7 +55,8 @@ define(function (require) {
                       { required: true, minLength: 2 }).result
         .then(function (name) {
           vm.shipment.updateCourierName(name)
-            .then(postUpdate(gettextCatalog.getString('Courier changed successfully.'), gettextCatalog.getString('Change successful')))
+            .then(postUpdate(gettextCatalog.getString('Courier changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }
@@ -71,8 +68,8 @@ define(function (require) {
                       { required: true, minLength: 2 }).result
         .then(function (tn) {
           vm.shipment.updateTrackingNumber(tn)
-            .then(postUpdate(gettextCatalog.getString('Tracking number changed successfully.',
-                                     gettextCatalog.getString('Change successful'))))
+            .then(postUpdate(gettextCatalog.getString('Tracking number changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }
@@ -95,12 +92,13 @@ define(function (require) {
     }
 
     function editToLocation() {
-      centreLocationsModalService.open(gettextCatalog.getString('Update to centre'),
-                                       gettextCatalog.getString('To centre'),
-                                       gettextCatalog.getString('The location of the centre this shipment is going to'),
-                                       vm.shipment.toLocationInfo,
-                                       [ vm.shipment.fromLocationInfo ]).result
-        .then(function (selection) {
+      centreLocationsModalService.open(
+        gettextCatalog.getString('Update to centre'),
+        gettextCatalog.getString('To centre'),
+        gettextCatalog.getString('The location of the centre this shipment is going to'),
+        vm.shipment.toLocationInfo,
+        [ vm.shipment.fromLocationInfo ]
+      ).result.then(function (selection) {
           if (selection) {
             vm.shipment.updateToLocation(selection.locationId)
               .then(postUpdate(gettextCatalog.getString('To location changed successfully.'),

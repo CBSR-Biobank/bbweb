@@ -52,7 +52,7 @@ define(function (require) {
       }
     ];
 
-    vm.getPresentSpecimens  = getPresentSpecimens;
+    vm.getExtraSpecimens    = getExtraSpecimens;
     vm.onInventoryIdsSubmit = onInventoryIdsSubmit;
     vm.tableActionSelected  = tableActionSelected;
 
@@ -62,9 +62,10 @@ define(function (require) {
       $scope.$emit('tabbed-page-update', 'tab-selected');
     }
 
-    function getPresentSpecimens(options) {
+    function getExtraSpecimens(options) {
       if (!vm.shipment) { return $q.when({ items: [], maxPages: 0 }); }
 
+      options = options || {};
       _.extend(options, { filter: 'state:in:' + ShipmentItemState.EXTRA });
 
       return ShipmentSpecimen.list(vm.shipment.id, options)
@@ -82,29 +83,31 @@ define(function (require) {
       });
       return vm.shipment.tagSpecimensAsExtra(inventoryIds)
         .then(function () {
+          vm.inventoryIds = '';
           vm.refreshTable += 1;
         })
         .catch(function (err) {
           var modalMsg;
 
-          if (err.data.message) {
-            modalMsg = errorIsAlreadyInShipment(err.data.message);
+          if (err.message) {
+            modalMsg = errorIsAlreadyInShipment(err.message);
             if (_.isUndefined(modalMsg)) {
-              modalMsg = errorIsInAnotherShipment(err.data.message);
+              modalMsg = errorIsInAnotherShipment(err.message);
             }
             if (_.isUndefined(modalMsg)) {
-              modalMsg = errorIsInvalidInventoryId(err.data.message);
+              modalMsg = errorIsInvalidInventoryId(err.message);
             }
             if (_.isUndefined(modalMsg)) {
-              modalMsg = errorIsInvalidCentre(err.data.message);
+              modalMsg = errorIsInvalidCentre(err.message);
             }
           }
 
-          if (_.isUndefined(modalMsg)) {
-            throw new Error('could not parse error message');
+          if (modalMsg) {
+            modalService.modalOk(gettextCatalog.getString('Invalid inventory IDs'), modalMsg);
+            return;
           }
 
-          modalService.modalOk(gettextCatalog.getString('Invalid inventory IDs'), modalMsg);
+          modalService.modalOk(gettextCatalog.getString('Server error'), JSON.stringify(err));
         });
     }
 

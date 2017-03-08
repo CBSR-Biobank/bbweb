@@ -5,8 +5,6 @@
 define(function (require) {
   'use strict';
 
-  var _ = require('lodash');
-
   var component = {
     templateUrl : '/assets/javascripts/centres/components/shipmentSpecimensAdd/shipmentSpecimensAdd.html',
     controller: ShipmentSpecimensAddController,
@@ -53,7 +51,7 @@ define(function (require) {
                   ShipmentSpecimen: ShipmentSpecimen
                 });
 
-    vm.inventoryIds           = [];
+    vm.inventoryIds           = '';
     vm.refreshSpecimensTable  = 0;
     vm.addSpecimens           = addSpecimens;
     vm.removeShipmentSpecimen = removeShipmentSpecimen;
@@ -70,7 +68,7 @@ define(function (require) {
     function addSpecimens() {
       var inventoryIdsArr;
 
-      if (!_.isString(vm.inventoryIds)) {
+      if (!vm.inventoryIds) {
         // nothing to do
         return;
       }
@@ -83,23 +81,23 @@ define(function (require) {
               body,
               inventoryIds;
 
-          if (error.data && error.data.message) {
-            inventoryIds = error.data.message.split(': ');
+          if (error && error.message) {
+            inventoryIds = error.message.split(': ');
 
-            if (error.data.message.match(/invalid specimen inventory IDs/)) {
+            if (error.message.match(/invalid specimen inventory IDs/)) {
               body = gettextCatalog.getString(
                 'Inventory IDs not present in the system:<br><b>{{ids}}</b>',
                 { ids: inventoryIds[2] });
-            } else if (error.data.message.match(/specimens are already in an active shipment/)) {
+            } else if (error.message.match(/specimens are already in an active shipment/)) {
               body = gettextCatalog.getString(
                 'Inventory IDs already in this shipment or another shipment:<br><b>{{ids}}</b>',
                 { ids: inventoryIds[2] });
-            } else if (error.data.message.match(/invalid centre for specimen inventory IDs/)) {
+            } else if (error.message.match(/invalid centre for specimen inventory IDs/)) {
               body = gettextCatalog.getString(
                 'Inventory IDs at a different location than where shipment is coming from:<br><b>{{ids}}</b> ',
                 { ids: inventoryIds[2] });
             } else {
-              body = error.data.message;
+              body = error.message;
             }
           } else {
             body = JSON.stringify(error);

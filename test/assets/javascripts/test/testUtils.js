@@ -68,9 +68,11 @@ define(function (require) {
         toContainAll: function(util, customEqualityTesters) {
           return {
             compare: function(actual, expected) {
-              return { pass: _.each(expected, function (item) {
-                return util.contains(actual, item, customEqualityTesters); })
-                };
+              return {
+                pass: _.each(expected, function (item) {
+                  return util.contains(actual, item, customEqualityTesters);
+                })
+              };
             }
           };
         }

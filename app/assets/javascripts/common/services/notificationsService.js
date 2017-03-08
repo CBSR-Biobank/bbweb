@@ -5,17 +5,18 @@
 define(function() {
   'use strict';
 
-  notificationsService.$inject = ['gettextCatalog', 'toastr'];
+  notificationsService.$inject = ['$q', 'gettextCatalog', 'toastr'];
 
   /**
    *
    */
-  function notificationsService(gettextCatalog, toastr) {
+  function notificationsService($q, gettextCatalog, toastr) {
     var service = {
-      submitSuccess: submitSuccess,
-      success:       success,
-      error:         error,
-      updateError:   updateError
+      submitSuccess:        submitSuccess,
+      success:              success,
+      error:                error,
+      updateError:          updateError,
+      updateErrorAndReject: updateErrorAndReject
     };
     return service;
 
@@ -57,6 +58,14 @@ define(function() {
         message += ': ' + err.data.message;
       }
       error(message, title);
+    }
+
+    /**
+     * Error is the error returned from a biobankApiService call that failed.
+     */
+    function updateErrorAndReject(err) {
+      updateError(err);
+      return $q.reject(err);
     }
 
   }

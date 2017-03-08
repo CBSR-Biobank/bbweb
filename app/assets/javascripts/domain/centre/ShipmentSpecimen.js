@@ -111,6 +111,10 @@ define(function (require) {
       obj = obj || {};
       ConcurrencySafeEntity.call(this, obj);
       _.extend(this, obj);
+
+      if (obj.specimen) {
+        _.extend(this, { specimen: new Specimen(obj.specimen) });
+      }
     }
 
     ShipmentSpecimen.prototype = Object.create(ConcurrencySafeEntity.prototype);

@@ -13,12 +13,12 @@ define(function (require) {
 
   module = angular.module(name, [])
     .config(require('./states'))
-    .constant('shipmentSendProgressItems', [
+    .constant('SHIPMENT_SEND_PROGRESS_ITEMS', [
       'Shipping information',
       'Items to ship',
       'Packed'
     ])
-    .constant('shipmentReceiveProgressItems', [
+    .constant('SHIPMENT_RECEIVE_PROGRESS_ITEMS', [
       'Sent',
       'Receive',
       'Unpack',

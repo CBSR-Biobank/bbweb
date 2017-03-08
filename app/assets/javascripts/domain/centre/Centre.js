@@ -210,7 +210,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
      * Concatenates the centre name and location name so that they can be selected from a
      * drop down list.
      *
-     * @param {domain.centres.CentreLocationDto} - the locations returned from the server.
+     * @param {domain.centres.CentreLocationDto} centreLocations - the locations returned from the server.
      *
      * @returns {Promise<Array<domain.centres.CentreLocationName>>} A promise.
      */

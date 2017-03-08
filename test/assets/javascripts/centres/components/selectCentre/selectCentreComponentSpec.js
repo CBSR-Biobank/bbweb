@@ -61,7 +61,7 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin, testUtils) {
+    beforeEach(inject(function(TestSuiteMixin) {
       var SuiteMixin = new SuiteMixinFactory(TestSuiteMixin);
       _.extend(this, SuiteMixin.prototype);
       this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
@@ -112,10 +112,16 @@ define([
           limit = centres.length / 2;
 
       self.createScope({ getCentres: self.createGetCentresFn(centres), limit: limit });
-
       spyOn(self.scope.model, 'getCentres').and.callThrough();
-      self.controller.nameFilterUpdated();
-      expect(this.scope.model.getCentres).toHaveBeenCalled();
+
+      _.forEach([
+        { callCount: 1, nameFilter: 'test' },
+        { callCount: 2, nameFilter: '' }
+      ], function (obj) {
+        self.controller.nameFilter = obj.nameFilter;
+        self.controller.nameFilterUpdated();
+        expect(self.scope.model.getCentres.calls.count()).toBe(obj.callCount);
+      });
     });
 
     it('page change causes centres to be re-loaded', function() {

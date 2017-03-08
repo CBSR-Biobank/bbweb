@@ -7,12 +7,15 @@ define(function (require) {
 
   var _ = require('lodash');
 
+  /**
+   *
+   * @param {domain.centres.CentreLocationDto} - the locations returned from the server.
+   */
   var component = {
     templateUrl : '/assets/javascripts/centres/components/shippingHome/shippingHome.html',
     controller: ShippingHomeController,
     controllerAs: 'vm',
     bindings: {
-      centreLocations: '<'
     }
   };
 
@@ -28,10 +31,9 @@ define(function (require) {
   function ShippingHomeController($state, gettextCatalog, Centre) {
     var vm = this;
 
-    vm.updateCentres   = updateCentres;
     vm.hasValidCentres = false;
-    vm.panelHeader     = gettextCatalog.getString('Select a centre to view its shipping information');
     vm.centreIcon      = 'glyphicon-ok-circle';
+    vm.updateCentres   = updateCentres;
     vm.centreSelected  = centreSelected;
 
     vm.$onInit = onInit;
