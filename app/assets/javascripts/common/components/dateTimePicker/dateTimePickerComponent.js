@@ -10,12 +10,12 @@ define(function () {
     controller: DateTimePickerController,
     controllerAs: 'vm',
     bindings: {
-      label: '@',
+      label:        '@',
       defaultValue: '<',
-      required: '<',
-      onEdit: '&',
-      labelCols: '@',
-      inputCols: '@'
+      required:     '<',
+      onEdit:       '&',
+      labelCols:    '@',
+      inputCols:    '@'
     }
   };
 

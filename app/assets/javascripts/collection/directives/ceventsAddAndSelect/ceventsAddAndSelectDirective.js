@@ -120,6 +120,7 @@ define(['lodash'], function(_) {
       } else {
         vm.pagerOptions.filter = '';
       }
+      vm.pagerOptions.page = 1;
       updateCollectionEvents();
     }
   }

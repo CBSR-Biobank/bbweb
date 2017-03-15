@@ -15,7 +15,7 @@ define(['lodash'], function(_) {
       bindToController: {
         getHeader:              '&',
         getStudies:             '&',
-        limit:               '=',
+        limit:                  '=',
         messageNoResults:       '@',
         icon:                   '@',
         navigateStateName:      '@',
@@ -32,11 +32,10 @@ define(['lodash'], function(_) {
   SelectStudyCtr.$inject = [
     '$state',
     'gettextCatalog',
-    'modalService',
-    'filterExpression'
+    'modalService'
   ];
 
-  function SelectStudyCtr($state, gettextCatalog, modalService, filterExpression) {
+  function SelectStudyCtr($state, gettextCatalog, modalService) {
     var vm = this;
 
     vm.displayStates = {
@@ -71,13 +70,11 @@ define(['lodash'], function(_) {
     }
 
     function updateStudies() {
-      var filterElements = [
-            { key: 'name',  value: vm.nameFilterWildcard },
-            { key: 'state', value: 'enabled' }
-          ];
+      if (vm.pagerOptions.filter) {
+        vm.pagerOptions.filter += ';';
+      }
 
-      _.extend(vm.pagerOptions, { filter: filterExpression.create(filterElements) });
-
+      vm.pagerOptions.filter += 'state::enabled';
       vm.getStudies()(vm.pagerOptions).then(function (pagedResult) {
         vm.pagedResult = pagedResult;
         vm.displayState = getDisplayState();
@@ -90,9 +87,9 @@ define(['lodash'], function(_) {
      */
     function nameFilterUpdated() {
       if (!_.isUndefined(vm.nameFilter) && (vm.nameFilter !== '')) {
-        vm.nameFilterWildcard = '*' + vm.nameFilter + '*';
+        vm.pagerOptions.filter = 'name:like:' + vm.nameFilter;
       } else {
-        vm.nameFilterWildcard = '';
+        vm.pagerOptions.filter = '';
       }
       vm.pagerOptions.page = 1;
       updateStudies();

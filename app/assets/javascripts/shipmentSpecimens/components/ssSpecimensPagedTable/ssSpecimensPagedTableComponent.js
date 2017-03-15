@@ -10,7 +10,7 @@ define(function (require) {
   /**
    * Displays Shipment Specimens in a table.
    *
-   * @param {string} defaultSortField - The column to sort by initially.
+   * @param {string} defaultSortField - The column to initially sort by.
    *
    * @param {int} refresh - Increment this counter refresh the table.
    *
@@ -57,10 +57,9 @@ define(function (require) {
     vm.$onChanges        = onChanges;
     vm.shipmentSpecimens = [];
     vm.limit             = 10;
-    vm.tableController   = undefined;
+    vm.tableController   = null;
     vm.getTableData      = getTableData;
     vm.tableDataLoading  = true;
-    vm.refresh           = 0;
     vm.hasActions        = _.isArray(vm.actions) && (vm.actions.length > 0);
     vm.actionSelected    = actionSelected;
 

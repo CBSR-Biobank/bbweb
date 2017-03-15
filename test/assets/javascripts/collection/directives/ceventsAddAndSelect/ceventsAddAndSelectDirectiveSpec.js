@@ -164,6 +164,37 @@ define([
         { collectionEventId: this.collectionEvent.id });
     });
 
+    describe('for updating visit number filter', function() {
+
+      beforeEach(function() {
+        spyOn(this.CollectionEvent, 'list').and.returnValue(this.$q.when(this.pagedResult));
+      });
+
+
+      it('filter is updated when user enters a value', function() {
+        var visitNumber = '20';
+
+        createController.call(this);
+        this.controller.visitNumberFilter = visitNumber;
+        this.controller.visitFilterUpdated();
+        this.scope.$digest();
+
+        expect(this.controller.pagerOptions.filter).toEqual('visitNumber::' + visitNumber);
+        expect(this.controller.pagerOptions.page).toEqual(1);
+      });
+
+      it('filter is updated when user clears the value', function() {
+        createController.call(this);
+        this.controller.visitNumberFilter = '';
+        this.controller.visitFilterUpdated();
+        this.scope.$digest();
+
+        expect(this.controller.pagerOptions.filter).toBeEmptyString();
+        expect(this.controller.pagerOptions.page).toEqual(1);
+      });
+
+    });
+
   });
 
 });

@@ -50,7 +50,11 @@
       'home',
       'shipmentSpecimens',
       'studies',
-      'users'
+      'users',
+      {
+        name: 'biobankTest',
+        location: '../../../test/assets/javascripts/test'
+      },
     ],
 
     paths: {
@@ -76,7 +80,6 @@
       'ui-bootstrap':                 '../../../target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/dist/ui-bootstrap-tpls',
 
       //
-      'biobankTest':                  '../../../test/assets/javascripts/test/module',
       'biobankApp':                   'app'
     },
 
@@ -95,6 +98,7 @@
       'bootstrap-ui-datetime-picker': ['angular'],
       'smart-table':                  ['angular'],
       'ui-bootstrap':                 ['angular'],
+      'biobankTest':                  ['angular'],
       'biobankApp':                   { exports: 'biobankApp' }
     },
 

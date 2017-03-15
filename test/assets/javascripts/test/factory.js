@@ -720,7 +720,9 @@ define([
       });
     }
 
-    function pagedResult(entities) {
+    function pagedResult(entities, options) {
+      options = options || {};
+
       return {
         items:    entities,
         page:     1,
@@ -728,7 +730,7 @@ define([
         total:    entities.length,
         limit:    5,
         next:     2,
-        maxPages: 4
+        maxPages: options.maxPages || 4
       };
     }
   }

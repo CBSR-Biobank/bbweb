@@ -5,9 +5,10 @@
 define(function (require) {
   'use strict';
 
-  var angular         = require('angular'),
-      mocks           = require('angularMocks'),
-      _               = require('lodash');
+  var mocks           = require('angularMocks'),
+      _               = require('lodash'),
+      shipmentSpecimensControllerSharedBehaviour =
+      require('../../../test/shipmentSpecimensControllerSharedBehaviour');
 
   describe('shipmentSpecimensAddComponent', function() {
 
@@ -153,6 +154,12 @@ define(function (require) {
         expect(this.Shipment.prototype.remove).not.toHaveBeenCalled();
         expect(this.controller.refreshSpecimensTable).toBe(refreshCount);
       });
+
+    });
+
+    describe('(shared)', function() {
+
+      shipmentSpecimensControllerSharedBehaviour();
 
     });
 

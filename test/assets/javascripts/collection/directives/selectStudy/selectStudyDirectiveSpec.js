@@ -132,8 +132,15 @@ define([
                          limit: limit
                        });
       spyOn(self.scope.model, 'getStudies').and.callThrough();
-      self.controller.nameFilterUpdated();
-      expect(this.scope.model.getStudies).toHaveBeenCalled();
+
+      _.forEach([
+        { callCount: 1, nameFilter: 'test' },
+        { callCount: 2, nameFilter: '' }
+      ], function (obj) {
+        self.controller.nameFilter = obj.nameFilter;
+        self.controller.nameFilterUpdated();
+        expect(self.scope.model.getStudies.calls.count()).toBe(obj.callCount);
+      });
     });
 
     it('page change causes studies to be re-loaded', function() {
@@ -182,6 +189,57 @@ define([
 
       expect(self.controller.studyGlyphicon(studyToNavigateTo))
         .toEqual('<i class="glyphicon glyphicon-ok-circle"></i>');
+    });
+
+    describe('when selecting a study', function() {
+
+      beforeEach(function() {
+        this.injectDependencies('$state', 'Study');
+        this.study = new this.Study(this.factory.study());
+      });
+
+      it('a state change is triggered when a study is selected', function() {
+        var location = this.factory.location(),
+            centre = this.factory.centre({ locations: [ location ] }),
+            centreLocations = this.factory.centreLocations([ centre ]),
+            args;
+
+        spyOn(this.$state, 'go').and.returnValue(null);
+        spyOn(this.Study.prototype, 'allLocations').and.returnValue(this.$q.when(centreLocations));
+
+        createScope.call(this,
+                         {
+                           getStudies: createGetStudiesFn.call(this, []),
+                           limit: 1
+                         });
+
+        this.controller.studySelected(this.study);
+        this.scope.$digest();
+        expect(this.$state.go).toHaveBeenCalled();
+
+        args = this.$state.go.calls.argsFor(0);
+        expect(args[0]).toEqual(navigateStateName);
+        expect(args[1][navigateStateParamName]).toEqual(this.study.id);
+      });
+
+      it('when the selected study does not have centres associated with it', function() {
+        this.injectDependencies('modalService');
+
+        spyOn(this.Study.prototype, 'allLocations').and.returnValue(this.$q.when([]));
+        spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
+
+        createScope.call(this,
+                         {
+                           getStudies: createGetStudiesFn.call(this, []),
+                           limit: 1
+                         });
+
+        this.controller.studySelected(this.study);
+        this.scope.$digest();
+        expect(this.modalService.modalOk).toHaveBeenCalled();
+      });
+
+
     });
 
   });

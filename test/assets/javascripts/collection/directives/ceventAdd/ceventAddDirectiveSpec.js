@@ -142,6 +142,17 @@ define([
       expect(this.$state.go).toHaveBeenCalledWith('home.collection.study.participant.cevents');
     });
 
+    it('time completed is updated when edited', function() {
+      var timeNow = new Date();
+
+      createDirective.call(this);
+      this.controller.dateTimeOnEdit(timeNow);
+      this.scope.$digest();
+
+      expect(this.controller.timeCompleted).toEqual(timeNow);
+    });
+
+
   });
 
 });

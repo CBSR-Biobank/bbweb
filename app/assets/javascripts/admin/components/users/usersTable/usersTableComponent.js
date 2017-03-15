@@ -15,25 +15,29 @@ define(['lodash'], function(_) {
   };
 
   UsersTableController.$inject = [
+    '$log',
     'AppConfig',
     'User',
     'UserCounts',
     'UserState',
     'UserViewer',
     'modalService',
-    'filterExpression'
+    'filterExpression',
+    'gettextCatalog'
   ];
 
   /**
    *
    */
-  function UsersTableController(AppConfig,
+  function UsersTableController($log,
+                                AppConfig,
                                 User,
                                 UserCounts,
                                 UserState,
                                 UserViewer,
                                 modalService,
-                                filterExpression) {
+                                filterExpression,
+                                gettextCatalog) {
     var vm = this;
 
     vm.users            = [];
@@ -88,22 +92,22 @@ define(['lodash'], function(_) {
     }
 
     function changeState(user, method, state) {
-      var index = vm.users.indexOf(user),
-          modalOptions = {
-            closeButtonText: 'Cancel',
-            actionButtonText: 'OK',
-            headerHtml: 'Change user state',
-            bodyHtml: 'Please confirm that you want to ' + state + ' user "' + user.name + '"?'
-          };
+      var index = vm.users.indexOf(user);
 
-      modalService.showModal({}, modalOptions)
+      if (index < 0) {
+        $log.error('user not found');
+        throw new Error('user not found');
+      }
+
+      modalService.modalOkCancel(
+        gettextCatalog.getString('Change user state'),
+        gettextCatalog.getString('Please confirm that you want to {{stateAction}} user {{userName}}',
+                                 {
+                                   stateAction: state,
+                                   userName: user.name
+                                 }))
         .then(function () { return user[method](); })
-        .then(function() { return User.get(user.id); })
         .then(function (updatedUser) {
-          if (index < 0) {
-            console.error('cannot not update user');
-            return;
-          }
           vm.users[index] = updatedUser;
         });
     }

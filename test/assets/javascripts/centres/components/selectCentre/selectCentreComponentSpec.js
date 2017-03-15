@@ -106,7 +106,7 @@ define([
       expect(self.element.find('ul.pagination-sm').length).toBe(1);
     });
 
-    it('updates to name filter cause studies to be re-loaded', function() {
+    it('updates to name filter cause centres to be re-loaded', function() {
       var self = this,
           centres = _.map(_.range(8), function () { return self.factory.centre(); }),
           limit = centres.length / 2;

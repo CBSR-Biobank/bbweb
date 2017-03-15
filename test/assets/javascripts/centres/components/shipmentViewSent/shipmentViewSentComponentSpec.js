@@ -5,12 +5,9 @@
 define(function (require) {
   'use strict';
 
-  /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "angular" }]*/
-
-  var angular = require('angular'),
-      mocks   = require('angularMocks'),
-      moment  = require('moment'),
-      _       = require('lodash');
+  var mocks  = require('angularMocks'),
+      moment = require('moment'),
+      _      = require('lodash');
 
   describe('shipmentViewSentComponent', function() {
 

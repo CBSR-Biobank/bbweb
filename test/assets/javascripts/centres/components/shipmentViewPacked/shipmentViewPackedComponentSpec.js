@@ -5,10 +5,9 @@
 define(function (require) {
   'use strict';
 
-  var angular = require('angular'),
-      mocks   = require('angularMocks'),
-      moment  = require('moment'),
-      _       = require('lodash');
+  var mocks  = require('angularMocks'),
+      moment = require('moment'),
+      _      = require('lodash');
 
   describe('shipmentViewPackedComponent', function() {
 

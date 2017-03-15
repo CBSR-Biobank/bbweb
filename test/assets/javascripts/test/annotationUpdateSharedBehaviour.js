@@ -84,6 +84,23 @@ define(function () {
         expect(this.notificationsService.updateError).toHaveBeenCalled();
       });
 
+      it('throws an exception if annotation is invalid', function() {
+        var self = this,
+            annotation = {
+              annotationType: {
+                name: ''
+              },
+              getLabel: function () { return null; }
+            };
+
+        context.createDirective.call(this);
+
+        expect(function () {
+          self.controller[context.controllerUpdateFuncName](annotation);
+        }).toThrowError(/invalid annotation type/);
+      });
+
+
     });
   }
 

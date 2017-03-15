@@ -11,42 +11,12 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  function SuiteMixinFactory(TestSuiteMixin) {
-
-    function SuiteMixin() {
-    }
-
-    SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
-
-    SuiteMixin.prototype.createScope = function (userCounts) {
-      this.element = angular.element('<users-table user-counts="vm.userCounts"></users-table>');
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = { userCounts:  userCounts };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('usersTable');
-    };
-
-    SuiteMixin.prototype.createUserCounts = function (registered, active, locked) {
-      return new this.UserCounts({
-        total:      registered + active + locked,
-        registered: registered,
-        active:     active,
-        locked:     locked
-      });
-    };
-
-    return SuiteMixin;
-  }
-
   describe('Component: usersTableComponent', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin) {
-      var SuiteMixin = new SuiteMixinFactory(TestSuiteMixin);
-      _.extend(this, SuiteMixin.prototype);
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, ComponentTestSuiteMixin.prototype);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -61,6 +31,23 @@ define([
       this.putHtmlTemplates(
         '/assets/javascripts/admin/components/users/usersTable/usersTable.html',
         '/assets/javascripts/common/directives/pagination.html');
+
+      this.createScope = function (userCounts) {
+        ComponentTestSuiteMixin.prototype.createScope.call(
+          this,
+          '<users-table user-counts="vm.userCounts"></users-table>',
+          { userCounts:  userCounts },
+          'usersTable');
+      };
+
+      this.createUserCounts = function (registered, active, locked) {
+        return new this.UserCounts({
+          total:      registered + active + locked,
+          registered: registered,
+          active:     active,
+          locked:     locked
+        });
+      };
     }));
 
     it('scope is valid on startup', function() {
@@ -81,28 +68,47 @@ define([
       expect(nonHashedPossibleStates).toContain({ id: 'all', title: 'All'});
     });
 
-    it('changing a users state works', function() {
-      var self          = this,
-          counts        = self.createUserCounts(1, 2, 3),
-          stateFnNames = ['activate', 'lock', 'unlock'],
-          user          = self.User.create(self.factory.user());
+    describe('changing user state', function() {
 
-      spyOn(self.User, 'get').and.returnValue(self.$q.when(user));
-      spyOn(self.User, 'list').and.returnValue(self.$q.when(self.factory.pagedResult([ user ])));
-      spyOn(self.modalService, 'showModal').and.returnValue(self.$q.when('--dont-care--'));
-
-      self.createScope(counts);
-      self.controller.getTableData({ pagination: { start: 0 }, search: {}, sort: {} });
-      self.scope.$digest();
-      expect(self.controller.users).toBeArrayOfSize(1);
-
-      _.each(stateFnNames, function(stateFnName) {
-        spyOn(self.User.prototype, stateFnName).and.returnValue(self.$q.when('state changed'));
-
-        self.controller[stateFnName](user);
-        self.scope.$digest();
-        expect(self.User.prototype[stateFnName]).toHaveBeenCalled();
+      beforeEach(function() {
+        this.counts       = this.createUserCounts(1, 2, 3);
+        this.stateFnNames = ['activate', 'lock', 'unlock'];
+        this.user         = new this.User(this.factory.user());
+        spyOn(this.User, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([ this.user ])));
       });
+
+      it('changing a users state works', function() {
+        var self = this;
+
+        spyOn(self.modalService, 'modalOkCancel').and.returnValue(self.$q.when('OK'));
+
+        self.createScope(this.counts);
+        self.controller.getTableData({ pagination: { start: 0 }, search: {}, sort: {} });
+        self.scope.$digest();
+        expect(self.controller.users).toBeArrayOfSize(1);
+
+        this.stateFnNames.forEach(function(stateFnName) {
+          spyOn(self.User.prototype, stateFnName).and.returnValue(self.$q.when(self.user));
+
+          self.controller[stateFnName](self.user);
+          self.scope.$digest();
+          expect(self.User.prototype[stateFnName]).toHaveBeenCalled();
+        });
+      });
+
+      it('throw error if user not in table', function() {
+        var self = this,
+            user = new this.User(this.factory.user());
+
+        this.createScope(this.counts);
+        this.stateFnNames.forEach(function(stateFnName) {
+          expect(function () {
+            self.controller[stateFnName](user);
+          }).toThrowError(/user not found/);
+        });
+      });
+
+
     });
 
     it('can view user information', function() {

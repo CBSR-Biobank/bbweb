@@ -73,24 +73,22 @@ define(['angular', 'lodash'], function(angular, _) {
       });
     }
 
-    function onSelect(item) {
+    function onSelect(study) {
       if (!vm.centre.isDisabled()) {
         $log.error('Should not be allowed to add studies to centre if centre is not disabled');
         throw new Error('An application error occurred, please contact your administrator.');
       }
 
       // add the study only if it's not there
-      if(_.indexOf(vm.centre.studyIds, item.id) < 0) {
-        vm.centre.addStudy(item).then(addSuccessful);
+      if(_.indexOf(vm.centre.studyIds, study.id) < 0) {
+        vm.centre.addStudy(study).then(addSuccessful);
       }
       vm.selected = undefined;
 
       function addSuccessful(centre) {
-        var study = vm.studyNamesById[item.id];
         vm.centre = centre;
-        vm.studyCollection.push(study);
+        vm.studyCollection.push(vm.studyNamesById[study.id]);
       }
-
     }
 
     function information(studyId) {

@@ -69,7 +69,7 @@
       'angular-gettext':              ['angular'],
       'angular-messages':             ['angular'],
       'angular-sanitize':             ['angular'],
-      'angular-toastr':               { deps: ['angular'], exports: 'toastr' },
+      'angular-toastr':               ['angular'],
       'angular-ui-router':            ['angular'],
       'angular-utils-ui-breadcrumbs': ['angular'],
       'bootstrap':                    { deps: ['jquery'] },

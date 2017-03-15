@@ -47,6 +47,7 @@ define([
       self.injectDependencies('$rootScope',
                               '$compile',
                               '$q',
+                              '$state',
                               'Centre',
                               'Location',
                               'modalService',
@@ -98,21 +99,33 @@ define([
     });
 
     it('displays information modal when removal of a location fails', function() {
-      var entities            = createEntities.call(this),
-          locationToRemove    = entities.locations[0],
-          deferred            = this.$q.defer();
+      var entities         = createEntities.call(this),
+          locationToRemove = entities.locations[0];
 
-      deferred.reject('simulated remove error');
       entities.centre.locations.push(locationToRemove);
 
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
-      spyOn(this.Centre.prototype, 'removeLocation').and.returnValue(deferred.promise);
+      spyOn(this.Centre.prototype, 'removeLocation').and.returnValue(this.$q.reject('simulated error'));
 
       createController.call(this, entities.centre);
       this.controller.remove(locationToRemove);
       this.scope.$digest();
       expect(this.modalService.modalOkCancel.calls.count()).toBe(2);
     });
+
+    it('allows a user to view a location', function() {
+      var centre = new this.Centre(this.factory.centre()),
+          location = new this.Location(this.factory.location());
+
+      spyOn(this.$state, 'go').and.returnValue(null);
+
+      createController.call(this, centre);
+      this.controller.view(location);
+      expect(this.$state.go).toHaveBeenCalledWith(
+        'home.admin.centres.centre.locations.locationView',
+        { uniqueId: location.uniqueId });
+    });
+
 
   });
 

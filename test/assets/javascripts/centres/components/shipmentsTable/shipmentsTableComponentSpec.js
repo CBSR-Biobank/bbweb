@@ -5,10 +5,7 @@
 define(function (require) {
   'use strict';
 
-  /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "angular" }]*/
-
-  var angular         = require('angular'),
-      mocks           = require('angularMocks'),
+  var mocks           = require('angularMocks'),
       _               = require('lodash');
 
   describe('shipmentsTableComponent', function() {

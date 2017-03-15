@@ -182,14 +182,14 @@ define(['lodash'], function (_) {
             gettextCatalog.getString('Collection event with name {{name}} cannot be removed',
                     { name: vm.ceventType.name }));
         }
-
-        function promiseFn() {
-          return vm.ceventType.remove().then(function () {
-            notificationsService.success(gettextCatalog.getString('Collection event removed'));
-            $state.go('home.admin.studies.study.collection', {}, { reload: true });
-          });
-        }
       });
+
+      function promiseFn() {
+        return vm.ceventType.remove().then(function () {
+          notificationsService.success(gettextCatalog.getString('Collection event removed'));
+          $state.go('home.admin.studies.study.collection', {}, { reload: true });
+        });
+      }
     }
   }
 

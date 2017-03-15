@@ -31,13 +31,11 @@ define([
 
     var createEntities = function () {
        var self = this,
-           entities = {};
-
-      entities.centre = new self.Centre(self.factory.centre());
-      entities.studies = _.map(_.range(3), function () {
-        return new self.Study(self.factory.study());
-      });
-      return entities;
+           studies = _.map(_.range(3), function () {
+             return new self.Study(self.factory.study());
+           }),
+           centre = new self.Centre(self.factory.centre());
+      return { centre: centre, studies: studies};
     };
 
     var createController = function (entities) {
@@ -78,6 +76,7 @@ define([
                               '$compile',
                               '$q',
                               'Centre',
+                              'CentreState',
                               'Study',
                               'EntityViewer',
                               'modalService',
@@ -134,36 +133,51 @@ define([
       });
     });
 
-    it('adds a new study when selected', function() {
-      var entities   = createEntities.call(this),
-          studyToAdd = entities.studies[2],
-          numStudiesBeforeAdd;
+    describe('when a study is selected', function() {
 
-      // studiesToAdd[2] is NOT one of the studies already associated with the centre
+      beforeEach(function() {
+        this.entities = createEntities.call(this);
+        spyOn(this.Centre.prototype, 'addStudy').and.returnValue(this.$q.when(this.entities.centre));
+        this.entities.centre.studyIds = [ this.entities.studies[1].id ];
+        createController.call(this, this.entities);
+      });
 
-      createController.call(this, entities);
-      spyOn(entities.centre, 'addStudy').and.returnValue(this.$q.when(entities.centre));
-      numStudiesBeforeAdd = this.controller.studyCollection.length;
-      this.controller.onSelect(studyToAdd);
-      this.scope.$digest();
-      expect(this.controller.studyCollection).toContain(studyNameDto.call(this, studyToAdd));
-      expect(this.controller.studyCollection.length).toBe(numStudiesBeforeAdd + 1);
-    });
+      it('adds a new study when selected', function() {
+        var numStudiesBeforeAdd = this.controller.studyCollection.length,
+            studyToAdd = this.entities.studies[2];
 
-    it('does not add an exiting study when selected', function() {
-      var entities   = createEntities.call(this),
-          studyToAdd = entities.studies[1],
-          numStudiesBeforeAdd;
+        // studiesToAdd[2] is NOT one of the studies already associated with the centre
 
-      // studiesToAdd[1] is already associated with the centre
+        this.controller.onSelect(studyToAdd);
+        this.scope.$digest();
+        expect(this.controller.studyCollection).toContain(studyNameDto(studyToAdd));
+        expect(this.controller.studyCollection.length).toBe(numStudiesBeforeAdd + 1);
+      });
 
-      createController.call(this, entities);
-      spyOn(entities.centre, 'addStudy').and.returnValue(this.$q.when(entities.centre));
-      numStudiesBeforeAdd = this.controller.studyCollection.length;
-      this.controller.onSelect(studyToAdd);
-      this.scope.$digest();
-      expect(this.controller.studyCollection).toContain(studyNameDto.call(this, studyToAdd));
-      expect(this.controller.studyCollection.length).toBe(numStudiesBeforeAdd + 1);
+      it('does not add an exiting study when selected', function() {
+        var numStudiesBeforeAdd = this.controller.studyCollection.length,
+            studyToAdd = this.entities.studies[1];
+
+        // studiesToAdd[1] is already associated with the centre
+        expect(this.controller.studyCollection).toContain(studyNameDto(studyToAdd));
+
+        this.controller.onSelect(studyToAdd);
+        this.scope.$digest();
+
+        expect(this.controller.studyCollection).toContain(studyNameDto(studyToAdd));
+        expect(this.controller.studyCollection.length).toBe(numStudiesBeforeAdd);
+      });
+
+      it('if centre is not disabled, an exception is thrown', function() {
+        var self = this,
+            studyToAdd = this.entities.studies[0];
+
+        this.entities.centre.state = this.CentreState.ENABLED;
+        expect(function () {
+          self.controller.onSelect(studyToAdd);
+        }).toThrowError(/An application error occurred/);
+      });
+
     });
 
     it('study viewer is displayed', function() {

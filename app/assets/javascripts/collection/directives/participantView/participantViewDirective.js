@@ -65,10 +65,6 @@ define(['lodash'], function (_) {
           vm.active = index;
         }
       });
-
-      $scope.$on('gettextLanguageChanged', function () {
-        stateHelper.reloadAndReinit();
-      });
     }
 
   }

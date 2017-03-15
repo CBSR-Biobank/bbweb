@@ -33,7 +33,6 @@ define(function (require) {
         this.modalElement = this.modalElementFind();
         this.scope = this.modalElement.scope();
       };
-
     }));
 
     it('can open modal', function() {

@@ -50,6 +50,31 @@ define([
       this.$httpBackend.flush();
     });
 
+    it('GET method with no data returns empty object', function() {
+      var promiseSuccess = false;
+
+      this.$httpBackend.whenGET('/test').respond(200, undefined);
+      this.biobankApi.get('/test').then(function(result) {
+        expect(result).toEqual({});
+        promiseSuccess = true;
+      });
+      this.$httpBackend.flush();
+      expect(promiseSuccess).toBeTrue();
+    });
+
+    it('GET error response with no data returns empty object', function() {
+      var promiseSuccess = false;
+
+      this.$httpBackend.whenGET('/test').respond(400, undefined);
+      this.biobankApi.get('/test').catch(function(err) {
+        expect(err.data).toBeUndefined();
+        expect(err.status).toEqual(400);
+        promiseSuccess = true;
+      });
+      this.$httpBackend.flush();
+      expect(promiseSuccess).toBeTrue();
+    });
+
     it('POST method success path works', function() {
       var url = '/test';
       var json = { cmd: 'cmd' };

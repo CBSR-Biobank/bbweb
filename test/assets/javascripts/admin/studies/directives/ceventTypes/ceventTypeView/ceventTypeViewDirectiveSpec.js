@@ -49,6 +49,7 @@ define(function (require) {
                               'AnnotationType',
                               'notificationsService',
                               'domainNotificationService',
+                              'modalService',
                               'factory');
 
       self.jsonStudy              = this.factory.study();
@@ -261,6 +262,41 @@ define(function (require) {
       this.scope.$digest();
 
       expect(this.controller.isPanelCollapsed).not.toEqual(panelState);
+    });
+
+    describe('removing a collection event type', function() {
+
+      it('can remove the collection event type', function() {
+        spyOn(this.CollectionEventType.prototype, 'inUse').and.returnValue(this.$q.when(false));
+        spyOn(this.CollectionEventType.prototype, 'remove').and.returnValue(this.$q.when(true));
+
+        spyOn(this.domainNotificationService, 'removeEntity').and.callThrough();
+        spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
+        spyOn(this.notificationsService, 'success').and.returnValue(null);
+
+        createController.call(this);
+        this.controller.removeCeventType();
+        this.scope.$digest();
+
+        expect(this.domainNotificationService.removeEntity).toHaveBeenCalled();
+        expect(this.notificationsService.success).toHaveBeenCalled();
+        expect(this.$state.go).toHaveBeenCalledWith('home.admin.studies.study.collection',
+                                                    {},
+                                                    { reload: true });
+      });
+
+      it('user is informed if it cannot be removed', function() {
+        spyOn(this.CollectionEventType.prototype, 'inUse').and.returnValue(this.$q.when(true));
+        spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
+
+        createController.call(this);
+        this.controller.removeCeventType();
+        this.scope.$digest();
+
+        expect(this.modalService.modalOk).toHaveBeenCalled();
+      });
+
+
     });
 
   });

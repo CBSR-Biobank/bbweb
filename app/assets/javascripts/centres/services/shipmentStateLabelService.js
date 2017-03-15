@@ -12,8 +12,6 @@ define(function (require) {
     'gettextCatalog'
   ];
 
-  // /home/nelson/src/cbsr/scala/bbweb/app/assets/javascripts/centres
-
   /**
    * An AngularJS service that converts a ShipmentState to a i18n string that can
    * be displayed to the user.

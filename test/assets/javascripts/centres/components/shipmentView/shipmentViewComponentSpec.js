@@ -5,9 +5,9 @@
 define(function (require) {
   'use strict';
 
-  var angular         = require('angular'),
-      mocks           = require('angularMocks'),
-      _               = require('lodash');
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
+
   describe('shipmentViewComponent', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));

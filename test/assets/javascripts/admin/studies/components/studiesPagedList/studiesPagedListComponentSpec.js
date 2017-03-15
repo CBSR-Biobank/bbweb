@@ -7,27 +7,24 @@
 define(function (require) {
   'use strict';
 
-  /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "angular" }]*/
-
-  var angular         = require('angular'),
-      mocks           = require('angularMocks'),
+  var mocks           = require('angularMocks'),
       _               = require('lodash'),
       sharedBehaviour = require('../../../../test/EntityPagedListSharedBehaviourSpec');
 
-  function SuiteMixinFactory(TestSuiteMixin) {
+  function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
     function SuiteMixin() {
     }
 
-    SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
+    SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
     SuiteMixin.prototype.constructor = SuiteMixin;
 
     SuiteMixin.prototype.createScope = function () {
-      this.element = angular.element('<studies-paged-list></studies-paged-list');
-      this.scope = this.$rootScope.$new();
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('studiesPagedList');
+      ComponentTestSuiteMixin.prototype.createScope.call(
+        this,
+        '<studies-paged-list></studies-paged-list',
+        undefined,
+        'studiesPagedList');
     };
 
     SuiteMixin.prototype.createCountsSpy = function (disabled, enabled, retired) {
@@ -58,10 +55,8 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin) {
-      var SuiteMixin = new SuiteMixinFactory(TestSuiteMixin);
-
-      _.extend(this, SuiteMixin.prototype);
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
       this.putHtmlTemplates(
         '/assets/javascripts/admin/studies/components/studiesPagedList/studiesPagedList.html',
@@ -72,6 +67,7 @@ define(function (require) {
                               '$compile',
                               'Study',
                               'StudyCounts',
+                              'StudyState',
                               'factory');
 
     }));
@@ -111,6 +107,39 @@ define(function (require) {
       }));
 
       sharedBehaviour(context);
+
+    });
+
+    describe('getItemIcon', function() {
+
+      beforeEach(function() {
+        this.createCountsSpy(2, 5);
+        this.createPagedResultsSpy([]);
+        this.createScope();
+      });
+
+      it('getItemIcon returns a valid icon', function() {
+        var self = this,
+            statesInfo = [
+              { state: this.StudyState.DISABLED, icon: 'glyphicon-cog' },
+              { state: this.StudyState.ENABLED,  icon: 'glyphicon-ok-circle' },
+              { state: this.StudyState.RETIRED,  icon: 'glyphicon-remove-sign' }
+            ];
+
+        statesInfo.forEach(function (info) {
+          var study = new self.Study(self.factory.study({ state: info.state }));
+          expect(self.controller.getItemIcon(study)).toEqual(info.icon);
+        });
+      });
+
+      it('getItemIcon throws an error for and invalid state', function() {
+        var self = this,
+            study = new this.Study(this.factory.study({ state: this.factory.stringNext() }));
+
+        expect(function () {
+          self.controller.getItemIcon(study);
+        }).toThrowError(/invalid study state/);
+      });
 
     });
 

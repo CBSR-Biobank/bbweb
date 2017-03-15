@@ -7,27 +7,24 @@
 define(function (require) {
   'use strict';
 
-  /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "angular" }]*/
-
-  var angular         = require('angular'),
-      mocks           = require('angularMocks'),
+  var mocks           = require('angularMocks'),
       _               = require('lodash'),
       sharedBehaviour = require('../../../../test/EntityPagedListSharedBehaviourSpec');
 
-  function SuiteMixinFactory(TestSuiteMixin) {
+  function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
     function SuiteMixin() {
     }
 
-    SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
+    SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
     SuiteMixin.prototype.constructor = SuiteMixin;
 
     SuiteMixin.prototype.createScope = function () {
-      this.element = angular.element('<centres-paged-list></centres-paged-list');
-      this.scope = this.$rootScope.$new();
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('centresPagedList');
+      ComponentTestSuiteMixin.prototype.createScope.call(
+        this,
+        '<centres-paged-list></centres-paged-list',
+        undefined,
+        'centresPagedList');
     };
 
     SuiteMixin.prototype.createCountsSpy = function (disabled, enabled) {
@@ -57,10 +54,8 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin) {
-      var SuiteMixin = new SuiteMixinFactory(TestSuiteMixin);
-
-      _.extend(this, SuiteMixin.prototype);
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
       this.putHtmlTemplates(
         '/assets/javascripts/admin/centres/components/centresPagedList/centresPagedList.html',
@@ -71,6 +66,7 @@ define(function (require) {
                               '$compile',
                               'Centre',
                               'CentreCounts',
+                              'CentreState',
                               'factory');
 
     }));
@@ -110,6 +106,38 @@ define(function (require) {
       }));
 
       sharedBehaviour(context);
+
+    });
+
+    describe('getItemIcon', function() {
+
+      beforeEach(function() {
+        this.createCountsSpy(2, 5);
+        this.createPagedResultsSpy([]);
+        this.createScope();
+      });
+
+      it('getItemIcon returns a valid icon', function() {
+        var self = this,
+            statesInfo = [
+              { state: this.CentreState.DISABLED, icon: 'glyphicon-cog' },
+              { state: this.CentreState.ENABLED,  icon: 'glyphicon-ok-circle' }
+            ];
+
+        statesInfo.forEach(function (info) {
+          var centre = new self.Centre(self.factory.centre({ state: info.state }));
+          expect(self.controller.getItemIcon(centre)).toEqual(info.icon);
+        });
+      });
+
+      it('getItemIcon throws an error for and invalid state', function() {
+        var self = this,
+            centre = new this.Centre(this.factory.centre({ state: this.factory.stringNext() }));
+
+        expect(function () {
+          self.controller.getItemIcon(centre);
+        }).toThrowError(/invalid centre state/);
+      });
 
     });
 

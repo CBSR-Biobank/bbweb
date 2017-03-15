@@ -34,24 +34,24 @@ define(['angular', 'lodash', 'moment'], function(angular, _, moment) {
    * compare a javascript domain object and a response from the server (for the same domain entity).
    */
   function testDomainEntities(AppConfig,
-                                  ConcurrencySafeEntity,
-                                  AnnotationType,
-                                  Annotation,
-                                  Study,
-                                  SpecimenGroup,
-                                  CollectionEventType,
-                                  ProcessingType,
-                                  SpecimenLinkType,
-                                  Participant,
-                                  CollectionEvent,
-                                  DateTimeAnnotation,
-                                  MultipleSelectAnnotation,
-                                  NumberAnnotation,
-                                  SingleSelectAnnotation,
-                                  TextAnnotation,
-                                  AnnotationValueType,
-                                  Centre,
-                                  Location) {
+                              ConcurrencySafeEntity,
+                              AnnotationType,
+                              Annotation,
+                              Study,
+                              SpecimenGroup,
+                              CollectionEventType,
+                              ProcessingType,
+                              SpecimenLinkType,
+                              Participant,
+                              CollectionEvent,
+                              DateTimeAnnotation,
+                              MultipleSelectAnnotation,
+                              NumberAnnotation,
+                              SingleSelectAnnotation,
+                              TextAnnotation,
+                              AnnotationValueType,
+                              Centre,
+                              Location) {
 
     var service = {
       extend: extend

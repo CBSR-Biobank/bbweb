@@ -62,9 +62,6 @@ define(function (require) {
     }
 
     function updateCentres() {
-
-      vm.pagerOptions.filter = (vm.nameFilterWildcard !== '') ?
-        'name::' + vm.nameFilterWildcard : '';
       vm.getCentres()(vm.pagerOptions).then(function (pagedResult) {
         vm.pagedResult = pagedResult;
         vm.displayState = getDisplayState();
@@ -77,9 +74,9 @@ define(function (require) {
      */
     function nameFilterUpdated() {
       if (!_.isUndefined(vm.nameFilter) && (vm.nameFilter !== '')) {
-        vm.nameFilterWildcard = '*' + vm.nameFilter + '*';
+        vm.pagerOptions.filter = 'name:like:' + vm.nameFilter;
       } else {
-        vm.nameFilterWildcard = '';
+        vm.pagerOptions.filter = '';
       }
       vm.pagerOptions.page = 1;
       updateCentres();

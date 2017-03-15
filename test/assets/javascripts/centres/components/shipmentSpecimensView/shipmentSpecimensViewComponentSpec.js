@@ -5,9 +5,10 @@
 define(function (require) {
   'use strict';
 
-  var angular         = require('angular'),
-      mocks           = require('angularMocks'),
-      _               = require('lodash');
+  var mocks = require('angularMocks'),
+      _     = require('lodash'),
+      shipmentSpecimensControllerSharedBehaviour =
+      require('../../../test/shipmentSpecimensControllerSharedBehaviour');
 
   describe('shipmentSpecimensViewComponent', function() {
 
@@ -26,6 +27,7 @@ define(function (require) {
                               'Shipment',
                               'factory');
       this.createScope = function (shipment, readOnly) {
+        readOnly = readOnly || false;
         ShippingComponentTestSuiteMixin.prototype.createScope.call(
           this,
           '<shipment-specimens-view shipment="vm.shipment" read-only="vm.readOnly"></shipment-specimens-view',
@@ -45,6 +47,12 @@ define(function (require) {
 
       expect(this.controller.shipment).toBe(shipment);
       expect(this.controller.readOnly).toBe(readOnly);
+    });
+
+    describe('(shared)', function() {
+
+      shipmentSpecimensControllerSharedBehaviour();
+
     });
 
   });

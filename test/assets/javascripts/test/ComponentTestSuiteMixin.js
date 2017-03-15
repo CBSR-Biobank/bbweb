@@ -21,7 +21,11 @@ define(function (require) {
     ComponentTestSuiteMixin.prototype.createScope = function (htmlElement, scopeVars, controllerName) {
       this.element = angular.element(htmlElement);
       this.scope = this.$rootScope.$new();
-      this.scope.vm = scopeVars;
+
+      if (scopeVars) {
+        this.scope.vm = scopeVars;
+      }
+
       this.$compile(this.element)(this.scope);
       this.scope.$digest();
       this.controller = this.element.controller(controllerName);
