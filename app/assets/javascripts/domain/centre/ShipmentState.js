@@ -10,12 +10,13 @@ define(function () {
    * @memberOf domain.centres
    */
   var ShipmentState = {
-    CREATED:  'created',
-    PACKED:   'packed',
-    SENT:     'sent',
-    RECEIVED: 'received',
-    UNPACKED: 'unpacked',
-    LOST:     'lost'
+    CREATED:   'created',
+    PACKED:    'packed',
+    SENT:      'sent',
+    RECEIVED:  'received',
+    UNPACKED:  'unpacked',
+    COMPLETED: 'completed',
+    LOST:      'lost'
   };
 
   return ShipmentState;

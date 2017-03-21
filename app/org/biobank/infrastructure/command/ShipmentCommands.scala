@@ -74,6 +74,12 @@ object ShipmentCommands {
                                      datetime:        DateTime)
       extends ShipmentModifyCommand
 
+  final case class CompleteShipmentCmd(userId:          String,
+                                       id:              String, // shipment ID
+                                       expectedVersion: Long,
+                                       datetime:        DateTime)
+      extends ShipmentModifyCommand
+
   final case class LostShipmentCmd(userId:          String,
                                    id:              String, // shipment ID
                                    expectedVersion: Long)
@@ -127,6 +133,9 @@ object ShipmentCommands {
 
   implicit val unpackShipmentCmdReads: Reads[UnpackShipmentCmd] =
     Json.reads[UnpackShipmentCmd]
+
+  implicit val completeShipmentCmdReads: Reads[CompleteShipmentCmd] =
+    Json.reads[CompleteShipmentCmd]
 
   implicit val lostShipmentCmdReads: Reads[LostShipmentCmd] =
     Json.reads[LostShipmentCmd]

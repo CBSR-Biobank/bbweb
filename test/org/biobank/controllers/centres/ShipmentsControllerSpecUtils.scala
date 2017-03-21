@@ -38,6 +38,19 @@ private[centres] trait ShipmentsControllerSpecUtils extends JsonHelper {
     checkOpionalTime(timeUnpacked, shipment.timeUnpacked)
   }
 
+  def compareTimestamps(shipment:      Shipment,
+                        timePacked:    Option[DateTime],
+                        timeSent:      Option[DateTime],
+                        timeReceived:  Option[DateTime],
+                        timeUnpacked:  Option[DateTime],
+                        timeCompleted: Option[DateTime]): Unit = {
+    checkOpionalTime(timePacked,    shipment.timePacked)
+    checkOpionalTime(timeSent,      shipment.timeSent)
+    checkOpionalTime(timeReceived,  shipment.timeReceived)
+    checkOpionalTime(timeUnpacked,  shipment.timeUnpacked)
+    checkOpionalTime(timeCompleted, shipment.timeCompleted)
+  }
+
   def compareTimestamps(shipment1: Shipment, shipment2: Shipment): Unit = {
     compareTimestamps(shipment1,
                       shipment2.timePacked,

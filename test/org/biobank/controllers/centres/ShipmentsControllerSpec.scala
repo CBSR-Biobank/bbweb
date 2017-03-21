@@ -354,7 +354,7 @@ class ShipmentsControllerSpec
       }
     }
 
-    "POST /centres" must {
+    "POST /shipments" must {
 
       def shipmentToAddJson(shipment: Shipment) =
         Json.obj("courierName"    -> shipment.courierName,
@@ -804,11 +804,13 @@ class ShipmentsControllerSpec
             info(s"change to $state state")
 
             val stateChangeTime = DateTime.now.minusDays(10)
-
             val shipment = f.shipments(state)
+            addSpecimenToShipment(shipment, f.fromCentre)
+
             changeStateCommon(shipment, Shipment.packedState, Some(stateChangeTime))
             shipmentRepository.getByKey(shipment.id) mustSucceed { repoShipment =>
               repoShipment mustBe a[PackedShipment]
+              repoShipment.version must be (shipment.version + 1)
               compareTimestamps(repoShipment,
                                 Some(stateChangeTime),
                                 None,
@@ -818,7 +820,26 @@ class ShipmentsControllerSpec
           }
         }
 
-        "not change to PACKED state from an invalid state" in {
+        "not change to PACKED state if no specimens in shipment" in {
+          val f = allShipmentsFixture
+          f.shipments.values.foreach(shipmentRepository.put)
+
+          val testStates = Table("state", Shipment.createdState, Shipment.sentState)
+
+          forAll(testStates) { state =>
+            info(s"change to $state state")
+            val shipment = f.shipments(state)
+            val updateJson = Json.obj("expectedVersion" -> shipment.version,
+                                      "datetime"        -> DateTime.now)
+            val json = makeRequest(POST, uri(shipment, "state/packed"), BAD_REQUEST, updateJson)
+
+            (json \ "status").as[String] must include ("error")
+
+            (json \ "message").as[String] must include ("InvalidState: shipment has no specimens")
+          }
+        }
+
+        "111 not change to PACKED state from an invalid state" in {
           val f = allShipmentsFixture
           f.shipments.values.foreach(shipmentRepository.put)
 
@@ -831,9 +852,12 @@ class ShipmentsControllerSpec
           forAll(states) { state =>
             info(s"from state $state")
             val shipment = f.shipments(state)
+
+            addSpecimenToShipment(shipment, f.fromCentre)
+
             val updateJson = Json.obj("expectedVersion" -> shipment.version,
                                       "datetime"        -> DateTime.now)
-            val json = makeRequest(POST, uri(shipment, s"state/packed"), BAD_REQUEST, updateJson)
+            val json = makeRequest(POST, uri(shipment, "state/packed"), BAD_REQUEST, updateJson)
 
             (json \ "status").as[String] must include ("error")
 
@@ -849,7 +873,8 @@ class ShipmentsControllerSpec
 
           val testStates = Table("state name",
                                  Shipment.packedState,
-                                 Shipment.receivedState)
+                                 Shipment.receivedState,
+                                 Shipment.lostState)
 
           forAll(testStates) { state =>
             info(s"$state state")
@@ -888,8 +913,7 @@ class ShipmentsControllerSpec
           val states = Table("state",
                              Shipment.createdState,
                              Shipment.sentState,
-                             Shipment.unpackedState,
-                             Shipment.lostState)
+                             Shipment.unpackedState)
 
           forAll(states) { state =>
             info(s"from state $state")
@@ -1033,6 +1057,67 @@ class ShipmentsControllerSpec
             (json \ "status").as[String] must include ("error")
 
             (json \ "message").as[String] must include ("InvalidState: cannot change to unpacked state")
+          }
+        }
+
+      }
+
+      "for COMPLETED state" must {
+
+        "change to COMPLETED state from UNPACKED" in {
+          val f = unpackedShipmentFixture
+          val timeCompleted = f.shipment.timeUnpacked.get.plusDays(1)
+
+          changeStateCommon(f.shipment, Shipment.completedState, Some(timeCompleted))
+          shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
+            repoShipment mustBe a[CompletedShipment]
+            repoShipment.version must be (f.shipment.version + 1)
+            compareTimestamps(repoShipment,
+                              f.shipment.timePacked,
+                              f.shipment.timeSent,
+                              f.shipment.timeReceived,
+                              f.shipment.timeUnpacked,
+                              Some(timeCompleted))
+          }
+        }
+
+        "must not change to COMPLETED state from UNPACKED if there are present specimens" in {
+          val f = unpackedShipmentFixture
+          val timeCompleted = f.shipment.timeUnpacked.get.plusDays(1)
+
+          shipmentRepository.put(f.shipment)
+          addSpecimenToShipment(f.shipment, f.fromCentre)
+
+          val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
+                                    "datetime"        -> timeCompleted)
+          val json = makeRequest(POST, uri(f.shipment, "state/completed"), BAD_REQUEST, updateJson)
+
+          (json \ "status").as[String] must include ("error")
+
+          (json \ "message").as[String] must include ("InvalidState: shipment has specimens in present state")
+        }
+
+        "not change to COMPLETED state from an invalid state" in {
+          val f = allShipmentsFixture
+          f.shipments.values.foreach(shipmentRepository.put)
+
+          val states = Table("state",
+                             Shipment.createdState,
+                             Shipment.packedState,
+                             Shipment.sentState,
+                             Shipment.receivedState,
+                             Shipment.lostState)
+
+          forAll(states) { state =>
+            info(s"from state $state")
+            val shipment = f.shipments(state)
+            val updateJson = Json.obj("expectedVersion" -> shipment.version,
+                                      "datetime"        -> DateTime.now)
+            val json = makeRequest(POST, uri(shipment, s"state/completed"), BAD_REQUEST, updateJson)
+
+            (json \ "status").as[String] must include ("error")
+
+            (json \ "message").as[String] must include ("InvalidState: cannot change to completed state")
           }
         }
 

@@ -119,6 +119,9 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
   def unpacked(id: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd : UnpackShipmentCmd => processCommand(cmd) }
 
+  def completed(id: ShipmentId): Action[JsValue] =
+    commandActionAsync(Json.obj("id" -> id)) { cmd : CompleteShipmentCmd => processCommand(cmd) }
+
   def lost(id: ShipmentId): Action[JsValue] =
     commandActionAsync(Json.obj("id" -> id)) { cmd : LostShipmentCmd => processCommand(cmd) }
 

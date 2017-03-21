@@ -75,6 +75,7 @@ sealed trait Shipment
   val timeSent:       Option[DateTime]
   val timeReceived:   Option[DateTime]
   val timeUnpacked:   Option[DateTime]
+  val timeCompleted:  Option[DateTime]
 
   def isCreated: DomainValidation[CreatedShipment] = {
     this match {
@@ -127,7 +128,8 @@ sealed trait Shipment
         |  timePacked:     $timePacked,
         |  timeSent:       $timeSent,
         |  timeReceived:   $timeReceived,
-        |  timeUnpacked:   $timeUnpacked
+        |  timeUnpacked:   $timeUnpacked,
+        |  timeCompleted:  $timeCompleted
         |}""".stripMargin
 }
 
@@ -157,6 +159,8 @@ trait ShipmentValidations {
 
   case object TimeUnpackedBeforeReceived extends ValidationKey
 
+  case object TimeCompletedBeforeUnpacked extends ValidationKey
+
   def validateTimeAfter(afterMaybe: Option[DateTime],
                         beforeMaybe: Option[DateTime],
                         errUndefined: ValidationKey,
@@ -178,18 +182,20 @@ trait ShipmentValidations {
 
 object Shipment extends ShipmentValidations {
 
-  val createdState: EntityState  = new EntityState("created")
-  val packedState: EntityState   = new EntityState("packed")
-  val sentState: EntityState     = new EntityState("sent")
-  val receivedState: EntityState = new EntityState("received")
-  val unpackedState: EntityState = new EntityState("unpacked")
-  val lostState: EntityState     = new EntityState("lost")
+  val createdState: EntityState   = new EntityState("created")
+  val packedState: EntityState    = new EntityState("packed")
+  val sentState: EntityState      = new EntityState("sent")
+  val receivedState: EntityState  = new EntityState("received")
+  val unpackedState: EntityState  = new EntityState("unpacked")
+  val completedState: EntityState = new EntityState("completed")
+  val lostState: EntityState      = new EntityState("lost")
 
   val shipmentStates: List[EntityState] = List(createdState,
                                                packedState,
                                                sentState,
                                                receivedState,
                                                unpackedState,
+                                               completedState,
                                                lostState)
 
   @SuppressWarnings(Array("org.wartremover.warts.Option2Iterable"))
@@ -207,8 +213,9 @@ object Shipment extends ShipmentValidations {
           Seq[(String, JsValue)]() ++
             shipment.timePacked.map("timePacked" -> Json.toJson(_)) ++
             shipment.timeSent.map("timeSent" -> Json.toJson(_)) ++
-            shipment.timeReceived.map("timeReceived" -> Json.toJson(_)) ++
-            shipment.timeUnpacked.map("timeUnpacked" -> Json.toJson(_))
+            shipment.timeReceived.map("timeReceived"  -> Json.toJson(_)) ++
+            shipment.timeUnpacked.map("timeUnpacked"  -> Json.toJson(_)) ++
+            shipment.timeUnpacked.map("timeCompleted" -> Json.toJson(_))
         )
       }
 
@@ -228,7 +235,8 @@ final case class CreatedShipment(id:             ShipmentId,
                                  timePacked:     Option[DateTime],
                                  timeSent:       Option[DateTime],
                                  timeReceived:   Option[DateTime],
-                                 timeUnpacked:   Option[DateTime])
+                                 timeUnpacked:   Option[DateTime],
+                                 timeCompleted:  Option[DateTime])
     extends { val state: EntityState = Shipment.createdState }
     with Shipment
     with ShipmentValidations {
@@ -288,7 +296,8 @@ final case class CreatedShipment(id:             ShipmentId,
                    timePacked     = Some(timePacked),
                    timeSent       = None,
                    timeReceived   = None,
-                   timeUnpacked   = None)
+                   timeUnpacked   = None,
+                   timeCompleted  = None)
 
   def skipToSent(timePacked: DateTime, timeSent: DateTime): DomainValidation[SentShipment] = {
     if (timeSent < timePacked) {
@@ -307,7 +316,8 @@ final case class CreatedShipment(id:             ShipmentId,
                    timePacked     = Some(timePacked),
                    timeSent       = Some(timeSent),
                    timeReceived   = None,
-                   timeUnpacked   = None).successNel[String]
+                   timeUnpacked   = None,
+                   timeCompleted  = None).successNel[String]
     }
   }
 
@@ -345,6 +355,7 @@ object CreatedShipment extends ShipmentValidations {
                                                     None,
                                                     None,
                                                     None,
+                                                    None,
                                                     None))
   }
 
@@ -364,7 +375,7 @@ object CreatedShipment extends ShipmentValidations {
        validateString(fromLocationId.id, FromLocationIdInvalid) |@|
        validateId(toCentreId, ToCentreIdInvalid) |@|
        validateString(toLocationId.id, ToLocationIdInvalid)) {
-      case (_, _, _, _, _, _, _, _) => true
+      case _ => true
     }
 
   }
@@ -384,7 +395,8 @@ final case class PackedShipment(id:             ShipmentId,
                                 timePacked:     Option[DateTime],
                                 timeSent:       Option[DateTime],
                                 timeReceived:   Option[DateTime],
-                                timeUnpacked:   Option[DateTime])
+                                timeUnpacked:   Option[DateTime],
+                                timeCompleted:  Option[DateTime])
     extends { val state: EntityState = Shipment.packedState }
     with Shipment
     with ShipmentValidations {
@@ -407,7 +419,8 @@ final case class PackedShipment(id:             ShipmentId,
                     timePacked     = None,
                     timeSent       = None,
                     timeReceived   = None,
-                    timeUnpacked   = None)
+                    timeUnpacked   = None,
+                    timeCompleted  = None)
 
   def send(timeSent: DateTime): DomainValidation[SentShipment] = {
     this.timePacked.
@@ -429,7 +442,8 @@ final case class PackedShipment(id:             ShipmentId,
                        timePacked     = this.timePacked,
                        timeSent       = Some(timeSent),
                        timeReceived   = None,
-                       timeUnpacked   = None).successNel[String]
+                       timeUnpacked   = None,
+                       timeCompleted  = None).successNel[String]
         }
       }
   }
@@ -449,7 +463,8 @@ final case class SentShipment(id:             ShipmentId,
                               timePacked:     Option[DateTime],
                               timeSent:       Option[DateTime],
                               timeReceived:   Option[DateTime],
-                              timeUnpacked:   Option[DateTime])
+                              timeUnpacked:   Option[DateTime],
+                              timeCompleted:  Option[DateTime])
     extends { val state: EntityState = Shipment.sentState }
     with Shipment
     with ShipmentValidations {
@@ -468,7 +483,8 @@ final case class SentShipment(id:             ShipmentId,
                    timePacked     = this.timePacked,
                    timeSent       = None,
                    timeReceived   = None,
-                   timeUnpacked   = None)
+                   timeUnpacked   = None,
+                   timeCompleted  = None)
   }
 
   def receive(timeReceived: DateTime): DomainValidation[ReceivedShipment] = {
@@ -491,7 +507,8 @@ final case class SentShipment(id:             ShipmentId,
                            timePacked     = this.timePacked,
                            timeSent       = this.timeSent,
                            timeReceived   = Some(timeReceived),
-                           timeUnpacked   = None).successNel[String]
+                           timeUnpacked   = None,
+                           timeCompleted  = None).successNel[String]
         }
       }
   }
@@ -513,7 +530,8 @@ final case class SentShipment(id:             ShipmentId,
                        timePacked     = this.timePacked,
                        timeSent       = this.timeSent,
                        timeReceived   = Some(timeReceived),
-                       timeUnpacked   = Some(timeUnpacked)).successNel[String]
+                       timeUnpacked   = Some(timeUnpacked),
+                       timeCompleted  = None).successNel[String]
     }
   }
 
@@ -531,7 +549,8 @@ final case class SentShipment(id:             ShipmentId,
                  timePacked     = this.timePacked,
                  timeSent       = this.timeSent,
                  timeReceived   = None,
-                 timeUnpacked   = None)
+                 timeUnpacked   = None,
+                 timeCompleted  = None)
   }
 }
 
@@ -548,7 +567,8 @@ final case class ReceivedShipment(id:             ShipmentId,
                                   timePacked:     Option[DateTime],
                                   timeSent:       Option[DateTime],
                                   timeReceived:   Option[DateTime],
-                                  timeUnpacked:   Option[DateTime])
+                                  timeUnpacked:   Option[DateTime],
+                                  timeCompleted:  Option[DateTime])
     extends { val state: EntityState = Shipment.receivedState }
     with Shipment
     with ShipmentValidations {
@@ -567,7 +587,8 @@ final case class ReceivedShipment(id:             ShipmentId,
                  timePacked     = this.timePacked,
                  timeSent       = this.timeSent,
                  timeReceived   = None,
-                 timeUnpacked   = None)
+                 timeUnpacked   = None,
+                 timeCompleted  = None)
   }
 
   def unpack(timeUnpacked: DateTime): DomainValidation[UnpackedShipment] = {
@@ -590,7 +611,8 @@ final case class ReceivedShipment(id:             ShipmentId,
                            timePacked     = this.timePacked,
                            timeSent       = this.timeSent,
                            timeReceived   = this.timeReceived,
-                           timeUnpacked   = Some(timeUnpacked)).successNel[String]
+                           timeUnpacked   = Some(timeUnpacked),
+                           timeCompleted  = None).successNel[String]
         }
       }
   }
@@ -610,7 +632,8 @@ final case class UnpackedShipment(id:             ShipmentId,
                                   timePacked:     Option[DateTime],
                                   timeSent:       Option[DateTime],
                                   timeReceived:   Option[DateTime],
-                                  timeUnpacked:   Option[DateTime])
+                                  timeUnpacked:   Option[DateTime],
+                                  timeCompleted:  Option[DateTime])
     extends { val state: EntityState = Shipment.unpackedState }
     with Shipment
     with ShipmentValidations {
@@ -629,10 +652,76 @@ final case class UnpackedShipment(id:             ShipmentId,
                      timePacked     = this.timePacked,
                      timeSent       = this.timeSent,
                      timeReceived   = this.timeReceived,
-                     timeUnpacked   = None)
+                     timeUnpacked   = None,
+                     timeCompleted  = None)
+  }
+
+  def complete(timeCompleted: DateTime): DomainValidation[CompletedShipment] = {
+    this.timeUnpacked.
+      toSuccessNel(TimeReceivedUndefined.toString).
+      flatMap { timeUnpacked =>
+        if (timeCompleted < timeUnpacked) {
+          TimeCompletedBeforeUnpacked.failureNel[CompletedShipment]
+        } else {
+          CompletedShipment(id             = this.id,
+                            version        = this.version + 1,
+                            timeAdded      = this.timeAdded,
+                            timeModified   = Some(DateTime.now),
+                            courierName    = this.courierName,
+                            trackingNumber = this.trackingNumber,
+                            fromCentreId   = this.fromCentreId,
+                            fromLocationId = this.fromLocationId,
+                            toCentreId     = this.toCentreId,
+                            toLocationId   = this.toLocationId,
+                            timePacked     = this.timePacked,
+                            timeSent       = this.timeSent,
+                            timeReceived   = this.timeReceived,
+                            timeUnpacked   = this.timeUnpacked,
+                            timeCompleted  = Some(timeCompleted)).successNel[String]
+        }
+      }
+  }
+}
+
+final case class CompletedShipment(id:             ShipmentId,
+                                   version:        Long,
+                                   timeAdded:      DateTime,
+                                   timeModified:   Option[DateTime],
+                                   courierName:    String,
+                                   trackingNumber: String,
+                                   fromCentreId:   CentreId,
+                                   fromLocationId: LocationId,
+                                   toCentreId:     CentreId,
+                                   toLocationId:   LocationId,
+                                   timePacked:     Option[DateTime],
+                                   timeSent:       Option[DateTime],
+                                   timeReceived:   Option[DateTime],
+                                   timeUnpacked:   Option[DateTime],
+                                   timeCompleted:  Option[DateTime])
+    extends { val state: EntityState = Shipment.lostState }
+    with Shipment
+    with ShipmentValidations {
+
+  def backToUnpacked: UnpackedShipment = {
+    UnpackedShipment(id             = this.id,
+                     version        = this.version + 1,
+                     timeAdded      = this.timeAdded,
+                     timeModified   = Some(DateTime.now),
+                     courierName    = this.courierName,
+                     trackingNumber = this.trackingNumber,
+                     fromCentreId   = this.fromCentreId,
+                     fromLocationId = this.fromLocationId,
+                     toCentreId     = this.toCentreId,
+                     toLocationId   = this.toLocationId,
+                     timePacked     = this.timePacked,
+                     timeSent       = this.timeSent,
+                     timeReceived   = this.timeReceived,
+                     timeUnpacked   = this.timeUnpacked,
+                     timeCompleted  = None)
   }
 
 }
+
 
 final case class LostShipment(id:             ShipmentId,
                               version:        Long,
@@ -647,7 +736,28 @@ final case class LostShipment(id:             ShipmentId,
                               timePacked:     Option[DateTime],
                               timeSent:       Option[DateTime],
                               timeReceived:   Option[DateTime],
-                              timeUnpacked:   Option[DateTime])
+                              timeUnpacked:   Option[DateTime],
+                              timeCompleted:  Option[DateTime])
     extends { val state: EntityState = Shipment.lostState }
     with Shipment
-    with ShipmentValidations
+    with ShipmentValidations {
+
+  def backToSent: SentShipment = {
+    SentShipment(id             = this.id,
+                 version        = this.version + 1,
+                 timeAdded      = this.timeAdded,
+                 timeModified   = Some(DateTime.now),
+                 courierName    = this.courierName,
+                 trackingNumber = this.trackingNumber,
+                 fromCentreId   = this.fromCentreId,
+                 fromLocationId = this.fromLocationId,
+                 toCentreId     = this.toCentreId,
+                 toLocationId   = this.toLocationId,
+                 timePacked     = this.timePacked,
+                 timeSent       = this.timeSent,
+                 timeReceived   = None,
+                 timeUnpacked   = None,
+                 timeCompleted  = None)
+  }
+
+}

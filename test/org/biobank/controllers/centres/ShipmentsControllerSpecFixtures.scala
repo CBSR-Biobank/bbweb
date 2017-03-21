@@ -208,4 +208,21 @@ private[centres] trait ShipmentsControllerSpecFixtures extends ControllerFixture
     }
   }
 
+  def addSpecimenToShipment(shipment: Shipment, fromCentre: Centre) = {
+    val _specimen = factory.createUsableSpecimen.
+      copy(originLocationId = fromCentre.locations.head.uniqueId,
+           locationId       = fromCentre.locations.head.uniqueId)
+
+    val _shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = shipment.id,
+                                                                specimenId = _specimen.id)
+
+    specimenRepository.put(_specimen)
+    shipmentSpecimenRepository.put(_shipmentSpecimen)
+
+    new {
+      val specimen         = _specimen
+      val shipmentSpecimen = _shipmentSpecimen
+    }
+  }
+
 }

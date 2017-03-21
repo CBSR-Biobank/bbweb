@@ -24,10 +24,10 @@
 
   <!--
   <logger name="org.biobank.controllers.centres" level="DEBUG" />
-       <logger name="com.google" level="INFO" />
-       <logger name="play" level="INFO" />
-       <logger name="net.sf.ehcache" level="INFO" />
-       <logger name="io.netty" level="INFO" />
+  <logger name="com.google" level="INFO" />
+  <logger name="play" level="INFO" />
+  <logger name="net.sf.ehcache" level="INFO" />
+  <logger name="io.netty" level="INFO" />
   -->
 
   <logger name="application" level="WARN" />

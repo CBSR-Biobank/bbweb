@@ -2,8 +2,14 @@ package org.biobank.service.centres
 
 import org.biobank.service.ServiceValidation
 import org.biobank.domain.LocationId
-import org.biobank.domain.centre.{ShipmentId, ShipmentRepository, ShipmentSpecimen, ShipmentSpecimenRepository}
-import org.biobank.domain.centre.ShipmentItemState
+import org.biobank.domain.centre.{
+  ShipmentId,
+  ShipmentItemState,
+  ShipmentRepository,
+  ShipmentSpecimen,
+  ShipmentSpecimenRepository
+}
+import org.biobank.domain.centre.ShipmentItemState._
 import org.biobank.domain.participants.{Specimen, SpecimenRepository}
 //import org.slf4j.LoggerFactory
 import scalaz._
@@ -176,6 +182,11 @@ trait ShipmentConstraints {
       nonPackedShipSpecimens <- getNonPackedShipmentSpecimens(shipSpecimens)
     } yield nonPackedShipSpecimens
 
+  }
+
+  def shipmentSpecimenCount(shipmentId: ShipmentId, state: ShipmentItemState): Int = {
+    shipmentSpecimenRepository.allForShipment(shipmentId).
+      filter(ss => ss.state == state).size
   }
 
 }

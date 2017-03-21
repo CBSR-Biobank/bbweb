@@ -284,7 +284,7 @@ class CollectionEventsProcessor @Inject() (
             val eventTime = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
             val update = applyEvent(cevent, eventTime)
             if (update.isFailure) {
-              log.error(s"shipment specimen update from event failed: $update")
+              log.error(s"collection event update from event failed: $update")
             }
           }
         }

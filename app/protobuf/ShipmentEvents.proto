@@ -70,5 +70,6 @@ message ShipmentEvent {
       WithVersion            removed                = 15;
       SkippedToSentState     skippedToSentState     = 16;
       SkippedToUnpackedState skippedToUnpackedState = 17;
+      StateUpdated           completed              = 18;
    }
 }

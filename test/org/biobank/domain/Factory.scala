@@ -428,7 +428,8 @@ class Factory {
                                    timePacked     = None,
                                    timeSent       = None,
                                    timeReceived   = None,
-                                   timeUnpacked   = None)
+                                   timeUnpacked   = None,
+                                   timeCompleted  = None)
     domainObjects = domainObjects + (classOf[Shipment] -> shipment)
     shipment
   }
@@ -470,6 +471,14 @@ class Factory {
     val shipment = createReceivedShipment(fromCentre, toCentre)
     shipment.unpack(shipment.timeReceived.get.plusDays(1)).fold(
       err => sys.error("failed to create a unpacked shipment"),
+      s   => s
+    )
+  }
+
+  def createCompletedShipment(fromCentre: Centre, toCentre: Centre): CompletedShipment = {
+    val shipment = createUnpackedShipment(fromCentre, toCentre)
+    shipment.complete(shipment.timeReceived.get.plusDays(1)).fold(
+      err => sys.error("failed to create a completed shipment"),
       s   => s
     )
   }

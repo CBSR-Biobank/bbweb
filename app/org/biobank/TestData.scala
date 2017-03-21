@@ -651,7 +651,8 @@ class TestData @Inject() (config:                        Configuration,
                                  timePacked     = None,
                                  timeSent       = None,
                                  timeReceived   = None,
-                                 timeUnpacked   = None)),
+                                 timeUnpacked   = None,
+                                 timeCompleted  = None)),
               ( Shipment.packedState ->
                  PackedShipment(id             = ShipmentId(s"test-shipment-2"),
                                 version        = 0,
@@ -666,7 +667,8 @@ class TestData @Inject() (config:                        Configuration,
                                 timePacked     = Some(DateTime.now),
                                 timeSent       = None,
                                 timeReceived   = None,
-                                timeUnpacked   = None)),
+                                timeUnpacked   = None,
+                                timeCompleted  = None)),
               ( Shipment.unpackedState ->
                  UnpackedShipment(id             = ShipmentId(s"test-shipment-3"),
                                   version        = 0,
@@ -681,7 +683,8 @@ class TestData @Inject() (config:                        Configuration,
                                   timePacked     = Some(DateTime.now),
                                   timeSent       = Some(DateTime.now),
                                   timeReceived   = Some(DateTime.now),
-                                  timeUnpacked   = Some(DateTime.now))))
+                                  timeUnpacked   = Some(DateTime.now),
+                                  timeCompleted  = None)))
 
           shipmentMap.values.foreach(shipmentRepository.put)
 

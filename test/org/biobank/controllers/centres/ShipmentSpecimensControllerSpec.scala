@@ -140,7 +140,7 @@ class ShipmentSpecimensControllerSpec
         }
       }
 
-      "111 fail for an invalid item state for a shipment specimen" in {
+      "fail for an invalid item state for a shipment specimen" in {
         val f = createdShipmentFixture
         val invalidStateName = "state::" + nameGenerator.next[ShipmentSpecimen]
 

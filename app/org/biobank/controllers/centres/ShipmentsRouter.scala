@@ -43,6 +43,9 @@ class ShipmentsRouter @Inject()(controller: ShipmentsController) extends SimpleR
     case POST(p"/state/unpacked/${shipmentId(id)}") =>
       controller.unpacked(id)
 
+    case POST(p"/state/completed/${shipmentId(id)}") =>
+      controller.completed(id)
+
     case POST(p"/state/lost/${shipmentId(id)}") =>
       controller.lost(id)
 
