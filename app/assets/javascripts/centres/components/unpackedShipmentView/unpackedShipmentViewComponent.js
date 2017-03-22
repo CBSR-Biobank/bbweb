@@ -141,13 +141,7 @@ define(function () {
                           { required: true }).result
         .then(function (timeCompleted) {
           return vm.shipment.complete(timeService.dateAndTimeToUtcString(timeCompleted))
-            .catch(function(err) {
-              if (err.message === 'TimeCompletedBeforeUnpacked') {
-                return notificationsService.updateErrorAndReject(
-                  'The time completed was before the time packed.');
-              }
-              return notificationsService.updateErrorAndReject(err);
-            });
+            .catch(notificationsService.updateError);
         })
         .then(function () {
           $state.go('home.shipping.shipment', { shipmentId: vm.shipment.id }, { reload: true });

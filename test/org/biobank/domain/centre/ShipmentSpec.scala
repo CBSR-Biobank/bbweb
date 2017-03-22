@@ -238,6 +238,33 @@ class ShipmentSpec extends DomainFreeSpec {
 
     }
 
+    "must not skip state" - {
+
+      "111 when time sent is before time packed" in {
+        val shipment = factory.createShipment
+        val timePacked = DateTime.now.minusDays(10)
+        val timeSent = timePacked.minusDays(1)
+        shipment.skipToSent(timePacked, timeSent) mustFailContains "TimeSentBeforePacked"
+      }
+
+      "111 when time unpacked is before time received" in {
+        val f = centresFixture
+        val shipment = factory.createSentShipment(f.fromCentre, f.toCentre)
+        val timeReceived = shipment.timeSent.fold { DateTime.now } { t => t }
+        val timeUnpacked = timeReceived.minusDays(1)
+        shipment.skipToUnpacked(timeReceived, timeUnpacked) mustFailContains "TimeUnpackedBeforeReceived"
+      }
+
+      "111 when time received is before time sent" in {
+        val f = centresFixture
+        val shipment = factory.createSentShipment(f.fromCentre, f.toCentre)
+        val timeReceived = shipment.timeSent.fold { DateTime.now } { t => t.minusDays(1) }
+        val timeUnpacked = timeReceived.plusDays(2)
+        shipment.skipToUnpacked(timeReceived, timeUnpacked) mustFailContains "TimeReceivedBeforeSent"
+      }
+
+    }
+
     "cannot be created" - {
 
       "with an invalid ID" in {

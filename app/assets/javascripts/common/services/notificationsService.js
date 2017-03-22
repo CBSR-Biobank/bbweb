@@ -52,10 +52,12 @@ define(function() {
      * Error is the error returned from a biobankApiService call that failed.
      */
     function updateError(err) {
-      var message = gettextCatalog.getString('Your change could not be saved'),
+      var message,
           title   = gettextCatalog.getString('Cannot apply your change');
-      if (err.data) {
-        message += ': ' + err.data.message;
+      if (err.message) {
+        message = err.message;
+      } else {
+        message = gettextCatalog.getString('Your change could not be saved');
       }
       error(message, title);
     }

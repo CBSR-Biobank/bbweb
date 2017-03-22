@@ -5,7 +5,7 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-3">
-          <strong>Courier</strong>
+          <strong translate>Courier</strong>
         </div>
         <div class="col-md-7">
           {{vm.shipment.courierName}}
@@ -25,7 +25,7 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-3">
-          <strong>Tracking number</strong>
+          <strong translate>Tracking number</strong>
         </div>
         <div class="col-md-7">
           {{vm.shipment.trackingNumber}}
@@ -45,7 +45,7 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-3">
-          <strong>From</strong>
+          <strong translate>From</strong>
         </div>
         <div class="col-md-7">
           {{vm.shipment.fromLocationInfo.name}}
@@ -65,7 +65,7 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-3">
-          <strong>To</strong>
+          <strong translate>To</strong>
         </div>
         <div class="col-md-7">
           {{vm.shipment.toLocationInfo.name}}
@@ -85,7 +85,7 @@
     <li class="list-group-item" ng-if="vm.shipment.timePacked">
       <div class="row">
         <div class="col-md-3">
-          <strong>Time packed</strong>
+          <strong translate>Time packed</strong>
         </div>
         <div class="col-md-9">
           {{vm.shipment.timePacked | localTime}}
@@ -97,7 +97,7 @@
     <li class="list-group-item" ng-if="vm.shipment.timeSent">
       <div class="row">
         <div class="col-md-3">
-          <strong>Time sent</strong>
+          <strong translate>Time sent</strong>
         </div>
         <div class="col-md-9">
           {{vm.shipment.timeSent | localTime}}
@@ -109,7 +109,7 @@
     <li class="list-group-item" ng-if="vm.shipment.timeReceived">
       <div class="row">
         <div class="col-md-3">
-          <strong>Time received</strong>
+          <strong translate>Time received</strong>
         </div>
         <div class="col-md-9">
           {{vm.shipment.timeReceived | localTime}}
@@ -121,10 +121,22 @@
     <li class="list-group-item" ng-if="vm.shipment.timeUnpacked">
       <div class="row">
         <div class="col-md-3">
-          <strong>Time unpacked</strong>
+          <strong translate>Time unpacked</strong>
         </div>
         <div class="col-md-9">
           {{vm.shipment.timeUnpacked | localTime}}
+        </div>
+      </div>
+    </li>
+
+    <!-- TIME COMPLETED -->
+    <li class="list-group-item" ng-if="vm.shipment.timeCompleted">
+      <div class="row">
+        <div class="col-md-3">
+          <strong translate>Time completed</strong>
+        </div>
+        <div class="col-md-9">
+          {{vm.shipment.timeCompleted | localTime}}
         </div>
       </div>
     </li>

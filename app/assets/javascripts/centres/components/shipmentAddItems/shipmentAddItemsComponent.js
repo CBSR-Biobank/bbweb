@@ -85,10 +85,10 @@ define(function (require) {
                                    { required: true }).result
           .then(function (timePacked) {
             return vm.shipment.pack(timeService.dateAndTimeToUtcString(timePacked))
-              .then(function (shipment) {
-                return $state.go('home.shipping.shipment', { shipmentId: shipment.id});
-              })
-              .catch(notificationsService.updateError);
+              .catch(notificationsService.updateErrorAndReject);
+          })
+          .then(function (shipment) {
+            return $state.go('home.shipping.shipment', { shipmentId: shipment.id});
           });
       });
     }
@@ -101,10 +101,18 @@ define(function (require) {
           .then(function (timeResult) {
             return vm.shipment.skipToStateSent(timeService.dateAndTimeToUtcString(timeResult.timePacked),
                                                timeService.dateAndTimeToUtcString(timeResult.timeSent))
-              .then(function (shipment) {
-                return $state.go('home.shipping.shipment', { shipmentId: shipment.id});
-              })
-              .catch(notificationsService.updateError);
+              .catch(function (err) {
+                if (err.message === 'TimeSentBeforePacked') {
+                  err.message = 'the time sent is before the time shipment was packed';
+                }
+                notificationsService.updateError(err);
+                return $q.reject(err);
+              });
+          })
+          .then(function () {
+            return $state.go('home.shipping.shipment',
+                             { shipmentId: vm.shipment.id },
+                             { reload: true });
           });
       });
     }

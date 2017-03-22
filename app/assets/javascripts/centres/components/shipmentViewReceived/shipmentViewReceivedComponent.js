@@ -15,6 +15,7 @@ define(function (require) {
   };
 
   ShipmentViewReceivedController.$inject = [
+    '$q',
     '$state',
     'gettextCatalog',
     'modalInput',
@@ -28,7 +29,8 @@ define(function (require) {
   /**
    *
    */
-  function ShipmentViewReceivedController($state,
+  function ShipmentViewReceivedController($q,
+                                          $state,
                                           gettextCatalog,
                                           modalInput,
                                           notificationsService,
@@ -56,7 +58,13 @@ define(function (require) {
                           { required: true }).result
         .then(function (timeUnpacked) {
           return vm.shipment.unpack(timeService.dateAndTimeToUtcString(timeUnpacked))
-            .catch(notificationsService.updateErrorAndReject);
+            .catch(function (err) {
+              if (err.message === 'TimeUnpackedBeforeReceived') {
+                err.message = gettextCatalog.getString('The unpacked time is before the received time');
+              }
+              notificationsService.updateError(err);
+              return $q.reject(err);
+            });
         })
         .then(function (shipment) {
           $state.go('home.shipping.shipment.unpack.info', { shipmentId: shipment.id });
@@ -68,9 +76,9 @@ define(function (require) {
         gettextCatalog.getString('Please confirm'),
         gettextCatalog.getString('Are you sure you want to place this shipment in <b>sent</b> state?'))
         .then(function () {
-          return vm.shipment.send(vm.shipment.timeSent)
-            .catch(notificationsService.updateErrorAndReject);
+          return vm.shipment.send(vm.shipment.timeSent);
         })
+        .catch(notificationsService.updateErrorAndReject)
         .then(stateHelper.reloadAndReinit);
     }
   }

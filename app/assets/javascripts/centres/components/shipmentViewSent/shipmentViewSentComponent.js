@@ -15,6 +15,7 @@ define(function (require) {
   };
 
   ShipmentViewSentController.$inject = [
+    '$q',
     '$state',
     'gettextCatalog',
     'modalInput',
@@ -29,7 +30,8 @@ define(function (require) {
   /**
    *
    */
-  function ShipmentViewSentController($state,
+  function ShipmentViewSentController($q,
+                                      $state,
                                       gettextCatalog,
                                       modalInput,
                                       notificationsService,
@@ -70,7 +72,13 @@ define(function (require) {
                           { required: true }).result
         .then(function (timeReceived) {
           return vm.shipment.receive(timeService.dateAndTimeToUtcString(timeReceived))
-            .catch(notificationsService.updateErrorAndReject);
+            .catch(function (err) {
+              if (err.message === 'TimeReceivedBeforeSent') {
+                err.message = gettextCatalog.getString('The received time is before the sent time');
+              }
+              notificationsService.updateError(err);
+              return $q.reject(err);
+            });
         })
         .then(stateHelper.reloadAndReinit);
     }
@@ -80,7 +88,17 @@ define(function (require) {
         .then(function (timeResult) {
           return vm.shipment.skipToStateUnpacked(timeService.dateAndTimeToUtcString(timeResult.timeReceived),
                                                  timeService.dateAndTimeToUtcString(timeResult.timeUnpacked))
-            .catch(notificationsService.updateErrorAndReject);
+            .catch(function (err) {
+              if (err.message === 'TimeReceivedBeforeSent') {
+                err.message =
+                  gettextCatalog.getString('the received time is before the time shipment was sent');
+              } else if (err.message === 'TimeUnpackedBeforeReceived') {
+                err.message =
+                  gettextCatalog.getString('the unpacked time is before the time shipment was received');
+              }
+              notificationsService.updateError(err);
+              return $q.reject(err);
+            });
         })
         .then(function (shipment) {
           return $state.go('home.shipping.shipment.unpack.info', { shipmentId: shipment.id});

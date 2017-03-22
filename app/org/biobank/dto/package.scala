@@ -112,8 +112,9 @@ package dto {
                                timeSent:         Option[DateTime],
                                timeReceived:     Option[DateTime],
                                timeUnpacked:     Option[DateTime],
+                               timeCompleted:    Option[DateTime],
                                specimenCount:    Int,
-                               containerCount:    Int)
+                               containerCount:   Int)
 
   object ShipmentDto {
 
@@ -143,6 +144,7 @@ package dto {
                   timeSent         = shipment.timeSent,
                   timeReceived     = shipment.timeReceived,
                   timeUnpacked     = shipment.timeUnpacked,
+                  timeCompleted    = shipment.timeCompleted,
                   specimenCount    = specimenCount,
                   containerCount   = containerCount,
                   state            = shipment.state.id)

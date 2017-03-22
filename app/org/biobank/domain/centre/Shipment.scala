@@ -211,11 +211,11 @@ object Shipment extends ShipmentValidations {
                  "toLocationId"   -> shipment.toLocationId.id) ++
         JsObject(
           Seq[(String, JsValue)]() ++
-            shipment.timePacked.map("timePacked" -> Json.toJson(_)) ++
-            shipment.timeSent.map("timeSent" -> Json.toJson(_)) ++
-            shipment.timeReceived.map("timeReceived"  -> Json.toJson(_)) ++
-            shipment.timeUnpacked.map("timeUnpacked"  -> Json.toJson(_)) ++
-            shipment.timeUnpacked.map("timeCompleted" -> Json.toJson(_))
+            shipment.timePacked.map("timePacked"       -> Json.toJson(_)) ++
+            shipment.timeSent.map("timeSent"           -> Json.toJson(_)) ++
+            shipment.timeReceived.map("timeReceived"   -> Json.toJson(_)) ++
+            shipment.timeUnpacked.map("timeUnpacked"   -> Json.toJson(_)) ++
+            shipment.timeCompleted.map("timeCompleted" -> Json.toJson(_))
         )
       }
 
@@ -514,10 +514,15 @@ final case class SentShipment(id:             ShipmentId,
   }
 
   def skipToUnpacked(timeReceived: DateTime, timeUnpacked: DateTime): DomainValidation[UnpackedShipment] = {
-    if (timeUnpacked < timeReceived) {
-      TimeUnpackedBeforeReceived.failureNel[UnpackedShipment]
-    } else {
-      UnpackedShipment(id             = this.id,
+    this.timeSent.
+      toSuccessNel(TimeSentUndefined.toString).
+      flatMap { timeSent =>
+        if (timeReceived < timeSent) {
+          TimeReceivedBeforeSent.failureNel[UnpackedShipment]
+        } else if (timeUnpacked < timeReceived) {
+          TimeUnpackedBeforeReceived.failureNel[UnpackedShipment]
+        } else {
+          UnpackedShipment(id             = this.id,
                        version        = this.version + 1,
                        timeAdded      = this.timeAdded,
                        timeModified   = Some(DateTime.now),
@@ -532,7 +537,8 @@ final case class SentShipment(id:             ShipmentId,
                        timeReceived   = Some(timeReceived),
                        timeUnpacked   = Some(timeUnpacked),
                        timeCompleted  = None).successNel[String]
-    }
+        }
+      }
   }
 
   def lost: LostShipment = {

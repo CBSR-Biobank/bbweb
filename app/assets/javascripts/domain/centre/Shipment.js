@@ -42,18 +42,13 @@ define(function (require) {
         'state':            { 'type': 'string' },
         'courierName':      { 'type': 'string' },
         'trackingNumber':   { 'type': 'string' },
-        'fromLocationInfo': {
-          'type': 'object',
-          'items': { '$ref': 'CentreLocationInfo' }
-        },
-        'toLocationInfo': {
-          'type': 'object',
-          'items': { '$ref': 'CentreLocationInfo' }
-        },
+        'fromLocationInfo': { 'type': 'object', 'items': { '$ref': 'CentreLocationInfo' } },
+        'toLocationInfo':   { 'type': 'object', 'items': { '$ref': 'CentreLocationInfo' } },
         'timePacked':       { 'type': [ 'string', 'null' ] },
         'timeSent':         { 'type': [ 'string', 'null' ] },
         'timeReceived':     { 'type': [ 'string', 'null' ] },
-        'timeUnpacked':     { 'type': [ 'string', 'null' ] }
+        'timeUnpacked':     { 'type': [ 'string', 'null' ] },
+        'timeCompleted':    { 'type': [ 'string', 'null' ] }
       },
       'required': [
         'id',
@@ -149,6 +144,12 @@ define(function (require) {
       /**
        * The date and time when the shipment was unpacked.
        * @name domain.centres.Shipment#timeUpacked
+       * @type {Date}
+       */
+
+      /**
+       * The date and time when all the specimens and containers were unpacked from the shipment.
+       * @name domain.centres.Shipment#timeCompleted
        * @type {Date}
        */
 

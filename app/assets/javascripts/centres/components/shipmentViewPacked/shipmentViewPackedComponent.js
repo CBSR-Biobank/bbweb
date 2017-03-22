@@ -56,7 +56,13 @@ define(function (require) {
                           { required: true }).result
         .then(function (timeSent) {
           return vm.shipment.send(timeService.dateAndTimeToUtcString(timeSent))
-            .catch(notificationsService.updateErrorAndReject);
+            .catch(function (err) {
+              if (err.message === 'TimeSentBeforePacked') {
+                err.message = gettextCatalog.getString('The sent time is before the packed time');
+              }
+              notificationsService.updateError(err);
+              return $q.reject(err);
+            });
         })
         .then(function () {
           $state.go('home.shipping');
