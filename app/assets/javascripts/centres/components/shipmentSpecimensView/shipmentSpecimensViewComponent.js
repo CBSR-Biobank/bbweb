@@ -10,8 +10,9 @@ define(function (require) {
     controller: ShipmentSpecimensViewController,
     controllerAs: 'vm',
     bindings: {
-      shipment: '<',
-      readOnly: '<'
+      shipment:      '<',
+      readOnly:      '<',
+      showItemState: '<'
     }
   };
 

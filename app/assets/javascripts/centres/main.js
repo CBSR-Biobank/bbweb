@@ -20,9 +20,9 @@ define(function (require) {
     ])
     .constant('SHIPMENT_RECEIVE_PROGRESS_ITEMS', [
       'Sent',
-      'Receive',
-      'Unpack',
-      'Items Received'
+      'Received',
+      'Unpacked',
+      'Completed'
     ])
 
     .controller('ShipmentSpecimenController', require('./controllers/ShipmentSpecimensController'))
@@ -39,7 +39,9 @@ define(function (require) {
     .component(
       'shipmentViewReceived',
       require('./components/shipmentViewReceived/shipmentViewReceivedComponent'))
-    .component('shipmentUnpack',       require('./components/shipmentUnpack/shipmentUnpackComponent'))
+    .component(
+      'shipmentViewCompleted',
+      require('./components/shipmentViewCompleted/shipmentViewCompletedComponent'))
     .component('shipmentsTable',       require('./components/shipmentsTable/shipmentsTableComponent'))
     .component(
       'shipmentSpecimensAdd',

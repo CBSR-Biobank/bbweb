@@ -698,7 +698,7 @@ final case class CompletedShipment(id:             ShipmentId,
                                    timeReceived:   Option[DateTime],
                                    timeUnpacked:   Option[DateTime],
                                    timeCompleted:  Option[DateTime])
-    extends { val state: EntityState = Shipment.lostState }
+    extends { val state: EntityState = Shipment.completedState }
     with Shipment
     with ShipmentValidations {
 

@@ -90,6 +90,7 @@ class ShipmentSpec extends DomainFreeSpec {
         val packedShipment = shipment.pack(timePacked)
 
         packedShipment mustBe a[PackedShipment]
+        packedShipment.state must be (Shipment.packedState)
         packedShipment.timePacked must be (Some(timePacked))
         packedShipment.version must be (shipment.version + 1)
         checkTimeStamps(packedShipment, shipment.timeAdded, DateTime.now)
@@ -101,6 +102,7 @@ class ShipmentSpec extends DomainFreeSpec {
         val timeSent = shipment.timePacked.get.plusDays(1)
         shipment.send(timeSent) mustSucceed { s =>
           s mustBe a[SentShipment]
+          s.state must be (Shipment.sentState)
           s.timeSent must be (Some(timeSent))
           s.version must be (shipment.version + 1)
           checkTimeStamps(s, shipment.timeAdded, DateTime.now)
@@ -113,6 +115,7 @@ class ShipmentSpec extends DomainFreeSpec {
         val timeReceived = shipment.timeSent.get.plusDays(1)
         shipment.receive(timeReceived) mustSucceed { s =>
           s mustBe a[ReceivedShipment]
+          s.state must be (Shipment.receivedState)
           s.timeReceived must be (Some(timeReceived))
           s.version must be (shipment.version + 1)
           checkTimeStamps(s, shipment.timeAdded, DateTime.now)
@@ -125,6 +128,7 @@ class ShipmentSpec extends DomainFreeSpec {
         val timeUnpacked = shipment.timeReceived.get.plusDays(1)
         shipment.unpack(timeUnpacked) mustSucceed { s =>
           s mustBe a[UnpackedShipment]
+          s.state must be (Shipment.unpackedState)
           s.timeUnpacked must be (Some(timeUnpacked))
           s.version must be (shipment.version + 1)
           checkTimeStamps(s, shipment.timeAdded, DateTime.now)
@@ -137,6 +141,7 @@ class ShipmentSpec extends DomainFreeSpec {
         val timeCompleted = shipment.timeUnpacked.get.plusDays(1)
         shipment.complete(timeCompleted) mustSucceed { s =>
           s mustBe a[CompletedShipment]
+          s.state must be (Shipment.completedState)
           s.timeCompleted must be (Some(timeCompleted))
           s.version must be (shipment.version + 1)
           checkTimeStamps(s, shipment.timeAdded, DateTime.now)
@@ -149,6 +154,7 @@ class ShipmentSpec extends DomainFreeSpec {
         val lostShipment = shipment.lost
 
         lostShipment mustBe a[LostShipment]
+        lostShipment.state must be (Shipment.lostState)
         lostShipment.version must be (shipment.version + 1)
         checkTimeStamps(lostShipment, shipment.timeAdded, DateTime.now)
       }

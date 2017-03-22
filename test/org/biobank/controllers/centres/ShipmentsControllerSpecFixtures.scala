@@ -122,12 +122,13 @@ private[centres] trait ShipmentsControllerSpecFixtures extends ControllerFixture
       val fromCentre = centres.fromCentre
       val toCentre = centres.toCentre
       val shipments = Map(
-          Shipment.createdState  -> factory.createShipment(fromCentre, toCentre),
-          Shipment.packedState   -> factory.createPackedShipment(fromCentre, toCentre),
-          Shipment.sentState     -> factory.createSentShipment(fromCentre, toCentre),
-          Shipment.receivedState -> factory.createReceivedShipment(fromCentre, toCentre),
-          Shipment.unpackedState -> factory.createUnpackedShipment(fromCentre, toCentre),
-          Shipment.lostState     -> factory.createLostShipment(fromCentre, toCentre))
+          Shipment.createdState   -> factory.createShipment(fromCentre, toCentre),
+          Shipment.packedState    -> factory.createPackedShipment(fromCentre, toCentre),
+          Shipment.sentState      -> factory.createSentShipment(fromCentre, toCentre),
+          Shipment.receivedState  -> factory.createReceivedShipment(fromCentre, toCentre),
+          Shipment.unpackedState  -> factory.createUnpackedShipment(fromCentre, toCentre),
+          Shipment.completedState -> factory.createCompletedShipment(fromCentre, toCentre),
+          Shipment.lostState      -> factory.createLostShipment(fromCentre, toCentre))
     }
   }
 

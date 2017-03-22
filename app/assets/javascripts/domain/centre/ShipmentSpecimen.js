@@ -33,16 +33,13 @@ define(function (require) {
       'id': 'Shipment',
       'type': 'object',
       'properties': {
-        'id':                  { 'type': 'string' },
-        'version':             { 'type': 'integer', 'minimum': 0 },
-        'timeAdded':           { 'type': 'string' },
-        'timeModified':        { 'type': [ 'string', 'null' ] },
-        'state':               { 'type': 'string' },
-        'shipmentId':          { 'type': 'string' },
-        'specimen': {
-          'type': 'object',
-          'items': { '$ref': 'Specimen' }
-        }
+        'id':           { 'type': 'string' },
+        'version':      { 'type': 'integer', 'minimum': 0 },
+        'timeAdded':    { 'type': 'string' },
+        'timeModified': { 'type': [ 'string', 'null' ] },
+        'state':        { 'type': 'string' },
+        'shipmentId':   { 'type': 'string' },
+        'specimen':     { 'type': 'object', 'items': { '$ref': 'Specimen' } }
       },
       'required': [
         'id',

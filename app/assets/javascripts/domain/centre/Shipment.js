@@ -454,11 +454,24 @@ define(function (require) {
     };
 
     /**
-     * Tags a shipment as RECEIVED.
+     * Tags a shipment as COMPLETED.
+     *
+     * Only shipments in UNPACKED state can be assigned to COMPLETED state.
+     *
+     * @param {Date} [datetime] - the date and time this shipment was completed.
+     *
+     * @returns {Promise} A copy of this shipment, but with the state set to COMPLETED.
+     */
+    Shipment.prototype.complete = function (datetime) {
+      return this.update.call(this, uri('state/completed', this.id), { datetime: datetime });
+    };
+
+    /**
+     * Tags a shipment as LOST.
      *
      * Only shipments in SENT state can be assigned to LOST state.
      *
-     * @returns {Promise} A copy of this shipment, but with the state set to RECEIVED.
+     * @returns {Promise} A copy of this shipment, but with the state set to LOST.
      */
     Shipment.prototype.lost = function () {
       return this.update.call(this, uri('state/lost', this.id));

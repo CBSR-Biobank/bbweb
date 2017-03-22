@@ -43,11 +43,7 @@ define(function () {
         },
         views: {
           'main@': {
-            template: [
-              '<centre-shipments',
-              '  centre="vm.centre">',
-              '</centre-shipments>'
-            ].join(''),
+            template: '<centre-shipments centre="vm.centre"></centre-shipments>',
             controller: [ 'centre', function (centre) {
               this.centre = centre;
             }],
@@ -101,9 +97,9 @@ define(function () {
           displayName: 'Shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
         }
       })
-      .state('home.shipping.unpack', {
+      .state('home.shipping.shipment.unpack', {
         abstract: true,
-        url: '/unpack/{shipmentId}',
+        url: '/unpack',
         resolve: {
           shipment: resolveShipment
         },
@@ -118,7 +114,7 @@ define(function () {
           breadcrumProxy: 'home.shipping.unpack.info'
         }
       })
-      .state('home.shipping.unpack.info', {
+      .state('home.shipping.shipment.unpack.info', {
         url: '/information',
         views: {
           'unpackedShipmentDetails': {
@@ -131,7 +127,7 @@ define(function () {
           displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
         }
       })
-      .state('home.shipping.unpack.unpack', {
+      .state('home.shipping.shipment.unpack.unpack', {
         url: '/unpack',
         views: {
           'unpackedShipmentDetails': {
@@ -144,7 +140,7 @@ define(function () {
           displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
         }
       })
-      .state('home.shipping.unpack.received', {
+      .state('home.shipping.shipment.unpack.received', {
         url: '/received',
         views: {
           'unpackedShipmentDetails': {
@@ -169,7 +165,7 @@ define(function () {
           displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
         }
       })
-      .state('home.shipping.unpack.missing', {
+      .state('home.shipping.shipment.unpack.missing', {
         url: '/missing',
         views: {
           'unpackedShipmentDetails': {
@@ -194,7 +190,7 @@ define(function () {
           displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
         }
       })
-      .state('home.shipping.unpack.extra', {
+      .state('home.shipping.shipment.unpack.extra', {
         url: '/extra',
         views: {
           'unpackedShipmentDetails': {

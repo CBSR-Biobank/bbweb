@@ -126,7 +126,7 @@ define(['lodash'], function (_) {
       if (shipment.state === ShipmentState.CREATED) {
         $state.go('home.shipping.addItems', { shipmentId: shipment.id });
       } else if (shipment.state === ShipmentState.UNPACKED) {
-        $state.go('home.shipping.unpack.info', { shipmentId: shipment.id });
+        $state.go('home.shipping.shipment.unpack.info', { shipmentId: shipment.id });
       } else {
         $state.go('home.shipping.shipment', { shipmentId: shipment.id });
       }

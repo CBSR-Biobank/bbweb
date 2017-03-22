@@ -743,11 +743,20 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                            event.getUnpacked.getVersion) { (shipment, _, time) =>
       val stateChangeTime =
         ISODateTimeFormat.dateTime.parseDateTime(event.getUnpacked.getStateChangeTime)
-      for {
-        received <- shipment.isReceived
-        unpacked <- received.copy(timeModified = Some(time)).unpack(stateChangeTime)
-      } yield {
-        shipmentRepository.put(unpacked)
+
+      val unpacked = shipment match {
+          case received: ReceivedShipment =>
+            received.unpack(stateChangeTime).map(_.copy(timeModified = Some(time)))
+
+          case completed: CompletedShipment =>
+            completed.backToUnpacked.copy(timeModified = Some(time)).successNel[String]
+
+          case _ =>
+            InvalidState(s"cannot change to received state: ${shipment.id}").failureNel[Shipment]
+        }
+
+      unpacked.map { s =>
+        shipmentRepository.put(s)
         true
       }
     }

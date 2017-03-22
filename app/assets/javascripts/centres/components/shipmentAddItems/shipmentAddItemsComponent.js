@@ -50,6 +50,7 @@ define(function (require) {
                                       shipmentSkipToSentModalService) {
     var vm = this;
 
+    vm.timePacked     = new Date();
     vm.tagAsPacked    = tagAsPacked;
     vm.tagAsSent      = tagAsSent;
     vm.removeShipment = removeShipment;
@@ -78,7 +79,6 @@ define(function (require) {
      */
     function tagAsPacked() {
       return validateStateChangeAllowed().then(function () {
-        vm.timePacked = new Date();
         return modalInput.dateTime(gettextCatalog.getString('Date and time shipment was packed'),
                                    gettextCatalog.getString('Time packed'),
                                    vm.timePacked,

@@ -1,0 +1,4 @@
+# when set to true, the actors will load test data
+application.testData.load=false
+application.testData.loadSpecimens=false
+application.testData.loadShipments=false

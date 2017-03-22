@@ -38,7 +38,8 @@ define(function (require) {
                                           SHIPMENT_RECEIVE_PROGRESS_ITEMS) {
     var vm = this;
 
-    vm.unpackShipment       = unpackShipment;
+    vm.timeUnpacked      = new Date();
+    vm.unpackShipment    = unpackShipment;
     vm.returnToSentState = returnToSentState;
 
     vm.progressInfo = {
@@ -58,7 +59,7 @@ define(function (require) {
             .catch(notificationsService.updateErrorAndReject);
         })
         .then(function (shipment) {
-          $state.go('home.shipping.unpack.info', { shipmentId: shipment.id });
+          $state.go('home.shipping.shipment.unpack.info', { shipmentId: shipment.id });
         });
     }
 

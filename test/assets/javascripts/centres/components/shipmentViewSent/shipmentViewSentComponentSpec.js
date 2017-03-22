@@ -146,7 +146,7 @@ define(function (require) {
             moment(this.timeValue).utc().format(),
             moment(this.timeValue).utc().format()
           );
-        expect(this.$state.go).toHaveBeenCalledWith('home.shipping.unpack.info',
+        expect(this.$state.go).toHaveBeenCalledWith('home.shipping.shipment.unpack.info',
                                                     { shipmentId: this.shipment.id});
       });
 

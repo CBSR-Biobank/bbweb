@@ -78,6 +78,10 @@ define(function (require) {
      * Inventory IDs entered by the user
      */
     function onInventoryIdsSubmit() {
+      if (!vm.inventoryIds) {
+        return null;
+      }
+
       var inventoryIds = _.map(vm.inventoryIds.split(','), function (nonTrimmedInventoryId) {
         return nonTrimmedInventoryId.trim();
       });

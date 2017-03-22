@@ -71,7 +71,7 @@ define(function (require) {
         this.scope.$digest();
 
         expect(this.Shipment.prototype.unpack).toHaveBeenCalledWith(moment(timeNow).utc().format());
-        expect(self.$state.go).toHaveBeenCalledWith('home.shipping.unpack.info',
+        expect(self.$state.go).toHaveBeenCalledWith('home.shipping.shipment.unpack.info',
                                                     { shipmentId: this.shipment.id });
       });
 

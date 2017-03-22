@@ -140,7 +140,7 @@ define(function (require) {
           expect(args[0]).toBe('home.shipping.shipment');
           break;
         case self.ShipmentState.UNPACKED:
-          expect(args[0]).toBe('home.shipping.unpack.info');
+          expect(args[0]).toBe('home.shipping.shipment.unpack.info');
           break;
         }
         expect(args[1]).toEqual({ shipmentId: shipment.id });

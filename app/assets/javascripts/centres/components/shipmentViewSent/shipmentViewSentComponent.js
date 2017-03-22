@@ -40,6 +40,7 @@ define(function (require) {
                                       shipmentSkipToUnpackedModalService) {
     var vm = this;
 
+    vm.timeReceived        = new Date();
     vm.returnToPackedState = returnToPackedState;
     vm.receiveShipment     = receiveShipment;
     vm.unpackShipment      = unpackShipment;
@@ -65,7 +66,7 @@ define(function (require) {
     function receiveShipment() {
       modalInput.dateTime(gettextCatalog.getString('Date and time shipment was received'),
                           gettextCatalog.getString('Time received'),
-                          new Date(),
+                          vm.timeReceived,
                           { required: true }).result
         .then(function (timeReceived) {
           return vm.shipment.receive(timeService.dateAndTimeToUtcString(timeReceived))
@@ -82,7 +83,7 @@ define(function (require) {
             .catch(notificationsService.updateErrorAndReject);
         })
         .then(function (shipment) {
-          return $state.go('home.shipping.unpack.info', { shipmentId: shipment.id});
+          return $state.go('home.shipping.shipment.unpack.info', { shipmentId: shipment.id});
         });
     }
   }

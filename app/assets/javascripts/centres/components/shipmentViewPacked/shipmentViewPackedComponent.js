@@ -38,6 +38,7 @@ define(function (require) {
                                         modalService) {
     var vm = this;
 
+    vm.timeSent     = new Date();
     vm.sendShipment = sendShipment;
     vm.addMoreItems = addMoreItems;
 
@@ -51,7 +52,7 @@ define(function (require) {
     function sendShipment() {
       modalInput.dateTime(gettextCatalog.getString('Date and time shipment was sent'),
                           gettextCatalog.getString('Time sent'),
-                          new Date(),
+                          vm.timeSent,
                           { required: true }).result
         .then(function (timeSent) {
           return vm.shipment.send(timeService.dateAndTimeToUtcString(timeSent))

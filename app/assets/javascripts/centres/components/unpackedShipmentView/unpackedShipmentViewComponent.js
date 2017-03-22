@@ -18,20 +18,28 @@ define(function () {
     '$controller',
     '$scope',
     '$state',
+    'ShipmentSpecimen',
+    'ShipmentItemState',
     'modalService',
+    'modalInput',
     'notificationsService',
+    'timeService',
     'SHIPMENT_RECEIVE_PROGRESS_ITEMS',
     'gettextCatalog'
   ];
 
-  /**
-   * FIXME: if the shipment has unpacked items, it cannot be returned to the previous state.
+  /*
+   * Controller for this component.
    */
   function UnpackedShipmentViewController($controller,
                                           $scope,
                                           $state,
+                                          ShipmentSpecimen,
+                                          ShipmentItemState,
                                           modalService,
+                                          modalInput,
                                           notificationsService,
+                                          timeService,
                                           SHIPMENT_RECEIVE_PROGRESS_ITEMS,
                                           gettextCatalog) {
     var vm = this;
@@ -48,30 +56,32 @@ define(function () {
     vm.tabs = [
       {
         heading: gettextCatalog.getString('Information'),
-        sref: 'home.shipping.unpack.info',
+        sref: 'home.shipping.shipment.unpack.info',
         active: true
       },
       {
         heading: gettextCatalog.getString('Unpack specimens'),
-        sref: 'home.shipping.unpack.unpack',
+        sref: 'home.shipping.shipment.unpack.unpack',
         active: false
       },
       {
         heading: gettextCatalog.getString('Received specimens'),
-        sref: 'home.shipping.unpack.received',
+        sref: 'home.shipping.shipment.unpack.received',
         active: false
       },
       {
         heading: gettextCatalog.getString('Missing specimens'),
-        sref: 'home.shipping.unpack.missing',
+        sref: 'home.shipping.shipment.unpack.missing',
         active: false
       },
       {
         heading: gettextCatalog.getString('Extra specimens'),
-        sref: 'home.shipping.unpack.extra',
+        sref: 'home.shipping.shipment.unpack.extra',
         active: false
       }
     ];
+
+    vm.timeCompleted = new Date();
 
     vm.progressInfo = {
       items: SHIPMENT_RECEIVE_PROGRESS_ITEMS,
@@ -79,13 +89,21 @@ define(function () {
     };
 
     vm.returnToReceivedState = returnToReceivedState;
+    vm.completeShipment = completeShipment;
 
     //----
 
-    function returnToReceivedState() {
+    function cannotGoBackToReceivedModal() {
+      modalService.modalOk(
+        gettextCatalog.getString('Cannot change state'),
+        gettextCatalog.getString('Cannot return this shipment to <b>Received</b> state since ' +
+                                 'specimens have already been unpacked.'));
+    }
+
+    function backToReceived() {
       modalService.modalOkCancel(
         gettextCatalog.getString('Please confirm'),
-        gettextCatalog.getString('Are you sure you want to place this shipment in <b>received</b> state?'))
+        gettextCatalog.getString('Are you sure you want to place this shipment in <b>Received</b> state?'))
         .then(function () {
           return vm.shipment.receive(vm.shipment.timeReceived)
             .catch(notificationsService.updateErrorAndReject);
@@ -93,7 +111,61 @@ define(function () {
         .then(function () {
           $state.go('home.shipping.shipment', { shipmentId: vm.shipment.id }, { reload: true });
         });
+    }
 
+    function returnToReceivedState() {
+      ShipmentSpecimen.list(vm.shipment.id, { filter: 'state:out:' + ShipmentItemState.PRESENT })
+        .then(function (pagedResult) {
+          var hasNonPresentSpecimens = pagedResult.items.length > 0;
+
+          if (hasNonPresentSpecimens) {
+            cannotGoBackToReceivedModal();
+            return;
+          }
+
+          backToReceived();
+        });
+    }
+
+    function cannotCompleteShipmentModal() {
+      modalService.modalOk(
+        gettextCatalog.getString('Cannot change state'),
+        gettextCatalog.getString('Cannot place this shipment in <b>Completed</b> state since ' +
+                                 'it still has specimens that need unpacking.'));
+    }
+
+    function completeShipmentConfirm() {
+      modalInput.dateTime(gettextCatalog.getString('Date and time shipment was completed'),
+                          gettextCatalog.getString('Time completed'),
+                          vm.timeCompleted,
+                          { required: true }).result
+        .then(function (timeCompleted) {
+          return vm.shipment.complete(timeService.dateAndTimeToUtcString(timeCompleted))
+            .catch(function(err) {
+              if (err.message === 'TimeCompletedBeforeUnpacked') {
+                return notificationsService.updateErrorAndReject(
+                  'The time completed was before the time packed.');
+              }
+              return notificationsService.updateErrorAndReject(err);
+            });
+        })
+        .then(function () {
+          $state.go('home.shipping.shipment', { shipmentId: vm.shipment.id }, { reload: true });
+        });
+    }
+
+    function completeShipment() {
+      ShipmentSpecimen.list(vm.shipment.id, { filter: 'state:in:' + ShipmentItemState.PRESENT })
+        .then(function (pagedResult) {
+          var hasPresentSpecimens = pagedResult.items.length > 0;
+
+          if (hasPresentSpecimens) {
+            cannotCompleteShipmentModal();
+            return;
+          }
+
+          completeShipmentConfirm();
+        });
     }
 
   }

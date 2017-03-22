@@ -839,7 +839,7 @@ class ShipmentsControllerSpec
           }
         }
 
-        "111 not change to PACKED state from an invalid state" in {
+        "not change to PACKED state from an invalid state" in {
           val f = allShipmentsFixture
           f.shipments.values.foreach(shipmentRepository.put)
 
@@ -1022,18 +1022,27 @@ class ShipmentsControllerSpec
 
       "for UNPACKED state" must {
 
-        "change to UNPACKED state from RECEIVED" in {
-          val f = receivedShipmentFixture
-          val timeUnpacked = f.shipment.timeReceived.get.plusDays(1)
+        "change to UNPACKED state from" in {
+          val f = allShipmentsFixture
 
-          changeStateCommon(f.shipment, Shipment.unpackedState, Some(timeUnpacked))
-          shipmentRepository.getByKey(f.shipment.id) mustSucceed { repoShipment =>
-            repoShipment mustBe a[UnpackedShipment]
-            compareTimestamps(repoShipment,
-                              f.shipment.timePacked,
-                              f.shipment.timeSent,
-                              f.shipment.timeReceived,
-                              Some(timeUnpacked))
+          val testStates = Table("state name",
+                                 Shipment.receivedState,
+                                 Shipment.completedState)
+
+          forAll(testStates) { state =>
+            info(s"$state state")
+            val shipment =  f.shipments(state)
+            val time = shipment.timeReceived.get.plusDays(1)
+
+            changeStateCommon(shipment, Shipment.unpackedState, Some(time))
+            shipmentRepository.getByKey(shipment.id) mustSucceed { repoShipment =>
+              repoShipment mustBe a[UnpackedShipment]
+              compareTimestamps(repoShipment,
+                                shipment.timePacked,
+                                shipment.timeSent,
+                                shipment.timeReceived,
+                                Some(time))
+            }
           }
         }
 

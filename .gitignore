@@ -30,6 +30,7 @@ node_modules/
 
 # Others
 email.conf
+testdata.conf
 .tern-port
 .cache
 .classpath
