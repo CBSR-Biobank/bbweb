@@ -47,7 +47,7 @@ define(['lodash'], function (_) {
 
       return biobankApi.del(url).then(function () {
         return self.asyncCreate(
-          _.extend(self, {
+          _.extend({}, self, {
             version: self.version + 1,
             annotations: _.filter(self.annotations, function(at) {
               return at.uniqueId !== annotation.uniqueId;
