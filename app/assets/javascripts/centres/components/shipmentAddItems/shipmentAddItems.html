@@ -34,11 +34,11 @@
 
   <shipment-specimens-add shipment="vm.shipment"></shipment-specimens-add>
 
-  <collapsable-panel heading="{{'Containers in this shipment'|translate}}">
+  <collapsible-panel heading="{{'Containers in this shipment'|translate}}">
     <div class="panel panel-warning">
       <div class="panel-heading" translate>No containers in this shipment</div>
     </div>
-  </collapsable-panel>
+  </collapsible-panel>
 </div>
 
 <div ng-if="!vm.shipment.isCreated()">

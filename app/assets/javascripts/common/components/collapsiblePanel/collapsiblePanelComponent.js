@@ -9,18 +9,18 @@ define(function () {
    * A panel that can be collapsed by the user.
    */
   var component = {
-    templateUrl: '/assets/javascripts/common/components/collapsablePanel/collapsablePanel.html',
+    templateUrl: '/assets/javascripts/common/components/collapsiblePanel/collapsiblePanel.html',
     transclude: true,
-    controller: CollapsablePanelController,
+    controller: CollapsiblePanelController,
     controllerAs: 'vm',
     bindings: {
       heading: '@'
     }
   };
 
-  //CollapsablePanelController.$inject = [];
+  //collapsiblePanelController.$inject = [];
 
-  function CollapsablePanelController() {
+  function CollapsiblePanelController() {
     var vm = this;
 
     vm.panelOpen = true;

@@ -81,7 +81,11 @@ define(function (require) {
       });
 
       it('user can return shipment to sent state', function() {
+        this.injectDependencies('ShipmentSpecimen');
+
+        spyOn(this.ShipmentSpecimen, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([])));
         spyOn(this.Shipment.prototype, 'receive').and.returnValue(this.$q.when(this.shipment));
+
         this.controller.returnToReceivedState();
         this.scope.$digest();
         expect(this.$state.go).toHaveBeenCalledWith('home.shipping.shipment',
@@ -91,8 +95,12 @@ define(function (require) {
 
       it('user is informed if shipment cannot be returned to sent state', function() {
         var error = this.$q.reject('simulated error');
+
+        this.injectDependencies('ShipmentSpecimen');
+        spyOn(this.ShipmentSpecimen, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([])));
         spyOn(this.Shipment.prototype, 'receive').and.returnValue(error);
         spyOn(this.notificationsService, 'updateErrorAndReject').and.returnValue(error);
+
         this.controller.returnToReceivedState();
         this.scope.$digest();
         expect(this.notificationsService.updateErrorAndReject).toHaveBeenCalled();

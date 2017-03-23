@@ -95,13 +95,13 @@ define(function (require) {
     });
 
     it('updateError with error message', function() {
-      var err = { data: { message: this.factory.stringNext() } },
+      var err = { message: this.factory.stringNext() },
           args;
 
       this.notificationsService.updateError(err);
       expect(this.toastr.error).toHaveBeenCalled();
       args = this.toastr.error.calls.argsFor(0);
-      expect(args[0]).toEqual('Your change could not be saved: ' + err.data.message);
+      expect(args[0]).toEqual(err.message);
       expect(args[1]).toEqual('Cannot apply your change');
       expect(args[2]).toBeObject();
       expect(args[2].closeButton).toBeTrue();
@@ -125,7 +125,7 @@ define(function (require) {
     });
 
     it('updateErrorAndReject with error message', function() {
-      var err = { data: { message: this.factory.stringNext() } },
+      var err = { message: this.factory.stringNext() },
           args;
 
       this.notificationsService.updateErrorAndReject(err).then(function (arg) {
@@ -135,7 +135,7 @@ define(function (require) {
 
       expect(this.toastr.error).toHaveBeenCalled();
       args = this.toastr.error.calls.argsFor(0);
-      expect(args[0]).toEqual('Your change could not be saved: ' + err.data.message);
+      expect(args[0]).toEqual(err.message);
       expect(args[1]).toEqual('Cannot apply your change');
       expect(args[2]).toBeObject();
       expect(args[2].closeButton).toBeTrue();

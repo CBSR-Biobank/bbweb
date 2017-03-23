@@ -8,14 +8,14 @@ define(function (require) {
   var mocks = require('angularMocks'),
       _     = require('lodash');
 
-  describe('collapsablePanelComponent', function() {
+  describe('collapsiblePanelComponent', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(ComponentTestSuiteMixin) {
       _.extend(this, ComponentTestSuiteMixin.prototype);
       this.putHtmlTemplates(
-        '/assets/javascripts/common/components/collapsablePanel/collapsablePanel.html');
+        '/assets/javascripts/common/components/collapsiblePanel/collapsiblePanel.html');
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -25,9 +25,9 @@ define(function (require) {
       this.createScope = function (heading) {
         ComponentTestSuiteMixin.prototype.createScope.call(
           this,
-          '<collapsable-panel heading="' + heading + '"><collapsable-panel>',
+          '<collapsible-panel heading="' + heading + '"><collapsible-panel>',
           undefined,
-          'collapsablePanel');
+          'collapsiblePanel');
       };
     }));
 

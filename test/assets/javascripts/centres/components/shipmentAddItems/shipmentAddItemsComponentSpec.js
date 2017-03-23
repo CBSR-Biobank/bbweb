@@ -19,7 +19,7 @@ define(function (require) {
         '/assets/javascripts/common/components/progressTracker/progressTracker.html',
         '/assets/javascripts/centres/components/shippingInfoView/shippingInfoView.html',
         '/assets/javascripts/centres/components/shipmentSpecimensAdd/shipmentSpecimensAdd.html',
-        '/assets/javascripts/common/components/collapsablePanel/collapsablePanel.html',
+        '/assets/javascripts/common/components/collapsiblePanel/collapsiblePanel.html',
         '/assets/javascripts/shipmentSpecimens/components/ssSpecimensPagedTable/ssSpecimensPagedTable.html',
         '/assets/javascripts/common/directives/statusLine/statusLine.html');
 
@@ -103,7 +103,8 @@ define(function (require) {
         this.controller.tagAsSent().then(function () {
           expect(self.Shipment.prototype.skipToStateSent).toHaveBeenCalled();
           expect(self.$state.go).toHaveBeenCalledWith('home.shipping.shipment',
-                                                      { shipmentId: self.shipment.id});
+                                                      { shipmentId: self.shipment.id },
+                                                      { reload: true });
           promiseSuccess = true;
         });
         this.scope.$digest();

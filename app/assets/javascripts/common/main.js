@@ -20,7 +20,7 @@ define(function (require) {
     .controller('PagedListController',    require('./controllers/PagedListController'))
 
     .component('dateTimePicker',          require('./components/dateTimePicker/dateTimePickerComponent'))
-    .component('collapsablePanel',        require('./components/collapsablePanel/collapsablePanelComponent'))
+    .component('collapsiblePanel',        require('./components/collapsiblePanel/collapsiblePanelComponent'))
     .component('nameAndStateFilters',     require('./components/nameAndStateFilters/nameAndStateFiltersComponent'))
     .component('progressTracker',         require('./components/progressTracker/progressTrackerComponent'))
 

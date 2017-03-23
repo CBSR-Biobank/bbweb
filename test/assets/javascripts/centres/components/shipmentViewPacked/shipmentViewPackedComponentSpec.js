@@ -74,11 +74,11 @@ define(function (require) {
 
       it('user is informed if shipment cannot be sent', function() {
         spyOn(this.Shipment.prototype, 'send').and.returnValue(this.$q.reject('simulated error'));
-        spyOn(this.notificationsService, 'updateErrorAndReject').and.returnValue(null);
+        spyOn(this.notificationsService, 'updateError').and.returnValue(null);
 
         this.controller.sendShipment();
         this.scope.$digest();
-        expect(this.notificationsService.updateErrorAndReject).toHaveBeenCalled();
+        expect(this.notificationsService.updateError).toHaveBeenCalled();
       });
 
     });

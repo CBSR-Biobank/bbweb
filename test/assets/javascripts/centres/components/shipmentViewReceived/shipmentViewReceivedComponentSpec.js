@@ -78,11 +78,11 @@ define(function (require) {
       it('user is informed if shipment cannot be unpacked', function() {
         var error = this.$q.reject('simulated error');
         spyOn(this.Shipment.prototype, 'unpack').and.returnValue(error);
-        spyOn(this.notificationsService, 'updateErrorAndReject').and.returnValue(error);
+        spyOn(this.notificationsService, 'updateError').and.returnValue(error);
 
         this.controller.unpackShipment();
         this.scope.$digest();
-        expect(this.notificationsService.updateErrorAndReject).toHaveBeenCalled();
+        expect(this.notificationsService.updateError).toHaveBeenCalled();
       });
 
     });

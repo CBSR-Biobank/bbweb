@@ -16,7 +16,7 @@ define(function (require) {
       _.extend(this, ShippingComponentTestSuiteMixin.prototype, ServerReplyMixin.prototype);
       this.putHtmlTemplates(
         '/assets/javascripts/centres/components/unpackedShipmentItems/unpackedShipmentItems.html',
-        '/assets/javascripts/common/components/collapsablePanel/collapsablePanel.html',
+        '/assets/javascripts/common/components/collapsiblePanel/collapsiblePanel.html',
         '/assets/javascripts/shipmentSpecimens/components/ssSpecimensPagedTable/ssSpecimensPagedTable.html');
 
       this.injectDependencies('$q',
