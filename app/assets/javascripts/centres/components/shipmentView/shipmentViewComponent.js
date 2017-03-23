@@ -24,7 +24,8 @@ define(function () {
     vm.shipmentStateValid = ((vm.shipment.state === ShipmentState.PACKED) ||
                              (vm.shipment.state === ShipmentState.SENT) ||
                              (vm.shipment.state === ShipmentState.RECEIVED) ||
-                             (vm.shipment.state === ShipmentState.COMPLETED));
+                             (vm.shipment.state === ShipmentState.COMPLETED) ||
+                             (vm.shipment.state === ShipmentState.LOST));
 
     vm.showSpecimenState = (vm.shipment.state === ShipmentState.COMPLETED);
 

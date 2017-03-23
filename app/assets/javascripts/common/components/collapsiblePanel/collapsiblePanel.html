@@ -2,7 +2,7 @@
   <div class="panel-heading">
     <h3 class="panel-title">
       {{vm.heading}}
-      <span class="pull-right">
+      <span class="pull-right" ng-if="vm.collapsible">
         <a data-toggle="collapse"
            href="#collapsiblePanelContents_{{$id}}"
            class="btn btn-xs btn-default"

@@ -24,7 +24,8 @@ define(function (require) {
         '/assets/javascripts/common/directives/statusLine/statusLine.html',
         '/assets/javascripts/centres/components/shipmentViewSent/shipmentViewSent.html',
         '/assets/javascripts/centres/components/shipmentViewReceived/shipmentViewReceived.html',
-        '/assets/javascripts/centres/components/shipmentViewCompleted/shipmentViewCompleted.html');
+        '/assets/javascripts/centres/components/shipmentViewCompleted/shipmentViewCompleted.html',
+        '/assets/javascripts/centres/components/shipmentViewLost/shipmentViewLost.html');
 
       this.injectDependencies('$q',
                               '$rootScope',

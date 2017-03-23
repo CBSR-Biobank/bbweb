@@ -42,6 +42,9 @@ define(function (require) {
     .component(
       'shipmentViewCompleted',
       require('./components/shipmentViewCompleted/shipmentViewCompletedComponent'))
+    .component(
+      'shipmentViewLost',
+      require('./components/shipmentViewLost/shipmentViewLostComponent'))
     .component('shipmentsTable',       require('./components/shipmentsTable/shipmentsTableComponent'))
     .component(
       'shipmentSpecimensAdd',

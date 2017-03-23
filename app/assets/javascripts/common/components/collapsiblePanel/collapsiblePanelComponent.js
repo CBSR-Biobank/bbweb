@@ -14,7 +14,8 @@ define(function () {
     controller: CollapsiblePanelController,
     controllerAs: 'vm',
     bindings: {
-      heading: '@'
+      heading:     '@',
+      collapsible: '<'
     }
   };
 

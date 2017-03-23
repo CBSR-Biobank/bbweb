@@ -9,18 +9,27 @@
     <div class="pull-right">
       <button class="btn btn-xs btn-warning"
               title="{{'Return shipment to packed state (un-send this shipment)'|translate}}"
-              ng-click="vm.returnToPackedState()">
-        <translate>Return to packed</translate>
+              ng-click="vm.returnToPackedState()"
+              translate>
+        Return to packed
+      </button>
+      <button class="btn btn-xs btn-danger"
+              title="{{'Mark shipment as lost'|translate}}"
+              ng-click="vm.tagAsLost()"
+              translate>
+        Tag as lost
       </button>
       <button class="btn btn-xs btn-primary"
               title="{{'Mark shipment as received'|translate}}"
-              ng-click="vm.receiveShipment()">
-        <translate>Tag as received</translate>
+              ng-click="vm.receiveShipment()"
+              translate>
+        Tag as received
       </button>
       <button class="btn btn-xs btn-primary"
               title="{{'Mark shipment as received and start unpacking it'|translate}}"
-              ng-click="vm.unpackShipment()">
-        <translate>Tag as unpacked</translate>
+              ng-click="vm.unpackShipment()"
+              translate>
+        Tag as unpacked
       </button>
     </div>
   </h1>

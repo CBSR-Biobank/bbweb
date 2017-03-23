@@ -3,10 +3,10 @@
     <shipment-view-packed    ng-switch-when="packed"    shipment="vm.shipment"></shipment-view-packed>
     <shipment-view-sent      ng-switch-when="sent"      shipment="vm.shipment"></shipment-view-sent>
     <shipment-view-received  ng-switch-when="received"  shipment="vm.shipment"></shipment-view-received>
-    <shipment-view-completed ng-switch-when="completed"  shipment="vm.shipment"></shipment-view-completed>
+    <shipment-view-completed ng-switch-when="completed" shipment="vm.shipment"></shipment-view-completed>
+    <shipment-view-lost      ng-switch-when="lost"      shipment="vm.shipment"></shipment-view-lost>
   </div>
   <shipping-info-view shipment="vm.shipment"
-                      read-only="true"
                       collapsible="false">
   </shipping-info-view>
   <shipment-specimens-view shipment="vm.shipment"

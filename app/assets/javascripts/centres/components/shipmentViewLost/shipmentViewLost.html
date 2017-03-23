@@ -1,0 +1,14 @@
+<div class="page-header">
+  <h1>
+    {{vm.shipment.courierName}}<small>: {{vm.shipment.trackingNumber}}
+    <br/> {{'Lost shipment'|translate}}</small>
+    <div class="pull-right">
+      <button class="btn btn-xs btn-warning"
+              title="{{'Return shipment to Sent state'|translate}}"
+              ng-click="vm.returnToSentState()">
+        <i class="glyphicon glyphicon-chevron-left"></i>
+        <translate>Back to sent</translate>
+      </button>
+    </div>
+  </h1>
+</div>

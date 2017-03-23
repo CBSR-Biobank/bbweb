@@ -27,8 +27,8 @@ define(function (require) {
     'shipmentSkipToUnpackedModalService'
   ];
 
-  /**
-   *
+  /*
+   * Controller for this component.
    */
   function ShipmentViewSentController($q,
                                       $state,
@@ -44,6 +44,7 @@ define(function (require) {
 
     vm.timeReceived        = new Date();
     vm.returnToPackedState = returnToPackedState;
+    vm.tagAsLost           = tagAsLost;
     vm.receiveShipment     = receiveShipment;
     vm.unpackShipment      = unpackShipment;
 
@@ -57,9 +58,20 @@ define(function (require) {
     function returnToPackedState() {
       modalService.modalOkCancel(
         gettextCatalog.getString('Please confirm'),
-        gettextCatalog.getString('Are you sure you want to place this shipment in <b>packed</b> state?'))
+        gettextCatalog.getString('Are you sure you want to place this shipment in <b>Packed</b> state?'))
         .then(function () {
           return vm.shipment.pack(vm.shipment.timePacked)
+            .catch(notificationsService.updateErrorAndReject);
+        })
+        .then(stateHelper.reloadAndReinit);
+    }
+
+    function tagAsLost() {
+      modalService.modalOkCancel(
+        gettextCatalog.getString('Please confirm'),
+        gettextCatalog.getString('Are you sure you want to tag this shipment as <b>Lost</b>?'))
+        .then(function () {
+          return vm.shipment.lost()
             .catch(notificationsService.updateErrorAndReject);
         })
         .then(stateHelper.reloadAndReinit);

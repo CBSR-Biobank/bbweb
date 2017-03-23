@@ -10,7 +10,8 @@ define(function (require) {
     controller: ShippingInfoViewController,
     controllerAs: 'vm',
     bindings: {
-      shipment: '<'
+      shipment:    '<',
+      collapsible: '<'
     }
   };
 

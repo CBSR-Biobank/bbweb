@@ -40,7 +40,7 @@ define(function (require) {
       this.createScope = function (shipment) {
         ShippingComponentTestSuiteMixin.prototype.createScope.call(
           this,
-          '<shipment-view-sent shipment="vm.shipment"></shipment-view-sen>',
+          '<shipment-view-sent shipment="vm.shipment"></shipment-view-sent>',
           { shipment: shipment },
           'shipmentViewSent');
       };
