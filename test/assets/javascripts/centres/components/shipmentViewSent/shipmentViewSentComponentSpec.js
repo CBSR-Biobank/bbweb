@@ -26,6 +26,7 @@ define(function (require) {
                               '$rootScope',
                               '$compile',
                               '$state',
+                              'toastr',
                               'stateHelper',
                               'Shipment',
                               'ShipmentState',
@@ -108,13 +109,30 @@ define(function (require) {
       });
 
       it('user is informed if shipment cannot be unpacked', function() {
-        var error = this.$q.reject('simulated error');
-        spyOn(this.Shipment.prototype, 'receive').and.returnValue(error);
-        spyOn(this.notificationsService, 'updateError').and.returnValue(error);
+        var self = this,
+            errorMsgs = [
+              'TimeReceivedBeforeSent',
+              'simulated error'
+            ],
+            errorPromises = errorMsgs.map(function (errMsg) {
+              return self.$q.reject({ message: errMsg });
+            });
 
-        this.controller.receiveShipment();
-        this.scope.$digest();
-        expect(this.notificationsService.updateError).toHaveBeenCalled();
+        spyOn(this.Shipment.prototype, 'receive').and.returnValues.apply(null, errorPromises);
+        spyOn(this.toastr, 'error').and.returnValue(null);
+
+        errorMsgs.forEach(function (errMsg, index) {
+          var args;
+
+          self.controller.receiveShipment();
+          self.scope.$digest();
+          expect(self.toastr.error.calls.count()).toBe(index + 1);
+
+          if (errMsg === 'TimeReceivedBeforeSent') {
+            args = self.toastr.error.calls.argsFor(index);
+            expect(args[0]).toContain('The received time is before the sent time');
+          }
+        });
       });
 
     });
@@ -151,16 +169,68 @@ define(function (require) {
       });
 
       it('user is informed if shipment cannot be unpacked', function() {
-        var error = this.$q.reject('simulated error');
-        spyOn(this.Shipment.prototype, 'skipToStateUnpacked').and.returnValue(error);
-        spyOn(this.notificationsService, 'updateError').and.returnValue(error);
+        var self = this,
+            errorMsgs = [
+              'TimeReceivedBeforeSent',
+              'TimeUnpackedBeforeReceived',
+              'simulated error'
+            ],
+            errorPromises = errorMsgs.map(function (errMsg) {
+              return self.$q.reject({ message: errMsg });
+            });
 
-        this.controller.unpackShipment();
-        this.scope.$digest();
-        expect(this.notificationsService.updateError).toHaveBeenCalled();
+        spyOn(this.Shipment.prototype, 'skipToStateUnpacked').and.returnValues.apply(null, errorPromises);
+        spyOn(this.toastr, 'error').and.returnValue(null);
+
+        errorMsgs.forEach(function (errMsg, index) {
+          var args;
+          self.controller.unpackShipment();
+          self.scope.$digest();
+          expect(self.toastr.error.calls.count()).toBe(index + 1);
+          args = self.toastr.error.calls.argsFor(index);
+
+          if (errMsg === 'TimeReceivedBeforeSent') {
+            expect(args[0]).toContain('The received time is before the sent time');
+          } else if (errMsg === 'TimeUnpackedBeforeReceived') {
+            expect(args[0]).toContain('The unpacked time is before the received time');
+          }
+        });
       });
 
     });
+
+    describe('when tagging as lost', function() {
+
+      beforeEach(function() {
+        spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
+      });
+
+      it('can tag a shipment as lost', function() {
+        spyOn(this.Shipment.prototype, 'lost').and.returnValue(this.$q.when(this.shipment));
+        spyOn(this.stateHelper, 'reloadAndReinit').and.returnValue(null);
+
+        this.shipment = this.createShipment({ state: this.ShipmentState.SENT });
+        this.createScope(this.shipment);
+        this.controller.tagAsLost();
+        this.scope.$digest();
+
+        expect(this.stateHelper.reloadAndReinit).toHaveBeenCalled();
+      });
+
+      it('user is informed if shipment cannot be tagged as lost', function() {
+        var errorPromise = this.$q.reject('simulated error');
+        spyOn(this.Shipment.prototype, 'lost').and.returnValue(errorPromise);
+        spyOn(this.notificationsService, 'updateErrorAndReject').and.returnValue(errorPromise);
+
+        this.shipment = this.createShipment({ state: this.ShipmentState.SENT });
+        this.createScope(this.shipment);
+        this.controller.tagAsLost();
+        this.scope.$digest();
+
+        expect(this.notificationsService.updateErrorAndReject).toHaveBeenCalled();
+      });
+    });
+
   });
 
 });

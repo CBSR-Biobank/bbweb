@@ -27,7 +27,8 @@ define(function (require) {
                ServerReplyMixin.prototype,
                AnnotationsEntityTestSuiteMixin.prototype);
 
-      self.injectDependencies('$httpBackend',
+      self.injectDependencies('$rootScope',
+                              '$httpBackend',
                               '$httpParamSerializer',
                               'Participant',
                               'CollectionEventType',
@@ -35,6 +36,7 @@ define(function (require) {
                               'Annotation',
                               'AnnotationValueType',
                               'AnnotationType',
+                              'annotationFactory',
                               'factory',
                               'testUtils');
 
@@ -186,185 +188,250 @@ define(function (require) {
       }).toThrowError('invalid collection event type');
     });
 
-    it('fails when creating from a non object', function() {
-      var self = this;
+    describe('when creating', function() {
 
-      expect(function () {
-        return new self.CollectionEvent.create(1);
-      }).toThrowError(/invalid object from server/);
-    });
+      it('fails when creating from a non object', function() {
+        var self = this;
 
-    it('fails when creating from an object with invalid keys', function() {
-      var self = this,
-          serverObj = { tmp: 1 };
-      expect(function () {
-        return new self.CollectionEvent.create(serverObj);
-      }).toThrowError(/invalid object from server/);
-    });
-
-    it('fails when creating from an object with annotation with invalid keys', function() {
-      var self = this,
-          jsonCevent = _.extend(this.factory.collectionEvent(),
-                                { annotations: [{ tmp: 1 }] });
-
-      expect(function () {
-        return new self.CollectionEvent.create(jsonCevent);
-      }).toThrowError(/invalid object.*bad annotations/);
-    });
-
-    it('has valid values when creating from a server response', function() {
-      var annotationData    = this.jsonAnnotationData(),
-          annotationTypes   = _.map(annotationData, 'annotationType'),
-          jsonCet           = this.factory.collectionEventType({annotationTypes: annotationTypes}),
-          cet               = new this.CollectionEventType(jsonCet),
-          jsonCevent        = this.factory.collectionEvent({annotationTypes: annotationTypes});
-
-      var collectionEvent = this.CollectionEvent.create(jsonCevent, cet);
-      collectionEvent.compareToJsonEntity(jsonCevent);
-    });
-
-    it('can retrieve a single collection event', function() {
-      var self = this,
-          collectionEvent = self.factory.collectionEvent();
-
-      self.$httpBackend.whenGET(uri(collectionEvent.id))
-        .respond(this.reply(collectionEvent));
-
-      self.CollectionEvent.get(collectionEvent.id).then(function (reply) {
-        expect(reply).toEqual(jasmine.any(self.CollectionEvent));
-        reply.compareToJsonEntity(collectionEvent);
+        expect(function () {
+          return new self.CollectionEvent.create(1);
+        }).toThrowError(/invalid object from server/);
       });
-      self.$httpBackend.flush();
-    });
 
-    it('get fails for and invalid collection event id', function() {
-      var self = this,
-          collectionEventId = self.factory.stringNext();
-
-      self.$httpBackend.whenGET(uri(collectionEventId))
-        .respond(404, { status: 'error', message: 'invalid id' });
-
-      self.CollectionEvent.get(collectionEventId)
-        .then(function () { fail('should not be called'); })
-        .catch(function (err) {
-          expect(err.message).toContain('invalid id');
-        });
-      self.$httpBackend.flush();
-    });
-
-    it('can list collection events for a participant', function() {
-      var self = this,
-          participant = self.factory.defaultParticipant(),
-          collectionEvents = _.map(_.range(2), function () {
-            return self.factory.collectionEvent();
-          }),
-          reply = self.factory.pagedResult(collectionEvents),
-          serverEntity;
-
-      self.$httpBackend.whenGET(uriWithPath('list', participant.id))
-        .respond(this.reply(reply));
-
-      self.CollectionEvent.list(participant.id).then(function (pagedResult) {
-        expect(pagedResult.items).toBeArrayOfSize(collectionEvents.length);
-
-        _.each(pagedResult.items, function(obj) {
-          expect(obj).toEqual(jasmine.any(self.CollectionEvent));
-          serverEntity = _.find(collectionEvents, { id: obj.id });
-          expect(serverEntity).toBeDefined();
-          obj.compareToJsonEntity(serverEntity);
-        });
+      it('fails when creating from an object with invalid keys', function() {
+        var self = this,
+            serverObj = { tmp: 1 };
+        expect(function () {
+          return new self.CollectionEvent.create(serverObj);
+        }).toThrowError(/invalid object from server/);
       });
-      self.$httpBackend.flush();
-    });
 
-    it('can list collection events sorted by corresponding fields', function() {
-      var self = this,
-          study = self.factory.study(),
-          participant = self.factory.participant({ studyId: study.id }),
-          reply = self.factory.pagedResult([]),
-          sortFields = [ 'visitNumber', 'timeCompleted'];
+      it('fails when creating from an object with annotation with invalid keys', function() {
+        var self = this,
+            jsonCevent = _.extend(this.factory.collectionEvent(),
+                                  { annotations: [{ tmp: 1 }] });
 
-      _.each(sortFields, function (sortField) {
-        self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?sort=' + sortField)
-          .respond(self.reply(reply));
-
-        self.CollectionEvent.list(participant.id, { sort: sortField }).then(function (pagedResult) {
-          expect(pagedResult.items).toBeEmptyArray();
-        });
-        self.$httpBackend.flush();
+        expect(function () {
+          return new self.CollectionEvent.create(jsonCevent);
+        }).toThrowError(/invalid object.*bad annotations/);
       });
-    });
 
-    it('can list collection events using a page number', function() {
-      var self = this,
-          study = self.factory.study(),
-          participant = self.factory.participant({ studyId: study.id }),
-          reply = self.factory.pagedResult([]),
-          pageNumber = 2;
+      it('has valid values when creating from a server response', function() {
+        var annotationData    = this.jsonAnnotationData(),
+            annotationTypes   = _.map(annotationData, 'annotationType'),
+            jsonCet           = this.factory.collectionEventType({annotationTypes: annotationTypes}),
+            cet               = new this.CollectionEventType(jsonCet),
+            jsonCevent        = this.factory.collectionEvent({annotationTypes: annotationTypes});
 
-      self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?page=' + pageNumber)
-        .respond(this.reply(reply));
-
-      self.CollectionEvent.list(participant.id, { page: pageNumber }).then(function (pagedResult) {
-        expect(pagedResult.items).toBeEmptyArray();
+        var collectionEvent = this.CollectionEvent.create(jsonCevent, cet);
+        collectionEvent.compareToJsonEntity(jsonCevent);
       });
-      self.$httpBackend.flush();
-    });
 
-    it('can list collection events using a page size', function() {
-      var self = this,
-          study = self.factory.study(),
-          participant = self.factory.participant({ studyId: study.id }),
-          reply = self.factory.pagedResult([]),
-          limit = 2;
+      it('fails when creating async from an object with invalid keys', function() {
+        var serverObj = { tmp: 1 },
+            catchTriggered = false;
 
-      self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?limit=' + limit)
-        .respond(this.reply(reply));
-
-      self.CollectionEvent.list(participant.id, { limit: limit }).then(function (pagedResult) {
-        expect(pagedResult.items).toBeEmptyArray();
+        this.CollectionEvent.asyncCreate(serverObj)
+          .catch(function (err) {
+            expect(err.indexOf('invalid object from server')).not.toEqual(null);
+            catchTriggered = true;
+          });
+        this.$rootScope.$digest();
+        expect(catchTriggered).toBeTrue();
       });
-      self.$httpBackend.flush();
+
+      it('fails when creating async from invalid annotation types', function() {
+        var cevent         = this.factory.collectionEvent(),
+            catchTriggered = false;
+
+        cevent.annotationTypes = [{ test: 1 }];
+        this.CollectionEvent.asyncCreate(cevent)
+          .catch(function (err) {
+            expect(err.indexOf('invalid object from server')).not.toEqual(null);
+            catchTriggered = true;
+          });
+        this.$rootScope.$digest();
+        expect(catchTriggered).toBeTrue();
+      });
+
     });
 
-    it('can retrieve a single collection event by visit number', function() {
-      var self            = this,
-          entities        = self.getCollectionEventEntities(true),
-          jsonParticipant = self.factory.defaultParticipant(),
-          jsonCevent      = self.factory.defaultCollectionEvent();
+    describe('when getting a single collection event', function() {
 
-      self.$httpBackend.whenGET(uri(jsonParticipant.id) + '/visitNumber/' + jsonCevent.visitNumber)
-        .respond(this.reply(jsonCevent));
+      beforeEach(function() {
+        this.collectionEvent = this.factory.collectionEvent();
+      });
 
-      self.CollectionEvent.getByVisitNumber(jsonParticipant.id,
-                                            jsonCevent.visitNumber,
-                                            entities.collectionEventType,
-                                            entities.annotationTypes)
-        .then(function (reply) {
+      it('can retrieve a single collection event', function() {
+        var self = this;
+
+        this.$httpBackend.whenGET(uri(this.collectionEvent.id))
+          .respond(this.reply(this.collectionEvent));
+
+        self.CollectionEvent.get(this.collectionEvent.id).then(function (reply) {
           expect(reply).toEqual(jasmine.any(self.CollectionEvent));
-          reply.compareToJsonEntity(jsonCevent);
+          reply.compareToJsonEntity(self.collectionEvent);
         });
-      self.$httpBackend.flush();
+        self.$httpBackend.flush();
+      });
+
+      it('get fails for and invalid collection event id', function() {
+        var self = this;
+
+        self.$httpBackend.whenGET(uri(this.collectionEvent.id))
+          .respond(404, { status: 'error', message: 'invalid id' });
+
+        self.CollectionEvent.get(this.collectionEvent.id)
+          .then(function () { fail('should not be called'); })
+          .catch(function (err) {
+            expect(err.message).toContain('invalid id');
+          });
+        self.$httpBackend.flush();
+      });
+
+      it('throws a domain error if id is falsy', function() {
+        var self = this;
+
+        expect(function () {
+          self.CollectionEvent.get();
+        }).toThrowError(/collection event id not specified/);
+      });
+
     });
 
-    it('can list collection events using ordering', function() {
-      var self = this,
-          participant = self.factory.participant(),
-          reply = self.factory.pagedResult([]),
-          sortExprs = [
-            { sort: 'visitNumber' },
-            { sort: '-visitNumber' }
-          ];
+    describe('when listing collection events', function() {
 
-      _.each(sortExprs, function (sortExpr) {
-        var url = sprintf('%s?%s', uriWithPath('list', participant.id), self.$httpParamSerializer(sortExpr));
-        self.$httpBackend.whenGET(url).respond(self.reply(reply));
+      it('can list collection events for a participant', function() {
+        var self = this,
+            participant = self.factory.defaultParticipant(),
+            collectionEvents = _.map(_.range(2), function () {
+              return self.factory.collectionEvent();
+            }),
+            reply = self.factory.pagedResult(collectionEvents),
+            serverEntity;
 
-        self.CollectionEvent.list(participant.id, sortExpr).then(function (pagedResult) {
+        self.$httpBackend.whenGET(uriWithPath('list', participant.id))
+          .respond(this.reply(reply));
+
+        self.CollectionEvent.list(participant.id).then(function (pagedResult) {
+          expect(pagedResult.items).toBeArrayOfSize(collectionEvents.length);
+
+          _.each(pagedResult.items, function(obj) {
+            expect(obj).toEqual(jasmine.any(self.CollectionEvent));
+            serverEntity = _.find(collectionEvents, { id: obj.id });
+            expect(serverEntity).toBeDefined();
+            obj.compareToJsonEntity(serverEntity);
+          });
+        });
+        self.$httpBackend.flush();
+      });
+
+      it('can list collection events sorted by corresponding fields', function() {
+        var self = this,
+            study = self.factory.study(),
+            participant = self.factory.participant({ studyId: study.id }),
+            reply = self.factory.pagedResult([]),
+            sortFields = [ 'visitNumber', 'timeCompleted'];
+
+        _.each(sortFields, function (sortField) {
+          self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?sort=' + sortField)
+            .respond(self.reply(reply));
+
+          self.CollectionEvent.list(participant.id, { sort: sortField }).then(function (pagedResult) {
+            expect(pagedResult.items).toBeEmptyArray();
+          });
+          self.$httpBackend.flush();
+        });
+      });
+
+      it('can list collection events using a page number', function() {
+        var self = this,
+            study = self.factory.study(),
+            participant = self.factory.participant({ studyId: study.id }),
+            reply = self.factory.pagedResult([]),
+            pageNumber = 2;
+
+        self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?page=' + pageNumber)
+          .respond(this.reply(reply));
+
+        self.CollectionEvent.list(participant.id, { page: pageNumber }).then(function (pagedResult) {
           expect(pagedResult.items).toBeEmptyArray();
         });
         self.$httpBackend.flush();
       });
+
+      it('can list collection events using a page size', function() {
+        var self = this,
+            study = self.factory.study(),
+            participant = self.factory.participant({ studyId: study.id }),
+            reply = self.factory.pagedResult([]),
+            limit = 2;
+
+        self.$httpBackend.whenGET(uriWithPath('list', participant.id) + '?limit=' + limit)
+          .respond(this.reply(reply));
+
+        self.CollectionEvent.list(participant.id, { limit: limit }).then(function (pagedResult) {
+          expect(pagedResult.items).toBeEmptyArray();
+        });
+        self.$httpBackend.flush();
+      });
+
+      it('can retrieve a single collection event by visit number', function() {
+        var self            = this,
+            entities        = self.getCollectionEventEntities(true),
+            jsonParticipant = self.factory.defaultParticipant(),
+            jsonCevent      = self.factory.defaultCollectionEvent();
+
+        self.$httpBackend.whenGET(uri(jsonParticipant.id) + '/visitNumber/' + jsonCevent.visitNumber)
+          .respond(this.reply(jsonCevent));
+
+        self.CollectionEvent.getByVisitNumber(jsonParticipant.id,
+                                              jsonCevent.visitNumber,
+                                              entities.collectionEventType,
+                                              entities.annotationTypes)
+          .then(function (reply) {
+            expect(reply).toEqual(jasmine.any(self.CollectionEvent));
+            reply.compareToJsonEntity(jsonCevent);
+          });
+        self.$httpBackend.flush();
+      });
+
+      it('can list collection events using ordering', function() {
+        var self = this,
+            participant = self.factory.participant(),
+            reply = self.factory.pagedResult([]),
+            sortExprs = [
+              { sort: 'visitNumber' },
+              { sort: '-visitNumber' }
+            ];
+
+        _.each(sortExprs, function (sortExpr) {
+          var url = sprintf('%s?%s', uriWithPath('list', participant.id), self.$httpParamSerializer(sortExpr));
+          self.$httpBackend.whenGET(url).respond(self.reply(reply));
+
+          self.CollectionEvent.list(participant.id, sortExpr).then(function (pagedResult) {
+            expect(pagedResult.items).toBeEmptyArray();
+          });
+          self.$httpBackend.flush();
+        });
+      });
+
+      it('returns rejected promise if collection events have invalid format', function() {
+        var participant    = this.factory.participant(),
+            reply          = this.factory.pagedResult([{ tmp: 1 }]),
+            catchTriggered = false;
+
+        this.$httpBackend.whenGET(uriWithPath('list', participant.id)).respond(this.reply(reply));
+
+        this.CollectionEvent.list(participant.id)
+          .catch(function (err) {
+            expect(err.indexOf('invalid collection events from server')).not.toBeNull();
+            catchTriggered = true;
+          });
+        this.$httpBackend.flush();
+        expect(catchTriggered).toBeTrue();
+      });
+
     });
 
     it('setting annotation types fails when it does not belong to collection event type',
@@ -485,6 +552,69 @@ define(function (require) {
 
       cevent.remove();
       this.$httpBackend.flush();
+    });
+
+    it('can add an annotation type', function() {
+      var self = this,
+          jsonCevent = this.factory.collectionEvent(),
+          cevent = new this.CollectionEvent(jsonCevent),
+          annotationType = new this.AnnotationType(this.factory.annotationType()),
+          annotation = this.annotationFactory.create(undefined, annotationType),
+          jsonAnnotation = _.extend(annotation.getServerAnnotation(), { expectedVersion: cevent.version }),
+          thenTriggered = false;
+
+      this.$httpBackend.expectPOST(uriWithPath('annot', cevent.id), jsonAnnotation)
+        .respond(this.reply(jsonCevent));
+
+      cevent.addAnnotation(annotation).then(function (reply) {
+        expect(reply).toEqual(jasmine.any(self.CollectionEvent));
+        expect(reply).toEqual(cevent);
+        thenTriggered = true;
+      });
+      this.$httpBackend.flush();
+      expect(thenTriggered).toBeTrue();
+    });
+
+    describe('when removing annotations', function() {
+
+      it('can remove an annotation type', function() {
+        var self = this,
+            annotationType = this.factory.annotationType(),
+            annotation = this.factory.annotation(undefined, annotationType),
+            jsonCevent = this.factory.collectionEvent({ annotations: [ annotation ]}),
+            cevent = new this.CollectionEvent(jsonCevent),
+            url = sprintf('%s/%s/%d',
+                          uriWithPath('annot', cevent.id),
+                          annotation.annotationTypeId,
+                          cevent.version),
+            thenTriggered = false;
+
+        this.$httpBackend.expectDELETE(url).respond(this.reply(true));
+
+        cevent.removeAnnotation(annotation).then(function (reply) {
+          expect(reply).toEqual(jasmine.any(self.CollectionEvent));
+          expect(reply.annotations).toBeArrayOfSize(cevent.annotations.length - 1);
+          thenTriggered = true;
+        });
+        this.$httpBackend.flush();
+        expect(thenTriggered).toBeTrue();
+      });
+
+      it('fails when removing an annotation it does not contain', function() {
+        var annotationType = this.factory.annotationType(),
+            annotation = this.factory.annotation(undefined, annotationType),
+            jsonCevent = this.factory.collectionEvent(),
+            cevent = new this.CollectionEvent(jsonCevent),
+            catchTriggered = false;
+
+        cevent.removeAnnotation(annotation).catch(function (err) {
+          expect(err.indexOf('annotation with annotation type ID not present')).not.toBeNull();
+          catchTriggered = true;
+        });
+        this.$rootScope.$digest();
+        expect(catchTriggered).toBeTrue();
+      });
+
     });
 
     var addJsonKeys = [

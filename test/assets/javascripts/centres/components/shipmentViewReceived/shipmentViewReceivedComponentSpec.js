@@ -23,6 +23,7 @@ define(function (require) {
                               '$rootScope',
                               '$compile',
                               '$state',
+                              'toastr',
                               'stateHelper',
                               'Shipment',
                               'ShipmentState',
@@ -76,13 +77,30 @@ define(function (require) {
       });
 
       it('user is informed if shipment cannot be unpacked', function() {
-        var error = this.$q.reject('simulated error');
-        spyOn(this.Shipment.prototype, 'unpack').and.returnValue(error);
-        spyOn(this.notificationsService, 'updateError').and.returnValue(error);
+        var self = this,
+            errorMsgs = [
+              'TimeUnpackedBeforeReceived',
+              'simulated error'
+            ],
+            errorPromises = errorMsgs.map(function (errMsg) {
+              return self.$q.reject({ message: errMsg });
+            });
 
-        this.controller.unpackShipment();
-        this.scope.$digest();
-        expect(this.notificationsService.updateError).toHaveBeenCalled();
+        spyOn(this.Shipment.prototype, 'unpack').and.returnValues.apply(null, errorPromises);
+        spyOn(this.toastr, 'error').and.returnValue(null);
+
+        errorMsgs.forEach(function (errMsg, index) {
+          var args;
+
+          self.controller.unpackShipment();
+          self.scope.$digest();
+          expect(self.toastr.error.calls.count()).toBe(index + 1);
+
+          if (errMsg === 'TimeReceivedBeforeSent') {
+            args = self.toastr.error.calls.argsFor(index);
+            expect(args[0]).toContain('The unpacked time is before the received time');
+          }
+        });
       });
 
     });

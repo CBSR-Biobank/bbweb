@@ -101,14 +101,15 @@ define(function (require) {
           return vm.shipment.skipToStateUnpacked(timeService.dateAndTimeToUtcString(timeResult.timeReceived),
                                                  timeService.dateAndTimeToUtcString(timeResult.timeUnpacked))
             .catch(function (err) {
+              var newErr = {};
               if (err.message === 'TimeReceivedBeforeSent') {
-                err.message =
-                  gettextCatalog.getString('the received time is before the time shipment was sent');
+                newErr.message =
+                  gettextCatalog.getString('The received time is before the sent time');
               } else if (err.message === 'TimeUnpackedBeforeReceived') {
-                err.message =
-                  gettextCatalog.getString('the unpacked time is before the time shipment was received');
+                newErr.message =
+                  gettextCatalog.getString('The unpacked time is before the received time');
               }
-              notificationsService.updateError(err);
+              notificationsService.updateError(newErr);
               return $q.reject(err);
             });
         })

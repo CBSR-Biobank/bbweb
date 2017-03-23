@@ -23,6 +23,7 @@ define(function (require) {
                               '$rootScope',
                               '$compile',
                               '$state',
+                              'toastr',
                               'Shipment',
                               'SHIPMENT_SEND_PROGRESS_ITEMS',
                               'modalInput',
@@ -73,12 +74,30 @@ define(function (require) {
       });
 
       it('user is informed if shipment cannot be sent', function() {
-        spyOn(this.Shipment.prototype, 'send').and.returnValue(this.$q.reject('simulated error'));
-        spyOn(this.notificationsService, 'updateError').and.returnValue(null);
+        var self = this,
+            errorMsgs = [
+              'TimeSentBeforePacked',
+              'simulated error'
+            ],
+            errorPromises = errorMsgs.map(function (errMsg) {
+              return self.$q.reject({ message: errMsg });
+            });
 
-        this.controller.sendShipment();
-        this.scope.$digest();
-        expect(this.notificationsService.updateError).toHaveBeenCalled();
+        spyOn(this.Shipment.prototype, 'send').and.returnValues.apply(null, errorPromises);
+        spyOn(this.toastr, 'error').and.returnValue(null);
+
+        errorMsgs.forEach(function (errMsg, index) {
+          var args;
+
+          self.controller.sendShipment();
+          self.scope.$digest();
+          expect(self.toastr.error.calls.count()).toBe(index + 1);
+
+          if (errMsg === 'TimeReceivedBeforeSent') {
+            args = self.toastr.error.calls.argsFor(index);
+            expect(args[0]).toContain('The sent time is before the packed time');
+          }
+        });
       });
 
     });

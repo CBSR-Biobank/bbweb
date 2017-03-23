@@ -27,6 +27,7 @@ define(function (require) {
                               '$rootScope',
                               '$compile',
                               '$state',
+                              'toastr',
                               'Shipment',
                               'SHIPMENT_SEND_PROGRESS_ITEMS',
                               'modalInput',
@@ -59,7 +60,7 @@ define(function (require) {
       expect(this.controller.removeShipment).toBeFunction();
     });
 
-    describe('can change state on shipment', function() {
+    describe('can change state to packed on shipment', function() {
 
       beforeEach(function() {
         this.shipment = this.createShipmentWithSpecimens(1);
@@ -86,11 +87,13 @@ define(function (require) {
         expect(promiseSuccess).toBeTrue();
       });
 
-      it('can tag a shipment as sent', function() {
-        var self = this,
-            promiseSuccess;
+    });
 
-        spyOn(this.Shipment.prototype, 'skipToStateSent').and.returnValue(this.$q.when(this.shipment));
+    describe('when tagging as sent', function() {
+
+      beforeEach(function() {
+        this.shipment = this.createShipmentWithSpecimens(1);
+        spyOn(this.Shipment, 'get').and.returnValue(this.$q.when(this.shipment));
         spyOn(this.shipmentSkipToSentModalService, 'open').and
           .returnValue({
             result: this.$q.when({
@@ -98,6 +101,14 @@ define(function (require) {
               timeSent: new Date()
             })
           });
+      });
+
+      it('can tag a shipment as sent', function() {
+        var self = this,
+            promiseSuccess;
+
+        spyOn(this.$state, 'go').and.returnValue(null);
+        spyOn(this.Shipment.prototype, 'skipToStateSent').and.returnValue(this.$q.when(this.shipment));
 
         this.createScope(this.shipment);
         this.controller.tagAsSent().then(function () {
@@ -109,6 +120,35 @@ define(function (require) {
         });
         this.scope.$digest();
         expect(promiseSuccess).toBeTrue();
+      });
+
+      it('user is informed if shipment cannot be tagged as sent', function() {
+        var self = this,
+            errorMsgs = [
+              'TimeSentBeforePacked',
+              'simulated error'
+            ],
+            errorPromises = errorMsgs.map(function (errMsg) {
+              return self.$q.reject({ message: errMsg });
+            });
+
+        spyOn(this.Shipment.prototype, 'skipToStateSent').and.returnValues.apply(null, errorPromises);
+        spyOn(this.toastr, 'error').and.returnValue(null);
+
+        this.createScope(this.shipment);
+
+        errorMsgs.forEach(function (errMsg, index) {
+          var args;
+
+          self.controller.tagAsSent();
+          self.scope.$digest();
+          expect(self.toastr.error.calls.count()).toBe(index + 1);
+
+          if (errMsg === 'TimeReceivedBeforeSent') {
+            args = self.toastr.error.calls.argsFor(index);
+            expect(args[0]).toContain('The received time is before the sent time');
+          }
+        });
       });
 
     });

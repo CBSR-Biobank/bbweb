@@ -2,8 +2,12 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
+define(function(require) {
   'use strict';
+
+  var tv4     = require('tv4'),
+      _       = require('lodash'),
+      sprintf = require('sprintf-js').sprintf;
 
   CollectionEventFactory.$inject = [
     '$q',
@@ -110,7 +114,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
 
       obj = obj || {};
       ConcurrencySafeEntity.call(this);
-      _.extend(this, obj);
+      _.extend(this, _.pick(obj, _.keys(schema.properties)));
 
       if (this.collectionEventTypeId &&
           collectionEventType &&
@@ -126,10 +130,6 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
     CollectionEvent.prototype = Object.create(ConcurrencySafeEntity.prototype);
     _.extend(CollectionEvent.prototype, HasAnnotations.prototype);
     CollectionEvent.prototype.constructor = CollectionEvent;
-
-    CollectionEvent.isValid = function(obj) {
-      return tv4.validate(obj, schema);
-    };
 
     /**
      * Creates a CollectionEvent, but first it validates <code>obj</code> to ensure that it has a valid
@@ -155,6 +155,22 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
       return new CollectionEvent(obj, collectionEventType);
     };
 
+    CollectionEvent.asyncCreate = function (obj) {
+      var deferred = $q.defer();
+
+      if (!tv4.validate(obj, schema)) {
+        $log.error('invalid object from server: ' + tv4.error);
+        deferred.reject('invalid object from server: ' + tv4.error);
+      } else if (!Annotation.validAnnotations(obj.annotationTypes)) {
+        $log.error('invalid annotation types from server: ' + tv4.error);
+        deferred.reject('invalid annotation types from server: ' + tv4.error);
+      } else {
+        deferred.resolve(new CollectionEvent(obj));
+      }
+
+      return deferred.promise;
+    };
+
     /**
      * Retrieves a CollectionEvent from the server.
      *
@@ -169,24 +185,8 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
       }
 
       return biobankApi.get(uri(id)).then(function (reply) {
-        return CollectionEvent.prototype.asyncCreate(reply);
+        return CollectionEvent.asyncCreate(reply);
       });
-    };
-
-    CollectionEvent.prototype.asyncCreate = function (obj) {
-      var deferred = $q.defer();
-
-      if (!tv4.validate(obj, schema)) {
-        $log.error('invalid object from server: ' + tv4.error);
-        deferred.reject('invalid object from server: ' + tv4.error);
-      } else if (!Annotation.validAnnotations(obj.annotationTypes)) {
-        $log.error('invalid annotation types from server: ' + tv4.error);
-        deferred.reject('invalid annotation types from server: ' + tv4.error);
-      } else {
-        deferred.resolve(new CollectionEvent(obj));
-      }
-
-      return deferred.promise;
     };
 
     /**
@@ -253,6 +253,10 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
         });
     };
 
+    CollectionEvent.prototype.asyncCreate = function (obj) {
+      return CollectionEvent.asyncCreate(obj);
+    };
+
     /**
      * Assigns a CollectionEventType and converts annotations to Annotation objects.
      */
@@ -281,7 +285,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
       });
 
       return biobankApi.post(uri(self.participantId), json).then(function(reply) {
-        return self.asyncCreate(reply);
+        return CollectionEvent.asyncCreate(reply);
       });
     };
 
@@ -320,11 +324,11 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
     };
 
     CollectionEvent.prototype.removeAnnotation = function (annotation) {
-      var url = sprintf.sprintf('%s/%d/%s',
-                                uri('annot', this.id),
-                                this.version,
-                                annotation.annotationTypeId);
-      return this.removeAnnotation.call(this, annotation, url);
+      var url = sprintf('%s/%s/%d',
+                        uri('annot', this.id),
+                        annotation.annotationTypeId,
+                        this.version);
+      return HasAnnotations.prototype.removeAnnotation.call(this, annotation, url);
     };
 
     function uri(/* participantId, collectionEventId, version */) {

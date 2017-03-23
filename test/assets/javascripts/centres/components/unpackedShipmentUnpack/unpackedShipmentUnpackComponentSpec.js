@@ -135,9 +135,8 @@ define(function (require) {
             ],
             tableRefreshCount;
 
-        spyOn(this.Shipment.prototype, 'tagSpecimensAsReceived')
-          .and.returnValues(errors[0], errors[1], errors[2], errors[3], errors[4]);
-        spyOn(this.modalService, 'modalOk').and.returnValues(errors);
+        spyOn(this.Shipment.prototype, 'tagSpecimensAsReceived').and.returnValues.apply(null, errors);
+        spyOn(this.modalService, 'modalOk').and.returnValues.apply(null, errors);
 
         this.createScope(shipment);
         this.controller.inventoryIds = this.factory.stringNext() + ','  + this.factory.stringNext();
@@ -158,6 +157,18 @@ define(function (require) {
           }
         });
       });
+
+      it('when inventory ID holds a null value', function() {
+        var self = this,
+            shipment = this.createShipment();
+
+        spyOn(this.Shipment.prototype, 'tagSpecimensAsReceived').and.callThrough();
+        this.createScope(shipment);
+        this.controller.inventoryIds = null;
+        expect(self.controller.onInventoryIdsSubmit()).toBeNull();
+        expect(this.Shipment.prototype.tagSpecimensAsReceived).not.toHaveBeenCalled();
+      });
+
 
     });
 

@@ -86,8 +86,7 @@ define(function (require) {
               this.$q.reject('simulated error')
             ];
 
-        spyOn(this.Shipment.prototype, 'addSpecimens')
-          .and.returnValues(errors[0], errors[1], errors[2], errors[3], errors[4]);
+        spyOn(this.Shipment.prototype, 'addSpecimens').and.returnValues.apply(null, errors);
         spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when(null));
 
         this.createScope(this.createShipment());

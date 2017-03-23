@@ -140,9 +140,8 @@ define(function (require) {
             ],
             tableRefreshCount;
 
-        spyOn(this.Shipment.prototype, 'tagSpecimensAsExtra')
-          .and.returnValues(errors[0], errors[1], errors[2], errors[3], errors[4], errors[5]);
-        spyOn(this.modalService, 'modalOk').and.returnValues(errors);
+        spyOn(this.Shipment.prototype, 'tagSpecimensAsExtra').and.returnValues.apply(null, errors);
+        spyOn(this.modalService, 'modalOk').and.returnValues.apply(null, errors);
 
         this.createScope(shipment);
         this.controller.inventoryIds = this.factory.stringNext() + ','  + this.factory.stringNext();
@@ -187,7 +186,7 @@ define(function (require) {
             tableRefreshCount;
 
         spyOn(this.ShipmentSpecimen.prototype, 'remove').and.returnValue(this.$q.when(true));
-        spyOn(this.modalService, 'modalOkCancel').and.returnValues(modalOkResults[0], modalOkResults[1]);
+        spyOn(this.modalService, 'modalOkCancel').and.returnValues.apply(null, modalOkResults);
 
         this.createScope(this.shipment);
         tableRefreshCount = this.controller.refreshTable;

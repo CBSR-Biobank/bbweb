@@ -28,9 +28,9 @@ define(['lodash'], function (_) {
 
     describe('(shared)', function () {
 
-      beforeEach(inject(function($rootScope) {
+      beforeEach(function() {
         this.injectDependencies('$rootScope', 'factory');
-      }));
+      });
 
       it('can add annotation', function () {
         this.updateEntity(context.entity,

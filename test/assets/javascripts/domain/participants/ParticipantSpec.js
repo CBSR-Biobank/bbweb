@@ -28,6 +28,7 @@ define(function(require) {
                AnnotationsEntityTestSuiteMixin.prototype);
 
       self.injectDependencies('$q',
+                              '$rootScope',
                               '$httpBackend',
                               'Participant',
                               'Study',
@@ -182,34 +183,51 @@ define(function(require) {
       }).toThrow(new Error('annotation types not found: ' + serverAnnotation.annotationTypeId));
     });
 
-    it('fails when creating from a non object', function() {
-      var self = this;
-      expect(function () { self.Participant.create(1); }).toThrowError(/invalid object from server/);
-    });
+    describe('when creating', function() {
 
-    it('fails when creating from an object with invalid keys', function() {
-      var self = this,
-          serverObj = { tmp: 1 };
-      expect(function () { self.Participant.create(serverObj); }).toThrowError(/invalid object from server/);
-    });
+      it('fails when creating from a non object', function() {
+        var self = this;
+        expect(function () { self.Participant.create(1); }).toThrowError(/invalid object from server/);
+      });
 
-    it('fails when creating from an object and an annotation has invalid keys', function() {
-      var self = this,
-          study = this.factory.study(),
-          jsonParticipant = this.factory.participant({ studyId: study.id });
+      it('fails when creating from an object with invalid keys', function() {
+        var self = this,
+            serverObj = { tmp: 1 };
+        expect(function () { self.Participant.create(serverObj); }).toThrowError(/invalid object from server/);
+      });
 
-      jsonParticipant.annotations = [{ tmp: 1 }];
-      expect(function () { self.Participant.create(jsonParticipant); })
-        .toThrowError(/bad annotation type/);
-    });
+      it('fails when creating from an object and an annotation has invalid keys', function() {
+        var self = this,
+            study = this.factory.study(),
+            jsonParticipant = this.factory.participant({ studyId: study.id });
 
-    it('has valid values when creating from a server response', function() {
-      var study = this.factory.study(),
-          jsonParticipant = this.factory.participant(study);
+        jsonParticipant.annotations = [{ tmp: 1 }];
+        expect(function () { self.Participant.create(jsonParticipant); })
+          .toThrowError(/bad annotation type/);
+      });
 
-      // TODO: add annotations to the server response
-      var participant = this.Participant.create(jsonParticipant);
-      participant.compareToJsonEntity(jsonParticipant);
+      it('has valid values when creating from a server response', function() {
+        var study = this.factory.study(),
+            jsonParticipant = this.factory.participant(study);
+
+        // TODO: add annotations to the server response
+        var participant = this.Participant.create(jsonParticipant);
+        participant.compareToJsonEntity(jsonParticipant);
+      });
+
+      it('fails when creating async from an object with invalid keys', function() {
+        var serverObj = { tmp: 1 },
+            catchTriggered = false;
+
+        this.Participant.asyncCreate(serverObj)
+          .catch(function (err) {
+            expect(err.indexOf('invalid object from server')).not.toEqual(null);
+            catchTriggered = true;
+          });
+        this.$rootScope.$digest();
+        expect(catchTriggered).toBeTrue();
+      });
+
     });
 
     it('can retrieve a single participant', function() {

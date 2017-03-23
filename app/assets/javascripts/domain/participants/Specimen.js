@@ -220,16 +220,12 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * asynchronous code.
      */
     Specimen.asyncCreate = function (obj) {
-      var deferred = $q.defer();
-
       if (!Specimen.isValid(obj)) {
         $log.error('invalid object from server: ' + tv4.error);
-        deferred.reject('invalid object from server: ' + tv4.error);
-      } else {
-        deferred.resolve(new Specimen(obj));
+        return $q.reject('invalid object from server: ' + tv4.error);
       }
 
-      return deferred.promise;
+      return  $q.when(new Specimen(obj));
     };
 
     /**
@@ -307,7 +303,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
           });
           deferred.resolve(reply);
         } catch (e) {
-          deferred.reject('invalid studies from server');
+          deferred.reject('invalid specimens from server');
         }
         return deferred.promise;
       });
@@ -404,53 +400,14 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
       return biobankApi.del(url);
     };
 
-    /**
-     * Updates a Specimen.
-     * @private
-     *
-     * @param {string} path - the path to use for the REST API.
-     *
-     *@param {object} reqJson - the JSON object to send along with the update request.
-     *
-     * @return {Promise} The updated specimen as a new object.
-     */
-    Specimen.prototype.update = function (path, reqJson) {
-      var self = this;
-
-      return ConcurrencySafeEntity.prototype.update.call(
-        this, uri(path, this.id), reqJson
-      ).then(postUpdate);
-
-      function postUpdate(updatedCevent) {
-        if (self.specimenType) {
-          updatedCevent.setSpecimenType(self.specimenType);
-        }
-        return $q.when(updatedCevent);
-      }
-    };
-
-    /**
-     * Updates the Specimen's timeCreated member.
-     *
-     * @param {Date} timeCreated - The new date and time to assign to {@link
-     * domain.participants.Specimen.timeCreated}.
-     *
-     * @returns {Promise} the updated specimen as a new object.
-     *
-     * @see domain.participants.Specimen.timeCreated
-     */
-    Specimen.prototype.updateTimecreated = function (timeCreated) {
-      return this.update('timeCreated', { visitNumber: timeCreated });
-    };
-
-    function uri(/* ceventId */) {
-      var ceventId,
+    function uri(/* specimenId */) {
+      var specimenId,
           result = '/participants/cevents/spcs',
           args = _.toArray(arguments);
 
       if (args.length > 0) {
-        ceventId = args.shift();
-        result += '/' + ceventId;
+        specimenId = args.shift();
+        result += '/' + specimenId;
       }
 
       return result;
