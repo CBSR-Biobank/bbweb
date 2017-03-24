@@ -107,15 +107,16 @@ define(function (require) {
         var self = this,
             badStudyJson = _.omit(self.factory.study(), 'name');
 
-        expect(function () { self.Study.create(badStudyJson); })
-          .toThrowError(/invalid object from server/);
+        expect(function () {
+          self.Study.create(badStudyJson);
+        }).toThrowError(/Missing required property/);
       });
 
       it('fails when creating from a non object for an annotation type', function() {
         var self = this,
             badStudyJson = self.factory.study({ annotationTypes: [ 1 ]});
         expect(function () { self.Study.create(badStudyJson); })
-          .toThrowError(/invalid object from server/);
+          .toThrowError(/bad annotation types/);
       });
 
     });
@@ -145,12 +146,12 @@ define(function (require) {
       self.Study.get(study.id).then(shouldNotFail).catch(shouldFail);
       self.$httpBackend.flush();
 
-      function shouldNotFail(reply) {
+      function shouldNotFail() {
         fail('function should not be called');
       }
 
       function shouldFail(error) {
-        expect(error).toStartWith('invalid object from server');
+        expect(error.message).toContain('Missing required property');
       }
     });
 
@@ -169,7 +170,7 @@ define(function (require) {
       }
 
       function shouldFail(error) {
-        expect(error).toContain('bad annotation types');
+        expect(error.message).toContain('bad annotation types');
       }
     });
 
@@ -311,7 +312,7 @@ define(function (require) {
       beforeEach(function() {
         this.annotationType = this.factory.annotationType();
         this.jsonStudy      = this.factory.study({ annotationTypes: [ this.annotationType ] });
-        this.study          = new this.Study(this.jsonStudy);
+        this.study          = this.Study.create(this.jsonStudy);
       });
 
       it('can add an annotation type on a study', function() {
@@ -342,12 +343,14 @@ define(function (require) {
 
       it('can remove an annotation on a study', function() {
         var url = sprintf('%s/%d/%s',
-                                  this.uri('pannottype', this.study.id),
-                                  this.study.version,
-                                  this.annotationType.uniqueId);
+                          this.uri('pannottype', this.study.id),
+                          this.study.version,
+                          this.annotationType.uniqueId);
 
         this.$httpBackend.whenDELETE(url).respond(this.reply(true));
-        this.study.removeAnnotationType(this.annotationType).then(this.expectStudy).catch(this.failTest);
+        this.study.removeAnnotationType(this.annotationType)
+          .then(this.expectStudy)
+          .catch(this.failTest);
         this.$httpBackend.flush();
       });
 

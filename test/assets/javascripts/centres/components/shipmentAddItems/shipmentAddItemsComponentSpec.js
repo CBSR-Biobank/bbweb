@@ -162,7 +162,6 @@ define(function (require) {
         this.createScope(this.shipment);
       });
 
-
       it('to packed when no specimens in shipment', function() {
         var self = this,
             promiseFailed;

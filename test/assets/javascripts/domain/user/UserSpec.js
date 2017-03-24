@@ -64,7 +64,7 @@ define(function (require) {
           nonObj = 1;
       expect(function () {
         self.User.create(nonObj);
-      }).toThrowError(/invalid object from server/);
+      }).toThrowError(/Invalid type/);
     });
 
     it('fails when creating from object with missing required keys', function() {
@@ -77,7 +77,7 @@ define(function (require) {
 
         expect(function () {
           self.User.create(badObj);
-        }).toThrowError(/invalid object from server/);
+        }).toThrowError(/Missing required property/);
       });
     });
 

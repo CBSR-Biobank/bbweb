@@ -29,7 +29,7 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin, testUtils) {
+    beforeEach(inject(function(TestSuiteMixin) {
       var self = this,
           specimenSpec,
           ceventType;
@@ -48,7 +48,7 @@ define(function (require) {
                               'factory');
 
       specimenSpec = self.factory.collectionSpecimenSpec();
-      ceventType = new self.CollectionEventType(
+      ceventType = self.CollectionEventType.create(
         self.factory.collectionEventType({ specimenSpecs: [ specimenSpec ]}));
 
       spyOn(self.CollectionEventType, 'list').and.returnValue(self.$q.when([ ceventType ]));

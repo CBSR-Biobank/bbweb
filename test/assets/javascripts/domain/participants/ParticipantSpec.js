@@ -33,6 +33,7 @@ define(function(require) {
                               'Participant',
                               'Study',
                               'Annotation',
+                              'annotationFactory',
                               'DateTimeAnnotation',
                               'MultipleSelectAnnotation',
                               'NumberAnnotation',
@@ -118,19 +119,25 @@ define(function(require) {
     });
 
     it('constructor with annotation parameter has valid values', function() {
-      var self = this,
-          annotationData = self.generateJsonAnnotationTypesAndAnnotations(),
-          study = new self.Study(annotationData.study),
+      var self               = this,
+          jsonAnnotationData = self.generateJsonAnnotationTypesAndAnnotations(),
+          study              = self.Study.create(jsonAnnotationData.study),
+          annotations,
           participant;
 
-      participant = new self.Participant({ annotations: annotationData.annotations }, study);
+      annotations = study.annotationTypes.map(function (annotationType) {
+        var annotation = _.find(jsonAnnotationData.annotations, { annotationTypeId: annotationType.uniqueId });
+        return self.annotationFactory.create(annotation, annotationType);
+      });
+
+      participant = new self.Participant({}, study, annotations);
 
       expect(participant.annotations).toBeArrayOfSize(study.annotationTypes.length);
       _.each(participant.annotations, function (annotation) {
-        var jsonAnnotation = _.find(annotationData.annotations,
-                                         { annotationTypeId: annotation.annotationTypeId }),
+        var jsonAnnotation = _.find(jsonAnnotationData.annotations,
+                                    { annotationTypeId: annotation.annotationTypeId }),
             annotationType = _.find(study.annotationTypes,
-                                         { uniqueId: annotation.annotationTypeId });
+                                    { uniqueId: annotation.annotationTypeId });
 
         self.validateAnnotationClass(annotationType, annotation);
         annotation.compareToJsonEntity(jsonAnnotation);
@@ -149,7 +156,7 @@ define(function(require) {
     it('constructor with NO annotation parameters has valid values', function() {
       var self = this,
           annotationData = this.generateJsonAnnotationTypesAndAnnotations(),
-          study = new this.Study(annotationData.study),
+          study = this.Study.create(annotationData.study),
           participant = new this.Participant({}, study);
 
       expect(participant.annotations).toBeArrayOfSize(study.annotationTypes.length);
@@ -162,38 +169,37 @@ define(function(require) {
     });
 
     it('constructor with invalid annotation parameter throws error', function() {
-      var self = this,
-          annotationType = new this.AnnotationType(
-            this.factory.annotationType({ valueType: this.AnnotationValueType.TEXT })),
-          jsonStudy = this.factory.study({ annotationTypes: [ annotationType ]}),
-          study = new this.Study(jsonStudy),
-          serverAnnotation = {};
+      var self             = this,
+          annotationType   = new this.AnnotationType(this.factory.annotationType()),
+          jsonStudy        = this.factory.study({ annotationTypes: [ annotationType ]}),
+          study            = this.Study.create(jsonStudy),
+          serverAnnotation = self.factory.annotation({ value: self.factory.valueForAnnotation(annotationType) },
+                                                     annotationType),
+          annotation;
 
       // put an invalid value in serverAnnotation.annotationTypeId
-      _.extend(
-        serverAnnotation,
-        self.factory.annotation(
-          { value: self.factory.valueForAnnotation(annotationType) },
-          annotationType),
-        { annotationTypeId: self.factory.stringNext() });
-
+      annotation = _.extend(this.annotationFactory.create(serverAnnotation, annotationType),
+               { annotationTypeId: self.factory.stringNext() });
       expect(function () {
-        return new self.Participant({ annotations: [ serverAnnotation ] },
-                                    study);
-      }).toThrow(new Error('annotation types not found: ' + serverAnnotation.annotationTypeId));
+        return new self.Participant({}, study, [ annotation ]);
+      }).toThrowError(/annotation types not found/);
     });
 
     describe('when creating', function() {
 
       it('fails when creating from a non object', function() {
         var self = this;
-        expect(function () { self.Participant.create(1); }).toThrowError(/invalid object from server/);
+        expect(function () {
+          self.Participant.create(1);
+        }).toThrowError(/Invalid type/);
       });
 
       it('fails when creating from an object with invalid keys', function() {
         var self = this,
             serverObj = { tmp: 1 };
-        expect(function () { self.Participant.create(serverObj); }).toThrowError(/invalid object from server/);
+        expect(function () {
+          self.Participant.create(serverObj);
+        }).toThrowError(/Missing required property/);
       });
 
       it('fails when creating from an object and an annotation has invalid keys', function() {
@@ -202,8 +208,9 @@ define(function(require) {
             jsonParticipant = this.factory.participant({ studyId: study.id });
 
         jsonParticipant.annotations = [{ tmp: 1 }];
-        expect(function () { self.Participant.create(jsonParticipant); })
-          .toThrowError(/bad annotation type/);
+        expect(function () {
+          self.Participant.create(jsonParticipant);
+        }).toThrowError(/bad annotation type/);
       });
 
       it('has valid values when creating from a server response', function() {
@@ -221,7 +228,7 @@ define(function(require) {
 
         this.Participant.asyncCreate(serverObj)
           .catch(function (err) {
-            expect(err.indexOf('invalid object from server')).not.toEqual(null);
+            expect(err.message).toContain('Missing required property');
             catchTriggered = true;
           });
         this.$rootScope.$digest();
@@ -271,11 +278,6 @@ define(function(require) {
 
       participant.add().then(function(reply) {
         expect(reply).toEqual(jasmine.any(self.Participant));
-        expect(reply.id).toEqual(jsonParticipant.id);
-        expect(reply.version).toEqual(0);
-        expect(reply.studyId).toEqual(study.id);
-        expect(reply.uniqueId).toEqual(participant.uniqueId);
-        expect(reply.annotations).toBeArrayOfSize(participant.annotations.length);
       });
       self.$httpBackend.flush();
     });
@@ -289,26 +291,22 @@ define(function(require) {
 
       entities.participant.add().then(function(replyParticipant) {
         expect(replyParticipant.id).toEqual(entities.jsonParticipant.id);
-        expect(replyParticipant.version).toEqual(0);
-        expect(replyParticipant.studyId).toEqual(entities.jsonStudy.id);
-        expect(replyParticipant.uniqueId).toEqual(entities.participant.uniqueId);
-        expect(replyParticipant.annotations).toBeArrayOfSize(entities.participant.annotations.length);
       });
       this.$httpBackend.flush();
     });
 
     it('can not add a participant with empty required annotations', function() {
       var self = this,
-          biobankApi = self.$injector.get('biobankApi'),
-          jsonAnnotationTypes = self.factory.allAnnotationTypes(),
-          replyParticipant = self.factory.participant();
+          biobankApi = this.$injector.get('biobankApi'),
+          jsonAnnotationTypes = this.factory.allAnnotationTypes(),
+          replyParticipant = this.factory.participant();
 
-      spyOn(biobankApi, 'post').and.returnValue(self.$q.when(replyParticipant));
+      spyOn(biobankApi, 'post').and.returnValue(this.$q.when(replyParticipant));
 
       _.each(jsonAnnotationTypes, function (serverAnnotationType) {
-        var annotationType = new self.AnnotationType(serverAnnotationType),
-            jsonStudy = self.factory.study({ annotationTypes: [ annotationType ]}),
-            study = new self.Study(jsonStudy),
+        var annotationType  = new self.AnnotationType(serverAnnotationType),
+            jsonStudy       = self.factory.study({ annotationTypes: [ annotationType ]}),
+            study           = self.Study.create(jsonStudy),
             jsonParticipant = self.factory.participant(),
             participant;
 
@@ -360,7 +358,7 @@ define(function(require) {
               studyId: jsonStudy.id,
               annotationTypes: [ jsonAnnotationType ]
             }),
-            study = new this.Study(jsonStudy),
+            study = this.Study.create(jsonStudy),
             participant = new this.Participant(jsonParticipant, study);
 
         context.entityType     = this.Participant;
@@ -370,7 +368,7 @@ define(function(require) {
         context.annotation     = participant.annotations[0];
         context.$httpBackend   = this.$httpBackend;
         context.addUrl         = updateUri('annot', participant.id);
-        context.deleteUrl      = sprintf.sprintf('%s/%d/%s',
+        context.removeUrl      = sprintf.sprintf('%s/%d/%s',
                                                  uri('annot', participant.id),
                                                  participant.version,
                                                  participant.annotations[0].annotationTypeId);

@@ -169,7 +169,7 @@ define(function (require) {
         var modalService = this.$injector.get('modalService'),
             jsonSpecimenSpec = this.factory.collectionSpecimenSpec(),
             jsonCeventType = this.factory.collectionEventType({ specimenSpecs: [ jsonSpecimenSpec ]}),
-            ceventType = new this.CollectionEventType(jsonCeventType);
+            ceventType = this.CollectionEventType.create(jsonCeventType);
 
         spyOn(modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
         spyOn(this.domainNotificationService, 'removeEntity').and.callThrough();
@@ -208,7 +208,7 @@ define(function (require) {
         var modalService = this.$injector.get('modalService'),
             jsonAnnotType = this.factory.annotationType(),
             jsonCeventType = this.factory.collectionEventType({ annotationTypes: [ jsonAnnotType ]}),
-            ceventType = new this.CollectionEventType(jsonCeventType);
+            ceventType = this.CollectionEventType.create(jsonCeventType);
 
         spyOn(modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
         spyOn(this.CollectionEventType.prototype, 'removeAnnotationType')

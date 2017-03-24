@@ -62,7 +62,7 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
      */
-    function Study(obj) {
+    function Study(obj, annotationTypes) {
 
       /**
        * A short identifying name that is unique.
@@ -96,13 +96,8 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
        */
       this.state = StudyState.DISABLED;
 
-      obj = obj || {};
-      ConcurrencySafeEntity.call(this);
-      _.extend(this, obj);
-
-      this.annotationTypes = _.map(this.annotationTypes, function (annotationType) {
-        return new AnnotationType(annotationType);
-      });
+      ConcurrencySafeEntity.call(this, schema, obj);
+      _.extend(this, { annotationTypes: annotationTypes });
     }
 
     Study.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -118,19 +113,8 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
      *
      * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
      */
-    Study.validate = function (obj) {
-      if (!tv4.validate(obj, schema)) {
-        $log.error('invalid object from server: ' + tv4.error);
-        return { valid: false, message: 'invalid object from server: ' + tv4.error };
-      }
-
-      obj.annotationTypes = obj.annotationTypes || {};
-
-      if (!HasAnnotationTypes.prototype.validAnnotationTypes(obj.annotationTypes)) {
-        return { valid: false, message: 'invalid object from server: bad annotation types: ' + tv4.error };
-      }
-
-      return { valid: true, message: null };
+    Study.isValid = function (obj) {
+      return ConcurrencySafeEntity.isValid(schema, null, obj);
     };
 
     /**
@@ -145,12 +129,21 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
      * a study within asynchronous code.
      */
     Study.create = function (obj) {
-      var validation = Study.validate(obj);
+      var annotationTypes, validation = Study.isValid(obj);
       if (!validation.valid) {
         $log.error(validation.message);
         throw new DomainError(validation.message);
       }
-      return new Study(obj);
+      try {
+        if (obj.annotationTypes) {
+          annotationTypes = obj.annotationTypes.map(function (annotationType) {
+            return AnnotationType.create(annotationType);
+          });
+        }
+      } catch (e) {
+        throw new DomainError('bad annotation types');
+      }
+      return new Study(obj, annotationTypes);
     };
 
     /**
@@ -165,16 +158,14 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
      * @see {@link domain.studies.Study.create|create()} when not creating a Study within asynchronous code.
      */
     Study.asyncCreate = function (obj) {
-      var deferred = $q.defer(),
-          validation = Study.validate(obj);
-      if (!validation.valid) {
-        $log.error(validation.message);
-        deferred.reject(validation.message);
-      } else {
-        deferred.resolve(new Study(obj));
-      }
+      var result;
 
-      return deferred.promise;
+      try {
+        result = Study.create(obj);
+        return $q.when(result);
+      } catch (e) {
+        return $q.reject(e);
+      }
     };
 
     /**

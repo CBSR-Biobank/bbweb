@@ -46,7 +46,7 @@ define(['lodash'], function(_) {
           found = _.find(self.annotationTypes,  { uniqueId: annotationType.uniqueId });
 
       if (!found) {
-        return $q.reject('annotation type with ID not present: ' + annotationType.uniqueId);
+        return $q.reject(new DomainError('annotation type with ID not present: ' + annotationType.uniqueId));
       }
 
       return biobankApi.del(url).then(function () {

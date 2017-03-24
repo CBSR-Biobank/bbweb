@@ -44,23 +44,23 @@ define(['lodash'], function(_) {
      * @param {boolean} required set only if annotationType does not have a 'required' attribute.
      */
     function create(obj, annotationType) {
-      var valid, annotation;
+      var validation, annotation;
 
       if (_.isUndefined(annotationType)) {
-        throw new DomainError('annotation type is undefined');
+        throw new DomainError('annotation type is undefined: ' + obj.annotationTypeId);
       }
 
       if (obj) {
-        valid = Annotation.isValid(obj);
-        if (!valid) {
-          throw new DomainError('invalid object from server: ' + Annotation.getInvalidError());
+        validation = Annotation.isValid(obj);
+        if (!validation.valid) {
+          throw new DomainError('invalid annotation from server: ' + validation.error);
         }
 
         if (obj.selectedValues) {
-          valid = annotationType.validOptions(obj.selectedValues);
+          validation.valid = annotationType.validOptions(obj.selectedValues);
         }
 
-        if (!valid) {
+        if (!validation.valid) {
           throw new DomainError('invalid selected values in object from server');
         }
       }

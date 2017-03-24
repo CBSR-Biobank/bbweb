@@ -61,7 +61,7 @@ define(['lodash'], function (_) {
       } else if (annotation instanceof SingleSelectAnnotation) {
         return modalInput.select(title,
                                  annotation.annotationType.name,
-                                 annotation.selectedValues[0],
+                                 annotation.getValue(),
                                  {
                                    required: annotation.required,
                                    selectOptions: annotation.annotationType.options

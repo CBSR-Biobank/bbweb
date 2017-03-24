@@ -5,47 +5,12 @@
 define(['lodash', 'tv4'], function(_, tv4) {
   'use strict';
 
-  CollectionSpecimenSpecFactory.$inject = [
-    'validationService',
-    'biobankApi'
-  ];
+  CollectionSpecimenSpecFactory.$inject = [ 'DomainEntity', 'DomainError' ];
 
   /**
    *
    */
-  function CollectionSpecimenSpecFactory(validationService,
-                                         biobankApi) {
-
-    /**
-     * Used for validation.
-     */
-    var schema = {
-      'id': 'CollectionSpecimenSpec',
-      'type': 'object',
-      'properties': {
-        'uniqueId':                    { 'type': 'string' },
-        'name':                        { 'type': 'string' },
-        'description':                 { 'type': [ 'string', 'null' ] },
-        'units':                       { 'type': 'string' },
-        'anatomicalSourceType':        { 'type': 'string' },
-        'preservationType':            { 'type': 'string' },
-        'preservationTemperatureType': { 'type': 'string' },
-        'specimenType':                { 'type': 'string' },
-        'maxCount':                    { 'type': 'integer', 'minimum': 1 },
-        'amount':                      { 'type': 'number', 'minimum': 0 }
-      },
-      'required': [
-        'uniqueId',
-        'name',
-        'units',
-        'anatomicalSourceType',
-        'preservationType',
-        'preservationTemperatureType',
-        'specimenType',
-        'maxCount',
-        'amount'
-      ]
-    };
+  function CollectionSpecimenSpecFactory(DomainEntity, DomainError) {
 
 
     /**
@@ -132,11 +97,55 @@ define(['lodash', 'tv4'], function(_, tv4) {
       _.extend(this, obj);
     }
 
+    CollectionSpecimenSpec.prototype = Object.create(DomainEntity.prototype);
+    CollectionSpecimenSpec.prototype.constructor = CollectionSpecimenSpec;
+
+    /**
+     * Used for validation.
+     */
+    CollectionSpecimenSpec.SCHEMA = {
+      'id': 'CollectionSpecimenSpec',
+      'type': 'object',
+      'properties': {
+        'uniqueId':                    { 'type': 'string' },
+        'name':                        { 'type': 'string' },
+        'description':                 { 'type': [ 'string', 'null' ] },
+        'units':                       { 'type': 'string' },
+        'anatomicalSourceType':        { 'type': 'string' },
+        'preservationType':            { 'type': 'string' },
+        'preservationTemperatureType': { 'type': 'string' },
+        'specimenType':                { 'type': 'string' },
+        'maxCount':                    { 'type': 'integer', 'minimum': 1 },
+        'amount':                      { 'type': 'number', 'minimum': 0 }
+      },
+      'required': [
+        'uniqueId',
+        'name',
+        'units',
+        'anatomicalSourceType',
+        'preservationType',
+        'preservationTemperatureType',
+        'specimenType',
+        'maxCount',
+        'amount'
+      ]
+    };
+
     /**
      * @private
      */
     CollectionSpecimenSpec.isValid = function(obj) {
-      return tv4.validate(obj, schema);
+      return DomainEntity.isValid(CollectionSpecimenSpec.SCHEMA, null, obj);
+    };
+
+    CollectionSpecimenSpec.create = function(obj) {
+      var validation = CollectionSpecimenSpec.isValid(obj);
+
+      if (!validation.valid) {
+        console.error('invalid object from server: ' + validation.message);
+        throw new DomainError('invalid object from server: ' + validation.message);
+      }
+      return new CollectionSpecimenSpec(obj);
     };
 
     return CollectionSpecimenSpec;

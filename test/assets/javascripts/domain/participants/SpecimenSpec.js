@@ -105,7 +105,7 @@ define(function (require) {
           catchTriggered = false;
       this.Specimen.asyncCreate(serverObj)
         .catch(function (err) {
-          expect(err.indexOf('invalid object from server')).not.toEqual(null);
+          expect(err.message).toContain('invalid object from server');
           catchTriggered = true;
         });
       this.$rootScope.$digest();

@@ -26,7 +26,7 @@ define(['lodash', 'tv4'], function(_, tv4) {
                        UserState,
                        usersService) {
 
-    var schema = {
+    var SCHEMA = {
       'id': 'User',
       'type': 'object',
       'properties': {
@@ -88,9 +88,7 @@ define(['lodash', 'tv4'], function(_, tv4) {
        */
       this.state = UserState.REGISTERED;
 
-      ConcurrencySafeEntity.call(this);
-      obj = obj || {};
-      _.extend(this, obj);
+      ConcurrencySafeEntity.call(this, SCHEMA, obj);
     }
 
     User.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -104,13 +102,8 @@ define(['lodash', 'tv4'], function(_, tv4) {
      *
      * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
      */
-    User.validate = function (obj) {
-      if (!tv4.validate(obj, schema)) {
-        $log.error('invalid object from server: ' + tv4.error);
-        return { valid: false, message: 'invalid object from server: ' + tv4.error };
-      }
-
-      return { valid: true, message: null };
+    User.isValid = function (obj) {
+      return ConcurrencySafeEntity.isValid(SCHEMA, null, obj);
     };
 
     /**
@@ -125,7 +118,7 @@ define(['lodash', 'tv4'], function(_, tv4) {
      * a user within asynchronous code.
      */
     User.create = function (obj) {
-      var validation = User.validate(obj);
+      var validation = User.isValid(obj);
       if (!validation.valid) {
         $log.error(validation.message);
         throw new DomainError(validation.message);
@@ -145,17 +138,14 @@ define(['lodash', 'tv4'], function(_, tv4) {
      * @see {@link domain.users.User.create|create()} when not creating a User within asynchronous code.
      */
     User.asyncCreate = function (obj) {
-      var deferred = $q.defer(),
-          validation = User.validate(obj);
+      var result;
 
-      if (!validation.valid) {
-        $log.error(validation.message);
-        deferred.reject(validation.message);
-      } else {
-        deferred.resolve(new User(obj));
+      try {
+        result = User.create(obj);
+        return $q.when(result);
+      } catch (e) {
+        return $q.reject(e);
       }
-
-      return deferred.promise;
     };
 
     /**

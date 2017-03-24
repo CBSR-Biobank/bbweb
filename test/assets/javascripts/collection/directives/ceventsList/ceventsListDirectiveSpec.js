@@ -13,26 +13,6 @@ define([
 
   describe('ceventsListDirective', function() {
 
-    var createDirective = function () {
-      this.element = angular.element([
-        '<cevents-list',
-        '  participant="vm.participant"',
-        '  collection-events-paged-result="vm.collectionEventsPagedResult"',
-        '  collection-event-types="vm.collectionEventTypes">',
-        '</cevents-list>'
-      ].join(''));
-
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = {
-        participant:                 this.participant,
-        collectionEventsPagedResult: this.pagedResult,
-        collectionEventTypes:        this.collectionEventTypes
-      };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('ceventsList');
-    };
-
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(TestSuiteMixin) {
@@ -57,14 +37,34 @@ define([
       this.jsonParticipant = this.factory.defaultParticipant();
       this.jsonCeventType  = this.factory.defaultCollectionEventType();
 
-      this.participant          = new this.Participant(this.jsonParticipant);
-      this.collectionEvent      = new this.CollectionEvent(this.jsonCevent);
+      this.participant          = this.Participant.create(this.jsonParticipant);
+      this.collectionEvent      = this.CollectionEvent.create(this.jsonCevent);
       this.pagedResult          = this.factory.pagedResult([ this.collectionEvent ]);
-      this.collectionEventTypes = [ new this.CollectionEventType(this.jsonCeventType) ];
+      this.collectionEventTypes = [ this.CollectionEventType.create(this.jsonCeventType) ];
+
+      this.createDirective = function () {
+        this.element = angular.element([
+          '<cevents-list',
+          '  participant="vm.participant"',
+          '  collection-events-paged-result="vm.collectionEventsPagedResult"',
+          '  collection-event-types="vm.collectionEventTypes">',
+          '</cevents-list>'
+        ].join(''));
+
+        this.scope = this.$rootScope.$new();
+        this.scope.vm = {
+          participant:                 this.participant,
+          collectionEventsPagedResult: this.pagedResult,
+          collectionEventTypes:        this.collectionEventTypes
+        };
+        this.$compile(this.element)(this.scope);
+        this.scope.$digest();
+        this.controller = this.element.controller('ceventsList');
+      };
     }));
 
     it('has valid scope', function() {
-      createDirective.call(this);
+      this.createDirective();
 
       expect(this.controller.participant).toBe(this.participant);
       expect(this.controller.collectionEventsPagedResult).toBe(this.pagedResult);
@@ -76,7 +76,7 @@ define([
 
       self.collectionEventTypes = [];
       expect(function () {
-        createDirective.call(self);
+        self.createDirective();
       }).toThrowError(/no collection event types defined for this study/);
     });
 

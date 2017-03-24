@@ -26,7 +26,20 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
                                  AnnotationMaxValueCount,
                                  annotationValueTypeLabelService) {
 
-    var schema = {
+    function AnnotationType(obj) {
+      // FIXME: jsdoc for this classes members is needed
+      this.uniqueId      = '';
+      this.name          = '';
+      this.description   = null;
+      this.valueType     = '';
+      this.maxValueCount = null;
+      this.options       = [];
+      this.required      = false;
+
+      ConcurrencySafeEntity.call(this, AnnotationType.SCHEMA, obj);
+    }
+
+    AnnotationType.SCHEMA = {
       'id': 'AnnotationType',
       'type': 'object',
       'properties': {
@@ -41,29 +54,16 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
       'required': [ 'uniqueId', 'name', 'valueType', 'required' ]
     };
 
-    function AnnotationType(obj) {
-      var defaults = {
-        uniqueId:      '',
-        name:          '',
-        description:   null,
-        valueType:     '',
-        maxValueCount: null,
-        options:       [],
-        required:      false
-      };
-
-      obj = obj || {};
-      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
-    }
-
-    AnnotationType.valid = function (obj) {
-      return tv4.validate(obj, schema);
+    AnnotationType.isValid = function (obj) {
+      return ConcurrencySafeEntity.isValid(AnnotationType.SCHEMA, null, obj);
     };
 
     AnnotationType.create = function (obj) {
-      if (!tv4.validate(obj, schema)) {
-        $log.error('invalid object from server: ' + tv4.error);
-        throw new DomainError('invalid object from server: ' + tv4.error);
+      var validation = AnnotationType.isValid(obj);
+
+      if (!validation.valid) {
+        $log.error('invalid object from server: ' + validation.error);
+        throw new DomainError('invalid object from server: ' + validation.error);
       }
       return new AnnotationType(obj);
     };

@@ -44,6 +44,7 @@ define(['lodash'], function(_) {
     var vm = this;
 
     vm.descriptionToggleLength = 100;
+    vm.hasSpecimenSpecs        = false;
     vm.changeState             = changeState;
     vm.editName                = editName;
     vm.editDescription         = editDescription;

@@ -5,14 +5,35 @@
 define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
   'use strict';
 
-  LocationFactory.$inject = [ 'DomainError' ];
+  LocationFactory.$inject = [ 'DomainEntity', 'DomainError' ];
 
   /**
    *
    */
-  function LocationFactory(DomainError) {
+  function LocationFactory(DomainEntity, DomainError) {
 
-    var schema = {
+    /**
+     * Location is a value object.
+     */
+    function Location(obj) {
+      // var defaults = {
+      //   uniqueId:       null,
+      //   name:           '',
+      //   street:         '',
+      //   city:           '',
+      //   province:       '',
+      //   postalCode:     '',
+      //   poBoxNumber:    null,
+      //   countryIsoCode: ''
+      // };
+
+      DomainEntity.call(this, Location.SCHEMA, obj);
+    }
+
+    Location.prototype = Object.create(DomainEntity.prototype);
+    Location.prototype.constructor = Location;
+
+    Location.SCHEMA = {
       'id': 'Location',
       'type': 'object',
       'properties': {
@@ -36,30 +57,8 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
       ]
     };
 
-
-    /**
-     * Location is a value object.
-     */
-    function Location(obj) {
-      var defaults = {
-        uniqueId:       null,
-        name:           '',
-        street:         '',
-        city:           '',
-        province:       '',
-        postalCode:     '',
-        poBoxNumber:    null,
-        countryIsoCode: ''
-      };
-
-      obj = obj || {};
-      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
-    }
-
-    Location.prototype.constructor = Location;
-
-    Location.valid = function(obj) {
-      return tv4.validate(obj, schema);
+    Location.isValid = function(obj) {
+      return DomainEntity.isValid(Location.SCHEMA, null, obj);
     };
 
     /**
@@ -68,9 +67,11 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
      * Should be used to create a location from the object returned by the server.
      */
     Location.create = function(obj) {
-      if (!tv4.validate(obj, schema)) {
-        console.error('invalid object from server: ' + tv4.error);
-        throw new DomainError('invalid object from server: ' + tv4.error);
+      var validation = Location.isValid(obj);
+
+      if (!validation.valid) {
+        console.error('invalid object from server: ' + validation.message);
+        throw new DomainError('invalid object from server: ' + validation.message);
       }
       return new Location(obj);
     };

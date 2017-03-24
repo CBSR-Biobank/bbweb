@@ -59,8 +59,8 @@ define(function (require) {
         var rawSpecimenSpec = self.factory.collectionSpecimenSpec(),
             rawCollectionEventType = self.factory.collectionEventType(
               { specimenSpecs: [ rawSpecimenSpec ]}),
-            collectionEventType = new self.CollectionEventType(rawCollectionEventType),
-            collectionEvent = new self.CollectionEvent(self.factory.collectionEvent(),
+            collectionEventType = self.CollectionEventType.create(rawCollectionEventType),
+            collectionEvent = self.CollectionEvent(self.factory.collectionEvent(),
                                                        self.collectionEventType),
             specimen = new self.Specimen(self.factory.specimen(),
                                          collectionEventType.specimenSpecs[0]),

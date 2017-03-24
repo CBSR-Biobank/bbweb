@@ -10,11 +10,7 @@ define(function (require) {
       sprintf = require('sprintf-js').sprintf;
 
   /**
-   * For now these tests test the interaction between the class and the server.
    *
-   * At the moment not sure if we need the service layer, or if the domain model objects call the rest API
-   * directly. If the service layer is kept then these tests will have to be modified and only mock the
-   * service methods in 'centresService'.
    */
   describe('Centre', function() {
 
@@ -65,20 +61,30 @@ define(function (require) {
         .toThrowError(/invalid object from server/);
     });
 
+    it('can be created with a location', function() {
+      var location = this.factory.location(),
+          rawCentre = this.factory.centre({ locations: [ location ]}),
+          centre = this.Centre.create(rawCentre);
+
+      expect(centre.locations).toBeArrayOfSize(1);
+    });
+
     it('fails when creating from a bad study ID', function() {
       var self = this,
           badCentreJson = self.factory.centre({ studyIds: [ null, '' ] });
 
-      expect(function () { self.Centre.create(badCentreJson); })
-        .toThrowError(/invalid object from server/);
+      expect(function () {
+        self.Centre.create(badCentreJson);
+      }).toThrowError(/invalid object from server/);
     });
 
     it('fails when creating from a bad location', function() {
       var self = this,
           badCentreJson = self.factory.centre({ locations: [ 1 ] });
 
-      expect(function () { self.Centre.create(badCentreJson); })
-        .toThrowError(/invalid object from server/);
+      expect(function () {
+        self.Centre.create(badCentreJson);
+      }).toThrowError(/invalid object from server.*locations/);
     });
 
     it('state predicates return valid results', function() {
@@ -117,7 +123,7 @@ define(function (require) {
       }
 
       function shouldFail(error) {
-        expect(error).toStartWith('invalid object from server');
+        expect(error.message).toContain('Missing required property');
       }
     });
 
@@ -130,12 +136,12 @@ define(function (require) {
       self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
       self.$httpBackend.flush();
 
-      function shouldNotFail(reply) {
+      function shouldNotFail() {
         fail('function should not be called');
       }
 
       function shouldFail(error) {
-        expect(error).toStartWith('invalid study IDs from server');
+        expect(error.message).toContain('bad study ids');
       }
     });
 
@@ -149,12 +155,13 @@ define(function (require) {
       self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
       self.$httpBackend.flush();
 
-      function shouldNotFail(reply) {
+      function shouldNotFail() {
         fail('function should not be called');
       }
 
       function shouldFail(error) {
-        expect(error).toStartWith('invalid locations from server');
+        expect(error.message).toContain('locations');
+        expect(error.message).toContain('Missing required property');
       }
     });
 

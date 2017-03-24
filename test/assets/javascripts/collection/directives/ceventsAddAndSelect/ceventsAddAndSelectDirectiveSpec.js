@@ -13,27 +13,6 @@ define([
 
   describe('ceventsAddAndSelectDirective', function() {
 
-    var createController = function () {
-      this.element = angular.element([
-        '<cevents-add-and-select',
-        '  participant="vm.participant"',
-        '  collection-events-paged-result="vm.collectionEventsPagedResult"',
-        '  collection-event-types="vm.collectionEventTypes">',
-        '</cevents-add-and-select>'
-      ].join(''));
-
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = {
-        participant:                 this.participant,
-        collectionEventsPagedResult: this.pagedResult,
-        collectionEventTypes:        this.collectionEventTypes
-      };
-
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('ceventsAddAndSelect');
-    };
-
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(TestSuiteMixin) {
@@ -57,14 +36,35 @@ define([
       this.jsonParticipant = this.factory.defaultParticipant();
       this.jsonCeventType  = this.factory.defaultCollectionEventType();
 
-      this.participant          = new this.Participant(this.jsonParticipant);
-      this.collectionEvent      = new this.CollectionEvent(this.jsonCevent);
+      this.participant          = this.Participant.create(this.jsonParticipant);
+      this.collectionEvent      = this.CollectionEvent.create(this.jsonCevent);
       this.pagedResult          = this.factory.pagedResult([ this.collectionEvent ]);
-      this.collectionEventTypes = [ new this.CollectionEventType(this.jsonCeventType) ];
+      this.collectionEventTypes = [ this.CollectionEventType.create(this.jsonCeventType) ];
+
+      this.createController = function () {
+        this.element = angular.element([
+          '<cevents-add-and-select',
+          '  participant="vm.participant"',
+          '  collection-events-paged-result="vm.collectionEventsPagedResult"',
+          '  collection-event-types="vm.collectionEventTypes">',
+          '</cevents-add-and-select>'
+        ].join(''));
+
+        this.scope = this.$rootScope.$new();
+        this.scope.vm = {
+          participant:                 this.participant,
+          collectionEventsPagedResult: this.pagedResult,
+          collectionEventTypes:        this.collectionEventTypes
+        };
+
+        this.$compile(this.element)(this.scope);
+        this.scope.$digest();
+        this.controller = this.element.controller('ceventsAddAndSelect');
+      };
     }));
 
     it('has valid scope', function() {
-      createController.call(this);
+      this.createController();
 
       expect(this.controller.participant).toBe(this.participant);
       expect(this.controller.collectionEventsPagedResult).toBe(this.pagedResult);
@@ -82,7 +82,7 @@ define([
 
         self.collectionEventTypes = [];
 
-        expect(function () { createController.call(self); })
+        expect(function () { self.createController(); })
           .toThrowError(/no collection event types defined for this study/);
       });
 
@@ -91,7 +91,7 @@ define([
 
         this.collectionEvent.collectionEventTypeId = self.factory.stringNext();
 
-        expect(function () { createController.call(self); })
+        expect(function () { self.createController(); })
           .toThrowError(/collection event type ID not found/);
       });
 
@@ -99,12 +99,12 @@ define([
 
     it('has valid display state when there are no collection events', function() {
       this.pagedResult = this.factory.pagedResult([]);
-      createController.call(this);
+      this.createController();
       expect(this.controller.displayState).toBe(this.controller.displayStates.NO_RESULTS);
     });
 
     it('has valid display state when there are collection events', function() {
-      createController.call(this);
+      this.createController();
       expect(this.controller.displayState).toBe(this.controller.displayStates.HAVE_RESULTS);
     });
 
@@ -112,7 +112,7 @@ define([
       spyOn(this.$state, 'go').and.returnValue('ok');
       spyOn(this.CollectionEvent, 'list').and.returnValue(this.$q.when(this.pagedResult));
 
-      createController.call(this);
+      this.createController();
       this.controller.pageChanged();
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home.collection.study.participant.cevents');
@@ -126,7 +126,7 @@ define([
         spyOn(this.$state, 'go').and.returnValue('ok');
         spyOn(this.CollectionEvent, 'list').and.returnValue(this.$q.when(this.pagedResult));
 
-        createController.call(this);
+        this.createController();
         this.controller.add();
         this.scope.$digest();
         expect(this.$state.go).toHaveBeenCalledWith(
@@ -145,7 +145,7 @@ define([
         spyOn(self.$state, 'go').and.returnValue('ok');
         spyOn(self.CollectionEvent, 'list').and.returnValue(self.$q.when(self.pagedResult));
 
-        createController.call(self);
+        self.createController();
         self.controller.add();
         self.scope.$digest();
         expect(self.$state.go).toHaveBeenCalledWith('home.collection.study.participant.cevents.add');
@@ -156,7 +156,7 @@ define([
     it('when eventInformation is called the state is changed', function() {
       spyOn(this.$state, 'go').and.returnValue('ok');
 
-      createController.call(this);
+      this.createController();
       this.controller.eventInformation(this.collectionEvent);
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith(
@@ -174,7 +174,7 @@ define([
       it('filter is updated when user enters a value', function() {
         var visitNumber = '20';
 
-        createController.call(this);
+        this.createController();
         this.controller.visitNumberFilter = visitNumber;
         this.controller.visitFilterUpdated();
         this.scope.$digest();
@@ -184,7 +184,7 @@ define([
       });
 
       it('filter is updated when user clears the value', function() {
-        createController.call(this);
+        this.createController();
         this.controller.visitNumberFilter = '';
         this.controller.visitFilterUpdated();
         this.scope.$digest();

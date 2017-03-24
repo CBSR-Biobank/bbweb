@@ -81,8 +81,9 @@ define([
             specimen = self.factory.specimen(),
             badJson = self.factory.shipmentSpecimen({ specimen: _.omit(specimen, 'originLocationInfo') });
 
-        expect(function () { self.ShipmentSpecimen.create(badJson); })
-          .toThrowError(/invalid object from server.*originLocationInfo/);
+        expect(function () {
+          self.ShipmentSpecimen.create(badJson);
+        }).toThrowError(/invalid object from server.*originLocationInfo/);
       });
 
       it('fails when creating from a bad location ID', function() {

@@ -35,7 +35,7 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, TestSuiteMixin, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, TestSuiteMixin) {
       var self = this, jsonAnnotType;
 
       _.extend(self, TestSuiteMixin.prototype);
@@ -49,7 +49,7 @@ define([
                               'factory');
 
       jsonAnnotType = self.factory.annotationType();
-      self.study = new self.Study(_.extend(self.factory.study(),
+      self.study = self.Study.create(_.extend(self.factory.study(),
                                            { annotationTypes: [ jsonAnnotType ]}));
       self.annotationType = new self.AnnotationType(jsonAnnotType);
 

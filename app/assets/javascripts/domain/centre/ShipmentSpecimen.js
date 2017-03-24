@@ -6,7 +6,6 @@ define(function (require) {
   'use strict';
 
   var _       = require('lodash'),
-      tv4     = require('tv4'),
       sprintf = require('sprintf-js').sprintf;
 
   ShipmentSpecimenFactory.$inject = [
@@ -29,7 +28,7 @@ define(function (require) {
                                    biobankApi,
                                    centreLocationInfoSchema) {
 
-    var schema = {
+    var SCHEMA = {
       'id': 'Shipment',
       'type': 'object',
       'properties': {
@@ -68,7 +67,7 @@ define(function (require) {
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
      */
-    function ShipmentSpecimen(obj) {
+    function ShipmentSpecimen(obj, specimen) {
 
       /**
        * The state this shipment specimen is in.
@@ -105,12 +104,10 @@ define(function (require) {
        * @protected
        */
 
-      obj = obj || {};
-      ConcurrencySafeEntity.call(this, obj);
-      _.extend(this, obj);
+      ConcurrencySafeEntity.call(this, SCHEMA, obj);
 
-      if (obj.specimen) {
-        _.extend(this, { specimen: new Specimen(obj.specimen) });
+      if (specimen) {
+        _.extend(this, { specimen: specimen });
       }
     }
 
@@ -121,10 +118,7 @@ define(function (require) {
      * @private
      */
     ShipmentSpecimen.isValid = function(obj) {
-      tv4.addSchema(centreLocationInfoSchema);
-      tv4.addSchema(Specimen.schema);
-      tv4.addSchema(schema);
-      return tv4.validate(obj, schema) && tv4.validate(obj.specimen, Specimen.schema);
+      return ConcurrencySafeEntity.isValid(SCHEMA, null, obj);
     };
 
     /**
@@ -140,12 +134,18 @@ define(function (require) {
      * a shipment specimen within asynchronous code.
      */
     ShipmentSpecimen.create = function (obj) {
-      if (!ShipmentSpecimen.isValid(obj)) {
-        $log.error('invalid object from server: ' + tv4.error);
-        throw new DomainError('invalid object from server: ' + tv4.error);
+      var specimen, validation = ShipmentSpecimen.isValid(obj);
+
+      if (!validation.valid) {
+        $log.error('invalid object from server: ' + validation.message);
+        throw new DomainError('invalid object from server: ' + validation.message);
       }
 
-      return new ShipmentSpecimen(obj);
+      if (obj.specimen) {
+        specimen = Specimen.create(obj.specimen);
+      }
+
+      return new ShipmentSpecimen(obj, specimen);
     };
 
     /**
@@ -159,10 +159,10 @@ define(function (require) {
       var obj = _.extend(
         _.pick(specimen, 'amount', 'timeCreated'),
         {
-          state: ShipmentItemState.PRESENT,
-          specimenId: specimen.id,
+          state:        ShipmentItemState.PRESENT,
+          specimenId:   specimen.id,
           locationInfo: { locationId: specimen.locationId },
-          status: specimen.status
+          status:       specimen.status
         });
 
       return new ShipmentSpecimen(obj);
@@ -182,16 +182,14 @@ define(function (require) {
      * within asynchronous code.
      */
     ShipmentSpecimen.asyncCreate = function (obj) {
-      var deferred = $q.defer();
+      var result;
 
-      if (!ShipmentSpecimen.isValid(obj)) {
-        $log.error('invalid object from server: ' + tv4.error);
-        deferred.reject('invalid object from server: ' + tv4.error);
-      } else {
-        deferred.resolve(new ShipmentSpecimen(obj));
+      try {
+        result = ShipmentSpecimen.create(obj);
+        return $q.when(result);
+      } catch (e) {
+        return $q.reject(e);
       }
-
-      return deferred.promise;
     };
 
     /**

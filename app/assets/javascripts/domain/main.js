@@ -9,77 +9,72 @@
 define(function (require) {
   'use strict';
 
-  var angular = require('angular'),
-      name = 'biobank.domain',
-      module;
+  var angular = require('angular');
 
-  module = angular.module('biobank.domain', []);
+  return angular.module('biobank.domain', [])
 
-  module.factory('AnnotationTypeViewer',                require('./AnnotationTypeViewer'));
-  module.factory('ConcurrencySafeEntity',               require('./ConcurrencySafeEntity'));
-  module.factory('DomainError',                         require('./DomainError'));
-  module.factory('EntityViewer',                        require('./EntityViewer'));
-  module.factory('Location',                            require('./Location'));
+    .factory('AnnotationTypeViewer',                require('./AnnotationTypeViewer'))
+    .factory('ConcurrencySafeEntity',               require('./ConcurrencySafeEntity'))
+    .factory('DomainEntity',                        require('./DomainEntity'))
+    .factory('DomainError',                         require('./DomainError'))
+    .factory('EntityViewer',                        require('./EntityViewer'))
+    .factory('Location',                            require('./Location'))
 
-  module.constant('AnatomicalSourceType',               require('./AnatomicalSourceType'));
-  module.constant('PreservationType',                   require('./PreservationType'));
-  module.constant('PreservationTemperatureType',        require('./PreservationTemperatureType'));
-  module.constant('ShipmentState',                      require('./centre/ShipmentState'));
-  module.constant('ShipmentItemState',                  require('./centre/ShipmentItemState'));
-  module.constant('centreLocationInfoSchema',           require('./centre/centreLocationInfoSchema'));
-  module.constant('SpecimenState',                      require('./participants/SpecimenState'));
+    .constant('AnatomicalSourceType',               require('./AnatomicalSourceType'))
+    .constant('PreservationType',                   require('./PreservationType'))
+    .constant('PreservationTemperatureType',        require('./PreservationTemperatureType'))
+    .constant('ShipmentState',                      require('./centre/ShipmentState'))
+    .constant('ShipmentItemState',                  require('./centre/ShipmentItemState'))
+    .constant('centreLocationInfoSchema',           require('./centre/centreLocationInfoSchema'))
+    .constant('SpecimenState',                      require('./participants/SpecimenState'))
 
-  module.constant('AnnotationValueType',                require('./AnnotationValueType'));
-  module.constant('AnnotationMaxValueCount',            require('./annotations/AnnotationMaxValueCount'));
-  module.constant('SpecimenType',                       require('./study/SpecimenType'));
+    .constant('AnnotationValueType',                require('./AnnotationValueType'))
+    .constant('AnnotationMaxValueCount',            require('./annotations/AnnotationMaxValueCount'))
+    .constant('SpecimenType',                       require('./study/SpecimenType'))
 
-  module.factory('Annotation',                          require('./annotations/Annotation'));
-  module.factory('AnnotationType',                      require('./annotations/AnnotationType'));
-  module.factory('DateTimeAnnotation',                  require('./annotations/DateTimeAnnotation'));
-  module.factory('MultipleSelectAnnotation',            require('./annotations/MultipleSelectAnnotation'));
-  module.factory('NumberAnnotation',                    require('./annotations/NumberAnnotation'));
-  module.factory('SingleSelectAnnotation',              require('./annotations/SingleSelectAnnotation'));
-  module.factory('TextAnnotation',                      require('./annotations/TextAnnotation'));
-  module.factory('HasAnnotationTypes',                  require('./annotations/HasAnnotationTypes'));
-  module.factory('HasAnnotations',                      require('./annotations/HasAnnotations'));
-  module.service('annotationFactory',                   require('./annotations/annotationFactory'));
-  module.service('annotationTypeValidation',            require('./annotations/annotationTypeValidation'));
+    .factory('Annotation',                          require('./annotations/Annotation'))
+    .factory('AnnotationType',                      require('./annotations/AnnotationType'))
+    .factory('DateTimeAnnotation',                  require('./annotations/DateTimeAnnotation'))
+    .factory('MultipleSelectAnnotation',            require('./annotations/MultipleSelectAnnotation'))
+    .factory('NumberAnnotation',                    require('./annotations/NumberAnnotation'))
+    .factory('SingleSelectAnnotation',              require('./annotations/SingleSelectAnnotation'))
+    .factory('TextAnnotation',                      require('./annotations/TextAnnotation'))
+    .factory('HasAnnotationTypes',                  require('./annotations/HasAnnotationTypes'))
+    .factory('HasAnnotations',                      require('./annotations/HasAnnotations'))
+    .service('annotationFactory',                   require('./annotations/annotationFactory'))
+    .service('annotationTypeValidation',            require('./annotations/annotationTypeValidation'))
 
-  module.factory('Centre',                              require('./centre/Centre'));
-  module.factory('CentreCounts',                        require('./centre/CentreCounts'));
-  module.factory('Shipment',                            require('./centre/Shipment'));
-  module.factory('ShipmentSpecimen',                    require('./centre/ShipmentSpecimen'));
+    .factory('Centre',                              require('./centre/Centre'))
+    .factory('CentreCounts',                        require('./centre/CentreCounts'))
+    .factory('Shipment',                            require('./centre/Shipment'))
+    .factory('ShipmentSpecimen',                    require('./centre/ShipmentSpecimen'))
 
-  module.factory('CollectionEventType',                 require('./study/CollectionEventType'));
-  module.factory('CollectionSpecimenSpec',              require('./study/CollectionSpecimenSpec'));
-  module.factory('HasCollectionSpecimenSpecs',          require('./study/HasCollectionSpecimenSpecs'));
-  module.factory('ProcessingTypeViewer',                require('./study/ProcessingTypeViewer'));
-  module.factory('SpcLinkTypeViewer',                   require('./study/SpcLinkTypeViewer'));
-  module.factory('SpecimenGroup',                       require('./study/SpecimenGroup'));
-  module.factory('SpecimenGroupViewer',                 require('./study/SpecimenGroupViewer'));
-  module.factory('SpecimenLinkAnnotationType',          require('./study/SpecimenLinkAnnotationType'));
-  module.factory('SpecimenLinkType',                    require('./study/SpecimenLinkType'));
-  module.factory('Study',                               require('./study/Study'));
-  module.factory('StudyCounts',                         require('./study/StudyCounts'));
-  module.factory('StudyAnnotationType',                 require('./study/StudyAnnotationType'));
-  module.factory('StudyViewer',                         require('./study/StudyViewer'));
-  module.service('ProcessingDto',                       require('./study/ProcessingDto'));
-  module.service('ProcessingType',                      require('./study/ProcessingType'));
-  module.service('studyAnnotationTypeValidation',       require('./study/studyAnnotationTypeValidation'));
+    .factory('CollectionEventType',                 require('./study/CollectionEventType'))
+    .factory('CollectionSpecimenSpec',              require('./study/CollectionSpecimenSpec'))
+    .factory('HasCollectionSpecimenSpecs',          require('./study/HasCollectionSpecimenSpecs'))
+    .factory('ProcessingTypeViewer',                require('./study/ProcessingTypeViewer'))
+    .factory('SpcLinkTypeViewer',                   require('./study/SpcLinkTypeViewer'))
+    .factory('SpecimenGroup',                       require('./study/SpecimenGroup'))
+    .factory('SpecimenGroupViewer',                 require('./study/SpecimenGroupViewer'))
+    .factory('SpecimenLinkAnnotationType',          require('./study/SpecimenLinkAnnotationType'))
+    .factory('SpecimenLinkType',                    require('./study/SpecimenLinkType'))
+    .factory('Study',                               require('./study/Study'))
+    .factory('StudyCounts',                         require('./study/StudyCounts'))
+    .factory('StudyAnnotationType',                 require('./study/StudyAnnotationType'))
+    .factory('StudyViewer',                         require('./study/StudyViewer'))
+    .service('ProcessingDto',                       require('./study/ProcessingDto'))
+    .service('ProcessingType',                      require('./study/ProcessingType'))
+    .service('studyAnnotationTypeValidation',       require('./study/studyAnnotationTypeValidation'))
 
-  module.factory('Participant',                         require('./participants/Participant'));
-  module.factory('CollectionEvent',                     require('./participants/CollectionEvent'));
-  module.factory('Specimen',                            require('./participants/Specimen'));
+    .factory('Participant',                         require('./participants/Participant'))
+    .factory('CollectionEvent',                     require('./participants/CollectionEvent'))
+    .factory('Specimen',                            require('./participants/Specimen'))
 
-  module.factory('User',                                require('./user/User'));
-  module.factory('UserViewer',                          require('./user/UserViewer'));
-  module.service('UserCounts',                          require('./user/UserCounts'));
+    .factory('User',                                require('./user/User'))
+    .factory('UserViewer',                          require('./user/UserViewer'))
+    .service('UserCounts',                          require('./user/UserCounts'))
 
-  module.constant('UserState',                         require('./user/UserState'));
-  module.constant('StudyState',                        require('./study/StudyState'));
-  module.constant('CentreState',                       require('./centre/CentreState'));
-
-  return {
-    name: name,
-    module: module
-  };});
+    .constant('UserState',                         require('./user/UserState'))
+    .constant('StudyState',                        require('./study/StudyState'))
+    .constant('CentreState',                       require('./centre/CentreState'));
+});

@@ -32,14 +32,14 @@ define(function(require) {
 
       maxValueCount = maxValueCount || 0;
 
-      jsonAnnotationType = this.factory.annotationType({ valueType: valueType,
-                                                         maxValueCount: maxValueCount });
-      value              = this.factory.valueForAnnotation(jsonAnnotationType);
-      jsonAnnotation     = this.factory.annotation({ value: value }, jsonAnnotationType);
-      jsonCeventType     = this.factory.collectionEventType({ annotationTypes: [ jsonAnnotationType ]});
-      jsonCevent         = this.factory.collectionEvent({ annotations: [ jsonAnnotation ]});
+      jsonAnnotationType  = this.factory.annotationType({ valueType: valueType,
+                                                          maxValueCount: maxValueCount });
+      value               = this.factory.valueForAnnotation(jsonAnnotationType);
+      jsonAnnotation      = this.factory.annotation({ value: value }, jsonAnnotationType);
+      jsonCeventType      = this.factory.collectionEventType({ annotationTypes: [ jsonAnnotationType ]});
+      jsonCevent          = this.factory.collectionEvent({ annotations: [ jsonAnnotation ]});
       collectionEventType = new this.CollectionEventType(jsonCeventType);
-      return new this.CollectionEvent(jsonCevent, collectionEventType);
+      return this.CollectionEvent.create(jsonCevent, collectionEventType);
     };
 
     SuiteMixin.prototype.createDirective = function (collectionEventTypes, collectionEvent) {

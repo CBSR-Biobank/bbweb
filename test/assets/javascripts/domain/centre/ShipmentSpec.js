@@ -124,7 +124,7 @@ define(function (require) {
         }
 
         function shouldFail(error) {
-          expect(error).toStartWith('invalid object from server');
+          expect(error.message).toContain('Missing required property');
         }
       });
 
@@ -142,7 +142,7 @@ define(function (require) {
         }
 
         function shouldFail(error) {
-          expect(error).toStartWith('invalid object from server');
+          expect(error.message).toContain('Missing required property');
         }
       });
 
@@ -160,7 +160,7 @@ define(function (require) {
         }
 
         function shouldFail(error) {
-          expect(error).toStartWith('invalid object from server');
+          expect(error.message).toContain('Missing required property');
         }
       });
 

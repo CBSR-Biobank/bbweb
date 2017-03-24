@@ -5,13 +5,12 @@
 define(['angular', 'lodash'], function(angular, _) {
   'use strict';
 
-  ConcurrencySafeEntityFactory.$inject = [ '$q', 'biobankApi' ];
+  ConcurrencySafeEntityFactory.$inject = [ '$q', 'DomainEntity', 'biobankApi' ];
 
   /**
-   * AngularJS factory for participants.
-   *
+   * A domain entity in the system that allows for optimistic concurrency versioning.
    */
-  function ConcurrencySafeEntityFactory($q, biobankApi) {
+  function ConcurrencySafeEntityFactory($q, DomainEntity, biobankApi) {
 
     /**
      * @classdesc Used to manage surrogate identity and optimistic concurrency versioning.
@@ -19,7 +18,7 @@ define(['angular', 'lodash'], function(angular, _) {
      * @class
      * @memberOf domain
      */
-    function ConcurrencySafeEntity() {
+    function ConcurrencySafeEntity(schema, obj) {
       /**
        * The unique ID that identifies an object of this type.
        * @name domain.ConcurrencySafeEntity#id
@@ -51,7 +50,12 @@ define(['angular', 'lodash'], function(angular, _) {
        * @protected
        */
       this.timeModified = null;
+
+      DomainEntity.call(this, schema, obj);
     }
+
+    ConcurrencySafeEntity.prototype = Object.create(DomainEntity.prototype);
+    ConcurrencySafeEntity.prototype.constructor = ConcurrencySafeEntity;
 
     /**
      * If the object does not have an ID it is new and is not yet present in the system.
@@ -60,6 +64,10 @@ define(['angular', 'lodash'], function(angular, _) {
      */
     ConcurrencySafeEntity.prototype.isNew = function() {
       return (this.id === null);
+    };
+
+    ConcurrencySafeEntity.isValid = function(schema, additionalSchemas, obj) {
+      return DomainEntity.isValid(schema, additionalSchemas, obj);
     };
 
     /** @protected */

@@ -10,6 +10,9 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
     '$log',
     'funutils',
     'ConcurrencySafeEntity',
+    'Study',
+    'Annotation',
+    'annotationFactory',
     'DomainError',
     'biobankApi',
     'HasAnnotations'
@@ -22,6 +25,9 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
                               $log,
                               funutils,
                               ConcurrencySafeEntity,
+                              Study,
+                              Annotation,
+                              annotationFactory,
                               DomainError,
                               biobankApi,
                               HasAnnotations) {
@@ -35,7 +41,8 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
         'timeAdded':       { 'type': 'string' },
         'timeModified':    { 'type': [ 'string', 'null' ] },
         'uniqueId':        { 'type': 'string' },
-        'annotations':     { 'type': 'array' }
+        'studyId':         { 'type': 'string' },
+        'annotations':     { 'type': 'array', 'items':{ '$ref': 'Annotation' } }
       },
       'required': [ 'id', 'studyId', 'uniqueId', 'annotations', 'version' ]
     };
@@ -58,7 +65,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * this class. Objects of this type are usually returned by the server's REST API.
      *
      */
-    function Participant(obj, study) {
+    function Participant(obj, study, annotations) {
       /**
        * A participant has a unique identifier that is used to identify the participant in the system. This
        * identifier is not the same as the <code>id</code> value object used by the domain model.
@@ -84,12 +91,14 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
        */
       this.annotations = [];
 
-      obj = obj || {};
-      ConcurrencySafeEntity.call(this);
-      _.extend(this, obj);
+      ConcurrencySafeEntity.call(this, schema, obj);
+      _.extend(this, {
+        study:       study,
+        annotations: annotations
+      });
 
-      if (study) {
-        this.setStudy(study);
+      if (this.study) {
+        this.setStudy(this.study);
       }
     }
 
@@ -106,18 +115,8 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      *
      * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
      */
-    Participant.validate = function (obj) {
-      if (!tv4.validate(obj, schema)) {
-        return { valid: false, message : 'invalid object from server: ' + tv4.error };
-      }
-
-      obj.annotations = obj.annotations || {};
-
-      if (!HasAnnotations.prototype.validAnnotations(obj.annotations)) {
-        return { valid: false, message : 'invalid object from server: bad annotation types' + tv4.error };
-      }
-
-      return { valid: true, message: null };
+    Participant.isValid = function (obj) {
+      return ConcurrencySafeEntity.isValid(schema, [Annotation.schema ], obj);
     };
 
     /**
@@ -132,12 +131,22 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * within asynchronous code.
      */
     Participant.create = function (obj) {
-      var validation = Participant.validate(obj);
+      var study, annotations, validation = Participant.isValid(obj);
       if (!validation.valid) {
         $log.error(validation.message);
         throw new DomainError(validation.message);
       }
-      return new Participant(obj);
+      if (obj.annotations) {
+        try {
+          annotations = obj.annotations.map(function (annotation) {
+            return Annotation.create(annotation);
+          });
+        } catch (e) {
+          throw new DomainError('bad annotation type');
+        }
+      }
+
+      return new Participant(obj, study, annotations);
     };
 
     /**
@@ -153,16 +162,14 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * asynchronous code.
      */
     Participant.asyncCreate = function (obj) {
-      var deferred = $q.defer(),
-          validation = Participant.validate(obj);
+      var result;
 
-      if (!validation.valid) {
-        $log.error(validation.message);
-        deferred.reject(validation.message);
-      } else {
-        deferred.resolve(new Participant(obj));
+      try {
+        result = Participant.create(obj);
+        return $q.when(result);
+      } catch (e) {
+        return $q.reject(e);
       }
-      return deferred.promise;
     };
 
     /**

@@ -41,8 +41,8 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
         'name':            { 'type': 'string' },
         'description':     { 'type': [ 'string', 'null' ] },
         'recurring':       { 'type': 'boolean' },
-        'specimenSpecs':   { 'type': 'array' },
-        'annotationTypes': { 'type': 'array' }
+        'specimenSpecs':   { 'type': 'array', 'items': { '$ref': 'CollectionSpecimenSpec' } },
+        'annotationTypes': { 'type': 'array', 'items': { '$ref': 'AnnotationType' } }
       },
       'required': [ 'id', 'version', 'timeAdded', 'name', 'recurring' ]
     };
@@ -64,15 +64,13 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * @param {Study} options.study the study this collection even type belongs to.
      */
     function CollectionEventType(obj, options) {
-      var self = this;
-
       /**
        * The ID of the {@link domain.studies.Study|Study} this collection event type belongs to.
        *
        * @name domain.studies.CollectionEventType#studyId
        * @type {string}
        */
-      self.studyId = null;
+      this.studyId = _.get(options, 'study.id', null);
 
       /**
        * A short identifying name that is unique.
@@ -80,7 +78,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
        * @name domain.studies.CollectionEventType#name
        * @type {string}
        */
-      self.name = '';
+      this.name = '';
 
       /**
        * An optional description that can provide additional details on the name.
@@ -96,7 +94,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
        * @name domain.studies.CollectionEventType#recurring
        * @type {boolean}
        */
-      self.recurring = false;
+      this.recurring = false;
 
       /**
        * The specifications for the specimens that are collected for this collection event type.
@@ -104,7 +102,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
        * @name domain.studies.CollectionEventType#specimenSpecs
        * @type {Array<domain.studies.CollectionSpecimenSpec>}
        */
-      self.annotationTypes = [];
+      this.specimenSpecs = [];
 
       /**
        * The annotation types that are collected for this collection event type.
@@ -112,21 +110,16 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
        * @name domain.studies.CollectionEventType#annotationTypes
        * @type {Array<domain.AnnotationType>}
        */
-      self.annotationTypes = [];
+      this.annotationTypes = [];
 
-      obj = obj || {};
-      options = options || {};
-      ConcurrencySafeEntity.call(self);
-      _.extend(self, obj, _.pick(options, 'study'));
+      ConcurrencySafeEntity.call(this, schema, obj);
 
+      options                 = options || {};
+      options.study           = _.get(options, 'study', undefined);
+      options.specimenSpecs   = _.get(options, 'specimenSpecs', []);
+      options.annotationTypes = _.get(options, 'annotationTypes', []);
 
-      self.specimenSpecs = _.map(self.specimenSpecs, function (specimenSpec) {
-        return new CollectionSpecimenSpec(specimenSpec);
-      });
-
-      this.annotationTypes = _.map(this.annotationTypes, function (annotationType) {
-        return new AnnotationType(annotationType);
-      });
+      _.extend(this, _.pick(options, 'study', 'specimenSpecs', 'annotationTypes'));
     }
 
     CollectionEventType.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -136,28 +129,21 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
     CollectionEventType.prototype.constructor = CollectionEventType;
 
     /**
-     * Checks if <tt>obj</tt> has valid properties to construct a {@link
-     * domain.studies.CollectionEventType|CollectionEventType}.
+     * Checks if <tt>obj</tt> has valid properties to construct a
+     * {@link domain.studies.CollectionEventType|CollectionEventType}.
      *
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
      *
      * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
      */
-    CollectionEventType.validate = function (obj) {
-      if (!tv4.validate(obj, schema)) {
-        return { valid: false, message: 'invalid collection event types from server: ' + tv4.error };
-      }
-
-      if (!HasCollectionSpecimenSpecs.prototype.validSpecimenSpecs(obj.specimenSpecs)) {
-        return { valid: false, message: 'invalid specimen specs from server: ' + tv4.error };
-      }
-
-      if (!HasAnnotationTypes.prototype.validAnnotationTypes(obj.annotationTypes)) {
-        return { valid: false, message: 'invalid annotation types from server: ' + tv4.error };
-      }
-
-      return { valid: true, message: null };
+    CollectionEventType.isValid = function(obj) {
+      return ConcurrencySafeEntity.isValid(schema,
+                                           [
+                                             CollectionSpecimenSpec.SCHEMA,
+                                             AnnotationType.SCHEMA
+                                           ],
+                                           obj);
     };
 
     /**
@@ -173,12 +159,34 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * collection event type within asynchronous code.
      */
     CollectionEventType.create = function (obj) {
-      var validation = CollectionEventType.validate(obj);
+      var options = {},
+          validation = CollectionEventType.isValid(obj);
       if (!validation.valid) {
-        $log.error(validation.message);
-        throw new DomainError(validation.message);
+        $log.error('invalid collection event type from server: ' + validation.message);
+        throw new DomainError('invalid collection event type from server: ' + validation.message);
       }
-      return new CollectionEventType(obj);
+
+      if (obj.annotationTypes) {
+        try {
+          options.annotationTypes = obj.annotationTypes.map(function (annotationType) {
+            return AnnotationType.create(annotationType);
+          });
+        } catch (e) {
+          throw new DomainError('invalid annotation types from server: ' + validation.message);
+        }
+      }
+
+      if (obj.specimenSpecs) {
+        try {
+          options.specimenSpecs = obj.specimenSpecs.map(function (specimenSpec) {
+            return CollectionSpecimenSpec.create(specimenSpec);
+          });
+        } catch (e) {
+          throw new DomainError('invalid specimen specs from server: ' + validation.message);
+        }
+      }
+
+      return new CollectionEventType(obj, options);
     };
 
     /**
@@ -194,16 +202,14 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * type within asynchronous code.
      */
     CollectionEventType.asyncCreate = function (obj) {
-      var deferred = $q.defer(),
-          validation = CollectionEventType.validate(obj);
+      var result;
 
-      if (!validation.valid) {
-        $log.error(validation.message);
-        deferred.reject(validation.message);
-      } else {
-        deferred.resolve(new CollectionEventType(obj));
+      try {
+        result = CollectionEventType.create(obj);
+        return $q.when(result);
+      } catch (e) {
+        return $q.reject(e);
       }
-      return deferred.promise;
     };
 
     /**

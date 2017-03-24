@@ -123,9 +123,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
        */
       this.state = null;
 
-      obj = obj || {};
-      ConcurrencySafeEntity.call(this, obj);
-      _.extend(this, obj);
+      ConcurrencySafeEntity.call(this, Specimen.SCHEMA, obj);
 
       if (specimenSpec) {
         this.setSpecimenSpec(specimenSpec);
@@ -138,13 +136,14 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
     /**
      * Used for validation.
      */
-    Specimen.schema = {
+    Specimen.SCHEMA = {
       'id': 'Specimen',
       'type': 'object',
       'properties': {
         'id':               { 'type': 'string' },
         'inventoryId':      { 'type': 'string' },
         'specimenSpecId':   { 'type': 'string' },
+        'specimenSpecName': { 'type': [ 'string', 'null' ] },
         'version':          { 'type': 'integer', 'minimum': 0 },
         'timeAdded':        { 'type': 'string' },
         'timeModified':     { 'type': [ 'string', 'null' ] },
@@ -178,9 +177,9 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * @private
      */
     Specimen.isValid = function(obj) {
-      tv4.addSchema(centreLocationInfoSchema);
-      tv4.addSchema(Specimen.schema);
-      return tv4.validate(obj, Specimen.schema);
+      return ConcurrencySafeEntity.isValid(Specimen.SCHEMA,
+                                           [ centreLocationInfoSchema, Specimen.schema ],
+                                           obj);
     };
 
     /**
@@ -198,9 +197,10 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * a specimen within asynchronous code.
      */
     Specimen.create = function (obj, specimenSpec) {
-      if (!Specimen.isValid(obj)) {
-        $log.error('invalid object from server: ' + tv4.error);
-        throw new DomainError('invalid object from server: ' + tv4.error);
+      var validation = Specimen.isValid(obj);
+      if (!validation.valid) {
+        $log.error('invalid object from server: ' + validation.message);
+        throw new DomainError('invalid object from server: ' + validation.message);
       }
 
       return new Specimen(obj, specimenSpec);
@@ -220,12 +220,14 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * asynchronous code.
      */
     Specimen.asyncCreate = function (obj) {
-      if (!Specimen.isValid(obj)) {
-        $log.error('invalid object from server: ' + tv4.error);
-        return $q.reject('invalid object from server: ' + tv4.error);
-      }
+      var result;
 
-      return  $q.when(new Specimen(obj));
+      try {
+        result = Specimen.create(obj);
+        return $q.when(result);
+      } catch (e) {
+        return $q.reject(e);
+      }
     };
 
     /**

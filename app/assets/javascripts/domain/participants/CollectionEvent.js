@@ -5,8 +5,7 @@
 define(function(require) {
   'use strict';
 
-  var tv4     = require('tv4'),
-      _       = require('lodash'),
+  var _       = require('lodash'),
       sprintf = require('sprintf-js').sprintf;
 
   CollectionEventFactory.$inject = [
@@ -15,24 +14,26 @@ define(function(require) {
     'funutils',
     'ConcurrencySafeEntity',
     'DomainError',
+    'CollectionEventType',
     'Annotation',
+    'annotationFactory',
     'biobankApi',
-    'HasAnnotations',
-    'annotationFactory'
+    'HasAnnotations'
   ];
 
   /**
-   * Factory for participants.
+   * Factory for collection events.
    */
   function CollectionEventFactory($q,
                                   $log,
                                   funutils,
                                   ConcurrencySafeEntity,
                                   DomainError,
+                                  CollectionEventType,
                                   Annotation,
+                                  annotationFactory,
                                   biobankApi,
-                                  HasAnnotations,
-                                  annotationFactory) {
+                                  HasAnnotations) {
 
     /**
      * Used to validate the fields of a plain object that contains default fields.
@@ -78,7 +79,7 @@ define(function(require) {
      * @param {domain.study.CollectionEventType} [collectionEventType] - The CollectionEventType that
      * describes this object.
      */
-    function CollectionEvent(obj, collectionEventType) {
+    function CollectionEvent(obj, collectionEventType, annotations) {
       // FIXME: jsdoc for this classes members is needed
       // var defaults = {
       //   participantId:         null,
@@ -110,17 +111,18 @@ define(function(require) {
        * @name domain.participants.CollectionEvent#annotations
        * @type {Array<domain.AnnotationType>}
        */
-      this.annotations = null;
+      this.annotations = [];
 
-      obj = obj || {};
-      ConcurrencySafeEntity.call(this);
-      _.extend(this, _.pick(obj, _.keys(schema.properties)));
+      ConcurrencySafeEntity.call(this, schema, obj);
 
       if (this.collectionEventTypeId &&
           collectionEventType &&
           (this.collectionEventTypeId !== collectionEventType.id)) {
         throw new DomainError('invalid collection event type');
       }
+
+      annotations = annotations || [];
+      _.extend(this, { annotations: annotations });
 
       if (collectionEventType) {
         this.setCollectionEventType(collectionEventType);
@@ -132,6 +134,19 @@ define(function(require) {
     CollectionEvent.prototype.constructor = CollectionEvent;
 
     /**
+     * Checks if <tt>obj</tt> has valid properties to construct a
+     * {@link domain.studies.CollectionEvent|CollectionEvent}.
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
+     */
+    CollectionEvent.isValid = function(obj) {
+      return ConcurrencySafeEntity.isValid(schema, null, obj);
+    };
+
+    /**
      * Creates a CollectionEvent, but first it validates <code>obj</code> to ensure that it has a valid
      * schema.
      *
@@ -141,34 +156,47 @@ define(function(require) {
      * @param {biobank.domain.CollectionEventType} [collectionEventType] - The CollectionEventType that
      * describes this object.
      */
-    CollectionEvent.create = function (obj, collectionEventType) {
-      if (!tv4.validate(obj, schema)) {
-        $log.error('invalid object from server: ' + tv4.error);
-        throw new DomainError('invalid object from server: ' + tv4.error);
+    CollectionEvent.create = function (obj) {
+      var collectionEventType,
+          annotations,
+          validation = CollectionEvent.isValid(obj);
+
+      if (!validation.valid) {
+        $log.error('invalid object from server: ' + validation.message);
+        throw new DomainError('invalid object from server: ' + validation.message);
       }
 
-      if (!Annotation.validAnnotations(obj.annotations)) {
-        $log.error('invalid object from server: bad annotations');
-        throw new DomainError('invalid object from server: bad annotations');
+      if (obj.collectionEventType) {
+        collectionEventType =  CollectionEventType.create(obj.collectionEventType);
       }
 
-      return new CollectionEvent(obj, collectionEventType);
+      if (obj.annotations) {
+        if (collectionEventType) {
+          // match annotations with annotationTypes
+          annotations = obj.annotations.map(function (annotation) {
+            var annotationType =
+                _.find(collectionEventType.annotationTypes, { uniqueId: annotation.annotationTypeId });
+            return annotationFactory.create(annotation, annotationType);
+          });
+        } else {
+          annotations = obj.annotations.map(function (annotation) {
+            return Annotation.create(annotation);
+          });
+        }
+      }
+
+      return new CollectionEvent(obj, collectionEventType, annotations);
     };
 
     CollectionEvent.asyncCreate = function (obj) {
-      var deferred = $q.defer();
+      var result;
 
-      if (!tv4.validate(obj, schema)) {
-        $log.error('invalid object from server: ' + tv4.error);
-        deferred.reject('invalid object from server: ' + tv4.error);
-      } else if (!Annotation.validAnnotations(obj.annotationTypes)) {
-        $log.error('invalid annotation types from server: ' + tv4.error);
-        deferred.reject('invalid annotation types from server: ' + tv4.error);
-      } else {
-        deferred.resolve(new CollectionEvent(obj));
+      try {
+        result = CollectionEvent.create(obj);
+        return $q.when(result);
+      } catch (e) {
+        return $q.reject(e);
       }
-
-      return deferred.promise;
     };
 
     /**
@@ -179,7 +207,7 @@ define(function(require) {
      * @param {biobank.domain.CollectionEventType} [collectionEventType] - The CollectionEventType that
      * describes this object.
      */
-    CollectionEvent.get = function (id, collectionEventType) {
+    CollectionEvent.get = function (id) {
       if (!id) {
         throw new DomainError('collection event id not specified');
       }
@@ -293,22 +321,11 @@ define(function(require) {
       return biobankApi.del(uri(this.participantId, this.id, this.version));
     };
 
-    /**
-     * Sets the collection event type after an update.
-     */
     CollectionEvent.prototype.update = function (path, reqJson) {
-      var self = this;
-
-      return ConcurrencySafeEntity.prototype.update.call(
-        this, uriWithPath(path, this.id), reqJson
-      ).then(postUpdate);
-
-      function postUpdate(updatedCevent) {
-        if (self.collectionEventType) {
-          updatedCevent.setCollectionEventType(self.collectionEventType);
-        }
-        return $q.when(updatedCevent);
-      }
+      return ConcurrencySafeEntity.prototype.update.call(this, uriWithPath(path, this.id), reqJson)
+        .then(function (updatedCevent) {
+          return $q.when(CollectionEvent.create(updatedCevent));
+        });
     };
 
     CollectionEvent.prototype.updateVisitNumber = function (visitNumber) {

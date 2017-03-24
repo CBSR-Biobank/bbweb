@@ -360,6 +360,7 @@ define([
           defaults = {
             id:                    domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT()),
             participantId:         participant.id,
+            collectionEventType:   collectionEventType,
             collectionEventTypeId: collectionEventType.id,
             timeCompleted:         moment(faker.date.recent(10)).format(),
             visitNumber:           1,

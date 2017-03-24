@@ -167,8 +167,8 @@ define(function(require) {
 
       it('fails when creating without an annotation type', function() {
         var self = this;
-        expect(function () { return self.annotationFactory.create(undefined); })
-          .toThrowError('annotation type is undefined');
+        expect(function () { return self.annotationFactory.create({}); })
+          .toThrowError(/annotation type is undefined/);
       });
 
       it('fails when creating with required parameter omitted', function() {
@@ -228,8 +228,9 @@ define(function(require) {
               options:       [ 'option1', 'option2', 'option3' ],
               required:      true
             });
-        expect(function () { self.annotationFactory.create(1, annotationType); })
-          .toThrowError(/invalid object from server/);
+        expect(function () {
+          self.annotationFactory.create(1, annotationType);
+        }).toThrowError(/invalid annotation from server/);
       });
 
       it('fails when creating from server response with bad selections', function() {
@@ -245,7 +246,7 @@ define(function(require) {
               selectedValues: { tmp: 1 }
             };
         expect(function () { self.annotationFactory.create(jsonAnnotation, annotationType); })
-          .toThrowError(/invalid object from server/);
+          .toThrowError(/invalid annotation from server/);
       });
 
       it('has valid values when created from server response', function() {

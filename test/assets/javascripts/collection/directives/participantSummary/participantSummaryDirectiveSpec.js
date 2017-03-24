@@ -37,9 +37,8 @@ define(function(require) {
       value              = this.factory.valueForAnnotation(jsonAnnotationType);
       jsonAnnotation     = this.factory.annotation({ value: value }, jsonAnnotationType);
       jsonStudy          = this.factory.study({ annotationTypes: [ jsonAnnotationType ]});
-      jsonParticipant    = this.factory.participant({ annotations: [ jsonAnnotation ]});
-
-      study = new this.Study(jsonStudy);
+      jsonParticipant    = this.factory.participant({ annotations: [ jsonAnnotation ] });
+      study              = this.Study.create(jsonStudy);
 
       return new this.Participant(jsonParticipant, study);
     };

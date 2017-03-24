@@ -37,14 +37,13 @@ define(['lodash'], function (_) {
                           context.updateFuncName,
                           context.annotation,
                           context.addUrl,
-                          _.pickBy(_.pick(context.annotation,
-                                          [
-                                            'annotationTypeId',
-                                            'stringValue',
-                                            'numberValue',
-                                            'selectedValues'
-                                          ]),
-                                   _.identity),
+                          _.pick(context.annotation.getServerAnnotation(),
+                                 [
+                                   'annotationTypeId',
+                                   'stringValue',
+                                   'numberValue',
+                                   'selectedValues'
+                                 ]),
                           context.response,
                           expectEntity,
                           failTest);

@@ -31,7 +31,9 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
 
       _.each(fields, function (field) {
         var jsonMissingField = _.omit(annotationTypeJson, field);
-        expect(self.AnnotationType.valid(jsonMissingField)).toEqual(false);
+        var validation = self.AnnotationType.isValid(jsonMissingField);
+        expect(validation.valid).toEqual(false);
+        expect(validation.message).toContain('Missing required property');
       });
     });
 

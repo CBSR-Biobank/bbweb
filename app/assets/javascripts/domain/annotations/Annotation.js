@@ -2,16 +2,17 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['moment', 'lodash', 'tv4'], function(moment, _, tv4) {
+define(['moment', 'lodash'], function(moment, _) {
   'use strict';
 
   AnnotationFactory.$inject = [
     '$log',
     'AnnotationValueType',
+    'DomainEntity',
     'DomainError'
   ];
 
-  function AnnotationFactory($log, AnnotationValueType, DomainError) {
+  function AnnotationFactory($log, AnnotationValueType, DomainEntity, DomainError) {
 
     var schema = {
       'id': 'Annotation',
@@ -20,7 +21,7 @@ define(['moment', 'lodash', 'tv4'], function(moment, _, tv4) {
         'annotationTypeId': { 'type': 'string' },
         'stringValue':      { 'type': [ 'string', 'null' ] },
         'numberValue':      { 'type': [ 'string', 'null' ] },
-        'selectedValues':   { 'type': 'array' }
+        'selectedValues':   { 'type': 'array', items: 'string' }
       },
       'required': [ 'annotationTypeId', 'selectedValues' ]
     };
@@ -29,20 +30,17 @@ define(['moment', 'lodash', 'tv4'], function(moment, _, tv4) {
      * Please use annotationFactory.create to create annotation objects.
      */
     function Annotation(obj, annotationType) {
-      var self = this,
-          defaults = {
-            annotationTypeId: null,
-            stringValue:      null,
-            numberValue:      null,
-            selectedValues:   []
-          };
+      // FIXME: jsdoc for this classes members is needed
+      //       annotationTypeId
+      //       stringValue
+      //       numberValue
+      //       selectedValues
 
-      obj = obj || {};
-      _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
+      DomainEntity.call(this, schema, obj);
 
       if (annotationType) {
-        self.annotationTypeId = annotationType.uniqueId;
-        self.annotationType = annotationType;
+        this.annotationTypeId = annotationType.uniqueId;
+        this.annotationType = annotationType;
 
         if (!_.includes(_.values(AnnotationValueType), annotationType.valueType)) {
           throw new DomainError('value type is invalid: ' + annotationType.valueType);
@@ -52,7 +50,7 @@ define(['moment', 'lodash', 'tv4'], function(moment, _, tv4) {
           throw new DomainError('required not defined');
         }
 
-        self.required = annotationType.required;
+        this.required = annotationType.required;
 
         if (annotationType.valueType === AnnotationValueType.SELECT) {
           if (!annotationType.isMultipleSelect() && !annotationType.isSingleSelect()) {
@@ -62,27 +60,28 @@ define(['moment', 'lodash', 'tv4'], function(moment, _, tv4) {
       }
     }
 
+    Annotation.prototype = Object.create(DomainEntity.prototype);
+    Annotation.prototype.constructor = Annotation;
+
     Annotation.isValid = function (obj) {
-      return tv4.validate(obj, schema);
+      return DomainEntity.isValid(schema, null, obj);
     };
 
     Annotation.validAnnotations = function (annotations) {
       return _.reduce(
         annotations,
         function (memo, annotation) {
-          return memo && tv4.validate(annotation, schema);
+          return memo && Annotation.isValid(annotation);
         },
         true);
     };
 
-    Annotation.getInvalidError = function () {
-      return tv4.error;
-    };
-
     Annotation.create = function (obj) {
-      if (!Annotation.isValid(obj)) {
-        $log.error('invalid object to create from: ' + tv4.error);
-        throw new DomainError('invalid object to create from: ' + tv4.error);
+      var validation = Annotation.isValid(obj);
+
+      if (!validation.valid) {
+        $log.error('invalid object to create from: ' + validation.error);
+        throw new DomainError('invalid object to create from: ' + validation.error);
       }
       return new Annotation(obj);
     };

@@ -6,7 +6,6 @@ define(function (require) {
   'use strict';
 
   var _       = require('lodash'),
-      tv4     = require('tv4'),
       sprintf = require('sprintf-js').sprintf;
 
   ShipmentFactory.$inject = [
@@ -31,7 +30,7 @@ define(function (require) {
                            centreLocationInfoSchema,
                            Specimen) {
 
-    var schema = {
+    var SCHEMA = {
       'id': 'Shipment',
       'type': 'object',
       'properties': {
@@ -48,7 +47,8 @@ define(function (require) {
         'timeSent':         { 'type': [ 'string', 'null' ] },
         'timeReceived':     { 'type': [ 'string', 'null' ] },
         'timeUnpacked':     { 'type': [ 'string', 'null' ] },
-        'timeCompleted':    { 'type': [ 'string', 'null' ] }
+        'timeCompleted':    { 'type': [ 'string', 'null' ] },
+        'specimenCount':    { 'type': 'integer', 'minimum': 0 }
       },
       'required': [
         'id',
@@ -153,9 +153,7 @@ define(function (require) {
        * @type {Date}
        */
 
-      obj = obj || {};
-      ConcurrencySafeEntity.call(this);
-      _.extend(this, obj);
+      ConcurrencySafeEntity.call(this, SCHEMA, obj);
     }
 
     Shipment.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -165,9 +163,7 @@ define(function (require) {
      * @private
      */
     Shipment.isValid = function(obj) {
-      tv4.addSchema(centreLocationInfoSchema);
-      tv4.addSchema(schema);
-      return tv4.validate(obj, schema);
+      return ConcurrencySafeEntity.isValid(SCHEMA, [ centreLocationInfoSchema ], obj);
     };
 
     /**
@@ -182,9 +178,11 @@ define(function (require) {
      * a shipment within asynchronous code.
      */
     Shipment.create = function (obj) {
-      if (!Shipment.isValid(obj)) {
-        $log.error('invalid object from server: ' + tv4.error);
-        throw new DomainError('invalid object from server: ' + tv4.error);
+      var validation = Shipment.isValid(obj);
+
+      if (!validation.valid) {
+        $log.error('invalid object from server: ' + validation.message);
+        throw new DomainError('invalid object from server: ' + validation.message);
       }
 
       return new Shipment(obj);
@@ -204,16 +202,14 @@ define(function (require) {
      * asynchronous code.
      */
     Shipment.asyncCreate = function (obj) {
-      var deferred = $q.defer();
+      var result;
 
-      if (!Shipment.isValid(obj)) {
-        $log.error('invalid object from server: ' + tv4.error);
-        deferred.reject('invalid object from server: ' + tv4.error);
-      } else {
-        deferred.resolve(new Shipment(obj));
+      try {
+        result = Shipment.create(obj);
+        return $q.when(result);
+      } catch (e) {
+        return $q.reject(e);
       }
-
-      return deferred.promise;
     };
 
     /**

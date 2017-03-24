@@ -14,10 +14,10 @@
     </thead>
     <tbody ng-if="!vm.tableDataLoading && (vm.shipmentSpecimens.length > 0)">
       <tr ng-repeat="ss in vm.shipmentSpecimens">
-        <td>{{ss.specimen.inventoryId}}</td>
-        <td>{{ss.specimen.amount}} {{ss.specimen.units}}</td>
-        <td>{{ss.specimen.specimenSpecName}}</td>
-        <td>{{ss.specimen.timeCreated| localTime}}</td>
+        <td><small>{{ss.specimen.inventoryId}}</small></td>
+        <td><small>{{ss.specimen.amount}} {{ss.specimen.units}}</small></td>
+        <td><small>{{ss.specimen.specimenSpecName}}</small></td>
+        <td><small>{{ss.specimen.timeCreated| localTime}}</small></td>
         <td ng-if="vm.showItemState">
           <span class="badge">{{ss.state}}</span>
         </td>
