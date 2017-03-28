@@ -6,6 +6,8 @@ import play.api.{Environment, Logger}
 import play.api.mvc._
 import org.biobank.controllers.{BbwebAction, CommandController, JsonController, PagedQuery}
 import org.biobank.domain.centre.{CentreId, ShipmentId}
+import org.biobank.dto.{ShipmentDto}
+import org.biobank.service.{FilterString, SortString, ServiceValidation}
 import org.biobank.service.centres.ShipmentsService
 import org.biobank.service.users.UsersService
 import org.biobank.service.{AuthToken, PagedResults}
@@ -30,17 +32,19 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
   import org.biobank.infrastructure.command.ShipmentCommands._
   import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
 
+  type ServiceListFunc = (CentreId, FilterString, SortString) => ServiceValidation[List[ShipmentDto]]
+
   val log: Logger = Logger(this.getClass)
 
   private val PageSizeMax = 10
 
-  def list(centreId: CentreId): Action[Unit] =
+  def list: Action[Unit] =
     action.async(parse.empty) { implicit request =>
       validationReply(
         Future {
           for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            shipments  <- shipmentsService.getShipments(centreId, pagedQuery.filter, pagedQuery.sort)
+            shipments  <- shipmentsService.getShipments(pagedQuery.filter, pagedQuery.sort)
             validPage  <- pagedQuery.validPage(shipments.size)
             results    <- PagedResults.create(shipments, pagedQuery.page, pagedQuery.limit)
           } yield results

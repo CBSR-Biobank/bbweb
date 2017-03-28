@@ -18,6 +18,8 @@ trait CentreRepository extends ReadWriteRepository[CentreId, Centre] {
 
   def withStudy(studyId: StudyId): Set[Centre]
 
+  def getByNames(names: Set[String]): Set[Centre]
+
 }
 
 @Singleton
@@ -71,5 +73,13 @@ class CentreRepositoryImpl
 
   def withStudy(studyId: StudyId): Set[Centre] = {
     getValues.filter { c => c.studyIds.contains(studyId) }.toSet
+  }
+
+  def getByNames(names: Set[String]): Set[Centre] = {
+    getValues.
+      filter { centre =>
+        names.contains(centre.name)
+      }.
+      toSet
   }
 }

@@ -111,7 +111,7 @@ define(function (require) {
       this.controller.centreSelected(centre);
       this.scope.$digest();
 
-      expect(this.$state.go).toHaveBeenCalledWith('home.shipping.centre', { centreId: centre.id });
+      expect(this.$state.go).toHaveBeenCalledWith('home.shipping.centre.incoming', { centreId: centre.id });
     });
 
   });

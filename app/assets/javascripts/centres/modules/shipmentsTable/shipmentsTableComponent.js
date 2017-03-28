@@ -2,23 +2,26 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function (_) {
+define(function (require) {
   'use strict';
+
+  var _ = require('lodash'),
+      sprintf = require('sprintf-js').sprintf;
 
   /**
    * Displays the shipments originating from, or destined to, a centre.
    *
    * @param {domain.centres.Centre} centre - The centre to display shipments for.
    *
-   * @param {Array<domain.centres.ShipmentState>} shipmentStatesFilter - the states to filter shipments by.
+   * @param {domain.centres.ShipmentTypes} shipmentTypes - the type of shipments to display.
    */
-  var component = {
-    templateUrl : '/assets/javascripts/centres/components/shipmentsTable/shipmentsTable.html',
+  var COMPONENT = {
+    templateUrl : '/assets/javascripts/centres/modules/shipmentsTable/shipmentsTable.html',
     controller: ShipmentsTableController,
     controllerAs: 'vm',
     bindings: {
-      centre:               '<',
-      shipmentStatesFilter: '<'
+      centre:        '<',
+      shipmentTypes: '@'
     }
   };
 
@@ -26,40 +29,66 @@ define(['lodash'], function (_) {
     '$state',
     'Shipment',
     'ShipmentState',
+    'SHIPMENT_TYPES',
     'timeService'
   ];
 
   /*
    * Controller for this component.
    */
-  function ShipmentsTableController($state, Shipment, ShipmentState, timeService) {
+  function ShipmentsTableController($state,
+                                    Shipment,
+                                    ShipmentState,
+                                    SHIPMENT_TYPES,
+                                    timeService) {
     var vm = this;
 
-    vm.$onChanges       = onChanges;
-    vm.states           = initStates();
+    vm.statesToDisplay  = [];
     vm.tableDataLoading = true;
     vm.limit            = 5;
     vm.shipmentDates    = {};
     vm.tableController  = null;
-    vm.shipmentStatesFilter = [];
+    vm.centreFilter     = null;
 
+    vm.$onInit             = onInit;
     vm.getTableData        = getTableData;
     vm.shipmentInformation = shipmentInformation;
 
     //--
 
-    function onChanges(changesObj) {
-      if (changesObj.shipmentStatesFilter && changesObj.shipmentStatesFilter.currentValue) {
-        vm.shipmentStatesFilter = changesObj.shipmentStatesFilter.currentValue;
-        reloadTableData();
+    function onInit() {
+      switch (vm.shipmentTypes) {
+      case SHIPMENT_TYPES.INCOMING:
+        vm.centreFilter = sprintf('toCentre:in:(%s)', vm.centre.name);
+        break;
+      case SHIPMENT_TYPES.OUTGOING:
+        vm.centreFilter = sprintf('fromCentre:in:(%s)', vm.centre.name);
+        break;
+      case SHIPMENT_TYPES.COMPLETED:
+        vm.centreFilter = sprintf('withCentre:in:(%s)', vm.centre.name);
+        break;
+      default:
+        throw new Error('shipmentTypes is invalid: ' + vm.shipmentTypes);
       }
-    }
 
-    function initStates() {
-      return [{ label: 'Any',  value: '' }].concat(
-        _.map(ShipmentState, function (state) {
-          return { label: state, value: state.toLowerCase() };
+      if (vm.shipmentTypes === SHIPMENT_TYPES.COMPLETED) {
+        vm.statesToDisplay = [ ShipmentState.COMPLETED ];
+      } else {
+        vm.statesToDisplay = [
+          ShipmentState.CREATED,
+          ShipmentState.PACKED,
+          ShipmentState.SENT,
+          ShipmentState.RECEIVED,
+          ShipmentState.UNPACKED,
+          ShipmentState.LOST
+        ];
+      }
+
+      vm.states = [{ label: 'any',  value: '' }].concat(
+        vm.statesToDisplay.map(function (state) {
+          return { label: state, value: state };
         }));
+      vm.stateFilter = vm.states[0].value;
     }
 
     function getTableData(tableState, controller) {
@@ -78,6 +107,10 @@ define(['lodash'], function (_) {
         vm.tableController = controller;
       }
 
+      if (vm.centreFilter) {
+        filters.push(vm.centreFilter);
+      }
+
       if (searchPredicateObject.courierName) {
         filters.push('courierName:like:' + searchPredicateObject.courierName);
       }
@@ -86,8 +119,10 @@ define(['lodash'], function (_) {
         filters.push('trackingNumber:like:' + searchPredicateObject.trackingNumber);
       }
 
-      if (vm.shipmentStatesFilter.length > 0) {
-        filters.push('state:in:(' + vm.shipmentStatesFilter.join(',') + ')');
+      if (vm.stateFilter === '') {
+        filters.push('state:in:(' + vm.statesToDisplay.join(',') + ')');
+      } else {
+        filters.push('state:in:(' + vm.stateFilter + ')');
       }
 
       if (filters.length > 0) {
@@ -99,7 +134,7 @@ define(['lodash'], function (_) {
       }
 
       vm.tableDataLoading = true;
-      Shipment.list(vm.centre.id, options).then(function (paginationResult) {
+      Shipment.list(options).then(function (paginationResult) {
         vm.shipments = paginationResult.items;
         vm.hasShipments = (vm.shipments.length > 0);
         tableState.pagination.numberOfPages = paginationResult.maxPages;
@@ -116,12 +151,6 @@ define(['lodash'], function (_) {
       });
     }
 
-    function reloadTableData() {
-      if (vm.tableController) {
-        getTableData(vm.tableController.tableState());
-      }
-    }
-
     function shipmentInformation(shipment) {
       if (shipment.state === ShipmentState.CREATED) {
         $state.go('home.shipping.addItems', { shipmentId: shipment.id });
@@ -133,5 +162,5 @@ define(['lodash'], function (_) {
     }
   }
 
-  return component;
+  return COMPONENT;
 });

@@ -17,8 +17,8 @@ private[centres] trait ShipmentsControllerSpecUtils extends JsonHelper {
 
   def uri(shipment: Shipment, path: String): String = uri(path) + s"/${shipment.id.id}"
 
-  def listUri(centre: Centre): String =
-    uri("list") + s"/${centre.id.id}"
+  //------------ REMOVE THIS AFTER TESTING ---------------
+  def listUri: String = uri("list")
 
   def compareObjs(jsonList: List[JsObject], shipmentsMap: Map[ShipmentId, Shipment]) = {
     jsonList.foreach { jsonObj =>

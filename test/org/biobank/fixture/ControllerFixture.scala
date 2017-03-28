@@ -123,8 +123,8 @@ abstract class ControllerFixture
       status(result) match {
         case `expectedStatus` =>
           val bodyText = contentAsString(result)
-            log.debug(s"reply: status: $result,\nbodyText: $bodyText")
           if (bodyText.isEmpty) {
+            log.debug(s"reply: status: $result,\nbodyText: EMPTY")
             JsNull
           } else {
             contentType(result) mustBe Some("application/json")

@@ -28,6 +28,15 @@ object ShipmentId {
 trait ShipmentPredicates {
   type ShipmentFilter = Shipment => Boolean
 
+  val fromCentreIdIsOneOf: Set[CentreId] => ShipmentFilter =
+    centreIds => shipment => centreIds.contains(shipment.fromCentreId)
+
+  val toCentreIdIsOneOf: Set[CentreId] => ShipmentFilter =
+    centreIds => shipment => centreIds.contains(shipment.toCentreId)
+
+  val withCentreIdIsOneOf: Set[CentreId] => ShipmentFilter =
+    centreIds => shipment => centreIds.contains(shipment.toCentreId) || centreIds.contains(shipment.fromCentreId)
+
   val courierNameIsOneOf: Set[String] => ShipmentFilter =
     courierNames => shipment => courierNames.contains(shipment.courierName)
 

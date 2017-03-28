@@ -29,6 +29,12 @@ class ShipmentsControllerSpec
                      Shipment.unpackedState,
                      Shipment.lostState)
 
+  def centreFilters(fromCentre: Centre, toCentre: Centre) =
+    Table("centre filters",
+          s"fromCentre:in:${fromCentre.name}",
+          s"toCentre:in:${toCentre.name}",
+          s"withCentre:in:(${fromCentre.name},${toCentre.name})")
+
   def skipStateCommon(shipment:   Shipment,
                       uriPath:    String,
                       updateJson: JsValue) = {
@@ -57,42 +63,66 @@ class ShipmentsControllerSpec
 
     "GET /shipments/list/:centreId" must {
 
-      "list none" in {
-        val centre = factory.createEnabledCentre
-        PagedResultsSpec(this).emptyResults(listUri(centre))
-      }
-
       "list a shipment" in {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
-        val jsonItem = PagedResultsSpec(this).singleItemResult(listUri(f.fromCentre))
-        compareObj(jsonItem, f.shipment)
+
+        forAll(centreFilters(f.fromCentre, f.toCentre)) { centreNameFilter =>
+          val jsonItem = PagedResultsSpec(this).singleItemResult(listUri,
+                                                                 Map("filter" -> centreNameFilter))
+          compareObj(jsonItem, f.shipment)
+        }
       }
 
       "list multiple shipments" in {
         val f = createdShipmentFixture(2)
         f.shipmentMap.values.foreach(shipmentRepository.put)
 
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri       = listUri(f.fromCentre),
-            offset    = 0,
-            total     = f.shipmentMap.size.toLong,
-            maybeNext = None,
-            maybePrev = None)
-        jsonItems must have size f.shipmentMap.size.toLong
+        forAll(centreFilters(f.fromCentre, f.toCentre)) { centreNameFilter =>
+          val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+              uri         = listUri,
+              queryParams = Map("filter" -> centreNameFilter),
+              offset      = 0,
+              total       = f.shipmentMap.size.toLong,
+              maybeNext   = None,
+              maybePrev   = None)
+          jsonItems must have size f.shipmentMap.size.toLong
+          compareObjs(jsonItems, f.shipmentMap)
+        }
+      }
 
-        compareObjs(jsonItems, f.shipmentMap)
+      "list a shipment when using a not equal to filter on centre name" in {
+        val f = createdShipmentFixture(1)
+        f.shipmentMap.values.foreach(shipmentRepository.put)
+
+        val filters = Table("centre filters",
+                            s"fromCentre:ne:${f.fromCentre.name}",
+                            s"toCentre:ne:${f.toCentre.name}",
+                            s"withCentre:ne:(${f.fromCentre.name},${f.toCentre.name})")
+
+        forAll(filters) { centreNameFilter =>
+          val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+              uri         = listUri,
+              queryParams = Map("filter" -> centreNameFilter),
+              offset      = 0,
+              total       = 0,
+              maybeNext   = None,
+              maybePrev   = None)
+          jsonItems must have size 0
+        }
       }
 
       "list a single shipment when filtered by state" in {
         val f = allShipmentsFixture
         f.shipments.values.foreach(shipmentRepository.put)
 
-        forAll(states) { state =>
-          info(s"$state shipment")
-          val jsonItem = PagedResultsSpec(this)
-            .singleItemResult(listUri(f.fromCentre), Map("filter" -> s"state::$state"))
-          compareObj(jsonItem, f.shipments.get(state).value)
+        forAll(centreFilters(f.fromCentre, f.toCentre)) { centreNameFilter =>
+          forAll(states) { state =>
+            info(s"$state shipment")
+            val jsonItem = PagedResultsSpec(this)
+              .singleItemResult(listUri, Map("filter" -> s"$centreNameFilter;state::$state"))
+            compareObj(jsonItem, f.shipments.get(state).value)
+          }
         }
       }
 
@@ -102,7 +132,7 @@ class ShipmentsControllerSpec
         f.shipments.values.foreach(shipmentRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri         = listUri(f.fromCentre),
+            uri         = listUri,
             queryParams = Map("filter" -> s"""state:in:(${shipmentStates.mkString(",")})""",
                               "sort"   -> "state"),
             offset      = 0,
@@ -116,9 +146,9 @@ class ShipmentsControllerSpec
       }
 
       "fail when using an invalid filter string" in {
-        val f = centresFixture
         val invalidFilterString = "xxx"
-        val reply = makeRequest(GET, listUri(f.fromCentre) + s"?filter=$invalidFilterString", BAD_REQUEST)
+
+        val reply = makeRequest(GET, listUri + s"?filter=$invalidFilterString", BAD_REQUEST)
 
         (reply \ "status").as[String] must include ("error")
 
@@ -126,12 +156,9 @@ class ShipmentsControllerSpec
       }
 
       "fail when using an invalid state filter" in {
-        val f = centresFixture
         val invalidStateName = nameGenerator.next[Shipment]
 
-        val reply = makeRequest(GET,
-                                listUri(f.fromCentre) + s"?filter=state::$invalidStateName",
-                                NOT_FOUND)
+        val reply = makeRequest(GET, listUri + s"?filter=state::$invalidStateName", NOT_FOUND)
 
         (reply \ "status").as[String] must include ("error")
 
@@ -142,23 +169,21 @@ class ShipmentsControllerSpec
         val f = createdShipmentFixture(2)
         f.shipmentMap.values.foreach(shipmentRepository.put)
         val shipment = f.shipmentMap.values.head
-        val uri = s"courierName::${shipment.courierName}"
-        val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(listUri(f.fromCentre), Map("filter" -> uri))
+        val filter = s"courierName::${shipment.courierName}"
+        val jsonItem = PagedResultsSpec(this).singleItemResult(listUri , Map("filter" -> filter))
         compareObj(jsonItem, shipment)
       }
 
       "list a single shipment when using a 'like' filter on courier name" in {
         val f = createdShipmentFixture(2)
         val shipments = f.shipmentMap.values.toList
-
         val shipment = shipments(0).copy(courierName = "ABC")
+        val filter = s"courierName:like:b"
+
         shipmentRepository.put(shipment)
         shipmentRepository.put(shipments(1).copy(courierName = "DEF"))
 
-        val uri = s"courierName:like:b"
-        val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(listUri(f.fromCentre), Map("filter" -> uri))
+        val jsonItem = PagedResultsSpec(this).singleItemResult(listUri, Map("filter" -> filter))
         compareObj(jsonItem, shipment)
       }
 
@@ -169,11 +194,11 @@ class ShipmentsControllerSpec
         val courierNames = shipments.map(_.courierName)
 
         shipments.foreach(shipmentRepository.put)
-        val uri = s"""courierName:in:(${courierNames.mkString(",")})"""
+        val filter = s"""courierName:in:(${courierNames.mkString(",")})"""
 
         val jsonItems =
-          PagedResultsSpec(this).multipleItemsResult(uri         = listUri(f.fromCentre),
-                                                     queryParams = Map("filter" -> uri),
+          PagedResultsSpec(this).multipleItemsResult(uri         = listUri,
+                                                     queryParams = Map("filter" -> filter),
                                                      offset      = 0,
                                                      total       = numShipments.toLong,
                                                      maybeNext   = None,
@@ -188,7 +213,7 @@ class ShipmentsControllerSpec
         f.shipmentMap.values.foreach(shipmentRepository.put)
         val shipment = f.shipmentMap.values.head
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-            listUri(f.fromCentre),
+            listUri,
             Map("filter" -> s"trackingNumber::${shipment.trackingNumber}"))
         compareObj(jsonItem, shipment)
       }
@@ -198,7 +223,6 @@ class ShipmentsControllerSpec
         val f = createdShipmentFixture(numShipments)
         val shipments = f.shipmentMap.values.toList
         val shipment = shipments(0)
-
         val expressions = Table(
             "expression",
             s"""courierName::${shipment.courierName};trackingNumber::${shipment.trackingNumber}""",
@@ -206,9 +230,9 @@ class ShipmentsControllerSpec
           )
 
         forAll(expressions) { expression =>
-        shipments.foreach(shipmentRepository.put)
+          shipments.foreach(shipmentRepository.put)
           val jsonItem =
-            PagedResultsSpec(this).singleItemResult(uri         = listUri(f.fromCentre),
+            PagedResultsSpec(this).singleItemResult(uri         = listUri,
                                                     queryParams = Map("filter" -> expression))
           compareObj(jsonItem, shipment)
         }
@@ -222,9 +246,10 @@ class ShipmentsControllerSpec
         shipments.foreach(shipmentRepository.put)
 
         val sortExprs = Table("sort by", "courierName", "-courierName")
+
         forAll(sortExprs) { sortExpr =>
           val jsonItems = PagedResultsSpec(this)
-            .multipleItemsResult(uri       = listUri(f.fromCentre),
+            .multipleItemsResult(uri       = listUri,
                                  queryParams = Map("sort" -> sortExpr),
                                  offset    = 0,
                                  total     = shipments.size.toLong,
@@ -255,12 +280,12 @@ class ShipmentsControllerSpec
         val sortExprs = Table("sort by", "trackingNumber", "-trackingNumber")
         forAll(sortExprs) { sortExpr =>
           val jsonItems = PagedResultsSpec(this)
-            .multipleItemsResult(uri       = listUri(f.fromCentre),
+            .multipleItemsResult(uri         = listUri,
                                  queryParams = Map("sort" -> sortExpr),
-                                 offset    = 0,
-                                 total     = shipments.size.toLong,
-                                 maybeNext = None,
-                                 maybePrev = None)
+                                 offset      = 0,
+                                 total       = shipments.size.toLong,
+                                 maybeNext   = None,
+                                 maybePrev   = None)
           jsonItems must have size shipments.size.toLong
           if (sortExpr == sortExprs(0)) {
             compareObj(jsonItems(0), shipments(2))
@@ -282,7 +307,7 @@ class ShipmentsControllerSpec
           }.toList
         shipments.foreach(shipmentRepository.put)
         val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri       = listUri(f.fromCentre),
+          .singleItemResult(uri       = listUri,
                             queryParams = Map("sort" -> "courierName", "limit" -> "1"),
                             total     = shipments.size.toLong,
                             maybeNext = Some(2))
@@ -297,37 +322,34 @@ class ShipmentsControllerSpec
           }.toList
         shipments.foreach(shipmentRepository.put)
         val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri       = listUri(f.fromCentre),
+          .singleItemResult(uri         = listUri,
                             queryParams = Map("sort" -> "courierName", "page" -> "3", "limit" -> "1"),
-                            total     = shipments.size.toLong,
-                            offset    = 2,
-                            maybeNext = None,
-                            maybePrev = Some(2))
+                            total       = shipments.size.toLong,
+                            offset      = 2,
+                            maybeNext   = None,
+                            maybePrev   = Some(2))
         compareObj(jsonItem, shipments(1))
       }
 
       "list a single shipment when using a 'like' filter on tracking number" in {
         val f = createdShipmentFixture(2)
         val shipments = f.shipmentMap.values.toList
-
         val shipment = shipments(0).copy(trackingNumber = "ABC")
+        val filter = s"trackingNumber:like:b"
+
         shipmentRepository.put(shipment)
         shipmentRepository.put(shipments(1).copy(trackingNumber = "DEF"))
 
-        val uri = s"trackingNumber:like:b"
-        val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(listUri(f.fromCentre), Map("filter" -> uri))
+        val jsonItem = PagedResultsSpec(this).singleItemResult(listUri, Map("filter" -> filter))
         compareObj(jsonItem, shipment)
       }
 
       "fail when using an invalid query parameters" in {
-        val f = centresFixture
-        val url = listUri(f.fromCentre)
-        PagedResultsSpec(this).failWithNegativePageNumber(url)
-        PagedResultsSpec(this).failWithInvalidPageNumber(url)
-        PagedResultsSpec(this).failWithNegativePageSize(url)
-        PagedResultsSpec(this).failWithInvalidPageSize(url, 100);
-        PagedResultsSpec(this).failWithInvalidSort(url)
+        PagedResultsSpec(this).failWithNegativePageNumber(listUri)
+        PagedResultsSpec(this).failWithInvalidPageNumber(listUri)
+        PagedResultsSpec(this).failWithNegativePageSize(listUri)
+        PagedResultsSpec(this).failWithInvalidPageSize(listUri, 100);
+        PagedResultsSpec(this).failWithInvalidSort(listUri)
       }
 
     }

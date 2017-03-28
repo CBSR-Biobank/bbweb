@@ -234,19 +234,12 @@ define(function (require) {
      *
      * <p>A paged API is used to list shipments. See below for more details.</p>
      *
-     * @param {String} centreId - The ID for the centre to list shipments for.
-     *
      * @param {object} options - The options to use to list shipments.
      *
-     * @param {string} options.courierFilter The filter to use on courier names. Default is empty string.
-     *
-     * @param {string} options.trackingNumberFilter The filter to use on tracking numbers. Default is empty
+     * @param {string} options.filter A filter expression to narrow down a search. Default is empty
      * string.
      *
-     * @param {string} options.stateFilter The filter to use on shipment state. Default is empty
-     * string. See {@link domain.centres.ShipmentState ShipmentState} for valid values.
-     *
-     * @param {string} options.sortField Shipments can be sorted by 'courierName', 'trackingNumber' or by
+     * @param {string} options.sort Shipments can be sorted by 'courierName', 'trackingNumber' or by
      * 'state'. Values other than these two yield an error.
      *
      * @param {int} options.page If the total results are longer than limit, then page selects which
@@ -260,8 +253,8 @@ define(function (require) {
      *
      * @return {Promise} A promise. If the promise succeeds then a paged result is returned.
      */
-    Shipment.list = function (centreId, options) {
-      var url = uri() + 'list/' + centreId,
+    Shipment.list = function (options) {
+      var url = uri() + 'list',
           params,
           validKeys = [
             'filter',

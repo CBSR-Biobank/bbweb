@@ -18,37 +18,53 @@ define(function () {
   };
 
   CentreShipmentsController.$inject = [
+    '$controller',
+    '$scope',
+    '$state',
     'Shipment',
-    'ShipmentState'
+    'ShipmentState',
+    'gettextCatalog'
   ];
 
   /*
    * Controller for this component.
    */
-  function CentreShipmentsController(Shipment, ShipmentState) {
+  function CentreShipmentsController($controller,
+                                     $scope,
+                                     $state,
+                                     Shipment,
+                                     ShipmentState,
+                                     gettextCatalog) {
     var vm = this;
 
-    vm.hasShipments = false;
-    vm.selectedShipmentStates = [
-      ShipmentState.CREATED,
-      ShipmentState.PACKED,
-      ShipmentState.SENT
-    ];
-    vm.stateSelectionChanged = stateSelectionChanged;
+    // initialize this controller's base class
+    $controller('TabbedPageController',
+                {
+                  vm:     vm,
+                  $scope: $scope,
+                  $state: $state
+                });
 
-    init();
+    vm.tabs = [
+      {
+        heading: gettextCatalog.getString('Incoming'),
+        sref: 'home.shipping.centre.incoming',
+        active: true
+      },
+      {
+        heading: gettextCatalog.getString('Outgoing'),
+        sref: 'home.shipping.centre.outgoing',
+        active: false
+      },
+      {
+        heading: gettextCatalog.getString('Completed'),
+        sref: 'home.shipping.centre.completed',
+        active: false
+      }
+    ];
 
     //--
 
-    function init() {
-      Shipment.list(vm.centre.id).then(function (result) {
-        vm.hasShipments = (result.items.length > 0);
-      });
-    }
-
-    function stateSelectionChanged(states) {
-      vm.selectedShipmentStates = states;
-    }
   }
 
   return component;

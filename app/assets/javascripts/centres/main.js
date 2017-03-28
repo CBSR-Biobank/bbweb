@@ -7,11 +7,10 @@
 define(function (require) {
   'use strict';
 
-  var angular = require('angular'),
-      name = 'biobank.centres',
-      module;
+  var angular              = require('angular'),
+      shipmentsTableModule = require('./modules/shipmentsTable/main');
 
-  module = angular.module(name, [])
+  return angular.module('biobank.centres', [shipmentsTableModule.name])
     .config(require('./states'))
     .constant('SHIPMENT_SEND_PROGRESS_ITEMS', [
       'Shipping information',
@@ -28,6 +27,9 @@ define(function (require) {
     .controller('ShipmentSpecimenController', require('./controllers/ShipmentSpecimensController'))
 
     .component('centreShipments',        require('./components/centreShipments/centreShipmentsComponent'))
+    .component('shipmentsCompleted',      require('./components/shipmentsCompleted/shipmentsCompletedComponent'))
+    .component('shipmentsIncoming',      require('./components/shipmentsIncoming/shipmentsIncomingComponent'))
+    .component('shipmentsOutgoing',      require('./components/shipmentsOutgoing/shipmentsOutgoingComponent'))
     .component('shippingHome',           require('./components/shippingHome/shippingHomeComponent'))
     .component('selectCentre',           require('./components/selectCentre/selectCentreComponent'))
     .component('shipmentAdd',            require('./components/shipmentAdd/shipmentAddComponent'))
@@ -45,7 +47,6 @@ define(function (require) {
     .component(
       'shipmentViewLost',
       require('./components/shipmentViewLost/shipmentViewLostComponent'))
-    .component('shipmentsTable',       require('./components/shipmentsTable/shipmentsTableComponent'))
     .component(
       'shipmentSpecimensAdd',
       require('./components/shipmentSpecimensAdd/shipmentSpecimensAddComponent'))
@@ -55,9 +56,6 @@ define(function (require) {
     .component(
       'shipmentSpecimensPanel',
       require('./components/shipmentSpecimensPanel/shipmentSpecimensPanelComponent'))
-    .component(
-      'shipmentStatesSelector',
-      require('./components/shipmentStatesSelector/shipmentStatesSelectorComponent'))
     .component(
       'unpackedShipmentExtra',
       require('./components/unpackedShipmentExtra/unpackedShipmentExtraComponent'))
@@ -86,6 +84,4 @@ define(function (require) {
     .service(
       'shipmentSkipToUnpackedModalService',
       require('./services/shipmentSkipToUnpackedModal/shipmentSkipToUnpackedModalService'));
-
-  return module;
 });

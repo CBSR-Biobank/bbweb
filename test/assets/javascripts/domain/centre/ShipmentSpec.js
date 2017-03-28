@@ -23,9 +23,9 @@ define(function (require) {
     beforeEach(inject(function (ServerReplyMixin, EntityTestSuiteMixin, testDomainEntities) {
       var self = this;
 
-      _.extend(self, EntityTestSuiteMixin.prototype, ServerReplyMixin.prototype);
+      _.extend(this, EntityTestSuiteMixin.prototype, ServerReplyMixin.prototype);
 
-      self.injectDependencies('$httpBackend',
+      this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
                               'Shipment',
                               'ShipmentSpecimen',
@@ -35,7 +35,7 @@ define(function (require) {
                               'testUtils',
                               'factory');
 
-      self.expectShipment = expectShipment;
+      this.expectShipment = expectShipment;
       testDomainEntities.extend();
 
       //---
@@ -164,20 +164,27 @@ define(function (require) {
         }
       });
 
+      it('throws an exception if id is falsy', function() {
+        var self = this;
+
+        expect(function () {
+          self.Shipment.get();
+        }).toThrowError(/shipment id not specified/);
+      });
+
     });
 
     describe('when listing shipments', function() {
 
       it('can retrieve shipments', function() {
-        var self = this,
-            centre = self.factory.centre(),
-            shipment = self.factory.shipment(),
-            shipments = [ shipment ],
-            reply = self.factory.pagedResult(shipments);
+        var self         = this,
+            shipment     = self.factory.shipment(),
+            shipments    = [ shipment ],
+            reply        = self.factory.pagedResult(shipments);
 
-        self.$httpBackend.whenGET(listUri(centre.id)).respond(this.reply(reply));
+        self.$httpBackend.whenGET(uri('list')).respond(self.reply(reply));
 
-        self.Shipment.list(centre.id).then(checkReply).catch(failTest);
+        this.Shipment.list().then(checkReply).catch(failTest);
         self.$httpBackend.flush();
 
         function checkReply(pagedResult) {
@@ -193,6 +200,9 @@ define(function (require) {
         var self = this,
             centre = self.factory.centre(),
             optionList = [
+              { filter: 'fromCentre:eq:' + centre.name },
+              { filter: 'toCentre:ne:' + centre.name },
+              { filter: 'withCentre::' + centre.name },
               { filter: 'courierName:like:Fedex' },
               { filter: 'trackingNumber::ABC' },
               { sort: 'state' },
@@ -201,14 +211,15 @@ define(function (require) {
               { order: 'desc' }
             ];
 
-        _.each(optionList, function (options) {
+        optionList.forEach(function (options) {
           var shipments = [ self.factory.shipment() ],
-              reply   = self.factory.pagedResult(shipments),
-              url     = sprintf('%s?%s', listUri(centre.id), self.$httpParamSerializer(options));
+              reply     = self.factory.pagedResult(shipments);
+
+          var url = sprintf('%s?%s', uri('list'), self.$httpParamSerializer(options));
 
           self.$httpBackend.whenGET(url).respond(self.reply(reply));
 
-          self.Shipment.list(centre.id, options).then(testShipment).catch(failTest);
+          self.Shipment.list(options).then(testShipment).catch(failTest);
           self.$httpBackend.flush();
 
           function testShipment(pagedResult) {
@@ -222,24 +233,21 @@ define(function (require) {
 
       it('fails when list returns an invalid shipment', function() {
         var self = this,
-            centre = self.factory.centre(),
             shipments = [ _.omit(self.factory.shipment(), 'courierName') ],
             reply = self.factory.pagedResult(shipments);
 
-        self.$httpBackend.whenGET(listUri(centre.id)).respond(this.reply(reply));
-
-        self.Shipment.list(centre.id).then(listFail).catch(shouldFail);
+        this.$httpBackend.whenGET(uri('list')).respond(self.reply(reply));
+        this.Shipment.list().then(listFail).catch(shouldFail);
         self.$httpBackend.flush();
-
-        function listFail() {
-          fail('function should not be called');
-        }
-
-        function shouldFail(error) {
-          expect(error).toStartWith('invalid shipments from server');
-        }
       });
 
+      function listFail() {
+        fail('function should not be called');
+      }
+
+      function shouldFail(error) {
+        expect(error).toStartWith('invalid shipments from server');
+      }
     });
 
     describe('when adding a shipment', function() {
@@ -397,6 +405,18 @@ define(function (require) {
 
         });
 
+        describe('to completed state', function() {
+
+          beforeEach(inject(function () {
+            context.stateChangeFuncName = 'complete';
+            context.state = this.ShipmentState.COMPLETED;
+            context.stateChangeTime = moment(faker.date.recent(10)).format();
+          }));
+
+          changeStateSharedBehaviour(context);
+
+        });
+
         describe('to lost state', function() {
 
           beforeEach(inject(function () {
@@ -462,6 +482,11 @@ define(function (require) {
         expect(shipment.isSent()).toBeTrue();
       });
 
+      it('for UNPACKED state predicate', function() {
+        var shipment = new this.Shipment(this.factory.shipment({ state: this.ShipmentState.UNPACKED }));
+        expect(shipment.isUnpacked()).toBeTrue();
+      });
+
       it('for not CREATED nor UNPACKED predicate', function() {
         var self = this;
 
@@ -478,23 +503,35 @@ define(function (require) {
 
     });
 
-    it('can add specimen', function() {
-      var self = this,
-          jsonSpecimen = self.factory.specimen(),
-          shipment = new self.Shipment(self.factory.shipment()),
-          inventoryId = self.factory.stringNext();
+    describe('for canAddInventoryId', function() {
 
-      self.$httpBackend.whenGET(uri('specimens/canadd', shipment.id) + '/' + inventoryId)
-        .respond(this.reply(jsonSpecimen));
+      it('can add specimen', function() {
+        var self = this,
+            jsonSpecimen = self.factory.specimen(),
+            shipment = new self.Shipment(self.factory.shipment()),
+            inventoryId = self.factory.stringNext();
 
-      shipment.canAddInventoryId(inventoryId)
-        .then(checkReply)
-        .catch(failTest);
-      self.$httpBackend.flush();
+        self.$httpBackend.whenGET(uri('specimens/canadd', shipment.id) + '/' + inventoryId)
+          .respond(this.reply(jsonSpecimen));
 
-      function checkReply(reply) {
-        expect(reply).toEqual(jasmine.any(self.Specimen));
-      }
+        shipment.canAddInventoryId(inventoryId)
+          .then(checkReply)
+          .catch(failTest);
+        self.$httpBackend.flush();
+
+        function checkReply(reply) {
+          expect(reply).toEqual(jasmine.any(self.Specimen));
+        }
+      });
+
+      it('throws an exception if id is falsy', function() {
+        var shipment = new this.Shipment(this.factory.shipment());
+
+        expect(function () {
+          shipment.canAddInventoryId();
+        }).toThrowError(/specimen inventory id not specified/);
+      });
+
     });
 
     describe('when adding shipment specimens', function() {
@@ -518,6 +555,14 @@ define(function (require) {
 
       xit('can add specimens in containers to shipments', function () {
         fail('needs to be implemented');
+      });
+
+      it('addSpecimens throws an exception if id is falsy', function() {
+        var shipment = new this.Shipment(this.factory.shipment());
+
+        expect(function () {
+          shipment.addSpecimens();
+        }).toThrowError(/specimenInventoryIds should be an array/);
       });
 
     });
@@ -602,6 +647,18 @@ define(function (require) {
       });
 
     });
+
+    it('can remove a shipment', function() {
+        var self         = this,
+            jsonShipment = self.factory.shipment(),
+            shipment     = new self.Shipment(jsonShipment),
+            url          = sprintf('%s/%d', uri(shipment.id), shipment.version);
+
+      this.$httpBackend.expectDELETE(url).respond(this.reply(true));
+      shipment.remove();
+      this.$httpBackend.flush();
+    });
+
 
     /**
      * @param {object} context - The configuration for this shared behaviour. See below.
@@ -704,10 +761,6 @@ define(function (require) {
       }
 
       return result;
-    }
-
-    function listUri(centreId) {
-      return uri() +'list/' + centreId;
     }
   });
 

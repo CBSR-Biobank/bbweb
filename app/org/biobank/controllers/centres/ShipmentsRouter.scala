@@ -13,8 +13,8 @@ class ShipmentsRouter @Inject()(controller: ShipmentsController) extends SimpleR
     case POST(p"/") =>
       controller.add
 
-    case GET(p"/list/${centreId(cId)}") =>
-      controller.list(cId)
+    case GET(p"/list") =>
+      controller.list
 
     case POST(p"/courier/${shipmentId(id)}") =>
       controller.updateCourier(id)

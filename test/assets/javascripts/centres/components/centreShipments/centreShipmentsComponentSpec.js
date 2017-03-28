@@ -34,11 +34,6 @@ define(function (require) {
       this.controller = this.element.controller('centreShipments');
     };
 
-   SuiteMixin.prototype.createPagedResultsSpy = function (shipments) {
-      var reply = this.factory.pagedResult(shipments);
-      spyOn(this.Shipment, 'list').and.returnValue(this.$q.when(reply));
-    };
-
     return SuiteMixin;
   }
 
@@ -51,8 +46,7 @@ define(function (require) {
       _.extend(this, SuiteMixin.prototype);
 
       this.putHtmlTemplates(
-        '/assets/javascripts/centres/components/centreShipments/centreShipments.html',
-        '/assets/javascripts/centres/components/shipmentStatesSelector/shipmentStatesSelector.html');
+        '/assets/javascripts/centres/components/centreShipments/centreShipments.html');
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -64,26 +58,9 @@ define(function (require) {
     }));
 
     it('should have valid scope', function() {
-      this.createPagedResultsSpy([]);
       this.createScope(new this.Centre(this.factory.centre()));
 
-      expect(this.controller.hasShipments).toBeDefined();
-      expect(this.controller.selectedShipmentStates).toBeNonEmptyArray();
-      expect(this.controller.selectedShipmentStates).toContain(this.ShipmentState.CREATED);
-      expect(this.controller.selectedShipmentStates).toContain(this.ShipmentState.PACKED);
-      expect(this.controller.selectedShipmentStates).toContain(this.ShipmentState.SENT);
-      expect(this.controller.stateSelectionChanged).toBeFunction();
-      expect(this.Shipment.list).toHaveBeenCalled();
-    });
-
-    it('state selections are updated', function() {
-      var selectedStates = [ this.ShipmentState.RECEIVED ];
-      this.createPagedResultsSpy([]);
-      this.createScope(new this.Centre(this.factory.centre()));
-
-      this.controller.stateSelectionChanged(selectedStates);
-      expect(this.controller.selectedShipmentStates).toBeArrayOfSize(selectedStates.length);
-      expect(this.controller.selectedShipmentStates).toContain(selectedStates[0]);
+      expect(this.controller.tabs).toBeNonEmptyArray();
     });
 
   });

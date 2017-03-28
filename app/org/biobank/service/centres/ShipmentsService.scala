@@ -28,7 +28,8 @@ import scalaz._
 trait ShipmentsService {
 
   /**
-   * Returns a set of shipments. The entities can be filtered and or sorted using expressions.
+   * Returns a set of shipments to or from a Centre. The shipments can be filtered and or sorted using
+   * expressions.
    *
    * @param centreId the ID of the centre the shipments belong to.
    *
@@ -36,7 +37,7 @@ trait ShipmentsService {
    *
    * @param sort the string representation of the sort expression to use when sorting the shipments.
    */
-  def getShipments(centreId: CentreId, filter: FilterString, sort: SortString):
+  def getShipments(filter: FilterString, sort: SortString):
       ServiceValidation[List[ShipmentDto]]
 
   def getShipment(id: ShipmentId): ServiceValidation[ShipmentDto]
@@ -81,7 +82,8 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
                                       val ceventSpecimenRepository:      CeventSpecimenRepository,
                                       val collectionEventRepository:     CollectionEventRepository,
                                       val collectionEventTypeRepository: CollectionEventTypeRepository,
-                                      val specimensService:              SpecimensService)
+                                      val specimensService:              SpecimensService,
+                                      val shipmentFilter:                ShipmentFilter)
     extends ShipmentsService
     with ShipmentConstraints {
 
@@ -97,11 +99,10 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
    * - http://danielwestheide.com/blog/2013/01/23/the-neophytes-guide-to-scala-part-10-staying-dry-with-higher-order-functions.html
    *
    */
-  def getShipments(centreId: CentreId, filter: FilterString, sort: SortString):
+  def getShipments(filter: FilterString, sort: SortString):
       ServiceValidation[List[ShipmentDto]] = {
 
-    val centreShipments = shipmentRepository.withCentre(centreId)
-    val filteredShipments = ShipmentFilter.filterShipments(centreShipments, filter)
+    val filteredShipments = shipmentFilter.filterShipments(filter)
     val sortStr = if (sort.expression.isEmpty) new SortString("courierName")
                   else sort
 

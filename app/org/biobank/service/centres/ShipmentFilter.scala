@@ -1,21 +1,37 @@
 package org.biobank.service.centres
 
+import com.google.inject.ImplementedBy
+import javax.inject.Inject
 import org.biobank.service._
 import org.biobank.service.Comparator._
 import org.biobank.service.QueryFilterParserGrammar._
 import org.biobank.service.{ServiceValidation, ServiceError}
 import org.biobank.domain.PredicateHelper
-import org.biobank.domain.centre.{Shipment, ShipmentPredicates}
+import org.biobank.domain.centre._
+import org.slf4j.{Logger, LoggerFactory}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
+
+@ImplementedBy(classOf[ShipmentFilterImpl])
+trait ShipmentFilter {
+
+  def filterShipments(filter: FilterString):ServiceValidation[Set[Shipment]];
+
+}
 
 /**
  * Functions that filter a set of shipments from an expression contained in a filter string.
  *
  */
-object ShipmentFilter extends PredicateHelper with ShipmentPredicates {
+class ShipmentFilterImpl @Inject() (val shipmentRepository: ShipmentRepository,
+                                    val centreRepository:   CentreRepository)
+ extends ShipmentFilter with PredicateHelper with ShipmentPredicates {
 
-  def filterShipments(shipments: Set[Shipment], filter: FilterString):ServiceValidation[Set[Shipment]] = {
+  val log: Logger = LoggerFactory.getLogger(this.getClass)
+
+  def filterShipments(filter: FilterString): ServiceValidation[Set[Shipment]] = {
+    val shipments = shipmentRepository.getValues.toSet
+
     QueryFilterParser.expressions(filter).flatMap { filterExpression =>
       filterExpression match {
         case None =>
@@ -36,6 +52,9 @@ object ShipmentFilter extends PredicateHelper with ShipmentPredicates {
     expression match {
       case Comparison(selector, comparator, args) =>
         selector match {
+          case "fromCentre"     => fromCentreFilter(comparator, args)
+          case "toCentre"       => toCentreFilter(comparator, args)
+          case "withCentre"     => withCentreFilter(comparator, args)
           case "courierName"    => courierNameFilter(comparator, args)
           case "trackingNumber" => trackingNumberFilter(comparator, args)
           case "state"          => stateFilter(comparator, args)
@@ -48,6 +67,43 @@ object ShipmentFilter extends PredicateHelper with ShipmentPredicates {
         expressions.map(comparisonToPredicates).sequenceU.map(x => any(x:_*))
       case _ =>
         ServiceError(s"invalid filter expression: $expression").failureNel[ShipmentFilter]
+    }
+  }
+
+  private def fromCentreFilter(comparator: Comparator, names: List[String]) = {
+    centreIdsFilter(comparator,
+                    fromCentreIdIsOneOf,
+                    names,
+                    ServiceError(s"invalid filter on 'from centre' name: $comparator"))
+  }
+
+  private def toCentreFilter(comparator: Comparator, names: List[String]) = {
+    centreIdsFilter(comparator,
+                    toCentreIdIsOneOf,
+                    names,
+                    ServiceError(s"invalid filter on 'to centre' name: $comparator"))
+  }
+
+  private def withCentreFilter(comparator: Comparator, names: List[String]) = {
+    centreIdsFilter(comparator,
+                    withCentreIdIsOneOf,
+                    names,
+                    ServiceError(s"invalid filter on 'with centre' name: $comparator"))
+  }
+
+  private def centreIdsFilter(comparator:     Comparator,
+                              shipmentFilter: Set[CentreId] => ShipmentFilter,
+                              names:          List[String],
+                              error:          ServiceError) = {
+    val centreIds = centreRepository.getByNames(names.toSet).map(_.id)
+
+    comparator match {
+      case Equal | In =>
+        shipmentFilter(centreIds).successNel[String]
+      case NotEqualTo | NotIn =>
+        complement(shipmentFilter(centreIds)).successNel[String]
+      case _ =>
+        error.failureNel[ShipmentFilter]
     }
   }
 

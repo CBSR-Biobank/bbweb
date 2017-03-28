@@ -59,7 +59,7 @@ define(function (require) {
     }
 
     function centreSelected(centre) {
-      $state.go('home.shipping.centre', { centreId: centre.id });
+      $state.go('home.shipping.centre.incoming', { centreId: centre.id });
     }
   }
 

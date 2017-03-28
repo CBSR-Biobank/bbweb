@@ -35,6 +35,7 @@ define(function () {
         }
       })
       .state('home.shipping.centre', {
+        abstract: true,
         url: '/centres/{centreId}',
         resolve: {
           centre: ['Centre', '$stateParams', function (Centre, $stateParams) {
@@ -44,14 +45,51 @@ define(function () {
         views: {
           'main@': {
             template: '<centre-shipments centre="vm.centre"></centre-shipments>',
-            controller: [ 'centre', function (centre) {
-              this.centre = centre;
-            }],
+            controller: CentreController,
             controllerAs: 'vm'
           }
         },
         data: {
-          displayName: '{{centre.name}}'
+          breadcrumProxy: 'home.shipping.centre.incoming'
+        }
+      })
+      .state('home.shipping.centre.incoming', {
+        url: '/incoming',
+        views: {
+          'shipments': {
+            template: '<shipments-incoming centre="vm.centre"></shipments-incoming>',
+            controller: CentreController,
+            controllerAs: 'vm'
+          }
+        },
+        data: {
+          displayName: '{{centre.name}}: Incoming'
+        }
+      })
+      .state('home.shipping.centre.outgoing', {
+        url: '/outgoing',
+        views: {
+          'shipments': {
+            template: '<shipments-outgoing centre="vm.centre"></shipments-outgoing>',
+            controller: CentreController,
+            controllerAs: 'vm'
+          }
+        },
+        data: {
+          displayName: '{{centre.name}}: Outgoing'
+        }
+      })
+      .state('home.shipping.centre.completed', {
+        url: '/completed',
+        views: {
+          'shipments': {
+            template: '<shipments-completed centre="vm.centre"></shipments-completed>',
+            controller: CentreController,
+            controllerAs: 'vm'
+          }
+        },
+        data: {
+          displayName: '{{centre.name}}: Completed'
         }
       })
       .state('home.shipping.add', {
@@ -208,6 +246,12 @@ define(function () {
 
     function ShipmentController(shipment) {
       this.shipment = shipment;
+    }
+
+    CentreController.$inject = [ 'centre' ];
+
+    function CentreController(centre) {
+      this.centre = centre;
     }
 
   }

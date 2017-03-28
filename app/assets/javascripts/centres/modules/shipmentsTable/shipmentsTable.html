@@ -1,0 +1,87 @@
+<table st-table="vm.shipments"
+       st-pipe="vm.getTableData"
+       class="table table-hover table-striped">
+  <thead>
+    <tr>
+      <th st-sort="courierName" translate>Courier</th>
+      <th st-sort="trackingNumber" translate>Tracking#</th>
+      <th st-sort="fromLocationName" ng-if="vm.shipmentTypes !== 'outgoing'" translate>
+        From
+      </th>
+      <th st-sort="toLocationName" ng-if="vm.shipmentTypes !== 'incoming'" translate>
+        To
+      </th>
+      <th>Date</th>
+      <th ng-if="vm.shipmentTypes !== 'completed'" st-sort="state" translate>
+        State
+      </th>
+    </tr>
+    <tr>
+      <th>
+        <input st-search="courierName"
+               placeholder="search for courier"
+               class="input-sm form-control"
+               type="search"/>
+      </th>
+      <th>
+        <input st-search="trackingNumber"
+               placeholder="search for tracking number"
+               class="input-sm form-control"
+               type="search"/>
+      </th>
+      <th></th>
+      <th></th>
+      <th>
+        <select class="form-control input-sm"
+                ng-if="vm.shipmentTypes !== 'completed'"
+                st-search="state"
+                name="state"
+                ng-model="vm.stateFilter"
+                ng-options="state.value as state.label for state in vm.states">
+        </select>
+      </th>
+    </tr>
+  </thead>
+  <tbody ng-show="!vm.tableDataLoading">
+    <tr ng-repeat="shipment in vm.shipments">
+      <td>
+        <a href ng-click="vm.shipmentInformation(shipment)">{{shipment.courierName}}</a>
+      </td>
+      <td>{{shipment.trackingNumber}}</td>
+      <td ng-if="(vm.shipmentTypes === 'incoming') || (vm.shipmentTypes === 'completed')">
+        <small>{{shipment.fromLocationInfo.name}}</small>
+      </td>
+      <td ng-if="(vm.shipmentTypes === 'outgoing') || (vm.shipmentTypes === 'completed')">
+        <small>{{shipment.toLocationInfo.name}}</small>
+      </td>
+      <td><small>{{vm.shipmentDates[shipment.id]}}</small></td>
+      <td ng-if="(vm.shipmentTypes !== 'completed')" st-sort="state">
+        <span class="badge">{{shipment.state}}</span>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="row" ng-if="(vm.shipments.length <= 0) && !vm.stateFilter")">
+  <div class="col-md-12">
+    <div class="alert alert-warning" role="alert">
+      <p><span class="glyphicon glyphicon-warning-sign"></span>
+        <translate>
+          This centre does not have any <b>{{vm.shipmentTypes}}</b> shipments.
+        </translate>
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="row" ng-if="(vm.shipments.length <= 0) && vm.stateFilter")">
+  <div class="col-md-12">
+    <div class="alert alert-warning" role="alert">
+      <p><span class="glyphicon glyphicon-warning-sign"></span>
+        <translate>
+          This centre does not have shipments in <b>{{vm.stateFilter}}</b> state.
+        </translate>
+      </p>
+    </div>
+  </div>
+</div>
