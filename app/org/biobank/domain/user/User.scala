@@ -1,6 +1,7 @@
 package org.biobank.domain.user
 
 import org.biobank.ValidationKey
+import org.biobank.infrastructure.JsonUtils._
 import org.biobank.domain._
 import org.biobank.infrastructure.EnumUtils._
 import org.joda.time.DateTime
@@ -72,22 +73,39 @@ sealed trait User extends ConcurrencySafeEntity[UserId] with HasState with HasNa
 
 object User {
 
-  val userStates: List[EntityState] = List(new EntityState("registered"),
-                                           new EntityState("active"),
-                                           new EntityState("locked"))
+  val registeredState: EntityState = new EntityState("registered")
+  val activeState: EntityState = new EntityState("active")
+  val lockedState: EntityState = new EntityState("locked")
+
+  val userStates: List[EntityState] = List(registeredState,
+                                           activeState,
+                                           lockedState)
 
   @SuppressWarnings(Array("org.wartremover.warts.Option2Iterable"))
-  implicit val userWrites: Writes[User] = new Writes[User] {
-    def writes(user: User): JsValue = {
+  implicit val userFormat: Format[User] = new Format[User] {
+    override def writes(user: User): JsValue = {
       ConcurrencySafeEntity.toJson(user) ++
-      Json.obj("state"        -> user.state.id,
-               "name"         -> user.name,
-               "email"        -> user.email) ++
+      Json.obj("state"    -> user.state.id,
+               "name"     -> user.name,
+               "email"    -> user.email,
+               "password" -> user.password,
+               "salt"     -> user.salt) ++
       JsObject(
         Seq[(String, JsValue)]() ++
           user.avatarUrl.map("avatarUrl" -> Json.toJson(_)))
     }
+
+      override def reads(json: JsValue): JsResult[User] = (json \ "state") match {
+          case JsDefined(JsString(registeredState.id)) => json.validate[RegisteredUser]
+          case JsDefined(JsString(activeState.id)) => json.validate[ActiveUser]
+          case JsDefined(JsString(lockedState.id)) => json.validate[LockedUser]
+          case _ => JsError("error")
+        }
   }
+
+  implicit val registeredUserReads: Reads[RegisteredUser] = Json.reads[RegisteredUser]
+  implicit val activeUserReads: Reads[ActiveUser]         = Json.reads[ActiveUser]
+  implicit val lockedUserReads: Reads[LockedUser]         = Json.reads[LockedUser]
 
   val sort2Compare: Map[String, (User, User) => Boolean] =
     Map[String, (User, User) => Boolean](

@@ -64,8 +64,6 @@ class QueryStringParserSpec extends FreeSpec with MustMatchers {
 
     "must parse multiple RSQL expressions" in {
       val result = QueryStringParser(s"a=foo1::bar1,foo2::bar2&b=foo3:in:(bar1,bar2)")
-      log.info(s"----> $result")
-
       inside (result) { case Some(expressions) =>
         expressions must have size (2)
         expressions("a") must be ("foo1::bar1,foo2::bar2")

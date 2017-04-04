@@ -22,7 +22,7 @@ import com.github.nscala_time.time.Imports._
  *
  * If an entity has a dependency on another, the other is created first, or if the other entity has
  * already been created it will be used.  For example, if a participant is created, it will belong to the last
- * study that was created.
+ * study that was created.x
  *
  */
 class Factory {

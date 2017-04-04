@@ -603,8 +603,6 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
             .copy(required = false)
           val annotation = factory.createAnnotation.copy(numberValue = Some(""))
 
-          log.info(s"----------------> $annotation")
-
           collectionEventTypeRepository.put(ceventType.copy(annotationTypes = Set(annotType)))
 
           val cevent = factory.createCollectionEvent

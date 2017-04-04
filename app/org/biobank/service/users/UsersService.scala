@@ -2,7 +2,6 @@ package org.biobank.service.users
 
 import akka.actor.ActorRef
 import akka.pattern.ask
-import akka.util.Timeout
 import com.google.inject.ImplementedBy
 import javax.inject._
 import org.biobank.ValidationKey
@@ -15,13 +14,11 @@ import org.biobank.service._
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
-import scala.concurrent.duration._
-
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[UsersServiceImpl])
-trait UsersService {
+trait UsersService extends BbwebService {
 
   def getAll: Set[User]
 
@@ -52,18 +49,17 @@ trait UsersService {
 
 }
 
-class UsersServiceImpl @javax.inject.Inject() (
-  @Named("usersProcessor") val processor: ActorRef,
-  val userRepository: UserRepository,
-  val passwordHasher: PasswordHasher)
-    extends UsersService {
+class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val processor: ActorRef,
+                                               val userRepository: UserRepository,
+                                               val passwordHasher: PasswordHasher)
+    extends UsersService
+    with BbwebServiceImpl {
+
   import org.biobank.CommonValidations._
 
   case object InvalidPassword extends ValidationKey
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
-
-  implicit val timeout: Timeout = 5.seconds
 
   def getAll: Set[User] = {
     userRepository.allUsers

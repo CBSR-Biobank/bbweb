@@ -56,14 +56,14 @@ object PagedResults {
   implicit def pagedResultsWrites[T](implicit fmt: Writes[T]) : Writes[PagedResults[T]] =
     new Writes[PagedResults[T]] {
       def writes(pr: PagedResults[T]): JsValue = Json.obj(
-        "items"           -> pr.items,
-        "page"            -> pr.page,
-        "offset"          -> pr.offset,
-        "total"           -> pr.total,
-        "limit"        -> pr.limit,
-        "prev"            -> pr.prev,
-        "next"            -> pr.next,
-        "maxPages"        -> pr.maxPages
+        "items"    -> pr.items,
+        "page"     -> pr.page,
+        "offset"   -> pr.offset,
+        "total"    -> pr.total,
+        "limit"    -> pr.limit,
+        "prev"     -> pr.prev,
+        "next"     -> pr.next,
+        "maxPages" -> pr.maxPages
       )
     }
 

@@ -1,7 +1,7 @@
 package org.biobank.service.users
 
 import akka.actor._
-import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
+import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
 import javax.inject.Inject
 import play.api.{Configuration, Environment, Mode}
 import org.biobank.domain.user._
@@ -10,12 +10,19 @@ import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.service._
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
+import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 object UsersProcessor {
 
   def props: Props = Props[UsersProcessor]
+
+  final case class SnapshotState(users: Set[User])
+
+  final case class PasswordInfo(password: String, salt: String)
+
+  implicit val snapshotStateFormat: Format[SnapshotState] = Json.format[SnapshotState]
 
 }
 
@@ -26,15 +33,13 @@ class UsersProcessor @Inject() (val config:         Configuration,
                                 val userRepository: UserRepository,
                                 val passwordHasher: PasswordHasher,
                                 val emailService:   EmailService,
-                                val env:            Environment)
+                                val env:            Environment,
+                                val snapshotWriter: SnapshotWriter)
     extends Processor {
+
+  import UsersProcessor._
   import org.biobank.CommonValidations._
-
   import UserEvent.EventType
-
-  case class PasswordInfo(password: String, salt: String)
-
-  case class SnapshotState(users: Set[User])
 
   override def persistenceId: String = "user-processor-id"
 
@@ -54,16 +59,19 @@ class UsersProcessor @Inject() (val config:         Configuration,
       case _ => log.error(s"user event not handled: $event")
     }
 
-    case SnapshotOffer(_, snapshot: SnapshotState) =>
-      snapshot.users.foreach(i => userRepository.put(i))
+    case SnapshotOffer(_, snapshotFilename: String) =>
+      applySnapshot(snapshotFilename)
 
-    case event: RecoveryCompleted =>
+    case RecoveryCompleted =>
+      log.debug("UsersProcessor: recovery completed")
       createDefaultUser
 
     case event => log.error(s"event not handled: $event")
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any",
+                          "org.wartremover.warts.PublicInference",
+                          "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {
     case cmd: RegisterUserCmd =>
       process(registerUserCmdToEvent(cmd))(applyRegisteredEvent)
@@ -93,10 +101,38 @@ class UsersProcessor @Inject() (val config:         Configuration,
       processUpdateCmdOnLockedUser(cmd, unlockUserCmdToEvent, applyUnlockedEvent)
 
     case "snap" =>
-      saveSnapshot(SnapshotState(userRepository.getValues.toSet))
-      stash()
+     mySaveSnapshot
+
+    case SaveSnapshotSuccess(metadata) =>
+      log.debug(s"snapshot saved successfully: ${metadata}")
+
+    case SaveSnapshotFailure(metadata, reason) =>
+      log.error(s"snapshot save error: ${metadata}")
+      reason.printStackTrace
+
+    case "persistence_restart" =>
+      throw new Exception("Intentionally throwing exception to test persistence by restarting the actor")
 
     case cmd => log.error(s"UsersProcessor: message not handled: $cmd")
+  }
+
+  private def mySaveSnapshot(): Unit = {
+    val snapshotState = SnapshotState(userRepository.getValues.toSet)
+    val filename = snapshotWriter.save(persistenceId, Json.toJson(snapshotState).toString)
+    log.debug(s"saved snapshot to: $filename")
+    saveSnapshot(filename)
+  }
+
+  private def applySnapshot(filename: String): Unit = {
+    log.info(s"snapshot recovery file: $filename")
+    val fileContents = snapshotWriter.load(filename);
+    Json.parse(fileContents).validate[SnapshotState].fold(
+      errors => log.error(s"could not apply snapshot: $filename: $errors"),
+      snapshot =>  {
+        log.debug(s"snapshot contains ${snapshot.users.size} users")
+        snapshot.users.foreach(userRepository.put)
+      }
+    )
   }
 
   private def registerUserCmdToEvent(cmd: RegisterUserCmd): ServiceValidation[UserEvent] = {

@@ -1,16 +1,17 @@
 package org.biobank.service.participants
 
 import akka.actor._
-import akka.persistence.SnapshotOffer
+import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
 import javax.inject.Inject
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
 import org.biobank.domain.Annotation
 import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.infrastructure.event.ParticipantEvents._
-import org.biobank.service.{Processor, ServiceError, ServiceValidation}
+import org.biobank.service.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
+import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -18,21 +19,25 @@ object ParticipantsProcessor {
 
   def props: Props = Props[ParticipantsProcessor]
 
+  final case class SnapshotState(participants: Set[Participant])
+
+  implicit val snapshotStateFormat: Format[SnapshotState] = Json.format[SnapshotState]
+
 }
 
 /**
  *
  */
 class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRepository,
-                                       val studyRepository:       StudyRepository)
+                                       val studyRepository:       StudyRepository,
+                                       val snapshotWriter:        SnapshotWriter)
     extends Processor {
 
+  import ParticipantsProcessor._
   import ParticipantEvent.EventType
   import org.biobank.infrastructure.event.EventUtils._
 
   override def persistenceId: String = "participant-processor-id"
-
-  case class SnapshotState(participants: Set[Participant])
 
   /**
    * These are the events that are recovered during journal recovery. They cannot fail and must be
@@ -51,15 +56,23 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
         case event => log.error(s"event not handled: $event")
       }
 
-    case SnapshotOffer(_, snapshot: SnapshotState) =>
-      snapshot.participants.foreach{ participant => participantRepository.put(participant) }
+    case SnapshotOffer(_, snapshotFilename: String) =>
+      applySnapshot(snapshotFilename)
+
+    case RecoveryCompleted =>
+      log.debug("ParticipantsProcessor: recovery completed")
+
+    case msg =>
+      log.error(s"message not handled: $msg")
   }
 
   /**
    * These are the commands that are requested. A command can fail, and will send the failure as a response
    * back to the user. Each valid command generates one or more events and is journaled.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any",
+                          "org.wartremover.warts.PublicInference",
+                          "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {
     case cmd: AddParticipantCmd =>
       process(addCmdToEvent(cmd))(applyAddedEvent)
@@ -74,10 +87,38 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
       processUpdateCmd(cmd, removeAnnotationCmdToEvent, applyAnnotationRemovedEvent)
 
     case "snap" =>
-      saveSnapshot(SnapshotState(participantRepository.getValues.toSet))
-      stash()
+     mySaveSnapshot
+
+    case SaveSnapshotSuccess(metadata) =>
+      log.debug(s"snapshot saved successfully: ${metadata}")
+
+    case SaveSnapshotFailure(metadata, reason) =>
+      log.error(s"snapshot save error: ${metadata}")
+      reason.printStackTrace
+
+    case "persistence_restart" =>
+      throw new Exception("Intentionally throwing exception to test persistence by restarting the actor")
 
     case cmd => log.error(s"ParticipantsProcessor: message not handled: $cmd")
+  }
+
+  private def mySaveSnapshot(): Unit = {
+    val snapshotState = SnapshotState(participantRepository.getValues.toSet)
+    val filename = snapshotWriter.save(persistenceId, Json.toJson(snapshotState).toString)
+    log.debug(s"saved snapshot to: $filename")
+    saveSnapshot(filename)
+  }
+
+  private def applySnapshot(filename: String): Unit = {
+    log.info(s"snapshot recovery file: $filename")
+    val fileContents = snapshotWriter.load(filename);
+    Json.parse(fileContents).validate[SnapshotState].fold(
+      errors => log.error(s"could not apply snapshot: $filename: $errors"),
+      snapshot =>  {
+        log.debug(s"snapshot contains ${snapshot.participants.size} participants")
+        snapshot.participants.foreach(participantRepository.put)
+      }
+    )
   }
 
   val ErrMsgUniqueIdExists: String = "participant with unique ID already exists"

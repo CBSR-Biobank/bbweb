@@ -2,9 +2,8 @@ package org.biobank.service.centres
 
 import akka.actor._
 import akka.event.{Logging, LoggingAdapter}
-import akka.persistence.{RecoveryCompleted, SnapshotOffer}
+import akka.persistence.{RecoveryCompleted, SnapshotOffer, SaveSnapshotSuccess, SaveSnapshotFailure}
 import javax.inject.Inject
-
 import org.biobank.TestData
 import org.biobank.domain.LocationId
 import org.biobank.domain.centre._
@@ -14,17 +13,22 @@ import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
 import org.biobank.infrastructure.event.EventUtils
 import org.biobank.infrastructure.event.ShipmentEvents._
 import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
-import org.biobank.service.{Processor, ServiceError, ServiceValidation}
+import org.biobank.service.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-
-import scalaz._
+import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
+import scalaz._
 
 object ShipmentsProcessor {
 
   def props: Props = Props[ShipmentsProcessor]
+
+  final case class SnapshotState(shipments: Set[Shipment],
+                                 shipmentSpecimens: Set[ShipmentSpecimen])
+
+  implicit val snapshotStateFormat: Format[SnapshotState] = Json.format[SnapshotState]
 
 }
 
@@ -35,23 +39,22 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                                     val shipmentSpecimenRepository: ShipmentSpecimenRepository,
                                     val centreRepository:           CentreRepository,
                                     val specimenRepository:         SpecimenRepository,
-                                    val testData:                   TestData)
+                                    val testData:                   TestData,
+                                    val snapshotWriter:             SnapshotWriter)
     extends Processor
     with ShipmentValidations
     with ShipmentConstraints {
+  import ShipmentsProcessor._
   import org.biobank.CommonValidations._
 
   override val log: LoggingAdapter = Logging(context.system, this)
 
   override def persistenceId: String = "shipments-processor-id"
 
-  case class SnapshotState(shipments: Set[Shipment],
-                           shipmentSpecimens: Set[ShipmentSpecimen])
-
   @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveRecover: Receive = {
     case event: ShipmentEvent =>
-      log.info(s"ShipmentsProcessor: receiveRecover: $event")
+      log.debug(s"ShipmentsProcessor: receiveRecover: $event")
       event.eventType match {
         case et: ShipmentEvent.EventType.Added                  => applyAddedEvent(event)
         case et: ShipmentEvent.EventType.CourierNameUpdated     => applyCourierNameUpdatedEvent(event)
@@ -85,14 +88,16 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     }
 
 
-    case SnapshotOffer(_, snapshot: SnapshotState) =>
-      snapshot.shipments.foreach{ shipmentRepository.put(_) }
-      snapshot.shipmentSpecimens.foreach{ shipmentSpecimenRepository.put(_) }
+    case SnapshotOffer(_, snapshotFilename: String) =>
+      applySnapshot(snapshotFilename)
 
     case RecoveryCompleted =>
+      log.debug(s"ShipmentsProcessor: recovery completed")
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any",
+                          "org.wartremover.warts.PublicInference",
+                          "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {
 
     case cmd: AddShipmentCmd =>
@@ -161,12 +166,41 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     case cmd: ShipmentSpecimenExtraCmd =>
       processSpecimenUpdateCmd(cmd, specimenExtraCmdToEvent, applySpecimenExtraEvent)
 
+    case "persistence_restart" =>
+      throw new Exception("Intentionally throwing exception to test persistence by restarting the actor")
+
     case "snap" =>
-      saveSnapshot(SnapshotState(shipmentRepository.getValues.toSet,
-                                 shipmentSpecimenRepository.getValues.toSet))
-      stash()
+      mySaveSnapshot
+
+    case SaveSnapshotSuccess(metadata) =>
+      log.info(s"SaveSnapshotSuccess: $metadata")
+
+    case SaveSnapshotFailure(metadata, reason) =>
+      log.info(s"SaveSnapshotFailure: $metadata, reason: $reason")
+      reason.printStackTrace
 
     case cmd => log.error(s"shipmentsProcessor: message not handled: $cmd")
+  }
+
+  private def mySaveSnapshot(): Unit = {
+    val snapshotState = SnapshotState(shipmentRepository.getValues.toSet,
+                                      shipmentSpecimenRepository.getValues.toSet)
+    val filename = snapshotWriter.save(persistenceId, Json.toJson(snapshotState).toString)
+    saveSnapshot(filename)
+  }
+
+  private def applySnapshot(filename: String): Unit = {
+    log.info(s"snapshot recovery file: $filename")
+    val fileContents = snapshotWriter.load(filename);
+    Json.parse(fileContents).validate[SnapshotState].fold(
+        errors => log.error(s"could not apply snapshot: $filename: $errors"),
+        snapshot =>  {
+          log.info(s"snapshot contains ${snapshot.shipments.size} shipments")
+          log.info(s"snapshot contains ${snapshot.shipmentSpecimens.size} shipment specimens")
+          snapshot.shipments.foreach(shipmentRepository.put)
+          snapshot.shipmentSpecimens.foreach(shipmentSpecimenRepository.put)
+        }
+    )
   }
 
   private def addCmdToEvent(cmd: AddShipmentCmd) = {

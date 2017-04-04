@@ -38,9 +38,6 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
     case GET(p"/${userId(id)}") =>
       controller.user(id)
 
-    case POST(p"/") =>
-      controller.registerUser
-
     case POST(p"/name/${userId(id)}") =>
       controller.updateName(id)
 
@@ -70,5 +67,12 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
 
     case POST(p"/passreset") =>
       controller.passwordReset
+
+    case POST(p"/snapshot") =>
+      controller.snapshot
+
+    case POST(p"/") =>
+      controller.registerUser
+
   }
 }

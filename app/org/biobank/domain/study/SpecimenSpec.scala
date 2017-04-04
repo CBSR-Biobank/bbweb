@@ -130,8 +130,7 @@ final case class CollectionSpecimenSpec(uniqueId:                    String,
 object CollectionSpecimenSpec extends SpecimenSpecValidations {
   import org.biobank.domain.CommonValidations._
 
-  implicit val collectionSpecimenSpecWrites: Writes[CollectionSpecimenSpec] =
-    Json.writes[CollectionSpecimenSpec]
+  implicit val collectionSpecimenSpecWrites: Format[CollectionSpecimenSpec] = Json.format[CollectionSpecimenSpec]
 
   val hashidsSalt: String = "biobank-collection-event-types"
 

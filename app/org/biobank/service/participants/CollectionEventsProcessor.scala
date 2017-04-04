@@ -1,7 +1,7 @@
 package org.biobank.service.participants
 
 import akka.actor._
-import akka.persistence.SnapshotOffer
+import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
 import javax.inject.Inject
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
@@ -9,15 +9,20 @@ import org.biobank.domain.Annotation
 import org.biobank.infrastructure.command.CollectionEventCommands._
 import org.biobank.infrastructure.event.CollectionEventEvents._
 import org.biobank.infrastructure.event.CommonEvents._
-import org.biobank.service.{Processor, ServiceValidation}
+import org.biobank.service.{Processor, ServiceValidation, SnapshotWriter}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
+import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 object CollectionEventsProcessor {
 
   def props: Props = Props[CollectionEventsProcessor]
+
+  final case class SnapshotState(collectionEvents: Set[CollectionEvent])
+
+  implicit val snapshotStateFormat: Format[SnapshotState] = Json.format[SnapshotState]
 
 }
 
@@ -28,16 +33,16 @@ class CollectionEventsProcessor @Inject() (
   val collectionEventRepository:     CollectionEventRepository,
   val collectionEventTypeRepository: CollectionEventTypeRepository,
   val participantRepository:         ParticipantRepository,
-  val studyRepository:               StudyRepository)
+  val studyRepository:               StudyRepository,
+  val snapshotWriter:                SnapshotWriter)
     extends Processor {
 
+  import CollectionEventsProcessor._
   import org.biobank.CommonValidations._
   import CollectionEventEvent.EventType
   import org.biobank.infrastructure.event.EventUtils._
 
   override def persistenceId: String = "collection-events-processor-id"
-
-  case class SnapshotState(collectionEvents: Set[CollectionEvent])
 
   /**
    * These are the events that are recovered during journal recovery. They cannot fail and must be
@@ -56,15 +61,23 @@ class CollectionEventsProcessor @Inject() (
       case event => log.error(s"event not handled: $event")
     }
 
-    case SnapshotOffer(_, snapshot: SnapshotState) =>
-      snapshot.collectionEvents.foreach{ collectionEventRepository.put(_) }
+    case SnapshotOffer(_, snapshotFilename: String) =>
+      applySnapshot(snapshotFilename)
+
+    case RecoveryCompleted =>
+      log.debug("CollectionEventsProcessor: recovery completed")
+
+    case msg =>
+      log.error(s"message not handled: $msg")
   }
 
   /**
    * These are the commands that are requested. A command can fail, and will send the failure as a response
    * back to the user. Each valid command generates one or more events and is journaled.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any",
+                          "org.wartremover.warts.PublicInference",
+                          "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {
     case cmd: AddCollectionEventCmd =>
       process(addCmdToEvent(cmd))(applyAddedEvent)
@@ -85,11 +98,40 @@ class CollectionEventsProcessor @Inject() (
       processUpdateCmd(cmd, removeCmdToEvent, applyRemovedEvent)
 
     case "snap" =>
-      saveSnapshot(SnapshotState(collectionEventRepository.getValues.toSet))
-      stash()
+     mySaveSnapshot
 
-    case cmd => log.error(s"collectionEventsProcessor: message not handled: $cmd")
+    case SaveSnapshotSuccess(metadata) =>
+      log.debug(s"snapshot saved successfully: ${metadata}")
 
+    case SaveSnapshotFailure(metadata, reason) =>
+      log.error(s"snapshot save error: ${metadata}")
+      reason.printStackTrace
+
+    case "persistence_restart" =>
+      throw new Exception("Intentionally throwing exception to test persistence by restarting the actor")
+
+    case cmd =>
+      log.error(s"collectionEventsProcessor: message not handled: $cmd")
+
+  }
+
+  private def mySaveSnapshot(): Unit = {
+    val snapshotState = SnapshotState(collectionEventRepository.getValues.toSet)
+    val filename = snapshotWriter.save(persistenceId, Json.toJson(snapshotState).toString)
+    log.debug(s"saved snapshot to: $filename")
+    saveSnapshot(filename)
+  }
+
+  private def applySnapshot(filename: String): Unit = {
+    log.info(s"snapshot recovery file: $filename")
+    val fileContents = snapshotWriter.load(filename);
+    Json.parse(fileContents).validate[SnapshotState].fold(
+      errors => log.error(s"could not apply snapshot: $filename: $errors"),
+      snapshot =>  {
+        log.debug(s"snapshot contains ${snapshot.collectionEvents.size} collection events")
+        snapshot.collectionEvents.foreach(collectionEventRepository.put)
+      }
+    )
   }
 
   private def addCmdToEvent(cmd:AddCollectionEventCmd): ServiceValidation[CollectionEventEvent] = {

@@ -1,6 +1,7 @@
 package org.biobank.domain.centre
 
 import org.biobank.ValidationKey
+import org.biobank.infrastructure.JsonUtils._
 import org.biobank.dto.NameDto
 import org.biobank.domain._
 import org.biobank.domain.study.StudyId
@@ -81,8 +82,8 @@ object Centre {
   val centreStates: List[EntityState] = List(disabledState, enabledState)
 
   @SuppressWarnings(Array("org.wartremover.warts.Option2Iterable"))
-  implicit val centreWrites: Writes[Centre] = new Writes[Centre] {
-      def writes(centre: Centre): JsValue = {
+  implicit val centreFormat: Format[Centre] = new Format[Centre] {
+      override def writes(centre: Centre): JsValue = {
         ConcurrencySafeEntity.toJson(centre) ++
         Json.obj("state"     -> centre.state.id,
                  "name"      -> centre.name,
@@ -92,7 +93,16 @@ object Centre {
           Seq[(String, JsValue)]() ++
             centre.description.map("description" -> Json.toJson(_)))
       }
+
+      override def reads(json: JsValue): JsResult[Centre] = (json \ "state") match {
+          case JsDefined(JsString(disabledState.id)) => json.validate[DisabledCentre]
+          case JsDefined(JsString(enabledState.id))  => json.validate[EnabledCentre]
+          case _ => JsError("error")
+        }
     }
+
+  implicit val disabledCentreReads: Reads[DisabledCentre] = Json.reads[DisabledCentre]
+  implicit val enabledCentreReads: Reads[EnabledCentre]   = Json.reads[EnabledCentre]
 
   type CentresCompare = (Centre, Centre) => Boolean
 

@@ -1,7 +1,7 @@
 package org.biobank.service.centres
 
 import akka.actor._
-import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
+import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
 import javax.inject.{Inject}
 import org.biobank.TestData
 import org.biobank.domain.LocationId
@@ -10,9 +10,10 @@ import org.biobank.domain.study.{StudyId, StudyRepository}
 import org.biobank.domain.Location
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
-import org.biobank.service.{Processor, ServiceError, ServiceValidation}
+import org.biobank.service.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
+import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -20,18 +21,22 @@ object CentresProcessor {
 
   def props: Props = Props[CentresProcessor]
 
+  final case class SnapshotState(centres: Set[Centre])
+
+  implicit val snapshotStateFormat: Format[SnapshotState] = Json.format[SnapshotState]
+
 }
 
 class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                   val studyRepository:  StudyRepository,
+                                  val snapshotWriter:   SnapshotWriter,
                                   val testData:         TestData)
     extends Processor {
+  import CentresProcessor._
   import org.biobank.CommonValidations._
   import CentreEvent.EventType
 
   override def persistenceId: String = "centre-processor-id"
-
-  case class SnapshotState(centres: Set[Centre])
 
   val ErrMsgNameExists: String = "centre with name already exists"
 
@@ -52,15 +57,18 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       case et => log.error(s"event not handled: $event")
     }
 
-    case SnapshotOffer(_, snapshot: SnapshotState) =>
-      snapshot.centres.foreach{ centre => centreRepository.put(centre) }
+    case SnapshotOffer(_, snapshotFilename: String) =>
+      applySnapshot(snapshotFilename)
 
     case RecoveryCompleted =>
+      log.debug("CentresProcessor: recovery completed")
 
     case cmd => log.error(s"CentresProcessor: message not handled: $cmd")
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any",
+                          "org.wartremover.warts.PublicInference",
+                          "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {
     case cmd: AddCentreCmd =>
       process(addCentreCmdToEvent(cmd))(applyAddedEvent)
@@ -93,10 +101,38 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       processUpdateCmdOnDisabledCentre(cmd, removeStudyCmdToEvent, applyStudyRemovedEvent)
 
     case "snap" =>
-      saveSnapshot(SnapshotState(centreRepository.getValues.toSet))
-      stash()
+     mySaveSnapshot
+
+    case SaveSnapshotSuccess(metadata) =>
+      log.debug(s"snapshot saved successfully: ${metadata}")
+
+    case SaveSnapshotFailure(metadata, reason) =>
+      log.error(s"snapshot save error: ${metadata}")
+      reason.printStackTrace
+
+    case "persistence_restart" =>
+      throw new Exception("Intentionally throwing exception to test persistence by restarting the actor")
 
     case cmd => log.error(s"CentresProcessor: message not handled: $cmd")
+  }
+
+  private def mySaveSnapshot(): Unit = {
+    val snapshotState = SnapshotState(centreRepository.getValues.toSet)
+    val filename = snapshotWriter.save(persistenceId, Json.toJson(snapshotState).toString)
+    log.debug(s"saved snapshot to: $filename")
+    saveSnapshot(filename)
+  }
+
+  private def applySnapshot(filename: String): Unit = {
+    log.info(s"snapshot recovery file: $filename")
+    val fileContents = snapshotWriter.load(filename);
+    Json.parse(fileContents).validate[SnapshotState].fold(
+      errors => log.error(s"could not apply snapshot: $filename: $errors"),
+      snapshot =>  {
+        log.debug(s"snapshot contains ${snapshot.centres.size} centres")
+        snapshot.centres.foreach(centreRepository.put)
+      }
+    )
   }
 
   private def addCentreCmdToEvent(cmd: AddCentreCmd): ServiceValidation[CentreEvent] = {

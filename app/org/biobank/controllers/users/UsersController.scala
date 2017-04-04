@@ -11,7 +11,7 @@ import play.api.Logger
 import play.api.cache.CacheApi
 import play.api.libs.json.Reads._
 import play.api.libs.json._
-import play.api.mvc.{Action, Cookie, DiscardingCookie}
+import play.api.mvc._
 import play.api.{Environment, Logger}
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
@@ -144,6 +144,12 @@ class UsersController @Inject() (val action:         BbwebAction,
       }
     )
   }
+
+  def snapshot: Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      usersService.snapshot
+      Future.successful(Results.Ok(Json.obj("status" ->"success", "data" -> true)))
+    }
 
   /** Resets the user's password.
    */

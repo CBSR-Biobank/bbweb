@@ -121,9 +121,10 @@ libraryDependencies ++= Seq(
   // Testing
   ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "2.4.17.3"  % "test" ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
   "com.typesafe.akka"           %% "akka-testkit"                        % akkaVer   % "test",
-  "org.scalatestplus"           %% "play"                                % "1.4.0"   % "test",
+  "org.scalatestplus.play"      %% "scalatestplus-play"                  % "1.5.1"   % "test",
   "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
-  "org.codehaus.janino"         %  "janino"                              % "3.0.6"   % "test"
+  "org.codehaus.janino"         %  "janino"                              % "3.0.6"   % "test",
+  "org.mockito"                 %  "mockito-core"                        % "2.7.21"  % "test"
   )
 
 incOptions := incOptions.value.withNameHashing(true)

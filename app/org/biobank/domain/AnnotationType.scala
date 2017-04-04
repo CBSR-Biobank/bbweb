@@ -180,7 +180,7 @@ trait AnnotationTypeValidations {
 object AnnotationType extends AnnotationTypeValidations {
   import org.biobank.domain.CommonValidations._
 
-  implicit val annotationTypeWrites: Writes[AnnotationType] = Json.writes[AnnotationType]
+  implicit val annotationTypeFormat: Format[AnnotationType] = Json.format[AnnotationType]
 
   def create(name:          String,
              description:   Option[String],

@@ -95,8 +95,9 @@ object Specimen {
   val usableState: EntityState = new EntityState("usable")
   val unusableState: EntityState = new EntityState("unusable")
 
-  implicit val specimenWrites: Writes[Specimen] = new Writes[Specimen] {
-      def writes(specimen: Specimen): JsValue =
+  implicit val specimenWrites: Format[Specimen] = new Format[Specimen] {
+
+      override def writes(specimen: Specimen): JsValue =
         ConcurrencySafeEntity.toJson(specimen) ++
         Json.obj(
           "state"            -> specimen.state.id,
@@ -110,7 +111,16 @@ object Specimen {
           "timeCreated"      -> specimen.timeCreated,
           "amount"           -> specimen.amount
         )
+
+      override def reads(json: JsValue): JsResult[Specimen] = (json \ "state") match {
+          case JsDefined(JsString(usableState.id)) => json.validate[UsableSpecimen]
+          case JsDefined(JsString(unusableState.id))  => json.validate[UnusableSpecimen]
+          case _ => JsError("error")
+        }
     }
+
+  implicit val usableSpecimenReads: Reads[UsableSpecimen] = Json.reads[UsableSpecimen]
+  implicit val unusableSpecimenReads: Reads[UnusableSpecimen]   = Json.reads[UnusableSpecimen]
 
   val sort2Compare: Map[String, (Specimen, Specimen) => Boolean] =
     Map[String, (Specimen, Specimen) => Boolean](

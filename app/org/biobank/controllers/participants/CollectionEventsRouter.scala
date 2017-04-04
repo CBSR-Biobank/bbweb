@@ -21,8 +21,8 @@ class CollectionEventsRouter @Inject()(controller: CollectionEventsController) e
     case GET(p"/$collectionEventId") =>
       controller.get(collectionEventId)
 
-    case POST(p"/${participantId(id)}") =>
-      controller.add(id)
+    case POST(p"/snapshot") =>
+      controller.snapshot
 
     case POST(p"/visitNumber/${collectionEventId(id)}") =>
       controller.updateVisitNumber(id)
@@ -32,6 +32,9 @@ class CollectionEventsRouter @Inject()(controller: CollectionEventsController) e
 
     case POST(p"/annot/${collectionEventId(id)}") =>
       controller.addAnnotation(id)
+
+    case POST(p"/${participantId(id)}") =>
+      controller.add(id)
 
     case DELETE(p"/annot/${collectionEventId(id)}/$annotTypeId/${long(ver)}") =>
       controller.removeAnnotation(id, annotTypeId, ver)

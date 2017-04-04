@@ -91,6 +91,6 @@ object Participant extends ParticipantValidations {
     }
   }
 
-  implicit val participantWrites: Writes[Participant] = Json.writes[Participant]
+  implicit val participantWrites: Format[Participant] = Json.format[Participant]
 
 }

@@ -2,7 +2,6 @@ package org.biobank.service.centres
 
 import akka.actor._
 import akka.pattern.ask
-import akka.util.Timeout
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
 import org.biobank.domain.centre._
@@ -15,12 +14,11 @@ import org.biobank.service._
 import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
-import scala.concurrent.duration._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[CentresServiceImpl])
-trait CentresService {
+trait CentresService extends BbwebService {
 
   /**
    * Returns a set of studies. The entities can be filtered and or sorted using expressions.
@@ -56,11 +54,10 @@ trait CentresService {
 class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: ActorRef,
                                     val centreRepository:          CentreRepository,
                                     val studyRepository:           StudyRepository)
-    extends CentresService {
+    extends CentresService
+    with BbwebServiceImpl {
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
-
-  implicit val timeout: Timeout = 5.seconds
 
   def getCentresCount(): Int = {
     centreRepository.getValues.size

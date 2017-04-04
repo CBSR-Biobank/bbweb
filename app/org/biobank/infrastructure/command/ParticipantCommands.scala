@@ -14,9 +14,9 @@ object ParticipantCommands {
       with HasExpectedVersion
 
   final case class AddParticipantCmd(userId:      String,
-                               studyId:     String,
-                               uniqueId:    String,
-                               annotations: List[Annotation])
+                                     studyId:     String,
+                                     uniqueId:    String,
+                                     annotations: List[Annotation])
       extends ParticipantCommand
 
   final case class UpdateParticipantUniqueIdCmd(userId:          String,

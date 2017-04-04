@@ -14,14 +14,14 @@ class CeventTypesRouter @Inject()(controller: CeventTypesController) extends Sim
     case GET(p"/${studyId(id)}" ? q_o"cetId=${ceventTypeId(cetId)}") =>
       controller.get(id, cetId)
 
-    case POST(p"/${studyId(id)}") =>
-      controller.add(id)
-
     case DELETE(p"/${studyId(id)}/${ceventTypeId(cetId)}/${long(ver)}") =>
       controller.remove(id, cetId, ver)
 
     case GET(p"/inuse/${ceventTypeId(cetId)}") =>
       controller.inUse(cetId)
+
+    case POST(p"/snapshot") =>
+      controller.snapshot
 
     case POST(p"/name/${ceventTypeId(cetId)}") =>
       controller.updateName(cetId)
@@ -46,6 +46,9 @@ class CeventTypesRouter @Inject()(controller: CeventTypesController) extends Sim
 
     case POST(p"/annottype/${ceventTypeId(cetId)}/$uniqueId") =>
       controller.updateAnnotationType(cetId, uniqueId)
+
+    case POST(p"/${studyId(id)}") =>
+      controller.add(id)
 
     case DELETE(p"/annottype/${studyId(id)}/${ceventTypeId(cetId)}/${long(ver)}/$uniqueId") =>
       controller.removeAnnotationType(id, cetId, ver, uniqueId)

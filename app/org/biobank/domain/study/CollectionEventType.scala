@@ -164,8 +164,7 @@ final case class CollectionEventType(studyId:            StudyId,
 object CollectionEventType extends CollectionEventTypeValidations {
   import org.biobank.domain.CommonValidations._
 
-  implicit val collectionEventTypeWrites: Writes[CollectionEventType] =
-    Json.writes[CollectionEventType]
+  implicit val collectionEventTypeWrites: Format[CollectionEventType] = Json.format[CollectionEventType]
 
   def create(studyId:            StudyId,
              id:                 CollectionEventTypeId,

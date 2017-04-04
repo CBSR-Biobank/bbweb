@@ -6,12 +6,14 @@ import javax.inject._
 import org.biobank.TestData
 import org.biobank.domain.study._
 import org.biobank.domain.{AnnotationType, AnnotationValueType}
+import org.biobank.domain.study.Study
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.EventUtils
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.service.{Processor, ServiceError, ServiceValidation}
+import org.biobank.service.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
+import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -19,9 +21,11 @@ object StudiesProcessor {
 
   def props: Props = Props[StudiesProcessor]
 
-}
+  final case class SnapshotState(studies: Set[Study])
 
-final case class SnapshotState(studies: List[Study])
+  implicit val snapshotStateFormat: Format[SnapshotState] = Json.format[SnapshotState]
+
+}
 
 /**
  * The StudiesProcessor is responsible for maintaining state changes for all
@@ -30,15 +34,17 @@ final case class SnapshotState(studies: List[Study])
  * events, afterwhich it will updated the current state of the [[org.biobank.domain.study.Study]] being
  * processed.
  */
-class StudiesProcessor @javax.inject.Inject() (
-  @Named("processingType")      val processingTypeProcessor:      ActorRef,
-  @Named("specimenLinkType")    val specimenLinkTypeProcessor:    ActorRef,
-  val studyRepository:                                            StudyRepository,
-  val processingTypeRepository:                                   ProcessingTypeRepository,
-  val specimenGroupRepository:                                    SpecimenGroupRepository,
-  val collectionEventTypeRepository:                              CollectionEventTypeRepository,
-  val testData:                                                   TestData)
+class StudiesProcessor @Inject() (
+  @Named("processingType")      val processingTypeProcessor:   ActorRef,
+  @Named("specimenLinkType")    val specimenLinkTypeProcessor: ActorRef,
+  val studyRepository:                                         StudyRepository,
+  val processingTypeRepository:                                ProcessingTypeRepository,
+  val specimenGroupRepository:                                 SpecimenGroupRepository,
+  val collectionEventTypeRepository:                           CollectionEventTypeRepository,
+  val testData:                                                TestData,
+  val snapshotWriter:                                          SnapshotWriter)
     extends Processor {
+  import StudiesProcessor._
   import org.biobank.CommonValidations._
 
   override def persistenceId: String = "studies-processor-id"
@@ -64,11 +70,11 @@ class StudiesProcessor @javax.inject.Inject() (
       case event => log.error(s"event not handled: $event")
     }
 
-    case SnapshotOffer(_, snapshot: SnapshotState) =>
-      snapshot.studies.foreach(studyRepository.put)
+    case SnapshotOffer(_, snapshotFilename: String) =>
+      applySnapshot(snapshotFilename)
 
     case RecoveryCompleted =>
-      log.debug(s"recovery completed")
+      log.debug(s"StudiesProcessor: recovery completed")
 
   }
 
@@ -131,19 +137,38 @@ class StudiesProcessor @javax.inject.Inject() (
       processUpdateCmdOnRetiredStudy(cmd, unretireCmdToEvent, applyUnretiredEvent)
 
     case "snap" =>
-      saveSnapshot(SnapshotState(studyRepository.getValues.toList))
+      mySaveSnapshot
 
     case SaveSnapshotSuccess(metadata) =>
-      log.debug(s"snapshot saved successfully: persistenceId: ${metadata.persistenceId}, sequenceNr: ${metadata.sequenceNr}")
+      log.debug(s"snapshot saved successfully: ${metadata}")
 
     case SaveSnapshotFailure(metadata, reason) =>
-      log.error(s"snapshot save error: persistenceId: ${metadata.persistenceId}, sequenceNr: ${metadata.sequenceNr}, reason: ${reason.getMessage}")
+      log.error(s"snapshot save error: ${metadata}")
       reason.printStackTrace
 
     case "persistence_restart" =>
       throw new Exception("Intentionally throwing exception to test persistence by restarting the actor")
 
     case cmd => log.error(s"StudiesProcessor: message not handled: $cmd")
+  }
+
+  private def mySaveSnapshot(): Unit = {
+    val snapshotState = SnapshotState(studyRepository.getValues.toSet)
+    val filename = snapshotWriter.save(persistenceId, Json.toJson(snapshotState).toString)
+    log.debug(s"saved snapshot to: $filename")
+    saveSnapshot(filename)
+  }
+
+  private def applySnapshot(filename: String): Unit = {
+    log.info(s"snapshot recovery file: $filename")
+    val fileContents = snapshotWriter.load(filename);
+    Json.parse(fileContents).validate[SnapshotState].fold(
+      errors => log.error(s"could not apply snapshot: $filename: $errors"),
+      snapshot =>  {
+        log.debug(s"snapshot contains ${snapshot.studies.size} studies")
+        snapshot.studies.foreach(studyRepository.put)
+      }
+    )
   }
 
   private def validateAndForward(cmd: StudyCommand) = {

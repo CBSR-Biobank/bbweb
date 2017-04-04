@@ -1,15 +1,18 @@
-<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../config/ehcache.xsd" updateCheck="false">
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../config/ehcache.xsd" updateCheck="false">
+
+  <!-- see https://gist.github.com/oscarrenalias/5063249 -->
 
     <defaultCache
-            maxElementsInMemory="10000"
+            maxBytesLocalHeap="256000000"
             eternal="false"
             timeToIdleSeconds="120"
             timeToLiveSeconds="120"
             overflowToDisk="false"
             maxElementsOnDisk="10000000"
-            diskPersistent="true"
+            diskPersistent="false"
             diskExpiryThreadIntervalSeconds="120"
             memoryStoreEvictionPolicy="LRU"
-    /> 
-    
+    />
+
 </ehcache>

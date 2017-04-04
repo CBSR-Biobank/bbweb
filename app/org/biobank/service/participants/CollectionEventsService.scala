@@ -2,7 +2,6 @@ package org.biobank.service.participants
 
 import akka.actor._
 import akka.pattern.ask
-import akka.util.Timeout
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
 import org.biobank.domain.participants._
@@ -14,12 +13,11 @@ import org.biobank.service._
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
-import scala.concurrent.duration._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[CollectionEventsServiceImpl])
-trait CollectionEventsService {
+trait CollectionEventsService extends BbwebService {
 
   def get(collectionEventId: String): ServiceValidation[CollectionEvent]
 
@@ -40,11 +38,10 @@ class CollectionEventsServiceImpl @Inject() (
   val studyRepository:                               StudyRepository,
   val participantRepository:                         ParticipantRepository,
   val collectionEventRepository:                     CollectionEventRepository)
-    extends CollectionEventsService {
+    extends CollectionEventsService
+    with BbwebServiceImpl {
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
-
-  implicit val timeout: Timeout = 5.seconds
 
   def get(collectionEventId: String): ServiceValidation[CollectionEvent] = {
     collectionEventRepository.getByKey(CollectionEventId(collectionEventId)).leftMap(_ =>

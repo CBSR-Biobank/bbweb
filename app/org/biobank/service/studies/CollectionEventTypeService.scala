@@ -9,6 +9,7 @@ import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.infrastructure.event.CollectionEventTypeEvents._
 import org.biobank.service.{BbwebService, BbwebServiceImpl, ServiceValidation, ServiceError}
+import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 import scalaz.Scalaz._
@@ -55,6 +56,8 @@ class CollectionEventTypeServiceImpl @Inject() (
   val collectionEventRepository:     CollectionEventRepository)
     extends CollectionEventTypeService
     with BbwebServiceImpl {
+
+  val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   def specimenGroupWithId(studyId: StudyId, specimenGroupId: String)
       : ServiceValidation[SpecimenGroup] = {

@@ -383,6 +383,19 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must be ("error")
         (json \ "message").as[String] must include("InvalidName")
       }
+
+      "not update a user's name when an invalid version number is used" in {
+        val user = factory.createActiveUser
+        userRepository.put(user)
+
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version + 1),
+                               "name"            -> user.name)
+        val json = makeRequest(POST, updateUri(user, "name"), BAD_REQUEST, reqJson)
+
+        (json \ "status").as[String] must be ("error")
+
+        (json \ "message").as[String] must include ("expected version doesn't match current version")
+      }
     }
 
     "POST /users/email/:id" must {
@@ -428,6 +441,19 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must be ("error")
         (json \ "message").as[String] must include("InvalidEmail")
+      }
+
+      "not update a user's email if an invalid version number is used " in {
+        val user = factory.createActiveUser
+        userRepository.put(user)
+
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version + 1),
+                               "email" -> user.email)
+        val json = makeRequest(POST, updateUri(user, "email"), BAD_REQUEST, reqJson)
+
+        (json \ "status").as[String] must be ("error")
+
+        (json \ "message").as[String] must include ("expected version doesn't match current version")
       }
 
     }
@@ -490,6 +516,20 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val json = makeRequest(POST, updateUri(user, "password"), BAD_REQUEST, json = reqJson)
 
         (json \ "status").as[String] must be ("error")
+      }
+
+      "fail when attempting to update a user's password with a bad version number" in {
+        val plainPassword = nameGenerator.next[String]
+        val user = createActiveUserInRepository(plainPassword)
+
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version + 1),
+                               "currentPassword" -> "abcdef",
+                               "newPassword" -> "")
+        val json = makeRequest(POST, updateUri(user, "password"), BAD_REQUEST, reqJson)
+
+        (json \ "status").as[String] must be ("error")
+
+        (json \ "message").as[String] must include ("expected version doesn't match current version")
       }
     }
 
@@ -558,6 +598,19 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must be ("error")
       }
+
+      "not update a user's avatar URL if an invalid version number is used" in {
+        val user = factory.createActiveUser
+        userRepository.put(user)
+
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version + 1),
+                               "avatarUrl" -> user.avatarUrl)
+        val json = makeRequest(POST, updateUri(user, "avatarurl"), BAD_REQUEST, json = reqJson)
+
+        (json \ "status").as[String] must be ("error")
+
+        (json \ "message").as[String] must include ("expected version doesn't match current version")
+      }
     }
 
     "GET /users/:id" must {
@@ -591,6 +644,18 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must be ("success")
       }
 
+      "must not activate a user with an invalid version number" in {
+        val user = factory.createRegisteredUser
+        userRepository.put(user)
+
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version + 1))
+        val json = makeRequest(POST, updateUri(user, "activate"), BAD_REQUEST, reqJson)
+
+        (json \ "status").as[String] must be ("error")
+
+        (json \ "message").as[String] must include ("expected version doesn't match current version")
+      }
+
     }
 
     "POST /users/lock" must {
@@ -605,6 +670,30 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must be ("success")
       }
 
+      "must not lock a user when an invalid version number is used" in {
+        val user = factory.createActiveUser
+        userRepository.put(user)
+
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version + 1))
+        val json = makeRequest(POST, updateUri(user, "lock"), BAD_REQUEST, reqJson)
+
+        (json \ "status").as[String] must be ("error")
+
+        (json \ "message").as[String] must include ("expected version doesn't match current version")
+      }
+
+      "must not lock a registered user" in {
+        val user = factory.createRegisteredUser
+        userRepository.put(user)
+
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version))
+        val json = makeRequest(POST, updateUri(user, "lock"), BAD_REQUEST, reqJson)
+
+        (json \ "status").as[String] must be ("error")
+
+        (json \ "message").as[String] must include ("user not active")
+      }
+
     }
 
     "POST /users/unlock" must {
@@ -617,6 +706,35 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val json = makeRequest(POST, updateUri(user, "unlock"), json = reqJson)
 
         (json \ "status").as[String] must be ("success")
+      }
+
+      "must not unlock a user if a invalid version number is used" in {
+        val user = factory.createLockedUser
+        userRepository.put(user)
+
+        val reqJson = Json.obj("expectedVersion" -> Some(user.version + 1))
+        val json = makeRequest(POST, updateUri(user, "unlock"), BAD_REQUEST, reqJson)
+
+        (json \ "status").as[String] must be ("error")
+
+        (json \ "message").as[String] must include ("expected version doesn't match current version")
+      }
+
+      "must not unlock a registered or active user" in {
+        val users = Table("user that can't be unlocked",
+                          factory.createRegisteredUser,
+                          factory.createActiveUser)
+        forAll(users) { user =>
+          info(s"${user.state}")
+          userRepository.put(user)
+
+          val reqJson = Json.obj("expectedVersion" -> Some(user.version))
+          val json = makeRequest(POST, updateUri(user, "unlock"), BAD_REQUEST, reqJson)
+
+          (json \ "status").as[String] must be ("error")
+
+          (json \ "message").as[String] must include ("user not locked")
+        }
       }
 
     }

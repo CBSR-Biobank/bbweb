@@ -11,23 +11,6 @@ class CentresRouter @Inject()(controller: CentresController) extends SimpleRoute
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   override def routes: Routes = {
 
-    // --- CENTRE LOCATIONS ---
-    case POST(p"/locations/${centreId(id)}") =>
-      controller.addLocation(id)
-
-    case POST(p"/locations/${centreId(centreId)}/$locationId") =>
-      controller.updateLocation(centreId, locationId)
-
-    case DELETE(p"/locations/${centreId(centreId)}/${long(ver)}/$locationId") =>
-      controller.removeLocation(centreId, ver, locationId)
-
-    // --- CENTRE TO STUDY LINK ---
-    case POST(p"/studies/${centreId(centreId)}") =>
-      controller.addStudy(centreId)
-
-    case DELETE(p"/studies/${centreId(centreId)}/${long(ver)}/$studyId") =>
-      controller.removeStudy(centreId, ver, studyId)
-
     // --- CENTRE DTOs ---
     case GET(p"/names") =>
       // this action extracts parameters from the raw query string
@@ -47,6 +30,21 @@ class CentresRouter @Inject()(controller: CentresController) extends SimpleRoute
     case GET(p"/${centreId(id)}")  =>
       controller.query(id)
 
+    case POST(p"/")  =>
+      controller.add
+
+    case POST(p"/locations/${centreId(id)}") =>
+      controller.addLocation(id)
+
+    case POST(p"/locations/${centreId(centreId)}/$locationId") =>
+      controller.updateLocation(centreId, locationId)
+
+    case POST(p"/snapshot") =>
+      controller.snapshot
+
+    case POST(p"/studies/${centreId(centreId)}") =>
+      controller.addStudy(centreId)
+
     case POST(p"/name/${centreId(id)}")  =>
       controller.updateName(id)
 
@@ -59,8 +57,11 @@ class CentresRouter @Inject()(controller: CentresController) extends SimpleRoute
     case POST(p"/disable/${centreId(id)}")  =>
       controller.disable(id)
 
-    case POST(p"/")  =>
-      controller.add
+    case DELETE(p"/studies/${centreId(centreId)}/${long(ver)}/$studyId") =>
+      controller.removeStudy(centreId, ver, studyId)
+
+    case DELETE(p"/locations/${centreId(centreId)}/${long(ver)}/$locationId") =>
+      controller.removeLocation(centreId, ver, locationId)
 
   }
 

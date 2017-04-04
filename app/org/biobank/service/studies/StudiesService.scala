@@ -2,9 +2,8 @@
 
 import akka.actor._
 import akka.pattern.ask
-import akka.util.Timeout
 import com.google.inject.ImplementedBy
-import javax.inject.{Inject, Named}
+import javax.inject._
 import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.study._
@@ -17,13 +16,12 @@ import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service._
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import scala.concurrent.Future
-import scala.concurrent.duration._
+import scala.concurrent._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[StudiesServiceImpl])
-trait StudiesService {
+trait StudiesService extends BbwebService {
 
   def getStudyCount(): Int
 
@@ -79,20 +77,18 @@ trait StudiesService {
   *
  */
 class StudiesServiceImpl @Inject() (
-  @Named("studiesProcessor") val studyProcessor:         ActorRef,
-  @Named("collectionEventType") val ceventTypeProcessor: ActorRef,
-  val studyRepository:                                   StudyRepository,
-  val centreRepository:                                  CentreRepository,
-  val processingTypeRepository:                          ProcessingTypeRepository,
-  val specimenGroupRepository:                           SpecimenGroupRepository,
-  val collectionEventTypeRepository:                     CollectionEventTypeRepository,
-  val collectionEventRepository:                         CollectionEventRepository,
-  val specimenLinkTypeRepository:                        SpecimenLinkTypeRepository)
-    extends StudiesService {
+  @Named("studiesProcessor") val processor: ActorRef,
+  val studyRepository:                      StudyRepository,
+  val centreRepository:                     CentreRepository,
+  val processingTypeRepository:             ProcessingTypeRepository,
+  val specimenGroupRepository:              SpecimenGroupRepository,
+  val collectionEventTypeRepository:        CollectionEventTypeRepository,
+  val collectionEventRepository:            CollectionEventRepository,
+  val specimenLinkTypeRepository:           SpecimenLinkTypeRepository)
+    extends StudiesService
+    with BbwebServiceImpl {
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
-
-  implicit val timeout: Timeout = 5.seconds
 
   def getStudyCount(): Int = {
     studyRepository.getValues.size
@@ -199,7 +195,7 @@ class StudiesServiceImpl @Inject() (
   }
 
   def processCommand(cmd: StudyCommand): Future[ServiceValidation[Study]] =
-    ask(studyProcessor, cmd).mapTo[ServiceValidation[StudyEvent]].map { validation =>
+    ask(processor, cmd).mapTo[ServiceValidation[StudyEvent]].map { validation =>
       for {
         event <- validation
         study <- studyRepository.getByKey(StudyId(event.id))
@@ -212,7 +208,7 @@ class StudiesServiceImpl @Inject() (
       case c: RemoveProcessingTypeCmd =>
         Future.successful(ServiceError(s"invalid service call: $cmd").failureNel[ProcessingType])
       case _ =>
-        ask(studyProcessor, cmd).mapTo[ServiceValidation[ProcessingTypeEvent]].map { validation =>
+        ask(processor, cmd).mapTo[ServiceValidation[ProcessingTypeEvent]].map { validation =>
           for {
             event  <- validation
             result <- processingTypeRepository.getByKey(ProcessingTypeId(event.id))
@@ -223,7 +219,7 @@ class StudiesServiceImpl @Inject() (
 
   def processRemoveProcessingTypeCommand(cmd: StudyCommand)
       : Future[ServiceValidation[Boolean]] =
-    ask(studyProcessor, cmd).mapTo[ServiceValidation[ProcessingTypeEvent]]
+    ask(processor, cmd).mapTo[ServiceValidation[ProcessingTypeEvent]]
       .map { validation => validation.map(_ => true) }
 
 }

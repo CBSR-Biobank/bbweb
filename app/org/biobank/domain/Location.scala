@@ -6,6 +6,19 @@ final case class LocationId(val id: String) extends AnyVal {
   override def toString: String = id
 }
 
+object LocationId {
+
+  // Do not want JSON to create a sub object, we just want it to be converted
+  // to a single string
+  implicit val locationIdFormat: Format[LocationId] = new Format[LocationId] {
+
+      override def writes(id: LocationId): JsValue = JsString(id.id)
+
+      override def reads(json: JsValue): JsResult[LocationId] =
+        Reads.StringReads.reads(json).map(LocationId.apply _)
+    }
+}
+
 
 /**
  * A Location is a street address.
@@ -53,9 +66,7 @@ final case class Location(uniqueId:       LocationId,
 object Location {
   import org.biobank.domain.CommonValidations._
 
-  implicit val locationIdReader: Reads[LocationId] = (__).read[String].map( new LocationId(_) )
-  implicit val locationIdWriter: Writes[LocationId] = Writes{ (id: LocationId) => JsString(id.id) }
-  implicit val locationWriter: Writes[Location] = Json.writes[Location]
+  implicit val locationFormat: Format[Location] = Json.format[Location]
 
   def create(name:           String,
              street:         String,

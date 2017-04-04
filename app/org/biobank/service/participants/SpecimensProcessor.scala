@@ -1,7 +1,7 @@
 package org.biobank.service.participants
 
 import akka.actor._
-import akka.persistence.SnapshotOffer
+import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
 import javax.inject.{Inject, Singleton}
 import org.biobank.domain.LocationId
 import org.biobank.domain.participants._
@@ -9,15 +9,23 @@ import org.biobank.domain.processing.ProcessingEventInputSpecimenRepository
 import org.biobank.domain.study.{CollectionEventType, CollectionEventTypeRepository}
 import org.biobank.infrastructure.command.SpecimenCommands._
 import org.biobank.infrastructure.event.SpecimenEvents._
-import org.biobank.service.{Processor, ServiceError, ServiceValidation}
+import org.biobank.service.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
+import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 object SpecimensProcessor {
+  import org.biobank.CommonValidations._
 
   def props: Props = Props[SpecimensProcessor]
+
+  final case class SnapshotState(specimens: Set[Specimen])
+
+  implicit val snapshotStateFormat: Format[SnapshotState] = Json.format[SnapshotState]
+
+  def specimenSpecNotFound(id: String): IdNotFound = IdNotFound(s"collection specimen spec id: $id")
 
 }
 
@@ -30,20 +38,18 @@ class SpecimensProcessor @Inject() (
   val collectionEventRepository:              CollectionEventRepository,
   val collectionEventTypeRepository:          CollectionEventTypeRepository,
   val ceventSpecimenRepository:               CeventSpecimenRepository,
-  val processingEventInputSpecimenRepository: ProcessingEventInputSpecimenRepository)
-// FIXME add container repository when implemented
-//val containerRepository:       ContainerRepository)
+  val processingEventInputSpecimenRepository: ProcessingEventInputSpecimenRepository,
+  val snapshotWriter:                         SnapshotWriter)
+  // FIXME add container repository when implemented
+  //val containerRepository:       ContainerRepository)
     extends Processor {
 
+  import SpecimensProcessor._
   import SpecimenEvent.EventType
   import org.biobank.infrastructure.event.EventUtils._
   import org.biobank.CommonValidations._
 
   override def persistenceId: String = "specimens-processor-id"
-
-  case class SnapshotState(specimens: Set[Specimen])
-
-  def specimenSpecNotFound(id: String): IdNotFound = IdNotFound(s"collection specimen spec id: $id")
 
   /**
    * These are the events that are recovered during journal recovery. They cannot fail and must be
@@ -51,26 +57,38 @@ class SpecimensProcessor @Inject() (
    */
   @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
   val receiveRecover: Receive = {
-    case event: SpecimenEvent => event.eventType match {
-      case et: EventType.Added              => applyAddedEvent(event)
-      case et: EventType.Moved              => applyMovedEvent(event)
-      case et: EventType.PosisitionAssigned => applyPositionAssignedEvent(event)
-      case et: EventType.AmountRemoved      => applyAmountRemovedEvent(event)
-      case et: EventType.UsableUpdated      => applyUsableUpdatedEvent(event)
-      case et: EventType.Removed            => applyRemovedEvent(event)
+    case event: SpecimenEvent =>
 
-      case event => log.error(s"event not handled: $event")
-    }
+      log.info(s"----------------------> $event")
 
-    case SnapshotOffer(_, snapshot: SnapshotState) =>
-      snapshot.specimens.foreach{ specimenRepository.put(_) }
+      event.eventType match {
+        case et: EventType.Added              => applyAddedEvent(event)
+        case et: EventType.Moved              => applyMovedEvent(event)
+        case et: EventType.PosisitionAssigned => applyPositionAssignedEvent(event)
+        case et: EventType.AmountRemoved      => applyAmountRemovedEvent(event)
+        case et: EventType.UsableUpdated      => applyUsableUpdatedEvent(event)
+        case et: EventType.Removed            => applyRemovedEvent(event)
+
+        case event => log.error(s"event not handled: $event")
+      }
+
+    case SnapshotOffer(_, snapshotFilename: String) =>
+      applySnapshot(snapshotFilename)
+
+    case RecoveryCompleted =>
+      log.debug("SpecimensProcessor: recovery completed")
+
+    case msg =>
+      log.error(s"message not handled: $msg")
   }
 
   /**
    * These are the commands that are requested. A command can fail, and will send the failure as a response
    * back to the user. Each valid command generates one or more events and is journaled.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any",
+                          "org.wartremover.warts.PublicInference",
+                          "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {
     case cmd: AddSpecimensCmd =>
       process(addCmdToEvent(cmd))(applyAddedEvent)
@@ -91,11 +109,40 @@ class SpecimensProcessor @Inject() (
       processUpdateCmd(cmd, removeCmdToEvent, applyRemovedEvent)
 
     case "snap" =>
-      saveSnapshot(SnapshotState(specimenRepository.getValues.toSet))
-      stash()
+     mySaveSnapshot
 
-    case cmd => log.error(s"specimensProcessor: message not handled: $cmd")
+    case SaveSnapshotSuccess(metadata) =>
+      log.debug(s"snapshot saved successfully: ${metadata}")
 
+    case SaveSnapshotFailure(metadata, reason) =>
+      log.error(s"snapshot save error: ${metadata}")
+      reason.printStackTrace
+
+    case "persistence_restart" =>
+      throw new Exception(
+        "SpecimensProcessor: Intentionally throwing exception to test persistence by restarting the actor")
+
+    case msg =>
+      log.error(s"specimensProcessor: message not handled: $msg")
+  }
+
+  private def mySaveSnapshot(): Unit = {
+    val snapshotState = SnapshotState(specimenRepository.getValues.toSet)
+    val filename = snapshotWriter.save(persistenceId, Json.toJson(snapshotState).toString)
+    log.debug(s"saved snapshot to: $filename")
+    saveSnapshot(filename)
+  }
+
+  private def applySnapshot(filename: String): Unit = {
+    log.info(s"snapshot recovery file: $filename")
+    val fileContents = snapshotWriter.load(filename);
+    Json.parse(fileContents).validate[SnapshotState].fold(
+      errors => log.error(s"could not apply snapshot: $filename: $errors"),
+      snapshot =>  {
+        log.debug(s"snapshot contains ${snapshot.specimens.size} collection events")
+        snapshot.specimens.foreach(specimenRepository.put)
+      }
+    )
   }
 
   private def addCmdToEvent(cmd: AddSpecimensCmd): ServiceValidation[SpecimenEvent] = {

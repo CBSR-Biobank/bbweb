@@ -143,5 +143,5 @@ object CollectionEvent
   def compareByTimeCompleted(a: CollectionEvent, b: CollectionEvent): Boolean =
     (a.timeCompleted compareTo b.timeCompleted) < 0
 
-  implicit val collectionEventWrites: Writes[CollectionEvent] = Json.writes[CollectionEvent]
+  implicit val collectionEventFormat: Format[CollectionEvent] = Json.format[CollectionEvent]
 }

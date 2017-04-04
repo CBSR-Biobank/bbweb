@@ -104,6 +104,8 @@ object ShipmentCommands {
                                      expectedVersion: Long)
       extends ShipmentModifyCommand
 
+  final case class ShipmentsSnapshotCmd(userId: String) extends ShipmentCommand
+
   implicit val addShipmentCmdReads: Reads[AddShipmentCmd] =
     Json.reads[AddShipmentCmd]
 
@@ -148,5 +150,8 @@ object ShipmentCommands {
 
   implicit val shipmentRemoveCmdReads: Reads[ShipmentRemoveCmd] =
     Json.reads[ShipmentRemoveCmd]
+
+  implicit val shipmentsSnapshotReads: Reads[ShipmentsSnapshotCmd] =
+    Json.reads[ShipmentsSnapshotCmd]
 
 }

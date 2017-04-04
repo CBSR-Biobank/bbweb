@@ -1,6 +1,7 @@
 package org.biobank.domain.study
 
 import org.biobank.ValidationKey
+import org.biobank.infrastructure.JsonUtils._
 import org.biobank.domain._
 import org.biobank.infrastructure.EnumUtils._
 import play.api.libs.json._
@@ -66,8 +67,8 @@ object Study {
       "state" -> compareByState)
 
   @SuppressWarnings(Array("org.wartremover.warts.Option2Iterable"))
-  implicit val studyWrites: Writes[Study] = new Writes[Study] {
-      def writes(study: Study): JsValue = {
+  implicit val studyFormat: Format[Study] = new Format[Study] {
+      override def writes(study: Study): JsValue = {
         ConcurrencySafeEntity.toJson(study) ++
         Json.obj("state"           -> study.state.id,
                  "name"            -> study.name,
@@ -77,7 +78,17 @@ object Study {
             study.description.map("description" -> Json.toJson(_)))
       }
 
+      override def reads(json: JsValue): JsResult[Study] = (json \ "state") match {
+          case JsDefined(JsString(disabledState.id)) => json.validate[DisabledStudy]
+          case JsDefined(JsString(enabledState.id))  => json.validate[EnabledStudy]
+          case JsDefined(JsString(retiredState.id))  => json.validate[RetiredStudy]
+          case _ => JsError("error")
+        }
     }
+
+  implicit val disabledStudyReads: Reads[DisabledStudy] = Json.reads[DisabledStudy]
+  implicit val enabledStudyReads: Reads[EnabledStudy]   = Json.reads[EnabledStudy]
+  implicit val retiredStudyReads: Reads[RetiredStudy]   = Json.reads[RetiredStudy]
 
   def compareByName(a: Study, b: Study): Boolean =
     (a.name compareToIgnoreCase b.name) < 0

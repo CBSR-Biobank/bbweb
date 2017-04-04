@@ -75,7 +75,7 @@ class ShipmentsControllerSpec
       }
 
       "list multiple shipments" in {
-        val f = createdShipmentFixture(2)
+        val f = createdShipmentsFixture(2)
         f.shipmentMap.values.foreach(shipmentRepository.put)
 
         forAll(centreFilters(f.fromCentre, f.toCentre)) { centreNameFilter =>
@@ -92,7 +92,7 @@ class ShipmentsControllerSpec
       }
 
       "list a shipment when using a not equal to filter on centre name" in {
-        val f = createdShipmentFixture(1)
+        val f = createdShipmentsFixture(1)
         f.shipmentMap.values.foreach(shipmentRepository.put)
 
         val filters = Table("centre filters",
@@ -166,7 +166,7 @@ class ShipmentsControllerSpec
       }
 
       "list a single shipment when filtered by courier name" in {
-        val f = createdShipmentFixture(2)
+        val f = createdShipmentsFixture(2)
         f.shipmentMap.values.foreach(shipmentRepository.put)
         val shipment = f.shipmentMap.values.head
         val filter = s"courierName::${shipment.courierName}"
@@ -175,7 +175,7 @@ class ShipmentsControllerSpec
       }
 
       "list a single shipment when using a 'like' filter on courier name" in {
-        val f = createdShipmentFixture(2)
+        val f = createdShipmentsFixture(2)
         val shipments = f.shipmentMap.values.toList
         val shipment = shipments(0).copy(courierName = "ABC")
         val filter = s"courierName:like:b"
@@ -189,7 +189,7 @@ class ShipmentsControllerSpec
 
       "list multiple shipments when filtered by courier name" in {
         val numShipments = 2
-        val f = createdShipmentFixture(numShipments)
+        val f = createdShipmentsFixture(numShipments)
         val shipments = f.shipmentMap.values.toList
         val courierNames = shipments.map(_.courierName)
 
@@ -209,7 +209,7 @@ class ShipmentsControllerSpec
       }
 
       "list a single shipment when filtered by tracking number" in {
-        val f = createdShipmentFixture(2)
+        val f = createdShipmentsFixture(2)
         f.shipmentMap.values.foreach(shipmentRepository.put)
         val shipment = f.shipmentMap.values.head
         val jsonItem = PagedResultsSpec(this).singleItemResult(
@@ -220,7 +220,7 @@ class ShipmentsControllerSpec
 
       "list a single shipment when filtered with a logical expression" in {
         val numShipments = 2
-        val f = createdShipmentFixture(numShipments)
+        val f = createdShipmentsFixture(numShipments)
         val shipments = f.shipmentMap.values.toList
         val shipment = shipments(0)
         val expressions = Table(
@@ -332,7 +332,7 @@ class ShipmentsControllerSpec
       }
 
       "list a single shipment when using a 'like' filter on tracking number" in {
-        val f = createdShipmentFixture(2)
+        val f = createdShipmentsFixture(2)
         val shipments = f.shipmentMap.values.toList
         val shipment = shipments(0).copy(trackingNumber = "ABC")
         val filter = s"trackingNumber:like:b"

@@ -3,7 +3,7 @@ package org.biobank.fixture
 import akka.actor.ActorRef
 import akka.actor._
 import akka.persistence.inmemory.extension.{ InMemoryJournalStorage, InMemorySnapshotStorage, StorageExtension }
-import akka.testkit.TestProbe
+import akka.testkit.{TestKit, TestProbe}
 import akka.util.Timeout
 import javax.inject.{ Inject, Named }
 import org.biobank.controllers.FixedEhCache
@@ -16,6 +16,7 @@ import org.biobank.domain.user._
 import org.biobank.service._
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.mock.MockitoSugar
 import org.scalatest.time._
 import play.api.cache.{ CacheApi /* , EhCacheModule */ }
 import play.api.inject.bind
@@ -45,11 +46,15 @@ trait TestFixture
     with MustMatchers
     with InMemoryCleanup
     with BeforeAndAfterAll
+    with MockitoSugar
     with TestDbConfiguration {
 
-  val app = new GuiceApplicationBuilder().
-    overrides(bind[CacheApi].to[FixedEhCache]).
-    build
+  val snapshotWriterMock = mock[SnapshotWriter]
+
+  val app = new GuiceApplicationBuilder()
+    .overrides(bind[CacheApi].to[FixedEhCache])
+    .overrides(bind[SnapshotWriter].toInstance(snapshotWriterMock))
+    .build
 
   implicit val system = ActorSystem("bbweb-test", TestDbConfiguration.config())
 
@@ -71,8 +76,7 @@ trait TestFixture
    */
   override def afterAll: Unit = {
     // Cleanup
-    //Await.result(system.terminate(), 10 seconds)
-    ()
+    TestKit.shutdownActorSystem(system)
   }
 
   val passwordHasher = app.injector.instanceOf[PasswordHasher]
@@ -85,11 +89,13 @@ trait TestFixture
 
   val participantRepository                    = app.injector.instanceOf[ParticipantRepository]
   val collectionEventRepository                = app.injector.instanceOf[CollectionEventRepository]
+  val specimenRepository                       = app.injector.instanceOf[SpecimenRepository]
   val ceventSpecimenRepository                 = app.injector.instanceOf[CeventSpecimenRepository]
 
   val userRepository = app.injector.instanceOf[UserRepository]
 
-  val centreRepository          = app.injector.instanceOf[CentreRepository]
+  val centreRepository = app.injector.instanceOf[CentreRepository]
+  val shipmentRepository = app.injector.instanceOf[ShipmentRepository]
 
   val usersProcessor = app.injector.instanceOf[NamedUsersProcessor].processor
 
@@ -109,22 +115,23 @@ trait TestFixture
 
   //val studyPersistenceQuery =  app.injector.instanceOf[StudyPersistenceQuery]
 
+  val specimensProcessor = app.injector.instanceOf[NamedSpecimensProcessor].processor
+  val participantsProcessor = app.injector.instanceOf[NamedParticipantsProcessor].processor
+  val collectionEventsProcessor = app.injector.instanceOf[NamedCollectionEventsProcessor].processor
+
+  val shipmentsProcessor = app.injector.instanceOf[NamedShipmentsProcessor].processor
 }
 
 case class NamedUsersProcessor @Inject() (@Named("usersProcessor") processor: ActorRef)
 
 case class NamedCentresProcessor @Inject() (@Named("centresProcessor") processor: ActorRef)
-
 case class NamedShipmentsProcessor @Inject() (@Named("shipmentsProcessor") processor: ActorRef)
 
-case class NamedCollectionEventTypeProcessor @Inject()        (
-  @Named("collectionEventType") processor: ActorRef)
+case class NamedParticipantsProcessor @Inject() (@Named("participantsProcessor") processor: ActorRef)
+case class NamedCollectionEventsProcessor @Inject() (@Named("collectionEventsProcessor") processor: ActorRef)
+case class NamedSpecimensProcessor @Inject() (@Named("specimensProcessor") processor: ActorRef)
 
-case class NamedProcessingTypeProcessor @Inject() (
-  @Named("processingType") processor: ActorRef)
-
-case class NamedSpecimenLinkTypeProcessor @Inject() (
-  @Named("specimenLinkType") processor: ActorRef)
-
-case class NamedStudiesProcessor @Inject() (
-  @Named("studiesProcessor") processor: ActorRef)
+case class NamedCollectionEventTypeProcessor @Inject() (@Named("collectionEventType") processor: ActorRef)
+case class NamedProcessingTypeProcessor @Inject() (@Named("processingType") processor: ActorRef)
+case class NamedSpecimenLinkTypeProcessor @Inject() (@Named("specimenLinkType") processor: ActorRef)
+case class NamedStudiesProcessor @Inject() (@Named("studiesProcessor") processor: ActorRef)

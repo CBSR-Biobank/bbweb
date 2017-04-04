@@ -1,6 +1,7 @@
 package org.biobank.domain.centre
 
 import org.biobank._
+import org.biobank.infrastructure.JsonUtils._
 import org.biobank.dto.{ShipmentSpecimenDto, SpecimenDto}
 import org.biobank.domain._
 import org.biobank.domain.centre.ShipmentItemState._
@@ -15,12 +16,13 @@ object ShipmentSpecimenId {
 
   // Do not want JSON to create a sub object, we just want it to be converted
   // to a single string
-  implicit val shipmentSpecimenIdReader: Reads[ShipmentSpecimenId] =
-    (__ \ "id").read[String].map( new ShipmentSpecimenId(_) )
+  implicit val shipmentSpecimenIdReader: Format[ShipmentSpecimenId] = new Format[ShipmentSpecimenId] {
 
-  implicit val shipmentSpecimenIdWriter: Writes[ShipmentSpecimenId] =
-    Writes{ (shipmentSpecimenId: ShipmentSpecimenId) => JsString(shipmentSpecimenId.id) }
+      override def writes(id: ShipmentSpecimenId): JsValue = JsString(id.id)
 
+      override def reads(json: JsValue): JsResult[ShipmentSpecimenId] =
+        Reads.StringReads.reads(json).map(ShipmentSpecimenId.apply _)
+    }
 }
 
 trait ShipmentSpecimenPredicates {
@@ -149,7 +151,16 @@ object ShipmentSpecimen extends ShipmentSpecimenValidations {
   import org.biobank.domain.CommonValidations._
   import org.biobank.CommonValidations._
 
-  implicit val shipmentSpecimenWrites: Writes[ShipmentSpecimen] = Json.writes[ShipmentSpecimen]
+  // Do not want JSON to create a sub object, we just want it to be converted
+  // to a single string
+  implicit val shipmentIdReader: Reads[ShipmentId] =
+    (__ \ "id").read[String].map( new ShipmentId(_) )
+
+  implicit val shipmentIdWriter: Writes[ShipmentId] =
+    Writes{ (shipmentId: ShipmentId) => JsString(shipmentId.id) }
+
+
+  implicit val shipmentSpecimenFormat: Format[ShipmentSpecimen] = Json.format[ShipmentSpecimen]
 
   def compareByState(a: ShipmentSpecimen, b: ShipmentSpecimen): Boolean = (a.state compareTo b.state) < 0
 
@@ -186,7 +197,7 @@ object ShipmentSpecimen extends ShipmentSpecimenValidations {
        validateId(shipmentId, ShipmentIdRequired) |@|
        validateId(specimenId, SpecimenIdRequired) |@|
        validateId(shipmentContainerId, ShipmentContainerIdInvalid)) {
-      case (_, _, _, _, _) => true
+      case _ => true
     }
   }
 }

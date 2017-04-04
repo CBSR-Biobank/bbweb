@@ -5,21 +5,19 @@ import org.biobank.controllers._
 import org.biobank.domain.study.{StudyId, CollectionEventTypeId}
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.service.AuthToken
-import org.biobank.service.studies.{StudiesService, CollectionEventTypeService}
+import org.biobank.service.studies.CollectionEventTypeService
 import org.biobank.service.users.UsersService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
-import play.api.mvc.{Action, Result}
+import play.api.mvc.{Action, Result, Results}
 import scala.concurrent.Future
 
 @Singleton
-class CeventTypesController @Inject() (
-  val action:                     BbwebAction,
-  val env:                        Environment,
-  val authToken:                  AuthToken,
-  val usersService:               UsersService,
-  val studiesService:             StudiesService,
-  val collectionEventTypeService: CollectionEventTypeService)
+class CeventTypesController @Inject() (val action:                     BbwebAction,
+                                       val env:                        Environment,
+                                       val authToken:                  AuthToken,
+                                       val usersService:               UsersService,
+                                       val collectionEventTypeService: CollectionEventTypeService)
     extends CommandController
     with JsonController {
 
@@ -36,7 +34,13 @@ class CeventTypesController @Inject() (
       }
     }
 
-  def add(studyId: StudyId): Action[JsValue] =
+  def snapshot: Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      collectionEventTypeService.snapshot
+      Future.successful(Results.Ok(Json.obj("status" ->"success", "data" -> true)))
+    }
+
+ def add(studyId: StudyId): Action[JsValue] =
     commandActionAsync(Json.obj("studyId" -> studyId)) {
       cmd: AddCollectionEventTypeCmd => processCommand(cmd) }
 

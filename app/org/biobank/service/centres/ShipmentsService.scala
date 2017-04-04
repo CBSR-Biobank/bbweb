@@ -2,7 +2,6 @@ package org.biobank.service.centres
 
 import akka.actor._
 import akka.pattern.ask
-import akka.util.Timeout
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
 import org.biobank.domain.centre._
@@ -19,13 +18,12 @@ import org.biobank.service._
 import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
-import scala.concurrent.duration._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 import scalaz._
 
 @ImplementedBy(classOf[ShipmentsServiceImpl])
-trait ShipmentsService {
+trait ShipmentsService extends BbwebService {
 
   /**
    * Returns a set of shipments to or from a Centre. The shipments can be filtered and or sorted using
@@ -69,6 +67,8 @@ trait ShipmentsService {
       Future[ServiceValidation[ShipmentDto]]
 
   def removeShipmentSpecimen(cmd: ShipmentSpecimenRemoveCmd): Future[ServiceValidation[Boolean]]
+
+  def snapshot(): Unit
 }
 
 /**
@@ -85,11 +85,10 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
                                       val specimensService:              SpecimensService,
                                       val shipmentFilter:                ShipmentFilter)
     extends ShipmentsService
+    with BbwebServiceImpl
     with ShipmentConstraints {
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
-
-  implicit val timeout: Timeout = 5.seconds
 
   /**
    * See:
@@ -235,4 +234,5 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
       validation.map(_ => true)
     }
   }
+
 }

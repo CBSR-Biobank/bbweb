@@ -18,8 +18,8 @@ class ParticipantsRouter @Inject()(controller: ParticipantsController) extends S
     case GET(p"/${studyId(sId)}/${participantId(id)}") =>
       controller.get(sId, id)
 
-    case POST(p"/${studyId(sId)}") =>
-      controller.add(sId)
+    case POST(p"/snapshot") =>
+      controller.snapshot
 
     case POST(p"/uniqueId/${participantId(id)}") =>
       controller.updateUniqueId(id)
@@ -27,9 +27,11 @@ class ParticipantsRouter @Inject()(controller: ParticipantsController) extends S
     case POST(p"/annot/${participantId(id)}") =>
       controller.addAnnotation(id)
 
+    case POST(p"/${studyId(sId)}") =>
+      controller.add(sId)
+
     case DELETE(p"/annot/${participantId(id)}/$annotTypeId/${long(ver)}") =>
       controller.removeAnnotation(id, annotTypeId, ver)
-
 
   }
 }

@@ -3,7 +3,6 @@ package org.biobank.domain.centre
 import org.biobank.domain.IdentifiedValueObject
 
 import play.api.libs.json._
-import play.api.libs.json.Reads._
 
 /** Identifies a unique [[Centre]] in the system.
   *
@@ -15,7 +14,11 @@ object CentreId {
 
   // Do not want JSON to create a sub object, we just want it to be converted
   // to a single string
-  implicit val centreIdReader: Reads[CentreId] = (__ \ "id").read[String].map( new CentreId(_) )
-  implicit val centreIdWriter: Writes[CentreId] = Writes{ (centreId: CentreId) => JsString(centreId.id) }
+  implicit val centreIdReader: Format[CentreId] = new Format[CentreId] {
 
+      override def writes(id: CentreId): JsValue = JsString(id.id)
+
+      override def reads(json: JsValue): JsResult[CentreId] =
+        Reads.StringReads.reads(json).map(CentreId.apply _)
+    }
 }

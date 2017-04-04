@@ -1,21 +1,26 @@
 package org.biobank.service.studies
 
 import akka.actor._
-import akka.persistence.{ SnapshotOffer, RecoveryCompleted }
+import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
 import org.biobank.domain._
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.study.{StudyId, CollectionEventType, CollectionEventTypeId, CollectionEventTypeRepository, CollectionSpecimenSpec }
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.infrastructure.event.EventUtils
-import org.biobank.service.{Processor, ServiceValidation}
+import org.biobank.service.{Processor, ServiceValidation, SnapshotWriter}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
+import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 object CollectionEventTypeProcessor {
 
   def props: Props = Props[CollectionEventTypeProcessor]
+
+  final case class SnapshotState(collectionEventTypes: Set[CollectionEventType])
+
+  implicit val snapshotStateFormat: Format[SnapshotState] = Json.format[SnapshotState]
 
 }
 
@@ -30,22 +35,23 @@ object CollectionEventTypeProcessor {
  */
 class CollectionEventTypeProcessor @javax.inject.Inject() (
   val collectionEventTypeRepository: CollectionEventTypeRepository,
-  val collectionEventRepository:     CollectionEventRepository)
+  val collectionEventRepository:     CollectionEventRepository,
+  val snapshotWriter:                SnapshotWriter)
     extends Processor {
 
+  import CollectionEventTypeProcessor._
   import org.biobank.CommonValidations._
   import org.biobank.infrastructure.event.CollectionEventTypeEvents._
   import org.biobank.infrastructure.event.CollectionEventTypeEvents.CollectionEventTypeEvent.EventType
 
-  override def persistenceId: String = "collection-event-processor-id"
-
-  case class SnapshotState(collectionEventTypes: Set[CollectionEventType])
+  override def persistenceId: String = "collection-event-type-processor-id"
 
   /**
    * These are the events that are recovered during journal recovery. They cannot fail and must be
    * processed to recreate the current state of the aggregate.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any",
+                          "org.wartremover.warts.PublicInference"))
   override def receiveRecover: Receive = {
     case event: CollectionEventTypeEvent =>
       event.eventType match {
@@ -63,14 +69,14 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
         case event => log.error(s"event not handled: $event")
       }
 
-    case SnapshotOffer(metadata, snapshot: SnapshotState) =>
-      log.info(s"snapshot metadata: $metadata")
-      snapshot.collectionEventTypes.foreach { ceType =>
-        collectionEventTypeRepository.put(ceType) }
+    case SnapshotOffer(_, snapshotFilename: String) =>
+      applySnapshot(snapshotFilename)
 
-    case RecoveryCompleted => log.debug("recovery completed")
+    case RecoveryCompleted =>
+      log.debug("CollectionEventTypesProcessor: recovery completed")
 
-    case msg => log.error(s"message not handled: $msg")
+    case msg =>
+      log.error(s"message not handled: $msg")
 
   }
 
@@ -78,7 +84,9 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
    * These are the commands that are requested. A command can fail, and will send the failure as a response
    * back to the user. Each valid command generates one or more events and is journaled.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any",
+                          "org.wartremover.warts.PublicInference",
+                          "org.wartremover.warts.Throw"))
   override def receiveCommand: Receive = {
     case cmd: AddCollectionEventTypeCmd =>
       process(addCmdToEvent(cmd))(applyAddedEvent)
@@ -111,10 +119,38 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       processUpdateCmd(cmd, removeSpecimenSpecCmdToEvent, applySpecimenSpecRemovedEvent)
 
     case "snap" =>
-      saveSnapshot(SnapshotState(collectionEventTypeRepository.getValues.toSet))
-      stash()
+     mySaveSnapshot
+
+    case SaveSnapshotSuccess(metadata) =>
+      log.debug(s"snapshot saved successfully: ${metadata}")
+
+    case SaveSnapshotFailure(metadata, reason) =>
+      log.error(s"snapshot save error: ${metadata}")
+      reason.printStackTrace
+
+    case "persistence_restart" =>
+      throw new Exception("Intentionally throwing exception to test persistence by restarting the actor")
 
     case cmd => log.error(s"CollectionEventTypeProcessor: message not handled: $cmd")
+  }
+
+  private def mySaveSnapshot(): Unit = {
+    val snapshotState = SnapshotState(collectionEventTypeRepository.getValues.toSet)
+    val filename = snapshotWriter.save(persistenceId, Json.toJson(snapshotState).toString)
+    log.debug(s"saved snapshot to: $filename")
+    saveSnapshot(filename)
+  }
+
+  private def applySnapshot(filename: String): Unit = {
+    log.info(s"snapshot recovery file: $filename")
+    val fileContents = snapshotWriter.load(filename);
+    Json.parse(fileContents).validate[SnapshotState].fold(
+      errors => log.error(s"could not apply snapshot: $filename: $errors"),
+      snapshot =>  {
+        log.debug(s"snapshot contains ${snapshot.collectionEventTypes.size} collection event types")
+        snapshot.collectionEventTypes.foreach(collectionEventTypeRepository.put)
+      }
+    )
   }
 
   private def addCmdToEvent(cmd: AddCollectionEventTypeCmd): ServiceValidation[CollectionEventTypeEvent] = {

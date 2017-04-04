@@ -1,9 +1,7 @@
 package org.biobank.domain.study
 
 import org.biobank.domain.IdentifiedValueObject
-
 import play.api.libs.json._
-import play.api.libs.json.Reads._
 
 /** Identifies a unique [[Study]] in the system.
   *
@@ -15,7 +13,12 @@ object StudyId {
 
   // Do not want JSON to create a sub object, we just want it to be converted
   // to a single string
-  implicit val studyIdReader: Reads[StudyId] = (__).read[String].map( new StudyId(_) )
-  implicit val studyIdWriter: Writes[StudyId] = Writes{ (id: StudyId) => JsString(id.id) }
+  implicit val studyIdFormat: Format[StudyId] = new Format[StudyId] {
+
+      override def writes(id: StudyId): JsValue = JsString(id.id)
+
+      override def reads(json: JsValue): JsResult[StudyId] =
+        Reads.StringReads.reads(json).map(StudyId.apply _)
+    }
 
 }

@@ -1,7 +1,7 @@
 package org.biobank.controllers.study
 
 import javax.inject.{Inject, Singleton}
-import org.biobank.controllers._
+import org.biobank.controllers.{BbwebAction, FilterAndSortQuery, CommandController, JsonController, PagedQuery}
 import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
@@ -10,7 +10,7 @@ import org.biobank.service.studies.StudiesService
 import org.biobank.service.users.UsersService
 import play.api.Logger
 import play.api.libs.json._
-import play.api.mvc.{Action, Result}
+import play.api.mvc.{Action, Result, Results}
 import play.api.{ Environment, Logger }
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
@@ -71,6 +71,12 @@ class StudiesController @Inject() (val action:         BbwebAction,
 
   def centresForStudy(studyId: StudyId): Action[Unit] = action(parse.empty) { implicit request =>
       Ok(studiesService.getCentresForStudy(studyId))
+    }
+
+  def snapshot: Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      studiesService.snapshot
+      Future.successful(Results.Ok(Json.obj("status" ->"success", "data" -> true)))
     }
 
   def add: Action[JsValue] = commandActionAsync { cmd: AddStudyCmd =>

@@ -10,7 +10,8 @@ import org.biobank.service.users.UsersService
 import org.biobank.service.participants._
 import play.api.{ Environment, Logger }
 import play.api.libs.json._
-import play.api.mvc.Action
+import play.api.mvc.{Action, Results}
+import scala.concurrent.Future
 
 @Singleton
 class ParticipantsController @Inject() (val action:              BbwebAction,
@@ -33,6 +34,12 @@ class ParticipantsController @Inject() (val action:              BbwebAction,
     action(parse.empty) { implicit request =>
       log.debug(s"ParticipantsController.getByUniqueId: studyId: $studyId, uniqueId: $uniqueId")
       validationReply(participantsService.getByUniqueId(studyId, uniqueId))
+    }
+
+  def snapshot: Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      participantsService.snapshot
+      Future.successful(Results.Ok(Json.obj("status" ->"success", "data" -> true)))
     }
 
   def add(studyId: StudyId): Action[JsValue] =

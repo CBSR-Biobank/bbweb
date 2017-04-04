@@ -21,6 +21,9 @@ class SpecimensRouter @Inject()(controller: SpecimensController) extends SimpleR
       // this action extracts parameters from the query string
       controller.list(ceId)
 
+    case POST(p"/snapshot") =>
+      controller.snapshot
+
     case POST(p"/${collectionEventId(ceId)}") =>
       controller.addSpecimens(ceId)
 

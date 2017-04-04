@@ -92,8 +92,8 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
       val json = makeRequest(POST,
                              updateUri(entity),
                              BAD_REQUEST,
-                               Json.obj("expectedVersion" -> entity.version) ++
-                                 annotationToJson(annotation))
+                             Json.obj("expectedVersion" -> entity.version) ++
+                               annotationToJson(annotation))
 
       (json \ "status").as[String] must include ("error")
 

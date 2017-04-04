@@ -6,7 +6,6 @@ import org.biobank.infrastructure.JsonUtils._
 import org.biobank.ValidationKey
 import org.joda.time.DateTime
 import org.slf4j.{Logger, LoggerFactory}
-import play.api.libs.json.Reads._
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -17,11 +16,13 @@ object ShipmentId {
 
   // Do not want JSON to create a sub object, we just want it to be converted
   // to a single string
-  implicit val shipmentIdReader: Reads[ShipmentId] =
-    (__ \ "id").read[String].map( new ShipmentId(_) )
+  implicit val shipmentIdReader: Format[ShipmentId] = new Format[ShipmentId] {
 
-  implicit val shipmentIdWriter: Writes[ShipmentId] =
-    Writes{ (shipmentId: ShipmentId) => JsString(shipmentId.id) }
+      override def writes(id: ShipmentId): JsValue = JsString(id.id)
+
+      override def reads(json: JsValue): JsResult[ShipmentId] =
+        Reads.StringReads.reads(json).map(ShipmentId.apply _)
+    }
 
 }
 
@@ -208,8 +209,8 @@ object Shipment extends ShipmentValidations {
                                                lostState)
 
   @SuppressWarnings(Array("org.wartremover.warts.Option2Iterable"))
-  implicit val shipmentWrites: Writes[Shipment] = new Writes[Shipment] {
-      def writes(shipment: Shipment): JsValue = {
+  implicit val shipmentFormat: Format[Shipment] = new Format[Shipment] {
+      override def writes(shipment: Shipment): JsValue = {
         ConcurrencySafeEntity.toJson(shipment) ++
         Json.obj("state"          -> shipment.state.id,
                  "courierName"    -> shipment.courierName,
@@ -228,7 +229,26 @@ object Shipment extends ShipmentValidations {
         )
       }
 
+      override def reads(json: JsValue): JsResult[Shipment] = (json \ "state") match {
+          case JsDefined(JsString(createdState.id))   => json.validate[CreatedShipment]
+          case JsDefined(JsString(packedState.id))    => json.validate[PackedShipment]
+          case JsDefined(JsString(sentState.id))      => json.validate[SentShipment]
+          case JsDefined(JsString(receivedState.id))  => json.validate[ReceivedShipment]
+          case JsDefined(JsString(unpackedState.id))  => json.validate[UnpackedShipment]
+          case JsDefined(JsString(completedState.id)) => json.validate[CompletedShipment]
+          case JsDefined(JsString(lostState.id))      => json.validate[LostShipment]
+          case _ => JsError("error")
+        }
     }
+
+  implicit val createdShipmentReads: Reads[CreatedShipment]     = Json.reads[CreatedShipment]
+  implicit val packedShipmentReads: Reads[PackedShipment]       = Json.reads[PackedShipment]
+  implicit val sentShipmentReads: Reads[SentShipment]           = Json.reads[SentShipment]
+  implicit val receivedShipmentReads: Reads[ReceivedShipment]   = Json.reads[ReceivedShipment]
+  implicit val unpackedShipmentReads: Reads[UnpackedShipment]   = Json.reads[UnpackedShipment]
+  implicit val completedShipmentReads: Reads[CompletedShipment] = Json.reads[CompletedShipment]
+  implicit val lostShipmentReads: Reads[LostShipment]           = Json.reads[LostShipment]
+
 }
 
 final case class CreatedShipment(id:             ShipmentId,
