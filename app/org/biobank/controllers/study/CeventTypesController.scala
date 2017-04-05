@@ -5,7 +5,7 @@ import org.biobank.controllers._
 import org.biobank.domain.study.{StudyId, CollectionEventTypeId}
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.service.AuthToken
-import org.biobank.service.studies.StudiesService
+import org.biobank.service.studies.{StudiesService, CollectionEventTypeService}
 import org.biobank.service.users.UsersService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
@@ -13,11 +13,13 @@ import play.api.mvc.{Action, Result}
 import scala.concurrent.Future
 
 @Singleton
-class CeventTypesController @Inject() (val action:         BbwebAction,
-                                       val env:            Environment,
-                                       val authToken:      AuthToken,
-                                       val usersService:   UsersService,
-                                       val studiesService: StudiesService)
+class CeventTypesController @Inject() (
+  val action:                     BbwebAction,
+  val env:                        Environment,
+  val authToken:                  AuthToken,
+  val usersService:               UsersService,
+  val studiesService:             StudiesService,
+  val collectionEventTypeService: CollectionEventTypeService)
     extends CommandController
     with JsonController {
 
@@ -28,9 +30,9 @@ class CeventTypesController @Inject() (val action:         BbwebAction,
       log.debug(s"CeventTypeController.list: studyId: $studyId, ceventTypeId: $ceventTypeId")
 
       ceventTypeId.fold {
-        validationReply(studiesService.collectionEventTypesForStudy(studyId).map(_.toList))
+        validationReply(collectionEventTypeService.collectionEventTypesForStudy(studyId).map(_.toList))
       } { id =>
-        validationReply(studiesService.collectionEventTypeWithId(studyId, id))
+        validationReply(collectionEventTypeService.collectionEventTypeWithId(studyId, id))
       }
     }
 
@@ -41,7 +43,7 @@ class CeventTypesController @Inject() (val action:         BbwebAction,
   def remove(studyId: StudyId, id: CollectionEventTypeId, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       val cmd = RemoveCollectionEventTypeCmd(Some(request.authInfo.userId.id), studyId.id, id.id, ver)
-      val future = studiesService.processRemoveCollectionEventTypeCommand(cmd)
+      val future = collectionEventTypeService.processRemoveCommand(cmd)
       validationReply(future)
   }
 
@@ -99,11 +101,11 @@ class CeventTypesController @Inject() (val action:         BbwebAction,
 
   def inUse(id: CollectionEventTypeId): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(studiesService.collectionEventTypeInUse(id))
+      validationReply(collectionEventTypeService.collectionEventTypeInUse(id))
     }
 
   private def processCommand(cmd: CollectionEventTypeCommand): Future[Result] = {
-    val future = studiesService.processCollectionEventTypeCommand(cmd)
+    val future = collectionEventTypeService.processCommand(cmd)
     validationReply(future)
   }
 }

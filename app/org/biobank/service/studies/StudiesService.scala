@@ -4,22 +4,20 @@ import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
 import com.google.inject.ImplementedBy
-import javax.inject._
+import javax.inject.{Inject, Named}
 import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.study._
 import org.biobank.dto._
 import org.biobank.dto.{ ProcessingDto }
 import org.biobank.infrastructure._
-import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.CollectionEventTypeEvents._
 import org.biobank.infrastructure.event.ProcessingTypeEvents._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service._
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import scala.concurrent._
+import scala.concurrent.Future
 import scala.concurrent.duration._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -46,21 +44,6 @@ trait StudiesService {
 
   def getCentresForStudy(studyId: StudyId): Set[CentreLocation]
 
-  def specimenGroupWithId(studyId: StudyId, specimenGroupId: String)
-      : ServiceValidation[SpecimenGroup]
-
-  def specimenGroupsForStudy(studyId: StudyId): ServiceValidation[Set[SpecimenGroup]]
-
-  def specimenGroupsInUse(studyId: StudyId): ServiceValidation[Set[SpecimenGroupId]]
-
-  def collectionEventTypeWithId(studyId: StudyId, collectionEventTypeId: CollectionEventTypeId)
-      : ServiceValidation[CollectionEventType]
-
-  def collectionEventTypeInUse(collectionEventTypeId: CollectionEventTypeId)
-      : ServiceValidation[Boolean]
-
-  def collectionEventTypesForStudy(studyId: StudyId): ServiceValidation[Set[CollectionEventType]]
-
   def processingTypeWithId(studyId: StudyId, processingTypeId: ProcessingTypeId)
       : ServiceValidation[ProcessingType]
 
@@ -77,15 +60,11 @@ trait StudiesService {
 
   def processCommand(cmd: StudyCommand): Future[ServiceValidation[Study]]
 
-  def processCollectionEventTypeCommand(cmd: CollectionEventTypeCommand)
-      : Future[ServiceValidation[CollectionEventType]]
-
-  def processRemoveCollectionEventTypeCommand(cmd: RemoveCollectionEventTypeCmd)
-      : Future[ServiceValidation[Boolean]]
-
+  // FIXME: move to its own service
   def processProcessingTypeCommand(cmd: StudyCommand)
       : Future[ServiceValidation[ProcessingType]]
 
+  // FIXME: move to its own service
   def processRemoveProcessingTypeCommand(cmd: StudyCommand)
       : Future[ServiceValidation[Boolean]]
 }
@@ -99,7 +78,7 @@ trait StudiesService {
   * @param studiesProcessor
   *
  */
-class StudiesServiceImpl @javax.inject.Inject() (
+class StudiesServiceImpl @Inject() (
   @Named("studiesProcessor") val studyProcessor:         ActorRef,
   @Named("collectionEventType") val ceventTypeProcessor: ActorRef,
   val studyRepository:                                   StudyRepository,
@@ -168,57 +147,6 @@ class StudiesServiceImpl @javax.inject.Inject() (
     }
   }
 
-  def specimenGroupWithId(studyId: StudyId, specimenGroupId: String)
-      : ServiceValidation[SpecimenGroup] = {
-    validStudyId(studyId) { study =>
-      specimenGroupRepository.withId(study.id, SpecimenGroupId(specimenGroupId))
-    }
-  }
-
-  def specimenGroupsForStudy(studyId: StudyId) : ServiceValidation[Set[SpecimenGroup]] = {
-    validStudyId(studyId) { study =>
-      specimenGroupRepository.allForStudy(study.id).successNel
-    }
-  }
-
-  def specimenGroupsInUse(studyId: StudyId): ServiceValidation[Set[SpecimenGroupId]] = {
-    ???
-    // validStudyId(studyId) { study =>
-    //     val cetSpecimenGroupIds = for {
-    //       ceventType <- collectionEventTypeRepository.allForStudy(study.id)
-    //       sgItem     <- ceventType.specimenGroupData
-    //     } yield SpecimenGroupId(sgItem.specimenGroupId)
-
-    //     val sltSpecimenGroupIds = for {
-    //       processingType   <- processingTypeRepository.allForStudy(study.id)
-    //       specimenLinkType <- specimenLinkTypeRepository.allForProcessingType(processingType.id)
-    //       sgId             <- Set(specimenLinkType.inputGroupId, specimenLinkType.outputGroupId)
-    //     } yield sgId
-
-    //     (cetSpecimenGroupIds ++ sltSpecimenGroupIds).success
-    //   }
-  }
-
-  def collectionEventTypeWithId(studyId: StudyId, collectionEventTypeId: CollectionEventTypeId)
-      : ServiceValidation[CollectionEventType] = {
-    validStudyId(studyId) { study =>
-      collectionEventTypeRepository.withId(study.id, collectionEventTypeId)
-    }
-  }
-
-  def collectionEventTypeInUse(id: CollectionEventTypeId): ServiceValidation[Boolean] = {
-    collectionEventTypeRepository.getByKey(id).map { ceventType =>
-      collectionEventRepository.collectionEventTypeInUse(id)
-    }
-  }
-
-  def collectionEventTypesForStudy(studyId: StudyId)
-      : ServiceValidation[Set[CollectionEventType]] = {
-    validStudyId(studyId) { study =>
-      collectionEventTypeRepository.allForStudy(study.id).successNel[String]
-    }
-  }
-
   def processingTypeWithId(studyId: StudyId, processingTypeId: ProcessingTypeId)
       : ServiceValidation[ProcessingType] = {
     validStudyId(studyId) { study =>
@@ -277,39 +205,6 @@ class StudiesServiceImpl @javax.inject.Inject() (
         study <- studyRepository.getByKey(StudyId(event.id))
       } yield study
     }
-
-  def processCollectionEventTypeCommand(cmd: CollectionEventTypeCommand)
-      : Future[ServiceValidation[CollectionEventType]] = {
-    cmd match {
-      case c: RemoveCollectionEventTypeCmd =>
-        Future.successful(ServiceError(s"invalid service call: $cmd").failureNel[CollectionEventType])
-      case _ => {
-        studyRepository.getDisabled(StudyId(cmd.studyId)).fold(
-          err => Future.successful(err.failure[CollectionEventType]),
-          study => {
-            ask(ceventTypeProcessor, cmd).mapTo[ServiceValidation[CollectionEventTypeEvent]]
-              .map { validation =>
-              for {
-                event  <- validation
-                result <- collectionEventTypeRepository.getByKey(CollectionEventTypeId(event.id))
-              } yield result
-            }
-          }
-        )
-      }
-    }
-  }
-
-  def processRemoveCollectionEventTypeCommand(cmd: RemoveCollectionEventTypeCmd)
-      : Future[ServiceValidation[Boolean]] = {
-    studyRepository.getDisabled(StudyId(cmd.studyId)).fold(
-      err => Future.successful(err.failure[Boolean]),
-      study => {
-        ask(ceventTypeProcessor, cmd).mapTo[ServiceValidation[CollectionEventTypeEvent]]
-          .map { validation => validation.map(_ => true) }
-      }
-    )
-  }
 
   def processProcessingTypeCommand(cmd: StudyCommand)
       : Future[ServiceValidation[ProcessingType]] = {

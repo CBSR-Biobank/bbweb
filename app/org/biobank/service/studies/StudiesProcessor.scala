@@ -6,7 +6,6 @@ import javax.inject._
 import org.biobank.TestData
 import org.biobank.domain.study._
 import org.biobank.domain.{AnnotationType, AnnotationValueType}
-import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.EventUtils
 import org.biobank.infrastructure.event.StudyEvents._
@@ -32,7 +31,6 @@ final case class SnapshotState(studies: List[Study])
  * processed.
  */
 class StudiesProcessor @javax.inject.Inject() (
-  @Named("collectionEventType") val collectionEventTypeProcessor: ActorRef,
   @Named("processingType")      val processingTypeProcessor:      ActorRef,
   @Named("specimenLinkType")    val specimenLinkTypeProcessor:    ActorRef,
   val studyRepository:                                            StudyRepository,
@@ -156,7 +154,6 @@ class StudiesProcessor @javax.inject.Inject() (
           study => study match {
             case study: DisabledStudy => {
               val childActor = cmd match {
-                  case _: CollectionEventTypeCommand => collectionEventTypeProcessor
                   case _: ProcessingTypeCommand      => processingTypeProcessor
                   case _: SpecimenLinkTypeCommand    => specimenLinkTypeProcessor
 
