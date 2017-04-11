@@ -18,6 +18,7 @@ define(function (require) {
 
   UnpackedShipmentExtraController.$inject = [
     '$q',
+    '$controller',
     '$scope',
     'ShipmentSpecimen',
     'ShipmentItemState',
@@ -31,6 +32,7 @@ define(function (require) {
    * Controller for this component.
    */
   function UnpackedShipmentExtraController($q,
+                                           $controller,
                                            $scope,
                                            ShipmentSpecimen,
                                            ShipmentItemState,
@@ -39,6 +41,10 @@ define(function (require) {
                                            notificationsService,
                                            gettextCatalog) {
     var vm = this;
+
+    $controller('UnpackBaseController', { vm:             vm,
+                                          modalService:   modalService,
+                                          gettextCatalog: gettextCatalog });
 
     vm.$onInit = onInit;
     vm.refreshTable = 0;
@@ -81,79 +87,7 @@ define(function (require) {
       var inventoryIds = _.map(vm.inventoryIds.split(','), function (nonTrimmedInventoryId) {
         return nonTrimmedInventoryId.trim();
       });
-      return vm.shipment.tagSpecimensAsExtra(inventoryIds)
-        .then(function () {
-          vm.inventoryIds = '';
-          vm.refreshTable += 1;
-        })
-        .catch(function (err) {
-          var modalMsg;
-
-          if (err.message) {
-            modalMsg = errorIsAlreadyInShipment(err.message);
-            if (_.isUndefined(modalMsg)) {
-              modalMsg = errorIsInAnotherShipment(err.message);
-            }
-            if (_.isUndefined(modalMsg)) {
-              modalMsg = errorIsInvalidInventoryId(err.message);
-            }
-            if (_.isUndefined(modalMsg)) {
-              modalMsg = errorIsInvalidCentre(err.message);
-            }
-          }
-
-          if (modalMsg) {
-            modalService.modalOk(gettextCatalog.getString('Invalid inventory IDs'), modalMsg);
-            return;
-          }
-
-          modalService.modalOk(gettextCatalog.getString('Server error'), JSON.stringify(err));
-        });
-    }
-
-    function errorIsAlreadyInShipment(errMsg) {
-      var regex = /EntityCriteriaError: specimen inventory IDs already in this shipment: (.*)/g,
-          match = regex.exec(errMsg);
-      if (match) {
-        return gettextCatalog.getString(
-          'The following inventory IDs are are already in this shipment:<br>{{ids}}',
-          { ids: match[1] });
-      }
-      return undefined;
-    }
-
-    function errorIsInAnotherShipment(errMsg) {
-      var regex = /EntityCriteriaError: specimens are already in an active shipment: (.*)/g,
-          match = regex.exec(errMsg);
-      if (match) {
-        return gettextCatalog.getString(
-          'The following inventory IDs are in another shipment:<br>{{ids}}' +
-            '<p>Remove them from the other shipment first to mark them as extra in this shipment.',
-          { ids: match[1] });
-      }
-      return undefined;
-    }
-
-    function errorIsInvalidInventoryId(errMsg) {
-      var regex = /EntityCriteriaError: invalid inventory Ids: (.*)/g,
-          match = regex.exec(errMsg);
-      if (match) {
-        return gettextCatalog.getString(
-          'The following inventory IDs are invalid:<br>{{ids}}',
-          { ids: match[1] });
-      }
-      return undefined;
-    }
-
-    function errorIsInvalidCentre(errMsg) {
-      var regex = /EntityCriteriaError: invalid centre for specimen inventory IDs: (.*)/g,
-          match = regex.exec(errMsg);
-      if (match) {
-        return gettextCatalog.getString(
-          'The following inventory IDs are not at the centre this shipment is coming from:<br>{{ids}}',
-          { ids: match[1] });
-      }
-      return undefined;
+      return vm.tagSpecimensAsExtra(inventoryIds);
     }
 
     /*
@@ -174,8 +108,8 @@ define(function (require) {
 
       function promiseFn() {
         return shipmentSpecimen.remove().then(function () {
-          notificationsService.success(gettextCatalog.getString('Specimen removed'));
           vm.refreshTable += 1;
+          notificationsService.success(gettextCatalog.getString('Specimen returnted to unpacked'));
         });
       }
     }

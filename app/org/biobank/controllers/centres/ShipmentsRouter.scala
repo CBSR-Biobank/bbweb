@@ -81,13 +81,13 @@ class ShipmentsRouter @Inject()(controller: ShipmentsController) extends SimpleR
       controller.specimenPresent(shId)
 
     case POST(p"/specimens/received/${shipmentId(shId)}") =>
-      controller.specimenReceived(shId)
+      controller.specimensReceived(shId)
 
     case POST(p"/specimens/missing/${shipmentId(shId)}") =>
-      controller.specimenMissing(shId)
+      controller.specimensMissing(shId)
 
     case POST(p"/specimens/extra/${shipmentId(shId)}") =>
-      controller.specimenExtra(shId)
+      controller.specimensExtra(shId)
 
     case DELETE(p"/${shipmentId(id)}/${long(ver)}") =>
       controller.remove(id, ver)

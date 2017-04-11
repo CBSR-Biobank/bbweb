@@ -24,6 +24,7 @@ define(function (require) {
     'ShipmentSpecimen',
     'ShipmentItemState',
     'modalService',
+    'notificationsService',
     'gettextCatalog'
   ];
 
@@ -36,6 +37,7 @@ define(function (require) {
                                            ShipmentSpecimen,
                                            ShipmentItemState,
                                            modalService,
+                                           notificationsService,
                                            gettextCatalog) {
     var vm = this;
 
@@ -92,6 +94,7 @@ define(function (require) {
         })
         .then(function () {
           vm.refreshSpecimensTable += 1;
+          notificationsService.success(gettextCatalog.getString('Specimen returnted to unpacked'));
         });
     }
 

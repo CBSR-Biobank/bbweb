@@ -18,12 +18,14 @@ define(function (require) {
 
   UnpackedShipmentUnpackController.$inject = [
     '$q',
+    '$controller',
     '$scope',
     'Shipment',
     'ShipmentSpecimen',
     'ShipmentItemState',
     'gettextCatalog',
-    'modalService'
+    'modalService',
+    'notificationsService'
   ];
 
   /*
@@ -32,13 +34,19 @@ define(function (require) {
    * The user can receive the specimens, mark them as EXTRA or MISSING.
    */
   function UnpackedShipmentUnpackController($q,
+                                            $controller,
                                             $scope,
                                             Shipment,
                                             ShipmentSpecimen,
                                             ShipmentItemState,
                                             gettextCatalog,
-                                            modalService) {
+                                            modalService,
+                                            notificationsService) {
     var vm = this;
+
+    $controller('UnpackBaseController', { vm:             vm,
+                                          modalService:   modalService,
+                                          gettextCatalog: gettextCatalog });
 
     vm.$onInit = onInit;
     vm.refreshTable = 0;
@@ -89,59 +97,46 @@ define(function (require) {
         .then(function () {
           vm.inventoryIds = '';
           vm.refreshTable += 1;
+          notificationsService.success(gettextCatalog.getString('Specimen(s) received'));
         })
         .catch(function (err) {
           var modalMsg;
 
           if (err.message) {
-            modalMsg = errorIsInvalidInventoryIds(err.message);
+            modalMsg = vm.errorIsShipSpecimensNotInShipment(err.message);
+
+            if (modalMsg && (inventoryIds.length === 1)) {
+              return checkIfTagAsExtra(inventoryIds[0]);
+            }
+
             if (_.isUndefined(modalMsg)) {
-              modalMsg = errorIsShipSpecimensNotInShipment(err.message);
+              modalMsg = vm.errorIsInvalidInventoryIds(err.message);
             }
             if (_.isUndefined(modalMsg)) {
-              modalMsg = errorIsShipSpecimensNotPresent(err.message);
+              modalMsg = vm.errorIsShipSpecimensNotPresent(err.message);
             }
           }
 
           if (modalMsg) {
-            modalService.modalOk(gettextCatalog.getString('Invalid inventory IDs'), modalMsg);
-            return;
+            return modalService.modalOk(gettextCatalog.getString('Invalid inventory IDs'), modalMsg);
           }
 
-          modalService.modalOk(gettextCatalog.getString('Server error'), JSON.stringify(err));
+          return modalService.modalOk(gettextCatalog.getString('Server error'), JSON.stringify(err));
         });
     }
 
-    function errorIsInvalidInventoryIds(errMsg) {
-      var regex = /EntityCriteriaError: invalid inventory Ids: (.*)/g,
-          match = regex.exec(errMsg);
-      if (match) {
-        return gettextCatalog.getString('The following inventory IDs are invalid:<br>{{ids}}',
-                                        { ids: match[1] });
-      }
-      return undefined;
-    }
-
-    function errorIsShipSpecimensNotInShipment(errMsg) {
-      var regex = /EntityCriteriaError: specimens not in this shipment: (.*)/g,
-          match = regex.exec(errMsg);
-      if (match) {
-        return gettextCatalog.getString(
-          'The following inventory IDs are for specimens not present in this shipment:<br>{{ids}}',
-          { ids: match[1] });
-      }
-      return undefined;
-    }
-
-    function errorIsShipSpecimensNotPresent(errMsg) {
-      var regex = /EntityCriteriaError: shipment specimens not present: (.*)/g,
-          match = regex.exec(errMsg);
-      if (match) {
-        return gettextCatalog.getString(
-          'The following inventory IDs are for have already been unpacked:<br>{{ids}}',
-          { ids: match[1] });
-      }
-      return undefined;
+    function checkIfTagAsExtra(inventoryId) {
+      return modalService.modalOkCancel(
+        gettextCatalog.getString('Invalid inventory IDs'),
+        gettextCatalog.getString(
+          'Specimen with  inventory ID <b>{{inventoryId}}</b> is not in this shipment. Mark it as extra?',
+          { inventoryId : inventoryId }))
+        .then(function () {
+          vm.tagSpecimensAsExtra([ inventoryId ]);
+        })
+        .then(function () {
+          notificationsService.success(gettextCatalog.getString('Specimen marked as extra'));
+        });
     }
 
     function tableActionSelected(shipmentSpecimen) {

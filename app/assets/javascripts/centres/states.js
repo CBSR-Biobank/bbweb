@@ -138,9 +138,6 @@ define(function () {
       .state('home.shipping.shipment.unpack', {
         abstract: true,
         url: '/unpack',
-        resolve: {
-          shipment: resolveShipment
-        },
         views: {
           'main@': {
             template: '<unpacked-shipment-view shipment="vm.shipment"></unpacked-shipment-view>',

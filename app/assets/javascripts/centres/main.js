@@ -25,6 +25,7 @@ define(function (require) {
     ])
 
     .controller('ShipmentSpecimenController', require('./controllers/ShipmentSpecimensController'))
+    .controller('UnpackBaseController', require('./controllers/UnpackBaseController'))
 
     .component('centreShipments',        require('./components/centreShipments/centreShipmentsComponent'))
     .component('shipmentsCompleted',      require('./components/shipmentsCompleted/shipmentsCompletedComponent'))
