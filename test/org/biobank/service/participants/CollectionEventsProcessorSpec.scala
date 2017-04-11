@@ -87,6 +87,7 @@ class CollectionEventsProcessorSpec extends TestFixture {
       collectionEventRepository.getValues.size must be (1)
       collectionEventRepository.getByKey(snapshotCollectionEvent.id) mustSucceed { repoCollectionEvent =>
         repoCollectionEvent.visitNumber must be (snapshotCollectionEvent.visitNumber)
+        ()
       }
     }
 

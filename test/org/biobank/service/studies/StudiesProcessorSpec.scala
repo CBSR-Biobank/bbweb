@@ -77,6 +77,7 @@ class StudiesProcessorSpec extends TestFixture {
       studyRepository.getValues.size must be (1)
       studyRepository.getByKey(snapshotStudy.id) mustSucceed { repoStudy =>
         repoStudy.name must be (snapshotStudy.name)
+        ()
       }
     }
 

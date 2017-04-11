@@ -64,6 +64,7 @@ class UserSpec extends DomainSpec {
             unlockedUser mustBe a[ActiveUser]
             unlockedUser.version mustBe(lockedUser.version + 1)
             unlockedUser.timeAdded mustBe (user.timeAdded)
+            ()
           }
         }
       }
@@ -175,6 +176,7 @@ class UserSpec extends DomainSpec {
       v mustSucceed { user =>
         user.authenticate(email, password) mustSucceed { authenticatedUser =>
           authenticatedUser mustBe(user)
+          ()
         }
       }
     }

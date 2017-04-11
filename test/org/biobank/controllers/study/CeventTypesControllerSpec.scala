@@ -65,6 +65,8 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include regex("InvalidStatus: study not disabled")
+
+    ()
   }
 
   def updateWithInvalidVersion(path: String, jsonField: JsObject) {
@@ -78,6 +80,8 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       (json \ "status").as[String] must include ("error")
 
       (json \ "message").as[String] must include regex (".*expected version doesn't match current version.*")
+
+      ()
     }
   }
 
@@ -96,6 +100,8 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include regex ("IdNotFound.*collection event type")
+
+    ()
   }
 
   def updateOnNonDisabledStudy(study: Study, path: String, jsonField: JsObject) {
@@ -117,6 +123,8 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
+
+    ()
   }
 
   def removeOnNonDisabledStudy(study: Study) {
@@ -133,6 +141,8 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
+
+    ()
   }
 
   "Collection Event Type REST API" when {
@@ -712,6 +722,8 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
           (json \ "status").as[String] must include ("error")
 
           (json \ "message").as[String] must include ("expected version doesn't match current version")
+
+          ()
         }
       }
 
@@ -757,6 +769,8 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
           (json \ "status").as[String] must include ("error")
 
           (json \ "message").as[String] must startWith ("annotation type does not exist")
+
+          ()
         }
       }
 
@@ -908,6 +922,8 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
           (json \ "status").as[String] must include ("error")
 
           (json \ "message").as[String] must include ("expected version doesn't match current version")
+
+          ()
         }
       }
 
@@ -953,6 +969,8 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
           (json \ "status").as[String] must include ("error")
 
           (json \ "message").as[String] must startWith ("specimen spec does not exist")
+
+          ()
         }
       }
 

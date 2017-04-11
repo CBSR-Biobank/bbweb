@@ -75,6 +75,7 @@ class CentresProcessorSpec extends TestFixture {
       centreRepository.getValues.size must be (1)
       centreRepository.getByKey(snapshotCentre.id) mustSucceed { repoCentre =>
         repoCentre.name must be (snapshotCentre.name)
+        ()
       }
     }
 

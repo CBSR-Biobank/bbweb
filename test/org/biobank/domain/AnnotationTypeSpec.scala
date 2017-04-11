@@ -26,6 +26,7 @@ class AnnotationTypeSpec extends DomainSpec {
             'options       (tuple._5),
             'required      (tuple._6)
           )
+          ()
         }
       }
     }

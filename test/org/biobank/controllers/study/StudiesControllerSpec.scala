@@ -23,8 +23,9 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
   def uri(study: Study, path: String): String = uri(path) + s"/${study.id.id}"
 
-  def compareNameDto(json: JsValue, study: Study) {
+  def compareNameDto(json: JsValue, study: Study): Unit = {
     compareObj(json, NameDto(study.id.id, study.name, study.state.id))
+    ()
   }
 
   def compareObjs(jsonList: List[JsObject], studies: List[Study]) = {
@@ -44,6 +45,8 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include regex("IdNotFound.*study")
+
+    ()
   }
 
   def checkInvalidStudyId(url: String): Unit = {
@@ -61,6 +64,8 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include ("expected version doesn't match current version")
+
+    ()
   }
 
   def updateWithInvalidVersion(url: String): Unit = {
@@ -82,6 +87,8 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include regex("InvalidStatus: study not disabled")
+
+    ()
   }
 
   "Study REST API" when {

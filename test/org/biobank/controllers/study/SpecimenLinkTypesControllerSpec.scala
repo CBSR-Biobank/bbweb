@@ -126,6 +126,7 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
           (json \ "status").as[String] must include ("success")
           val jsonList = (json \ "data").as[List[JsObject]]
           jsonList must have size 0
+          ()
         }
       }
 
@@ -204,6 +205,8 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
           (json \ "status").as[String] must include ("error")
 
           (json \ "message").as[String] must include regex ("specimen link type does not exist")
+
+          ()
         }
       }
 

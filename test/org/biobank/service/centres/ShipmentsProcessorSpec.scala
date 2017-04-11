@@ -95,6 +95,7 @@ class ShipmentsProcessorSpec extends TestFixture with ShipmentSpecFixtures {
       shipmentRepository.getValues.size must be (1)
       shipmentRepository.getByKey(snapshotShipment.id) mustSucceed { repoShipment =>
         repoShipment.courierName must be (snapshotShipment.courierName)
+        ()
       }
     }
 

@@ -190,6 +190,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include regex("InvalidStatus: study not enabled")
+
+    ()
   }
 
   def updateWithInvalidVersion(participant: Participant,
@@ -207,6 +209,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include regex (".*expected version doesn't match current version.*")
+
+    ()
   }
 
   def updateOnInvalidCevent(participant: Participant,
@@ -223,6 +227,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include regex ("IdNotFound.*collection event")
+
+    ()
   }
 
   def removeOnNonEnabledStudy(study: Study, cevent: CollectionEvent) = {
@@ -258,6 +264,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
           val jsonObj = (json \ "data").as[JsObject]
           compareObj(jsonObj, ceventToGet)
+          ()
         }
       }
 
@@ -270,6 +277,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           (json \ "status").as[String] must include ("error")
 
           (json \ "message").as[String] must include ("collection event id is invalid")
+
+          ()
         }
       }
 
@@ -404,7 +413,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
               compareObj(jsonItems(3), cevents(0))
             }
           }
-
+          ()
         }
       }
 
@@ -425,6 +434,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
               maybeNext   = Some(2))
 
           compareObj(jsonItem, cevents(0))
+          ()
         }
       }
 
@@ -447,6 +457,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
               maybePrev   = Some(3))
 
           compareObj(jsonItem, cevents(3))
+          ()
         }
       }
 
@@ -459,6 +470,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           PagedResultsSpec(this).failWithNegativePageSize(uri)
           PagedResultsSpec(this).failWithInvalidPageSize(uri, 100);
           PagedResultsSpec(this).failWithInvalidSort(uri)
+          ()
         }
       }
 
@@ -489,6 +501,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           (json \ "status").as[String] must include ("success")
           val jsonObj = (json \ "data").as[JsObject]
           compareObj(jsonObj, ceventToGet)
+          ()
         }
       }
 
@@ -514,6 +527,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           (json \ "status").as[String] must include ("error")
 
           (json \ "message").as[String] must include ("collection event does not exist")
+
+          ()
         }
       }
     }
@@ -564,6 +579,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           (json \ "status").as[String] must include ("error")
 
           (json \ "message").as[String] must include ("a collection event with this visit number already exists")
+
+          ()
         }
       }
 
@@ -640,6 +657,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
           (json \ "message").as[String] must include (
             "participant and collection event type not in the same study")
+
+          ()
         }
       }
 
@@ -657,6 +676,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           (json \ "status").as[String] must include ("error")
 
           (json \ "message").as[String] must include ("a collection event with this visit number already exists")
+
+          ()
         }
       }
 
@@ -676,6 +697,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           (json \ "status").as[String] must include ("error")
 
           (json \ "message").as[String] must include ("missing required annotation type(s)")
+
+          ()
         }
       }
 
@@ -693,6 +716,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           (json \ "status").as[String] must include ("error")
 
           (json \ "message").as[String] must include ("no annotation types")
+
+          ()
         }
       }
 
@@ -716,6 +741,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
           (json \ "message").as[String] must include (
             "annotation(s) do not belong to annotation types")
+
+          ()
         }
       }
 
@@ -741,6 +768,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           (json \ "status").as[String] must include ("error")
 
           (json \ "message").as[String] must include ("duplicate annotations")
+
+          ()
         }
       }
 
@@ -749,6 +778,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           val disabledStudy = factory.createDisabledStudy.copy(id = study.id)
           val cevent = factory.createCollectionEvent
           addOnNonEnabledStudy(disabledStudy, cevent)
+          ()
         }
       }
 
@@ -757,6 +787,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           val retiredStudy = factory.createRetiredStudy.copy(id = study.id)
           val cevent = factory.createCollectionEvent
           addOnNonEnabledStudy(retiredStudy, cevent)
+          ()
         }
       }
 
@@ -815,6 +846,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           (json \ "status").as[String] must include ("error")
 
           (json \ "message").as[String] must include ("a collection event with this visit number already exists")
+
+          ()
         }
       }
 
@@ -981,6 +1014,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           val disabledStudy = factory.createDisabledStudy.copy(id = study.id)
           val cevent = factory.createCollectionEvent
           removeOnNonEnabledStudy(disabledStudy, cevent)
+          ()
         }
       }
 
@@ -989,6 +1023,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           val retiredStudy = factory.createRetiredStudy.copy(id = study.id)
           val cevent = factory.createCollectionEvent
           removeOnNonEnabledStudy(retiredStudy, cevent)
+          ()
         }
       }
 

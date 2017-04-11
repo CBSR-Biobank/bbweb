@@ -91,6 +91,7 @@ class SpecimensProcessorSpec extends TestFixture with SpecimenSpecFixtures {
       specimenRepository.getValues.size must be (1)
       specimenRepository.getByKey(snapshotSpecimen.id) mustSucceed { repoSpecimen =>
         repoSpecimen.inventoryId must be (snapshotSpecimen.inventoryId)
+        ()
       }
     }
 

@@ -86,6 +86,7 @@ class CentreSpec extends DomainSpec {
       centre.enable() mustSucceed { enabledCentre =>
         enabledCentre mustBe a[EnabledCentre]
         enabledCentre.timeAdded mustBe (centre.timeAdded)
+        ()
       }
     }
 
@@ -99,6 +100,7 @@ class CentreSpec extends DomainSpec {
       centre.disable mustSucceed { disabledCentre =>
         disabledCentre mustBe a[DisabledCentre]
         disabledCentre.timeAdded mustBe (centre.timeAdded)
+        ()
       }
     }
 
@@ -155,6 +157,7 @@ class CentreSpec extends DomainSpec {
       centre.withStudyId(study.id) mustSucceed { c =>
         c.studyIds must have size 1
         c.studyIds must contain (study.id)
+        ()
       }
     }
 
@@ -164,6 +167,7 @@ class CentreSpec extends DomainSpec {
 
       centre.removeStudyId(study.id) mustSucceed { c =>
         c.studyIds must have size 0
+        ()
       }
     }
 
@@ -178,6 +182,7 @@ class CentreSpec extends DomainSpec {
       centre.withLocation(location) mustSucceed { c =>
         c.locations must have size 1
         c.locations must contain (location)
+        ()
       }
     }
 
@@ -189,6 +194,7 @@ class CentreSpec extends DomainSpec {
       centre.withLocation(location2) mustSucceed { c =>
         c.locations must have size 1
         c.locations must contain (location2)
+        ()
       }
     }
 
@@ -198,6 +204,7 @@ class CentreSpec extends DomainSpec {
 
       centre.removeLocation(location.uniqueId) mustSucceed { c =>
         c.studyIds must have size 0
+        ()
       }
     }
 

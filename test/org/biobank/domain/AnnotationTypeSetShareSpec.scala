@@ -26,6 +26,7 @@ trait AnnotationTypeSetSharedSpec[T <: ConcurrencySafeEntity[_]]
       addAnnotationType(entity, annotationType) mustSucceed { entity =>
         getAnnotationTypeSet(entity).size mustBe (annotationTypeCount + 1)
         getAnnotationTypeSet(entity) must contain (annotationType)
+        ()
       }
     }
 
@@ -38,6 +39,7 @@ trait AnnotationTypeSetSharedSpec[T <: ConcurrencySafeEntity[_]]
         val at2 = annotationType.copy(uniqueId = annotationType.uniqueId)
         addAnnotationType(entity, at2) mustSucceed { e =>
           getAnnotationTypeSet(e) must contain (at2)
+          ()
         }
       }
     }
@@ -50,6 +52,7 @@ trait AnnotationTypeSetSharedSpec[T <: ConcurrencySafeEntity[_]]
         getAnnotationTypeSet(entity) must contain (annotationType)
         removeAnnotationType(entity, annotationType.uniqueId) mustSucceed { e =>
           getAnnotationTypeSet(e) must not contain (annotationType)
+          ()
         }
       }
     }

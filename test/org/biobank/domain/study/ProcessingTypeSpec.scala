@@ -40,6 +40,7 @@ class ProcessingTypeSpec @Inject() (
 
         (processingType.timeAdded to DateTime.now).millis must be < 100L
         processingType.timeModified mustBe (None)
+        ()
       }
     }
 
@@ -64,6 +65,7 @@ class ProcessingTypeSpec @Inject() (
 
         pt2.timeAdded mustBe (processingType.timeAdded)
         pt2.timeModified must not be (None)
+        ()
       }
     }
   }

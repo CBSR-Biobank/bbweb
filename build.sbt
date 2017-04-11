@@ -89,17 +89,17 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka"           %% "akka-persistence-query-experimental" % akkaVer   % "compile",
   "com.typesafe.akka"           %% "akka-remote"                         % akkaVer   % "compile",
   ( "com.okumin"                %% "akka-persistence-sql-async"          % "0.4.0"   % "compile"  ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
-  "org.scalaz"                  %% "scalaz-core"                         % "7.2.9"   % "compile",
+  "org.scalaz"                  %% "scalaz-core"                         % "7.2.10"  % "compile",
   "com.github.mauricio"         %% "mysql-async"                         % "0.2.21",
   "com.github.t3hnar"           %% "scala-bcrypt"                        % "3.0",
-  "com.github.ancane"           %% "hashids-scala"                       % "1.2",
+  "com.github.ancane"           %% "hashids-scala"                       % "1.3",
   "com.typesafe.play"           %% "play-mailer"                         % "5.0.0",
   "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.5.0",
   "com.github.nscala-time"      %% "nscala-time"                         % "2.16.0",
   // WebJars infrastructure
   ( "org.webjars"               %% "webjars-play"                        % "2.5.0").exclude("org.webjars", "requirejs"),
   // WebJars dependencies
-  "org.webjars"                 %  "requirejs"                           % "2.3.2",
+  "org.webjars"                 %  "requirejs"                           % "2.3.3",
   "org.webjars.npm"             %  "angular"                             % angularVer,
   "org.webjars.npm"             %  "angular-animate"                     % angularVer,
   "org.webjars.npm"             %  "angular-cookies"                     % angularVer,
@@ -113,18 +113,18 @@ libraryDependencies ++= Seq(
   "org.webjars.bower"           %  "angular-utils-ui-breadcrumbs"        % "0.2.2",
   "org.webjars.npm"             %  "bootstrap"                           % "3.3.7",
   ( "org.webjars.bower"         %  "bootstrap-ui-datetime-picker"        % "2.4.3" ).exclude("org.webjars.bower", "angular"),
-  "org.webjars.npm"             %  "jquery"                              % "3.1.1",
+  "org.webjars.npm"             %  "jquery"                              % "3.2.1",
   "org.webjars.npm"             %  "lodash"                              % "4.17.4",
-  "org.webjars.npm"             %  "moment"                              % "2.17.1",
+  "org.webjars.npm"             %  "moment"                              % "2.18.1",
   "org.webjars.npm"             %  "sprintf-js"                          % "1.0.3",
   "org.webjars.npm"             %  "tv4"                                 % "1.2.7",
   // Testing
   ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "2.4.17.3"  % "test" ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
   "com.typesafe.akka"           %% "akka-testkit"                        % akkaVer   % "test",
-  "org.scalatestplus.play"      %% "scalatestplus-play"                  % "1.5.1"   % "test",
+  "org.scalatestplus.play"      %% "scalatestplus-play"                  % "2.0.0"   % "test",
   "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
-  "org.codehaus.janino"         %  "janino"                              % "3.0.6"   % "test",
-  "org.mockito"                 %  "mockito-core"                        % "2.7.21"  % "test"
+  "org.codehaus.janino"         %  "janino"                              % "3.0.7"   % "test",
+  "org.mockito"                 %  "mockito-core"                        % "2.7.22"  % "test"
   )
 
 incOptions := incOptions.value.withNameHashing(true)

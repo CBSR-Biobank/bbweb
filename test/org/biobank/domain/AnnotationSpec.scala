@@ -27,6 +27,7 @@ class AnnotationSpec extends DomainSpec {
           'numberValue            (numberValue),
           'selectedValues         (selectedValues)
         )
+        ()
       }
     }
 
@@ -47,7 +48,8 @@ class AnnotationSpec extends DomainSpec {
           'numberValue       (numberValue),
           'selectedValues    (selectedValues)
         )
-        }
+        ()
+      }
     }
 
     "when a selected value is given" in {
@@ -67,6 +69,7 @@ class AnnotationSpec extends DomainSpec {
           'numberValue       (numberValue),
           'selectedValues    (selectedValues)
         )
+        ()
       }
     }
 
@@ -87,6 +90,7 @@ class AnnotationSpec extends DomainSpec {
           'numberValue       (numberValue),
           'selectedValues    (selectedValues)
         )
+        ()
       }
     }
 

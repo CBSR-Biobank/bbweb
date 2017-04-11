@@ -50,6 +50,7 @@ class SpecimenGroupSpec extends DomainSpec {
 
         (specimenGroup.timeAdded to DateTime.now).millis must be < 1000L
         specimenGroup.timeModified mustBe (None)
+        ()
       }
     }
 
@@ -87,6 +88,7 @@ class SpecimenGroupSpec extends DomainSpec {
 
         (specimenGroup.timeAdded to updatedSg.timeAdded).millis must be < 100L
         updatedSg.timeModified must not be (None)
+        ()
       }
     }
 

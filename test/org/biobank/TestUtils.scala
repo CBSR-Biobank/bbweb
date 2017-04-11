@@ -15,7 +15,7 @@ object TestUtils extends MustMatchers with OptionValues {
 
   val TimeCoparisonMillis = 2000L
 
-  def checkOpionalTime(expectedTimeMaybe: Option[DateTime], actualTimeMaybe: Option[DateTime]): Unit = {
+  def checkOpionalTime(expectedTimeMaybe: Option[DateTime], actualTimeMaybe: Option[DateTime]) = {
     expectedTimeMaybe match {
       case Some(expectedTime) => actualTimeMaybe match {
         case Some(actualTime) => checkTimeStamps(expectedTime, actualTime)
@@ -29,11 +29,10 @@ object TestUtils extends MustMatchers with OptionValues {
   }
 
   def checkTimeStamps(expectedTime:  DateTime, actualTime: DateTime): Unit = {
-    if (expectedTime < actualTime) {
-      (expectedTime to actualTime).millis must be < TimeCoparisonMillis
-    } else {
-      (actualTime to expectedTime).millis must be < TimeCoparisonMillis
-    }
+    val timediff = if (expectedTime < actualTime) (expectedTime to actualTime).millis
+                   else (actualTime to expectedTime).millis
+    timediff must be < TimeCoparisonMillis
+    ()
   }
 
   def checkTimeStamps(entity:               ConcurrencySafeEntity[_],
@@ -85,7 +84,7 @@ object TestUtils extends MustMatchers with OptionValues {
       *
       *  @param fn the function to execute.
       */
-    def mustSucceed(fn: T => Unit) = {
+    def mustSucceed(fn: T => Unit): Unit = {
       validation.fold(
         err => fail(err.list.toList.mkString(", ")),
         entity => fn(entity)

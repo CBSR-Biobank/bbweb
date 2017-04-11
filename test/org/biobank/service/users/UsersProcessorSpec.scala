@@ -75,6 +75,7 @@ class UsersProcessorSpec extends TestFixture {
 
       userRepository.getByKey(snapshotUser.id) mustSucceed { repoUser =>
         repoUser.name must be (snapshotUser.name)
+        ()
       }
     }
 

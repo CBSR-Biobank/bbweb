@@ -85,6 +85,7 @@ class CollectionEventTypesProcessorSpec extends TestFixture {
       collectionEventTypeRepository.getByKey(snapshotCollectionEventType.id)
         .mustSucceed { repoCollectionEventType =>
           repoCollectionEventType.name must be (snapshotCollectionEventType.name)
+          ()
         }
     }
 

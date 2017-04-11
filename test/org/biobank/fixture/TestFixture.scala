@@ -16,7 +16,7 @@ import org.biobank.domain.user._
 import org.biobank.service._
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.time._
 import play.api.cache.{ CacheApi /* , EhCacheModule */ }
 import play.api.inject.bind

@@ -51,6 +51,8 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
+
+    ()
   }
 
   def updateOnNonDisabledStudy(study: Study) {
@@ -70,6 +72,8 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
+
+    ()
   }
 
   def removeOnNonDisabledStudy(study: Study) {
@@ -86,6 +90,8 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
+
+    ()
   }
 
   "Processing Type REST API" when {

@@ -69,19 +69,31 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
   def compareSpecimenSpec(json: JsValue, specimenSpec: SpecimenSpec): Unit = {
     (json \ "uniqueId").as[String]                    mustBe (specimenSpec.uniqueId)
+
     (json \ "name").as[String]                        mustBe (specimenSpec.name)
+
     (json \ "description").asOpt[String]              mustBe (specimenSpec.description)
+
     (json \ "units").as[String]                       mustBe (specimenSpec.units)
+
     (json \ "anatomicalSourceType").as[String]        mustBe (specimenSpec.anatomicalSourceType.toString)
+
     (json \ "preservationType").as[String]            mustBe (specimenSpec.preservationType.toString)
+
     (json \ "preservationTemperatureType").as[String] mustBe (specimenSpec.preservationTemperatureType.toString)
+
     (json \ "specimenType").as[String]                mustBe (specimenSpec.specimenType.toString)
+
+    ()
   }
 
   def compareCollectionSpecimenSpec(json: JsValue, specimenSpec: CollectionSpecimenSpec): Unit = {
     compareSpecimenSpec(json, specimenSpec)
     (json \ "maxCount").as[Int]         mustBe (specimenSpec.maxCount)
+
     (json \ "amount").as[BigDecimal] mustBe (specimenSpec.amount)
+
+    ()
   }
 
   def compareAnnotData(json: JsValue, annotationTypeData: AnnotationTypeData) = {
@@ -218,13 +230,22 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
   def compareLocation(json: JsValue, location: Location): Unit = {
     (json \ "uniqueId").as[String]       mustBe (location.uniqueId.id)
+
     (json \ "name").as[String]           mustBe (location.name)
+
     (json \ "street").as[String]         mustBe (location.street)
+
     (json \ "city").as[String]           mustBe (location.city)
+
     (json \ "province").as[String]       mustBe (location.province)
+
     (json \ "postalCode").as[String]     mustBe (location.postalCode)
+
     (json \ "countryIsoCode").as[String] mustBe (location.countryIsoCode)
+
     (json \ "poBoxNumber").asOpt[String] mustBe (location.poBoxNumber)
+
+    ()
   }
 
   def compareObj(json: JsValue, shipment: Shipment) = {

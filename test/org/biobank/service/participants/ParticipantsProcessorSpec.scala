@@ -80,6 +80,7 @@ class ParticipantsProcessorSpec extends TestFixture {
       participantRepository.getValues.size must be (1)
       participantRepository.getByKey(snapshotParticipant.id) mustSucceed { repoParticipant =>
         repoParticipant.uniqueId must be (snapshotParticipant.uniqueId)
+        ()
       }
     }
 

@@ -83,6 +83,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
       study.enable mustSucceed { enabledStudy =>
         enabledStudy mustBe a[EnabledStudy]
         enabledStudy.timeAdded mustBe (study.timeAdded)
+        ()
       }
     }
 
@@ -91,6 +92,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
       study.disable mustSucceed { disabledStudy =>
         disabledStudy mustBe a[DisabledStudy]
         disabledStudy.timeAdded mustBe (study.timeAdded)
+        ()
       }
     }
 
@@ -99,6 +101,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
       study.retire mustSucceed { retiredStudy =>
         retiredStudy mustBe a[RetiredStudy]
         retiredStudy.timeAdded mustBe (study.timeAdded)
+        ()
       }
     }
 
@@ -107,6 +110,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
       study.unretire() mustSucceed { disabledStudy =>
         disabledStudy mustBe a[DisabledStudy]
         disabledStudy.timeAdded mustBe (study.timeAdded)
+        ()
       }
     }
 

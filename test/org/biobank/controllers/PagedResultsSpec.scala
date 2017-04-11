@@ -23,6 +23,7 @@ case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers 
 
     val jsonList = (json \ "data" \ "items").as[List[JsObject]]
     jsonList must have length 0
+    ()
   }
 
   def singleItemResult(uri:         String,

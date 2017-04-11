@@ -211,6 +211,8 @@ trait StudyAnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with Ha
       (json \ "status").as[String] must include ("error")
 
       (json \ "message").as[String] must include regex("InvalidStatus: study not enabled")
+
+      ()
     }
   }
 

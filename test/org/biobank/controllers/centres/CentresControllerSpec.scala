@@ -60,6 +60,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include regex ("IdNotFound.*centre")
+
+    ()
   }
 
   def checkInvalidCentreId(url: String): Unit = {
@@ -78,6 +80,8 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include ("expected version doesn't match current version")
+
+    ()
   }
 
   def updateWithInvalidVersion(url: String): Unit = {
@@ -98,17 +102,28 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
     (json \ "status").as[String] must include ("error")
 
     (json \ "message").as[String] must include ("centre is not disabled")
+
+    ()
   }
 
   def validateJsonLocation(jsonObj: JsObject, location: Location): Unit = {
     (jsonObj \ "uniqueId").as[String]       must not be empty
+
     (jsonObj \ "name").as[String]           mustBe (location.name)
+
     (jsonObj \ "street").as[String]         mustBe (location.street)
+
     (jsonObj \ "city").as[String]           mustBe (location.city)
+
     (jsonObj \ "province").as[String]       mustBe (location.province)
+
     (jsonObj \ "postalCode").as[String]     mustBe (location.postalCode)
+
     (jsonObj \ "poBoxNumber").asOpt[String] mustBe (location.poBoxNumber)
+
     (jsonObj \ "countryIsoCode").as[String] mustBe (location.countryIsoCode)
+
+    ()
   }
 
   "Centre REST API" when {
@@ -669,6 +684,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
             'poBoxNumber    (location.poBoxNumber),
             'countryIsoCode (location.countryIsoCode)
           )
+          ()
         }
       }
 
@@ -738,6 +754,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
             'poBoxNumber    (locationWithNewName.poBoxNumber),
             'countryIsoCode (locationWithNewName.countryIsoCode)
           )
+          ()
         }
       }
 
