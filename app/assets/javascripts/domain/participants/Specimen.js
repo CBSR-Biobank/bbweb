@@ -326,7 +326,9 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
       var json = { collectionEventId: ceventId };
 
       json.specimenData = _.map(specimens, function (specimen) {
-        return _.pick(specimen, 'inventoryId', 'specimenSpecId', 'timeCreated', 'locationId', 'amount');
+        var result = _.pick(specimen, 'inventoryId', 'specimenSpecId', 'timeCreated', 'amount');
+        result.locationId = specimen.locationInfo.locationId;
+        return result;
       });
       return biobankApi.post(uri(ceventId), json);
     };
@@ -397,8 +399,8 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      *
      * @return {Promise} Resolves to true if the specimen was removed successfully.
      */
-    Specimen.prototype.remove = function () {
-      var url = sprintf.sprintf('%s/%s/%d', uri(this.collectionEventId), this.id, this.version);
+    Specimen.prototype.remove = function (collectionEventId) {
+      var url = sprintf.sprintf('%s/%s/%d', uri(collectionEventId), this.id, this.version);
       return biobankApi.del(url);
     };
 

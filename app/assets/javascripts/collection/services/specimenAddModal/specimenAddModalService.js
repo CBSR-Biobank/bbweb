@@ -75,7 +75,7 @@ define(function (require) {
 
         vm.inventoryId          = undefined;
         vm.selectedSpecimenSpec = undefined;
-        vm.selectedLocationId   = undefined;
+        vm.selectedLocationInfo = undefined;
         vm.amount               = undefined;
         vm.defaultAmount        = undefined;
         vm.centreLocations      = centreLocations;
@@ -107,11 +107,11 @@ define(function (require) {
 
           return new Specimen(
             {
-              inventoryId:      vm.inventoryId,
-              originLocationId: vm.selectedLocationId,
-              locationId:       vm.selectedLocationId,
-              timeCreated:      timeService.dateAndTimeToUtcString(vm.timeCollected),
-              amount:           vm.amount
+              inventoryId:        vm.inventoryId,
+              originLocationInfo: vm.selectedLocationInfo,
+              locationInfo:       vm.selectedLocationInfo,
+              timeCreated:        timeService.dateAndTimeToUtcString(vm.timeCollected),
+              amount:             vm.amount
             },
             vm.selectedSpecimenSpec);
         }

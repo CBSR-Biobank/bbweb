@@ -74,6 +74,9 @@ define(function () {
         .then(function () {
           notificationsService.success(gettextCatalog.getString('Specimen added'));
           reloadTableData();
+        })
+        .catch(function (err) {
+          notificationsService.error(JSON.stringify(err));
         });
     }
 
@@ -123,7 +126,7 @@ define(function () {
           { id: specimen.inventoryId }));
 
       function promiseFn() {
-        return specimen.remove().then(function () {
+        return specimen.remove(vm.collectionEvent.id).then(function () {
           notificationsService.success(gettextCatalog.getString('Specimen removed'));
           reloadTableData();
         });
