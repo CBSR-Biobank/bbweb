@@ -7,7 +7,6 @@ import play.api.routing.sird._
 
 class ApplicationRouter @Inject()(controller: Application) extends SimpleRouter {
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   override def routes: Routes = {
 
     case GET(p"/dtos/counts") =>

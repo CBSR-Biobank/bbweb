@@ -43,7 +43,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
 
   override def persistenceId: String = "user-processor-id"
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveRecover: Receive = {
     case event: UserEvent => event.eventType match {
       case et: EventType.Registered       => applyRegisteredEvent(event)
@@ -69,9 +69,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
     case event => log.error(s"event not handled: $event")
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any",
-                          "org.wartremover.warts.PublicInference",
-                          "org.wartremover.warts.Throw"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {
     case cmd: RegisterUserCmd =>
       process(registerUserCmdToEvent(cmd))(applyRegisteredEvent)

@@ -51,7 +51,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
 
   override def persistenceId: String = "shipments-processor-id"
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveRecover: Receive = {
     case event: ShipmentEvent =>
       log.debug(s"ShipmentsProcessor: receiveRecover: $event")
@@ -95,9 +95,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       log.debug(s"ShipmentsProcessor: recovery completed")
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any",
-                          "org.wartremover.warts.PublicInference",
-                          "org.wartremover.warts.Throw"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {
 
     case cmd: AddShipmentCmd =>

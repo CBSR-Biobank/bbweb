@@ -94,7 +94,6 @@ class StudiesServiceImpl @Inject() (
     studyRepository.getValues.size
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   def getCountsByStatus(): StudyCountsByStatus = {
     // FIXME should be replaced by DTO query to the database
     val studies = studyRepository.getValues

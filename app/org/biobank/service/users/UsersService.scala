@@ -65,7 +65,6 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
     userRepository.allUsers
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   def getCountsByStatus(): UserCountsByStatus = {
     // FIXME should be replaced by DTO query to the database
     val users = userRepository.getValues

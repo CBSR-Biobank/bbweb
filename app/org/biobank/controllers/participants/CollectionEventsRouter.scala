@@ -8,7 +8,6 @@ import play.api.routing.sird._
 class CollectionEventsRouter @Inject()(controller: CollectionEventsController) extends SimpleRouter {
   import ParticipantsRouting._
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   override def routes: Routes = {
 
     case GET(p"/list/${participantId(id)}") =>

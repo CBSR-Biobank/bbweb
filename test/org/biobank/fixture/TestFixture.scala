@@ -46,8 +46,7 @@ trait TestFixture
     with MustMatchers
     with InMemoryCleanup
     with BeforeAndAfterAll
-    with MockitoSugar
-    with TestDbConfiguration {
+    with MockitoSugar {
 
   val snapshotWriterMock = mock[SnapshotWriter]
 
@@ -56,7 +55,7 @@ trait TestFixture
     .overrides(bind[SnapshotWriter].toInstance(snapshotWriterMock))
     .build
 
-  implicit val system = ActorSystem("bbweb-test", TestDbConfiguration.config())
+  implicit val system = ActorSystem("bbweb-test")
 
   implicit val timeout: Timeout = 5.seconds
 

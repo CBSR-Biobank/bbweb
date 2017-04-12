@@ -40,7 +40,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
 
   val ErrMsgNameExists: String = "centre with name already exists"
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveRecover: Receive = {
     case event: CentreEvent => event.eventType match {
       case et: EventType.Added              => applyAddedEvent(event)
@@ -66,9 +66,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     case cmd => log.error(s"CentresProcessor: message not handled: $cmd")
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Any",
-                          "org.wartremover.warts.PublicInference",
-                          "org.wartremover.warts.Throw"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {
     case cmd: AddCentreCmd =>
       process(addCentreCmdToEvent(cmd))(applyAddedEvent)

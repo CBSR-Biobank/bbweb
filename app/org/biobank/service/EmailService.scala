@@ -76,7 +76,6 @@ class EmailService @Inject() (env:           Environment,
     else Seq[String](adminEmail)
 
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   private def sendEmail(subject:  String,
                         from:     String,
                         to:       Seq[String],

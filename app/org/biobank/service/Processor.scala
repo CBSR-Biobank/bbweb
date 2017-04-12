@@ -22,15 +22,12 @@ trait Processor extends PersistentActor with ActorLogging {
     val originalSender = context.sender
     validation.fold(
       err => {
-        // inform the sender of the failure
-        originalSender ! validation
+        originalSender ! validation // inform the sender of the failure
       },
       event => {
-        // FIXME: change this call to a peristAsync()?
         persist(event) { ev =>
           successFn(ev)
-          // inform the sender of the successful event resulting from a valid command
-          originalSender ! ev.successNel[String]
+          originalSender ! validation // inform the sender of the successful event resulting from a valid command
         }
       }
     )

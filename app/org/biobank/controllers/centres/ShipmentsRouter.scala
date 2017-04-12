@@ -8,7 +8,6 @@ import play.api.routing.sird._
 class ShipmentsRouter @Inject()(controller: ShipmentsController) extends SimpleRouter {
   import CentreRouting._
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   override def routes: Routes = {
     case POST(p"/") =>
       controller.add

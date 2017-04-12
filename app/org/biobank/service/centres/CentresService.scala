@@ -83,7 +83,6 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
       toSet
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   def getCountsByStatus(): CentreCountsByStatus = {
     // FIXME should be replaced by DTO query to the database
     val centres = centreRepository.getValues

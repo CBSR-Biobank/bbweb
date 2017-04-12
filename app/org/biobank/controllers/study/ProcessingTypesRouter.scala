@@ -8,7 +8,6 @@ import play.api.routing.sird._
 class ProcessingTypesRouter @Inject()(controller: ProcessingTypesController) extends SimpleRouter {
   import StudiesRouting._
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   override def routes: Routes = {
 
     case GET(p"/${studyId(sId)}" ? q_o"ptId=${procTypeId(ptId)}") =>

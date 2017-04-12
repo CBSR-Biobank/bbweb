@@ -48,7 +48,7 @@ class CollectionEventsProcessor @Inject() (
    * These are the events that are recovered during journal recovery. They cannot fail and must be
    * processed to recreate the current state of the aggregate.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveRecover: Receive = {
     case event: CollectionEventEvent => event.eventType match {
       case et: EventType.Added                => applyAddedEvent(event)
@@ -75,9 +75,7 @@ class CollectionEventsProcessor @Inject() (
    * These are the commands that are requested. A command can fail, and will send the failure as a response
    * back to the user. Each valid command generates one or more events and is journaled.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any",
-                          "org.wartremover.warts.PublicInference",
-                          "org.wartremover.warts.Throw"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {
     case cmd: AddCollectionEventCmd =>
       process(addCmdToEvent(cmd))(applyAddedEvent)
@@ -393,7 +391,6 @@ class CollectionEventsProcessor @Inject() (
     }
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
   private def applyRemovedEvent(event: CollectionEventEvent): Unit = {
     onValidEventAndVersion(event,
                            event.eventType.isRemoved,

@@ -9,7 +9,6 @@ class ParticipantsRouter @Inject()(controller: ParticipantsController) extends S
   import ParticipantsRouting._
   import org.biobank.controllers.study.StudiesRouting._
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   override def routes: Routes = {
 
     case GET(p"/uniqueId/${studyId(sId)}/$uniqueId") =>

@@ -53,7 +53,7 @@ class StudiesProcessor @Inject() (
    * These are the events that are recovered during journal recovery. They cannot fail and must be
    * processed to recreate the current state of the aggregate.
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.PublicInference"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveRecover: Receive = {
     case event: StudyEvent => event.eventType match {
       case et: StudyEvent.EventType.Added                 => applyAddedEvent(event)
@@ -93,9 +93,7 @@ class StudiesProcessor @Inject() (
    *  - [[StudiesProcessor]]
    *  - [[StudyAnnotationTypeProcessor]]
    */
-  @SuppressWarnings(Array("org.wartremover.warts.Any",
-                          "org.wartremover.warts.PublicInference",
-                          "org.wartremover.warts.Throw"))
+  @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {
     case cmd: StudyCommandWithStudyId => validateAndForward(cmd)
     case cmd: SpecimenLinkTypeCommand => validateAndForward(cmd)

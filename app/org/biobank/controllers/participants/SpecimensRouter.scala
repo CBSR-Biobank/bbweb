@@ -9,7 +9,6 @@ import play.api.routing.sird._
 class SpecimensRouter @Inject()(controller: SpecimensController) extends SimpleRouter {
   import ParticipantsRouting._
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   override def routes: Routes = {
     case GET(p"/get/${specimenId(spcId)}") =>
       controller.get(spcId)
