@@ -13,14 +13,12 @@ import play.api.mvc._
   * Controller for the main page, and also the about and contact us pages.
  */
 @Singleton
-class Application @Inject() (val action:                BbwebAction,
-                             val env:                   Environment,
-                             val authToken:             AuthToken,
-                             val usersService:          UsersService,
-                             val studiesService:        StudiesService,
-                             val centresService:        CentresService
-                             //, val studyPersistenceQuery: StudyPersistenceQuery
-                             )
+class Application @Inject() (val action:         BbwebAction,
+                             val env:            Environment,
+                             val authToken:      AuthToken,
+                             val usersService:   UsersService,
+                             val studiesService: StudiesService,
+                             val centresService: CentresService)
     extends Controller
     with Security
     with JsonController {

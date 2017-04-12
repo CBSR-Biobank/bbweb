@@ -23,7 +23,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import scala.concurrent.duration._
 
-trait InMemoryCleanup extends BeforeAndAfterEach { _: Suite =>
+trait InMemoryPersistenceCleanup extends BeforeAndAfterEach { _: Suite =>
 
   implicit val system: ActorSystem
 
@@ -44,7 +44,7 @@ trait TestFixture
     extends WordSpecLike
     with ScalaFutures
     with MustMatchers
-    with InMemoryCleanup
+    with InMemoryPersistenceCleanup
     with BeforeAndAfterAll
     with MockitoSugar {
 
@@ -55,7 +55,7 @@ trait TestFixture
     .overrides(bind[SnapshotWriter].toInstance(snapshotWriterMock))
     .build
 
-  implicit val system = ActorSystem("bbweb-test")
+  implicit val system: ActorSystem = app.injector.instanceOf[ActorSystem]
 
   implicit val timeout: Timeout = 5.seconds
 
@@ -111,8 +111,6 @@ trait TestFixture
     app.injector.instanceOf[NamedSpecimenLinkTypeProcessor].processor
 
   val studiesProcessor = app.injector.instanceOf[NamedStudiesProcessor].processor
-
-  //val studyPersistenceQuery =  app.injector.instanceOf[StudyPersistenceQuery]
 
   val specimensProcessor = app.injector.instanceOf[NamedSpecimensProcessor].processor
   val participantsProcessor = app.injector.instanceOf[NamedParticipantsProcessor].processor

@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import scalaz.Scalaz._
 
-class UsersProcessorSpec extends TestFixture {
+class UsersProcessorSpec extends TestFixture with PresistenceQueryEvents {
 
   import org.biobank.TestUtils._
 
@@ -37,10 +37,11 @@ class UsersProcessorSpec extends TestFixture {
       val v = ask(usersProcessor, cmd).mapTo[ServiceValidation[UserEvent]].futureValue
       v.isSuccess must be (true)
       userRepository.getValues.map { c => c.name } must contain (user.name)
-      usersProcessor ! "persistence_restart"
-      userRepository.removeAll
 
-      Thread.sleep(250)
+      userRepository.removeAll
+      usersProcessor ! "persistence_restart"
+
+      Thread.sleep(500)
 
       userRepository.getValues.map { c => c.name } must contain (user.name)
     }

@@ -9,7 +9,7 @@ import org.biobank.domain.processing.ProcessingEventInputSpecimenRepository
 import org.biobank.domain.study.{CollectionEventType, CollectionEventTypeRepository}
 import org.biobank.infrastructure.command.SpecimenCommands._
 import org.biobank.infrastructure.event.SpecimenEvents._
-import org.biobank.service.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
+import org.biobank.service._
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
@@ -58,9 +58,6 @@ class SpecimensProcessor @Inject() (
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveRecover: Receive = {
     case event: SpecimenEvent =>
-
-      log.info(s"----------------------> $event")
-
       event.eventType match {
         case et: EventType.Added              => applyAddedEvent(event)
         case et: EventType.Moved              => applyMovedEvent(event)
@@ -88,23 +85,28 @@ class SpecimensProcessor @Inject() (
    */
   @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {
-    case cmd: AddSpecimensCmd =>
-      process(addCmdToEvent(cmd))(applyAddedEvent)
+    case command: SpecimenCommand =>
+      log.info(s"SpecimensProcessor: command: $command")
 
-    case cmd: MoveSpecimensCmd =>
-      process(moveCmdToEvent(cmd))(applyMovedEvent)
+      command match {
+        case cmd: AddSpecimensCmd =>
+          process(addCmdToEvent(cmd))(applyAddedEvent)
 
-    case cmd: SpecimenAssignPositionCmd =>
-      processUpdateCmd(cmd, assignPositionCmdToEvent, applyPositionAssignedEvent)
+        case cmd: MoveSpecimensCmd =>
+          process(moveCmdToEvent(cmd))(applyMovedEvent)
 
-    case cmd: SpecimenRemoveAmountCmd =>
-      processUpdateCmd(cmd, removeAmountCmdToEvent, applyAmountRemovedEvent)
+        case cmd: SpecimenAssignPositionCmd =>
+          processUpdateCmd(cmd, assignPositionCmdToEvent, applyPositionAssignedEvent)
 
-    case cmd: SpecimenUpdateUsableCmd =>
-      processUpdateCmd(cmd, updateUsableCmdToEvent, applyUsableUpdatedEvent)
+        case cmd: SpecimenRemoveAmountCmd =>
+          processUpdateCmd(cmd, removeAmountCmdToEvent, applyAmountRemovedEvent)
 
-    case cmd: RemoveSpecimenCmd =>
-      processUpdateCmd(cmd, removeCmdToEvent, applyRemovedEvent)
+        case cmd: SpecimenUpdateUsableCmd =>
+          processUpdateCmd(cmd, updateUsableCmdToEvent, applyUsableUpdatedEvent)
+
+        case cmd: RemoveSpecimenCmd =>
+          processUpdateCmd(cmd, removeCmdToEvent, applyRemovedEvent)
+      }
 
     case "snap" =>
      mySaveSnapshot
@@ -127,7 +129,7 @@ class SpecimensProcessor @Inject() (
   private def mySaveSnapshot(): Unit = {
     val snapshotState = SnapshotState(specimenRepository.getValues.toSet)
     val filename = snapshotWriter.save(persistenceId, Json.toJson(snapshotState).toString)
-    log.debug(s"saved snapshot to: $filename")
+    log.info(s"saved snapshot to: $filename")
     saveSnapshot(filename)
   }
 
@@ -218,7 +220,6 @@ class SpecimensProcessor @Inject() (
     v.foreach { specimens =>
       val ceventId = CollectionEventId(event.getAdded.getCollectionEventId)
       specimens.foreach { specimen =>
-        log.info(s"------------> $specimen")
         specimenRepository.put(specimen)
         ceventSpecimenRepository.put(CeventSpecimen(ceventId, specimen.id))
       }

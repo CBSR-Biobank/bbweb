@@ -45,19 +45,20 @@ class UsersProcessor @Inject() (val config:         Configuration,
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveRecover: Receive = {
-    case event: UserEvent => event.eventType match {
-      case et: EventType.Registered       => applyRegisteredEvent(event)
-      case et: EventType.Activated        => applyActivatedEvent(event)
-      case et: EventType.NameUpdated      => applyNameUpdatedEvent(event)
-      case et: EventType.EmailUpdated     => applyEmailUpdatedEvent(event)
-      case et: EventType.PasswordUpdated  => applyPasswordUpdatedEvent(event)
-      case et: EventType.AvatarUrlUpdated => applyAvatarUrlUpdatedEvent(event)
-      case et: EventType.Locked           => applyLockedEvent(event)
-      case et: EventType.Unlocked         => applyUnlockedEvent(event)
-      case et: EventType.PasswordReset    => applyPasswordResetEvent(event)
+    case event: UserEvent =>
+      event.eventType match {
+        case et: EventType.Registered       => applyRegisteredEvent(event)
+        case et: EventType.Activated        => applyActivatedEvent(event)
+        case et: EventType.NameUpdated      => applyNameUpdatedEvent(event)
+        case et: EventType.EmailUpdated     => applyEmailUpdatedEvent(event)
+        case et: EventType.PasswordUpdated  => applyPasswordUpdatedEvent(event)
+        case et: EventType.AvatarUrlUpdated => applyAvatarUrlUpdatedEvent(event)
+        case et: EventType.Locked           => applyLockedEvent(event)
+        case et: EventType.Unlocked         => applyUnlockedEvent(event)
+        case et: EventType.PasswordReset    => applyPasswordResetEvent(event)
 
-      case _ => log.error(s"user event not handled: $event")
-    }
+        case _ => log.error(s"user event not handled: $event")
+      }
 
     case SnapshotOffer(_, snapshotFilename: String) =>
       applySnapshot(snapshotFilename)
@@ -109,7 +110,8 @@ class UsersProcessor @Inject() (val config:         Configuration,
       reason.printStackTrace
 
     case "persistence_restart" =>
-      throw new Exception("Intentionally throwing exception to test persistence by restarting the actor")
+      throw new Exception(
+        "UsersProcessor: Intentionally throwing exception to test persistence by restarting the actor")
 
     case cmd => log.error(s"UsersProcessor: message not handled: $cmd")
   }

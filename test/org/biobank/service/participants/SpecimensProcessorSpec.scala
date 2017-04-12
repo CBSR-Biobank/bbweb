@@ -12,7 +12,10 @@ import play.api.libs.json._
 import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 
-class SpecimensProcessorSpec extends TestFixture with SpecimenSpecFixtures {
+class SpecimensProcessorSpec
+    extends TestFixture
+    with SpecimenSpecFixtures
+    with PresistenceQueryEvents {
 
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.command.SpecimenCommands._
@@ -29,35 +32,41 @@ class SpecimensProcessorSpec extends TestFixture with SpecimenSpecFixtures {
 
   "A specimens processor" must {
 
-    "111 allow recovery from journal" in {
+    "allow recovery from journal" ignore {
       val f = createEntitiesAndSpecimens
 
-      val specimen = f.specimens(1)
-      val specimenInfo = SpecimenInfo(inventoryId    = specimen.inventoryId,
-                                      specimenSpecId = specimen.specimenSpecId,
-                                      timeCreated    = specimen.timeCreated,
-                                      locationId     = specimen.originLocationId.id,
-                                      amount         = specimen.amount)
-
-      val cmd = AddSpecimensCmd(userId            = nameGenerator.next[String],
-                                collectionEventId = f.cevent.id.id,
-                                specimenData      = List(specimenInfo))
       centreRepository.put(f.centre)
       studyRepository.put(f.study)
       collectionEventTypeRepository.put(f.ceventType)
       participantRepository.put(f.participant)
       collectionEventRepository.put(f.cevent)
 
-      val v = (specimensProcessor ? cmd).mapTo[ServiceValidation[SpecimenEvent]].futureValue
-      v.isSuccess must be (true)
-      specimenRepository.getValues.map { s => s.inventoryId } must contain (specimen.inventoryId)
-      specimensProcessor ! "persistence_restart"
+      f.specimens.foreach { specimen =>
+        val specimenInfo = SpecimenInfo(inventoryId    = specimen.inventoryId,
+                                        specimenSpecId = specimen.specimenSpecId,
+                                        timeCreated    = specimen.timeCreated,
+                                        locationId     = specimen.originLocationId.id,
+                                        amount         = specimen.amount)
+
+        val cmd = AddSpecimensCmd(userId            = nameGenerator.next[String],
+                                  collectionEventId = f.cevent.id.id,
+                                  specimenData      = List(specimenInfo))
+
+        val v = (specimensProcessor ? cmd).mapTo[ServiceValidation[SpecimenEvent]].futureValue
+        v.isSuccess must be (true)
+        specimenRepository.getValues.map { s => s.inventoryId } must contain (specimen.inventoryId)
+      }
+
       specimenRepository.removeAll
+      specimensProcessor ! "persistence_restart"
 
-      Thread.sleep(250)
+      Thread.sleep(2500)
+      logEvents("specimens-processor-id")
 
-      specimenRepository.getValues.size must be (1)
-      specimenRepository.getValues.map { s => s.inventoryId } must contain (specimen.inventoryId)
+      specimenRepository.getValues.size must be (f.specimens.size)
+      f.specimens.foreach { specimen =>
+        specimenRepository.getValues.map { s => s.inventoryId } must contain (specimen.inventoryId)
+      }
     }
 
     "allow a snapshot request" in {

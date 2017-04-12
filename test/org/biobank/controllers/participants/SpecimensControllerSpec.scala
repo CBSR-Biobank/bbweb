@@ -29,7 +29,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
     uri(cevent) + s"/${specimen.id.id}/$version"
 
   override def createEntities() = {
-    val f = createEntities
+    val f = super.createEntities
     centreRepository.put(f.centre)
     studyRepository.put(f.study)
     collectionEventTypeRepository.put(f.ceventType)
@@ -39,7 +39,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
   }
 
   override def createEntitiesAndSpecimens() = {
-    val f = createEntitiesAndSpecimens
+    val f = super.createEntitiesAndSpecimens
     storeSpecimens(f.cevent, f.specimens)
     f
   }

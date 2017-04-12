@@ -85,8 +85,8 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   cache,
   filters,
-  ( "com.typesafe.akka"         %% "akka-persistence"                    % akkaVer   % "compile"  ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
-  "com.typesafe.akka"           %% "akka-persistence-query-experimental" % akkaVer   % "compile",
+  ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.4.17"   % "compile"  ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
+  "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.17"   % "compile",
   "com.typesafe.akka"           %% "akka-remote"                         % akkaVer   % "compile",
   ( "com.okumin"                %% "akka-persistence-sql-async"          % "0.4.0"   % "compile"  ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
   "org.scalaz"                  %% "scalaz-core"                         % "7.2.10"  % "compile",
