@@ -400,7 +400,11 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * @return {Promise} Resolves to true if the specimen was removed successfully.
      */
     Specimen.prototype.remove = function (collectionEventId) {
-      var url = sprintf.sprintf('%s/%s/%d', uri(collectionEventId), this.id, this.version);
+      var url;
+      if (!collectionEventId) {
+        throw new DomainError('collection event id not specified');
+      }
+      url = sprintf.sprintf('%s/%s/%d', uri(collectionEventId), this.id, this.version);
       return biobankApi.del(url);
     };
 

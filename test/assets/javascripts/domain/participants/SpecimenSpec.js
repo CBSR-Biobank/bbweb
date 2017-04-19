@@ -376,7 +376,7 @@ define(function (require) {
 
       specimen.collectionEventId = cevent.id;
       this.$httpBackend.expectDELETE(url).respond(this.reply(true));
-      specimen.remove();
+      specimen.remove(cevent.id);
       this.$httpBackend.flush();
     });
 
@@ -384,8 +384,10 @@ define(function (require) {
 
   function addJson(collectionEvent, specimens) {
     var json = { collectionEventId: collectionEvent.id };
-    json.specimenData = _.map(specimens, function (specimen) {
-      return _.pick(specimen, 'inventoryId', 'specimenSpecId', 'timeCreated', 'locationId', 'amount');
+    json.specimenData = specimens.map(function (specimen) {
+      var result = _.pick(specimen, 'inventoryId', 'specimenSpecId', 'timeCreated', 'amount');
+      result.locationId = specimen.locationInfo.locationId;
+      return result;
     });
     return json;
   }
