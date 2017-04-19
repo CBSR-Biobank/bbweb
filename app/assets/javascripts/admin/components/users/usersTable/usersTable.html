@@ -66,7 +66,7 @@
                   ng-click="vm.lock(user)"
                   data-toggle="tooltip"
                   title="{{'Lock user'|translate}}"
-                  ng-if="user.isActive()">
+                  ng-if="user.isRegistered() || user.isActive()">
             <i class="glyphicon glyphicon-lock"></i>
           </button>
           <button class="btn btn-xs btn-danger"

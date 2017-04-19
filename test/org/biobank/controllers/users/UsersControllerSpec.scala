@@ -660,14 +660,19 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
     "POST /users/lock" must {
 
-      "lock a user" in {
-        val user = factory.createActiveUser
-        userRepository.put(user)
+      "111 lock a user" in {
+        val users = Table("users that can be locked",
+                          factory.createRegisteredUser,
+                          factory.createActiveUser)
+        forAll(users) { user =>
+          info(s"when ${user.state}")
+          userRepository.put(user)
 
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version))
-        val json = makeRequest(POST, updateUri(user, "lock"), json = reqJson)
+          val reqJson = Json.obj("expectedVersion" -> Some(user.version))
+          val json = makeRequest(POST, updateUri(user, "lock"), json = reqJson)
 
-        (json \ "status").as[String] must be ("success")
+          (json \ "status").as[String] must be ("success")
+        }
       }
 
       "must not lock a user when an invalid version number is used" in {
@@ -682,8 +687,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include ("expected version doesn't match current version")
       }
 
-      "must not lock a registered user" in {
-        val user = factory.createRegisteredUser
+      "must not lock a locked user" in {
+        val user = factory.createLockedUser
         userRepository.put(user)
 
         val reqJson = Json.obj("expectedVersion" -> Some(user.version))
@@ -691,7 +696,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
         (json \ "status").as[String] must be ("error")
 
-        (json \ "message").as[String] must include ("user not active")
+        (json \ "message").as[String] must include ("user not registered or active")
       }
 
     }

@@ -94,7 +94,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
       process(resetUserPasswordCmdToEvent(cmd))(applyPasswordResetEvent)
 
     case cmd: LockUserCmd =>
-      processUpdateCmdOnActiveUser(cmd, lockUserCmdToEvent, applyLockedEvent)
+      processUpdateCmd(cmd, lockUserCmdToEvent, applyLockedEvent)
 
     case cmd: UnlockUserCmd =>
       processUpdateCmdOnLockedUser(cmd, unlockUserCmdToEvent, applyUnlockedEvent)
@@ -253,9 +253,14 @@ class UsersProcessor @Inject() (val config:         Configuration,
     }
   }
 
-  private def lockUserCmdToEvent(cmd:  LockUserCmd,
-                                 user: ActiveUser): ServiceValidation[UserEvent] = {
-    user.lock.map { _ =>
+  private def lockUserCmdToEvent(cmd:  LockUserCmd, user: User): ServiceValidation[UserEvent] = {
+    val v = user match {
+        case au: ActiveUser => au.lock
+        case ru: RegisteredUser => ru.lock
+        case _ => ServiceError(s"user not registered or active: ${user.id.id}").failureNel[LockedUser]
+      }
+
+    v.map { _ =>
       UserEvent(user.id.id).update(
         _.optionalUserId := cmd.userId,
         _.time           := ISODateTimeFormat.dateTime.print(DateTime.now),
@@ -484,11 +489,17 @@ class UsersProcessor @Inject() (val config:         Configuration,
     }
   }
 
+  /* registered and active users can be locked */
   private def applyLockedEvent(event: UserEvent): Unit = {
-    onValidEventActiveUserAndVersion(event,
-                                     event.eventType.isLocked,
-                                     event.getLocked.getVersion) { (user, eventTime) =>
-      val v = user.lock
+    onValidEventUserAndVersion(event,
+                               event.eventType.isLocked,
+                               event.getLocked.getVersion) { (user, eventTime) =>
+
+      val v = user match {
+          case au: ActiveUser => au.lock
+          case ru: RegisteredUser => ru.lock
+          case _ => ServiceError(s"user not registered or active: $event").failureNel[LockedUser]
+        }
       v.foreach(u => userRepository.put(u.copy(timeModified = Some(eventTime))))
       v.map(_ => true)
     }

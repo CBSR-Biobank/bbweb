@@ -269,6 +269,11 @@ define(function (require) {
       this.statusChangeShared(user, 'lock', 'lock', this.UserState.LOCKED);
     });
 
+    it('can lock an REGISTERED user', function() {
+      var user = new this.User(_.extend(this.factory.user(), { state: this.UserState.REGISTERED }));
+      this.statusChangeShared(user, 'lock', 'lock', this.UserState.LOCKED);
+    });
+
     it('can unlock a locked user', function() {
       var user = new this.User(_.extend(this.factory.user(), { state: this.UserState.LOCKED }));
       this.statusChangeShared(user, 'unlock', 'unlock', this.UserState.ACTIVE);
@@ -286,15 +291,15 @@ define(function (require) {
       });
     });
 
-    it('fails when calling lock and the user is not active', function() {
+    it('fails when calling lock and the user is LOCKED', function() {
       var self = this,
-          statuses = [ self.UserState.REGISTERED, self.UserState.LOCKED ];
+          statuses = [ self.UserState.LOCKED ];
 
       _.each(statuses, function (state) {
         var user = new self.User(_.extend(self.factory.user(), { state: state }));
 
         expect(function () { user.lock(); })
-          .toThrowError(/user state is not active/);
+          .toThrowError(/user state is not registered or active/);
       });
     });
 

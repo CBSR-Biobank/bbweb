@@ -263,10 +263,8 @@ define(['lodash', 'tv4'], function(_, tv4) {
     };
 
     User.prototype.lock = function () {
-      var self = this;
-
-      if (self.state !== UserState.ACTIVE) {
-        throw new DomainError('user state is not active: ' + self.state);
+      if ((this.state !== UserState.REGISTERED) && (this.state !== UserState.ACTIVE))  {
+        throw new DomainError('user state is not registered or active: ' + this.state);
       }
 
       return changeStatus(this, 'lock');

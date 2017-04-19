@@ -183,7 +183,7 @@ final case class RegisteredUser(id:           UserId,
     with User
     with UserValidations {
 
-  /* Activates a registered user. */
+  /* if registration is valid, the user can be activated and allowed to access the system */
   def activate(): DomainValidation[ActiveUser] = {
     ActiveUser(id           = this.id,
                version      = this.version + 1,
@@ -195,6 +195,21 @@ final case class RegisteredUser(id:           UserId,
                salt         = this.salt,
                avatarUrl    = this.avatarUrl).successNel[String]
   }
+
+  /* if registration is invalid, the user registration is locked and not allowed to register again */
+  def lock(): DomainValidation[LockedUser] = {
+    LockedUser(id           = this.id,
+               version      = this.version + 1,
+               timeAdded    = this.timeAdded,
+               timeModified = Some(DateTime.now),
+               name         = this.name,
+               email        = this.email,
+               password     = this.password,
+               salt         = this.salt,
+               avatarUrl    = this.avatarUrl).successNel[String]
+  }
+
+
 
 }
 
@@ -269,7 +284,7 @@ final case class ActiveUser(id:           UserId,
            timeModified = Some(DateTime.now)))
   }
 
-  /** Locks an active user. */
+  /** A registered user that can no longer access the system should be locked */
   def lock(): DomainValidation[LockedUser] = {
     LockedUser(id           = this.id,
                version      = this.version + 1,
@@ -297,7 +312,7 @@ final case class LockedUser(id:           UserId,
     extends { val state: EntityState = new EntityState("locked") }
     with User {
 
-  /** Unlocks a locked user. */
+  /** Unlocks a locked user */
   def unlock(): DomainValidation[ActiveUser] = {
     ActiveUser(id           = this.id,
                version      = this.version + 1,
@@ -342,4 +357,5 @@ object UserHelper {
       case _ => user.successNel[String]
     }
   }
+
 }
