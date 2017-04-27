@@ -16,6 +16,18 @@ package dto {
 
   }
 
+  final case class UserDto(id:        String,
+                           version:   Long,
+                           name:      String,
+                           email:     String,
+                           avatarUrl: Option[String])
+
+  object UserDto {
+
+    implicit val userDtoWriter: Writes[UserDto] = Json.writes[UserDto]
+
+  }
+
   final case class NameDto(id: String, name: String, state: String)
 
   object NameDto {

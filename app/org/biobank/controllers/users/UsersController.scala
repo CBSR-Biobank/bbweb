@@ -66,7 +66,7 @@ class UsersController @Inject() (val action:         BbwebAction,
             user => {
               val token = authToken.newToken(user.id)
               log.debug(s"user logged in: ${user.email}, token: $token")
-              Ok(user).withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
+              Ok(user.toDto).withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
             }
           )
         }
@@ -79,7 +79,7 @@ class UsersController @Inject() (val action:         BbwebAction,
   def authenticateUser(): Action[Unit] = action(parse.empty) { implicit request =>
       usersService.getUser(request.authInfo.userId).fold(
         err  => Unauthorized,
-        user => Ok(user)
+        user => Ok(user.toDto)
       )
     }
 
@@ -90,7 +90,7 @@ class UsersController @Inject() (val action:         BbwebAction,
    * X-XSRF-TOKEN in HTTP header.
    */
   def logout(): Action[Unit] = action(parse.empty) { implicit request =>
-      cacheApi.remove(request.authInfo.token)
+      authToken.removeToken(request.authInfo.token)
       Ok("user has been logged out")
         .discardingCookies(DiscardingCookie(name = AuthTokenCookieKey))
         .withNewSession

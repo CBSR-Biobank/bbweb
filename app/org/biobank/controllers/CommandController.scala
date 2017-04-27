@@ -18,6 +18,10 @@ trait CommandController extends Controller with Security {
 
   implicit val usersService: UsersService
 
+  /*
+   * Concatenates JSON values along with the user ID of the logged in user to create a JSON
+   * representation of a command.
+   */
   def commandFromJson(json: JsValue, jsonExtra: JsValue, userId: UserId): JsObject = {
     val result = Json.obj("userId" -> userId.id) ++ json.as[JsObject]
     if (jsonExtra == JsNull) result

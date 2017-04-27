@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
+define(function() {
   'use strict';
 
   usersServiceFactory.$inject = ['$q', '$cookies', '$log', 'biobankApi'];

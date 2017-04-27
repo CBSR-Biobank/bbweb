@@ -25,6 +25,8 @@ trait AuthToken {
 
   def newToken(userId: UserId): String
 
+  def removeToken(token: String): Unit
+
   def getUserId(token: String): ServiceValidation[UserId]
 
 }
@@ -51,6 +53,11 @@ class AuthTokenImpl @Inject() (val env: Environment, val cacheApi: CacheApi)
     cacheApi.set(token, userId, tokenExpirationTime)
     token
   }
+
+  /**
+   * Removes a token from the cache.
+   */
+  def removeToken(token: String): Unit = cacheApi.remove(token)
 
   /**
    *  If token is valid then the timeout is re-assigned on the cache.

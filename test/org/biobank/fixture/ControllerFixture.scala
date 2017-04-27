@@ -65,11 +65,8 @@ abstract class ControllerFixture
 
   val nameGenerator = new NameGenerator(this.getClass())
 
-  //private val dbName = "bbweb-test"
-
   var adminToken: String = ""
 
-  // allow tests to access the test [[Factory]].
   val factory = new Factory
 
   /**
