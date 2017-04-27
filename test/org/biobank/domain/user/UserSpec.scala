@@ -1,6 +1,6 @@
 package org.biobank.domain.user
 
-import org.biobank.domain.DomainSpec
+import org.biobank.domain.{DomainSpec, DomainValidation}
 import org.biobank.fixture.NameGenerator
 import com.github.nscala_time.time.Imports._
 import org.slf4j.LoggerFactory
@@ -15,19 +15,20 @@ class UserSpec extends DomainSpec {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
+  def createFrom(user: RegisteredUser): DomainValidation[RegisteredUser] =
+    RegisteredUser.create(id          = user.id,
+                          version     = user.version,
+                          name        = user.name,
+                          email       = user.email,
+                          password    = user.password,
+                          salt        = user.salt,
+                          avatarUrl   = user.avatarUrl)
+
   "A registered user" can {
 
     "be created" in {
       val user = factory.createRegisteredUser
-      val v = RegisteredUser.create(id          = user.id,
-                                    version     = 0L,
-                                    name        = user.name,
-                                    email       = user.email,
-                                    password    = user.password,
-                                    salt        = user.salt,
-                                    avatarUrl   = user.avatarUrl)
-
-      v mustSucceed  { u =>
+      createFrom(user) mustSucceed { u =>
         u mustBe a[RegisteredUser]
         u must have (
           'id        (user.id),
@@ -44,7 +45,7 @@ class UserSpec extends DomainSpec {
       }
     }
 
-    "become registered" in {
+    "be activated" in {
       val user = factory.createRegisteredUser
 
       user.activate.mustSucceed { u =>
@@ -62,6 +63,19 @@ class UserSpec extends DomainSpec {
         )
 
         checkTimeStamps(u, user.timeAdded, DateTime.now)
+      }
+    }
+
+    "pass authentication" in {
+      val email = nameGenerator.nextEmail[User]
+      val password = nameGenerator.next[User]
+
+      val user = factory.createRegisteredUser.copy(email = email, password = password)
+      createFrom(user) mustSucceed { user =>
+        user.authenticate(email, password) mustSucceed { authenticatedUser =>
+          authenticatedUser mustBe(user)
+          ()
+        }
       }
     }
 
@@ -207,111 +221,43 @@ class UserSpec extends DomainSpec {
   "A user" must {
 
     "not be created with an empty id" in {
-      val v = RegisteredUser.create(id          = UserId(""),
-                                    version     = 0L,
-                                    name        = nameGenerator.next[User],
-                                    email       = nameGenerator.nextEmail[User],
-                                    password    = nameGenerator.next[User],
-                                    salt        = nameGenerator.next[User],
-                                    avatarUrl   = Some(nameGenerator.nextUrl[User]))
-      v mustFail "IdRequired"
+      val user = factory.createRegisteredUser.copy(id = UserId(""))
+      createFrom(user) mustFail "IdRequired"
     }
 
     "not be created with an invalid version" in {
-      val v = RegisteredUser.create(id          = UserId(nameGenerator.next[User]),
-                                    version     = -2L,
-                                    name        = nameGenerator.next[User],
-                                    email       = nameGenerator.nextEmail[User],
-                                    password    = nameGenerator.next[User],
-                                    salt        = nameGenerator.next[User],
-                                    avatarUrl   = Some(nameGenerator.nextUrl[User]))
-      v mustFail "InvalidVersion"
+      val user = factory.createRegisteredUser.copy(version = -2L)
+      createFrom(user) mustFail "InvalidVersion"
     }
 
     "not be created with an empty name" in {
-      val v = RegisteredUser.create(id          = UserId(nameGenerator.next[User]),
-                                    version     = 0L,
-                                    name        = "",
-                                    email       = nameGenerator.nextEmail[User],
-                                    password    = nameGenerator.next[User],
-                                    salt        = nameGenerator.next[User],
-                                    avatarUrl   = Some(nameGenerator.nextUrl[User]))
-      v mustFail "InvalidName"
+      val user = factory.createRegisteredUser.copy(name = "")
+      createFrom(user) mustFail "InvalidName"
     }
 
     "not be created with an empty email" in {
-      val v = RegisteredUser.create(id          = UserId(nameGenerator.next[User]),
-                                    version     = 0L,
-                                    name        = nameGenerator.next[User],
-                                    email       = "",
-                                    password    = nameGenerator.next[User],
-                                    salt        = nameGenerator.next[User],
-                                    avatarUrl   = Some(nameGenerator.nextUrl[User]))
-      v mustFail "InvalidEmail"
+      val user = factory.createRegisteredUser.copy(email = "")
+      createFrom(user) mustFail "InvalidEmail"
     }
 
     "not be created with an invalid email" in {
-      val v = RegisteredUser.create(id          = UserId(nameGenerator.next[User]),
-                                    version     = 0L,
-                                    name        = nameGenerator.next[User],
-                                    email       = "abcdef",
-                                    password    = nameGenerator.next[User],
-                                    salt        = nameGenerator.next[User],
-                                    avatarUrl   = Some(nameGenerator.nextUrl[User]))
-      v mustFail "InvalidEmail"
+      val user = factory.createRegisteredUser.copy(email = nameGenerator.next[User])
+      createFrom(user) mustFail "InvalidEmail"
     }
 
     "not be created with an empty password" in {
-      val v = RegisteredUser.create(id          = UserId(nameGenerator.next[User]),
-                                    version     = 0L,
-                                    name        = nameGenerator.next[User],
-                                    email       = nameGenerator.nextEmail[User],
-                                    password    = "",
-                                    salt        = nameGenerator.next[User],
-                                    avatarUrl   = Some(nameGenerator.nextUrl[User]))
-      v mustFail "PasswordRequired"
+      val user = factory.createRegisteredUser.copy(password = "")
+      createFrom(user) mustFail "PasswordRequired"
     }
 
     "not be created with an empty salt option" in {
-      val v = RegisteredUser.create(id          = UserId(nameGenerator.next[User]),
-                                    version     = 0L,
-                                    name        = nameGenerator.next[User],
-                                    email       = nameGenerator.nextEmail[User],
-                                    password    = nameGenerator.next[User],
-                                    salt        = "",
-                                    avatarUrl   = Some(nameGenerator.nextUrl[User]))
-      v mustFail "SaltRequired"
+      val user = factory.createRegisteredUser.copy(salt = "")
+      createFrom(user) mustFail "SaltRequired"
     }
 
     "not be created with an invalid avatar url" in {
-      val v = RegisteredUser.create(id          = UserId(nameGenerator.next[User]),
-                                    version     = 0L,
-                                    name        = nameGenerator.next[User],
-                                    email       = nameGenerator.nextEmail[User],
-                                    password    = nameGenerator.next[User],
-                                    salt        = nameGenerator.next[User],
-                                    avatarUrl   = Some(nameGenerator.next[User]))
-      v mustFail "InvalidUrl"
-    }
-
-    "pass authentication" in {
-      val email = nameGenerator.nextEmail[User]
-      val password = nameGenerator.next[User]
-
-      val v = RegisteredUser.create(id          = UserId(nameGenerator.next[User]),
-                                    version     = 0L,
-                                    name        = nameGenerator.next[User],
-                                    email       = email,
-                                    password    = password,
-                                    salt        = nameGenerator.next[User],
-                                    avatarUrl   = Some(nameGenerator.nextUrl[User]))
-
-      v mustSucceed { user =>
-        user.authenticate(email, password) mustSucceed { authenticatedUser =>
-          authenticatedUser mustBe(user)
-          ()
-        }
-      }
+      val user = factory.createRegisteredUser.copy(avatarUrl = Some(nameGenerator.next[User]))
+      createFrom(user) mustFail "InvalidUrl"
     }
 
     "fail authentication for bad password" in {
@@ -319,29 +265,15 @@ class UserSpec extends DomainSpec {
       val password = nameGenerator.next[User]
       val badPassword = nameGenerator.next[User]
 
-      val v = RegisteredUser.create(id          = UserId(nameGenerator.next[User]),
-                                    version     = 0L,
-                                    name        = nameGenerator.next[User],
-                                    email       = email,
-                                    password    = password,
-                                    salt        = nameGenerator.next[User],
-                                    avatarUrl   = Some(nameGenerator.nextUrl[User]))
-
-      v mustSucceed { user =>
+      val user = factory.createRegisteredUser.copy(email = email, password = password)
+      createFrom(user) mustSucceed { user =>
         user.authenticate(email, badPassword) mustFail "authentication failure"
       }
     }
 
     "have more than one validation fail" in {
-      val v = RegisteredUser.create(id          = UserId(nameGenerator.next[User]),
-                                    version     = -2L,
-                                    name        = "",
-                                    email       = nameGenerator.nextEmail[User],
-                                    password    = nameGenerator.next[User],
-                                    salt        = nameGenerator.next[User],
-                                    avatarUrl   = Some(nameGenerator.nextUrl[User]))
-
-      v mustFail ("InvalidVersion", "InvalidName")
+      val user = factory.createRegisteredUser.copy(version = -1L, name = "")
+      createFrom(user) mustFail ("InvalidVersion", "InvalidName")
     }
 
   }
