@@ -3,6 +3,7 @@ package org.biobank.domain
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
 import org.biobank.domain.user._
+import org.biobank.domain.access._
 import org.biobank.domain.study._
 import org.biobank.domain.participants._
 import org.biobank.domain.centre._
@@ -71,8 +72,51 @@ class Factory {
                           password     = nameGenerator.next[User],
                           salt         = nameGenerator.next[User],
                           avatarUrl    = Some(nameGenerator.nextUrl[User]))
-    domainObjects  = domainObjects + (classOf[LockedUser] -> user)
+    domainObjects = domainObjects + (classOf[LockedUser] -> user)
     user
+  }
+
+  def createRole(): Role = {
+    val role = Role(id           = AccessItemId(nameGenerator.next[AccessItem]),
+                    version      = 0L,
+                    timeAdded    = DateTime.now,
+                    timeModified = None,
+                    name         = nameGenerator.next[Role],
+                    description  = Some(nameGenerator.next[Role]),
+                    userIds      = Set.empty[UserId],
+                    ruleName     = "",
+                    parentIds    = Set.empty[AccessItemId],
+                    childrenIds  = Set.empty[AccessItemId])
+    domainObjects = domainObjects + (classOf[Role] -> role)
+    role
+  }
+
+  def createPermission(): Permission = {
+    val permission = Permission(id           = AccessItemId(nameGenerator.next[AccessItem]),
+                                version      = 0L,
+                                timeAdded    = DateTime.now,
+                                timeModified = None,
+                                name         = nameGenerator.next[Permission],
+                                description  = Some(nameGenerator.next[Permission]),
+                                ruleName     = "",
+                                parentIds    = Set.empty[AccessItemId],
+                                childrenIds  = Set.empty[AccessItemId])
+    domainObjects = domainObjects + (classOf[Permission] -> permission)
+    permission
+  }
+
+  def createMembership(): Membership = {
+    val membership = Membership(id           = MembershipId(nameGenerator.next[MembershipId]),
+                                version      = 0L,
+                                timeAdded    = DateTime.now,
+                                timeModified = None,
+                                userIds      = Set.empty[UserId],
+                                allStudies   = false,
+                                allCentres   = false,
+                                studyIds     = Set.empty[StudyId],
+                                centreIds    = Set.empty[CentreId])
+    domainObjects = domainObjects + (classOf[Membership] -> membership)
+    membership
   }
 
   def createDisabledStudy(): DisabledStudy = {

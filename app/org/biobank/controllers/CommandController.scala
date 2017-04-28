@@ -72,7 +72,9 @@ trait CommandController extends Controller {
     validation.fold(
       err => {
         val errMsgs = err.list.toList.mkString(", ")
-        if (("IdNotFound".r.findAllIn(errMsgs).length > 0)
+        if (errMsgs.contains("Unauthorized")) {
+          Unauthorized
+        } else if (("IdNotFound".r.findAllIn(errMsgs).length > 0)
               || ("not found".r.findAllIn(errMsgs).length > 0)
               || ("does not exist".r.findAllIn(errMsgs).length > 0)
               || ("invalid.*id".r.findAllIn(errMsgs).length > 0)) {

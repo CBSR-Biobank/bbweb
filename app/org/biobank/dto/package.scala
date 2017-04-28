@@ -8,7 +8,7 @@ import play.api.libs.json._
 
 package dto {
 
-  final case class AggregateCountsDto(studies: Int, centres: Int, users: Int)
+  final case class AggregateCountsDto(studies: Long, centres: Long, users: Long)
 
   object AggregateCountsDto {
 

@@ -1,0 +1,32 @@
+syntax = "proto2";
+
+package org.biobank.infrastructure.event;
+
+message AccessEvent {
+
+  message Role {
+
+    message UserAdded {
+      optional string userId = 1;
+    }
+
+    optional string roleId  = 1;
+    optional int64  version = 2;
+
+    oneof event_type {
+      UserAdded userAdded = 3;
+    }
+  }
+
+  message Permission {
+    optional string permissionId  = 1;
+  }
+
+  required string sessionUserId = 1;
+  optional string time          = 2;
+
+  oneof event_type {
+    Role       role = 3;
+    Permission permission = 4;
+  }
+}

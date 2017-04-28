@@ -69,16 +69,16 @@ sealed trait User extends ConcurrencySafeEntity[UserId] with HasState with HasNa
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {
-        |  id: $id,
-        |  version: $version,
-        |  timeAdded: $timeAdded,
+        |  id:           $id,
+        |  version:      $version,
+        |  timeAdded:    $timeAdded,
         |  timeModified: $timeModified,
-        |  state: $state,
-        |  name: $name,
-        |  email: $email,
-        |  password: $password,
-        |  salt: $salt,
-        |  avatarUrl: $avatarUrl,
+        |  state:        $state,
+        |  name:         $name,
+        |  email:        $email,
+        |  password:     $password,
+        |  salt:         $salt,
+        |  avatarUrl:    $avatarUrl,
         |}""".stripMargin
 }
 

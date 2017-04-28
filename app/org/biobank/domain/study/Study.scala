@@ -104,8 +104,6 @@ trait StudyValidations {
 
   val NameMinLength: Long = 2L
 
-  case object InvalidStudyId extends ValidationKey
-
   case object InvalidSpecimenGroupId extends ValidationKey
 }
 
@@ -119,12 +117,12 @@ trait StudyValidations {
  * NOTE: functions withName and withDescription should be moved to the Study trait after this
  *       bug is fixed: https://issues.scala-lang.org/browse/SI-5122
  */
-final case class DisabledStudy(id:                         StudyId,
-                               version:                    Long,
-                               timeAdded:                  DateTime,
-                               timeModified:               Option[DateTime],
-                               name:                       String,
-                               description:                Option[String],
+final case class DisabledStudy(id:              StudyId,
+                               version:         Long,
+                               timeAdded:       DateTime,
+                               timeModified:    Option[DateTime],
+                               name:            String,
+                               description:     Option[String],
                                annotationTypes: Set[AnnotationType])
     extends { val state: EntityState = Study.disabledState }
     with Study

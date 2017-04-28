@@ -43,9 +43,9 @@ trait ShipmentConstraints {
           err => trimmedId.failureNel[Specimen],
           spc => spc.successNel[String]
         )
-      }.
-      toList.sequenceU.
-      leftMap(err =>
+      }
+      .toList.sequenceU
+      .leftMap(err =>
         EntityCriteriaNotFound{s"invalid specimen inventory IDs: " + err.list.toList.mkString(", ")}.nel)
   }
 

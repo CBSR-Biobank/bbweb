@@ -27,7 +27,7 @@ trait CentresService extends BbwebService {
    *
    * @param sort the string representation of the sort expression to use when sorting the studies.
    */
-  def getCentresCount(): Int
+  def getCentresCount(): Long
 
   def searchLocations(cmd: SearchCentreLocationsCmd): Set[CentreLocationInfo]
 
@@ -59,8 +59,8 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def getCentresCount(): Int = {
-    centreRepository.getValues.size
+  def getCentresCount(): Long = {
+    centreRepository.getValues.size.toLong
   }
 
   def searchLocations(cmd: SearchCentreLocationsCmd): Set[CentreLocationInfo] =  {

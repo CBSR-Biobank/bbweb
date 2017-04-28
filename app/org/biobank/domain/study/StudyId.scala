@@ -5,7 +5,7 @@ import play.api.libs.json._
 
 /** Identifies a unique [[Study]] in the system.
   *
-  * Used as a value object to maintain associations to with objects in the system.
+  * Used as a value object to maintain associations to with other entities in the system.
   */
 final case class StudyId(id: String) extends IdentifiedValueObject[String]
 

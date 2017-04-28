@@ -22,6 +22,10 @@ package biobank {
 
     final case class InvalidVersion(msg: String) extends ValidationMsgKey
 
+    case object Unauthorized extends ValidationKey {
+      override val toString: String = "Unauthorized"
+    }
+
     final case class IdNotFound(msg: String) extends ValidationMsgKey {
       override val toString: String = s"IdNotFound: $msg"
     }

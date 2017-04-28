@@ -1,13 +1,11 @@
 package org.biobank
 
 import com.github.nscala_time.time.Imports._
-
 import org.biobank.domain.{ ConcurrencySafeEntity, DomainValidation }
-
-import org.slf4j.LoggerFactory
 import org.scalatest._
-import org.scalatest.matchers.Matcher
 import org.scalatest.matchers.MatchResult
+import org.scalatest.matchers.Matcher
+import org.slf4j.LoggerFactory
 
 object TestUtils extends MustMatchers with OptionValues {
 
@@ -84,10 +82,13 @@ object TestUtils extends MustMatchers with OptionValues {
       *
       *  @param fn the function to execute.
       */
-    def mustSucceed(fn: T => Unit): Unit = {
+    def mustSucceed(fn: T => Any): Unit = {
       validation.fold(
         err => fail(err.list.toList.mkString(", ")),
-        entity => fn(entity)
+        entity => {
+          fn(entity)
+          ()
+        }
       )
     }
 

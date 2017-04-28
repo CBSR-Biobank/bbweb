@@ -28,7 +28,7 @@ class CeventSpecimenRepositoryImpl
     extends ReadWriteRepositoryRefImpl[SpecimenId, CeventSpecimen](v => v.specimenId)
     with CeventSpecimenRepository {
 
-  // only existing center and location IDs should be stored, never new IDs
+  // only existing collection event and specimen IDs should be stored, never new IDs
   @SuppressWarnings(Array("org.wartremover.warts.Throw"))
   def nextIdentity: SpecimenId = throw new IllegalStateException("should not be used")
 

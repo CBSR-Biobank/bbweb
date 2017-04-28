@@ -7,7 +7,7 @@ import org.biobank.service.studies.StudiesService
 import org.biobank.service.users.UsersService
 import play.api.Environment
 import play.api.mvc._
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * Controller for the main page, and also the about and contact us pages.
@@ -27,10 +27,16 @@ class Application @Inject() (val action:         BbwebAction,
     Results.Ok(views.html.index())
   }
 
-  def aggregateCounts: Action[Unit] = action(parse.empty) { implicit request =>
-    Ok(AggregateCountsDto(studiesService.getStudyCount,
-                          centresService.getCentresCount,
-                          usersService.getAll.size))
+  def aggregateCounts: Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      Future {
+        val v = usersService.getCountsByStatus(request.authInfo.userId).map { userCounts =>
+            AggregateCountsDto(studiesService.getStudyCount,
+                               centresService.getCentresCount,
+                               userCounts.total)
+          }
+        validationReply(v)
+      }
   }
 
 }

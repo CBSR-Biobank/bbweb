@@ -885,9 +885,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val token = doLogin(user.email, plainPassword)
 
         // this request is valid since user is logged in
-        var json = makeRequest(GET, uri, OK, JsNull, token)
-        val jsonList = (json \ "data" \ "items").as[List[JsObject]]
-        jsonList must have size 1
+        var json = makeRequest(GET, uri("authenticate"), OK, JsNull, token)
+        (json \ "data" \ "id").as[String] must be (user.id.id)
 
         // the user is now logged out
         json = makeRequest(POST, uri("logout"), OK, JsNull, token)

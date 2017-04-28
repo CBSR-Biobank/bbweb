@@ -25,6 +25,12 @@ object CommonValidations {
       override val toString: String = "InvalidNumberString"
     }
 
+  case object InvalidUserId extends ValidationKey
+
+  case object InvalidStudyId extends ValidationKey
+
+  case object InvalidCentreId extends ValidationKey
+
   case object CentreIdRequired extends ValidationKey
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading", "org.wartremover.warts.Null"))

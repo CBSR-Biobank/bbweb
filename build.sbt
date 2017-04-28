@@ -168,54 +168,58 @@ wartremoverExcluded += crossTarget.value / "routes" / "main" / "controllers" / "
 // see following for explanation: https://github.com/puffnfresh/wartremover/issues/219
 //wartremoverExcluded ++= ((crossTarget.value / "src_managed" / "main" / "compiled_protobuf" ) ** "*.scala").get
 
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreAddedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreDescriptionUpdatedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreDisabledEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreEnabledEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreEventsProto.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreLocationAddedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreLocationRemovedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreLocationUpdatedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreNameUpdatedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "StudyAddedToCentreEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "StudyRemovedFromCentreEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CollectionEventEvents" / "CollectionEventEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CollectionEventEvents" / "CollectionEventEventsProto.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CollectionEventTypeEvents" / "CollectionEventTypeEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CollectionEventTypeEvents" / "CollectionEventTypeEventsProto.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CommonEvents" / "Annotation.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CommonEvents" / "AnnotationType.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CommonEvents" / "AnnotationTypeRemoved.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CommonEvents" / "CommonEventsProto.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CommonEvents" / "Location.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "ParticipantEvents" / "ParticipantEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "ParticipantEvents" / "ParticipantEventsProto.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "ProcessingTypeEvents" / "ProcessingTypeEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "ProcessingTypeEvents" / "ProcessingTypeEventsProto.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "ShipmentEvents" / "ShipmentEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "ShipmentEvents" / "ShipmentEventsProto.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "ShipmentSpecimenEvents" / "ShipmentSpecimenEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "ShipmentSpecimenEvents" / "ShipmentSpecimenEventsProto.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "SpecimenEvents" / "SpecimenEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "SpecimenEvents" / "SpecimenEventsProto.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "CollectionEventTypeAddedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "CollectionEventTypeRemovedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "CollectionEventTypeUpdatedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "ProcessingTypeAddedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "ProcessingTypeRemovedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "ProcessingTypeUpdatedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenGroupAddedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenGroupRemovedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenGroupUpdatedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenLinkAnnotationTypeAddedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenLinkAnnotationTypeRemovedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenLinkAnnotationTypeUpdatedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenLinkTypeAddedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenLinkTypeRemovedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenLinkTypeUpdatedEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "StudyEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "StudyEventOld.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "StudyEventsProto.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "UserEvents" / "UserEvent.scala"
-wartremoverExcluded += crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "UserEvents" / "UserEventsProto.scala"
+wartremoverExcluded ++= Seq(
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "AccessEvents" / "AccessEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "AccessEvents" / "AccessEventsProto.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreAddedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreDescriptionUpdatedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreDisabledEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreEnabledEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreEventsProto.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreLocationAddedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreLocationRemovedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreLocationUpdatedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreNameUpdatedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "StudyAddedToCentreEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "StudyRemovedFromCentreEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CollectionEventEvents" / "CollectionEventEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CollectionEventEvents" / "CollectionEventEventsProto.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CollectionEventTypeEvents" / "CollectionEventTypeEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CollectionEventTypeEvents" / "CollectionEventTypeEventsProto.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CommonEvents" / "Annotation.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CommonEvents" / "AnnotationType.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CommonEvents" / "AnnotationTypeRemoved.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CommonEvents" / "CommonEventsProto.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CommonEvents" / "Location.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "ParticipantEvents" / "ParticipantEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "ParticipantEvents" / "ParticipantEventsProto.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "ProcessingTypeEvents" / "ProcessingTypeEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "ProcessingTypeEvents" / "ProcessingTypeEventsProto.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "ShipmentEvents" / "ShipmentEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "ShipmentEvents" / "ShipmentEventsProto.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "ShipmentSpecimenEvents" / "ShipmentSpecimenEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "ShipmentSpecimenEvents" / "ShipmentSpecimenEventsProto.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "SpecimenEvents" / "SpecimenEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "SpecimenEvents" / "SpecimenEventsProto.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "CollectionEventTypeAddedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "CollectionEventTypeRemovedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "CollectionEventTypeUpdatedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "ProcessingTypeAddedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "ProcessingTypeRemovedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "ProcessingTypeUpdatedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenGroupAddedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenGroupRemovedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenGroupUpdatedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenLinkAnnotationTypeAddedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenLinkAnnotationTypeRemovedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenLinkAnnotationTypeUpdatedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenLinkTypeAddedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenLinkTypeRemovedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "SpecimenLinkTypeUpdatedEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "StudyEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "StudyEventOld.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "StudyEvents" / "StudyEventsProto.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "UserEvents" / "UserEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "UserEvents" / "UserEventsProto.scala"
+  )

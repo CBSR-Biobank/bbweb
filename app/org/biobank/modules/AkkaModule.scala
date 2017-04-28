@@ -2,6 +2,7 @@ package org.biobank.modules
 
 import com.google.inject.AbstractModule
 import org.biobank.TestData
+import org.biobank.service.access._
 import org.biobank.service.centres._
 import org.biobank.service.participants._
 import org.biobank.service.studies._
@@ -12,9 +13,10 @@ class AkkaModule extends AbstractModule with AkkaGuiceSupport {
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def configure() = {
 
+    bindActor[AccessProcessor]("accessProcessor")
+    bindActor[UsersProcessor]("usersProcessor")
     bindActor[CentresProcessor]("centresProcessor")
     bindActor[ShipmentsProcessor]("shipmentsProcessor")
-    bindActor[UsersProcessor]("usersProcessor")
 
     bindActor[ParticipantsProcessor]("participantsProcessor")
     bindActor[CollectionEventsProcessor]("collectionEventsProcessor")

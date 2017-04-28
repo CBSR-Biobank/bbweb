@@ -23,7 +23,7 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[StudiesServiceImpl])
 trait StudiesService extends BbwebService {
 
-  def getStudyCount(): Int
+  def getStudyCount(): Long
 
   def getCountsByStatus(): StudyCountsByStatus
 
@@ -90,8 +90,8 @@ class StudiesServiceImpl @Inject() (
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def getStudyCount(): Int = {
-    studyRepository.getValues.size
+  def getStudyCount(): Long = {
+    studyRepository.getValues.size.toLong
   }
 
   def getCountsByStatus(): StudyCountsByStatus = {

@@ -51,15 +51,10 @@ class UsersController @Inject() (val action:         BbwebAction,
    */
   def login(): Action[JsValue] =
     anonymousCommandAction[LoginCredentials]{ credentials =>
-      val v = for {
-          user  <- usersService.validatePassword(credentials.email, credentials.password)
-          valid <- usersService.allowLogin(user)
-        } yield user
-
-      // FIXME: what if user attempts multiple failed logins? lock the account after 3 attempts?
-      // how long to lock the account?
       Future {
-        v.fold(
+        // FIXME: what if user attempts multiple failed logins? lock the account after 3 attempts?
+        // how long to lock the account?
+        usersService.loginAllowed(credentials.email, credentials.password).fold(
           err => Unauthorized,
           user => {
             val token = authToken.newToken(user.id)
@@ -94,8 +89,8 @@ class UsersController @Inject() (val action:         BbwebAction,
     }
 
   def userCounts(): Action[Unit] =
-    action(parse.empty) { implicit request =>
-      Ok(usersService.getCountsByStatus)
+    action.async(parse.empty) { implicit request =>
+      validationReply(Future(usersService.getCountsByStatus(request.authInfo.userId)))
     }
 
   def list: Action[Unit] =
@@ -104,7 +99,7 @@ class UsersController @Inject() (val action:         BbwebAction,
         Future {
           for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            users      <- usersService.getUsers(pagedQuery.filter, pagedQuery.sort)
+            users      <- usersService.getUsers(request.authInfo.userId, pagedQuery.filter, pagedQuery.sort)
             validPage  <- pagedQuery.validPage(users.size)
             results    <- PagedResults.create(users, pagedQuery.page, pagedQuery.limit)
           } yield results
@@ -114,7 +109,7 @@ class UsersController @Inject() (val action:         BbwebAction,
 
   /** Retrieves the user for the given id as JSON */
   def user(id: UserId): Action[Unit] = action(parse.empty) { implicit request =>
-      validationReply(usersService.getUser(id))
+      validationReply(usersService.getUserIfAuthorized(request.authInfo.userId, id))
     }
 
   def registerUser(): Action[JsValue] =

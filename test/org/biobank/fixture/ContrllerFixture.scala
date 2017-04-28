@@ -3,6 +3,7 @@ package org.biobank.fixture
 import org.biobank.Global
 import org.biobank.controllers.FixedEhCache
 import org.biobank.domain._
+import org.biobank.domain.access.AccessItemRepository
 import org.biobank.domain.centre._
 import org.biobank.domain.participants._
 import org.biobank.domain.processing._
@@ -166,6 +167,8 @@ abstract class ControllerFixture
   // new instances of each of these is created with the new application
 
   def passwordHasher = app.injector.instanceOf[PasswordHasher]
+
+  def accessItemRepository                   = app.injector.instanceOf[AccessItemRepository]
 
   def collectionEventTypeRepository          = app.injector.instanceOf[CollectionEventTypeRepository]
   def processingTypeRepository               = app.injector.instanceOf[ProcessingTypeRepository]
