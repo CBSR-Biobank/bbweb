@@ -4,12 +4,20 @@
  *
  * Karma configuration
  */
+
+/* global module */
+
 module.exports = function(config) {
   'use strict';
 
   var path = require("path");
 
   config.set({
+
+    // If using jasmine-core 2.6.0 the follwing settings are required
+    // browserNoActivityTimeout: 60000,
+    // browserDisconnectTimeout: 30000,
+    // captureTimeout: 60000,
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: './',
@@ -60,9 +68,9 @@ module.exports = function(config) {
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
-    preprocessors: {
+    //preprocessors: {
       //'app/assets/javascripts/**/*.js': 'coverage' -> moved to Gruntfile.js
-    },
+    //},
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
