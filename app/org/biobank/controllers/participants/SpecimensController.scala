@@ -5,7 +5,6 @@ import org.biobank.controllers._
 import org.biobank.domain.participants.{CollectionEventId, SpecimenId}
 import org.biobank.service._
 import org.biobank.service.participants.SpecimensService
-import org.biobank.service.users.UsersService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
 import play.api.mvc.{Action, Results}
@@ -17,12 +16,9 @@ import scalaz.Validation.FlatMap._
 @Singleton
 class SpecimensController @Inject() (val action:       BbwebAction,
                                      val env:          Environment,
-                                     val authToken:    AuthToken,
-                                     val usersService: UsersService,
                                      val service:      SpecimensService)
-                                 (implicit ec: ExecutionContext)
-    extends CommandController
-    with JsonController {
+                                 (implicit val ec: ExecutionContext)
+    extends CommandController {
   import org.biobank.infrastructure.command.SpecimenCommands._
 
   val log: Logger = Logger(this.getClass)
@@ -62,7 +58,7 @@ class SpecimensController @Inject() (val action:       BbwebAction,
     }
 
   def addSpecimens(ceventId: CollectionEventId): Action[JsValue] =
-    commandActionAsync(Json.obj("collectionEventId" -> ceventId)) { cmd: AddSpecimensCmd =>
+    commandAction[AddSpecimensCmd](Json.obj("collectionEventId" -> ceventId)) { cmd =>
       val future = service.processCommand(cmd)
       validationReply(future)
     }

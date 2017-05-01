@@ -4,9 +4,8 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.participants.{ParticipantId, CollectionEventId}
 import org.biobank.infrastructure.command.CollectionEventCommands._
-import org.biobank.service.{AuthToken, PagedResults}
+import org.biobank.service.PagedResults
 import org.biobank.service.participants.CollectionEventsService
-import org.biobank.service.users.UsersService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
 import play.api.mvc.{Action, Result, Results}
@@ -18,12 +17,9 @@ import scalaz.Validation.FlatMap._
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 class CollectionEventsController @Inject() (val action:       BbwebAction,
                                             val env:          Environment,
-                                            val authToken:    AuthToken,
-                                            val usersService: UsersService,
                                             val service:      CollectionEventsService)
-                                        (implicit ec: ExecutionContext)
-    extends CommandController
-    with JsonController {
+                                        (implicit val ec: ExecutionContext)
+    extends CommandController {
 
   val log: Logger = Logger(this.getClass)
 
@@ -60,24 +56,16 @@ class CollectionEventsController @Inject() (val action:       BbwebAction,
     }
 
   def add(participantId: ParticipantId): Action[JsValue] =
-    commandActionAsync(Json.obj("participantId" -> participantId)) { cmd: AddCollectionEventCmd =>
-      processCommand(cmd)
-    }
+    commandAction[AddCollectionEventCmd](Json.obj("participantId" -> participantId))(processCommand)
 
   def updateVisitNumber(ceventId: CollectionEventId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventVisitNumberCmd =>
-      processCommand(cmd)
-    }
+    commandAction[UpdateCollectionEventVisitNumberCmd](Json.obj("id" -> ceventId))(processCommand)
 
   def updateTimeCompleted(ceventId: CollectionEventId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventTimeCompletedCmd =>
-      processCommand(cmd)
-    }
+    commandAction[UpdateCollectionEventTimeCompletedCmd](Json.obj("id" -> ceventId))(processCommand)
 
   def addAnnotation(ceventId: CollectionEventId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> ceventId)) { cmd: UpdateCollectionEventAnnotationCmd =>
-      processCommand(cmd)
-    }
+    commandAction[UpdateCollectionEventAnnotationCmd](Json.obj("id" -> ceventId))(processCommand)
 
   def removeAnnotation(ceventId: CollectionEventId,
                        annotTypeId:   String,

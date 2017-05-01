@@ -4,22 +4,20 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.study.{ProcessingTypeId, SpecimenLinkTypeId}
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.service.AuthToken
 import org.biobank.service.studies.StudiesService
-import org.biobank.service.users.UsersService
 import play.api.Logger
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
 import play.api.mvc.Action
+import scala.concurrent.ExecutionContext
 
+@SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
 class SpecimenLinkTypesController @Inject() (val action:         BbwebAction,
                                              val env:            Environment,
-                                             val authToken:      AuthToken,
-                                             val usersService:   UsersService,
                                              val studiesService: StudiesService)
-    extends CommandController
-    with JsonController {
+                               (implicit val ec: ExecutionContext)
+    extends CommandController {
 
   val log: Logger = Logger(this.getClass)
 
@@ -36,14 +34,13 @@ class SpecimenLinkTypesController @Inject() (val action:         BbwebAction,
     }
 
   def addSpecimenLinkType(processingTypeId: ProcessingTypeId): Action[JsValue] =
-    commandActionAsync(Json.obj("processingTypeId" -> processingTypeId)) { cmd: AddSpecimenLinkTypeCmd =>
+    commandAction[AddSpecimenLinkTypeCmd](Json.obj("processingTypeId" -> processingTypeId)) { cmd =>
       val future = studiesService.processCommand(cmd)
       validationReply(future)
     }
 
   def updateSpecimenLinkType(processingTypeId: ProcessingTypeId, id: SpecimenLinkTypeId): Action[JsValue] =
-    commandActionAsync(Json.obj("processingTypeId" -> processingTypeId, "id" -> id)) {
-      cmd: UpdateSpecimenLinkTypeCmd =>
+    commandAction[UpdateSpecimenLinkTypeCmd](Json.obj("processingTypeId" -> processingTypeId, "id" -> id)) { cmd =>
       val future = studiesService.processCommand(cmd)
       validationReply(future)
     }

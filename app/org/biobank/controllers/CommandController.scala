@@ -1,68 +1,60 @@
 package org.biobank.controllers
 
-import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.command.Commands._
-import org.biobank.service.users.UsersService
-import org.biobank.service.{AuthToken, ServiceValidation}
-import play.api.libs.concurrent.Execution.Implicits._
+import org.biobank.service.{ServiceValidation}
+import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json._
 import play.api.mvc._
-import scala.concurrent.Future
-
-@SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-trait CommandController extends Controller with Security {
-
-  val action: BbwebAction
-
-  implicit val authToken: AuthToken
-
-  implicit val usersService: UsersService
-
-  /*
-   * Concatenates JSON values along with the user ID of the logged in user to create a JSON
-   * representation of a command.
-   */
-  def commandFromJson(json: JsValue, jsonExtra: JsValue, userId: UserId): JsObject = {
-    val result = Json.obj("userId" -> userId.id) ++ json.as[JsObject]
-    if (jsonExtra == JsNull) result
-    else result ++ jsonExtra.as[JsObject]
-  }
-
-  def commandAction[T <: Command](additionalJson: JsValue)(func: T => Result)
-                   (implicit reads: Reads[T]): Action[JsValue] =
-    action(parse.json) { implicit request =>
-      commandFromJson(request.body, additionalJson, request.authInfo.userId).validate[T].fold(
-        errors => BadRequest(Json.obj("status" ->"error", "message" -> JsError.toJson(errors))),
-        cmd => func(cmd)
-      )
-    }
-
-  def commandAction[T <: Command](func: T => Result)(implicit reads: Reads[T]): Action[JsValue] =
-    commandAction(JsNull)(func)
-
-  def commandActionAsync[T <: Command](additionalJson: JsValue)
-                        (func: T => Future[Result])
-                        (implicit reads: Reads[T]):
-      Action[JsValue] =
-    action.async(parse.json) { implicit request =>
-      commandFromJson(request.body, additionalJson, request.authInfo.userId).validate[T].fold(
-        errors => Future.successful(BadRequest(Json.obj("status" ->"error",
-                                                        "message" -> JsError.toJson(errors)))),
-        cmd => func(cmd)
-      )
-    }
-
-  def commandActionAsync[T <: Command](func: T => Future[Result])(implicit reads: Reads[T]):
-      Action[JsValue] =
-    commandActionAsync(JsNull)(func)
-
-}
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
  *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
  */
 @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-trait JsonController extends Controller {
+trait CommandController extends Controller {
+
+  implicit val ec: ExecutionContext
+
+  val action: BbwebAction
+
+  private val log: Logger = LoggerFactory.getLogger(this.getClass)
+
+  @SuppressWarnings(Array("org.wartremover.warts.Var"))
+  def commandAction[T <: Command](jsonExtra: JsValue)
+                   (block: T => Future[Result])
+                   (implicit reads: Reads[T]): Action[JsValue] =
+    action.async(parse.json) { request =>
+      var jsonCmd = request.body.as[JsObject] ++ Json.obj("userId" -> request.authInfo.userId.id)
+      if (jsonExtra != JsNull) {
+        jsonCmd = jsonCmd ++ jsonExtra.as[JsObject]
+      }
+      processJsonCommand(jsonCmd)(block)
+    }
+
+  /**
+   * This is for actions that do not require the user to be logged in.
+   */
+  def anonymousCommandAction[T <: Command](block: T => Future[Result])
+                         (implicit reads: Reads[T]): Action[JsValue] =
+    Action.async(parse.json) { request =>
+      processJsonCommand(request.body.as[JsObject])(block)
+    }
+
+  private def processJsonCommand[T <: Command](jsonCmd: JsValue)
+                                (block: T => Future[Result])
+                                (implicit reads: Reads[T]): Future[Result] = {
+    if (log.isTraceEnabled) {
+      log.trace(s"commandAction: json: $jsonCmd")
+    }
+
+    jsonCmd.validate[T].fold(
+      errors => {
+        val errString = errors.map(e => s"field: ${e._1}, errors: ${e._2}").toList.mkString(", ")
+        Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> errString)))
+      },
+      cmd => block(cmd)
+    )
+  }
 
   def errorReplyJson(message: String): JsValue = Json.obj("status" -> "error", "message" -> message)
 

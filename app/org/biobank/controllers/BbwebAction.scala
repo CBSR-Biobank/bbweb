@@ -11,7 +11,7 @@ import play.api.mvc.Results.Unauthorized
 import scala.concurrent.{ExecutionContext, Future}
 
 class BbwebRequest[A](request: Request[A], val authInfo: AuthenticationInfo)
-    extends WrappedRequest(request)
+    extends WrappedRequest[A](request)
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 class BbwebAction @Inject()(val env:          Environment,
@@ -26,10 +26,9 @@ class BbwebAction @Inject()(val env:          Environment,
 
   private val logger = org.slf4j.LoggerFactory.getLogger(this.getClass)
 
-  override def invokeBlock[A](request: Request[A], block: BbwebRequestBlock[A]):
-      Future[Result] = {
+  override def invokeBlock[A](request: Request[A], block: BbwebRequestBlock[A]): Future[Result] = {
     if (logger.isTraceEnabled) {
-      logger.trace(s"invokeBlock: request = $request")
+      logger.trace(s"invokeBlock: request: $request")
     }
 
     validateToken(request).fold(

@@ -436,9 +436,8 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val json = makeRequest(POST,
                                uri(study, "name"),
                                BAD_REQUEST,
-                               Json.obj(
-                                 "expectedVersion" -> Some(study.version),
-                                 "name"            -> "a"))
+                               Json.obj("expectedVersion" -> Some(study.version),
+                                        "name"            -> "a"))
 
         (json \ "status").as[String] must include ("error")
 

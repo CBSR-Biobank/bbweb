@@ -86,7 +86,7 @@ class SpecimensProcessor @Inject() (
   @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {
     case command: SpecimenCommand =>
-      log.info(s"SpecimensProcessor: command: $command")
+      log.debug(s"SpecimensProcessor: command: $command")
 
       command match {
         case cmd: AddSpecimensCmd =>

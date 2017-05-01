@@ -4,22 +4,19 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.study.{StudyId, CollectionEventTypeId}
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
-import org.biobank.service.AuthToken
 import org.biobank.service.studies.CollectionEventTypeService
-import org.biobank.service.users.UsersService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
 import play.api.mvc.{Action, Result, Results}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
+@SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
 class CeventTypesController @Inject() (val action:                     BbwebAction,
                                        val env:                        Environment,
-                                       val authToken:                  AuthToken,
-                                       val usersService:               UsersService,
                                        val collectionEventTypeService: CollectionEventTypeService)
-    extends CommandController
-    with JsonController {
+                               (implicit val ec: ExecutionContext)
+    extends CommandController {
 
   val log: Logger = Logger(this.getClass)
 
@@ -41,8 +38,7 @@ class CeventTypesController @Inject() (val action:                     BbwebActi
     }
 
  def add(studyId: StudyId): Action[JsValue] =
-    commandActionAsync(Json.obj("studyId" -> studyId)) {
-      cmd: AddCollectionEventTypeCmd => processCommand(cmd) }
+    commandAction[AddCollectionEventTypeCmd](Json.obj("studyId" -> studyId))(processCommand)
 
   def remove(studyId: StudyId, id: CollectionEventTypeId, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
@@ -52,24 +48,19 @@ class CeventTypesController @Inject() (val action:                     BbwebActi
   }
 
   def updateName(id: CollectionEventTypeId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) {
-      cmd: UpdateCollectionEventTypeNameCmd => processCommand(cmd) }
+    commandAction[UpdateCollectionEventTypeNameCmd](Json.obj("id" -> id))(processCommand)
 
   def updateDescription(id: CollectionEventTypeId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) {
-      cmd: UpdateCollectionEventTypeDescriptionCmd => processCommand(cmd) }
+    commandAction[UpdateCollectionEventTypeDescriptionCmd](Json.obj("id" -> id))(processCommand)
 
   def updateRecurring(id: CollectionEventTypeId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) {
-      cmd: UpdateCollectionEventTypeRecurringCmd => processCommand(cmd) }
+    commandAction[UpdateCollectionEventTypeRecurringCmd](Json.obj("id" -> id))(processCommand)
 
   def addAnnotationType(id: CollectionEventTypeId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) {
-        cmd: CollectionEventTypeAddAnnotationTypeCmd => processCommand(cmd) }
+    commandAction[CollectionEventTypeAddAnnotationTypeCmd](Json.obj("id" -> id))(processCommand)
 
   def updateAnnotationType(id: CollectionEventTypeId, uniqueId: String): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id, "uniqueId" -> uniqueId)) {
-        cmd: CollectionEventTypeUpdateAnnotationTypeCmd => processCommand(cmd) }
+    commandAction[CollectionEventTypeUpdateAnnotationTypeCmd](Json.obj("id" -> id, "uniqueId" -> uniqueId))(processCommand)
 
   def removeAnnotationType(studyId: StudyId, id: CollectionEventTypeId, ver: Long, uniqueId: String)
       : Action[Unit]=
@@ -84,12 +75,10 @@ class CeventTypesController @Inject() (val action:                     BbwebActi
     }
 
   def addSpecimenSpec(id: CollectionEventTypeId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) {
-      cmd: AddCollectionSpecimenSpecCmd => processCommand(cmd) }
+    commandAction[AddCollectionSpecimenSpecCmd](Json.obj("id" -> id))(processCommand)
 
   def updateSpecimenSpec(id: CollectionEventTypeId, uniqueId: String): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id, "uniqueId" -> uniqueId)) {
-      cmd: UpdateCollectionSpecimenSpecCmd => processCommand(cmd) }
+    commandAction[UpdateCollectionSpecimenSpecCmd](Json.obj("id" -> id, "uniqueId" -> uniqueId))(processCommand)
 
   def removeSpecimenSpec(studyId: StudyId, id: CollectionEventTypeId, ver: Long, uniqueId: String)
       : Action[Unit]=

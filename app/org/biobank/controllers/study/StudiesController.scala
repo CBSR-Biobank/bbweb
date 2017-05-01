@@ -1,13 +1,12 @@
 package org.biobank.controllers.study
 
 import javax.inject.{Inject, Singleton}
-import org.biobank.controllers.{BbwebAction, FilterAndSortQuery, CommandController, JsonController, PagedQuery}
+import org.biobank.controllers.{BbwebAction, FilterAndSortQuery, CommandController, PagedQuery}
 import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service._
 import org.biobank.service.studies.StudiesService
-import org.biobank.service.users.UsersService
 import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc.{Action, Result, Results}
@@ -23,12 +22,9 @@ import scalaz.Validation.FlatMap._
 @Singleton
 class StudiesController @Inject() (val action:         BbwebAction,
                                    val env:            Environment,
-                                   val authToken:      AuthToken,
-                                   val usersService:   UsersService,
                                    val studiesService: StudiesService)
-                               (implicit ec: ExecutionContext)
-    extends CommandController
-    with JsonController {
+                               (implicit val ec: ExecutionContext)
+    extends CommandController {
 
   val log: Logger = Logger(this.getClass)
 
@@ -79,23 +75,21 @@ class StudiesController @Inject() (val action:         BbwebAction,
       Future.successful(Results.Ok(Json.obj("status" ->"success", "data" -> true)))
     }
 
-  def add: Action[JsValue] = commandActionAsync { cmd: AddStudyCmd =>
-      processCommand(cmd)
-    }
+  def add: Action[JsValue] = commandAction[AddStudyCmd](JsNull)(processCommand)
 
   def updateName(id: StudyId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateStudyNameCmd => processCommand(cmd) }
+    commandAction[UpdateStudyNameCmd](Json.obj("id" -> id))(processCommand)
 
   def updateDescription(id: StudyId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) { cmd : UpdateStudyDescriptionCmd => processCommand(cmd) }
+    commandAction[UpdateStudyDescriptionCmd](Json.obj("id" -> id))(processCommand)
 
   def addAnnotationType(id: StudyId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) { cmd : StudyAddParticipantAnnotationTypeCmd => processCommand(cmd) }
+    commandAction[StudyAddParticipantAnnotationTypeCmd](Json.obj("id" -> id))(processCommand)
 
-  def updateAnnotationType(id: StudyId, uniqueId: String): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id, "uniqueId" -> uniqueId)) {
-      cmd : StudyUpdateParticipantAnnotationTypeCmd => processCommand(cmd)
-    }
+  def updateAnnotationType(id: StudyId, uniqueId: String): Action[JsValue] = {
+    val json = Json.obj("id" -> id, "uniqueId" -> uniqueId)
+    commandAction[StudyUpdateParticipantAnnotationTypeCmd](json)(processCommand)
+  }
 
   def removeAnnotationType(studyId: StudyId, ver: Long, uniqueId: String): Action[Unit] =
     action.async(parse.empty) { implicit request =>
@@ -104,16 +98,16 @@ class StudiesController @Inject() (val action:         BbwebAction,
     }
 
   def enable(id: StudyId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) { cmd: EnableStudyCmd => processCommand(cmd) }
+    commandAction[EnableStudyCmd](Json.obj("id" -> id))(processCommand)
 
   def disable(id: StudyId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) { cmd: DisableStudyCmd => processCommand(cmd) }
+    commandAction[DisableStudyCmd](Json.obj("id" -> id))(processCommand)
 
   def retire(id: StudyId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) { cmd: RetireStudyCmd => processCommand(cmd) }
+    commandAction[RetireStudyCmd](Json.obj("id" -> id))(processCommand)
 
   def unretire(id: StudyId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) { cmd: UnretireStudyCmd => processCommand(cmd) }
+    commandAction[UnretireStudyCmd](Json.obj("id" -> id))(processCommand)
 
   def valueTypes: Action[Unit] = Action(parse.empty) { request =>
       Ok(AnnotationValueType.values.map(x => x))

@@ -5,22 +5,19 @@ import org.biobank.controllers._
 import org.biobank.domain.study.StudyId
 import org.biobank.domain.participants.ParticipantId
 import org.biobank.infrastructure.command.ParticipantCommands._
-import org.biobank.service.AuthToken
-import org.biobank.service.users.UsersService
 import org.biobank.service.participants._
 import play.api.{ Environment, Logger }
 import play.api.libs.json._
 import play.api.mvc.{Action, Results}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
+@SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
 class ParticipantsController @Inject() (val action:              BbwebAction,
                                         val env:                 Environment,
-                                        val authToken:           AuthToken,
-                                        val usersService:        UsersService,
                                         val participantsService: ParticipantsService)
-    extends CommandController
-    with JsonController {
+                               (implicit val ec: ExecutionContext)
+    extends CommandController {
 
   val log: Logger = Logger(this.getClass)
 
@@ -43,13 +40,13 @@ class ParticipantsController @Inject() (val action:              BbwebAction,
     }
 
   def add(studyId: StudyId): Action[JsValue] =
-    commandActionAsync(Json.obj("studyId" -> studyId)) { cmd : AddParticipantCmd => processCommand(cmd) }
+    commandAction[AddParticipantCmd](Json.obj("studyId" -> studyId))(processCommand)
 
   def updateUniqueId(id: ParticipantId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateParticipantUniqueIdCmd => processCommand(cmd) }
+    commandAction[UpdateParticipantUniqueIdCmd](Json.obj("id" -> id))(processCommand)
 
   def addAnnotation(id: ParticipantId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) { cmd: ParticipantAddAnnotationCmd => processCommand(cmd) }
+    commandAction[ParticipantAddAnnotationCmd](Json.obj("id" -> id))(processCommand)
 
   def removeAnnotation(participantId: ParticipantId, annotTypeId: String, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>

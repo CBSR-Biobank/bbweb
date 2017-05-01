@@ -1,5 +1,6 @@
 package org.biobank.controllers.users
 
+import org.biobank.infrastructure.command.Commands._
 import javax.inject.{Inject, Singleton}
 import org.biobank.domain.user._
 import org.biobank.controllers._
@@ -18,24 +19,24 @@ import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 import scalaz._
 
-@Singleton
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
+@Singleton
 class UsersController @Inject() (val action:         BbwebAction,
                                  val env:            Environment,
                                  val cacheApi:       CacheApi,
                                  val authToken:      AuthToken,
                                  val usersService:   UsersService,
                                  val studiesService: StudiesService)
-                             (implicit ec: ExecutionContext)
-    extends CommandController
-    with JsonController {
+                             (implicit val ec: ExecutionContext)
+    extends CommandController {
+  import org.biobank.controllers.Security._
 
   val log: Logger = Logger(this.getClass)
 
   private val PageSizeMax = 20
 
   /** Used for obtaining the email and password from the HTTP login request */
-  case class LoginCredentials(email: String, password: String)
+  case class LoginCredentials(email: String, password: String) extends Command
 
   /** JSON reader for [[LoginCredentials]]. */
   implicit val loginCredentialsReads: Reads[LoginCredentials] = Json.reads[LoginCredentials]
@@ -48,29 +49,25 @@ class UsersController @Inject() (val action:         BbwebAction,
    *
    * @return The token needed for subsequent requests
    */
-  def login(): Action[JsValue] = Action(parse.json) { implicit request =>
-      request.body.validate[LoginCredentials].fold(
-        errors => {
-          BadRequest(JsError.toJson(errors))
-        },
-        loginCredentials => {
-          val v = for {
-              user  <- usersService.validatePassword(loginCredentials.email, loginCredentials.password)
-              valid <- usersService.allowLogin(user)
-            } yield user
+  def login(): Action[JsValue] =
+    anonymousCommandAction[LoginCredentials]{ credentials =>
+      val v = for {
+          user  <- usersService.validatePassword(credentials.email, credentials.password)
+          valid <- usersService.allowLogin(user)
+        } yield user
 
-          // FIXME: what if user attempts multiple failed logins? lock the account after 3 attempts?
-          // how long to lock the account?
-          v.fold(
-            err => Unauthorized,
-            user => {
-              val token = authToken.newToken(user.id)
-              log.debug(s"user logged in: ${user.email}, token: $token")
-              Ok(user.toDto).withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
-            }
-          )
-        }
-      )
+      // FIXME: what if user attempts multiple failed logins? lock the account after 3 attempts?
+      // how long to lock the account?
+      Future {
+        v.fold(
+          err => Unauthorized,
+          user => {
+            val token = authToken.newToken(user.id)
+            log.debug(s"user logged in: ${user.email}, token: $token")
+            Ok(user.toDto).withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
+          }
+        )
+      }
     }
 
   /**
@@ -120,30 +117,24 @@ class UsersController @Inject() (val action:         BbwebAction,
       validationReply(usersService.getUser(id))
     }
 
-  def registerUser(): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    request.body.validate[RegisterUserCmd].fold(
-      errors => {
-        Future.successful(BadRequest(JsError.toJson(errors)))
-      },
-      cmd => {
-        Logger.debug(s"registerUser: cmd: $cmd")
-        val future = usersService.register(cmd)
-        future.map { validation =>
-          validation.fold(
-            err   => {
-              val errs = err.list.toList.mkString(", ")
-              if (errs.contains("exists")) {
-                Forbidden("email already registered")
-              } else {
-                BadRequest(errs)
-              }
-            },
-            user => Ok(user)
-          )
-        }
+  def registerUser(): Action[JsValue] =
+    anonymousCommandAction[RegisterUserCmd]{ cmd =>
+      Logger.debug(s"registerUser: cmd: $cmd")
+      val future = usersService.register(cmd)
+      future.map { validation =>
+        validation.fold(
+          err   => {
+            val errs = err.list.toList.mkString(", ")
+            if (errs.contains("exists")) {
+              Forbidden("email already registered")
+            } else {
+              BadRequest(errs)
+            }
+          },
+          user => Ok(user)
+        )
       }
-    )
-  }
+    }
 
   def snapshot: Action[Unit] =
     action.async(parse.empty) { implicit request =>
@@ -153,68 +144,49 @@ class UsersController @Inject() (val action:         BbwebAction,
 
   /** Resets the user's password.
    */
-  def passwordReset(): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    request.body.validate[ResetUserPasswordCmd].fold(
-      errors => {
-        Future.successful(BadRequest(JsError.toJson(errors)))
-      },
-      cmd => {
-        val future = usersService.resetPassword(cmd)
-        future.map { validation =>
-          validation.fold(
-            err   => Unauthorized,
-            event => Ok("password has been reset")
-          )
-        }
+  def passwordReset(): Action[JsValue] =
+    anonymousCommandAction[ResetUserPasswordCmd]{ cmd =>
+      val future = usersService.resetPassword(cmd)
+      future.map { validation =>
+        validation.fold(
+          err   => Unauthorized,
+          event => Ok("password has been reset")
+        )
       }
-    )
-  }
+    }
 
   def updateName(id: UserId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserNameCmd =>
-      processCommand(cmd)
-    }
+    commandAction[UpdateUserNameCmd](Json.obj("id" -> id))(processCommand)
 
   def updateEmail(id: UserId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserEmailCmd =>
-      processCommand(cmd)
-    }
+    commandAction[UpdateUserEmailCmd](Json.obj("id" -> id))(processCommand)
 
   def updatePassword(id: UserId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserPasswordCmd =>
-      processCommand(cmd)
-    }
+    commandAction[UpdateUserPasswordCmd](Json.obj("id" -> id))(processCommand)
 
   def updateAvatarUrl(id: UserId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) { cmd: UpdateUserAvatarUrlCmd =>
-      processCommand(cmd)
-    }
+    commandAction[UpdateUserAvatarUrlCmd](Json.obj("id" -> id))(processCommand)
 
   def activateUser(id: UserId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) { cmd: ActivateUserCmd =>
-      processCommand(cmd)
-    }
+    commandAction[ActivateUserCmd](Json.obj("id" -> id))(processCommand)
 
   def lockUser(id: UserId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) { cmd: LockUserCmd =>
-      processCommand(cmd)
-    }
+    commandAction[LockUserCmd](Json.obj("id" -> id))(processCommand)
 
   def unlockUser(id: UserId): Action[JsValue] =
-    commandActionAsync(Json.obj("id" -> id)) { cmd: UnlockUserCmd =>
-      processCommand(cmd)
-    }
+    commandAction[UnlockUserCmd](Json.obj("id" -> id))(processCommand)
 
-  def userStudies(id: UserId, query: Option[String], sort: Option[String], order: Option[String])
-      : Action[Unit] =
+  def userStudies(id:    UserId,
+                  query: Option[String],
+                  sort:  Option[String],
+                  order: Option[String]): Action[Unit] =
     action(parse.empty) { implicit request =>
       // FIXME this should return only the studies this user has access to
       //
-      // This this for now, but fix once user groups have been implemented
+      // This this for now, but fix once user access have been implemented
       val studies = studiesService.getStudyCount
       Ok(studies)
     }
-
 
   private def processCommand(cmd: UserCommand) = {
     validationReply(usersService.processCommand(cmd))

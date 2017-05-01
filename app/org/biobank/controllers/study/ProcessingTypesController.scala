@@ -4,22 +4,19 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.study.{StudyId, ProcessingTypeId}
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.service.AuthToken
 import org.biobank.service.studies.StudiesService
-import org.biobank.service.users.UsersService
 import play.api.libs.json._
 import play.api.Environment
 import play.api.mvc.{Action, Result}
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
+@SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
 class ProcessingTypesController @Inject() (val action:         BbwebAction,
                                            val env:            Environment,
-                                           val authToken:      AuthToken,
-                                           val usersService:   UsersService,
                                            val studiesService: StudiesService)
-    extends CommandController
-    with JsonController {
+                               (implicit val ec: ExecutionContext)
+    extends CommandController {
 
   def get(studyId: StudyId, procTypeId: Option[ProcessingTypeId]): Action[Unit] =
     action(parse.empty) { implicit request =>
@@ -31,14 +28,10 @@ class ProcessingTypesController @Inject() (val action:         BbwebAction,
     }
 
   def addProcessingType(studyId: StudyId): Action[JsValue] =
-    commandActionAsync(Json.obj("studyId" -> studyId)) { cmd: AddProcessingTypeCmd =>
-      processCommand(cmd)
-    }
+    commandAction[AddProcessingTypeCmd](Json.obj("studyId" -> studyId))(processCommand)
 
   def updateProcessingType(studyId: StudyId, id: ProcessingTypeId): Action[JsValue] =
-    commandActionAsync(Json.obj("studyId" -> studyId, "id" -> id)) { cmd: UpdateProcessingTypeCmd =>
-      processCommand(cmd)
-    }
+    commandAction[UpdateProcessingTypeCmd](Json.obj("studyId" -> studyId, "id" -> id))(processCommand)
 
   def removeProcessingType(studyId: StudyId, id: ProcessingTypeId, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>

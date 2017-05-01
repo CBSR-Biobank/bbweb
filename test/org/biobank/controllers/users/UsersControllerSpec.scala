@@ -660,7 +660,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
     "POST /users/lock" must {
 
-      "111 lock a user" in {
+      "lock a user" in {
         val users = Table("users that can be locked",
                           factory.createRegisteredUser,
                           factory.createActiveUser)

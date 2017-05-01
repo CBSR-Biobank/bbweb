@@ -10,14 +10,17 @@ import scalaz.Validation.FlatMap._
 
 final case class AuthenticationInfo(token: String, userId: UserId)
 
-trait Security {
-
-  val env: Environment
-
+object Security {
   val AuthTokenCookieKey: String = "XSRF-TOKEN"
   val AuthTokenHeader: String    = "X-XSRF-TOKEN"
   val AuthTokenUrlKey: String    = "auth"
   val TestAuthToken: String      = "bbweb-test-token"
+}
+
+trait Security {
+  import Security._
+
+  val env: Environment
 
   val usersService: UsersService
 
