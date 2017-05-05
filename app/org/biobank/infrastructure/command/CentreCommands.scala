@@ -7,40 +7,40 @@ import play.api.libs.json.Reads._
 
 object CentreCommands {
 
-  trait CentreCommand extends Command with HasUserId
+  trait CentreCommand extends Command with HasSessionUserId
 
   trait CentreModifyCommand extends CentreCommand with HasIdentity with HasExpectedVersion
 
   trait CentreCommandWithCentreId extends CentreCommand with HasCentreIdentity
 
-  final case class AddCentreCmd(userId:      String,
-                                name:        String,
-                                description: Option[String])
+  final case class AddCentreCmd(sessionUserId: String,
+                                name:          String,
+                                description:   Option[String])
       extends CentreCommand
 
-  final case class UpdateCentreNameCmd(userId:          String,
+  final case class UpdateCentreNameCmd(sessionUserId:   String,
                                        id:              String,
                                        expectedVersion: Long,
                                        name:            String)
       extends CentreModifyCommand
 
-  final case class UpdateCentreDescriptionCmd(userId:          String,
+  final case class UpdateCentreDescriptionCmd(sessionUserId:   String,
                                               id:              String,
                                               expectedVersion: Long,
                                               description:     Option[String])
       extends CentreModifyCommand
 
-  final case class EnableCentreCmd(userId:          String,
+  final case class EnableCentreCmd(sessionUserId:   String,
                                    id:              String,
                                    expectedVersion: Long)
       extends CentreModifyCommand
 
-  final case class DisableCentreCmd(userId:          String,
+  final case class DisableCentreCmd(sessionUserId:   String,
                                     id:              String,
                                     expectedVersion: Long)
       extends CentreModifyCommand
 
-  final case class AddCentreLocationCmd(userId:          String,
+  final case class AddCentreLocationCmd(sessionUserId:   String,
                                         id:              String,
                                         expectedVersion: Long,
                                         name:            String,
@@ -52,7 +52,7 @@ object CentreCommands {
                                         countryIsoCode:  String)
       extends CentreModifyCommand
 
-  final case class UpdateCentreLocationCmd(userId:          String,
+  final case class UpdateCentreLocationCmd(sessionUserId:   String,
                                            id:              String,
                                            locationId:      String,
                                            expectedVersion: Long,
@@ -65,7 +65,7 @@ object CentreCommands {
                                            countryIsoCode:  String)
       extends CentreModifyCommand
 
-  final case class RemoveCentreLocationCmd(userId:          String,
+  final case class RemoveCentreLocationCmd(sessionUserId:   String,
                                            id:              String,
                                            expectedVersion: Long,
                                            locationId:      String)
@@ -73,13 +73,13 @@ object CentreCommands {
 
   trait CentreStudyCmd extends CentreCommandWithCentreId
 
-  final case class AddStudyToCentreCmd(userId:          String,
+  final case class AddStudyToCentreCmd(sessionUserId:   String,
                                        id:              String,
                                        expectedVersion: Long,
                                        studyId:         String)
       extends CentreModifyCommand
 
-  final case class RemoveStudyFromCentreCmd(userId:          String,
+  final case class RemoveStudyFromCentreCmd(sessionUserId:   String,
                                             id:              String,
                                             expectedVersion: Long,
                                             studyId:         String)

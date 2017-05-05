@@ -9,7 +9,6 @@ import scalaz.Scalaz._
 trait Processor extends PersistentActor with ActorLogging {
   import org.biobank.CommonValidations._
 
-
   /**
    * Persists the event passed in the validation if it is successful. In either case
    * the sender is sent either the success or failure validation.

@@ -9,7 +9,7 @@ import org.joda.time.DateTime
 
 object SpecimenCommands {
 
-  trait SpecimenCommand extends Command with HasUserId with HasCollectionEventIdentity
+  trait SpecimenCommand extends Command with HasSessionUserId with HasCollectionEventIdentity
 
   trait SpecimenModifyCommand
       extends SpecimenCommand
@@ -22,20 +22,20 @@ object SpecimenCommands {
                                 locationId:     String,
                                 amount:         BigDecimal)
 
-  final case class AddSpecimensCmd(userId:            String,
+  final case class AddSpecimensCmd(sessionUserId:     String,
                                    collectionEventId: String,
                                    specimenData:      List[SpecimenInfo])
       extends SpecimenCommand
 
 
-  final case class MoveSpecimensCmd(userId:            String,
+  final case class MoveSpecimensCmd(sessionUserId:     String,
                                     collectionEventId: String,
                                     expectedVersion:   Long,
                                     locationId:        String,
                                     specimenData:      Set[SpecimenInfo])
       extends SpecimenCommand
 
-  final case class SpecimenAssignPositionCmd(userId:            String,
+  final case class SpecimenAssignPositionCmd(sessionUserId:     String,
                                              id:                String,
                                              collectionEventId: String,
                                              expectedVersion:   Long,
@@ -43,21 +43,21 @@ object SpecimenCommands {
       extends SpecimenModifyCommand
       with HasIdentity
 
-  final case class SpecimenRemoveAmountCmd(userId:            String,
+  final case class SpecimenRemoveAmountCmd(sessionUserId:     String,
                                            id:                String,
                                            collectionEventId: String,
                                            expectedVersion:   Long,
                                            amount:            BigDecimal)
       extends SpecimenModifyCommand
 
-  final case class SpecimenUpdateUsableCmd(userId:            String,
+  final case class SpecimenUpdateUsableCmd(sessionUserId:     String,
                                            id:                String,
                                            collectionEventId: String,
                                            expectedVersion:   Long,
                                            usable:            Boolean)
       extends SpecimenModifyCommand
 
-  final case class RemoveSpecimenCmd(userId:            String,
+  final case class RemoveSpecimenCmd(sessionUserId:     String,
                                      id:                String,
                                      collectionEventId: String,
                                      expectedVersion:   Long)

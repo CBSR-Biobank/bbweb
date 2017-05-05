@@ -6,38 +6,38 @@ import play.api.libs.json._
 
 object ParticipantCommands {
 
-  trait ParticipantCommand extends Command with HasUserId
+  trait ParticipantCommand extends Command with HasSessionUserId
 
   trait ParticipantModifyCommand
       extends ParticipantCommand
       with HasIdentity
       with HasExpectedVersion
 
-  final case class AddParticipantCmd(userId:      String,
-                                     studyId:     String,
-                                     uniqueId:    String,
-                                     annotations: List[Annotation])
+  final case class AddParticipantCmd(sessionUserId: String,
+                                     studyId:       String,
+                                     uniqueId:      String,
+                                     annotations:   List[Annotation])
       extends ParticipantCommand
 
-  final case class UpdateParticipantUniqueIdCmd(userId:          String,
-                                          id:              String,
-                                          expectedVersion: Long,
-                                          uniqueId:        String)
+  final case class UpdateParticipantUniqueIdCmd(sessionUserId:   String,
+                                                id:              String,
+                                                expectedVersion: Long,
+                                                uniqueId:        String)
       extends ParticipantModifyCommand
 
-  final case class ParticipantAddAnnotationCmd(userId:           String,
-                                         id:               String,
-                                         expectedVersion:  Long,
-                                         annotationTypeId: String,
-                                         stringValue:      Option[String],
-                                         numberValue:      Option[String],
-                                         selectedValues:   Set[String])
+  final case class ParticipantAddAnnotationCmd(sessionUserId:    String,
+                                               id:               String,
+                                               expectedVersion:  Long,
+                                               annotationTypeId: String,
+                                               stringValue:      Option[String],
+                                               numberValue:      Option[String],
+                                               selectedValues:   Set[String])
       extends ParticipantModifyCommand
 
-  final case class ParticipantRemoveAnnotationCmd(userId:           String,
-                                            id:               String,
-                                            expectedVersion:  Long,
-                                            annotationTypeId: String)
+  final case class ParticipantRemoveAnnotationCmd(sessionUserId:    String,
+                                                  id:               String,
+                                                  expectedVersion:  Long,
+                                                  annotationTypeId: String)
       extends ParticipantModifyCommand
 
   implicit val addParticipantCmdReads: Reads[AddParticipantCmd] =

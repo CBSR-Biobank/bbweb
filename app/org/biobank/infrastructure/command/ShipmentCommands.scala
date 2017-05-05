@@ -8,103 +8,103 @@ object ShipmentCommands {
 
   import org.biobank.infrastructure.JsonUtils._
 
-  trait ShipmentCommand extends Command with HasUserId
+  trait ShipmentCommand extends Command with HasSessionUserId
 
   trait ShipmentModifyCommand extends ShipmentCommand with HasIdentity with HasExpectedVersion
 
   trait ShipmentCommandWithShipmentId extends ShipmentCommand with HasShipmentIdentity
 
-  final case class AddShipmentCmd(userId:         String,
+  final case class AddShipmentCmd(sessionUserId:  String,
                                   courierName:    String,
                                   trackingNumber: String,
                                   fromLocationId: String,
                                   toLocationId:   String)
       extends ShipmentCommand
 
-  final case class UpdateShipmentCourierNameCmd(userId:          String,
+  final case class UpdateShipmentCourierNameCmd(sessionUserId:   String,
                                                 id:              String, // shipment ID
                                                 expectedVersion: Long,
                                                 courierName:     String)
       extends ShipmentModifyCommand
 
-  final case class UpdateShipmentTrackingNumberCmd(userId:          String,
+  final case class UpdateShipmentTrackingNumberCmd(sessionUserId:   String,
                                                    id:              String, // shipment ID
                                                    expectedVersion: Long,
                                                    trackingNumber:  String)
       extends ShipmentModifyCommand
 
-  final case class UpdateShipmentFromLocationCmd(userId:          String,
+  final case class UpdateShipmentFromLocationCmd(sessionUserId:   String,
                                                  id:              String, // shipment ID
                                                  expectedVersion: Long,
                                                  locationId:      String)
       extends ShipmentModifyCommand
 
-  final case class UpdateShipmentToLocationCmd(userId:          String,
+  final case class UpdateShipmentToLocationCmd(sessionUserId:   String,
                                                id:              String, // shipment ID
                                                expectedVersion: Long,
                                                locationId:      String)
       extends ShipmentModifyCommand
 
-  final case class CreatedShipmentCmd(userId:          String,
+  final case class CreatedShipmentCmd(sessionUserId:   String,
                                       id:              String, // shipment ID
                                       expectedVersion: Long)
       extends ShipmentModifyCommand
 
-  final case class PackShipmentCmd(userId:          String,
+  final case class PackShipmentCmd(sessionUserId:   String,
                                    id:              String, // shipment ID
                                    expectedVersion: Long,
                                    datetime:        DateTime)
       extends ShipmentModifyCommand
 
-  final case class SendShipmentCmd(userId:          String,
+  final case class SendShipmentCmd(sessionUserId:   String,
                                    id:              String, // shipment ID
                                    expectedVersion: Long,
                                    datetime:        DateTime)
       extends ShipmentModifyCommand
 
-  final case class ReceiveShipmentCmd(userId:       String,
-                                   id:              String, // shipment ID
-                                   expectedVersion: Long,
-                                   datetime:        DateTime)
+  final case class ReceiveShipmentCmd(sessionUserId: String,
+                                   id:               String, // shipment ID
+                                   expectedVersion:  Long,
+                                   datetime:         DateTime)
       extends ShipmentModifyCommand
 
-  final case class UnpackShipmentCmd(userId:          String,
+  final case class UnpackShipmentCmd(sessionUserId:   String,
                                      id:              String, // shipment ID
                                      expectedVersion: Long,
                                      datetime:        DateTime)
       extends ShipmentModifyCommand
 
-  final case class CompleteShipmentCmd(userId:          String,
+  final case class CompleteShipmentCmd(sessionUserId:   String,
                                        id:              String, // shipment ID
                                        expectedVersion: Long,
                                        datetime:        DateTime)
       extends ShipmentModifyCommand
 
-  final case class LostShipmentCmd(userId:          String,
+  final case class LostShipmentCmd(sessionUserId:   String,
                                    id:              String, // shipment ID
                                    expectedVersion: Long)
       extends ShipmentModifyCommand
 
-  final case class ShipmentSkipStateToSentCmd(userId:          String,
+  final case class ShipmentSkipStateToSentCmd(sessionUserId:   String,
                                               id:              String, // shipment ID
                                               expectedVersion: Long,
                                               timePacked:      DateTime,
                                               timeSent:        DateTime)
       extends ShipmentModifyCommand
 
-  final case class ShipmentSkipStateToUnpackedCmd(userId:          String,
+  final case class ShipmentSkipStateToUnpackedCmd(sessionUserId:   String,
                                                   id:              String, // shipment ID
                                                   expectedVersion: Long,
                                                   timeReceived:    DateTime,
                                                   timeUnpacked:    DateTime)
       extends ShipmentModifyCommand
 
-  final case class ShipmentRemoveCmd(userId:          String,
+  final case class ShipmentRemoveCmd(sessionUserId:   String,
                                      id:              String, // shipment ID
                                      expectedVersion: Long)
       extends ShipmentModifyCommand
 
-  final case class ShipmentsSnapshotCmd(userId: String) extends ShipmentCommand
+  final case class ShipmentsSnapshotCmd(sessionUserId: String) extends ShipmentCommand
 
   implicit val addShipmentCmdReads: Reads[AddShipmentCmd] =
     Json.reads[AddShipmentCmd]

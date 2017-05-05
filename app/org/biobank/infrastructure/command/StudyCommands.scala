@@ -9,7 +9,7 @@ object StudyCommands {
   import org.biobank.infrastructure.command.Commands._
 
   // study commands
-  trait StudyCommand extends Command with HasOptionalUserId
+  trait StudyCommand extends Command with HasOptionalSessionUserId
 
   trait StudyModifyCommand extends StudyCommand with HasIdentity with HasExpectedVersion
 
@@ -21,24 +21,24 @@ object StudyCommands {
       with HasIdentity
       with HasExpectedVersion
 
-  final case class AddStudyCmd(userId:      Option[String],
-                               name:        String,
-                               description: Option[String])
+  final case class AddStudyCmd(sessionUserId: Option[String],
+                               name:          String,
+                               description:   Option[String])
       extends StudyCommand
 
-  final case class UpdateStudyNameCmd(userId:          Option[String],
+  final case class UpdateStudyNameCmd(sessionUserId:   Option[String],
                                       id:              String,
                                       expectedVersion: Long,
                                       name:            String)
       extends StudyModifyCommand
 
-  final case class UpdateStudyDescriptionCmd(userId:          Option[String],
+  final case class UpdateStudyDescriptionCmd(sessionUserId:   Option[String],
                                              id:              String,
                                              expectedVersion: Long,
                                              description:     Option[String])
       extends StudyModifyCommand
 
-  final case class StudyAddParticipantAnnotationTypeCmd(userId:          Option[String],
+  final case class StudyAddParticipantAnnotationTypeCmd(sessionUserId:   Option[String],
                                                         id:              String,
                                                         expectedVersion: Long,
                                                         name:            String,
@@ -49,7 +49,7 @@ object StudyCommands {
                                                         required:        Boolean)
       extends StudyModifyCommand
 
-  final case class StudyUpdateParticipantAnnotationTypeCmd(userId:          Option[String],
+  final case class StudyUpdateParticipantAnnotationTypeCmd(sessionUserId:   Option[String],
                                                            id:              String,
                                                            uniqueId:        String,
                                                            expectedVersion: Long,
@@ -61,29 +61,29 @@ object StudyCommands {
                                                            required:        Boolean)
       extends StudyModifyCommand
 
-  final case class UpdateStudyRemoveAnnotationTypeCmd(userId:          Option[String],
+  final case class UpdateStudyRemoveAnnotationTypeCmd(sessionUserId:   Option[String],
                                                       id:              String,
                                                       expectedVersion: Long,
                                                       uniqueId:        String)
       extends StudyModifyCommand
 
-  final case class EnableStudyCmd(userId:          Option[String],
+  final case class EnableStudyCmd(sessionUserId:   Option[String],
                                   id:              String,
                                   expectedVersion: Long)
       extends StudyModifyCommand
 
-  final case class DisableStudyCmd(userId:    Option[String],
+  final case class DisableStudyCmd(sessionUserId:   Option[String],
                                    id:              String,
                                    expectedVersion: Long)
       extends StudyModifyCommand
 
-  final case class RetireStudyCmd(userId:    Option[String],
-                                  id: String,
+  final case class RetireStudyCmd(sessionUserId:   Option[String],
+                                  id:              String,
                                   expectedVersion: Long)
       extends StudyModifyCommand
 
-  final case class UnretireStudyCmd(userId:    Option[String],
-                                    id: String,
+  final case class UnretireStudyCmd(sessionUserId:   Option[String],
+                                    id:              String,
                                     expectedVersion: Long)
       extends StudyModifyCommand
 
@@ -98,7 +98,7 @@ object StudyCommands {
 
   // specimen link annotation type
   final case class AddSpecimenLinkAnnotationTypeCmd(
-    userId:    Option[String],
+    sessionUserId:    Option[String],
     studyId:       String,
     name:          String,
     description:   Option[String],
@@ -109,7 +109,7 @@ object StudyCommands {
       extends StudyAnnotationTypeCommand
 
   final case class UpdateSpecimenLinkAnnotationTypeCmd(
-    userId:    Option[String],
+    sessionUserId:    Option[String],
     studyId:         String,
     id:              String,
     expectedVersion: Long,
@@ -122,7 +122,7 @@ object StudyCommands {
       extends StudyAnnotationTypeModifyCommand
 
   final case class RemoveSpecimenLinkAnnotationTypeCmd(
-    userId:    Option[String],
+    sessionUserId:    Option[String],
     id:              String,
     expectedVersion: Long)
 
@@ -135,7 +135,7 @@ object StudyCommands {
       with HasExpectedVersion
 
   final case class AddProcessingTypeCmd(
-    userId:    Option[String],
+    sessionUserId:    Option[String],
     studyId:     String,
     name:        String,
     description: Option[String],
@@ -143,7 +143,7 @@ object StudyCommands {
       extends ProcessingTypeCommand
 
   final case class UpdateProcessingTypeCmd(
-    userId:    Option[String],
+    sessionUserId:    Option[String],
     studyId:         String,
     id:              String,
     expectedVersion: Long,
@@ -153,7 +153,7 @@ object StudyCommands {
       extends ProcessingTypeModifyCommand
 
   final case class RemoveProcessingTypeCmd(
-    userId:    Option[String],
+    sessionUserId:    Option[String],
     studyId:         String,
     id:              String,
     expectedVersion: Long)
@@ -172,7 +172,7 @@ object StudyCommands {
       with HasExpectedVersion
 
   final case class AddSpecimenLinkTypeCmd(
-    userId:    Option[String],
+    sessionUserId:    Option[String],
     processingTypeId:      String,
     expectedInputChange:   BigDecimal,
     expectedOutputChange:  BigDecimal,
@@ -186,7 +186,7 @@ object StudyCommands {
       extends SpecimenLinkTypeCommand
 
   final case class UpdateSpecimenLinkTypeCmd(
-    userId:    Option[String],
+    sessionUserId:    Option[String],
     processingTypeId:      String,
     id:                    String,
     expectedVersion:       Long,
@@ -201,7 +201,7 @@ object StudyCommands {
     annotationTypeData:    List[SpecimenLinkTypeAnnotationTypeData])
       extends SpecimenLinkTypeModifyCommand
 
-  final case class RemoveSpecimenLinkTypeCmd(userId:           Option[String],
+  final case class RemoveSpecimenLinkTypeCmd(sessionUserId:    Option[String],
                                              processingTypeId: String,
                                              id:               String,
                                              expectedVersion:  Long)

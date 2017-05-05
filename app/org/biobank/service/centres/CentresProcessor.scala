@@ -144,7 +144,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                              studyIds    = Set.empty,
                                              locations   = Set.empty)
     } yield CentreEvent(newCentre.id.id).update(
-      _.userId                    := cmd.userId,
+      _.userId                    := cmd.sessionUserId,
       _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.added.name                := cmd.name,
       _.added.optionalDescription := cmd.description
@@ -157,7 +157,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       nameAvailable <- nameAvailable(cmd.name, centre.id)
       centre        <- centre.withName(cmd.name)
     } yield CentreEvent(centre.id.id).update(
-      _.userId              := cmd.userId,
+      _.userId              := cmd.sessionUserId,
       _.time                := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.nameUpdated.version := cmd.expectedVersion,
       _.nameUpdated.name    := cmd.name
@@ -168,7 +168,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                                 centre: DisabledCentre): ServiceValidation[CentreEvent] = {
     centre.withDescription(cmd.description).map { _ =>
       CentreEvent(centre.id.id).update(
-        _.userId                                 := cmd.userId,
+        _.userId                                 := cmd.sessionUserId,
         _.time                                   := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.descriptionUpdated.version             := cmd.expectedVersion,
         _.descriptionUpdated.optionalDescription := cmd.description
@@ -180,7 +180,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                      centre: DisabledCentre): ServiceValidation[CentreEvent] = {
     centre.enable.map { _ =>
       CentreEvent(centre.id.id).update(
-        _.userId          := cmd.userId,
+        _.userId          := cmd.sessionUserId,
         _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.enabled.version := cmd.expectedVersion)
     }
@@ -190,7 +190,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                       centre: EnabledCentre): ServiceValidation[CentreEvent] = {
     centre.disable.map { _ =>
       CentreEvent(centre.id.id).update(
-        _.userId           := cmd.userId,
+        _.userId           := cmd.sessionUserId,
         _.time             := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.disabled.version := cmd.expectedVersion)
     }
@@ -209,7 +209,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       }
       updatedCentre <- centre.withLocation(location)
     } yield CentreEvent(centre.id.id).update(
-      _.userId                                     := cmd.userId,
+      _.userId                                     := cmd.sessionUserId,
       _.time                                       := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.locationAdded.version                      := cmd.expectedVersion,
       _.locationAdded.location.locationId          := location.uniqueId.id,
@@ -241,7 +241,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       }
       updatedCentre <- centre.withLocation(location)
     } yield CentreEvent(centre.id.id).update(
-      _.userId                                       := cmd.userId,
+      _.userId                                       := cmd.sessionUserId,
       _.time                                         := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.locationUpdated.version                      := cmd.expectedVersion,
       _.locationUpdated.location.locationId          := cmd.locationId,
@@ -261,7 +261,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                        centre: DisabledCentre): ServiceValidation[CentreEvent] = {
     centre.removeLocation(LocationId(cmd.locationId)) map { _ =>
       CentreEvent(centre.id.id).update(
-        _.userId                     := cmd.userId,
+        _.userId                     := cmd.sessionUserId,
         _.time                       := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.locationRemoved.version    := cmd.expectedVersion,
         _.locationRemoved.locationId := cmd.locationId)
@@ -275,7 +275,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                  centre: DisabledCentre): ServiceValidation[CentreEvent] = {
     studyRepository.getByKey(StudyId(cmd.studyId)).map { _ =>
       CentreEvent(centre.id.id).update(
-        _.userId             := cmd.userId,
+        _.userId             := cmd.sessionUserId,
         _.time               := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.studyAdded.version := cmd.expectedVersion,
         _.studyAdded.studyId := cmd.studyId)
@@ -291,7 +291,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       studyExists <- studyRepository.getByKey(StudyId(cmd.studyId))
       canRemove   <- centre.removeStudyId(StudyId(cmd.studyId))
     } yield CentreEvent(centre.id.id).update(
-      _.userId               := cmd.userId,
+      _.userId               := cmd.sessionUserId,
       _.time                 := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.studyRemoved.version := cmd.expectedVersion,
       _.studyRemoved.studyId := cmd.studyId)

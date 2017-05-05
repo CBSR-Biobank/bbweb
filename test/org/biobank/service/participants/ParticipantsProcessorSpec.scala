@@ -32,10 +32,10 @@ class ParticipantsProcessorSpec extends TestFixture {
     "allow recovery from journal" in {
       val participant = factory.createParticipant
       val study = factory.defaultEnabledStudy
-      val cmd = AddParticipantCmd(userId      = nameGenerator.next[String],
-                                  studyId     = study.id.id,
-                                  uniqueId    = participant.uniqueId,
-                                  annotations = List.empty)
+      val cmd = AddParticipantCmd(sessionUserId = nameGenerator.next[String],
+                                  studyId       = study.id.id,
+                                  uniqueId      = participant.uniqueId,
+                                  annotations   = List.empty)
       studyRepository.put(study)
       val v = ask(participantsProcessor, cmd).mapTo[ServiceValidation[ParticipantEvent]].futureValue
       v.isSuccess must be (true)

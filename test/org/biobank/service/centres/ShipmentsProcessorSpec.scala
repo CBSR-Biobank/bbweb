@@ -46,7 +46,7 @@ class ShipmentsProcessorSpec extends TestFixture with ShipmentSpecFixtures {
 
     "allow recovery from journal" in {
       val f = createdShipmentFixture
-      val cmd = AddShipmentCmd(userId         = "",
+      val cmd = AddShipmentCmd(sessionUserId  = "",
                                courierName    = f.shipment.courierName,
                                trackingNumber = f.shipment.trackingNumber,
                                fromLocationId = f.shipment.fromLocationId.id,

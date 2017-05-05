@@ -214,7 +214,7 @@ class StudiesProcessor @Inject() (
       study <- DisabledStudy.create(id, 0L, cmd.name, cmd.description, Set.empty)
     } yield {
       StudyEvent(study.id.id).update(
-        _.optionalUserId            := cmd.userId,
+        _.optionalUserId            := cmd.sessionUserId,
         _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.added.name                := cmd.name,
         _.added.optionalDescription := cmd.description)
@@ -226,7 +226,7 @@ class StudiesProcessor @Inject() (
     (nameAvailable(cmd.name, StudyId(cmd.id)) |@|
        study.withName(cmd.name)) { case (_, _) =>
         StudyEvent(study.id.id).update(
-          _.optionalUserId      := cmd.userId,
+          _.optionalUserId      := cmd.sessionUserId,
           _.time                := ISODateTimeFormat.dateTime.print(DateTime.now),
           _.nameUpdated.version := cmd.expectedVersion,
           _.nameUpdated.name    := cmd.name)
@@ -237,7 +237,7 @@ class StudiesProcessor @Inject() (
       : ServiceValidation[StudyEvent] = {
     study.withDescription(cmd.description).map { _ =>
       StudyEvent(study.id.id).update(
-        _.optionalUserId                         := cmd.userId,
+        _.optionalUserId                         := cmd.sessionUserId,
         _.time                                   := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.descriptionUpdated.version             := cmd.expectedVersion,
         _.descriptionUpdated.optionalDescription := cmd.description)
@@ -258,7 +258,7 @@ class StudiesProcessor @Inject() (
       }
       updatedStudy <- study.withParticipantAnnotationType(annotationType)
     } yield StudyEvent(study.id.id).update(
-      _.optionalUserId                     := cmd.userId,
+      _.optionalUserId                     := cmd.sessionUserId,
       _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.annotationTypeAdded.version        := cmd.expectedVersion,
       _.annotationTypeAdded.annotationType := EventUtils.annotationTypeToEvent(annotationType))
@@ -277,7 +277,7 @@ class StudiesProcessor @Inject() (
                                        cmd.required).successNel[String]
       updatedStudy   <- study.withParticipantAnnotationType(annotationType)
     } yield StudyEvent(study.id.id).update(
-      _.optionalUserId                       := cmd.userId,
+      _.optionalUserId                       := cmd.sessionUserId,
       _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.annotationTypeUpdated.version        := cmd.expectedVersion,
       _.annotationTypeUpdated.annotationType := EventUtils.annotationTypeToEvent(annotationType))
@@ -288,7 +288,7 @@ class StudiesProcessor @Inject() (
       : ServiceValidation[StudyEvent] = {
     study.removeParticipantAnnotationType(cmd.uniqueId) map { s =>
       StudyEvent(study.id.id).update(
-        _.optionalUserId                 := cmd.userId,
+        _.optionalUserId                 := cmd.sessionUserId,
         _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.annotationTypeRemoved.version  := cmd.expectedVersion,
         _.annotationTypeRemoved.uniqueId := cmd.uniqueId)
@@ -307,7 +307,7 @@ class StudiesProcessor @Inject() (
     } else {
       study.enable.map { _ =>
         StudyEvent(study.id.id).update(
-          _.optionalUserId  := cmd.userId,
+          _.optionalUserId  := cmd.sessionUserId,
           _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
           _.enabled.version := cmd.expectedVersion)
       }
@@ -319,7 +319,7 @@ class StudiesProcessor @Inject() (
       : ServiceValidation[StudyEvent] = {
     study.disable map { _ =>
       StudyEvent(study.id.id).update(
-        _.optionalUserId   := cmd.userId,
+        _.optionalUserId   := cmd.sessionUserId,
         _.time             := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.disabled.version := cmd.expectedVersion)
     }
@@ -330,7 +330,7 @@ class StudiesProcessor @Inject() (
       : ServiceValidation[StudyEvent] = {
     study.retire map { _ =>
       StudyEvent(study.id.id).update(
-        _.optionalUserId  := cmd.userId,
+        _.optionalUserId  := cmd.sessionUserId,
         _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.retired.version := cmd.expectedVersion)
     }
@@ -341,7 +341,7 @@ class StudiesProcessor @Inject() (
       : ServiceValidation[StudyEvent] = {
     study.unretire map { _ =>
       StudyEvent(study.id.id).update(
-        _.optionalUserId    := cmd.userId,
+        _.optionalUserId    := cmd.sessionUserId,
         _.time              := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.unretired.version := cmd.expectedVersion)
     }

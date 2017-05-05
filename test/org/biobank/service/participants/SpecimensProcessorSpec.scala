@@ -48,7 +48,7 @@ class SpecimensProcessorSpec
                                         locationId     = specimen.originLocationId.id,
                                         amount         = specimen.amount)
 
-        val cmd = AddSpecimensCmd(userId            = nameGenerator.next[String],
+        val cmd = AddSpecimensCmd(sessionUserId     = nameGenerator.next[String],
                                   collectionEventId = f.cevent.id.id,
                                   specimenData      = List(specimenInfo))
 

@@ -4,12 +4,12 @@ object Commands {
 
   trait Command
 
-  trait HasUserId {
-    val userId: String
+  trait HasSessionUserId {
+    val sessionUserId: String
   }
 
-  trait HasOptionalUserId {
-    val userId: Option[String]
+  trait HasOptionalSessionUserId {
+    val sessionUserId: Option[String]
   }
 
   trait HasExpectedVersion {

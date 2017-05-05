@@ -11,40 +11,40 @@ object ShipmentSpecimenCommands {
 
   trait ShipmentSpecimenModifyCommand extends ShipmentSpecimenCommand
 
-  final case class ShipmentAddSpecimensCmd(userId:               String,
+  final case class ShipmentAddSpecimensCmd(sessionUserId:        String,
                                            shipmentId:           String,
                                            shipmentContainerId:  Option[String],
                                            specimenInventoryIds: List[String])
       extends ShipmentSpecimenCommand
 
-  final case class ShipmentSpecimenRemoveCmd(userId:             String,
+  final case class ShipmentSpecimenRemoveCmd(sessionUserId:      String,
                                              shipmentId:         String,
                                              expectedVersion:    Long,
                                              shipmentSpecimenId: String)
       extends ShipmentSpecimenModifyCommand
 
-  final case class ShipmentSpecimenUpdateContainerCmd(userId:               String,
+  final case class ShipmentSpecimenUpdateContainerCmd(sessionUserId:        String,
                                                       shipmentId:           String,
                                                       shipmentContainerId:  Option[String],
                                                       specimenInventoryIds: List[String])
       extends ShipmentSpecimenModifyCommand
 
-  final case class ShipmentSpecimensPresentCmd(userId:               String,
+  final case class ShipmentSpecimensPresentCmd(sessionUserId:        String,
                                                shipmentId:           String,
                                                specimenInventoryIds: List[String])
       extends ShipmentSpecimenModifyCommand
 
-  final case class ShipmentSpecimensReceiveCmd(userId:               String,
+  final case class ShipmentSpecimensReceiveCmd(sessionUserId:        String,
                                                shipmentId:           String,
                                                specimenInventoryIds: List[String])
       extends ShipmentSpecimenModifyCommand
 
-  final case class ShipmentSpecimenMissingCmd(userId:               String,
+  final case class ShipmentSpecimenMissingCmd(sessionUserId:        String,
                                               shipmentId:           String,
                                               specimenInventoryIds: List[String])
       extends ShipmentSpecimenModifyCommand
 
-  final case class ShipmentSpecimenExtraCmd(userId:               String,
+  final case class ShipmentSpecimenExtraCmd(sessionUserId:        String,
                                             shipmentId:           String,
                                             specimenInventoryIds: List[String])
       extends ShipmentSpecimenModifyCommand

@@ -31,9 +31,9 @@ class StudiesProcessorSpec extends TestFixture {
 
     "allow recovery from journal" in {
       val study = factory.createDisabledStudy
-      val cmd = AddStudyCmd(userId      = None,
-                            name        = study.name,
-                            description = study.description)
+      val cmd = AddStudyCmd(sessionUserId = None,
+                            name          = study.name,
+                            description   = study.description)
       val v = ask(studiesProcessor, cmd).mapTo[ServiceValidation[StudyEvent]].futureValue
       v.isSuccess must be (true)
       studyRepository.getValues.map { s => s.name } must contain (study.name)

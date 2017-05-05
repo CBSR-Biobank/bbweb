@@ -35,7 +35,7 @@ class CollectionEventsProcessorSpec extends TestFixture {
       val participant = factory.defaultParticipant
       val study = factory.defaultEnabledStudy
       val ceventType = factory.defaultCollectionEventType.copy(studyId = participant.studyId)
-      val cmd = AddCollectionEventCmd(userId                = nameGenerator.next[String],
+      val cmd = AddCollectionEventCmd(sessionUserId         = nameGenerator.next[String],
                                       participantId         = participant.id.id,
                                       collectionEventTypeId = ceventType.id.id,
                                       timeCompleted         = DateTime.now,

@@ -29,9 +29,9 @@ class CentresProcessorSpec extends TestFixture {
 
     "allow recovery from journal" in {
       val centre = factory.createDisabledCentre
-      val cmd = AddCentreCmd(userId      = nameGenerator.next[String],
-                             name        = centre.name,
-                             description = centre.description)
+      val cmd = AddCentreCmd(sessionUserId = nameGenerator.next[String],
+                             name          = centre.name,
+                             description   = centre.description)
       val v = ask(centresProcessor, cmd).mapTo[ServiceValidation[CentreEvent]].futureValue
       v.isSuccess must be (true)
       centreRepository.getValues.map { c => c.name } must contain (centre.name)

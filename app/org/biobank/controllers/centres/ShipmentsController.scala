@@ -93,7 +93,7 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
 
   def remove(shipmentId: ShipmentId, version: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      val cmd = ShipmentRemoveCmd(userId          = request.authInfo.userId.id,
+      val cmd = ShipmentRemoveCmd(sessionUserId   = request.authInfo.userId.id,
                                   id              = shipmentId.id,
                                   expectedVersion = version)
       val future = shipmentsService.removeShipment(cmd)
@@ -150,7 +150,7 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
 
   def removeSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String, version: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      val cmd = ShipmentSpecimenRemoveCmd(userId             = request.authInfo.userId.id,
+      val cmd = ShipmentSpecimenRemoveCmd(sessionUserId      = request.authInfo.userId.id,
                                           shipmentId         = shipmentId.id,
                                           expectedVersion    = version,
                                           shipmentSpecimenId = shipmentSpecimenId)

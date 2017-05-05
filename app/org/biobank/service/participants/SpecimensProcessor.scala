@@ -151,7 +151,7 @@ class SpecimensProcessor @Inject() (
       ceventType      <- collectionEventTypeRepository.getByKey(collectionEvent.collectionEventTypeId)
       specIdsValid    <- validateSpecimenInfo(cmd.specimenData, ceventType)
       invIdsValid     <- validateInventoryId(cmd.specimenData)
-    } yield SpecimenEvent(cmd.userId).update(
+    } yield SpecimenEvent(cmd.sessionUserId).update(
       _.time                    := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.added.collectionEventId := collectionEvent.id.id,
       _.added.specimenData      := cmd.specimenData.map { specimenInfo =>
@@ -185,7 +185,7 @@ class SpecimensProcessor @Inject() (
                                cevent:   CollectionEvent,
                                specimen: Specimen): ServiceValidation[SpecimenEvent] = {
     specimenHasNoChildren(specimen).map( _ =>
-      SpecimenEvent(cmd.userId).update(
+      SpecimenEvent(cmd.sessionUserId).update(
         _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.removed.version           := specimen.version,
         _.removed.specimenId        := specimen.id.id,

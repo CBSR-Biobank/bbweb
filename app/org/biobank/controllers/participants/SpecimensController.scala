@@ -66,7 +66,7 @@ class SpecimensController @Inject() (val action:       BbwebAction,
   def removeSpecimen(ceventId: CollectionEventId, spcId: SpecimenId, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       val cmd = RemoveSpecimenCmd(
-          userId                = request.authInfo.userId.id,
+          sessionUserId         = request.authInfo.userId.id,
           id                    = spcId.id,
           collectionEventId     = ceventId.id,
           expectedVersion       = ver)

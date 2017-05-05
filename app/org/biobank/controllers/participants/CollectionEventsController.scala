@@ -71,7 +71,7 @@ class CollectionEventsController @Inject() (val action:       BbwebAction,
                        annotTypeId:   String,
                        ver:           Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      val cmd = RemoveCollectionEventAnnotationCmd(userId           = request.authInfo.userId.id,
+      val cmd = RemoveCollectionEventAnnotationCmd(sessionUserId    = request.authInfo.userId.id,
                                                    id               = ceventId.id,
                                                    expectedVersion  = ver,
                                                    annotationTypeId = annotTypeId)
@@ -80,7 +80,7 @@ class CollectionEventsController @Inject() (val action:       BbwebAction,
 
   def remove(participantId: ParticipantId, ceventId: CollectionEventId, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      val cmd = RemoveCollectionEventCmd(userId          = request.authInfo.userId.id,
+      val cmd = RemoveCollectionEventCmd(sessionUserId   = request.authInfo.userId.id,
                                          id              = ceventId.id,
                                          participantId   = participantId.id,
                                          expectedVersion = ver)

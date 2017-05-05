@@ -50,7 +50,7 @@ class ParticipantsController @Inject() (val action:              BbwebAction,
 
   def removeAnnotation(participantId: ParticipantId, annotTypeId: String, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      val cmd = ParticipantRemoveAnnotationCmd(userId           = request.authInfo.userId.id,
+      val cmd = ParticipantRemoveAnnotationCmd(sessionUserId    = request.authInfo.userId.id,
                                                id               = participantId.id,
                                                expectedVersion  = ver,
                                                annotationTypeId = annotTypeId)

@@ -9,7 +9,9 @@ object UserCommands {
 
   trait UserCommand extends Command
 
-  trait UserModifyCommand extends UserCommand with HasIdentity with HasExpectedVersion
+  trait UserModifyCommand extends UserCommand with HasIdentity with HasExpectedVersion with HasSessionUserId
+
+  trait UserStateChangeCommand extends UserModifyCommand
 
   final case class RegisterUserCmd(userId:    Option[String],
                                    name:      String,
@@ -18,45 +20,45 @@ object UserCommands {
                                    avatarUrl: Option[String])
       extends UserCommand
 
-  final case class UpdateUserNameCmd(userId:          Option[String],
+  final case class UpdateUserNameCmd(sessionUserId:   String,
                                      id:              String,
                                      expectedVersion: Long,
                                      name:            String)
       extends UserModifyCommand
 
-  final case class UpdateUserEmailCmd(userId:          Option[String],
+  final case class UpdateUserEmailCmd(sessionUserId:   String,
                                       id:              String,
                                       expectedVersion: Long,
                                       email:           String)
       extends UserModifyCommand
 
-  final case class UpdateUserPasswordCmd(userId:          Option[String],
+  final case class UpdateUserPasswordCmd(sessionUserId:   String,
                                          id:              String,
                                          expectedVersion: Long,
                                          currentPassword: String,
                                          newPassword:     String)
       extends UserModifyCommand
 
-  final case class UpdateUserAvatarUrlCmd(userId:          Option[String],
+  final case class UpdateUserAvatarUrlCmd(sessionUserId:   String,
                                           id:              String,
                                           expectedVersion: Long,
                                           avatarUrl:       Option[String])
       extends UserModifyCommand
 
-  final case class ActivateUserCmd(userId:          Option[String],
+  final case class ActivateUserCmd(sessionUserId:   String,
                                    id:              String,
                                    expectedVersion: Long)
-      extends UserModifyCommand
+      extends UserStateChangeCommand
 
-  final case class LockUserCmd(userId:          Option[String],
+  final case class LockUserCmd(sessionUserId:   String,
                                id:              String,
                                expectedVersion: Long)
-      extends UserModifyCommand
+      extends UserStateChangeCommand
 
-  final case class UnlockUserCmd(userId:          Option[String],
+  final case class UnlockUserCmd(sessionUserId:   String,
                                  id:              String,
                                  expectedVersion: Long)
-      extends UserModifyCommand
+      extends UserStateChangeCommand
 
   final case class ResetUserPasswordCmd(email: String)
       extends UserCommand
