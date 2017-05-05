@@ -6,9 +6,9 @@ import org.biobank.service.QueryFilterParserGrammar._
 import org.biobank.service.{ServiceValidation, ServiceError}
 import org.biobank.domain.PredicateHelper
 import org.biobank.domain.centre.{ShipmentItemState, ShipmentSpecimen, ShipmentSpecimenPredicates}
+import org.slf4j.{Logger, LoggerFactory}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
-import org.slf4j.{Logger, LoggerFactory}
 
 /**
  * Functions that filter a set of shipment specimens from an expression contained in a filter string.

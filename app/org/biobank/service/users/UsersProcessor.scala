@@ -172,7 +172,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
       emailService.userActivatedEmail(u.email)
 
       UserEvent(user.id.id).update(
-        _.time              := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                     := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.whenActive.sessionUserId := cmd.sessionUserId,
         _.activated.version        := cmd.expectedVersion)
     }
@@ -182,7 +182,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
                                    user: ActiveUser): ServiceValidation[UserEvent] = {
     user.withName(cmd.name).map { _ =>
       UserEvent(user.id.id).update(
-        _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                        := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.whenActive.sessionUserId    := cmd.sessionUserId,
         _.whenActive.version          := cmd.expectedVersion,
         _.whenActive.nameUpdated.name := cmd.name)
@@ -195,7 +195,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
       emailAvailable <- emailAvailable(cmd.email, user.id)
       updatedUser    <- user.withEmail(cmd.email)
     } yield UserEvent(user.id.id).update(
-      _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                          := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.whenActive.sessionUserId      := cmd.sessionUserId,
       _.whenActive.version            := cmd.expectedVersion,
       _.whenActive.emailUpdated.email := cmd.email)
@@ -207,7 +207,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
       val passwordInfo = encryptPassword(user, cmd.newPassword)
       user.withPassword(passwordInfo.password, passwordInfo.salt).map { user =>
         UserEvent(user.id.id).update(
-          _.time                     := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.time                                := ISODateTimeFormat.dateTime.print(DateTime.now),
           _.whenActive.sessionUserId            := cmd.sessionUserId,
           _.whenActive.version                  := cmd.expectedVersion,
           _.whenActive.passwordUpdated.password := passwordInfo.password,
@@ -222,7 +222,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
                                         user: ActiveUser): ServiceValidation[UserEvent] = {
     user.withAvatarUrl(cmd.avatarUrl).map { _ =>
       UserEvent(user.id.id).update(
-        _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                                          := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.whenActive.sessionUserId                      := cmd.sessionUserId,
         _.whenActive.version                            := cmd.expectedVersion,
         _.whenActive.avatarUrlUpdated.optionalAvatarUrl := cmd.avatarUrl)
@@ -248,7 +248,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
       emailService.passwordResetEmail(updatedUser.email, plainPassword)
 
       UserEvent(user.id.id).update(
-        _.time                   := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                              := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.whenActive.optionalSessionUserId  := None,
         _.whenActive.version                := user.version,
         _.whenActive.passwordReset.password := passwordInfo.password,
@@ -265,9 +265,9 @@ class UsersProcessor @Inject() (val config:         Configuration,
 
     v.map { _ =>
       UserEvent(user.id.id).update(
-        _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time           := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.locked.sessionUserId := cmd.sessionUserId,
-        _.locked.version        := cmd.expectedVersion)
+        _.locked.version := cmd.expectedVersion)
     }
   }
 
@@ -275,9 +275,9 @@ class UsersProcessor @Inject() (val config:         Configuration,
                                    user: LockedUser): ServiceValidation[UserEvent] = {
     user.unlock.map { _ =>
       UserEvent(user.id.id).update(
-        _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time           := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.unlocked.sessionUserId := cmd.sessionUserId,
-        _.unlocked.version      := cmd.expectedVersion)
+        _.unlocked.version := cmd.expectedVersion)
     }
   }
 
