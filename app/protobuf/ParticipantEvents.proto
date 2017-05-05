@@ -27,9 +27,9 @@ message ParticipantEvent {
       optional string annotationTypeId = 2;
    }
 
-   required string id     = 1; // the participant id
-   optional string userId = 2;
-   optional string time   = 3;
+   required string id            = 1; // the participant id
+   optional string sessionUserId = 2;
+   optional string time          = 3;
 
    oneof event_type {
       Added             added             = 4;

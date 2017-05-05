@@ -39,7 +39,7 @@ message CollectionEventEvent {
    required string id                    = 1; // the collection event id
    optional string participantId         = 2;
    optional string collectionEventTypeId = 3;
-   optional string userId                = 4;
+   optional string sessionUserId         = 4;
    optional string time                  = 5;
 
    oneof event_type {

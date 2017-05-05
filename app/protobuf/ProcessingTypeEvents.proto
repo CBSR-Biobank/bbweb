@@ -30,9 +30,9 @@ message ProcessingTypeEvent {
       optional int64  version          = 1;
    }
 
-   required string id     = 1;
-   optional string userId = 2;
-   optional string time   = 3;
+   required string id            = 1;
+   optional string sessionUserId = 2;
+   optional string time          = 3;
 
    oneof event_type {
       Added              added              = 4;

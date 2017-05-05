@@ -54,8 +54,8 @@ message SpecimenEvent {
       optional string collectionEventId = 3;
    }
 
-   required string userId = 1;
-   optional string time   = 2;
+   required string sessionUserId = 1;
+   optional string time          = 2;
 
    oneof event_type {
       Added            added              = 3;

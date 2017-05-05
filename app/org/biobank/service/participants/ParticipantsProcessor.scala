@@ -134,7 +134,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
                                               cmd.annotations.toSet,
                                               DateTime.now)
     } yield ParticipantEvent(newParticipant.id.id).update(
-      _.userId            := cmd.sessionUserId,
+      _.sessionUserId     := cmd.sessionUserId,
       _.time              := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.added.studyId     := newParticipant.studyId.id,
       _.added.uniqueId    := cmd.uniqueId,
@@ -148,7 +148,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
       uniqueIdAvailable  <- uniqueIdAvailable(cmd.uniqueId, participant.id)
       updatedParticipant <- participant.withUniqueId(cmd.uniqueId)
     } yield ParticipantEvent(updatedParticipant.id.id).update(
-      _.userId                   := cmd.sessionUserId,
+      _.sessionUserId            := cmd.sessionUserId,
       _.time                     := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.uniqueIdUpdated.version  := cmd.expectedVersion,
       _.uniqueIdUpdated.uniqueId := cmd.uniqueId)
@@ -167,7 +167,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
                                                            allAnnotations.toList)
       updatedParticipant <- participant.withAnnotation(annotation)
     } yield ParticipantEvent(updatedParticipant.id.id).update(
-      _.userId                     := cmd.sessionUserId,
+      _.sessionUserId              := cmd.sessionUserId,
       _.time                       := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.annotationAdded.version    := cmd.expectedVersion,
       _.annotationAdded.annotation := annotationToEvent(annotation))
@@ -188,7 +188,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
       }
       updatedParticipant <- participant.withoutAnnotation(cmd.annotationTypeId)
     } yield ParticipantEvent(updatedParticipant.id.id).update(
-      _.userId                             := cmd.sessionUserId,
+      _.sessionUserId                      := cmd.sessionUserId,
       _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.annotationRemoved.version          := cmd.expectedVersion,
       _.annotationRemoved.annotationTypeId := cmd.annotationTypeId)

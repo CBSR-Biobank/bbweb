@@ -14,7 +14,7 @@ object StudyEventsUtil {
    */
   def createStudyEvent(id: StudyId, command: StudyCommand): StudyEventOld =
     StudyEventOld(id.id).update(
-      _.optionalUserId := command.sessionUserId,
-      _.time           := ISODateTimeFormat.dateTime.print(DateTime.now))
+      _.optionalSessionUserId := command.sessionUserId,
+      _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now))
 
 }

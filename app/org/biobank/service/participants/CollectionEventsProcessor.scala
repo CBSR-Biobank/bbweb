@@ -157,7 +157,7 @@ class CollectionEventsProcessor @Inject() (
     } yield CollectionEventEvent(newCollectionEvent.id.id).update(
       _.participantId         := cmd.participantId,
       _.collectionEventTypeId := newCollectionEvent.collectionEventTypeId.id,
-      _.userId                := cmd.sessionUserId,
+      _.sessionUserId         := cmd.sessionUserId,
       _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.added.timeCompleted   := ISODateTimeFormatter.print(cmd.timeCompleted),
       _.added.visitNumber     := cmd.visitNumber,
@@ -175,7 +175,7 @@ class CollectionEventsProcessor @Inject() (
     } yield CollectionEventEvent(updatedCevent.id.id).update(
       _.participantId                  := participant.id.id,
       _.collectionEventTypeId          := updatedCevent.collectionEventTypeId.id,
-      _.userId                         := cmd.sessionUserId,
+      _.sessionUserId                  := cmd.sessionUserId,
       _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.visitNumberUpdated.version     := cmd.expectedVersion,
       _.visitNumberUpdated.visitNumber := updatedCevent.visitNumber)
@@ -190,7 +190,7 @@ class CollectionEventsProcessor @Inject() (
       CollectionEventEvent(updatedCevent.id.id).update(
         _.participantId                      := participant.id.id,
         _.collectionEventTypeId              := updatedCevent.collectionEventTypeId.id,
-        _.userId                             := cmd.sessionUserId,
+        _.sessionUserId                      := cmd.sessionUserId,
         _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.timeCompletedUpdated.version       := cmd.expectedVersion,
         _.timeCompletedUpdated.timeCompleted := ISODateTimeFormat.dateTime.print(updatedCevent.timeCompleted))
@@ -214,7 +214,7 @@ class CollectionEventsProcessor @Inject() (
     } yield CollectionEventEvent(updatedCevent.id.id).update(
       _.participantId                := participant.id.id,
       _.collectionEventTypeId        := updatedCevent.collectionEventTypeId.id,
-      _.userId                       := cmd.sessionUserId,
+      _.sessionUserId                := cmd.sessionUserId,
       _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.annotationUpdated.version    := cmd.expectedVersion,
       _.annotationUpdated.annotation := annotationToEvent(annotation))
@@ -239,7 +239,7 @@ class CollectionEventsProcessor @Inject() (
     } yield CollectionEventEvent(updatedCevent.id.id).update(
       _.participantId                      := participant.id.id,
       _.collectionEventTypeId              := updatedCevent.collectionEventTypeId.id,
-      _.userId                             := cmd.sessionUserId,
+      _.sessionUserId                      := cmd.sessionUserId,
       _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.annotationRemoved.version          := cmd.expectedVersion,
       _.annotationRemoved.annotationTypeId := cmd.annotationTypeId)
@@ -253,7 +253,7 @@ class CollectionEventsProcessor @Inject() (
     CollectionEventEvent(cevent.id.id).update(
       _.participantId         := participant.id.id,
       _.collectionEventTypeId := cevent.collectionEventTypeId.id,
-      _.userId                := cmd.sessionUserId,
+      _.sessionUserId         := cmd.sessionUserId,
       _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.removed.version       := cevent.version).successNel[String]
   }

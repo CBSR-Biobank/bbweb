@@ -165,7 +165,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                                               Set.empty)
     } yield CollectionEventTypeEvent(cetId.id).update(
       _.studyId                   := studyId.id,
-      _.optionalUserId            := cmd.userId,
+      _.optionalSessionUserId     := cmd.userId,
       _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.added.name                := newItem.name,
       _.added.optionalDescription := newItem.description,
@@ -178,10 +178,10 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       EntityInUse(s"collection event type in use: ${ceventType.id}").failureNel[CollectionEventTypeEvent]
     } else {
       CollectionEventTypeEvent(ceventType.id.id).update(
-        _.studyId         := ceventType.studyId.id,
-        _.optionalUserId  := cmd.userId,
-        _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.removed.version := cmd.expectedVersion).successNel[String]
+        _.studyId               := ceventType.studyId.id,
+        _.optionalSessionUserId := cmd.userId,
+        _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.removed.version       := cmd.expectedVersion).successNel[String]
     }
   }
 
@@ -191,11 +191,11 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       nameAvailable <- nameAvailable(cmd.name, cet.studyId, CollectionEventTypeId(cmd.id))
       newItem       <- cet.withName(cmd.name)
     } yield CollectionEventTypeEvent(newItem.id.id).update(
-      _.studyId             := newItem.studyId.id,
-      _.optionalUserId      := cmd.userId,
-      _.time                := ISODateTimeFormat.dateTime.print(DateTime.now),
-      _.nameUpdated.version := cmd.expectedVersion,
-      _.nameUpdated.name    := newItem.name)
+      _.studyId               := newItem.studyId.id,
+      _.optionalSessionUserId := cmd.userId,
+      _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.nameUpdated.version   := cmd.expectedVersion,
+      _.nameUpdated.name      := newItem.name)
   }
 
   private def updateDescriptionCmdToEvent(cmd: UpdateCollectionEventTypeDescriptionCmd,
@@ -204,7 +204,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     cet.withDescription(cmd.description).map { _ =>
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                                := cet.studyId.id,
-        _.optionalUserId                         := cmd.userId,
+        _.optionalSessionUserId                  := cmd.userId,
         _.time                                   := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.descriptionUpdated.version             := cmd.expectedVersion,
         _.descriptionUpdated.optionalDescription := cmd.description)
@@ -217,7 +217,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     cet.withRecurring(cmd.recurring).map { _ =>
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                    := cet.studyId.id,
-        _.optionalUserId             := cmd.userId,
+        _.optionalSessionUserId      := cmd.userId,
         _.time                       := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.recurringUpdated.version   := cmd.expectedVersion,
         _.recurringUpdated.recurring := cmd.recurring)
@@ -239,7 +239,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       updatedCet <- cet.withAnnotationType(annotationType)
     } yield CollectionEventTypeEvent(cet.id.id).update(
       _.studyId                            := cet.studyId.id,
-      _.optionalUserId                     := cmd.userId,
+      _.optionalSessionUserId              := cmd.userId,
       _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.annotationTypeAdded.version        := cmd.expectedVersion,
       _.annotationTypeAdded.annotationType := EventUtils.annotationTypeToEvent(annotationType))
@@ -251,7 +251,7 @@ private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotat
     cet.removeAnnotationType(cmd.uniqueId) map { c =>
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                        := cet.studyId.id,
-        _.optionalUserId                 := cmd.userId,
+        _.optionalSessionUserId          := cmd.userId,
         _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.annotationTypeRemoved.version  := cmd.expectedVersion,
         _.annotationTypeRemoved.uniqueId := cmd.uniqueId)
@@ -274,7 +274,7 @@ private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotat
       updatedCet <- cet.withSpecimenSpec(specimenSpec)
     } yield CollectionEventTypeEvent(cet.id.id).update(
       _.studyId                        := cet.studyId.id,
-      _.optionalUserId                 := cmd.userId,
+      _.optionalSessionUserId          := cmd.userId,
       _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.specimenSpecAdded.version      := cmd.expectedVersion,
       _.specimenSpecAdded.specimenSpec := EventUtils.specimenSpecToEvent(specimenSpec))
@@ -299,7 +299,7 @@ private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotat
       updatedCet <- cet.withSpecimenSpec(specimenSpec)
     } yield CollectionEventTypeEvent(cet.id.id).update(
       _.studyId                          := cet.studyId.id,
-      _.optionalUserId                   := cmd.userId,
+      _.optionalSessionUserId            := cmd.userId,
       _.time                             := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.specimenSpecUpdated.version      := cmd.expectedVersion,
       _.specimenSpecUpdated.specimenSpec := EventUtils.specimenSpecToEvent(specimenSpec))
@@ -311,7 +311,7 @@ private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotat
     cet.removeSpecimenSpec(cmd.uniqueId) map { c =>
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                      := cet.studyId.id,
-        _.optionalUserId               := cmd.userId,
+        _.optionalSessionUserId        := cmd.userId,
         _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.specimenSpecRemoved.version  := cmd.expectedVersion,
         _.specimenSpecRemoved.uniqueId := cmd.uniqueId)

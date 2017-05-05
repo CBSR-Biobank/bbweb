@@ -3,13 +3,13 @@ package org.biobank.service.users
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
 import javax.inject.Inject
-import play.api.{Configuration, Environment, Mode}
 import org.biobank.domain.user._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.service._
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
+import play.api.{Configuration, Environment}
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -47,15 +47,20 @@ class UsersProcessor @Inject() (val config:         Configuration,
   val receiveRecover: Receive = {
     case event: UserEvent =>
       event.eventType match {
-        case et: EventType.Registered       => applyRegisteredEvent(event)
-        case et: EventType.Activated        => applyActivatedEvent(event)
-        case et: EventType.NameUpdated      => applyNameUpdatedEvent(event)
-        case et: EventType.EmailUpdated     => applyEmailUpdatedEvent(event)
-        case et: EventType.PasswordUpdated  => applyPasswordUpdatedEvent(event)
-        case et: EventType.AvatarUrlUpdated => applyAvatarUrlUpdatedEvent(event)
-        case et: EventType.Locked           => applyLockedEvent(event)
-        case et: EventType.Unlocked         => applyUnlockedEvent(event)
-        case et: EventType.PasswordReset    => applyPasswordResetEvent(event)
+        case _: EventType.Registered => applyRegisteredEvent(event)
+        case _: EventType.Activated  => applyActivatedEvent(event)
+        case _: EventType.Unlocked   => applyUnlockedEvent(event)
+        case _: EventType.Locked     => applyLockedEvent(event)
+
+        case _: EventType.WhenActive       =>
+          event.getWhenActive.eventType match {
+            case _: UserEvent.WhenActive.EventType.NameUpdated      => applyNameUpdatedEvent(event)
+            case _: UserEvent.WhenActive.EventType.EmailUpdated     => applyEmailUpdatedEvent(event)
+            case _: UserEvent.WhenActive.EventType.PasswordUpdated  => applyPasswordUpdatedEvent(event)
+            case _: UserEvent.WhenActive.EventType.AvatarUrlUpdated => applyAvatarUrlUpdatedEvent(event)
+            case _: UserEvent.WhenActive.EventType.PasswordReset    => applyPasswordResetEvent(event)
+            case _ => log.error(s"user active event not handled: $event")
+          }
 
         case _ => log.error(s"user event not handled: $event")
       }
@@ -65,7 +70,6 @@ class UsersProcessor @Inject() (val config:         Configuration,
 
     case RecoveryCompleted =>
       log.debug("UsersProcessor: recovery completed")
-      createDefaultUser
 
     case event => log.error(s"event not handled: $event")
   }
@@ -153,7 +157,6 @@ class UsersProcessor @Inject() (val config:         Configuration,
       emailService.userRegisteredEmail(cmd.name, cmd.email)
 
       UserEvent(user.id.id).update(
-        _.optionalUserId               := None,
         _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.registered.name              := cmd.name,
         _.registered.email             := cmd.email,
@@ -169,9 +172,9 @@ class UsersProcessor @Inject() (val config:         Configuration,
       emailService.userActivatedEmail(u.email)
 
       UserEvent(user.id.id).update(
-        _.userId            := cmd.sessionUserId,
         _.time              := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.activated.version := cmd.expectedVersion)
+        _.whenActive.sessionUserId := cmd.sessionUserId,
+        _.activated.version        := cmd.expectedVersion)
     }
   }
 
@@ -179,10 +182,10 @@ class UsersProcessor @Inject() (val config:         Configuration,
                                    user: ActiveUser): ServiceValidation[UserEvent] = {
     user.withName(cmd.name).map { _ =>
       UserEvent(user.id.id).update(
-        _.userId              := cmd.sessionUserId,
-        _.time                := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.nameUpdated.version := cmd.expectedVersion,
-        _.nameUpdated.name    := cmd.name)
+        _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.whenActive.sessionUserId    := cmd.sessionUserId,
+        _.whenActive.version          := cmd.expectedVersion,
+        _.whenActive.nameUpdated.name := cmd.name)
     }
   }
 
@@ -192,10 +195,10 @@ class UsersProcessor @Inject() (val config:         Configuration,
       emailAvailable <- emailAvailable(cmd.email, user.id)
       updatedUser    <- user.withEmail(cmd.email)
     } yield UserEvent(user.id.id).update(
-      _.userId               := cmd.sessionUserId,
-      _.time                 := ISODateTimeFormat.dateTime.print(DateTime.now),
-      _.emailUpdated.version := cmd.expectedVersion,
-      _.emailUpdated.email   := cmd.email)
+      _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.whenActive.sessionUserId      := cmd.sessionUserId,
+      _.whenActive.version            := cmd.expectedVersion,
+      _.whenActive.emailUpdated.email := cmd.email)
   }
 
   private def updatePasswordCmdToEvent(cmd:  UpdateUserPasswordCmd,
@@ -204,11 +207,11 @@ class UsersProcessor @Inject() (val config:         Configuration,
       val passwordInfo = encryptPassword(user, cmd.newPassword)
       user.withPassword(passwordInfo.password, passwordInfo.salt).map { user =>
         UserEvent(user.id.id).update(
-          _.userId                   := cmd.sessionUserId,
           _.time                     := ISODateTimeFormat.dateTime.print(DateTime.now),
-          _.passwordUpdated.version  := cmd.expectedVersion,
-          _.passwordUpdated.password := passwordInfo.password,
-          _.passwordUpdated.salt     := passwordInfo.salt)
+          _.whenActive.sessionUserId            := cmd.sessionUserId,
+          _.whenActive.version                  := cmd.expectedVersion,
+          _.whenActive.passwordUpdated.password := passwordInfo.password,
+          _.whenActive.passwordUpdated.salt     := passwordInfo.salt)
       }
     } else {
       InvalidPassword.failureNel[UserEvent]
@@ -219,10 +222,10 @@ class UsersProcessor @Inject() (val config:         Configuration,
                                         user: ActiveUser): ServiceValidation[UserEvent] = {
     user.withAvatarUrl(cmd.avatarUrl).map { _ =>
       UserEvent(user.id.id).update(
-        _.userId                             := cmd.sessionUserId,
         _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.avatarUrlUpdated.version           := cmd.expectedVersion,
-        _.avatarUrlUpdated.optionalAvatarUrl := cmd.avatarUrl)
+        _.whenActive.sessionUserId                      := cmd.sessionUserId,
+        _.whenActive.version                            := cmd.expectedVersion,
+        _.whenActive.avatarUrlUpdated.optionalAvatarUrl := cmd.avatarUrl)
     }
   }
 
@@ -245,11 +248,11 @@ class UsersProcessor @Inject() (val config:         Configuration,
       emailService.passwordResetEmail(updatedUser.email, plainPassword)
 
       UserEvent(user.id.id).update(
-        _.optionalUserId         := None,
         _.time                   := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.passwordReset.version  := user.version,
-        _.passwordReset.password := passwordInfo.password,
-        _.passwordReset.salt     := passwordInfo.salt)
+        _.whenActive.optionalSessionUserId  := None,
+        _.whenActive.version                := user.version,
+        _.whenActive.passwordReset.password := passwordInfo.password,
+        _.whenActive.passwordReset.salt     := passwordInfo.salt)
     }
   }
 
@@ -262,9 +265,9 @@ class UsersProcessor @Inject() (val config:         Configuration,
 
     v.map { _ =>
       UserEvent(user.id.id).update(
-        _.userId         := cmd.sessionUserId,
-        _.time           := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.locked.version := cmd.expectedVersion)
+        _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.locked.sessionUserId := cmd.sessionUserId,
+        _.locked.version        := cmd.expectedVersion)
     }
   }
 
@@ -272,9 +275,9 @@ class UsersProcessor @Inject() (val config:         Configuration,
                                    user: LockedUser): ServiceValidation[UserEvent] = {
     user.unlock.map { _ =>
       UserEvent(user.id.id).update(
-        _.userId           := cmd.sessionUserId,
-        _.time             := ISODateTimeFormat.dateTime.print(DateTime.now),
-        _.unlocked.version := cmd.expectedVersion)
+        _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.unlocked.sessionUserId := cmd.sessionUserId,
+        _.unlocked.version      := cmd.expectedVersion)
     }
   }
 
@@ -379,7 +382,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
             val update = applyEvent(user, eventTime)
 
             if (update.isFailure) {
-              log.error(s"study update from event failed: $update")
+              log.error(s"user update from event failed: $update")
             }
           }
         }
@@ -401,13 +404,12 @@ class UsersProcessor @Inject() (val config:         Configuration,
     }
   }
 
-  private def onValidEventActiveUserAndVersion(event: UserEvent,
-                                               eventType: Boolean,
-                                               eventVersion: Long)
-                                              (applyEvent: (ActiveUser,
-                                                            DateTime) => ServiceValidation[Boolean])
+  private def onValidUserActiveEvent(event: UserEvent)
+                                    (applyEvent: (ActiveUser, DateTime) => ServiceValidation[Boolean])
       : Unit = {
-    onValidEventUserAndVersion(event, eventType, eventVersion) { (user, eventTime) =>
+    onValidEventUserAndVersion(event,
+                               event.eventType.isWhenActive,
+                               event.getWhenActive.getVersion) { (user, eventTime) =>
       user match {
         case user: ActiveUser => applyEvent(user, eventTime)
         case user => ServiceError(s"user not active: $event").failureNel[Boolean]
@@ -440,50 +442,42 @@ class UsersProcessor @Inject() (val config:         Configuration,
   }
 
   private def applyNameUpdatedEvent(event: UserEvent): Unit = {
-    onValidEventActiveUserAndVersion(event,
-                                     event.eventType.isNameUpdated,
-                                     event.getNameUpdated.getVersion) { (user, eventTime) =>
-      val v = user.withName(event.getNameUpdated.getName)
+    onValidUserActiveEvent(event) { (user, eventTime) =>
+      val v = user.withName(event.getWhenActive.getNameUpdated.getName)
       v.foreach(u => userRepository.put(u.copy(timeModified = Some(eventTime))))
       v.map(_ => true)
     }
   }
 
   private def applyEmailUpdatedEvent(event: UserEvent): Unit = {
-    onValidEventActiveUserAndVersion(event,
-                                     event.eventType.isEmailUpdated,
-                                     event.getEmailUpdated.getVersion) { (user, eventTime) =>
-      val v = user.withEmail(event.getEmailUpdated.getEmail)
+    onValidUserActiveEvent(event) { (user, eventTime) =>
+      val v = user.withEmail(event.getWhenActive.getEmailUpdated.getEmail)
       v.foreach(u => userRepository.put(u.copy(timeModified = Some(eventTime))))
       v.map(_ => true)
     }
   }
 
   private def applyPasswordUpdatedEvent(event: UserEvent): Unit = {
-    onValidEventActiveUserAndVersion(event,
-                                     event.eventType.isPasswordUpdated,
-                                     event.getPasswordUpdated.getVersion) { (user, eventTime) =>
-      val v = user.withPassword(event.getPasswordUpdated.getPassword, event.getPasswordUpdated.getSalt)
+    onValidUserActiveEvent(event) { (user, eventTime) =>
+      val v = user.withPassword(event.getWhenActive.getPasswordUpdated.getPassword,
+                                event.getWhenActive.getPasswordUpdated.getSalt)
       v.foreach(u => userRepository.put(u.copy(timeModified = Some(eventTime))))
       v.map(_ => true)
     }
   }
 
   private def applyAvatarUrlUpdatedEvent(event: UserEvent): Unit = {
-    onValidEventActiveUserAndVersion(event,
-                                     event.eventType.isAvatarUrlUpdated,
-                                     event.getAvatarUrlUpdated.getVersion) { (user, eventTime) =>
-      val v = user.withAvatarUrl(event.getAvatarUrlUpdated.avatarUrl)
+    onValidUserActiveEvent(event) { (user, eventTime) =>
+      val v = user.withAvatarUrl(event.getWhenActive.getAvatarUrlUpdated.avatarUrl)
       v.foreach(u => userRepository.put(u.copy(timeModified = Some(eventTime))))
       v.map(_ => true)
     }
   }
 
   private def applyPasswordResetEvent(event: UserEvent): Unit = {
-    onValidEventActiveUserAndVersion(event,
-                                     event.eventType.isPasswordReset,
-                                     event.getPasswordReset.getVersion) { (user, eventTime) =>
-      val v = user.withPassword(event.getPasswordReset.getPassword, event.getPasswordReset.getSalt)
+    onValidUserActiveEvent(event) { (user, eventTime) =>
+      val v = user.withPassword(event.getWhenActive.getPasswordReset.getPassword,
+                                event.getWhenActive.getPasswordReset.getSalt)
       v.foreach(u => userRepository.put(u.copy(timeModified = Some(eventTime))))
       v.map(_ => true)
     }
@@ -494,7 +488,6 @@ class UsersProcessor @Inject() (val config:         Configuration,
     onValidEventUserAndVersion(event,
                                event.eventType.isLocked,
                                event.getLocked.getVersion) { (user, eventTime) =>
-
       val v = user match {
           case au: ActiveUser => au.lock
           case ru: RegisteredUser => ru.lock
@@ -548,29 +541,4 @@ class UsersProcessor @Inject() (val config:         Configuration,
     PasswordInfo(newPwd, newSalt)
   }
 
-  /**
-   * For new installations startup only:
-   *
-   * - password is "testuser"
-   * - for production servers, the password should be changed as soon as possible
-   */
-  private def createDefaultUser(): Unit = {
-    val adminEmail = if (env.mode == Mode.Dev) org.biobank.Global.DefaultUserEmail
-                     else config.getString("admin.email").getOrElse(org.biobank.Global.DefaultUserEmail)
-
-    if ((env.mode == Mode.Dev) || (env.mode == Mode.Prod)) {
-      userRepository.put(
-        ActiveUser(id           = org.biobank.Global.DefaultUserId,
-                   version      = 0L,
-                   timeAdded    = DateTime.now,
-                   timeModified = None,
-                   name         = "Administrator",
-                   email        = adminEmail,
-                   password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
-                   salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
-                   avatarUrl    = None))
-      log.info(s"created default user: $adminEmail")
-    }
-    ()
-  }
 }

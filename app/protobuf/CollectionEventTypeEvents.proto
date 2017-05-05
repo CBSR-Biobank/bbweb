@@ -69,10 +69,10 @@ message CollectionEventTypeEvent {
       optional string uniqueId = 2;
    }
 
-   required string id      = 1;
-   optional string studyId = 2;
-   optional string userId  = 3;
-   optional string time    = 4;
+   required string id            = 1;
+   optional string studyId       = 2;
+   optional string sessionUserId = 3;
+   optional string time          = 4;
 
    oneof event_type {
       Added                 added                 = 5;

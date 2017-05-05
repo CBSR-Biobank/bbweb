@@ -24,7 +24,7 @@ trait CommandController extends Controller {
                    (block: T => Future[Result])
                    (implicit reads: Reads[T]): Action[JsValue] =
     action.async(parse.json) { request =>
-      var jsonCmd = request.body.as[JsObject] ++ Json.obj("userId" -> request.authInfo.userId.id)
+      var jsonCmd = request.body.as[JsObject] ++ Json.obj("sessionUserId" -> request.authInfo.userId.id)
       if (jsonExtra != JsNull) {
         jsonCmd = jsonCmd ++ jsonExtra.as[JsObject]
       }

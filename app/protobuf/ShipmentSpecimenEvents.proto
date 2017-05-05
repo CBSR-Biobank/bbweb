@@ -37,9 +37,9 @@ message ShipmentSpecimenEvent {
     optional string shipmentSpecimenId = 2;
   }
 
-  required string shipmentId = 1;
-  optional string userId     = 2;
-  optional string time       = 3;
+  required string shipmentId    = 1;
+  optional string sessionUserId = 2;
+  optional string time          = 3;
 
   oneof event_type {
     Added                         added            = 4;
