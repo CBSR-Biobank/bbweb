@@ -24,6 +24,12 @@ trait UserPredicates extends HasNamePredicates[User] {
   val emailContains: String => UserFilter =
     email => entity => entity.email.contains(email.replaceAll("[\\*]", ""))
 
+  val emailIsLike: Set[String] => UserFilter =
+    emails => entity => {
+      val lc = entity.email.toLowerCase
+      emails.forall(e => lc.contains(e.toLowerCase))
+    }
+
 }
 
 /**

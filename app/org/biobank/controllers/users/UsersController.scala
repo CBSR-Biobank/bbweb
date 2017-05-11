@@ -54,12 +54,14 @@ class UsersController @Inject() (val action:         BbwebAction,
       Future {
         // FIXME: what if user attempts multiple failed logins? lock the account after 3 attempts?
         // how long to lock the account?
+
         usersService.loginAllowed(credentials.email, credentials.password).fold(
           err => Unauthorized,
           user => {
             val token = authToken.newToken(user.id)
             log.debug(s"user logged in: ${user.email}, token: $token")
-            Ok(user.toDto).withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
+            Ok(usersService.userToDto(user))
+              .withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
           }
         )
       }
@@ -71,7 +73,7 @@ class UsersController @Inject() (val action:         BbwebAction,
   def authenticateUser(): Action[Unit] = action(parse.empty) { implicit request =>
       usersService.getUser(request.authInfo.userId).fold(
         err  => Unauthorized,
-        user => Ok(user.toDto)
+        user =>  Ok(usersService.userToDto(user))
       )
     }
 
@@ -171,16 +173,18 @@ class UsersController @Inject() (val action:         BbwebAction,
   def unlockUser(id: UserId): Action[JsValue] =
     commandAction[UnlockUserCmd](Json.obj("id" -> id))(processCommand)
 
-  def userStudies(id:    UserId,
-                  query: Option[String],
-                  sort:  Option[String],
-                  order: Option[String]): Action[Unit] =
-    action(parse.empty) { implicit request =>
-      // FIXME this should return only the studies this user has access to
-      //
-      // This this for now, but fix once user access have been implemented
-      val studies = studiesService.getStudyCount
-      Ok(studies)
+  def userStudies: Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      validationReply(
+        Future {
+          for {
+            studyIds   <- usersService.getUserStudyIds(request.authInfo.userId)
+            pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
+            studies    <- studiesService.filterStudies(studyIds, pagedQuery.filter, pagedQuery.sort)
+            results    <- PagedResults.create(studies, pagedQuery.page, pagedQuery.limit)
+          } yield results
+        }
+      )
     }
 
   private def processCommand(cmd: UserCommand) = {

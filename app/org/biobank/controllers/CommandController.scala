@@ -64,6 +64,8 @@ trait CommandController extends Controller {
 
   def NotFound(message: String): Result = Results.NotFound(errorReplyJson(message))
 
+  def InternalServerError(message: String): Result = Results.InternalServerError(errorReplyJson(message))
+
   def Ok[T](data: T)(implicit writes: Writes[T]): Result =
     Results.Ok(Json.obj("status" ->"success", "data" -> Json.toJson[T](data)))
 

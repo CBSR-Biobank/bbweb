@@ -1,6 +1,7 @@
 package org.biobank
 
 import org.biobank.domain.EntityState
+import org.biobank.domain.access.RoleId._
 import org.biobank.domain.centre.Shipment
 import org.biobank.infrastructure.JsonUtils._
 import org.joda.time.DateTime
@@ -23,7 +24,8 @@ package dto {
                            state:        EntityState,
                            name:         String,
                            email:        String,
-                           avatarUrl:    Option[String])
+                           avatarUrl:    Option[String],
+                           roles:        Set[RoleId])
 
   object UserDto {
 

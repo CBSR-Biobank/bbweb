@@ -5,6 +5,7 @@ import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import javax.inject._
 import org.biobank.domain.access._
+import org.biobank.domain.access.RoleId._
 import org.biobank.domain.user.{UserId, UserRepository}
 import org.biobank.domain.study.{StudyId, StudyRepository}
 import org.biobank.domain.centre.{CentreId, CentreRepository}
@@ -12,7 +13,6 @@ import org.biobank.infrastructure.command.AccessCommands._
 import org.biobank.infrastructure.event.AccessEvents._
 import org.biobank.service._
 import org.slf4j.{Logger, LoggerFactory}
-import play.api.{Environment, Mode}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 import scalaz.Scalaz._
@@ -34,6 +34,10 @@ trait AccessService extends BbwebService {
                                studyId:      Option[StudyId],
                                centreId:     Option[CentreId]): ServiceValidation[Boolean]
 
+  def getRoles(userId: UserId): Set[RoleId]
+
+  def getMembership(userId: UserId): ServiceValidation[Membership]
+
 }
 
 class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: ActorRef,
@@ -41,8 +45,7 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
                                    val membershipRepository:                MembershipRepository,
                                    val userRepository:                      UserRepository,
                                    val studyRepository:                     StudyRepository,
-                                   val centreRepository:                    CentreRepository,
-                                   val env:                                 Environment)
+                                   val centreRepository:                    CentreRepository)
     extends AccessService
     with BbwebServiceImpl {
 
@@ -58,14 +61,11 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
   }
 
   def hasPermission(userId: UserId, permissionId: AccessItemId): ServiceValidation[Boolean] = {
-    if ((env.mode == Mode.Test) && (userId == org.biobank.Global.DefaultUserId)) {
-      true.successNel[String]
-    } else {
-      val v = userRepository.getByKey(userId).flatMap { _ =>
-          hasPermissionInternal(userId, permissionId)
-        }
-      v.leftMap { err => Unauthorized.nel }
-    }
+    val v = userRepository.getByKey(userId).flatMap { _ =>
+        hasPermissionInternal(userId, permissionId)
+      }
+    log.debug(s"hasPermission: $v")
+    v.leftMap { err => Unauthorized.nel }
   }
 
   def isMember(userId:   UserId,
@@ -94,6 +94,14 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
     } yield (permission && member)
   }
 
+  def getRoles(userId: UserId): Set[RoleId] = {
+    accessItemRepository.rolesForUser(userId).map(r => RoleId.withName(r.id.id))
+  }
+
+  def getMembership(userId: UserId): ServiceValidation[Membership] = {
+    membershipRepository.getUserMembership(userId)
+  }
+
   def processRoleCommand(cmd: AccessCommand): Future[ServiceValidation[Role]] = {
     log.debug(s"processRoleCommand: cmd: $cmd")
     ask(processor, cmd).mapTo[ServiceValidation[AccessEvent]].map { validation =>
@@ -105,8 +113,7 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
   }
 
   // should only called if userId is valid
-  private def hasPermissionInternal(userId: UserId, permissionId: AccessItemId)
-      : ServiceValidation[Boolean] = {
+  private def hasPermissionInternal(userId: UserId, permissionId: AccessItemId): ServiceValidation[Boolean] = {
 
     def hasPermissionParents(parentIds: Set[AccessItemId]): Boolean = {
       val found = parentIds.find { id =>
@@ -115,24 +122,29 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
             item => checkItemAccess(item)
           )
         }.toSuccessNel("not allowed")
-      log.debug(s"hasPermissionParents: ${found.isSuccess}")
-      found.isSuccess
+      log.debug(s"hasPermissionParents: ${found}")
+      found.fold(err => false, _ => true)
     }
 
     def checkItemAccess(item: AccessItem): Boolean = {
-      log.debug(s"checkItemAccess: ${item.id}")
       item match {
         case permission: Permission =>
+          log.debug(s"checkItemAccess: ${item.id}, checking permission parents: ${permission.parentIds}")
           hasPermissionParents(permission.parentIds)
 
         case role: Role =>
-          val result = if (role.userIds.exists(_ == userId)) true
-                       else hasPermissionParents(role.parentIds)
+          val result = if (role.userIds.exists(_ == userId)) {
+              true
+            } else {
+              log.debug(s"checkItemAccess: ${item.id}, checking role parents")
+              hasPermissionParents(role.parentIds)
+            }
           log.debug(s"checkItemAccess: role: ${item.id}, result: $result")
           result
       }
     }
 
+    log.debug(s"hasPermission: userId: $userId, permissionId: $permissionId")
     accessItemRepository.getByKey(permissionId).map(checkItemAccess)
   }
 

@@ -1,14 +1,13 @@
 package org.biobank.domain.access
 
 import com.google.inject.ImplementedBy
-import javax.inject.{Inject, Singleton}
+import javax.inject.Singleton
 import org.biobank.Global
 import org.biobank.domain._
 import org.biobank.domain.access.PermissionId._
 import org.biobank.domain.access.RoleId._
 import org.biobank.domain.user.UserId
 import org.slf4j.{Logger, LoggerFactory}
-import play.api.{Environment, Mode}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -17,13 +16,16 @@ trait AccessItemRepository extends ReadWriteRepository[AccessItemId, AccessItem]
 
   def getRole(id: AccessItemId): DomainValidation[Role]
 
+  def getRoles(): Set[Role]
+
+  def rolesForUser(userId: UserId): Set[Role]
+
   def getPermission(id: AccessItemId): DomainValidation[Permission]
 
 }
 
 @Singleton
-class AccessItemRepositoryImpl @Inject() (val env: Environment)
-    extends ReadWriteRepositoryRefImpl[AccessItemId, AccessItem](v => v.id)
+class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, AccessItem](v => v.id)
     with AccessItemRepository {
 
   import org.biobank.CommonValidations._
@@ -51,6 +53,37 @@ class AccessItemRepositoryImpl @Inject() (val env: Environment)
     } yield role
   }
 
+  def getRoles(): Set[Role] = {
+    getValues.collect { case r: Role => r }.toSet
+  }
+
+  def rolesForUser(userId: UserId): Set[Role] = {
+
+    def roleChildren(role: Role): Set[Role] = {
+      role.childrenIds.map(getByKey).toList.sequenceU.fold(
+        err => Set.empty[Role],
+        list => list.flatMap { item =>
+          item match {
+            case r: Role => roleChildren(r) + role
+            case r => Set(role)
+          }
+        }.toSet
+      )
+    }
+
+    val hasRole = getValues.find { item =>
+        item match {
+          case r: Role => r.userIds.exists(_ == userId)
+          case _ => false
+        }
+      }
+
+    hasRole match {
+      case Some(role: Role) => roleChildren(role) + role
+      case _ => Set.empty[Role]
+    }
+  }
+
   def getPermission(id: AccessItemId): DomainValidation[Permission] = {
     for {
       accessItem <- getByKey(id)
@@ -67,14 +100,30 @@ class AccessItemRepositoryImpl @Inject() (val env: Environment)
     log.trace("accessItemRepository:initPermissions")
     val permissions = Set[Permission](
 
-        createPermissionSimple(PermissionId.UserUpdate,      "User can update other users"),
-        createPermissionSimple(PermissionId.UserChangeState, "User can change state on other users"),
-        createPermissionSimple(PermissionId.UserRead,        "User can view information for other users"),
+        // USER PERMISSIONS
+        createPermissionSimple(PermissionId.UserUpdate,
+                               "User can update other users",
+                               Set(RoleId.UserAdministrator)),
+        createPermissionSimple(PermissionId.UserChangeState,
+                               "User can change state on other users",
+                               Set(RoleId.UserAdministrator)),
+        createPermissionSimple(PermissionId.UserRead,
+                               "User can view information for other users",
+                               Set(RoleId.UserAdministrator)),
 
-        createPermissionSimple(PermissionId.StudyCreate,      "User can create studies"),
-        createPermissionSimple(PermissionId.StudyRead,        "User can view studies"),
-        createPermissionSimple(PermissionId.StudyUpdate,      "User can update studies"),
-        createPermissionSimple(PermissionId.StudyChangeState, "User can change states on studies")
+        // STUDY PERMISSIONS
+        createPermissionSimple(PermissionId.StudyCreate,
+                               "User can create studies",
+                               Set(RoleId.StudyAdministrator)),
+        createPermissionSimple(PermissionId.StudyRead,
+                               "User can view studies",
+                               Set(RoleId.StudyAdministrator)),
+        createPermissionSimple(PermissionId.StudyUpdate,
+                               "User can update studies",
+                               Set(RoleId.StudyAdministrator)),
+        createPermissionSimple(PermissionId.StudyChangeState,
+                               "User can change states on studies",
+                               Set(RoleId.StudyAdministrator))
       )
     permissions.foreach(put)
   }
@@ -89,12 +138,13 @@ class AccessItemRepositoryImpl @Inject() (val env: Environment)
                timeModified = None,
                name         = permissionId.toString,
                description  = Some(description),
-               ruleName     = "",
                parentIds    = parentIds,
                childrenIds  = childrenIds)
 
-  private def createPermissionSimple(permissionId: PermissionId, description: String): Permission =
-    createPermission(permissionId, description, Set.empty[AccessItemId], Set.empty[AccessItemId])
+  private def createPermissionSimple(permissionId: PermissionId,
+                                     description:  String,
+                                     parentIds:    Set[AccessItemId]): Permission =
+      createPermission(permissionId, description, parentIds, Set.empty[AccessItemId])
 
   def initRoles(): Unit = {
     log.trace("accessItemRepository:initRoles")
@@ -104,7 +154,12 @@ class AccessItemRepositoryImpl @Inject() (val env: Environment)
         createRoleSimple(RoleId.SpecimenCollector,     "SpecimenCollector"),
         createRoleSimple(RoleId.CentreAdministrator,   "CentreAdministrator"),
 
-        createRoleSimple(RoleId.StudyAdministrator,    "StudyAdministrator"),
+        createRole(roleId      = RoleId.StudyAdministrator,
+                   description = "Study Administrator",
+                   parentIds   = Set(RoleId.WebsiteAdministrator),
+                   childrenIds = Set(PermissionId.StudyUpdate,
+                                     PermissionId.StudyChangeState,
+                                     PermissionId.StudyRead)),
 
         createRole(roleId      = RoleId.UserAdministrator,
                    description = "UserAdministrator",
@@ -140,7 +195,6 @@ class AccessItemRepositoryImpl @Inject() (val env: Environment)
          timeModified = None,
          name         = roleId.toString,
          description  = Some(description),
-         ruleName     = "",
          userIds      = userIds,
          parentIds    = parentIds,
          childrenIds  = childrenIds)
@@ -153,10 +207,7 @@ class AccessItemRepositoryImpl @Inject() (val env: Environment)
 
   private def init(): Unit = {
     initPermissions
-
-    if ((env.mode == Mode.Dev) || (env.mode == Mode.Prod)) {
-      initRoles
-    }
+    initRoles
   }
 
   init

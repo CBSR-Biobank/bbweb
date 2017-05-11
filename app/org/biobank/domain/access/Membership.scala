@@ -2,9 +2,10 @@ package org.biobank.domain.access
 
 import org.biobank.domain._
 import org.biobank.domain.user.{User, UserId}
-import org.biobank.domain.study.{Study, StudyId}
-import org.biobank.domain.centre.{Centre, CentreId}
+import org.biobank.domain.study.StudyId
+import org.biobank.domain.centre.CentreId
 import org.joda.time.DateTime
+import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json._
 import scalaz.Scalaz._
 
@@ -26,17 +27,51 @@ object MembershipId {
 
 }
 
+final case class MembershipStudyInfo(allStudies: Boolean, studyIds: Set[StudyId]) {
+
+  def hasAllStudies(): MembershipStudyInfo =
+    copy(allStudies = true, studyIds = Set.empty[StudyId])
+
+ def addStudy(id: StudyId): MembershipStudyInfo =
+    copy(allStudies = false, studyIds = studyIds + id)
+
+ def removeStudy(id: StudyId): MembershipStudyInfo =
+   copy(allStudies = false, studyIds = studyIds - id)
+
+  def isMemberOfStudy(id: StudyId): Boolean = {
+    if (allStudies) true
+    else studyIds.exists(_ == id)
+  }
+
+}
+
+final case class MembershipCentreInfo(allCentres: Boolean, centreIds: Set[CentreId]) {
+
+  def hasAllCentres(): MembershipCentreInfo =
+    copy(allCentres = true, centreIds = Set.empty[CentreId])
+
+ def addCentre(id: CentreId): MembershipCentreInfo =
+   copy(allCentres = false, centreIds = centreIds + id)
+
+ def removeCentre(id: CentreId): MembershipCentreInfo =
+    copy(allCentres = false, centreIds = centreIds - id)
+
+  def isMemberOfCentre(id: CentreId): Boolean = {
+    if (allCentres) true
+    else centreIds.exists(_ == id)
+  }
+}
 
 final case class Membership(id:           MembershipId,
                             version:      Long,
                             timeAdded:    DateTime,
                             timeModified: Option[DateTime],
                             userIds:      Set[UserId],
-                            allStudies:   Boolean,
-                            allCentres:   Boolean,
-                            studyIds:     Set[StudyId],
-                            centreIds:    Set[CentreId])
+                            studyInfo:    MembershipStudyInfo,
+                            centreInfo:   MembershipCentreInfo)
     extends ConcurrencySafeEntity[MembershipId] {
+
+  val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   def addUser(user: User): Membership = {
     copy(userIds      = userIds + user.id,
@@ -44,42 +79,38 @@ final case class Membership(id:           MembershipId,
          timeModified = Some(DateTime.now))
   }
 
-  def hasAllStudies(setting: Boolean): Membership = {
-    copy(allStudies   = setting,
-         studyIds     = if (setting) Set.empty[StudyId] else studyIds,
+  def hasAllStudies(): Membership = {
+    copy(studyInfo    = studyInfo.hasAllStudies,
          version      = version + 1,
          timeModified = Some(DateTime.now))
   }
 
-  def addStudy(study: Study): Membership = {
-    copy(studyIds     = studyIds + study.id,
-         allStudies   = false,
+  def addStudy(id: StudyId): Membership = {
+    copy(studyInfo    = studyInfo.addStudy(id),
          version      = version + 1,
          timeModified = Some(DateTime.now))
   }
 
-  def removeStudy(study: Study): Membership = {
-    copy(studyIds     = studyIds - study.id,
+  def removeStudy(id: StudyId): Membership = {
+    copy(studyInfo    = studyInfo.removeStudy(id),
          version      = version + 1,
          timeModified = Some(DateTime.now))
   }
 
   def hasAllCentres(setting: Boolean): Membership = {
-    copy(allCentres   = setting,
-         centreIds    = if (setting) Set.empty[CentreId] else centreIds,
+    copy(centreInfo   = centreInfo.hasAllCentres,
          version      = version + 1,
          timeModified = Some(DateTime.now))
   }
 
-  def addCentre(centre: Centre): Membership = {
-    copy(centreIds    = centreIds + centre.id,
-         allCentres   = false,
+  def addCentre(id: CentreId): Membership = {
+    copy(centreInfo   = centreInfo.addCentre(id),
          version      = version + 1,
          timeModified = Some(DateTime.now))
   }
 
-  def removeCentre(centre: Centre): Membership = {
-    copy(centreIds    = centreIds - centre.id,
+  def removeCentre(id: CentreId): Membership = {
+    copy(centreInfo   = centreInfo.removeCentre(id),
          version      = version + 1,
          timeModified = Some(DateTime.now))
   }
@@ -87,20 +118,15 @@ final case class Membership(id:           MembershipId,
   /**
    * If studyId is None, then don't bother checking for study membership.
    */
-  def isMemberOfStudy(studyId: Option[StudyId]): Boolean = {
-    studyId match {
-      case None => true
-      case _    => if (allStudies) true
-                   else studyId.map(id => studyIds.exists(_ == id)).getOrElse(true)
-    }
+  def isMemberOfStudy(id: StudyId): Boolean = {
+    studyInfo.isMemberOfStudy(id)
   }
 
   /**
    * If centreId is None, then don't bother checking for study membership.
    */
-  def isMemberOfCentre(centreId: Option[CentreId]): Boolean = {
-    if (allCentres) true
-    else centreId.map(id => centreIds.exists(_ == id)).getOrElse(true)
+  def isMemberOfCentre(id: CentreId): Boolean = {
+    centreInfo.isMemberOfCentre(id)
   }
 
   /**
@@ -108,10 +134,23 @@ final case class Membership(id:           MembershipId,
    */
   def isMember(studyId: Option[StudyId], centreId: Option[CentreId]): Boolean = {
     (studyId, centreId) match {
-      case (None, None) => true
-      case _            => isMemberOfStudy(studyId) && isMemberOfCentre(centreId)
+      case (None, None)           => true
+      case (Some(studyId), None)  => isMemberOfStudy(studyId)
+      case (None, Some(centreId)) => isMemberOfCentre(centreId)
+      case (Some(sId), Some(cId)) => isMemberOfStudy(sId) && isMemberOfCentre(cId)
     }
   }
+
+  override def toString: String =
+    s"""|Membership:{
+        |  id:           $id
+        |  version:      $version
+        |  timeAdded:    $timeAdded
+        |  timeModified: $timeModified
+        |  userIds:      $userIds
+        |  studyInfo:    $studyInfo
+        |  centreInfo:   $centreInfo
+        |}""".stripMargin
 }
 
 object Membership {
@@ -148,13 +187,15 @@ object Membership {
                    timeAdded    = timeAdded,
                    timeModified = timeModified,
                    userIds      = userIds,
-                   allStudies   = allStudies,
-                   allCentres   = allCentres,
-                   studyIds     = studyIds,
-                   centreIds    = centreIds)
+                   studyInfo     = MembershipStudyInfo(allStudies, studyIds),
+                   centreInfo    = MembershipCentreInfo(allCentres, centreIds))
     }
   }
 
-  implicit val domainFormat: Format[Membership] = Json.format[Membership]
+  implicit val membershipStudyIds: Format[MembershipStudyInfo] = Json.format[MembershipStudyInfo]
+
+  implicit val membershipCentreIds: Format[MembershipCentreInfo] = Json.format[MembershipCentreInfo]
+
+  implicit val membershipFormat: Format[Membership] = Json.format[Membership]
 
 }

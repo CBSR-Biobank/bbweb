@@ -4,9 +4,11 @@ import akka.actor._
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import javax.inject._
+import org.biobank.domain.access.PermissionId
 import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.study._
+import org.biobank.domain.user.UserId
 import org.biobank.dto._
 import org.biobank.dto.{ ProcessingDto }
 import org.biobank.infrastructure._
@@ -14,6 +16,7 @@ import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.ProcessingTypeEvents._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service._
+import org.biobank.service.access.AccessService
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
@@ -23,7 +26,7 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[StudiesServiceImpl])
 trait StudiesService extends BbwebService {
 
-  def getStudyCount(): Long
+  def getStudyCount(requestUserId: UserId): ServiceValidation[Long]
 
   def getCountsByStatus(): StudyCountsByStatus
 
@@ -35,6 +38,9 @@ trait StudiesService extends BbwebService {
    * @param sort the string representation of the sort expression to use when sorting the studies.
    */
   def getStudies(filter: FilterString, sort: SortString): ServiceValidation[Seq[Study]]
+
+  def filterStudies(studyIds: Set[StudyId], filter: FilterString, sort: SortString):
+      ServiceValidation[Seq[Study]]
 
   def getStudyNames(filter: FilterString, sort: SortString): ServiceValidation[Seq[NameDto]]
 
@@ -78,6 +84,7 @@ trait StudiesService extends BbwebService {
  */
 class StudiesServiceImpl @Inject() (
   @Named("studiesProcessor") val processor: ActorRef,
+  val accessService:                        AccessService,
   val studyRepository:                      StudyRepository,
   val centreRepository:                     CentreRepository,
   val processingTypeRepository:             ProcessingTypeRepository,
@@ -88,10 +95,14 @@ class StudiesServiceImpl @Inject() (
     extends StudiesService
     with BbwebServiceImpl {
 
+  import org.biobank.domain.access.AccessItem._
+
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def getStudyCount(): Long = {
-    studyRepository.getValues.size.toLong
+  def getStudyCount(requestUserId: UserId): ServiceValidation[Long] = {
+    accessService.hasPermission(requestUserId, PermissionId.StudyRead).map { _ =>
+      studyRepository.getValues.size.toLong
+    }
   }
 
   def getCountsByStatus(): StudyCountsByStatus = {
@@ -106,24 +117,15 @@ class StudiesServiceImpl @Inject() (
   }
 
   def getStudies(filter: FilterString, sort: SortString): ServiceValidation[Seq[Study]] = {
-    val allStudies = studyRepository.getValues.toSet
-    val sortStr = if (sort.expression.isEmpty) new SortString("name")
-                  else sort
+    filterStudiesInternal(studyRepository.getValues.toSet, filter, sort)
+  }
 
-    for {
-      studies <- StudyFilter.filterStudies(allStudies, filter)
-      sortExpressions <- {
-        QuerySortParser(sortStr).toSuccessNel(ServiceError(s"could not parse sort expression: $sort"))
-      }
-      sortFunc <- {
-        Study.sort2Compare.get(sortExpressions(0).name).
-          toSuccessNel(ServiceError(s"invalid sort field: ${sortExpressions(0).name}"))
-      }
-    } yield {
-      val result = studies.toSeq.sortWith(sortFunc)
-      if (sortExpressions(0).order == AscendingOrder) result
-      else result.reverse
-    }
+  def filterStudies(studyIds: Set[StudyId], filter: FilterString, sort: SortString):
+      ServiceValidation[Seq[Study]] = {
+    studyIds.map(studyRepository.getByKey).toList.sequenceU.fold(
+      err => ServiceError(s"invalid study ids").failureNel[Seq[Study]],
+      studies => filterStudiesInternal(studies.toSet, filter, sort)
+    )
   }
 
   def getStudyNames(filter: FilterString, sort: SortString): ServiceValidation[Seq[NameDto]] = {
@@ -220,5 +222,26 @@ class StudiesServiceImpl @Inject() (
       : Future[ServiceValidation[Boolean]] =
     ask(processor, cmd).mapTo[ServiceValidation[ProcessingTypeEvent]]
       .map { validation => validation.map(_ => true) }
+
+  private def filterStudiesInternal(unfilteredStudies: Set[Study], filter: FilterString, sort: SortString):
+      ServiceValidation[Seq[Study]] = {
+    val sortStr = if (sort.expression.isEmpty) new SortString("name")
+                  else sort
+
+    for {
+      studies <- StudyFilter.filterStudies(unfilteredStudies, filter)
+      sortExpressions <- {
+        QuerySortParser(sortStr).toSuccessNel(ServiceError(s"could not parse sort expression: $sort"))
+      }
+      sortFunc <- {
+        Study.sort2Compare.get(sortExpressions(0).name).
+          toSuccessNel(ServiceError(s"invalid sort field: ${sortExpressions(0).name}"))
+      }
+    } yield {
+      val result = studies.toSeq.sortWith(sortFunc)
+      if (sortExpressions(0).order == AscendingOrder) result
+      else result.reverse
+    }
+  }
 
 }

@@ -66,6 +66,8 @@ object UserFilter
         emailIsOneOf(emailSet).successNel[String]
       case NotEqualTo | NotIn =>
         complement(emailIsOneOf(emailSet)).successNel[String]
+      case Like =>
+        emailIsLike(emailSet).successNel[String]
       case _ =>
         ServiceError(s"invalid filter on courier email: $comparator").failureNel[UserFilter]
     }

@@ -29,7 +29,7 @@ class ApplicationSpec extends ControllerFixture {
 
       (jsonObj \ "centres").as[Int] mustBe (0)
 
-      (jsonObj \ "users").as[Int] mustBe (0)
+      (jsonObj \ "users").as[Int] mustBe (1) // 1 for the default user
     }
 
     it("return correct aggregate counts") {
@@ -44,7 +44,7 @@ class ApplicationSpec extends ControllerFixture {
 
       (jsonObj \ "centres").as[Int] mustBe (1)
 
-      (jsonObj \ "users").as[Int] mustBe (1)
+      (jsonObj \ "users").as[Int] mustBe (2) // +1 for the default user
     }
 
   }

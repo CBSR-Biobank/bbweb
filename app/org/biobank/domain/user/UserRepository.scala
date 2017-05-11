@@ -100,19 +100,15 @@ class UserRepositoryImpl @Inject() (val config: Configuration,
     val adminEmail = if (env.mode == Mode.Dev) org.biobank.Global.DefaultUserEmail
                      else config.getString("admin.email").getOrElse(org.biobank.Global.DefaultUserEmail)
 
-    if ((env.mode == Mode.Dev) || (env.mode == Mode.Prod)) {
-      put(ActiveUser(id           = org.biobank.Global.DefaultUserId,
-                     version      = 0L,
-                     timeAdded    = Global.StartOfTime,
-                     timeModified = None,
-                     name         = "Administrator",
-                     email        = adminEmail,
-                     password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
-                     salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
-                     avatarUrl    = None))
-      log.info(s"created default user: $adminEmail")
-    }
-    ()
+    put(ActiveUser(id           = org.biobank.Global.DefaultUserId,
+                   version      = 0L,
+                   timeAdded    = Global.StartOfTime,
+                   timeModified = None,
+                   name         = "Administrator",
+                   email        = adminEmail,
+                   password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
+                   salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
+                   avatarUrl    = None))
   }
 
   createDefaultUser

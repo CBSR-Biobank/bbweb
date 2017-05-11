@@ -84,7 +84,6 @@ class Factory {
                     name         = nameGenerator.next[Role],
                     description  = Some(nameGenerator.next[Role]),
                     userIds      = Set.empty[UserId],
-                    ruleName     = "",
                     parentIds    = Set.empty[AccessItemId],
                     childrenIds  = Set.empty[AccessItemId])
     domainObjects = domainObjects + (classOf[Role] -> role)
@@ -98,7 +97,6 @@ class Factory {
                                 timeModified = None,
                                 name         = nameGenerator.next[Permission],
                                 description  = Some(nameGenerator.next[Permission]),
-                                ruleName     = "",
                                 parentIds    = Set.empty[AccessItemId],
                                 childrenIds  = Set.empty[AccessItemId])
     domainObjects = domainObjects + (classOf[Permission] -> permission)
@@ -111,10 +109,8 @@ class Factory {
                                 timeAdded    = DateTime.now,
                                 timeModified = None,
                                 userIds      = Set.empty[UserId],
-                                allStudies   = false,
-                                allCentres   = false,
-                                studyIds     = Set.empty[StudyId],
-                                centreIds    = Set.empty[CentreId])
+                                studyInfo    = MembershipStudyInfo(false, Set.empty[StudyId]),
+                                centreInfo   = MembershipCentreInfo(false, Set.empty[CentreId]))
     domainObjects = domainObjects + (classOf[Membership] -> membership)
     membership
   }

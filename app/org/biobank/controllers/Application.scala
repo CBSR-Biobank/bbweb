@@ -8,6 +8,7 @@ import org.biobank.service.users.UsersService
 import play.api.Environment
 import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
+import scalaz.Validation.FlatMap._
 
 /**
   * Controller for the main page, and also the about and contact us pages.
@@ -30,11 +31,12 @@ class Application @Inject() (val action:         BbwebAction,
   def aggregateCounts: Action[Unit] =
     action.async(parse.empty) { implicit request =>
       Future {
-        val v = usersService.getCountsByStatus(request.authInfo.userId).map { userCounts =>
-            AggregateCountsDto(studiesService.getStudyCount,
-                               centresService.getCentresCount,
-                               userCounts.total)
-          }
+        val v = for {
+            studyCounts <- studiesService.getStudyCount(request.authInfo.userId)
+            userCounts  <- usersService.getCountsByStatus(request.authInfo.userId)
+          } yield AggregateCountsDto(studyCounts,
+                                     centresService.getCentresCount,
+                                     userCounts.total)
         validationReply(v)
       }
   }

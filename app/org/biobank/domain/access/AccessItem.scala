@@ -40,8 +40,6 @@ sealed trait AccessItem
 
   val accessItemType: AccessItemType
 
-  val ruleName: String
-
   val NameMinLength: Long = 2L
 
   val parentIds: Set[AccessItemId]
@@ -57,7 +55,6 @@ sealed trait AccessItem
         |  name:           $name,
         |  description:    $description,
         |  accessItemType: $accessItemType
-        |  ruleName:       $ruleName,
         |  parentIds:      $parentIds,
         |  childrenIds:    $childrenIds
         |}""".stripMargin
@@ -74,7 +71,6 @@ object AccessItem {
         ConcurrencySafeEntity.toJson(accessItem) ++
         Json.obj("accessItemType" -> accessItem.accessItemType.id,
                  "name"           -> accessItem.name,
-                 "ruleName"       -> accessItem.ruleName,
                  "parentIds"      -> accessItem.parentIds,
                  "childrenIds"    -> accessItem.childrenIds) ++
         JsObject(
@@ -97,6 +93,10 @@ object AccessItem {
   implicit def permissionIdToAccessItemId(permissionId: PermissionId): AccessItemId =
     AccessItemId(permissionId.toString)
 
+  @SuppressWarnings(Array("org.wartremover.warts.ImplicitConversion"))
+  implicit def permissionIdsToAccessItemId(permissionIds: Set[PermissionId]): Set[AccessItemId] =
+    permissionIds.map(p => AccessItemId(p.toString))
+
   implicit val disabledStudyFormat: Reads[Role] = Json.format[Role]
   implicit val permissionFormat: Reads[Permission] = Json.format[Permission]
 
@@ -109,7 +109,6 @@ final case class Role(id:           AccessItemId,
                       name:         String,
                       description:  Option[String],
                       userIds:      Set[UserId],
-                      ruleName:     String,
                       parentIds:    Set[AccessItemId],
                       childrenIds:  Set[AccessItemId])
     extends { val accessItemType: AccessItemType = AccessItem.roleAccessItemType }
@@ -148,13 +147,6 @@ final case class Role(id:           AccessItemId,
     }
   }
 
-  /** Updates the rule name. */
-  def withRuleName(description: Option[String]): Role = {
-    copy(ruleName     = ruleName,
-         version      = version + 1,
-         timeModified = Some(DateTime.now))
-  }
-
   def addParent(role: Role): Role = {
     copy(parentIds    = parentIds + role.id,
          version      = version + 1,
@@ -179,6 +171,20 @@ final case class Role(id:           AccessItemId,
          timeModified = Some(DateTime.now))
   }
 
+
+  override def toString: String =
+    s"""|${this.getClass.getSimpleName}: {
+        |  id:             $id,
+        |  version:        $version,
+        |  timeAdded:      $timeAdded,
+        |  timeModified:   $timeModified,
+        |  name:           $name,
+        |  description:    $description,
+        |  accessItemType: $accessItemType
+        |  userIds:        $userIds,
+        |  parentIds:      $parentIds,
+        |  childrenIds:    $childrenIds
+        |}""".stripMargin
 }
 
 final case class Permission(id:           AccessItemId,
@@ -187,18 +193,10 @@ final case class Permission(id:           AccessItemId,
                             timeModified: Option[DateTime],
                             name:         String,
                             description:  Option[String],
-                            ruleName:     String,
                             parentIds:    Set[AccessItemId],
                             childrenIds:  Set[AccessItemId])
     extends { val accessItemType: AccessItemType = AccessItem.permissionAccessItemType }
     with AccessItem {
-
-  /** Updates the rule name. */
-  def withRuleName(description: Option[String]): Permission = {
-    copy(ruleName     = ruleName,
-         version      = version + 1,
-         timeModified = Some(DateTime.now))
-  }
 
   def addParent(accessItem: AccessItem): Permission = {
     copy(parentIds    = parentIds + accessItem.id,
@@ -229,7 +227,6 @@ object Permission {
   def create(id:           AccessItemId,
              name:         String,
              description:  Option[String],
-             ruleName:     String,
              parentIds:    Set[AccessItemId],
              childrenIds:  Set[AccessItemId]): Permission =
     Permission(id           = id,
@@ -238,7 +235,6 @@ object Permission {
                timeModified = None,
                name         = name,
                description  = description,
-               ruleName     = ruleName,
                parentIds    = parentIds,
                childrenIds  = childrenIds)
 }

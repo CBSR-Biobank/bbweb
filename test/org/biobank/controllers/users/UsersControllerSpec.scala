@@ -1,10 +1,12 @@
 package org.biobank.controllers.users
 
 import com.github.nscala_time.time.Imports._
+import org.biobank.Global
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.user._
 import org.biobank.fixture.ControllerFixture
+import org.biobank.service.users.UserServiceFixtures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.mvc.Cookie
@@ -14,7 +16,7 @@ import play.api.test._
 /**
  * Tests the REST API for [[User]].
  */
-class UsersControllerSpec extends ControllerFixture with JsonHelper {
+class UsersControllerSpec extends ControllerFixture with JsonHelper with UserServiceFixtures {
   import org.biobank.TestUtils._
 
   def uri: String = "/users/"
@@ -26,31 +28,19 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
   def updateUri(user: User, path: String): String = uri(path) + s"/${user.id.id}"
 
   def createRegisteredUserInRepository(plainPassword: String): RegisteredUser = {
-    val salt = passwordHasher.generateSalt
-
-    val user = factory.createRegisteredUser.copy(
-      salt = salt,
-      password = passwordHasher.encrypt(plainPassword, salt))
+    val user = createRegisteredUser(plainPassword)
     userRepository.put(user)
     user
   }
 
   def createActiveUserInRepository(plainPassword: String): ActiveUser = {
-    val salt = passwordHasher.generateSalt
-
-    val user = factory.createActiveUser.copy(
-      salt = salt,
-      password = passwordHasher.encrypt(plainPassword, salt))
+    val user = createActiveUser(plainPassword)
     userRepository.put(user)
     user
   }
 
   def createLockedUserInRepository(plainPassword: String): LockedUser = {
-    val salt = passwordHasher.generateSalt
-
-    val user = factory.createLockedUser.copy(
-      salt = salt,
-      password = passwordHasher.encrypt(plainPassword, salt))
+    val user = createLockedUser(plainPassword)
     userRepository.put(user)
     user
   }
@@ -63,34 +53,43 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
     }
   }
 
-  describe("User REST API") {
+  def jsonUsersFilterOutDefaultUser(jsonList: List[JsObject]): List[JsObject] = {
+    jsonList.filter(json => (json \ "id").as[String] != Global.DefaultUserId.id)
+  }
+
+  def multipleItemsResultWithDefaultUser(uri:         String,
+                                         queryParams: Map[String, String] =  Map.empty,
+                                         offset:      Long,
+                                         total:       Long,
+                                         maybeNext:   Option[Int],
+                                         maybePrev:   Option[Int]) = {
+    val jsonUsers = PagedResultsSpec(this).multipleItemsResult(uri,
+                                                               queryParams,
+                                                               offset,
+                                                               total + 1, // +1 for the default user
+                                                               maybeNext,
+                                                               maybePrev)
+    jsonUsersFilterOutDefaultUser(jsonUsers)
+  }
+
+  describe("Users REST API") {
 
     describe("GET /users") {
 
-      it("list none") {
-        PagedResultsSpec(this).emptyResults(uri)
-      }
-
-      it("list a new user") {
-        val user = factory.createRegisteredUser
-        userRepository.put(user)
+      it("lists the default user") {
         val jsonItem = PagedResultsSpec(this).singleItemResult(uri)
-        compareObj(jsonItem, user)
+        (jsonItem \ "id").as[String] must be (Global.DefaultUserId.id)
       }
 
       it("list multiple users") {
-        val users = (0 until 2).map { x =>
-            factory.createRegisteredUser
-          }.toList
-
+        val users = (0 until 2).map(_ => factory.createRegisteredUser).toList
         users.foreach(userRepository.put)
 
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri       = uri,
-          offset    = 0,
-          total     = users.size.toLong,
-          maybeNext = None,
-          maybePrev = None)
+        val jsonItems = multipleItemsResultWithDefaultUser(uri       = uri,
+                                                           offset    = 0,
+                                                           total     = users.size.toLong,
+                                                           maybeNext = None,
+                                                           maybePrev = None)
         jsonItems must have size users.size.toLong
         compareObjs(jsonItems, users)
       }
@@ -132,13 +131,12 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         users.foreach(userRepository.put)
 
         val expectedUsers = List(users(1), users(2))
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri,
-          queryParams = Map("filter" -> "state::active"),
-          offset = 0,
-          total = expectedUsers.size.toLong,
-          maybeNext = None,
-          maybePrev = None)
+        val jsonItems = multipleItemsResultWithDefaultUser(uri = uri,
+                                                           queryParams = Map("filter" -> "state::active"),
+                                                           offset = 0,
+                                                           total = expectedUsers.size.toLong,
+                                                           maybeNext = None,
+                                                           maybePrev = None)
 
         jsonItems must have size expectedUsers.size.toLong
         compareObjs(jsonItems, expectedUsers)
@@ -152,12 +150,12 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
         val expectedUsers = List(users(1), users(2))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri,
-          queryParams = Map("filter" -> "state::locked"),
-          offset = 0,
-          total = expectedUsers.size.toLong,
-          maybeNext = None,
-          maybePrev = None)
+            uri = uri,
+            queryParams = Map("filter" -> "state::locked"),
+            offset = 0,
+            total = expectedUsers.size.toLong,
+            maybeNext = None,
+            maybePrev = None)
 
         jsonItems must have size expectedUsers.size.toLong
         compareObjs(jsonItems, expectedUsers)
@@ -171,13 +169,12 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
         val sortExprs = Table("sort by", "name", "-name")
         forAll(sortExprs) { sortExpr =>
-          val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-              uri = uri,
-              queryParams = Map("sort" -> sortExpr),
-              offset = 0,
-              total = users.size.toLong,
-              maybeNext = None,
-              maybePrev = None)
+          val jsonItems = multipleItemsResultWithDefaultUser(uri         = uri,
+                                                             queryParams = Map("sort" -> sortExpr),
+                                                             offset      = 0,
+                                                             total       = users.size.toLong,
+                                                             maybeNext   = None,
+                                                             maybePrev   = None)
 
           jsonItems must have size users.size.toLong
           if (sortExpr == sortExprs(0)) {
@@ -200,13 +197,12 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
         val sortExprs = Table("sort by", "email", "-email")
         forAll(sortExprs) { sortExpr =>
-          val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-              uri = uri,
-              queryParams = Map("sort" -> sortExpr),
-              offset = 0,
-              total = users.size.toLong,
-              maybeNext = None,
-              maybePrev = None)
+          val jsonItems = multipleItemsResultWithDefaultUser(uri         = uri,
+                                                             queryParams = Map("sort" -> sortExpr),
+                                                             offset      = 0,
+                                                             total       = users.size.toLong,
+                                                             maybeNext   = None,
+                                                             maybePrev   = None)
 
           jsonItems must have size users.size.toLong
           if (sortExpr == sortExprs(0)) {
@@ -229,13 +225,12 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
         val sortExprs = Table("sort by", "state", "-state")
         forAll(sortExprs) { sortExpr =>
-          val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-              uri = uri,
-              queryParams = Map("sort" -> sortExpr),
-              offset = 0,
-              total = users.size.toLong,
-              maybeNext = None,
-              maybePrev = None)
+          val jsonItems = multipleItemsResultWithDefaultUser(uri = uri,
+                                                             queryParams = Map("sort" -> sortExpr),
+                                                             offset = 0,
+                                                             total = users.size.toLong,
+                                                             maybeNext = None,
+                                                             maybePrev = None)
 
           jsonItems must have size users.size.toLong
           if (sortExpr == sortExprs(0)) {
@@ -257,10 +252,11 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         users.foreach(userRepository.put)
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-          uri = uri,
-          queryParams = Map("sort" -> "email", "limit" -> "1"),
-          total = users.size.toLong,
-          maybeNext = Some(2))
+            uri         = uri,
+            queryParams = Map("filter" -> "email:like:test",
+                              "sort"   -> "email", "limit" -> "1"),
+            total       = users.size.toLong,
+            maybeNext   = Some(2))
 
         compareObj(jsonItem, users(2))
       }
@@ -288,7 +284,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must include ("success")
         checkCounts(json            = (json \ "data").get,
                     registeredCount = 0,
-                    activeCount     = 0,
+                    activeCount     = 1, // +1 for the default user
                     lockedCount     = 0)
       }
 
@@ -305,7 +301,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must include ("success")
         checkCounts(json            = (json \ "data").get,
                     registeredCount = 3,
-                    activeCount     = 2,
+                    activeCount     = 2 + 1, // +1 for the default user
                     lockedCount     = 1)
       }
 
@@ -956,6 +952,27 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         val reply = makeRequest(GET, uri("authenticate"), UNAUTHORIZED, JsNull, token = token)
         reply must be (JsNull)
       }
+    }
+
+    describe("GET /users/studies") {
+
+      // these tests can only test the studies the default user has access to, since the
+      // test framework logs in as the default user.
+      //
+      // Tests for other types of users can be found in AccessServiceSpec.
+
+      it("returns no studies for default user") {
+        // no studies have been added, default user has access to all studies
+        PagedResultsSpec(this).emptyResults(uri("studies"))
+      }
+
+      it("returns a study for the default user") {
+        val study = factory.createEnabledStudy
+        studyRepository.put(study)
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri("studies"))
+        (jsonItem \ "id").as[String] must be (study.id.id)
+      }
+
     }
 
   }

@@ -1,19 +1,16 @@
 package org.biobank.service.access
 
 import org.biobank.fixture._
-import org.biobank.domain.ConcurrencySafeEntity
 import org.biobank.domain.access._
-import org.biobank.domain.user.{User, UserRepository}
-import org.biobank.domain.study.{Study, StudyRepository}
-import org.biobank.domain.centre.{Centre, CentreRepository}
+import org.biobank.domain.user.{ActiveUser, UserRepository}
+import org.biobank.domain.study.{StudyId, StudyRepository}
+import org.biobank.domain.centre.{CentreId, CentreRepository}
 
-class AccessServiceSpec extends TestFixture {
+class AccessServiceSpec extends TestFixture with AccessServiceFixtures {
 
   import org.biobank.TestUtils._
 
   val accessItemRepository = app.injector.instanceOf[AccessItemRepository]
-
-  val accessService = app.injector.instanceOf[AccessService]
 
   val membershipRepository = app.injector.instanceOf[MembershipRepository]
 
@@ -23,33 +20,16 @@ class AccessServiceSpec extends TestFixture {
 
   val centreRepository = app.injector.instanceOf[CentreRepository]
 
-  case class PermissionFixture(user: User, role: Role, permission: Permission)
+  val accessService = app.injector.instanceOf[AccessService]
 
-  case class MembershipFixture(user:       User,
-                               study:      Study,
-                               centre:     Centre) extends {
-    val membership = factory.createMembership.copy(userIds   = Set(user.id),
-                                                   studyIds  = Set(study.id),
-                                                   centreIds = Set(centre.id))
-  }
+  case class PermissionFixtureParam(user: ActiveUser, role: Role, permission: Permission)
 
-  def permissionFixture = PermissionFixture(user       = factory.createActiveUser,
-                                            role       = factory.createRole,
-                                            permission = factory.createPermission)
-
-  def membershipFixture = MembershipFixture(user   = factory.createActiveUser,
-                                            study  = factory.createEnabledStudy,
-                                            centre = factory.createEnabledCentre)
-
-  def addToRepository[T <: ConcurrencySafeEntity[_]](entity: T): Unit = {
-    entity match {
-      case u: User       => userRepository.put(u)
-      case s: Study      => studyRepository.put(s)
-      case c: Centre     => centreRepository.put(c)
-      case i: AccessItem => accessItemRepository.put(i)
-      case m: Membership => membershipRepository.put(m)
-      case _             => fail("invalid entity")
-    }
+  def permissionFixture() = {
+    val f = PermissionFixtureParam(user       = factory.createActiveUser,
+                                   role       = factory.createRole,
+                                   permission = factory.createPermission)
+    Set(f.user, f.role, f.permission).foreach(addToRepository)
+    f
   }
 
   override def beforeEach() {
@@ -58,11 +38,11 @@ class AccessServiceSpec extends TestFixture {
     super.beforeEach()
   }
 
-  describe("The Access Service") {
+  describe("Access Service") {
 
-    describe("for hasPermission") {
+    describe("hasPermission") {
 
-      it("allow access to a user that has permission through a role") {
+      it("allows access to a user that has permission through a role") {
         val f = permissionFixture
         val role = f.role.copy(userIds = Set(f.user.id))
         val permission = f.permission.copy(parentIds = Set(role.id))
@@ -72,7 +52,7 @@ class AccessServiceSpec extends TestFixture {
         accessService.hasPermission(f.user.id, permission.id) mustSucceed { _ must be (true) }
       }
 
-      it("allow access to a user through multiple roles") {
+      it("allows access to a user through multiple roles") {
         val f = permissionFixture
         val parentRole = f.role.copy(userIds = Set(f.user.id))
         val childRole = factory.createRole.copy(parentIds = Set(parentRole.id))
@@ -83,7 +63,7 @@ class AccessServiceSpec extends TestFixture {
         accessService.hasPermission(f.user.id, permission.id) mustSucceed { _ must be (true) }
       }
 
-      it("allow access to a user through role that has multiple permissions") {
+      it("allows access to a user through role that has multiple permissions") {
         val f = permissionFixture
         val role = f.role.copy(userIds = Set(f.user.id))
         val permission1 = f.permission.copy(parentIds = Set(f.role.id))
@@ -94,7 +74,7 @@ class AccessServiceSpec extends TestFixture {
         accessService.hasPermission(f.user.id, permission2.id) mustSucceed { _ must be (true) }
       }
 
-      it("allow access to a users through different roles from a permission") {
+      it("allows access to a user through different roles from a permission") {
         val f = permissionFixture
         val user1 = f.user
         val user2 = factory.createActiveUser
@@ -109,7 +89,7 @@ class AccessServiceSpec extends TestFixture {
         accessService.hasPermission(user2.id, permission.id) mustSucceed { _ must be (true) }
       }
 
-      it("allow access to a users through common role") {
+      it("allows access to a user through common role") {
         val f = permissionFixture
         val user1 = f.user
         val user2 = factory.createActiveUser
@@ -125,7 +105,7 @@ class AccessServiceSpec extends TestFixture {
         accessService.hasPermission(user2.id, permission.id) mustSucceed { _ must be (true) }
       }
 
-      it("forbid access to a user does not have permission") {
+      it("forbids access to a user does not have permission") {
         val f = permissionFixture
         val role = f.role.copy(userIds = Set(f.user.id))
         val permission = f.permission.copy(parentIds = Set(role.id))
@@ -140,68 +120,57 @@ class AccessServiceSpec extends TestFixture {
 
     describe("for isMember") {
 
-      it("allow a user that is a member of a study and centre") {
+      it("allows a user that is a member of a study and centre") {
         val f = membershipFixture
-        Set(f.user, f.study, f.centre, f.membership).foreach(addToRepository)
-
         accessService.isMember(f.user.id, Some(f.study.id), Some(f.centre.id)) mustSucceed { _ must be (true) }
-
         accessService.isMember(f.user.id, Some(f.study.id), None) mustSucceed { _ must be (true) }
-
         accessService.isMember(f.user.id, None, Some(f.centre.id)) mustSucceed { _ must be (true) }
-
         accessService.isMember(f.user.id, None, None) mustSucceed { _ must be (false) }
       }
 
-      it("allow user that is member of all studies and all centres") {
+      it("allows user that is member of all studies and all centres") {
         val f = membershipFixture
-        val membership = factory.createMembership.copy(userIds = Set(f.user.id),
-                                                       allStudies = true,
-                                                       allCentres = true)
+        val membership = f.membership.copy(userIds    = Set(f.user.id),
+                                           studyInfo  = MembershipStudyInfo(true, Set.empty[StudyId]),
+                                           centreInfo = MembershipCentreInfo(true, Set.empty[CentreId]))
 
-        Set(f.user, f.study, f.centre, membership).foreach(addToRepository)
-
+        addToRepository(membership)
         accessService.isMember(f.user.id, Some(f.study.id), Some(f.centre.id)) mustSucceed { _ must be (true) }
-
         accessService.isMember(f.user.id, Some(f.study.id), None) mustSucceed { _ must be (true) }
-
         accessService.isMember(f.user.id, None, Some(f.centre.id)) mustSucceed { _ must be (true) }
-
         accessService.isMember(f.user.id, None, None) mustSucceed { _ must be (false) }
       }
 
-      it("forbid a user that is not a member of a study and centre") {
+      it("forbids a user that is not a member of a study and centre") {
         val f = membershipFixture
-        val membership = factory.createMembership.copy(userIds = Set(f.user.id))
-        Set(f.user, f.study, f.centre, membership).foreach(addToRepository)
+        val membership = f.membership.copy(userIds    = Set(f.user.id),
+                                           studyInfo  = MembershipStudyInfo(false, Set.empty[StudyId]),
+                                           centreInfo = MembershipCentreInfo(false, Set.empty[CentreId]))
+        addToRepository(membership)
 
         accessService.isMember(f.user.id, Some(f.study.id), Some(f.centre.id)) mustSucceed { _ must be (false) }
-
         accessService.isMember(f.user.id, Some(f.study.id), None) mustSucceed { _ must be (false) }
-
         accessService.isMember(f.user.id, None, Some(f.centre.id)) mustSucceed { _ must be (false) }
-
         accessService.isMember(f.user.id, None, None) mustSucceed { _ must be (false) }
       }
 
       it("fails if user not found") {
         val f = membershipFixture
         val membership = factory.createMembership.copy(userIds = Set(f.user.id))
-        Set(f.user, f.study, f.centre, membership).foreach(addToRepository)
+        addToRepository(membership)
 
         val user2 = factory.createActiveUser
         accessService.isMember(user2.id, Some(f.study.id), Some(f.centre.id))
           .mustFail(s"IdNotFound: user id: ${user2.id}")
 
         accessService.isMember(user2.id, Some(f.study.id), None) mustFail s"IdNotFound: user id: ${user2.id}"
-
         accessService.isMember(user2.id, None, Some(f.centre.id)) mustFail s"IdNotFound: user id: ${user2.id}"
       }
 
       it("fails if study not found") {
         val f = membershipFixture
         val membership = factory.createMembership.copy(userIds = Set(f.user.id))
-        Set(f.user, f.study, f.centre, membership).foreach(addToRepository)
+        addToRepository(membership)
 
         val study2 = factory.createEnabledStudy
         accessService.isMember(f.user.id, Some(study2.id), Some(f.centre.id))
@@ -214,7 +183,7 @@ class AccessServiceSpec extends TestFixture {
       it("fails if centre not found") {
         val f = membershipFixture
         val membership = factory.createMembership.copy(userIds = Set(f.user.id))
-        Set(f.user, f.study, f.centre, membership).foreach(addToRepository)
+        addToRepository(membership)
 
         val centre2 = factory.createEnabledCentre
         accessService.isMember(f.user.id, Some(f.study.id), Some(centre2.id))
@@ -225,6 +194,7 @@ class AccessServiceSpec extends TestFixture {
       }
 
     }
+
   }
 
 }

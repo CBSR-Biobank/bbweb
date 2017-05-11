@@ -2,7 +2,10 @@ package org.biobank.domain.access
 
 import com.google.inject.ImplementedBy
 import javax.inject.Singleton
+import org.biobank.Global
 import org.biobank.domain._
+import org.biobank.domain.centre.CentreId
+import org.biobank.domain.study.StudyId
 import org.biobank.domain.user.UserId
 import scalaz.Scalaz._
 
@@ -20,9 +23,7 @@ class MembershipRepositoryImpl
 
   import org.biobank.CommonValidations._
 
-  // only existing users get a doamin, no need to generate a new ID
-  @SuppressWarnings(Array("org.wartremover.warts.Throw"))
-  def nextIdentity: MembershipId = throw new IllegalStateException("should not be used")
+  def nextIdentity: MembershipId = new MembershipId(nextIdentityAsString)
 
   def domainNotFound(id: MembershipId): IdNotFound = IdNotFound(s"user id: $id")
 
@@ -34,4 +35,15 @@ class MembershipRepositoryImpl
     getMap.get(id).toSuccessNel(domainNotFound(id).toString)
   }
 
+  private def init(): Unit = {
+    put(Membership(id           = nextIdentity,
+                   version      = 0L,
+                   timeAdded    = Global.StartOfTime,
+                   timeModified = None,
+                   userIds      = Set(Global.DefaultUserId),
+                   studyInfo    = MembershipStudyInfo(true, Set.empty[StudyId]),
+                   centreInfo   = MembershipCentreInfo(true, Set.empty[CentreId])))
+  }
+
+  init
 }
