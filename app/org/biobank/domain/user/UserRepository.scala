@@ -103,7 +103,7 @@ class UserRepositoryImpl @Inject() (val config: Configuration,
     if ((env.mode == Mode.Dev) || (env.mode == Mode.Prod)) {
       put(ActiveUser(id           = org.biobank.Global.DefaultUserId,
                      version      = 0L,
-                     timeAdded    = new DateTime(Long.MinValue),
+                     timeAdded    = Global.StartOfTime,
                      timeModified = None,
                      name         = "Administrator",
                      email        = adminEmail,

@@ -1,12 +1,11 @@
 package org.biobank
 
-import org.biobank.domain.user._
-
-import javax.inject._
 import akka.stream.Materializer
-import play.filters.gzip.GzipFilter
+import javax.inject._
+import org.biobank.domain.user._
+import org.joda.time.{DateTime, DateTimeZone}
 import play.api.{Configuration}
-//import java.io.File
+import play.filters.gzip.GzipFilter
 
 /**
  * This is a trait so that it can be used by tests also.
@@ -72,5 +71,9 @@ object Global {
   val DefaultUserEmail: String = "admin@admin.com"
 
   val DefaultUserId: UserId = UserId(DefaultUserEmail)
+
+  val StartOfTime: DateTime = new DateTime(1, 1, 1, 0, 0, 0, DateTimeZone.UTC)
+
+  val EndOfTime: DateTime = new DateTime(9999, 1, 1, 0, 0, 0, DateTimeZone.UTC)
 
 }
