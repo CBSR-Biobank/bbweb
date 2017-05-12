@@ -52,7 +52,7 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
 
   def annotationTypeUpdateSharedBehaviour() = {
 
-    s"update a ${entityName} with annotations" in {
+    it(s"update a ${entityName} with annotations") {
       val annotTypeData = createAnnotationsAndTypes
       val addedAnnotations = ListBuffer.empty[Annotation]
 
@@ -84,7 +84,7 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
       }
     }
 
-    s"fail when adding annotation and ${entityName} parent does not have annotation types" in {
+    it(s"fail when adding annotation and ${entityName} parent does not have annotation types") {
       val annotation = factory.createAnnotation
 
       val entity = createEntity(Set.empty, Set(annotation))
@@ -100,7 +100,7 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
       (json \ "message").as[String] must include ("no annotation types")
     }
 
-    "fail when adding annotation and annotation has invalid annotation type id" in {
+    it("fail when adding annotation and annotation has invalid annotation type id") {
       val annotationType = factory.createAnnotationType
       val annotation = factory.createAnnotation.copy(annotationTypeId = nameGenerator.next[Annotation])
 
@@ -117,7 +117,7 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
       (json \ "message").as[String] must include ("annotation(s) do not belong to annotation types")
     }
 
-    "fail when adding annotation with an invalid version" in {
+    it("fail when adding annotation with an invalid version") {
       val annotation = factory.createAnnotation
 
       val entity = createEntity(Set.empty, Set(annotation))
@@ -137,7 +137,7 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
 
   def annotationTypeRemoveSharedBehaviour() = {
 
-    "remove an annotation" in {
+    it("remove an annotation") {
       val annotationType = factory.createAnnotationType
       val annotation = factory.createAnnotation
       val entity = createEntity(Set(annotationType), Set(annotation))
@@ -151,7 +151,7 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
       (json \ "data" \ "annotations").as[List[JsObject]] must have size 0
     }
 
-    "fail when attempting to remove a required annotation" in {
+    it("fail when attempting to remove a required annotation") {
       val annotationType = factory.createAnnotationType.copy(required = true)
       val annotation = factory.createAnnotation
       val entity = createEntity(Set(annotationType), Set(annotation))
@@ -180,7 +180,7 @@ trait StudyAnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with Ha
 
     super.annotationTypeUpdateSharedBehaviour
 
-    "fail when adding an annotation on a non enabled study" in {
+    it("fail when adding an annotation on a non enabled study") {
       val annotationType = factory.createAnnotationType
       val annotation = factory.createAnnotation
       val entity = createEntity(Set(annotationType), Set(annotation))

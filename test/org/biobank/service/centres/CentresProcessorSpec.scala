@@ -1,7 +1,10 @@
 package org.biobank.service.centres
 
+import akka.actor.ActorRef
 import akka.pattern._
+import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
+import org.biobank.domain.centre.CentreRepository
 import org.biobank.service.ServiceValidation
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
@@ -10,13 +13,19 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import scalaz.Scalaz._
 
-class CentresProcessorSpec extends TestFixture {
+case class NamedCentresProcessor @Inject() (@Named("centresProcessor") processor: ActorRef)
+
+class CentresProcessorSpec extends ProcessorTestFixture {
 
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.command.CentreCommands._
   import org.biobank.infrastructure.event.CentreEvents._
 
   val log = LoggerFactory.getLogger(this.getClass)
+
+  val centreRepository = app.injector.instanceOf[CentreRepository]
+
+  val centresProcessor = app.injector.instanceOf[NamedCentresProcessor].processor
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -25,9 +34,9 @@ class CentresProcessorSpec extends TestFixture {
     super.beforeEach()
   }
 
-  "A centres processor" must {
+  describe("A centres processor must") {
 
-    "allow recovery from journal" in {
+    it("allow for recovery from journal") {
       val centre = factory.createDisabledCentre
       val cmd = AddCentreCmd(sessionUserId = nameGenerator.next[String],
                              name          = centre.name,
@@ -44,7 +53,7 @@ class CentresProcessorSpec extends TestFixture {
       centreRepository.getValues.map { c => c.name } must contain (centre.name)
     }
 
-    "allow a snapshot request" in {
+    it("allow a snapshot request") {
       val centres = (1 to 2).map { _ => factory.createDisabledCentre }
       centres.foreach(centreRepository.put)
 
@@ -54,7 +63,7 @@ class CentresProcessorSpec extends TestFixture {
       ()
     }
 
-    "accept a snapshot offer" in {
+    it("accept a snapshot offer") {
       val snapshotFilename = "testfilename"
       val centres = (1 to 2).map { _ => factory.createDisabledCentre }
       val snapshotCentre = centres(1)

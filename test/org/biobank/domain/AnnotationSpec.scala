@@ -8,9 +8,9 @@ class AnnotationSpec extends DomainSpec {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  "can be created" when {
+  describe("can be created") {
 
-    "when a string value is given" in {
+    it("when a string value is given") {
       val annotationTypeId = nameGenerator.next[String]
       val stringValue      = Some(nameGenerator.next[String])
       val numberValue      = None
@@ -31,7 +31,7 @@ class AnnotationSpec extends DomainSpec {
       }
     }
 
-    "when a number value is given" in {
+    it("when a number value is given") {
       val annotationTypeId = nameGenerator.next[String]
       val stringValue      = None
       val numberValue      = Some("1.01")
@@ -52,7 +52,7 @@ class AnnotationSpec extends DomainSpec {
       }
     }
 
-    "when a selected value is given" in {
+    it("when a selected value is given") {
       val annotationTypeId = nameGenerator.next[String]
       val stringValue      = None
       val numberValue      = None
@@ -73,7 +73,7 @@ class AnnotationSpec extends DomainSpec {
       }
     }
 
-    "when number value is empty" in {
+    it("when number value is empty") {
       val annotationTypeId = nameGenerator.next[String]
       val stringValue      = None
       val numberValue      = Some("")
@@ -96,9 +96,9 @@ class AnnotationSpec extends DomainSpec {
 
   }
 
-  "not be created" when {
+  describe("not be created") {
 
-    "annotation type id is empty" in {
+    it("annotation type id is empty") {
       val v = Annotation.create(annotationTypeId = "",
                                 stringValue      = Some(nameGenerator.next[String]),
                                 numberValue      = None,
@@ -106,7 +106,7 @@ class AnnotationSpec extends DomainSpec {
       v mustFail "AnnotationTypeIdRequired"
     }
 
-    "string value is empty" in {
+    it("string value is empty") {
       val v = Annotation.create(annotationTypeId = nameGenerator.next[String],
                                 stringValue      = Some(""),
                                 numberValue      = None,
@@ -114,7 +114,7 @@ class AnnotationSpec extends DomainSpec {
       v mustFail "NonEmptyStringOption"
     }
 
-    "number value is not a number string" in {
+    it("number value is not a number string") {
       val v = Annotation.create(annotationTypeId = nameGenerator.next[String],
                                 stringValue      = None,
                                 numberValue      = Some(nameGenerator.next[String]),
@@ -122,7 +122,7 @@ class AnnotationSpec extends DomainSpec {
       v mustFail "InvalidNumberString"
     }
 
-    "the value in selected value is empty" in {
+    it("the value in selected value is empty") {
       val annotationTypeId = nameGenerator.next[String]
       val v = Annotation.create(annotationTypeId = annotationTypeId,
                                 stringValue      = None,

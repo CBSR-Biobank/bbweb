@@ -6,7 +6,7 @@ import org.biobank.domain.containers.{ ContainerId, ContainerSchemaPositionId }
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 
-class SpecimenSpec extends DomainFreeSpec {
+class SpecimenSpec extends DomainSpec {
   import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
@@ -26,11 +26,11 @@ class SpecimenSpec extends DomainFreeSpec {
                           positionId       = specimen.positionId,
                           amount           = specimen.amount)
 
-  "A usable specimen" - {
+  describe("A usable specimen") {
 
-    "can be created" - {
+    describe("can be created") {
 
-      "when valid arguments are used" in {
+      it("when valid arguments are used") {
         val specimen = factory.createUsableSpecimen.copy(version = 0L)
         createFrom(specimen) mustSucceed { spc =>
           spc must have (
@@ -52,9 +52,9 @@ class SpecimenSpec extends DomainFreeSpec {
 
     }
 
-    "can be updated" - {
+    describe("can be updated") {
 
-      "with a new inventory ID" in {
+      it("with a new inventory ID") {
         val specimen = factory.createUsableSpecimen
         val newInventoryId = nameGenerator.next[Specimen]
 
@@ -65,7 +65,7 @@ class SpecimenSpec extends DomainFreeSpec {
         }
       }
 
-      "with a new amount" in {
+      it("with a new amount") {
         val specimen = factory.createUsableSpecimen
         val newAmount = specimen.amount + 1
 
@@ -76,7 +76,7 @@ class SpecimenSpec extends DomainFreeSpec {
         }
       }
 
-      "with a new origin location" in {
+      it("with a new origin location") {
         val specimen = factory.createUsableSpecimen
         val newLocation = factory.createLocation
 
@@ -87,7 +87,7 @@ class SpecimenSpec extends DomainFreeSpec {
         }
       }
 
-      "with a new location" in {
+      it("with a new location") {
         val specimen = factory.createUsableSpecimen
         val newLocation = factory.createLocation
 
@@ -98,7 +98,7 @@ class SpecimenSpec extends DomainFreeSpec {
         }
       }
 
-      "with a new position" in {
+      it("with a new position") {
         val specimen = factory.createUsableSpecimen
         val newPosition = ContainerSchemaPositionId(nameGenerator.next[Specimen])
 
@@ -110,9 +110,9 @@ class SpecimenSpec extends DomainFreeSpec {
       }
     }
 
-    "can be made unusable" - {
+    describe("can be made unusable") {
 
-      "from a usable specimen" in {
+      it("from a usable specimen") {
         val specimen = factory.createUsableSpecimen
 
         specimen.makeUnusable mustSucceed { s =>
@@ -124,49 +124,49 @@ class SpecimenSpec extends DomainFreeSpec {
 
     }
 
-    "cannot be created" - {
+    describe("cannot be created") {
 
-      "with an empty id" in {
+      it("with an empty id") {
         val specimen = factory.createUsableSpecimen.copy(id = SpecimenId(""))
         createFrom(specimen) mustFail "IdRequired"
       }
 
-      "with an empty inventory id" in {
+      it("with an empty inventory id") {
         val specimen = factory.createUsableSpecimen.copy(inventoryId = "")
         createFrom(specimen) mustFail "InventoryIdInvalid"
       }
 
-      "with an empty specimen spec id" in {
+      it("with an empty specimen spec id") {
         val specimen = factory.createUsableSpecimen.copy(specimenSpecId = "")
         createFrom(specimen) mustFail "SpecimenSpecIdInvalid"
       }
 
-      "with an invalid version number" in {
+      it("with an invalid version number") {
         val specimen = factory.createUsableSpecimen.copy(version = -2)
         createFrom(specimen) mustFail "InvalidVersion"
       }
 
-      "with an empty origin location id" in {
+      it("with an empty origin location id") {
         val specimen = factory.createUsableSpecimen.copy(originLocationId = LocationId(""))
         createFrom(specimen) mustFail "OriginLocationIdInvalid"
       }
 
-      "with an empty location id" in {
+      it("with an empty location id") {
         val specimen = factory.createUsableSpecimen.copy(locationId = LocationId(""))
         createFrom(specimen) mustFail "LocationIdInvalid"
       }
 
-      "with an empty container id" in {
+      it("with an empty container id") {
         val specimen = factory.createUsableSpecimen.copy(containerId = Some(ContainerId("")))
         createFrom(specimen) mustFail "ContainerIdInvalid"
       }
 
-      "with an empty position id" in {
+      it("with an empty position id") {
         val specimen = factory.createUsableSpecimen.copy(positionId = Some(ContainerSchemaPositionId("")))
         createFrom(specimen) mustFail "PositionInvalid"
       }
 
-      "with a negative amount" in {
+      it("with a negative amount") {
         val specimen = factory.createUsableSpecimen.copy(amount           = BigDecimal(-1))
         createFrom(specimen) mustFail "AmountInvalid"
       }
@@ -175,31 +175,31 @@ class SpecimenSpec extends DomainFreeSpec {
 
   }
 
-  "cannot be updated" - {
+  describe("cannot be updated") {
 
-    "with an invalid inventory ID" in {
+    it("with an invalid inventory ID") {
       val specimen = factory.createUsableSpecimen
       specimen.withInventoryId("") mustFail "InventoryIdInvalid"
     }
 
-    "with an invalid amount" in {
+    it("with an invalid amount") {
       val specimen = factory.createUsableSpecimen
       specimen.withAmount(BigDecimal("-1")) mustFail "AmountInvalid"
     }
 
-    "with an invalid origin location" in {
+    it("with an invalid origin location") {
       val specimen = factory.createUsableSpecimen
       val newLocation = factory.createLocation.copy(uniqueId = LocationId(""))
       specimen.withOriginLocation(newLocation) mustFail "LocationIdInvalid"
     }
 
-    "with an invalid location" in {
+    it("with an invalid location") {
       val specimen = factory.createUsableSpecimen
       val newLocation = factory.createLocation.copy(uniqueId = LocationId(""))
       specimen.withLocation(newLocation) mustFail "LocationIdInvalid"
     }
 
-    "with an invalid position" in {
+    it("with an invalid position") {
       val specimen = factory.createUsableSpecimen
       val newPosition = ContainerSchemaPositionId("")
 
@@ -207,9 +207,9 @@ class SpecimenSpec extends DomainFreeSpec {
     }
   }
 
-  "can be made unusable" - {
+  describe("can be made unusable") {
 
-    "from a usable specimen" in {
+    it("from a usable specimen") {
       val specimen = factory.createUsableSpecimen
 
       specimen.makeUnusable mustSucceed { s =>
@@ -221,11 +221,11 @@ class SpecimenSpec extends DomainFreeSpec {
 
   }
 
-  "A usable specimen" - {
+  describe("A usable specimen") {
 
-    "can be made usable" - {
+    describe("can be made usable") {
 
-      "from a unusable specimen" in {
+      it("from a unusable specimen") {
         val specimen = factory.createUnusableSpecimen
 
         specimen.makeUsable mustSucceed { s =>
@@ -239,23 +239,23 @@ class SpecimenSpec extends DomainFreeSpec {
 
   }
 
-  "Specimens can be compared" - {
+  describe("Specimens can be compared") {
 
-    "by specimen ID" in {
+    it("by specimen ID") {
       val (specimen1, specimen2) = (factory.createUsableSpecimen.copy(id = SpecimenId("A")),
                                     factory.createUsableSpecimen.copy(id = SpecimenId("B")))
       Specimen.compareById(specimen1, specimen2) mustBe true
       Specimen.compareById(specimen2, specimen1) mustBe false
     }
 
-    "by inventory ID" in {
+    it("by inventory ID") {
       val (specimen1, specimen2) = (factory.createUsableSpecimen.copy(inventoryId = "A"),
                                     factory.createUsableSpecimen.copy(inventoryId = "B"))
       Specimen.compareByInventoryId(specimen1, specimen2) mustBe true
       Specimen.compareByInventoryId(specimen2, specimen1) mustBe false
     }
 
-    "by time created" in {
+    it("by time created") {
       val (specimen1, specimen2) =
         (factory.createUsableSpecimen.copy(timeCreated = DateTime.now.minusDays(1)),
          factory.createUsableSpecimen.copy(timeCreated = DateTime.now))
@@ -263,7 +263,7 @@ class SpecimenSpec extends DomainFreeSpec {
       Specimen.compareByTimeCreated(specimen2, specimen1) mustBe false
     }
 
-    "by state" in {
+    it("by state") {
       val (specimen1, specimen2) = (factory.createUnusableSpecimen, factory.createUsableSpecimen)
       Specimen.compareByState(specimen1, specimen2) mustBe true
       Specimen.compareByState(specimen2, specimen1) mustBe false

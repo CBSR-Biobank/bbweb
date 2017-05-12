@@ -1,7 +1,11 @@
 package org.biobank.service.participants
 
+import akka.actor.ActorRef
 import akka.pattern._
+import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
+import org.biobank.domain.participants._
+import org.biobank.domain.study.{StudyRepository, CollectionEventTypeRepository}
 import org.biobank.service.ServiceValidation
 import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers._
@@ -11,13 +15,25 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import scalaz.Scalaz._
 
-class CollectionEventsProcessorSpec extends TestFixture {
+case class NamedCollectionEventsProcessor @Inject() (@Named("collectionEventsProcessor") processor: ActorRef)
+
+class CollectionEventsProcessorSpec extends ProcessorTestFixture {
 
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.command.CollectionEventCommands._
   import org.biobank.infrastructure.event.CollectionEventEvents._
 
   val log = LoggerFactory.getLogger(this.getClass)
+
+  val collectionEventsProcessor = app.injector.instanceOf[NamedCollectionEventsProcessor].processor
+
+  val studyRepository = app.injector.instanceOf[StudyRepository]
+
+  val collectionEventTypeRepository = app.injector.instanceOf[CollectionEventTypeRepository]
+
+  val participantRepository = app.injector.instanceOf[ParticipantRepository]
+
+  val collectionEventRepository = app.injector.instanceOf[CollectionEventRepository]
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -28,9 +44,9 @@ class CollectionEventsProcessorSpec extends TestFixture {
     super.beforeEach()
   }
 
-  "A collectionEvents processor" must {
+  describe("A collectionEvents processor must") {
 
-    "allow recovery from journal" in {
+    it("allow recovery from journal") {
       val collectionEvent = factory.createCollectionEvent
       val participant = factory.defaultParticipant
       val study = factory.defaultEnabledStudy
@@ -56,7 +72,7 @@ class CollectionEventsProcessorSpec extends TestFixture {
       collectionEventRepository.getValues.map { s => s.visitNumber } must contain (collectionEvent.visitNumber)
     }
 
-    "allow a snapshot request" in {
+    it("allow a snapshot request") {
       val collectionEvents = (1 to 2).map { _ => factory.createCollectionEvent }
       collectionEvents.foreach(collectionEventRepository.put)
 
@@ -66,7 +82,7 @@ class CollectionEventsProcessorSpec extends TestFixture {
       ()
     }
 
-    "accept a snapshot offer" in {
+    it("accept a snapshot offer") {
       val snapshotFilename = "testfilename"
       val collectionEvents = (1 to 2).map { _ => factory.createCollectionEvent }
       val snapshotCollectionEvent = collectionEvents(1)

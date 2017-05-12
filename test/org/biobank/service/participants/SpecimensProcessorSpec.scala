@@ -1,8 +1,12 @@
 package org.biobank.service.participants
 
+import akka.actor.ActorRef
 import akka.pattern._
+import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
-import org.biobank.domain.participants.SpecimenSpecFixtures
+import org.biobank.domain.study.{StudyRepository, CollectionEventTypeRepository}
+import org.biobank.domain.centre.CentreRepository
+import org.biobank.domain.participants._
 import org.biobank.service.ServiceValidation
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
@@ -12,8 +16,10 @@ import play.api.libs.json._
 import scala.language.reflectiveCalls
 import scalaz.Scalaz._
 
+case class NamedSpecimensProcessor @Inject() (@Named("specimensProcessor") processor: ActorRef)
+
 class SpecimensProcessorSpec
-    extends TestFixture
+    extends ProcessorTestFixture
     with SpecimenSpecFixtures
     with PresistenceQueryEvents {
 
@@ -23,6 +29,20 @@ class SpecimensProcessorSpec
 
   val log = LoggerFactory.getLogger(this.getClass)
 
+  val specimensProcessor = app.injector.instanceOf[NamedSpecimensProcessor].processor
+
+  val studyRepository = app.injector.instanceOf[StudyRepository]
+
+  val centreRepository = app.injector.instanceOf[CentreRepository]
+
+  val collectionEventTypeRepository = app.injector.instanceOf[CollectionEventTypeRepository]
+
+  val participantRepository = app.injector.instanceOf[ParticipantRepository]
+
+  val collectionEventRepository = app.injector.instanceOf[CollectionEventRepository]
+
+  val specimenRepository = app.injector.instanceOf[SpecimenRepository]
+
   val nameGenerator = new NameGenerator(this.getClass)
 
   override def beforeEach() {
@@ -30,9 +50,9 @@ class SpecimensProcessorSpec
     super.beforeEach()
   }
 
-  "A specimens processor" must {
+  describe("A specimens processor must") {
 
-    "allow recovery from journal" ignore {
+    ignore("allow recovery from journal") {
       val f = createEntitiesAndSpecimens
 
       centreRepository.put(f.centre)
@@ -69,7 +89,7 @@ class SpecimensProcessorSpec
       }
     }
 
-    "allow a snapshot request" in {
+    it("allow a snapshot request") {
       val specimens = (1 to 2).map { _ => factory.createUsableSpecimen }
       specimens.foreach(specimenRepository.put)
 
@@ -79,7 +99,7 @@ class SpecimensProcessorSpec
       ()
     }
 
-    "accept a snapshot offer" in {
+    it("accept a snapshot offer") {
       val snapshotFilename = "testfilename"
       val specimens = (1 to 2).map { _ => factory.createUsableSpecimen }
       val snapshotSpecimen = specimens(1)

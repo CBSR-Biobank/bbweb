@@ -1,7 +1,10 @@
 package org.biobank.service.studies
 
+import akka.actor.ActorRef
 import akka.pattern._
+import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
+import org.biobank.domain.study.{StudyRepository, CollectionEventTypeRepository}
 import org.biobank.service.ServiceValidation
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
@@ -10,13 +13,22 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import scalaz.Scalaz._
 
-class CollectionEventTypesProcessorSpec extends TestFixture {
+case class NamedCollectionEventTypeProcessor @Inject() (@Named("collectionEventType") processor: ActorRef)
+
+class CollectionEventTypesProcessorSpec extends ProcessorTestFixture {
 
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.command.CollectionEventTypeCommands._
   import org.biobank.infrastructure.event.CollectionEventTypeEvents._
 
   val log = LoggerFactory.getLogger(this.getClass)
+
+  val collectionEventTypeProcessor =
+    app.injector.instanceOf[NamedCollectionEventTypeProcessor].processor
+
+  val studyRepository = app.injector.instanceOf[StudyRepository]
+
+  val collectionEventTypeRepository = app.injector.instanceOf[CollectionEventTypeRepository]
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -27,9 +39,9 @@ class CollectionEventTypesProcessorSpec extends TestFixture {
     super.beforeEach()
   }
 
-  "A collectionEventTypes processor" must {
+  describe("A collectionEventTypes processor must") {
 
-    "allow recovery from journal" in {
+    it("allow recovery from journal") {
       val collectionEventType = factory.createCollectionEventType
       val study = factory.defaultDisabledStudy
       val cmd = AddCollectionEventTypeCmd(userId      = None,
@@ -51,7 +63,7 @@ class CollectionEventTypesProcessorSpec extends TestFixture {
       collectionEventTypeRepository.getValues.map { cet => cet.name } must contain (collectionEventType.name)
     }
 
-    "allow a snapshot request" in {
+    it("allow a snapshot request") {
       val collectionEventTypes = (1 to 2).map { _ => factory.createCollectionEventType }
       val study = factory.defaultDisabledStudy
       collectionEventTypes.foreach(collectionEventTypeRepository.put)
@@ -63,7 +75,7 @@ class CollectionEventTypesProcessorSpec extends TestFixture {
       ()
     }
 
-    "accept a snapshot offer" in {
+    it("accept a snapshot offer") {
       val snapshotFilename = "testfilename"
       val collectionEventTypes = (1 to 2).map { _ => factory.createCollectionEventType }
       val snapshotCollectionEventType = collectionEventTypes(1)

@@ -1,24 +1,24 @@
 package org.biobank.controllers
 
 import org.slf4j.LoggerFactory
-import org.scalatest.{FreeSpec, MustMatchers }
+import org.scalatest.{FunSpec, MustMatchers }
 import org.scalatest.Inside._
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
-class QueryStringParserSpec extends FreeSpec with MustMatchers {
+class QueryStringParserSpec extends FunSpec with MustMatchers {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  "QueryStringParser" - {
+  describe("QueryStringParser") {
 
-    "must not fail for an empty string" in {
+    it("must not fail for an empty string") {
       val result = QueryStringParser("")
       inside (result) { case Some(expressions) =>
         expressions must have size (0)
       }
     }
 
-    "must parse a single expression" in {
+    it("must parse a single expression") {
       val result = QueryStringParser(s"foo=bar")
       inside (result) { case Some(expressions) =>
         expressions must have size (1)
@@ -26,7 +26,7 @@ class QueryStringParserSpec extends FreeSpec with MustMatchers {
       }
     }
 
-    "must parse a single empty expression" in {
+    it("must parse a single empty expression") {
       val testStrings = Table("expression",
                               s"""foo=''""",
                               s"""foo=""""")
@@ -39,7 +39,7 @@ class QueryStringParserSpec extends FreeSpec with MustMatchers {
       }
     }
 
-    "must parse a multiple expressions" in {
+    it("must parse a multiple expressions") {
       val result = QueryStringParser(s"foo1=bar1&foo2=bar2")
       inside (result) { case Some(expressions) =>
         expressions must have size (2)
@@ -48,7 +48,7 @@ class QueryStringParserSpec extends FreeSpec with MustMatchers {
       }
     }
 
-    "must parse an RSQL expression, including expressions with single and double quotes" in {
+    it("must parse an RSQL expression, including expressions with single and double quotes") {
       val testStrings = Table("expression",
                               "a=foo1::bar1,foo2::bar2",
                               "a='foo1::bar1,foo2::bar2'",
@@ -62,7 +62,7 @@ class QueryStringParserSpec extends FreeSpec with MustMatchers {
       }
     }
 
-    "must parse multiple RSQL expressions" in {
+    it("must parse multiple RSQL expressions") {
       val result = QueryStringParser(s"a=foo1::bar1,foo2::bar2&b=foo3:in:(bar1,bar2)")
       inside (result) { case Some(expressions) =>
         expressions must have size (2)

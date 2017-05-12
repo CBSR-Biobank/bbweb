@@ -244,11 +244,11 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
     (json \ "message").as[String] must include regex("InvalidStatus: study not enabled")
   }
 
-  "Collection Event REST API" when {
+  describe("Collection Event REST API") {
 
-    "GET /participants/cevents/:ceventId" must {
+    describe("GET /participants/cevents/:ceventId") {
 
-      "get a single collection event for a participant" in {
+      it("get a single collection event for a participant") {
         createEntities { (study, participant, ceventType) =>
           val cevents = (0 until 2).map { x =>
               val cevent = factory.createCollectionEvent
@@ -268,7 +268,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "fail when querying for a single collection event ID and ID is invalid" in {
+      it("fail when querying for a single collection event ID and ID is invalid") {
         createEntities { (study, participant, ceventType) =>
           val cevent = factory.createCollectionEvent
 
@@ -284,15 +284,15 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     }
 
-    "GET /participants/cevents/list/{participantId}" must {
+    describe("GET /participants/cevents/list/{participantId}") {
 
-      "list none" in {
+      it("list none") {
         createEntities { (study, participant, ceventType) =>
           PagedResultsSpec(this).emptyResults(listUri(participant.id))
         }
       }
 
-      "list a single collection event" in {
+      it("list a single collection event") {
         createEntities { (study, participant, ceventType) =>
           val cevent = factory.createCollectionEvent
           collectionEventRepository.put(cevent)
@@ -309,7 +309,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "get all collection events for a participant" in {
+      it("get all collection events for a participant") {
         createEntities { (study, participant, ceventType) =>
           val participants = (0 until 2).map { x =>
               val participant = factory.createParticipant.copy(studyId = study.id)
@@ -341,7 +341,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "list collection events sorted by visit number" in {
+      it("list collection events sorted by visit number") {
         createEntities { (study, participant, ceventType) =>
           val cevents = (1 to 4).map { visitNumber =>
               val cevent = factory.createCollectionEvent.copy(
@@ -380,7 +380,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "list collection events sorted by time completed" in {
+      it("list collection events sorted by time completed") {
         createEntities { (study, participant, ceventType) =>
           val cevents = (1 to 4).map { hour =>
               val cevent = factory.createCollectionEvent.copy(
@@ -417,7 +417,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "list the first collection event in a paged query" in {
+      it("list the first collection event in a paged query") {
         createEntities { (study, participant, ceventType) =>
           val cevents = (1 to 4).map { hour =>
               val cevent = factory.createCollectionEvent.copy(
@@ -438,7 +438,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "list the last collection event in a paged query" in {
+      it("list the last collection event in a paged query") {
         createEntities { (study, participant, ceventType) =>
           val cevents = (1 to 4).map { hour =>
               val cevent = factory.createCollectionEvent.copy(
@@ -461,7 +461,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "fail when using an invalid query parameters" in {
+      it("fail when using an invalid query parameters") {
         createEntities { (study, participant, ceventType) =>
           val uri = listUri(participant.id)
 
@@ -474,7 +474,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "fail for invalid participant id" in {
+      it("fail for invalid participant id") {
         val participant = factory.createParticipant
         val json = makeRequest(GET, listUri(participant.id), NOT_FOUND)
 
@@ -485,9 +485,9 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     }
 
-    "GET /participants/cevents/visitNumber/:participantId/:vn" must {
+    describe("GET /participants/cevents/visitNumber/:participantId/:vn") {
 
-      "get a collection event by visit number" in {
+      it("get a collection event by visit number") {
         createEntities { (study, participant, ceventType) =>
           val cevents = (1 to 2).map { visitNumber =>
               val cevent = factory.createCollectionEvent.copy(visitNumber = visitNumber)
@@ -505,7 +505,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "fail for invalid participant id when querying for a collection event with a visit number" in {
+      it("fail for invalid participant id when querying for a collection event with a visit number") {
         val participant = factory.createParticipant
         val cevent = factory.createCollectionEvent
 
@@ -518,7 +518,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         (json \ "message").as[String] must include regex ("IdNotFound.*participant id")
       }
 
-      "fail when querying for a collection event with a visit number" in {
+      it("fail when querying for a collection event with a visit number") {
         createEntities { (study, participant, ceventType) =>
           val cevent = factory.createCollectionEvent
 
@@ -533,9 +533,9 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
       }
     }
 
-    "POST /participants/cevents/:participantId" must {
+    describe("POST /participants/cevents/:participantId") {
 
-      "add a collection event with no annotations" in {
+      it("add a collection event with no annotations") {
         createEntities { (study, participant, ceventType) =>
           val cevent = factory.createCollectionEvent
           cevent.annotations must have size 0
@@ -565,7 +565,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "fail when adding and visit number is already used" in {
+      it("fail when adding and visit number is already used") {
         createEntities { (study, participant, ceventType) =>
           val cevent = factory.createCollectionEvent
 
@@ -584,7 +584,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "add a collection event with annotations" in {
+      it("add a collection event with annotations") {
         createEntities { (study, participant, ceventType) =>
           val annotTypes = createAnnotationsAndTypes
           val annotations = annotTypes.values.toList
@@ -613,7 +613,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "be able to add a collection event with an empty, non required, number annotation" in {
+      it("be able to add a collection event with an empty, non required, number annotation") {
         createEntities { (study, participant, ceventType) =>
           val annotType = factory
             .createAnnotationType(AnnotationValueType.Number, None, Seq.empty)
@@ -639,7 +639,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "fail when adding and participant and collection event type not in same study" in {
+      it("fail when adding and participant and collection event type not in same study") {
         createEntities { (study, participant, ceventType) =>
           val otherStudy = factory.createDisabledStudy
           val otherCeventType = factory.createCollectionEventType.copy(studyId = otherStudy.id)
@@ -662,7 +662,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "fail when adding collection event with duplicate visit number" in {
+      it("fail when adding collection event with duplicate visit number") {
         createEntities { (study, participant, ceventType) =>
           val cevent1 = factory.createCollectionEvent
           collectionEventRepository.put(cevent1)
@@ -681,7 +681,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "fail when missing a required annotation type" in {
+      it("fail when missing a required annotation type") {
         createEntities { (study, participant, ceventType) =>
           val annotType = factory.createAnnotationType.copy(required = true)
 
@@ -702,7 +702,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "fail when using annotations and collection event type has no annotations" in {
+      it("fail when using annotations and collection event type has no annotations") {
         createEntities { (study, participant, ceventType) =>
           val annotation = factory.createAnnotation
             .copy(annotationTypeId = nameGenerator.next[Annotation])
@@ -721,7 +721,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "fail for an annotation with an invalid annotation type id" in {
+      it("fail for an annotation with an invalid annotation type id") {
         createEntities { (study, participant, ceventType) =>
           val annotType = factory.createAnnotationType
 
@@ -746,7 +746,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "fail for more than one annotation with the same annotation type ID" in {
+      it("fail for more than one annotation with the same annotation type ID") {
         createEntities { (study, participant, ceventType) =>
           val annotType = factory.createAnnotationType
 
@@ -773,7 +773,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "not add a collection event on an disabled study" in {
+      it("not add a collection event on an disabled study") {
         createEntities { (study, participant, ceventType) =>
           val disabledStudy = factory.createDisabledStudy.copy(id = study.id)
           val cevent = factory.createCollectionEvent
@@ -782,7 +782,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "not add a collection event on an retired study" in {
+      it("not add a collection event on an retired study") {
         createEntities { (study, participant, ceventType) =>
           val retiredStudy = factory.createRetiredStudy.copy(id = study.id)
           val cevent = factory.createCollectionEvent
@@ -793,9 +793,9 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     }
 
-    "POST /participants/cevents/visitNumber/:ceventId" must {
+    describe("POST /participants/cevents/visitNumber/:ceventId") {
 
-      "update the visit number on a collection event" in {
+      it("update the visit number on a collection event") {
         createEntities { (study, participant, ceventType) =>
           val cevent = factory.createCollectionEvent
           val newVisitNumber = cevent.visitNumber + 1
@@ -826,7 +826,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "fail when updating visit number to one already used" in {
+      it("fail when updating visit number to one already used") {
         createEntities { (study, participant, ceventType) =>
           val cevents = (1 to 2).map { visitNumber =>
               val cevent = factory.createCollectionEvent.copy(visitNumber = visitNumber)
@@ -851,7 +851,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "not update a collection event's visit number on a non enabled study" in {
+      it("not update a collection event's visit number on a non enabled study") {
         createEntities { (study, participant, ceventType) =>
           val newTimeCompleted = 2
 
@@ -873,7 +873,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "fail when updating visit number and collection event ID is invalid" in {
+      it("fail when updating visit number and collection event ID is invalid") {
         createEntities { (study, participant, ceventType) =>
           updateOnInvalidCevent(participant,
                                 ceventType,
@@ -882,7 +882,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "fail when updating visit number with an invalid version" in {
+      it("fail when updating visit number with an invalid version") {
         createEntities { (study, participant, ceventType) =>
           updateWithInvalidVersion(participant,
                                    ceventType,
@@ -893,9 +893,9 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     }
 
-    "POST /participants/cevents/timeCompleted/:ceventId" must {
+    describe("POST /participants/cevents/timeCompleted/:ceventId") {
 
-      "update the time completed on a collection event" in {
+      it("update the time completed on a collection event") {
         createEntities { (study, participant, ceventType) =>
           val cevent = factory.createCollectionEvent
           val newTimeCompleted = cevent.timeCompleted - 2.months
@@ -926,7 +926,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "not update a collection event's time completed on a non enabled study" in {
+      it("not update a collection event's time completed on a non enabled study") {
         createEntities { (study, participant, ceventType) =>
           val newTimeCompleted = DateTime.now - 2.months
 
@@ -948,7 +948,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "fail when updating time completed and collection event ID is invalid" in {
+      it("fail when updating time completed and collection event ID is invalid") {
         createEntities { (study, participant, ceventType) =>
           updateOnInvalidCevent(participant,
                                 ceventType,
@@ -957,7 +957,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "fail when updating time completed with an invalid version" in {
+      it("fail when updating time completed with an invalid version") {
         createEntities { (study, participant, ceventType) =>
           updateWithInvalidVersion(participant,
                                    ceventType,
@@ -968,11 +968,11 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     }
 
-    "POST /participants/cevents/annot/:ceventId" must {
+    describe("POST /participants/cevents/annot/:ceventId") {
 
       annotationTypeUpdateSharedBehaviour
 
-      "fail when adding annotation and collection event ID is invalid" in {
+      it("fail when adding annotation and collection event ID is invalid") {
         createEntities { (study, participant, ceventType) =>
 
           val annotationType = factory.createAnnotationType
@@ -986,15 +986,15 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     }
 
-    "DELETE /participants/cevents/annot/:ceventId/:annotTypeId/:ver" must {
+    describe("DELETE /participants/cevents/annot/:ceventId/:annotTypeId/:ver") {
 
       annotationTypeRemoveSharedBehaviour
 
     }
 
-    "DELETE /participants/cevents/:participantId/:ceventId/:ver" must {
+    describe("DELETE /participants/cevents/:participantId/:ceventId/:ver") {
 
-      "remove a collection event" in {
+      it("remove a collection event") {
         createEntities { (study, participant, ceventType) =>
           val cevent = factory.createCollectionEvent
           collectionEventRepository.put(cevent)
@@ -1009,7 +1009,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "not remove a collection event from an disabled study" in {
+      it("not remove a collection event from an disabled study") {
         createEntities { (study, participant, ceventType) =>
           val disabledStudy = factory.createDisabledStudy.copy(id = study.id)
           val cevent = factory.createCollectionEvent
@@ -1018,7 +1018,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      "not remove a collection event from an retired study" in {
+      it("not remove a collection event from an retired study") {
         createEntities { (study, participant, ceventType) =>
           val retiredStudy = factory.createRetiredStudy.copy(id = study.id)
           val cevent = factory.createCollectionEvent

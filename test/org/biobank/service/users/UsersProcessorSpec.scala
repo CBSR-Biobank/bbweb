@@ -1,7 +1,10 @@
 package org.biobank.service.users
 
+import akka.actor.ActorRef
 import akka.pattern._
+import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
+import org.biobank.domain.user.UserRepository
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.service._
@@ -12,11 +15,17 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import scalaz.Scalaz._
 
-class UsersProcessorSpec extends TestFixture with PresistenceQueryEvents {
+case class NamedUsersProcessor @Inject() (@Named("usersProcessor") processor: ActorRef)
+
+class UsersProcessorSpec extends ProcessorTestFixture with PresistenceQueryEvents {
 
   import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
+
+  val usersProcessor = app.injector.instanceOf[NamedUsersProcessor].processor
+
+  val userRepository = app.injector.instanceOf[UserRepository]
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -25,9 +34,9 @@ class UsersProcessorSpec extends TestFixture with PresistenceQueryEvents {
     super.beforeEach()
   }
 
-  "A user processor" must {
+  describe("A user processor must") {
 
-    "allow recovery from journal" in {
+    it("allow recovery from journal") {
       val user = factory.createActiveUser
       val cmd = RegisterUserCmd(userId    = None,
                                 name      = user.name,
@@ -46,7 +55,7 @@ class UsersProcessorSpec extends TestFixture with PresistenceQueryEvents {
       userRepository.getValues.map { c => c.name } must contain (user.name)
     }
 
-    "allow a snapshot request" in {
+    it("allow a snapshot request") {
       val users = (1 to 2).map { _ => factory.createActiveUser }
       users.foreach(userRepository.put)
 
@@ -56,7 +65,7 @@ class UsersProcessorSpec extends TestFixture with PresistenceQueryEvents {
       ()
     }
 
-    "accept a snapshot offer" in {
+    it("accept a snapshot offer") {
       val snapshotFilename = "testfilename"
       val users = (1 to 2).map { _ => factory.createActiveUser }
       val snapshotUser = users(1)

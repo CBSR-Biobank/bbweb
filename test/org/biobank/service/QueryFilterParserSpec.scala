@@ -1,7 +1,7 @@
 package org.biobank.service
 
 import org.slf4j.LoggerFactory
-import org.scalatest.{FreeSpec, MustMatchers }
+import org.scalatest.{FunSpec, MustMatchers }
 import org.scalatest.OptionValues._
 import org.scalatest.Inside._
 import org.scalatest.matchers.{Matcher, MatchResult}
@@ -61,7 +61,7 @@ trait CustomMatchers {
 
 object CustomMatchers extends CustomMatchers
 
-class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatchers {
+class QueryFilterParserSpec extends FunSpec with MustMatchers with CustomMatchers {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -75,14 +75,14 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
                           NotEqualTo,
                           Equal)
 
-  "QueryFilterParser" - {
+  describe("QueryFilterParser") {
 
-    "must fail for an empty string" in {
+    it("must fail for an empty string") {
       val result = QueryFilterParser(new FilterString(""))
       result mustBe None
     }
 
-    "must parse a single comparison" in {
+    it("must parse a single comparison") {
       forAll(comparisons) { comparator =>
         val selector = "foo"
         val value = "bar"
@@ -91,7 +91,7 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
       }
     }
 
-    "must parse IN and OUT comparisons with arguments" in {
+    it("must parse IN and OUT comparisons with arguments") {
       val comparisons = Table("comparator", In, NotIn)
 
       forAll(comparisons) { comparator =>
@@ -103,7 +103,7 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
       }
     }
 
-    "must parse IN and OUT comparisons with arguments within an OR expression" in {
+    it("must parse IN and OUT comparisons with arguments within an OR expression") {
       val comparisons = Table("comparator", In, NotIn)
 
       forAll(comparisons) { comparator =>
@@ -118,7 +118,7 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
       }
     }
 
-    "must parse IN and OUT comparisons with arguments within an AND expression" in {
+    it("must parse IN and OUT comparisons with arguments within an AND expression") {
       val comparisons = Table("comparator", In, NotIn)
 
       forAll(comparisons) { comparator =>
@@ -133,7 +133,7 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
       }
     }
 
-    "must parse an AND expression" in {
+    it("must parse an AND expression") {
       val selectors = List("foo1", "foo2")
       val values = List("bar1", "bar2")
 
@@ -149,7 +149,7 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
       }
     }
 
-    "must parse an OR expression" in {
+    it("must parse an OR expression") {
       val selectors = List("foo1", "foo2")
       val values = List("bar1", "bar2")
 
@@ -165,7 +165,7 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
       }
     }
 
-    "must parse an AND expression within an OR expresssion" in {
+    it("must parse an AND expression within an OR expresssion") {
       val stringToParse = s"(foo1::bar1;foo2::bar2),(foo3::bar3;foo4::bar4)"
       val result = QueryFilterParser(new FilterString(stringToParse))
       //log.info(s"-------> $result")
@@ -183,7 +183,7 @@ class QueryFilterParserSpec extends FreeSpec with MustMatchers with CustomMatche
       }
     }
 
-    "must parse an OR expression within an AND expresssion" in {
+    it("must parse an OR expression within an AND expresssion") {
       val stringToParse = s"(foo1::bar1,foo2::bar2);(foo3::bar3,foo4::bar4)"
       val result = QueryFilterParser(new FilterString(stringToParse))
       inside (result.value) { case AndExpression(expressions) =>

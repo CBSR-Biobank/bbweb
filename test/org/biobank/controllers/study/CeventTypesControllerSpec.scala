@@ -145,11 +145,11 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
     ()
   }
 
-  "Collection Event Type REST API" when {
+  describe("Collection Event Type REST API") {
 
-    "GET /studies/cetypes" must {
+    describe("GET /studies/cetypes") {
 
-      "list none" in {
+      it("list none") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -159,7 +159,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         jsonList must have size 0
       }
 
-      "list a single collection event type" in {
+      it("list a single collection event type") {
         createEntities { (study, cet) =>
           val json = makeRequest(GET, uri(study))
 
@@ -170,7 +170,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "get a single collection event type" in {
+      it("get a single collection event type") {
         createEntities { (study, cet) =>
           val json = makeRequest(GET, uriWithQuery(study, cet))
 
@@ -180,7 +180,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "list multiple collection event types" in {
+      it("list multiple collection event types") {
         createEntities { (study, cet) =>
           val cet2 = factory.createCollectionEventType.copy(
               specimenSpecs   = Set(factory.createCollectionSpecimenSpec),
@@ -204,7 +204,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "fail for invalid study id" in {
+      it("fail for invalid study id") {
         val study = factory.createDisabledStudy
 
         val json = makeRequest(GET, uri(study), NOT_FOUND)
@@ -214,7 +214,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include regex("IdNotFound.*study")
       }
 
-      "fail for an invalid study ID when using a collection event type id" in {
+      it("fail for an invalid study ID when using a collection event type id") {
         val study = factory.createDisabledStudy
         val cet = factory.createCollectionEventType
 
@@ -225,7 +225,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include regex("IdNotFound.*study")
       }
 
-      "fail for an invalid collection event type id" in {
+      it("fail for an invalid collection event type id") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -240,9 +240,9 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "POST /studies/cetypes/:studyId" must {
+    describe("POST /studies/cetypes/:studyId") {
 
-      "add a collection event type" in {
+      it("add a collection event type") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -269,7 +269,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "allow adding a collection event type with same name on two different studies" in {
+      it("allow adding a collection event type with same name on two different studies") {
         val cet = factory.createCollectionEventType
 
         List(factory.createDisabledStudy, factory.createDisabledStudy) foreach { study =>
@@ -297,15 +297,15 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "not add a collection event type to an enabled study" in {
+      it("not add a collection event type to an enabled study") {
         addOnNonDisabledStudy(factory.createEnabledStudy)
       }
 
-      "not add a collection event type to an retired study" in {
+      it("not add a collection event type to an retired study") {
         addOnNonDisabledStudy(factory.createRetiredStudy)
       }
 
-      "fail when adding and study IDs is invalid" in {
+      it("fail when adding and study IDs is invalid") {
         val study = factory.createDisabledStudy
         val cet = factory.createCollectionEventType
 
@@ -316,7 +316,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include regex ("IdNotFound.*study")
       }
 
-      "fail when adding a collection event type with a duplicate name to the same study" in {
+      it("fail when adding a collection event type with a duplicate name to the same study") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -333,9 +333,9 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "DELETE /studies/cetypes/:studyId/:id/:ver" must {
+    describe("DELETE /studies/cetypes/:studyId/:id/:ver") {
 
-      "remove a collection event type" in {
+      it("remove a collection event type") {
         createEntities { (study, cet) =>
           val json = makeRequest(DELETE, uri(study, cet, cet.version))
 
@@ -345,23 +345,23 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "not remove a collection event type on an enabled study" in {
+      it("not remove a collection event type on an enabled study") {
         removeOnNonDisabledStudy(factory.createEnabledStudy)
       }
 
-      "not remove a collection event type on an retired study" in {
+      it("not remove a collection event type on an retired study") {
         removeOnNonDisabledStudy(factory.createRetiredStudy)
       }
 
-      "not remove a collection event type that is in use" ignore {
+      ignore("not remove a collection event type that is in use") {
         fail("write this test")
       }
 
     }
 
-    "POST /studies/cetypes/name/:id" must {
+    describe("POST /studies/cetypes/name/:id") {
 
-      "update a collection event type's name" in {
+      it("update a collection event type's name") {
         createEntities { (study, cet) =>
           val newName = nameGenerator.next[CollectionEventType]
           val json = makeRequest(POST, uri(cet, "name"),
@@ -392,7 +392,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "allow updating to the same name on collection event types of two different studies" in {
+      it("allow updating to the same name on collection event types of two different studies") {
         val studyCetTuples = (1 to 2).map { _ =>
             val study = factory.createDisabledStudy
             studyRepository.put(study)
@@ -433,7 +433,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "fail when updating name to one already used by another collection event type in the same study" in {
+      it("fail when updating name to one already used by another collection event type in the same study") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -457,30 +457,30 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include ("collection event type with name already exists")
       }
 
-      "not update a collection event type's name on an enabled study" in {
+      it("not update a collection event type's name on an enabled study") {
         updateOnNonDisabledStudy(factory.createEnabledStudy,
                                  "name",
                                  Json.obj("name" -> nameGenerator.next[CollectionEventType]))
       }
 
-      "not update a collection event type's name on an retired study" in {
+      it("not update a collection event type's name on an retired study") {
         updateOnNonDisabledStudy(factory.createRetiredStudy,
                                  "name",
                                  Json.obj("name" -> nameGenerator.next[CollectionEventType]))
       }
 
-      "fail when updating name and collection event type ID is invalid" in {
+      it("fail when updating name and collection event type ID is invalid") {
         updateOnInvalidCeventType("name", Json.obj("name" -> nameGenerator.next[CollectionEventType]))
       }
 
-      "fail when updating name with an invalid version" in {
+      it("fail when updating name with an invalid version") {
         updateWithInvalidVersion("name", Json.obj("name" -> nameGenerator.next[CollectionEventType]))
       }
     }
 
-    "POST /studies/cetypes/description/:id" must {
+    describe("POST /studies/cetypes/description/:id") {
 
-      "update a collection event type's name" in {
+      it("update a collection event type's name") {
         createEntities { (study, cet) =>
           val newDescription = Some(nameGenerator.next[CollectionEventType])
           val json = makeRequest(POST, uri(cet, "description"),
@@ -511,33 +511,33 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "not update a collection event type's description on an enabled study" in {
+      it("not update a collection event type's description on an enabled study") {
         updateOnNonDisabledStudy(factory.createEnabledStudy,
                                  "description",
                                  Json.obj("description" -> nameGenerator.next[CollectionEventType]))
       }
 
-      "not update a collection event type's description on an retired study" in {
+      it("not update a collection event type's description on an retired study") {
         updateOnNonDisabledStudy(factory.createRetiredStudy,
                                  "description",
                                  Json.obj("description" -> nameGenerator.next[CollectionEventType]))
       }
 
-      "fail when updating description and collection event type ID is invalid" in {
+      it("fail when updating description and collection event type ID is invalid") {
         updateOnInvalidCeventType("description",
                                   Json.obj("description" -> nameGenerator.next[CollectionEventType]))
 
       }
 
-      "fail when updating description with an invalid version" in {
+      it("fail when updating description with an invalid version") {
         updateWithInvalidVersion("description",
                                  Json.obj("description" -> nameGenerator.next[CollectionEventType]))
       }
     }
 
-    "POST /studies/cetypes/recurring/:id" must {
+    describe("POST /studies/cetypes/recurring/:id") {
 
-      "update a collection event type's name" in {
+      it("update a collection event type's name") {
         createEntities { (study, cet) =>
           var version = cet.version
 
@@ -573,30 +573,30 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "not update a collection event type's recurring on an enabled study" in {
+      it("not update a collection event type's recurring on an enabled study") {
         updateOnNonDisabledStudy(factory.createEnabledStudy,
                                  "recurring",
                                  Json.obj("recurring" -> false))
       }
 
-      "not update a collection event type's recurring on an retired study" in {
+      it("not update a collection event type's recurring on an retired study") {
         updateOnNonDisabledStudy(factory.createRetiredStudy,
                                  "recurring",
                                  Json.obj("recurring" -> false))
       }
 
-      "fail when updating recurring and collection event type ID is invalid" in {
+      it("fail when updating recurring and collection event type ID is invalid") {
         updateOnInvalidCeventType("recurring", Json.obj("recurring" -> false))
       }
 
-      "fail when updating recurring with an invalid version" in {
+      it("fail when updating recurring with an invalid version") {
         updateWithInvalidVersion("recurring", Json.obj("recurring" -> false))
       }
     }
 
-    "POST /studies/cetypes/annottypes/:id" must {
+    describe("POST /studies/cetypes/annottypes/:id") {
 
-      "add an annotation type" in {
+      it("add an annotation type") {
         createEntities { (study, cet) =>
           val annotType = factory.createAnnotationType
 
@@ -642,29 +642,29 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "fail when adding annotation type and collection event type ID does not exist" in {
+      it("fail when adding annotation type and collection event type ID does not exist") {
         updateOnInvalidCeventType("annottype",
                                   annotationTypeToJsonNoId(factory.createAnnotationType))
       }
 
-      "fail when adding annotation type and an invalid version" in {
+      it("fail when adding annotation type and an invalid version") {
         updateWithInvalidVersion("annottype",
                                   annotationTypeToJsonNoId(factory.createAnnotationType))
       }
 
-      "not add an annotation type on an enabled study" in {
+      it("not add an annotation type on an enabled study") {
         updateOnNonDisabledStudy(factory.createEnabledStudy,
                                  "annottype",
                                   annotationTypeToJsonNoId(factory.createAnnotationType))
       }
 
-      "not add an annotation type on an retired study" in {
+      it("not add an annotation type on an retired study") {
         updateOnNonDisabledStudy(factory.createRetiredStudy,
                                  "annottype",
                                   annotationTypeToJsonNoId(factory.createAnnotationType))
       }
 
-      "fail when adding annotation type and collection event type ID is invalid" in {
+      it("fail when adding annotation type and collection event type ID is invalid") {
         updateOnInvalidCeventType("annottype",
                                   annotationTypeToJsonNoId(factory.createAnnotationType))
       }
@@ -672,9 +672,9 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
   }
 
-  "DELETE /studies/cetypes/annottype/:id/:ver/:uniqueId" must {
+  describe("DELETE /studies/cetypes/annottype/:id/:ver/:uniqueId") {
 
-      "remove an annotation type" in {
+      it("remove an annotation type") {
         createEntities { (study, cet) =>
           val annotationType = factory.createAnnotationType
           collectionEventTypeRepository.put(cet.copy(annotationTypes = Set(annotationType)))
@@ -707,7 +707,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "fail when removing annotation type and an invalid version" in {
+      it("fail when removing annotation type and an invalid version") {
         createEntities { (study, cet) =>
           val annotationType = factory.createAnnotationType
           collectionEventTypeRepository.put(cet.copy(annotationTypes = Set(annotationType)))
@@ -727,7 +727,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "fail when removing annotation type and study ID does not exist" in {
+      it("fail when removing annotation type and study ID does not exist") {
         val studyId = nameGenerator.next[Study]
         val cetId = nameGenerator.next[CollectionEventType]
 
@@ -740,7 +740,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include regex ("IdNotFound.*study")
       }
 
-      "fail when removing annotation type and collection event type ID does not exist" in {
+      it("fail when removing annotation type and collection event type ID does not exist") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
         val cetId = nameGenerator.next[CollectionEventType]
@@ -754,7 +754,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include regex ("IdNotFound.*collection event type")
       }
 
-      "fail when removing an annotation type that does not exist" in {
+      it("fail when removing an annotation type that does not exist") {
         createEntities { (study, cet) =>
           val badUniqueId = nameGenerator.next[Study]
           val annotationType = factory.createAnnotationType
@@ -774,7 +774,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "fail when removing an annotation type on a non disabled study" in {
+      it("fail when removing an annotation type on a non disabled study") {
         List(factory.createEnabledStudy, factory.createRetiredStudy).foreach { study =>
           studyRepository.put(study)
 
@@ -796,9 +796,9 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
   }
 
-  "POST /studies/cetypes/spcspec/:id" must {
+  describe("POST /studies/cetypes/spcspec/:id") {
 
-      "add a specimen spec" in {
+      it("add a specimen spec") {
         createEntities { (study, cet) =>
           val spec = factory.createCollectionSpecimenSpec
 
@@ -844,37 +844,37 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "fail when adding specimen spec and collection event type ID does not exist" in {
+      it("fail when adding specimen spec and collection event type ID does not exist") {
         updateOnInvalidCeventType("spcspec",
                                   collectionSpecimenSpecToJsonNoId(factory.createCollectionSpecimenSpec))
       }
 
-      "fail when adding specimen spec and an invalid version" in {
+      it("fail when adding specimen spec and an invalid version") {
         updateWithInvalidVersion("spcspec",
                                   collectionSpecimenSpecToJsonNoId(factory.createCollectionSpecimenSpec))
       }
 
-      "not add an specimen spec on an enabled study" in {
+      it("not add an specimen spec on an enabled study") {
         updateOnNonDisabledStudy(factory.createEnabledStudy,
                                  "spcspec",
                                   collectionSpecimenSpecToJsonNoId(factory.createCollectionSpecimenSpec))
       }
 
-      "not add a specimen spec on an retired study" in {
+      it("not add a specimen spec on an retired study") {
         updateOnNonDisabledStudy(factory.createRetiredStudy,
                                  "spcspec",
                                   collectionSpecimenSpecToJsonNoId(factory.createCollectionSpecimenSpec))
       }
 
-      "fail when adding specimen spec and collection event type ID is invalid" in {
+      it("fail when adding specimen spec and collection event type ID is invalid") {
         updateOnInvalidCeventType("spcspec",
                                   collectionSpecimenSpecToJsonNoId(factory.createCollectionSpecimenSpec))
       }
   }
 
-  "DELETE /studies/cetypes/spcspec/:id/:ver/:uniqueId" must {
+  describe("DELETE /studies/cetypes/spcspec/:id/:ver/:uniqueId") {
 
-      "remove an specimen spec" in {
+      it("remove an specimen spec") {
         createEntities { (study, cet) =>
           val specimenSpec = factory.createCollectionSpecimenSpec
           collectionEventTypeRepository.put(cet.copy(specimenSpecs = Set(specimenSpec)))
@@ -907,7 +907,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "fail when removing specimen spec and an invalid version" in {
+      it("fail when removing specimen spec and an invalid version") {
         createEntities { (study, cet) =>
           val specimenSpec = factory.createCollectionSpecimenSpec
           collectionEventTypeRepository.put(cet.copy(specimenSpecs = Set(specimenSpec)))
@@ -927,7 +927,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "fail when removing specimen spec and study ID does not exist" in {
+      it("fail when removing specimen spec and study ID does not exist") {
         val studyId = nameGenerator.next[Study]
         val cetId = nameGenerator.next[CollectionEventType]
 
@@ -940,7 +940,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include regex ("IdNotFound.*study")
       }
 
-      "fail when removing specimen spec and collection event type ID does not exist" in {
+      it("fail when removing specimen spec and collection event type ID does not exist") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
         val cetId = nameGenerator.next[CollectionEventType]
@@ -954,7 +954,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include regex ("IdNotFound.*collection event type")
       }
 
-      "fail when removing an specimen spec that does not exist" in {
+      it("fail when removing an specimen spec that does not exist") {
         createEntities { (study, cet) =>
           val badUniqueId = nameGenerator.next[Study]
           val specimenSpec = factory.createCollectionSpecimenSpec
@@ -974,7 +974,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "fail when removing an specimen spec on a non disabled study" in {
+      it("fail when removing an specimen spec on a non disabled study") {
         List(factory.createEnabledStudy, factory.createRetiredStudy).foreach { study =>
           studyRepository.put(study)
 

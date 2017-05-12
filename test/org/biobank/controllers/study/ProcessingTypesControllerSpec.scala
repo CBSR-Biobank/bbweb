@@ -94,10 +94,10 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
     ()
   }
 
-  "Processing Type REST API" when {
+  describe("Processing Type REST API") {
 
-    "GET /studies/proctypes" must {
-      "list none" in {
+    describe("GET /studies/proctypes") {
+      it("list none") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -107,7 +107,7 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
         jsonList must have size 0
       }
 
-      "list a single processing type" in {
+      it("list a single processing type") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -121,7 +121,7 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
         compareObj(jsonList(0), procType)
       }
 
-      "get a single processing type" in {
+      it("get a single processing type") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -134,7 +134,7 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
         compareObj(jsonObj, procType)
       }
 
-      "list multiple processing types" in {
+      it("list multiple processing types") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -151,7 +151,7 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
         ()
       }
 
-      "fail for an invalid study ID" in {
+      it("fail for an invalid study ID") {
         val study = factory.createDisabledStudy
 
         val json = makeRequest(GET, uri(study), NOT_FOUND)
@@ -161,7 +161,7 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include regex ("IdNotFound.*study")
       }
 
-      "fail for an invalid study ID when using an processing type id" in {
+      it("fail for an invalid study ID when using an processing type id") {
         val study = factory.createDisabledStudy
         val procType = factory.createProcessingType
 
@@ -172,7 +172,7 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include regex ("IdNotFound.*study")
       }
 
-      "fail for an invalid processing type id" in {
+      it("fail for an invalid processing type id") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -186,9 +186,9 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    "POST /studies/proctypes" must {
+    describe("POST /studies/proctypes") {
 
-      "add a processing type" in {
+      it("add a processing type") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -201,15 +201,15 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must include ("success")
       }
 
-      "not add a processing type to an enabled study" in {
+      it("not add a processing type to an enabled study") {
         addOnNonDisabledStudy(factory.createEnabledStudy)
       }
 
-      "not add a processing type to an retired study" in {
+      it("not add a processing type to an retired study") {
         addOnNonDisabledStudy(factory.createRetiredStudy)
       }
 
-      "allow adding a processing type with same name on two different studies" in {
+      it("allow adding a processing type with same name on two different studies") {
         val commonName = nameGenerator.next[ProcessingType]
 
         (0 until 2).foreach { x =>
@@ -225,8 +225,8 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    "PUT /studies/proctypes" must {
-      "update a processing type" in {
+    describe("PUT /studies/proctypes") {
+      it("update a processing type") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -246,15 +246,15 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must include ("success")
       }
 
-      "not update a processing type on an enabled study" in {
+      it("not update a processing type on an enabled study") {
         updateOnNonDisabledStudy(factory.createEnabledStudy)
       }
 
-      "not update a processing type on an retired study" in {
+      it("not update a processing type on an retired study") {
         updateOnNonDisabledStudy(factory.createRetiredStudy)
       }
 
-      "allow a updating processing types on two different studies to same name" in {
+      it("allow a updating processing types on two different studies to same name") {
         val commonName = nameGenerator.next[ProcessingType]
 
         (0 until 2).map { study =>
@@ -271,8 +271,8 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    "DELETE /studies/proctypes/:studyId/:id/:ver" must {
-      "remove a processing type" in {
+    describe("DELETE /studies/proctypes/:studyId/:id/:ver") {
+      it("remove a processing type") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -284,11 +284,11 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must include ("success")
       }
 
-      "not remove a processing type on an enabled study" in {
+      it("not remove a processing type on an enabled study") {
         removeOnNonDisabledStudy(factory.createEnabledStudy)
       }
 
-      "not remove a processing type on an retired study" in {
+      it("not remove a processing type on an retired study") {
         removeOnNonDisabledStudy(factory.createRetiredStudy)
       }
     }

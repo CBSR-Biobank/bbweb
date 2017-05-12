@@ -1,8 +1,13 @@
 package org.biobank.service.centres
 
+import akka.actor.ActorRef
 import akka.pattern._
+import javax.inject.{ Inject, Named }
+import org.biobank.Global
 import org.biobank.domain.centre.ShipmentSpecFixtures
 import org.biobank.fixture._
+import org.biobank.domain.study.StudyRepository
+import org.biobank.domain.centre.{CentreRepository, ShipmentRepository}
 import org.biobank.service.ServiceValidation
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
@@ -12,7 +17,9 @@ import play.api.libs.json._
 import scalaz.Scalaz._
 import scala.language.reflectiveCalls
 
-class ShipmentsProcessorSpec extends TestFixture with ShipmentSpecFixtures {
+final case class NamedShipmentsProcessor @Inject() (@Named("shipmentsProcessor") processor: ActorRef)
+
+class ShipmentsProcessorSpec extends ProcessorTestFixture with ShipmentSpecFixtures {
 
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.command.ShipmentCommands._
@@ -20,9 +27,15 @@ class ShipmentsProcessorSpec extends TestFixture with ShipmentSpecFixtures {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  val nameGenerator = new NameGenerator(this.getClass)
+  val shipmentsProcessor = app.injector.instanceOf[NamedShipmentsProcessor].processor
 
-  val persistenceId = "shipments-processor-id"
+  val studyRepository = app.injector.instanceOf[StudyRepository]
+
+  val centreRepository = app.injector.instanceOf[CentreRepository]
+
+  val shipmentRepository = app.injector.instanceOf[ShipmentRepository]
+
+  val nameGenerator = new NameGenerator(this.getClass)
 
   override def beforeEach() {
     studyRepository.removeAll
@@ -42,11 +55,11 @@ class ShipmentsProcessorSpec extends TestFixture with ShipmentSpecFixtures {
     f
   }
 
-  "A shipments processor" must {
+  describe("A shipments processor must") {
 
-    "allow recovery from journal" in {
+    it("111 allow recovery from journal") {
       val f = createdShipmentFixture
-      val cmd = AddShipmentCmd(sessionUserId  = "",
+      val cmd = AddShipmentCmd(sessionUserId  = Global.DefaultUserId.id,
                                courierName    = f.shipment.courierName,
                                trackingNumber = f.shipment.trackingNumber,
                                fromLocationId = f.shipment.fromLocationId.id,
@@ -64,7 +77,7 @@ class ShipmentsProcessorSpec extends TestFixture with ShipmentSpecFixtures {
       shipmentRepository.getValues.map { s => s.courierName } must contain (f.shipment.courierName)
     }
 
-    "allow a snapshot request" in {
+    it("allow a snapshot request") {
       val f = createdShipmentFixture
       shipmentRepository.put(f.shipment)
 
@@ -74,7 +87,7 @@ class ShipmentsProcessorSpec extends TestFixture with ShipmentSpecFixtures {
       ()
     }
 
-    "accept a snapshot offer" in {
+    it("accept a snapshot offer") {
       val f = createdShipmentsFixture(2)
       val snapshotFilename = "testfilename"
       val snapshotShipment = f.shipmentMap.values.toList(1)

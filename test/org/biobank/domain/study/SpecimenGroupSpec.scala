@@ -15,9 +15,9 @@ class SpecimenGroupSpec extends DomainSpec {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  "A specimen group" can {
+  describe("A specimen group can") {
 
-    "be created" in {
+    it("be created") {
       val studyId = StudyId(nameGenerator.next[SpecimenGroup])
       val id = SpecimenGroupId(nameGenerator.next[SpecimenGroup])
       val version = 0L
@@ -54,7 +54,7 @@ class SpecimenGroupSpec extends DomainSpec {
       }
     }
 
-    "be updated" in {
+    it("be updated") {
       val specimenGroup = factory.createSpecimenGroup
 
       val name = nameGenerator.next[SpecimenGroup]
@@ -94,9 +94,9 @@ class SpecimenGroupSpec extends DomainSpec {
 
   }
 
-  "A specimen group" must {
+  describe("A specimen group") {
 
-    "not be created with an empty study id" in {
+    it("not be created with an empty study id") {
       val studyId = StudyId("")
       val id = SpecimenGroupId(nameGenerator.next[SpecimenGroup])
       val version = 0L
@@ -116,7 +116,7 @@ class SpecimenGroupSpec extends DomainSpec {
       )
     }
 
-    "not be created with an empty id" in {
+    it("not be created with an empty id") {
       val studyId = StudyId(nameGenerator.next[SpecimenGroup])
       val id = SpecimenGroupId("")
       val version = 0L
@@ -136,7 +136,7 @@ class SpecimenGroupSpec extends DomainSpec {
       )
     }
 
-    "not be created with an invalid version" in {
+    it("not be created with an invalid version") {
       val studyId = StudyId(nameGenerator.next[SpecimenGroup])
       val id = SpecimenGroupId(nameGenerator.next[SpecimenGroup])
       val version = -2L
@@ -154,7 +154,7 @@ class SpecimenGroupSpec extends DomainSpec {
       validation mustFail "InvalidVersion"
     }
 
-    "not be created with an null or empty name" in {
+    it("not be created with an null or empty name") {
       val studyId = StudyId(nameGenerator.next[SpecimenGroup])
       val id = SpecimenGroupId(nameGenerator.next[SpecimenGroup])
       val version = 0L
@@ -182,7 +182,7 @@ class SpecimenGroupSpec extends DomainSpec {
       )
     }
 
-    "not be created with an empty description option" in {
+    it("not be created with an empty description option") {
       val studyId = StudyId(nameGenerator.next[SpecimenGroup])
       val id = SpecimenGroupId(nameGenerator.next[SpecimenGroup])
       val version = 0L
@@ -209,7 +209,7 @@ class SpecimenGroupSpec extends DomainSpec {
       )
     }
 
-    "not be created with null or empty units" in {
+    it("not be created with null or empty units") {
       val studyId = StudyId(nameGenerator.next[SpecimenGroup])
       val id = SpecimenGroupId(nameGenerator.next[SpecimenGroup])
       val version = 0L
@@ -228,7 +228,7 @@ class SpecimenGroupSpec extends DomainSpec {
       )
     }
 
-    "have more than one validation fail" in {
+    it("have more than one validation fail") {
       val studyId = StudyId(nameGenerator.next[SpecimenGroup])
       val id = SpecimenGroupId(nameGenerator.next[SpecimenGroup])
       val version = -2L

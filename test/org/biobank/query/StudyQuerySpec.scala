@@ -11,9 +11,9 @@ class StudyQuerySp extends WordSpecLike with MustMatchers {
   //
   //  vaameGenerator = new NameGenerator[this.getClass]
   //
-  //  "Study" can {
+  //  describe("Study") {
   //
-  //    "be added" in {
+  //    it("be added") {
   //      running(FakeApplication(additionalConfiguration = inMemoryDatabase())) {
   //        val id = UUID.randomUUID.toString
   //        val version = 0L

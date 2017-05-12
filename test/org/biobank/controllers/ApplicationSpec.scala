@@ -8,20 +8,20 @@ import play.api.test.Helpers._
 
 class ApplicationSpec extends ControllerFixture {
 
-  "Application" must {
+  describe("Application") {
 
-    "send 404 on a bad request" in {
+    it("send 404 on a bad request") {
       val result = route(app, FakeRequest(GET, "/xyz")).get
       status(result) mustEqual NOT_FOUND
     }
 
-    "return results for index" in {
+    it("return results for index") {
       val result = route(app, FakeRequest(GET, "/")).get
       status(result) mustBe (OK)
       contentType(result) mustBe (Some("text/html"))
     }
 
-    "return initial aggregate counts" in {
+    it("return initial aggregate counts") {
       val json = makeRequest(GET, "/dtos/counts")
       val jsonObj = (json \ "data").as[JsObject]
 
@@ -32,7 +32,7 @@ class ApplicationSpec extends ControllerFixture {
       (jsonObj \ "users").as[Int] mustBe (0)
     }
 
-    "return correct aggregate counts" in {
+    it("return correct aggregate counts") {
       studyRepository.put(factory.createDisabledStudy)
       centreRepository.put(factory.createDisabledCentre)
       userRepository.put(factory.createRegisteredUser)

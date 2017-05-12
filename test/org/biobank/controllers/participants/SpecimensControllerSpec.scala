@@ -73,11 +73,11 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
     }
   }
 
-  "Specimens REST API" when {
+  describe("Specimens REST API") {
 
-    "GET /participants/cevents/spcs/get/:spcId" must {
+    describe("GET /participants/cevents/spcs/get/:spcId") {
 
-      "return a specimen" in {
+      it("return a specimen") {
         val f = createEntitiesAndSpecimens
         val specimen = f.specimens.head
         val specimenDto = f.specimenDtos.head
@@ -88,7 +88,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         compareObj((json \ "data").get, specimenDto)
       }
 
-      "fails for an invalid specimen ID" in {
+      it("fails for an invalid specimen ID") {
         val f = createEntitiesAndSpecimens
         val specimen = f.specimens.head.copy(id = SpecimenId(nameGenerator.next[Specimen]))
         val json = makeRequest(GET, uri(specimen), NOT_FOUND)
@@ -100,9 +100,9 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
     }
 
-    "GET /participants/cevents/spcs/invid/:invId" must {
+    describe("GET /participants/cevents/spcs/invid/:invId") {
 
-      "return a specimen by inventory ID" in {
+      it("return a specimen by inventory ID") {
         val f = createEntitiesAndSpecimens
         val specimen = f.specimens.head
         val specimenDto = f.specimenDtos.head
@@ -113,7 +113,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         compareObj((json \ "data").get, specimenDto)
       }
 
-      "fails for an invalid inventory ID" in {
+      it("fails for an invalid inventory ID") {
         val invalidInventoryId = nameGenerator.next[Specimen]
         val json = makeRequest(GET, s"${uri}/invid/$invalidInventoryId", NOT_FOUND)
 
@@ -124,14 +124,14 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
     }
 
 
-    "GET /participants/cevents/spcs/:ceventId" must {
+    describe("GET /participants/cevents/spcs/:ceventId") {
 
-      "list none" in {
+      it("list none") {
         val e = createEntities
         PagedResultsSpec(this).emptyResults(uri(e.cevent))
       }
 
-      "lists all specimens for a collection event" in {
+      it("lists all specimens for a collection event") {
         val e = createEntitiesAndSpecimens
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
@@ -145,7 +145,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         compareObjs(jsonItems, e.specimenDtos)
       }
 
-      "list specimens sorted by id" in {
+      it("list specimens sorted by id") {
         val e = createEntities
         val specimens = List("id1", "id2").map { id =>
             factory.createUsableSpecimen.copy(id = SpecimenId(id))
@@ -180,7 +180,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         }
       }
 
-      "list specimens sorted by time created" in {
+      it("list specimens sorted by time created") {
         val e = createEntities
         val specimens = List(1, 2).map { hour =>
             factory.createUsableSpecimen.copy(timeCreated = DateTime.now.hour(hour))
@@ -215,7 +215,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         }
       }
 
-      "list specimens sorted by state" in {
+      it("list specimens sorted by state") {
         val e = createEntities
         val specimens: List[Specimen] = List(factory.createUsableSpecimen,
                                              factory.createUnusableSpecimen)
@@ -249,7 +249,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         }
       }
 
-      "list the first specimen in a paged query" in {
+      it("list the first specimen in a paged query") {
         val e = createEntities
         val specimens = List("id1", "id2").map { id =>
             factory.createUsableSpecimen.copy(id = SpecimenId(id))
@@ -272,7 +272,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         compareObj(jsonItem, specimenDto)
       }
 
-      "list the last specimen in a paged query" in {
+      it("list the last specimen in a paged query") {
         val e = createEntities
         val specimens = List("id1", "id2").map { id =>
             factory.createUsableSpecimen.copy(id = SpecimenId(id))
@@ -296,7 +296,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         compareObj(jsonItem, specimenDto)
       }
 
-      "fail when using an invalid query parameters" in {
+      it("fail when using an invalid query parameters") {
         val e = createEntities
         val url = uri(e.cevent)
 
@@ -307,7 +307,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         PagedResultsSpec(this).failWithInvalidSort(url)
       }
 
-      "fail for invalid collection event id" in {
+      it("fail for invalid collection event id") {
         val cevent = factory.createCollectionEvent
         val json = makeRequest(GET, uri(cevent), NOT_FOUND)
 
@@ -318,9 +318,9 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
     }
 
-    "POST /participants/cevents/spcs/:ceventId" must {
+    describe("POST /participants/cevents/spcs/:ceventId") {
 
-      "add a specimen to a collection event" in {
+      it("add a specimen to a collection event") {
         val e = createEntities
         val specimen = factory.createUsableSpecimen
         val json = makeRequest(POST, uri(e.cevent), specimensToAddJson(List(specimen)))
@@ -353,7 +353,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         }
       }
 
-      "add more than one specimen to a collection event" in {
+      it("add more than one specimen to a collection event") {
         val e = createEntities
         val specimens = (1 to 2).map(_ => factory.createUsableSpecimen).toList
 
@@ -370,9 +370,9 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
       }
     }
 
-    "DELETE  /participants/cevents/spcs/:ceventId/:spcId/:ver" must {
+    describe("DELETE  /participants/cevents/spcs/:ceventId/:spcId/:ver") {
 
-      "remove a specimen from a collection event" in {
+      it("remove a specimen from a collection event") {
         val e = createEntities
         val specimen = factory.createUsableSpecimen
         specimenRepository.put(specimen)
@@ -383,7 +383,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         (json \ "status").as[String] must include ("success")
       }
 
-      "not remove a specimen which has been processed" in {
+      it("not remove a specimen which has been processed") {
         val e = createEntities
         val specimen = factory.createUsableSpecimen
         specimenRepository.put(specimen)

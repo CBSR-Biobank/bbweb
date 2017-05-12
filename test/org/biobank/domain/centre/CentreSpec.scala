@@ -14,9 +14,9 @@ class CentreSpec extends DomainSpec {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  "A centre" can {
+  describe("A centre") {
 
-    "be created" in {
+    it("be created") {
       val centre = factory.createDisabledCentre
       DisabledCentre.create(id          = centre.id,
                             version     = 0,
@@ -41,7 +41,7 @@ class CentreSpec extends DomainSpec {
       }
     }
 
-    "have it's name updated" in {
+    it("have it's name updated") {
       val centre = factory.createDisabledCentre
       val name = nameGenerator.next[Centre]
 
@@ -60,7 +60,7 @@ class CentreSpec extends DomainSpec {
       }
     }
 
-    "have it's description updated" in {
+    it("have it's description updated") {
       val centre = factory.createDisabledCentre
       val description = Some(nameGenerator.next[Centre])
 
@@ -79,7 +79,7 @@ class CentreSpec extends DomainSpec {
       }
     }
 
-    "be enabled if it has at least one location" in {
+    it("be enabled if it has at least one location") {
       val location = factory.createLocation
       val centre = factory.createDisabledCentre.copy(locations = Set(location))
 
@@ -90,12 +90,12 @@ class CentreSpec extends DomainSpec {
       }
     }
 
-    "not be enabled if it has no locations" in {
+    it("not be enabled if it has no locations") {
       val centre = factory.createDisabledCentre
       centre.enable() mustFail ".*centre does not have locations.*"
     }
 
-    "disable an enabled centre" in {
+    it("disable an enabled centre") {
       val centre = factory.createEnabledCentre
       centre.disable mustSucceed { disabledCentre =>
         disabledCentre mustBe a[DisabledCentre]
@@ -106,7 +106,7 @@ class CentreSpec extends DomainSpec {
 
   }
 
-  "A centre" can {
+  describe("A centre") {
 
     def createFrom(centre: DisabledCentre) = {
       DisabledCentre.create(id          = centre.id,
@@ -117,40 +117,40 @@ class CentreSpec extends DomainSpec {
                             locations   = centre.locations)
     }
 
-    "not be created with an empty id" in {
+    it("not be created with an empty id") {
       val centre = factory.createDisabledCentre.copy(id = CentreId(""))
       createFrom(centre) mustFail "IdRequired"
     }
 
-    "not be created with an invalid version" in {
+    it("not be created with an invalid version") {
       val centre = factory.createDisabledCentre.copy(version = -2L)
       createFrom(centre) mustFail "InvalidVersion"
     }
 
-    "not be created with a null or empty name" in {
+    it("not be created with a null or empty name") {
       List("", null).foreach { name =>
         val centre = factory.createDisabledCentre.copy(name = name)
         createFrom(centre) mustFail "InvalidName"
       }
     }
 
-    "not be created with an empty description option" in {
+    it("not be created with an empty description option") {
       List(Some(""), Some(null)).foreach { description =>
         val centre = factory.createDisabledCentre.copy(description = description)
         createFrom(centre) mustFail "InvalidDescription"
       }
     }
 
-    "have more than one validation fail" in {
+    it("have more than one validation fail") {
       val centre = factory.createDisabledCentre.copy(version = -2L, name = null)
       createFrom(centre) mustFail ("InvalidVersion",  "InvalidName")
     }
 
   }
 
-  "A centre" can {
+  describe("A centre") {
 
-    "add a studyId" in {
+    it("add a studyId") {
       val centre = factory.createDisabledCentre.copy(studyIds = Set.empty)
       val study = factory.createDisabledStudy
 
@@ -161,7 +161,7 @@ class CentreSpec extends DomainSpec {
       }
     }
 
-    "remove a studyId" in {
+    it("remove a studyId") {
       val study = factory.createDisabledStudy
       val centre = factory.createDisabledCentre.copy(studyIds = Set(study.id))
 
@@ -173,9 +173,9 @@ class CentreSpec extends DomainSpec {
 
   }
 
-  "A centre" can {
+  describe("A centre") {
 
-    "add a location" in {
+    it("add a location") {
       val centre = factory.createDisabledCentre.copy(locations = Set.empty)
       val location = factory.createLocation
 
@@ -186,7 +186,7 @@ class CentreSpec extends DomainSpec {
       }
     }
 
-    "replace a location" in {
+    it("replace a location") {
       val location = factory.createLocation
       val location2 = factory.createLocation.copy(uniqueId = location.uniqueId)
       val centre = factory.createDisabledCentre.copy(locations = Set(location))
@@ -198,7 +198,7 @@ class CentreSpec extends DomainSpec {
       }
     }
 
-    "remove a location" in {
+    it("remove a location") {
       val location = factory.createLocation
       val centre = factory.createDisabledCentre.copy(locations = Set(location))
 

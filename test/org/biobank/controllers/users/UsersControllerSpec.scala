@@ -63,22 +63,22 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
     }
   }
 
-  "User REST API" must {
+  describe("User REST API") {
 
-    "GET /users" must {
+    describe("GET /users") {
 
-      "list none" in {
+      it("list none") {
         PagedResultsSpec(this).emptyResults(uri)
       }
 
-      "list a new user" in {
+      it("list a new user") {
         val user = factory.createRegisteredUser
         userRepository.put(user)
         val jsonItem = PagedResultsSpec(this).singleItemResult(uri)
         compareObj(jsonItem, user)
       }
 
-      "list multiple users" in {
+      it("list multiple users") {
         val users = (0 until 2).map { x =>
             factory.createRegisteredUser
           }.toList
@@ -95,7 +95,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         compareObjs(jsonItems, users)
       }
 
-      "list a single user when filtered by name" in {
+      it("list a single user when filtered by name") {
         val users = List(factory.createRegisteredUser.copy(name = "user1"),
                          factory.createRegisteredUser.copy(name = "user2"))
         val user = users(0)
@@ -105,7 +105,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         compareObj(jsonItem, users(0))
       }
 
-      "list a single user when filtered by email" in {
+      it("list a single user when filtered by email") {
         val users = List(factory.createRegisteredUser.copy(email = "user1@test.com"),
                          factory.createRegisteredUser.copy(email = "user2@test.com"))
         val user = users(0)
@@ -115,7 +115,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         compareObj(jsonItem, users(0))
       }
 
-      "list a single registered user when filtered by state" in {
+      it("list a single registered user when filtered by state") {
         val users = List(factory.createRegisteredUser.copy(email = "user1@test.com"),
                          factory.createActiveUser.copy(email = "user2@test.com"),
                          factory.createActiveUser.copy(email = "user3@test.com"))
@@ -125,7 +125,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         compareObj(jsonItem, users(0))
       }
 
-      "list active users when filtered by state" in {
+      it("list active users when filtered by state") {
         val users = List(factory.createRegisteredUser.copy(email = "user1@test.com"),
                          factory.createActiveUser.copy(email = "user2@test.com"),
                          factory.createActiveUser.copy(email = "user3@test.com"))
@@ -144,7 +144,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         compareObjs(jsonItems, expectedUsers)
       }
 
-      "list locked users when filtered by state" in {
+      it("list locked users when filtered by state") {
         val users = List(factory.createActiveUser.copy(email = "user1@test.com"),
                          factory.createLockedUser.copy(email = "user2@test.com"),
                          factory.createLockedUser.copy(email = "user3@test.com"))
@@ -163,7 +163,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         compareObjs(jsonItems, expectedUsers)
       }
 
-      "list users sorted by name" in {
+      it("list users sorted by name") {
         val users = List(factory.createRegisteredUser.copy(name = "user3"),
                          factory.createRegisteredUser.copy(name = "user2"),
                          factory.createRegisteredUser.copy(name = "user1"))
@@ -192,7 +192,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "list users sorted by email" in {
+      it("list users sorted by email") {
         val users = List(factory.createRegisteredUser.copy(email = "user3@test.com"),
                          factory.createActiveUser.copy(email = "user2@test.com"),
                          factory.createActiveUser.copy(email = "user1@test.com"))
@@ -221,7 +221,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "list users sorted by state" in {
+      it("list users sorted by state") {
         val users = List(factory.createRegisteredUser.copy(email = "user3@test.com"),
                          factory.createLockedUser.copy(email = "user2@test.com"),
                          factory.createActiveUser.copy(email = "user1@test.com"))
@@ -250,7 +250,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "list a single user when using paged query" in {
+      it("list a single user when using paged query") {
         val users = List(factory.createRegisteredUser.copy(email = "user3@test.com"),
                          factory.createLockedUser.copy(email = "user2@test.com"),
                          factory.createActiveUser.copy(email = "user1@test.com"))
@@ -265,13 +265,13 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         compareObj(jsonItem, users(2))
       }
 
-      "fail when using an invalid query parameters" in {
+      it("fail when using an invalid query parameters") {
         PagedResultsSpec(this).failWithInvalidParams(uri)
       }
 
     }
 
-    "GET /users/counts" must {
+    describe("GET /users/counts") {
 
       def checkCounts(json:            JsValue,
                       registeredCount: Long,
@@ -283,7 +283,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "lockedCount").as[Long] must be (lockedCount)
       }
 
-      "return empty counts" in {
+      it("return empty counts") {
         val json = makeRequest(GET, uri("counts"))
         (json \ "status").as[String] must include ("success")
         checkCounts(json            = (json \ "data").get,
@@ -292,7 +292,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
                     lockedCount     = 0)
       }
 
-      "return valid counts" in {
+      it("return valid counts") {
         val users = List(factory.createRegisteredUser,
                          factory.createRegisteredUser,
                          factory.createRegisteredUser,
@@ -311,9 +311,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "POST /users" must {
+    describe("POST /users") {
 
-      "register a user" in {
+      it("register a user") {
         val user = factory.createRegisteredUser
         val reqJson = Json.obj("name" -> user.name,
                                "email" -> user.email,
@@ -342,7 +342,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "fail on registering an existing user" in {
+      it("fail on registering an existing user") {
         val user = factory.createRegisteredUser
         userRepository.put(user)
 
@@ -358,9 +358,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    "POST /users/name/:id" must {
+    describe("POST /users/name/:id") {
 
-      "update a user's name" in {
+      it("update a user's name") {
         val user = factory.createActiveUser
         userRepository.put(user)
 
@@ -372,7 +372,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "data" \ "name").as[String] must be(user.name)
       }
 
-      "not update a user's name with an invalid name" in {
+      it("not update a user's name with an invalid name") {
         val user = factory.createActiveUser
         userRepository.put(user)
 
@@ -384,7 +384,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include("InvalidName")
       }
 
-      "not update a user's name when an invalid version number is used" in {
+      it("not update a user's name when an invalid version number is used") {
         val user = factory.createActiveUser
         userRepository.put(user)
 
@@ -398,9 +398,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    "POST /users/email/:id" must {
+    describe("POST /users/email/:id") {
 
-      "update a user's email" in {
+      it("update a user's email") {
         val user = factory.createActiveUser.copy(timeAdded = DateTime.lastMonth)
         userRepository.put(user)
 
@@ -431,7 +431,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "not update a user's email with an invalid email address" in {
+      it("not update a user's email with an invalid email address") {
         val user = factory.createActiveUser
         userRepository.put(user)
 
@@ -443,7 +443,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include("InvalidEmail")
       }
 
-      "not update a user's email if an invalid version number is used " in {
+      it("not update a user's email if an invalid version number is used ") {
         val user = factory.createActiveUser
         userRepository.put(user)
 
@@ -458,9 +458,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "POST /users/password/:id" must {
+    describe("POST /users/password/:id") {
 
-      "update a user's password" in {
+      it("update a user's password") {
         val plainPassword = nameGenerator.next[User]
         val newPassword = nameGenerator.next[User]
         val salt = passwordHasher.generateSalt
@@ -494,7 +494,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "not update a user's password with an empty current password" in {
+      it("not update a user's password with an empty current password") {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
 
@@ -506,7 +506,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must be ("error")
       }
 
-      "not update a user's password with an empty new password" in {
+      it("not update a user's password with an empty new password") {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
 
@@ -518,7 +518,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must be ("error")
       }
 
-      "fail when attempting to update a user's password with a bad version number" in {
+      it("fail when attempting to update a user's password with a bad version number") {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
 
@@ -533,9 +533,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    "POST /users/avatarurl/:id" must {
+    describe("POST /users/avatarurl/:id") {
 
-      "update a user's avatar URL" in {
+      it("update a user's avatar URL") {
         val user = factory.createActiveUser.copy(timeAdded = DateTime.lastMonth)
         userRepository.put(user)
 
@@ -564,7 +564,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "remove a user's avatar URL" in {
+      it("remove a user's avatar URL") {
         val user = factory.createActiveUser
         userRepository.put(user)
 
@@ -576,7 +576,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "data" \ "avatarUrl").asOpt[String] mustBe None
       }
 
-      "not update a user's avatar URL if URL is invalid" in {
+      it("not update a user's avatar URL if URL is invalid") {
         val user = factory.createActiveUser
         userRepository.put(user)
 
@@ -588,7 +588,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include("InvalidUrl")
       }
 
-      "not update a user's avatar URL if URL is empty" in {
+      it("not update a user's avatar URL if URL is empty") {
         val user = factory.createActiveUser
         userRepository.put(user)
 
@@ -599,7 +599,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must be ("error")
       }
 
-      "not update a user's avatar URL if an invalid version number is used" in {
+      it("not update a user's avatar URL if an invalid version number is used") {
         val user = factory.createActiveUser
         userRepository.put(user)
 
@@ -613,9 +613,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    "GET /users/:id" must {
+    describe("GET /users/:id") {
 
-      "return a user" in {
+      it("return a user") {
         val user = factory.createActiveUser
         userRepository.put(user)
         val json = makeRequest(GET, uri(user))
@@ -624,7 +624,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         compareObj(jsonObj, user)
       }
 
-      "return not found for an invalid user" in {
+      it("return not found for an invalid user") {
         val user = factory.createActiveUser
         val json = makeRequest(GET, uri(user), NOT_FOUND)
         (json \ "status").as[String] must be ("error")
@@ -632,9 +632,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    "POST /users/activate" must {
+    describe("POST /users/activate") {
 
-      "activate a user" in {
+      it("activate a user") {
         val user = factory.createRegisteredUser
         userRepository.put(user)
 
@@ -644,7 +644,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must be ("success")
       }
 
-      "must not activate a user with an invalid version number" in {
+      it("must not activate a user with an invalid version number") {
         val user = factory.createRegisteredUser
         userRepository.put(user)
 
@@ -658,9 +658,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "POST /users/lock" must {
+    describe("POST /users/lock") {
 
-      "lock a user" in {
+      it("lock a user") {
         val users = Table("users that can be locked",
                           factory.createRegisteredUser,
                           factory.createActiveUser)
@@ -675,7 +675,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      "must not lock a user when an invalid version number is used" in {
+      it("must not lock a user when an invalid version number is used") {
         val user = factory.createActiveUser
         userRepository.put(user)
 
@@ -687,7 +687,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include ("expected version doesn't match current version")
       }
 
-      "must not lock a locked user" in {
+      it("must not lock a locked user") {
         val user = factory.createLockedUser
         userRepository.put(user)
 
@@ -701,9 +701,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "POST /users/unlock" must {
+    describe("POST /users/unlock") {
 
-      "must unlock a user" in {
+      it("must unlock a user") {
         val user = factory.createLockedUser
         userRepository.put(user)
 
@@ -713,7 +713,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must be ("success")
       }
 
-      "must not unlock a user if a invalid version number is used" in {
+      it("must not unlock a user if a invalid version number is used") {
         val user = factory.createLockedUser
         userRepository.put(user)
 
@@ -725,7 +725,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include ("expected version doesn't match current version")
       }
 
-      "must not unlock a registered or active user" in {
+      it("must not unlock a registered or active user") {
         val users = Table("user that can't be unlocked",
                           factory.createRegisteredUser,
                           factory.createActiveUser)
@@ -744,9 +744,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "POST /users/login" must {
+    describe("POST /users/login") {
 
-      "allow a user to log in" in {
+      it("allow a user to log in") {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
 
@@ -759,7 +759,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "data" \ "email").as[String] must be (user.email)
       }
 
-      "prevent an invalid user from logging in" in {
+      it("prevent an invalid user from logging in") {
         val invalidUser = nameGenerator.nextEmail[String]
         val reqJson = Json.obj("email" -> invalidUser,
                                "password" -> nameGenerator.next[String])
@@ -767,7 +767,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         json must be (JsNull)
       }
 
-      "prevent a user logging in with bad password" in {
+      it("prevent a user logging in with bad password") {
         val user = createRegisteredUserInRepository(nameGenerator.next[String])
         val invalidPassword = nameGenerator.next[String]
         val reqJson = Json.obj("email" -> user.email,
@@ -776,7 +776,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         json must be (JsNull)
       }
 
-      "not allow a locked user to log in" in {
+      it("not allow a locked user to log in") {
         val plainPassword = nameGenerator.next[User]
         val lockedUser = createLockedUserInRepository(plainPassword)
 
@@ -786,7 +786,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         json must be (JsNull)
       }
 
-      "not allow a request with an invalid token" in {
+      it("not allow a request with an invalid token") {
         val badToken = nameGenerator.next[String]
 
         // this request is valid since user is logged in
@@ -802,7 +802,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         ()
       }
 
-      "not allow mismatched tokens in request for an non asyncaction" in {
+      it("not allow mismatched tokens in request for an non asyncaction") {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
 
@@ -822,7 +822,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         ()
       }
 
-      "not allow mismatched tokens in request for an async action" in {
+      it("not allow mismatched tokens in request for an async action") {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
 
@@ -850,7 +850,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         ()
       }
 
-      "not allow requests missing XSRF-TOKEN cookie" in {
+      it("not allow requests missing XSRF-TOKEN cookie") {
         val resp = route(app, FakeRequest(GET, uri))
         resp must not be (None)
         resp.map { result =>
@@ -861,7 +861,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         ()
       }
 
-      "not allow requests missing X-XSRF-TOKEN in header" in {
+      it("not allow requests missing X-XSRF-TOKEN in header") {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
         val token = doLogin(user.email, plainPassword)
@@ -877,9 +877,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    "POST /logout" must {
+    describe("POST /logout") {
 
-      "disallow access to logged out users" in {
+      it("disallow access to logged out users") {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
         val token = doLogin(user.email, plainPassword)
@@ -899,9 +899,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    "POST /users/passreset" must {
+    describe("POST /users/passreset") {
 
-      "allow an active user to reset his/her password" in {
+      it("allow an active user to reset his/her password") {
         val user = createActiveUserInRepository(nameGenerator.next[String])
         val json = makeRequest(POST,
                                uri("passreset"),
@@ -909,14 +909,14 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "status").as[String] must be ("success")
       }
 
-      "not allow a registered user to reset his/her password" in {
+      it("not allow a registered user to reset his/her password") {
         val user = createRegisteredUserInRepository(nameGenerator.next[String])
         val reqJson = Json.obj("email" -> user.email)
         val json = makeRequest(POST, uri("passreset"), UNAUTHORIZED, reqJson)
         json must be (JsNull)
       }
 
-      "not allow a locked user to reset his/her password" in {
+      it("not allow a locked user to reset his/her password") {
         val lockedUser = factory.createLockedUser
         userRepository.put(lockedUser)
 
@@ -925,7 +925,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         json must be (JsNull)
       }
 
-      "not allow a password reset on an invalid email address" in {
+      it("not allow a password reset on an invalid email address") {
         val reqJson = Json.obj("email" -> nameGenerator.nextEmail[User])
         val json = makeRequest(POST, uri("passreset"), UNAUTHORIZED, reqJson)
         json must be (JsNull)
@@ -933,9 +933,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    "GET /users/authenticate" must {
+    describe("GET /users/authenticate") {
 
-      "allow a user to authenticate" in {
+      it("allow a user to authenticate") {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
         val token = doLogin(user.email, plainPassword)
@@ -945,7 +945,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper {
         (authReplyJson \ "data" \ "email").as[String] must be (user.email)
       }
 
-      "not allow a locked user to authenticate" in {
+      it("not allow a locked user to authenticate") {
         val plainPassword = nameGenerator.next[String]
         val activeUser = createActiveUserInRepository(plainPassword)
         val token = doLogin(activeUser.email, plainPassword)

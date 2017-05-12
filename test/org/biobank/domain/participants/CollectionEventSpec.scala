@@ -6,7 +6,7 @@ import org.biobank.domain.study._
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 
-class CollectionEventSpec extends DomainFreeSpec {
+class CollectionEventSpec extends DomainSpec {
   import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
@@ -23,11 +23,11 @@ class CollectionEventSpec extends DomainFreeSpec {
                            visitNumber            = collectionEvent.visitNumber,
                            annotations            = collectionEvent.annotations)
 
-  "A collection event" - {
+  describe("A collection event") {
 
-    "can be created" - {
+    describe("can be created") {
 
-      "when valid arguments are used and with no annotations" in {
+      it("when valid arguments are used and with no annotations") {
         val cevent = factory.createCollectionEvent.copy(version = 0L)
         createFrom(cevent) mustSucceed { ce =>
           ce must have (
@@ -44,7 +44,7 @@ class CollectionEventSpec extends DomainFreeSpec {
         }
       }
 
-      "when valid arguments are used and annotations" in {
+      it("when valid arguments are used and annotations") {
         val annotation = factory.createAnnotation
         val cevent = factory.createCollectionEvent.copy(annotations = Set(annotation),
                                                         version     = 0L)
@@ -64,38 +64,38 @@ class CollectionEventSpec extends DomainFreeSpec {
       }
     }
 
-    "cannot be created with" - {
+    describe("cannot be created with") {
 
-      "an empty id is used" in {
+      it("an empty id is used") {
         val cevent = factory.createCollectionEvent.copy(id = CollectionEventId(""))
         createFrom(cevent) mustFail "IdRequired"
       }
 
-      "an empty participant id is used" in {
+      it("an empty participant id is used") {
         val cevent = factory.createCollectionEvent.copy(participantId = ParticipantId(""))
         createFrom(cevent) mustFail "ParticipantIdRequired"
       }
 
-      "an empty collection event type id is used" in {
+      it("an empty collection event type id is used") {
         val cevent = factory.createCollectionEvent.copy(collectionEventTypeId = CollectionEventTypeId(""))
         createFrom(cevent) mustFail "CollectionEventTypeIdRequired"
       }
 
-      "an invalid visit number is used" in {
+      it("an invalid visit number is used") {
         val cevent = factory.createCollectionEvent.copy(visitNumber = 0)
         createFrom(cevent) mustFail "VisitNumberInvalid"
       }
 
-      "an invalid version is used" in {
+      it("an invalid version is used") {
         val cevent = factory.createCollectionEvent.copy(version = -2)
         createFrom(cevent) mustFail "InvalidVersion"
       }
 
     }
 
-    "can be updated" - {
+    describe("can be updated") {
 
-      "with a new visit number" in {
+      it("with a new visit number") {
         val cevent = factory.createCollectionEvent
         val newVisitNumber = cevent.visitNumber + 10
 
@@ -106,7 +106,7 @@ class CollectionEventSpec extends DomainFreeSpec {
         }
       }
 
-      "with a new time completed" in {
+      it("with a new time completed") {
         val cevent = factory.createCollectionEvent
         val newTimeCompleted = cevent.timeCompleted.minusDays(10)
 
@@ -119,9 +119,9 @@ class CollectionEventSpec extends DomainFreeSpec {
 
     }
 
-    "cannot be updated" - {
+    describe("cannot be updated") {
 
-      "with an invalid visit number" in {
+      it("with an invalid visit number") {
         val cevent = factory.createCollectionEvent
         cevent.withVisitNumber(0) mustFail "VisitNumberInvalid"
         cevent.withVisitNumber(-1) mustFail "VisitNumberInvalid"

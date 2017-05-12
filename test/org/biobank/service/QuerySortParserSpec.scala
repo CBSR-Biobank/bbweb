@@ -4,23 +4,23 @@ import org.biobank.infrastructure.{AscendingOrder, DescendingOrder}
 import org.slf4j.LoggerFactory
 import org.scalatest.Inside._
 import org.scalatest.OptionValues._
-import org.scalatest.{FreeSpec, MustMatchers }
+import org.scalatest.{FunSpec, MustMatchers }
 
-class QuerySortParserSpec extends FreeSpec with MustMatchers {
+class QuerySortParserSpec extends FunSpec with MustMatchers {
   import QuerySortParserGrammar._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  "QuerySortParserSpec" - {
+  describe("QuerySortParserSpec") {
 
-    "must fail for an empty string" in {
+    it("must fail for an empty string") {
       val result = QuerySortParser(new SortString(""))
       inside (result) { case Some(expressions) =>
         expressions must have size (0)
       }
     }
 
-    "must parse a single sort field" in {
+    it("must parse a single sort field") {
       val result = QuerySortParser(new SortString("foo"))
       result.value must have length (1)
       inside (result.value(0)) { case SortExpression(name, sortOrder) =>
@@ -29,7 +29,7 @@ class QuerySortParserSpec extends FreeSpec with MustMatchers {
       }
     }
 
-    "must parse a single sort field with descending order" in {
+    it("must parse a single sort field with descending order") {
       val result = QuerySortParser(new SortString("-bar"))
       result.value must have length (1)
       inside (result.value(0)) { case SortExpression(name, sortOrder) =>
@@ -38,7 +38,7 @@ class QuerySortParserSpec extends FreeSpec with MustMatchers {
       }
     }
 
-    "must parse multiple fields" in {
+    it("must parse multiple fields") {
       val values = List("foo", "bar")
       val result = QuerySortParser(new SortString(s"${values(0)}|-${values(1)}"))
       result.value must have length (2)
@@ -50,7 +50,7 @@ class QuerySortParserSpec extends FreeSpec with MustMatchers {
       }
     }
 
-    "must fail for invalid input" in {
+    it("must fail for invalid input") {
       val result = QuerySortParser(new SortString("foo,bar"))
       result mustBe None
     }

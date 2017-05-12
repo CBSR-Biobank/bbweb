@@ -1,13 +1,13 @@
 package org.biobank.domain.centre
 
 import com.github.nscala_time.time.Imports._
-import org.biobank.domain.{ DomainFreeSpec, DomainValidation, LocationId }
+import org.biobank.domain.{ DomainSpec, DomainValidation, LocationId }
 import org.biobank.fixture.NameGenerator
 import org.slf4j.LoggerFactory
 import scalaz.Scalaz._
 import scala.language.reflectiveCalls
 
-class ShipmentSpec extends DomainFreeSpec {
+class ShipmentSpec extends DomainSpec {
 
   import org.biobank.TestUtils._
 
@@ -54,11 +54,11 @@ class ShipmentSpec extends DomainFreeSpec {
                            toLocationId   = shipment.toLocationId)
   }
 
-  "A shipment" - {
+  describe("A shipment") {
 
-    "can be created" - {
+    describe("can be created") {
 
-      "when valid arguments are used" in {
+      it("when valid arguments are used") {
         val shipment = factory.createShipment.copy(version = 0L)
         createFrom(shipment).mustSucceed { s =>
           s must have (
@@ -82,9 +82,9 @@ class ShipmentSpec extends DomainFreeSpec {
 
     }
 
-    "can change state" - {
+    describe("can change state") {
 
-      "to packed" in {
+      it("to packed") {
         val shipment = factory.createShipment
         val timePacked = DateTime.now.minusDays(10)
         val packedShipment = shipment.pack(timePacked)
@@ -96,7 +96,7 @@ class ShipmentSpec extends DomainFreeSpec {
         checkTimeStamps(packedShipment, shipment.timeAdded, DateTime.now)
       }
 
-      "to sent" in {
+      it("to sent") {
         val f = centresFixture
         val shipment = factory.createPackedShipment(f.fromCentre, f.toCentre)
         val timeSent = shipment.timePacked.get.plusDays(1)
@@ -109,7 +109,7 @@ class ShipmentSpec extends DomainFreeSpec {
         }
       }
 
-      "to received" in {
+      it("to received") {
         val f = centresFixture
         val shipment = factory.createSentShipment(f.fromCentre, f.toCentre)
         val timeReceived = shipment.timeSent.get.plusDays(1)
@@ -122,7 +122,7 @@ class ShipmentSpec extends DomainFreeSpec {
         }
       }
 
-      "to unpacked" in {
+      it("to unpacked") {
         val f = centresFixture
         val shipment = factory.createReceivedShipment(f.fromCentre, f.toCentre)
         val timeUnpacked = shipment.timeReceived.get.plusDays(1)
@@ -135,7 +135,7 @@ class ShipmentSpec extends DomainFreeSpec {
         }
       }
 
-      "to completed" in {
+      it("to completed") {
         val f = centresFixture
         val shipment = factory.createUnpackedShipment(f.fromCentre, f.toCentre)
         val timeCompleted = shipment.timeUnpacked.get.plusDays(1)
@@ -148,7 +148,7 @@ class ShipmentSpec extends DomainFreeSpec {
         }
       }
 
-      "to lost" in {
+      it("to lost") {
         val f = centresFixture
         val shipment = factory.createSentShipment(f.fromCentre, f.toCentre)
         val lostShipment = shipment.lost
@@ -161,44 +161,44 @@ class ShipmentSpec extends DomainFreeSpec {
 
     }
 
-    "can go to previous state" - {
+    describe("can go to previous state") {
 
-      "from packed to created" in {
+      it("from packed to created") {
         val f = centresFixture
         val shipment = factory.createPackedShipment(f.fromCentre, f.toCentre)
         val createdShipment = shipment.created
         createdShipment mustBe a[CreatedShipment]
       }
 
-      "from sent to packed" in {
+      it("from sent to packed") {
         val f = centresFixture
         val shipment = factory.createSentShipment(f.fromCentre, f.toCentre)
         val packedShipment = shipment.backToPacked
         packedShipment mustBe a[PackedShipment]
       }
 
-      "from received to sent" in {
+      it("from received to sent") {
         val f = centresFixture
         val shipment = factory.createReceivedShipment(f.fromCentre, f.toCentre)
         val sentShipment = shipment.backToSent
         sentShipment mustBe a[SentShipment]
       }
 
-      "from unpacked to received" in {
+      it("from unpacked to received") {
         val f = centresFixture
         val shipment = factory.createUnpackedShipment(f.fromCentre, f.toCentre)
         val receivedShipment = shipment.backToReceived
         receivedShipment mustBe a[ReceivedShipment]
       }
 
-      "from completed to unpacked" in {
+      it("from completed to unpacked") {
         val f = centresFixture
         val shipment = factory.createCompletedShipment(f.fromCentre, f.toCentre)
         val unpackedShipment = shipment.backToUnpacked
         unpackedShipment mustBe a[UnpackedShipment]
       }
 
-      "from lost to sent" in {
+      it("from lost to sent") {
         val f = centresFixture
         val shipment = factory.createLostShipment(f.fromCentre, f.toCentre)
         val sentShipment = shipment.backToSent
@@ -207,9 +207,9 @@ class ShipmentSpec extends DomainFreeSpec {
 
     }
 
-    "can skip state" - {
+    describe("can skip state") {
 
-      "from created to sent" in {
+      it("from created to sent") {
         val shipment = factory.createShipment
         val timePacked = DateTime.now.minusDays(10)
         val timeSent = timePacked.plusDays(1)
@@ -222,7 +222,7 @@ class ShipmentSpec extends DomainFreeSpec {
         }
       }
 
-      "from sent to unpacked" in {
+      it("from sent to unpacked") {
         val f = centresFixture
         val shipment = factory.createSentShipment(f.fromCentre, f.toCentre)
         val timeReceived = shipment.timeSent.fold { DateTime.now } { t => t }
@@ -238,16 +238,16 @@ class ShipmentSpec extends DomainFreeSpec {
 
     }
 
-    "must not skip state" - {
+    describe("must not skip state") {
 
-      "when time sent is before time packed" in {
+      it("when time sent is before time packed") {
         val shipment = factory.createShipment
         val timePacked = DateTime.now.minusDays(10)
         val timeSent = timePacked.minusDays(1)
         shipment.skipToSent(timePacked, timeSent) mustFailContains "TimeSentBeforePacked"
       }
 
-      "when time unpacked is before time received" in {
+      it("when time unpacked is before time received") {
         val f = centresFixture
         val shipment = factory.createSentShipment(f.fromCentre, f.toCentre)
         val timeReceived = shipment.timeSent.fold { DateTime.now } { t => t }
@@ -255,7 +255,7 @@ class ShipmentSpec extends DomainFreeSpec {
         shipment.skipToUnpacked(timeReceived, timeUnpacked) mustFailContains "TimeUnpackedBeforeReceived"
       }
 
-      "when time received is before time sent" in {
+      it("when time received is before time sent") {
         val f = centresFixture
         val shipment = factory.createSentShipment(f.fromCentre, f.toCentre)
         val timeReceived = shipment.timeSent.fold { DateTime.now } { t => t.minusDays(1) }
@@ -265,34 +265,34 @@ class ShipmentSpec extends DomainFreeSpec {
 
     }
 
-    "cannot be created" - {
+    describe("cannot be created") {
 
-      "with an invalid ID" in {
+      it("with an invalid ID") {
         val shipment = factory.createShipment.copy(id = ShipmentId(""))
         createFrom(shipment) mustFail "IdRequired"
       }
 
-      "with an invalid version" in {
+      it("with an invalid version") {
         val shipment = factory.createShipment.copy(version = -2L)
         createFrom(shipment) mustFail "InvalidVersion"
       }
 
-      "with an invalid courier name" in {
+      it("with an invalid courier name") {
         val shipment = factory.createShipment.copy(courierName = "")
         createFrom(shipment) mustFail "CourierNameInvalid"
       }
 
-      "with an invalid tracking number" in {
+      it("with an invalid tracking number") {
         val shipment = factory.createShipment.copy(trackingNumber = "")
         createFrom(shipment) mustFail "TrackingNumberInvalid"
       }
 
-      "with an invalid from location" in {
+      it("with an invalid from location") {
         val shipment = factory.createShipment.copy(fromLocationId = LocationId(""))
         createFrom(shipment) mustFail "FromLocationIdInvalid"
       }
 
-      "with an invalid to location" in {
+      it("with an invalid to location") {
         val shipment = factory.createShipment.copy(toLocationId = LocationId(""))
         createFrom(shipment) mustFail "ToLocationIdInvalid"
       }

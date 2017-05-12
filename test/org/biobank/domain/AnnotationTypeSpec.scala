@@ -11,9 +11,9 @@ class AnnotationTypeSpec extends DomainSpec {
   def createAnnotationType(tuple: AnnotTypeTuple): DomainValidation[AnnotationType] =
     (AnnotationType.create _).tupled(tuple)
 
-  "An Annotation Type" can {
+  describe("An Annotation Type") {
 
-    "be created for each value type" in {
+    it("be created for each value type") {
       AnnotationValueType.values.foreach { vt =>
         val tuple = AnnotationValueTypeToTuple(vt)
         createAnnotationType(tuple).mustSucceed { annotType =>
@@ -31,7 +31,7 @@ class AnnotationTypeSpec extends DomainSpec {
       }
     }
 
-    "not be created with an null or empty name" in {
+    it("not be created with an null or empty name") {
       val invalidNames: List[String] = List(null, "")
 
       invalidNames.foreach { invalidName =>
@@ -40,7 +40,7 @@ class AnnotationTypeSpec extends DomainSpec {
       }
     }
 
-    "not be created with an empty description option" in {
+    it("not be created with an empty description option") {
       val invalidDescriptions = List(Some(null), Some(""))
 
       invalidDescriptions.foreach { invalidDescription =>
@@ -49,12 +49,12 @@ class AnnotationTypeSpec extends DomainSpec {
       }
     }
 
-    "not be created with an negative max value count" in {
+    it("not be created with an negative max value count") {
       createAnnotationType(numberAnnotationTypeTuple.copy(_4 = Some(-1)))
         .mustFail(1, "MaxValueCountError")
     }
 
-    "not be created with an invalid options" in {
+    it("not be created with an invalid options") {
       createAnnotationType(numberAnnotationTypeTuple.copy(_5 = Seq("")))
         .mustFail(1, "OptionRequired")
 
@@ -62,7 +62,7 @@ class AnnotationTypeSpec extends DomainSpec {
         .mustFail(1, "DuplicateOptionsError")
     }
 
-    "have more than one validation fail" in {
+    it("have more than one validation fail") {
       createAnnotationType(numberAnnotationTypeTuple.copy(
                              _1 = "",
                              _5 = Seq("dup", "dup")))

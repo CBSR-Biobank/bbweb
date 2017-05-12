@@ -6,7 +6,7 @@ import org.biobank.domain._
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 
-class ParticipantSpec extends DomainFreeSpec {
+class ParticipantSpec extends DomainSpec {
   import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
@@ -21,11 +21,11 @@ class ParticipantSpec extends DomainFreeSpec {
                        annotations  = participant.annotations,
                        timeAdded    = DateTime.now)
 
-  "A participant" - {
+  describe("A participant") {
 
-    "can be created" - {
+    describe("can be created") {
 
-      "when valid arguments are used and without annotations" in {
+      it("when valid arguments are used and without annotations") {
         val participant = factory.createParticipant.copy(version = 0L)
         createFrom(participant) mustSucceed { p =>
           p must have (
@@ -40,7 +40,7 @@ class ParticipantSpec extends DomainFreeSpec {
         }
       }
 
-      "when valid arguments are used and with an annotation" in {
+      it("when valid arguments are used and with an annotation") {
         val annotation = factory.createAnnotation
         val participant = factory.createParticipant.copy(annotations = Set(annotation),
                                                          version     = 0L)
@@ -59,9 +59,9 @@ class ParticipantSpec extends DomainFreeSpec {
 
     }
 
-    "can be updated" - {
+    describe("can be updated") {
 
-      "with a new unique ID" in {
+      it("with a new unique ID") {
         val participant = factory.createParticipant
         val newUniqueId = nameGenerator.next[Participant]
 
@@ -72,7 +72,7 @@ class ParticipantSpec extends DomainFreeSpec {
         }
       }
 
-      "with a new annotation" in {
+      it("with a new annotation") {
         val participant = factory.createParticipant.copy(annotations = Set())
         val annotation = factory.createAnnotation
 
@@ -83,7 +83,7 @@ class ParticipantSpec extends DomainFreeSpec {
         }
       }
 
-      "without an annotation" in {
+      it("without an annotation") {
         val annotation = factory.createAnnotation
         val participant = factory.createParticipant.copy(annotations = Set(annotation))
 
@@ -95,14 +95,14 @@ class ParticipantSpec extends DomainFreeSpec {
       }
     }
 
-    "cannot be created" - {
+    describe("cannot be created") {
 
-      "with an empty id" in {
+      it("with an empty id") {
         val participant = factory.createParticipant.copy(id = ParticipantId(""))
         createFrom(participant) mustFail "IdRequired"
       }
 
-      "with an empty unique id" in {
+      it("with an empty unique id") {
         val participant = factory.createParticipant.copy(uniqueId = "")
         createFrom(participant) mustFail "UniqueIdRequired"
       }
@@ -110,14 +110,14 @@ class ParticipantSpec extends DomainFreeSpec {
 
   }
 
-  "cannot be updated" - {
+  describe("cannot be updated") {
 
-    "with an invalid unique ID" in {
+    it("with an invalid unique ID") {
       val participant = factory.createParticipant
       participant.withUniqueId("") mustFail "UniqueIdRequired"
     }
 
-    "to remove an annotation, with an invalid annotation type ID" in {
+    it("to remove an annotation, with an invalid annotation type ID") {
       val participant = factory.createParticipant
       participant.withoutAnnotation(nameGenerator.next[Participant]) mustFail "annotation does not exist:.*"
     }

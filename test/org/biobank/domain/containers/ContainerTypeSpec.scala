@@ -15,9 +15,9 @@ class ContainerTypeSpec extends DomainSpec {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  // "A containerType" can {
+  // describe("A containerType") {
 
-  //   "be created" in {
+  //   it("be created") {
   //     val containerType = factory.createEnabledContainerType
   //     val v = EnabledContainerType.create(id          = containerType.id,
   //                                         centreId    = containerType.centreId,
@@ -43,7 +43,7 @@ class ContainerTypeSpec extends DomainSpec {
   //     }
   //   }
 
-  //   "have it's centreId updated" in {
+  //   it("have it's centreId updated") {
   //     val containerType = factory.createEnabledContainerType
   //     val centreId = Some(CentreId(nameGenerator.next[ContainerType]))
 
@@ -61,7 +61,7 @@ class ContainerTypeSpec extends DomainSpec {
   //     }
   //   }
 
-  //   "have it's schemaId updated" in {
+  //   it("have it's schemaId updated") {
   //     val containerType = factory.createEnabledContainerType
   //     val schemaId = ContainerSchemaId(nameGenerator.next[ContainerType])
 
@@ -79,7 +79,7 @@ class ContainerTypeSpec extends DomainSpec {
   //     }
   //   }
 
-  //   "have it's name updated" in {
+  //   it("have it's name updated") {
   //     val containerType = factory.createEnabledContainerType
   //     val name = nameGenerator.next[ContainerType]
 
@@ -97,7 +97,7 @@ class ContainerTypeSpec extends DomainSpec {
   //     }
   //   }
 
-  //   "have it's description updated" in {
+  //   it("have it's description updated") {
   //     val containerType = factory.createEnabledContainerType
   //     val description = Some(nameGenerator.next[ContainerType])
 
@@ -113,7 +113,7 @@ class ContainerTypeSpec extends DomainSpec {
   //     }
   //   }
 
-  //   "enabled a disabled container type" in {
+  //   it("enabled a disabled container type") {
   //     val containerType = factory.createDisabledContainerType
   //     containerType.enable mustSucceed { enabledContainerType =>
   //       enabledContainerType mustBe a[EnabledContainerType]
@@ -121,7 +121,7 @@ class ContainerTypeSpec extends DomainSpec {
   //     }
   //   }
 
-  //   "disable an enabled container type" in {
+  //   it("disable an enabled container type") {
   //     val containerType = factory.createEnabledContainerType
   //     containerType.disable mustSucceed { disabledContainerType =>
   //       disabledContainerType mustBe a[EnabledContainerType]
@@ -131,9 +131,9 @@ class ContainerTypeSpec extends DomainSpec {
 
   // }
 
-  // "A containerType" must {
+  // describe("A containerType") {
 
-  //   "not be created with an empty id" in {
+  //   it("not be created with an empty id") {
   //     val v = EnabledContainerType.create(
   //       id          = ContainerTypeId(""),
   //       centreId    = Some(CentreId(nameGenerator.next[ContainerType])),
@@ -146,7 +146,7 @@ class ContainerTypeSpec extends DomainSpec {
   //     v mustFail "IdRequired"
   //   }
 
-  //   "not be created with an invalid centre id" in {
+  //   it("not be created with an invalid centre id") {
   //     val v = EnabledContainerType.create(
   //       id          = ContainerTypeId(nameGenerator.next[ContainerType]),
   //       centreId    = Some(CentreId("")),
@@ -159,7 +159,7 @@ class ContainerTypeSpec extends DomainSpec {
   //     v mustFail "CentreIdRequired"
   //   }
 
-  //   "not be created with an invalid schema id" in {
+  //   it("not be created with an invalid schema id") {
   //     val v = EnabledContainerType.create(
   //       id          = ContainerTypeId(nameGenerator.next[ContainerType]),
   //       centreId    = Some(CentreId(nameGenerator.next[ContainerType])),
@@ -172,7 +172,7 @@ class ContainerTypeSpec extends DomainSpec {
   //     v mustFail "ContainerSchemaIdInvalid"
   //   }
 
-  //   "not be created with an invalid version" in {
+  //   it("not be created with an invalid version") {
   //     val v = EnabledContainerType.create(
   //       id          = ContainerTypeId(nameGenerator.next[ContainerType]),
   //       centreId    = Some(CentreId(nameGenerator.next[ContainerType])),
@@ -185,7 +185,7 @@ class ContainerTypeSpec extends DomainSpec {
   //     v mustFail "InvalidVersion"
   //   }
 
-  //   "not be created with an null or empty name" in {
+  //   it("not be created with an null or empty name") {
   //     var v = EnabledContainerType.create(
   //       id          = ContainerTypeId(nameGenerator.next[ContainerType]),
   //       centreId    = Some(CentreId(nameGenerator.next[ContainerType])),
@@ -209,7 +209,7 @@ class ContainerTypeSpec extends DomainSpec {
   //     v mustFail "InvalidName"
   //   }
 
-  //   "not be created with an empty description option" in {
+  //   it("not be created with an empty description option") {
   //     var v = EnabledContainerType.create(
   //       id          = ContainerTypeId(nameGenerator.next[ContainerType]),
   //       centreId    = Some(CentreId(nameGenerator.next[ContainerType])),
@@ -233,7 +233,7 @@ class ContainerTypeSpec extends DomainSpec {
   //     v mustFail "InvalidDescription"
   //   }
 
-  //   "have more than one validation fail" in {
+  //   it("have more than one validation fail") {
   //     var v = EnabledContainerType.create(
   //       id          = ContainerTypeId(nameGenerator.next[ContainerType]),
   //       centreId    = Some(CentreId(nameGenerator.next[ContainerType])),

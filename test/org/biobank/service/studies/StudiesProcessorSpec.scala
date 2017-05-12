@@ -1,7 +1,10 @@
 package org.biobank.service.studies
 
+import akka.actor.ActorRef
 import akka.pattern._
+import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
+import org.biobank.domain.study.StudyRepository
 import org.biobank.service.ServiceValidation
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
@@ -10,13 +13,19 @@ import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import scalaz.Scalaz._
 
-class StudiesProcessorSpec extends TestFixture {
+final case class NamedStudiesProcessor @Inject() (@Named("studiesProcessor") processor: ActorRef)
+
+class StudiesProcessorSpec extends ProcessorTestFixture {
 
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.command.StudyCommands._
   import org.biobank.infrastructure.event.StudyEvents._
 
   val log = LoggerFactory.getLogger(this.getClass)
+
+  val studiesProcessor = app.injector.instanceOf[NamedStudiesProcessor].processor
+
+  val studyRepository = app.injector.instanceOf[StudyRepository]
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -27,9 +36,9 @@ class StudiesProcessorSpec extends TestFixture {
     super.beforeEach()
   }
 
-  "A studies processor" must {
+  describe("A studies processor must") {
 
-    "allow recovery from journal" in {
+    it("allow recovery from journal") {
       val study = factory.createDisabledStudy
       val cmd = AddStudyCmd(sessionUserId = None,
                             name          = study.name,
@@ -46,7 +55,7 @@ class StudiesProcessorSpec extends TestFixture {
       studyRepository.getValues.map { s => s.name } must contain (study.name)
     }
 
-    "allow a snapshot request" in {
+    it("allow a snapshot request") {
       val studies = (1 to 2).map { _ => factory.createDisabledStudy }
       studies.foreach(studyRepository.put)
 
@@ -56,7 +65,7 @@ class StudiesProcessorSpec extends TestFixture {
       ()
     }
 
-    "accept a snapshot offer" in {
+    it("accept a snapshot offer") {
       val snapshotFilename = "testfilename"
       val studies = (1 to 2).map { _ => factory.createDisabledStudy }
       val snapshotStudy = studies(1)

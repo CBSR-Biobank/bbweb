@@ -1,10 +1,12 @@
 package org.biobank.domain
 
 import org.biobank.fixture.NameGenerator
+import org.scalatest.FunSpec
 
-trait AnnotationTypeSetSharedSpec[T <: ConcurrencySafeEntity[_]]
-    extends DomainSpec {
+trait AnnotationTypeSetSharedSpec[T <: ConcurrencySafeEntity[_]] { this: FunSpec =>
   import org.biobank.TestUtils._
+
+  val factory: Factory
 
   protected val nameGenerator: NameGenerator
 
@@ -18,7 +20,7 @@ trait AnnotationTypeSetSharedSpec[T <: ConcurrencySafeEntity[_]]
 
   def annotationTypeSetSharedBehaviour() = {
 
-    "add an annotation type" in {
+    it("add an annotation type") {
       val entity = createEntity
       val annotationTypeCount = getAnnotationTypeSet(entity).size
       val annotationType = factory.createAnnotationType
@@ -30,7 +32,7 @@ trait AnnotationTypeSetSharedSpec[T <: ConcurrencySafeEntity[_]]
       }
     }
 
-    "replace an annotation type" in {
+    it("replace an annotation type") {
       val entity = createEntity
       val annotationType = factory.createAnnotationType
       addAnnotationType(entity, annotationType) mustSucceed { entity =>
@@ -44,7 +46,7 @@ trait AnnotationTypeSetSharedSpec[T <: ConcurrencySafeEntity[_]]
       }
     }
 
-    "remove an annotation type" in {
+    it("remove an annotation type") {
       val entity = createEntity
       val annotationType = factory.createAnnotationType
 
@@ -57,7 +59,7 @@ trait AnnotationTypeSetSharedSpec[T <: ConcurrencySafeEntity[_]]
       }
     }
 
-    "not allow adding an annotation type with a duplicate name" in {
+    it("not allow adding an annotation type with a duplicate name") {
       val entity = createEntity
       val annotationType = factory.createAnnotationType
       addAnnotationType(entity, annotationType) mustSucceed { entity =>

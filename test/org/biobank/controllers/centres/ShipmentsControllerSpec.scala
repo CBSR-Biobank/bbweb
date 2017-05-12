@@ -59,11 +59,11 @@ class ShipmentsControllerSpec
     }
   }
 
-  "Shipment REST API" when {
+  describe("Shipment REST API") {
 
-    "GET /shipments/list/:centreId" must {
+    describe("GET /shipments/list/:centreId") {
 
-      "list a shipment" in {
+      it("list a shipment") {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
 
@@ -74,7 +74,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "list multiple shipments" in {
+      it("list multiple shipments") {
         val f = createdShipmentsFixture(2)
         f.shipmentMap.values.foreach(shipmentRepository.put)
 
@@ -91,7 +91,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "list a shipment when using a not equal to filter on centre name" in {
+      it("list a shipment when using a not equal to filter on centre name") {
         val f = createdShipmentsFixture(1)
         f.shipmentMap.values.foreach(shipmentRepository.put)
 
@@ -112,7 +112,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "list a single shipment when filtered by state" in {
+      it("list a single shipment when filtered by state") {
         val f = allShipmentsFixture
         f.shipments.values.foreach(shipmentRepository.put)
 
@@ -126,7 +126,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "list multiple shipments when filtered by states" in {
+      it("list multiple shipments when filtered by states") {
         val shipmentStates = List(Shipment.createdState, Shipment.unpackedState)
         val f = allShipmentsFixture
         f.shipments.values.foreach(shipmentRepository.put)
@@ -145,7 +145,7 @@ class ShipmentsControllerSpec
         compareObj(jsonItems(1), f.shipments(Shipment.unpackedState))
       }
 
-      "fail when using an invalid filter string" in {
+      it("fail when using an invalid filter string") {
         val invalidFilterString = "xxx"
 
         val reply = makeRequest(GET, listUri + s"?filter=$invalidFilterString", BAD_REQUEST)
@@ -155,7 +155,7 @@ class ShipmentsControllerSpec
         (reply \ "message").as[String] must include regex ("could not parse filter expression:")
       }
 
-      "fail when using an invalid state filter" in {
+      it("fail when using an invalid state filter") {
         val invalidStateName = nameGenerator.next[Shipment]
 
         val reply = makeRequest(GET, listUri + s"?filter=state::$invalidStateName", NOT_FOUND)
@@ -165,7 +165,7 @@ class ShipmentsControllerSpec
         (reply \ "message").as[String] must include regex ("shipment state does not exist:")
       }
 
-      "list a single shipment when filtered by courier name" in {
+      it("list a single shipment when filtered by courier name") {
         val f = createdShipmentsFixture(2)
         f.shipmentMap.values.foreach(shipmentRepository.put)
         val shipment = f.shipmentMap.values.head
@@ -174,7 +174,7 @@ class ShipmentsControllerSpec
         compareObj(jsonItem, shipment)
       }
 
-      "list a single shipment when using a 'like' filter on courier name" in {
+      it("list a single shipment when using a 'like' filter on courier name") {
         val f = createdShipmentsFixture(2)
         val shipments = f.shipmentMap.values.toList
         val shipment = shipments(0).copy(courierName = "ABC")
@@ -187,7 +187,7 @@ class ShipmentsControllerSpec
         compareObj(jsonItem, shipment)
       }
 
-      "list multiple shipments when filtered by courier name" in {
+      it("list multiple shipments when filtered by courier name") {
         val numShipments = 2
         val f = createdShipmentsFixture(numShipments)
         val shipments = f.shipmentMap.values.toList
@@ -208,7 +208,7 @@ class ShipmentsControllerSpec
         compareObj(jsonItems(1), shipments(1))
       }
 
-      "list a single shipment when filtered by tracking number" in {
+      it("list a single shipment when filtered by tracking number") {
         val f = createdShipmentsFixture(2)
         f.shipmentMap.values.foreach(shipmentRepository.put)
         val shipment = f.shipmentMap.values.head
@@ -218,7 +218,7 @@ class ShipmentsControllerSpec
         compareObj(jsonItem, shipment)
       }
 
-      "list a single shipment when filtered with a logical expression" in {
+      it("list a single shipment when filtered with a logical expression") {
         val numShipments = 2
         val f = createdShipmentsFixture(numShipments)
         val shipments = f.shipmentMap.values.toList
@@ -238,7 +238,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "list shipments sorted by courier name" in {
+      it("list shipments sorted by courier name") {
         val f = centresFixture
         val shipments = List("FedEx", "UPS", "Canada Post").map { name =>
             factory.createShipment(f.fromCentre, f.toCentre).copy(courierName = name)
@@ -269,7 +269,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "list shipments sorted by tracking number" in {
+      it("list shipments sorted by tracking number") {
         val f = centresFixture
         val shipments = List("TN2", "TN3", "TN1")
           .map { trackingNumber =>
@@ -299,7 +299,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "list a single shipment when using paged query" in {
+      it("list a single shipment when using paged query") {
         val f = centresFixture
         val shipments = List("FedEx", "UPS", "Canada Post")
           .map { name =>
@@ -314,7 +314,7 @@ class ShipmentsControllerSpec
         compareObj(jsonItem, shipments(2))
       }
 
-      "list the last shipment when using paged query" in {
+      it("list the last shipment when using paged query") {
         val f = centresFixture
         val shipments = List("FedEx", "UPS", "Canada Post")
           .map { name =>
@@ -331,7 +331,7 @@ class ShipmentsControllerSpec
         compareObj(jsonItem, shipments(1))
       }
 
-      "list a single shipment when using a 'like' filter on tracking number" in {
+      it("list a single shipment when using a 'like' filter on tracking number") {
         val f = createdShipmentsFixture(2)
         val shipments = f.shipmentMap.values.toList
         val shipment = shipments(0).copy(trackingNumber = "ABC")
@@ -344,7 +344,7 @@ class ShipmentsControllerSpec
         compareObj(jsonItem, shipment)
       }
 
-      "fail when using an invalid query parameters" in {
+      it("fail when using an invalid query parameters") {
         PagedResultsSpec(this).failWithNegativePageNumber(listUri)
         PagedResultsSpec(this).failWithInvalidPageNumber(listUri)
         PagedResultsSpec(this).failWithNegativePageSize(listUri)
@@ -354,9 +354,9 @@ class ShipmentsControllerSpec
 
     }
 
-    "GET /shipments/:id" must {
+    describe("GET /shipments/:id") {
 
-      "get a shipment" in {
+      it("get a shipment") {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
         val json = makeRequest(GET, uri(f.shipment))
@@ -365,7 +365,7 @@ class ShipmentsControllerSpec
         compareObj(jsonObj, f.shipment)
       }
 
-      "returns an error for an invalid shipment ID" in {
+      it("returns an error for an invalid shipment ID") {
         val shipment = factory.createShipment
 
         val json = makeRequest(GET, uri(shipment), NOT_FOUND)
@@ -376,7 +376,7 @@ class ShipmentsControllerSpec
       }
     }
 
-    "POST /shipments" must {
+    describe("POST /shipments") {
 
       def shipmentToAddJson(shipment: Shipment) =
         Json.obj("courierName"    -> shipment.courierName,
@@ -385,7 +385,7 @@ class ShipmentsControllerSpec
                  "toLocationId"   -> shipment.toLocationId.id,
                  "timePacked"     -> shipment.timePacked)
 
-      "add a shipment" in {
+      it("add a shipment") {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
         val json = makeRequest(POST, uri, shipmentToAddJson(f.shipment))
@@ -413,7 +413,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "fail when adding a shipment with no courier name" in {
+      it("fail when adding a shipment with no courier name") {
         val shipment = createdShipmentFixture.shipment.copy(courierName = "")
         val json = makeRequest(POST, uri, BAD_REQUEST, shipmentToAddJson(shipment))
 
@@ -422,7 +422,7 @@ class ShipmentsControllerSpec
         (json \ "message").as[String] must include ("CourierNameInvalid")
       }
 
-      "fail when adding a shipment with no tracking number" in {
+      it("fail when adding a shipment with no tracking number") {
         val shipment = createdShipmentFixture.shipment.copy(trackingNumber = "")
         val json = makeRequest(POST, uri, BAD_REQUEST, shipmentToAddJson(shipment))
 
@@ -431,7 +431,7 @@ class ShipmentsControllerSpec
         (json \ "message").as[String] must include ("TrackingNumberInvalid")
       }
 
-      "fail when adding a shipment with no FROM location id" in {
+      it("fail when adding a shipment with no FROM location id") {
         val shipment = createdShipmentFixture.shipment.copy(fromLocationId = LocationId(""))
         val json = makeRequest(POST, uri, NOT_FOUND, shipmentToAddJson(shipment))
 
@@ -440,7 +440,7 @@ class ShipmentsControllerSpec
         (json \ "message").as[String] must include regex ("EntityCriteriaError.*centre with location id")
       }
 
-      "fail when adding a shipment with no TO location id" in {
+      it("fail when adding a shipment with no TO location id") {
         val shipment = createdShipmentFixture.shipment.copy(toLocationId = LocationId(""))
         val json = makeRequest(POST, uri, NOT_FOUND, shipmentToAddJson(shipment))
 
@@ -452,9 +452,9 @@ class ShipmentsControllerSpec
     }
 
 
-    "POST /shipments/courier/:id" must {
+    describe("POST /shipments/courier/:id") {
 
-      "allow updating the courier name" in {
+      it("allow updating the courier name") {
         val f = createdShipmentFixture
         val newCourier = nameGenerator.next[Shipment]
         shipmentRepository.put(f.shipment)
@@ -480,7 +480,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "not allow updating the courier name to an empty string" in {
+      it("not allow updating the courier name to an empty string") {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
         val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
@@ -492,7 +492,7 @@ class ShipmentsControllerSpec
         (json \ "message").as[String] must include ("CourierNameInvalid")
       }
 
-      "must not allow updating the courier name on a shipment not in created state"  in {
+      it("must not allow updating the courier name on a shipment not in created state") {
         val f = allShipmentsFixture
 
         nonCreatedStates.foreach { state =>
@@ -511,9 +511,9 @@ class ShipmentsControllerSpec
 
     }
 
-    "POST /shipments/trackingnumber/:id" must {
+    describe("POST /shipments/trackingnumber/:id") {
 
-      "allow updating the tracking number" in {
+      it("allow updating the tracking number") {
         val f = createdShipmentFixture
         val newTrackingNumber = nameGenerator.next[Shipment]
         shipmentRepository.put(f.shipment)
@@ -539,7 +539,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "not allow updating the tracking number to an empty string" in {
+      it("not allow updating the tracking number to an empty string") {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
         val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
@@ -551,7 +551,7 @@ class ShipmentsControllerSpec
         (json \ "message").as[String] must include ("TrackingNumberInvalid")
       }
 
-      "must not allow updating the tracking number on a shipment not in created state"  in {
+      it("must not allow updating the tracking number on a shipment not in created state") {
         val f = allShipmentsFixture
 
         nonCreatedStates.foreach { state =>
@@ -570,9 +570,9 @@ class ShipmentsControllerSpec
 
     }
 
-    "POST /shipments/fromlocation/:id" must {
+    describe("POST /shipments/fromlocation/:id") {
 
-      "allow updating the location the shipment is from" in {
+      it("allow updating the location the shipment is from") {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
 
@@ -602,7 +602,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "not allow updating the from location to an empty string" in {
+      it("not allow updating the from location to an empty string") {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
         val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
@@ -614,7 +614,7 @@ class ShipmentsControllerSpec
         (json \ "message").as[String] must include regex ("EntityCriteriaError.*centre with location id")
       }
 
-      "not allow updating the from location to an invalid id" in {
+      it("not allow updating the from location to an invalid id") {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
 
@@ -629,7 +629,7 @@ class ShipmentsControllerSpec
         (json \ "message").as[String] must include regex ("EntityCriteriaError.*centre with location id")
       }
 
-      "must not allow updating the from location on a shipment not in created state"  in {
+      it("must not allow updating the from location on a shipment not in created state") {
         val f = allShipmentsFixture
         val badLocation = factory.createLocation
 
@@ -649,9 +649,9 @@ class ShipmentsControllerSpec
 
     }
 
-    "POST /shipments/tolocation/:id" must {
+    describe("POST /shipments/tolocation/:id") {
 
-      "allow updating the location the shipment is going to" in {
+      it("allow updating the location the shipment is going to") {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
 
@@ -681,7 +681,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "not allow updating the TO location to an empty string" in {
+      it("not allow updating the TO location to an empty string") {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
         val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
@@ -693,7 +693,7 @@ class ShipmentsControllerSpec
         (json \ "message").as[String] must include regex ("EntityCriteriaError.*centre with location id")
       }
 
-      "not allow updating the TO location to an invalid id" in {
+      it("not allow updating the TO location to an invalid id") {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
 
@@ -708,7 +708,7 @@ class ShipmentsControllerSpec
         (json \ "message").as[String] must include regex ("EntityCriteriaError.*centre with location id")
       }
 
-      "must not allow updating the TO location on a shipment not in created state"  in {
+      it("must not allow updating the TO location on a shipment not in created state") {
         val f = allShipmentsFixture
         val badLocation = factory.createLocation
 
@@ -728,7 +728,7 @@ class ShipmentsControllerSpec
 
     }
 
-    "POST /shipments/state/:id" must {
+    describe("POST /shipments/state/:id") {
 
       def changeStateCommon(shipment:  Shipment,
                             newState:  EntityState,
@@ -757,9 +757,9 @@ class ShipmentsControllerSpec
         }
       }
 
-      "for all states" should {
+      describe("for all states") {
 
-        "fail requests to update the state on a shipment that does not exist" in {
+        it("fail requests to update the state on a shipment that does not exist") {
           val f = createdShipmentFixture
           val time = DateTime.now.minusDays(10)
 
@@ -777,9 +777,9 @@ class ShipmentsControllerSpec
 
       }
 
-      "for CREATED state" should {
+      describe("for CREATED state") {
 
-        "change to CREATED state from PACKED state" in {
+        it("change to CREATED state from PACKED state") {
           val f = packedShipmentFixture
 
           changeStateCommon(f.shipment, Shipment.createdState, None)
@@ -793,7 +793,7 @@ class ShipmentsControllerSpec
           }
         }
 
-        "not change to CREATED state from a state other than PACKED" in {
+        it("not change to CREATED state from a state other than PACKED") {
           val f = allShipmentsFixture
           f.shipments.values.foreach(shipmentRepository.put)
 
@@ -816,9 +816,9 @@ class ShipmentsControllerSpec
         }
       }
 
-      "for PACKED state" must {
+      describe("for PACKED state") {
 
-        "111 change to PACKED state from other valid states" in {
+        it("111 change to PACKED state from other valid states") {
           val f = allShipmentsFixture
           val testStates = Table("state", Shipment.createdState, Shipment.sentState)
 
@@ -842,7 +842,7 @@ class ShipmentsControllerSpec
           }
         }
 
-        "not change to PACKED state if no specimens in shipment" in {
+        it("not change to PACKED state if no specimens in shipment") {
           val f = allShipmentsFixture
           f.shipments.values.foreach(shipmentRepository.put)
 
@@ -861,7 +861,7 @@ class ShipmentsControllerSpec
           }
         }
 
-        "not change to PACKED state from an invalid state" in {
+        it("not change to PACKED state from an invalid state") {
           val f = allShipmentsFixture
           f.shipments.values.foreach(shipmentRepository.put)
 
@@ -888,9 +888,9 @@ class ShipmentsControllerSpec
         }
       }
 
-      "for SENT state" must {
+      describe("for SENT state") {
 
-        "change to SENT state from" in {
+        it("change to SENT state from") {
           val f = allShipmentsFixture
 
           val testStates = Table("state name",
@@ -915,7 +915,7 @@ class ShipmentsControllerSpec
           }
         }
 
-        "fail when updating state to SENT where time is less than packed time" in {
+        it("fail when updating state to SENT where time is less than packed time") {
           val f = packedShipmentFixture
           shipmentRepository.put(f.shipment)
           val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
@@ -928,7 +928,7 @@ class ShipmentsControllerSpec
           (json \ "message").as[String] must include ("TimeSentBeforePacked")
         }
 
-        "not change to SENT state from an invalid state" in {
+        it("not change to SENT state from an invalid state") {
           val f = allShipmentsFixture
           f.shipments.values.foreach(shipmentRepository.put)
 
@@ -952,9 +952,9 @@ class ShipmentsControllerSpec
 
       }
 
-      "for RECEIVED state" must {
+      describe("for RECEIVED state") {
 
-        "change to RECEIVED state from" in {
+        it("change to RECEIVED state from") {
           val f = allShipmentsFixture
 
           val testStates = Table("state name",
@@ -978,7 +978,7 @@ class ShipmentsControllerSpec
           }
         }
 
-        "not change to RECEIVED state from an invalid state" in {
+        it("not change to RECEIVED state from an invalid state") {
           val f = allShipmentsFixture
           f.shipments.values.foreach(shipmentRepository.put)
 
@@ -1001,7 +1001,7 @@ class ShipmentsControllerSpec
           }
         }
 
-        "fail for updating state to RECEIVED where time is less than sent time" in {
+        it("fail for updating state to RECEIVED where time is less than sent time") {
           val f = sentShipmentFixture
           shipmentRepository.put(f.shipment)
           val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
@@ -1014,7 +1014,7 @@ class ShipmentsControllerSpec
           (json \ "message").as[String] must include ("TimeReceivedBeforeSent")
         }
 
-        "fail to change from UNPACKED to RECEIVED if some specimens are not in PRESENT state" in {
+        it("fail to change from UNPACKED to RECEIVED if some specimens are not in PRESENT state") {
           val f = specimensFixture(1)
 
           val shipment = makeUnpackedShipment(f.shipment)
@@ -1037,14 +1037,14 @@ class ShipmentsControllerSpec
             "InvalidState: cannot change to received state, items have already been processed")
         }
 
-        "fail to change from UNPACKED to RECEIVED if some containers are not in PRESENT state" ignore {
+        ignore("fail to change from UNPACKED to RECEIVED if some containers are not in PRESENT state") {
           fail("needs implementation")
         }
       }
 
-      "for UNPACKED state" must {
+      describe("for UNPACKED state") {
 
-        "change to UNPACKED state from" in {
+        it("change to UNPACKED state from") {
           val f = allShipmentsFixture
 
           val testStates = Table("state name",
@@ -1068,7 +1068,7 @@ class ShipmentsControllerSpec
           }
         }
 
-        "not change to UNPACKED state from an invalid state" in {
+        it("not change to UNPACKED state from an invalid state") {
           val f = allShipmentsFixture
           f.shipments.values.foreach(shipmentRepository.put)
 
@@ -1093,9 +1093,9 @@ class ShipmentsControllerSpec
 
       }
 
-      "for COMPLETED state" must {
+      describe("for COMPLETED state") {
 
-        "change to COMPLETED state from UNPACKED" in {
+        it("change to COMPLETED state from UNPACKED") {
           val f = unpackedShipmentFixture
           val timeCompleted = f.shipment.timeUnpacked.get.plusDays(1)
 
@@ -1112,7 +1112,7 @@ class ShipmentsControllerSpec
           }
         }
 
-        "must not change to COMPLETED state from UNPACKED if there are present specimens" in {
+        it("must not change to COMPLETED state from UNPACKED if there are present specimens") {
           val f = unpackedShipmentFixture
           val timeCompleted = f.shipment.timeUnpacked.get.plusDays(1)
 
@@ -1128,7 +1128,7 @@ class ShipmentsControllerSpec
           (json \ "message").as[String] must include ("InvalidState: shipment has specimens in present state")
         }
 
-        "not change to COMPLETED state from an invalid state" in {
+        it("not change to COMPLETED state from an invalid state") {
           val f = allShipmentsFixture
           f.shipments.values.foreach(shipmentRepository.put)
 
@@ -1154,9 +1154,9 @@ class ShipmentsControllerSpec
 
       }
 
-      "for LOST state" must {
+      describe("for LOST state") {
 
-        "allow setting a shipment's state to LOST" in {
+        it("allow setting a shipment's state to LOST") {
           val f = sentShipmentFixture
 
           changeStateCommon(f.shipment, Shipment.lostState, None)
@@ -1166,7 +1166,7 @@ class ShipmentsControllerSpec
           }
         }
 
-        "not change to LOST state from an invalid state" in {
+        it("not change to LOST state from an invalid state") {
           val f = allShipmentsFixture
           f.shipments.values.foreach(shipmentRepository.put)
 
@@ -1192,9 +1192,9 @@ class ShipmentsControllerSpec
 
     }
 
-    "POST /shipments/state/skip-to-sent/:id" must {
+    describe("POST /shipments/state/skip-to-sent/:id") {
 
-      "switch from CREATED to SENT state" in {
+      it("switch from CREATED to SENT state") {
         val f = createdShipmentFixture
         val timePacked = DateTime.now.minusDays(10)
         val timeSent = timePacked.plusDays(1)
@@ -1213,7 +1213,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "fails when skipping to SENT state from state" in {
+      it("fails when skipping to SENT state from state") {
         val f = allShipmentsFixture
 
         val fromStates = Table("from states",
@@ -1240,9 +1240,9 @@ class ShipmentsControllerSpec
 
     }
 
-    "POST /shipments/state/skip-to-unpacked/:id" must {
+    describe("POST /shipments/state/skip-to-unpacked/:id") {
 
-      "switch from SENT to UNPACKED state" in {
+      it("switch from SENT to UNPACKED state") {
         val f = sentShipmentFixture
         val timeReceived = f.shipment.timeSent.fold { DateTime.now } { t => t.plusDays(1) }
         val timeUnpacked = timeReceived.plusDays(1)
@@ -1259,7 +1259,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "fails when skipping to UNPACKED state from state" in {
+      it("fails when skipping to UNPACKED state from state") {
         val f = allShipmentsFixture
 
         val fromStates = Table("from states",
@@ -1286,9 +1286,9 @@ class ShipmentsControllerSpec
 
     }
 
-    "DELETE /shipments/:id/:ver" must {
+    describe("DELETE /shipments/:id/:ver") {
 
-      "must delete a shipment in created state" in {
+      it("must delete a shipment in created state") {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
 
@@ -1299,7 +1299,7 @@ class ShipmentsControllerSpec
         shipmentRepository.getByKey(f.shipment.id) mustFail "IdNotFound.*shipment id.*"
       }
 
-      "fail on attempt to delete a shipment not in the system"  in {
+      it("fail on attempt to delete a shipment not in the system") {
         val f = createdShipmentFixture
 
         val json = makeRequest(DELETE, uri(f.shipment) + s"/${f.shipment.version}", NOT_FOUND)
@@ -1309,7 +1309,7 @@ class ShipmentsControllerSpec
         (json \ "message").as[String] must include regex ("IdNotFound.*shipment id")
       }
 
-      "must not delete a shipment not in created state"  in {
+      it("must not delete a shipment not in created state") {
         val f = allShipmentsFixture
 
         nonCreatedStates.foreach { state =>
@@ -1324,7 +1324,7 @@ class ShipmentsControllerSpec
         }
       }
 
-      "attempt to remove a shipment containing specimens fails" in {
+      it("attempt to remove a shipment containing specimens fails") {
         val f = specimensFixture(1)
 
         val specimen = f.specimens.head

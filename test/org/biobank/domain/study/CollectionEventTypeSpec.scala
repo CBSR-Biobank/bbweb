@@ -12,8 +12,7 @@ import com.github.nscala_time.time.Imports._
 import org.slf4j.LoggerFactory
 import scalaz.Scalaz._
 
-class CollectionEventTypeSpec extends DomainSpec
-    with AnnotationTypeSetSharedSpec[CollectionEventType] {
+class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpec[CollectionEventType] {
   import org.biobank.TestUtils._
 
   val log = LoggerFactory.getLogger(this.getClass)
@@ -31,9 +30,9 @@ class CollectionEventTypeSpec extends DomainSpec
                                ceventType.annotationTypes)
   }
 
-  "A collection event type" can {
+  describe("A collection event type can") {
 
-    "be created" in {
+    it("be created") {
       val ceventType = factory.createCollectionEventType
       createFrom(ceventType) mustSucceed { cet =>
         cet mustBe a[CollectionEventType]
@@ -53,7 +52,7 @@ class CollectionEventTypeSpec extends DomainSpec
       }
     }
 
-    "have it's name updated" in {
+    it("have it's name updated") {
       val cet = factory.createCollectionEventType
       val name = nameGenerator.next[CollectionEventType]
 
@@ -75,7 +74,7 @@ class CollectionEventTypeSpec extends DomainSpec
       }
     }
 
-    "have it's description updated" in {
+    it("have it's description updated") {
       val cet = factory.createCollectionEventType
       val description = Some(nameGenerator.next[CollectionEventType])
 
@@ -97,7 +96,7 @@ class CollectionEventTypeSpec extends DomainSpec
       }
     }
 
-    "have it's recurring field updated" in {
+    it("have it's recurring field updated") {
       val cet = factory.createCollectionEventType
 
       List(true, false).foreach { recurring =>
@@ -122,24 +121,24 @@ class CollectionEventTypeSpec extends DomainSpec
 
   }
 
-  "A collection event type" must {
+  describe("A collection event type") {
 
-    "not be created with an empty study id" in {
+    it("not be created with an empty study id") {
       val ceventType = factory.createCollectionEventType.copy(studyId = StudyId(""))
       createFrom(ceventType) mustFail "StudyIdRequired"
     }
 
-    "not be created with an empty id" in {
+    it("not be created with an empty id") {
       val ceventType = factory.createCollectionEventType.copy(id = CollectionEventTypeId(""))
       createFrom(ceventType) mustFail "IdRequired"
     }
 
-    "not be created with an invalid version" in {
+    it("not be created with an invalid version") {
       val ceventType = factory.createCollectionEventType.copy(version = -2L)
       createFrom(ceventType) mustFail "InvalidVersion"
     }
 
-    "not be created with an null or empty name" in {
+    it("not be created with an null or empty name") {
       var ceventType = factory.createCollectionEventType.copy(name = null)
       createFrom(ceventType) mustFail "NameRequired"
 
@@ -147,7 +146,7 @@ class CollectionEventTypeSpec extends DomainSpec
       createFrom(ceventType) mustFail "NameRequired"
     }
 
-    "not be created with an empty description option" in {
+    it("not be created with an empty description option") {
       var ceventType = factory.createCollectionEventType.copy(description = Some(null))
       createFrom(ceventType) mustFail "InvalidDescription"
 
@@ -155,16 +154,16 @@ class CollectionEventTypeSpec extends DomainSpec
       createFrom(ceventType) mustFail "InvalidDescription"
     }
 
-    "have more than one validation fail" in {
+    it("have more than one validation fail") {
       val ceventType = factory.createCollectionEventType.copy(version = -2L, name = "")
       createFrom(ceventType) mustFail ("InvalidVersion", "NameRequired")
     }
 
   }
 
-  "A collection event type's specimen spec set" must {
+  describe("A collection event type's specimen spec set") {
 
-    "add a specimen spec" in {
+    it("add a specimen spec") {
       val cet = factory.createCollectionEventType.copy(specimenSpecs = Set.empty)
       val specimenSpec = factory.createCollectionSpecimenSpec
 
@@ -186,7 +185,7 @@ class CollectionEventTypeSpec extends DomainSpec
       }
     }
 
-    "replace a specimen spec" in {
+    it("replace a specimen spec") {
       val specimenSpec = factory.createCollectionSpecimenSpec
       val specimenSpec2 = factory.createCollectionSpecimenSpec.copy(uniqueId = specimenSpec.uniqueId)
       val cet = factory.createCollectionEventType.copy(specimenSpecs = Set(specimenSpec))
@@ -209,7 +208,7 @@ class CollectionEventTypeSpec extends DomainSpec
       }
     }
 
-    "remove a specimen spec" in {
+    it("remove a specimen spec") {
       val specimenSpec = factory.createCollectionSpecimenSpec
       val cet = factory.createCollectionEventType.copy(specimenSpecs = Set(specimenSpec))
 
@@ -231,7 +230,7 @@ class CollectionEventTypeSpec extends DomainSpec
       }
     }
 
-    "not allow adding a specimen spec with a duplicate name" in {
+    it("not allow adding a specimen spec with a duplicate name") {
       val specimenSpec = factory.createCollectionSpecimenSpec
       val specimenSpec2 = factory.createCollectionSpecimenSpec.copy(name = specimenSpec.name)
       val cet = factory.createCollectionEventType.copy(specimenSpecs = Set(specimenSpec))
@@ -259,7 +258,7 @@ class CollectionEventTypeSpec extends DomainSpec
     entity.removeAnnotationType(uniqueId)
   }
 
-  "A collection event type's annotation type set" must {
+  describe("A collection event type's annotation type set") {
 
     annotationTypeSetSharedBehaviour
 

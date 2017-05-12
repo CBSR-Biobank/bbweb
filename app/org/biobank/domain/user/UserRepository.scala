@@ -1,10 +1,10 @@
 package org.biobank.domain.user
 
-import javax.inject.Singleton
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
+import javax.inject.Singleton
+import org.biobank.Global
 import org.biobank.domain.{ DomainValidation, ReadWriteRepository, ReadWriteRepositoryRefImpl }
-import org.joda.time.DateTime
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.{Configuration, Environment, Mode}
 import scalaz.Scalaz._

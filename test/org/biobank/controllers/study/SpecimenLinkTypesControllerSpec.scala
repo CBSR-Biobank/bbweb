@@ -117,10 +117,10 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
     fn(disabledStudy, procType)
   }
 
-  "SpecimenLink Type REST API" when {
+  describe("SpecimenLink Type REST API") {
 
-    "GET /studies/sltypes" must {
-      "list none" in {
+    describe("GET /studies/sltypes") {
+      it("list none") {
         createEntities() { (study, processingType) =>
           val json = makeRequest(GET, uri(processingType))
           (json \ "status").as[String] must include ("success")
@@ -130,7 +130,7 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
         }
       }
 
-      "list a single specimen link type" in {
+      it("list a single specimen link type") {
         createEntities() { (study, procType) =>
           val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
           specimenGroupRepository.put(inputSg)
@@ -145,7 +145,7 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
         }
       }
 
-      "get a single specimen link type" in {
+      it("get a single specimen link type") {
         createEntities() { (study, procType) =>
 
           val (slType, inputSg, outputSg) = factory.createSpecimenLinkTypeAndSpecimenGroups
@@ -160,7 +160,7 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
         }
       }
 
-      "list multiple specimen link types" in {
+      it("list multiple specimen link types") {
         createEntities() { (study, procType) =>
           val sltypes = List(factory.createSpecimenLinkType, factory.createSpecimenLinkType)
 
@@ -176,7 +176,7 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
         }
       }
 
-      "fail for invalid processing type id" in {
+      it("fail for invalid processing type id") {
         val procType = factory.createProcessingType
 
         val json = makeRequest(GET, uri(procType), NOT_FOUND)
@@ -186,7 +186,7 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
         (json \ "message").as[String] must include regex ("IdNotFound.*processing type")
       }
 
-      "fail for an invalid procesing type ID when using an specimen link type id" in {
+      it("fail for an invalid procesing type ID when using an specimen link type id") {
         val procType = factory.createProcessingType
         val slType = factory.createSpecimenLinkType
 
@@ -197,7 +197,7 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
         (json \ "message").as[String] must include regex ("IdNotFound.*processing type")
       }
 
-      "fail for an invalid specimen link type id" in {
+      it("fail for an invalid specimen link type id") {
         createEntities() { (study, procType) =>
           val slType = factory.createSpecimenLinkType
           val json = makeRequest(GET, uriWithQuery(procType, slType), NOT_FOUND)
@@ -212,8 +212,8 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
 
     }
 
-    "POST /studies/sltypes" must {
-      "add a specimen link type" in {
+    describe("POST /studies/sltypes") {
+      it("add a specimen link type") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -229,15 +229,15 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
         (json \ "status").as[String] must include ("success")
       }
 
-      "not add a specimen link type to an enabled study" in {
+      it("not add a specimen link type to an enabled study") {
         addOnNonDisabledStudy(factory.createEnabledStudy, factory.createProcessingType)
       }
 
-      "not add a specimen link type to an retired study" in {
+      it("not add a specimen link type to an retired study") {
         addOnNonDisabledStudy(factory.createRetiredStudy, factory.createProcessingType)
       }
 
-      "fail when adding and processing type IDs do not match" in {
+      it("fail when adding and processing type IDs do not match") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -259,8 +259,8 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
 
     }
 
-    "PUT /studies/sltypes" must {
-      "must update a specimen link type" in {
+    describe("PUT /studies/sltypes") {
+      it("must update a specimen link type") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -283,15 +283,15 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
         (json \ "status").as[String] must include ("success")
       }
 
-      "not update a specimen link type on an enabled study" in {
+      it("not update a specimen link type on an enabled study") {
         updateOnNonDisabledStudy(factory.createEnabledStudy, factory.createProcessingType)
       }
 
-      "not update a specimen link type on an retired study" in {
+      it("not update a specimen link type on an retired study") {
         updateOnNonDisabledStudy(factory.createRetiredStudy, factory.createProcessingType)
       }
 
-      "fail when updating and processing type IDs do not match" in {
+      it("fail when updating and processing type IDs do not match") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -315,7 +315,7 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
         (json \ "message").as[String] must include regex ("IdNotFound.*processing type")
       }
 
-      "fail when updating and specimen link type IDs do not match" in {
+      it("fail when updating and specimen link type IDs do not match") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -339,8 +339,8 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
 
     }
 
-    "DELETE /studies/sltypes" must {
-      "remove a specimen link type" in {
+    describe("DELETE /studies/sltypes") {
+      it("remove a specimen link type") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
@@ -357,11 +357,11 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
         (json \ "status").as[String] must include ("success")
       }
 
-      "not remove a specimen link type on an enabled study" in {
+      it("not remove a specimen link type on an enabled study") {
         removeOnNonDisabledStudy(factory.createEnabledStudy, factory.createProcessingType)
       }
 
-      "not remove a specimen link type on an retired study" in {
+      it("not remove a specimen link type on an retired study") {
         removeOnNonDisabledStudy(factory.createRetiredStudy, factory.createProcessingType)
       }
     }

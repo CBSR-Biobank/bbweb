@@ -21,9 +21,9 @@ class SpecimenLinkTypeSpec @Inject() (
 
   // val nameGenerator = new NameGenerator(this.getClass)
 
-  // "A specimen link type" can {
+  // describe("A specimen link type") {
 
-  //   "be created" in {
+  //   it("be created") {
   //     val processingType = factory.defaultProcessingType
   //     val inputSpecimenGroup = factory.createSpecimenGroup
   //     val outputSpecimenGroup = factory.createSpecimenGroup
@@ -58,7 +58,7 @@ class SpecimenLinkTypeSpec @Inject() (
   //     }
   //   }
 
-  //   "be update" in {
+  //   it("be update") {
   //     val slType = factory.createSpecimenLinkType
 
   //     val inputSpecimenGroup = factory.createSpecimenGroup
@@ -96,9 +96,9 @@ class SpecimenLinkTypeSpec @Inject() (
 
   // }
 
-  // "A specimen link type" must {
+  // describe("A specimen link type") {
 
-  //   "not be created with an empty processing type id" in {
+  //   it("not be created with an empty processing type id") {
   //     val processingTypeId = ProcessingTypeId("")
   //     val inputSpecimenGroup = factory.createSpecimenGroup
   //     val outputSpecimenGroup = factory.createSpecimenGroup
@@ -115,7 +115,7 @@ class SpecimenLinkTypeSpec @Inject() (
   //     validation mustFail "ProcessingTypeIdRequired"
   //   }
 
-  //   "not be created with an empty id" in {
+  //   it("not be created with an empty id") {
   //     val processingType = factory.defaultProcessingType
   //     val inputSpecimenGroup = factory.createSpecimenGroup
   //     val outputSpecimenGroup = factory.createSpecimenGroup
@@ -132,7 +132,7 @@ class SpecimenLinkTypeSpec @Inject() (
   //     validation mustFail "IdRequired"
   //   }
 
-  //   "not be created with an invalid specimen group ids" in {
+  //   it("not be created with an invalid specimen group ids") {
   //     val processingType = factory.defaultProcessingType
   //     var specimenGroupIdIn: SpecimenGroupId = SpecimenGroupId("")
   //     var specimenGroupIdOut: SpecimenGroupId = specimenGroupRepository.nextIdentity
@@ -161,7 +161,7 @@ class SpecimenLinkTypeSpec @Inject() (
   //     validation2 mustFail "SpecimenGroupIdRequired"
   //   }
 
-  //   "not be created with an invalid version" in {
+  //   it("not be created with an invalid version") {
   //     val processingType = factory.defaultProcessingType
   //     val inputSpecimenGroup = factory.createSpecimenGroup
   //     val outputSpecimenGroup = factory.createSpecimenGroup
@@ -178,7 +178,7 @@ class SpecimenLinkTypeSpec @Inject() (
   //     validation mustFail "InvalidVersion"
   //   }
 
-  //   "not be created with an invalid expected input / output change" in {
+  //   it("not be created with an invalid expected input / output change") {
   //     val processingType = factory.defaultProcessingType
   //     val inputSpecimenGroup = factory.createSpecimenGroup
   //     val outputSpecimenGroup = factory.createSpecimenGroup
@@ -207,7 +207,7 @@ class SpecimenLinkTypeSpec @Inject() (
   //     validation2 mustFail "InvalidPositiveNumber"
   //   }
 
-  //   "not be created with an invalid input / output count" in {
+  //   it("not be created with an invalid input / output count") {
   //     val processingType = factory.defaultProcessingType
   //     val inputSpecimenGroup = factory.createSpecimenGroup
   //     val outputSpecimenGroup = factory.createSpecimenGroup
@@ -235,7 +235,7 @@ class SpecimenLinkTypeSpec @Inject() (
   //     validation2 mustFail "InvalidPositiveNumber"
   //   }
 
-  //   "not be created with invalid container types" in {
+  //   it("not be created with invalid container types") {
   //     val processingType = factory.defaultProcessingType
   //     val inputSpecimenGroup = factory.createSpecimenGroup
   //     val outputSpecimenGroup = factory.createSpecimenGroup
@@ -262,7 +262,7 @@ class SpecimenLinkTypeSpec @Inject() (
   //     validation2 mustFail "ContainerTypeIdRequired"
   //   }
 
-  //   "have more than one validation fail" in {
+  //   it("have more than one validation fail") {
   //     val processingType = factory.defaultProcessingType
   //     val inputSpecimenGroup = factory.createSpecimenGroup
   //     val outputSpecimenGroup = factory.createSpecimenGroup
@@ -279,7 +279,7 @@ class SpecimenLinkTypeSpec @Inject() (
   //     validation.mustFail("IdRequired", "InvalidVersion")
   //   }
 
-  //   "not be created with an invalid annotation type id" in {
+  //   it("not be created with an invalid annotation type id") {
   //     val processingType = factory.defaultProcessingType
   //     val inputSpecimenGroup = factory.createSpecimenGroup
   //     val outputSpecimenGroup = factory.createSpecimenGroup

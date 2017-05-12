@@ -28,9 +28,9 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
   }
 
 
-  "A study" can {
+  describe("A study") {
 
-    "be created" in {
+    it("be created") {
       val study = factory.createDisabledStudy
       createFrom(study).mustSucceed { s =>
         s mustBe a[DisabledStudy]
@@ -46,7 +46,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
       }
     }
 
-    "have it's name updated" in {
+    it("have it's name updated") {
       val study = factory.createDisabledStudy
       val name = nameGenerator.next[Study]
 
@@ -62,7 +62,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
       }
     }
 
-    "have it's description updated" in {
+    it("have it's description updated") {
       val study = factory.createDisabledStudy
       val description = Some(nameGenerator.next[Study])
 
@@ -78,7 +78,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
       }
     }
 
-    "be enabled" in {
+    it("be enabled") {
       val study = factory.createDisabledStudy
       study.enable mustSucceed { enabledStudy =>
         enabledStudy mustBe a[EnabledStudy]
@@ -87,7 +87,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
       }
     }
 
-    "when disabled, can be enabled" in {
+    it("when disabled, can be enabled") {
       val study = factory.createEnabledStudy
       study.disable mustSucceed { disabledStudy =>
         disabledStudy mustBe a[DisabledStudy]
@@ -96,7 +96,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
       }
     }
 
-    "be retired" in {
+    it("be retired") {
       val study = factory.createDisabledStudy
       study.retire mustSucceed { retiredStudy =>
         retiredStudy mustBe a[RetiredStudy]
@@ -105,7 +105,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
       }
     }
 
-    "be unretired" in {
+    it("be unretired") {
       val study = factory.createRetiredStudy
       study.unretire() mustSucceed { disabledStudy =>
         disabledStudy mustBe a[DisabledStudy]
@@ -116,19 +116,19 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
 
   }
 
-  "A study" must {
+  describe("A study") {
 
-    "not be created with an empty id" in {
+    it("not be created with an empty id") {
       val study = factory.createDisabledStudy.copy(id = StudyId(""))
       createFrom(study) mustFail "IdRequired"
     }
 
-    "not be created with an invalid version" in {
+    it("not be created with an invalid version") {
       val study = factory.createDisabledStudy.copy(version = -2L)
       createFrom(study) mustFail "InvalidVersion"
     }
 
-    "not be created with an null or empty name" in {
+    it("not be created with an null or empty name") {
       var study = factory.createDisabledStudy.copy(name = null)
       createFrom(study) mustFail "InvalidName"
 
@@ -136,7 +136,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
       createFrom(study) mustFail "InvalidName"
     }
 
-    "not be created with an empty description" in {
+    it("not be created with an empty description") {
       var study = factory.createDisabledStudy.copy(description = Some(null))
       createFrom(study) mustFail "InvalidDescription"
 
@@ -144,7 +144,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
       createFrom(study) mustFail "InvalidDescription"
     }
 
-    "have more than one validation fail" in {
+    it("have more than one validation fail") {
       val study = factory.createDisabledStudy.copy(version = -2L, name = "")
       createFrom(study) mustFail ("InvalidVersion",  "InvalidName")
     }
@@ -171,7 +171,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
     study.removeParticipantAnnotationType(uniqueId)
   }
 
-  "A study's annotation type set" must {
+  describe("A study's annotation type set") {
 
     annotationTypeSetSharedBehaviour
 

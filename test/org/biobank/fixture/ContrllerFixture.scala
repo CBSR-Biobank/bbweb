@@ -52,7 +52,7 @@ trait BbwebFakeApplication {
  * make it easier to drop all items in the database prior to running a test in a test suite.
  */
 abstract class ControllerFixture
-    extends PlaySpec
+    extends FunSpec
     with OneServerPerTest
     with OneBrowserPerTest
     with HtmlUnitFactory

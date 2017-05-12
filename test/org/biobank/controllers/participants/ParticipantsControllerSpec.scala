@@ -138,11 +138,11 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
   }
 
 
-  "Study REST API" when {
+  describe("Study REST API") {
 
-    "GET /participants/:studyId/:id" must {
+    describe("GET /participants/:studyId/:id") {
 
-      "get participant" in {
+      it("get participant") {
 
         val study = factory.createEnabledStudy
         studyRepository.put(study)
@@ -157,7 +157,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         compareObj(jsObj, participant)
       }
 
-      "get participant with no annotations" in {
+      it("get participant with no annotations") {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -172,9 +172,9 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
     }
 
-    "GET /participants/uniqueId/:studyId/:id" must {
+    describe("GET /participants/uniqueId/:studyId/:id") {
 
-      "must return false for a participant ID that exists" in {
+      it("must return false for a participant ID that exists") {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -189,7 +189,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         compareObj(jsObj, participant)
       }
 
-      "must return BAD_REQUEST for a participant ID that exists but in a different study" in {
+      it("must return BAD_REQUEST for a participant ID that exists but in a different study") {
         val participant = factory.createParticipant
         participantRepository.put(participant)
 
@@ -203,7 +203,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         (json \ "message").as[String] must include regex ("EntityCriteriaError.*participant")
       }
 
-      "must return NOT_FOUND for a participant ID that does not exist" in {
+      it("must return NOT_FOUND for a participant ID that does not exist") {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -218,9 +218,9 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
     }
 
-    "POST /participants/:studyId" must {
+    describe("POST /participants/:studyId") {
 
-      "add a participant with no annotation types" in {
+      it("add a participant with no annotation types") {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -241,7 +241,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         }
       }
 
-      "add a participant with annotations" in {
+      it("add a participant with annotations") {
         val annotTypes = createAnnotationsAndTypes
         val annotations = annotTypes.values.toSet
 
@@ -264,7 +264,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         }
       }
 
-      "fail when adding participant with duplicate uniqueId" in {
+      it("fail when adding participant with duplicate uniqueId") {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -277,7 +277,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         (json \ "message").as[String] must include ("participant with unique ID already exists")
       }
 
-      "fail when missing a required annotation type" in {
+      it("fail when missing a required annotation type") {
         val annotType = factory.createAnnotationType.copy(required = true);
         val study = factory.createEnabledStudy.copy(annotationTypes = Set(annotType))
         studyRepository.put(study)
@@ -288,7 +288,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         (json \ "message").as[String] must include ("missing required annotation type")
       }
 
-      "fail when participant has annotations and the study does not have any annotation types" in {
+      it("fail when participant has annotations and the study does not have any annotation types") {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -302,7 +302,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         (json \ "message").as[String] must include ("no annotation types")
       }
 
-      "for an annotation with an invalid annotation type id" in {
+      it("for an annotation with an invalid annotation type id") {
         val annotType = factory.createAnnotationType
         val annotation = factory.createAnnotation.copy(annotationTypeId = nameGenerator.next[AnnotationType])
 
@@ -318,7 +318,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         (json \ "message").as[String] must include ("annotation(s) do not belong to annotation types")
       }
 
-      "fail for more than one annotation with the same annotation type" in {
+      it("fail for more than one annotation with the same annotation type") {
         val pat = createAnnotationType
         val study = factory.createEnabledStudy.copy(annotationTypes = Set(pat))
         studyRepository.put(study)
@@ -338,22 +338,22 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         (json \ "message").as[String] must include ("duplicate annotations")
       }
 
-      "not add a participant on an disabled study" in {
+      it("not add a participant on an disabled study") {
         val disabledStudy = factory.createDisabledStudy
         val participant = factory.createParticipant.copy(studyId = disabledStudy.id)
         addOnNonEnabledStudy(disabledStudy, participant)
       }
 
-      "not add a participant on an retired study" in {
+      it("not add a participant on an retired study") {
         val retiredStudy = factory.createRetiredStudy
         val participant = factory.createParticipant.copy(studyId = retiredStudy.id)
         addOnNonEnabledStudy(retiredStudy, participant)
       }
     }
 
-    "POST /participants/uniqueId/:id" must {
+    describe("POST /participants/uniqueId/:id") {
 
-      "update a participant's unique id" in {
+      it("update a participant's unique id") {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -380,7 +380,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         }
       }
 
-      "fail when updating a participant's unique id to one already used" in {
+      it("fail when updating a participant's unique id to one already used") {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
@@ -404,7 +404,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         (json \ "message").as[String] must include ("participant with unique ID already exists")
       }
 
-      "not update a participant on an disabled study" in {
+      it("not update a participant on an disabled study") {
         val disabledStudy = factory.createDisabledStudy
         val participant = factory.createParticipant.copy(studyId = disabledStudy.id)
         updateOnNonEnabledStudy(disabledStudy,
@@ -413,7 +413,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
                                 Json.obj("uniqueId" -> participant.uniqueId))
       }
 
-      "not update a participant on an retired study" in {
+      it("not update a participant on an retired study") {
         val retiredStudy = factory.createRetiredStudy
         val participant = factory.createParticipant.copy(studyId = retiredStudy.id)
         updateOnNonEnabledStudy(retiredStudy,
@@ -424,13 +424,13 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
     }
 
-    "POST /participants/annot/:id" must {
+    describe("POST /participants/annot/:id") {
 
       annotationTypeUpdateSharedBehaviour
 
     }
 
-    "DELETE /participants/annot/:id/:annotTypeId/:ver" must {
+    describe("DELETE /participants/annot/:id/:annotTypeId/:ver") {
 
       annotationTypeRemoveSharedBehaviour
 

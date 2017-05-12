@@ -8,8 +8,7 @@ import org.slf4j.LoggerFactory
 import com.github.nscala_time.time.Imports._
 import scalaz.Scalaz._
 
-class ProcessingTypeSpec @Inject() (
-  val processingTypeRepository: ProcessingTypeRepository)
+class ProcessingTypeSpec @Inject() (val processingTypeRepository: ProcessingTypeRepository)
     extends DomainSpec {
   import org.biobank.TestUtils._
 
@@ -17,9 +16,9 @@ class ProcessingTypeSpec @Inject() (
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  "A processing type" can {
+  describe("A processing type") {
 
-    "be created" in {
+    it("be created") {
       val disabledStudy = factory.defaultDisabledStudy
       val processingTypeId = processingTypeRepository.nextIdentity
       val name = nameGenerator.next[ProcessingType]
@@ -44,7 +43,7 @@ class ProcessingTypeSpec @Inject() (
       }
     }
 
-    "be updated" in {
+    it("be updated") {
       val processingType = factory.createProcessingType
 
       val name = nameGenerator.next[ProcessingType]
@@ -70,9 +69,9 @@ class ProcessingTypeSpec @Inject() (
     }
   }
 
-  "A processing type" must {
+  describe("A processing type") {
 
-    "not be created with an empty study id" in {
+    it("not be created with an empty study id") {
       val studyId = StudyId("")
       val processingTypeId = processingTypeRepository.nextIdentity
       val name = nameGenerator.next[ProcessingType]
@@ -85,7 +84,7 @@ class ProcessingTypeSpec @Inject() (
     }
 
 
-    "not be created with an empty id" in {
+    it("not be created with an empty id") {
       val disabledStudy = factory.defaultDisabledStudy
       val processingTypeId = ProcessingTypeId("")
       val name = nameGenerator.next[ProcessingType]
@@ -97,7 +96,7 @@ class ProcessingTypeSpec @Inject() (
       validation mustFail "IdRequired"
     }
 
-    "not be created with an invalid version" in {
+    it("not be created with an invalid version") {
       val disabledStudy = factory.defaultDisabledStudy
       val processingTypeId = processingTypeRepository.nextIdentity
       val name = nameGenerator.next[ProcessingType]
@@ -109,7 +108,7 @@ class ProcessingTypeSpec @Inject() (
       validation mustFail "InvalidVersion"
     }
 
-    "not be created with an null or empty name" in {
+    it("not be created with an null or empty name") {
       val disabledStudy = factory.defaultDisabledStudy
       val processingTypeId = processingTypeRepository.nextIdentity
       var name: String = null
@@ -126,7 +125,7 @@ class ProcessingTypeSpec @Inject() (
       validation2 mustFail "NameRequired"
     }
 
-    "not be created with an empty description option" in {
+    it("not be created with an empty description option") {
       val disabledStudy = factory.defaultDisabledStudy
       val processingTypeId = processingTypeRepository.nextIdentity
       val name = nameGenerator.next[ProcessingType]
@@ -143,7 +142,7 @@ class ProcessingTypeSpec @Inject() (
       validation2 mustFail "InvalidDescription"
     }
 
-    "have more than one validation fail" in {
+    it("have more than one validation fail") {
       val disabledStudy = factory.defaultDisabledStudy
       val processingTypeId = processingTypeRepository.nextIdentity
       val name = nameGenerator.next[ProcessingType]

@@ -32,11 +32,11 @@ class ShipmentSpecimensControllerSpec
   def uri(shipment: Shipment, shipmentSpecimen: ShipmentSpecimen): String =
     s"/shipments/specimens/${shipment.id.id}/${shipmentSpecimen.id.id}"
 
-  "Shipment specimens REST API" when {
+  describe("Shipment specimens REST API") {
 
-    "GET /shipments/specimens/:id" must {
+    describe("GET /shipments/specimens/:id") {
 
-      "work for shipment with no specimens" in {
+      it("work for shipment with no specimens") {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
 
@@ -49,7 +49,7 @@ class ShipmentSpecimensControllerSpec
         jsonItems must have size 0
       }
 
-      "work for shipment with one specimen" in {
+      it("work for shipment with one specimen") {
         val f = specimensFixture(1)
 
         val specimen = f.specimens.head
@@ -71,7 +71,7 @@ class ShipmentSpecimensControllerSpec
         compareObj(jsonItem, dto)
       }
 
-      "work for shipment with more than one specimen" in {
+      it("work for shipment with more than one specimen") {
         val numSpecimens = 2
         val f = specimensFixture(numSpecimens)
 
@@ -103,7 +103,7 @@ class ShipmentSpecimensControllerSpec
         }
       }
 
-      "list shipment specimens by item state" in {
+      it("list shipment specimens by item state") {
         val numSpecimens = 4
         val f = shipmentSpecimensFixture(numSpecimens)
 
@@ -117,7 +117,7 @@ class ShipmentSpecimensControllerSpec
         compareObj(jsonItem, f.shipmentSpecimenMap.values.head._4)
       }
 
-      "list shipment specimens filtered by item state" in {
+      it("list shipment specimens filtered by item state") {
         val numSpecimens = ShipmentItemState.values.size
         val f = shipmentSpecimensFixture(numSpecimens)
 
@@ -140,7 +140,7 @@ class ShipmentSpecimensControllerSpec
         }
       }
 
-      "fail for an invalid item state for a shipment specimen" in {
+      it("fail for an invalid item state for a shipment specimen") {
         val f = createdShipmentFixture
         val invalidStateName = "state::" + nameGenerator.next[ShipmentSpecimen]
 
@@ -154,7 +154,7 @@ class ShipmentSpecimensControllerSpec
           "InvalidState: shipment specimen state does not exist")
       }
 
-      "list a single specimen when using paged query" in {
+      it("list a single specimen when using paged query") {
         val numSpecimens = 2
         val f = shipmentSpecimensFixture(numSpecimens)
 
@@ -168,7 +168,7 @@ class ShipmentSpecimensControllerSpec
         compareObj(jsonItem, f.shipmentSpecimenMap.values.head._4)
       }
 
-      "list the last specimen when using paged query" in {
+      it("list the last specimen when using paged query") {
         val numSpecimens = 2
         val f = shipmentSpecimensFixture(numSpecimens)
 
@@ -183,7 +183,7 @@ class ShipmentSpecimensControllerSpec
         compareObj(jsonItem, f.shipmentSpecimenMap.values.toList(1)._4)
       }
 
-      "fail when using an invalid query parameters" in {
+      it("fail when using an invalid query parameters") {
         val f = shipmentSpecimensFixture(2)
         val url = uri(f.shipment)
         PagedResultsSpec(this).failWithNegativePageNumber(url)
@@ -193,7 +193,7 @@ class ShipmentSpecimensControllerSpec
         PagedResultsSpec(this).failWithInvalidSort(url)
       }
 
-      "list specimens in descending order by state" in {
+      it("list specimens in descending order by state") {
         val numSpecimens = ShipmentItemState.values.size
         val f = shipmentSpecimensFixture(numSpecimens)
 
@@ -220,9 +220,9 @@ class ShipmentSpecimensControllerSpec
       }
     }
 
-    "GET /shipments/specimens/:shId/:shSpcId" must {
+    describe("GET /shipments/specimens/:shId/:shSpcId") {
 
-      "get a shipment specimen" in {
+      it("get a shipment specimen") {
         val f = shipmentSpecimensFixture(1)
         val shipmentSpecimen = f.shipmentSpecimenMap.values.head._3
         val dto = f.shipmentSpecimenMap.values.head._4
@@ -236,7 +236,7 @@ class ShipmentSpecimensControllerSpec
         compareObj(jsonObj, dto)
       }
 
-      "fails for an invalid shipment id" in {
+      it("fails for an invalid shipment id") {
         val f = shipmentSpecimensFixture(1)
         val shipmentSpecimen = f.shipmentSpecimenMap.values.head._2
 
@@ -251,9 +251,9 @@ class ShipmentSpecimensControllerSpec
 
     }
 
-    "GET /shipments/specimens/canadd/:shId/:invId" must {
+    describe("GET /shipments/specimens/canadd/:shId/:invId") {
 
-      "can add a specimen inventory Id" in {
+      it("can add a specimen inventory Id") {
         val f = specimensFixture(1)
         shipmentRepository.put(f.shipment)
         val specimen = f.specimens.head
@@ -276,7 +276,7 @@ class ShipmentSpecimensControllerSpec
         compareObj(jsonObj, specimenDto)
       }
 
-      "fail when adding a specimen inventory Id already in the shipment" in {
+      it("fail when adding a specimen inventory Id already in the shipment") {
         val f = shipmentSpecimensFixture(1)
         val specimen = f.shipmentSpecimenMap.values.head._1
 
@@ -288,7 +288,7 @@ class ShipmentSpecimensControllerSpec
         (reply \ "message").as[String] must include ("specimens are already in an active shipment")
       }
 
-      "not add a specimen inventory Id that does not exist" in {
+      it("not add a specimen inventory Id that does not exist") {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
 
@@ -302,7 +302,7 @@ class ShipmentSpecimensControllerSpec
           "EntityCriteriaError: specimen with inventory ID not found")
       }
 
-      "not add a specimen inventory Id that not present at shipment's from centre" in {
+      it("not add a specimen inventory Id that not present at shipment's from centre") {
         val f = specimensFixture(1)
         val specimen = f.specimens.head.copy(locationId = f.toCentre.locations.head.uniqueId)
         specimenRepository.put(specimen)
@@ -315,7 +315,7 @@ class ShipmentSpecimensControllerSpec
         (reply \ "message").as[String] must include ("specimen not at shipment's from location")
       }
 
-      "fails for a specimen already in another active shipment" in {
+      it("fails for a specimen already in another active shipment") {
         val f = shipmentSpecimensFixture(1)
         val specimen = f.shipmentSpecimenMap.values.head._1
         val newShipment = factory.createShipment(f.fromCentre, f.toCentre)
@@ -331,9 +331,9 @@ class ShipmentSpecimensControllerSpec
       }
     }
 
-    "POST /shipments/specimens/:id" must {
+    describe("POST /shipments/specimens/:id") {
 
-      "add a specimen to a shipment" in {
+      it("add a specimen to a shipment") {
         val f = specimensFixture(1)
         val specimen = f.specimens.head
         val addJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
@@ -358,7 +358,7 @@ class ShipmentSpecimensControllerSpec
         TestUtils.checkOpionalTime(repoSs.timeModified, None)
       }
 
-      "not add a specimen to a shipment which is not in the system" in {
+      it("not add a specimen to a shipment which is not in the system") {
         val f = specimensFixture(1)
         val shipment = factory.createShipment
         val specimen = f.specimens.head
@@ -370,7 +370,7 @@ class ShipmentSpecimensControllerSpec
         (reply \ "message").as[String] must include regex ("IdNotFound.*shipment id")
       }
 
-      "not add a specimen to a shipment not in created state" in {
+      it("not add a specimen to a shipment not in created state") {
         val f = specimensFixture(1)
         val specimen = f.specimens.head
 
@@ -396,7 +396,7 @@ class ShipmentSpecimensControllerSpec
         }
       }
 
-      "not add a specimen from a different centre to a shipment" in {
+      it("not add a specimen from a different centre to a shipment") {
         val f = specimensFixture(1)
         shipmentRepository.put(f.shipment)
         val specimen = f.specimens.head.copy(locationId = f.toCentre.locations.head.uniqueId)
@@ -412,7 +412,7 @@ class ShipmentSpecimensControllerSpec
       }
     }
 
-    "alter specimens in shipments" must {
+    describe("alter specimens in shipments") {
 
       val stateData = Table(
           ("shipment specimen states", "url path"),
@@ -420,7 +420,7 @@ class ShipmentSpecimensControllerSpec
           (ShipmentItemState.Missing,  "missing")
         )
 
-      "change state on a shipment specimen" in {
+      it("change state on a shipment specimen") {
         val f = specimensFixture(1)
 
         val shipment = makeUnpackedShipment(f.shipment)
@@ -459,7 +459,7 @@ class ShipmentSpecimensControllerSpec
         }
       }
 
-      "cannot change a shipment specimen's state if shipment is not PACKED" in {
+      it("cannot change a shipment specimen's state if shipment is not PACKED") {
         val f = specimensFixture(1)
         val shipments = Table("shipment",
                               f.shipment,
@@ -488,7 +488,7 @@ class ShipmentSpecimensControllerSpec
         }
       }
 
-      "cannot change a shipment specimen's state if it's not in the shipment" in {
+      it("cannot change a shipment specimen's state if it's not in the shipment") {
         val f = specimensFixture(1)
         val shipment = makeUnpackedShipment(f.shipment)
         val specimen = f.specimens.headOption.value
@@ -507,7 +507,7 @@ class ShipmentSpecimensControllerSpec
         }
       }
 
-      "cannot change a shipment specimen's state if the specimen not in the system" in {
+      it("cannot change a shipment specimen's state if the specimen not in the system") {
         val f = specimensFixture(1)
         val shipment = makeUnpackedShipment(f.shipment)
         val specimen = f.specimens.headOption.value
@@ -527,7 +527,7 @@ class ShipmentSpecimensControllerSpec
         }
       }
 
-      "cannot change a shipment specimen's state if shipment specimen's state is not present" in {
+      it("cannot change a shipment specimen's state if shipment specimen's state is not present") {
         val f = specimensFixture(1)
         val shipment = makeUnpackedShipment(f.shipment)
         val specimen = f.specimens.headOption.value
@@ -549,7 +549,7 @@ class ShipmentSpecimensControllerSpec
         }
       }
 
-      "change a shipment specimen's state to PRESENT from another state" in {
+      it("change a shipment specimen's state to PRESENT from another state") {
         val f = specimensFixture(1)
         val shipment = makeUnpackedShipment(f.shipment)
         val specimen = f.specimens.headOption.value
@@ -585,7 +585,7 @@ class ShipmentSpecimensControllerSpec
         }
       }
 
-      "fail when changing a shipment specimen's state to PRESENT when it is already PRESENT" in {
+      it("fail when changing a shipment specimen's state to PRESENT when it is already PRESENT") {
         val f = specimensFixture(1)
         val shipment = makeUnpackedShipment(f.shipment)
         val specimen = f.specimens.headOption.value
@@ -605,7 +605,7 @@ class ShipmentSpecimensControllerSpec
         (reply \ "message").as[String] must include ("EntityCriteriaError: shipment specimens are present:")
       }
 
-      "add a shipment specimen as EXTRA to a shipment" in {
+      it("add a shipment specimen as EXTRA to a shipment") {
         val f = specimensFixture(1)
         val shipment = makeUnpackedShipment(f.shipment)
         val specimen = f.specimens.headOption.value
@@ -635,7 +635,7 @@ class ShipmentSpecimensControllerSpec
         TestUtils.checkOpionalTime(repoSs.timeModified, None)
       }
 
-      "not add an EXTRA shipment specimen to a shipment if it is present in another shipment" in {
+      it("not add an EXTRA shipment specimen to a shipment if it is present in another shipment") {
         val f = specimensFixture(1)
         val f2 = createdShipmentFixture
         val shipment = makeUnpackedShipment(f.shipment)
@@ -658,7 +658,7 @@ class ShipmentSpecimensControllerSpec
           "EntityCriteriaError: specimens are already in an active shipment")
       }
 
-      "not add an EXTRA shipment specimen to a shipment if it is already part of the shipment" in {
+      it("not add an EXTRA shipment specimen to a shipment if it is already part of the shipment") {
         val f = specimensFixture(1)
         val shipment = makeUnpackedShipment(f.shipment)
         shipmentRepository.put(shipment)
@@ -679,7 +679,7 @@ class ShipmentSpecimensControllerSpec
         }
       }
 
-      "not add an EXTRA shipment specimen to a shipment if specimen at a different centre" in {
+      it("not add an EXTRA shipment specimen to a shipment if specimen at a different centre") {
         val f = specimensFixture(1)
         val shipment = makeUnpackedShipment(f.shipment)
         shipmentRepository.put(shipment)
@@ -698,9 +698,9 @@ class ShipmentSpecimensControllerSpec
 
     }
 
-    "DELETE /shipments/specimens/:shId/:shSpcId/:ver" must {
+    describe("DELETE /shipments/specimens/:shId/:shSpcId/:ver") {
 
-      "must remove a specimen from shipment in created state" in {
+      it("must remove a specimen from shipment in created state") {
         val f = specimensFixture(1)
 
         val specimen = f.specimens.head
@@ -716,7 +716,7 @@ class ShipmentSpecimensControllerSpec
         shipmentSpecimenRepository.getByKey(shipmentSpecimen.id) mustFail "IdNotFound.*shipment specimen.*"
       }
 
-      "must remove an extra specimen from shipment in unpacked state" in {
+      it("must remove an extra specimen from shipment in unpacked state") {
         val f = specimensFixture(1)
         val shipment = makeUnpackedShipment(f.shipment)
         val specimen = f.specimens.head
@@ -734,7 +734,7 @@ class ShipmentSpecimensControllerSpec
         shipmentSpecimenRepository.getByKey(shipmentSpecimen.id) mustFail "IdNotFound.*shipment specimen.*"
       }
 
-      "must not delete a specimen from a shipment not in created or unpacked state" in {
+      it("must not delete a specimen from a shipment not in created or unpacked state") {
         val f = specimensFixture(1)
         val specimen = f.specimens.head
         val shipments = Table("shipment",

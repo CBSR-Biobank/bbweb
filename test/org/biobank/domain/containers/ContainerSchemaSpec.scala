@@ -15,9 +15,9 @@ class ContainerSchemaSpec extends DomainSpec {
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  "A container schema" can {
+  describe("A container schema") {
 
-    "be created" in {
+    it("be created") {
       val containerType = factory.createContainerSchema
       val v = ContainerSchema.create(id          = containerType.id,
                                      version     = 0L,
@@ -39,7 +39,7 @@ class ContainerSchemaSpec extends DomainSpec {
       }
     }
 
-    "have it's name updated" in {
+    it("have it's name updated") {
 
       val containerType = factory.createContainerSchema
       val name = nameGenerator.next[ContainerType]
@@ -56,7 +56,7 @@ class ContainerSchemaSpec extends DomainSpec {
       }
     }
 
-    "have it's description updated" in {
+    it("have it's description updated") {
       val containerType = factory.createContainerSchema
       val description = Some(nameGenerator.next[ContainerType])
 
@@ -74,9 +74,9 @@ class ContainerSchemaSpec extends DomainSpec {
 
   }
 
-  "A container schema" must {
+  describe("A container schema") {
 
-    "not be created with an empty id" in {
+    it("not be created with an empty id") {
       val v = ContainerSchema.create(
         id          = ContainerSchemaId(""),
         version     = 0L,
@@ -87,7 +87,7 @@ class ContainerSchemaSpec extends DomainSpec {
       v mustFail "IdRequired"
     }
 
-    "not be created with an invalid version" in {
+    it("not be created with an invalid version") {
       val v = ContainerSchema.create(
         id          = ContainerSchemaId(nameGenerator.next[ContainerType]),
         version     = -2,
@@ -98,7 +98,7 @@ class ContainerSchemaSpec extends DomainSpec {
       v mustFail "InvalidVersion"
     }
 
-    "not be created with an null or empty name" in {
+    it("not be created with an null or empty name") {
       var v = ContainerSchema.create(
         id          = ContainerSchemaId(nameGenerator.next[ContainerType]),
         version     = 0L,
@@ -118,7 +118,7 @@ class ContainerSchemaSpec extends DomainSpec {
       v mustFail "InvalidName"
     }
 
-    "not be created with an empty description option" in {
+    it("not be created with an empty description option") {
       var v = ContainerSchema.create(
         id          = ContainerSchemaId(nameGenerator.next[ContainerType]),
         version     = 0L,
@@ -138,7 +138,7 @@ class ContainerSchemaSpec extends DomainSpec {
       v mustFail "InvalidDescription"
     }
 
-    "have more than one validation fail" in {
+    it("have more than one validation fail") {
       val v = ContainerSchema.create(
         id          = ContainerSchemaId(nameGenerator.next[ContainerType]),
         version     = -2,
