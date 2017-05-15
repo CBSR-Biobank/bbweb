@@ -15,7 +15,6 @@ import org.mockito.Mockito._
 import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import scalaz.Scalaz._
-import scala.language.reflectiveCalls
 
 final case class NamedShipmentsProcessor @Inject() (@Named("shipmentsProcessor") processor: ActorRef)
 

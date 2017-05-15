@@ -8,7 +8,6 @@ import org.joda.time.DateTime
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
-import scala.language.reflectiveCalls
 
 /**
  * Tests the REST API for [[Shipment]]s.

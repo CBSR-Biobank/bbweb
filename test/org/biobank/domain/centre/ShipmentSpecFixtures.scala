@@ -1,12 +1,73 @@
 package org.biobank.domain.centre
 
 import com.github.nscala_time.time.Imports._
-import org.biobank.dto.{CentreLocationInfo}
-import org.biobank.domain.Factory
+import org.biobank.dto._
+import org.biobank.domain.{EntityState, Factory}
+import org.biobank.domain.study._
+import org.biobank.domain.participants._
 import org.scalatest.Assertions._
-import scala.language.reflectiveCalls
 
 trait ShipmentSpecFixtures {
+
+  class ToFromCentres(val fromCentre: Centre, val toCentre: Centre)
+
+  class ShipmentFixture[T <: Shipment](fromCentre:   Centre,
+                                       toCentre:     Centre,
+                                       val shipment: T)
+      extends ToFromCentres(fromCentre, toCentre)
+
+  class ShipmentsFixture[T <: Shipment](fromCentre:      Centre,
+                                        toCentre:        Centre,
+                                        val shipmentMap: Map[ShipmentId, Shipment])
+      extends ToFromCentres(fromCentre, toCentre)
+
+  class ShipmentsByStateFixture[T <: Shipment](fromCentre:    Centre,
+                                               toCentre:      Centre,
+                                               val shipments: Map[EntityState, Shipment])
+      extends ToFromCentres(fromCentre, toCentre)
+
+  class CreatedShipmentsFixture(fromCentre:      Centre,
+                                toCentre:        Centre,
+                                val shipmentMap: Map[ShipmentId, CreatedShipment])
+      extends ToFromCentres(fromCentre, toCentre)
+
+  class SpecimenShipmentSpecimen(val specimen: UsableSpecimen, val shipmentSpecimen: ShipmentSpecimen)
+
+  class SpecimensFixture(fromCentre:       Centre,
+                         toCentre:         Centre,
+                         shipment:         Shipment,
+                         val study:        Study,
+                         val specimenSpec: CollectionSpecimenSpec,
+                         val ceventType:   CollectionEventType,
+                         val participant:  Participant,
+                         val cevent:       CollectionEvent,
+                         val specimens:    List[UsableSpecimen])
+      extends ShipmentFixture(fromCentre, toCentre, shipment)
+
+  case class ShipmentSpecimenData(val specimen:            UsableSpecimen,
+                                  val specimenDto:         SpecimenDto,
+                                  val shipmentSpecimen:    ShipmentSpecimen,
+                                  val shipmentSpecimenDto: ShipmentSpecimenDto)
+
+  class ShipmentSpecimensFixture(fromCentre:              Centre,
+                                 toCentre:                Centre,
+                                 shipment:                Shipment,
+                                 study:                   Study,
+                                 specimenSpec:            CollectionSpecimenSpec,
+                                 ceventType:              CollectionEventType,
+                                 participant:             Participant,
+                                 cevent:                  CollectionEvent,
+                                 specimens:               List[UsableSpecimen],
+                                 val shipmentSpecimenMap: Map[SpecimenId, ShipmentSpecimenData])
+      extends SpecimensFixture(fromCentre,
+                               toCentre,
+                               shipment,
+                               study,
+                               specimenSpec,
+                               ceventType,
+                               participant,
+                               cevent,
+                               specimens)
 
   val factory: Factory
 
@@ -21,142 +82,130 @@ trait ShipmentSpecFixtures {
         val location = factory.createLocation
         factory.createEnabledCentre.copy(locations = Set(location))
       }
-    new {
-      val fromCentre = centres(0)
-      val toCentre = centres(1)
-    }
-  }
-
-  def makePackedShipment(shipment: CreatedShipment): PackedShipment = {
-    shipment.pack(DateTime.now)
-  }
-
-  def makeSentShipment(shipment: CreatedShipment): SentShipment = {
-    makePackedShipment(shipment).send(DateTime.now).fold(
-      err => fail("could not make a sent shipment"), s => s)
-  }
-
-  def makeReceivedShipment(shipment: CreatedShipment): ReceivedShipment = {
-    makeSentShipment(shipment).receive(DateTime.now).fold(
-      err => fail("could not make a received shipment"), s => s)
-  }
-
-  def makeUnpackedShipment(shipment: CreatedShipment): UnpackedShipment = {
-    makeReceivedShipment(shipment).unpack(DateTime.now).fold(
-      err => fail("could not make a unpacked shipment"), s => s)
-  }
-
-  def makeLostShipment(shipment: CreatedShipment): LostShipment = {
-    makeSentShipment(shipment).lost
+    new ToFromCentres(centres(0), centres(1))
   }
 
   def createdShipmentFixture = {
     val f = centresFixture
-    new {
-      val fromCentre = f.fromCentre
-      val toCentre = f.toCentre
-      val shipment = factory.createShipment(f.fromCentre, f.toCentre)
+    new ShipmentFixture(f.fromCentre,
+                        f.toCentre,
+                        factory.createShipment(f.fromCentre, f.toCentre))
+  }
+
+  def makePackedShipment(shipment: Shipment): PackedShipment = {
+    shipment match {
+      case s: CreatedShipment => s.pack(DateTime.now)
+      case _ => fail(s"bad shipment state: ${shipment.state}")
     }
+  }
+
+  def makeSentShipment(shipment: Shipment): SentShipment = {
+    makePackedShipment(shipment).send(DateTime.now).fold(
+      err => fail("could not make a sent shipment"), s => s)
+  }
+
+  def makeReceivedShipment(shipment: Shipment): ReceivedShipment = {
+    makeSentShipment(shipment).receive(DateTime.now).fold(
+      err => fail("could not make a received shipment"), s => s)
+  }
+
+  def makeUnpackedShipment(shipment: Shipment): UnpackedShipment = {
+    makeReceivedShipment(shipment).unpack(DateTime.now).fold(
+      err => fail("could not make a unpacked shipment"), s => s)
+  }
+
+  def makeLostShipment(shipment: Shipment): LostShipment = {
+    makeSentShipment(shipment).lost
   }
 
   def createdShipmentsFixture(numShipments: Int) = {
     val f = centresFixture
-    new {
-      val fromCentre = f.fromCentre
-      val toCentre = f.toCentre
-      val shipmentMap = (1 to numShipments).map { _ =>
-          val shipment = factory.createShipment(f.fromCentre, f.toCentre)
-          shipment.id -> shipment
-        }.toMap
-    }
+    new CreatedShipmentsFixture(
+      f.fromCentre,
+      f.toCentre,
+      (1 to numShipments).map { _ =>
+        val shipment = factory.createShipment(f.fromCentre, f.toCentre)
+        shipment.id -> shipment
+      }.toMap
+    )
   }
 
   def packedShipmentFixture = {
     val f = createdShipmentFixture
-    new {
-      val fromCentre = f.fromCentre
-      val toCentre = f.toCentre
-      val shipment = makePackedShipment(f.shipment)
-    }
+    new ShipmentFixture(fromCentre = f.fromCentre,
+                        toCentre   = f.toCentre,
+                        shipment   = makePackedShipment(f.shipment))
   }
 
   def sentShipmentFixture = {
     val f = createdShipmentFixture
-    new {
-      val fromCentre = f.fromCentre
-      val toCentre = f.toCentre
-      val shipment = makeSentShipment(f.shipment)
-    }
+
+    new ShipmentFixture(fromCentre = f.fromCentre,
+                        toCentre = f.toCentre,
+                        shipment = makeSentShipment(f.shipment))
   }
 
   def receivedShipmentFixture = {
     val f = createdShipmentFixture
-    new {
-      val fromCentre = f.fromCentre
-      val toCentre = f.toCentre
-      val shipment = makeReceivedShipment(f.shipment)
-    }
+    new ShipmentFixture(fromCentre = f.fromCentre,
+                        toCentre = f.toCentre,
+                        shipment = makeReceivedShipment(f.shipment))
   }
 
   def unpackedShipmentFixture = {
     val f = createdShipmentFixture
-    new {
-      val fromCentre = f.fromCentre
-      val toCentre = f.toCentre
-      val shipment = makeUnpackedShipment(f.shipment)
-    }
+    new ShipmentFixture(fromCentre = f.fromCentre,
+                        toCentre   = f.toCentre,
+                        shipment   = makeUnpackedShipment(f.shipment))
   }
 
   def lostShipmentFixture = {
     val f = createdShipmentFixture
-    new {
-      val fromCentre = f.fromCentre
-      val toCentre = f.toCentre
-      val shipment = makeLostShipment(f.shipment)
-    }
+    new ShipmentFixture(fromCentre = f.fromCentre,
+                        toCentre   = f.toCentre,
+                        shipment   = makeLostShipment(f.shipment))
   }
 
   def allShipmentsFixture = {
     val centres = centresFixture
-    new {
-      val fromCentre = centres.fromCentre
-      val toCentre = centres.toCentre
-      val shipments = Map(
+    val fromCentre = centres.fromCentre
+    val toCentre = centres.toCentre
+    new ShipmentsByStateFixture(
+      fromCentre = centres.fromCentre,
+      toCentre = centres.toCentre,
+      shipments = Map(
           Shipment.createdState   -> factory.createShipment(fromCentre, toCentre),
           Shipment.packedState    -> factory.createPackedShipment(fromCentre, toCentre),
           Shipment.sentState      -> factory.createSentShipment(fromCentre, toCentre),
           Shipment.receivedState  -> factory.createReceivedShipment(fromCentre, toCentre),
           Shipment.unpackedState  -> factory.createUnpackedShipment(fromCentre, toCentre),
           Shipment.completedState -> factory.createCompletedShipment(fromCentre, toCentre),
-          Shipment.lostState      -> factory.createLostShipment(fromCentre, toCentre))
-    }
+          Shipment.lostState      -> factory.createLostShipment(fromCentre, toCentre)))
   }
 
   def specimensFixture(numSpecimens: Int) = {
     val f = createdShipmentFixture
-    val _study = factory.createEnabledStudy
-    val _specimenSpec = factory.createCollectionSpecimenSpec
-    val _ceventType = factory.createCollectionEventType.copy(studyId = _study.id,
-                                                             specimenSpecs = Set(_specimenSpec),
-                                                             annotationTypes = Set.empty)
-    val _participant = factory.createParticipant.copy(studyId = _study.id)
-    val _cevent = factory.createCollectionEvent
-    val _specimens = (1 to numSpecimens).map { _ =>
+    val study = factory.createEnabledStudy
+    val specimenSpec = factory.createCollectionSpecimenSpec
+    val ceventType = factory.createCollectionEventType.copy(studyId = study.id,
+                                                            specimenSpecs = Set(specimenSpec),
+                                                            annotationTypes = Set.empty)
+    val participant = factory.createParticipant.copy(studyId = study.id)
+    val cevent = factory.createCollectionEvent
+    val specimens = (1 to numSpecimens).map { _ =>
         factory.createUsableSpecimen.copy(originLocationId = f.fromCentre.locations.head.uniqueId,
-               locationId = f.fromCentre.locations.head.uniqueId)
+                                          locationId = f.fromCentre.locations.head.uniqueId)
       }.toList
 
-    new {
-      val fromCentre   = f.fromCentre
-      val toCentre     = f.toCentre
-      val study        = _study
-      val specimenSpec = _specimenSpec
-      val ceventType   = _ceventType
-      val participant  = _participant
-      val cevent       = _cevent
-      val specimens    = _specimens
-      val shipment     = f.shipment
-    }
+    new SpecimensFixture(fromCentre   = f.fromCentre,
+                         toCentre     = f.toCentre,
+                         study        = study,
+                         specimenSpec = specimenSpec,
+                         ceventType   = ceventType,
+                         participant  = participant,
+                         cevent       = cevent,
+                         specimens    = specimens,
+                         shipment     = f.shipment)
   }
 
   def shipmentSpecimensFixture(numSpecimens: Int) = {
@@ -173,38 +222,31 @@ trait ShipmentSpecFixtures {
                                                     originLocationName)
         val specimenDto =
           specimen.createDto(f.cevent, f.specimenSpec, centreLocationInfo, centreLocationInfo)
-        (updatedSpecimen.id, (updatedSpecimen,
-                              specimenDto,
-                              shipmentSpecimen,
-                              shipmentSpecimen.createDto(specimenDto)))
+        (updatedSpecimen.id, new ShipmentSpecimenData(updatedSpecimen,
+                                                      specimenDto,
+                                                      shipmentSpecimen,
+                                                      shipmentSpecimen.createDto(specimenDto)))
       }.toMap
 
-    new {
-      val fromCentre          = f.fromCentre
-      val toCentre            = f.toCentre
-      val study               = f.study
-      val specimenSpec        = f.specimenSpec
-      val ceventType          = f.ceventType
-      val participant         = f.participant
-      val cevent              = f.cevent
-      val specimens           = f.specimens
-      val shipment            = f.shipment
-      val shipmentSpecimenMap = map
-    }
+    new ShipmentSpecimensFixture(fromCentre          = f.fromCentre,
+                                 toCentre            = f.toCentre,
+                                 study               = f.study,
+                                 specimenSpec        = f.specimenSpec,
+                                 ceventType          = f.ceventType,
+                                 participant         = f.participant,
+                                 cevent              = f.cevent,
+                                 specimens           = f.specimens,
+                                 shipment            = f.shipment,
+                                 shipmentSpecimenMap = map)
   }
 
   def addSpecimenToShipment(shipment: Shipment, fromCentre: Centre) = {
-    val _specimen = factory.createUsableSpecimen.
+    val specimen = factory.createUsableSpecimen.
       copy(originLocationId = fromCentre.locations.head.uniqueId,
            locationId       = fromCentre.locations.head.uniqueId)
-
-    val _shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = shipment.id,
-                                                                specimenId = _specimen.id)
-
-    new {
-      val specimen         = _specimen
-      val shipmentSpecimen = _shipmentSpecimen
-    }
+    val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = shipment.id,
+                                                               specimenId = specimen.id)
+    new SpecimenShipmentSpecimen(specimen, shipmentSpecimen)
   }
 
 }

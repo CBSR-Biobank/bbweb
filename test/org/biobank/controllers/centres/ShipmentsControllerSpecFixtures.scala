@@ -3,7 +3,6 @@ package org.biobank.controllers.centres
 import org.biobank.domain.centre._
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.participants._
-import scala.language.reflectiveCalls
 
 private[centres] class ShipmentsControllerSpecFixtures extends ControllerFixture with ShipmentSpecFixtures {
 
@@ -34,8 +33,8 @@ private[centres] class ShipmentsControllerSpecFixtures extends ControllerFixture
   override def shipmentSpecimensFixture(numSpecimens: Int) = {
     val f = super.shipmentSpecimensFixture(numSpecimens)
     f.shipmentSpecimenMap.values.foreach { v =>
-      specimenRepository.put(v._1)
-      shipmentSpecimenRepository.put(v._3)
+      specimenRepository.put(v.specimen)
+      shipmentSpecimenRepository.put(v.shipmentSpecimen)
     }
     f
   }

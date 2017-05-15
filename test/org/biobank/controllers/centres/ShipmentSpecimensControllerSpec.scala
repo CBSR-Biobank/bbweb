@@ -8,7 +8,6 @@ import org.biobank.domain.participants._
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
-import scala.language.reflectiveCalls
 
 /**
  * Tests the REST API for [[ShipmentSpecimen]]s.
@@ -114,7 +113,7 @@ class ShipmentSpecimensControllerSpec
             maybeNext   = Some(2))
 
 
-        compareObj(jsonItem, f.shipmentSpecimenMap.values.head._4)
+        compareObj(jsonItem, f.shipmentSpecimenMap.values.head.shipmentSpecimenDto)
       }
 
       it("list shipment specimens filtered by item state") {
@@ -122,9 +121,9 @@ class ShipmentSpecimensControllerSpec
         val f = shipmentSpecimensFixture(numSpecimens)
 
         val shipmentSpecimensMap = f.shipmentSpecimenMap.values.zip(ShipmentItemState.values).
-          map { case ((spc, spcDto, shipSpc, shipSpcDto), itemState) =>
-            val shipmentSpecimen = shipSpc.copy(state = itemState)
-            val shipmentSpecimenDto = shipmentSpecimen.createDto(spcDto)
+          map { case (shipmentSpecimenData, itemState) =>
+            val shipmentSpecimen = shipmentSpecimenData.shipmentSpecimen.copy(state = itemState)
+            val shipmentSpecimenDto = shipmentSpecimen.createDto(shipmentSpecimenData.specimenDto)
             shipmentSpecimenRepository.put(shipmentSpecimen)
             (itemState, shipmentSpecimen, shipmentSpecimenDto)
           }
@@ -165,7 +164,7 @@ class ShipmentSpecimensControllerSpec
             maybeNext   = Some(2))
 
 
-        compareObj(jsonItem, f.shipmentSpecimenMap.values.head._4)
+        compareObj(jsonItem, f.shipmentSpecimenMap.values.head.shipmentSpecimenDto)
       }
 
       it("list the last specimen when using paged query") {
@@ -180,7 +179,7 @@ class ShipmentSpecimensControllerSpec
             maybeNext   = None,
             maybePrev   = Some(1))
 
-        compareObj(jsonItem, f.shipmentSpecimenMap.values.toList(1)._4)
+        compareObj(jsonItem, f.shipmentSpecimenMap.values.toList(1).shipmentSpecimenDto)
       }
 
       it("fail when using an invalid query parameters") {
@@ -198,9 +197,9 @@ class ShipmentSpecimensControllerSpec
         val f = shipmentSpecimensFixture(numSpecimens)
 
         val shipmentSpecimensMap = f.shipmentSpecimenMap.values.zip(ShipmentItemState.values).
-          map { case ((spc, spcDto, shipSpc, shipSpcDto), itemState) =>
-            val shipmentSpecimen = shipSpc.copy(state = itemState)
-            val shipmentSpecimenDto = shipmentSpecimen.createDto(spcDto)
+          map { case (shipmentSpecimenData, itemState) =>
+            val shipmentSpecimen = shipmentSpecimenData.shipmentSpecimen.copy(state = itemState)
+            val shipmentSpecimenDto = shipmentSpecimen.createDto(shipmentSpecimenData.specimenDto)
             shipmentSpecimenRepository.put(shipmentSpecimen)
             (itemState, (shipmentSpecimen, shipmentSpecimenDto))
           }.toMap
@@ -224,21 +223,20 @@ class ShipmentSpecimensControllerSpec
 
       it("get a shipment specimen") {
         val f = shipmentSpecimensFixture(1)
-        val shipmentSpecimen = f.shipmentSpecimenMap.values.head._3
-        val dto = f.shipmentSpecimenMap.values.head._4
+        val shipmentSpecimen = f.shipmentSpecimenMap.values.head.shipmentSpecimen
+        val dto = f.shipmentSpecimenMap.values.head.shipmentSpecimenDto
 
         val json = makeRequest(GET, uri(f.shipment) + s"/${shipmentSpecimen.id}")
 
         (json \ "status").as[String] must include ("success")
 
         val jsonObj = (json \ "data").as[JsObject]
-
         compareObj(jsonObj, dto)
       }
 
       it("fails for an invalid shipment id") {
         val f = shipmentSpecimensFixture(1)
-        val shipmentSpecimen = f.shipmentSpecimenMap.values.head._2
+        val shipmentSpecimen = f.shipmentSpecimenMap.values.head.specimenDto
 
         val badShipment = factory.createShipment
 
@@ -278,7 +276,7 @@ class ShipmentSpecimensControllerSpec
 
       it("fail when adding a specimen inventory Id already in the shipment") {
         val f = shipmentSpecimensFixture(1)
-        val specimen = f.shipmentSpecimenMap.values.head._1
+        val specimen = f.shipmentSpecimenMap.values.head.specimen
 
         val url = uri(f.shipment, "canadd") + s"/${specimen.inventoryId}"
         val reply = makeRequest(GET, url, BAD_REQUEST)
@@ -317,7 +315,7 @@ class ShipmentSpecimensControllerSpec
 
       it("fails for a specimen already in another active shipment") {
         val f = shipmentSpecimensFixture(1)
-        val specimen = f.shipmentSpecimenMap.values.head._1
+        val specimen = f.shipmentSpecimenMap.values.head.specimen
         val newShipment = factory.createShipment(f.fromCentre, f.toCentre)
         shipmentRepository.put(newShipment)
 
