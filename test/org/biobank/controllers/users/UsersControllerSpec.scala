@@ -6,7 +6,6 @@ import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.user._
 import org.biobank.fixture.ControllerFixture
-import org.biobank.service.users.UserServiceFixtures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.mvc.Cookie
@@ -16,7 +15,7 @@ import play.api.test._
 /**
  * Tests the REST API for [[User]].
  */
-class UsersControllerSpec extends ControllerFixture with JsonHelper with UserServiceFixtures {
+class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFixtures {
   import org.biobank.TestUtils._
 
   def uri: String = "/users/"

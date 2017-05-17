@@ -13,8 +13,7 @@ object UserCommands {
 
   trait UserStateChangeCommand extends UserModifyCommand
 
-  final case class RegisterUserCmd(userId:    Option[String],
-                                   name:      String,
+  final case class RegisterUserCmd(name:      String,
                                    email:     String,
                                    password:  String,
                                    avatarUrl: Option[String])

@@ -13,6 +13,8 @@ object StudyCommands {
 
   trait StudyModifyCommand extends StudyCommand with HasIdentity with HasExpectedVersion
 
+  trait StudyStateChangeCommand extends StudyModifyCommand
+
   trait StudyCommandWithStudyId extends StudyCommand with HasStudyIdentity
 
   trait StudyModifyCommandWithStudyId
@@ -70,22 +72,22 @@ object StudyCommands {
   final case class EnableStudyCmd(sessionUserId:   Option[String],
                                   id:              String,
                                   expectedVersion: Long)
-      extends StudyModifyCommand
+      extends StudyStateChangeCommand
 
   final case class DisableStudyCmd(sessionUserId:   Option[String],
                                    id:              String,
                                    expectedVersion: Long)
-      extends StudyModifyCommand
+      extends StudyStateChangeCommand
 
   final case class RetireStudyCmd(sessionUserId:   Option[String],
                                   id:              String,
                                   expectedVersion: Long)
-      extends StudyModifyCommand
+      extends StudyStateChangeCommand
 
   final case class UnretireStudyCmd(sessionUserId:   Option[String],
                                     id:              String,
                                     expectedVersion: Long)
-      extends StudyModifyCommand
+      extends StudyStateChangeCommand
 
 
   // study annotation type commands

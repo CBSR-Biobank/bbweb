@@ -153,8 +153,10 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
                                studyId:  Option[StudyId],
                                centreId: Option[CentreId]): ServiceValidation[Boolean] = {
 
-    membershipRepository.getUserMembership(userId).map { membership =>
+    val membership = membershipRepository.getUserMembership(userId).map { membership =>
       membership.isMember(studyId, centreId)
     }
+    log.debug(s"isMemberInternal: userId: $userId, studyId: $studyId, centreId: $centreId, membership: $membership")
+    membership
   }
 }

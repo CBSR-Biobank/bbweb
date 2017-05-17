@@ -4,11 +4,14 @@ import akka.actor.ActorRef
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
+import org.biobank.domain.access._
 import org.biobank.domain.study._
 import org.biobank.domain.participants.CollectionEventRepository
+import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.infrastructure.event.CollectionEventTypeEvents._
-import org.biobank.service.{BbwebService, BbwebServiceImpl, ServiceValidation, ServiceError}
+import org.biobank.service._
+import org.biobank.service.access.AccessService
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
@@ -25,6 +28,9 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[CollectionEventTypeServiceImpl])
 trait CollectionEventTypeService extends BbwebService {
 
+  def specimenGroupWithId(requestUserId: UserId, studyId: StudyId, specimenGroupId: String)
+      : ServiceValidation[SpecimenGroup]
+
   def specimenGroupsInUse(studyId: StudyId): ServiceValidation[Set[SpecimenGroupId]]
 
   def specimenGroupsForStudy(studyId: StudyId): ServiceValidation[Set[SpecimenGroup]]
@@ -37,9 +43,6 @@ trait CollectionEventTypeService extends BbwebService {
 
   def collectionEventTypesForStudy(studyId: StudyId): ServiceValidation[Set[CollectionEventType]]
 
-  def specimenGroupWithId(studyId: StudyId, specimenGroupId: String)
-      : ServiceValidation[SpecimenGroup]
-
   def processCommand(cmd: CollectionEventTypeCommand)
       : Future[ServiceValidation[CollectionEventType]]
 
@@ -48,33 +51,37 @@ trait CollectionEventTypeService extends BbwebService {
 
 }
 
-class CollectionEventTypeServiceImpl @Inject() (
+class CollectionEventTypeServiceImpl @Inject()(
   @Named("collectionEventType") val processor: ActorRef,
+  val accessService:                 AccessService,
   val collectionEventTypeRepository: CollectionEventTypeRepository,
   val studyRepository:               StudyRepository,
   val specimenGroupRepository:       SpecimenGroupRepository,
   val collectionEventRepository:     CollectionEventRepository)
     extends CollectionEventTypeService
-    with BbwebServiceImpl {
+    with BbwebServiceImpl
+    with ServiceWithPermissionChecks {
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def specimenGroupWithId(studyId: StudyId, specimenGroupId: String)
+  def specimenGroupWithId(requestUserId: UserId, studyId: StudyId, specimenGroupId: String)
       : ServiceValidation[SpecimenGroup] = {
-    validStudyId(studyId) { study =>
-      specimenGroupRepository.withId(study.id, SpecimenGroupId(specimenGroupId))
+    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
+      withStudy(studyId) { study =>
+        specimenGroupRepository.withId(study.id, SpecimenGroupId(specimenGroupId))
+      }
     }
   }
 
   def specimenGroupsForStudy(studyId: StudyId) : ServiceValidation[Set[SpecimenGroup]] = {
-    validStudyId(studyId) { study =>
+    withStudy(studyId) { study =>
       specimenGroupRepository.allForStudy(study.id).successNel
     }
   }
 
   def specimenGroupsInUse(studyId: StudyId): ServiceValidation[Set[SpecimenGroupId]] = {
     ???
-    // validStudyId(studyId) { study =>
+    // withStudy(studyId) { study =>
     //     val cetSpecimenGroupIds = for {
     //       ceventType <- collectionEventTypeRepository.allForStudy(study.id)
     //       sgItem     <- ceventType.specimenGroupData
@@ -92,7 +99,7 @@ class CollectionEventTypeServiceImpl @Inject() (
 
   def collectionEventTypeWithId(studyId: StudyId, collectionEventTypeId: CollectionEventTypeId)
       : ServiceValidation[CollectionEventType] = {
-    validStudyId(studyId) { study =>
+    withStudy(studyId) { study =>
       collectionEventTypeRepository.withId(study.id, collectionEventTypeId)
     }
   }
@@ -105,7 +112,7 @@ class CollectionEventTypeServiceImpl @Inject() (
 
   def collectionEventTypesForStudy(studyId: StudyId)
       : ServiceValidation[Set[CollectionEventType]] = {
-    validStudyId(studyId) { study =>
+    withStudy(studyId) { study =>
       collectionEventTypeRepository.allForStudy(study.id).successNel[String]
     }
   }
@@ -142,7 +149,7 @@ class CollectionEventTypeServiceImpl @Inject() (
     )
   }
 
-  private def validStudyId[T](studyId: StudyId)(fn: Study => ServiceValidation[T]): ServiceValidation[T] = {
+  private def withStudy[T](studyId: StudyId)(fn: Study => ServiceValidation[T]): ServiceValidation[T] = {
     for {
       study <- studyRepository.getByKey(studyId)
       result <- fn(study)

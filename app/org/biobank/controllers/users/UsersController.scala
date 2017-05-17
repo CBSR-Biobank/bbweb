@@ -29,6 +29,7 @@ class UsersController @Inject() (val action:         BbwebAction,
                                  val studiesService: StudiesService)
                              (implicit val ec: ExecutionContext)
     extends CommandController {
+
   import org.biobank.controllers.Security._
 
   val log: Logger = Logger(this.getClass)
@@ -178,9 +179,10 @@ class UsersController @Inject() (val action:         BbwebAction,
       validationReply(
         Future {
           for {
-            studyIds   <- usersService.getUserStudyIds(request.authInfo.userId)
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            studies    <- studiesService.filterStudies(studyIds, pagedQuery.filter, pagedQuery.sort)
+            studies    <- studiesService.getStudies(request.authInfo.userId,
+                                                    pagedQuery.filter,
+                                                    pagedQuery.sort)
             results    <- PagedResults.create(studies, pagedQuery.page, pagedQuery.limit)
           } yield results
         }

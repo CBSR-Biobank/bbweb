@@ -59,10 +59,6 @@ class CentresController @Inject() (val action:         BbwebAction,
       )
     }
 
-  // def locations() = action(parse.empty) { implicit request =>
-  //     Ok(centresService.centreLocations)
-  // }
-
   def searchLocations(): Action[JsValue] =
     commandAction[SearchCentreLocationsCmd](JsNull){ cmd =>
       Future.successful(Ok(centresService.searchLocations(cmd)))

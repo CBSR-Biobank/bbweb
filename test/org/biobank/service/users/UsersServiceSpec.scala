@@ -1,6 +1,5 @@
 package org.biobank.service.users
 
-import org.biobank.Global
 import org.biobank.domain.access._
 import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.study.{StudyId, StudyRepository}
@@ -18,19 +17,11 @@ class UsersServiceSpec
     extends ProcessorTestFixture
     with AccessServiceFixtures
     with UserServiceFixtures
+    with UserFixtures
     with ScalaFutures {
 
   import org.biobank.TestUtils._
-  import org.biobank.domain.access.AccessItem._
-import org.biobank.infrastructure.command.UserCommands._
-
-  class AdminUserFixture(val adminUser: ActiveUser)
-
-  class UsersFixture(adminUser:             ActiveUser,
-                     val nonAdminUser:      ActiveUser,
-                     val user:              ActiveUser,
-                     val userPlainPassword: String)
-      extends AdminUserFixture(adminUser)
+  import org.biobank.infrastructure.command.UserCommands._
 
   val usersService = app.injector.instanceOf[UsersService]
 
@@ -50,44 +41,14 @@ import org.biobank.infrastructure.command.UserCommands._
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  // Removes all users but the default user
-  def removeUsersFromRepository(): Unit = {
-    userRepository.getValues
-      .filter { u => u.id !== Global.DefaultUserId }
-      .foreach(userRepository.remove)
-  }
-
-  def restoreRoles(): Unit = {
-    accessItemRepository.getValues
-      .collect { case r: Role => r }
-      .filter { r => r.id != RoleId.WebsiteAdministrator }
-      .foreach(r => accessItemRepository.put(r.copy(userIds = Set.empty[UserId])))
-    accessItemRepository.getRole(RoleId.WebsiteAdministrator).foreach { r =>
-      accessItemRepository.put(r.copy(userIds = Set(Global.DefaultUserId)))
-    }
-  }
-
-  def addUserTotUserAdmin(userId: UserId): Unit = {
-    accessItemRepository.getRole(RoleId.UserAdministrator) mustSucceed { role =>
-      accessItemRepository.put(role.copy(userIds = role.userIds + userId))
-    }
-  }
-
-  def adminUserFixture() = {
-    val f = new AdminUserFixture(factory.createActiveUser)
-    addToRepository(f.adminUser)
-    addUserTotUserAdmin(f.adminUser.id)
-    f
-  }
-
-  def usersFixture() = {
+  override def usersFixture() = {
     val plainPassword = nameGenerator.next[User]
-    val f = new UsersFixture(factory.createActiveUser,
-                             factory.createActiveUser,
-                             createActiveUser(plainPassword),
-                             plainPassword)
+    val f = new UsersFixtureWithPassword(factory.createActiveUser,
+                                         factory.createActiveUser,
+                                         createActiveUser(plainPassword),
+                                         plainPassword)
     Set(f.adminUser, f.nonAdminUser, f.user).foreach(addToRepository)
-    addUserTotUserAdmin(f.adminUser.id)
+    addUserToUserAdminRole(f.adminUser.id)
     f
   }
 
@@ -119,7 +80,7 @@ import org.biobank.infrastructure.command.UserCommands._
                                registeredUser: RegisteredUser,
                                activeUser:     ActiveUser,
                                lockedUser:     LockedUser) =
-    Table("user update commands",
+    Table("user sate change commands",
           ActivateUserCmd(
             sessionUserId   = sessionUserId.id,
             id              = registeredUser.id.id,
@@ -202,8 +163,8 @@ import org.biobank.infrastructure.command.UserCommands._
       }
 
       it("user counts by status") {
-        val user = factory.createActiveUser
-        usersService.getCountsByStatus(user.id) mustFail "Unauthorized"
+        val f = usersFixture
+        usersService.getCountsByStatus(f.nonAdminUser.id) mustFail "Unauthorized"
       }
 
       it("update a user") {

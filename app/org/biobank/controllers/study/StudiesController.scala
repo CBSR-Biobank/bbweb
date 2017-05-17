@@ -31,8 +31,8 @@ class StudiesController @Inject() (val action:         BbwebAction,
   private val PageSizeMax = 10
 
   def studyCounts(): Action[Unit] =
-    action(parse.empty) { implicit request =>
-      Ok(studiesService.getCountsByStatus)
+    action.async(parse.empty) { implicit request =>
+      validationReply(Future(studiesService.getCountsByStatus(request.authInfo.userId)))
     }
 
   def list: Action[Unit] =
@@ -41,7 +41,7 @@ class StudiesController @Inject() (val action:         BbwebAction,
         Future {
           for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            studies    <- studiesService.getStudies(pagedQuery.filter, pagedQuery.sort)
+            studies    <- studiesService.getStudies(request.authInfo.userId, pagedQuery.filter, pagedQuery.sort)
             validPage  <- pagedQuery.validPage(studies.size)
             results    <- PagedResults.create(studies, pagedQuery.page, pagedQuery.limit)
           } yield results
@@ -55,18 +55,22 @@ class StudiesController @Inject() (val action:         BbwebAction,
         Future {
           for {
             filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
-            studyNames    <- studiesService.getStudyNames(filterAndSort.filter, filterAndSort.sort)
+            studyNames    <- studiesService.getStudyNames(request.authInfo.userId,
+                                                          filterAndSort.filter,
+                                                          filterAndSort.sort)
           } yield studyNames
         }
       )
     }
 
-  def get(id: StudyId): Action[Unit] = action(parse.empty) { implicit request =>
-      validationReply(studiesService.getStudy(id))
+  def get(id: StudyId): Action[Unit] =
+    action(parse.empty) { implicit request =>
+      validationReply(studiesService.getStudy(request.authInfo.userId, id))
     }
 
-  def centresForStudy(studyId: StudyId): Action[Unit] = action(parse.empty) { implicit request =>
-      Ok(studiesService.getCentresForStudy(studyId))
+  def centresForStudy(studyId: StudyId): Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      validationReply(Future(studiesService.getCentresForStudy(request.authInfo.userId, studyId)))
     }
 
   def snapshot: Action[Unit] =

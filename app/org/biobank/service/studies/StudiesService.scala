@@ -4,7 +4,7 @@ import akka.actor._
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import javax.inject._
-import org.biobank.domain.access.PermissionId
+import org.biobank.domain.access._
 import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.study._
@@ -28,7 +28,7 @@ trait StudiesService extends BbwebService {
 
   def getStudyCount(requestUserId: UserId): ServiceValidation[Long]
 
-  def getCountsByStatus(): StudyCountsByStatus
+  def getCountsByStatus(requestUserId: UserId): ServiceValidation[StudyCountsByStatus]
 
   /**
    * Returns a set of studies. The entities can be filtered and or sorted using expressions.
@@ -37,16 +37,14 @@ trait StudiesService extends BbwebService {
    *
    * @param sort the string representation of the sort expression to use when sorting the studies.
    */
-  def getStudies(filter: FilterString, sort: SortString): ServiceValidation[Seq[Study]]
+  def getStudies(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[Study]]
 
-  def filterStudies(studyIds: Set[StudyId], filter: FilterString, sort: SortString):
-      ServiceValidation[Seq[Study]]
+  def getStudyNames(requestUserId: UserId, filter: FilterString, sort: SortString)
+      : ServiceValidation[Seq[NameDto]]
 
-  def getStudyNames(filter: FilterString, sort: SortString): ServiceValidation[Seq[NameDto]]
+  def getStudy(requestUserId: UserId, id: StudyId): ServiceValidation[Study]
 
-  def getStudy(id: StudyId): ServiceValidation[Study]
-
-  def getCentresForStudy(studyId: StudyId): Set[CentreLocation]
+  def getCentresForStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Set[CentreLocation]]
 
   def processingTypeWithId(studyId: StudyId, processingTypeId: ProcessingTypeId)
       : ServiceValidation[ProcessingType]
@@ -82,7 +80,7 @@ trait StudiesService extends BbwebService {
   * @param studiesProcessor
   *
  */
-class StudiesServiceImpl @Inject() (
+class StudiesServiceImpl @Inject()(
   @Named("studiesProcessor") val processor: ActorRef,
   val accessService:                        AccessService,
   val studyRepository:                      StudyRepository,
@@ -93,67 +91,76 @@ class StudiesServiceImpl @Inject() (
   val collectionEventRepository:            CollectionEventRepository,
   val specimenLinkTypeRepository:           SpecimenLinkTypeRepository)
     extends StudiesService
-    with BbwebServiceImpl {
+    with BbwebServiceImpl
+    with ServiceWithPermissionChecks {
 
-  import org.biobank.domain.access.AccessItem._
+  import org.biobank.CommonValidations._
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   def getStudyCount(requestUserId: UserId): ServiceValidation[Long] = {
-    accessService.hasPermission(requestUserId, PermissionId.StudyRead).map { _ =>
-      studyRepository.getValues.size.toLong
+    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
+      getMembershipStudies(requestUserId).map { studies =>
+        studies.size.toLong
+      }
     }
   }
 
-  def getCountsByStatus(): StudyCountsByStatus = {
-    // FIXME should be replaced by DTO query to the database
-    val studies = studyRepository.getValues
-    StudyCountsByStatus(
-      total         = studies.size.toLong,
-      disabledCount = studies.collect { case s: DisabledStudy => s }.size.toLong,
-      enabledCount  = studies.collect { case s: EnabledStudy => s }.size.toLong,
-      retiredCount  = studies.collect { case s: RetiredStudy => s }.size.toLong
-    )
-  }
-
-  def getStudies(filter: FilterString, sort: SortString): ServiceValidation[Seq[Study]] = {
-    filterStudiesInternal(studyRepository.getValues.toSet, filter, sort)
-  }
-
-  def filterStudies(studyIds: Set[StudyId], filter: FilterString, sort: SortString):
-      ServiceValidation[Seq[Study]] = {
-    studyIds.map(studyRepository.getByKey).toList.sequenceU.fold(
-      err => ServiceError(s"invalid study ids").failureNel[Seq[Study]],
-      studies => filterStudiesInternal(studies.toSet, filter, sort)
-    )
-  }
-
-  def getStudyNames(filter: FilterString, sort: SortString): ServiceValidation[Seq[NameDto]] = {
-    getStudies(filter, sort).map(_.map(s => NameDto(s.id.id, s.name, s.state.id)))
-  }
-
-  def getStudy(id: StudyId) : ServiceValidation[Study] = {
-    studyRepository.getByKey(id)
-  }
-
-  def getCentresForStudy(studyId: StudyId): Set[CentreLocation] = {
-    centreRepository.withStudy(studyId).flatMap { centre =>
-      centre.locations.map { location =>
-        CentreLocation(centre.id.id, location.id.id, centre.name, location.name)
+  def getCountsByStatus(requestUserId: UserId): ServiceValidation[StudyCountsByStatus] = {
+    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
+      getMembershipStudies(requestUserId).map { studies =>
+        StudyCountsByStatus(
+          total         = studies.size.toLong,
+          disabledCount = studies.collect { case s: DisabledStudy => s }.size.toLong,
+          enabledCount  = studies.collect { case s: EnabledStudy => s }.size.toLong,
+          retiredCount  = studies.collect { case s: RetiredStudy => s }.size.toLong
+        )
       }
+    }
+  }
+
+  def getStudies(requestUserId: UserId, filter: FilterString, sort: SortString)
+      : ServiceValidation[Seq[Study]] = {
+    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
+      getMembershipStudies(requestUserId).flatMap { studies =>
+        filterStudiesInternal(studies, filter, sort)
+      }
+    }
+  }
+
+  def getStudyNames(requestUserId: UserId, filter: FilterString, sort: SortString)
+      : ServiceValidation[Seq[NameDto]] = {
+    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
+      getStudies(requestUserId, filter, sort).map(_.map(s => NameDto(s.id.id, s.name, s.state.id)))
+    }
+  }
+
+  def getStudy(requestUserId: UserId, id: StudyId) : ServiceValidation[Study] = {
+    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
+      studyRepository.getByKey(id)
+    }
+  }
+
+  def getCentresForStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Set[CentreLocation]] = {
+    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
+      centreRepository.withStudy(studyId).flatMap { centre =>
+        centre.locations.map { location =>
+          CentreLocation(centre.id.id, location.id.id, centre.name, location.name)
+        }
+      }.successNel[String]
     }
   }
 
   def processingTypeWithId(studyId: StudyId, processingTypeId: ProcessingTypeId)
       : ServiceValidation[ProcessingType] = {
-    validStudyId(studyId) { study =>
+    withStudy(studyId) { study =>
       processingTypeRepository.withId(study.id, processingTypeId)
     }
   }
 
   def processingTypesForStudy(studyId: StudyId)
       : ServiceValidation[Set[ProcessingType]] = {
-    validStudyId(studyId) { study =>
+    withStudy(studyId) { study =>
       processingTypeRepository.allForStudy(study.id).successNel[String]
     }
   }
@@ -177,10 +184,10 @@ class StudiesServiceImpl @Inject() (
     "deprectated: annot type refactor".failureNel[ProcessingDto]
   }
 
-  private def validStudyId[T](studyId: StudyId)(fn: Study => ServiceValidation[T])
+  private def withStudy[T](studyId: StudyId)(fn: Study => ServiceValidation[T])
       : ServiceValidation[T] = {
     for {
-      study <- studyRepository.getByKey(studyId)
+      study  <- studyRepository.getByKey(studyId)
       result <- fn(study)
     } yield result
   }
@@ -189,19 +196,33 @@ class StudiesServiceImpl @Inject() (
                                    (fn: ProcessingType => ServiceValidation[T])
       : ServiceValidation[T] = {
     for {
-      pt <- processingTypeRepository.getByKey(processingTypeId)
-      study <- studyRepository.getByKey(pt.studyId)
+      pt     <- processingTypeRepository.getByKey(processingTypeId)
+      study  <- studyRepository.getByKey(pt.studyId)
       result <- fn(pt)
     } yield result
   }
 
-  def processCommand(cmd: StudyCommand): Future[ServiceValidation[Study]] =
-    ask(processor, cmd).mapTo[ServiceValidation[StudyEvent]].map { validation =>
-      for {
-        event <- validation
-        study <- studyRepository.getByKey(StudyId(event.id))
-      } yield study
+  def processCommand(cmd: StudyCommand): Future[ServiceValidation[Study]] = {
+    cmd.sessionUserId match {
+      case None => Future.successful(Unauthorized.failureNel[Study])
+      case Some(sessionUserId) =>
+        //val (permissionId: PermissionId, studyId: Option[StudyId]) = cmd match {
+        val (permissionId, studyId) = cmd match {
+            case c: StudyStateChangeCommand => (PermissionId.StudyChangeState, Some(StudyId(c.id)))
+            case c: StudyModifyCommand      => (PermissionId.StudyUpdate, Some(StudyId(c.id)))
+            case c: AddStudyCmd             => (PermissionId.StudyCreate, None)
+          }
+
+        whenPermittedAndIsMemberAsync(UserId(sessionUserId), permissionId, studyId, None) { () =>
+          ask(processor, cmd).mapTo[ServiceValidation[StudyEvent]].map { validation =>
+            for {
+              event <- validation
+              study <- studyRepository.getByKey(StudyId(event.id))
+            } yield study
+          }
+        }
     }
+  }
 
   def processProcessingTypeCommand(cmd: StudyCommand)
       : Future[ServiceValidation[ProcessingType]] = {
@@ -241,6 +262,19 @@ class StudiesServiceImpl @Inject() (
       val result = studies.toSeq.sortWith(sortFunc)
       if (sortExpressions(0).order == AscendingOrder) result
       else result.reverse
+    }
+  }
+
+  private def getMembershipStudies(userId: UserId): ServiceValidation[Set[Study]] = {
+    accessService.getMembership(userId).flatMap { membership =>
+      if (membership.studyInfo.allStudies) {
+        studyRepository.getValues.toSet.successNel[String]
+      } else {
+        membership.studyInfo.studyIds
+          .map(studyRepository.getByKey)
+          .toList.sequenceU
+          .map(studies => studies.toSet)
+      }
     }
   }
 

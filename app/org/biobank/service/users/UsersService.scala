@@ -86,7 +86,8 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
                                                val studyRepository:                    StudyRepository,
                                                val passwordHasher:                     PasswordHasher)
     extends UsersService
-    with BbwebServiceImpl {
+    with BbwebServiceImpl
+    with ServiceWithPermissionChecks {
 
   import org.biobank.CommonValidations._
   import org.biobank.domain.access.AccessItem._
@@ -96,9 +97,8 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   def getUserIfAuthorized(requestUserId: UserId, id: UserId): ServiceValidation[UserDto] = {
-    val hasPermission = accessService.hasPermission(requestUserId, PermissionId.UserRead)
-
-    if (hasPermission.valueOr(_ => false) || (requestUserId == id)) {
+    val hasPermission = accessService.hasPermission(requestUserId, PermissionId.UserRead).valueOr(_ => false)
+    if (hasPermission || (requestUserId == id)) {
       userRepository.getByKey(id).map(userToDto)
     } else {
       Unauthorized.failureNel[UserDto]
@@ -113,9 +113,7 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
   def getUsers(requestUserId: UserId,
                filter:        FilterString,
                sort:          SortString): ServiceValidation[Seq[User]] = {
-    val hasPermission = accessService.hasPermission(requestUserId, PermissionId.UserRead)
-
-    if (hasPermission.valueOr(_ => false)) {
+    whenPermitted(requestUserId, PermissionId.UserRead) { () =>
       val allUsers = userRepository.getValues.toSet
       val sortStr = if (sort.expression.isEmpty) new SortString("email")
                     else sort
@@ -132,20 +130,19 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
         if (firstSort.order == AscendingOrder) result
         else result.reverse
       }
-    } else {
-      Unauthorized.failureNel[Seq[User]]
     }
   }
 
   def getCountsByStatus(requestUserId: UserId): ServiceValidation[UserCountsByStatus] = {
-    accessService.hasPermission(requestUserId, PermissionId.UserRead).map { _ =>
+    whenPermitted(requestUserId, PermissionId.UserRead) { () =>
       // FIXME should be replaced by DTO query to the database
       val users = userRepository.getValues
       UserCountsByStatus(
         total           = users.size.toLong,
         registeredCount = users.collect { case u: RegisteredUser => u }.size.toLong,
         activeCount     = users.collect { case u: ActiveUser     => u }.size.toLong,
-        lockedCount     = users.collect { case u: LockedUser     => u }.size.toLong)
+        lockedCount     = users.collect { case u: LockedUser     => u }.size.toLong
+      ).successNel[String]
     }
   }
 
@@ -183,26 +180,21 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
     val v = cmd match {
         case c: UserStateChangeCommand =>
           accessService.hasPermission(UserId(c.sessionUserId), PermissionId.UserChangeState)
-        case c: UserModifyCommand      =>
+        case c: UserModifyCommand =>
           accessService.hasPermission(UserId(c.sessionUserId), PermissionId.UserUpdate)
         case _ => true.successNel[String]
       }
 
-    v.fold(
-      err => Future.successful(Unauthorized.failureNel[User]),
-      authorized => {
-        if (authorized) {
-          ask(processor, cmd).mapTo[ServiceValidation[UserEvent]].map { validation =>
-            for {
-              event <- validation
-              user  <- userRepository.getByKey(UserId(event.id))
-            } yield user
-          }
-        } else {
-          Future.successful(Unauthorized.failureNel[User])
-        }
+    if (v.exists(permission => permission)) {
+      ask(processor, cmd).mapTo[ServiceValidation[UserEvent]].map { validation =>
+        for {
+          event <- validation
+          user  <- userRepository.getByKey(UserId(event.id))
+        } yield user
       }
-    )
+    } else {
+      Future.successful(Unauthorized.failureNel[User])
+    }
   }
 
   def userToDto(user: User): UserDto = {
@@ -216,4 +208,5 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
             avatarUrl    = user.avatarUrl,
             roles        = accessService.getRoles(user.id))
   }
+
 }

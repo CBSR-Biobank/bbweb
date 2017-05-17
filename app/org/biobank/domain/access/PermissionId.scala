@@ -22,11 +22,6 @@ object PermissionId extends Enumeration {
   val CentreUpdate: Value          = Value("CentreUpdate")
   val CentreDelete: Value          = Value("CentreDelete")
 
-  val SpecimenTypeCreate: Value    = Value("SpecimenTypeCreate")
-  val SpecimenTypeRead: Value      = Value("SpecimenTypeRead")
-  val SpecimenTypeUpdate: Value    = Value("SpecimenTypeUpdate")
-  val SpecimenTypeDelete: Value    = Value("SpecimenTypeDelete")
-
   val PatientCreate: Value         = Value("PatientCreate")
   val PatientRead: Value           = Value("PatientRead")
   val PatientUpdate: Value         = Value("PatientUpdate")

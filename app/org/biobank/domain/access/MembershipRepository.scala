@@ -7,6 +7,7 @@ import org.biobank.domain._
 import org.biobank.domain.centre.CentreId
 import org.biobank.domain.study.StudyId
 import org.biobank.domain.user.UserId
+//import org.slf4j.{Logger, LoggerFactory}
 import scalaz.Scalaz._
 
 @ImplementedBy(classOf[MembershipRepositoryImpl])
@@ -22,6 +23,8 @@ class MembershipRepositoryImpl
     with MembershipRepository {
 
   import org.biobank.CommonValidations._
+
+  //private val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   def nextIdentity: MembershipId = new MembershipId(nextIdentityAsString)
 

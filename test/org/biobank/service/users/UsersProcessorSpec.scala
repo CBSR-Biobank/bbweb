@@ -38,8 +38,7 @@ class UsersProcessorSpec extends ProcessorTestFixture with PresistenceQueryEvent
 
     it("allow recovery from journal") {
       val user = factory.createActiveUser
-      val cmd = RegisterUserCmd(userId    = None,
-                                name      = user.name,
+      val cmd = RegisterUserCmd(name      = user.name,
                                 email     = user.email,
                                 password  = user.password,
                                 avatarUrl = user.avatarUrl)
