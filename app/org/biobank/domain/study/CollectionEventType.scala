@@ -46,16 +46,16 @@ trait CollectionEventTypeValidations {
   * @param annotationTypeData The [[AnnotationType]]s for a collection event type.
   *
   */
-final case class CollectionEventType(studyId:            StudyId,
-                                     id:                 CollectionEventTypeId,
-                                     version:            Long,
-                                     timeAdded:          DateTime,
-                                     timeModified:       Option[DateTime],
-                                     name:               String,
-                                     description:        Option[String],
-                                     recurring:          Boolean,
-                                     specimenSpecs:      Set[CollectionSpecimenSpec],
-                                     annotationTypes:    Set[AnnotationType])
+final case class CollectionEventType(studyId:              StudyId,
+                                     id:                   CollectionEventTypeId,
+                                     version:              Long,
+                                     timeAdded:            DateTime,
+                                     timeModified:         Option[DateTime],
+                                     name:                 String,
+                                     description:          Option[String],
+                                     recurring:            Boolean,
+                                     specimenDescriptions: Set[CollectionSpecimenDescription],
+                                     annotationTypes:      Set[AnnotationType])
     extends ConcurrencySafeEntity[CollectionEventTypeId]
     with HasName
     with HasOptionalDescription
@@ -109,54 +109,54 @@ final case class CollectionEventType(studyId:            StudyId,
   // replaces a previous one with the same unique id if it exists
   //
   // fails if there is another with the same name
-  def withSpecimenSpec(specimenSpec: CollectionSpecimenSpec)
+  def withSpecimenDescription(specimenDesc: CollectionSpecimenDescription)
       : DomainValidation[CollectionEventType] = {
     for {
       nameNotUsed <- {
-        specimenSpecs
-          .find { x => (x.name == specimenSpec.name) && (x.uniqueId != specimenSpec.uniqueId) }
+        specimenDescriptions
+          .find { x => (x.name == specimenDesc.name) && (x.id != specimenDesc.id) }
           .fold
           { true.successNel[DomainError] }
-          { _ => DomainError(s"specimen spec name already used: ${specimenSpec.name}").failureNel[Boolean] }
+          { _ => DomainError(s"specimen spec name already used: ${specimenDesc.name}").failureNel[Boolean] }
       }
-      specValid <- CollectionSpecimenSpec.validate(specimenSpec)
-    } yield copy(specimenSpecs = specimenSpecs - specimenSpec + specimenSpec,
+      specValid <- CollectionSpecimenDescription.validate(specimenDesc)
+    } yield copy(specimenDescriptions = specimenDescriptions - specimenDesc + specimenDesc,
                  version       = version + 1,
                  timeModified  = Some(DateTime.now))
   }
 
-  def removeSpecimenSpec(specimenSpecId: String): DomainValidation[CollectionEventType] = {
-    specimenSpecs
-      .find { x => x.uniqueId == specimenSpecId }
+  def removeSpecimenDescription(specimenDescId: SpecimenDescriptionId): DomainValidation[CollectionEventType] = {
+    specimenDescriptions
+      .find { x => x.id == specimenDescId }
       .fold
-      { DomainError(s"specimen spec does not exist: $specimenSpecId").failureNel[CollectionEventType] }
-      { specimenSpec =>
-        copy(specimenSpecs = specimenSpecs - specimenSpec,
+      { DomainError(s"specimen spec does not exist: $specimenDescId").failureNel[CollectionEventType] }
+      { specimenDesc =>
+        copy(specimenDescriptions = specimenDescriptions - specimenDesc,
              version       = version + 1,
              timeModified  = Some(DateTime.now)).successNel[DomainError]
       }
   }
 
-  def hasSpecimenSpecs(): Boolean = {
-    ! specimenSpecs.isEmpty
+  def hasSpecimenDescriptions(): Boolean = {
+    ! specimenDescriptions.isEmpty
   }
 
-  def specimenSpec(uniqueId: String): DomainValidation[CollectionSpecimenSpec] = {
-    specimenSpecs.find(_.uniqueId == uniqueId).toSuccessNel("specimen spec not found")
+  def specimenDesc(id: SpecimenDescriptionId): DomainValidation[CollectionSpecimenDescription] = {
+    specimenDescriptions.find(_.id == id).toSuccessNel("specimen description not found")
   }
 
   override def toString: String =
     s"""|CollectionEventType:{
-        |  studyId:           $studyId,
-        |  id:                $id,
-        |  version:           $version,
-        |  timeAdded:         $timeAdded,
-        |  timeModified:      $timeModified,
-        |  name:              $name,
-        |  description:       $description,
-        |  recurring:         $recurring,
-        |  specimenSpecs:     { $specimenSpecs },
-        |  annotationTypes:   { $annotationTypes }
+        |  studyId:              $studyId,
+        |  id:                   $id,
+        |  version:              $version,
+        |  timeAdded:            $timeAdded,
+        |  timeModified:         $timeModified,
+        |  name:                 $name,
+        |  description:          $description,
+        |  recurring:            $recurring,
+        |  specimenDescriptions: { $specimenDescriptions },
+        |  annotationTypes:      { $annotationTypes }
         |}""".stripMargin
 
 }
@@ -166,21 +166,21 @@ object CollectionEventType extends CollectionEventTypeValidations {
 
   implicit val collectionEventTypeWrites: Format[CollectionEventType] = Json.format[CollectionEventType]
 
-  def create(studyId:            StudyId,
-             id:                 CollectionEventTypeId,
-             version:            Long,
-             name:               String,
-             description:        Option[String],
-             recurring:          Boolean,
-             specimenSpecs:      Set[CollectionSpecimenSpec],
-             annotationTypes:    Set[AnnotationType])
+  def create(studyId:              StudyId,
+             id:                   CollectionEventTypeId,
+             version:              Long,
+             name:                 String,
+             description:          Option[String],
+             recurring:            Boolean,
+             specimenDescriptions: Set[CollectionSpecimenDescription],
+             annotationTypes:      Set[AnnotationType])
       : DomainValidation[CollectionEventType] = {
     (validateId(studyId, StudyIdRequired) |@|
        validateId(id) |@|
        validateVersion(version) |@|
        validateString(name, NameRequired) |@|
        validateNonEmptyOption(description, InvalidDescription) |@|
-       specimenSpecs.toList.traverseU(CollectionSpecimenSpec.validate) |@|
+       specimenDescriptions.toList.traverseU(CollectionSpecimenDescription.validate) |@|
        annotationTypes.toList.traverseU(AnnotationType.validate)) {
       case (_, _, _, _, _, _, _) => CollectionEventType(studyId,
                                                         id,
@@ -190,7 +190,7 @@ object CollectionEventType extends CollectionEventTypeValidations {
                                                         name,
                                                         description,
                                                         recurring,
-                                                        specimenSpecs,
+                                                        specimenDescriptions,
                                                         annotationTypes)
     }
   }

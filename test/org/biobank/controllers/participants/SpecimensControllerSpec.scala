@@ -56,11 +56,11 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
       "specimenData" ->
         specimens.map { specimen =>
           Json.obj(
-            "inventoryId"    -> specimen.inventoryId,
-            "specimenSpecId" -> specimen.specimenSpecId,
-            "timeCreated"    -> specimen.timeCreated,
-            "locationId"     -> specimen.locationId.id,
-            "amount"         -> specimen.amount)
+            "inventoryId"           -> specimen.inventoryId,
+            "specimenDescriptionId" -> specimen.specimenDescriptionId,
+            "timeCreated"           -> specimen.timeCreated,
+            "locationId"            -> specimen.locationId.id,
+            "amount"                -> specimen.amount)
         }
       )
   }
@@ -153,7 +153,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
         val specimenDtos = specimensToDtos(specimens,
                                            e.cevent,
-                                           e.specimenSpec,
+                                           e.specimenDescription,
                                            e.centreLocationInfo,
                                            e.centreLocationInfo)
 
@@ -190,7 +190,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
         val specimenDtos = specimensToDtos(specimens,
                                            e.cevent,
-                                           e.specimenSpec,
+                                           e.specimenDescription,
                                            e.centreLocationInfo,
                                            e.centreLocationInfo)
 
@@ -224,7 +224,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
         val specimenDtos = specimensToDtos(specimens,
                                            e.cevent,
-                                           e.specimenSpec,
+                                           e.specimenDescription,
                                            e.centreLocationInfo,
                                            e.centreLocationInfo)
 
@@ -258,7 +258,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         storeSpecimens(e.cevent, specimens)
 
         val specimenDto = specimens(0).createDto(e.cevent,
-                                                 e.specimenSpec,
+                                                 e.specimenDescription,
                                                  e.centreLocationInfo,
                                                  e.centreLocationInfo)
 
@@ -281,7 +281,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         storeSpecimens(e.cevent, specimens)
 
         val specimenDto = specimens(1).createDto(e.cevent,
-                                                 e.specimenSpec,
+                                                 e.specimenDescription,
                                                  e.centreLocationInfo,
                                                  e.centreLocationInfo)
 
@@ -338,14 +338,14 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
           specimenRepository.getByKey(repoSpecimens.head.specimenId) mustSucceed { repoSpecimen =>
 
           repoSpecimen must have (
-            'inventoryId       (specimen.inventoryId),
-            'specimenSpecId    (specimen.specimenSpecId),
-            'version           (specimen.version),
-            'originLocationId  (specimen.originLocationId.id),
-            'locationId        (specimen.locationId.id),
-            'containerId       (specimen.containerId),
-            'positionId        (specimen.positionId),
-            'amount            (specimen.amount)
+            'inventoryId           (specimen.inventoryId),
+            'specimenDescriptionId (specimen.specimenDescriptionId),
+            'version               (specimen.version),
+            'originLocationId      (specimen.originLocationId.id),
+            'locationId            (specimen.locationId.id),
+            'containerId           (specimen.containerId),
+            'positionId            (specimen.positionId),
+            'amount                (specimen.amount)
           )
 
           (repoSpecimen.timeCreated to specimen.timeCreated).millis must be < TimeCoparisonMillis

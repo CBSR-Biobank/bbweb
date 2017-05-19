@@ -103,8 +103,7 @@ define(['lodash'], function (_) {
           'ceventType',
           '$stateParams',
           function (ceventType, $stateParams) {
-            var annotationType = _.find(ceventType.annotationTypes,
-                                             { uniqueId: $stateParams.annotationTypeId });
+            var annotationType = _.find(ceventType.annotationTypes, { id: $stateParams.annotationTypeId });
             if (_.isUndefined(annotationType)) {
               throw new Error('could not find annotation type: ' + $stateParams.annotationTypeId);
             }
@@ -142,15 +141,15 @@ define(['lodash'], function (_) {
     /**
      * Collection Event Specimen Spec Add
      */
-    $stateProvider.state('home.admin.studies.study.collection.ceventType.specimenSpecAdd', {
+    $stateProvider.state('home.admin.studies.study.collection.ceventType.specimenDescriptionAdd', {
       url: '/spcspec/add',
       views: {
         'main@': {
           template: [
-            '<collection-specimen-spec-add',
+            '<collection-specimen-description-add',
             '  study="vm.study"',
             '  collection-event-type="vm.ceventType">',
-            '</collection-specimen-spec-add>'
+            '</collection-specimen-description-add>'
           ].join(''),
           controller: [
             'study',
@@ -171,46 +170,46 @@ define(['lodash'], function (_) {
     /**
      * Collection Event Specimen Spec Add
      */
-    $stateProvider.state('home.admin.studies.study.collection.ceventType.specimenSpecView', {
-      url: '/spcspec/view/{specimenSpecId}',
+    $stateProvider.state('home.admin.studies.study.collection.ceventType.specimenDescriptionView', {
+      url: '/spcspec/view/{specimenDescriptionId}',
       resolve: {
-        specimenSpec: [
+        specimenDescription: [
           'ceventType',
           '$stateParams',
           function (ceventType, $stateParams) {
-            var specimenSpec = _.find(ceventType.specimenSpecs,
-                                           { uniqueId: $stateParams.specimenSpecId });
-            if (_.isUndefined(specimenSpec)) {
-              throw new Error('could not find specimen spec: ' + $stateParams.specimenSpecId);
+            var specimenDescription = _.find(ceventType.specimenDescriptions,
+                                           { id: $stateParams.specimenDescriptionId });
+            if (_.isUndefined(specimenDescription)) {
+              throw new Error('could not find specimen spec: ' + $stateParams.specimenDescriptionId);
             }
-            return specimenSpec;
+            return specimenDescription;
           }
         ]
       },
       views: {
         'main@': {
           template: [
-            '<collection-specimen-spec-view',
+            '<collection-specimen-description-view',
             '  study="vm.study"',
             '  collection-event-type="vm.ceventType"',
-            '  specimen-spec="vm.specimenSpec">',
-            '</collection-specimen-spec-view>'
+            '  specimen-description="vm.specimenDescription">',
+            '</collection-specimen-description-view>'
           ].join(''),
           controller: [
             'study',
             'ceventType',
-            'specimenSpec',
-            function (study, ceventType, specimenSpec) {
+            'specimenDescription',
+            function (study, ceventType, specimenDescription) {
               this.study = study;
               this.ceventType = ceventType;
-              this.specimenSpec = specimenSpec;
+              this.specimenDescription = specimenDescription;
             }
           ],
           controllerAs: 'vm'
         }
       },
       data: {
-        displayName: '{{specimenSpec.name}}'
+        displayName: '{{specimenDescription.name}}'
       }
     });
 

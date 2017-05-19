@@ -44,7 +44,7 @@ define(['lodash'], function(_) {
     var vm = this;
 
     vm.descriptionToggleLength = 100;
-    vm.hasSpecimenSpecs        = false;
+    vm.hasSpecimenDescriptions = false;
     vm.changeState             = changeState;
     vm.editName                = editName;
     vm.editDescription         = editDescription;
@@ -58,8 +58,8 @@ define(['lodash'], function(_) {
       $scope.$emit('tabbed-page-update', 'tab-selected');
 
       CollectionEventType.list(vm.study.id).then(function (ceTypes) {
-        var specimenSpecs = _.flatMap(ceTypes, function(ceType) { return ceType.specimenSpecs; });
-        vm.hasSpecimenSpecs = (specimenSpecs.length > 0);
+        var specimenDescriptions = _.flatMap(ceTypes, function(ceType) { return ceType.specimenDescriptions; });
+        vm.hasSpecimenDescriptions = (specimenDescriptions.length > 0);
       });
     }
 

@@ -84,42 +84,42 @@ object CollectionEventTypeCommands {
                                                               uniqueId:        String)
       extends CollectionEventTypeModifyCommand
 
-  final case class AddCollectionSpecimenSpecCmd(userId:                      Option[String],
-                                                studyId:                     String,
-                                                id:                          String,
-                                                expectedVersion:             Long,
-                                                name:                        String,
-                                                description:                 Option[String],
-                                                units:                       String,
-                                                anatomicalSourceType:        AnatomicalSourceType,
-                                                preservationType:            PreservationType,
-                                                preservationTemperatureType: PreservationTemperatureType,
-                                                specimenType:                SpecimenType,
-                                                maxCount:                    Int,
-                                                amount:                      BigDecimal)
+  final case class AddCollectionSpecimenDescriptionCmd(userId:                      Option[String],
+                                                       studyId:                     String,
+                                                       id:                          String,
+                                                       expectedVersion:             Long,
+                                                       name:                        String,
+                                                       description:                 Option[String],
+                                                       units:                       String,
+                                                       anatomicalSourceType:        AnatomicalSourceType,
+                                                       preservationType:            PreservationType,
+                                                       preservationTemperatureType: PreservationTemperatureType,
+                                                       specimenType:                SpecimenType,
+                                                       maxCount:                    Int,
+                                                       amount:                      BigDecimal)
       extends CollectionEventTypeModifyCommand
 
-  final case class UpdateCollectionSpecimenSpecCmd(userId:                      Option[String],
-                                                   studyId:                     String,
-                                                   id:                          String,
-                                                   expectedVersion:             Long,
-                                                   uniqueId:                    String,
-                                                   name:                        String,
-                                                   description:                 Option[String],
-                                                   units:                       String,
-                                                   anatomicalSourceType:        AnatomicalSourceType,
-                                                   preservationType:            PreservationType,
-                                                   preservationTemperatureType: PreservationTemperatureType,
-                                                   specimenType:                SpecimenType,
-                                                   maxCount:                    Int,
-                                                   amount:                      BigDecimal)
+  final case class UpdateCollectionSpecimenDescriptionCmd(userId:                      Option[String],
+                                                          studyId:                     String,
+                                                          id:                          String,
+                                                          expectedVersion:             Long,
+                                                          specimenDescriptionId:       String,
+                                                          name:                        String,
+                                                          description:                 Option[String],
+                                                          units:                       String,
+                                                          anatomicalSourceType:        AnatomicalSourceType,
+                                                          preservationType:            PreservationType,
+                                                          preservationTemperatureType: PreservationTemperatureType,
+                                                          specimenType:                SpecimenType,
+                                                          maxCount:                    Int,
+                                                          amount:                      BigDecimal)
       extends CollectionEventTypeModifyCommand
 
-  final case class RemoveCollectionSpecimenSpecCmd(userId:          Option[String],
-                                                   studyId:         String,
-                                                   id:              String,
-                                                   expectedVersion: Long,
-                                                   uniqueId:        String)
+  final case class RemoveCollectionSpecimenDescriptionCmd(userId:                Option[String],
+                                                          studyId:               String,
+                                                          id:                    String,
+                                                          expectedVersion:       Long,
+                                                          specimenDescriptionId: String)
       extends CollectionEventTypeModifyCommand
 
 
@@ -149,13 +149,13 @@ object CollectionEventTypeCommands {
   implicit val removeCollectionEventAnnotationTypeCmdReads: Reads[RemoveCollectionEventTypeAnnotationTypeCmd] =
     Json.reads[RemoveCollectionEventTypeAnnotationTypeCmd]
 
-  implicit val addCollectionSpecimenSpecCmdReads: Reads[AddCollectionSpecimenSpecCmd] =
-    Json.reads[AddCollectionSpecimenSpecCmd]
+  implicit val addCollectionSpecimenDescriptionCmdReads: Reads[AddCollectionSpecimenDescriptionCmd] =
+    Json.reads[AddCollectionSpecimenDescriptionCmd]
 
-  implicit val updateCollectionSpecimenSpecCmdReads: Reads[UpdateCollectionSpecimenSpecCmd] =
-    Json.reads[UpdateCollectionSpecimenSpecCmd]
+  implicit val updateCollectionSpecimenDescriptionCmdReads: Reads[UpdateCollectionSpecimenDescriptionCmd] =
+    Json.reads[UpdateCollectionSpecimenDescriptionCmd]
 
-  implicit val removeCollectionSpecimenSpecCmdReads: Reads[RemoveCollectionSpecimenSpecCmd] =
-    Json.reads[RemoveCollectionSpecimenSpecCmd]
+  implicit val removeCollectionSpecimenDescriptionCmdReads: Reads[RemoveCollectionSpecimenDescriptionCmd] =
+    Json.reads[RemoveCollectionSpecimenDescriptionCmd]
 
 }

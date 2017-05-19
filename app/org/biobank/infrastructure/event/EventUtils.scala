@@ -4,11 +4,11 @@ import org.biobank.infrastructure.command.SpecimenCommands.SpecimenInfo
 import org.biobank.infrastructure.event.CommonEvents.{AnnotationType => EventAnnotationType}
 import org.biobank.infrastructure.event.CollectionEventTypeEvents._
 import org.biobank.infrastructure.event.SpecimenEvents._
-import org.biobank.domain.{AnatomicalSourceType, AnnotationType, AnnotationValueType, PreservationTemperatureType, PreservationType, SpecimenType}
-import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
-import org.biobank.domain.study.CollectionSpecimenSpec
+import org.biobank.domain._
+import org.biobank.domain.study.{CollectionSpecimenDescription, SpecimenDescriptionId}
 import org.biobank.domain.participants.SpecimenId
 import org.biobank.domain.centre.ShipmentSpecimen
+import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
 import org.joda.time._
 import org.joda.time.format.{DateTimeFormatter, ISODateTimeFormat}
 
@@ -58,24 +58,26 @@ object EventUtils {
     )
   }
 
-  def specimenSpecToEvent(specimenSpec: CollectionSpecimenSpec): CollectionEventTypeEvent.SpecimenSpec = {
-    CollectionEventTypeEvent.SpecimenSpec().update(
-      _.uniqueId                    := specimenSpec.uniqueId,
-      _.name                        := specimenSpec.name,
-      _.optionalDescription         := specimenSpec.description,
-      _.units                       := specimenSpec.units,
-      _.anatomicalSourceType        := specimenSpec.anatomicalSourceType.toString,
-      _.preservationType            := specimenSpec.preservationType.toString,
-      _.preservationTemperatureType := specimenSpec.preservationTemperatureType.toString,
-      _.specimenType                := specimenSpec.specimenType.toString,
-      _.maxCount                    := specimenSpec.maxCount,
-      _.amount                      := specimenSpec.amount.doubleValue
+  def specimenDescriptionToEvent(specimenDesc: CollectionSpecimenDescription):
+      CollectionEventTypeEvent.SpecimenDescription = {
+    CollectionEventTypeEvent.SpecimenDescription().update(
+      _.id                          := specimenDesc.id.id,
+      _.name                        := specimenDesc.name,
+      _.optionalDescription         := specimenDesc.description,
+      _.units                       := specimenDesc.units,
+      _.anatomicalSourceType        := specimenDesc.anatomicalSourceType.toString,
+      _.preservationType            := specimenDesc.preservationType.toString,
+      _.preservationTemperatureType := specimenDesc.preservationTemperatureType.toString,
+      _.specimenType                := specimenDesc.specimenType.toString,
+      _.maxCount                    := specimenDesc.maxCount,
+      _.amount                      := specimenDesc.amount.doubleValue
     )
   }
 
-  def specimenSpecFromEvent(event: CollectionEventTypeEvent.SpecimenSpec): CollectionSpecimenSpec = {
-    CollectionSpecimenSpec(
-      uniqueId                    = event.getUniqueId,
+  def specimenDescriptionFromEvent(event: CollectionEventTypeEvent.SpecimenDescription)
+      : CollectionSpecimenDescription = {
+    CollectionSpecimenDescription(
+      id                          = SpecimenDescriptionId(event.getId),
       name                        = event.getName,
       description                 = event.description,
       units                       = event.getUnits,
@@ -90,12 +92,12 @@ object EventUtils {
 
   def specimenInfoToEvent(id: SpecimenId, specimenInfo: SpecimenInfo): SpecimenEvent.Added.SpecimenInfo = {
     SpecimenEvent.Added.SpecimenInfo().update(
-      _.id             := id.id,
-      _.inventoryId    := specimenInfo.inventoryId,
-      _.specimenSpecId := specimenInfo.specimenSpecId,
-      _.timeCreated    := ISODateTimeFormatter.print(specimenInfo.timeCreated),
-      _.locationId     := specimenInfo.locationId,
-      _.amount         := specimenInfo.amount.doubleValue
+      _.id                    := id.id,
+      _.inventoryId           := specimenInfo.inventoryId,
+      _.specimenDescriptionId := specimenInfo.specimenDescriptionId,
+      _.timeCreated           := ISODateTimeFormatter.print(specimenInfo.timeCreated),
+      _.locationId            := specimenInfo.locationId,
+      _.amount                := specimenInfo.amount.doubleValue
     )
   }
 

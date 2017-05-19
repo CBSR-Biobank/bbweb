@@ -91,22 +91,22 @@ package dto {
     implicit val userCountsByStatusWriter: Writes[UserCountsByStatus] = Json.writes[UserCountsByStatus]
   }
 
-  final case class SpecimenDto(id:                 String,
-                               state:              EntityState,
-                               inventoryId:        String,
-                               collectionEventId:  String,
-                               specimenSpecId:     String,
-                               specimenSpecName:   String,
-                               version:            Long,
-                               timeAdded:          DateTime,
-                               timeModified:       Option[DateTime],
-                               originLocationInfo: CentreLocationInfo,
-                               locationInfo:       CentreLocationInfo,
-                               containerId:        Option[String],
-                               positionId:         Option[String],
-                               timeCreated:        DateTime,
-                               amount:             BigDecimal,
-                               units:              String)
+  final case class SpecimenDto(id:                    String,
+                               state:                 EntityState,
+                               inventoryId:           String,
+                               collectionEventId:     String,
+                               specimenDescriptionId: String,
+                               specimenSpecName:      String,
+                               version:               Long,
+                               timeAdded:             DateTime,
+                               timeModified:          Option[DateTime],
+                               originLocationInfo:    CentreLocationInfo,
+                               locationInfo:          CentreLocationInfo,
+                               containerId:           Option[String],
+                               positionId:            Option[String],
+                               timeCreated:           DateTime,
+                               amount:                BigDecimal,
+                               units:                 String)
 
   object SpecimenDto {
 

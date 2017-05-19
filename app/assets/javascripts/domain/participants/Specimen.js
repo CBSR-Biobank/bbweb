@@ -47,11 +47,11 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      *        this class. Objects of this type are usually returned by the server's REST API.
      *
-     * @param {domain.studies.CollectionSpecimenSpec} [specimenSpec] - The specimen spec from the collection
+     * @param {domain.studies.CollectionSpecimenDescription} [specimenDescription] - The specimen spec from the collection
      *        event type this specimen represents. An Undefined value is also valid.
      *
      */
-    function Specimen(obj, specimenSpec) {
+    function Specimen(obj, specimenDescription) {
 
       /**
        * The unique inventory ID for this specimen.
@@ -63,14 +63,14 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
       this.inventoryId = null;
 
       /**
-       * The ID corresponding to the the {@link domain.studies.CollectionSpecimenSpec SpecimenSpec}
+       * The ID corresponding to the the {@link domain.studies.CollectionSpecimenDescription SpecimenDescription}
        * for this specimen.
        *
-       * @name domain.participants.Specimen#specimenSpecId
+       * @name domain.participants.Specimen#specimenDescriptionId
        * @type {string}
        * @default null
        */
-      this.specimenSpecId = null;
+      this.specimenDescriptionId = null;
 
       /**
        * The location of the {@link domain.participants.Centre} where this specimen was created.
@@ -109,7 +109,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
 
       /**
        * The amount this specimen contains, in units specified in {@link
-       * domain.studies.CollectionSpecimenSpec#units CollectionSpecimenSpec#units}.
+       * domain.studies.CollectionSpecimenDescription#units CollectionSpecimenDescription#units}.
        *
        * @name domain.participants.Specimen#amount
        * @type {number}
@@ -125,8 +125,8 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
 
       ConcurrencySafeEntity.call(this, Specimen.SCHEMA, obj);
 
-      if (specimenSpec) {
-        this.setSpecimenSpec(specimenSpec);
+      if (specimenDescription) {
+        this.setSpecimenDescription(specimenDescription);
       }
     }
 
@@ -140,31 +140,31 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
       'id': 'Specimen',
       'type': 'object',
       'properties': {
-        'id':               { 'type': 'string' },
-        'inventoryId':      { 'type': 'string' },
-        'specimenSpecId':   { 'type': 'string' },
-        'specimenSpecName': { 'type': [ 'string', 'null' ] },
-        'version':          { 'type': 'integer', 'minimum': 0 },
-        'timeAdded':        { 'type': 'string' },
-        'timeModified':     { 'type': [ 'string', 'null' ] },
-        'originLocationInfo': {
-          'type': 'object',
-          'items': { '$ref': 'CentreLocationInfo' }
+        'id':                      { 'type': 'string' },
+        'inventoryId':             { 'type': 'string' },
+        'specimenDescriptionId':   { 'type': 'string' },
+        'specimenDescriptionName': { 'type': [ 'string', 'null' ] },
+        'version':                 { 'type': 'integer', 'minimum': 0 },
+        'timeAdded':               { 'type': 'string' },
+        'timeModified':            { 'type': [ 'string', 'null' ] },
+        'originLocationInfo':      {
+          'type':                  'object',
+          'items':                 { '$ref': 'CentreLocationInfo' }
         },
-        'locationInfo': {
-          'type': 'object',
-          'items': { '$ref': 'CentreLocationInfo' }
+        'locationInfo':            {
+          'type':                  'object',
+          'items':                 { '$ref': 'CentreLocationInfo' }
         },
-        'containerId':      { 'type': [ 'string', 'null' ] },
-        'postitionId':      { 'type': [ 'string', 'null' ] },
-        'timeCreated':      { 'type': 'string' },
-        'amount':           { 'type': 'number' },
-        'state':            { 'type': 'string' }
+        'containerId':             { 'type': [ 'string', 'null' ] },
+        'postitionId':             { 'type': [ 'string', 'null' ] },
+        'timeCreated':             { 'type': 'string' },
+        'amount':                  { 'type': 'number' },
+        'state':                   { 'type': 'string' }
       },
       'required': [
         'id',
         'inventoryId',
-        'specimenSpecId',
+        'specimenDescriptionId',
         'version',
         'timeCreated',
         'state',
@@ -188,7 +188,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
      *
-     * @param {CollectionSpecimenSpec} [specimenSpec] - The specimen spec from the collection event type this
+     * @param {CollectionSpecimenDescription} [specimenDescription] - The specimen spec from the collection event type this
      * specimen represents.
      *
      * @returns {Specimen} A new specimen.
@@ -196,14 +196,14 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * @see [asyncCreate()]{@link domain.participants.Specimen.asyncCreate} when you need to create
      * a specimen within asynchronous code.
      */
-    Specimen.create = function (obj, specimenSpec) {
+    Specimen.create = function (obj, specimenDescription) {
       var validation = Specimen.isValid(obj);
       if (!validation.valid) {
         $log.error('invalid object from server: ' + validation.message);
         throw new DomainError('invalid object from server: ' + validation.message);
       }
 
-      return new Specimen(obj, specimenSpec);
+      return new Specimen(obj, specimenDescription);
     };
 
     /**
@@ -326,7 +326,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
       var json = { collectionEventId: ceventId };
 
       json.specimenData = _.map(specimens, function (specimen) {
-        var result = _.pick(specimen, 'inventoryId', 'specimenSpecId', 'timeCreated', 'amount');
+        var result = _.pick(specimen, 'inventoryId', 'specimenDescriptionId', 'timeCreated', 'amount');
         result.locationId = specimen.locationInfo.locationId;
         return result;
       });
@@ -336,14 +336,14 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
     /**
      * Sets the specimen spec ID for this Specimen.
      *
-     * @param {domain.studies.CollectionSpecimenSpec} specimenSpec The specimen specifications associated with
+     * @param {domain.studies.CollectionSpecimenDescription} specimenDescription The specimen specifications associated with
      * this specimen.
      *
      * @returns {undefined}
      */
-    Specimen.prototype.setSpecimenSpec = function (specimenSpec) {
-      this.specimenSpecId = specimenSpec.uniqueId;
-      this.specimenSpec = specimenSpec;
+    Specimen.prototype.setSpecimenDescription = function (specimenDescription) {
+      this.specimenDescriptionId = specimenDescription.id;
+      this.specimenDescription = specimenDescription;
     };
 
     /**
@@ -352,10 +352,10 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * @returns {number} The amount used for this specimen.
      */
     Specimen.prototype.name = function () {
-      if (_.isUndefined(this.specimenSpec)) {
+      if (_.isUndefined(this.specimenDescription)) {
         throw new DomainError('specimen spec not assigned');
       }
-      return this.specimenSpec.name;
+      return this.specimenDescription.name;
     };
 
     /**
@@ -364,10 +364,10 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * @returns {number} The amount used for this specimen.
      */
     Specimen.prototype.defaultAmount = function () {
-      if (_.isUndefined(this.specimenSpec)) {
+      if (_.isUndefined(this.specimenDescription)) {
         throw new DomainError('specimen spec not assigned');
       }
-      return this.specimenSpec.amount;
+      return this.specimenDescription.amount;
     };
 
     /**
@@ -376,10 +376,10 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * @returns {boolean} True if the amount is the default.
      */
     Specimen.prototype.isDefaultAmount = function () {
-      if (_.isUndefined(this.specimenSpec)) {
+      if (_.isUndefined(this.specimenDescription)) {
         throw new DomainError('specimen spec not assigned');
       }
-      return (this.amount === this.specimenSpec.amount);
+      return (this.amount === this.specimenDescription.amount);
     };
 
     /**
@@ -388,10 +388,10 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * @returns {string} The units used for this specimen.
      */
     Specimen.prototype.units = function () {
-      if (_.isUndefined(this.specimenSpec)) {
+      if (_.isUndefined(this.specimenDescription)) {
         throw new DomainError('specimen spec not assigned');
       }
-      return this.specimenSpec.units;
+      return this.specimenDescription.units;
     };
 
     /**

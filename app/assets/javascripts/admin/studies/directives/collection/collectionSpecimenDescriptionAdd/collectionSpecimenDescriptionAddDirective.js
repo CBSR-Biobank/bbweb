@@ -8,7 +8,7 @@ define(['lodash'], function (_) {
   /**
    *
    */
-  function collectionSpecimenSpecAddDirective() {
+  function collectionSpecimenDescriptionAddDirective() {
     var directive = {
       restrict: 'E',
       scope: {},
@@ -16,15 +16,15 @@ define(['lodash'], function (_) {
         study:               '=',
         collectionEventType: '='
       },
-      templateUrl : '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenSpecAdd/collectionSpecimenSpecAdd.html',
-      controller: CollectionSpecimenSpecAddCtrl,
+      templateUrl : '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenDescriptionAdd/collectionSpecimenDescriptionAdd.html',
+      controller: CollectionSpecimenDescriptionAddCtrl,
       controllerAs: 'vm'
     };
 
     return directive;
   }
 
-  CollectionSpecimenSpecAddCtrl.$inject = [
+  CollectionSpecimenDescriptionAddCtrl.$inject = [
     '$state',
     'gettextCatalog',
     'domainNotificationService',
@@ -37,7 +37,7 @@ define(['lodash'], function (_) {
 
   var returnState = 'home.admin.studies.study.collection.ceventType';
 
-  function CollectionSpecimenSpecAddCtrl($state,
+  function CollectionSpecimenDescriptionAddCtrl($state,
                                          gettextCatalog,
                                          domainNotificationService,
                                          notificationsService,
@@ -57,8 +57,8 @@ define(['lodash'], function (_) {
 
     //--
 
-    function submit(specimenSpec) {
-      vm.collectionEventType.addSpecimenSpec(specimenSpec)
+    function submit(specimenDescription) {
+      vm.collectionEventType.addSpecimenDescription(specimenDescription)
         .then(onAddSuccessful)
         .catch(onAddFailed);
 
@@ -77,6 +77,6 @@ define(['lodash'], function (_) {
     }
   }
 
-  return collectionSpecimenSpecAddDirective;
+  return collectionSpecimenDescriptionAddDirective;
 
 });

@@ -14,24 +14,11 @@ define(function (require) {
 
   describe('Directive: studySummaryDirective', function() {
 
-    var createController = function () {
-      this.element = angular.element('<study-summary study="vm.study"></study-summary>');
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = { study: this.study };
-
-      this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
-      this.scope.$on('tabbed-page-update', this.eventRxFunc);
-
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('studySummary');
-    };
-
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(TestSuiteMixin) {
       var self = this,
-          specimenSpec,
+          specimenDescription,
           ceventType;
 
       _.extend(self, TestSuiteMixin.prototype);
@@ -42,39 +29,52 @@ define(function (require) {
                               '$state',
                               'Study',
                               'CollectionEventType',
-                              'CollectionSpecimenSpec',
+                              'CollectionSpecimenDescription',
                               'modalService',
                               'notificationsService',
                               'factory');
 
-      specimenSpec = self.factory.collectionSpecimenSpec();
+      specimenDescription = self.factory.collectionSpecimenDescription();
       ceventType = self.CollectionEventType.create(
-        self.factory.collectionEventType({ specimenSpecs: [ specimenSpec ]}));
+        self.factory.collectionEventType({ specimenDescriptions: [ specimenDescription ]}));
 
       spyOn(self.CollectionEventType, 'list').and.returnValue(self.$q.when([ ceventType ]));
       spyOn(self.modalService, 'showModal').and.returnValue(self.$q.when(true));
 
       self.study = new self.Study(self.factory.study());
 
-      this.putHtmlTemplates(
+      self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/studySummary/studySummary.html',
         '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
         '/assets/javascripts/common/directives/statusLine/statusLine.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
+
+      self.createController = function () {
+        self.element = angular.element('<study-summary study="vm.study"></study-summary>');
+        self.scope = self.$rootScope.$new();
+        self.scope.vm = { study: self.study };
+
+        self.eventRxFunc = jasmine.createSpy().and.returnValue(null);
+        self.scope.$on('tabbed-page-update', self.eventRxFunc);
+
+        self.$compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('studySummary');
+      };
     }));
 
     it('initialization is valid', function() {
-      createController.call(this);
+      this.createController();
       expect(this.controller.study).toBe(this.study);
       expect(this.controller.descriptionToggleLength).toBeDefined();
-      expect(this.controller.hasSpecimenSpecs).toBeTrue();
+      expect(this.controller.hasSpecimenDescriptions).toBeTrue();
       expect(this.eventRxFunc).toHaveBeenCalled();
     });
 
     it('should have valid settings when study has no collection event types', function() {
       this.CollectionEventType.list = jasmine.createSpy().and.returnValue(this.$q.when([ ]));
-      createController.call(this);
-      expect(this.controller.hasSpecimenSpecs).toBeFalse();
+      this.createController(this);
+      expect(this.controller.hasSpecimenDescriptions).toBeFalse();
     });
 
     describe('updates to name', function () {
@@ -83,7 +83,7 @@ define(function (require) {
 
       beforeEach(inject(function () {
         context.entity             = this.Study;
-        context.createController   = createController;
+        context.createController   = this.createController.bind(this);
         context.updateFuncName     = 'updateName';
         context.controllerFuncName = 'editName';
         context.modalInputFuncName = 'text';
@@ -99,7 +99,7 @@ define(function (require) {
 
       beforeEach(inject(function () {
         context.entity             = this.Study;
-        context.createController   = createController;
+        context.createController   = this.createController.bind(this);
         context.updateFuncName     = 'updateDescription';
         context.controllerFuncName = 'editDescription';
         context.modalInputFuncName = 'textArea';
@@ -159,7 +159,7 @@ define(function (require) {
           spyOn(this.Study, 'get').and.returnValue(this.$q.when(this.study));
           spyOn(this.Study.prototype, context.state).and.returnValue(this.$q.when(this.study));
 
-          createController.call(this);
+          this.createController();
           this.controller.changeState(context.state);
           this.scope.$digest();
           expect(this.Study.prototype[context.state]).toHaveBeenCalled();
@@ -172,7 +172,7 @@ define(function (require) {
       var self = this,
           badState = 'xxx';
 
-      createController.call(this);
+      this.createController();
       expect(function () {
         self.controller.changeState(badState);
       }).toThrow(new Error('invalid state: ' + badState));

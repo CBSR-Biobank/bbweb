@@ -50,8 +50,8 @@ define(function (require) {
     .factory('ShipmentSpecimen',                    require('./centre/ShipmentSpecimen'))
 
     .factory('CollectionEventType',                 require('./study/CollectionEventType'))
-    .factory('CollectionSpecimenSpec',              require('./study/CollectionSpecimenSpec'))
-    .factory('HasCollectionSpecimenSpecs',          require('./study/HasCollectionSpecimenSpecs'))
+    .factory('CollectionSpecimenDescription',       require('./study/CollectionSpecimenDescription'))
+    .factory('HasCollectionSpecimenDescriptions',   require('./study/HasCollectionSpecimenDescriptions'))
     .factory('ProcessingTypeViewer',                require('./study/ProcessingTypeViewer'))
     .factory('SpcLinkTypeViewer',                   require('./study/SpcLinkTypeViewer'))
     .factory('SpecimenGroup',                       require('./study/SpecimenGroup'))

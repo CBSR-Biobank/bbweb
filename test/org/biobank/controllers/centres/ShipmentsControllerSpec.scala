@@ -817,7 +817,7 @@ class ShipmentsControllerSpec
 
       describe("for PACKED state") {
 
-        it("111 change to PACKED state from other valid states") {
+        it("change to PACKED state from other valid states") {
           val f = allShipmentsFixture
           val testStates = Table("state", Shipment.createdState, Shipment.sentState)
 

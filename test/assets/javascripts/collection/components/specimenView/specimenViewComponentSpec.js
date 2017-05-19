@@ -56,14 +56,14 @@ define(function (require) {
 
       // the object must have keys in same order as the parameters for createController()
       this.createEntities = function () {
-        var rawSpecimenSpec = self.factory.collectionSpecimenSpec(),
+        var rawSpecimenDescription = self.factory.collectionSpecimenDescription(),
             rawCollectionEventType = self.factory.collectionEventType(
-              { specimenSpecs: [ rawSpecimenSpec ]}),
+              { specimenDescriptions: [ rawSpecimenDescription ]}),
             collectionEventType = self.CollectionEventType.create(rawCollectionEventType),
             collectionEvent = self.CollectionEvent(self.factory.collectionEvent(),
                                                        self.collectionEventType),
             specimen = new self.Specimen(self.factory.specimen(),
-                                         collectionEventType.specimenSpecs[0]),
+                                         collectionEventType.specimenDescriptions[0]),
             participant = new self.Participant(self.factory.defaultParticipant()),
             study = new self.Study(this.factory.defaultStudy());
 
@@ -80,7 +80,7 @@ define(function (require) {
     it('has valid scope', function() {
       var entities = this.createEntities();
       this.createController.apply(this, _.values(entities));
-      expect(this.controller.specimenSpec).toBeDefined();
+      expect(this.controller.specimenDescription).toBeDefined();
     });
 
     it('user can return to previous page', function() {

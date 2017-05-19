@@ -6,7 +6,7 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.domain.LocationId
 import org.biobank.domain.participants._
 import org.biobank.domain.processing.ProcessingEventInputSpecimenRepository
-import org.biobank.domain.study.{CollectionEventType, CollectionEventTypeRepository}
+import org.biobank.domain.study.{CollectionEventType, CollectionEventTypeRepository, SpecimenDescriptionId}
 import org.biobank.infrastructure.command.SpecimenCommands._
 import org.biobank.infrastructure.event.SpecimenEvents._
 import org.biobank.service._
@@ -198,17 +198,18 @@ class SpecimensProcessor @Inject() (
         validEventType <- validEventType(event.eventType.isAdded)
         specimens      <- {
           event.getAdded.specimenData.toList.traverseU { info =>
-            UsableSpecimen.create(id               = SpecimenId(info.getId),
-                                  inventoryId      = info.getInventoryId,
-                                  specimenSpecId   = info.getSpecimenSpecId,
-                                  version          = 0L,
-                                  originLocationId = LocationId(info.getLocationId),
-                                  locationId       = LocationId(info.getLocationId),
-                                  containerId      = None,
-                                  positionId       = None,
-                                  timeAdded        = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
-                                  timeCreated      = ISODateTimeParser.parseDateTime(info.getTimeCreated),
-                                  amount           = BigDecimal(info.getAmount))
+            UsableSpecimen.create(
+              id                    = SpecimenId(info.getId),
+              inventoryId           = info.getInventoryId,
+              specimenDescriptionId = SpecimenDescriptionId(info.getSpecimenDescriptionId),
+              version               = 0L,
+              originLocationId      = LocationId(info.getLocationId),
+              locationId            = LocationId(info.getLocationId),
+              containerId           = None,
+              positionId            = None,
+              timeAdded             = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
+              timeCreated           = ISODateTimeParser.parseDateTime(info.getTimeCreated),
+              amount                = BigDecimal(info.getAmount))
           }
         }
       } yield specimens
@@ -279,12 +280,12 @@ class SpecimensProcessor @Inject() (
   private def validateSpecimenInfo(specimenData: List[SpecimenInfo], ceventType: CollectionEventType)
       : ServiceValidation[Boolean] = {
 
-    val cmdSpecIds    = specimenData.map(s => s.specimenSpecId).toSet
-    val ceventSpecIds = ceventType.specimenSpecs.map(s => s.uniqueId).toSet
-    val notBelonging  = cmdSpecIds.diff(ceventSpecIds)
+    val cmdSpcDescIds = specimenData.map(s => SpecimenDescriptionId(s.specimenDescriptionId)).toSet
+    val ceventDescId  = ceventType.specimenDescriptions.map(s => s.id).toSet
+    val notBelonging  = cmdSpcDescIds.diff(ceventDescId)
 
     if (notBelonging.isEmpty) true.successNel[String]
-    else EntityCriteriaError("specimen specs do not belong to collection event type: "
+    else EntityCriteriaError("specimen descriptions do not belong to collection event type: "
                                + notBelonging.mkString(", ")).failureNel[Boolean]
   }
 

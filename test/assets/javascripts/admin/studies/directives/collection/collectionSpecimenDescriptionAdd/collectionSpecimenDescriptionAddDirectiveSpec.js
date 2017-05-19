@@ -11,14 +11,14 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('collectionSpecimenSpecAddDirective', function() {
+  describe('collectionSpecimenDescriptionAddDirective', function() {
 
     var createDirective = function (test) {
       this.element = angular.element([
-        '<collection-specimen-spec-add',
+        '<collection-specimen-description-add',
         ' study="vm.study"',
         ' collection-event-type="vm.collectionEventType">',
-        '</collection-specimen-spec-add>'
+        '</collection-specimen-description-add>'
       ].join(''));
 
       this.scope = this.$rootScope.$new();
@@ -28,7 +28,7 @@ define([
       };
       this.$compile(this.element)(this.scope);
       this.scope.$digest();
-      this.controller = this.element.controller('collectionSpecimenSpecAdd');
+      this.controller = this.element.controller('collectionSpecimenDescriptionAdd');
     };
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
@@ -46,11 +46,11 @@ define([
                               'domainNotificationService',
                               'Study',
                               'CollectionEventType',
-                              'CollectionSpecimenSpec',
+                              'CollectionSpecimenDescription',
                               'factory');
 
       self.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenSpecAdd/collectionSpecimenSpecAdd.html');
+        '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenDescriptionAdd/collectionSpecimenDescriptionAdd.html');
 
       self.jsonCevenType       = self.factory.collectionEventType();
       self.jsonStudy           = self.factory.defaultStudy();
@@ -78,18 +78,18 @@ define([
     describe('on submit', function() {
 
       beforeEach(function() {
-        this.jsonSpec     = this.factory.collectionSpecimenSpec();
-        this.specimenSpec = new this.CollectionSpecimenSpec(this.jsonSpec);
+        this.jsonSpec     = this.factory.collectionSpecimenDescription();
+        this.specimenDescription = new this.CollectionSpecimenDescription(this.jsonSpec);
       });
 
 
       it('can submit a specimen spec', function() {
-        spyOn(this.CollectionEventType.prototype, 'addSpecimenSpec')
+        spyOn(this.CollectionEventType.prototype, 'addSpecimenDescription')
           .and.returnValue(this.$q.when(this.collectionEventType));
         spyOn(this.notificationsService, 'submitSuccess').and.callThrough();
 
         createDirective.call(this);
-        this.controller.submit(this.specimenSpec);
+        this.controller.submit(this.specimenDescription);
         this.scope.$digest();
 
         expect(this.$state.go).toHaveBeenCalledWith(
@@ -98,12 +98,12 @@ define([
       });
 
       it('displays an error when submit fails', function() {
-        spyOn(this.CollectionEventType.prototype, 'addSpecimenSpec')
+        spyOn(this.CollectionEventType.prototype, 'addSpecimenDescription')
           .and.returnValue(this.$q.reject('simulated error'));
         spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(this.$q.when('OK'));
 
         createDirective.call(this);
-        this.controller.submit(this.specimenSpec);
+        this.controller.submit(this.specimenDescription);
         this.scope.$digest();
 
         expect(this.domainNotificationService.updateErrorModal).toHaveBeenCalled();

@@ -342,36 +342,36 @@ class TestData @Inject() (config:                        Configuration,
 
       // Use a list since "id" is determined at the time of adding to the repository
       val ceventTypes =
-        List(CollectionEventType(studyId            = bbpsp.id,
-                                 id                 = CollectionEventTypeId(hashids.encode(1)),
-                                 version            = 0L,
-                                 timeAdded          = Global.StartOfTime,
-                                 timeModified       = None,
-                                 name               = "Default Event ",
-                                 description        = None,
-                                 recurring          = true,
-                                 specimenSpecs      = getBbpspSpecimenSpecs,
-                                 annotationTypes    = getBbpspCeventAnnotationTypes),
-             CollectionEventType(studyId            = bbpsp.id,
-                                 id                 = CollectionEventTypeId(hashids.encode(2)),
-                                 version            = 0L,
-                                 timeAdded          = Global.StartOfTime,
-                                 timeModified       = None,
-                                 name               = "Second Event ",
-                                 description        = Some("Example event"),
-                                 recurring          = false,
-                                 specimenSpecs      = getBbpspSpecimenSpecs,
-                                 annotationTypes    = Set.empty))
+        List(CollectionEventType(studyId              = bbpsp.id,
+                                 id                   = CollectionEventTypeId(hashids.encode(1)),
+                                 version              = 0L,
+                                 timeAdded            = Global.StartOfTime,
+                                 timeModified         = None,
+                                 name                 = "Default Event ",
+                                 description          = None,
+                                 recurring            = true,
+                                 specimenDescriptions = getBbpspSpecimenDescriptions,
+                                 annotationTypes      = getBbpspCeventAnnotationTypes),
+             CollectionEventType(studyId              = bbpsp.id,
+                                 id                   = CollectionEventTypeId(hashids.encode(2)),
+                                 version              = 0L,
+                                 timeAdded            = Global.StartOfTime,
+                                 timeModified         = None,
+                                 name                 = "Second Event ",
+                                 description          = Some("Example event"),
+                                 recurring            = false,
+                                 specimenDescriptions = getBbpspSpecimenDescriptions,
+                                 annotationTypes      = Set.empty))
 
       ceventTypes.foreach { cet => collectionEventTypeRepository.put(cet) }
     }
   }
 
-  def getBbpspSpecimenSpecs(): Set[CollectionSpecimenSpec] = {
+  def getBbpspSpecimenDescriptions(): Set[CollectionSpecimenDescription] = {
     val hashids = Hashids("bbpsp-specimen-specs")
 
-    Set(CollectionSpecimenSpec(
-          uniqueId                    = hashids.encode(1),
+    Set(CollectionSpecimenDescription(
+          id                          = SpecimenDescriptionId(hashids.encode(1)),
           name                        = "10 mL Lavender top EDTA tube",
           description                 = None,
           units                       = "mL",
@@ -381,8 +381,8 @@ class TestData @Inject() (config:                        Configuration,
           specimenType                = SpecimenType.WholeBloodEdta,
           maxCount                    = 2, // set to 2 for testing form, set back to 1 for demo
           amount                      = 10.0),
-        CollectionSpecimenSpec(
-          uniqueId                    = hashids.encode(2),
+        CollectionSpecimenDescription(
+          id                          = SpecimenDescriptionId(hashids.encode(1)),
           name                        = "10 mL Orange top PAXgene tube",
           description                 = None,
           units                       = "mL",
@@ -393,8 +393,8 @@ class TestData @Inject() (config:                        Configuration,
           maxCount                    = 1,
           amount                      = 10.0)
           //,
-          // CollectionSpecimenSpec(
-          //   uniqueId                    = hashids.encode(3),
+          // CollectionSpecimenDescription(
+          //   id                          = SpecimenDescriptionId(hashids.encode(1)),
           //   name                        = "3mL Lavender top EDTA tube",
           //   description                 = None,
           //   units                       = "mL",
@@ -404,8 +404,8 @@ class TestData @Inject() (config:                        Configuration,
           //   specimenType                = SpecimenType.WholeBloodEdta,
           //   maxCount                    = 1,
           //   amount                      = Some(3)),
-          // CollectionSpecimenSpec(
-          //   uniqueId                    = hashids.encode(4),
+          // CollectionSpecimenDescription(
+          //   id                          = SpecimenDescriptionId(hashids.encode(1)),
           //   name                        = "4ml lavender top EDTA tube",
           //   description                 = None,
           //   units                       = "mL",
@@ -415,8 +415,8 @@ class TestData @Inject() (config:                        Configuration,
           //   specimenType                = SpecimenType.WholeBloodEdta,
           //   maxCount                    = 1,
           //   amount                      = Some(4)),
-          // CollectionSpecimenSpec(
-          //   uniqueId                    = hashids.encode(5),
+          // CollectionSpecimenDescription(
+          //   id                          = SpecimenDescriptionId(hashids.encode(1)),
           //   name                        = "9ml CPDA yellow top tube",
           //   description                 = None,
           //   units                       = "mL",
@@ -426,8 +426,8 @@ class TestData @Inject() (config:                        Configuration,
           //   specimenType                = SpecimenType.WholeBloodEdta,
           //   maxCount                    = 1,
           //   amount                      = Some(9)),
-          // CollectionSpecimenSpec(
-          //   uniqueId                    = hashids.encode(6),
+          // CollectionSpecimenDescription(
+          //   id                          = SpecimenDescriptionId(hashids.encode(1)),
           //   name                        = "Urine cup",
           //   description                 = None,
           //   units                       = "mL",
@@ -544,20 +544,20 @@ class TestData @Inject() (config:                        Configuration,
 
     def addSpecimen(id:           SpecimenId,
                     inventoryId:  String,
-                    specimenSpec: CollectionSpecimenSpec,
+                    specimenDesc: CollectionSpecimenDescription,
                     location:     Location) =
-      UsableSpecimen(id               = id,
-                     inventoryId      = inventoryId,
-                     specimenSpecId   = specimenSpec.uniqueId,
-                     version          = 0L,
-                     timeAdded        = Global.StartOfTime,
-                     timeModified     = None,
-                     originLocationId = location.uniqueId,
-                     locationId       = location.uniqueId,
-                     containerId      = None,
-                     positionId       = None,
-                     timeCreated      = DateTime.now.minusDays(1),
-                     amount           = BigDecimal(0.1))
+      UsableSpecimen(id                    = id,
+                     inventoryId           = inventoryId,
+                     specimenDescriptionId = specimenDesc.id,
+                     version               = 0L,
+                     timeAdded             = Global.StartOfTime,
+                     timeModified          = None,
+                     originLocationId      = location.uniqueId,
+                     locationId            = location.uniqueId,
+                     containerId           = None,
+                     positionId            = None,
+                     timeCreated           = DateTime.now.minusDays(1),
+                     amount                = BigDecimal(0.1))
 
 
     if (loadSpecimenTestData) {
@@ -588,7 +588,7 @@ class TestData @Inject() (config:                        Configuration,
                                 val location = centre.locations.head
                                 val specimen = addSpecimen(SpecimenId(hashids.encode(uniqueId.toLong)),
                                                            inventoryId,
-                                                           cventType.specimenSpecs.head,
+                                                           cventType.specimenDescriptions.head,
                                                            location)
                                 specimenRepository.put(specimen)
                                 ceventSpecimenRepository.put(CeventSpecimen(cevent.id, specimen.id))

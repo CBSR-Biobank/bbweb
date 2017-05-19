@@ -26,7 +26,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
                                ceventType.name,
                                ceventType.description,
                                ceventType.recurring,
-                               ceventType.specimenSpecs,
+                               ceventType.specimenDescriptions,
                                ceventType.annotationTypes)
   }
 
@@ -46,7 +46,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
           'recurring   (ceventType.recurring)
         )
 
-        cet.specimenSpecs must have size 0
+        cet.specimenDescriptions must have size 0
         cet.annotationTypes must have size 0
         checkTimeStamps(cet, DateTime.now, None)
       }
@@ -68,7 +68,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
           'recurring   (cet.recurring)
         )
 
-        updatedCet.specimenSpecs must have size 0
+        updatedCet.specimenDescriptions must have size 0
         updatedCet.annotationTypes must have size 0
         checkTimeStamps(updatedCet, DateTime.now, DateTime.now)
       }
@@ -90,7 +90,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
           'recurring   (cet.recurring)
         )
 
-        updatedCet.specimenSpecs must have size 0
+        updatedCet.specimenDescriptions must have size 0
         updatedCet.annotationTypes must have size 0
         checkTimeStamps(updatedCet, DateTime.now, DateTime.now)
       }
@@ -112,7 +112,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
             'recurring   (recurring)
           )
 
-          updatedCet.specimenSpecs must have size 0
+          updatedCet.specimenDescriptions must have size 0
           updatedCet.annotationTypes must have size 0
           checkTimeStamps(updatedCet, DateTime.now, DateTime.now)
         }
@@ -164,10 +164,10 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
   describe("A collection event type's specimen spec set") {
 
     it("add a specimen spec") {
-      val cet = factory.createCollectionEventType.copy(specimenSpecs = Set.empty)
-      val specimenSpec = factory.createCollectionSpecimenSpec
+      val cet = factory.createCollectionEventType.copy(specimenDescriptions = Set.empty)
+      val specimenDescription = factory.createCollectionSpecimenDescription
 
-      cet.withSpecimenSpec(specimenSpec) mustSucceed { updatedCet =>
+      cet.withSpecimenDescription(specimenDescription) mustSucceed { updatedCet =>
         updatedCet mustBe a[CollectionEventType]
 
         updatedCet must have (
@@ -179,18 +179,18 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
           'recurring   (cet.recurring)
         )
 
-        updatedCet.specimenSpecs must have size 1
+        updatedCet.specimenDescriptions must have size 1
         updatedCet.annotationTypes must have size 0
         checkTimeStamps(updatedCet, DateTime.now, DateTime.now)
       }
     }
 
     it("replace a specimen spec") {
-      val specimenSpec = factory.createCollectionSpecimenSpec
-      val specimenSpec2 = factory.createCollectionSpecimenSpec.copy(uniqueId = specimenSpec.uniqueId)
-      val cet = factory.createCollectionEventType.copy(specimenSpecs = Set(specimenSpec))
+      val specimenDescription = factory.createCollectionSpecimenDescription
+      val specimenDescription2 = factory.createCollectionSpecimenDescription.copy(id = specimenDescription.id)
+      val cet = factory.createCollectionEventType.copy(specimenDescriptions = Set(specimenDescription))
 
-      cet.withSpecimenSpec(specimenSpec2) mustSucceed { updatedCet =>
+      cet.withSpecimenDescription(specimenDescription2) mustSucceed { updatedCet =>
         updatedCet mustBe a[CollectionEventType]
 
         updatedCet must have (
@@ -202,17 +202,17 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
           'recurring   (cet.recurring)
         )
 
-        updatedCet.specimenSpecs must have size 1
+        updatedCet.specimenDescriptions must have size 1
         updatedCet.annotationTypes must have size 0
         checkTimeStamps(updatedCet, DateTime.now, DateTime.now)
       }
     }
 
     it("remove a specimen spec") {
-      val specimenSpec = factory.createCollectionSpecimenSpec
-      val cet = factory.createCollectionEventType.copy(specimenSpecs = Set(specimenSpec))
+      val specimenDescription = factory.createCollectionSpecimenDescription
+      val cet = factory.createCollectionEventType.copy(specimenDescriptions = Set(specimenDescription))
 
-      cet.removeSpecimenSpec(specimenSpec.uniqueId) mustSucceed { updatedCet =>
+      cet.removeSpecimenDescription(specimenDescription.id) mustSucceed { updatedCet =>
         updatedCet mustBe a[CollectionEventType]
 
         updatedCet must have (
@@ -224,18 +224,18 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
           'recurring   (cet.recurring)
         )
 
-        updatedCet.specimenSpecs must have size 0
+        updatedCet.specimenDescriptions must have size 0
         updatedCet.annotationTypes must have size 0
         checkTimeStamps(updatedCet, DateTime.now, DateTime.now)
       }
     }
 
     it("not allow adding a specimen spec with a duplicate name") {
-      val specimenSpec = factory.createCollectionSpecimenSpec
-      val specimenSpec2 = factory.createCollectionSpecimenSpec.copy(name = specimenSpec.name)
-      val cet = factory.createCollectionEventType.copy(specimenSpecs = Set(specimenSpec))
+      val specimenDescription = factory.createCollectionSpecimenDescription
+      val specimenDescription2 = factory.createCollectionSpecimenDescription.copy(name = specimenDescription.name)
+      val cet = factory.createCollectionEventType.copy(specimenDescriptions = Set(specimenDescription))
 
-      cet.withSpecimenSpec(specimenSpec2) mustFail "specimen spec name already used.*"
+      cet.withSpecimenDescription(specimenDescription2) mustFail "specimen spec name already used.*"
     }
   }
 

@@ -16,11 +16,11 @@ object SpecimenCommands {
       with HasIdentity
       with HasExpectedVersion
 
-  final case class SpecimenInfo(inventoryId:    String,
-                                specimenSpecId: String,
-                                timeCreated:    DateTime,
-                                locationId:     String,
-                                amount:         BigDecimal)
+  final case class SpecimenInfo(inventoryId:           String,
+                                specimenDescriptionId: String,
+                                timeCreated:           DateTime,
+                                locationId:            String,
+                                amount:                BigDecimal)
 
   final case class AddSpecimensCmd(sessionUserId:     String,
                                    collectionEventId: String,

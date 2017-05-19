@@ -137,9 +137,9 @@ define(['angular', 'lodash', 'moment'], function(angular, _, moment) {
         validateAttrs(this, serverEntity, 'name', 'recurring');
         validateOptional(this, serverEntity, 'description');
 
-        if (this.specimenSpecs && serverEntity.specimenSpecs) {
-          expect(this.specimenSpecs).toBeArrayOfSize(serverEntity.specimenSpecs.length);
-          expect(this.specimenSpecs).toContainAll(serverEntity.specimenSpecs);
+        if (this.specimenDescriptions && serverEntity.specimenDescriptions) {
+          expect(this.specimenDescriptions).toBeArrayOfSize(serverEntity.specimenDescriptions.length);
+          expect(this.specimenDescriptions).toContainAll(serverEntity.specimenDescriptions);
         } else {
           fail('specimen specs mismatch');
         }

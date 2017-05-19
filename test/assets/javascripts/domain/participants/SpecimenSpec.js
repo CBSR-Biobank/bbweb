@@ -79,9 +79,9 @@ define(function (require) {
     });
 
     it('constructor with specimen spec has valid values', function() {
-      var specimenSpec = this.factory.collectionSpecimenSpec(),
-          specimen = new this.Specimen({}, specimenSpec);
-      expect(specimen.specimenSpecId).toBe(specimenSpec.uniqueId);
+      var specimenDescription = this.factory.collectionSpecimenDescription(),
+          specimen = new this.Specimen({}, specimenDescription);
+      expect(specimen.specimenDescriptionId).toBe(specimenDescription.id);
     });
 
     it('fails when creating from an object with invalid keys', function() {
@@ -167,15 +167,15 @@ define(function (require) {
 
       it('can list specimens for a collection event', function() {
         var self = this,
-            specimenSpec,
+            specimenDescription,
             cevent,
             specimens,
             reply;
 
         self.factory.centre({ locations: [ self.factory.location() ]});
 
-        specimenSpec = self.factory.collectionSpecimenSpec();
-        self.factory.collectionEventType({ specimenSpecs: [ specimenSpec ]});
+        specimenDescription = self.factory.collectionSpecimenDescription();
+        self.factory.collectionEventType({ specimenDescriptions: [ specimenDescription ]});
 
         cevent       = self.factory.collectionEvent();
         specimens    = _.map(_.range(3), function () { return self.factory.specimen(); });
@@ -259,15 +259,15 @@ define(function (require) {
 
     it('can add specimens', function() {
       var self = this,
-          specimenSpec,
+          specimenDescription,
           cevent,
           jsonCevent,
           jsonSpecimens,
           specimens,
           json;
 
-      this.factory.collectionEventType({ specimenSpecs: [ specimenSpec ]});
-      specimenSpec  = this.factory.collectionSpecimenSpec();
+      this.factory.collectionEventType({ specimenDescriptions: [ specimenDescription ]});
+      specimenDescription  = this.factory.collectionSpecimenDescription();
       jsonCevent    = this.factory.collectionEvent();
       cevent        = new this.CollectionEvent(jsonCevent);
       jsonSpecimens = _.range(3).map(function () { return self.factory.specimen(); });
@@ -282,21 +282,21 @@ define(function (require) {
 
     it('can assign the specimen spec', function() {
       var specimen = new this.Specimen(this.factory.specimen()),
-          specimenSpec  = this.factory.collectionSpecimenSpec();
-      expect(specimen.specimenSpecId).not.toBe(specimenSpec.uniqueId);
-      expect(specimen.specimenSpec).not.toEqual(specimenSpec);
-      specimen.setSpecimenSpec(specimenSpec);
-      expect(specimen.specimenSpecId).toBe(specimenSpec.uniqueId);
-      expect(specimen.specimenSpec).toEqual(specimenSpec);
+          specimenDescription  = this.factory.collectionSpecimenDescription();
+      expect(specimen.specimenDescriptionId).not.toBe(specimenDescription.id);
+      expect(specimen.specimenDescription).not.toEqual(specimenDescription);
+      specimen.setSpecimenDescription(specimenDescription);
+      expect(specimen.specimenDescriptionId).toBe(specimenDescription.id);
+      expect(specimen.specimenDescription).toEqual(specimenDescription);
     });
 
     describe('for name', function() {
 
       it('can get the specimen specs name', function() {
-        var specimenSpec  = this.factory.collectionSpecimenSpec(),
+        var specimenDescription  = this.factory.collectionSpecimenDescription(),
             specimen = new this.Specimen(this.factory.specimen());
-        specimen.setSpecimenSpec(specimenSpec);
-        expect(specimen.name()).toBe(specimenSpec.name);
+        specimen.setSpecimenDescription(specimenDescription);
+        expect(specimen.name()).toBe(specimenDescription.name);
       });
 
       it('throws a domain error if specimen spec not assigned', function() {
@@ -310,10 +310,10 @@ define(function (require) {
     describe('for name', function() {
 
       it('can get the specimen specs default amount', function() {
-        var specimenSpec  = this.factory.collectionSpecimenSpec(),
+        var specimenDescription  = this.factory.collectionSpecimenDescription(),
             specimen = new this.Specimen(this.factory.specimen());
-        specimen.setSpecimenSpec(specimenSpec);
-        expect(specimen.defaultAmount()).toBe(specimenSpec.amount);
+        specimen.setSpecimenDescription(specimenDescription);
+        expect(specimen.defaultAmount()).toBe(specimenDescription.amount);
       });
 
       it('throws a domain error if specimen spec not assigned', function() {
@@ -327,18 +327,18 @@ define(function (require) {
     describe('for isDefaultAmount', function() {
 
       it('true when amount is the same as the default amount', function() {
-        var specimenSpec  = this.factory.collectionSpecimenSpec(),
+        var specimenDescription  = this.factory.collectionSpecimenDescription(),
             specimen = new this.Specimen(this.factory.specimen());
-        specimen.setSpecimenSpec(specimenSpec);
-        specimen.amount = specimenSpec.amount;
+        specimen.setSpecimenDescription(specimenDescription);
+        specimen.amount = specimenDescription.amount;
         expect(specimen.isDefaultAmount()).toBeTrue();
       });
 
       it('false when amount is the same as the default amount', function() {
-        var specimenSpec  = this.factory.collectionSpecimenSpec(),
+        var specimenDescription  = this.factory.collectionSpecimenDescription(),
             specimen = new this.Specimen(this.factory.specimen());
-        specimen.setSpecimenSpec(specimenSpec);
-        specimen.amount = specimenSpec.amount + 1;
+        specimen.setSpecimenDescription(specimenDescription);
+        specimen.amount = specimenDescription.amount + 1;
         expect(specimen.isDefaultAmount()).toBeFalse();
       });
 
@@ -354,10 +354,10 @@ define(function (require) {
     describe('for units', function() {
 
       it('can get the units', function() {
-        var specimenSpec  = this.factory.collectionSpecimenSpec(),
+        var specimenDescription  = this.factory.collectionSpecimenDescription(),
             specimen = new this.Specimen(this.factory.specimen());
-        specimen.setSpecimenSpec(specimenSpec);
-        expect(specimen.units()).toBe(specimenSpec.units);
+        specimen.setSpecimenDescription(specimenDescription);
+        expect(specimen.units()).toBe(specimenDescription.units);
       });
 
       it('throws a domain error if specimen spec not assigned', function() {
@@ -385,7 +385,7 @@ define(function (require) {
   function addJson(collectionEvent, specimens) {
     var json = { collectionEventId: collectionEvent.id };
     json.specimenData = specimens.map(function (specimen) {
-      var result = _.pick(specimen, 'inventoryId', 'specimenSpecId', 'timeCreated', 'amount');
+      var result = _.pick(specimen, 'inventoryId', 'specimenDescriptionId', 'timeCreated', 'amount');
       result.locationId = specimen.locationInfo.locationId;
       return result;
     });

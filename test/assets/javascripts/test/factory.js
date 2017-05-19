@@ -99,7 +99,7 @@ define([
       allAnnotationTypes:                allAnnotationTypes,
       annotation:                        annotation,
       valueForAnnotation:                valueForAnnotation,
-      collectionSpecimenSpec:            collectionSpecimenSpec,
+      collectionSpecimenDescription:     collectionSpecimenDescription,
       location:                          location,
       centreLocations:                   centreLocations,
       centreLocationInfo:                centreLocationInfo,
@@ -239,13 +239,13 @@ define([
     function collectionEventType(options) {
       var study = defaultStudy(),
           defaults = {
-            id:              domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE()),
-            studyId:         study.id,
-            name:            stringNext(),
-            description:     faker.lorem.sentences(4),
-            specimenSpecs:   [],
-            annotationTypes: [],
-            recurring:       false
+            id:                   domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE()),
+            studyId:              study.id,
+            name:                 stringNext(),
+            description:          faker.lorem.sentences(4),
+            specimenDescriptions: [],
+            annotationTypes:      [],
+            recurring:            false
           },
           validKeys = commonFieldNames.concat(_.keys(defaults)),
           cet = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
@@ -412,26 +412,26 @@ define([
       };
     }
 
-    function specimen(options, specimenSpec) {
-      var ceventType = collectionEventType({ specimenSpecs: [ collectionSpecimenSpec() ] }),
+    function specimen(options) {
+      var ceventType = collectionEventType({ specimenDescriptions: [ collectionSpecimenDescription() ] }),
           ctr = centre({ locations: [ location() ]}),
           defaults = {
-            id:                  domainEntityNameNext(ENTITY_NAME_SPECIMEN()),
-            inventoryId:         domainEntityNameNext(ENTITY_NAME_SPECIMEN()),
-            specimenSpecId:      null,
-            originLocationInfo:  null,
-            locationInfo:        null,
-            timeCreated:         moment(faker.date.recent(10)).format(),
-            amount:              1,
-            state:               SpecimenState.USABLE
+            id:                    domainEntityNameNext(ENTITY_NAME_SPECIMEN()),
+            inventoryId:           domainEntityNameNext(ENTITY_NAME_SPECIMEN()),
+            specimenDescriptionId: null,
+            originLocationInfo:    null,
+            locationInfo:          null,
+            timeCreated:           moment(faker.date.recent(10)).format(),
+            amount:                1,
+            state:                 SpecimenState.USABLE
           },
           validKeys = commonFieldNames.concat(_.keys(defaults)),
           spc;
 
       options = options || {};
 
-      if (ceventType.specimenSpecs && (ceventType.specimenSpecs.length > 0)) {
-        defaults.specimenSpecId = ceventType.specimenSpecs[0].uniqueId;
+      if (ceventType.specimenDescriptions && (ceventType.specimenDescriptions.length > 0)) {
+        defaults.specimenDescriptionId = ceventType.specimenDescriptions[0].id;
       }
 
       if (ctr.locations && (ctr.locations.length > 0)) {
@@ -582,8 +582,8 @@ define([
       return annotationTypes;
     }
 
-    function collectionSpecimenSpec(options) {
-      var defaults = { uniqueId:                    domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP()),
+    function collectionSpecimenDescription(options) {
+      var defaults = { id:                          domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP()),
                        name:                        stringNext(),
                        description:                 faker.lorem.sentences(4),
                        units:                       'mL',

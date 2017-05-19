@@ -33,14 +33,14 @@ define([
         '/assets/javascripts/collection/components/ceventSpecimensView/ceventSpecimensView.html',
         '/assets/javascripts/common/directives/pagination.html');
 
-      this.rawSpecimenSpec = this.factory.collectionSpecimenSpec();
+      this.rawSpecimenDescription = this.factory.collectionSpecimenDescription();
       this.rawCollectionEventType = this.factory.collectionEventType(
-        { specimenSpecs: [ this.rawSpecimenSpec ]});
+        { specimenDescriptions: [ this.rawSpecimenDescription ]});
       this.collectionEventType = new this.CollectionEventType(this.rawCollectionEventType);
       this.collectionEvent = new this.CollectionEvent(this.factory.collectionEvent(),
                                                       this.collectionEventType);
       this.specimen = new this.Specimen(this.factory.specimen(),
-                                        this.collectionEventType.specimenSpecs[0]);
+                                        this.collectionEventType.specimenDescriptions[0]);
       this.study = new this.Study(this.factory.defaultStudy());
 
       this.createController = function (study, collectionEvent) {

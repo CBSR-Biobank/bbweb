@@ -12,28 +12,7 @@ define(function (require) {
       _                      = require('lodash'),
       faker                  = require('faker');
 
-  describe('collectionSpecimenSpecViewDirective', function() {
-
-    var createController = function () {
-      this.element = angular.element([
-        '<collection-specimen-spec-view',
-        '  study="vm.study"',
-        '  collection-event-type="vm.collectionEventType"',
-        '  specimen-spec="vm.specimenSpec">',
-        '</collection-specimen-spec-view>'
-      ].join(''));
-
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = {
-        study:               this.study,
-        collectionEventType: this.collectionEventType,
-        specimenSpec:        this.specimenSpec
-      };
-
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('collectionSpecimenSpecView');
-    };
+  describe('collectionSpecimenDescriptionViewDirective', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -47,31 +26,51 @@ define(function (require) {
                               '$q',
                               'Study',
                               'CollectionEventType',
-                              'CollectionSpecimenSpec',
+                              'CollectionSpecimenDescription',
                               'factory');
 
       self.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenSpecView/collectionSpecimenSpecView.html',
+        '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenDescriptionView/collectionSpecimenDescriptionView.html',
         '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html');
 
-      self.jsonSpecimenSpec    = self.factory.collectionSpecimenSpec();
+      self.jsonSpecimenDescription    = self.factory.collectionSpecimenDescription();
       self.jsonCeventType      = self.factory.collectionEventType({
-        specimenSpecs: [ self.jsonSpecimenSpec ]
+        specimenDescriptions: [ self.jsonSpecimenDescription ]
       });
       self.jsonStudy           = self.factory.defaultStudy;
 
       self.study               = new self.Study(self.jsonStudy);
       self.collectionEventType = new self.CollectionEventType(self.jsonCeventType);
-      self.specimenSpec        = new self.CollectionSpecimenSpec(self.jsonSpecimenSpec);
+      self.specimenDescription        = new self.CollectionSpecimenDescription(self.jsonSpecimenDescription);
 
+      self.createController = function () {
+        self.element = angular.element([
+          '<collection-specimen-description-view',
+          '  study="vm.study"',
+          '  collection-event-type="vm.collectionEventType"',
+          '  specimen-description="vm.specimenDescription">',
+          '</collection-specimen-description-view>'
+        ].join(''));
+
+        self.scope = self.$rootScope.$new();
+        self.scope.vm = {
+          study:               self.study,
+          collectionEventType: self.collectionEventType,
+          specimenDescription: self.specimenDescription
+        };
+
+        self.$compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('collectionSpecimenDescriptionView');
+      };
     }));
 
     it('should have valid scope', function() {
-      createController.call(this);
+      this.createController();
 
       expect(this.controller.study).toBe(this.study);
       expect(this.controller.collectionEventType).toBe(this.collectionEventType);
-      expect(this.controller.specimenSpec).toBe(this.specimenSpec);
+      expect(this.controller.specimenDescription).toBe(this.specimenDescription);
 
       expect(this.controller.editName).toBeFunction();
       expect(this.controller.editDescription).toBeFunction();
@@ -90,7 +89,7 @@ define(function (require) {
 
       spyOn($state, 'go').and.returnValue('ok');
 
-      createController.call(this);
+      this.createController();
       this.controller.back();
       this.scope.$digest();
 
@@ -105,7 +104,7 @@ define(function (require) {
       var context = {};
 
       beforeEach(inject(function () {
-        context.createController         = createController;
+        context.createController         = this.createController.bind(this);
         context.controllerUpdateFuncName = 'editName';
         context.modalInputFuncName       = 'text';
         context.ceventType               = this.collectionEventType;
@@ -121,7 +120,7 @@ define(function (require) {
       var context = {};
 
       beforeEach(inject(function () {
-        context.createController         = createController;
+        context.createController         = this.createController.bind(this);
         context.controllerUpdateFuncName = 'editDescription';
         context.modalInputFuncName       = 'textArea';
         context.ceventType               = this.collectionEventType;
@@ -139,7 +138,7 @@ define(function (require) {
       beforeEach(inject(function () {
         this.injectDependencies('AnatomicalSourceType');
 
-        context.createController         = createController;
+        context.createController         = this.createController.bind(this);
         context.controllerUpdateFuncName = 'editAnatomicalSource';
         context.modalInputFuncName       = 'select';
         context.ceventType               = this.collectionEventType;
@@ -157,7 +156,7 @@ define(function (require) {
       beforeEach(inject(function () {
         this.injectDependencies('PreservationType');
 
-        context.createController         = createController;
+        context.createController         = this.createController.bind(this);
         context.controllerUpdateFuncName = 'editPreservationType';
         context.modalInputFuncName       = 'select';
         context.ceventType               = this.collectionEventType;
@@ -175,7 +174,7 @@ define(function (require) {
       beforeEach(inject(function () {
         this.injectDependencies('PreservationTemperatureType');
 
-        context.createController         = createController;
+        context.createController         = this.createController.bind(this);
         context.controllerUpdateFuncName = 'editPreservationTemperature';
         context.modalInputFuncName       = 'select';
         context.ceventType               = this.collectionEventType;
@@ -193,7 +192,7 @@ define(function (require) {
       beforeEach(inject(function () {
         this.injectDependencies('SpecimenType');
 
-        context.createController         = createController;
+        context.createController         = this.createController.bind(this);
         context.controllerUpdateFuncName = 'editSpecimenType';
         context.modalInputFuncName       = 'select';
         context.ceventType               = this.collectionEventType;
@@ -209,7 +208,7 @@ define(function (require) {
       var context = {};
 
       beforeEach(inject(function () {
-        context.createController         = createController;
+        context.createController         = this.createController.bind(this);
         context.controllerUpdateFuncName = 'editUnits';
         context.modalInputFuncName       = 'text';
         context.ceventType               = this.collectionEventType;
@@ -225,7 +224,7 @@ define(function (require) {
       var context = {};
 
       beforeEach(inject(function () {
-        context.createController         = createController;
+        context.createController         = this.createController.bind(this);
         context.controllerUpdateFuncName = 'editAmount';
         context.modalInputFuncName       = 'positiveFloat';
         context.ceventType               = this.collectionEventType;
@@ -241,7 +240,7 @@ define(function (require) {
       var context = {};
 
       beforeEach(inject(function () {
-        context.createController         = createController;
+        context.createController         = this.createController.bind(this);
         context.controllerUpdateFuncName = 'editMaxCount';
         context.modalInputFuncName       = 'naturalNumber';
         context.ceventType               = this.collectionEventType;
@@ -258,7 +257,7 @@ define(function (require) {
    *
    * @param {object} context.ceventType the collection event type that contains the specimen spec.
    *
-   * @param {CollectionSpecimenSpec} context.specimenSpec the specimen spec to be viewed.
+   * @param {CollectionSpecimenDescription} context.specimenDescription the specimen spec to be viewed.
    *
    * @param {function} context.createController is a function that creates the controller and scope:
    * this.controller, and this.scope.
@@ -278,7 +277,7 @@ define(function (require) {
 
         spyOn(this.modalInput, context.modalInputFuncName)
           .and.returnValue({ result: deferred.promise});
-        spyOn(this.CollectionEventType.prototype, 'updateSpecimenSpec')
+        spyOn(this.CollectionEventType.prototype, 'updateSpecimenDescription')
           .and.returnValue(this.$q.when(context.ceventType));
         spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
@@ -286,7 +285,7 @@ define(function (require) {
         this.controller[context.controllerUpdateFuncName]();
         this.scope.$digest();
 
-        expect(this.CollectionEventType.prototype.updateSpecimenSpec).toHaveBeenCalled();
+        expect(this.CollectionEventType.prototype.updateSpecimenDescription).toHaveBeenCalled();
         expect(this.notificationsService.success).toHaveBeenCalled();
       });
 
@@ -299,7 +298,7 @@ define(function (require) {
 
         spyOn(this.modalInput, context.modalInputFuncName)
           .and.returnValue({ result: deferred.promise});
-        spyOn(this.CollectionEventType.prototype, 'updateSpecimenSpec')
+        spyOn(this.CollectionEventType.prototype, 'updateSpecimenDescription')
           .and.returnValue(updateDeferred.promise);
         spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 

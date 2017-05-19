@@ -13,21 +13,21 @@ define([
 
   function SuiteMixin() {}
 
-  SuiteMixin.prototype.createDirective = function (specimenSpec) {
-    specimenSpec = specimenSpec || this.specimenSpec;
+  SuiteMixin.prototype.createDirective = function (specimenDescription) {
+    specimenDescription = specimenDescription || this.specimenDescription;
     this.element = angular.element([
-      '<collection-specimen-spec-summary',
-      '  specimen-spec="vm.specimenSpec">',
-      '</collection-specimen-spec-summary>'
+      '<collection-specimen-description-summary',
+      '  specimen-description="vm.specimenDescription">',
+      '</collection-specimen-description-summary>'
     ].join(''));
 
     this.scope = this.$rootScope.$new();
-    this.scope.vm = { specimenSpec: specimenSpec };
+    this.scope.vm = { specimenDescription: specimenDescription };
     this.$compile(this.element)(this.scope);
     this.scope.$digest();
   };
 
-  describe('collectionSpecimenSpecSummaryDirective', function() {
+  describe('collectionSpecimenDescriptionSummaryDirective', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -38,18 +38,18 @@ define([
 
       self.injectDependencies('$rootScope',
                               '$compile',
-                              'CollectionSpecimenSpec');
+                              'CollectionSpecimenDescription');
 
       self.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenSpecSummary/collectionSpecimenSpecSummary.html');
+        '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenDescriptionSummary/collectionSpecimenDescriptionSummary.html');
 
-      self.specimenSpec = new self.CollectionSpecimenSpec(factory.collectionSpecimenSpec());
+      self.specimenDescription = new self.CollectionSpecimenDescription(factory.collectionSpecimenDescription());
 
     }));
 
     it('can be created', function() {
       this.createDirective();
-      expect(this.scope.vm.specimenSpec).toBe(this.specimenSpec);
+      expect(this.scope.vm.specimenDescription).toBe(this.specimenDescription);
     });
 
 

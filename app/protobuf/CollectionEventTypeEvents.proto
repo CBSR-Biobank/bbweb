@@ -41,8 +41,8 @@ message CollectionEventTypeEvent {
       optional AnnotationType annotationType = 2;
    };
 
-   message SpecimenSpec {
-      optional string uniqueId                    = 1;
+   message SpecimenDescription {
+      optional string id                          = 1;
       optional string name                        = 2;
       optional string description                 = 3;
       optional string units                       = 4;
@@ -54,19 +54,19 @@ message CollectionEventTypeEvent {
       optional double amount                      = 10;
   }
 
-   message SpecimenSpecAdded {
-      optional int64        version      = 1;
-      optional SpecimenSpec specimenSpec = 2;
+   message SpecimenDescriptionAdded {
+      optional int64               version             = 1;
+      optional SpecimenDescription specimenDescription = 2;
   }
 
-   message SpecimenSpecUpdated {
-      optional int64        version      = 1;
-      optional SpecimenSpec specimenSpec = 2;
+   message SpecimenDescriptionUpdated {
+      optional int64               version             = 1;
+      optional SpecimenDescription specimenDescription = 2;
   }
 
-   message SpecimenSpecRemoved {
-      optional int64  version  = 1;
-      optional string uniqueId = 2;
+   message SpecimenDescriptionRemoved {
+      optional int64  version = 1;
+      optional string id      = 2;
    }
 
    required string id            = 1;
@@ -75,16 +75,16 @@ message CollectionEventTypeEvent {
    optional string time          = 4;
 
    oneof event_type {
-      Added                 added                 = 5;
-      Removed               removed               = 6;
-      NameUpdated           nameUpdated           = 7;
-      DescriptionUpdated    descriptionUpdated    = 8;
-      RecurringUpdated      recurringUpdated      = 9;
-      AnnotationTypeAdded   annotationTypeAdded   = 10;
-      AnnotationTypeUpdated annotationTypeUpdated = 11;
-      AnnotationTypeRemoved annotationTypeRemoved = 12;
-      SpecimenSpecAdded     specimenSpecAdded     = 13;
-      SpecimenSpecUpdated   specimenSpecUpdated   = 14;
-      SpecimenSpecRemoved   specimenSpecRemoved   = 15;
+      Added                       added                      = 5;
+      Removed                     removed                    = 6;
+      NameUpdated                 nameUpdated                = 7;
+      DescriptionUpdated          descriptionUpdated         = 8;
+      RecurringUpdated            recurringUpdated           = 9;
+      AnnotationTypeAdded         annotationTypeAdded        = 10;
+      AnnotationTypeUpdated       annotationTypeUpdated      = 11;
+      AnnotationTypeRemoved       annotationTypeRemoved      = 12;
+      SpecimenDescriptionAdded    specimenDescriptionAdded   = 13;
+      SpecimenDescriptionUpdated  specimenDescriptionUpdated = 14;
+      SpecimenDescriptionRemoved  specimenDescriptionRemoved = 15;
    }
 }

@@ -7,13 +7,13 @@ message SpecimenEvent {
    message Added {
 
       message SpecimenInfo {
-         optional string id             = 1;
-         optional string inventoryId    = 2;
-         optional string specimenSpecId = 3;
-         optional string specimenId     = 4;
-         optional string timeCreated    = 5;
-         optional string locationId     = 6;
-         optional double amount         = 7;
+         optional string id                    = 1;
+         optional string inventoryId           = 2;
+         optional string specimenDescriptionId = 3;
+         optional string specimenId            = 4;
+         optional string timeCreated           = 5;
+         optional string locationId            = 6;
+         optional double amount                = 7;
       }
 
       optional string       collectionEventId = 1;

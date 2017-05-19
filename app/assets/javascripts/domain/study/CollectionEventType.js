@@ -10,10 +10,10 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
     '$log',
     'biobankApi',
     'ConcurrencySafeEntity',
-    'CollectionSpecimenSpec',
+    'CollectionSpecimenDescription',
     'DomainError',
     'AnnotationType',
-    'HasCollectionSpecimenSpecs',
+    'HasCollectionSpecimenDescriptions',
     'HasAnnotationTypes'
   ];
 
@@ -24,25 +24,25 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
                                       $log,
                                       biobankApi,
                                       ConcurrencySafeEntity,
-                                      CollectionSpecimenSpec,
+                                      CollectionSpecimenDescription,
                                       DomainError,
                                       AnnotationType,
-                                      HasCollectionSpecimenSpecs,
+                                      HasCollectionSpecimenDescriptions,
                                       HasAnnotationTypes) {
 
     var schema = {
       'id': 'CollectionEventType',
       'type': 'object',
       'properties': {
-        'id':              { 'type': 'string' },
-        'version':         { 'type': 'integer', 'minimum': 0 },
-        'timeAdded':       { 'type': 'string' },
-        'timeModified':    { 'type': 'string' },
-        'name':            { 'type': 'string' },
-        'description':     { 'type': [ 'string', 'null' ] },
-        'recurring':       { 'type': 'boolean' },
-        'specimenSpecs':   { 'type': 'array', 'items': { '$ref': 'CollectionSpecimenSpec' } },
-        'annotationTypes': { 'type': 'array', 'items': { '$ref': 'AnnotationType' } }
+        'id':                   { 'type': 'string' },
+        'version':              { 'type': 'integer', 'minimum': 0 },
+        'timeAdded':            { 'type': 'string' },
+        'timeModified':         { 'type': 'string' },
+        'name':                 { 'type': 'string' },
+        'description':          { 'type': [ 'string', 'null' ] },
+        'recurring':            { 'type': 'boolean' },
+        'specimenDescriptions': { 'type': 'array', 'items': { '$ref': 'CollectionSpecimenDescription' } },
+        'annotationTypes':      { 'type': 'array', 'items': { '$ref': 'AnnotationType' } }
       },
       'required': [ 'id', 'version', 'timeAdded', 'name', 'recurring' ]
     };
@@ -99,10 +99,10 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
       /**
        * The specifications for the specimens that are collected for this collection event type.
        *
-       * @name domain.studies.CollectionEventType#specimenSpecs
-       * @type {Array<domain.studies.CollectionSpecimenSpec>}
+       * @name domain.studies.CollectionEventType#specimenDescriptions
+       * @type {Array<domain.studies.CollectionSpecimenDescription>}
        */
-      this.specimenSpecs = [];
+      this.specimenDescriptions = [];
 
       /**
        * The annotation types that are collected for this collection event type.
@@ -116,16 +116,16 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
 
       options                 = options || {};
       options.study           = _.get(options, 'study', undefined);
-      options.specimenSpecs   = _.get(options, 'specimenSpecs', []);
+      options.specimenDescriptions   = _.get(options, 'specimenDescriptions', []);
       options.annotationTypes = _.get(options, 'annotationTypes', []);
 
-      _.extend(this, _.pick(options, 'study', 'specimenSpecs', 'annotationTypes'));
+      _.extend(this, _.pick(options, 'study', 'specimenDescriptions', 'annotationTypes'));
     }
 
     CollectionEventType.prototype = Object.create(ConcurrencySafeEntity.prototype);
     _.extend(CollectionEventType.prototype,
              HasAnnotationTypes.prototype,
-             HasCollectionSpecimenSpecs.prototype);
+             HasCollectionSpecimenDescriptions.prototype);
     CollectionEventType.prototype.constructor = CollectionEventType;
 
     /**
@@ -140,7 +140,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
     CollectionEventType.isValid = function(obj) {
       return ConcurrencySafeEntity.isValid(schema,
                                            [
-                                             CollectionSpecimenSpec.SCHEMA,
+                                             CollectionSpecimenDescription.SCHEMA,
                                              AnnotationType.SCHEMA
                                            ],
                                            obj);
@@ -176,10 +176,10 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
         }
       }
 
-      if (obj.specimenSpecs) {
+      if (obj.specimenDescriptions) {
         try {
-          options.specimenSpecs = obj.specimenSpecs.map(function (specimenSpec) {
-            return CollectionSpecimenSpec.create(specimenSpec);
+          options.specimenDescriptions = obj.specimenDescriptions.map(function (specimenDescription) {
+            return CollectionSpecimenDescription.create(specimenDescription);
           });
         } catch (e) {
           throw new DomainError('invalid specimen specs from server: ' + validation.message);
@@ -292,41 +292,41 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
         { studyId: this.studyId, recurring: recurring });
     };
 
-    CollectionEventType.prototype.addSpecimenSpec = function (specimenSpec) {
+    CollectionEventType.prototype.addSpecimenDescription = function (specimenDescription) {
       return ConcurrencySafeEntity.prototype.update.call(
         this,
-        uri('spcspec', this.id),
-        _.extend({ studyId: this.studyId }, _.omit(specimenSpec, 'uniqueId')));
+        uri('spcdesc', this.id),
+        _.extend({ studyId: this.studyId }, _.omit(specimenDescription, 'id')));
     };
 
-    CollectionEventType.prototype.updateSpecimenSpec = function (specimenSpec) {
+    CollectionEventType.prototype.updateSpecimenDescription = function (specimenDescription) {
       return ConcurrencySafeEntity.prototype.update.call(
         this,
-        uri('spcspec', this.id) + '/' + specimenSpec.uniqueId,
-        _.extend({ studyId: this.studyId }, specimenSpec));
+        uri('spcdesc', this.id) + '/' + specimenDescription.id,
+        _.extend({ studyId: this.studyId }, specimenDescription));
     };
 
-    CollectionEventType.prototype.removeSpecimenSpec = function (specimenSpec) {
+    CollectionEventType.prototype.removeSpecimenDescription = function (specimenDescription) {
       var self = this,
           url,
-          found = _.find(self.specimenSpecs,  { uniqueId: specimenSpec.uniqueId });
+          found = _.find(self.specimenDescriptions,  { id: specimenDescription.id });
 
       if (!found) {
-        throw new DomainError('specimen spec with ID not present: ' + specimenSpec.uniqueId);
+        throw new DomainError('specimen description with ID not present: ' + specimenDescription.id);
       }
 
       url = sprintf.sprintf('%s/%s/%d/%s',
-                            uri('spcspec', this.studyId),
+                            uri('spcdesc', this.studyId),
                             this.id,
                             this.version,
-                            specimenSpec.uniqueId);
+                            specimenDescription.id);
 
       return biobankApi.del(url).then(function () {
         return self.asyncCreate(
           _.extend(self, {
             version: self.version + 1,
-            specimenSpecs: _.filter(self.specimenSpecs, function(ss) {
-              return ss.uniqueId !== specimenSpec.uniqueId;
+            specimenDescriptions: _.filter(self.specimenDescriptions, function(ss) {
+              return ss.id !== specimenDescription.id;
             })
           }));
       });

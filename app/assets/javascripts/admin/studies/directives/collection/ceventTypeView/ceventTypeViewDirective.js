@@ -47,18 +47,18 @@ define(['lodash'], function (_) {
 
     vm.isPanelCollapsed     = false;
 
-    vm.editName             = editName;
-    vm.editDescription      = editDescription;
-    vm.editRecurring        = editRecurring;
-    vm.editSpecimenSpec     = editSpecimenSpec;
-    vm.editAnnotationType   = editAnnotationType;
-    vm.removeAnnotationType = removeAnnotationType;
-    vm.addAnnotationType    = addAnnotationType;
-    vm.removeSpecimenSpec   = removeSpecimenSpec;
-    vm.addSpecimenSpec      = addSpecimenSpec;
-    vm.addSpecimenSpec      = addSpecimenSpec;
-    vm.panelButtonClicked   = panelButtonClicked;
-    vm.removeCeventType     = removeCeventType;
+    vm.editName                  = editName;
+    vm.editDescription           = editDescription;
+    vm.editRecurring             = editRecurring;
+    vm.editSpecimenDescription   = editSpecimenDescription;
+    vm.editAnnotationType        = editAnnotationType;
+    vm.removeAnnotationType      = removeAnnotationType;
+    vm.addAnnotationType         = addAnnotationType;
+    vm.removeSpecimenDescription = removeSpecimenDescription;
+    vm.addSpecimenDescription    = addSpecimenDescription;
+    vm.addSpecimenDescription    = addSpecimenDescription;
+    vm.panelButtonClicked        = panelButtonClicked;
+    vm.removeCeventType          = removeCeventType;
 
     //--
 
@@ -113,16 +113,16 @@ define(['lodash'], function (_) {
       $state.go('home.admin.studies.study.collection.ceventType.annotationTypeAdd');
     }
 
-    function addSpecimenSpec() {
-      $state.go('home.admin.studies.study.collection.ceventType.specimenSpecAdd');
+    function addSpecimenDescription() {
+      $state.go('home.admin.studies.study.collection.ceventType.specimenDescriptionAdd');
     }
 
-    function editSpecimenSpec(specimenSpec) {
-      $state.go('home.admin.studies.study.collection.ceventType.specimenSpecView',
-                { specimenSpecId: specimenSpec.uniqueId });
+    function editSpecimenDescription(specimenDescription) {
+      $state.go('home.admin.studies.study.collection.ceventType.specimenDescriptionView',
+                { specimenDescriptionId: specimenDescription.uniqueId });
     }
 
-    function removeSpecimenSpec(specimenSpec) {
+    function removeSpecimenDescription(specimenDescription) {
       if (!vm.study.isDisabled()) {
         throw new Error('modifications not allowed');
       }
@@ -131,13 +131,13 @@ define(['lodash'], function (_) {
         removePromiseFunc,
         gettextCatalog.getString('Remove specimen'),
         gettextCatalog.getString('Are you sure you want to remove specimen {{name}}?',
-                                 { name: specimenSpec.name }),
+                                 { name: specimenDescription.name }),
         gettextCatalog.getString('Remove failed'),
         gettextCatalog.getString('Specimen {{name} cannot be removed',
-                                 { name: specimenSpec.name }));
+                                 { name: specimenDescription.name }));
 
       function removePromiseFunc() {
-        return vm.ceventType.removeSpecimenSpec(specimenSpec);
+        return vm.ceventType.removeSpecimenDescription(specimenDescription);
       }
     }
 

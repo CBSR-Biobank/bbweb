@@ -65,7 +65,7 @@ define(function () {
         .then(function (centreLocations) {
           vm.centreLocations = centreLocations;
           return specimenAddModal.open(vm.centreLocations,
-                                       vm.collectionEvent.collectionEventType.specimenSpecs,
+                                       vm.collectionEvent.collectionEventType.specimenDescriptions,
                                        new Date(vm.collectionEvent.timeCompleted)).result;
         })
         .then(function (specimens) {

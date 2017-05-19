@@ -8,40 +8,40 @@ define(['lodash'], function (_) {
   /**
    *
    */
-  function collectionSpecimenSpecViewDirective() {
+  function collectionSpecimenDescriptionViewDirective() {
     var directive = {
       restrict: 'E',
       scope: {},
       bindToController: {
         study:               '=',
         collectionEventType: '=',
-        specimenSpec:        '='
+        specimenDescription: '='
       },
-      templateUrl : '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenSpecView/collectionSpecimenSpecView.html',
-      controller: CollectionSpecimenSpecViewCtrl,
+      templateUrl : '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenDescriptionView/collectionSpecimenDescriptionView.html',
+      controller: CollectionSpecimenDescriptionViewCtrl,
       controllerAs: 'vm'
     };
 
     return directive;
   }
 
-  CollectionSpecimenSpecViewCtrl.$inject = [
+  CollectionSpecimenDescriptionViewCtrl.$inject = [
     '$state',
     'gettextCatalog',
     'modalInput',
     'notificationsService',
-    'CollectionSpecimenSpec',
+    'CollectionSpecimenDescription',
     'AnatomicalSourceType',
     'PreservationType',
     'PreservationTemperatureType',
     'SpecimenType'
   ];
 
-  function CollectionSpecimenSpecViewCtrl($state,
+  function CollectionSpecimenDescriptionViewCtrl($state,
                                           gettextCatalog,
                                           modalInput,
                                           notificationsService,
-                                          CollectionSpecimenSpec,
+                                          CollectionSpecimenDescription,
                                           AnatomicalSourceType,
                                           PreservationType,
                                           PreservationTemperatureType,
@@ -74,7 +74,7 @@ define(['lodash'], function (_) {
     }
 
     function updateCollectionEventType() {
-      return vm.collectionEventType.updateSpecimenSpec(vm.specimenSpec)
+      return vm.collectionEventType.updateSpecimenDescription(vm.specimenDescription)
         .then(function (collectionEventType) {
           vm.collectionEventType = collectionEventType;
         })
@@ -85,10 +85,10 @@ define(['lodash'], function (_) {
     function editName() {
       modalInput.text(gettextCatalog.getString('Specimen spec name'),
                       gettextCatalog.getString('Name'),
-                      vm.specimenSpec.name,
+                      vm.specimenDescription.name,
                       { required: true, minLength: 2 }).result
         .then(function (name) {
-          vm.specimenSpec.name = name;
+          vm.specimenDescription.name = name;
           return updateCollectionEventType();
         });
     }
@@ -96,9 +96,9 @@ define(['lodash'], function (_) {
     function editDescription() {
       modalInput.textArea(gettextCatalog.getString('Specimen spec description'),
                           gettextCatalog.getString('Description'),
-                          vm.specimenSpec.description).result
+                          vm.specimenDescription.description).result
         .then(function (description) {
-          vm.specimenSpec.description = description;
+          vm.specimenDescription.description = description;
           return updateCollectionEventType();
         });
     }
@@ -106,13 +106,13 @@ define(['lodash'], function (_) {
     function editAnatomicalSource() {
       modalInput.select(gettextCatalog.getString('Specimen spec anatomical source'),
                         gettextCatalog.getString('Anatomical source'),
-                        vm.specimenSpec.anatomicalSourceType,
+                        vm.specimenDescription.anatomicalSourceType,
                         {
                           required: true,
                           selectOptions: _.values(AnatomicalSourceType)
                         }).result
         .then(function (selection) {
-          vm.specimenSpec.anatomicalSourceType = selection;
+          vm.specimenDescription.anatomicalSourceType = selection;
           return updateCollectionEventType();
         });
     }
@@ -120,13 +120,13 @@ define(['lodash'], function (_) {
     function editPreservationType() {
       modalInput.select(gettextCatalog.getString('Specimen spec preservation type'),
                         gettextCatalog.getString('Preservation type'),
-                        vm.specimenSpec.preservationType,
+                        vm.specimenDescription.preservationType,
                         {
                           required: true,
                           selectOptions: _.values(PreservationType)
                         }).result
         .then(function (selection) {
-          vm.specimenSpec.preservationType = selection;
+          vm.specimenDescription.preservationType = selection;
           return updateCollectionEventType();
         });
     }
@@ -134,13 +134,13 @@ define(['lodash'], function (_) {
     function editPreservationTemperature() {
       modalInput.select(gettextCatalog.getString('Specimen spec preservation temperature'),
                         gettextCatalog.getString('Preservation temperature'),
-                        vm.specimenSpec.preservationTemperatureType,
+                        vm.specimenDescription.preservationTemperatureType,
                         {
                           required: true,
                           selectOptions: _.values(PreservationTemperatureType)
                         }).result
         .then(function (selection) {
-          vm.specimenSpec.preservationTemperatureType = selection;
+          vm.specimenDescription.preservationTemperatureType = selection;
           return updateCollectionEventType();
         });
     }
@@ -148,13 +148,13 @@ define(['lodash'], function (_) {
     function editSpecimenType() {
       modalInput.select(gettextCatalog.getString('Specimen spec - specimen type'),
                         gettextCatalog.getString('Sepcimen type'),
-                        vm.specimenSpec.specimenType,
+                        vm.specimenDescription.specimenType,
                         {
                           required: true,
                           selectOptions: _.values(SpecimenType)
                         }).result
         .then(function (selection) {
-          vm.specimenSpec.specimenType = selection;
+          vm.specimenDescription.specimenType = selection;
           return updateCollectionEventType();
         });
     }
@@ -162,10 +162,10 @@ define(['lodash'], function (_) {
     function editUnits() {
       modalInput.text(gettextCatalog.getString('Specimen spec units'),
                       gettextCatalog.getString('Units'),
-                      vm.specimenSpec.units,
+                      vm.specimenDescription.units,
                       { required: true }).result
         .then(function (units) {
-          vm.specimenSpec.units = units;
+          vm.specimenDescription.units = units;
           return updateCollectionEventType();
         });
     }
@@ -173,10 +173,10 @@ define(['lodash'], function (_) {
     function editAmount() {
       modalInput.positiveFloat(gettextCatalog.getString('Specimen spec amount'),
                                gettextCatalog.getString('Amount'),
-                               vm.specimenSpec.amount,
+                               vm.specimenDescription.amount,
                                { required: true, positiveFloat: true }).result
         .then(function (value) {
-          vm.specimenSpec.amount = value;
+          vm.specimenDescription.amount = value;
           return updateCollectionEventType();
         });
     }
@@ -184,10 +184,10 @@ define(['lodash'], function (_) {
     function editMaxCount() {
       modalInput.naturalNumber(gettextCatalog.getString('Specimen spec max count'),
                                gettextCatalog.getString('Max count'),
-                               vm.specimenSpec.maxCount,
+                               vm.specimenDescription.maxCount,
                                { required: true, naturalNumber: true, min: 1 }).result
         .then(function (value) {
-          vm.specimenSpec.maxCount = value;
+          vm.specimenDescription.maxCount = value;
           return updateCollectionEventType();
         });
     }
@@ -198,6 +198,6 @@ define(['lodash'], function (_) {
 
   }
 
-  return collectionSpecimenSpecViewDirective;
+  return collectionSpecimenDescriptionViewDirective;
 
 });

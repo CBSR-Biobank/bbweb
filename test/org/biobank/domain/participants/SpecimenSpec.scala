@@ -3,6 +3,7 @@ package org.biobank.domain.participants
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
 import org.biobank.domain.containers.{ ContainerId, ContainerSchemaPositionId }
+import org.biobank.domain.study.SpecimenDescriptionId
 import org.slf4j.LoggerFactory
 import org.joda.time.DateTime
 
@@ -14,17 +15,17 @@ class SpecimenSpec extends DomainSpec {
   val nameGenerator = new NameGenerator(this.getClass)
 
   def createFrom(specimen: Specimen): DomainValidation[Specimen] =
-    UsableSpecimen.create(id               = specimen.id,
-                          inventoryId      = specimen.inventoryId,
-                          specimenSpecId   = specimen.specimenSpecId,
-                          version          = specimen.version,
-                          timeAdded        = DateTime.now,
-                          timeCreated      = specimen.timeCreated,
-                          originLocationId = specimen.originLocationId,
-                          locationId       = specimen.locationId,
-                          containerId      = specimen.containerId,
-                          positionId       = specimen.positionId,
-                          amount           = specimen.amount)
+    UsableSpecimen.create(id                    = specimen.id,
+                          inventoryId           = specimen.inventoryId,
+                          specimenDescriptionId = specimen.specimenDescriptionId,
+                          version               = specimen.version,
+                          timeAdded             = DateTime.now,
+                          timeCreated           = specimen.timeCreated,
+                          originLocationId      = specimen.originLocationId,
+                          locationId            = specimen.locationId,
+                          containerId           = specimen.containerId,
+                          positionId            = specimen.positionId,
+                          amount                = specimen.amount)
 
   describe("A usable specimen") {
 
@@ -33,16 +34,16 @@ class SpecimenSpec extends DomainSpec {
       it("when valid arguments are used") {
         val specimen = factory.createUsableSpecimen.copy(version = 0L)
         createFrom(specimen) mustSucceed { spc =>
-          spc must have (
-            'id              (specimen.id),
-            'inventoryId     (specimen.inventoryId),
-            'specimenSpecId  (specimen.specimenSpecId),
-            'version         (0),
-            'originLocationId(specimen.originLocationId.id),
-            'locationId      (specimen.locationId.id),
-            'containerId     (specimen.containerId),
-            'positionId      (specimen.positionId),
-            'amount          (specimen.amount)
+          spc must have(
+            'id                    (specimen.id),
+            'inventoryId           (specimen.inventoryId),
+            'specimenDescriptionId (specimen.specimenDescriptionId),
+            'version               (0),
+            'originLocationId      (specimen.originLocationId.id),
+            'locationId            (specimen.locationId.id),
+            'containerId           (specimen.containerId),
+            'positionId            (specimen.positionId),
+            'amount                (specimen.amount)
           )
 
           checkTimeStamps(specimen, spc.timeAdded, spc.timeModified)
@@ -137,8 +138,8 @@ class SpecimenSpec extends DomainSpec {
       }
 
       it("with an empty specimen spec id") {
-        val specimen = factory.createUsableSpecimen.copy(specimenSpecId = "")
-        createFrom(specimen) mustFail "SpecimenSpecIdInvalid"
+        val specimen = factory.createUsableSpecimen.copy(specimenDescriptionId = SpecimenDescriptionId(""))
+        createFrom(specimen) mustFail "SpecimenDescriptionIdInvalid"
       }
 
       it("with an invalid version number") {

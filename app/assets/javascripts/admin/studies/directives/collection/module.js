@@ -21,12 +21,12 @@ define(function (require) {
                    require('./ceventTypesAddAndSelect/ceventTypesAddAndSelectDirective'));
   module.directive('ceventTypeView',
                    require('./ceventTypeView/ceventTypeViewDirective'));
-  module.directive('collectionSpecimenSpecAdd',
-                   require('./collectionSpecimenSpecAdd/collectionSpecimenSpecAddDirective'));
-  module.directive('collectionSpecimenSpecSummary',
-                   require('./collectionSpecimenSpecSummary/collectionSpecimenSpecSummaryDirective'));
-  module.directive('collectionSpecimenSpecView',
-                   require('./collectionSpecimenSpecView/collectionSpecimenSpecViewDirective'));
+  module.directive('collectionSpecimenDescriptionAdd',
+                   require('./collectionSpecimenDescriptionAdd/collectionSpecimenDescriptionAddDirective'));
+  module.directive('collectionSpecimenDescriptionSummary',
+                   require('./collectionSpecimenDescriptionSummary/collectionSpecimenDescriptionSummaryDirective'));
+  module.directive('collectionSpecimenDescriptionView',
+                   require('./collectionSpecimenDescriptionView/collectionSpecimenDescriptionViewDirective'));
 
   return {
     name: name,

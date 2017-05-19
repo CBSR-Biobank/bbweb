@@ -66,7 +66,7 @@ class ShipmentSpecimensControllerSpec
                                                     originLocationName)
 
         val dto = shipmentSpecimen.createDto(
-            specimen.createDto(f.cevent, f.specimenSpec, centreLocationInfo, centreLocationInfo))
+            specimen.createDto(f.cevent, f.specimenDescription, centreLocationInfo, centreLocationInfo))
         compareObj(jsonItem, dto)
       }
 
@@ -97,7 +97,7 @@ class ShipmentSpecimensControllerSpec
                                                       specimen.originLocationId.id,
                                                       originLocationName)
           val dto = shipmentSpecimen.createDto(
-              specimen.createDto(f.cevent, f.specimenSpec, centreLocationInfo, centreLocationInfo))
+              specimen.createDto(f.cevent, f.specimenDescription, centreLocationInfo, centreLocationInfo))
           compareObj(jsonItems(index), dto)
         }
       }
@@ -263,7 +263,7 @@ class ShipmentSpecimensControllerSpec
                                                     specimen.originLocationId.id,
                                                     originLocationName)
         val specimenDto =
-          specimen.createDto(f.cevent, f.specimenSpec, centreLocationInfo, centreLocationInfo)
+          specimen.createDto(f.cevent, f.specimenDescription, centreLocationInfo, centreLocationInfo)
 
         val url = uri(f.shipment, "canadd") + s"/${specimen.inventoryId}"
         val reply = makeRequest(GET, url)

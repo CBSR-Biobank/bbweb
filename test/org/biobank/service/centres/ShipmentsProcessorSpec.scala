@@ -56,7 +56,7 @@ class ShipmentsProcessorSpec extends ProcessorTestFixture with ShipmentSpecFixtu
 
   describe("A shipments processor must") {
 
-    it("111 allow recovery from journal") {
+    it("allow recovery from journal") {
       val f = createdShipmentFixture
       val cmd = AddShipmentCmd(sessionUserId  = Global.DefaultUserId.id,
                                courierName    = f.shipment.courierName,

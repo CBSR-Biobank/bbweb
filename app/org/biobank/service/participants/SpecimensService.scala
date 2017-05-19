@@ -67,7 +67,7 @@ class SpecimensServiceImpl @Inject() (
       ceventSpecimen     <- ceventSpecimenRepository.withSpecimenId(specimen.id)
       cevent             <- collectionEventRepository.getByKey(ceventSpecimen.ceventId)
       ceventType         <- collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
-      specimenSpec       <- ceventType.specimenSpec(specimen.specimenSpecId)
+      specimenDesc       <- ceventType.specimenDesc(specimen.specimenDescriptionId)
       originCentre       <- centreRepository.getByLocationId(specimen.originLocationId)
       originLocationName <- originCentre.locationName(specimen.originLocationId)
       centre             <- centreRepository.getByLocationId(specimen.locationId)
@@ -79,7 +79,7 @@ class SpecimensServiceImpl @Inject() (
       val locationInfo = CentreLocationInfo(centre.id.id,
                                             specimen.locationId.id,
                                             locationName)
-      specimen.createDto(cevent, specimenSpec, originLocationInfo, locationInfo)
+      specimen.createDto(cevent, specimenDesc, originLocationInfo, locationInfo)
     }
   }
 

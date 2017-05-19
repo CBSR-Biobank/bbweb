@@ -28,8 +28,8 @@ define(function (require) {
   function SpecimenViewController($state) {
     var vm = this;
 
-    vm.specimenSpec = _.find(vm.collectionEventType.specimenSpecs,
-                               { uniqueId: vm.specimen.specimenSpecId });
+    vm.specimenDescription = _.find(vm.collectionEventType.specimenDescriptions,
+                                    { id: vm.specimen.specimenDescriptionId });
 
     vm.editParticipant = editParticipant;
     vm.back            = back;

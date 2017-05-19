@@ -27,7 +27,7 @@ define(function (require) {
      * @param {domain.Location[]} centreLocations - The locations belonging to the centres the specimens
      *        can be collected at.
      *
-     * @param {domain.studies.CollectionSpecimenSpec[]} specimenSpecs - the specimen specifications belonging
+     * @param {domain.studies.CollectionSpecimenDescription[]} specimenDescriptions - the specimen specifications belonging
      *        to the collection event these specimen belong to.
      *
      * @param {Date} defaultDatetime - The default date to use for the specimens <code>time collected<code>.
@@ -37,7 +37,7 @@ define(function (require) {
      * When running the Travis CI build, jshint did not like that this function was named "open". Therefore,
      * it was renamed.
      */
-    function openModal(centreLocations, specimenSpecs, defaultDatetime) {
+    function openModal(centreLocations, specimenDescriptions, defaultDatetime) {
       var modalInstance = $uibModal.open({
         templateUrl: '/assets/javascripts/collection/services/specimenAddModal/specimenAddModal.html',
         controller: ModalInstanceController,
@@ -74,12 +74,12 @@ define(function (require) {
         var vm = this;
 
         vm.inventoryId          = undefined;
-        vm.selectedSpecimenSpec = undefined;
+        vm.selectedSpecimenDescription = undefined;
         vm.selectedLocationInfo = undefined;
         vm.amount               = undefined;
         vm.defaultAmount        = undefined;
         vm.centreLocations      = centreLocations;
-        vm.specimenSpecs        = specimenSpecs;
+        vm.specimenDescriptions        = specimenDescriptions;
         vm.usingDefaultAmount   = true;
         vm.timeCollected        = defaultDatetime;
         vm.specimens            = [];
@@ -88,7 +88,7 @@ define(function (require) {
         vm.nextPressed          = nextPressed;
         vm.closePressed         = closePressed;
         vm.dateTimeOnEdit       = dateTimeOnEdit;
-        vm.specimenSpecChanged  = specimenSpecChanged;
+        vm.specimenDescriptionChanged  = specimenDescriptionChanged;
         vm.inventoryIdUpdated   = inventoryIdUpdated;
 
         $scope.$watch('vm.amount', function () {
@@ -101,7 +101,7 @@ define(function (require) {
          * Creates a new specimen based on values stored in the controller.
          */
         function createSpecimen() {
-          if (_.isUndefined(vm.selectedSpecimenSpec)) {
+          if (_.isUndefined(vm.selectedSpecimenDescription)) {
             throw new Error('specimen type not selected');
           }
 
@@ -113,7 +113,7 @@ define(function (require) {
               timeCreated:        timeService.dateAndTimeToUtcString(vm.timeCollected),
               amount:             vm.amount
             },
-            vm.selectedSpecimenSpec);
+            vm.selectedSpecimenDescription);
         }
 
         /*
@@ -131,7 +131,7 @@ define(function (require) {
           vm.specimens.push(createSpecimen());
 
           vm.inventoryId          = undefined;
-          vm.selectedSpecimenSpec = undefined;
+          vm.selectedSpecimenDescription = undefined;
           vm.amount               = undefined;
           vm.defaultAmount        = undefined;
           vm.usingDefaultAmount   = true;
@@ -144,7 +144,7 @@ define(function (require) {
           // inputs elements that are in a disabled state but are enabled when those events
           // are triggered.
           $timeout(function() {
-            var element = $window.document.getElementById('specimenSpec');
+            var element = $window.document.getElementById('specimenDescription');
             if (element) { element.focus(); }
           });
         }
@@ -166,11 +166,11 @@ define(function (require) {
         /*
          * Called when the user selects a new specimen type in the modal.
          */
-        function specimenSpecChanged() {
-          if (vm.selectedSpecimenSpec) {
-            vm.amount        = vm.selectedSpecimenSpec.amount;
-            vm.defaultAmount = vm.selectedSpecimenSpec.amount;
-            vm.units         = vm.selectedSpecimenSpec.units;
+        function specimenDescriptionChanged() {
+          if (vm.selectedSpecimenDescription) {
+            vm.amount        = vm.selectedSpecimenDescription.amount;
+            vm.defaultAmount = vm.selectedSpecimenDescription.amount;
+            vm.units         = vm.selectedSpecimenDescription.units;
           }
         }
 

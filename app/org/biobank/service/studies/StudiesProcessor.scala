@@ -302,7 +302,7 @@ class StudiesProcessor @Inject() (
 
     if (collectionEventTypes.isEmpty) {
       EntityCriteriaError("no collection event types").failureNel[StudyEvent]
-    } else if (collectionEventTypes.filter { cet => cet.hasSpecimenSpecs }.isEmpty) {
+    } else if (collectionEventTypes.filter { cet => cet.hasSpecimenDescriptions }.isEmpty) {
       EntityCriteriaError("no collection specimen specs").failureNel[StudyEvent]
     } else {
       study.enable.map { _ =>

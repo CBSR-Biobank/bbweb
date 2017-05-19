@@ -4,7 +4,7 @@ import org.biobank.ValidationKey
 import org.biobank.dto.{CentreLocationInfo, SpecimenDto}
 import org.biobank.domain._
 import org.biobank.domain.containers.{ContainerId, ContainerSchemaPositionId}
-import org.biobank.domain.study.{CollectionSpecimenSpec, StudyValidations}
+import org.biobank.domain.study.{CollectionSpecimenDescription, SpecimenDescriptionId, StudyValidations}
 import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation, Location}
 import org.biobank.infrastructure.EnumUtils._
 import org.joda.time.DateTime
@@ -15,7 +15,7 @@ import scalaz.Scalaz._
  * Represents something that was obtained from a [[Participant]] in a [[study.Study]].
  *
  * A Specimen collected from a [[Participant]] can be created with this aggregate and then added to a
- * [[CollectionEvent]]. When a specimen is created it must be assigned the corresponding [[SpecimenSpec]]
+ * [[CollectionEvent]]. When a specimen is created it must be assigned the corresponding [[SpecimenDescription]]
  * defined in either the [[CollectionEvent]] or the specimen link type to which it corresponds .
  */
 sealed trait Specimen
@@ -26,8 +26,8 @@ sealed trait Specimen
   /** The inventory ID assigned to this specimen. */
   val inventoryId: String
 
-  /** The [[CollectionSpecimenSpec]] this specimen belongs to, defined by the study it belongs to. */
-  val specimenSpecId: String
+  /** The [[CollectionSpecimenDescription]] this specimen belongs to, defined by the study it belongs to. */
+  val specimenDescriptionId: SpecimenDescriptionId
 
   /** The [[Centre]] where this specimen was created. */
   val originLocationId: LocationId
@@ -48,44 +48,44 @@ sealed trait Specimen
    */
   val timeCreated: DateTime
 
-  /** The amount, in units specified in the [[SpecimenSpec]], for this specimen. */
+  /** The amount, in units specified in the [[SpecimenDescription]], for this specimen. */
   val amount: scala.math.BigDecimal
 
   def createDto(collectionEvent:    CollectionEvent,
-                specimenSpec:       CollectionSpecimenSpec,
+                specimenDesc:       CollectionSpecimenDescription,
                 originLocationInfo: CentreLocationInfo,
                 locationInfo:       CentreLocationInfo): SpecimenDto =
-    SpecimenDto(id                 = this.id.id,
-                state              = this.state,
-                inventoryId        = this.inventoryId,
-                collectionEventId  = collectionEvent.id.id,
-                specimenSpecId     = this.specimenSpecId,
-                specimenSpecName   = specimenSpec.name,
-                version            = this.version,
-                timeAdded          = this.timeAdded,
-                timeModified       = this.timeModified,
-                originLocationInfo = originLocationInfo,
-                locationInfo       = locationInfo,
-                containerId        = this.containerId.map(_.id),
-                positionId         = this.positionId.map(_.id),
-                timeCreated        = this.timeCreated,
-                amount             = this.amount,
-                units              = specimenSpec.units)
+    SpecimenDto(id                    = this.id.id,
+                state                 = this.state,
+                inventoryId           = this.inventoryId,
+                collectionEventId     = collectionEvent.id.id,
+                specimenDescriptionId = this.specimenDescriptionId.id,
+                specimenSpecName      = specimenDesc.name,
+                version               = this.version,
+                timeAdded             = this.timeAdded,
+                timeModified          = this.timeModified,
+                originLocationInfo    = originLocationInfo,
+                locationInfo          = locationInfo,
+                containerId           = this.containerId.map(_.id),
+                positionId            = this.positionId.map(_.id),
+                timeCreated           = this.timeCreated,
+                amount                = this.amount,
+                units                 = specimenDesc.units)
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {
-        |  id:               $id
-        |  inventoryId:      $inventoryId
-        |  specimenSpecId:   $specimenSpecId
-        |  version:          $version
-        |  timeAdded:        $timeAdded
-        |  timeModified:     $timeModified
-        |  originLocationId: $originLocationId
-        |  locationId:       $locationId
-        |  containerId:      $containerId
-        |  positionId:       $positionId
-        |  timeCreated:      $timeCreated
-        |  amount:           $amount
+        |  id:                    $id
+        |  inventoryId:           $inventoryId
+        |  specimenDescriptionId: $specimenDescriptionId
+        |  version:               $version
+        |  timeAdded:             $timeAdded
+        |  timeModified:          $timeModified
+        |  originLocationId:      $originLocationId
+        |  locationId:            $locationId
+        |  containerId:           $containerId
+        |  positionId:            $positionId
+        |  timeCreated:           $timeCreated
+        |  amount:                $amount
         |}""".stripMargin
 }
 
@@ -100,16 +100,16 @@ object Specimen {
       override def writes(specimen: Specimen): JsValue =
         ConcurrencySafeEntity.toJson(specimen) ++
         Json.obj(
-          "state"            -> specimen.state.id,
-          "inventoryId"      -> specimen.inventoryId,
-          "specimenSpecId"   -> specimen.specimenSpecId,
-          "originLocationId" -> specimen.originLocationId.id,
-          "locationId"       -> specimen.locationId.id,
-          "containerId"      -> specimen.containerId,
-          "positionId"       -> specimen.positionId,
-          "version"          -> specimen.version,
-          "timeCreated"      -> specimen.timeCreated,
-          "amount"           -> specimen.amount
+          "state"                 -> specimen.state.id,
+          "inventoryId"           -> specimen.inventoryId,
+          "specimenDescriptionId" -> specimen.specimenDescriptionId,
+          "originLocationId"      -> specimen.originLocationId.id,
+          "locationId"            -> specimen.locationId.id,
+          "containerId"           -> specimen.containerId,
+          "positionId"            -> specimen.positionId,
+          "version"               -> specimen.version,
+          "timeCreated"           -> specimen.timeCreated,
+          "amount"                -> specimen.amount
         )
 
       override def reads(json: JsValue): JsResult[Specimen] = (json \ "state") match {
@@ -145,25 +145,25 @@ trait SpecimenValidations {
 
   case object InventoryIdInvalid extends ValidationKey
 
-  case object SpecimenSpecIdInvalid extends ValidationKey
+  case object SpecimenDescriptionIdInvalid extends ValidationKey
 
 }
 
 /**
  * A usable specimen is a specimen that can be used for processing.
  */
-final case class UsableSpecimen(id:               SpecimenId,
-                                inventoryId:      String,
-                                specimenSpecId:   String,
-                                version:          Long,
-                                timeAdded:        DateTime,
-                                timeModified:     Option[DateTime],
-                                originLocationId: LocationId,
-                                locationId:       LocationId,
-                                containerId:      Option[ContainerId],
-                                positionId:       Option[ContainerSchemaPositionId],
-                                timeCreated:      DateTime,
-                                amount:           BigDecimal)
+final case class UsableSpecimen(id:                    SpecimenId,
+                                inventoryId:           String,
+                                specimenDescriptionId: SpecimenDescriptionId,
+                                version:               Long,
+                                timeAdded:             DateTime,
+                                timeModified:          Option[DateTime],
+                                originLocationId:      LocationId,
+                                locationId:            LocationId,
+                                containerId:           Option[ContainerId],
+                                positionId:            Option[ContainerSchemaPositionId],
+                                timeCreated:           DateTime,
+                                amount:                BigDecimal)
     extends { val state: EntityState = Specimen.usableState }
     with Specimen
     with SpecimenValidations
@@ -220,18 +220,18 @@ final case class UsableSpecimen(id:               SpecimenId,
   }
 
   def makeUnusable(): DomainValidation[UnusableSpecimen] = {
-    UnusableSpecimen(id               = this.id,
-                     inventoryId      = this.inventoryId,
-                     specimenSpecId   = this.specimenSpecId,
-                     version          = this.version + 1,
-                     timeAdded        = this.timeAdded,
-                     timeModified     = Some(DateTime.now),
-                     originLocationId = this.originLocationId,
-                     locationId       = this.locationId,
-                     containerId      = this.containerId,
-                     positionId       = this.positionId,
-                     timeCreated      = this.timeCreated,
-                     amount           = this.amount).successNel[String]
+    UnusableSpecimen(id                    = this.id,
+                     inventoryId           = this.inventoryId,
+                     specimenDescriptionId = this.specimenDescriptionId,
+                     version               = this.version + 1,
+                     timeAdded             = this.timeAdded,
+                     timeModified          = Some(DateTime.now),
+                     originLocationId      = this.originLocationId,
+                     locationId            = this.locationId,
+                     containerId           = this.containerId,
+                     positionId            = this.positionId,
+                     timeCreated           = this.timeCreated,
+                     amount                = this.amount).successNel[String]
   }
 }
 
@@ -243,21 +243,21 @@ object UsableSpecimen
   import org.biobank.CommonValidations._
   import org.biobank.domain.CommonValidations._
 
-  def create(id:               SpecimenId,
-             inventoryId:      String,
-             specimenSpecId:   String,
-             version:          Long,
-             originLocationId: LocationId,
-             locationId:       LocationId,
-             containerId:      Option[ContainerId],
-             positionId:       Option[ContainerSchemaPositionId],
-             timeAdded:        DateTime,
-             timeCreated:      DateTime,
-             amount:           BigDecimal)
+  def create(id:                    SpecimenId,
+             inventoryId:           String,
+             specimenDescriptionId: SpecimenDescriptionId,
+             version:               Long,
+             originLocationId:      LocationId,
+             locationId:            LocationId,
+             containerId:           Option[ContainerId],
+             positionId:            Option[ContainerSchemaPositionId],
+             timeAdded:             DateTime,
+             timeCreated:           DateTime,
+             amount:                BigDecimal)
       : DomainValidation[UsableSpecimen] = {
     validate(id,
              inventoryId,
-             specimenSpecId,
+             specimenDescriptionId,
              version,
              originLocationId,
              locationId,
@@ -267,7 +267,7 @@ object UsableSpecimen
              amount)
       .map(_ => UsableSpecimen(id,
                                inventoryId,
-                               specimenSpecId,
+                               specimenDescriptionId,
                                version,
                                timeAdded,
                                None,
@@ -279,27 +279,27 @@ object UsableSpecimen
                                amount))
   }
 
-  def validate(id:               SpecimenId,
-               inventoryId:      String,
-               specimenSpecId:   String,
-               version:          Long,
-               originLocationId: LocationId,
-               locationId:       LocationId,
-               containerId:      Option[ContainerId],
-               positionId:       Option[ContainerSchemaPositionId],
-               timeCreated:      DateTime,
-               amount:           BigDecimal)
+  def validate(id:                    SpecimenId,
+               inventoryId:           String,
+               specimenDescriptionId: SpecimenDescriptionId,
+               version:               Long,
+               originLocationId:      LocationId,
+               locationId:            LocationId,
+               containerId:           Option[ContainerId],
+               positionId:            Option[ContainerSchemaPositionId],
+               timeCreated:           DateTime,
+               amount:                BigDecimal)
       : DomainValidation[Boolean] = {
     (validateId(id) |@|
        validateString(inventoryId, InventoryIdInvalid) |@|
-       validateString(specimenSpecId, SpecimenSpecIdInvalid) |@|
+       validateId(specimenDescriptionId, SpecimenDescriptionIdInvalid) |@|
        validateVersion(version) |@|
        validateString(originLocationId.id, OriginLocationIdInvalid) |@|
        validateString(locationId.id, LocationIdInvalid) |@|
        validateId(containerId, ContainerIdInvalid) |@|
        validateId(positionId, PositionInvalid) |@|
        validatePositiveNumber(amount, AmountInvalid)) {
-      case (_, _, _, _, _, _, _, _, _) => true
+      case _ => true
     }
   }
 
@@ -310,33 +310,33 @@ object UsableSpecimen
  *
  * It may be that the total amount of the spcimen has already been used in processing.
  */
-final case class UnusableSpecimen(id:               SpecimenId,
-                                  inventoryId:      String,
-                                  specimenSpecId:   String,
-                                  version:          Long,
-                                  timeAdded:        DateTime,
-                                  timeModified:     Option[DateTime],
-                                  originLocationId: LocationId,
-                                  locationId:       LocationId,
-                                  containerId:      Option[ContainerId],
-                                  positionId:       Option[ContainerSchemaPositionId],
-                                  timeCreated:      DateTime,
-                                  amount:           BigDecimal)
+final case class UnusableSpecimen(id:                    SpecimenId,
+                                  inventoryId:           String,
+                                  specimenDescriptionId: SpecimenDescriptionId,
+                                  version:               Long,
+                                  timeAdded:             DateTime,
+                                  timeModified:          Option[DateTime],
+                                  originLocationId:      LocationId,
+                                  locationId:            LocationId,
+                                  containerId:           Option[ContainerId],
+                                  positionId:            Option[ContainerSchemaPositionId],
+                                  timeCreated:           DateTime,
+                                  amount:                BigDecimal)
     extends { val state: EntityState = Specimen.unusableState }
     with Specimen {
 
   def makeUsable(): DomainValidation[UsableSpecimen] = {
-    UsableSpecimen(id               = this.id,
-                   inventoryId      = this.inventoryId,
-                   specimenSpecId   = this.specimenSpecId,
-                   version          = this.version + 1,
-                   timeAdded        = this.timeAdded,
-                   timeModified     = Some(DateTime.now),
-                   originLocationId = this.originLocationId,
-                   locationId       = this.locationId,
-                   containerId      = this.containerId,
-                   positionId       = this.positionId,
-                   timeCreated      = this.timeCreated,
-                   amount           = this.amount).successNel[String]
+    UsableSpecimen(id                    = this.id,
+                   inventoryId           = this.inventoryId,
+                   specimenDescriptionId = this.specimenDescriptionId,
+                   version               = this.version + 1,
+                   timeAdded             = this.timeAdded,
+                   timeModified          = Some(DateTime.now),
+                   originLocationId      = this.originLocationId,
+                   locationId            = this.locationId,
+                   containerId           = this.containerId,
+                   positionId            = this.positionId,
+                   timeCreated           = this.timeCreated,
+                   amount                = this.amount).successNel[String]
   }
 }

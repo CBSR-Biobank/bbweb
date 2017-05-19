@@ -5,34 +5,34 @@
 define(['lodash', 'tv4'], function(_, tv4) {
   'use strict';
 
-  CollectionSpecimenSpecFactory.$inject = [ 'DomainEntity', 'DomainError' ];
+  CollectionSpecimenDescriptionFactory.$inject = [ 'DomainEntity', 'DomainError' ];
 
   /**
    *
    */
-  function CollectionSpecimenSpecFactory(DomainEntity, DomainError) {
+  function CollectionSpecimenDescriptionFactory(DomainEntity, DomainError) {
 
 
     /**
-     * @classdesc Creates a new CollectionSpecimenSpec.
+     * @classdesc Creates a new CollectionSpecimenDescription.
      * @class
      * @memberOf domain.studies
      *
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
      */
-    function CollectionSpecimenSpec(obj) {
+    function CollectionSpecimenDescription(obj) {
       /**
-       * The unique ID that identifies an object of this type.
-       * @name domain.studies.CollectionSpecimenSpec#uniqueId
+       * The ID that identifies an object of this type.
+       * @name domain.studies.CollectionSpecimenDescription#id
        *
        * @type string
        */
-      this.uniqueId = null;
+      this.id = null;
 
       /**
        * A short identifying name.
-       * @name domain.studies.CollectionSpecimenSpec#name
+       * @name domain.studies.CollectionSpecimenDescription#name
        * @type string
        */
       this.name = '';
@@ -40,74 +40,73 @@ define(['lodash', 'tv4'], function(_, tv4) {
       /**
        * A description that can provide additional details on the name.
        *
-       * @name domain.studies.CollectionSpecimenSpec#description
+       * @name domain.studies.CollectionSpecimenDescription#description
        * @type {?string}
-       * @see domain.studies.CollectionSpecimenSpec#name
+       * @see domain.studies.CollectionSpecimenDescription#name
        */
       this.description = null;
 
       /**
        * Specifies how the specimen amount is measured (e.g. volume, weight, length, etc.).
-       * @name domain.studies.CollectionSpecimenSpec#units
+       * @name domain.studies.CollectionSpecimenDescription#units
        * @type {string}
        */
       this.units = '';
 
       /**
-       * @name domain.studies.CollectionSpecimenSpec#anatomicalSourceType
+       * @name domain.studies.CollectionSpecimenDescription#anatomicalSourceType
        * @type {domain.AnatomicalSourceType}
        */
       this.anatomicalSourceType = '';
 
       /**
-       * @name domain.studies.CollectionSpecimenSpec#preservationType
+       * @name domain.studies.CollectionSpecimenDescription#preservationType
        * @type {domain.PreservationType}
        */
       this.preservationType = '';
 
       /**
-       * @name domain.studies.CollectionSpecimenSpec#preservationTemperatureType
+       * @name domain.studies.CollectionSpecimenDescription#preservationTemperatureType
        * @type {domain.PreservationTemperatureType}
        */
       this.preservationTemperatureType = '';
 
       /**
-       * @name domain.studies.CollectionSpecimenSpec#specimenType
+       * @name domain.studies.CollectionSpecimenDescription#specimenType
        * @type {domain.SpecimenType}
        */
       this.specimenType = '';
 
       /**
        * The amount per specimen, measured in units, to be collected.
-       * @name domain.studies.CollectionSpecimenSpec#amount
+       * @name domain.studies.CollectionSpecimenDescription#amount
        * @type {number}
-       * @see domain.studies.CollectionSpecimenSpec#units
+       * @see domain.studies.CollectionSpecimenDescription#units
        */
       this.units = null;
 
       /**
        * The number of specimens to be collected.
-       * @name domain.studies.CollectionSpecimenSpec#maxCount
+       * @name domain.studies.CollectionSpecimenDescription#maxCount
        * @type {number}
-       * @see domain.studies.CollectionSpecimenSpec.units
+       * @see domain.studies.CollectionSpecimenDescription.units
        */
       this.maxCount = null;
 
-      obj = obj || {};
-      _.extend(this, obj);
+      DomainEntity.call(this, CollectionSpecimenDescription.SCHEMA, obj);
     }
 
-    CollectionSpecimenSpec.prototype = Object.create(DomainEntity.prototype);
-    CollectionSpecimenSpec.prototype.constructor = CollectionSpecimenSpec;
+    CollectionSpecimenDescription.prototype = Object.create(DomainEntity.prototype);
+    CollectionSpecimenDescription.prototype.constructor = CollectionSpecimenDescription;
 
     /**
      * Used for validation.
      */
-    CollectionSpecimenSpec.SCHEMA = {
-      'id': 'CollectionSpecimenSpec',
+    CollectionSpecimenDescription.SCHEMA = {
+      'id': 'CollectionSpecimenDescription',
       'type': 'object',
       'properties': {
-        'uniqueId':                    { 'type': 'string' },
+        'id':                          { 'type': 'string' },
         'name':                        { 'type': 'string' },
         'description':                 { 'type': [ 'string', 'null' ] },
         'units':                       { 'type': 'string' },
@@ -119,7 +118,7 @@ define(['lodash', 'tv4'], function(_, tv4) {
         'amount':                      { 'type': 'number', 'minimum': 0 }
       },
       'required': [
-        'uniqueId',
+        'id',
         'name',
         'units',
         'anatomicalSourceType',
@@ -134,23 +133,23 @@ define(['lodash', 'tv4'], function(_, tv4) {
     /**
      * @private
      */
-    CollectionSpecimenSpec.isValid = function(obj) {
-      return DomainEntity.isValid(CollectionSpecimenSpec.SCHEMA, null, obj);
+    CollectionSpecimenDescription.isValid = function(obj) {
+      return DomainEntity.isValid(CollectionSpecimenDescription.SCHEMA, null, obj);
     };
 
-    CollectionSpecimenSpec.create = function(obj) {
-      var validation = CollectionSpecimenSpec.isValid(obj);
+    CollectionSpecimenDescription.create = function(obj) {
+      var validation = CollectionSpecimenDescription.isValid(obj);
 
       if (!validation.valid) {
         console.error('invalid object from server: ' + validation.message);
         throw new DomainError('invalid object from server: ' + validation.message);
       }
-      return new CollectionSpecimenSpec(obj);
+      return new CollectionSpecimenDescription(obj);
     };
 
-    return CollectionSpecimenSpec;
+    return CollectionSpecimenDescription;
   }
 
-  return CollectionSpecimenSpecFactory;
+  return CollectionSpecimenDescriptionFactory;
 
 });

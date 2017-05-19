@@ -1,7 +1,7 @@
 package org.biobank.domain.participants
 
 import org.biobank.domain.Factory
-import org.biobank.domain.study.CollectionSpecimenSpec
+import org.biobank.domain.study.CollectionSpecimenDescription
 import org.biobank.dto.{CentreLocationInfo}
 import scala.language.reflectiveCalls
 
@@ -12,9 +12,9 @@ trait SpecimenSpecFixtures {
   def createEntities() = {
     val _centre = factory.createEnabledCentre.copy(locations = Set(factory.createLocation))
     val _study = factory.createEnabledStudy
-    val _specimenSpec = factory.createCollectionSpecimenSpec
+    val _specimenDescription = factory.createCollectionSpecimenDescription
     val _ceventType = factory.createCollectionEventType.copy(studyId = _study.id,
-                                                             specimenSpecs = Set(_specimenSpec),
+                                                             specimenDescriptions = Set(_specimenDescription),
                                                              annotationTypes = Set.empty)
     val _participant = factory.createParticipant.copy(studyId = _study.id)
     val _cevent = factory.createCollectionEvent
@@ -29,7 +29,7 @@ trait SpecimenSpecFixtures {
       val centre             = _centre
       val centreLocationInfo = _centreLocationInfo
       val study              = _study
-      val specimenSpec       = _specimenSpec
+      val specimenDescription       = _specimenDescription
       val ceventType         = _ceventType
       val participant        = _participant
       val cevent             = _cevent
@@ -51,7 +51,7 @@ trait SpecimenSpecFixtures {
       val specimens          = _specimens
       val specimenDtos       = specimensToDtos(_specimens,
                                                entities.cevent,
-                                               entities.specimenSpec,
+                                               entities.specimenDescription,
                                                entities.centreLocationInfo,
                                                entities.centreLocationInfo)
     }
@@ -59,10 +59,10 @@ trait SpecimenSpecFixtures {
 
   def specimensToDtos(specimens:              List[Specimen],
                       cevent:                 CollectionEvent,
-                      specimenSpec:           CollectionSpecimenSpec,
+                      specimenDescription:           CollectionSpecimenDescription,
                       fromCentreLocationInfo: CentreLocationInfo,
                       toCentreLocationInfo:   CentreLocationInfo) =
     specimens.map  { s =>
-      s.createDto(cevent, specimenSpec, fromCentreLocationInfo, toCentreLocationInfo)
+      s.createDto(cevent, specimenDescription, fromCentreLocationInfo, toCentreLocationInfo)
     }
 }

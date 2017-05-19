@@ -74,21 +74,22 @@ class CeventTypesController @Inject() (val action:                     BbwebActi
       processCommand(cmd)
     }
 
-  def addSpecimenSpec(id: CollectionEventTypeId): Action[JsValue] =
-    commandAction[AddCollectionSpecimenSpecCmd](Json.obj("id" -> id))(processCommand)
+  def addSpecimenDescription(id: CollectionEventTypeId): Action[JsValue] =
+    commandAction[AddCollectionSpecimenDescriptionCmd](Json.obj("id" -> id))(processCommand)
 
-  def updateSpecimenSpec(id: CollectionEventTypeId, uniqueId: String): Action[JsValue] =
-    commandAction[UpdateCollectionSpecimenSpecCmd](Json.obj("id" -> id, "uniqueId" -> uniqueId))(processCommand)
+  def updateSpecimenDescription(id: CollectionEventTypeId, sdId: String): Action[JsValue] =
+    commandAction[UpdateCollectionSpecimenDescriptionCmd](
+      Json.obj("id" -> id,"specimenDescriptionId" -> sdId))(processCommand)
 
-  def removeSpecimenSpec(studyId: StudyId, id: CollectionEventTypeId, ver: Long, uniqueId: String)
+  def removeSpecimenDescription(studyId: StudyId, id: CollectionEventTypeId, ver: Long, sdId: String)
       : Action[Unit]=
     action.async(parse.empty) { implicit request =>
-      val cmd = RemoveCollectionSpecimenSpecCmd(
+      val cmd = RemoveCollectionSpecimenDescriptionCmd(
           userId                = Some(request.authInfo.userId.id),
           studyId               = studyId.id,
           id                    = id.id,
           expectedVersion       = ver,
-          uniqueId              = uniqueId)
+          specimenDescriptionId = sdId)
       processCommand(cmd)
     }
 

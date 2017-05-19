@@ -62,11 +62,11 @@ class SpecimensProcessorSpec
       collectionEventRepository.put(f.cevent)
 
       f.specimens.foreach { specimen =>
-        val specimenInfo = SpecimenInfo(inventoryId    = specimen.inventoryId,
-                                        specimenSpecId = specimen.specimenSpecId,
-                                        timeCreated    = specimen.timeCreated,
-                                        locationId     = specimen.originLocationId.id,
-                                        amount         = specimen.amount)
+        val specimenInfo = SpecimenInfo(inventoryId           = specimen.inventoryId,
+                                        specimenDescriptionId = specimen.specimenDescriptionId.id,
+                                        timeCreated           = specimen.timeCreated,
+                                        locationId            = specimen.originLocationId.id,
+                                        amount                = specimen.amount)
 
         val cmd = AddSpecimensCmd(sessionUserId     = nameGenerator.next[String],
                                   collectionEventId = f.cevent.id.id,

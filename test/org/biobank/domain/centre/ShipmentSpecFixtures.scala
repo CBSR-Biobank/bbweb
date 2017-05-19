@@ -33,15 +33,15 @@ trait ShipmentSpecFixtures {
 
   class SpecimenShipmentSpecimen(val specimen: UsableSpecimen, val shipmentSpecimen: ShipmentSpecimen)
 
-  class SpecimensFixture(fromCentre:       Centre,
-                         toCentre:         Centre,
-                         shipment:         Shipment,
-                         val study:        Study,
-                         val specimenSpec: CollectionSpecimenSpec,
-                         val ceventType:   CollectionEventType,
-                         val participant:  Participant,
-                         val cevent:       CollectionEvent,
-                         val specimens:    List[UsableSpecimen])
+  class SpecimensFixture(fromCentre:              Centre,
+                         toCentre:                Centre,
+                         shipment:                Shipment,
+                         val study:               Study,
+                         val specimenDescription: CollectionSpecimenDescription,
+                         val ceventType:          CollectionEventType,
+                         val participant:         Participant,
+                         val cevent:              CollectionEvent,
+                         val specimens:           List[UsableSpecimen])
       extends ShipmentFixture(fromCentre, toCentre, shipment)
 
   case class ShipmentSpecimenData(val specimen:            UsableSpecimen,
@@ -53,7 +53,7 @@ trait ShipmentSpecFixtures {
                                  toCentre:                Centre,
                                  shipment:                Shipment,
                                  study:                   Study,
-                                 specimenSpec:            CollectionSpecimenSpec,
+                                 specimenDescription:     CollectionSpecimenDescription,
                                  ceventType:              CollectionEventType,
                                  participant:             Participant,
                                  cevent:                  CollectionEvent,
@@ -63,7 +63,7 @@ trait ShipmentSpecFixtures {
                                toCentre,
                                shipment,
                                study,
-                               specimenSpec,
+                               specimenDescription,
                                ceventType,
                                participant,
                                cevent,
@@ -186,9 +186,9 @@ trait ShipmentSpecFixtures {
   def specimensFixture(numSpecimens: Int) = {
     val f = createdShipmentFixture
     val study = factory.createEnabledStudy
-    val specimenSpec = factory.createCollectionSpecimenSpec
+    val specimenDescription = factory.createCollectionSpecimenDescription
     val ceventType = factory.createCollectionEventType.copy(studyId = study.id,
-                                                            specimenSpecs = Set(specimenSpec),
+                                                            specimenDescriptions = Set(specimenDescription),
                                                             annotationTypes = Set.empty)
     val participant = factory.createParticipant.copy(studyId = study.id)
     val cevent = factory.createCollectionEvent
@@ -197,15 +197,15 @@ trait ShipmentSpecFixtures {
                                           locationId = f.fromCentre.locations.head.uniqueId)
       }.toList
 
-    new SpecimensFixture(fromCentre   = f.fromCentre,
-                         toCentre     = f.toCentre,
-                         study        = study,
-                         specimenSpec = specimenSpec,
-                         ceventType   = ceventType,
-                         participant  = participant,
-                         cevent       = cevent,
-                         specimens    = specimens,
-                         shipment     = f.shipment)
+    new SpecimensFixture(fromCentre          = f.fromCentre,
+                         toCentre            = f.toCentre,
+                         study               = study,
+                         specimenDescription = specimenDescription,
+                         ceventType          = ceventType,
+                         participant         = participant,
+                         cevent              = cevent,
+                         specimens           = specimens,
+                         shipment            = f.shipment)
   }
 
   def shipmentSpecimensFixture(numSpecimens: Int) = {
@@ -221,7 +221,7 @@ trait ShipmentSpecFixtures {
                                                     specimen.originLocationId.id,
                                                     originLocationName)
         val specimenDto =
-          specimen.createDto(f.cevent, f.specimenSpec, centreLocationInfo, centreLocationInfo)
+          specimen.createDto(f.cevent, f.specimenDescription, centreLocationInfo, centreLocationInfo)
         (updatedSpecimen.id, new ShipmentSpecimenData(updatedSpecimen,
                                                       specimenDto,
                                                       shipmentSpecimen,
@@ -231,7 +231,7 @@ trait ShipmentSpecFixtures {
     new ShipmentSpecimensFixture(fromCentre          = f.fromCentre,
                                  toCentre            = f.toCentre,
                                  study               = f.study,
-                                 specimenSpec        = f.specimenSpec,
+                                 specimenDescription = f.specimenDescription,
                                  ceventType          = f.ceventType,
                                  participant         = f.participant,
                                  cevent              = f.cevent,

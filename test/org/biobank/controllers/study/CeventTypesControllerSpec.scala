@@ -43,13 +43,12 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
   }
 
   def cetToAddCmd(cet: CollectionEventType) = {
-    Json.obj(
-      "studyId"         -> cet.studyId.id,
-      "name"            -> cet.name,
-      "description"     -> cet.description,
-      "recurring"       -> cet.recurring,
-      "specimenSpecs"   -> cet.specimenSpecs,
-      "annotationTypes" -> cet.annotationTypes)
+    Json.obj("studyId"              -> cet.studyId.id,
+             "name"                 -> cet.name,
+             "description"          -> cet.description,
+             "recurring"            -> cet.recurring,
+             "specimenDescriptions" -> cet.specimenDescriptions,
+             "annotationTypes"      -> cet.annotationTypes)
   }
 
   def addOnNonDisabledStudy(study: Study) {
@@ -57,7 +56,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
     val cet = factory.createCollectionEventType.copy(
         studyId         = study.id,
-        specimenSpecs   = Set(factory.createCollectionSpecimenSpec),
+        specimenDescriptions   = Set(factory.createCollectionSpecimenDescription),
         annotationTypes = Set(factory.createAnnotationType))
 
     val json = makeRequest(POST, uri(study), BAD_REQUEST, cetToAddCmd(cet))
@@ -110,7 +109,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
     val cet = factory.createCollectionEventType.copy(
         studyId            = study.id,
-        specimenSpecs   = Set(factory.createCollectionSpecimenSpec),
+        specimenDescriptions   = Set(factory.createCollectionSpecimenDescription),
         annotationTypes = Set(factory.createAnnotationType))
     collectionEventTypeRepository.put(cet)
 
@@ -132,7 +131,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
     val cet = factory.createCollectionEventType.copy(
         studyId         = study.id,
-        specimenSpecs   = Set(factory.createCollectionSpecimenSpec),
+        specimenDescriptions   = Set(factory.createCollectionSpecimenDescription),
         annotationTypes = Set(factory.createAnnotationType))
     collectionEventTypeRepository.put(cet)
 
@@ -183,11 +182,11 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("list multiple collection event types") {
         createEntities { (study, cet) =>
           val cet2 = factory.createCollectionEventType.copy(
-              specimenSpecs   = Set(factory.createCollectionSpecimenSpec),
-              annotationTypes = Set(factory.createAnnotationType))
+              specimenDescriptions = Set(factory.createCollectionSpecimenDescription),
+              annotationTypes      = Set(factory.createAnnotationType))
 
           val cetypes = List(cet, cet2)
-          cetypes map { cet => collectionEventTypeRepository.put(cet) }
+          cetypes.foreach(collectionEventTypeRepository.put)
 
           val json = makeRequest(GET, uri(study))
                                 (json \ "status").as[String] must include ("success")
@@ -196,11 +195,9 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
           jsonList.foreach { jsonCet =>
             val jsonId = (jsonCet \ "id").as[String]
-            val cet = cetypes.find { x => x.id.id == jsonId }
-            cet mustBe defined
-            compareObj(jsonCet, cet.value)
+            val cet = cetypes.find { x => x.id.id == jsonId }.value
+            compareObj(jsonCet, cet)
           }
-          ()
         }
       }
 
@@ -263,7 +260,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
             'recurring   (cet.recurring)
           )
 
-          repoCet.specimenSpecs must have size cet.specimenSpecs.size.toLong
+          repoCet.specimenDescriptions must have size cet.specimenDescriptions.size.toLong
           repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
           checkTimeStamps(repoCet, cet.timeAdded, None)
         }
@@ -290,7 +287,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
               'recurring   (cet.recurring)
             )
 
-            repoCet.specimenSpecs must have size cet.specimenSpecs.size.toLong
+            repoCet.specimenDescriptions must have size cet.specimenDescriptions.size.toLong
             repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
             checkTimeStamps(repoCet, cet.timeAdded, None)
           }
@@ -385,7 +382,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
               'recurring   (cet.recurring)
             )
 
-            repoCet.specimenSpecs must have size cet.specimenSpecs.size.toLong
+            repoCet.specimenDescriptions must have size cet.specimenDescriptions.size.toLong
             repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
             checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
           }
@@ -426,7 +423,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
               'recurring   (cet.recurring)
             )
 
-            repoCet.specimenSpecs must have size cet.specimenSpecs.size.toLong
+            repoCet.specimenDescriptions must have size cet.specimenDescriptions.size.toLong
             repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
             checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
           }
@@ -504,7 +501,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
               'recurring   (cet.recurring)
             )
 
-            repoCet.specimenSpecs must have size cet.specimenSpecs.size.toLong
+            repoCet.specimenDescriptions must have size cet.specimenDescriptions.size.toLong
             repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
             checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
           }
@@ -565,7 +562,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
                 'recurring   (recurring)
               )
 
-              repoCet.specimenSpecs must have size cet.specimenSpecs.size.toLong
+              repoCet.specimenDescriptions must have size cet.specimenDescriptions.size.toLong
               repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
               checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
             }
@@ -624,7 +621,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
               'recurring   (cet.recurring)
             )
 
-            repoCet.specimenSpecs must have size cet.specimenSpecs.size.toLong
+            repoCet.specimenDescriptions must have size cet.specimenDescriptions.size.toLong
             repoCet.annotationTypes must have size 1
 
             repoCet.annotationTypes.head.uniqueId must not be empty
@@ -699,7 +696,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
               'recurring   (cet.recurring)
             )
 
-            repoCet.specimenSpecs must have size cet.specimenSpecs.size.toLong
+            repoCet.specimenDescriptions must have size cet.specimenDescriptions.size.toLong
             repoCet.annotationTypes must have size 0
 
             checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
@@ -796,18 +793,18 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
   }
 
-  describe("POST /studies/cetypes/spcspec/:id") {
+  describe("POST /studies/cetypes/spcdesc/:id") {
 
       it("add a specimen spec") {
         createEntities { (study, cet) =>
-          val spec = factory.createCollectionSpecimenSpec
+          val spec = factory.createCollectionSpecimenDescription
 
-          val reqJson = Json.obj("id"                          -> cet.id.id,
-                                 "studyId"                     -> cet.studyId.id,
-                                 "expectedVersion"             -> Some(cet.version)) ++
-            collectionSpecimenSpecToJsonNoId(spec)
+          val reqJson = Json.obj("id"              -> cet.id.id,
+                                 "studyId"         -> cet.studyId.id,
+                                 "expectedVersion" -> Some(cet.version)) ++
+          collectionSpecimenDescriptionToJsonNoId(spec)
 
-          val json = makeRequest(POST, uri(cet, "spcspec"), reqJson)
+          val json = makeRequest(POST, uri(cet, "spcdesc"), reqJson)
 
           (json \ "status").as[String] must include ("success")
 
@@ -826,10 +823,10 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
             )
 
             repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
-            repoCet.specimenSpecs must have size 1
+            repoCet.specimenDescriptions must have size 1
 
-            repoCet.specimenSpecs.head.uniqueId must not be empty
-            repoCet.specimenSpecs.head must have (
+            repoCet.specimenDescriptions.head.id.id must not be empty
+            repoCet.specimenDescriptions.head must have (
               'name                        (spec.name),
               'description                 (spec.description),
               'units                       (spec.units),
@@ -845,43 +842,48 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       it("fail when adding specimen spec and collection event type ID does not exist") {
-        updateOnInvalidCeventType("spcspec",
-                                  collectionSpecimenSpecToJsonNoId(factory.createCollectionSpecimenSpec))
+        updateOnInvalidCeventType(
+          "spcdesc",
+          collectionSpecimenDescriptionToJsonNoId(factory.createCollectionSpecimenDescription))
       }
 
       it("fail when adding specimen spec and an invalid version") {
-        updateWithInvalidVersion("spcspec",
-                                  collectionSpecimenSpecToJsonNoId(factory.createCollectionSpecimenSpec))
+        updateWithInvalidVersion(
+          "spcdesc",
+          collectionSpecimenDescriptionToJsonNoId(factory.createCollectionSpecimenDescription))
       }
 
       it("not add an specimen spec on an enabled study") {
-        updateOnNonDisabledStudy(factory.createEnabledStudy,
-                                 "spcspec",
-                                  collectionSpecimenSpecToJsonNoId(factory.createCollectionSpecimenSpec))
+        updateOnNonDisabledStudy(
+          factory.createEnabledStudy,
+          "spcdesc",
+          collectionSpecimenDescriptionToJsonNoId(factory.createCollectionSpecimenDescription))
       }
 
       it("not add a specimen spec on an retired study") {
-        updateOnNonDisabledStudy(factory.createRetiredStudy,
-                                 "spcspec",
-                                  collectionSpecimenSpecToJsonNoId(factory.createCollectionSpecimenSpec))
+        updateOnNonDisabledStudy(
+          factory.createRetiredStudy,
+          "spcdesc",
+          collectionSpecimenDescriptionToJsonNoId(factory.createCollectionSpecimenDescription))
       }
 
       it("fail when adding specimen spec and collection event type ID is invalid") {
-        updateOnInvalidCeventType("spcspec",
-                                  collectionSpecimenSpecToJsonNoId(factory.createCollectionSpecimenSpec))
+        updateOnInvalidCeventType(
+          "spcdesc",
+          collectionSpecimenDescriptionToJsonNoId(factory.createCollectionSpecimenDescription))
       }
   }
 
-  describe("DELETE /studies/cetypes/spcspec/:id/:ver/:uniqueId") {
+  describe("DELETE /studies/cetypes/spcdesc/:id/:ver/:uniqueId") {
 
-      it("remove an specimen spec") {
+      it("111 remove an specimen spec") {
         createEntities { (study, cet) =>
-          val specimenSpec = factory.createCollectionSpecimenSpec
-          collectionEventTypeRepository.put(cet.copy(specimenSpecs = Set(specimenSpec)))
+          val specimenDescription = factory.createCollectionSpecimenDescription
+          collectionEventTypeRepository.put(cet.copy(specimenDescriptions = Set(specimenDescription)))
 
           val json = makeRequest(
               DELETE,
-              s"/studies/cetypes/spcspec/${study.id}/${cet.id}/${cet.version}/${specimenSpec.uniqueId}")
+              s"/studies/cetypes/spcdesc/${study.id}/${cet.id}/${cet.version}/${specimenDescription.id.id}")
 
           (json \ "status").as[String] must include ("success")
 
@@ -900,7 +902,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
             )
 
             repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
-            repoCet.specimenSpecs must have size 0
+            repoCet.specimenDescriptions must have size 0
 
             checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
           }
@@ -909,14 +911,14 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
       it("fail when removing specimen spec and an invalid version") {
         createEntities { (study, cet) =>
-          val specimenSpec = factory.createCollectionSpecimenSpec
-          collectionEventTypeRepository.put(cet.copy(specimenSpecs = Set(specimenSpec)))
+          val specimenDescription = factory.createCollectionSpecimenDescription
+          collectionEventTypeRepository.put(cet.copy(specimenDescriptions = Set(specimenDescription)))
 
           val badVersion = cet.version + 1
 
           val json = makeRequest(
               DELETE,
-              s"/studies/cetypes/spcspec/${study.id}/${cet.id}/$badVersion/${specimenSpec.uniqueId}",
+              s"/studies/cetypes/spcdesc/${study.id}/${cet.id}/$badVersion/${specimenDescription.id}",
               BAD_REQUEST)
 
           (json \ "status").as[String] must include ("error")
@@ -933,7 +935,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
         val json = makeRequest(
             DELETE,
-            s"/studies/cetypes/spcspec/$studyId/$cetId/0/xyz", NOT_FOUND)
+            s"/studies/cetypes/spcdesc/$studyId/$cetId/0/xyz", NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -947,7 +949,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
         val json = makeRequest(
             DELETE,
-            s"/studies/cetypes/spcspec/${study.id}/$cetId/0/xyz", NOT_FOUND)
+            s"/studies/cetypes/spcdesc/${study.id}/$cetId/0/xyz", NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -957,13 +959,13 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("fail when removing an specimen spec that does not exist") {
         createEntities { (study, cet) =>
           val badUniqueId = nameGenerator.next[Study]
-          val specimenSpec = factory.createCollectionSpecimenSpec
+          val specimenDescription = factory.createCollectionSpecimenDescription
 
-          collectionEventTypeRepository.put(cet.copy(specimenSpecs = Set(specimenSpec)))
+          collectionEventTypeRepository.put(cet.copy(specimenDescriptions = Set(specimenDescription)))
 
           val json = makeRequest(
               DELETE,
-              s"/studies/cetypes/spcspec/${study.id}/${cet.id}/${cet.version}/$badUniqueId",
+              s"/studies/cetypes/spcdesc/${study.id}/${cet.id}/${cet.version}/$badUniqueId",
               NOT_FOUND)
 
           (json \ "status").as[String] must include ("error")
@@ -978,14 +980,14 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         List(factory.createEnabledStudy, factory.createRetiredStudy).foreach { study =>
           studyRepository.put(study)
 
-          val specimenSpec = factory.createCollectionSpecimenSpec
+          val specimenDescription = factory.createCollectionSpecimenDescription
           val cet = factory.createCollectionEventType.copy(studyId = study.id,
-                                                           specimenSpecs = Set(specimenSpec))
+                                                           specimenDescriptions = Set(specimenDescription))
           collectionEventTypeRepository.put(cet)
 
           val json = makeRequest(
               DELETE,
-              s"/studies/cetypes/spcspec/${study.id}/${cet.id}/${cet.version}/${specimenSpec.uniqueId}",
+              s"/studies/cetypes/spcdesc/${study.id}/${cet.id}/${cet.version}/${specimenDescription.id}",
               BAD_REQUEST)
 
           (json \ "status").as[String] must include ("error")

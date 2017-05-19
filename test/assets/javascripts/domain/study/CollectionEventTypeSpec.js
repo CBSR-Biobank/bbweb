@@ -38,7 +38,7 @@ define(function (require) {
      * Returns 3 collection event types, each one with a different missing field.
      */
     SuiteMixin.prototype.getBadCollectionEventTypes = function () {
-      var badSpecimenSpec   = _.omit(this.factory.collectionSpecimenSpec(), 'name'),
+      var badSpecimenDescription   = _.omit(this.factory.collectionSpecimenDescription(), 'name'),
           badAnnotationType = _.omit(this.factory.annotationType(), 'name'),
           data = [
             {
@@ -46,8 +46,8 @@ define(function (require) {
               errMsg : 'Missing required property'
             },
             {
-              cet: this.factory.collectionEventType({ specimenSpecs: [ badSpecimenSpec ]}),
-              errMsg : 'specimenSpecs.*Missing required property'
+              cet: this.factory.collectionEventType({ specimenDescriptions: [ badSpecimenDescription ]}),
+              errMsg : 'specimenDescriptions.*Missing required property'
             },
             {
               cet: this.factory.collectionEventType({ annotationTypes: [ badAnnotationType ]}),
@@ -115,7 +115,7 @@ define(function (require) {
       expect(ceventType.studyId).toBe(null);
       expect(ceventType.name).toBe('');
       expect(ceventType.recurring).toBe(false);
-      expect(ceventType.specimenSpecs).toBeArrayOfSize(0);
+      expect(ceventType.specimenDescriptions).toBeArrayOfSize(0);
       expect(ceventType.annotationTypes).toBeArrayOfSize(0);
     });
 
@@ -127,13 +127,13 @@ define(function (require) {
     });
 
     it('fails when creating from a bad json specimen spec', function() {
-      var jsonSpec = _.omit(this.factory.collectionSpecimenSpec(), 'name'),
+      var jsonSpec = _.omit(this.factory.collectionSpecimenDescription(), 'name'),
           badJsonCet = _.extend(this.factory.collectionEventType(this.jsonStudy),
-                                { specimenSpecs: [ jsonSpec ] });
+                                { specimenDescriptions: [ jsonSpec ] });
 
       expect(function () {
         CollectionEventType.create(badJsonCet);
-      }).toThrowError(/specimenSpecs.*Missing required property/);
+      }).toThrowError(/specimenDescriptions.*Missing required property/);
     });
 
     it('fails when creating from bad json annotation type data', function() {
@@ -313,56 +313,42 @@ define(function (require) {
     describe('for specimen specs', function() {
 
       beforeEach(function() {
-        this.jsonSpec = this.factory.collectionSpecimenSpec();
-        this.jsonCet  = this.factory.collectionEventType({ specimenSpecs: [ this.jsonSpec ] });
+        this.jsonSpec = this.factory.collectionSpecimenDescription();
+        this.jsonCet  = this.factory.collectionEventType({ specimenDescriptions: [ this.jsonSpec ] });
         this.cet      = this.CollectionEventType.create(this.jsonCet);
       });
 
-      it('should add a specimen spec', function () {
+      it('should add a specimen description', function () {
         this.updateEntity.call(this,
                                this.cet,
-                               'addSpecimenSpec',
-                               _.omit(this.jsonSpec, 'uniqueId'),
-                               this.uri('spcspec', this.cet.id),
-                               _.extend(_.omit(this.jsonSpec, 'uniqueId'), { studyId: this.cet.studyId }),
+                               'addSpecimenDescription',
+                               _.omit(this.jsonSpec, 'id'),
+                               this.uri('spcdesc', this.cet.id),
+                               _.extend(_.omit(this.jsonSpec, 'id'), { studyId: this.cet.studyId }),
                                this.jsonCet,
                                this.expectCet,
                                this.failTest);
       });
 
-      it('should update a specimen spec', function () {
-        this.updateEntity.call(this,
-                               this.cet,
-                               'updateSpecimenSpec',
-                               this.jsonSpec,
-                               sprintf('%s/%s',
-                                               this.uri('spcspec', this.cet.id),
-                                               this.jsonSpec.uniqueId),
-                               _.extend(this.jsonSpec, { studyId: this.cet.studyId }),
-                               this.jsonCet,
-                               this.expectCet,
-                               this.failTest);
-      });
-
-      it('should remove a specimen spec', function () {
+      it('should remove a specimen description', function () {
         var url = sprintf('%s/%s/%d/%s',
-                                  this.uri('spcspec', this.cet.studyId),
-                                  this.cet.id,
-                                  this.cet.version,
-                                  this.jsonSpec.uniqueId);
+                          this.uri('spcdesc', this.cet.studyId),
+                          this.cet.id,
+                          this.cet.version,
+                          this.jsonSpec.id);
 
         this.$httpBackend.whenDELETE(url).respond(this.reply(true));
-        this.cet.removeSpecimenSpec(this.jsonSpec).then(this.expectCet).catch(this.failTest);
+        this.cet.removeSpecimenDescription(this.jsonSpec).then(this.expectCet).catch(this.failTest);
         this.$httpBackend.flush();
       });
 
       it('throws an error when attempting to remove an invalid specimen spec', function () {
         var self = this;
 
-        self.cet.specimenSpecs = [];
+        self.cet.specimenDescriptions = [];
         expect(function () {
-          self.cet.removeSpecimenSpec(self.jsonSpec).then(this.expectCet).catch(this.failTest);
-        }).toThrowError(/specimen spec with ID not present/);
+          self.cet.removeSpecimenDescription(self.jsonSpec).then(this.expectCet).catch(this.failTest);
+        }).toThrowError(/specimen description with ID not present/);
       });
 
     });
@@ -385,20 +371,6 @@ define(function (require) {
                                this.uri('annottype', this.cet.id),
                                _.extend(_.omit(this.jsonAnnotType, 'uniqueId'),
                                         { studyId: this.cet.studyId }),
-                               this.jsonCet,
-                               this.expectCet,
-                               this.failTest);
-      });
-
-      it('should update an annotation type', function () {
-        this.updateEntity.call(this,
-                               this.cet,
-                               'updateAnnotationType',
-                               this.jsonAnnotType,
-                               sprintf('%s/%s',
-                                               this.uri('annottype', this.cet.id),
-                                               this.jsonAnnotType.uniqueId),
-                               _.extend(this.jsonAnnotType, { studyId: this.cet.studyId }),
                                this.jsonCet,
                                this.expectCet,
                                this.failTest);
