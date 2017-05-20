@@ -1045,7 +1045,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
         (jsonCentreLocation \ "centreId").as[String] must be (centre.id.id)
 
-        (jsonCentreLocation \ "locationId").as[String] must be (location.uniqueId.id)
+        (jsonCentreLocation \ "locationId").as[String] must be (location.id.id)
 
         (jsonCentreLocation \ "centreName").as[String] must be (centre.name)
 

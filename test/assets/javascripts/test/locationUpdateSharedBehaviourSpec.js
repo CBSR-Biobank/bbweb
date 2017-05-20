@@ -4,11 +4,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
+define(function() {
   'use strict';
 
   /**
@@ -29,15 +25,16 @@ define([
 
         spyOn(this.modalInput, context.modalInputFuncName)
           .and.returnValue({ result: modalInputDeferred.promise});
-        spyOn(context.entity.prototype, context.entityUpdateFuncName)
+        spyOn(context.entity, context.entityUpdateFuncName)
           .and.returnValue(this.$q.when(context.entity));
         spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
         context.createController.call(this);
-        this.controller[context.controllerUpdateFuncName](context.locationt);
+        this.controller[context.controllerUpdateFuncName](context.location);
         this.scope.$digest();
 
-        expect(context.entity.prototype[context.entityUpdateFuncName]).toHaveBeenCalled();
+        expect(context.entity[context.entityUpdateFuncName]).toHaveBeenCalled();
+        expect(this.controller.location).toBeDefined();
         expect(this.notificationsService.success).toHaveBeenCalled();
       });
 
@@ -50,7 +47,7 @@ define([
 
         spyOn(this.modalInput, context.modalInputFuncName)
           .and.returnValue({ result: modalDeferred.promise});
-        spyOn(context.entity.prototype, context.entityUpdateFuncName)
+        spyOn(context.entity, context.entityUpdateFuncName)
           .and.returnValue(updateDeferred.promise);
         spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 

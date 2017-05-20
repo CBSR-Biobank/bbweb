@@ -251,7 +251,7 @@ class TestData @Inject() (config:                        Configuration,
       v.foreach { centres =>
         centres.foreach { centre =>
           val location = if (centre.name == "100-Calgary AB") {
-              Location(uniqueId       = LocationId(s"${centre.name}:Primary"),
+              Location(id             = LocationId(s"${centre.name}:Primary"),
                        name           = "Primary",
                        street         = "1403 29 St NW",
                        city           = "Calgary",
@@ -260,7 +260,7 @@ class TestData @Inject() (config:                        Configuration,
                        poBoxNumber    = None,
                        countryIsoCode = "CA")
             } else {
-              Location(uniqueId       = LocationId(s"${centre.name}:Primary"),
+              Location(id             = LocationId(s"${centre.name}:Primary"),
                        name           = "Primary",
                        street         = "London Health Sciences Center, University Hospital, Rm A3-222B, 339 Windermere Road",
                        city           = "London",
@@ -552,8 +552,8 @@ class TestData @Inject() (config:                        Configuration,
                      version               = 0L,
                      timeAdded             = Global.StartOfTime,
                      timeModified          = None,
-                     originLocationId      = location.uniqueId,
-                     locationId            = location.uniqueId,
+                     originLocationId      = location.id,
+                     locationId            = location.id,
                      containerId           = None,
                      positionId            = None,
                      timeCreated           = DateTime.now.minusDays(1),
@@ -593,7 +593,7 @@ class TestData @Inject() (config:                        Configuration,
                                 specimenRepository.put(specimen)
                                 ceventSpecimenRepository.put(CeventSpecimen(cevent.id, specimen.id))
 
-                                log.debug(s"added specimen: invId: $inventoryId, participant: ${participant.uniqueId}, visitNum: ${cevent.visitNumber}, locationId: ${location.uniqueId}")
+                                log.debug(s"added specimen: invId: $inventoryId, participant: ${participant.uniqueId}, visitNum: ${cevent.visitNumber}, locationId: ${location.id}")
                               }
                             }
                       }
@@ -645,9 +645,9 @@ class TestData @Inject() (config:                        Configuration,
                                  courierName    = "FedEx",
                                  trackingNumber = "TN1",
                                  fromCentreId   = fromCentre.id,
-                                 fromLocationId = fromCentre.locations.head.uniqueId,
+                                 fromLocationId = fromCentre.locations.head.id,
                                  toCentreId     = toCentre.id,
-                                 toLocationId   = toCentre.locations.head.uniqueId,
+                                 toLocationId   = toCentre.locations.head.id,
                                  timePacked     = None,
                                  timeSent       = None,
                                  timeReceived   = None,
@@ -661,9 +661,9 @@ class TestData @Inject() (config:                        Configuration,
                                 courierName    = "FedEx",
                                 trackingNumber = "TN2",
                                 fromCentreId   = fromCentre.id,
-                                fromLocationId = fromCentre.locations.head.uniqueId,
+                                fromLocationId = fromCentre.locations.head.id,
                                 toCentreId     = toCentre.id,
-                                toLocationId   = toCentre.locations.head.uniqueId,
+                                toLocationId   = toCentre.locations.head.id,
                                 timePacked     = Some(DateTime.now),
                                 timeSent       = None,
                                 timeReceived   = None,
@@ -677,9 +677,9 @@ class TestData @Inject() (config:                        Configuration,
                                   courierName    = "FedEx",
                                   trackingNumber = "TN3",
                                   fromCentreId   = fromCentre.id,
-                                  fromLocationId = fromCentre.locations.head.uniqueId,
+                                  fromLocationId = fromCentre.locations.head.id,
                                   toCentreId     = toCentre.id,
-                                  toLocationId   = toCentre.locations.head.uniqueId,
+                                  toLocationId   = toCentre.locations.head.id,
                                   timePacked     = Some(DateTime.now),
                                   timeSent       = Some(DateTime.now),
                                   timeReceived   = Some(DateTime.now),
@@ -689,13 +689,13 @@ class TestData @Inject() (config:                        Configuration,
           shipmentMap.values.foreach(shipmentRepository.put)
 
           centres.foreach { centre =>
-            val locationId = centre.locations.head.uniqueId
+            val locationId = centre.locations.head.id
             val specimens = specimenRepository.getValues.filter(_.locationId == locationId)
             val halfSpecimenCount = specimens.size / 2
 
             specimens.zipWithIndex.foreach { case (spc, index) =>
               val shipment =
-                if (locationId == centres(0).locations.head.uniqueId) {
+                if (locationId == centres(0).locations.head.id) {
                   if (index < halfSpecimenCount) {
                     shipmentMap(Shipment.createdState)
                   } else {

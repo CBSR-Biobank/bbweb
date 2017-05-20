@@ -322,9 +322,9 @@ define(function (require) {
         this.updateEntity.call(this,
                                centre,
                                'addLocation',
-                               _.omit(jsonLocation, 'uniqueId'),
+                               _.omit(jsonLocation, 'id'),
                                uri('locations', centre.id),
-                               _.omit(jsonLocation, 'uniqueId'),
+                               _.omit(jsonLocation, 'id'),
                                jsonCentre,
                                expectCentre,
                                failTest);
@@ -340,7 +340,7 @@ define(function (require) {
                                centre,
                                'updateLocation',
                                jsonLocation,
-                               uri('locations', centre.id) + '/' + jsonLocation.uniqueId,
+                               uri('locations', centre.id) + '/' + jsonLocation.id,
                                jsonLocation,
                                jsonCentre,
                                expectCentre,
@@ -363,7 +363,7 @@ define(function (require) {
             url          = sprintf('%s/%d/%s',
                                    uri('locations', centre.id),
                                    centre.version,
-                                   jsonLocation.uniqueId);
+                                   jsonLocation.id);
 
         self.$httpBackend.expectDELETE(url).respond(this.reply(true));
         centre.removeLocation(jsonLocation).then(checkCentre).catch(failTest);

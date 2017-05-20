@@ -398,7 +398,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
      * @returns {Promise} A copy of this centre, but with the location added to it.
      */
     Centre.prototype.addLocation = function (location) {
-      return this.update.call(this, uri('locations', this.id), _.omit(location, 'uniqueId'));
+      return this.update.call(this, uri('locations', this.id), _.omit(location, 'id'));
     };
 
     /**
@@ -410,7 +410,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
      */
     Centre.prototype.updateLocation = function (location) {
       return this.update.call(this,
-                              uri('locations', this.id) + '/' + location.uniqueId,
+                              uri('locations', this.id) + '/' + location.id,
                               location);
     };
 
@@ -424,19 +424,19 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
     Centre.prototype.removeLocation = function (location) {
       var self = this, existingLoc, url;
 
-      existingLoc = _.find(self.locations, { uniqueId: location.uniqueId });
+      existingLoc = _.find(self.locations, { id: location.id });
       if (_.isUndefined(existingLoc)) {
         throw new DomainError('location does not exist: ' + location.id);
       }
 
-      url = sprintf.sprintf('%s/%d/%s', uri('locations', self.id), self.version, location.uniqueId);
+      url = sprintf.sprintf('%s/%d/%s', uri('locations', self.id), self.version, location.id);
 
       return biobankApi.del(url).then(function(reply) {
         return Centre.asyncCreate(
           _.extend(self, {
             version: self.version + 1,
             locations: _.filter(self.locations, function(loc) {
-              return loc.uniqueId !== location.uniqueId;
+              return loc.id !== location.id;
             })
           }));
       });

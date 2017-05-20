@@ -395,7 +395,7 @@ define([
       }
       return {
         centreId:   centre.id,
-        locationId: centre.locations[0].uniqueId,
+        locationId: centre.locations[0].id,
         name:       centre.name +': ' + centre.locations[0].name
       };
     }
@@ -406,7 +406,7 @@ define([
       }
       return {
         centreId:     centre.id,
-        locationId:   centre.locations[0].uniqueId,
+        locationId:   centre.locations[0].id,
         centreName:   centre.name,
         locationName: centre.locations[0].name
       };
@@ -471,7 +471,7 @@ define([
           ctr = centre({ locations: [ loc ]}),
           locationInfo = {
             centreId: ctr.id,
-            locationId: loc.uniqueId,
+            locationId: loc.id,
             name: ctr.name + ': ' + loc.name
           },
           defaults = {
@@ -693,7 +693,7 @@ define([
      * This is a value object, so it does not have the common fields.
      */
     function location(options) {
-      var defaults = { uniqueId:       domainEntityNameNext(ENTITY_NAME_LOCATION()),
+      var defaults = { id:             domainEntityNameNext(ENTITY_NAME_LOCATION()),
                        name:           stringNext(),
                        street:         faker.address.streetAddress(),
                        city:           faker.address.city(),
@@ -713,7 +713,7 @@ define([
         return _.map(centre.locations, function (location) {
           return {
             centreId:     centre.id,
-            locationId:   location.uniqueId,
+            locationId:   location.id,
             centreName:   centre.name,
             locationName: location.name
           };

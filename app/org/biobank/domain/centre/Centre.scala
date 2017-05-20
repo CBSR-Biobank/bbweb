@@ -48,7 +48,7 @@ sealed trait Centre
   val locations: Set[Location]
 
   def locationWithId(locationId: LocationId): DomainValidation[Location] = {
-    locations.find(_.uniqueId == locationId)
+    locations.find(_.id == locationId)
       .toSuccessNel(s"invalid location id: $locationId")
   }
 
@@ -202,9 +202,9 @@ final case class DisabledCentre(id:           CentreId,
   }
 
   /** removes a location from this centre. */
-  def removeLocation(locationUniqueId: LocationId): DomainValidation[DisabledCentre] = {
-    locations.find { x => x.uniqueId == locationUniqueId }.fold {
-      DomainError(s"location does not exist: $locationUniqueId")
+  def removeLocation(id: LocationId): DomainValidation[DisabledCentre] = {
+    locations.find { x => x.id == id }.fold {
+      DomainError(s"location does not exist: $id")
         .failureNel[DisabledCentre]
     } { location =>
       copy(locations    = locations - location,

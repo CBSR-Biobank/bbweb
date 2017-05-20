@@ -147,13 +147,13 @@ define(['lodash'], function (_) {
      * Used to add a centre location.
      */
     $stateProvider.state('home.admin.centres.centre.locations.locationView', {
-      url: '/location/view/:uniqueId',
+      url: '/location/view/:locationId',
       resolve: {
         location: [
           '$stateParams',
           'centre',
           function ($stateParams, centre) {
-            return _.find(centre.locations, { uniqueId: $stateParams.uniqueId });
+            return _.find(centre.locations, { uniqueId: $stateParams.locationId });
           }
         ]
       },

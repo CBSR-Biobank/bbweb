@@ -253,7 +253,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     for {
       centre      <- centreRepository.getByLocationId(LocationId(cmd.locationId))
       location    <- centre.locationWithId(LocationId(cmd.locationId))
-      newShipment <- shipment.withFromLocation(centre.id, location.uniqueId)
+      newShipment <- shipment.withFromLocation(centre.id, location.id)
     } yield ShipmentEvent(shipment.id.id).update(
       _.sessionUserId                  := cmd.sessionUserId,
       _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
@@ -267,7 +267,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     for {
       centre      <- centreRepository.getByLocationId(LocationId(cmd.locationId))
       location    <- centre.locationWithId(LocationId(cmd.locationId))
-      newShipment <- shipment.withToLocation(centre.id, location.uniqueId)
+      newShipment <- shipment.withToLocation(centre.id, location.id)
     } yield ShipmentEvent(shipment.id.id).update(
       _.sessionUserId                := cmd.sessionUserId,
       _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),

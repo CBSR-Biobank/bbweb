@@ -302,7 +302,7 @@ class ShipmentSpecimensControllerSpec
 
       it("not add a specimen inventory Id that not present at shipment's from centre") {
         val f = specimensFixture(1)
-        val specimen = f.specimens.head.copy(locationId = f.toCentre.locations.head.uniqueId)
+        val specimen = f.specimens.head.copy(locationId = f.toCentre.locations.head.id)
         specimenRepository.put(specimen)
 
         val url = uri(f.shipment, "canadd") + s"/${specimen.inventoryId}"
@@ -397,7 +397,7 @@ class ShipmentSpecimensControllerSpec
       it("not add a specimen from a different centre to a shipment") {
         val f = specimensFixture(1)
         shipmentRepository.put(f.shipment)
-        val specimen = f.specimens.head.copy(locationId = f.toCentre.locations.head.uniqueId)
+        val specimen = f.specimens.head.copy(locationId = f.toCentre.locations.head.id)
         specimenRepository.put(specimen)
 
         val addJson = Json.obj("specimenInventoryIds" -> List(specimen.inventoryId))
@@ -681,7 +681,7 @@ class ShipmentSpecimensControllerSpec
         val f = specimensFixture(1)
         val shipment = makeUnpackedShipment(f.shipment)
         shipmentRepository.put(shipment)
-        val specimen = f.specimens.headOption.value.copy(locationId = f.toCentre.locations.head.uniqueId)
+        val specimen = f.specimens.headOption.value.copy(locationId = f.toCentre.locations.head.id)
         specimenRepository.put(specimen)
 
         val url = uri(shipment, "extra")

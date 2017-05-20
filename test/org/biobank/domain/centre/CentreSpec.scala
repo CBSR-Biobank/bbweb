@@ -188,7 +188,7 @@ class CentreSpec extends DomainSpec {
 
     it("replace a location") {
       val location = factory.createLocation
-      val location2 = factory.createLocation.copy(uniqueId = location.uniqueId)
+      val location2 = factory.createLocation.copy(id = location.id)
       val centre = factory.createDisabledCentre.copy(locations = Set(location))
 
       centre.withLocation(location2) mustSucceed { c =>
@@ -202,7 +202,7 @@ class CentreSpec extends DomainSpec {
       val location = factory.createLocation
       val centre = factory.createDisabledCentre.copy(locations = Set(location))
 
-      centre.removeLocation(location.uniqueId) mustSucceed { c =>
+      centre.removeLocation(location.id) mustSucceed { c =>
         c.studyIds must have size 0
         ()
       }

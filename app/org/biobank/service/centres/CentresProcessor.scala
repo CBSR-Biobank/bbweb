@@ -203,7 +203,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                     centre: DisabledCentre): ServiceValidation[CentreEvent] = {
     for {
       location <- {
-        // need to call Location.create so that a new uniqueId is generated
+        // need to call Location.create so that a new Id is generated
         Location.create(cmd.name, cmd.street, cmd.city, cmd.province,
                         cmd.postalCode, cmd.poBoxNumber, cmd.countryIsoCode)
       }
@@ -212,7 +212,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       _.sessionUserId                              := cmd.sessionUserId,
       _.time                                       := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.locationAdded.version                      := cmd.expectedVersion,
-      _.locationAdded.location.locationId          := location.uniqueId.id,
+      _.locationAdded.location.locationId          := location.id.id,
       _.locationAdded.location.name                := cmd.name,
       _.locationAdded.location.street              := cmd.street,
       _.locationAdded.location.city                := cmd.city,
@@ -229,8 +229,8 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                        centre: DisabledCentre): ServiceValidation[CentreEvent] = {
     for {
       location <- {
-        // need to call Location.create so that a new uniqueId is generated
-        Location(uniqueId       = LocationId(cmd.locationId),
+        // need to call Location.create so that a new Id is generated
+        Location(id             = LocationId(cmd.locationId),
                  name           = cmd.name,
                  street         = cmd.street,
                  city           = cmd.city,
@@ -425,7 +425,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       val locationAddedEvent = event.getLocationAdded
       val eventLocation = locationAddedEvent.getLocation
 
-      val v = centre.withLocation(Location(uniqueId       = LocationId(eventLocation.getLocationId),
+      val v = centre.withLocation(Location(id             = LocationId(eventLocation.getLocationId),
                                            name           = eventLocation.getName,
                                            street         = eventLocation.getStreet,
                                            city           = eventLocation.getCity,
@@ -445,7 +445,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       val locationUpdatedEvent = event.getLocationUpdated
       val eventLocation = locationUpdatedEvent.getLocation
       val v = centre.withLocation(
-          Location(uniqueId       = LocationId(eventLocation.getLocationId),
+          Location(id             = LocationId(eventLocation.getLocationId),
                    name           = eventLocation.getName,
                    street         = eventLocation.getStreet,
                    city           = eventLocation.getCity,

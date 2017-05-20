@@ -341,8 +341,8 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
             'inventoryId           (specimen.inventoryId),
             'specimenDescriptionId (specimen.specimenDescriptionId),
             'version               (specimen.version),
-            'originLocationId      (specimen.originLocationId.id),
-            'locationId            (specimen.locationId.id),
+            'originLocationId      (specimen.originLocationId),
+            'locationId            (specimen.locationId),
             'containerId           (specimen.containerId),
             'positionId            (specimen.positionId),
             'amount                (specimen.amount)

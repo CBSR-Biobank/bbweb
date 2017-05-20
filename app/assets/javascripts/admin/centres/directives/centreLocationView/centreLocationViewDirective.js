@@ -56,7 +56,7 @@ define(['lodash'], function (_) {
       timeout = timeout || 1500;
       return function (centre) {
         vm.centre = centre;
-        vm.location = _.find(vm.centre.locations, { uniqueId: vm.location.uniqueId });
+        vm.location = _.find(vm.centre.locations, { id: vm.location.id });
         notificationsService.success(message, title, timeout);
       };
     }

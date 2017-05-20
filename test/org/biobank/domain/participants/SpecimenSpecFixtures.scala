@@ -21,7 +21,7 @@ trait SpecimenSpecFixtures {
 
     val _centreLocationInfo =
       CentreLocationInfo(_centre.id.id,
-                         _centre.locations.head.uniqueId.id,
+                         _centre.locations.head.id.id,
                          _centre.name,
                          _centre.locations.head.name)
 

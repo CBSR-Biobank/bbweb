@@ -39,8 +39,8 @@ class SpecimenSpec extends DomainSpec {
             'inventoryId           (specimen.inventoryId),
             'specimenDescriptionId (specimen.specimenDescriptionId),
             'version               (0),
-            'originLocationId      (specimen.originLocationId.id),
-            'locationId            (specimen.locationId.id),
+            'originLocationId      (specimen.originLocationId),
+            'locationId            (specimen.locationId),
             'containerId           (specimen.containerId),
             'positionId            (specimen.positionId),
             'amount                (specimen.amount)
@@ -81,8 +81,8 @@ class SpecimenSpec extends DomainSpec {
         val specimen = factory.createUsableSpecimen
         val newLocation = factory.createLocation
 
-        specimen.withOriginLocation(newLocation) mustSucceed { s =>
-          s.originLocationId must be (newLocation.uniqueId)
+        specimen.withOriginLocation(newLocation.id) mustSucceed { s =>
+          s.originLocationId must be (newLocation.id)
           s.version must be (specimen.version + 1)
           checkTimeStamps(s, specimen.timeAdded, DateTime.now)
         }
@@ -92,8 +92,8 @@ class SpecimenSpec extends DomainSpec {
         val specimen = factory.createUsableSpecimen
         val newLocation = factory.createLocation
 
-        specimen.withLocation(newLocation) mustSucceed { s =>
-          s.locationId must be (newLocation.uniqueId)
+        specimen.withLocation(newLocation.id) mustSucceed { s =>
+          s.locationId must be (newLocation.id)
           s.version must be (specimen.version + 1)
           checkTimeStamps(s, specimen.timeAdded, DateTime.now)
         }
@@ -190,14 +190,14 @@ class SpecimenSpec extends DomainSpec {
 
     it("with an invalid origin location") {
       val specimen = factory.createUsableSpecimen
-      val newLocation = factory.createLocation.copy(uniqueId = LocationId(""))
-      specimen.withOriginLocation(newLocation) mustFail "LocationIdInvalid"
+      val newLocation = factory.createLocation.copy(id = LocationId(""))
+      specimen.withOriginLocation(newLocation.id) mustFail "LocationIdInvalid"
     }
 
     it("with an invalid location") {
       val specimen = factory.createUsableSpecimen
-      val newLocation = factory.createLocation.copy(uniqueId = LocationId(""))
-      specimen.withLocation(newLocation) mustFail "LocationIdInvalid"
+      val newLocation = factory.createLocation.copy(id = LocationId(""))
+      specimen.withLocation(newLocation.id) mustFail "LocationIdInvalid"
     }
 
     it("with an invalid position") {

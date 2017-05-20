@@ -66,7 +66,7 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
   def searchLocations(cmd: SearchCentreLocationsCmd): Set[CentreLocationInfo] =  {
     val allLocationInfos = centreRepository.getValues.flatMap { centre =>
         centre.locations.map { location =>
-          CentreLocationInfo(centre.id.id, location.uniqueId.id, centre.name, location.name)
+          CentreLocationInfo(centre.id.id, location.id.id, centre.name, location.name)
         }
       }
 

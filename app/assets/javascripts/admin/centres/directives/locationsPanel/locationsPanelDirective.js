@@ -58,7 +58,7 @@ define(['lodash'], function(_) {
     }
 
     function view(location) {
-      $state.go('home.admin.centres.centre.locations.locationView', { uniqueId: location.uniqueId });
+      $state.go('home.admin.centres.centre.locations.locationView', { id: location.id });
     }
 
     function remove(location) {

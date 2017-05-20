@@ -212,15 +212,14 @@ trait JsonHelper extends MustMatchers with OptionValues {
     }
 
     (json \ "locations").as[List[JsObject]].foreach { jsLocation =>
-      val jsLocationId = (jsLocation \ "uniqueId").as[String]
-      centre.locations.find { x => x.uniqueId == LocationId(jsLocationId) }
-        .fold { fail(s"annotation with id not found on centre: $jsLocationId")
-      } { location => compareLocation(jsLocation, location) }
+      val jsId = (jsLocation \ "id").as[String]
+      val location = centre.locations.find { x => x.id.id == jsId }.value
+      compareLocation(jsLocation, location)
     }
   }
 
   def compareLocation(json: JsValue, location: Location): Unit = {
-    (json \ "uniqueId").as[String]       mustBe (location.uniqueId.id)
+    (json \ "id").as[String]             mustBe (location.id.id)
 
     (json \ "name").as[String]           mustBe (location.name)
 

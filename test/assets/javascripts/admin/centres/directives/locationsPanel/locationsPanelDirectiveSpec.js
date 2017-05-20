@@ -123,7 +123,7 @@ define([
       this.controller.view(location);
       expect(this.$state.go).toHaveBeenCalledWith(
         'home.admin.centres.centre.locations.locationView',
-        { uniqueId: location.uniqueId });
+        { id: location.id });
     });
 
 

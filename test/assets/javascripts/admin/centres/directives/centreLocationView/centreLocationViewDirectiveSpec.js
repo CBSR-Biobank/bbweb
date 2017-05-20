@@ -19,7 +19,7 @@ define(function (require) {
       centre = centre || this.centre;
       location = location || this.location;
 
-      expect(_.find(centre.locations, { uniqueId: location.uniqueId})).toBeDefined();
+      expect(_.find(centre.locations, { id: location.id})).toBeDefined();
 
       this.element = angular.element(
         '<centre-location-view centre="vm.centre" location="vm.location"></centre-location-view>');
@@ -82,7 +82,7 @@ define(function (require) {
       var context = {};
 
       beforeEach(inject(function () {
-        context.entity                   = this.Centre;
+        context.entity                   = this.centre;
         context.entityUpdateFuncName     = 'updateLocation';
         context.createController         = createController;
         context.location                 = this.centre.locations[0];

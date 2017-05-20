@@ -14,7 +14,7 @@ trait CentreRepository extends ReadWriteRepository[CentreId, Centre] {
 
   def getEnabled(id: CentreId): DomainValidation[EnabledCentre]
 
-  def getByLocationId(uniqueId: LocationId): DomainValidation[Centre]
+  def getByLocationId(id: LocationId): DomainValidation[Centre]
 
   def withStudy(studyId: StudyId): Set[Centre]
 
@@ -60,12 +60,12 @@ class CentreRepositoryImpl
     } yield enabled
   }
 
-  def getByLocationId(uniqueId: LocationId): DomainValidation[Centre] = {
-    val centres = getValues.filter { c => !c.locations.filter( l => l.uniqueId == uniqueId ).isEmpty}
+  def getByLocationId(id: LocationId): DomainValidation[Centre] = {
+    val centres = getValues.filter { c => !c.locations.filter( l => l.id == id ).isEmpty}
     if (centres.isEmpty) {
-      EntityCriteriaError(s"centre with location id does not exist: $uniqueId").failureNel[Centre]
+      EntityCriteriaError(s"centre with location id does not exist: $id").failureNel[Centre]
     } else if (centres.size > 1){
-      EntityCriteriaError(s"multiple centres with location id: $uniqueId").failureNel[Centre]
+      EntityCriteriaError(s"multiple centres with location id: $id").failureNel[Centre]
     } else {
       centres.headOption.toSuccessNel("list not expected to be empty")
     }

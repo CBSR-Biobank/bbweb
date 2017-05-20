@@ -2,9 +2,11 @@ package org.biobank.domain
 
 import play.api.libs.json._
 
-final case class LocationId(val id: String) extends AnyVal {
-  override def toString: String = id
-}
+/** Identifies a unique [[Loction]] in for a [[Centre]].
+  *
+  * Used as a value object to maintain associations to with entities in the system.
+  */
+final case class LocationId(id: String) extends IdentifiedValueObject[String]
 
 object LocationId {
 
@@ -17,13 +19,13 @@ object LocationId {
       override def reads(json: JsValue): JsResult[LocationId] =
         Reads.StringReads.reads(json).map(LocationId.apply _)
     }
-}
 
+}
 
 /**
  * A Location is a street address.
  *
- * This is a value type. Two locations are considered equal if they have the same uniqueId.
+ * This is a value type. Two locations are considered equal if they have the same Id.
  *
  * @param uniqeId an ID to identify this location.
  *
@@ -41,7 +43,7 @@ object LocationId {
  *
  * @param countryIsoCode the ISO country code for the country the location is in.
  */
-final case class Location(uniqueId:       LocationId,
+final case class Location(id:       LocationId,
                           name:           String,
                           street:         String,
                           city:           String,
@@ -49,19 +51,8 @@ final case class Location(uniqueId:       LocationId,
                           postalCode:     String,
                           poBoxNumber:    Option[String],
                           countryIsoCode: String)
-    extends HasName {
-
-  override def equals(that: Any): Boolean = {
-    that match {
-      case that: Location => this.uniqueId.id.equalsIgnoreCase(that.uniqueId.id)
-      case _ => false
-    }
-  }
-
-  override def hashCode:Int = {
-    uniqueId.id.toUpperCase.hashCode
-  }
-}
+    extends IdentifiedValueObject[LocationId]
+    with HasName
 
 object Location {
   import org.biobank.domain.CommonValidations._
@@ -76,8 +67,8 @@ object Location {
              poBoxNumber:    Option[String],
              countryIsoCode: String): DomainValidation[Location] = {
     validate(name, street, city, province, postalCode, poBoxNumber,countryIsoCode).map { _ =>
-      val uniqueId = LocationId(java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase)
-      Location(uniqueId, name, street, city, province, postalCode, poBoxNumber, countryIsoCode)
+      val id = LocationId(java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase)
+      Location(id, name, street, city, province, postalCode, poBoxNumber, countryIsoCode)
     }
   }
 

@@ -5,7 +5,7 @@ import org.biobank.dto.{CentreLocationInfo, SpecimenDto}
 import org.biobank.domain._
 import org.biobank.domain.containers.{ContainerId, ContainerSchemaPositionId}
 import org.biobank.domain.study.{CollectionSpecimenDescription, SpecimenDescriptionId, StudyValidations}
-import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation, Location}
+import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation}
 import org.biobank.infrastructure.EnumUtils._
 import org.joda.time.DateTime
 import play.api.libs.json._
@@ -192,9 +192,9 @@ final case class UsableSpecimen(id:                    SpecimenId,
   /**
    * Location should belong to a centre.
    */
-  def withOriginLocation(location: Location): DomainValidation[Specimen] = {
-    validateString(location.uniqueId.id, LocationIdInvalid).map { s =>
-      copy(originLocationId = location.uniqueId,
+  def withOriginLocation(id: LocationId): DomainValidation[Specimen] = {
+    validateId(id, LocationIdInvalid).map { s =>
+      copy(originLocationId = id,
            version          = version + 1,
            timeModified     = Some(DateTime.now))
     }
@@ -203,9 +203,9 @@ final case class UsableSpecimen(id:                    SpecimenId,
   /**
    * Location should belong to a centre.
    */
-  def withLocation(location: Location): DomainValidation[Specimen] = {
-    validateString(location.uniqueId.id, LocationIdInvalid).map { s =>
-      copy(locationId   = location.uniqueId,
+  def withLocation(id: LocationId): DomainValidation[Specimen] = {
+    validateId(id, LocationIdInvalid).map { s =>
+      copy(locationId   = id,
            version      = version + 1,
            timeModified = Some(DateTime.now))
     }

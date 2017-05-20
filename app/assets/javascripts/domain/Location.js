@@ -16,16 +16,14 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
      * Location is a value object.
      */
     function Location(obj) {
-      // var defaults = {
-      //   uniqueId:       null,
-      //   name:           '',
-      //   street:         '',
-      //   city:           '',
-      //   province:       '',
-      //   postalCode:     '',
-      //   poBoxNumber:    null,
-      //   countryIsoCode: ''
-      // };
+      this.id             = null;
+      this.name           = '';
+      this.street         = '';
+      this.city           = '';
+      this.province       = '';
+      this.postalCode     = '';
+      this.poBoxNumber    = null;
+      this.countryIsoCode = '';
 
       DomainEntity.call(this, Location.SCHEMA, obj);
     }
@@ -37,7 +35,7 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
       'id': 'Location',
       'type': 'object',
       'properties': {
-        'uniqueId':       { 'type': 'string'},
+        'id':             { 'type': 'string'},
         'name':           { 'type': 'string'},
         'street':         { 'type': 'string'},
         'city':           { 'type': 'string'},
@@ -47,7 +45,7 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
         'countryIsoCode': { 'type': 'string'}
       },
       'required': [
-        'uniqueId',
+        'id',
         'name',
         'street',
         'city',

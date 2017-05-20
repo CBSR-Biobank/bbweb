@@ -193,8 +193,8 @@ trait ShipmentSpecFixtures {
     val participant = factory.createParticipant.copy(studyId = study.id)
     val cevent = factory.createCollectionEvent
     val specimens = (1 to numSpecimens).map { _ =>
-        factory.createUsableSpecimen.copy(originLocationId = f.fromCentre.locations.head.uniqueId,
-                                          locationId = f.fromCentre.locations.head.uniqueId)
+        factory.createUsableSpecimen.copy(originLocationId = f.fromCentre.locations.head.id,
+                                          locationId = f.fromCentre.locations.head.id)
       }.toList
 
     new SpecimensFixture(fromCentre          = f.fromCentre,
@@ -242,8 +242,8 @@ trait ShipmentSpecFixtures {
 
   def addSpecimenToShipment(shipment: Shipment, fromCentre: Centre) = {
     val specimen = factory.createUsableSpecimen.
-      copy(originLocationId = fromCentre.locations.head.uniqueId,
-           locationId       = fromCentre.locations.head.uniqueId)
+      copy(originLocationId = fromCentre.locations.head.id,
+           locationId       = fromCentre.locations.head.id)
     val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = shipment.id,
                                                                specimenId = specimen.id)
     new SpecimenShipmentSpecimen(specimen, shipmentSpecimen)
