@@ -245,16 +245,16 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       _.annotationTypeAdded.annotationType := EventUtils.annotationTypeToEvent(annotationType))
   }
 
-private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotationTypeCmd,
+  private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotationTypeCmd,
                                              cet: CollectionEventType)
       : ServiceValidation[CollectionEventTypeEvent] = {
-    cet.removeAnnotationType(cmd.uniqueId) map { c =>
+    cet.removeAnnotationType(AnnotationTypeId(cmd.annotationTypeId)) map { c =>
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                        := cet.studyId.id,
         _.optionalSessionUserId          := cmd.userId,
         _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.annotationTypeRemoved.version  := cmd.expectedVersion,
-        _.annotationTypeRemoved.uniqueId := cmd.uniqueId)
+        _.annotationTypeRemoved.id       := cmd.annotationTypeId)
     }
   }
 
@@ -440,7 +440,9 @@ private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotat
     onValidEventAndVersion(event,
                            event.eventType.isAnnotationTypeRemoved,
                            event.getAnnotationTypeRemoved.getVersion) { (cet, eventTime) =>
-      storeIfValid(cet.removeAnnotationType(event.getAnnotationTypeRemoved.getUniqueId), eventTime)
+      storeIfValid(
+        cet.removeAnnotationType(AnnotationTypeId(event.getAnnotationTypeRemoved.getId)),
+        eventTime)
     }
   }
 

@@ -1,12 +1,7 @@
 package org.biobank.domain.participants
 
 import org.biobank.ValidationKey
-import org.biobank.domain.{
-  Annotation,
-  ConcurrencySafeEntity,
-  HasAnnotations,
-  DomainValidation
-}
+import org.biobank.domain._
 import org.biobank.domain.study._
 import org.biobank.infrastructure.JsonUtils._
 import org.joda.time.DateTime
@@ -77,7 +72,7 @@ final case class CollectionEvent(id:                    CollectionEventId,
     }
   }
 
-  def withoutAnnotation(annotationTypeId: String): DomainValidation[CollectionEvent] = {
+  def withoutAnnotation(annotationTypeId: AnnotationTypeId): DomainValidation[CollectionEvent] = {
     checkRemoveAnnotation(annotationTypeId).map { annotation =>
       val newAnnotations = annotations - annotation
       copy(annotations  = newAnnotations,

@@ -116,7 +116,7 @@ define(function (require) {
         var self = this,
             badStudyJson = self.factory.study({ annotationTypes: [ 1 ]});
         expect(function () { self.Study.create(badStudyJson); })
-          .toThrowError(/bad annotation types/);
+          .toThrowError(/Invalid type/);
       });
 
     });
@@ -170,7 +170,7 @@ define(function (require) {
       }
 
       function shouldFail(error) {
-        expect(error.message).toContain('bad annotation types');
+        expect(error.message).toContain('Missing required property');
       }
     });
 
@@ -319,9 +319,9 @@ define(function (require) {
         this.updateEntity.call(this,
                                this.study,
                                'addAnnotationType',
-                               _.omit(this.annotationType, 'uniqueId'),
+                               _.omit(this.annotationType, 'id'),
                                this.uri('pannottype', this.study.id),
-                               _.omit(this.annotationType, 'uniqueId'),
+                               _.omit(this.annotationType, 'id'),
                                this.jsonStudy,
                                this.expectStudy,
                                this.failTest);
@@ -345,7 +345,7 @@ define(function (require) {
         var url = sprintf('%s/%d/%s',
                           this.uri('pannottype', this.study.id),
                           this.study.version,
-                          this.annotationType.uniqueId);
+                          this.annotationType.id);
 
         this.$httpBackend.whenDELETE(url).respond(this.reply(true));
         this.study.removeAnnotationType(this.annotationType)

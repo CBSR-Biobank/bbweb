@@ -41,8 +41,8 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
         'timeModified':    { 'type': [ 'string', 'null' ] },
         'name':            { 'type': 'string' },
         'description':     { 'type': [ 'string', 'null' ] },
-        'annotationTypes': { 'type': 'array' },
-        'state':          { 'type': 'string' }
+        'annotationTypes': { 'type': 'array', 'items':{ '$ref': 'AnnotationType' }  },
+        'state':           { 'type': 'string' }
       },
       'required': [ 'id', 'version', 'timeAdded', 'name', 'state' ]
     };
@@ -313,7 +313,7 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
     Study.prototype.addAnnotationType = function (annotationType) {
       return this.update.call(this,
                               uri('pannottype', this.id),
-                              _.omit(annotationType, 'uniqueId'));
+                              _.omit(annotationType, 'id'));
     };
 
     /**
@@ -340,7 +340,7 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
      */
     Study.prototype.removeAnnotationType = function (annotationType) {
       var url = sprintf.sprintf('%s/%d/%s',
-                                uri('pannottype', this.id), this.version, annotationType.uniqueId);
+                                uri('pannottype', this.id), this.version, annotationType.id);
       return HasAnnotationTypes.prototype.removeAnnotationType.call(this, annotationType, url);
     };
 

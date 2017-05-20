@@ -367,9 +367,9 @@ define(function (require) {
         this.updateEntity.call(this,
                                this.cet,
                                'addAnnotationType',
-                               _.omit(this.jsonAnnotType, 'uniqueId'),
+                               _.omit(this.jsonAnnotType, 'id'),
                                this.uri('annottype', this.cet.id),
-                               _.extend(_.omit(this.jsonAnnotType, 'uniqueId'),
+                               _.extend(_.omit(this.jsonAnnotType, 'id'),
                                         { studyId: this.cet.studyId }),
                                this.jsonCet,
                                this.expectCet,
@@ -379,21 +379,26 @@ define(function (require) {
       describe('removing an annotation type', function() {
 
         it('should remove an annotation type', function () {
-          var url = sprintf('%s/%s/%d/%s',
+          var self = this,
+              url = sprintf('%s/%s/%d/%s',
                             this.uri('annottype', this.cet.studyId),
                             this.cet.id,
                             this.cet.version,
-                            this.jsonAnnotType.uniqueId);
+                            this.jsonAnnotType.id);
 
           this.$httpBackend.whenDELETE(url).respond(this.reply(true));
           this.cet.removeAnnotationType(this.jsonAnnotType)
-            .then(this.expectCet)
+            .then(annotationTypeCheck)
             .catch(this.failTest);
           this.$httpBackend.flush();
+
+          function annotationTypeCheck(ceventType) {
+            expect(_.find(ceventType.annotationTypes, { id: self.jsonAnnotType.id })).toBeUndefined();
+          }
         });
 
         it('fails when removing an invalid annotation type', function() {
-          var jsonAnnotType = _.extend({}, this.jsonAnnotType, { uniqueId: this.factory.stringNext() });
+          var jsonAnnotType = _.extend({}, this.jsonAnnotType, { id: this.factory.stringNext() });
           this.cet.removeAnnotationType(jsonAnnotType)
             .catch(function (err) {
               expect(err.message).toContain('annotation type with ID not present:');

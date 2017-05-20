@@ -1,15 +1,9 @@
 package org.biobank.domain.study
 
-import org.biobank.domain.{
-  AnnotationType,
-  AnnotationTypeSetSharedSpec,
-  DomainSpec,
-  DomainValidation
-}
-import org.biobank.fixture.NameGenerator
-
-import org.slf4j.LoggerFactory
 import com.github.nscala_time.time.Imports._
+import org.biobank.domain._
+import org.biobank.fixture.NameGenerator
+import org.slf4j.LoggerFactory
 import scalaz.Scalaz._
 
 class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStudy] {
@@ -165,10 +159,9 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
     study.withParticipantAnnotationType(annotationType)
   }
 
-  override def removeAnnotationType(study:    DisabledStudy,
-                                    uniqueId: String)
+  override def removeAnnotationType(study: DisabledStudy, id: AnnotationTypeId)
       : DomainValidation[DisabledStudy] = {
-    study.removeParticipantAnnotationType(uniqueId)
+    study.removeParticipantAnnotationType(id)
   }
 
   describe("A study's annotation type set") {

@@ -47,8 +47,7 @@ define(['lodash'], function (_) {
 
     function postUpdate(collectionEventType) {
       vm.collectionEventType = collectionEventType;
-      vm.annotationType = _.find(vm.collectionEventType.annotationTypes,
-                                 { uniqueId: vm.annotationType.uniqueId });
+      vm.annotationType = _.find(vm.collectionEventType.annotationTypes, { id: vm.annotationType.id });
       if (_.isUndefined(vm.annotationType)) {
         return $q.reject('could not update annotation type');
       }

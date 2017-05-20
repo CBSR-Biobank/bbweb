@@ -43,10 +43,10 @@ define(['lodash'], function(_) {
      */
     HasAnnotationTypes.prototype.removeAnnotationType = function (annotationType, url) {
       var self = this,
-          found = _.find(self.annotationTypes,  { uniqueId: annotationType.uniqueId });
+          found = _.find(self.annotationTypes,  { id: annotationType.id });
 
       if (!found) {
-        return $q.reject(new DomainError('annotation type with ID not present: ' + annotationType.uniqueId));
+        return $q.reject(new DomainError('annotation type with ID not present: ' + annotationType.id));
       }
 
       return biobankApi.del(url).then(function () {
@@ -54,7 +54,7 @@ define(['lodash'], function(_) {
           _.extend(self, {
             version: self.version + 1,
             annotationTypes: _.filter(self.annotationTypes, function(at) {
-              return at.uniqueId !== annotationType.uniqueId;
+              return at.id !== annotationType.id;
             })
           }));
       });

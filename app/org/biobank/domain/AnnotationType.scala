@@ -6,6 +6,26 @@ import org.biobank.domain.AnnotationValueType._
 import play.api.libs.json._
 import scalaz.Scalaz._
 
+/** Identifies a unique [[SpecimenDescription]] in a Collection Event Type.
+  *
+  * Used as a value object to maintain associations to with entities in the system.
+  */
+final case class AnnotationTypeId(id: String) extends IdentifiedValueObject[String]
+
+object AnnotationTypeId {
+
+  // Do not want JSON to create a sub object, we just want it to be converted
+  // to a single string
+  implicit val annotationTypeIdFormat: Format[AnnotationTypeId] = new Format[AnnotationTypeId] {
+
+      override def writes(id: AnnotationTypeId): JsValue = JsString(id.id)
+
+      override def reads(json: JsValue): JsResult[AnnotationTypeId] =
+        Reads.StringReads.reads(json).map(AnnotationTypeId.apply _)
+    }
+
+}
+
 /**
  * Annotation types define an [[Annotation]].
  *
@@ -25,37 +45,27 @@ import scalaz.Scalaz._
  *
  * @param required When true, the user must enter a value for this annotation.
  */
-final case class AnnotationType(uniqueId:      String,
+final case class AnnotationType(id:            AnnotationTypeId,
                                 name:          String,
                                 description:   Option[String],
                                 valueType:     AnnotationValueType,
                                 maxValueCount: Option[Int],
                                 options:       Seq[String],
                                 required:      Boolean)
-    extends HasName
+    extends IdentifiedValueObject[AnnotationTypeId]
+    with HasName
     with HasOptionalDescription
     with AnnotationTypeValidations {
 
-  override def equals(that: Any): Boolean = {
-    that match {
-      case that: AnnotationType => this.uniqueId.equalsIgnoreCase(that.uniqueId)
-      case _ => false
-    }
-  }
-
-  override def hashCode:Int = {
-    uniqueId.toUpperCase.hashCode
-  }
-
   override def toString: String =
     s"""|AnnotationType:{
-        |  uniqueId:              $uniqueId,
-        |  name:                  $name,
-        |  description:           $description,
-        |  valueType:             $valueType,
-        |  maxValueCount:         $maxValueCount,
-        |  options:               { $options },
-        |  required:              $required
+        |  id:            $id,
+        |  name:          $name,
+        |  description:   $description,
+        |  valueType:     $valueType,
+        |  maxValueCount: $maxValueCount,
+        |  options:       { $options },
+        |  required:      $required
         |}""".stripMargin
 
 }
@@ -194,8 +204,8 @@ object AnnotationType extends AnnotationTypeValidations {
        validateOptions(options) |@|
        validateSelectParams(valueType, maxValueCount, options)) {
       case (_, _, _, _, _) =>
-        val uniqueId = java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase
-        AnnotationType(uniqueId, name, description, valueType, maxValueCount, options, required)
+        val id = AnnotationTypeId(java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase)
+        AnnotationType(id, name, description, valueType, maxValueCount, options, required)
     }
   }
 

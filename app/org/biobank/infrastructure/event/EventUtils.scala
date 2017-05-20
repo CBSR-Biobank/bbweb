@@ -16,7 +16,7 @@ object EventUtils {
 
   def annotationTypeToEvent(annotationType: AnnotationType): EventAnnotationType = {
     EventAnnotationType().update(
-      _.uniqueId              := annotationType.uniqueId,
+      _.id                    := annotationType.id.id,
       _.name                  := annotationType.name,
       _.optionalDescription   := annotationType.description,
       _.valueType             := annotationType.valueType.toString,
@@ -28,7 +28,7 @@ object EventUtils {
 
   def annotationTypeFromEvent(event: EventAnnotationType): AnnotationType = {
     AnnotationType(
-      uniqueId      = event.getUniqueId,
+      id            = AnnotationTypeId(event.getId),
       name          = event.getName,
       description   = event.description,
       valueType     = AnnotationValueType.withName(event.getValueType),
@@ -41,7 +41,7 @@ object EventUtils {
   def annotationToEvent(annotation: org.biobank.domain.Annotation)
       : org.biobank.infrastructure.event.CommonEvents.Annotation = {
     org.biobank.infrastructure.event.CommonEvents.Annotation().update(
-      _.annotationTypeId    := annotation.annotationTypeId,
+      _.annotationTypeId    := annotation.annotationTypeId.id,
       _.optionalStringValue := annotation.stringValue,
       _.optionalNumberValue := annotation.numberValue,
       _.selectedValues      := annotation.selectedValues.toSeq
@@ -51,7 +51,7 @@ object EventUtils {
   def annotationFromEvent(event: org.biobank.infrastructure.event.CommonEvents.Annotation)
       : org.biobank.domain.Annotation = {
     org.biobank.domain.Annotation(
-      annotationTypeId = event.getAnnotationTypeId,
+      annotationTypeId = AnnotationTypeId(event.getAnnotationTypeId),
       stringValue      = event.stringValue,
       numberValue      = event.numberValue,
       selectedValues   = event.selectedValues.toSet

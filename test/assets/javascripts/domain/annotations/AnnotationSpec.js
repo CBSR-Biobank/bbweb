@@ -267,8 +267,7 @@ define(function(require) {
 
     it('calling getAnnotationTypeId gives a valid result', function() {
       _.each(this.getAnnotationAndTypeForAllValueTypes(), function (entities) {
-        expect(entities.annotation.getAnnotationTypeId())
-          .toBe(entities.annotationType.uniqueId);
+        expect(entities.annotation.getAnnotationTypeId()).toBe(entities.annotationType.id);
       });
     });
 

@@ -1,14 +1,8 @@
 package org.biobank.domain.study
 
-import org.biobank.domain.{
-  AnnotationType,
-  AnnotationTypeSetSharedSpec,
-  DomainSpec,
-  DomainValidation
-}
-import org.biobank.fixture.NameGenerator
-
 import com.github.nscala_time.time.Imports._
+import org.biobank.domain._
+import org.biobank.fixture.NameGenerator
 import org.slf4j.LoggerFactory
 import scalaz.Scalaz._
 
@@ -253,9 +247,9 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
     entity.withAnnotationType(annotationType)
   }
 
-  override def removeAnnotationType(entity: CollectionEventType, uniqueId: String)
+  override def removeAnnotationType(entity: CollectionEventType, id: AnnotationTypeId)
       : DomainValidation[CollectionEventType] = {
-    entity.removeAnnotationType(uniqueId)
+    entity.removeAnnotationType(id)
   }
 
   describe("A collection event type's annotation type set") {

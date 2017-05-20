@@ -164,8 +164,7 @@ final case class DisabledStudy(id:                         StudyId,
   }
 
   /** removes a participant annotation type from this study. */
-  def removeParticipantAnnotationType(annotationTypeId: String)
-      : DomainValidation[DisabledStudy] = {
+  def removeParticipantAnnotationType(annotationTypeId: AnnotationTypeId): DomainValidation[DisabledStudy] = {
     checkRemoveAnnotationType(annotationTypeId).map { annotationType =>
       val newAnnotationTypes = annotationTypes - annotationType
       copy(annotationTypes = newAnnotationTypes,

@@ -46,12 +46,8 @@ define(function () {
       }));
 
       it('on update should invoke the update method on entity', function() {
-        var modalInputDeferred = this.$q.defer();
-
-        modalInputDeferred.resolve(context.newValue);
-
         spyOn(this.modalInput, context.modalInputFuncName)
-          .and.returnValue({ result: modalInputDeferred.promise});
+          .and.returnValue({ result: this.$q.when(context.newValue) });
         spyOn(context.entity.prototype, context.entityUpdateFuncName)
           .and.returnValue(this.$q.when(context.entity));
         spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));

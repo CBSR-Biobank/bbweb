@@ -57,11 +57,11 @@ class StudiesRouter @Inject()(controller: StudiesController) extends SimpleRoute
     case POST(p"/pannottype/${studyId(id)}") =>
       controller.addAnnotationType(id)
 
-    case POST(p"/pannottype/${studyId(id)}/$uniqueId") =>
-      controller.updateAnnotationType(id, uniqueId)
+    case POST(p"/pannottype/${studyId(id)}/$annotationTypeId") =>
+      controller.updateAnnotationType(id, annotationTypeId)
 
-    case DELETE(p"/pannottype/${studyId(id)}/${long(ver)}/$uniqueId") =>
-      controller.removeAnnotationType(id, ver, uniqueId)
+    case DELETE(p"/pannottype/${studyId(id)}/${long(ver)}/$annotationTypeId") =>
+      controller.removeAnnotationType(id, ver, annotationTypeId)
 
     case POST(p"/enable/${studyId(id)}") =>
       controller.enable(id)

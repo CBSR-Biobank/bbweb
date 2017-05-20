@@ -49,8 +49,8 @@ define(['lodash'], function (_) {
      *
      * @param {Annotation} the annotation.
      */
-    AnnotationsEntityTestSuiteMixin.prototype.validateAnnotationClass = function  (annotationType,
-                                                                                   annotation) {
+    AnnotationsEntityTestSuiteMixin.prototype.validateAnnotationClass = function (annotationType,
+                                                                                  annotation) {
       switch (annotationType.valueType) {
       case AnnotationValueType.TEXT:
         expect(annotation).toEqual(jasmine.any(TextAnnotation));

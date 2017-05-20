@@ -4,9 +4,8 @@ import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
 import javax.inject._
 import org.biobank.TestData
+import org.biobank.domain._
 import org.biobank.domain.study._
-import org.biobank.domain.{AnnotationType, AnnotationValueType}
-import org.biobank.domain.study.Study
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.EventUtils
 import org.biobank.infrastructure.event.StudyEvents._
@@ -268,7 +267,7 @@ class StudiesProcessor @Inject() (
                                              study: DisabledStudy)
       : ServiceValidation[StudyEvent] = {
     for {
-      annotationType <- AnnotationType(cmd.uniqueId,
+      annotationType <- AnnotationType(AnnotationTypeId(cmd.annotationTypeId),
                                        cmd.name,
                                        cmd.description,
                                        cmd.valueType,
@@ -286,12 +285,12 @@ class StudiesProcessor @Inject() (
   private def removeAnnotationTypeCmdToEvent(cmd: UpdateStudyRemoveAnnotationTypeCmd,
                                              study: DisabledStudy)
       : ServiceValidation[StudyEvent] = {
-    study.removeParticipantAnnotationType(cmd.uniqueId) map { s =>
+    study.removeParticipantAnnotationType(AnnotationTypeId(cmd.annotationTypeId)) map { s =>
       StudyEvent(study.id.id).update(
-        _.optionalSessionUserId                 := cmd.sessionUserId,
+        _.optionalSessionUserId          := cmd.sessionUserId,
         _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.annotationTypeRemoved.version  := cmd.expectedVersion,
-        _.annotationTypeRemoved.uniqueId := cmd.uniqueId)
+        _.annotationTypeRemoved.id       := cmd.annotationTypeId)
     }
   }
 
@@ -528,7 +527,7 @@ class StudiesProcessor @Inject() (
                                         event.eventType.isAnnotationTypeAdded,
                                         event.getAnnotationTypeAdded.getVersion) { (study, eventTime) =>
       val eventAnnotationType = event.getAnnotationTypeAdded.getAnnotationType
-      val annotationType = AnnotationType(eventAnnotationType.getUniqueId,
+      val annotationType = AnnotationType(AnnotationTypeId(eventAnnotationType.getId),
                                           eventAnnotationType.getName,
                                           eventAnnotationType.description,
                                           AnnotationValueType.withName(eventAnnotationType.getValueType),
@@ -544,7 +543,7 @@ class StudiesProcessor @Inject() (
                                         event.eventType.isAnnotationTypeUpdated,
                                         event.getAnnotationTypeUpdated.getVersion) { (study, eventTime) =>
       val eventAnnotationType = event.getAnnotationTypeUpdated.getAnnotationType
-      val annotationType = AnnotationType(eventAnnotationType.getUniqueId,
+      val annotationType = AnnotationType(AnnotationTypeId(eventAnnotationType.getId),
                                           eventAnnotationType.getName,
                                           eventAnnotationType.description,
                                           AnnotationValueType.withName(eventAnnotationType.getValueType),
@@ -559,8 +558,9 @@ class StudiesProcessor @Inject() (
     onValidEventDisabledStudyAndVersion(event,
                                         event.eventType.isAnnotationTypeRemoved,
                                         event.getAnnotationTypeRemoved.getVersion) { (study, eventTime) =>
-      putDisabledOnSuccess(study.removeParticipantAnnotationType(event.getAnnotationTypeRemoved.getUniqueId),
-                           eventTime)
+      putDisabledOnSuccess(
+        study.removeParticipantAnnotationType(AnnotationTypeId(event.getAnnotationTypeRemoved.getId)),
+        eventTime)
     }
   }
 

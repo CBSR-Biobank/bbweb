@@ -1,9 +1,9 @@
 package org.biobank.controllers.participants
 
 import org.biobank.controllers._
+import org.biobank.domain._
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
-import org.biobank.domain.{ Annotation, AnnotationType, AnnotationValueType, DomainValidation }
 import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.test.Helpers._
@@ -66,7 +66,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
   def createAnnotationType() = {
     AnnotationType(
-      uniqueId      = nameGenerator.next[AnnotationType],
+      id            = AnnotationTypeId(nameGenerator.next[AnnotationType]),
       name          = nameGenerator.next[AnnotationType],
       description   = None,
       valueType     = AnnotationValueType.Text,
@@ -148,7 +148,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         studyRepository.put(study)
 
         val participant = factory.defaultParticipant.copy(
-          annotations = Set(factory.createAnnotation))
+          annotations = Set(factory.createAnnotationWithValues(factory.defaultAnnotationType)))
         participantRepository.put(participant)
 
         val json = makeRequest(GET, uri(factory.defaultEnabledStudy, participant))
@@ -258,9 +258,8 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
         jsonAnnotations.foreach { jsonAnnotation =>
           val jsonAnnotationTypeId = (jsonAnnotation \ "annotationTypeId").as[String]
-          val annotation = annotations.find( x => x.annotationTypeId == jsonAnnotationTypeId)
-          annotation mustBe defined
-          compareAnnotation(jsonAnnotation, annotation.value)
+          val annotation = annotations.find( x => x.annotationTypeId.id == jsonAnnotationTypeId).value
+          compareAnnotation(jsonAnnotation, annotation)
         }
       }
 
@@ -304,7 +303,8 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
       it("for an annotation with an invalid annotation type id") {
         val annotType = factory.createAnnotationType
-        val annotation = factory.createAnnotation.copy(annotationTypeId = nameGenerator.next[AnnotationType])
+        val annotation = factory.createAnnotation
+          .copy(annotationTypeId = AnnotationTypeId(nameGenerator.next[AnnotationType]))
 
         val study = factory.createEnabledStudy.copy(annotationTypes = Set(annotType))
         studyRepository.put(study)

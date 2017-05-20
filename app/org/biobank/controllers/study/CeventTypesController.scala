@@ -59,10 +59,11 @@ class CeventTypesController @Inject() (val action:                     BbwebActi
   def addAnnotationType(id: CollectionEventTypeId): Action[JsValue] =
     commandAction[CollectionEventTypeAddAnnotationTypeCmd](Json.obj("id" -> id))(processCommand)
 
-  def updateAnnotationType(id: CollectionEventTypeId, uniqueId: String): Action[JsValue] =
-    commandAction[CollectionEventTypeUpdateAnnotationTypeCmd](Json.obj("id" -> id, "uniqueId" -> uniqueId))(processCommand)
+  def updateAnnotationType(id: CollectionEventTypeId, annotationTypeId: String): Action[JsValue] =
+    commandAction[CollectionEventTypeUpdateAnnotationTypeCmd](
+      Json.obj("id" -> id, "annotationTypeId" -> annotationTypeId))(processCommand)
 
-  def removeAnnotationType(studyId: StudyId, id: CollectionEventTypeId, ver: Long, uniqueId: String)
+  def removeAnnotationType(studyId: StudyId, id: CollectionEventTypeId, ver: Long, annotationTypeId: String)
       : Action[Unit]=
     action.async(parse.empty) { implicit request =>
       val cmd = RemoveCollectionEventTypeAnnotationTypeCmd(
@@ -70,7 +71,7 @@ class CeventTypesController @Inject() (val action:                     BbwebActi
           studyId               = studyId.id,
           id                    = id.id,
           expectedVersion       = ver,
-          uniqueId              = uniqueId)
+          annotationTypeId      = annotationTypeId)
       processCommand(cmd)
     }
 

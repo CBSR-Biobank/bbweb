@@ -351,7 +351,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
                                 uri('annottype', this.studyId),
                                 this.id,
                                 this.version,
-                                annotationType.uniqueId);
+                                annotationType.id);
 
       return HasAnnotationTypes.prototype.removeAnnotationType.call(this, annotationType, url);
     };

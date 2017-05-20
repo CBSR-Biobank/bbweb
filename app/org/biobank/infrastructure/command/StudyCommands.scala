@@ -49,22 +49,22 @@ object StudyCommands {
                                                         required:        Boolean)
       extends StudyModifyCommand
 
-  final case class StudyUpdateParticipantAnnotationTypeCmd(sessionUserId:   Option[String],
-                                                           id:              String,
-                                                           uniqueId:        String,
-                                                           expectedVersion: Long,
-                                                           name:            String,
-                                                           description:     Option[String],
-                                                           valueType:       AnnotationValueType,
-                                                           maxValueCount:   Option[Int],
-                                                           options:         Seq[String],
-                                                           required:        Boolean)
+  final case class StudyUpdateParticipantAnnotationTypeCmd(sessionUserId:    Option[String],
+                                                           id:               String,
+                                                           annotationTypeId: String,
+                                                           expectedVersion:  Long,
+                                                           name:             String,
+                                                           description:      Option[String],
+                                                           valueType:        AnnotationValueType,
+                                                           maxValueCount:    Option[Int],
+                                                           options:          Seq[String],
+                                                           required:         Boolean)
       extends StudyModifyCommand
 
-  final case class UpdateStudyRemoveAnnotationTypeCmd(sessionUserId:   Option[String],
-                                                      id:              String,
-                                                      expectedVersion: Long,
-                                                      uniqueId:        String)
+  final case class UpdateStudyRemoveAnnotationTypeCmd(sessionUserId:    Option[String],
+                                                      id:               String,
+                                                      expectedVersion:  Long,
+                                                      annotationTypeId: String)
       extends StudyModifyCommand
 
   final case class EnableStudyCmd(sessionUserId:   Option[String],

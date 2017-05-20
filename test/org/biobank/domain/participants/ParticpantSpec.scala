@@ -119,7 +119,8 @@ class ParticipantSpec extends DomainSpec {
 
     it("to remove an annotation, with an invalid annotation type ID") {
       val participant = factory.createParticipant
-      participant.withoutAnnotation(nameGenerator.next[Participant]) mustFail "annotation does not exist:.*"
+      participant.withoutAnnotation(AnnotationTypeId(nameGenerator.next[Participant]))
+        .mustFail("annotation does not exist:.*")
     }
 
   }

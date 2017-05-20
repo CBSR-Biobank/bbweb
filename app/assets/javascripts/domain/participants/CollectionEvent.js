@@ -175,7 +175,7 @@ define(function(require) {
           // match annotations with annotationTypes
           annotations = obj.annotations.map(function (annotation) {
             var annotationType =
-                _.find(collectionEventType.annotationTypes, { uniqueId: annotation.annotationTypeId });
+                _.find(collectionEventType.annotationTypes, { id: annotation.annotationTypeId });
             return annotationFactory.create(annotation, annotationType);
           });
         } else {

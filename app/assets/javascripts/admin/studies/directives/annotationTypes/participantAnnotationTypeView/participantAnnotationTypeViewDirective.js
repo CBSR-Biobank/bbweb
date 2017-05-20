@@ -46,8 +46,7 @@ define(['lodash'], function (_) {
 
     function postUpdate(study) {
       vm.study = study;
-      vm.annotationType = _.find(vm.study.annotationTypes,
-                                 { uniqueId: vm.annotationType.uniqueId });
+      vm.annotationType = _.find(vm.study.annotationTypes, { id: vm.annotationType.id });
       if (_.isUndefined(vm.annotationType)) {
         return $q.reject('could not update annotation type');
       }

@@ -49,12 +49,9 @@ trait JsonHelper extends MustMatchers with OptionValues {
     jsonAnnotationTypes must have size (study.annotationTypes.size.toLong)
 
     jsonAnnotationTypes.foreach { json =>
-      val jsonUniqueId = (json \ "uniqueId").as[String]
-      study.annotationTypes.find { at => at.uniqueId == jsonUniqueId }.fold {
-        fail(s"could not find annotation type in study: $jsonUniqueId")
-      } {
-        compareAnnotationType(json, _)
-      }
+      val jsonAnnotationTypeId = (json \ "id").as[String]
+      val annotType = study.annotationTypes.find { at => at.id.id == jsonAnnotationTypeId }.value
+      compareAnnotationType(json, annotType)
     }
   }
 
@@ -121,40 +118,40 @@ trait JsonHelper extends MustMatchers with OptionValues {
     }
 
     (json \ "annotationTypes").as[List[JsObject]].foreach { jsItem =>
-      val jsonId = (jsItem \ "uniqueId").as[String]
-      val at = ceventType.annotationTypes.find { x => x.uniqueId == jsonId }.value
+      val jsonId = (jsItem \ "id").as[String]
+      val at = ceventType.annotationTypes.find { x => x.id.id == jsonId }.value
       compareAnnotationType(jsItem, at)
     }
   }
 
   def compareAnnotationType(json: JsValue, annotType: AnnotationType) = {
-    (json \ "uniqueId").as[String]       mustBe (annotType.uniqueId)
-    (json \ "name").as[String]           mustBe (annotType.name)
-    (json \ "description").asOpt[String] mustBe (annotType.description)
-    (json \ "valueType").as[String]      mustBe (annotType.valueType.toString)
-    (json \ "maxValueCount").asOpt[Int]  mustBe (annotType.maxValueCount)
-    (json \ "options").as[Seq[String]]   mustBe (annotType.options)
-    (json \ "required").as[Boolean]      mustBe (annotType.required)
+    (json \ "id").as[String]               mustBe (annotType.id.id)
+    (json \ "name").as[String]             mustBe (annotType.name)
+    (json \ "description").asOpt[String]   mustBe (annotType.description)
+    (json \ "valueType").as[String]        mustBe (annotType.valueType.toString)
+    (json \ "maxValueCount").asOpt[Int]    mustBe (annotType.maxValueCount)
+    (json \ "options").as[Seq[String]]     mustBe (annotType.options)
+    (json \ "required").as[Boolean]        mustBe (annotType.required)
   }
 
   def compareObj(json: JsValue, processingType: ProcessingType) = {
     compareEntity(json, processingType)
-    (json \ "studyId").as[String] mustBe (processingType.studyId.id)
-    (json \ "name").as[String] mustBe (processingType.name)
+    (json \ "studyId").as[String]        mustBe (processingType.studyId.id)
+    (json \ "name").as[String]           mustBe (processingType.name)
     (json \ "description").asOpt[String] mustBe (processingType.description)
-    (json \ "enabled").as[Boolean] mustBe (processingType.enabled)
+    (json \ "enabled").as[Boolean]       mustBe (processingType.enabled)
   }
 
   def compareObj(json: JsValue, specimenLinkType: SpecimenLinkType) = {
     compareEntity(json, specimenLinkType)
-    (json \ "processingTypeId").as[String] mustBe (specimenLinkType.processingTypeId.id)
-    (json \ "expectedInputChange").as[BigDecimal] mustBe (specimenLinkType.expectedInputChange)
+    (json \ "processingTypeId").as[String]         mustBe (specimenLinkType.processingTypeId.id)
+    (json \ "expectedInputChange").as[BigDecimal]  mustBe (specimenLinkType.expectedInputChange)
     (json \ "expectedOutputChange").as[BigDecimal] mustBe (specimenLinkType.expectedOutputChange)
-    (json \ "inputCount").as[Int] mustBe (specimenLinkType.inputCount)
-    (json \ "outputCount").as[Int] mustBe (specimenLinkType.outputCount)
-    (json \ "inputGroupId").as[String] mustBe (specimenLinkType.inputGroupId.id)
-    (json \ "outputGroupId").as[String] mustBe (specimenLinkType.outputGroupId.id)
-    (json \ "inputContainerTypeId").asOpt[String] mustBe (specimenLinkType.inputContainerTypeId.map(_.id))
+    (json \ "inputCount").as[Int]                  mustBe (specimenLinkType.inputCount)
+    (json \ "outputCount").as[Int]                 mustBe (specimenLinkType.outputCount)
+    (json \ "inputGroupId").as[String]             mustBe (specimenLinkType.inputGroupId.id)
+    (json \ "outputGroupId").as[String]            mustBe (specimenLinkType.outputGroupId.id)
+    (json \ "inputContainerTypeId").asOpt[String]  mustBe (specimenLinkType.inputContainerTypeId.map(_.id))
     (json \ "outputContainerTypeId").asOpt[String] mustBe (specimenLinkType.outputContainerTypeId.map(_.id))
 
     (json \ "annotationTypeData").as[List[JsObject]] must have size specimenLinkType.annotationTypeData.size.toLong
@@ -166,7 +163,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
   }
 
   def compareAnnotation(json: JsValue, annotation: Annotation): Unit = {
-    (json \ "annotationTypeId").as[String] mustBe (annotation.annotationTypeId)
+    (json \ "annotationTypeId").as[String] mustBe (annotation.annotationTypeId.id)
     (json \ "stringValue").asOpt[String] mustBe (annotation.stringValue)
     (json \ "numberValue").asOpt[String] mustBe (annotation.numberValue)
 
@@ -186,16 +183,9 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
     (json \ "annotations").as[List[JsObject]].foreach { jsAnnotation =>
       val annotationTypeId = (jsAnnotation \ "annotationTypeId").as[String]
-      val participantAnnotationMaybe = participant.annotations.find { a  =>
-        a.annotationTypeId == annotationTypeId
-      }
-
-      participantAnnotationMaybe match {
-        case Some(participantAnnotation) =>
-          compareAnnotation(jsAnnotation, participantAnnotation)
-        case None =>
-          fail(s"annotation with annotationTypeId not found on participant: $annotationTypeId")
-      }
+      val participantAnnotation = participant.annotations
+        .find(a => a.annotationTypeId.id == annotationTypeId).value
+      compareAnnotation(jsAnnotation, participantAnnotation)
     }
   }
 
@@ -264,7 +254,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
   }
 
   def annotationTypeToJson(annotType: AnnotationType): JsObject = {
-    Json.obj("uniqueId"    -> annotType.uniqueId,
+    Json.obj("id"          -> annotType.id,
              "name"        -> annotType.name,
              "description" -> annotType.description,
              "valueType"   -> annotType.valueType,

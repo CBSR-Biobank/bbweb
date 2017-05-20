@@ -127,16 +127,12 @@ define(function (require) {
 
       this.jsonCet = this.factory.collectionEventType({ annotationTypes: jsonAnnotationTypes });
       ceventType = this.CollectionEventType.create(this.jsonCet);
-      collectionEvent = new this.CollectionEvent({},
-                                                 ceventType,
-                                                 annotations);
+      collectionEvent = new this.CollectionEvent({}, ceventType, annotations);
 
 
       ceventType.annotationTypes.forEach(function (annotationType) {
-        var annotation = _.find(collectionEvent.annotations,
-                                { annotationTypeId: annotationType.uniqueId }),
-            jsonAnnotation = _.find(jsonAnnotations,
-                                    { annotationTypeId: annotationType.uniqueId});
+        var annotation = _.find(collectionEvent.annotations, { annotationTypeId: annotationType.id }),
+            jsonAnnotation = _.find(jsonAnnotations, { annotationTypeId: annotationType.id});
         self.validateAnnotationClass(annotationType, annotation);
         annotation.compareToJsonEntity(jsonAnnotation);
         expect(annotation.required).toBe(annotationType.required);
@@ -156,8 +152,7 @@ define(function (require) {
 
       expect(collectionEvent.annotations).toBeArrayOfSize(annotationData.length);
       _.each(ceventType.annotationTypes, function (annotationType) {
-        var annotation = _.find(collectionEvent.annotations,
-                                     { annotationTypeId: annotationType.uniqueId });
+        var annotation = _.find(collectionEvent.annotations, { annotationTypeId: annotationType.id });
         self.validateAnnotationClass(annotationType, annotation);
         expect(annotation.required).toBe(annotationType.required);
       });
@@ -234,7 +229,7 @@ define(function (require) {
             jsonCet =  this.factory.collectionEventType({ annotationTypes: [ jsonAnnotationType ] }),
             jsonCevent = this.factory.collectionEvent({
               collectionEventType: jsonCet,
-              annotations: [ { annotationTypeId: jsonAnnotationType.uniqueId, tmp: 1 } ]
+              annotations: [ { annotationTypeId: jsonAnnotationType.id, tmp: 1 } ]
             });
 
         expect(function () {
@@ -474,7 +469,7 @@ define(function (require) {
           collectionEvent = new this.CollectionEvent({}, ceventType);
 
           // replace id with a bad one
-          annotationTypes[0].uniqueId = badAnnotationTypeId;
+          annotationTypes[0].id = badAnnotationTypeId;
           expect(function () {
             collectionEvent.setAnnotationTypes(annotationTypes);
           }).toThrowError(/annotation types not found/);
@@ -520,8 +515,7 @@ define(function (require) {
       _.each(jsonAnnotationTypes, function (jsonAnnotType) {
         var jsonAnnotation, annotationType, ceventType, jsonCevent, collectionEvent;
 
-        jsonAnnotation = self.factory.annotation({ value: null,
-                                                        annotationTypeId: jsonAnnotType.uniqueId});
+        jsonAnnotation = self.factory.annotation({ value: null, annotationTypeId: jsonAnnotType.id});
 
         annotationType = new self.AnnotationType(jsonAnnotType);
         ceventType = self.CollectionEventType.create(

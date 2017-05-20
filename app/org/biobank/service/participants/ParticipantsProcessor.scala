@@ -3,6 +3,7 @@ package org.biobank.service.participants
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
 import javax.inject.Inject
+import org.biobank.domain.AnnotationTypeId
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
 import org.biobank.domain.Annotation
@@ -158,7 +159,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
                                       study:       Study,
                                       participant: Participant): ServiceValidation[ParticipantEvent] = {
     for {
-      annotation         <- Annotation.create(cmd.annotationTypeId,
+      annotation         <- Annotation.create(AnnotationTypeId(cmd.annotationTypeId),
                                               cmd.stringValue,
                                               cmd.numberValue,
                                               cmd.selectedValues)
@@ -179,14 +180,14 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
     for {
       annotType <- {
         study.annotationTypes
-          .find { x => x.uniqueId == cmd.annotationTypeId }
+          .find { x => x.id.id == cmd.annotationTypeId }
           .toSuccessNel(s"annotation type with ID does not exist: ${cmd.annotationTypeId}")
       }
       notRequired <- {
         if (annotType.required) ServiceError(s"annotation is required").failureNel[Boolean]
         else true.successNel[String]
       }
-      updatedParticipant <- participant.withoutAnnotation(cmd.annotationTypeId)
+      updatedParticipant <- participant.withoutAnnotation(AnnotationTypeId(cmd.annotationTypeId))
     } yield ParticipantEvent(updatedParticipant.id.id).update(
       _.sessionUserId                      := cmd.sessionUserId,
       _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
@@ -279,7 +280,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
     onValidEventAndVersion(event,
                            event.eventType.isAnnotationRemoved,
                            event.getAnnotationRemoved.getVersion) { (participant, eventTime) =>
-      val v = participant.withoutAnnotation(event.getAnnotationRemoved.getAnnotationTypeId)
+      val v = participant.withoutAnnotation(AnnotationTypeId(event.getAnnotationRemoved.getAnnotationTypeId))
       v.foreach( p => participantRepository.put(p.copy(timeModified = Some(eventTime))))
       v.map(_ => true)
     }

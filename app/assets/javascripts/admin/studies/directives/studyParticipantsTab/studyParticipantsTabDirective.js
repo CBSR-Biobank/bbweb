@@ -56,7 +56,7 @@ define(['lodash'], function (_) {
 
     function editAnnotationType(annotationType) {
       $state.go('home.admin.studies.study.participants.annotationTypeView',
-                { annotationTypeId: annotationType.uniqueId });
+                { annotationTypeId: annotationType.id });
     }
 
     function removeAnnotationType(annotationType) {

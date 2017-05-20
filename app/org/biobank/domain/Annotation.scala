@@ -11,20 +11,20 @@ import scalaz.Validation.FlatMap._
  * This is a value type.
  *
  */
-final case class Annotation(annotationTypeId: String,
+final case class Annotation(annotationTypeId: AnnotationTypeId,
                             stringValue:      Option[String],
                             numberValue:      Option[String], // FIXME: should we use java.lang.Number
                             selectedValues:   Set[String]) {
 
   override def equals(that: Any): Boolean = {
     that match {
-      case that: Annotation => this.annotationTypeId.equalsIgnoreCase(that.annotationTypeId)
+      case that: Annotation => this.annotationTypeId == that.annotationTypeId
       case _ => false
     }
   }
 
   override def hashCode:Int = {
-    annotationTypeId.toUpperCase.hashCode
+    annotationTypeId.id.toUpperCase.hashCode
   }
 
 }
@@ -38,7 +38,7 @@ object Annotation {
 
   implicit val annotationFormat: Format[Annotation] = Json.format[Annotation]
 
-  def create(annotationTypeId: String,
+  def create(annotationTypeId: AnnotationTypeId,
              stringValue:      Option[String],
              numberValue:      Option[String],
              selectedValues:   Set[String])
@@ -48,7 +48,7 @@ object Annotation {
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  def validate(annotationTypeId: String,
+  def validate(annotationTypeId: AnnotationTypeId,
                stringValue:      Option[String],
                numberValue:      Option[String],
                selectedValues:   Set[String])
@@ -71,7 +71,7 @@ object Annotation {
       }
     }
 
-    (validateString(annotationTypeId, AnnotationTypeIdRequired) |@|
+    (validateId(annotationTypeId, AnnotationTypeIdRequired) |@|
        validateNonEmptyOption(stringValue, NonEmptyStringOption) |@|
        validateNumberStringOption(numberValue) |@|
        selectedValues.toList.traverseU(validateAnnotationOption) |@|
@@ -104,7 +104,7 @@ object Annotation {
 
     val requiredAnnotTypeIds = annotationTypes
       .filter(annotationType => annotationType.required)
-      .map(annotationType => annotationType.uniqueId)
+      .map(annotationType => annotationType.id)
       .toSet
 
     if (!requiredAnnotTypeIds.isEmpty && annotations.isEmpty) {
@@ -135,7 +135,7 @@ object Annotation {
           }
         }
         allBelong <- {
-          val annotTypeIds = annotationTypes.map(at => at.uniqueId).toSet
+          val annotTypeIds = annotationTypes.map(at => at.id).toSet
           val notBelonging = annotTypeIdsFromAnnotationsAsSet.diff(annotTypeIds)
 
           if (notBelonging.isEmpty) {

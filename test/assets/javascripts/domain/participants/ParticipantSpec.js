@@ -126,7 +126,7 @@ define(function(require) {
           participant;
 
       annotations = study.annotationTypes.map(function (annotationType) {
-        var annotation = _.find(jsonAnnotationData.annotations, { annotationTypeId: annotationType.uniqueId });
+        var annotation = _.find(jsonAnnotationData.annotations, { annotationTypeId: annotationType.id });
         return self.annotationFactory.create(annotation, annotationType);
       });
 
@@ -136,8 +136,7 @@ define(function(require) {
       _.each(participant.annotations, function (annotation) {
         var jsonAnnotation = _.find(jsonAnnotationData.annotations,
                                     { annotationTypeId: annotation.annotationTypeId }),
-            annotationType = _.find(study.annotationTypes,
-                                    { uniqueId: annotation.annotationTypeId });
+            annotationType = _.find(study.annotationTypes, { id: annotation.annotationTypeId });
 
         self.validateAnnotationClass(annotationType, annotation);
         annotation.compareToJsonEntity(jsonAnnotation);
@@ -161,8 +160,7 @@ define(function(require) {
 
       expect(participant.annotations).toBeArrayOfSize(study.annotationTypes.length);
       _.each(participant.annotations, function (annotation) {
-        var annotationType = _.find(study.annotationTypes,
-                                         { uniqueId: annotation.annotationTypeId });
+        var annotationType = _.find(study.annotationTypes, { id: annotation.annotationTypeId });
         self.validateAnnotationClass(annotationType, annotation);
         expect(annotation.required).toBe(annotationType.required);
       });

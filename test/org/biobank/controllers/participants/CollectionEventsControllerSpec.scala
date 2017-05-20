@@ -2,9 +2,9 @@ package org.biobank.controllers.participants
 
 import com.github.nscala_time.time.Imports._
 import org.biobank.controllers._
+import org.biobank.domain._
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
-import org.biobank.domain.{ Annotation, AnnotationType, AnnotationValueType, DomainValidation }
 import org.biobank.infrastructure.JsonUtils._
 import org.joda.time.DateTime
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -102,7 +102,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
   def createCollectionEventAnnotationType() = {
     AnnotationType(
-      uniqueId      = nameGenerator.next[AnnotationType],
+      id            = AnnotationTypeId(nameGenerator.next[AnnotationType]),
       name          = nameGenerator.next[AnnotationType],
       description   = None,
       valueType     = AnnotationValueType.Text,
@@ -605,10 +605,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
           jsonAnnotations.foreach { jsonAnnotation =>
             val jsonAnnotationTypeId = (jsonAnnotation \ "annotationTypeId").as[String]
-            val annotation = annotations.find( x =>
-                x.annotationTypeId == jsonAnnotationTypeId)
-            annotation mustBe defined
-            compareAnnotation(jsonAnnotation, annotation.value)
+            val annotation = annotations.find(x => x.annotationTypeId.id == jsonAnnotationTypeId).value
+            compareAnnotation(jsonAnnotation, annotation)
           }
         }
       }
@@ -705,7 +703,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
       it("fail when using annotations and collection event type has no annotations") {
         createEntities { (study, participant, ceventType) =>
           val annotation = factory.createAnnotation
-            .copy(annotationTypeId = nameGenerator.next[Annotation])
+            .copy(annotationTypeId = AnnotationTypeId(nameGenerator.next[Annotation]))
 
           val cevent = factory.createCollectionEvent
           val json = makeRequest(method         = POST,
@@ -729,7 +727,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           collectionEventTypeRepository.put(ceventType.copy(annotationTypes = Set(annotType)))
 
           val annotation = factory.createAnnotation.copy(
-              annotationTypeId = nameGenerator.next[Annotation])
+              annotationTypeId = AnnotationTypeId(nameGenerator.next[Annotation]))
 
           val cevent = factory.createCollectionEvent
           val json = makeRequest(POST,
@@ -753,7 +751,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           // update the collection event type with annotation type data
           collectionEventTypeRepository.put(ceventType.copy(annotationTypes = Set(annotType)))
 
-          val annotation = factory.createAnnotation
+          val annotation = factory.createAnnotationWithValues(annotType)
           annotation.stringValue mustBe defined
 
           val cevent = factory.createCollectionEvent

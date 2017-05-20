@@ -16,7 +16,7 @@ trait AnnotationTypeSetSharedSpec[T <: ConcurrencySafeEntity[_]] { this: FunSpec
 
   protected def addAnnotationType(entity: T, annotationType: AnnotationType): DomainValidation[T]
 
-  protected def removeAnnotationType(entity: T, annotationTypeId: String): DomainValidation[T]
+  protected def removeAnnotationType(entity: T, annotationTypeId: AnnotationTypeId): DomainValidation[T]
 
   def annotationTypeSetSharedBehaviour() = {
 
@@ -38,7 +38,7 @@ trait AnnotationTypeSetSharedSpec[T <: ConcurrencySafeEntity[_]] { this: FunSpec
       addAnnotationType(entity, annotationType) mustSucceed { entity =>
         getAnnotationTypeSet(entity) must contain (annotationType)
 
-        val at2 = annotationType.copy(uniqueId = annotationType.uniqueId)
+        val at2 = annotationType.copy(id = annotationType.id)
         addAnnotationType(entity, at2) mustSucceed { e =>
           getAnnotationTypeSet(e) must contain (at2)
           ()
@@ -52,7 +52,7 @@ trait AnnotationTypeSetSharedSpec[T <: ConcurrencySafeEntity[_]] { this: FunSpec
 
       addAnnotationType(entity, annotationType) mustSucceed { entity =>
         getAnnotationTypeSet(entity) must contain (annotationType)
-        removeAnnotationType(entity, annotationType.uniqueId) mustSucceed { e =>
+        removeAnnotationType(entity, annotationType.id) mustSucceed { e =>
           getAnnotationTypeSet(e) must not contain (annotationType)
           ()
         }

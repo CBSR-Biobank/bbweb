@@ -536,7 +536,7 @@ define([
      * multiple selection.
      */
     function annotationType(options) {
-      var defaults = { uniqueId:      domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE()),
+      var defaults = { id:            domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE()),
                        name:          stringNext(),
                        description:   null,
                        valueType:     AnnotationValueType.TEXT,
@@ -615,8 +615,8 @@ define([
       options = options || {};
       annotationType = annotationType || {};
 
-      if (annotationType.uniqueId) {
-        annotation.annotationTypeId = annotationType.uniqueId;
+      if (annotationType.id) {
+        annotation.annotationTypeId = annotationType.id;
       }
 
       if (!_.isUndefined(options.value) && annotationType.valueType) {

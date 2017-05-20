@@ -94,7 +94,7 @@ define([
 
         expect(this.$state.go).toHaveBeenCalledWith(
           'home.admin.studies.study.participants.annotationTypeView',
-          { annotationTypeId: this.annotationType.uniqueId });
+          { annotationTypeId: this.annotationType.id });
       });
 
       describe('when removing an annotation type', function() {

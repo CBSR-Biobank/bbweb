@@ -39,7 +39,7 @@ define(['moment', 'lodash'], function(moment, _) {
       DomainEntity.call(this, schema, obj);
 
       if (annotationType) {
-        this.annotationTypeId = annotationType.uniqueId;
+        this.annotationTypeId = annotationType.id;
         this.annotationType = annotationType;
 
         if (!_.includes(_.values(AnnotationValueType), annotationType.valueType)) {
@@ -93,7 +93,7 @@ define(['moment', 'lodash'], function(moment, _) {
       if (_.isUndefined(this.annotationType)) {
         throw new DomainError('annotation type not assigned');
       }
-      return this.annotationType.uniqueId;
+      return this.annotationType.id;
     };
 
     /**

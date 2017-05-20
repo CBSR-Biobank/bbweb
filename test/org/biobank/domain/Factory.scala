@@ -165,31 +165,10 @@ class Factory {
     ceventType
   }
 
-  def createAnnotationType(uniqueId:      String,
-                           valueType:     AnnotationValueType,
-                           maxValueCount: Int,
-                           options:       Seq[String]) = {
-    val (vtMaxValueCount, vtOptions) = valueType match {
-        case AnnotationValueType.Text     => (None, Seq.empty)
-        case AnnotationValueType.Number   => (None, Seq.empty)
-        case AnnotationValueType.DateTime => (None, Seq.empty)
-        case AnnotationValueType.Select   => (Some(maxValueCount), options)
-      }
-
-    (defaultDisabledStudy.id,
-     id,
-     nameGenerator.next[AnnotationType],
-     Some(nameGenerator.next[AnnotationType]),
-     valueType,
-     vtMaxValueCount,
-     vtOptions,
-     false)
-  }
-
   def createAnnotationType(valueType:     AnnotationValueType,
                            maxValueCount: Option[Int],
                            options:       Seq[String]): AnnotationType = {
-    val annotationType = AnnotationType(nameGenerator.next[AnnotationType],
+    val annotationType = AnnotationType(AnnotationTypeId(nameGenerator.next[AnnotationType]),
                                         nameGenerator.next[AnnotationType],
                                         None,
                                         valueType,
@@ -282,18 +261,22 @@ class Factory {
     }
   }
 
-  def createAnnotation(annotationType: AnnotationType): Annotation = {
-    val (stringValue, numberValue, selectedValues) = createAnnotationValues(annotationType)
-    val annot = Annotation(annotationTypeId = defaultAnnotationType.uniqueId,
-                           stringValue            = stringValue,
-                           numberValue            = numberValue,
-                           selectedValues         = selectedValues)
+  def createAnnotation(): Annotation = {
+    val annot = Annotation(annotationTypeId = defaultAnnotationType.id,
+                           stringValue      = None,
+                           numberValue      = None,
+                           selectedValues   = Set.empty[String])
     domainObjects = domainObjects + (classOf[Annotation] -> annot)
     annot
   }
 
-  def createAnnotation(): Annotation = {
-    createAnnotation(defaultAnnotationType)
+  def createAnnotationWithValues(annotationType: AnnotationType): Annotation = {
+    val (stringValue, numberValue, selectedValues) = createAnnotationValues(annotationType)
+    val annot = createAnnotation.copy(stringValue      = stringValue,
+                                      numberValue      = numberValue,
+                                      selectedValues   = selectedValues)
+    domainObjects = domainObjects + (classOf[Annotation] -> annot)
+    annot
   }
 
   def createCollectionEvent(): CollectionEvent = {

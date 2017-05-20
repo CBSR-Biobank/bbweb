@@ -17,7 +17,7 @@ class AnnotationTypeSpec extends DomainSpec {
       AnnotationValueType.values.foreach { vt =>
         val tuple = AnnotationValueTypeToTuple(vt)
         createAnnotationType(tuple).mustSucceed { annotType =>
-          annotType.uniqueId must not be empty
+          annotType.id.id must not be empty
           annotType must have (
             'name          (tuple._1),
             'description   (tuple._2),

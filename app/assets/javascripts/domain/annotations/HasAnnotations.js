@@ -50,7 +50,7 @@ define(['lodash'], function (_) {
           _.extend({}, self, {
             version: self.version + 1,
             annotations: _.filter(self.annotations, function(at) {
-              return at.uniqueId !== annotation.uniqueId;
+              return at.id !== annotation.id;
             })
           }));
       });
@@ -64,15 +64,14 @@ define(['lodash'], function (_) {
 
       // make sure the annotations ids match up with the corresponding annotation types
       differentIds = _.difference(_.map(self.annotations, 'annotationTypeId'),
-                                  _.map(annotationTypes, 'uniqueId'));
+                                  _.map(annotationTypes, 'id'));
 
       if (differentIds.length > 0) {
         throw new DomainError('annotation types not found: ' + differentIds);
       }
 
       self.annotations = _.map(annotationTypes, function (annotationType) {
-        var jsonAnnotationMaybe = _.find(self.annotations,
-                                     { annotationTypeId: annotationType.uniqueId });
+        var jsonAnnotationMaybe = _.find(self.annotations, { annotationTypeId: annotationType.id });
 
         if (jsonAnnotationMaybe instanceof Annotation) {
           // annotation was already converted to Annotation or sub class

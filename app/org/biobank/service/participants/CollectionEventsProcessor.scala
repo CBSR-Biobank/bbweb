@@ -3,6 +3,7 @@ package org.biobank.service.participants
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
 import javax.inject.Inject
+import org.biobank.domain.AnnotationTypeId
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
 import org.biobank.domain.Annotation
@@ -203,7 +204,7 @@ class CollectionEventsProcessor @Inject() (
                                          cevent:              CollectionEvent)
       : ServiceValidation[CollectionEventEvent] = {
     for {
-      annotation      <- Annotation.create(cmd.annotationTypeId,
+      annotation      <- Annotation.create(AnnotationTypeId(cmd.annotationTypeId),
                                            cmd.stringValue,
                                            cmd.numberValue,
                                            cmd.selectedValues)
@@ -228,14 +229,14 @@ class CollectionEventsProcessor @Inject() (
     for {
       annotType <- {
         collectionEventType.annotationTypes
-          .find { x => x.uniqueId == cmd.annotationTypeId }
+          .find { x => x.id.id == cmd.annotationTypeId }
           .toSuccessNel(s"annotation type with ID does not exist: ${cmd.annotationTypeId}")
       }
       notRequired <- {
         if (annotType.required) EntityRequired(s"annotation is required").failureNel[Boolean]
         else true.successNel[String]
       }
-      updatedCevent <- cevent.withoutAnnotation(cmd.annotationTypeId)
+      updatedCevent <- cevent.withoutAnnotation(AnnotationTypeId(cmd.annotationTypeId))
     } yield CollectionEventEvent(updatedCevent.id.id).update(
       _.participantId                      := participant.id.id,
       _.collectionEventTypeId              := updatedCevent.collectionEventTypeId.id,
@@ -381,7 +382,7 @@ class CollectionEventsProcessor @Inject() (
     onValidEventAndVersion(event,
                            event.eventType.isAnnotationRemoved,
                            event.getAnnotationRemoved.getVersion) { (cevent, eventTime) =>
-      val v = cevent.withoutAnnotation(event.getAnnotationRemoved.getAnnotationTypeId)
+      val v = cevent.withoutAnnotation(AnnotationTypeId(event.getAnnotationRemoved.getAnnotationTypeId))
 
       v.foreach { c =>
         collectionEventRepository.put(c.copy(timeModified = Some(eventTime)))

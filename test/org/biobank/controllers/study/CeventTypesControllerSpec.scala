@@ -624,7 +624,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
             repoCet.specimenDescriptions must have size cet.specimenDescriptions.size.toLong
             repoCet.annotationTypes must have size 1
 
-            repoCet.annotationTypes.head.uniqueId must not be empty
+            repoCet.annotationTypes.head.id.id must not be empty
             repoCet.annotationTypes.head must have (
               'name          (annotType.name),
               'description   (annotType.description),
@@ -678,7 +678,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
           val json = makeRequest(
               DELETE,
-              s"/studies/cetypes/annottype/${study.id}/${cet.id}/${cet.version}/${annotationType.uniqueId}")
+              s"/studies/cetypes/annottype/${study.id}/${cet.id}/${cet.version}/${annotationType.id}")
 
           (json \ "status").as[String] must include ("success")
 
@@ -713,7 +713,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
           val json = makeRequest(
               DELETE,
-              s"/studies/cetypes/annottype/${study.id}/${cet.id}/$badVersion/${annotationType.uniqueId}",
+              s"/studies/cetypes/annottype/${study.id}/${cet.id}/$badVersion/${annotationType.id}",
               BAD_REQUEST)
 
           (json \ "status").as[String] must include ("error")
@@ -782,7 +782,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
           val json = makeRequest(
               DELETE,
-              s"/studies/cetypes/annottype/${study.id}/${cet.id}/${cet.version}/${annotationType.uniqueId}",
+              s"/studies/cetypes/annottype/${study.id}/${cet.id}/${cet.version}/${annotationType.id}",
               BAD_REQUEST)
 
           (json \ "status").as[String] must include ("error")
@@ -876,7 +876,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
   describe("DELETE /studies/cetypes/spcdesc/:id/:ver/:uniqueId") {
 
-      it("111 remove an specimen spec") {
+      it("remove an specimen spec") {
         createEntities { (study, cet) =>
           val specimenDescription = factory.createCollectionSpecimenDescription
           collectionEventTypeRepository.put(cet.copy(specimenDescriptions = Set(specimenDescription)))

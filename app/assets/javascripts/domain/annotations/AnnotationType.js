@@ -8,7 +8,7 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
   AnnotationTypeFactory.$inject = [
     '$log',
     'validationService',
-    'ConcurrencySafeEntity',
+    'DomainEntity',
     'DomainError',
     'AnnotationValueType',
     'AnnotationMaxValueCount',
@@ -20,7 +20,7 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
    */
   function AnnotationTypeFactory($log,
                                  validationService,
-                                 ConcurrencySafeEntity,
+                                 DomainEntity,
                                  DomainError,
                                  AnnotationValueType,
                                  AnnotationMaxValueCount,
@@ -28,7 +28,7 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
 
     function AnnotationType(obj) {
       // FIXME: jsdoc for this classes members is needed
-      this.uniqueId      = '';
+      this.id            = '';
       this.name          = '';
       this.description   = null;
       this.valueType     = '';
@@ -36,26 +36,26 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
       this.options       = [];
       this.required      = false;
 
-      ConcurrencySafeEntity.call(this, AnnotationType.SCHEMA, obj);
+      DomainEntity.call(this, AnnotationType.SCHEMA, obj);
     }
 
     AnnotationType.SCHEMA = {
       'id': 'AnnotationType',
       'type': 'object',
       'properties': {
-        'uniqueId':        { 'type': 'string'  },
-        'name':            { 'type': 'string'  },
-        'description':     { 'type': [ 'string', 'null' ] },
-        'valueType':       { 'type': 'string'  },
-        'maxValueCount':   { 'type': [ 'number', 'null' ] },
-        'options':         { 'type': 'array'   },
-        'required':        { 'type': 'boolean' }
+        'id':            { 'type': 'string'  },
+        'name':          { 'type': 'string'  },
+        'description':   { 'type': [ 'string', 'null' ] },
+        'valueType':     { 'type': 'string'  },
+        'maxValueCount': { 'type': [ 'number', 'null' ] },
+        'options':       { 'type': 'array'   },
+        'required':      { 'type': 'boolean' }
       },
-      'required': [ 'uniqueId', 'name', 'valueType', 'required' ]
+      'required': [ 'id', 'name', 'valueType', 'required' ]
     };
 
     AnnotationType.isValid = function (obj) {
-      return ConcurrencySafeEntity.isValid(AnnotationType.SCHEMA, null, obj);
+      return DomainEntity.isValid(AnnotationType.SCHEMA, null, obj);
     };
 
     AnnotationType.create = function (obj) {

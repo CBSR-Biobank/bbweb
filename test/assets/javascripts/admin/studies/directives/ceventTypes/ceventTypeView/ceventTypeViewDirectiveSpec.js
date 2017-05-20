@@ -98,7 +98,7 @@ define(function (require) {
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith(
         'home.admin.studies.study.collection.ceventType.annotationTypeView',
-        { annotationTypeId: annotType.uniqueId });
+        { annotationTypeId: annotType.id });
     });
 
     describe('updates to name', function () {
@@ -152,18 +152,19 @@ define(function (require) {
 
     });
 
-    it('editing a specimen spec changes to correct state', function() {
-      var specimenDescription = new this.CollectionSpecimenDescription(this.factory.collectionSpecimenDescription());
+    it('editing a specimen description changes to correct state', function() {
+      var specimenDescription =
+          new this.CollectionSpecimenDescription(this.factory.collectionSpecimenDescription());
 
       createController.call(this);
       this.controller.editSpecimenDescription(specimenDescription);
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith(
         'home.admin.studies.study.collection.ceventType.specimenDescriptionView',
-        { specimenDescriptionId: specimenDescription.uniqueId });
+        { specimenDescriptionId: specimenDescription.id });
     });
 
-    describe('removing a specimen spec', function() {
+    describe('removing a specimen description', function() {
 
       it('can be removed when in valid state', function() {
         var modalService = this.$injector.get('modalService'),
@@ -228,12 +229,14 @@ define(function (require) {
       it('throws an error if modifications are not allowed', function() {
         var annotationType = new this.AnnotationType(this.factory.annotationType());
 
+        spyOn(this.modalService, 'modalOk').and.returnValue(null);
         spyOn(this.CollectionEventType.prototype, 'removeAnnotationType').and.callThrough();
 
         createController.call(this);
-        this.controller.annotationTypeIdsInUse = [ annotationType.uniqueId ];
+        this.controller.annotationTypeIdsInUse = [ annotationType.id ];
         this.controller.removeAnnotationType(annotationType);
 
+        expect(this.modalService.modalOk).toHaveBeenCalled();
         expect(this.CollectionEventType.prototype.removeAnnotationType).not.toHaveBeenCalled();
       });
 

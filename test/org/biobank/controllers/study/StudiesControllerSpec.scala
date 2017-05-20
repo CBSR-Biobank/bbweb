@@ -543,7 +543,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
           repoStudy.annotationTypes must have size 1
 
-          repoStudy.annotationTypes.head.uniqueId must not be empty
+          repoStudy.annotationTypes.head.id.id must not be empty
           repoStudy.annotationTypes.head must have (
             'name          (annotType.name),
             'description   (annotType.description),
@@ -585,7 +585,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.put(study)
 
         val json = makeRequest(
-            DELETE, uri(study, "pannottype") + s"/${study.version}/${annotationType.uniqueId}")
+            DELETE, uri(study, "pannottype") + s"/${study.version}/${annotationType.id}")
 
         (json \ "status").as[String] must include ("success")
 
@@ -614,7 +614,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.put(study)
 
         val json = makeRequest(DELETE,
-                               uri(study, "pannottype") + s"/$badVersion/${annotationType.uniqueId}",
+                               uri(study, "pannottype") + s"/$badVersion/${annotationType.id}",
                                BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
@@ -656,7 +656,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
           studyRepository.put(study)
 
           val json = makeRequest(DELETE,
-                                 uri(study, "pannottype") + s"/${study.version}/${annotationType.uniqueId}",
+                                 uri(study, "pannottype") + s"/${study.version}/${annotationType.id}",
                                  BAD_REQUEST)
 
           (json \ "status").as[String] must include ("error")

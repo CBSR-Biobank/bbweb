@@ -1,19 +1,10 @@
 package org.biobank.domain.study
 
 import org.biobank.ValidationKey
-import org.biobank.domain.{
-  AnnotationType,
-  ConcurrencySafeEntity,
-  DomainError,
-  DomainValidation,
-  HasName,
-  HasOptionalDescription,
-  HasAnnotationTypes
-}
+import org.biobank.domain._
 import org.biobank.infrastructure.JsonUtils._
-
-import play.api.libs.json._
 import org.joda.time.DateTime
+import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -96,8 +87,7 @@ final case class CollectionEventType(studyId:              StudyId,
     }
   }
 
-  def removeAnnotationType(annotationTypeId: String)
-      : DomainValidation[CollectionEventType] = {
+  def removeAnnotationType(annotationTypeId: AnnotationTypeId): DomainValidation[CollectionEventType] = {
     checkRemoveAnnotationType(annotationTypeId).map { annotationType =>
       val newAnnotationTypes = annotationTypes - annotationType
       copy(annotationTypes = newAnnotationTypes,

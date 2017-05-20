@@ -86,14 +86,17 @@ class StudiesController @Inject() (val action:         BbwebAction,
   def addAnnotationType(id: StudyId): Action[JsValue] =
     commandAction[StudyAddParticipantAnnotationTypeCmd](Json.obj("id" -> id))(processCommand)
 
-  def updateAnnotationType(id: StudyId, uniqueId: String): Action[JsValue] = {
-    val json = Json.obj("id" -> id, "uniqueId" -> uniqueId)
+  def updateAnnotationType(id: StudyId, annotationTypeId: String): Action[JsValue] = {
+    val json = Json.obj("id" -> id, "annotationTypeId" -> annotationTypeId)
     commandAction[StudyUpdateParticipantAnnotationTypeCmd](json)(processCommand)
   }
 
-  def removeAnnotationType(studyId: StudyId, ver: Long, uniqueId: String): Action[Unit] =
+  def removeAnnotationType(studyId: StudyId, ver: Long, annotationTypeId: String): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      val cmd = UpdateStudyRemoveAnnotationTypeCmd(Some(request.authInfo.userId.id), studyId.id, ver, uniqueId)
+      val cmd = UpdateStudyRemoveAnnotationTypeCmd(Some(request.authInfo.userId.id),
+                                                   studyId.id,
+                                                   ver,
+                                                   annotationTypeId)
       processCommand(cmd)
     }
 

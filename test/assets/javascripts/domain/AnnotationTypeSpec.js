@@ -27,7 +27,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
             options: []
           });
 
-       var fields = [ 'uniqueId', 'name', 'valueType', 'required' ];
+       var fields = [ 'id', 'name', 'valueType', 'required' ];
 
       _.each(fields, function (field) {
         var jsonMissingField = _.omit(annotationTypeJson, field);
@@ -40,7 +40,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
     it('has default values', function() {
       var annotationType = new this.AnnotationType();
 
-      expect(annotationType.uniqueId).toBeEmptyString();
+      expect(annotationType.id).toBeEmptyString();
       expect(annotationType.name).toBeEmptyString();
       expect(annotationType.description).toBeNull();
       expect(annotationType.valueType).toBeEmptyString();
@@ -66,7 +66,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
             options: []
           });
 
-       var fields = [ 'uniqueId', 'name', 'valueType', 'required' ];
+       var fields = [ 'id', 'name', 'valueType', 'required' ];
 
       _.each(fields, function (field) {
         var jsonMissingField = _.omit(annotationTypeJson, field);

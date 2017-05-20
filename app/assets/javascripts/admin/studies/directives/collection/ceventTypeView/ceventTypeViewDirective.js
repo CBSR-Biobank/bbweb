@@ -119,7 +119,7 @@ define(['lodash'], function (_) {
 
     function editSpecimenDescription(specimenDescription) {
       $state.go('home.admin.studies.study.collection.ceventType.specimenDescriptionView',
-                { specimenDescriptionId: specimenDescription.uniqueId });
+                { specimenDescriptionId: specimenDescription.id });
     }
 
     function removeSpecimenDescription(specimenDescription) {
@@ -143,11 +143,11 @@ define(['lodash'], function (_) {
 
     function editAnnotationType(annotType) {
       $state.go('home.admin.studies.study.collection.ceventType.annotationTypeView',
-                { annotationTypeId: annotType.uniqueId });
+                { annotationTypeId: annotType.id });
     }
 
     function removeAnnotationType(annotationType) {
-      if (_.includes(vm.annotationTypeIdsInUse, annotationType.uniqueId)) {
+      if (_.includes(vm.annotationTypeIdsInUse, annotationType.id)) {
         vm.removeInUseModal(annotationType, vm.annotationTypeName);
       } else {
         if (!vm.study.isDisabled()) {

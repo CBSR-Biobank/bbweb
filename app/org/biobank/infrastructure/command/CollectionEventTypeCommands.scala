@@ -64,24 +64,24 @@ object CollectionEventTypeCommands {
                                                            required:        Boolean)
       extends CollectionEventTypeModifyCommand
 
-  final case class CollectionEventTypeUpdateAnnotationTypeCmd(userId:          Option[String],
-                                                              studyId:         String,
-                                                              id:              String,
-                                                              expectedVersion: Long,
-                                                              uniqueId:        String,
-                                                              name:            String,
-                                                              description:     Option[String],
-                                                              valueType:       AnnotationValueType,
-                                                              maxValueCount:   Option[Int],
-                                                              options:         Seq[String],
-                                                              required:        Boolean)
+  final case class CollectionEventTypeUpdateAnnotationTypeCmd(userId:           Option[String],
+                                                              studyId:          String,
+                                                              id:               String,
+                                                              expectedVersion:  Long,
+                                                              annotationTypeId: String,
+                                                              name:             String,
+                                                              description:      Option[String],
+                                                              valueType:        AnnotationValueType,
+                                                              maxValueCount:    Option[Int],
+                                                              options:          Seq[String],
+                                                              required:         Boolean)
       extends CollectionEventTypeModifyCommand
 
-  final case class RemoveCollectionEventTypeAnnotationTypeCmd(userId:          Option[String],
-                                                              studyId:         String,
-                                                              id:              String,
-                                                              expectedVersion: Long,
-                                                              uniqueId:        String)
+  final case class RemoveCollectionEventTypeAnnotationTypeCmd(userId:           Option[String],
+                                                              studyId:          String,
+                                                              id:               String,
+                                                              expectedVersion:  Long,
+                                                              annotationTypeId: String)
       extends CollectionEventTypeModifyCommand
 
   final case class AddCollectionSpecimenDescriptionCmd(userId:                      Option[String],

@@ -3,18 +3,18 @@ syntax = "proto2";
 package org.biobank.infrastructure.event;
 
 message AnnotationType {
-   optional string uniqueId      = 2;
-   optional string name          = 3;
-   optional string description   = 4;
-   optional string valueType     = 5; // a scala enum is used here
-   optional int32  maxValueCount = 6;
-   repeated string options       = 7;
-   optional bool   required      = 8;
+   optional string id            = 1;
+   optional string name          = 2;
+   optional string description   = 3;
+   optional string valueType     = 4; // a scala enum is used here
+   optional int32  maxValueCount = 5;
+   repeated string options       = 6;
+   optional bool   required      = 7;
 }
 
 message AnnotationTypeRemoved {
-   optional int64  version  = 1;
-   optional string uniqueId = 2;
+   optional int64  version = 1;
+   optional string id      = 2;
 }
 
 message Annotation {

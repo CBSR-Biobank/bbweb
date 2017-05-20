@@ -74,10 +74,8 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
 
         jsonAnnotations.foreach { jsonAnnotation =>
           val jsonAnnotationTypeId = (jsonAnnotation \ "annotationTypeId").as[String]
-          val foundAnnotation = addedAnnotations.find( x =>
-              x.annotationTypeId == jsonAnnotationTypeId)
-          foundAnnotation mustBe defined
-          compareAnnotation(jsonAnnotation, foundAnnotation.value)
+          val foundAnnotation = addedAnnotations.find(x => x.annotationTypeId.id == jsonAnnotationTypeId).value
+          compareAnnotation(jsonAnnotation, foundAnnotation)
         }
 
         entityFromRepository(entity.id.toString).map(entity = _)
@@ -102,7 +100,8 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
 
     it("fail when adding annotation and annotation has invalid annotation type id") {
       val annotationType = factory.createAnnotationType
-      val annotation = factory.createAnnotation.copy(annotationTypeId = nameGenerator.next[Annotation])
+      val annotation = factory.createAnnotation
+        .copy(annotationTypeId = AnnotationTypeId(nameGenerator.next[Annotation]))
 
       val entity = createEntity(Set(annotationType), Set(annotation))
 

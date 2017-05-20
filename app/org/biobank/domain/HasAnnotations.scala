@@ -8,10 +8,10 @@ trait HasAnnotations[T <: ConcurrencySafeEntity[_]] {
 
   def withAnnotation(annotation: Annotation): DomainValidation[T]
 
-  def withoutAnnotation(annotationTypeId: String): DomainValidation[T]
+  def withoutAnnotation(annotationTypeId: AnnotationTypeId): DomainValidation[T]
 
   /** removes an annotation type. */
-  protected def checkRemoveAnnotation(annotationTypeId: String)
+  protected def checkRemoveAnnotation(annotationTypeId: AnnotationTypeId)
       : DomainValidation[Annotation] = {
     annotations
       .find { x => x.annotationTypeId == annotationTypeId }
