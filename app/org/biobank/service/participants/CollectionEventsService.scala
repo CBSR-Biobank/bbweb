@@ -6,6 +6,7 @@ import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
+import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.CollectionEventCommands._
 import org.biobank.infrastructure.event.CollectionEventEvents._
@@ -30,6 +31,8 @@ trait CollectionEventsService extends BbwebService {
   def processCommand(cmd: CollectionEventCommand): Future[ServiceValidation[CollectionEvent]]
 
   def processRemoveCommand(cmd: CollectionEventCommand): Future[ServiceValidation[Boolean]]
+
+  def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
 
 }
 

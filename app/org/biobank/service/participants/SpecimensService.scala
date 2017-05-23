@@ -7,6 +7,7 @@ import javax.inject.{Inject, Named}
 import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
+import org.biobank.domain.user.UserId
 import org.biobank.dto.{CentreLocationInfo, SpecimenDto}
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.SpecimenCommands._
@@ -34,6 +35,9 @@ trait SpecimensService extends BbwebService {
 
 
   def getSpecimenDto(id: SpecimenId): ServiceValidation[SpecimenDto]
+
+  def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
+
 }
 
 class SpecimensServiceImpl @Inject() (

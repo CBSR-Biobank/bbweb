@@ -3,6 +3,7 @@ package org.biobank.service.studies
 import akka.actor.ActorRef
 import akka.pattern._
 import javax.inject.{ Inject, Named }
+import org.biobank.Global
 import org.biobank.fixture._
 import org.biobank.domain.study.{StudyRepository, CollectionEventTypeRepository}
 import org.biobank.service.ServiceValidation
@@ -44,11 +45,11 @@ class CollectionEventTypesProcessorSpec extends ProcessorTestFixture {
     it("allow recovery from journal") {
       val collectionEventType = factory.createCollectionEventType
       val study = factory.defaultDisabledStudy
-      val cmd = AddCollectionEventTypeCmd(userId      = None,
-                                          studyId     = study.id.id,
-                                          name        = collectionEventType.name,
-                                          description = collectionEventType.description,
-                                          recurring   = true)
+      val cmd = AddCollectionEventTypeCmd(sessionUserId = Global.DefaultUserId.id,
+                                          studyId       = study.id.id,
+                                          name          = collectionEventType.name,
+                                          description   = collectionEventType.description,
+                                          recurring     = true)
       val v = ask(collectionEventTypeProcessor, cmd)
         .mapTo[ServiceValidation[CollectionEventTypeEvent]]
         .futureValue

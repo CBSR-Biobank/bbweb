@@ -10,7 +10,7 @@ trait HasAnnotationTypes extends AnnotationTypeValidations {
   protected def checkAddAnnotationType(annotationType: AnnotationType)
       : DomainValidation[Boolean] = {
     (validate(annotationType) |@| nameNotUsed(annotationType)) {
-      case (_, _) => true
+      case _ => true
     }
   }
 

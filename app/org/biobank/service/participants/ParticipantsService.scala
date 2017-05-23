@@ -6,6 +6,7 @@ import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named, Singleton}
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
+import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.infrastructure.event.ParticipantEvents._
 import org.biobank.service.{BbwebService, BbwebServiceImpl, ServiceValidation}
@@ -23,6 +24,8 @@ trait ParticipantsService extends BbwebService {
   def getByUniqueId(studyId: StudyId, uniqueId: String): ServiceValidation[Participant]
 
   def processCommand(cmd: ParticipantCommand): Future[ServiceValidation[Participant]]
+
+  def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
 
 }
 

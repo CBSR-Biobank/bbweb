@@ -8,7 +8,6 @@ import org.biobank.domain.user._
 
 trait UserServiceFixtures {
 
-  import org.biobank.TestUtils._
   import org.biobank.domain.access.AccessItem._
 
   class UsersOfAllStates(val registeredUser: RegisteredUser,
@@ -53,28 +52,6 @@ trait UserServiceFixtures {
     accessItemRepository.getRole(RoleId.WebsiteAdministrator).foreach { r =>
       accessItemRepository.put(r.copy(userIds = Set(Global.DefaultUserId)))
     }
-  }
-
-  protected def addUserToUserAdminRole(userId: UserId): Unit = {
-    accessItemRepository.getRole(RoleId.UserAdministrator) mustSucceed { role =>
-      accessItemRepository.put(role.copy(userIds = role.userIds + userId))
-    }
-  }
-
-  protected def adminUserFixture() = {
-    val f = new AdminUserFixture(factory.createActiveUser)
-    addToRepository(f.adminUser)
-    addUserToUserAdminRole(f.adminUser.id)
-    f
-  }
-
-  protected def usersFixture() = {
-    val f = new UsersFixture(factory.createActiveUser,
-                             factory.createActiveUser,
-                             factory.createActiveUser)
-    Set(f.adminUser, f.nonAdminUser, f.user).foreach(addToRepository)
-    addUserToUserAdminRole(f.adminUser.id)
-    f
   }
 
 }

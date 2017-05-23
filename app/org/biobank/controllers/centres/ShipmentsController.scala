@@ -84,9 +84,8 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
     }
 
   def snapshot: Action[Unit] =
-    action.async(parse.empty) { implicit request =>
-      shipmentsService.snapshot
-      Future.successful(Results.Ok(Json.obj("status" ->"success", "data" -> true)))
+    action(parse.empty) { implicit request =>
+      validationReply(shipmentsService.snapshotRequest(request.authInfo.userId).map { _ => true })
     }
 
   def add(): Action[JsValue] = commandAction[AddShipmentCmd](JsNull)(processCommand)

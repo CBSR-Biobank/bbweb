@@ -7,6 +7,8 @@ import org.biobank.infrastructure.EnumUtils._
 object PermissionId extends Enumeration {
   type PermissionId = Value
 
+  val Snapshot: Value             = Value("Snapshot")
+
   val UserUpdate: Value           = Value("UserUpdate")
   val UserChangeState: Value      = Value("UserChangeState")
   val UserRead: Value             = Value("UserRead")

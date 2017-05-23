@@ -9,7 +9,7 @@ import org.biobank.service._
 import org.biobank.service.studies.StudiesService
 import play.api.Logger
 import play.api.libs.json._
-import play.api.mvc.{Action, Result, Results}
+import play.api.mvc.{Action, Result}
 import play.api.{ Environment, Logger }
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
@@ -20,9 +20,9 @@ import scalaz.Validation.FlatMap._
  */
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
-class StudiesController @Inject() (val action:         BbwebAction,
-                                   val env:            Environment,
-                                   val studiesService: StudiesService)
+class StudiesController @Inject() (val action:  BbwebAction,
+                                   val env:     Environment,
+                                   val service: StudiesService)
                                (implicit val ec: ExecutionContext)
     extends CommandController {
 
@@ -32,7 +32,7 @@ class StudiesController @Inject() (val action:         BbwebAction,
 
   def studyCounts(): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(Future(studiesService.getCountsByStatus(request.authInfo.userId)))
+      validationReply(Future(service.getCountsByStatus(request.authInfo.userId)))
     }
 
   def list: Action[Unit] =
@@ -41,7 +41,7 @@ class StudiesController @Inject() (val action:         BbwebAction,
         Future {
           for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            studies    <- studiesService.getStudies(request.authInfo.userId, pagedQuery.filter, pagedQuery.sort)
+            studies    <- service.getStudies(request.authInfo.userId, pagedQuery.filter, pagedQuery.sort)
             validPage  <- pagedQuery.validPage(studies.size)
             results    <- PagedResults.create(studies, pagedQuery.page, pagedQuery.limit)
           } yield results
@@ -55,7 +55,7 @@ class StudiesController @Inject() (val action:         BbwebAction,
         Future {
           for {
             filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
-            studyNames    <- studiesService.getStudyNames(request.authInfo.userId,
+            studyNames    <- service.getStudyNames(request.authInfo.userId,
                                                           filterAndSort.filter,
                                                           filterAndSort.sort)
           } yield studyNames
@@ -65,18 +65,17 @@ class StudiesController @Inject() (val action:         BbwebAction,
 
   def get(id: StudyId): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(studiesService.getStudy(request.authInfo.userId, id))
+      validationReply(service.getStudy(request.authInfo.userId, id))
     }
 
   def centresForStudy(studyId: StudyId): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(Future(studiesService.getCentresForStudy(request.authInfo.userId, studyId)))
+      validationReply(Future(service.getCentresForStudy(request.authInfo.userId, studyId)))
     }
 
   def snapshot: Action[Unit] =
-    action.async(parse.empty) { implicit request =>
-      studiesService.snapshot
-      Future.successful(Results.Ok(Json.obj("status" ->"success", "data" -> true)))
+    action(parse.empty) { implicit request =>
+      validationReply(service.snapshotRequest(request.authInfo.userId).map { _ => true })
     }
 
   def add: Action[JsValue] = commandAction[AddStudyCmd](JsNull)(processCommand)
@@ -150,7 +149,7 @@ class StudiesController @Inject() (val action:         BbwebAction,
     }
 
   private def processCommand(cmd: StudyCommand): Future[Result] = {
-    val future = studiesService.processCommand(cmd)
+    val future = service.processCommand(cmd)
     validationReply(future)
   }
 

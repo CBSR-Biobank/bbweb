@@ -17,16 +17,11 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
 class StudiesServiceSpec
     extends ProcessorTestFixture
     with UserServiceFixtures
+    with StudiesServiceFixtures
     with ScalaFutures {
 
   import org.biobank.TestUtils._
-  import org.biobank.domain.access.AccessItem._
   import org.biobank.infrastructure.command.StudyCommands._
-
-  class UsersStudyFixture(val adminUser:    ActiveUser,
-                          val nonAdminUser: ActiveUser,
-                          val membership:   Membership,
-                          val study:        DisabledStudy)
 
   class StudyOfAllStatesFixure(val adminUser:     ActiveUser,
                                val nonAdminUser:  ActiveUser,
@@ -39,35 +34,15 @@ class StudiesServiceSpec
 
   protected val accessItemRepository = app.injector.instanceOf[AccessItemRepository]
 
-  private val membershipRepository = app.injector.instanceOf[MembershipRepository]
+  protected val membershipRepository = app.injector.instanceOf[MembershipRepository]
 
   protected val userRepository = app.injector.instanceOf[UserRepository]
 
-  private val studyRepository = app.injector.instanceOf[StudyRepository]
+  protected val studyRepository = app.injector.instanceOf[StudyRepository]
 
-  private val collectionEventTypeRepository = app.injector.instanceOf[CollectionEventTypeRepository]
+  protected val collectionEventTypeRepository = app.injector.instanceOf[CollectionEventTypeRepository]
 
   private val studiesService = app.injector.instanceOf[StudiesService]
-
-  private def addUserToStudyAdminRole(userId: UserId): Unit = {
-    accessItemRepository.getRole(RoleId.StudyAdministrator) mustSucceed { role =>
-      accessItemRepository.put(role.copy(userIds = role.userIds + userId))
-    }
-  }
-
-  private def usersStudyFixture() = {
-    val adminUser = factory.createActiveUser
-    val study = factory.createDisabledStudy
-    val membership = factory.createMembership.copy(userIds = Set(adminUser.id),
-                                                   studyInfo = MembershipStudyInfo(false, Set(study.id)))
-    val f = new UsersStudyFixture(adminUser,
-                                  factory.createActiveUser,
-                                  membership,
-                                  study)
-    Set(f.adminUser, f.nonAdminUser, f.membership, f.study).foreach(addToRepository)
-    addUserToStudyAdminRole(f.adminUser.id)
-    f
-  }
 
   private def studiesOfAllStatesFixure() = {
     val adminUser = factory.createActiveUser
@@ -102,7 +77,7 @@ class StudiesServiceSpec
     f
   }
 
-  protected def addToRepository[T <: ConcurrencySafeEntity[_]](entity: T): Unit = {
+  override protected def addToRepository[T <: ConcurrencySafeEntity[_]](entity: T): Unit = {
     entity match {
       case u: User       => userRepository.put(u)
       case i: AccessItem => accessItemRepository.put(i)
@@ -259,7 +234,7 @@ class StudiesServiceSpec
         }
       }
 
-      it("111 change a study's state") {
+      it("change a study's state") {
         val f = studiesOfAllStatesFixure
         forAll(stateChangeCommandsTable(f.adminUser.id,
                                         f.disabledStudy,

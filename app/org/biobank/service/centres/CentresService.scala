@@ -6,6 +6,7 @@ import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
 import org.biobank.domain.centre._
 import org.biobank.domain.study.StudyRepository
+import org.biobank.domain.user.UserId
 import org.biobank.dto._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.CentreCommands._
@@ -40,6 +41,9 @@ trait CentresService extends BbwebService {
   def getCentre(id: CentreId): ServiceValidation[Centre]
 
   def processCommand(cmd: CentreCommand): Future[ServiceValidation[Centre]]
+
+  def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
+
 }
 
 /**

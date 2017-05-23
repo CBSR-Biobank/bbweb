@@ -7,6 +7,7 @@ import javax.inject.{Inject, Named}
 import org.biobank.domain.centre._
 import org.biobank.domain.participants.{CeventSpecimenRepository, CollectionEventRepository, Specimen, SpecimenRepository}
 import org.biobank.domain.study.CollectionEventTypeRepository
+import org.biobank.domain.user.UserId
 import org.biobank.dto.{CentreLocationInfo, ShipmentDto, ShipmentSpecimenDto, SpecimenDto}
 import org.biobank.infrastructure.command.ShipmentCommands._
 import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
@@ -68,7 +69,8 @@ trait ShipmentsService extends BbwebService {
 
   def removeShipmentSpecimen(cmd: ShipmentSpecimenRemoveCmd): Future[ServiceValidation[Boolean]]
 
-  def snapshot(): Unit
+  def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
+
 }
 
 /**

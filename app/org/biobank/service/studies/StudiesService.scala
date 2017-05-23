@@ -69,6 +69,9 @@ trait StudiesService extends BbwebService {
   // FIXME: move to its own service
   def processRemoveProcessingTypeCommand(cmd: StudyCommand)
       : Future[ServiceValidation[Boolean]]
+
+  def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
+
 }
 
 /**
@@ -91,7 +94,6 @@ class StudiesServiceImpl @Inject()(
   val collectionEventRepository:            CollectionEventRepository,
   val specimenLinkTypeRepository:           SpecimenLinkTypeRepository)
     extends StudiesService
-    with BbwebServiceImpl
     with ServiceWithPermissionChecks {
 
   import org.biobank.CommonValidations._

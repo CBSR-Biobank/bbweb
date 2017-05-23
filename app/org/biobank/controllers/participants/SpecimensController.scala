@@ -7,7 +7,7 @@ import org.biobank.service._
 import org.biobank.service.participants.SpecimensService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
-import play.api.mvc.{Action, Results}
+import play.api.mvc.Action
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -52,9 +52,8 @@ class SpecimensController @Inject() (val action:       BbwebAction,
     }
 
   def snapshot: Action[Unit] =
-    action.async(parse.empty) { implicit request =>
-      service.snapshot
-      Future.successful(Results.Ok(Json.obj("status" ->"success", "data" -> true)))
+    action(parse.empty) { implicit request =>
+      validationReply(service.snapshotRequest(request.authInfo.userId).map(_ => true))
     }
 
   def addSpecimens(ceventId: CollectionEventId): Action[JsValue] =

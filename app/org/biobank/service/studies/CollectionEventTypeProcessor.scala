@@ -233,6 +233,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       : ServiceValidation[CollectionEventTypeEvent] = {
     for {
       annotationType <- {
+        // need to call AnnotationType.create so that a new Id is generated
         AnnotationType.create(cmd.name,
                               cmd.description,
                               cmd.valueType,

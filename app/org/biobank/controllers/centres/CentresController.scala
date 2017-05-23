@@ -70,9 +70,8 @@ class CentresController @Inject() (val action:         BbwebAction,
     }
 
   def snapshot: Action[Unit] =
-    action.async(parse.empty) { implicit request =>
-      centresService.snapshot
-      Future.successful(Results.Ok(Json.obj("status" ->"success", "data" -> true)))
+    action(parse.empty) { implicit request =>
+      validationReply(centresService.snapshotRequest(request.authInfo.userId).map(_ => true))
     }
 
   def add(): Action[JsValue] = commandAction[AddCentreCmd](JsNull)(processCommand)

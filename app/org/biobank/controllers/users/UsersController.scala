@@ -135,9 +135,8 @@ class UsersController @Inject() (val action:         BbwebAction,
     }
 
   def snapshot: Action[Unit] =
-    action.async(parse.empty) { implicit request =>
-      usersService.snapshot
-      Future.successful(Results.Ok(Json.obj("status" ->"success", "data" -> true)))
+    action(parse.empty) { implicit request =>
+      validationReply(usersService.snapshotRequest(request.authInfo.userId).map { _ => true })
     }
 
   /** Resets the user's password.

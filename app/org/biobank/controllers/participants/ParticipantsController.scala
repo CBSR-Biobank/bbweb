@@ -8,8 +8,8 @@ import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.service.participants._
 import play.api.{ Environment, Logger }
 import play.api.libs.json._
-import play.api.mvc.{Action, Results}
-import scala.concurrent.{ExecutionContext, Future}
+import play.api.mvc.Action
+import scala.concurrent.ExecutionContext
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
@@ -34,9 +34,8 @@ class ParticipantsController @Inject() (val action:              BbwebAction,
     }
 
   def snapshot: Action[Unit] =
-    action.async(parse.empty) { implicit request =>
-      participantsService.snapshot
-      Future.successful(Results.Ok(Json.obj("status" ->"success", "data" -> true)))
+    action(parse.empty) { implicit request =>
+      validationReply(participantsService.snapshotRequest(request.authInfo.userId).map(_ => true))
     }
 
   def add(studyId: StudyId): Action[JsValue] =

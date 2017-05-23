@@ -78,6 +78,8 @@ trait UsersService extends BbwebService {
 
   def userToDto(user: User): UserDto
 
+  def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
+
 }
 
 class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val processor: ActorRef,
@@ -86,7 +88,6 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
                                                val studyRepository:                    StudyRepository,
                                                val passwordHasher:                     PasswordHasher)
     extends UsersService
-    with BbwebServiceImpl
     with ServiceWithPermissionChecks {
 
   import org.biobank.CommonValidations._

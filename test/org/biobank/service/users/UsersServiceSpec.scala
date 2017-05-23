@@ -22,6 +22,7 @@ class UsersServiceSpec
 
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.command.UserCommands._
+  import org.biobank.domain.access.AccessItem._
 
   val usersService = app.injector.instanceOf[UsersService]
 
@@ -41,7 +42,20 @@ class UsersServiceSpec
 
   val nameGenerator = new NameGenerator(this.getClass)
 
-  override def usersFixture() = {
+  protected def addUserToUserAdminRole(userId: UserId): Unit = {
+    accessItemRepository.getRole(RoleId.UserAdministrator) mustSucceed { role =>
+      accessItemRepository.put(role.copy(userIds = role.userIds + userId))
+    }
+  }
+
+  protected def adminUserFixture() = {
+    val f = new AdminUserFixture(factory.createActiveUser)
+    addToRepository(f.adminUser)
+    addUserToUserAdminRole(f.adminUser.id)
+    f
+  }
+
+  def usersFixture() = {
     val plainPassword = nameGenerator.next[User]
     val f = new UsersFixtureWithPassword(factory.createActiveUser,
                                          factory.createActiveUser,
@@ -189,7 +203,7 @@ class UsersServiceSpec
 
     describe("studies membership") {
 
-      it("111 user has access to all studies corresponding his membership") {
+      it("user has access to all studies corresponding his membership") {
         val f = membershipFixture
         val membership = f.membership.copy(studyInfo  = MembershipStudyInfo(true, Set.empty[StudyId]))
         Set(f.user, f.study, membership).foreach(addToRepository)
@@ -199,7 +213,7 @@ class UsersServiceSpec
         }
       }
 
-      it("111 user has access to studies corresponding his membership") {
+      it("user has access to studies corresponding his membership") {
         val f = membershipFixture
         Set(f.user, f.study, f.membership).foreach(addToRepository)
         usersService.getUserStudyIds(f.user.id) mustSucceed { reply =>
