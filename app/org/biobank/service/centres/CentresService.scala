@@ -4,6 +4,7 @@ import akka.actor._
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
+import org.biobank.domain.access._
 import org.biobank.domain.centre._
 import org.biobank.domain.study.StudyRepository
 import org.biobank.domain.user.UserId
@@ -12,6 +13,7 @@ import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
 import org.biobank.service._
+import org.biobank.service.access.AccessService
 import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
@@ -28,17 +30,19 @@ trait CentresService extends BbwebService {
    *
    * @param sort the string representation of the sort expression to use when sorting the studies.
    */
-  def getCentresCount(): Long
+  def getCentresCount(requestUserId: UserId): ServiceValidation[Long]
 
-  def searchLocations(cmd: SearchCentreLocationsCmd): Set[CentreLocationInfo]
+  def getCountsByStatus(requestUserId: UserId): ServiceValidation[CentreCountsByStatus]
 
-  def getCentres(filter: FilterString, sort: SortString): ServiceValidation[Seq[Centre]]
+  def searchLocations(cmd: SearchCentreLocationsCmd): ServiceValidation[Set[CentreLocationInfo]]
 
-  def getCountsByStatus(): CentreCountsByStatus
+  def getCentres(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[Centre]]
 
-  def getCentreNames(filter: FilterString, sort: SortString): ServiceValidation[Seq[NameDto]]
+  def getCentreNames(requestUserId: UserId,
+                     filter:        FilterString,
+                     sort:          SortString): ServiceValidation[Seq[NameDto]]
 
-  def getCentre(id: CentreId): ServiceValidation[Centre]
+  def getCentre(requestUserId: UserId, id: CentreId): ServiceValidation[Centre]
 
   def processCommand(cmd: CentreCommand): Future[ServiceValidation[Centre]]
 
@@ -56,54 +60,127 @@ trait CentresService extends BbwebService {
  *
  */
 class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: ActorRef,
+                                    val accessService:             AccessService,
                                     val centreRepository:          CentreRepository,
                                     val studyRepository:           StudyRepository)
     extends CentresService
-    with BbwebServiceImpl {
+    with ServiceWithPermissionChecks {
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def getCentresCount(): Long = {
-    centreRepository.getValues.size.toLong
+  def getCentresCount(requestUserId: UserId): ServiceValidation[Long] = {
+    withPermittedCentres(requestUserId) { centres =>
+      centres.size.toLong.successNel[String]
+    }
   }
 
-  def searchLocations(cmd: SearchCentreLocationsCmd): Set[CentreLocationInfo] =  {
-    val allLocationInfos = centreRepository.getValues.flatMap { centre =>
-        centre.locations.map { location =>
-          CentreLocationInfo(centre.id.id, location.id.id, centre.name, location.name)
+  def getCountsByStatus(requestUserId: UserId): ServiceValidation[CentreCountsByStatus] = {
+    withPermittedCentres(requestUserId) { centres =>
+      CentreCountsByStatus(
+        total         = centres.size.toLong,
+        disabledCount = centres.collect { case s: DisabledCentre => s }.size.toLong,
+        enabledCount  = centres.collect { case s: EnabledCentre => s }.size.toLong
+      ).successNel[String]
+    }
+  }
+
+  def getCentres(requestUserId: UserId,
+                 filter:        FilterString,
+                 sort:          SortString):ServiceValidation[Seq[Centre]] =  {
+    withPermittedCentres(requestUserId) { centres =>
+      filterCentresInternal(centres, filter, sort)
+    }
+  }
+
+  def getCentreNames(requestUserId: UserId,
+                     filter:        FilterString,
+                     sort:          SortString): ServiceValidation[Seq[NameDto]] = {
+    whenPermitted(requestUserId, PermissionId.CentreRead) { () =>
+      getCentres(requestUserId, filter, sort).map(_.map(s => NameDto(s.id.id, s.name, s.state.id)))
+    }
+  }
+
+  def getCentre(requestUserId: UserId, id: CentreId): ServiceValidation[Centre] = {
+    whenPermitted(requestUserId, PermissionId.CentreRead) { () =>
+      centreRepository.getByKey(id)
+    }
+  }
+
+  def searchLocations(cmd: SearchCentreLocationsCmd): ServiceValidation[Set[CentreLocationInfo]] =  {
+    withPermittedCentres(UserId(cmd.sessionUserId)) { centres =>
+      val allLocationInfos = centres.flatMap { centre =>
+          centre.locations.map { location =>
+            CentreLocationInfo(centre.id.id, location.id.id, centre.name, location.name)
+          }
         }
+
+      val filterLowerCase = cmd.filter.toLowerCase.trim
+      val filteredLocationInfos =
+        if (filterLowerCase.isEmpty) {
+          allLocationInfos
+        } else {
+          allLocationInfos.filter { l =>
+            l.name.toLowerCase contains filterLowerCase
+          }
+        }
+
+      filteredLocationInfos
+        .toSeq
+        .sortWith { (a, b) => (a.name compareToIgnoreCase b.name) < 0 }
+        .take(cmd.limit)
+        .toSet
+        .successNel[String]
+    }
+  }
+
+  def processCommand(cmd: CentreCommand): Future[ServiceValidation[Centre]] = {
+    val (permissionId, centreId) = cmd match {
+        case c: CentreStateChangeCommand => (PermissionId.CentreChangeState, Some(CentreId(c.id)))
+        case c: CentreModifyCommand      => (PermissionId.CentreUpdate, Some(CentreId(c.id)))
+        case c: AddCentreCmd             => (PermissionId.CentreCreate, None)
       }
 
-    val filterLowerCase = cmd.filter.toLowerCase.trim
-    val filteredLocationInfos = if (filterLowerCase.isEmpty) { allLocationInfos }
-                                else allLocationInfos.filter { l =>
-                                  l.name.toLowerCase contains filterLowerCase
-                                }
-
-    filteredLocationInfos.
-      toSeq.
-      sortWith { (a, b) => (a.name compareToIgnoreCase b.name) < 0 }.
-      take(cmd.limit).
-      toSet
+    whenPermittedAndIsMemberAsync(UserId(cmd.sessionUserId), permissionId, None, centreId) { () =>
+      ask(processor, cmd).mapTo[ServiceValidation[CentreEvent]].map { validation =>
+        for {
+          event <- validation
+          centre <- centreRepository.getByKey(CentreId(event.id))
+        } yield centre
+      }
+    }
   }
 
-  def getCountsByStatus(): CentreCountsByStatus = {
-    // FIXME should be replaced by DTO query to the database
-    val centres = centreRepository.getValues
-    CentreCountsByStatus(
-      total         = centres.size.toLong,
-      disabledCount = centres.collect { case s: DisabledCentre => s }.size.toLong,
-      enabledCount  = centres.collect { case s: EnabledCentre => s }.size.toLong
-    )
+  private def withPermittedCentres[T](requestUserId: UserId)(block: Set[Centre] => ServiceValidation[T])
+      : ServiceValidation[T] = {
+    whenPermitted(requestUserId, PermissionId.CentreRead) { () =>
+      for {
+        centres <- getMembershipCentres(requestUserId)
+        result  <- block(centres)
+      } yield result
+    }
   }
 
-  def getCentres(filter: FilterString, sort: SortString):ServiceValidation[Seq[Centre]] =  {
-    val allCentres = centreRepository.getValues.toSet
+  private def getMembershipCentres(userId: UserId): ServiceValidation[Set[Centre]] = {
+    accessService.getMembership(userId).flatMap { membership =>
+      if (membership.centreInfo.allCentres) {
+        centreRepository.getValues.toSet.successNel[String]
+      } else {
+        membership.centreInfo.centreIds
+          .map(centreRepository.getByKey)
+          .toList.sequenceU
+          .map(centres => centres.toSet)
+      }
+    }
+  }
+
+  def filterCentresInternal(unfilteredCentres: Set[Centre],
+                            filter:            FilterString,
+                            sort:              SortString): ServiceValidation[Seq[Centre]] =  {
     val sortStr = if (sort.expression.isEmpty) new SortString("name")
                   else sort
 
     for {
-      centres <- CentreFilter.filterCentres(allCentres, filter)
+      centres <- CentreFilter.filterCentres(unfilteredCentres, filter)
       sortExpressions <- {
         QuerySortParser(sortStr).toSuccessNel(ServiceError(s"could not parse sort expression: $sort"))
       }
@@ -117,21 +194,5 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
       else result.reverse
     }
   }
-
-  def getCentreNames(filter: FilterString, sort: SortString): ServiceValidation[Seq[NameDto]] = {
-    getCentres(filter, sort).map(_.map(s => NameDto(s.id.id, s.name, s.state.id)))
-  }
-
-  def getCentre(id: CentreId): ServiceValidation[Centre] = {
-    centreRepository.getByKey(id)
-  }
-
-  def processCommand(cmd: CentreCommand): Future[ServiceValidation[Centre]] =
-    ask(processor, cmd).mapTo[ServiceValidation[CentreEvent]].map { validation =>
-      for {
-        event <- validation
-        centre <- centreRepository.getByKey(CentreId(event.id))
-      } yield centre
-    }
 
 }

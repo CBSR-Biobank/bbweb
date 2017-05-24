@@ -101,32 +101,26 @@ class StudiesServiceImpl @Inject()(
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   def getStudyCount(requestUserId: UserId): ServiceValidation[Long] = {
-    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
-      getMembershipStudies(requestUserId).map { studies =>
-        studies.size.toLong
-      }
+    withPermittedStudies(requestUserId) { studies =>
+      studies.size.toLong.successNel[String]
     }
   }
 
   def getCountsByStatus(requestUserId: UserId): ServiceValidation[StudyCountsByStatus] = {
-    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
-      getMembershipStudies(requestUserId).map { studies =>
-        StudyCountsByStatus(
-          total         = studies.size.toLong,
-          disabledCount = studies.collect { case s: DisabledStudy => s }.size.toLong,
-          enabledCount  = studies.collect { case s: EnabledStudy => s }.size.toLong,
-          retiredCount  = studies.collect { case s: RetiredStudy => s }.size.toLong
-        )
-      }
+    withPermittedStudies(requestUserId) { studies =>
+      StudyCountsByStatus(
+        total         = studies.size.toLong,
+        disabledCount = studies.collect { case s: DisabledStudy => s }.size.toLong,
+        enabledCount  = studies.collect { case s: EnabledStudy => s }.size.toLong,
+        retiredCount  = studies.collect { case s: RetiredStudy => s }.size.toLong
+      ).successNel[String]
     }
   }
 
   def getStudies(requestUserId: UserId, filter: FilterString, sort: SortString)
       : ServiceValidation[Seq[Study]] = {
-    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
-      getMembershipStudies(requestUserId).flatMap { studies =>
-        filterStudiesInternal(studies, filter, sort)
-      }
+    withPermittedStudies(requestUserId) { studies =>
+      filterStudiesInternal(studies, filter, sort)
     }
   }
 
@@ -246,6 +240,29 @@ class StudiesServiceImpl @Inject()(
     ask(processor, cmd).mapTo[ServiceValidation[ProcessingTypeEvent]]
       .map { validation => validation.map(_ => true) }
 
+  private def withPermittedStudies[T](requestUserId: UserId)(block: Set[Study] => ServiceValidation[T])
+      : ServiceValidation[T] = {
+    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
+      for {
+        studies <- getMembershipStudies(requestUserId)
+        result  <- block(studies)
+      } yield result
+    }
+  }
+
+  private def getMembershipStudies(userId: UserId): ServiceValidation[Set[Study]] = {
+    accessService.getMembership(userId).flatMap { membership =>
+      if (membership.studyInfo.allStudies) {
+        studyRepository.getValues.toSet.successNel[String]
+      } else {
+        membership.studyInfo.studyIds
+          .map(studyRepository.getByKey)
+          .toList.sequenceU
+          .map(studies => studies.toSet)
+      }
+    }
+  }
+
   private def filterStudiesInternal(unfilteredStudies: Set[Study], filter: FilterString, sort: SortString):
       ServiceValidation[Seq[Study]] = {
     val sortStr = if (sort.expression.isEmpty) new SortString("name")
@@ -264,19 +281,6 @@ class StudiesServiceImpl @Inject()(
       val result = studies.toSeq.sortWith(sortFunc)
       if (sortExpressions(0).order == AscendingOrder) result
       else result.reverse
-    }
-  }
-
-  private def getMembershipStudies(userId: UserId): ServiceValidation[Set[Study]] = {
-    accessService.getMembership(userId).flatMap { membership =>
-      if (membership.studyInfo.allStudies) {
-        studyRepository.getValues.toSet.successNel[String]
-      } else {
-        membership.studyInfo.studyIds
-          .map(studyRepository.getByKey)
-          .toList.sequenceU
-          .map(studies => studies.toSet)
-      }
     }
   }
 

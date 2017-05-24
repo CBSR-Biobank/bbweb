@@ -11,6 +11,8 @@ object CentreCommands {
 
   trait CentreModifyCommand extends CentreCommand with HasIdentity with HasExpectedVersion
 
+  trait CentreStateChangeCommand extends CentreModifyCommand
+
   trait CentreCommandWithCentreId extends CentreCommand with HasCentreIdentity
 
   final case class AddCentreCmd(sessionUserId: String,
@@ -28,16 +30,6 @@ object CentreCommands {
                                               id:              String,
                                               expectedVersion: Long,
                                               description:     Option[String])
-      extends CentreModifyCommand
-
-  final case class EnableCentreCmd(sessionUserId:   String,
-                                   id:              String,
-                                   expectedVersion: Long)
-      extends CentreModifyCommand
-
-  final case class DisableCentreCmd(sessionUserId:   String,
-                                    id:              String,
-                                    expectedVersion: Long)
       extends CentreModifyCommand
 
   final case class AddCentreLocationCmd(sessionUserId:   String,
@@ -85,7 +77,19 @@ object CentreCommands {
                                             studyId:         String)
       extends CentreModifyCommand
 
-  final case class SearchCentreLocationsCmd(filter: String, limit: Int)
+  final case class EnableCentreCmd(sessionUserId:   String,
+                                   id:              String,
+                                   expectedVersion: Long)
+      extends CentreStateChangeCommand
+
+  final case class DisableCentreCmd(sessionUserId:   String,
+                                    id:              String,
+                                    expectedVersion: Long)
+      extends CentreStateChangeCommand
+
+  final case class SearchCentreLocationsCmd(sessionUserId: String,
+                                            filter:        String,
+                                            limit:         Int)
       extends Command
 
   implicit val addCentreCmdReads: Reads[AddCentreCmd] =

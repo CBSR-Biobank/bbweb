@@ -12,7 +12,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
 /**
- * Primarily these are tests that exercise the User Access aspect of UsersService.
+ * Primarily these are tests that exercise the User Access aspect of StudiesService.
  */
 class StudiesServiceSpec
     extends ProcessorTestFixture

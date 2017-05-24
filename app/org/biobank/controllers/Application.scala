@@ -31,13 +31,13 @@ class Application @Inject() (val action:         BbwebAction,
   def aggregateCounts: Action[Unit] =
     action.async(parse.empty) { implicit request =>
       Future {
-        val v = for {
+        validationReply(
+          for {
             studyCounts <- studiesService.getStudyCount(request.authInfo.userId)
+            centreCounts <- centresService.getCentresCount(request.authInfo.userId)
             userCounts  <- usersService.getCountsByStatus(request.authInfo.userId)
-          } yield AggregateCountsDto(studyCounts,
-                                     centresService.getCentresCount,
-                                     userCounts.total)
-        validationReply(v)
+          } yield AggregateCountsDto(studyCounts, centreCounts, userCounts.total)
+        )
       }
   }
 

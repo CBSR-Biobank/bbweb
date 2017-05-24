@@ -18,9 +18,9 @@ import scalaz.Validation.FlatMap._
  */
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
-class CentresController @Inject() (val action:         BbwebAction,
-                                   val env:            Environment,
-                                   val centresService: CentresService)
+class CentresController @Inject()(val action:  BbwebAction,
+                                  val env:     Environment,
+                                  val service: CentresService)
                                (implicit val ec: ExecutionContext)
     extends CommandController {
 
@@ -29,8 +29,8 @@ class CentresController @Inject() (val action:         BbwebAction,
   private val PageSizeMax = 10
 
   def centreCounts(): Action[Unit] =
-    action(parse.empty) { implicit request =>
-      Ok(centresService.getCountsByStatus)
+    action.async(parse.empty) { implicit request =>
+      Future(validationReply(service.getCountsByStatus(request.authInfo.userId)))
     }
 
   def list: Action[Unit] =
@@ -39,7 +39,7 @@ class CentresController @Inject() (val action:         BbwebAction,
         Future {
           for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            centres    <- centresService.getCentres(pagedQuery.filter, pagedQuery.sort)
+            centres    <- service.getCentres(request.authInfo.userId, pagedQuery.filter, pagedQuery.sort)
             validPage  <- pagedQuery.validPage(centres.size)
             results    <- PagedResults.create(centres, pagedQuery.page, pagedQuery.limit)
           } yield results
@@ -53,7 +53,9 @@ class CentresController @Inject() (val action:         BbwebAction,
         Future {
           for {
             filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
-            centreNames    <- centresService.getCentreNames(filterAndSort.filter, filterAndSort.sort)
+            centreNames    <- service.getCentreNames(request.authInfo.userId,
+                                                     filterAndSort.filter,
+                                                     filterAndSort.sort)
           } yield centreNames
         }
       )
@@ -61,17 +63,17 @@ class CentresController @Inject() (val action:         BbwebAction,
 
   def searchLocations(): Action[JsValue] =
     commandAction[SearchCentreLocationsCmd](JsNull){ cmd =>
-      Future.successful(Ok(centresService.searchLocations(cmd)))
+      Future(validationReply(service.searchLocations(cmd)))
     }
 
   def query(id: CentreId): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(centresService.getCentre(id))
+      validationReply(service.getCentre(request.authInfo.userId, id))
     }
 
   def snapshot: Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(centresService.snapshotRequest(request.authInfo.userId).map(_ => true))
+      validationReply(service.snapshotRequest(request.authInfo.userId).map(_ => true))
     }
 
   def add(): Action[JsValue] = commandAction[AddCentreCmd](JsNull)(processCommand)
@@ -110,7 +112,7 @@ class CentresController @Inject() (val action:         BbwebAction,
     commandAction[DisableCentreCmd](Json.obj("id" -> id))(processCommand)
 
   private def processCommand(cmd: CentreCommand): Future[Result] = {
-    val future = centresService.processCommand(cmd)
+    val future = service.processCommand(cmd)
     validationReply(future)
   }
 
