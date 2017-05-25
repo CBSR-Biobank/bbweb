@@ -4,70 +4,64 @@ package org.biobank.infrastructure.event;
 
 import "CommonEvents.proto";
 
-message CentreAddedEvent {
-  optional string name        = 1;
-  optional string description = 2;
-}
-
-message CentreNameUpdatedEvent {
-  optional int64  version     = 1;
-  optional string name        = 2;
-}
-
-message CentreDescriptionUpdatedEvent {
-  optional int64  version     = 1;
-  optional string description = 2;
-}
-
-message CentreEnabledEvent {
-  optional int64  version = 1;
-}
-
-message CentreDisabledEvent {
-  optional int64  version = 1;
-}
-
-message CentreLocationAddedEvent {
-  optional int64    version  = 1;
-  optional Location location = 2;
-}
-
-message CentreLocationUpdatedEvent {
-  optional int64    version  = 1;
-  optional Location location = 2;
-}
-
-message CentreLocationRemovedEvent {
-  optional int64  version    = 1;
-  optional string locationId = 2;
-}
-
-message StudyAddedToCentreEvent {
-  optional int64  version  = 1;
-  optional string studyId  = 2;
-}
-
-message StudyRemovedFromCentreEvent {
-  optional int64  version  = 1;
-  optional string studyId  = 2;
-}
-
 message CentreEvent {
+
+  message Added {
+    optional string name        = 1;
+    optional string description = 2;
+  }
+
+  message NameUpdated {
+    optional int64  version     = 1;
+    optional string name        = 2;
+  }
+
+  message DescriptionUpdated {
+    optional int64  version     = 1;
+    optional string description = 2;
+  }
+
+  message Enabled {
+    optional int64  version = 1;
+  }
+
+  message Disabled {
+    optional int64  version = 1;
+  }
+
+  message LocationAdded {
+    optional int64    version  = 1;
+    optional Location location = 2;
+  }
+
+  message LocationRemoved {
+    optional int64  version    = 1;
+    optional string locationId = 2;
+  }
+
+  message StudyAdded {
+    optional int64  version  = 1;
+    optional string studyId  = 2;
+  }
+
+  message StudyRemoved {
+    optional int64  version  = 1;
+    optional string studyId  = 2;
+  }
 
   required string id            = 1;
   optional string sessionUserId = 2;
   optional string time          = 3;
 
   oneof event_type {
-    CentreAddedEvent              added              = 4;
-    CentreNameUpdatedEvent        nameUpdated        = 5;
-    CentreDescriptionUpdatedEvent descriptionUpdated = 6;
-    CentreEnabledEvent            enabled            = 7;
-    CentreDisabledEvent           disabled           = 8;
-    CentreLocationAddedEvent      locationAdded      = 9;
-    CentreLocationUpdatedEvent    locationUpdated    = 10;
-    CentreLocationRemovedEvent    locationRemoved    = 11;
-    StudyAddedToCentreEvent       studyAdded         = 12;
-    StudyRemovedFromCentreEvent   studyRemoved       = 13;
+    Added              added              = 4;
+    NameUpdated        nameUpdated        = 5;
+    DescriptionUpdated descriptionUpdated = 6;
+    Enabled            enabled            = 7;
+    Disabled           disabled           = 8;
+    LocationAdded      locationAdded      = 9;
+    LocationRemoved    locationRemoved    = 10;
+    StudyAdded         studyAdded         = 11;
+    StudyRemoved       studyRemoved       = 12;
   }
 }

@@ -9,12 +9,14 @@ object RoleId extends Enumeration {
 
   val WebsiteAdministrator: Value  = Value("WebsiteAdministrator")
   val UserAdministrator: Value     = Value("UserAdministrator")
-  val StudyAdministrator: Value    = Value("StudyAdministrator")
   val CentreAdministrator: Value   = Value("CentreAdministrator")
   val ShippingAdministrator: Value = Value("ShippingAdministrator")
 
   val SpecimenCollector: Value     = Value("SpecimenCollector")
   val SpecimenProcessor: Value     = Value("SpecimenProcessor")
+
+  val StudyAdministrator: Value    = Value("StudyAdministrator")
+  val StudyUser: Value             = Value("StudyUser")
 
   implicit val roleFormat: Format[RoleId] =
     enumFormat(org.biobank.domain.access.RoleId)

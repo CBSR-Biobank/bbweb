@@ -112,18 +112,32 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
                                Set(RoleId.UserAdministrator)),
 
         // STUDY PERMISSIONS
-        createPermissionSimple(PermissionId.StudyCreate,
-                               "User can create studies",
-                               Set(RoleId.StudyAdministrator)),
         createPermissionSimple(PermissionId.StudyRead,
                                "User can view studies",
+                               Set(RoleId.StudyUser)),
+        createPermissionSimple(PermissionId.StudyCreate,
+                               "User can create studies",
                                Set(RoleId.StudyAdministrator)),
         createPermissionSimple(PermissionId.StudyUpdate,
                                "User can update studies",
                                Set(RoleId.StudyAdministrator)),
         createPermissionSimple(PermissionId.StudyChangeState,
                                "User can change states on studies",
-                               Set(RoleId.StudyAdministrator))
+                               Set(RoleId.StudyAdministrator)),
+
+        // CENTRE PERMISSIONS
+        createPermissionSimple(PermissionId.CentreCreate,
+                               "User can create centres",
+                               Set(RoleId.CentreAdministrator)),
+        createPermissionSimple(PermissionId.CentreRead,
+                               "User can view centres",
+                               Set(RoleId.CentreAdministrator)),
+        createPermissionSimple(PermissionId.CentreUpdate,
+                               "User can update centres",
+                               Set(RoleId.CentreAdministrator)),
+        createPermissionSimple(PermissionId.CentreChangeState,
+                               "User can change states on centres",
+                               Set(RoleId.CentreAdministrator))
       )
     permissions.foreach(put)
   }
@@ -152,7 +166,19 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
         createRoleSimple(RoleId.ShippingAdministrator, "ShippingAdministrator"),
         createRoleSimple(RoleId.SpecimenProcessor,     "SpecimenProcessor"),
         createRoleSimple(RoleId.SpecimenCollector,     "SpecimenCollector"),
-        createRoleSimple(RoleId.CentreAdministrator,   "CentreAdministrator"),
+
+        createRole(roleId      = RoleId.CentreAdministrator,
+                   description = "Centre Administrator",
+                   parentIds   = Set(RoleId.WebsiteAdministrator),
+                   childrenIds = Set(PermissionId.CentreCreate,
+                                     PermissionId.CentreUpdate,
+                                     PermissionId.CentreChangeState,
+                                     PermissionId.CentreRead)),
+
+        createRole(roleId      = RoleId.StudyUser,
+                   description = "Study User",
+                   parentIds   = Set(RoleId.StudyAdministrator),
+                   childrenIds = Set(PermissionId.StudyRead)),
 
         createRole(roleId      = RoleId.StudyAdministrator,
                    description = "Study Administrator",
@@ -160,7 +186,7 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
                    childrenIds = Set(PermissionId.StudyCreate,
                                      PermissionId.StudyUpdate,
                                      PermissionId.StudyChangeState,
-                                     PermissionId.StudyRead)),
+                                     RoleId.StudyUser)),
 
         createRole(roleId      = RoleId.UserAdministrator,
                    description = "UserAdministrator",

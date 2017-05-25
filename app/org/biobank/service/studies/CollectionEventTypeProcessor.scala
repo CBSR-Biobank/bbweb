@@ -63,7 +63,6 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
         case et: EventType.AnnotationTypeUpdated      => applyAnnotationTypeUpdatedEvent(event)
         case et: EventType.AnnotationTypeRemoved      => applyAnnotationTypeRemovedEvent(event)
         case et: EventType.SpecimenDescriptionAdded   => applySpecimenDescriptionAddedEvent(event)
-        case et: EventType.SpecimenDescriptionUpdated => applySpecimenDescriptionUpdatedEvent(event)
         case et: EventType.SpecimenDescriptionRemoved => applySpecimenDescriptionRemovedEvent(event)
 
         case event => log.error(s"event not handled: $event")
@@ -495,16 +494,6 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                            event.getSpecimenDescriptionAdded.getVersion) { (cet, eventTime) =>
       storeIfValid(
         cet.withSpecimenDescription(EventUtils.specimenDescriptionFromEvent(event.getSpecimenDescriptionAdded.getSpecimenDescription)),
-        eventTime)
-    }
-  }
-
-  private def applySpecimenDescriptionUpdatedEvent(event: CollectionEventTypeEvent): Unit = {
-    onValidEventAndVersion(event,
-                           event.eventType.isSpecimenDescriptionUpdated,
-                           event.getSpecimenDescriptionUpdated.getVersion) { (cet, eventTime) =>
-      storeIfValid(
-        cet.withSpecimenDescription(EventUtils.specimenDescriptionFromEvent(event.getSpecimenDescriptionUpdated.getSpecimenDescription)),
         eventTime)
     }
   }

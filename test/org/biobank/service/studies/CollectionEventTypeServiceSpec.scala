@@ -21,14 +21,23 @@ class CollectionEventTypeServiceSpec
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 
-  class UsersCeventTypeFixture(adminUser:          ActiveUser,
-                               nonAdminUser:       ActiveUser,
-                               membership:         Membership,
-                               study:              DisabledStudy,
-                               val ceventType:     CollectionEventType,
-                               val specimenDesc:   CollectionSpecimenDescription,
-                               val annotationType: AnnotationType)
-  extends UsersStudyFixture(adminUser, nonAdminUser, membership, study)
+  trait CeventFixture {
+    val specimenDesc = factory.createCollectionSpecimenDescription
+    val annotationType = factory.createAnnotationType
+    val ceventTypeNoStudy = factory.createCollectionEventType
+      .copy(specimenDescriptions = Set(specimenDesc),
+            annotationTypes      = Set(annotationType))
+  }
+
+  class UsersCeventTypeFixture extends UsersWithStudyAccessFixture with CeventFixture {
+    val ceventType = ceventTypeNoStudy.copy(studyId = study.id)
+    collectionEventTypeRepository.put(ceventType)
+  }
+
+  class UserWithNoStudyAccessFixtureWithCevent extends UserWithNoStudyAccessFixture with CeventFixture {
+    val ceventType = ceventTypeNoStudy.copy(studyId = study.id)
+    collectionEventTypeRepository.put(ceventType)
+  }
 
   protected val nameGenerator = new NameGenerator(this.getClass)
 
@@ -43,24 +52,6 @@ class CollectionEventTypeServiceSpec
   protected val collectionEventTypeRepository = app.injector.instanceOf[CollectionEventTypeRepository]
 
   private val ceventTypeService = app.injector.instanceOf[CollectionEventTypeService]
-
-  private def usersCeventFixture(): UsersCeventTypeFixture = {
-    val f = usersStudyFixture
-    val specimenDesc = factory.createCollectionSpecimenDescription
-    val annotationType = factory.createAnnotationType
-    val cet = factory.createCollectionEventType.copy(studyId              = f.study.id,
-                                                     specimenDescriptions = Set(specimenDesc),
-                                                     annotationTypes      = Set(annotationType))
-    collectionEventTypeRepository.put(cet)
-    new UsersCeventTypeFixture(adminUser      = f.adminUser,
-                               nonAdminUser   = f.nonAdminUser,
-                               membership     = f.membership,
-                               study          = f.study,
-                               ceventType     = cet,
-                               specimenDesc   = specimenDesc,
-                               annotationType = annotationType)
-  }
-
 
   private def updateCommandsTable(sessionUserId:  UserId,
                                   study:          Study,
@@ -150,63 +141,79 @@ class CollectionEventTypeServiceSpec
     describe("a user with the Study Admin role is allowed to") {
 
       it("retrieve a collection event type ") {
-        val f = usersCeventFixture
-        ceventTypeService.collectionEventTypeWithId(f.adminUser.id, f.study.id, f.ceventType.id)
-          .mustSucceed { result =>
-            result.id must be (f.ceventType.id)
-          }
+        val f = new UsersCeventTypeFixture
+        forAll (f.usersCanReadTable) { (user, label) =>
+          info(label)
+          ceventTypeService.collectionEventTypeWithId(user.id, f.study.id, f.ceventType.id)
+            .mustSucceed { result =>
+              result.id must be (f.ceventType.id)
+            }
+        }
       }
 
       it("query if a collection event type is in use") {
-        val f = usersCeventFixture
-        ceventTypeService.collectionEventTypeInUse(f.adminUser.id, f.ceventType.id)
-          .mustSucceed { result =>
-            result must be (false)
-          }
+        val f = new UsersCeventTypeFixture
+        forAll (f.usersCanReadTable) { (user, label) =>
+          info(label)
+          ceventTypeService.collectionEventTypeInUse(user.id, f.ceventType.id)
+            .mustSucceed { result =>
+              result must be (false)
+            }
+        }
       }
 
       it("retrieve all collection event types for a study") {
-        val f = usersCeventFixture
-        ceventTypeService.collectionEventTypesForStudy(f.adminUser.id, f.study.id)
-          .mustSucceed { result =>
-            result must have size 1
-          }
+        val f = new UsersCeventTypeFixture
+        forAll (f.usersCanReadTable) { (user, label) =>
+          info(label)
+          ceventTypeService.collectionEventTypesForStudy(user.id, f.study.id)
+            .mustSucceed { result =>
+              result must have size 1
+            }
+        }
       }
 
       it("update a collection event type") {
-        val f = usersCeventFixture
-        forAll(updateCommandsTable(f.adminUser.id,
-                                   f.study,
-                                   f.ceventType,
-                                   f.specimenDesc,
-                                   f.annotationType)) { cmd =>
-          val ceventType = cmd match {
-              case _: CollectionEventTypeAddAnnotationTypeCmd =>
-                f.ceventType.copy(annotationTypes = Set.empty[AnnotationType])
-              case _: AddCollectionSpecimenDescriptionCmd =>
-                f.ceventType.copy(specimenDescriptions = Set.empty[CollectionSpecimenDescription])
-              case _ =>
-                f.ceventType
-            }
+        val f = new UsersCeventTypeFixture
+        forAll (f.usersCanUpdateTable) { (user, label) =>
+          info(label)
+          forAll(updateCommandsTable(user.id,
+                                     f.study,
+                                     f.ceventType,
+                                     f.specimenDesc,
+                                     f.annotationType)) { cmd =>
+            val ceventType = cmd match {
+                case _: CollectionEventTypeAddAnnotationTypeCmd =>
+                  f.ceventType.copy(annotationTypes = Set.empty[AnnotationType])
+                case _: AddCollectionSpecimenDescriptionCmd =>
+                  f.ceventType.copy(specimenDescriptions = Set.empty[CollectionSpecimenDescription])
+                case _ =>
+                  f.ceventType
+              }
 
-          collectionEventTypeRepository.put(ceventType) // restore it to it's previous state
-          ceventTypeService.processCommand(cmd).futureValue mustSucceed { reply =>
-            reply.studyId.id must be (cmd.studyId)
+            collectionEventTypeRepository.put(ceventType) // restore it to it's previous state
+            ceventTypeService.processCommand(cmd).futureValue mustSucceed { reply =>
+              reply.studyId.id must be (cmd.studyId)
+            }
           }
         }
       }
 
       it("remove a collection event type") {
-        val f = usersCeventFixture
-        val cmd = RemoveCollectionEventTypeCmd(
-          sessionUserId    = f.adminUser.id.id,
-          studyId          = f.study.id.id,
-          id               = f.ceventType.id.id,
-          expectedVersion  = f.ceventType.version
-        )
+        val f = new UsersCeventTypeFixture
+        forAll (f.usersCanUpdateTable) { (user, label) =>
+          info(label)
+          val cmd = RemoveCollectionEventTypeCmd(
+              sessionUserId    = user.id.id,
+              studyId          = f.study.id.id,
+              id               = f.ceventType.id.id,
+              expectedVersion  = f.ceventType.version
+            )
 
-        ceventTypeService.processRemoveCommand(cmd).futureValue mustSucceed { reply =>
-          reply must be (true)
+          collectionEventTypeRepository.put(f.ceventType) // restore it to it's previous state
+          ceventTypeService.processRemoveCommand(cmd).futureValue mustSucceed { reply =>
+            reply must be (true)
+          }
         }
       }
 
@@ -215,26 +222,26 @@ class CollectionEventTypeServiceSpec
     describe("a user without the Study Admin role is not allowed to") {
 
       it("retrieve a collection event type ") {
-        val f = usersCeventFixture
-        ceventTypeService.collectionEventTypeWithId(f.nonAdminUser.id, f.study.id, f.ceventType.id)
+        val f = new UserWithNoStudyAccessFixtureWithCevent
+        ceventTypeService.collectionEventTypeWithId(f.nonStudyPermissionUser.id, f.study.id, f.ceventType.id)
           .mustFail("Unauthorized")
       }
 
       it("query if a collection event type is in use") {
-        val f = usersCeventFixture
-        ceventTypeService.collectionEventTypeInUse(f.nonAdminUser.id, f.ceventType.id)
+        val f = new UserWithNoStudyAccessFixtureWithCevent
+        ceventTypeService.collectionEventTypeInUse(f.nonStudyPermissionUser.id, f.ceventType.id)
           .mustFail("Unauthorized")
       }
 
       it("retrieve all collection event types for a study") {
-        val f = usersCeventFixture
-        ceventTypeService.collectionEventTypesForStudy(f.nonAdminUser.id, f.study.id)
+        val f = new UserWithNoStudyAccessFixtureWithCevent
+        ceventTypeService.collectionEventTypesForStudy(f.nonStudyPermissionUser.id, f.study.id)
           .mustFail("Unauthorized")
       }
 
       it("update a collection event type") {
-        val f = usersCeventFixture
-        forAll(updateCommandsTable(f.nonAdminUser.id,
+        val f = new UserWithNoStudyAccessFixtureWithCevent
+        forAll(updateCommandsTable(f.nonStudyPermissionUser.id,
                                    f.study,
                                    f.ceventType,
                                    f.specimenDesc,
@@ -244,9 +251,9 @@ class CollectionEventTypeServiceSpec
       }
 
       it("remove a collection event type") {
-        val f = usersCeventFixture
+        val f = new UserWithNoStudyAccessFixtureWithCevent
         val cmd = RemoveCollectionEventTypeCmd(
-          sessionUserId    = f.nonAdminUser.id.id,
+          sessionUserId    = f.nonStudyPermissionUser.id.id,
           studyId          = f.study.id.id,
           id               = f.ceventType.id.id,
           expectedVersion  = f.ceventType.version

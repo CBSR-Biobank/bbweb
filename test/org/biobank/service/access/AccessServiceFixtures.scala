@@ -9,6 +9,12 @@ import org.scalatest.Assertions
 
 trait AccessServiceFixtures extends Assertions {
 
+  case class MembershipFixtureParam(user: User, study: Study, centre: Centre) extends {
+    val membership = factory.createMembership.copy(userIds    = Set(user.id),
+                                                   studyInfo  = MembershipStudyInfo(false, Set(study.id)),
+                                                   centreInfo = MembershipCentreInfo(false, Set(centre.id)))
+  }
+
   val factory: Factory
 
   val accessItemRepository: AccessItemRepository
@@ -21,13 +27,7 @@ trait AccessServiceFixtures extends Assertions {
 
   val centreRepository: CentreRepository
 
-  case class MembershipFixtureParam(user: User, study: Study, centre: Centre) extends {
-    val membership = factory.createMembership.copy(userIds    = Set(user.id),
-                                                   studyInfo  = MembershipStudyInfo(false, Set(study.id)),
-                                                   centreInfo = MembershipCentreInfo(false, Set(centre.id)))
-  }
-
-  def membershipFixture() = {
+  protected def membershipFixture() = {
     val f = MembershipFixtureParam(user   = factory.createActiveUser,
                                    study  = factory.createEnabledStudy,
                                    centre = factory.createEnabledCentre)
@@ -35,7 +35,7 @@ trait AccessServiceFixtures extends Assertions {
     f
   }
 
-  def addToRepository[T <: ConcurrencySafeEntity[_]](entity: T): Unit = {
+  protected def addToRepository[T <: ConcurrencySafeEntity[_]](entity: T): Unit = {
     entity match {
       case u: User       => userRepository.put(u)
       case i: AccessItem => accessItemRepository.put(i)

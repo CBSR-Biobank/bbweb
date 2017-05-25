@@ -2,7 +2,6 @@ package org.biobank.domain.user
 
 import org.biobank.ValidationKey
 import org.biobank.infrastructure.JsonUtils._
-import org.biobank.dto.UserDto
 import org.biobank.domain._
 import org.biobank.infrastructure.EnumUtils._
 import org.joda.time.DateTime
@@ -62,16 +61,6 @@ sealed trait User extends ConcurrencySafeEntity[UserId] with HasState with HasNa
     if (this.password == password) this.successNel[String]
     else DomainError("authentication failure").failureNel[User]
   }
-
-  def toDto(): UserDto =
-    UserDto(id           = id.id,
-            version      = version,
-            timeAdded    = timeAdded,
-            timeModified = timeModified,
-            state        = state,
-            name         = name,
-            email        = email,
-            avatarUrl    = avatarUrl)
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {

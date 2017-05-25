@@ -42,7 +42,7 @@ trait StudiesService extends BbwebService {
   def getStudyNames(requestUserId: UserId, filter: FilterString, sort: SortString)
       : ServiceValidation[Seq[NameDto]]
 
-  def getStudy(requestUserId: UserId, id: StudyId): ServiceValidation[Study]
+  def getStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Study]
 
   def getCentresForStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Set[CentreLocation]]
 
@@ -131,14 +131,20 @@ class StudiesServiceImpl @Inject()(
     }
   }
 
-  def getStudy(requestUserId: UserId, id: StudyId) : ServiceValidation[Study] = {
-    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
-      studyRepository.getByKey(id)
+  def getStudy(requestUserId: UserId, studyId: StudyId) : ServiceValidation[Study] = {
+    whenPermittedAndIsMember(requestUserId,
+                             PermissionId.StudyRead,
+                             Some(studyId),
+                             None) { () =>
+      studyRepository.getByKey(studyId)
     }
   }
 
   def getCentresForStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Set[CentreLocation]] = {
-    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
+    whenPermittedAndIsMember(requestUserId,
+                             PermissionId.StudyRead,
+                             Some(studyId),
+                             None) { () =>
       centreRepository.withStudy(studyId).flatMap { centre =>
         centre.locations.map { location =>
           CentreLocation(centre.id.id, location.id.id, centre.name, location.name)
