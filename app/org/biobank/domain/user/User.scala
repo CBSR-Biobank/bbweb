@@ -58,11 +58,14 @@ sealed trait User extends ConcurrencySafeEntity[UserId] with HasState with HasNa
   }
 
   def toDto(): UserDto =
-    UserDto(id        = id.id,
-            version   = version,
-            name      = name,
-            email     = email,
-            avatarUrl = avatarUrl)
+    UserDto(id           = id.id,
+            version      = version,
+            timeAdded    = timeAdded,
+            timeModified = timeModified,
+            state        = state,
+            name         = name,
+            email        = email,
+            avatarUrl    = avatarUrl)
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {

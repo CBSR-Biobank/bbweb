@@ -53,7 +53,7 @@ define(function () {
 
     function init() {
       usersService.requestCurrentUser().then(function (user) {
-        vm.user = user;
+        vm.user = User.create(user);
         vm.allowRemoveAvatarUrl = (vm.user.avatarUrl !== null);
       });
     }

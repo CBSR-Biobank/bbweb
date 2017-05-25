@@ -16,11 +16,14 @@ package dto {
 
   }
 
-  final case class UserDto(id:        String,
-                           version:   Long,
-                           name:      String,
-                           email:     String,
-                           avatarUrl: Option[String])
+  final case class UserDto(id:           String,
+                           version:      Long,
+                           timeAdded:    DateTime,
+                           timeModified: Option[DateTime],
+                           state:        EntityState,
+                           name:         String,
+                           email:        String,
+                           avatarUrl:    Option[String])
 
   object UserDto {
 
