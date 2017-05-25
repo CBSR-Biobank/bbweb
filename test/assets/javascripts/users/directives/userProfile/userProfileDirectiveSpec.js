@@ -28,9 +28,8 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, TestSuiteMixin, testUtils) {
+    beforeEach(inject(function($rootScope, $compile, TestSuiteMixin) {
       var self = this;
-
       _.extend(self, TestSuiteMixin.prototype);
 
       self.injectDependencies('$rootScope',
@@ -68,7 +67,8 @@ define(function (require) {
       var user = this.factory.user();
 
       createController.call(this, user);
-      expect(this.scope.vm.user).toEqual(user);
+      expect(this.controller.user.id).toEqual(user.id);
+      expect(this.controller.user).toEqual(jasmine.any(this.User));
     });
 
     describe('updates to name', function () {
