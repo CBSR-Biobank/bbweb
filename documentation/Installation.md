@@ -116,23 +116,23 @@ sbt playGenerateSecret
 First, create the application with the following command:
 
 ```sh
-sbt clean stage
+sbt clean dist
 ```
 
-Generate an application secrete using the command given above and use the `APPLICATION_SECRET` environment
-variable to start the server:
+Copy the generated ZIP file to the releases directory:
 
-```bash
-APPLICATION_SECRET="__value_generated_above__" target/universal/stage/bin/bbweb
+```sh
+cp target/universal/bbweb-VERSION.zip ~/bbweb_releases/
+unzip -d ~/bbweb_releases target/universal/bbweb-VERSION.zip
+```
+
+Generate an application secret using the command given to start the server:
+
+```sh
+setsid ~/bbweb_releases/bbweb-VERSION/bin/bbweb -Dplay.crypto.secret="__value_generated_above__"
 ```
 
 Replace `__value_generated_above__` with the value generated from the `sbt playGenerateSecret` command.
-
-To use an HTTPS:
-
-```bash
-APPLICATION_SECRET="__value_generated_above__" target/universal/stage/bin/bbweb
-```
 
 ### Setting up with Apache
 
