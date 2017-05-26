@@ -8,7 +8,9 @@ import org.biobank.domain.user._
 
 trait UserServiceFixtures {
 
+  import org.biobank.TestUtils._
   import org.biobank.domain.access.AccessItem._
+  import org.biobank.domain.access.RoleId._
 
   class UsersOfAllStates(val registeredUser: RegisteredUser,
                          val activeUser:     ActiveUser,
@@ -36,6 +38,12 @@ trait UserServiceFixtures {
   protected val userRepository: UserRepository
 
   protected def addToRepository[T <: ConcurrencySafeEntity[_]](entity: T): Unit
+
+  protected def addUserToRole(user: User, roleId: RoleId): Unit = {
+    accessItemRepository.getRole(roleId) mustSucceed { role =>
+      accessItemRepository.put(role.copy(userIds = role.userIds + user.id))
+    }
+  }
 
   // Removes all users but the protected default user
   protected def removeUsersFromRepository(): Unit = {

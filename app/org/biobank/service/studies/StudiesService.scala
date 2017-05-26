@@ -94,7 +94,8 @@ class StudiesServiceImpl @Inject()(
   val collectionEventRepository:            CollectionEventRepository,
   val specimenLinkTypeRepository:           SpecimenLinkTypeRepository)
     extends StudiesService
-    with ServiceWithPermissionChecks {
+    with AccessChecksSerivce
+    with StudyServicePermissionChecks {
 
   import org.biobank.CommonValidations._
 
@@ -245,29 +246,6 @@ class StudiesServiceImpl @Inject()(
       : Future[ServiceValidation[Boolean]] =
     ask(processor, cmd).mapTo[ServiceValidation[ProcessingTypeEvent]]
       .map { validation => validation.map(_ => true) }
-
-  private def withPermittedStudies[T](requestUserId: UserId)(block: Set[Study] => ServiceValidation[T])
-      : ServiceValidation[T] = {
-    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
-      for {
-        studies <- getMembershipStudies(requestUserId)
-        result  <- block(studies)
-      } yield result
-    }
-  }
-
-  private def getMembershipStudies(userId: UserId): ServiceValidation[Set[Study]] = {
-    accessService.getMembership(userId).flatMap { membership =>
-      if (membership.studyInfo.allStudies) {
-        studyRepository.getValues.toSet.successNel[String]
-      } else {
-        membership.studyInfo.studyIds
-          .map(studyRepository.getByKey)
-          .toList.sequenceU
-          .map(studies => studies.toSet)
-      }
-    }
-  }
 
   private def filterStudiesInternal(unfilteredStudies: Set[Study], filter: FilterString, sort: SortString):
       ServiceValidation[Seq[Study]] = {

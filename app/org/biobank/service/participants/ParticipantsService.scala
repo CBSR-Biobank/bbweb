@@ -9,7 +9,8 @@ import org.biobank.domain.study._
 import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.infrastructure.event.ParticipantEvents._
-import org.biobank.service.{BbwebService, BbwebServiceImpl, ServiceValidation}
+import org.biobank.service._
+import org.biobank.service.access.AccessService
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
@@ -32,11 +33,13 @@ trait ParticipantsService extends BbwebService {
 @Singleton
 class ParticipantsServiceImpl @Inject() (
   @Named("participantsProcessor") val processor: ActorRef,
+  val accessService:                             AccessService,
   val studyRepository:                           StudyRepository,
   val participantRepository:                     ParticipantRepository,
   val collectionEventRepository:                 CollectionEventRepository)
     extends ParticipantsService
-    with BbwebServiceImpl {
+    with BbwebServiceImpl
+    with ServicePermissionChecks {
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 

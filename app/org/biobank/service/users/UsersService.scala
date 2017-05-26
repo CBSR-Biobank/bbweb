@@ -88,7 +88,8 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
                                                val studyRepository:                    StudyRepository,
                                                val passwordHasher:                     PasswordHasher)
     extends UsersService
-    with ServiceWithPermissionChecks {
+    with AccessChecksSerivce
+    with ServicePermissionChecks {
 
   import org.biobank.CommonValidations._
   import org.biobank.domain.access.AccessItem._

@@ -24,7 +24,7 @@ class CollectionEventTypeServiceSpec
   trait CeventFixture {
     val specimenDesc = factory.createCollectionSpecimenDescription
     val annotationType = factory.createAnnotationType
-    val ceventTypeNoStudy = factory.createCollectionEventType
+    protected val ceventTypeNoStudy = factory.createCollectionEventType
       .copy(specimenDescriptions = Set(specimenDesc),
             annotationTypes      = Set(annotationType))
   }

@@ -64,7 +64,8 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
                                     val centreRepository:          CentreRepository,
                                     val studyRepository:           StudyRepository)
     extends CentresService
-    with ServiceWithPermissionChecks {
+    with AccessChecksSerivce
+    with ServicePermissionChecks {
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 

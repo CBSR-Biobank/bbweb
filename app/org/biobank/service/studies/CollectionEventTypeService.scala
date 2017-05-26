@@ -56,7 +56,9 @@ class CollectionEventTypeServiceImpl @Inject()(
   val studyRepository:               StudyRepository,
   val specimenGroupRepository:       SpecimenGroupRepository,
   val collectionEventRepository:     CollectionEventRepository)
-    extends CollectionEventTypeService with ServiceWithPermissionChecks {
+    extends CollectionEventTypeService
+    with AccessChecksSerivce
+    with ServicePermissionChecks {
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
@@ -64,7 +66,10 @@ class CollectionEventTypeServiceImpl @Inject()(
                                 studyId:               StudyId,
                                 collectionEventTypeId: CollectionEventTypeId)
       : ServiceValidation[CollectionEventType] = {
-    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
+    whenPermittedAndIsMember(requestUserId,
+                             PermissionId.StudyRead,
+                             Some(studyId),
+                             None) { () =>
       withStudy(studyId) { study =>
         collectionEventTypeRepository.withId(study.id, collectionEventTypeId)
       }
@@ -72,16 +77,22 @@ class CollectionEventTypeServiceImpl @Inject()(
   }
 
   def collectionEventTypeInUse(requestUserId: UserId, id: CollectionEventTypeId): ServiceValidation[Boolean] = {
-    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
-      collectionEventTypeRepository.getByKey(id).map { ceventType =>
-        collectionEventRepository.collectionEventTypeInUse(id)
+    collectionEventTypeRepository.getByKey(id).flatMap { ceventType =>
+      whenPermittedAndIsMember(requestUserId,
+                               PermissionId.StudyRead,
+                               Some(ceventType.studyId),
+                               None) { () =>
+        collectionEventRepository.collectionEventTypeInUse(id).successNel[String]
       }
     }
   }
 
   def collectionEventTypesForStudy(requestUserId: UserId, studyId: StudyId)
       : ServiceValidation[Set[CollectionEventType]] = {
-    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
+    whenPermittedAndIsMember(requestUserId,
+                             PermissionId.StudyRead,
+                             Some(studyId),
+                             None) { () =>
       withStudy(studyId) { study =>
         collectionEventTypeRepository.allForStudy(study.id).successNel[String]
       }

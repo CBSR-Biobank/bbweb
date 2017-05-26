@@ -62,12 +62,12 @@ class CentresServiceSpec
   class UserWithNoCentreAccessFixture {
     val location            = factory.createLocation
     val centre              = factory.createDisabledCentre.copy(locations = Set(location))
-    val nonMembershipUser       = factory.createActiveUser
+    val nonAccessUser       = factory.createActiveUser
     val noCentresMembership = factory.createMembership.copy(
-        userIds = Set(nonMembershipUser.id),
+        userIds = Set(nonAccessUser.id),
         centreInfo = MembershipCentreInfo(false, Set.empty[CentreId]))
 
-    Set(centre, nonMembershipUser, noCentresMembership ).foreach(addToRepository)
+    Set(centre, nonAccessUser, noCentresMembership ).foreach(addToRepository)
   }
 
   class CentresOfAllStatesFixure extends UsersWithCentreAccessFixture {
@@ -298,23 +298,23 @@ class CentresServiceSpec
 
       it("retrieve centre counts") {
         val f = new UserWithNoCentreAccessFixture
-        centresService.getCentresCount(f.nonMembershipUser.id) mustFail "Unauthorized"
+        centresService.getCentresCount(f.nonAccessUser.id) mustFail "Unauthorized"
       }
 
       it("retrieve centre counts by status") {
         val f = new UserWithNoCentreAccessFixture
-        centresService.getCountsByStatus(f.nonMembershipUser.id) mustFail "Unauthorized"
+        centresService.getCountsByStatus(f.nonAccessUser.id) mustFail "Unauthorized"
       }
 
       it("retrieve centres") {
         val f = new UserWithNoCentreAccessFixture
-        centresService.getCentres(f.nonMembershipUser.id, new FilterString(""), new SortString(""))
+        centresService.getCentres(f.nonAccessUser.id, new FilterString(""), new SortString(""))
           .mustFail("Unauthorized")
       }
 
       it("retrieve centre names") {
         val f = new UserWithNoCentreAccessFixture
-        centresService.getCentreNames(f.nonMembershipUser.id, new FilterString(""), new SortString(""))
+        centresService.getCentreNames(f.nonAccessUser.id, new FilterString(""), new SortString(""))
           .mustFail("Unauthorized")
       }
 
@@ -322,12 +322,12 @@ class CentresServiceSpec
         val f = new UserWithNoCentreAccessFixture
         val centre = factory.createEnabledCentre
         centreRepository.put(centre)
-        centresService.getCentre(f.nonMembershipUser.id, centre.id) mustFail "Unauthorized"
+        centresService.getCentre(f.nonAccessUser.id, centre.id) mustFail "Unauthorized"
       }
 
       it("search locations") {
         val f = new UserWithNoCentreAccessFixture
-        val cmd = SearchCentreLocationsCmd(sessionUserId = f.nonMembershipUser.id.id,
+        val cmd = SearchCentreLocationsCmd(sessionUserId = f.nonAccessUser.id.id,
                                            filter        = "",
                                            limit         = 10)
         centresService.searchLocations(cmd) mustFail "Unauthorized"
@@ -337,7 +337,7 @@ class CentresServiceSpec
         val f = new UserWithNoCentreAccessFixture
         val study = factory.createDisabledStudy
         studyRepository.put(study)
-        forAll(updateCommandsTable(f.nonMembershipUser.id, f.centre, f.location, study)) { cmd =>
+        forAll(updateCommandsTable(f.nonAccessUser.id, f.centre, f.location, study)) { cmd =>
           centreRepository.put(f.centre) // restore the centre to it's previous state
           centresService.processCommand(cmd).futureValue mustFail "Unauthorized"
         }
@@ -346,7 +346,7 @@ class CentresServiceSpec
       it("change a centre's state") {
         val f1 = new UserWithNoCentreAccessFixture
         val f2 = new CentresOfAllStatesFixure
-        forAll(stateChangeCommandsTable(f1.nonMembershipUser.id,
+        forAll(stateChangeCommandsTable(f1.nonAccessUser.id,
                                         f2.disabledCentre,
                                         f2.enabledCentre)) { cmd =>
           Set(f2.disabledCentre, f2.enabledCentre).foreach(addToRepository)

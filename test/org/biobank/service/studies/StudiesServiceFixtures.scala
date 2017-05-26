@@ -10,10 +10,6 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
 
 trait StudiesServiceFixtures extends ProcessorTestFixture with UserServiceFixtures {
 
-  import org.biobank.TestUtils._
-  import org.biobank.domain.access.AccessItem._
-  import org.biobank.domain.access.RoleId._
-
   class UsersWithStudyAccessFixture {
     val study               = factory.createDisabledStudy
     val allStudiesAdminUser = factory.createActiveUser
@@ -83,12 +79,6 @@ trait StudiesServiceFixtures extends ProcessorTestFixture with UserServiceFixtur
   protected val studyRepository: StudyRepository
 
   protected val collectionEventTypeRepository: CollectionEventTypeRepository
-
-  protected def addUserToRole(user: User, roleId: RoleId): Unit = {
-    accessItemRepository.getRole(roleId) mustSucceed { role =>
-      accessItemRepository.put(role.copy(userIds = role.userIds + user.id))
-    }
-  }
 
   protected def addUserToStudyAdminRole(user: User): Unit = {
     addUserToRole(user, RoleId.StudyAdministrator)
