@@ -24,13 +24,13 @@ class ParticipantsController @Inject() (val action:              BbwebAction,
   def get(studyId: StudyId, participantId: ParticipantId): Action[Unit] =
     action(parse.empty) { implicit request =>
       log.debug(s"ParticipantsController.get: studyId: $studyId, participantId: $participantId")
-      validationReply(participantsService.get(studyId, participantId))
+      validationReply(participantsService.get(request.authInfo.userId, studyId, participantId))
     }
 
   def getByUniqueId(studyId: StudyId, uniqueId: String): Action[Unit] =
     action(parse.empty) { implicit request =>
       log.debug(s"ParticipantsController.getByUniqueId: studyId: $studyId, uniqueId: $uniqueId")
-      validationReply(participantsService.getByUniqueId(studyId, uniqueId))
+      validationReply(participantsService.getByUniqueId(request.authInfo.userId, studyId, uniqueId))
     }
 
   def snapshot: Action[Unit] =

@@ -4,6 +4,7 @@ import akka.actor._
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named, Singleton}
+import org.biobank.domain.access._
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
 import org.biobank.domain.user.UserId
@@ -20,9 +21,13 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[ParticipantsServiceImpl])
 trait ParticipantsService extends BbwebService {
 
-  def get(studyId: StudyId, participantId: ParticipantId): ServiceValidation[Participant]
+  def get(requestUserId: UserId,
+          studyId:       StudyId,
+          participantId: ParticipantId): ServiceValidation[Participant]
 
-  def getByUniqueId(studyId: StudyId, uniqueId: String): ServiceValidation[Participant]
+  def getByUniqueId(requestUserId: UserId,
+                    studyId:       StudyId,
+                    uniqueId:      String): ServiceValidation[Participant]
 
   def processCommand(cmd: ParticipantCommand): Future[ServiceValidation[Participant]]
 
@@ -38,25 +43,55 @@ class ParticipantsServiceImpl @Inject() (
   val participantRepository:                     ParticipantRepository,
   val collectionEventRepository:                 CollectionEventRepository)
     extends ParticipantsService
-    with BbwebServiceImpl
+    with AccessChecksSerivce
     with ServicePermissionChecks {
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def get(studyId: StudyId, participantId: ParticipantId): ServiceValidation[Participant] = {
-    participantRepository.withId(studyId, participantId)
-  }
-
-  def getByUniqueId(studyId: StudyId, uniqueId: String): ServiceValidation[Participant] = {
-    participantRepository.withUniqueId(studyId, uniqueId)
-  }
-
-  def processCommand(cmd: ParticipantCommand): Future[ServiceValidation[Participant]] =
-    ask(processor, cmd).mapTo[ServiceValidation[ParticipantEvent]].map { validation =>
-      for {
-        event       <- validation
-        participant <- participantRepository.getByKey(ParticipantId(event.id))
-      } yield participant
+  def get(requestUserId: UserId,
+          studyId:       StudyId,
+          participantId: ParticipantId): ServiceValidation[Participant] = {
+    whenPermittedAndIsMember(requestUserId,
+                             PermissionId.StudyRead,
+                             Some(studyId),
+                             None) { () =>
+      participantRepository.withId(studyId, participantId)
     }
+  }
+
+  def getByUniqueId(requestUserId: UserId,
+                    studyId:       StudyId,
+                    uniqueId:      String): ServiceValidation[Participant] = {
+    whenPermittedAndIsMember(requestUserId,
+                             PermissionId.StudyRead,
+                             Some(studyId),
+                             None) { () =>
+      participantRepository.withUniqueId(studyId, uniqueId)
+    }
+  }
+
+  def processCommand(cmd: ParticipantCommand): Future[ServiceValidation[Participant]] = {
+    val validStudyId = cmd match {
+        case c: AddParticipantCmd => StudyId(c.studyId).successNel[String]
+        case c: ParticipantModifyCommand => {
+          participantRepository.getByKey(ParticipantId(c.id)).map(p => p.studyId)
+        }
+      }
+
+    validStudyId.fold(
+      err => Future.successful(err.failure[Participant]),
+      studyId => whenPermittedAndIsMemberAsync(UserId(cmd.sessionUserId),
+                                               PermissionId.StudyUpdate,
+                                               Some(studyId),
+                                               None) { () =>
+        ask(processor, cmd).mapTo[ServiceValidation[ParticipantEvent]].map { validation =>
+          for {
+            event       <- validation
+            participant <- participantRepository.getByKey(ParticipantId(event.id))
+          } yield participant
+        }
+      }
+    )
+  }
 
 }
