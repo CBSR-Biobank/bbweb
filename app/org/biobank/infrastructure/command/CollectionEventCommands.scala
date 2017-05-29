@@ -37,7 +37,7 @@ object CollectionEventCommands {
                                                          timeCompleted:   DateTime)
       extends CollectionEventModifyCommand
 
-  final case class UpdateCollectionEventAnnotationCmd(sessionUserId:    String,
+  final case class AddCollectionEventAnnotationCmd(sessionUserId:    String,
                                                       id:               String,
                                                       expectedVersion:  Long,
                                                       annotationTypeId: String,
@@ -61,7 +61,7 @@ object CollectionEventCommands {
   implicit val addCollectionEventCmdReads: Reads[AddCollectionEventCmd]                                 = Json.reads[AddCollectionEventCmd]
   implicit val updateCollectionEventVisitNumberCmdReads: Reads[UpdateCollectionEventVisitNumberCmd]     = Json.reads[UpdateCollectionEventVisitNumberCmd]
   implicit val updateCollectionEventTimeCompletedCmdReads: Reads[UpdateCollectionEventTimeCompletedCmd] = Json.reads[UpdateCollectionEventTimeCompletedCmd]
-  implicit val updateCollectionEventAnnotationCmdReads: Reads[UpdateCollectionEventAnnotationCmd]       = Json.reads[UpdateCollectionEventAnnotationCmd]
+  implicit val updateCollectionEventAnnotationCmdReads: Reads[AddCollectionEventAnnotationCmd]       = Json.reads[AddCollectionEventAnnotationCmd]
   implicit val removeCollectionEventCmdReads: Reads[RemoveCollectionEventCmd]                           = Json.reads[RemoveCollectionEventCmd]
 
 }

@@ -51,14 +51,17 @@ trait ShipmentsService extends BbwebService {
    *
    * @param sort the string representation of the sort expression to use when sorting the shipment specimens.
    */
-  def getShipmentSpecimens(shipmentId: ShipmentId, filter: FilterString, sort: SortString):
-      ServiceValidation[Seq[ShipmentSpecimenDto]]
+  def getShipmentSpecimens(requestUserId: UserId,
+                           shipmentId:    ShipmentId,
+                           filter:        FilterString,
+                           sort:          SortString): ServiceValidation[Seq[ShipmentSpecimenDto]]
 
-  def shipmentCanAddSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String)
+  def shipmentCanAddSpecimen(requestUserId: UserId, shipmentId: ShipmentId, shipmentSpecimenId: String)
       : ServiceValidation[SpecimenDto]
 
-  def getShipmentSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String)
-      : ServiceValidation[ShipmentSpecimenDto]
+  def getShipmentSpecimen(requestUserId:      UserId,
+                          shipmentId:         ShipmentId,
+                          shipmentSpecimenId: String): ServiceValidation[ShipmentSpecimenDto]
 
   def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[ShipmentDto]]
 
@@ -127,7 +130,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
     shipmentRepository.getByKey(id).flatMap(getShipmentDto)
   }
 
-  def shipmentCanAddSpecimen(shipmentId: ShipmentId, specimenInventoryId: String)
+  def shipmentCanAddSpecimen(requestUserId: UserId, shipmentId: ShipmentId, specimenInventoryId: String)
       : ServiceValidation[SpecimenDto] = {
     for {
         shipment     <- shipmentRepository.getByKey(shipmentId)
@@ -140,12 +143,14 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
           }
         }
         canBeAdded   <- specimensNotPresentInShipment(specimen)
-        specimenDto  <- specimensService.get(specimen.id)
+        specimenDto  <- specimensService.get(requestUserId, specimen.id)
       } yield specimenDto
   }
 
-  def getShipmentSpecimens(shipmentId: ShipmentId, filter: FilterString, sort: SortString):
-      ServiceValidation[List[ShipmentSpecimenDto]] = {
+  def getShipmentSpecimens(requestUserId: UserId,
+                           shipmentId:    ShipmentId,
+                           filter:        FilterString,
+                           sort:          SortString): ServiceValidation[List[ShipmentSpecimenDto]] = {
 
     val shipmentSpecimens = shipmentSpecimenRepository.allForShipment(shipmentId)
     val filteredShipmentSpecimens = ShipmentSpecimenFilter.filterShipmentSpecimens(shipmentSpecimens, filter)
@@ -160,7 +165,10 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
         ShipmentSpecimenDto.sort2Compare.get(sortExpressions(0).name).
           toSuccessNel(ServiceError(s"invalid sort field: ${sortExpressions(0).name}"))
       }
-      shipmentSpecimenss <- filteredShipmentSpecimens.flatMap(_.map(getShipmentSpecimenDto).toList.sequenceU)
+      shipmentSpecimenss <- {
+        filteredShipmentSpecimens.flatMap(
+          _.map(s => getShipmentSpecimenDto(requestUserId, s)).toList.sequenceU)
+      }
     } yield {
       val result = shipmentSpecimenss.sortWith(sortFunc)
       if (sortExpressions(0).order == AscendingOrder) result
@@ -168,12 +176,12 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
     }
   }
 
-  def getShipmentSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String)
+  def getShipmentSpecimen(requestUserId: UserId, shipmentId: ShipmentId, shipmentSpecimenId: String)
       : ServiceValidation[ShipmentSpecimenDto] = {
     for {
       shipment <- shipmentRepository.getByKey(shipmentId)
       ss       <- shipmentSpecimenRepository.getByKey(ShipmentSpecimenId(shipmentSpecimenId))
-      dto      <- getShipmentSpecimenDto(ss)
+      dto      <- getShipmentSpecimenDto(requestUserId, ss)
     } yield dto
   }
 
@@ -197,9 +205,9 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
     }
   }
 
-  private def getShipmentSpecimenDto(shipmentSpecimen: ShipmentSpecimen)
+  private def getShipmentSpecimenDto(requestUserId: UserId, shipmentSpecimen: ShipmentSpecimen)
       : ServiceValidation[ShipmentSpecimenDto] = {
-    specimensService.getSpecimenDto(shipmentSpecimen.specimenId).map { specimenDto =>
+    specimensService.getSpecimenDto(requestUserId, shipmentSpecimen.specimenId).map { specimenDto =>
       shipmentSpecimen.createDto(specimenDto)
     }
   }

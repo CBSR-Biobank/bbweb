@@ -27,7 +27,7 @@ class CollectionEventsController @Inject() (val action:       BbwebAction,
 
   def get(ceventId: String): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.get(ceventId))
+      validationReply(service.get(request.authInfo.userId, CollectionEventId(ceventId)))
     }
 
   def list(participantId: ParticipantId): Action[Unit] =
@@ -36,7 +36,10 @@ class CollectionEventsController @Inject() (val action:       BbwebAction,
         Future {
           for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            cevents    <- service.list(participantId, pagedQuery.filter, pagedQuery.sort)
+            cevents    <- service.list(request.authInfo.userId,
+                                       participantId,
+                                       pagedQuery.filter,
+                                       pagedQuery.sort)
             validPage  <- pagedQuery.validPage(cevents.size)
             results    <- PagedResults.create(cevents, pagedQuery.page, pagedQuery.limit)
           } yield results
@@ -46,7 +49,7 @@ class CollectionEventsController @Inject() (val action:       BbwebAction,
 
   def getByVisitNumber(participantId: ParticipantId, visitNumber: Int): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.getByVisitNumber(participantId, visitNumber))
+      validationReply(service.getByVisitNumber(request.authInfo.userId, participantId, visitNumber))
     }
 
   def snapshot: Action[Unit] =
@@ -64,7 +67,7 @@ class CollectionEventsController @Inject() (val action:       BbwebAction,
     commandAction[UpdateCollectionEventTimeCompletedCmd](Json.obj("id" -> ceventId))(processCommand)
 
   def addAnnotation(ceventId: CollectionEventId): Action[JsValue] =
-    commandAction[UpdateCollectionEventAnnotationCmd](Json.obj("id" -> ceventId))(processCommand)
+    commandAction[AddCollectionEventAnnotationCmd](Json.obj("id" -> ceventId))(processCommand)
 
   def removeAnnotation(ceventId: CollectionEventId,
                        annotTypeId:   String,

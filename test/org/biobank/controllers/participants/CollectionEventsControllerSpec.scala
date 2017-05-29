@@ -268,15 +268,15 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      it("fail when querying for a single collection event ID and ID is invalid") {
+      it("fail when querying for a single collection event and ID is invalid") {
         createEntities { (study, participant, ceventType) =>
           val cevent = factory.createCollectionEvent
 
-          val json = makeRequest(GET, uri(cevent), BAD_REQUEST)
+          val json = makeRequest(GET, uri(cevent), NOT_FOUND)
 
           (json \ "status").as[String] must include ("error")
 
-          (json \ "message").as[String] must include ("collection event id is invalid")
+          (json \ "message").as[String] must include ("IdNotFound: collection event id")
 
           ()
         }

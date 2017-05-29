@@ -22,19 +22,19 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[SpecimensServiceImpl])
 trait SpecimensService extends BbwebService {
 
-  def get(id: SpecimenId): ServiceValidation[SpecimenDto]
+  def get(requestUserId: UserId, id: SpecimenId): ServiceValidation[SpecimenDto]
 
-  def getByInventoryId(inventoryId: String): ServiceValidation[SpecimenDto]
+  def getByInventoryId(requestUserId: UserId, inventoryId: String): ServiceValidation[SpecimenDto]
 
-  def list(collectionEventId: CollectionEventId, sort: SortString)
+  def getSpecimenDto(requestUserId: UserId, id: SpecimenId): ServiceValidation[SpecimenDto]
+
+  def list(requestUserId: UserId, collectionEventId: CollectionEventId, sort: SortString)
       : ServiceValidation[Seq[SpecimenDto]]
 
   def processCommand(cmd: SpecimenCommand): Future[ServiceValidation[CollectionEvent]]
 
   def processRemoveCommand(cmd: SpecimenCommand): Future[ServiceValidation[Boolean]]
 
-
-  def getSpecimenDto(id: SpecimenId): ServiceValidation[SpecimenDto]
 
   def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
 
@@ -52,49 +52,28 @@ class SpecimensServiceImpl @Inject() (
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def getSpecimenDto(id: SpecimenId): ServiceValidation[SpecimenDto] = {
+  def get(requestUserId: UserId, id: SpecimenId): ServiceValidation[SpecimenDto] = {
     for {
       specimen <- specimenRepository.getByKey(id)
       dto      <- convertToDto(specimen)
     } yield dto
   }
 
-  def get(id: SpecimenId): ServiceValidation[SpecimenDto] = {
-    for {
-      specimen <- specimenRepository.getByKey(id)
-      dto      <- convertToDto(specimen)
-    } yield dto
-  }
-
-  private def convertToDto(specimen: Specimen): ServiceValidation[SpecimenDto] = {
-    for {
-      ceventSpecimen     <- ceventSpecimenRepository.withSpecimenId(specimen.id)
-      cevent             <- collectionEventRepository.getByKey(ceventSpecimen.ceventId)
-      ceventType         <- collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
-      specimenDesc       <- ceventType.specimenDesc(specimen.specimenDescriptionId)
-      originCentre       <- centreRepository.getByLocationId(specimen.originLocationId)
-      originLocationName <- originCentre.locationName(specimen.originLocationId)
-      centre             <- centreRepository.getByLocationId(specimen.locationId)
-      locationName       <- centre.locationName(specimen.locationId)
-    } yield {
-      val originLocationInfo = CentreLocationInfo(originCentre.id.id,
-                                                  specimen.originLocationId.id,
-                                                  originLocationName)
-      val locationInfo = CentreLocationInfo(centre.id.id,
-                                            specimen.locationId.id,
-                                            locationName)
-      specimen.createDto(cevent, specimenDesc, originLocationInfo, locationInfo)
-    }
-  }
-
-  def getByInventoryId(inventoryId: String): ServiceValidation[SpecimenDto] = {
+  def getByInventoryId(requestUserId: UserId, inventoryId: String): ServiceValidation[SpecimenDto] = {
     for {
       specimen <- specimenRepository.getByInventoryId(inventoryId)
       dto      <- convertToDto(specimen)
     } yield dto
   }
 
-  def list(collectionEventId: CollectionEventId, sort: SortString)
+  def getSpecimenDto(requestUserId: UserId, id: SpecimenId): ServiceValidation[SpecimenDto] = {
+    for {
+      specimen <- specimenRepository.getByKey(id)
+      dto      <- convertToDto(specimen)
+    } yield dto
+  }
+
+  def list(requestUserId: UserId, collectionEventId: CollectionEventId, sort: SortString)
       : ServiceValidation[Seq[SpecimenDto]] = {
 
     def getSpecimens(ceventId: CollectionEventId): ServiceValidation[List[Specimen]] = {
@@ -144,6 +123,27 @@ class SpecimensServiceImpl @Inject() (
       cevent <- collectionEventRepository.getByKey(ceventId)
       result <- fn(cevent)
     } yield result
+  }
+
+  private def convertToDto(specimen: Specimen): ServiceValidation[SpecimenDto] = {
+    for {
+      ceventSpecimen     <- ceventSpecimenRepository.withSpecimenId(specimen.id)
+      cevent             <- collectionEventRepository.getByKey(ceventSpecimen.ceventId)
+      ceventType         <- collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
+      specimenDesc       <- ceventType.specimenDesc(specimen.specimenDescriptionId)
+      originCentre       <- centreRepository.getByLocationId(specimen.originLocationId)
+      originLocationName <- originCentre.locationName(specimen.originLocationId)
+      centre             <- centreRepository.getByLocationId(specimen.locationId)
+      locationName       <- centre.locationName(specimen.locationId)
+    } yield {
+      val originLocationInfo = CentreLocationInfo(originCentre.id.id,
+                                                  specimen.originLocationId.id,
+                                                  originLocationName)
+      val locationInfo = CentreLocationInfo(centre.id.id,
+                                            specimen.locationId.id,
+                                            locationName)
+      specimen.createDto(cevent, specimenDesc, originLocationInfo, locationInfo)
+    }
   }
 
 }

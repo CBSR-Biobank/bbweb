@@ -6,7 +6,6 @@ import org.biobank.domain.access._
 import org.biobank.domain.study._
 import org.biobank.domain.participants._
 import org.biobank.domain.user._
-import org.biobank.service.studies._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
@@ -15,27 +14,11 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
  */
 class ParticipantsServiceSpec
     extends ProcessorTestFixture
-    with StudiesServiceFixtures
+    with ParticipantsServiceFixtures
     with ScalaFutures {
 
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.command.ParticipantCommands._
-
-  class ParticipantFixure extends UsersWithStudyAccessFixture {
-    val annotationType = factory.createAnnotationType
-    val annotation     = factory.createAnnotationWithValues(annotationType)
-    val enabledStudy   = factory.createEnabledStudy.copy(annotationTypes = Set(annotationType))
-    val specimenDesc = factory.createCollectionSpecimenDescription
-    val ceventType     = factory.createCollectionEventType.copy(studyId              = enabledStudy.id,
-                                                                specimenDescriptions = Set(specimenDesc))
-    val participant    = factory.createParticipant.copy(studyId     = enabledStudy.id,
-                                                        annotations = Set(annotation))
-
-    Set(enabledStudy, participant, ceventType).foreach(addToRepository)
-    addToRepository(studyOnlyMembership.copy(
-                      studyInfo = studyOnlyMembership.studyInfo.copy(studyIds = Set(enabledStudy.id))))
-
-  }
 
   protected val nameGenerator = new NameGenerator(this.getClass)
 
@@ -51,14 +34,9 @@ class ParticipantsServiceSpec
 
   protected val participantRepository = app.injector.instanceOf[ParticipantRepository]
 
-  private val participantsService = app.injector.instanceOf[ParticipantsService]
+  protected val collectionEventRepository = app.injector.instanceOf[CollectionEventRepository]
 
-  override protected def addToRepository[T <: ConcurrencySafeEntity[_]](entity: T): Unit = {
-    entity match {
-      case e: Participant => participantRepository.put(e)
-      case e => super.addToRepository(e)
-    }
-  }
+  private val participantsService = app.injector.instanceOf[ParticipantsService]
 
   private def commandsTable(sessionUserId: UserId, participant: Participant, annotation: Annotation) = {
     Table("participant commands",
@@ -97,7 +75,7 @@ class ParticipantsServiceSpec
     describe("when getting a participant") {
 
       it("users can access") {
-        val f = new ParticipantFixure
+        val f = new UsersWithParticipantAccessFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
           participantsService.get(user.id, f.enabledStudy.id, f.participant.id)
@@ -108,7 +86,7 @@ class ParticipantsServiceSpec
       }
 
       it("users cannot access") {
-        val f = new ParticipantFixure
+        val f = new UsersWithParticipantAccessFixture
         forAll (f.usersCannotReadTable) { (user, label) =>
           info(label)
           participantsService.get(user.id, f.enabledStudy.id, f.participant.id) mustFail "Unauthorized"
@@ -120,7 +98,7 @@ class ParticipantsServiceSpec
     describe("when getting a participant by unique ID") {
 
       it("users can access") {
-        val f = new ParticipantFixure
+        val f = new UsersWithParticipantAccessFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
           participantsService.getByUniqueId(user.id, f.enabledStudy.id, f.participant.uniqueId)
@@ -131,7 +109,7 @@ class ParticipantsServiceSpec
       }
 
       it("users cannot access") {
-        val f = new ParticipantFixure
+        val f = new UsersWithParticipantAccessFixture
         forAll (f.usersCannotReadTable) { (user, label) =>
           info(label)
           participantsService.getByUniqueId(user.id, f.enabledStudy.id, f.participant.uniqueId)
@@ -143,9 +121,9 @@ class ParticipantsServiceSpec
 
     describe("when adding a participant") {
 
-      it("users can access") {
-        val f = new ParticipantFixure
-        forAll (f.usersCanUpdateTable) { (user, label) =>
+      it("111 users can access") {
+        val f = new UsersWithParticipantAccessFixture
+        forAll (f.usersCanAddOrUpdateTable) { (user, label) =>
           participantRepository.removeAll
           val cmd = AddParticipantCmd(
               sessionUserId   = user.id.id,
@@ -159,9 +137,10 @@ class ParticipantsServiceSpec
       }
 
       it("users cannot access") {
-        val f = new ParticipantFixure
+        val f = new UsersWithParticipantAccessFixture
         forAll (f.usersCannotUpdateTable) { (user, label) =>
           info(label)
+          participantRepository.removeAll
           val cmd = AddParticipantCmd(
               sessionUserId   = user.id.id,
               studyId         = f.participant.studyId.id,
@@ -176,8 +155,8 @@ class ParticipantsServiceSpec
     describe("when updating participants") {
 
       it("users can access") {
-        val f = new ParticipantFixure
-        forAll (f.usersCanUpdateTable) { (user, label) =>
+        val f = new UsersWithParticipantAccessFixture
+        forAll (f.usersCanAddOrUpdateTable) { (user, label) =>
           info(label)
           forAll(commandsTable(user.id, f.participant, f.annotation)) { cmd =>
             val participant = cmd match {
@@ -193,7 +172,7 @@ class ParticipantsServiceSpec
       }
 
       it("users cannot access") {
-        val f = new ParticipantFixure
+        val f = new UsersWithParticipantAccessFixture
         forAll (f.usersCannotUpdateTable) { (user, label) =>
           info(label)
           forAll(commandsTable(user.id, f.participant, f.annotation)) { cmd =>

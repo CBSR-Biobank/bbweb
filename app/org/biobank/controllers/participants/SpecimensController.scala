@@ -30,12 +30,12 @@ class SpecimensController @Inject() (val action:       BbwebAction,
    */
   def get(id: SpecimenId): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.get(id))
+      validationReply(service.get(request.authInfo.userId, id))
     }
 
   def getByInventoryId(invId: String): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.getByInventoryId(invId))
+      validationReply(service.getByInventoryId(request.authInfo.userId, invId))
     }
 
   def list(ceventId: CollectionEventId): Action[Unit] =
@@ -44,7 +44,7 @@ class SpecimensController @Inject() (val action:       BbwebAction,
         Future {
           for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            specimens  <- service.list(ceventId, pagedQuery.sort)
+            specimens  <- service.list(request.authInfo.userId, ceventId, pagedQuery.sort)
             validPage  <- pagedQuery.validPage(specimens.size)
             results    <- PagedResults.create(specimens, pagedQuery.page, pagedQuery.limit)
           } yield results

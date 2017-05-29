@@ -50,7 +50,7 @@ class CentresServiceSpec
                                     (centreOnlyAdminUser,  "centre only admin user"),
                                     (centreUser,           "non-admin centre user"))
 
-    def usersCanUpdateTable() = Table(("users with update access", "label"),
+    def usersCanAddOrUpdateTable() = Table(("users with update access", "label"),
                                       (allCentresAdminUser, "all centres admin user"),
                                       (centreOnlyAdminUser,  "centre only admin user"))
 
@@ -361,7 +361,7 @@ class CentresServiceSpec
       it("users can access") {
         val f = new UsersWithCentreAccessFixture
 
-        forAll (f.usersCanUpdateTable) { (user, label) =>
+        forAll (f.usersCanAddOrUpdateTable) { (user, label) =>
           val cmd = AddCentreCmd(sessionUserId = user.id.id,
                                 name           = f.centre.name,
                                 description    = f.centre.description)
@@ -392,7 +392,7 @@ class CentresServiceSpec
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        forAll (f.usersCanUpdateTable) { (user, label) =>
+        forAll (f.usersCanAddOrUpdateTable) { (user, label) =>
           info(label)
           forAll(updateCommandsTable(user.id, f.centre, f.location, study)) { cmd =>
             val centre = cmd match {
@@ -430,7 +430,7 @@ class CentresServiceSpec
 
       it("users can access") {
         val f = new CentresOfAllStatesFixure
-        forAll (f.usersCanUpdateTable) { (user, label) =>
+        forAll (f.usersCanAddOrUpdateTable) { (user, label) =>
           info(label)
           forAll(stateChangeCommandsTable(user.id,
                                           f.disabledCentre,

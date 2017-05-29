@@ -87,7 +87,7 @@ class CollectionEventsProcessor @Inject() (
     case cmd: UpdateCollectionEventTimeCompletedCmd =>
       processUpdateCmd(cmd, updateTimeCompletedCmdToEvent, applyTimeCompletedUpdatedEvent)
 
-    case cmd: UpdateCollectionEventAnnotationCmd =>
+    case cmd: AddCollectionEventAnnotationCmd =>
       processUpdateCmd(cmd, updateAnnotationCmdToEvent, applyAnnotationUpdatedEvent)
 
     case cmd: RemoveCollectionEventAnnotationCmd =>
@@ -198,7 +198,7 @@ class CollectionEventsProcessor @Inject() (
     }
   }
 
-  private def updateAnnotationCmdToEvent(cmd:                 UpdateCollectionEventAnnotationCmd,
+  private def updateAnnotationCmdToEvent(cmd:                 AddCollectionEventAnnotationCmd,
                                          participant:         Participant,
                                          collectionEventType: CollectionEventType,
                                          cevent:              CollectionEvent)

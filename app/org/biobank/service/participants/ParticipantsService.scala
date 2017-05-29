@@ -52,7 +52,7 @@ class ParticipantsServiceImpl @Inject() (
           studyId:       StudyId,
           participantId: ParticipantId): ServiceValidation[Participant] = {
     whenPermittedAndIsMember(requestUserId,
-                             PermissionId.StudyRead,
+                             PermissionId.ParticipantRead,
                              Some(studyId),
                              None) { () =>
       participantRepository.withId(studyId, participantId)
@@ -63,7 +63,7 @@ class ParticipantsServiceImpl @Inject() (
                     studyId:       StudyId,
                     uniqueId:      String): ServiceValidation[Participant] = {
     whenPermittedAndIsMember(requestUserId,
-                             PermissionId.StudyRead,
+                             PermissionId.ParticipantRead,
                              Some(studyId),
                              None) { () =>
       participantRepository.withUniqueId(studyId, uniqueId)
@@ -73,15 +73,19 @@ class ParticipantsServiceImpl @Inject() (
   def processCommand(cmd: ParticipantCommand): Future[ServiceValidation[Participant]] = {
     val validStudyId = cmd match {
         case c: AddParticipantCmd => StudyId(c.studyId).successNel[String]
-        case c: ParticipantModifyCommand => {
+        case c: ParticipantModifyCommand =>
           participantRepository.getByKey(ParticipantId(c.id)).map(p => p.studyId)
-        }
+      }
+
+    val permission = cmd match {
+        case c: AddParticipantCmd => PermissionId.ParticipantCreate
+        case c                    => PermissionId.ParticipantUpdate
       }
 
     validStudyId.fold(
       err => Future.successful(err.failure[Participant]),
       studyId => whenPermittedAndIsMemberAsync(UserId(cmd.sessionUserId),
-                                               PermissionId.StudyUpdate,
+                                               permission,
                                                Some(studyId),
                                                None) { () =>
         ask(processor, cmd).mapTo[ServiceValidation[ParticipantEvent]].map { validation =>

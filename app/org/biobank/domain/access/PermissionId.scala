@@ -25,20 +25,20 @@ object PermissionId extends Enumeration {
   val CentreDelete: Value          = Value("CentreDelete")
   val CentreChangeState: Value     = Value("CentreChangeState")
 
-  val PatientCreate: Value         = Value("PatientCreate")
-  val PatientRead: Value           = Value("PatientRead")
-  val PatientUpdate: Value         = Value("PatientUpdate")
-  val PatientDelete: Value         = Value("PatientDelete")
-  val PatientMerge: Value          = Value("PatientMerge")
+  val ParticipantRead: Value       = Value("ParticipantRead")
+  val ParticipantCreate: Value     = Value("ParticipantCreate")
+  val ParticipantUpdate: Value     = Value("ParticipantUpdate")
+  val ParticipantDelete: Value      = Value("ParticipantDelete")
 
-  val CollectionEventCreate: Value = Value("CollectionEventCreate")
   val CollectionEventRead: Value   = Value("CollectionEventRead")
+  val CollectionEventCreate: Value = Value("CollectionEventCreate")
   val CollectionEventUpdate: Value = Value("CollectionEventUpdate")
   val CollectionEventDelete: Value = Value("CollectionEventDelete")
 
   val SpecimenCreate: Value        = Value("SpecimenCreate")
   val SpecimenRead: Value          = Value("SpecimenRead")
   val SpecimenUpdate: Value        = Value("SpecimenUpdate")
+  val SpecimenChangeState: Value   = Value("SpecimenChangeState")
   val SpecimenDelete: Value        = Value("SpecimenDelete")
 
   val ProcessingEventCreate: Value = Value("ProcessingEventCreate")

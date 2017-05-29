@@ -145,7 +145,10 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
     }
 
     log.debug(s"hasPermission: userId: $userId, permissionId: $permissionId")
-    accessItemRepository.getByKey(permissionId).map(checkItemAccess)
+    accessItemRepository.getByKey(permissionId)
+      .map(checkItemAccess)
+      .leftMap(_ => Unauthorized.toString)
+      .toValidationNel
   }
 
   // should only called if userId is valid, studyId is None or valid, and centreId is None or valid
@@ -153,9 +156,13 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
                                studyId:  Option[StudyId],
                                centreId: Option[CentreId]): ServiceValidation[Boolean] = {
 
-    val membership = membershipRepository.getUserMembership(userId).map { membership =>
-      membership.isMember(studyId, centreId)
-    }
+    val membership = membershipRepository
+      .getUserMembership(userId).map { membership =>
+        membership.isMember(studyId, centreId)
+      }
+      .leftMap(_ => Unauthorized.toString)
+      .toValidationNel
+
     log.debug(s"isMemberInternal: userId: $userId, studyId: $studyId, centreId: $centreId, membership: $membership")
     membership
   }

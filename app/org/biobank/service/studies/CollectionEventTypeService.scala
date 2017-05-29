@@ -132,9 +132,11 @@ class CollectionEventTypeServiceImpl @Inject()(
                                              PermissionId.StudyUpdate,
                                              Some(study.id),
                                              None) { () =>
-        ask(processor, cmd).mapTo[ServiceValidation[CollectionEventTypeEvent]].map { validation =>
-          validation.map(_ => true)
-        }
+        ask(processor, cmd)
+          .mapTo[ServiceValidation[CollectionEventTypeEvent]]
+          .map { validation =>
+            validation.map(event => true)
+          }
       }
     )
   }

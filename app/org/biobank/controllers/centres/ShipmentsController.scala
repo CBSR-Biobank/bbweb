@@ -61,7 +61,8 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
         Future {
           for {
             pagedQuery        <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            shipmentSpecimens <- shipmentsService.getShipmentSpecimens(shipmentId,
+            shipmentSpecimens <- shipmentsService.getShipmentSpecimens(request.authInfo.userId,
+                                                                       shipmentId,
                                                                        pagedQuery.filter,
                                                                        pagedQuery.sort)
             validPage         <- pagedQuery.validPage(shipmentSpecimens.size)
@@ -75,12 +76,16 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
 
   def canAddSpecimens(shipmentId: ShipmentId, specimenInventoryId: String): Action[Unit] =
     action(parse.empty) { request =>
-      validationReply(shipmentsService.shipmentCanAddSpecimen(shipmentId, specimenInventoryId))
+      validationReply(shipmentsService.shipmentCanAddSpecimen(request.authInfo.userId,
+                                                              shipmentId,
+                                                              specimenInventoryId))
     }
 
   def getSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(shipmentsService.getShipmentSpecimen(shipmentId, shipmentSpecimenId))
+      validationReply(shipmentsService.getShipmentSpecimen(request.authInfo.userId,
+                                                           shipmentId,
+                                                           shipmentSpecimenId))
     }
 
   def snapshot: Action[Unit] =

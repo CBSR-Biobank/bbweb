@@ -39,7 +39,7 @@ trait StudiesServiceFixtures extends ProcessorTestFixture with UserServiceFixtur
                                        (noMembershipUser,       "non membership user"),
                                        (nonStudyPermissionUser, "non study permission user"))
 
-    def usersCanUpdateTable() = Table(("users with update access", "label"),
+    def usersCanAddOrUpdateTable() = Table(("users with update access", "label"),
                                       (allStudiesAdminUser, "all studies admin user"),
                                       (studyOnlyAdminUser,  "study only admin user"))
 
@@ -87,7 +87,7 @@ trait StudiesServiceFixtures extends ProcessorTestFixture with UserServiceFixtur
       case s: Study               => studyRepository.put(s)
       case c: CollectionEventType => collectionEventTypeRepository.put(c)
       case m: Membership          => membershipRepository.put(m)
-      case _                      => fail("invalid entity")
+      case _                      => fail(s"invalid entity: ${entity}")
     }
   }
 

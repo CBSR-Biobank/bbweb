@@ -111,20 +111,6 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
                                "User can view information for other users",
                                Set(RoleId.UserAdministrator)),
 
-        // STUDY PERMISSIONS
-        createPermissionSimple(PermissionId.StudyRead,
-                               "User can view studies",
-                               Set(RoleId.StudyUser)),
-        createPermissionSimple(PermissionId.StudyCreate,
-                               "User can create studies",
-                               Set(RoleId.StudyAdministrator)),
-        createPermissionSimple(PermissionId.StudyUpdate,
-                               "User can update studies",
-                               Set(RoleId.StudyAdministrator)),
-        createPermissionSimple(PermissionId.StudyChangeState,
-                               "User can change states on studies",
-                               Set(RoleId.StudyAdministrator)),
-
         // CENTRE PERMISSIONS
         createPermissionSimple(PermissionId.CentreRead,
                                "User can view centres",
@@ -137,7 +123,67 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
                                Set(RoleId.CentreAdministrator)),
         createPermissionSimple(PermissionId.CentreChangeState,
                                "User can change states on centres",
-                               Set(RoleId.CentreAdministrator))
+                               Set(RoleId.CentreAdministrator)),
+
+        // STUDY PERMISSIONS
+        createPermissionSimple(PermissionId.StudyRead,
+                               "User can view studies",
+                               Set(RoleId.StudyUser,
+                                   RoleId.SpecimenCollector)),
+        createPermissionSimple(PermissionId.StudyCreate,
+                               "User can create studies",
+                               Set(RoleId.StudyAdministrator)),
+        createPermissionSimple(PermissionId.StudyUpdate,
+                               "User can update studies",
+                               Set(RoleId.StudyAdministrator)),
+        createPermissionSimple(PermissionId.StudyChangeState,
+                               "User can change states on studies",
+                               Set(RoleId.StudyUser)),
+
+        // PARTICIPANT PERMISSIONS
+        createPermissionSimple(PermissionId.ParticipantRead,
+                               "User can view participants",
+                               Set(RoleId.SpecimenCollector)),
+        createPermissionSimple(PermissionId.ParticipantCreate,
+                               "User can create participants",
+                               Set(RoleId.SpecimenCollector)),
+        createPermissionSimple(PermissionId.ParticipantUpdate,
+                               "User can update participants",
+                               Set(RoleId.SpecimenCollector)),
+        createPermissionSimple(PermissionId.ParticipantDelete,
+                               "User can update participants",
+                               Set(RoleId.StudyAdministrator)),
+
+        // COLLECTION EVENT PERMISSIONS
+        createPermissionSimple(PermissionId.CollectionEventRead,
+                               "User can view collectionEvents",
+                               Set(RoleId.SpecimenCollector)),
+        createPermissionSimple(PermissionId.CollectionEventCreate,
+                               "User can create collectionEvents",
+                               Set(RoleId.SpecimenCollector)),
+        createPermissionSimple(PermissionId.CollectionEventUpdate,
+                               "User can update collectionEvents",
+                               Set(RoleId.SpecimenCollector)),
+        createPermissionSimple(PermissionId.CollectionEventDelete,
+                               "User can update collectionEvents",
+                               Set(RoleId.SpecimenCollector)),
+
+        // SPECIMEN PERMISSIONS
+        createPermissionSimple(PermissionId.SpecimenRead,
+                               "User can view specimens",
+                               Set(RoleId.SpecimenCollector)),
+        createPermissionSimple(PermissionId.SpecimenCreate,
+                               "User can create specimens",
+                               Set(RoleId.SpecimenCollector)),
+        createPermissionSimple(PermissionId.SpecimenUpdate,
+                               "User can update specimens",
+                               Set(RoleId.SpecimenCollector)),
+        createPermissionSimple(PermissionId.SpecimenDelete,
+                               "User can update specimens",
+                               Set(RoleId.SpecimenCollector)),
+        createPermissionSimple(PermissionId.SpecimenChangeState,
+                               "User can change states on specimens",
+                               Set(RoleId.StudyUser))
       )
     permissions.foreach(put)
   }
@@ -164,8 +210,15 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
     log.trace("accessItemRepository:initRoles")
     val roles = Set[Role](
         createRoleSimple(RoleId.ShippingAdministrator, "ShippingAdministrator"),
+
         createRoleSimple(RoleId.SpecimenProcessor,     "SpecimenProcessor"),
-        createRoleSimple(RoleId.SpecimenCollector,     "SpecimenCollector"),
+
+        createRole(roleId      = RoleId.UserAdministrator,
+                   description = "UserAdministrator",
+                   parentIds   = Set(RoleId.WebsiteAdministrator),
+                   childrenIds = Set(PermissionId.UserUpdate,
+                                     PermissionId.UserChangeState,
+                                     PermissionId.UserRead)),
 
         createRole(roleId      = RoleId.CentreUser,
                    description = "Centre User",
@@ -183,7 +236,8 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
         createRole(roleId      = RoleId.StudyUser,
                    description = "Study User",
                    parentIds   = Set(RoleId.StudyAdministrator),
-                   childrenIds = Set(PermissionId.StudyRead)),
+                   childrenIds = Set(PermissionId.StudyRead,
+                                     PermissionId.SpecimenChangeState)),
 
         createRole(roleId      = RoleId.StudyAdministrator,
                    description = "Study Administrator",
@@ -193,12 +247,14 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
                                      PermissionId.StudyChangeState,
                                      RoleId.StudyUser)),
 
-        createRole(roleId      = RoleId.UserAdministrator,
-                   description = "UserAdministrator",
-                   parentIds   = Set(RoleId.WebsiteAdministrator),
-                   childrenIds = Set(PermissionId.UserUpdate,
-                                     PermissionId.UserChangeState,
-                                     PermissionId.UserRead)),
+        createRole(roleId      = RoleId.SpecimenCollector,
+                   description = "SpecimenCollector",
+                   parentIds   = Set(RoleId.StudyUser),
+                   childrenIds = Set(PermissionId.SpecimenRead,
+                                     PermissionId.SpecimenCreate,
+                                     PermissionId.SpecimenUpdate,
+                                     PermissionId.SpecimenDelete,
+                                     PermissionId.StudyRead)),
 
         createRole(roleId      = RoleId.WebsiteAdministrator,
                    description = "WebsiteAdministrator",
@@ -209,7 +265,8 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
                                      RoleId.CentreAdministrator,
                                      RoleId.ShippingAdministrator,
                                      RoleId.SpecimenCollector,
-                                     RoleId.SpecimenProcessor)))
+                                     RoleId.SpecimenProcessor))
+      )
 
 
     roles.foreach(put)

@@ -4,6 +4,7 @@ import akka.actor._
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
+import org.biobank.domain.access._
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
 import org.biobank.domain.user.UserId
@@ -11,6 +12,7 @@ import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.CollectionEventCommands._
 import org.biobank.infrastructure.event.CollectionEventEvents._
 import org.biobank.service._
+import org.biobank.service.access.AccessService
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
@@ -20,17 +22,20 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[CollectionEventsServiceImpl])
 trait CollectionEventsService extends BbwebService {
 
-  def get(collectionEventId: String): ServiceValidation[CollectionEvent]
+  def get(requestUserId: UserId, collectionEventId: CollectionEventId): ServiceValidation[CollectionEvent]
 
-  def list(participantId: ParticipantId,
+  def getByVisitNumber(requestUserId: UserId,
+                       participantId: ParticipantId,
+                       visitNumber:   Int): ServiceValidation[CollectionEvent]
+
+  def list(requestUserId: UserId,
+           participantId: ParticipantId,
            filter:        FilterString,
            sort:          SortString): ServiceValidation[Seq[CollectionEvent]]
 
-  def getByVisitNumber(participantId: ParticipantId, visitNumber: Int): ServiceValidation[CollectionEvent]
-
   def processCommand(cmd: CollectionEventCommand): Future[ServiceValidation[CollectionEvent]]
 
-  def processRemoveCommand(cmd: CollectionEventCommand): Future[ServiceValidation[Boolean]]
+  def processRemoveCommand(cmd: RemoveCollectionEventCmd): Future[ServiceValidation[Boolean]]
 
   def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
 
@@ -38,27 +43,45 @@ trait CollectionEventsService extends BbwebService {
 
 class CollectionEventsServiceImpl @Inject() (
   @Named("collectionEventsProcessor") val processor: ActorRef,
+  val accessService:                                 AccessService,
   val studyRepository:                               StudyRepository,
   val participantRepository:                         ParticipantRepository,
-  val collectionEventRepository:                     CollectionEventRepository)
+  val collectionEventRepository:                     CollectionEventRepository,
+  val collectionEventTypeRepository:                 CollectionEventTypeRepository)
     extends CollectionEventsService
-    with BbwebServiceImpl {
+    with AccessChecksSerivce
+    with ServicePermissionChecks {
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def get(collectionEventId: String): ServiceValidation[CollectionEvent] = {
-    collectionEventRepository.getByKey(CollectionEventId(collectionEventId)).leftMap(_ =>
-      ServiceError(s"collection event id is invalid: $collectionEventId")).toValidationNel
+  def get(requestUserId: UserId, collectionEventId: CollectionEventId): ServiceValidation[CollectionEvent] = {
+    for {
+      cevent     <- collectionEventRepository.getByKey(collectionEventId)
+      ceventType <- collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
+      permitted  <- whenPermittedAndIsMember(requestUserId,
+                                             PermissionId.CollectionEventRead,
+                                             Some(ceventType.studyId),
+                                             None) { () => true.successNel[String] }
+      } yield cevent
   }
 
-  def list(participantId: ParticipantId,
+  def getByVisitNumber(requestUserId: UserId,
+                       participantId: ParticipantId,
+                       visitNumber:   Int)
+      : ServiceValidation[CollectionEvent] = {
+    whenParticipantPermitted(requestUserId, participantId) { participant =>
+      collectionEventRepository.withVisitNumber(participantId, visitNumber)
+    }
+  }
+
+  def list(requestUserId: UserId,
+           participantId: ParticipantId,
            filter:        FilterString,
            sort:          SortString): ServiceValidation[Seq[CollectionEvent]] = {
-    val sortStr = if (sort.expression.isEmpty) new SortString("visitNumber")
-                  else sort
-
-    validParticipantId(participantId) { participant =>
+    whenParticipantPermitted(requestUserId, participantId) { participant =>
       val allCevents = collectionEventRepository.allForParticipant(participantId).toSet
+      val sortStr = if (sort.expression.isEmpty) new SortString("visitNumber")
+                    else sort
 
       for {
         cevents         <- CollectionEventFilter.filterCollectionEvents(allCevents, filter)
@@ -76,36 +99,80 @@ class CollectionEventsServiceImpl @Inject() (
     }
   }
 
-  def getByVisitNumber(participantId: ParticipantId, visitNumber: Int)
-      : ServiceValidation[CollectionEvent] = {
-    validParticipantId(participantId) { participant =>
-      collectionEventRepository.withVisitNumber(participantId, visitNumber)
+  def processCommand(cmd: CollectionEventCommand): Future[ServiceValidation[CollectionEvent]] = {
+    val validCommand = cmd match {
+        case c: RemoveCollectionEventCmd =>
+          ServiceError(s"invalid service call: $cmd, use processRemoveCommand").failureNel[DisabledStudy]
+        case c => c.successNel[String]
+      }
+
+    validCommand.fold(
+      err => Future.successful(err.failure[CollectionEvent]),
+      c => whenParticipantPermittedAsync(cmd) { () =>
+        ask(processor, cmd)
+          .mapTo[ServiceValidation[CollectionEventEvent]]
+          .map { validation =>
+            for {
+              event  <- validation
+              cevent <- collectionEventRepository.getByKey(CollectionEventId(event.id))
+            } yield cevent
+          }
+      }
+    )
+  }
+
+  def processRemoveCommand(cmd: RemoveCollectionEventCmd): Future[ServiceValidation[Boolean]] = {
+    whenParticipantPermittedAsync(cmd) { () =>
+      ask(processor, cmd)
+        .mapTo[ServiceValidation[CollectionEventEvent]]
+        .map { validation =>
+          validation.map(event => true)
+        }
     }
   }
 
-  private def validParticipantId[T](participantId: ParticipantId)(fn: Participant => ServiceValidation[T])
+  private def whenParticipantPermitted[T](requestUserId: UserId,
+                                          participantId: ParticipantId)
+                                      (block: Participant => ServiceValidation[T])
       : ServiceValidation[T] = {
     for {
       participant <- participantRepository.getByKey(participantId)
       study       <- studyRepository.getByKey(participant.studyId)
-      result      <- fn(participant)
+      result      <- whenPermittedAndIsMember(requestUserId,
+                                              PermissionId.CollectionEventRead,
+                                              Some(study.id),
+                                              None)(() => block(participant))
     } yield result
   }
 
-  def processCommand(cmd: CollectionEventCommand): Future[ServiceValidation[CollectionEvent]] =
-    ask(processor, cmd).mapTo[ServiceValidation[CollectionEventEvent]].map { validation =>
-      for {
-        event  <- validation
-        cevent <- collectionEventRepository.getByKey(CollectionEventId(event.id))
-      } yield cevent
-    }
+  private def whenParticipantPermittedAsync[T](cmd: CollectionEventCommand)
+                                           (block: () => Future[ServiceValidation[T]])
+      : Future[ServiceValidation[T]] = {
+    val validParticipantId = cmd match {
+        case c: AddCollectionEventCmd => ParticipantId(c.participantId).successNel[String]
+        case c: CollectionEventModifyCommand =>
+          collectionEventRepository.getByKey(CollectionEventId(c.id)).map(c => c.participantId)
+      }
 
-  def processRemoveCommand(cmd: CollectionEventCommand): Future[ServiceValidation[Boolean]] =
-    ask(processor, cmd).mapTo[ServiceValidation[CollectionEventEvent]].map { validation =>
-      for {
-        event  <- validation
-        result <- true.successNel[String]
-      } yield result
-    }
+    val permission = cmd match {
+        case c: AddCollectionEventCmd    => PermissionId.CollectionEventCreate
+        case c: RemoveCollectionEventCmd => PermissionId.CollectionEventDelete
+        case c                           => PermissionId.CollectionEventUpdate
+      }
+
+    val validStudy = for {
+        participantId <- validParticipantId
+        participant   <- participantRepository.getByKey(participantId)
+        study         <- studyRepository.getByKey(participant.studyId)
+      } yield study
+
+    validStudy.fold(
+      err => Future.successful(err.failure[T]),
+      study => whenPermittedAndIsMemberAsync(UserId(cmd.sessionUserId),
+                                             permission,
+                                             Some(study.id),
+                                             None)(block)
+    )
+  }
 
 }

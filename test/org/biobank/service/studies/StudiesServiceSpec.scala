@@ -302,7 +302,7 @@ class StudiesServiceSpec
       it("users can access") {
         val f = new UsersWithStudyAccessFixture
 
-        forAll (f.usersCanUpdateTable) { (user, label) =>
+        forAll (f.usersCanAddOrUpdateTable) { (user, label) =>
           val cmd = AddStudyCmd(sessionUserId = Some(user.id.id),
                                 name          = f.study.name,
                                 description   = f.study.description)
@@ -332,7 +332,7 @@ class StudiesServiceSpec
         val f = new UsersWithStudyAccessFixture
         val annotationType = factory.createAnnotationType
 
-        forAll (f.usersCanUpdateTable) { (user, label) =>
+        forAll (f.usersCanAddOrUpdateTable) { (user, label) =>
           info(label)
 
           forAll(updateCommandsTable(user.id, f.study, annotationType)) { cmd =>
@@ -370,7 +370,7 @@ class StudiesServiceSpec
 
       it("users can access") {
         val f = new StudyOfAllStatesFixure
-        forAll (f.usersCanUpdateTable) { (user, label) =>
+        forAll (f.usersCanAddOrUpdateTable) { (user, label) =>
           info(label)
           forAll(stateChangeCommandsTable(user.id,
                                           f.disabledStudy,

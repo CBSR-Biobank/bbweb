@@ -19,10 +19,7 @@ class CollectionEventTypeServiceSpec
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 
-  trait CeventFixture {
-  }
-
-  class UsersCeventTypeFixture extends UsersWithStudyAccessFixture with CeventFixture {
+  class UsersCeventTypeFixture extends UsersWithStudyAccessFixture {
     val specimenDesc = factory.createCollectionSpecimenDescription
     val annotationType = factory.createAnnotationType
     val ceventType = factory.createCollectionEventType
@@ -207,7 +204,7 @@ class CollectionEventTypeServiceSpec
 
       it("users can access") {
         val f = new UsersCeventTypeFixture
-        forAll (f.usersCanUpdateTable) { (user, label) =>
+        forAll (f.usersCanAddOrUpdateTable) { (user, label) =>
           val cmd = AddCollectionEventTypeCmd(sessionUserId   = user.id.id,
                                               studyId         = f.study.id.id,
                                               name            = nameGenerator.next[String],
@@ -239,7 +236,7 @@ class CollectionEventTypeServiceSpec
 
       it("users with access") {
         val f = new UsersCeventTypeFixture
-        forAll (f.usersCanUpdateTable) { (user, label) =>
+        forAll (f.usersCanAddOrUpdateTable) { (user, label) =>
           info(label)
           forAll(updateCommandsTable(user.id,
                                      f.study,
@@ -282,7 +279,7 @@ class CollectionEventTypeServiceSpec
 
       it("users with access") {
         val f = new UsersCeventTypeFixture
-        forAll (f.usersCanUpdateTable) { (user, label) =>
+        forAll (f.usersCanAddOrUpdateTable) { (user, label) =>
           info(label)
           val cmd = RemoveCollectionEventTypeCmd(
               sessionUserId    = user.id.id,
@@ -301,6 +298,7 @@ class CollectionEventTypeServiceSpec
       it("users without access") {
         val f = new UsersCeventTypeFixture
         forAll (f.usersCannotUpdateTable) { (user, label) =>
+          info(label)
           val cmd = RemoveCollectionEventTypeCmd(
               sessionUserId    = user.id.id,
               studyId          = f.study.id.id,
