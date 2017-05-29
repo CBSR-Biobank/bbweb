@@ -11,11 +11,12 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
 trait StudiesServiceFixtures extends ProcessorTestFixture with UserServiceFixtures {
 
   class UsersWithStudyAccessFixture {
-    val study               = factory.createDisabledStudy
-    val allStudiesAdminUser = factory.createActiveUser
-    val studyOnlyAdminUser  = factory.createActiveUser
-    val studyUser           = factory.createActiveUser
-    val noMembershipUser    = factory.createActiveUser
+    val study                  = factory.createDisabledStudy
+    val allStudiesAdminUser    = factory.createActiveUser
+    val studyOnlyAdminUser     = factory.createActiveUser
+    val studyUser              = factory.createActiveUser
+    val noMembershipUser       = factory.createActiveUser
+    val nonStudyPermissionUser = factory.createActiveUser
 
     val allStudiesMembership = factory.createMembership.copy(
         userIds = Set(allStudiesAdminUser.id),
@@ -25,7 +26,7 @@ trait StudiesServiceFixtures extends ProcessorTestFixture with UserServiceFixtur
         userIds = Set(studyOnlyAdminUser.id, studyUser.id),
         studyInfo = MembershipStudyInfo(false, Set(study.id)))
 
-    val noStudiesMembership    = factory.createMembership.copy(
+    val noStudiesMembership = factory.createMembership.copy(
         userIds = Set(noMembershipUser.id),
         studyInfo = MembershipStudyInfo(false, Set.empty[StudyId]))
 
@@ -34,18 +35,24 @@ trait StudiesServiceFixtures extends ProcessorTestFixture with UserServiceFixtur
                                     (studyOnlyAdminUser,  "study only admin user"),
                                     (studyUser,           "non-admin study user"))
 
+    def usersCannotReadTable() = Table(("users without read access", "label"),
+                                       (noMembershipUser,       "non membership user"),
+                                       (nonStudyPermissionUser, "non study permission user"))
+
     def usersCanUpdateTable() = Table(("users with update access", "label"),
                                       (allStudiesAdminUser, "all studies admin user"),
                                       (studyOnlyAdminUser,  "study only admin user"))
 
-    def usersCannotUpdateTable() = Table(("users with update access", "label"),
-                                         (studyUser,         "study user"),
-                                         (noMembershipUser,  "non membership user"))
+    def usersCannotUpdateTable() = Table(("users without update access", "label"),
+                                         (studyUser,              "study user"),
+                                         (noMembershipUser,       "non membership user"),
+                                         (nonStudyPermissionUser, "non study permission user"))
     Set(study,
         allStudiesAdminUser,
         studyOnlyAdminUser,
         studyUser,
         noMembershipUser,
+        nonStudyPermissionUser,
         allStudiesMembership,
         studyOnlyMembership,
         noStudiesMembership
@@ -55,17 +62,6 @@ trait StudiesServiceFixtures extends ProcessorTestFixture with UserServiceFixtur
     addUserToStudyAdminRole(studyOnlyAdminUser)
     addUserToRole(studyUser, RoleId.StudyUser)
     addUserToRole(noMembershipUser, RoleId.StudyUser)
-  }
-
-  class UserWithNoStudyAccessFixture {
-    val study                  = factory.createDisabledStudy
-    val nonStudyPermissionUser = factory.createActiveUser
-
-    val noStudiesMembership    = factory.createMembership.copy(
-        userIds = Set(nonStudyPermissionUser.id),
-        studyInfo = MembershipStudyInfo(false, Set.empty[StudyId]))
-
-    Set(study, nonStudyPermissionUser, noStudiesMembership).foreach(addToRepository)
   }
 
   protected val factory: Factory

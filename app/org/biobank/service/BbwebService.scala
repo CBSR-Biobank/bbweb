@@ -8,6 +8,7 @@ import org.biobank.domain.centre.CentreId
 import org.biobank.domain.study.StudyId
 import org.biobank.domain.user.UserId
 import org.biobank.service.access.AccessService
+//import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scalaz.Scalaz._
@@ -46,6 +47,8 @@ trait ServicePermissionChecks {
   import org.biobank.CommonValidations._
   import org.biobank.domain.access.AccessItem._
   import org.biobank.domain.access.PermissionId._
+
+  //private val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   protected val accessService: AccessService
 

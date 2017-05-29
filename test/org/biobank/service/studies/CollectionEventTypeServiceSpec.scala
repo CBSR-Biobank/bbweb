@@ -5,7 +5,6 @@ import org.biobank.domain._
 import org.biobank.domain.access._
 import org.biobank.domain.study._
 import org.biobank.domain.user._
-import org.biobank.service.users._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
@@ -14,7 +13,6 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
  */
 class CollectionEventTypeServiceSpec
     extends ProcessorTestFixture
-    with UserServiceFixtures
     with StudiesServiceFixtures
     with ScalaFutures {
 
@@ -22,20 +20,15 @@ class CollectionEventTypeServiceSpec
   import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 
   trait CeventFixture {
-    val specimenDesc = factory.createCollectionSpecimenDescription
-    val annotationType = factory.createAnnotationType
-    protected val ceventTypeNoStudy = factory.createCollectionEventType
-      .copy(specimenDescriptions = Set(specimenDesc),
-            annotationTypes      = Set(annotationType))
   }
 
   class UsersCeventTypeFixture extends UsersWithStudyAccessFixture with CeventFixture {
-    val ceventType = ceventTypeNoStudy.copy(studyId = study.id)
-    collectionEventTypeRepository.put(ceventType)
-  }
-
-  class UserWithNoStudyAccessFixtureWithCevent extends UserWithNoStudyAccessFixture with CeventFixture {
-    val ceventType = ceventTypeNoStudy.copy(studyId = study.id)
+    val specimenDesc = factory.createCollectionSpecimenDescription
+    val annotationType = factory.createAnnotationType
+    val ceventType = factory.createCollectionEventType
+      .copy(studyId              = study.id,
+            specimenDescriptions = Set(specimenDesc),
+            annotationTypes      = Set(annotationType))
     collectionEventTypeRepository.put(ceventType)
   }
 
@@ -59,13 +52,6 @@ class CollectionEventTypeServiceSpec
                                   specimenDesc:   CollectionSpecimenDescription,
                                   annotationType: AnnotationType) = {
     Table("collection event type update commands",
-          AddCollectionEventTypeCmd(
-            sessionUserId   = sessionUserId.id,
-            studyId         = study.id.id,
-            name            = nameGenerator.next[String],
-            description     = None,
-            recurring       = true
-          ),
           UpdateCollectionEventTypeNameCmd(
             sessionUserId   = sessionUserId.id,
             studyId         = study.id.id,
@@ -138,9 +124,9 @@ class CollectionEventTypeServiceSpec
 
   describe("CollectionEventTypeService") {
 
-    describe("a user with the Study Admin role is allowed to") {
+    describe("when getting a collection event type") {
 
-      it("retrieve a collection event type ") {
+      it("users can access") {
         val f = new UsersCeventTypeFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
@@ -151,7 +137,23 @@ class CollectionEventTypeServiceSpec
         }
       }
 
-      it("query if a collection event type is in use") {
+      it("users cannot access") {
+        val f = new UsersCeventTypeFixture
+        info("no membership user")
+        ceventTypeService.collectionEventTypeWithId(f.noMembershipUser.id, f.study.id, f.ceventType.id)
+          .mustFail("Unauthorized")
+
+        info("no permission user")
+        ceventTypeService.collectionEventTypeWithId(f.nonStudyPermissionUser.id, f.study.id, f.ceventType.id)
+          .mustFail("Unauthorized")
+
+      }
+
+    }
+
+    describe("when querying if a collection event type is in use") {
+
+      it("users can access") {
         val f = new UsersCeventTypeFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
@@ -162,7 +164,22 @@ class CollectionEventTypeServiceSpec
         }
       }
 
-      it("retrieve all collection event types for a study") {
+      it("users cannot access") {
+        val f = new UsersCeventTypeFixture
+        info("no membership user")
+        ceventTypeService.collectionEventTypeInUse(f.noMembershipUser.id, f.ceventType.id)
+          .mustFail("Unauthorized")
+
+        info("no permission user")
+        ceventTypeService.collectionEventTypeInUse(f.nonStudyPermissionUser.id, f.ceventType.id)
+          .mustFail("Unauthorized")
+      }
+
+    }
+
+    describe("when getting all collection event types for a study") {
+
+      it("users can access") {
         val f = new UsersCeventTypeFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
@@ -173,7 +190,54 @@ class CollectionEventTypeServiceSpec
         }
       }
 
-      it("update a collection event type") {
+      it("users cannot access") {
+        val f = new UsersCeventTypeFixture
+        info("no membership user")
+        ceventTypeService.collectionEventTypesForStudy(f.noMembershipUser.id, f.study.id)
+          .mustFail("Unauthorized")
+
+        info("no permission user")
+        ceventTypeService.collectionEventTypesForStudy(f.nonStudyPermissionUser.id, f.study.id)
+          .mustFail("Unauthorized")
+      }
+
+    }
+
+    describe("when adding a collection event type") {
+
+      it("users can access") {
+        val f = new UsersCeventTypeFixture
+        forAll (f.usersCanUpdateTable) { (user, label) =>
+          val cmd = AddCollectionEventTypeCmd(sessionUserId   = user.id.id,
+                                              studyId         = f.study.id.id,
+                                              name            = nameGenerator.next[String],
+                                              description     = None,
+                                              recurring       = true)
+          collectionEventTypeRepository.removeAll
+          ceventTypeService.processCommand(cmd).futureValue mustSucceed { reply =>
+            reply.studyId must be (f.study.id)
+          }
+        }
+      }
+
+      it("users cannot access") {
+        val f = new UsersCeventTypeFixture
+        forAll (f.usersCannotUpdateTable) { (user, label) =>
+          val cmd = AddCollectionEventTypeCmd(sessionUserId   = user.id.id,
+                                              studyId         = f.study.id.id,
+                                              name            = nameGenerator.next[String],
+                                              description     = None,
+                                              recurring       = true)
+          collectionEventTypeRepository.removeAll
+          ceventTypeService.processCommand(cmd).futureValue mustFail "Unauthorized"
+        }
+      }
+
+    }
+
+    describe("when updating a collection event type") {
+
+      it("users with access") {
         val f = new UsersCeventTypeFixture
         forAll (f.usersCanUpdateTable) { (user, label) =>
           info(label)
@@ -199,7 +263,24 @@ class CollectionEventTypeServiceSpec
         }
       }
 
-      it("remove a collection event type") {
+      it("users without access") {
+        val f = new UsersCeventTypeFixture
+        forAll (f.usersCannotUpdateTable) { (user, label) =>
+          forAll(updateCommandsTable(user.id,
+                                     f.study,
+                                     f.ceventType,
+                                     f.specimenDesc,
+                                     f.annotationType)) { cmd =>
+            ceventTypeService.processCommand(cmd).futureValue mustFail "Unauthorized"
+          }
+        }
+      }
+
+    }
+
+    describe("when removing a collection event type") {
+
+      it("users with access") {
         val f = new UsersCeventTypeFixture
         forAll (f.usersCanUpdateTable) { (user, label) =>
           info(label)
@@ -217,51 +298,19 @@ class CollectionEventTypeServiceSpec
         }
       }
 
-    }
+      it("users without access") {
+        val f = new UsersCeventTypeFixture
+        forAll (f.usersCannotUpdateTable) { (user, label) =>
+          val cmd = RemoveCollectionEventTypeCmd(
+              sessionUserId    = user.id.id,
+              studyId          = f.study.id.id,
+              id               = f.ceventType.id.id,
+              expectedVersion  = f.ceventType.version
+            )
 
-    describe("a user without the Study Admin role is not allowed to") {
-
-      it("retrieve a collection event type ") {
-        val f = new UserWithNoStudyAccessFixtureWithCevent
-        ceventTypeService.collectionEventTypeWithId(f.nonStudyPermissionUser.id, f.study.id, f.ceventType.id)
-          .mustFail("Unauthorized")
-      }
-
-      it("query if a collection event type is in use") {
-        val f = new UserWithNoStudyAccessFixtureWithCevent
-        ceventTypeService.collectionEventTypeInUse(f.nonStudyPermissionUser.id, f.ceventType.id)
-          .mustFail("Unauthorized")
-      }
-
-      it("retrieve all collection event types for a study") {
-        val f = new UserWithNoStudyAccessFixtureWithCevent
-        ceventTypeService.collectionEventTypesForStudy(f.nonStudyPermissionUser.id, f.study.id)
-          .mustFail("Unauthorized")
-      }
-
-      it("update a collection event type") {
-        val f = new UserWithNoStudyAccessFixtureWithCevent
-        forAll(updateCommandsTable(f.nonStudyPermissionUser.id,
-                                   f.study,
-                                   f.ceventType,
-                                   f.specimenDesc,
-                                   f.annotationType)) { cmd =>
-          ceventTypeService.processCommand(cmd).futureValue mustFail "Unauthorized"
+          ceventTypeService.processRemoveCommand(cmd).futureValue mustFail "Unauthorized"
         }
       }
-
-      it("remove a collection event type") {
-        val f = new UserWithNoStudyAccessFixtureWithCevent
-        val cmd = RemoveCollectionEventTypeCmd(
-          sessionUserId    = f.nonStudyPermissionUser.id.id,
-          studyId          = f.study.id.id,
-          id               = f.ceventType.id.id,
-          expectedVersion  = f.ceventType.version
-        )
-
-        ceventTypeService.processRemoveCommand(cmd).futureValue mustFail "Unauthorized"
-      }
-
     }
 
   }

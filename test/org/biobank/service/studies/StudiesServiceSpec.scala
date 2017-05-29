@@ -7,7 +7,6 @@ import org.biobank.domain.ConcurrencySafeEntity
 import org.biobank.domain.study._
 import org.biobank.domain.user._
 import org.biobank.service.{FilterString, SortString}
-import org.biobank.service.users._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
@@ -16,14 +15,11 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
  */
 class StudiesServiceSpec
     extends ProcessorTestFixture
-    with UserServiceFixtures
     with StudiesServiceFixtures
     with ScalaFutures {
 
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.command.StudyCommands._
-
-  case class UserMembership(user: User, membership: Membership)
 
   class StudyOfAllStatesFixure extends UsersWithStudyAccessFixture {
     val disabledStudy = study
@@ -36,8 +32,8 @@ class StudiesServiceSpec
     Set(disabledStudy, enabledStudy, retiredStudy).foreach(addToRepository)
     collectionEventTypeRepository.put(cet)
     addToRepository(studyOnlyMembership.copy(
-        studyInfo = studyOnlyMembership.studyInfo.copy(
-            studyIds = Set(disabledStudy.id, enabledStudy.id, retiredStudy.id))))
+                      studyInfo = studyOnlyMembership.studyInfo.copy(
+                          studyIds = Set(disabledStudy.id, enabledStudy.id, retiredStudy.id))))
 
   }
 
@@ -147,24 +143,34 @@ class StudiesServiceSpec
 
   describe("StudiesService") {
 
-    describe("users with access to a study are allowed to") {
+    describe ("for study counts") {
 
-      it("retrieve study counts") {
+      it("users can access") {
         val f = new UsersWithStudyAccessFixture
         forAll (f.usersCanReadTable) { (user, label) =>
-          info(label)
+          info(s"$label")
           studiesService.getStudyCount(user.id) mustSucceed { count =>
             count must be (1)
           }
         }
+      }
 
+      it("users cannot access") {
+        val f = new UsersWithStudyAccessFixture
         info("no membership user")
         studiesService.getStudyCount(f.noMembershipUser.id) mustSucceed { count =>
           count must be (0)
         }
+
+        info("no permission user")
+        studiesService.getStudyCount(f.nonStudyPermissionUser.id) mustFail "Unauthorized"
       }
 
-      it("retrieve study counts by status") {
+    }
+
+    describe ("for study counts by status") {
+
+      it("users can access") {
         val f = new UsersWithStudyAccessFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
@@ -172,14 +178,24 @@ class StudiesServiceSpec
             counts.total must be (1)
           }
         }
+      }
 
+      it("users cannot access") {
+        val f = new UsersWithStudyAccessFixture
         info("no membership user")
         studiesService.getCountsByStatus(f.noMembershipUser.id) mustSucceed { count =>
           count.total must be (0)
         }
+
+        info("no permission user")
+        studiesService.getCountsByStatus(f.nonStudyPermissionUser.id) mustFail "Unauthorized"
       }
 
-      it("retrieve studies") {
+    }
+
+    describe("for listing studies") {
+
+      it("users can access") {
         val f = new UsersWithStudyAccessFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
@@ -188,15 +204,26 @@ class StudiesServiceSpec
               studies must have length (1)
             }
         }
+      }
 
+      it("users cannot access") {
+        val f = new UsersWithStudyAccessFixture
         info("no membership user")
         studiesService.getStudies(f.noMembershipUser.id, new FilterString(""), new SortString(""))
           .mustSucceed { studies =>
             studies must have length (0)
           }
+
+        info("no permission user")
+        studiesService.getStudies(f.nonStudyPermissionUser.id, new FilterString(""), new SortString(""))
+          .mustFail("Unauthorized")
       }
 
-      it("retrieve study names") {
+    }
+
+    describe("for listing study names") {
+
+      it("users can access") {
         val f = new UsersWithStudyAccessFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
@@ -205,15 +232,26 @@ class StudiesServiceSpec
               studies must have length (1)
             }
         }
+      }
 
+      it("users cannot access") {
+        val f = new UsersWithStudyAccessFixture
         info("no membership user")
         studiesService.getStudyNames(f.noMembershipUser.id, new FilterString(""), new SortString(""))
           .mustSucceed { studies =>
             studies must have length (0)
           }
+
+        info("no permission user")
+        studiesService.getStudyNames(f.nonStudyPermissionUser.id, new FilterString(""), new SortString(""))
+          .mustFail("Unauthorized")
       }
 
-      it("retrieve a study") {
+    }
+
+    describe("for retrieving a study") {
+
+      it("users can access") {
         val f = new UsersWithStudyAccessFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
@@ -221,12 +259,23 @@ class StudiesServiceSpec
             result.id must be (f.study.id)
           }
         }
+      }
+
+      it("users cannot access") {
+        val f = new UsersWithStudyAccessFixture
 
         info("no membership user")
         studiesService.getStudy(f.noMembershipUser.id, f.study.id) mustFail "Unauthorized"
+
+        info("no permission user")
+        studiesService.getStudy(f.nonStudyPermissionUser.id, f.study.id) mustFail "Unauthorized"
       }
 
-      it("retrieve centres for a study") {
+    }
+
+    describe("for retrieve centres for a study") {
+
+      it("users can access") {
         val f = new UsersWithStudyAccessFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
@@ -234,12 +283,52 @@ class StudiesServiceSpec
             result must have size (0)
           }
         }
+      }
+
+      it("users cannot access") {
+        val f = new UsersWithStudyAccessFixture
 
         info("no membership user")
         studiesService.getCentresForStudy(f.noMembershipUser.id, f.study.id) mustFail "Unauthorized"
+
+        info("no permission user")
+        studiesService.getCentresForStudy(f.nonStudyPermissionUser.id, f.study.id) mustFail "Unauthorized"
       }
 
-      it("111 update a study") {
+    }
+
+    describe("when adding a study") {
+
+      it("users can access") {
+        val f = new UsersWithStudyAccessFixture
+
+        forAll (f.usersCanUpdateTable) { (user, label) =>
+          val cmd = AddStudyCmd(sessionUserId = Some(user.id.id),
+                                name          = f.study.name,
+                                description   = f.study.description)
+          studyRepository.removeAll
+          studiesService.processCommand(cmd).futureValue mustSucceed { s =>
+            s.name must be (f.study.name)
+          }
+        }
+      }
+
+      it("users cannot access") {
+        val f = new UsersWithStudyAccessFixture
+
+        forAll (f.usersCannotUpdateTable) { (user, label) =>
+          val cmd = AddStudyCmd(sessionUserId = Some(user.id.id),
+                                name          = f.study.name,
+                                description   = f.study.description)
+          studiesService.processCommand(cmd).futureValue mustFail "Unauthorized"
+        }
+      }
+
+    }
+
+    describe("when updating a study") {
+
+      it("users can access") {
         val f = new UsersWithStudyAccessFixture
         val annotationType = factory.createAnnotationType
 
@@ -260,9 +349,14 @@ class StudiesServiceSpec
             }
           }
         }
+      }
+
+      it("users cannot access") {
+        val f = new UsersWithStudyAccessFixture
+        val annotationType = factory.createAnnotationType
 
         forAll (f.usersCannotUpdateTable) { (user, label) =>
-          info(s"$label cannot update")
+          info(label)
           studyRepository.put(f.study) // restore the study to it's previous state
           forAll(updateCommandsTable(user.id, f.study, annotationType)) { cmd =>
             studiesService.processCommand(cmd).futureValue mustFail "Unauthorized"
@@ -270,7 +364,11 @@ class StudiesServiceSpec
         }
       }
 
-      it("change a study's state") {
+    }
+
+    describe("when changing a study's state") {
+
+      it("users can access") {
         val f = new StudyOfAllStatesFixure
         forAll (f.usersCanUpdateTable) { (user, label) =>
           info(label)
@@ -286,70 +384,15 @@ class StudiesServiceSpec
         }
       }
 
-    }
-
-    describe("users without access to a study are not allowed to") {
-
-      it("retrieve study counts") {
-        val f = new UserWithNoStudyAccessFixture
-        studiesService.getStudyCount(f.nonStudyPermissionUser.id) mustFail "Unauthorized"
-      }
-
-      it("retrieve study counts by status") {
-        val f = new UserWithNoStudyAccessFixture
-        studiesService.getCountsByStatus(f.nonStudyPermissionUser.id) mustFail "Unauthorized"
-      }
-
-      it("retrieve studies") {
-        val f = new UserWithNoStudyAccessFixture
-        studiesService.getStudies(f.nonStudyPermissionUser.id, new FilterString(""), new SortString(""))
-          .mustFail("Unauthorized")
-      }
-
-      it("retrieve study names") {
-        val f = new UserWithNoStudyAccessFixture
-        studiesService.getStudyNames(f.nonStudyPermissionUser.id, new FilterString(""), new SortString(""))
-          .mustFail("Unauthorized")
-      }
-
-      it("retrieve a study") {
-        val f = new UserWithNoStudyAccessFixture
-        studiesService.getStudy(f.nonStudyPermissionUser.id, f.study.id) mustFail "Unauthorized"
-      }
-
-      it("retrieve centres for a study") {
-        val f = new UserWithNoStudyAccessFixture
-        studiesService.getCentresForStudy(f.nonStudyPermissionUser.id, f.study.id) mustFail "Unauthorized"
-      }
-
-      it("update a study") {
-        val f = new UserWithNoStudyAccessFixture
-        val annotationType = factory.createAnnotationType
-
-        forAll(updateCommandsTable(f.nonStudyPermissionUser.id, f.study, annotationType)) { cmd =>
-          studyRepository.put(f.study) // restore the study to it's previous state
-          studiesService.processCommand(cmd).futureValue mustFail "Unauthorized"
-        }
-      }
-
-      it("111 change a study's state") {
-        val f1 = new UserWithNoStudyAccessFixture
-        val f2 = new StudyOfAllStatesFixure
-        forAll(stateChangeCommandsTable(f1.nonStudyPermissionUser.id,
-                                        f2.disabledStudy,
-                                        f2.enabledStudy,
-                                        f2.retiredStudy)) { cmd =>
-          Set(f2.disabledStudy, f2.enabledStudy, f2.retiredStudy).foreach(addToRepository)
-          studiesService.processCommand(cmd).futureValue mustFail "Unauthorized"
-        }
-
-        forAll (f2.usersCannotUpdateTable) { (user, label) =>
+      it("users cannot access") {
+        val f = new StudyOfAllStatesFixure
+        forAll (f.usersCannotUpdateTable) { (user, label) =>
           info(label)
-          studyRepository.put(f2.study) // restore the study to it's previous state
+          studyRepository.put(f.study) // restore the study to it's previous state
           forAll(stateChangeCommandsTable(user.id,
-                                          f2.disabledStudy,
-                                          f2.enabledStudy,
-                                          f2.retiredStudy)) { cmd =>
+                                          f.disabledStudy,
+                                          f.enabledStudy,
+                                          f.retiredStudy)) { cmd =>
             studiesService.processCommand(cmd).futureValue mustFail "Unauthorized"
           }
         }

@@ -102,7 +102,10 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
   }
 
   def getCentre(requestUserId: UserId, id: CentreId): ServiceValidation[Centre] = {
-    whenPermitted(requestUserId, PermissionId.CentreRead) { () =>
+    whenPermittedAndIsMember(requestUserId,
+                             PermissionId.CentreRead,
+                             None,
+                             Some(id)) { () =>
       centreRepository.getByKey(id)
     }
   }
