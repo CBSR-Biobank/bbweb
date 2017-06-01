@@ -65,7 +65,7 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
                                     val studyRepository:           StudyRepository)
     extends CentresService
     with AccessChecksSerivce
-    with ServicePermissionChecks {
+    with CentreServicePermissionChecks {
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
@@ -150,29 +150,6 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
           event <- validation
           centre <- centreRepository.getByKey(CentreId(event.id))
         } yield centre
-      }
-    }
-  }
-
-  private def withPermittedCentres[T](requestUserId: UserId)(block: Set[Centre] => ServiceValidation[T])
-      : ServiceValidation[T] = {
-    whenPermitted(requestUserId, PermissionId.CentreRead) { () =>
-      for {
-        centres <- getMembershipCentres(requestUserId)
-        result  <- block(centres)
-      } yield result
-    }
-  }
-
-  private def getMembershipCentres(userId: UserId): ServiceValidation[Set[Centre]] = {
-    accessService.getMembership(userId).flatMap { membership =>
-      if (membership.centreInfo.allCentres) {
-        centreRepository.getValues.toSet.successNel[String]
-      } else {
-        membership.centreInfo.centreIds
-          .map(centreRepository.getByKey)
-          .toList.sequenceU
-          .map(centres => centres.toSet)
       }
     }
   }

@@ -35,8 +35,8 @@ object PermissionId extends Enumeration {
   val CollectionEventUpdate: Value = Value("CollectionEventUpdate")
   val CollectionEventDelete: Value = Value("CollectionEventDelete")
 
-  val SpecimenCreate: Value        = Value("SpecimenCreate")
   val SpecimenRead: Value          = Value("SpecimenRead")
+  val SpecimenCreate: Value        = Value("SpecimenCreate")
   val SpecimenUpdate: Value        = Value("SpecimenUpdate")
   val SpecimenChangeState: Value   = Value("SpecimenChangeState")
   val SpecimenDelete: Value        = Value("SpecimenDelete")
@@ -46,10 +46,10 @@ object PermissionId extends Enumeration {
   val ProcessingEventUpdate: Value = Value("ProcessingEventUpdate")
   val ProcessingEventDelete: Value = Value("ProcessingEventDelete")
 
-  val ShipmentCreate: Value        = Value("ShipmentCreate")
   val ShipmentRead: Value          = Value("ShipmentRead")
-  val ShipmentChangeState: Value   = Value("ShipmentChangeState")
+  val ShipmentCreate: Value        = Value("ShipmentCreate")
   val ShipmentUpdate: Value        = Value("ShipmentUpdate")
+  val ShipmentChangeState: Value   = Value("ShipmentChangeState")
   val ShipmentDelete: Value        = Value("ShipmentDelete")
 
   val ContainerTypeCreate: Value   = Value("ContainerTypeCreate")

@@ -12,8 +12,6 @@ object ShipmentCommands {
 
   trait ShipmentModifyCommand extends ShipmentCommand with HasIdentity with HasExpectedVersion
 
-  trait ShipmentCommandWithShipmentId extends ShipmentCommand with HasShipmentIdentity
-
   final case class AddShipmentCmd(sessionUserId:  String,
                                   courierName:    String,
                                   trackingNumber: String,

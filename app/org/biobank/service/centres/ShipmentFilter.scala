@@ -15,7 +15,7 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[ShipmentFilterImpl])
 trait ShipmentFilter {
 
-  def filterShipments(filter: FilterString):ServiceValidation[Set[Shipment]];
+  def filterShipments(shipments: Set[Shipment], filter: FilterString):ServiceValidation[Set[Shipment]];
 
 }
 
@@ -29,9 +29,7 @@ class ShipmentFilterImpl @Inject() (val shipmentRepository: ShipmentRepository,
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def filterShipments(filter: FilterString): ServiceValidation[Set[Shipment]] = {
-    val shipments = shipmentRepository.getValues.toSet
-
+  def filterShipments(shipments: Set[Shipment], filter: FilterString): ServiceValidation[Set[Shipment]] = {
     QueryFilterParser.expressions(filter).flatMap { filterExpression =>
       filterExpression match {
         case None =>

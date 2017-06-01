@@ -209,8 +209,6 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
   def initRoles(): Unit = {
     log.trace("accessItemRepository:initRoles")
     val roles = Set[Role](
-        createRoleSimple(RoleId.ShippingAdministrator, "ShippingAdministrator"),
-
         createRoleSimple(RoleId.SpecimenProcessor,     "SpecimenProcessor"),
 
         createRole(roleId      = RoleId.UserAdministrator,
@@ -253,8 +251,21 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
                    childrenIds = Set(PermissionId.SpecimenRead,
                                      PermissionId.SpecimenCreate,
                                      PermissionId.SpecimenUpdate,
-                                     PermissionId.SpecimenDelete,
-                                     PermissionId.StudyRead)),
+                                     PermissionId.SpecimenDelete)),
+
+        createRole(roleId = RoleId.ShippingAdministrator,
+                   description = "ShippingAdministrator",
+                   parentIds   = Set(RoleId.CentreAdministrator),
+                   childrenIds = Set(RoleId.ShippingUser,
+                                     PermissionId.ShipmentDelete)),
+
+        createRole(roleId = RoleId.ShippingUser,
+                   description = "ShippingAdministrator",
+                   parentIds   = Set(RoleId.ShippingAdministrator),
+                   childrenIds = Set(PermissionId.ShipmentRead,
+                                     PermissionId.ShipmentCreate,
+                                     PermissionId.ShipmentUpdate,
+                                     PermissionId.ShipmentChangeState)),
 
         createRole(roleId      = RoleId.WebsiteAdministrator,
                    description = "WebsiteAdministrator",
@@ -263,7 +274,6 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
                    childrenIds = Set(RoleId.UserAdministrator,
                                      RoleId.StudyAdministrator,
                                      RoleId.CentreAdministrator,
-                                     RoleId.ShippingAdministrator,
                                      RoleId.SpecimenCollector,
                                      RoleId.SpecimenProcessor))
       )

@@ -36,23 +36,25 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
 
   private val PageSizeMax = 10
 
+  def get(id: ShipmentId): Action[Unit] =
+    action(parse.empty) { implicit request =>
+      validationReply(shipmentsService.getShipment(request.authInfo.userId, id))
+    }
+
   def list: Action[Unit] =
     action.async(parse.empty) { implicit request =>
       validationReply(
         Future {
           for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            shipments  <- shipmentsService.getShipments(pagedQuery.filter, pagedQuery.sort)
+            shipments  <- shipmentsService.getShipments(request.authInfo.userId,
+                                                        pagedQuery.filter,
+                                                        pagedQuery.sort)
             validPage  <- pagedQuery.validPage(shipments.size)
             results    <- PagedResults.create(shipments, pagedQuery.page, pagedQuery.limit)
           } yield results
         }
       )
-    }
-
-  def get(id: ShipmentId): Action[Unit] =
-    action(parse.empty) { implicit request =>
-      validationReply(shipmentsService.getShipment(id))
     }
 
   def listSpecimens(shipmentId: ShipmentId): Action[Unit] =
