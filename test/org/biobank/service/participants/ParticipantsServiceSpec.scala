@@ -121,7 +121,7 @@ class ParticipantsServiceSpec
 
     describe("when adding a participant") {
 
-      it("111 users can access") {
+      it("users can access") {
         val f = new UsersWithParticipantAccessFixture
         forAll (f.usersCanAddOrUpdateTable) { (user, label) =>
           participantRepository.removeAll
@@ -138,7 +138,7 @@ class ParticipantsServiceSpec
 
       it("users cannot access") {
         val f = new UsersWithParticipantAccessFixture
-        forAll (f.usersCannotUpdateTable) { (user, label) =>
+        forAll (f.usersCannotAddOrUpdateTable) { (user, label) =>
           info(label)
           participantRepository.removeAll
           val cmd = AddParticipantCmd(
@@ -173,7 +173,7 @@ class ParticipantsServiceSpec
 
       it("users cannot access") {
         val f = new UsersWithParticipantAccessFixture
-        forAll (f.usersCannotUpdateTable) { (user, label) =>
+        forAll (f.usersCannotAddOrUpdateTable) { (user, label) =>
           info(label)
           forAll(commandsTable(user.id, f.participant, f.annotation)) { cmd =>
             participantsService.processCommand(cmd).futureValue mustFail "Unauthorized"

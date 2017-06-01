@@ -54,21 +54,22 @@ trait ServicePermissionChecks {
 
   protected def whenPermitted[T](requestUserId: UserId, permissionId: PermissionId)
                            (block: () => ServiceValidation[T]): ServiceValidation[T] = {
-    if (accessService.hasPermission(requestUserId, permissionId).exists(permission => permission)) {
-      block()
-    } else {
-      Unauthorized.failureNel[T]
-    }
+    accessService.hasPermission(requestUserId, permissionId).fold(
+      err        => err.failure[T],
+      permission => if (permission) block()
+                    else Unauthorized.failureNel[T]
+    )
   }
 
   protected def whenPermittedAsync[T](requestUserId: UserId, permissionId: PermissionId)
                                   (block: () => Future[ServiceValidation[T]])
       : Future[ServiceValidation[T]] = {
-    if (accessService.hasPermission(requestUserId, permissionId).exists(permission => permission)) {
-      block()
-    } else {
-      Future.successful(Unauthorized.failureNel[T])
-    }
+    accessService.hasPermission(requestUserId, permissionId)
+      .fold(
+        err        => Future.successful(err.failure[T]),
+        permission => if (permission) block()
+                      else Future.successful(Unauthorized.failureNel[T])
+      )
   }
 
   protected def whenPermittedAndIsMember[T](requestUserId: UserId,
@@ -76,12 +77,12 @@ trait ServicePermissionChecks {
                                             studyId:      Option[StudyId],
                                             centreId:     Option[CentreId])
                                         (block: () => ServiceValidation[T]): ServiceValidation[T] = {
-    val v = accessService.hasPermissionAndIsMember(requestUserId, permissionId, studyId, centreId)
-    if (v.exists(permission => permission)) {
-      block()
-    } else {
-      Unauthorized.failureNel[T]
-    }
+    accessService.hasPermissionAndIsMember(requestUserId, permissionId, studyId, centreId)
+      .fold(
+        err        => err.failure[T],
+        permission => if (permission) block()
+                      else Unauthorized.failureNel[T]
+      )
   }
 
   protected def whenPermittedAndIsMemberAsync[T](requestUserId: UserId,
@@ -90,11 +91,11 @@ trait ServicePermissionChecks {
                                                  centreId:     Option[CentreId])
                                              (block: () => Future[ServiceValidation[T]])
       : Future[ServiceValidation[T]] = {
-    val v = accessService.hasPermissionAndIsMember(requestUserId, permissionId, studyId, centreId)
-    if (v.exists(permission => permission)) {
-      block()
-    } else {
-      Future.successful(Unauthorized.failureNel[T])
-    }
+    accessService.hasPermissionAndIsMember(requestUserId, permissionId, studyId, centreId)
+      .fold(
+        err        => Future.successful(err.failure[T]),
+        permission => if (permission) block()
+                      else Future.successful(Unauthorized.failureNel[T])
+      )
   }
 }

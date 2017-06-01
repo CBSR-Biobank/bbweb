@@ -219,7 +219,7 @@ class CollectionEventTypeServiceSpec
 
       it("users cannot access") {
         val f = new UsersCeventTypeFixture
-        forAll (f.usersCannotUpdateTable) { (user, label) =>
+        forAll (f.usersCannotAddOrUpdateTable) { (user, label) =>
           val cmd = AddCollectionEventTypeCmd(sessionUserId   = user.id.id,
                                               studyId         = f.study.id.id,
                                               name            = nameGenerator.next[String],
@@ -262,7 +262,7 @@ class CollectionEventTypeServiceSpec
 
       it("users without access") {
         val f = new UsersCeventTypeFixture
-        forAll (f.usersCannotUpdateTable) { (user, label) =>
+        forAll (f.usersCannotAddOrUpdateTable) { (user, label) =>
           forAll(updateCommandsTable(user.id,
                                      f.study,
                                      f.ceventType,
@@ -297,7 +297,7 @@ class CollectionEventTypeServiceSpec
 
       it("users without access") {
         val f = new UsersCeventTypeFixture
-        forAll (f.usersCannotUpdateTable) { (user, label) =>
+        forAll (f.usersCannotAddOrUpdateTable) { (user, label) =>
           info(label)
           val cmd = RemoveCollectionEventTypeCmd(
               sessionUserId    = user.id.id,

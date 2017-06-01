@@ -49,8 +49,6 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
     extends AccessService
     with BbwebServiceImpl {
 
-  import org.biobank.CommonValidations._
-
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   def assignRole(cmd: AddUserToRoleCmd): Future[ServiceValidation[Role]] = {
@@ -65,7 +63,7 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
         hasPermissionInternal(userId, permissionId)
       }
     log.debug(s"hasPermission: $v")
-    v.leftMap { err => Unauthorized.nel }
+    v
   }
 
   def isMember(userId:   UserId,
@@ -145,10 +143,7 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
     }
 
     log.debug(s"hasPermission: userId: $userId, permissionId: $permissionId")
-    accessItemRepository.getByKey(permissionId)
-      .map(checkItemAccess)
-      .leftMap(_ => Unauthorized.toString)
-      .toValidationNel
+    accessItemRepository.getByKey(permissionId).map(checkItemAccess)
   }
 
   // should only called if userId is valid, studyId is None or valid, and centreId is None or valid
@@ -160,8 +155,6 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
       .getUserMembership(userId).map { membership =>
         membership.isMember(studyId, centreId)
       }
-      .leftMap(_ => Unauthorized.toString)
-      .toValidationNel
 
     log.debug(s"isMemberInternal: userId: $userId, studyId: $studyId, centreId: $centreId, membership: $membership")
     membership

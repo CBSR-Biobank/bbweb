@@ -23,7 +23,7 @@ trait ParticipantsServiceFixtures extends StudiesServiceFixtures {
             (studyOnlyAdminUser,  "study only admin user"),
             (collectorUser,       "specimen collector user"))
 
-    override def usersCannotUpdateTable() =
+    override def usersCannotAddOrUpdateTable() =
       Table(("users without update access", "label"),
             (noMembershipUser,       "non membership user"),
             (nonStudyPermissionUser, "non study permission user"))

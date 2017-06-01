@@ -207,7 +207,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
 
   private def getShipmentSpecimenDto(requestUserId: UserId, shipmentSpecimen: ShipmentSpecimen)
       : ServiceValidation[ShipmentSpecimenDto] = {
-    specimensService.getSpecimenDto(requestUserId, shipmentSpecimen.specimenId).map { specimenDto =>
+    specimensService.get(requestUserId, shipmentSpecimen.specimenId).map { specimenDto =>
       shipmentSpecimen.createDto(specimenDto)
     }
   }

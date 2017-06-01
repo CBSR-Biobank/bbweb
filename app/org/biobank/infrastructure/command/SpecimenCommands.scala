@@ -31,7 +31,6 @@ object SpecimenCommands {
   final case class MoveSpecimensCmd(sessionUserId:     String,
                                     collectionEventId: String,
                                     expectedVersion:   Long,
-                                    locationId:        String,
                                     specimenData:      Set[SpecimenInfo])
       extends SpecimenCommand
 

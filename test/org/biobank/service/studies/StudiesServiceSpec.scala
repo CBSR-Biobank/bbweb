@@ -316,7 +316,7 @@ class StudiesServiceSpec
       it("users cannot access") {
         val f = new UsersWithStudyAccessFixture
 
-        forAll (f.usersCannotUpdateTable) { (user, label) =>
+        forAll (f.usersCannotAddOrUpdateTable) { (user, label) =>
           val cmd = AddStudyCmd(sessionUserId = Some(user.id.id),
                                 name          = f.study.name,
                                 description   = f.study.description)
@@ -355,7 +355,7 @@ class StudiesServiceSpec
         val f = new UsersWithStudyAccessFixture
         val annotationType = factory.createAnnotationType
 
-        forAll (f.usersCannotUpdateTable) { (user, label) =>
+        forAll (f.usersCannotAddOrUpdateTable) { (user, label) =>
           info(label)
           studyRepository.put(f.study) // restore the study to it's previous state
           forAll(updateCommandsTable(user.id, f.study, annotationType)) { cmd =>
@@ -386,7 +386,7 @@ class StudiesServiceSpec
 
       it("users cannot access") {
         val f = new StudyOfAllStatesFixure
-        forAll (f.usersCannotUpdateTable) { (user, label) =>
+        forAll (f.usersCannotAddOrUpdateTable) { (user, label) =>
           info(label)
           studyRepository.put(f.study) // restore the study to it's previous state
           forAll(stateChangeCommandsTable(user.id,

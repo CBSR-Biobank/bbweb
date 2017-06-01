@@ -138,7 +138,7 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
                                Set(RoleId.StudyAdministrator)),
         createPermissionSimple(PermissionId.StudyChangeState,
                                "User can change states on studies",
-                               Set(RoleId.StudyUser)),
+                               Set(RoleId.StudyAdministrator)),
 
         // PARTICIPANT PERMISSIONS
         createPermissionSimple(PermissionId.ParticipantRead,

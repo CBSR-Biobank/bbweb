@@ -209,7 +209,6 @@ class StudiesServiceImpl @Inject()(
     cmd.sessionUserId match {
       case None => Future.successful(Unauthorized.failureNel[Study])
       case Some(sessionUserId) =>
-        //val (permissionId: PermissionId, studyId: Option[StudyId]) = cmd match {
         val (permissionId, studyId) = cmd match {
             case c: StudyStateChangeCommand => (PermissionId.StudyChangeState, Some(StudyId(c.id)))
             case c: StudyModifyCommand      => (PermissionId.StudyUpdate, Some(StudyId(c.id)))

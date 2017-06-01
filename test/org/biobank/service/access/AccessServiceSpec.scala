@@ -109,11 +109,11 @@ class AccessServiceSpec extends TestFixture with AccessServiceFixtures {
         val f = permissionFixture
         val role = f.role.copy(userIds = Set(f.user.id))
         val permission = f.permission.copy(parentIds = Set(role.id))
-
-        Set(f.user, role, permission).foreach(addToRepository)
-
         val user2 = factory.createActiveUser
-        accessService.hasPermission(user2.id, permission.id) mustFail "Unauthorized"
+        Set(f.user, role, permission, user2).foreach(addToRepository)
+        accessService.hasPermission(user2.id, permission.id) mustSucceed { hasPermission =>
+          hasPermission must be (false)
+        }
       }
 
     }

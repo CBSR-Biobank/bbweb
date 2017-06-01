@@ -42,7 +42,7 @@ class CentresServiceSpec
         centreInfo = MembershipCentreInfo(false, Set(centre.id)))
 
     val noCentresMembership = factory.createMembership.copy(
-        userIds = Set(noMembershipUser.id),
+        userIds = Set(noMembershipUser.id, noCentrePermissionUser.id),
         centreInfo = MembershipCentreInfo(false, Set.empty[CentreId]))
 
     def usersCanReadTable() = Table(("users with read access", "label"),
@@ -54,7 +54,7 @@ class CentresServiceSpec
                                       (allCentresAdminUser, "all centres admin user"),
                                       (centreOnlyAdminUser,  "centre only admin user"))
 
-    def usersCannotUpdateTable() = Table(("users with update access", "label"),
+    def usersCannotAddOrUpdateTable() = Table(("users with update access", "label"),
                                          (centreUser,             "non-admin centre user"),
                                          (noMembershipUser,       "all centres admin user"),
                                          (noCentrePermissionUser, "centre only admin user"))
@@ -375,7 +375,7 @@ class CentresServiceSpec
       it("users cannot access") {
         val f = new UsersWithCentreAccessFixture
 
-        forAll (f.usersCannotUpdateTable) { (user, label) =>
+        forAll (f.usersCannotAddOrUpdateTable) { (user, label) =>
           val cmd = AddCentreCmd(sessionUserId = user.id.id,
                                 name           = f.centre.name,
                                 description    = f.centre.description)
@@ -417,7 +417,7 @@ class CentresServiceSpec
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        forAll (f.usersCannotUpdateTable) { (user, label) =>
+        forAll (f.usersCannotAddOrUpdateTable) { (user, label) =>
           forAll(updateCommandsTable(user.id, f.centre, f.location, study)) { cmd =>
             centresService.processCommand(cmd).futureValue mustFail "Unauthorized"
           }
@@ -445,7 +445,7 @@ class CentresServiceSpec
 
       it("users cannot update") {
         val f = new CentresOfAllStatesFixure
-        forAll (f.usersCannotUpdateTable) { (user, label) =>
+        forAll (f.usersCannotAddOrUpdateTable) { (user, label) =>
           info(label)
           forAll(stateChangeCommandsTable(user.id,
                                           f.disabledCentre,

@@ -84,7 +84,7 @@ class CollectionEventServiceSpec
 
     describe("when getting a collection event") {
 
-      it("111 users can access") {
+      it("users can access") {
         val f = new UsersWithCeventAccessFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
@@ -111,7 +111,7 @@ class CollectionEventServiceSpec
 
     describe("when getting a collection event by visit number") {
 
-      it("111 users can access") {
+      it("users can access") {
         val f = new UsersWithCeventAccessFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
@@ -170,7 +170,7 @@ class CollectionEventServiceSpec
 
     describe("when adding a collection event type") {
 
-      it("111 users can access") {
+      it("users can access") {
         val f = new UsersWithCeventAccessFixture
         forAll (f.usersCanAddOrUpdateTable) { (user, label) =>
           val cmd = AddCollectionEventCmd(sessionUserId         = user.id.id,
@@ -189,7 +189,7 @@ class CollectionEventServiceSpec
 
       it("users cannot access") {
         val f = new UsersWithCeventAccessFixture
-        forAll (f.usersCannotUpdateTable) { (user, label) =>
+        forAll (f.usersCannotAddOrUpdateTable) { (user, label) =>
           val cmd = AddCollectionEventCmd(sessionUserId         = user.id.id,
                                           participantId         = f.participant.id.id,
                                           collectionEventTypeId = f.ceventType.id.id,
@@ -227,7 +227,7 @@ class CollectionEventServiceSpec
 
       it("users without access") {
         val f = new UsersWithCeventAccessFixture
-        forAll (f.usersCannotUpdateTable) { (user, label) =>
+        forAll (f.usersCannotAddOrUpdateTable) { (user, label) =>
           forAll(updateCommandsTable(user.id, f.cevent, f.ceventAnnotation)) { cmd =>
             ceventsService.processCommand(cmd).futureValue mustFail "Unauthorized"
           }
@@ -256,7 +256,7 @@ class CollectionEventServiceSpec
 
       it("users without access") {
         val f = new UsersWithCeventAccessFixture
-        forAll (f.usersCannotUpdateTable) { (user, label) =>
+        forAll (f.usersCannotAddOrUpdateTable) { (user, label) =>
           info(label)
           val cmd = RemoveCollectionEventCmd(sessionUserId   = user.id.id,
                                              id              = f.cevent.id.id,
