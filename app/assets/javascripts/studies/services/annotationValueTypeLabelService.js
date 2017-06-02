@@ -29,7 +29,8 @@ define(['lodash'], function (_) {
     labels[AnnotationValueType.SELECT]    = gettextCatalog.getString('Select');
 
     var service = {
-      valueTypeToLabel: valueTypeToLabel
+      valueTypeToLabel: valueTypeToLabel,
+      getLabels:        getLabels
     };
     return service;
 
@@ -39,8 +40,9 @@ define(['lodash'], function (_) {
       var result;
 
       if (valueType === AnnotationValueType.SELECT) {
-        isSingleSelect = _.isUndefined(isSingleSelect) ? true : isSingleSelect;
-        if (isSingleSelect) {
+        if (_.isUndefined(isSingleSelect)) {
+          return labels[AnnotationValueType.SELECT];
+        } else  if (isSingleSelect) {
           return gettextCatalog.getString('Single Select');
         }
         return gettextCatalog.getString('Multiple Select');
@@ -51,6 +53,15 @@ define(['lodash'], function (_) {
         throw new Error('invalid annotation value type: ' + valueType);
       }
       return result;
+    }
+
+    function getLabels() {
+      return _.map(AnnotationValueType, function (valueType) {
+        return {
+          id:    valueType,
+          label: valueTypeToLabel(valueType)
+        };
+      });
     }
 
   }

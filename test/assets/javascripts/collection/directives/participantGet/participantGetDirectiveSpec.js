@@ -86,9 +86,13 @@ define([
       });
 
       it('with a NOT_FOUND opens a modal', function() {
-        var uniqueId = this.factory.stringNext();
+        var uniqueId = this.factory.stringNext(),
+            errorMsg = {
+              status:  'error',
+              message: 'EntityCriteriaNotFound: participant with unique ID does not exist: xxx'
+            };
 
-        spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject({ status: 404 }));
+        spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject(errorMsg));
         spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('ok'));
         spyOn(this.$state, 'go').and.returnValue('ok');
 
@@ -104,9 +108,13 @@ define([
       });
 
       it('with a NOT_FOUND opens a modal and cancel is pressed', function() {
-        var uniqueId = this.factory.stringNext();
+        var uniqueId = this.factory.stringNext(),
+            errorMsg = {
+              status:  'error',
+              message: 'EntityCriteriaNotFound: participant with unique ID does not exist: xxx'
+            };
 
-        spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject({ status: 404 }));
+        spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject(errorMsg));
         spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
         spyOn(this.stateHelper, 'reloadAndReinit').and.returnValue(null);
 
@@ -122,10 +130,8 @@ define([
       it('on a 404 response, when patient with unique id already exists, modal is shown to user', function() {
         spyOn(this.Participant, 'getByUniqueId').and.returnValue(
           this.$q.reject({
-            status: 400,
-            data: {
-              message: 'EntityCriteriaError: participant not in study'
-            }
+            status:  'error',
+            message: 'EntityCriteriaError: participant not in study'
           }));
         spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('Ok'));
 

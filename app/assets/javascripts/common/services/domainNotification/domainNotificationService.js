@@ -39,19 +39,19 @@ define(function () {
         actionButtonText: gettextCatalog.getString('OK')
       };
 
-      if (error.data.message) {
-        $log.error(error.data.message);
+      if (error.message) {
+        $log.error(error.message);
       }
 
-      if ((typeof error.data.message === 'string') &&
-          (error.data.message.indexOf('expected version doesn\'t match current version') > -1)) {
+      if ((typeof error.message === 'string') &&
+          (error.message.indexOf('expected version doesn\'t match current version') > -1)) {
           /* concurrent change error */
           modalDefaults.templateUrl = '/assets/javascripts/common/modalConcurrencyError.html';
           modalOptions.domainType = domainObjTypeName;
       } else {
         // most likely a programming error
         modalOptions.headerHtml = gettextCatalog.getString('Cannot submit this change');
-        modalOptions.bodyHtml = gettextCatalog.getString('Error: ') + JSON.stringify(error.data.message);
+        modalOptions.bodyHtml = gettextCatalog.getString('Error: ') + JSON.stringify(error.message);
       }
 
       return modalService.showModal(modalDefaults, modalOptions);

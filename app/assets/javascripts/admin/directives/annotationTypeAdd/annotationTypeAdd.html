@@ -54,7 +54,7 @@
       <select class="form-control"
               name="valueType"
               ng-model="vm.annotationType.valueType"
-              ng-options="valueType for valueType in vm.valueTypes"
+              ng-options="valueType.id as valueType.label for valueType in vm.valueTypes"
               ng-change="vm.valueTypeChange()"
               required>
         <option value="" translate>-- make a selection --</option>
@@ -69,7 +69,7 @@
 
   <!-- SELECTIONS -->
   <div class="form-group"
-       ng-if="vm.annotationType.valueType === 'Select'"
+       ng-if="vm.annotationType.isValueTypeSelect()"
        ng-class="{ 'has-error' : annotationTypeForm.valueType.$error }">
     <label for="maxValueCount" class="col-md-2 form-control-label" translate>Selections</label>
     <div class="col-md-5">
@@ -96,7 +96,7 @@
 
   <!-- SELECTION OPTIONS -->
   <div class="form-group"
-       ng-if="vm.annotationType.valueType === 'Select'"
+       ng-if="vm.annotationType.isValueTypeSelect()"
        ng-repeat="opt in vm.annotationType.options track by $index"
        ng-class="{ 'has-error' : subForm.option.$invalid && !subForm.option.$pristine }">
     <ng-form name="subForm">
@@ -128,7 +128,7 @@
 
   <!-- ADD SELECTION OPTION -->
   <div class="form-group"
-       ng-if="vm.annotationType.valueType === 'Select'">
+       ng-if="vm.annotationType.isValueTypeSelect()">
     <div class="col-md-2">
       <button class="btn btn-sm btn-primary pull-right"
               ng-click="vm.optionAdd()">

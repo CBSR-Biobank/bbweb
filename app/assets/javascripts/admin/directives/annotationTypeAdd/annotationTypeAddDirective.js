@@ -31,18 +31,20 @@ define(['lodash'], function (_) {
 
   AnnotationTypeAddCtrl.$inject = [
     'AnnotationType',
-    'AnnotationValueType'
+    'AnnotationValueType',
+    'annotationValueTypeLabelService'
   ];
 
   /*
    * The controller for this directive.
    */
   function AnnotationTypeAddCtrl(AnnotationType,
-                                 AnnotationValueType) {
+                                 AnnotationValueType,
+                                 annotationValueTypeLabelService) {
     var vm = this;
 
     vm.annotationType        = new AnnotationType();
-    vm.valueTypes            = _.values(AnnotationValueType);
+    vm.valueTypes            = annotationValueTypeLabelService.getLabels();
 
     vm.valueTypeChange       = valueTypeChange;
     vm.maxValueCountRequired = maxValueCountRequired;
@@ -97,6 +99,9 @@ define(['lodash'], function (_) {
      */
     function submit(annotationType) {
       annotationType.maxValueCount = parseInt(annotationType.maxValueCount);
+      if (!annotationType.isValueTypeSelect()) {
+        delete annotationType.maxValueCount;
+      }
       vm.onSubmit()(annotationType);
     }
 

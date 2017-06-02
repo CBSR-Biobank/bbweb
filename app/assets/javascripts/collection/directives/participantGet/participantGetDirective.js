@@ -33,6 +33,10 @@ define(function () {
     'Participant'
   ];
 
+  var patientDoesNotExistRe = /EntityCriteriaNotFound: participant with unique ID does not exist/;
+
+  var studyMismatchRe = /EntityCriteriaError: participant not in study/i;
+
   /**
    *
    */
@@ -61,10 +65,14 @@ define(function () {
     }
 
     function participantGetError(error) {
-      var studyMismatchRe = /EntityCriteriaError: participant not in study/i;
-      if (error.status === 404) {
+      if (error.status !== 'error') {
+        $log.error('expected an error reply: ', JSON.stringify(error));
+        return;
+      }
+
+      if (error.message.match(patientDoesNotExistRe)) {
         createParticipantModal(vm.uniqueId);
-      } else if ((error.status === 400) && error.data.message.match(studyMismatchRe)) {
+      } else if (error.message.match(studyMismatchRe)) {
         modalService.modalOk(
           gettextCatalog.getString('Duplicate unique ID'),
           gettextCatalog.getString(

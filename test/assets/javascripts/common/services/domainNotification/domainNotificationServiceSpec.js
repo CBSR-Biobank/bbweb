@@ -27,8 +27,12 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
       }));
 
       it('opens a modal when error is a version mismatch error', function() {
-        var err = { data: { message: 'expected version doesn\'t match current version' } };
-        var domainEntityName = 'entity';
+        var domainEntityName = 'entity',
+            err = {
+              status:  'error',
+              message: 'expected version doesn\'t match current version'
+            };
+
         this.domainNotificationService.updateErrorModal(err, domainEntityName);
         expect(this.modalService.showModal).toHaveBeenCalledWith({
           templateUrl: '/assets/javascripts/common/modalConcurrencyError.html'

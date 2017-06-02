@@ -70,7 +70,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
        * @name domain.studies.CollectionEventType#studyId
        * @type {string}
        */
-      this.studyId = _.get(options, 'study.id', null);
+      this.studyId = _.get(obj, 'studyId', null);
 
       /**
        * A short identifying name that is unique.

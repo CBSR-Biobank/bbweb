@@ -39,7 +39,7 @@ define(['lodash'], function (_) {
     vm.onUpdate = onUpdate;
 
     function onUpdate(annotationType) {
-      return vm.collectionEventType.updateAnnotationType(annotationType)
+      return vm.collectionEventType.addAnnotationType(annotationType)
         .then(postUpdate)
         .then(notifySuccess)
         .catch(notificationsService.updateError);

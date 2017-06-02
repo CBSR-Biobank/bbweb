@@ -43,6 +43,7 @@ define([
                               'AnnotationType',
                               'AnnotationValueType',
                               'AnnotationMaxValueCount',
+                              'annotationValueTypeLabelService',
                               'factory');
 
       self.putHtmlTemplates(
@@ -53,9 +54,14 @@ define([
     }));
 
     it('scope should be valid when adding', function() {
+      var self = this,
+          labels = this.annotationValueTypeLabelService.getLabels();
       createController.call(this);
       expect(this.controller.annotationType).toEqual(jasmine.any(this.AnnotationType));
-      expect(this.controller.valueTypes).toEqual(_.values(this.AnnotationValueType));
+      expect(this.controller.valueTypes.length).toEqual(labels.length);
+      _.forEach(self.controller.valueTypes, function (value) {
+        expect(labels).toContain({ id: value.id, label: value.label });
+      });
     });
 
     it('maxValueCountRequired is valid', function() {
