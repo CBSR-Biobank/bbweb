@@ -60,7 +60,7 @@ define(['lodash'], function (_) {
     }
 
     function removeAnnotationType(annotationType) {
-      if (_.includes(vm.annotationTypeIdsInUse, annotationType.uniqueId)) {
+      if (_.includes(vm.annotationTypeIdsInUse, annotationType.id)) {
         vm.removeInUseModal(annotationType, 'ParticipantAnnotationType');
       } else {
         if (!vm.modificationsAllowed) {

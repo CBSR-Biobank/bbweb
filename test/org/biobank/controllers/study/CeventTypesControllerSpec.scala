@@ -684,15 +684,14 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
     describe("POST /studies/cetypes/annottype/:cetId/:annotationTypeId") {
 
-      it("update an annotation type") {
+      it("111 update an annotation type") {
         createEntities { (study, cet) =>
           val annotationType = factory.createAnnotationType
           collectionEventTypeRepository.put(cet.copy(annotationTypes = Set(annotationType)))
 
 
           val updatedAnnotationType =
-            annotationType.copy(name        = nameGenerator.next[CollectionEventType],
-                                description = Some(nameGenerator.next[CollectionEventType]))
+            annotationType.copy(description = Some(nameGenerator.next[CollectionEventType]))
 
           val reqJson = Json.obj("id"              -> cet.id.id,
                                  "studyId"         -> cet.studyId.id,

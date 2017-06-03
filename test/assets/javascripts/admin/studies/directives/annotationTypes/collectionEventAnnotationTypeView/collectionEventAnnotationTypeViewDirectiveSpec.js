@@ -75,7 +75,7 @@ define([
 
       beforeEach(inject(function () {
         context.entity                       = this.CollectionEventType;
-        context.updateAnnotationTypeFuncName = 'addAnnotationType';
+        context.updateAnnotationTypeFuncName = 'updateAnnotationType';
         context.parentObject                 = this.collectionEventType;
         context.annotationType               = this.annotationType;
         context.createController             = createController;

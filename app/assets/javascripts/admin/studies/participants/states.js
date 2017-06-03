@@ -46,8 +46,7 @@ define(['lodash'], function (_) {
           'study',
           '$stateParams',
           function (study, $stateParams) {
-            var annotationType = _.find(study.annotationTypes,
-                                             { uniqueId: $stateParams.annotationTypeId });
+            var annotationType = _.find(study.annotationTypes, { id: $stateParams.annotationTypeId });
             if (_.isUndefined(annotationType)) {
               throw new Error('could not find annotation type: ' + $stateParams.annotationTypeId);
             }

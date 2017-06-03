@@ -326,7 +326,7 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
      */
     Study.prototype.updateAnnotationType = function (annotationType) {
       return this.update.call(this,
-                              uri('pannottype', this.id) + '/' + annotationType.uniqueId,
+                              uri('pannottype', this.id) + '/' + annotationType.id,
                               annotationType);
     };
 

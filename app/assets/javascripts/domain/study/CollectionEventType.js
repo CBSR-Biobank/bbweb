@@ -342,7 +342,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
     CollectionEventType.prototype.updateAnnotationType = function (annotationType) {
       return ConcurrencySafeEntity.prototype.update.call(
         this,
-        uri('annottype', this.id) + '/' + annotationType.uniqueId,
+        uri('annottype', this.id) + '/' + annotationType.id,
         _.extend({ studyId: this.studyId }, annotationType));
     };
 
