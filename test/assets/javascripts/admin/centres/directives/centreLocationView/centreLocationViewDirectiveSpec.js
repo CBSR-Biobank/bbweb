@@ -45,6 +45,7 @@ define(function (require) {
                               '$state',
                               'Centre',
                               'Location',
+                              'stateHelper',
                               'factory');
 
       self.location = new self.Location(self.factory.location());
@@ -54,6 +55,7 @@ define(function (require) {
         '/assets/javascripts/admin/centres/directives/centreLocationView/centreLocationView.html');
 
       self.returnStateName = 'home.admin.centres.centre.locations';
+      spyOn(self.stateHelper, 'updateBreadcrumbs').and.returnValue(null);
     }));
 
     it('scope should be valid', function() {

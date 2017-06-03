@@ -6,13 +6,7 @@
   </div>
 </div>
 
-<div class="panel panel-warning" ng-if="vm.study.annotationTypes.length <= 0">
-  <div class="panel-heading" translate>
-    No annotations have been entered yet.
-  </div>
-</div>
-
-<div class="panel panel-default" ng-if="vm.study.annotationTypes.length > 0">
+<div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">
       <translate>Annotations</translate>
@@ -29,8 +23,13 @@
       Participant annotations allow a study to collect custom named and defined pieces of data for each
       participant. Annotations are optional and are not required to be defined.
     </li>
+    <li class="list-group-item" ng-if="vm.study.annotationTypes.length <= 0">
+      <div class="alert alert-warning">
+        No annotations have been entered yet.
+      </div>
+    </li>
     <li class="list-group-item" ng-if="vm.study.annotationTypes.length > 0" translate>
-      The following annotations have been entered:
+      <p class="text-info">The following annotations have been entered:</p>
     </li>
     <li class="list-group-item" ng-repeat="annotationType in vm.study.annotationTypes">
       <div class="row">

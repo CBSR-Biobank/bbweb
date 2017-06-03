@@ -22,13 +22,19 @@ define(['lodash'], function (_) {
   StudyParticipantsTabCtrl.$inject = [
     '$scope',
     '$state',
-    'ParticipantAnnotationTypeModals'
+    'ParticipantAnnotationTypeModals',
+    'notificationsService',
+    'gettextCatalog'
   ];
 
   /**
    * Controller for studyParticipantsTabDirective.
    */
-  function StudyParticipantsTabCtrl($scope, $state, ParticipantAnnotationTypeModals) {
+  function StudyParticipantsTabCtrl($scope,
+                                    $state,
+                                    ParticipantAnnotationTypeModals,
+                                    notificationsService,
+                                    gettextCatalog) {
     var vm = this;
 
     _.extend(vm, new ParticipantAnnotationTypeModals());
@@ -68,7 +74,10 @@ define(['lodash'], function (_) {
         }
 
         vm.remove(annotationType, function () {
-          return vm.study.removeAnnotationType(annotationType);
+          return vm.study.removeAnnotationType(annotationType)
+            .then(function () {
+              notificationsService.success(gettextCatalog.getString('Annotation removed'));
+            });
         });
       }
 

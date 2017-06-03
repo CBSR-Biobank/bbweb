@@ -176,6 +176,9 @@ define(function(require) {
           annotations = obj.annotations.map(function (annotation) {
             var annotationType =
                 _.find(collectionEventType.annotationTypes, { id: annotation.annotationTypeId });
+            if (_.isUndefined(annotationType)) {
+              throw new DomainError('annotation type not found: ' + annotation.annotationTypeId);
+            }
             return annotationFactory.create(annotation, annotationType);
           });
         } else {

@@ -2,8 +2,11 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
+define(function(require) {
   'use strict';
+
+  var _ = require('lodash'),
+      sprintf = require('sprintf-js').sprintf;
 
   CollectionEventTypeFactory.$inject = [
     '$q',
@@ -114,12 +117,16 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
 
       ConcurrencySafeEntity.call(this, schema, obj);
 
-      options                 = options || {};
-      options.study           = _.get(options, 'study', undefined);
-      options.specimenDescriptions   = _.get(options, 'specimenDescriptions', []);
-      options.annotationTypes = _.get(options, 'annotationTypes', []);
+      options                      = options || {};
+      options.study                = _.get(options, 'study', undefined);
+      options.specimenDescriptions = _.get(options, 'specimenDescriptions', []);
+      options.annotationTypes      = _.get(options, 'annotationTypes', []);
 
       _.extend(this, _.pick(options, 'study', 'specimenDescriptions', 'annotationTypes'));
+
+      if (options.study) {
+        this.studyId = options.study.id;
+      }
     }
 
     CollectionEventType.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -261,14 +268,14 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
 
     CollectionEventType.prototype.add = function() {
       var json = _.pick(this, 'studyId','name', 'recurring', 'description');
-      return biobankApi.post(sprintf.sprintf('%s/%s', uri(), this.studyId), json)
+      return biobankApi.post(sprintf('%s/%s', uri(), this.studyId), json)
         .then(function(reply) {
           return CollectionEventType.asyncCreate(reply);
         });
     };
 
     CollectionEventType.prototype.remove = function () {
-      var url = sprintf.sprintf('%s/%s/%s/%d', uri(), this.studyId, this.id, this.version);
+      var url = sprintf('%s/%s/%s/%d', uri(), this.studyId, this.id, this.version);
       return biobankApi.del(url);
     };
 
@@ -300,9 +307,12 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
     };
 
     CollectionEventType.prototype.updateSpecimenDescription = function (specimenDescription) {
+      var url = sprintf('%s/%s',
+                        uri('spcdesc', this.id),
+                        specimenDescription.id);
       return ConcurrencySafeEntity.prototype.update.call(
         this,
-        uri('spcdesc', this.id) + '/' + specimenDescription.id,
+        url,
         _.extend({ studyId: this.studyId }, specimenDescription));
     };
 
@@ -315,7 +325,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
         throw new DomainError('specimen description with ID not present: ' + specimenDescription.id);
       }
 
-      url = sprintf.sprintf('%s/%s/%d/%s',
+      url = sprintf('%s/%s/%d/%s',
                             uri('spcdesc', this.studyId),
                             this.id,
                             this.version,
@@ -347,11 +357,11 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
     };
 
     CollectionEventType.prototype.removeAnnotationType = function (annotationType) {
-      var url = sprintf.sprintf('%s/%s/%d/%s',
-                                uri('annottype', this.studyId),
-                                this.id,
-                                this.version,
-                                annotationType.id);
+      var url = sprintf('%s/%s/%d/%s',
+                        uri('annottype', this.studyId),
+                        this.id,
+                        this.version,
+                        annotationType.id);
 
       return HasAnnotationTypes.prototype.removeAnnotationType.call(this, annotationType, url);
     };

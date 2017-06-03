@@ -5,6 +5,8 @@
 define(function (require) {
   'use strict';
 
+  var _ = require('lodash');
+
   /**
    *
    */
@@ -27,6 +29,7 @@ define(function (require) {
   CeventViewCtrl.$inject = [
     '$state',
     'gettextCatalog',
+    'CollectionEvent',
     'Specimen',
     'timeService',
     'modalService',
@@ -41,6 +44,7 @@ define(function (require) {
    */
   function CeventViewCtrl($state,
                           gettextCatalog,
+                          CollectionEvent,
                           Specimen,
                           timeService,
                           modalService,
@@ -49,6 +53,8 @@ define(function (require) {
                           notificationsService,
                           annotationUpdate) {
     var vm = this;
+
+    vm.collectionEventType = _.find(vm.collectionEventTypes, { id: vm.collectionEvent.collectionEventTypeId });
 
     vm.panelOpen                      = true;
     vm.editTimeCompleted              = editTimeCompleted;
@@ -62,6 +68,7 @@ define(function (require) {
     function postUpdate(message, title, timeout) {
       return function (cevent) {
         vm.collectionEvent = cevent;
+        vm.collectionEvent.setCollectionEventType(vm.collectionEventType);
         notificationsService.success(message, title, timeout);
       };
     }

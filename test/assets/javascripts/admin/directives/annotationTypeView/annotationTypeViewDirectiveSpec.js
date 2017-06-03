@@ -180,6 +180,12 @@ define([
 
       describe('(shared) update functions', function () {
 
+        beforeEach(function() {
+          var stateHelper = this.$injector.get('stateHelper');
+          spyOn(stateHelper, 'updateBreadcrumbs').and.returnValue(null);
+        });
+
+
         it('should update a field', function() {
           var newValue = this.factory.stringNext();
 

@@ -35,9 +35,7 @@
   <shipment-specimens-add shipment="vm.shipment"></shipment-specimens-add>
 
   <collapsible-panel heading="{{'Containers in this shipment'|translate}}">
-    <div class="panel panel-warning">
-      <div class="panel-heading" translate>No containers in this shipment</div>
-    </div>
+    <div class="alert alert-warning" translate>No containers in this shipment</div>
   </collapsible-panel>
 </div>
 
@@ -47,10 +45,11 @@
       <translate>Add items to ship</translate>
     </h1>
   </div>
-  <div class="panel panel-warning">
-    <div class="panel-heading" translate>
+  <div class="alert alert-warning">
+    <span class="glyphicon glyphicon-warning-sign"></span>
+    <translate>
       Cannot add items to shipment <em>{{vm.shipment.courierName}}: {{vm.shipment.trackingNumber}}</em> since
       it is in the wrong state.
-    </div>
+    </translate>
   </div>
 </div>

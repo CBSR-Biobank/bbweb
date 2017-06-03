@@ -32,6 +32,7 @@ define(function (require) {
                               'CollectionSpecimenDescription',
                               'modalService',
                               'notificationsService',
+                              'stateHelper',
                               'factory');
 
       specimenDescription = self.factory.collectionSpecimenDescription();
@@ -61,6 +62,8 @@ define(function (require) {
         self.scope.$digest();
         self.controller = self.element.controller('studySummary');
       };
+
+      spyOn(self.stateHelper, 'updateBreadcrumbs').and.returnValue(null);
     }));
 
     it('initialization is valid', function() {

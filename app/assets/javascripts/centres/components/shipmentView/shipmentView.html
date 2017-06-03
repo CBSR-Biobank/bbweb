@@ -6,8 +6,7 @@
     <shipment-view-completed ng-switch-when="completed" shipment="vm.shipment"></shipment-view-completed>
     <shipment-view-lost      ng-switch-when="lost"      shipment="vm.shipment"></shipment-view-lost>
   </div>
-  <shipping-info-view shipment="vm.shipment"
-                      collapsible="false">
+  <shipping-info-view shipment="vm.shipment" collapsible="true" read-only="true">
   </shipping-info-view>
   <shipment-specimens-view shipment="vm.shipment"
                            read-only="true"
@@ -22,8 +21,11 @@
       <br/>{{vm.pageHeader}}</small>
     </h1>
   </div>
-  <div class="panel panel-warning">
-    <div class="panel-heading" translate>
+  <div class="alert alert-warning">
+    <span class="glyphicon glyphicon-warning-sign"></span>
+    <translate>
       Cannot display information for shipment <em>{{vm.shipment.courierName}}: {{vm.shipment.trackingNumber}}</em> since
-      it is in the wrong state. </div> </div>
+      it is in the wrong state.
+    </translate>
+  </div>
 </div>

@@ -185,7 +185,7 @@ define(function (require) {
             collectionEventType: ceventType,
             annotations: [ jsonAnnotation ]
           }));
-      }).toThrowError(/annotation type is undefined/);
+      }).toThrowError(/annotation type not found/);
     });
 
     it('fails when constructing with invalid collection event type', function() {

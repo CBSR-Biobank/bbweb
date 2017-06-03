@@ -11,6 +11,7 @@ define(['lodash'], function (_) {
     'ConcurrencySafeEntity',
     'DomainError',
     'Annotation',
+    'AnnotationType',
     'annotationFactory'
   ];
 
@@ -24,6 +25,7 @@ define(['lodash'], function (_) {
                                  ConcurrencySafeEntity,
                                  DomainError,
                                  Annotation,
+                                 AnnotationType,
                                  annotationFactory) {
 
     function HasAnnotations() {}
@@ -73,7 +75,9 @@ define(['lodash'], function (_) {
       self.annotations = _.map(annotationTypes, function (annotationType) {
         var jsonAnnotationMaybe = _.find(self.annotations, { annotationTypeId: annotationType.id });
 
-        if (jsonAnnotationMaybe instanceof Annotation) {
+        if ((jsonAnnotationMaybe instanceof Annotation) &&
+            (jsonAnnotationMaybe.annotationType) &&
+            (jsonAnnotationMaybe.annotationType instanceof AnnotationType)) {
           // annotation was already converted to Annotation or sub class
           return jsonAnnotationMaybe;
         }

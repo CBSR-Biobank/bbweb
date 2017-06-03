@@ -280,16 +280,14 @@ define(['lodash'], function(_) {
                                     collectionEventTypes) {
       return CollectionEvent.get($stateParams.collectionEventId)
         .then(function (cevent) {
-          var deferred = $q.defer(),
-              ceventType = _.find(collectionEventTypes, { id: cevent.collectionEventTypeId });
+          var ceventType = _.find(collectionEventTypes, { id: cevent.collectionEventTypeId });
 
           if (!ceventType) {
-            deferred.reject('could not find collection event type');
-          } else {
-            cevent.setCollectionEventType(ceventType);
-            deferred.resolve(cevent);
+            return $q.reject('could not find collection event type');
           }
-          return deferred.promise;
+
+          cevent.setCollectionEventType(ceventType);
+          return $q.when(cevent);
         });
     }
 

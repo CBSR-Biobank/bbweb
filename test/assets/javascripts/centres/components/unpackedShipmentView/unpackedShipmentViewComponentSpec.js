@@ -13,6 +13,8 @@ define(function (require) {
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(ShippingComponentTestSuiteMixin, ServerReplyMixin, testUtils) {
+      var self = this;
+
       _.extend(this, ShippingComponentTestSuiteMixin.prototype, ServerReplyMixin.prototype);
       this.putHtmlTemplates(
         '/assets/javascripts/centres/components/unpackedShipmentView/unpackedShipmentView.html',
@@ -29,6 +31,8 @@ define(function (require) {
                               'factory');
 
       this.createScope = function (shipment) {
+        self.Shipment.get = jasmine.createSpy().and.returnValue(self.$q.when(shipment));
+
         ShippingComponentTestSuiteMixin.prototype.createScope.call(
           this,
           '<unpacked-shipment-view shipment="vm.shipment"><unpacked-shipment-view>',

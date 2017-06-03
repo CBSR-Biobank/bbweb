@@ -153,7 +153,7 @@ define(['lodash'], function (_) {
           '$stateParams',
           'centre',
           function ($stateParams, centre) {
-            return _.find(centre.locations, { uniqueId: $stateParams.locationId });
+            return _.find(centre.locations, { id: $stateParams.locationId });
           }
         ]
       },

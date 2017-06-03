@@ -4,25 +4,25 @@
 <div class="modal-body">
   <form class="form-horizontal" name="form" novalidate>
 
-    <!-- SPECIMEN SPEC -->
+    <!-- SPECIMEN Description -->
     <div class="form-group row"
-         ng-class="{ 'has-error' : form.specimenSpec.$invalid && !form.specimenSpec.$pristine }">
+         ng-class="{ 'has-error' : form.specimenDescription.$invalid && !form.specimenDescription.$pristine }">
       <label class="col-md-3 form-control-label" translate>Specimen type</label>
       <div class="col-md-9">
         <select class="form-control"
-                id="specimenSpec"
-                name="specimenSpec"
-                ng-model="vm.selectedSpecimenSpec"
-                ng-options="specimenSpec as specimenSpec.name for specimenSpec in vm.specimenSpecs"
-                ng-change="vm.specimenSpecChanged()"
+                id="specimenDescription"
+                name="specimenDescription"
+                ng-model="vm.selectedSpecimenDescription"
+                ng-options="specimenDescription as specimenDescription.name for specimenDescription in vm.specimenDescriptions"
+                ng-change="vm.specimenDescriptionChanged()"
                 focus-me="true"
                 required>
           <option value="" translate>-- make a selection --</option>
         </select>
       </div>
       <div class="col-sm-offset-3 col-sm-9"
-           ng-messages="form.specimenSpec.$error"
-           ng-if="form.specimenSpec.$dirty">
+           ng-messages="form.specimenDescription.$error"
+           ng-if="form.specimenDescription.$dirty">
         <div ng-message="required" class="help-block" translate>A specimen type must be selected</div>
       </div>
     </div>
@@ -68,7 +68,7 @@
                  ng-model="vm.amount"
                  positive-float />
           <span class="input-group-addon">
-            {{vm.selectedSpecimenSpec ? vm.selectedSpecimenSpec.units : ''}}
+            {{vm.selectedSpecimenDescription ? vm.selectedSpecimenDescription.units : ''}}
           </span>
         </div>
       </div>

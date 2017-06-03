@@ -12,8 +12,9 @@ define(function () {
    */
   function stateHelperService($state, $stateParams) {
     var service = {
-      reloadAndReinit: reloadAndReinit,
-      reloadStateAndReinit: reloadStateAndReinit
+      reloadAndReinit:      reloadAndReinit,
+      reloadStateAndReinit: reloadStateAndReinit,
+      updateBreadcrumbs:    updateBreadcrumbs
     };
     return service;
 
@@ -36,6 +37,13 @@ define(function () {
       var params = stateParams || {};
       var options = stateOptions || {};
       return $state.transitionTo(stateName, params, options);
+    }
+
+    /**
+     * Reloads the current state in order to have breadcrumbs updated.
+     */
+    function updateBreadcrumbs() {
+      reloadAndReinit();
     }
   }
 

@@ -106,7 +106,7 @@
       <span class="pull-right">
         <button class="btn btn-xs btn-primary"
                 title="{{'Add a specimen to this collection event'|translate}}"
-                ng-click="vm.addSpecimenSpec()"
+                ng-click="vm.addSpecimenDescription()"
                 ng-if="vm.study.isDisabled()">
           Add specimen
           <i class="glyphicon glyphicon-plus"></i>
@@ -116,22 +116,23 @@
   </div>
   <ul class="list-group">
     <li class="list-group-item" ng-if="vm.ceventType.specimenSpecs.length <= 0">
-      <div class="panel panel-warning">
-        <div class="panel-heading" translate>
+      <div class="alert alert-warning">
+        <span class="glyphicon glyphicon-warning-sign"></span>
+        <translate>
           No specimens defined yet.
-        </div>
+        </translate>
       </div>
     </li>
     <li class="list-group-item"
-        ng-repeat="specimenSpec in vm.ceventType.specimenSpecs">
+        ng-repeat="specimenDescription in vm.ceventType.specimenDescriptions">
       <div class="row">
         <div class="col-md-10">
-          <collection-specimen-spec-summary specimen-spec="specimenSpec">
-          </collection-specimen-spec-summary>
+          <collection-specimen-description-summary specimen-description="specimenDescription">
+          </collection-specimen-description-summary>
         </div>
         <div class="col-md-2">
-          <update-remove-buttons on-update="vm.editSpecimenSpec(specimenSpec)"
-                                 on-remove="vm.removeSpecimenSpec(specimenSpec)"
+          <update-remove-buttons on-update="vm.editSpecimenDescription(specimenDescription)"
+                                 on-remove="vm.removeSpecimenDescription(specimenDescription)"
                                  update-button-enabled="vm.study.isDisabled()"
                                  remove-button-enabled="vm.study.isDisabled()">
           </update-remove-buttons>

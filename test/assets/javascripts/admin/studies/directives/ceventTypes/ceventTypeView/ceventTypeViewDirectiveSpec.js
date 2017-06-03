@@ -15,6 +15,8 @@ define(function (require) {
   describe('ceventTypeViewDirective', function() {
 
     var createController = function (study, collectionEventType) {
+      this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when(collectionEventType));
+
       study = study || this.study;
       collectionEventType = collectionEventType || this.collectionEventType;
 
@@ -50,6 +52,7 @@ define(function (require) {
                               'notificationsService',
                               'domainNotificationService',
                               'modalService',
+                              'stateHelper',
                               'factory');
 
       self.jsonStudy              = this.factory.study();
@@ -67,6 +70,7 @@ define(function (require) {
         '/assets/javascripts/common/directives/updateRemoveButtons.html',
         '/assets/javascripts/common/directives/statusLine/statusLine.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
+      spyOn(self.stateHelper, 'updateBreadcrumbs').and.returnValue(null);
     }));
 
     it('scope should be valid', function() {

@@ -30,22 +30,26 @@ define(['lodash'], function (_) {
     'gettextCatalog',
     'modalInput',
     'notificationsService',
+    'CollectionEventType',
     'CollectionSpecimenDescription',
     'AnatomicalSourceType',
     'PreservationType',
     'PreservationTemperatureType',
-    'SpecimenType'
+    'SpecimenType',
+    'stateHelper'
   ];
 
   function CollectionSpecimenDescriptionViewCtrl($state,
-                                          gettextCatalog,
-                                          modalInput,
-                                          notificationsService,
-                                          CollectionSpecimenDescription,
-                                          AnatomicalSourceType,
-                                          PreservationType,
-                                          PreservationTemperatureType,
-                                          SpecimenType) {
+                                                 gettextCatalog,
+                                                 modalInput,
+                                                 notificationsService,
+                                                 CollectionEventType,
+                                                 CollectionSpecimenDescription,
+                                                 AnatomicalSourceType,
+                                                 PreservationType,
+                                                 PreservationTemperatureType,
+                                                 SpecimenType,
+                                                 stateHelper) {
     var vm = this;
 
     vm.returnState = {
@@ -64,8 +68,17 @@ define(['lodash'], function (_) {
     vm.editMaxCount                = editMaxCount;
     vm.back                        = back;
 
+    onInit();
 
     //--
+
+    function onInit() {
+      // reload the collection event type in case changes were made to it
+      CollectionEventType.get(vm.collectionEventType.studyId, vm.collectionEventType.id)
+        .then(function (ceventType) {
+          vm.collectionEventType = ceventType;
+        });
+    }
 
     function notifySuccess() {
       return notificationsService.success(gettextCatalog.getString('Annotation type changed successfully.'),
@@ -89,7 +102,10 @@ define(['lodash'], function (_) {
                       { required: true, minLength: 2 }).result
         .then(function (name) {
           vm.specimenDescription.name = name;
-          return updateCollectionEventType();
+          return updateCollectionEventType()
+            .then(function () {
+              stateHelper.updateBreadcrumbs();
+            });
         });
     }
 

@@ -27,16 +27,29 @@ define(['lodash'], function (_) {
 
   CollectionEventAnnotationTypeViewCtrl.$inject = [
     '$q',
+    'CollectionEventType',
     'gettextCatalog',
     'notificationsService'
   ];
 
   function CollectionEventAnnotationTypeViewCtrl($q,
+                                                 CollectionEventType,
                                                  gettextCatalog,
                                                  notificationsService) {
     var vm = this;
 
     vm.onUpdate = onUpdate;
+    onInit();
+
+    //---
+
+    function onInit() {
+      // reload the collection event type in case changes were made to it
+      CollectionEventType.get(vm.collectionEventType.studyId, vm.collectionEventType.id)
+        .then(function (ceventType) {
+          vm.collectionEventType = ceventType;
+        });
+    }
 
     function onUpdate(annotationType) {
       return vm.collectionEventType.updateAnnotationType(annotationType)

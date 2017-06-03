@@ -10,7 +10,7 @@ define(function () {
     controller: CeventSpecimensViewController,
     controllerAs: 'vm',
     bindings: {
-      study:           '<',
+      study:              '<',
       collectionEvent: '<'
     }
   };
@@ -69,14 +69,14 @@ define(function () {
                                        new Date(vm.collectionEvent.timeCompleted)).result;
         })
         .then(function (specimens) {
-          return Specimen.add(vm.collectionEvent.id, specimens);
-        })
-        .then(function () {
-          notificationsService.success(gettextCatalog.getString('Specimen added'));
-          reloadTableData();
-        })
-        .catch(function (err) {
-          notificationsService.error(JSON.stringify(err));
+          return Specimen.add(vm.collectionEvent.id, specimens)
+            .then(function () {
+              notificationsService.success(gettextCatalog.getString('Specimen added'));
+              reloadTableData();
+            })
+            .catch(function (err) {
+              notificationsService.error(JSON.stringify(err));
+            });
         });
     }
 
@@ -127,9 +127,9 @@ define(function () {
 
       function promiseFn() {
         return specimen.remove(vm.collectionEvent.id).then(function () {
-          notificationsService.success(gettextCatalog.getString('Specimen removed'));
-          reloadTableData();
-        });
+            notificationsService.success(gettextCatalog.getString('Specimen removed'));
+            reloadTableData();
+          });
       }
     }
 

@@ -30,7 +30,8 @@ define(['lodash'], function(_) {
     'modalService',
     'modalInput',
     'notificationsService',
-    'CollectionEventType'
+    'CollectionEventType',
+    'stateHelper'
   ];
 
   function StudySummaryCtrl($scope,
@@ -39,7 +40,8 @@ define(['lodash'], function(_) {
                             modalService,
                             modalInput,
                             notificationsService,
-                            CollectionEventType) {
+                            CollectionEventType,
+                            stateHelper) {
 
     var vm = this;
 
@@ -113,8 +115,11 @@ define(['lodash'], function(_) {
                       { required: true, minLength: 2 }).result
         .then(function (name) {
           vm.study.updateName(name)
-            .then(postUpdate(gettextCatalog.getString('Name changed successfully.'),
-                             gettextCatalog.getString('Change successful')))
+            .then(function (study) {
+              stateHelper.updateBreadcrumbs();
+              postUpdate(gettextCatalog.getString('Name changed successfully.'),
+                         gettextCatalog.getString('Change successful'))(study);
+            })
             .catch(notificationsService.updateError);
         });
     }

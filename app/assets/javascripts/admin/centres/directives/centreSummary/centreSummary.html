@@ -55,12 +55,12 @@
         </div>
       </div>
     </li>
-    <li class="list-group-item"
-        ng-if="!vm.centre.hasLocations()">
-      <div class="panel panel-warning">
-        <div class="panel-heading" translate>
+    <li class="list-group-item" ng-if="!vm.centre.hasLocations()">
+      <div class="alert alert-warning">
+        <span class="glyphicon glyphicon-warning-sign"></span>
+        <translate>
           Centre cannot be enabled until at least one location is added.
-        </div>
+        </translate>
       </div>
     </li>
   </ul>

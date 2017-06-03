@@ -14,13 +14,13 @@
   <ul class="list-group">
 
     <li class="list-group-item" ng-if="!vm.centre.hasLocations()">
-      <div class="panel panel-warning">
-        <div class="panel-heading" translate>
+      <div class="alert alert-warning">
+        <span class="glyphicon glyphicon-warning-sign"></span>
+        <translate>
           Locations have not been added.
-        </div>
+        </translate>
       </div>
     </li>
-
     <li class="list-group-item" ng-repeat="location in vm.centre.locations">
       <div class="row">
         <div class="col-md-10">

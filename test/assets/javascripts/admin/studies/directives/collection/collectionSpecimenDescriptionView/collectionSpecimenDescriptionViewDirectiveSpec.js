@@ -27,6 +27,7 @@ define(function (require) {
                               'Study',
                               'CollectionEventType',
                               'CollectionSpecimenDescription',
+                              'stateHelper',
                               'factory');
 
       self.putHtmlTemplates(
@@ -44,6 +45,9 @@ define(function (require) {
       self.specimenDescription        = new self.CollectionSpecimenDescription(self.jsonSpecimenDescription);
 
       self.createController = function () {
+        self.CollectionEventType.get = jasmine.createSpy()
+          .and.returnValue(self.$q.when(self.collectionEventType));
+
         self.element = angular.element([
           '<collection-specimen-description-view',
           '  study="vm.study"',
@@ -63,6 +67,8 @@ define(function (require) {
         self.scope.$digest();
         self.controller = self.element.controller('collectionSpecimenDescriptionView');
       };
+
+      spyOn(self.stateHelper, 'updateBreadcrumbs').and.returnValue(null);
     }));
 
     it('should have valid scope', function() {

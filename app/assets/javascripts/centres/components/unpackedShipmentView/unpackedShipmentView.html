@@ -43,10 +43,11 @@
       <br/> {{'Unpack shipment'|translate}}</small>
     </h1>
   </div>
-  <div class="panel panel-warning">
-    <div class="panel-heading" translate>
+  <div class="alert alert-warning">
+    <span class="glyphicon glyphicon-warning-sign"></span>
+    <translate>
       Cannot unpack items from shipment <em>{{vm.shipment.courierName}}: {{vm.shipment.trackingNumber}}</em> since
       it is in the wrong state.
-    </div>
+    </translate>
   </div>
 </div>

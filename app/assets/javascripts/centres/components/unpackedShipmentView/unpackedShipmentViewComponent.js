@@ -18,6 +18,7 @@ define(function () {
     '$controller',
     '$scope',
     '$state',
+    'Shipment',
     'ShipmentSpecimen',
     'ShipmentItemState',
     'modalService',
@@ -34,6 +35,7 @@ define(function () {
   function UnpackedShipmentViewController($controller,
                                           $scope,
                                           $state,
+                                          Shipment,
                                           ShipmentSpecimen,
                                           ShipmentItemState,
                                           modalService,
@@ -43,6 +45,8 @@ define(function () {
                                           SHIPMENT_RECEIVE_PROGRESS_ITEMS,
                                           gettextCatalog) {
     var vm = this;
+
+    vm.$onInit = onInit;
 
     // initialize this controller's base class
     $controller('TabbedPageController',
@@ -92,6 +96,13 @@ define(function () {
     vm.completeShipment = completeShipment;
 
     //----
+
+    function onInit() {
+      // get shipment again to get latest version
+      return Shipment.get(vm.shipment.id).then(function (shipment) {
+        vm.shipment = shipment;
+      });
+    }
 
     function cannotGoBackToReceivedModal() {
       modalService.modalOk(

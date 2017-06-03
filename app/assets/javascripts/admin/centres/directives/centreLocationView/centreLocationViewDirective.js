@@ -28,13 +28,15 @@ define(['lodash'], function (_) {
     '$state',
     'gettextCatalog',
     'modalInput',
-    'notificationsService'
+    'notificationsService',
+    'stateHelper'
   ];
 
   function CentreLocationViewCtrl($state,
                                   gettextCatalog,
                                   modalInput,
-                                  notificationsService) {
+                                  notificationsService,
+                                  stateHelper) {
     var vm = this;
 
     vm.back               = back;
@@ -69,8 +71,11 @@ define(['lodash'], function (_) {
         .then(function (name) {
           vm.location.name = name;
           vm.centre.updateLocation(vm.location)
-            .then(postUpdate(gettextCatalog.getString('Name changed successfully.'),
-                             gettextCatalog.getString('Change successful')))
+            .then(function (centre) {
+              stateHelper.updateBreadcrumbs();
+              postUpdate(gettextCatalog.getString('Name changed successfully.'),
+                         gettextCatalog.getString('Change successful'))(centre);
+            })
             .catch(notificationsService.updateError);
         });
     }

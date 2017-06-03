@@ -28,7 +28,9 @@ define(function () {
    *   @param {string} context.modalInputFuncName - the name of the {modalInput} function that opens a modal
    *   and allows the user to change the value on the annotation.
    *
-   *   @param {Object} context.entity - the domain entity that has the annotation to be updated.
+   *   @param {Object} context.entity - the domain entity class.
+   *
+   *   @param {Object} context.entityInstance - the domain entity that has the annotation to be updated.
    *
    *   @param {string} context.entityUpdateFuncName - the function on the domain entity used to update the
    *   annotation.
@@ -49,7 +51,7 @@ define(function () {
         spyOn(this.modalInput, context.modalInputFuncName)
           .and.returnValue({ result: this.$q.when(context.newValue) });
         spyOn(context.entity.prototype, context.entityUpdateFuncName)
-          .and.returnValue(this.$q.when(context.entity));
+          .and.returnValue(this.$q.when(context.entityInstance));
         spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
         context.createDirective.call(this);

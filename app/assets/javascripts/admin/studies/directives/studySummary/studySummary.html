@@ -7,7 +7,7 @@
                 ng-click="vm.changeState('enable')"
                 title="{{'Enable'|translate}}"
                 ng-if="vm.study.isDisabled()"
-                ng-disabled="!vm.hasSpecimenSpecs">
+                ng-disabled="!vm.hasSpecimenDescriptions">
           <i class="glyphicon glyphicon-ok-circle"></i>
         </button>
 
@@ -70,14 +70,12 @@
       </div>
     </li>
     <li class="list-group-item"
-        ng-if="!vm.hasSpecimenSpecs">
-      <div class="panel panel-warning">
-        <div class="panel-heading">
-          <span class="glyphicon glyphicon-warning-sign"></span>
-          <translate>
-            Study cannot be enabled until at least one specimen is added to a collection event.
-          </translate>
-        </div>
+        ng-if="!vm.hasSpecimenDescriptions">
+      <div class="alert alert-warning">
+        <span class="glyphicon glyphicon-warning-sign"></span>
+        <translate>
+          Study cannot be enabled until at least one specimen is added to a collection event.
+        </translate>
       </div>
     </li>
   </ul>

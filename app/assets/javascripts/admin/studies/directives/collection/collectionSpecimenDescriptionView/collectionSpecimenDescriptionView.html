@@ -3,7 +3,7 @@
 </div>
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">{{vm.specimenSpec.name}}</h3>
+    <h3 class="panel-title">{{vm.specimenDescription.name}}</h3>
   </div>
   <ul class="list-group">
     <li class="list-group-item">
@@ -12,7 +12,7 @@
           <strong translate>Name:</strong>
         </div>
         <div class="col-md-6">
-          {{vm.specimenSpec.name}}
+          {{vm.specimenDescription.name}}
         </div>
         <div class="col-md-3">
           <button class="btn btn-xs btn-primary pull-right"
@@ -30,7 +30,7 @@
         </div>
         <div class="col-md-9">
           <truncate-toggle
-             text="vm.specimenSpec.description"
+             text="vm.specimenDescription.description"
              toggle-length="60"
              text-empty-warning="{{'Description not entered yet.'|translate}}"
              allow-edit="true"
@@ -45,7 +45,7 @@
           <strong translate>Anatomical source:</strong>
         </div>
         <div class="col-md-6">
-          {{vm.specimenSpec.anatomicalSourceType}}
+          {{vm.specimenDescription.anatomicalSourceType}}
         </div>
         <div class="col-md-3">
           <button class="btn btn-xs btn-primary pull-right"
@@ -62,7 +62,7 @@
           <strong translate>Preservation type:</strong>
         </div>
         <div class="col-md-6">
-          {{vm.specimenSpec.preservationType}}
+          {{vm.specimenDescription.preservationType}}
         </div>
         <div class="col-md-3">
           <button class="btn btn-xs btn-primary pull-right"
@@ -79,7 +79,7 @@
           <strong translate>Preservation temperature:</strong>
         </div>
         <div class="col-md-6">
-          {{vm.specimenSpec.preservationTemperatureType}}
+          {{vm.specimenDescription.preservationTemperatureType}}
         </div>
         <div class="col-md-3">
           <button class="btn btn-xs btn-primary pull-right"
@@ -96,7 +96,7 @@
           <strong translate>Specimen type:</strong>
         </div>
         <div class="col-md-6">
-          {{vm.specimenSpec.specimenType}}
+          {{vm.specimenDescription.specimenType}}
         </div>
         <div class="col-md-3">
           <button class="btn btn-xs btn-primary pull-right"
@@ -113,7 +113,7 @@
           <strong translate>Units:</strong>
         </div>
         <div class="col-md-6">
-          {{vm.specimenSpec.units}}
+          {{vm.specimenDescription.units}}
         </div>
         <div class="col-md-3">
           <button class="btn btn-xs btn-primary pull-right"
@@ -130,7 +130,7 @@
           <strong translate>Amount:</strong>
         </div>
         <div class="col-md-6">
-          {{vm.specimenSpec.amount}}
+          {{vm.specimenDescription.amount}}
         </div>
         <div class="col-md-3">
           <button class="btn btn-xs btn-primary pull-right"
@@ -147,7 +147,7 @@
           <strong translate>Max count:</strong>
         </div>
         <div class="col-md-6">
-          {{vm.specimenSpec.maxCount}}
+          {{vm.specimenDescription.maxCount}}
         </div>
         <div class="col-md-3">
           <button class="btn btn-xs btn-primary pull-right"

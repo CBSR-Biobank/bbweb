@@ -16,6 +16,9 @@ define([
   describe('collectionEventAnnotationTypeViewDirective', function() {
 
     var createController = function () {
+      this.CollectionEventType.get = jasmine.createSpy()
+        .and.returnValue(this.$q.when(this.collectionEventType));
+
       this.element = angular.element([
         '<collection-event-annotation-type-view',
         '  collection-event-type="vm.collectionEventType"',

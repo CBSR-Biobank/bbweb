@@ -31,7 +31,8 @@ define(['lodash'], function (_) {
     'modalInput',
     'domainNotificationService',
     'notificationsService',
-    'CollectionEventAnnotationTypeModals'
+    'CollectionEventAnnotationTypeModals',
+    'stateHelper'
   ];
 
   function CeventTypeViewCtrl($state,
@@ -40,7 +41,8 @@ define(['lodash'], function (_) {
                               modalInput,
                               domainNotificationService,
                               notificationsService,
-                              CollectionEventAnnotationTypeModals) {
+                              CollectionEventAnnotationTypeModals,
+                              stateHelper) {
     var vm = this;
 
     _.extend(vm, new CollectionEventAnnotationTypeModals());
@@ -77,8 +79,11 @@ define(['lodash'], function (_) {
                       { required: true, minLength: 2 }).result
         .then(function (name) {
           vm.ceventType.updateName(name)
-            .then(postUpdate(gettextCatalog.getString('Name changed successfully.'),
-                             gettextCatalog.getString('Change successful')))
+            .then(function (ceventType) {
+              stateHelper.updateBreadcrumbs();
+              postUpdate(gettextCatalog.getString('Name changed successfully.'),
+                         gettextCatalog.getString('Change successful'))(ceventType);
+            })
             .catch(notificationsService.updateError);
         });
     }
@@ -137,7 +142,10 @@ define(['lodash'], function (_) {
                                  { name: specimenDescription.name }));
 
       function removePromiseFunc() {
-        return vm.ceventType.removeSpecimenDescription(specimenDescription);
+        return vm.ceventType.removeSpecimenDescription(specimenDescription)
+          .then(function () {
+            notificationsService.success(gettextCatalog.getString('Specimen removed'));
+          });
       }
     }
 
@@ -155,7 +163,10 @@ define(['lodash'], function (_) {
         }
 
         vm.remove(annotationType, function () {
-          return vm.ceventType.removeAnnotationType(annotationType);
+          return vm.ceventType.removeAnnotationType(annotationType)
+            .then(function () {
+              notificationsService.success(gettextCatalog.getString('Annotation removed'));
+            });
         });
       }
     }
@@ -169,15 +180,17 @@ define(['lodash'], function (_) {
         if (inUse) {
           modalService.modalOk(
             gettextCatalog.getString('Collection event in use'),
-            gettextCatalog.getString('This collection event cannot be removed since one or more participants are using it. ' +
-                    'If you still want to remove it, the participants using it have to be modified ' +
-                    'to no longer use it.'));
+             gettextCatalog.getString(
+                'This collection event cannot be removed since one or more participants are using it. ' +
+                   'If you still want to remove it, the participants using it have to be modified ' +
+                   'to no longer use it.'));
         } else {
           domainNotificationService.removeEntity(
             promiseFn,
             gettextCatalog.getString('Remove collection event'),
-            gettextCatalog.getString('Are you sure you want to remove collection event with name <strong>{{name}}</strong>?',
-                    { name: vm.ceventType.name }),
+             gettextCatalog.getString(
+                'Are you sure you want to remove collection event with name <strong>{{name}}</strong>?',
+                { name: vm.ceventType.name }),
             gettextCatalog.getString('Remove failed'),
             gettextCatalog.getString('Collection event with name {{name}} cannot be removed',
                     { name: vm.ceventType.name }));

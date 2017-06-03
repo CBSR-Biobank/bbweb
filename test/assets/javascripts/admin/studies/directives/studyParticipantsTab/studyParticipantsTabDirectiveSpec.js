@@ -112,7 +112,7 @@ define([
         });
 
         it('displays a modal when it cant be removed', function() {
-          spyOn(this.modalService, 'modalOk').and.returnValue('OK');
+          spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
 
           createDirective.call(this);
 
@@ -120,7 +120,7 @@ define([
           this.controller.removeAnnotationType(this.annotationType);
           this.scope.$digest();
 
-          expect(this.modalService.modalOk).toHaveBeenCalled();
+          expect(this.modalService.modalOkCancel).toHaveBeenCalled();
         });
 
         it('throws an error when it cant be removed', function() {

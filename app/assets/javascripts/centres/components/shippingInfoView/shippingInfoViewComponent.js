@@ -11,7 +11,8 @@ define(function (require) {
     controllerAs: 'vm',
     bindings: {
       shipment:    '<',
-      collapsible: '<'
+      collapsible: '<',
+      readOnly:    '<'
     }
   };
 

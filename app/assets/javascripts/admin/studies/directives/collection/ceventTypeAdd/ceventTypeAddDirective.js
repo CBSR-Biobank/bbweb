@@ -39,7 +39,6 @@ define(['lodash'], function(_) {
     var vm = this;
 
     vm.ceventType  = new CollectionEventType({}, { study: vm.study });
-    vm.ceventType  = new CollectionEventType({ study: vm.study });
     vm.returnState = 'home.admin.studies.study.collection';
 
     vm.title       = gettextCatalog.getString('Add Collection Event');

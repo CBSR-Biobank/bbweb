@@ -8,10 +8,12 @@
 
   <ul class="list-group">
     <li class="list-group-item" ng-if="! vm.haveUsers">
-      <div class="panel panel-warning">
-        <div class="panel-heading" translate>
+      <div class="alert alert-warning">
+        <span class="glyphicon glyphicon-warning-sign"></span>
+        <translate>
           No users have been added yet.
-        </div>
+        </translate>
+      </div>
       </div>
     </li>
   </ul>

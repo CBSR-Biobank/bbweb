@@ -38,13 +38,13 @@ define(['lodash'], function (_) {
   var returnState = 'home.admin.studies.study.collection.ceventType';
 
   function CollectionSpecimenDescriptionAddCtrl($state,
-                                         gettextCatalog,
-                                         domainNotificationService,
-                                         notificationsService,
-                                         AnatomicalSourceType,
-                                         PreservationType,
-                                         PreservationTemperatureType,
-                                         SpecimenType) {
+                                                gettextCatalog,
+                                                domainNotificationService,
+                                                notificationsService,
+                                                AnatomicalSourceType,
+                                                PreservationType,
+                                                PreservationTemperatureType,
+                                                SpecimenType) {
     var vm = this;
 
     vm.anatomicalSourceTypes = _.values(AnatomicalSourceType);
