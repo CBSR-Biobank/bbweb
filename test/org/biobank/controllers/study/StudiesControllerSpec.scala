@@ -1,7 +1,7 @@
 package org.biobank.controllers.study
 
 import org.biobank.controllers._
-import org.biobank.domain.JsonHelper
+import org.biobank.domain.{AnnotationType, JsonHelper}
 import org.biobank.domain.study._
 import org.biobank.dto._
 import org.biobank.fixture.ControllerFixture
@@ -15,20 +15,32 @@ import play.api.test.Helpers._
 class StudiesControllerSpec extends ControllerFixture with JsonHelper {
   import org.biobank.TestUtils._
 
-  def uri(): String = "/studies/"
+  private def uri(): String = "/studies/"
 
-  def uri(path: String): String = uri + s"$path"
+  private def uri(path: String): String = uri + s"$path"
 
-  def uri(study: Study): String = uri + s"${study.id.id}"
+  private def uri(study: Study): String = uri + s"${study.id.id}"
 
-  def uri(study: Study, path: String): String = uri(path) + s"/${study.id.id}"
+  private def uri(study: Study, path: String): String = uri(path) + s"/${study.id.id}"
 
-  def compareNameDto(json: JsValue, study: Study): Unit = {
+  private def urlName(study: Study)        = uri(study, "name")
+  private def urlDescription(study: Study) = uri(study, "description")
+  private def urlDisable(study: Study)     = uri(study, "disable")
+  private def urlEnable(study: Study)      = uri(study, "enable")
+  private def urlRetire(study: Study)      = uri(study, "retire")
+  private def urlUnretire(study: Study)    = uri(study, "unretire")
+
+  private def urlAddAnnotationType(study: Study) = uri(study, "pannottype")
+
+  private def urlUpdateAnnotationType(annotType: AnnotationType) =
+      (study: Study) => urlAddAnnotationType(study) + s"/${annotType.id}"
+
+  private def compareNameDto(json: JsValue, study: Study): Unit = {
     compareObj(json, NameDto(study.id.id, study.name, study.state.id))
     ()
   }
 
-  def compareObjs(jsonList: List[JsObject], studies: List[Study]) = {
+  private def compareObjs(jsonList: List[JsObject], studies: List[Study]) = {
     val studiesMap = studies.map { study => (study.id, study) }.toMap
     jsonList.foreach { jsonObj =>
       val jsonId = StudyId((jsonObj \ "id").as[String])
@@ -36,11 +48,10 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
     }
   }
 
-  def checkInvalidStudyId(path: String, jsonField: JsObject): Unit = {
-    val invalidStudyId = nameGenerator.next[Study]
+  private def checkInvalidStudyId(jsonField: JsObject, urlFunc: Study => String): Unit = {
+    val invalidStudy = factory.createDisabledStudy.copy(id = StudyId(nameGenerator.next[Study]))
     val cmdJson = Json.obj("expectedVersion" -> 0L) ++ jsonField
-
-    val json = makeRequest(POST, s"/studies/$path/$invalidStudyId", NOT_FOUND, cmdJson)
+    val json = makeRequest(POST, urlFunc(invalidStudy), NOT_FOUND, cmdJson)
 
     (json \ "status").as[String] must include ("error")
 
@@ -49,17 +60,17 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
     ()
   }
 
-  def checkInvalidStudyId(url: String): Unit = {
-    checkInvalidStudyId(url, Json.obj())
+  private def checkInvalidStudyId(urlFunc: Study => String): Unit = {
+    checkInvalidStudyId(Json.obj(), urlFunc)
   }
 
-  def updateWithInvalidVersion(path: String, jsonField: JsObject): Unit = {
+  private def updateWithInvalidVersion(jsonField: JsObject, urlFunc: Study => String): Unit = {
     val study = factory.createDisabledStudy
     studyRepository.put(study)
 
     val cmdJson = Json.obj("expectedVersion" -> Some(study.version + 1)) ++ jsonField
 
-    val json = makeRequest(POST, uri(study, path), BAD_REQUEST, cmdJson)
+    val json = makeRequest(POST, urlFunc(study), BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] must include ("error")
 
@@ -68,11 +79,13 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
     ()
   }
 
-  def updateWithInvalidVersion(url: String): Unit = {
-    updateWithInvalidVersion(url, Json.obj())
+  private def updateWithInvalidVersion(urlFunc: Study => String): Unit = {
+    updateWithInvalidVersion(Json.obj(), urlFunc)
   }
 
-  def updateNonDisabledStudy[T <: Study](study: T, path: String, jsonField: JsObject): Unit = {
+  private def updateNonDisabledStudy[T <: Study](study: T,
+                                                 jsonField: JsObject,
+                                                 urlFunc: Study => String): Unit = {
     study match {
       case s: DisabledStudy => fail("study should not be disabled")
       case _ => // do nothing
@@ -82,7 +95,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     val cmdJson = Json.obj("expectedVersion" -> Some(study.version)) ++ jsonField
 
-    val json = makeRequest(POST, uri(study, path), BAD_REQUEST, cmdJson)
+    val json = makeRequest(POST, urlFunc(study), BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] must include ("error")
 
@@ -445,16 +458,16 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       it("fail when updating name and study ID does not exist") {
-        checkInvalidStudyId("name", Json.obj("name" -> nameGenerator.next[Study]))
+        checkInvalidStudyId(Json.obj("name" -> nameGenerator.next[Study]), urlName)
       }
 
       it("fail when updating name with invalid version") {
-        updateWithInvalidVersion("name", Json.obj("name" -> nameGenerator.next[Study]))
+        updateWithInvalidVersion(Json.obj("name" -> nameGenerator.next[Study]), urlName)
       }
 
       it("fail when updating name on an enabled study") {
         List(factory.createEnabledStudy, factory.createRetiredStudy).foreach { study =>
-          updateNonDisabledStudy(study, "name", Json.obj("name" -> nameGenerator.next[Study]))
+          updateNonDisabledStudy(study, Json.obj("name" -> nameGenerator.next[Study]), urlName)
         }
       }
 
@@ -492,18 +505,18 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       it("fail when updating description and study ID does not exist") {
-        checkInvalidStudyId("description",
-                            Json.obj("description" -> nameGenerator.next[Study]))
+        checkInvalidStudyId(Json.obj("description" -> nameGenerator.next[Study]), urlDescription)
       }
 
       it("fail when updating description with invalid version") {
-        updateWithInvalidVersion("description",
-                                 Json.obj("description" -> nameGenerator.next[Study]))
+        updateWithInvalidVersion(Json.obj("description" -> nameGenerator.next[Study]), urlDescription)
       }
 
       it("fail when updating description on a non disabled study") {
         List(factory.createEnabledStudy, factory.createRetiredStudy).foreach { study =>
-          updateNonDisabledStudy(study, "description", Json.obj("description" -> nameGenerator.next[Study]))
+          updateNonDisabledStudy(study,
+                                 Json.obj("description" -> nameGenerator.next[Study]),
+                                 urlDescription)
         }
       }
 
@@ -558,20 +571,92 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       it("fail when adding annotation type and study ID does not exist") {
-        checkInvalidStudyId("pannottype",
-                            annotationTypeToJsonNoId(factory.createAnnotationType))
+        checkInvalidStudyId(annotationTypeToJsonNoId(factory.createAnnotationType), urlAddAnnotationType)
       }
 
       it("fail when adding annotation type and an invalid version") {
-        updateWithInvalidVersion("pannottype",
-                            annotationTypeToJsonNoId(factory.createAnnotationType))
+        updateWithInvalidVersion(annotationTypeToJsonNoId(factory.createAnnotationType),
+                                 urlAddAnnotationType)
       }
 
       it("fail when adding an annotation type on a non disabled study") {
         List(factory.createEnabledStudy, factory.createRetiredStudy).foreach { study =>
           updateNonDisabledStudy(study,
-                                 "pannottype",
-                                 annotationTypeToJsonNoId(factory.createAnnotationType))
+                                 annotationTypeToJsonNoId(factory.createAnnotationType),
+                                 urlAddAnnotationType)
+        }
+      }
+
+    }
+
+    describe("POST /studies/pannottype/:id/:annotTypeId") {
+
+      it("update a participant annotation type") {
+        val annotType = factory.createAnnotationType
+        val updatedAnnotType = annotType.copy(name        = nameGenerator.next[Study],
+                                              description = Some(nameGenerator.next[Study]))
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val cmdJson = Json.obj(
+            "id"               -> study.id.id,
+            "expectedVersion"  -> Some(study.version),
+            "annotationTypeId" -> updatedAnnotType.id,
+            "name"             -> updatedAnnotType.name,
+            "description"      -> updatedAnnotType.description,
+            "valueType"        -> updatedAnnotType.valueType,
+            "options"          -> updatedAnnotType.options,
+            "required"         -> updatedAnnotType.required)
+        val json = makeRequest(POST, uri(study, "pannottype") + s"/${annotType.id}", json = cmdJson)
+
+        (json \ "status").as[String] must include ("success")
+
+        val jsonId = StudyId((json \ "data" \ "id").as[String])
+        jsonId must be (study.id)
+
+        studyRepository.getByKey(jsonId) mustSucceed { repoStudy =>
+          compareObj((json \ "data").as[JsObject], repoStudy)
+
+          repoStudy must have (
+            'id          (study.id),
+            'version     (study.version + 1),
+            'name        (study.name),
+            'description (study.description)
+            )
+
+          repoStudy.annotationTypes must have size 1
+
+          repoStudy.annotationTypes.head.id.id must not be empty
+          repoStudy.annotationTypes.head must have (
+            'name          (updatedAnnotType.name),
+            'description   (updatedAnnotType.description),
+            'valueType     (updatedAnnotType.valueType),
+            'maxValueCount (updatedAnnotType.maxValueCount),
+            'options       (updatedAnnotType.options),
+            'required      (updatedAnnotType.required)
+          )
+
+          checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
+        }
+      }
+
+      it("fail when updating annotation type and study ID does not exist") {
+        val annotType = factory.createAnnotationType
+        checkInvalidStudyId(annotationTypeToJson(annotType), urlUpdateAnnotationType(annotType))
+      }
+
+      it("fail when updating annotation type and an invalid version") {
+        val annotType = factory.createAnnotationType
+        updateWithInvalidVersion(annotationTypeToJson(factory.createAnnotationType),
+                                 urlUpdateAnnotationType(annotType))
+      }
+
+      it("fail when updating an annotation type on a non disabled study") {
+        val annotType = factory.createAnnotationType
+        List(factory.createEnabledStudy, factory.createRetiredStudy).foreach { study =>
+          updateNonDisabledStudy(study,
+                                 annotationTypeToJson(annotType),
+                                 urlUpdateAnnotationType(annotType))
         }
       }
 
@@ -741,11 +826,11 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       it("fail when enabling and study ID does not exit") {
-        checkInvalidStudyId("enable")
+        checkInvalidStudyId(urlEnable)
       }
 
       it("fail when enabling a study and the version is invalid") {
-        updateWithInvalidVersion("enable")
+        updateWithInvalidVersion(urlEnable)
       }
     }
 
@@ -780,11 +865,11 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       it("fail when disabling and study ID does not exit") {
-        checkInvalidStudyId("disable")
+        checkInvalidStudyId(urlDisable)
       }
 
       it("fail when disabling a study and the version is invalid") {
-        updateWithInvalidVersion("disable")
+        updateWithInvalidVersion(urlDisable)
       }
     }
 
@@ -819,11 +904,11 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       it("fail when retiring and study ID does not exit") {
-        checkInvalidStudyId("retire")
+        checkInvalidStudyId(urlRetire)
       }
 
       it("fail when retiring a study and the version is invalid") {
-        updateWithInvalidVersion("retire")
+        updateWithInvalidVersion(urlRetire)
       }
     }
 
@@ -858,11 +943,11 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       it("fail when unretiring and study ID does not exit") {
-        checkInvalidStudyId("unretire")
+        checkInvalidStudyId(urlUnretire)
       }
 
       it("fail when unretiring a study and the version is invalid") {
-        updateWithInvalidVersion("unretire")
+        updateWithInvalidVersion(urlUnretire)
       }
     }
 

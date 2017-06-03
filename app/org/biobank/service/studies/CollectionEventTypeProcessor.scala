@@ -60,6 +60,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
         case et: EventType.DescriptionUpdated         => applyDescriptionUpdatedEvent(event)
         case et: EventType.RecurringUpdated           => applyRecurringUpdatedEvent(event)
         case et: EventType.AnnotationTypeAdded        => applyAnnotationTypeAddedEvent(event)
+        case et: EventType.AnnotationTypeUpdated      => applyAnnotationTypeUpdatedEvent(event)
         case et: EventType.AnnotationTypeRemoved      => applyAnnotationTypeRemovedEvent(event)
         case et: EventType.SpecimenDescriptionAdded   => applySpecimenDescriptionAddedEvent(event)
         case et: EventType.SpecimenDescriptionUpdated => applySpecimenDescriptionUpdatedEvent(event)
@@ -102,6 +103,9 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
 
     case cmd: CollectionEventTypeAddAnnotationTypeCmd =>
       processUpdateCmd(cmd, addAnnotationTypeCmdToEvent, applyAnnotationTypeAddedEvent)
+
+    case cmd: CollectionEventTypeUpdateAnnotationTypeCmd =>
+      processUpdateCmd(cmd, updateAnnotationTypeCmdToEvent, applyAnnotationTypeUpdatedEvent)
 
     case cmd: RemoveCollectionEventTypeAnnotationTypeCmd =>
       processUpdateCmd(cmd, removeAnnotationTypeCmdToEvent, applyAnnotationTypeRemovedEvent)
@@ -243,6 +247,28 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.annotationTypeAdded.version        := cmd.expectedVersion,
       _.annotationTypeAdded.annotationType := EventUtils.annotationTypeToEvent(annotationType))
+  }
+
+  private def updateAnnotationTypeCmdToEvent(cmd: CollectionEventTypeUpdateAnnotationTypeCmd,
+                                             cet: CollectionEventType)
+      : ServiceValidation[CollectionEventTypeEvent] = {
+    for {
+      annotationType <- AnnotationType(AnnotationTypeId(cmd.annotationTypeId),
+                                       cmd.name,
+                                       cmd.description,
+                                       cmd.valueType,
+                                       cmd.maxValueCount,
+                                       cmd.options,
+                                       cmd.required).successNel[String]
+      updatedCet   <- cet.withAnnotationType(annotationType)
+    } yield {
+      CollectionEventTypeEvent(cet.id.id).update(
+        _.studyId                              := cet.studyId.id,
+        _.optionalSessionUserId                := cmd.userId,
+        _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.annotationTypeUpdated.version        := cmd.expectedVersion,
+        _.annotationTypeUpdated.annotationType := EventUtils.annotationTypeToEvent(annotationType))
+    }
   }
 
   private def removeAnnotationTypeCmdToEvent(cmd: RemoveCollectionEventTypeAnnotationTypeCmd,
@@ -433,6 +459,22 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                            event.getAnnotationTypeAdded.getVersion) { (cet, eventTime) =>
       val eventAnnotationType = event.getAnnotationTypeAdded.getAnnotationType
       storeIfValid(cet.withAnnotationType(EventUtils.annotationTypeFromEvent(eventAnnotationType)), eventTime)
+    }
+  }
+
+  private def applyAnnotationTypeUpdatedEvent(event: CollectionEventTypeEvent) : Unit = {
+    onValidEventAndVersion(event,
+                           event.eventType.isAnnotationTypeUpdated,
+                           event.getAnnotationTypeUpdated.getVersion) { (cet, eventTime) =>
+      val eventAnnotationType = event.getAnnotationTypeUpdated.getAnnotationType
+      val annotationType = AnnotationType(AnnotationTypeId(eventAnnotationType.getId),
+                                          eventAnnotationType.getName,
+                                          eventAnnotationType.description,
+                                          AnnotationValueType.withName(eventAnnotationType.getValueType),
+                                          eventAnnotationType.maxValueCount,
+                                          eventAnnotationType.options,
+                                          eventAnnotationType.getRequired)
+      storeIfValid(cet.withAnnotationType(annotationType), eventTime)
     }
   }
 

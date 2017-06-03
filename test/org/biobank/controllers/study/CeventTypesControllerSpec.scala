@@ -1,6 +1,7 @@
 package org.biobank.controllers.study
 
 import org.biobank.fixture._
+import org.biobank.domain.AnnotationType
 import org.biobank.domain.study.{ CollectionEventType, Study }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper
@@ -13,26 +14,23 @@ import org.joda.time.DateTime
 class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
   import org.biobank.TestUtils._
 
-  def uri(): String = "/studies/cetypes"
+  private def uri(): String = "/studies/cetypes"
 
-  def uri(study: Study): String = uri + s"/${study.id.id}"
+  private def uri(study: Study): String = uri + s"/${study.id.id}"
 
-  def uri(study: Study, ceventType: CollectionEventType): String =
+  private def uri(study: Study, ceventType: CollectionEventType): String =
     uri(study) + s"/${ceventType.id.id}"
 
-  def uri(ceventType: CollectionEventType, path: String): String =
+  private def uri(ceventType: CollectionEventType, path: String): String =
     uri + s"/$path/${ceventType.id.id}"
 
-  def uriWithQuery(study: Study, ceventType: CollectionEventType): String =
+  private def uriWithQuery(study: Study, ceventType: CollectionEventType): String =
     uri(study) + s"?cetId=${ceventType.id.id}"
 
-  def uri(study: Study, ceventType: CollectionEventType, version: Long): String =
+  private def uri(study: Study, ceventType: CollectionEventType, version: Long): String =
     uri(study, ceventType) + s"/$version"
 
-  def uri(study: Study, ceventType: CollectionEventType, version: Long, id: String): String =
-    uri(study, ceventType, version) + s"/$id"
-
-  def createEntities(fn: (Study, CollectionEventType) => Unit): Unit = {
+  private def createEntities(fn: (Study, CollectionEventType) => Unit): Unit = {
     val disabledStudy = factory.createDisabledStudy
     studyRepository.put(disabledStudy)
 
@@ -42,7 +40,20 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
     fn(disabledStudy, cet)
   }
 
-  def cetToAddCmd(cet: CollectionEventType) = {
+  private def urlName(cet: CollectionEventType) = uri(cet, "name")
+  private def urlDescription(cet: CollectionEventType) = uri(cet, "description")
+  private def urlRecurring(cet: CollectionEventType) = uri(cet, "recurring")
+  private def urlAddSepecimenDescription(cet: CollectionEventType) = uri(cet, "spcdesc")
+
+  private def urlAddAnnotationType(cet: CollectionEventType) = uri(cet, "annottype")
+
+  private def urlUpdateAnnotationType(annotType: AnnotationType) =
+      (cet: CollectionEventType) => urlAddAnnotationType(cet) + s"/${annotType.id}"
+
+  private def urlUpdateSpecimenDescription(sd: SpecimenDescription) =
+      (cet: CollectionEventType) => urlAddSepecimenDescription(cet) + s"/${sd.id}"
+
+  private def cetToAddCmd(cet: CollectionEventType) = {
     Json.obj("studyId"              -> cet.studyId.id,
              "name"                 -> cet.name,
              "description"          -> cet.description,
@@ -68,13 +79,14 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
     ()
   }
 
-  def updateWithInvalidVersion(path: String, jsonField: JsObject) {
+  private def updateWithInvalidVersion(jsonField: JsObject,
+                                       urlFunc:   CollectionEventType => String) {
     createEntities { (study, cet) =>
       val reqJson = jsonField ++ Json.obj("id"              -> cet.id.id,
                                           "studyId"         -> study.id,
                                           "expectedVersion" -> (cet.version + 1))
 
-      val json = makeRequest(POST, uri(cet, path), BAD_REQUEST, reqJson)
+      val json = makeRequest(POST, urlFunc(cet), BAD_REQUEST, reqJson)
 
       (json \ "status").as[String] must include ("error")
 
@@ -84,17 +96,16 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
     }
   }
 
-  def updateOnInvalidCeventType(path: String, jsonField: JsObject) {
+  private def updateOnInvalidCeventType(jsonField: JsObject,
+                                        urlFunc: CollectionEventType => String) {
     val study = factory.createDisabledStudy
     studyRepository.put(study)
-
     val cet = factory.createCollectionEventType
-
     val reqJson = jsonField ++ Json.obj("id"              -> cet.id.id,
                                         "studyId"         -> study.id,
                                         "expectedVersion" -> cet.version)
 
-    val json = makeRequest(POST, uri(cet, path), NOT_FOUND, reqJson)
+    val json = makeRequest(POST, urlFunc(cet), NOT_FOUND, reqJson)
 
     (json \ "status").as[String] must include ("error")
 
@@ -103,21 +114,23 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
     ()
   }
 
-  def updateOnNonDisabledStudy(study: Study, path: String, jsonField: JsObject) {
+  private def updateOnNonDisabledStudy(study: Study,
+                                       jsonField: JsObject,
+                                       urlFunc:   CollectionEventType => String) {
     study must not be an [DisabledStudy]
     studyRepository.put(study)
 
     val cet = factory.createCollectionEventType.copy(
-        studyId            = study.id,
-        specimenDescriptions   = Set(factory.createCollectionSpecimenDescription),
-        annotationTypes = Set(factory.createAnnotationType))
+        studyId              = study.id,
+        specimenDescriptions = Set(factory.createCollectionSpecimenDescription),
+        annotationTypes      = Set(factory.createAnnotationType))
     collectionEventTypeRepository.put(cet)
 
     val reqJson = jsonField ++ Json.obj("studyId"         -> study.id.id,
                                         "id"              -> cet.id.id,
                                         "expectedVersion" -> cet.version)
 
-    val json = makeRequest(POST, uri(cet, path), BAD_REQUEST, reqJson)
+    val json = makeRequest(POST, urlFunc(cet), BAD_REQUEST, reqJson)
 
     (json \ "status").as[String] must include ("error")
 
@@ -126,7 +139,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
     ()
   }
 
-  def removeOnNonDisabledStudy(study: Study) {
+  private def removeOnNonDisabledStudy(study: Study) {
     studyRepository.put(study)
 
     val cet = factory.createCollectionEventType.copy(
@@ -456,22 +469,23 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
       it("not update a collection event type's name on an enabled study") {
         updateOnNonDisabledStudy(factory.createEnabledStudy,
-                                 "name",
-                                 Json.obj("name" -> nameGenerator.next[CollectionEventType]))
+                                 Json.obj("name" -> nameGenerator.next[CollectionEventType]),
+                                 urlName)
       }
 
       it("not update a collection event type's name on an retired study") {
         updateOnNonDisabledStudy(factory.createRetiredStudy,
-                                 "name",
-                                 Json.obj("name" -> nameGenerator.next[CollectionEventType]))
+                                 Json.obj("name" -> nameGenerator.next[CollectionEventType]),
+                                 urlName)
       }
 
       it("fail when updating name and collection event type ID is invalid") {
-        updateOnInvalidCeventType("name", Json.obj("name" -> nameGenerator.next[CollectionEventType]))
+        updateOnInvalidCeventType(Json.obj("name" -> nameGenerator.next[CollectionEventType]), urlName)
       }
 
       it("fail when updating name with an invalid version") {
-        updateWithInvalidVersion("name", Json.obj("name" -> nameGenerator.next[CollectionEventType]))
+        updateWithInvalidVersion(Json.obj("name" -> nameGenerator.next[CollectionEventType]),
+                                 urlName)
       }
     }
 
@@ -510,25 +524,25 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
       it("not update a collection event type's description on an enabled study") {
         updateOnNonDisabledStudy(factory.createEnabledStudy,
-                                 "description",
-                                 Json.obj("description" -> nameGenerator.next[CollectionEventType]))
+                                 Json.obj("description" -> nameGenerator.next[CollectionEventType]),
+                                 urlDescription)
       }
 
       it("not update a collection event type's description on an retired study") {
         updateOnNonDisabledStudy(factory.createRetiredStudy,
-                                 "description",
-                                 Json.obj("description" -> nameGenerator.next[CollectionEventType]))
+                                 Json.obj("description" -> nameGenerator.next[CollectionEventType]),
+                                 urlDescription)
       }
 
       it("fail when updating description and collection event type ID is invalid") {
-        updateOnInvalidCeventType("description",
-                                  Json.obj("description" -> nameGenerator.next[CollectionEventType]))
+        updateOnInvalidCeventType(Json.obj("description" -> nameGenerator.next[CollectionEventType]),
+                                  urlDescription)
 
       }
 
       it("fail when updating description with an invalid version") {
-        updateWithInvalidVersion("description",
-                                 Json.obj("description" -> nameGenerator.next[CollectionEventType]))
+        updateWithInvalidVersion(Json.obj("description" -> nameGenerator.next[CollectionEventType]),
+                                 urlDescription)
       }
     }
 
@@ -572,22 +586,22 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
       it("not update a collection event type's recurring on an enabled study") {
         updateOnNonDisabledStudy(factory.createEnabledStudy,
-                                 "recurring",
-                                 Json.obj("recurring" -> false))
+                                 Json.obj("recurring" -> false),
+                                 urlRecurring)
       }
 
       it("not update a collection event type's recurring on an retired study") {
         updateOnNonDisabledStudy(factory.createRetiredStudy,
-                                 "recurring",
-                                 Json.obj("recurring" -> false))
+                                 Json.obj("recurring" -> false),
+                                 urlRecurring)
       }
 
       it("fail when updating recurring and collection event type ID is invalid") {
-        updateOnInvalidCeventType("recurring", Json.obj("recurring" -> false))
+        updateOnInvalidCeventType(Json.obj("recurring" -> false), urlRecurring)
       }
 
       it("fail when updating recurring with an invalid version") {
-        updateWithInvalidVersion("recurring", Json.obj("recurring" -> false))
+        updateWithInvalidVersion(Json.obj("recurring" -> false), urlRecurring)
       }
     }
 
@@ -601,7 +615,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
               "id"              -> cet.id.id,
               "studyId"         -> cet.studyId.id,
               "expectedVersion" -> Some(cet.version)) ++
-            annotationTypeToJsonNoId(annotType)
+          annotationTypeToJsonNoId(annotType)
 
           val json = makeRequest(POST, uri(cet, "annottype"), reqJson)
 
@@ -640,36 +654,121 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       it("fail when adding annotation type and collection event type ID does not exist") {
-        updateOnInvalidCeventType("annottype",
-                                  annotationTypeToJsonNoId(factory.createAnnotationType))
+        updateOnInvalidCeventType(annotationTypeToJsonNoId(factory.createAnnotationType),
+                                  urlAddAnnotationType)
       }
 
       it("fail when adding annotation type and an invalid version") {
-        updateWithInvalidVersion("annottype",
-                                  annotationTypeToJsonNoId(factory.createAnnotationType))
+        updateWithInvalidVersion(annotationTypeToJsonNoId(factory.createAnnotationType),
+                                 urlAddAnnotationType)
       }
 
       it("not add an annotation type on an enabled study") {
         updateOnNonDisabledStudy(factory.createEnabledStudy,
-                                 "annottype",
-                                  annotationTypeToJsonNoId(factory.createAnnotationType))
+                                 annotationTypeToJsonNoId(factory.createAnnotationType),
+                                 urlAddAnnotationType)
       }
 
       it("not add an annotation type on an retired study") {
         updateOnNonDisabledStudy(factory.createRetiredStudy,
-                                 "annottype",
-                                  annotationTypeToJsonNoId(factory.createAnnotationType))
+                                 annotationTypeToJsonNoId(factory.createAnnotationType),
+                                 urlAddAnnotationType)
       }
 
       it("fail when adding annotation type and collection event type ID is invalid") {
-        updateOnInvalidCeventType("annottype",
-                                  annotationTypeToJsonNoId(factory.createAnnotationType))
+        def url(cet: CollectionEventType) = uri(cet, "annottype")
+        updateOnInvalidCeventType(annotationTypeToJsonNoId(factory.createAnnotationType),
+                                  url)
       }
     }
 
-  }
+    describe("POST /studies/cetypes/annottype/:cetId/:annotationTypeId") {
 
-  describe("DELETE /studies/cetypes/annottype/:id/:ver/:uniqueId") {
+      it("update an annotation type") {
+        createEntities { (study, cet) =>
+          val annotationType = factory.createAnnotationType
+          collectionEventTypeRepository.put(cet.copy(annotationTypes = Set(annotationType)))
+
+
+          val updatedAnnotationType =
+            annotationType.copy(name        = nameGenerator.next[CollectionEventType],
+                                description = Some(nameGenerator.next[CollectionEventType]))
+
+          val reqJson = Json.obj("id"              -> cet.id.id,
+                                 "studyId"         -> cet.studyId.id,
+                                 "expectedVersion" -> Some(cet.version)) ++
+          annotationTypeToJson(updatedAnnotationType)
+
+          val json = makeRequest(POST, uri(cet, "annottype") + s"/${annotationType.id}", reqJson)
+
+          (json \ "status").as[String] must include ("success")
+
+          val jsonId = (json \ "data" \ "id").as[String]
+          jsonId must be (cet.id.id)
+
+          collectionEventTypeRepository.getByKey(cet.id) mustSucceed { repoCet =>
+            compareObj((json \ "data").as[JsObject], repoCet)
+
+            repoCet must have (
+              'studyId     (cet.studyId),
+              'version     (cet.version + 1),
+              'name        (cet.name),
+              'description (cet.description),
+              'recurring   (cet.recurring)
+            )
+
+            repoCet.specimenDescriptions must have size cet.specimenDescriptions.size.toLong
+            repoCet.annotationTypes must have size 1
+
+            repoCet.annotationTypes.head.id.id must not be empty
+            repoCet.annotationTypes.head must have (
+              'name          (updatedAnnotationType.name),
+              'description   (updatedAnnotationType.description),
+              'valueType     (updatedAnnotationType.valueType),
+              'maxValueCount (updatedAnnotationType.maxValueCount),
+              'options       (updatedAnnotationType.options),
+              'required      (updatedAnnotationType.required)
+            )
+
+            checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
+          }
+        }
+      }
+
+      it("fail when updating annotation type and collection event type ID does not exist") {
+        val annotationType = factory.createAnnotationType
+        updateOnInvalidCeventType(annotationTypeToJson(annotationType),
+                                  urlUpdateAnnotationType(annotationType))
+      }
+
+      it("fail when updating annotation type and an invalid version") {
+        val annotationType = factory.createAnnotationType
+        updateWithInvalidVersion(annotationTypeToJson(annotationType),
+                                 urlUpdateAnnotationType(annotationType))
+      }
+
+      it("not add an annotation type on an enabled study") {
+        val annotationType = factory.createAnnotationType
+        updateOnNonDisabledStudy(factory.createEnabledStudy,
+                                 annotationTypeToJson(annotationType),
+                                 urlUpdateAnnotationType(annotationType))
+      }
+
+      it("not add an annotation type on an retired study") {
+        val annotationType = factory.createAnnotationType
+        updateOnNonDisabledStudy(factory.createRetiredStudy,
+                                 annotationTypeToJson(annotationType),
+                                 urlUpdateAnnotationType(annotationType))
+      }
+
+      it("fail when adding annotation type and collection event type ID is invalid") {
+        val annotationType = factory.createAnnotationType
+        updateOnInvalidCeventType(annotationTypeToJsonNoId(factory.createAnnotationType),
+                                 urlUpdateAnnotationType(annotationType))
+      }
+    }
+
+    describe("DELETE /studies/cetypes/annottype/:id/:ver/:uniqueId") {
 
       it("remove an annotation type") {
         createEntities { (study, cet) =>
@@ -777,7 +876,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
           val annotationType = factory.createAnnotationType
           val cet = factory.createCollectionEventType.copy(studyId = study.id,
-                                                       annotationTypes = Set(annotationType))
+                                                           annotationTypes = Set(annotationType))
           collectionEventTypeRepository.put(cet)
 
           val json = makeRequest(
@@ -791,9 +890,9 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-  }
+    }
 
-  describe("POST /studies/cetypes/spcdesc/:id") {
+    describe("POST /studies/cetypes/spcdesc/:id") {
 
       it("add a specimen spec") {
         createEntities { (study, cet) =>
@@ -843,38 +942,124 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
       it("fail when adding specimen spec and collection event type ID does not exist") {
         updateOnInvalidCeventType(
-          "spcdesc",
-          collectionSpecimenDescriptionToJsonNoId(factory.createCollectionSpecimenDescription))
+          collectionSpecimenDescriptionToJsonNoId(factory.createCollectionSpecimenDescription),
+          urlAddSepecimenDescription)
       }
 
       it("fail when adding specimen spec and an invalid version") {
         updateWithInvalidVersion(
-          "spcdesc",
-          collectionSpecimenDescriptionToJsonNoId(factory.createCollectionSpecimenDescription))
+          collectionSpecimenDescriptionToJsonNoId(factory.createCollectionSpecimenDescription),
+          urlAddSepecimenDescription)
       }
 
       it("not add an specimen spec on an enabled study") {
         updateOnNonDisabledStudy(
           factory.createEnabledStudy,
-          "spcdesc",
-          collectionSpecimenDescriptionToJsonNoId(factory.createCollectionSpecimenDescription))
+          collectionSpecimenDescriptionToJsonNoId(factory.createCollectionSpecimenDescription),
+          urlAddSepecimenDescription)
       }
 
       it("not add a specimen spec on an retired study") {
         updateOnNonDisabledStudy(
           factory.createRetiredStudy,
-          "spcdesc",
-          collectionSpecimenDescriptionToJsonNoId(factory.createCollectionSpecimenDescription))
+          collectionSpecimenDescriptionToJsonNoId(factory.createCollectionSpecimenDescription),
+          urlAddSepecimenDescription)
       }
 
       it("fail when adding specimen spec and collection event type ID is invalid") {
         updateOnInvalidCeventType(
-          "spcdesc",
-          collectionSpecimenDescriptionToJsonNoId(factory.createCollectionSpecimenDescription))
+          collectionSpecimenDescriptionToJsonNoId(factory.createCollectionSpecimenDescription),
+          urlAddSepecimenDescription)
       }
-  }
+    }
 
-  describe("DELETE /studies/cetypes/spcdesc/:id/:ver/:uniqueId") {
+    describe("POST /studies/cetypes/spcdesc/:cetId/:specimenDescriptionId") {
+
+      it("update an specimen description") {
+        createEntities { (study, cet) =>
+          val specimenDescription = factory.createCollectionSpecimenDescription
+          collectionEventTypeRepository.put(cet.copy(specimenDescriptions = Set(specimenDescription)))
+
+
+          val updatedSpecimenDescription =
+            specimenDescription.copy(name        = nameGenerator.next[CollectionEventType],
+                                description = Some(nameGenerator.next[CollectionEventType]))
+
+          val reqJson = Json.obj("id"              -> cet.id.id,
+                                 "studyId"         -> cet.studyId.id,
+                                 "expectedVersion" -> Some(cet.version)) ++
+          collectionSpecimenDescriptionToJsonNoId(updatedSpecimenDescription)
+
+          val json = makeRequest(POST, uri(cet, "spcdesc") + s"/${specimenDescription.id}", reqJson)
+
+          (json \ "status").as[String] must include ("success")
+
+          val jsonId = (json \ "data" \ "id").as[String]
+          jsonId must be (cet.id.id)
+
+          collectionEventTypeRepository.getByKey(cet.id) mustSucceed { repoCet =>
+            compareObj((json \ "data").as[JsObject], repoCet)
+
+            repoCet must have (
+              'studyId     (cet.studyId),
+              'version     (cet.version + 1),
+              'name        (cet.name),
+              'description (cet.description),
+              'recurring   (cet.recurring)
+            )
+
+            repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
+            repoCet.specimenDescriptions must have size 1
+
+            repoCet.specimenDescriptions.head.id.id must not be empty
+            repoCet.specimenDescriptions.head must have (
+              'name                        (updatedSpecimenDescription.name),
+              'description                 (updatedSpecimenDescription.description),
+              'units                       (updatedSpecimenDescription.units),
+              'anatomicalSourceType        (updatedSpecimenDescription.anatomicalSourceType),
+              'preservationType            (updatedSpecimenDescription.preservationType),
+              'preservationTemperatureType (updatedSpecimenDescription.preservationTemperatureType),
+              'specimenType                (updatedSpecimenDescription.specimenType)
+            )
+            checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
+          }
+        }
+      }
+
+      it("fail when updating specimen description and collection event type ID does not exist") {
+        val specimenDescription = factory.createCollectionSpecimenDescription
+        updateOnInvalidCeventType(collectionSpecimenDescriptionToJson(specimenDescription),
+                                  urlUpdateSpecimenDescription(specimenDescription))
+      }
+
+      it("fail when updating specimen description and an invalid version") {
+        val specimenDescription = factory.createCollectionSpecimenDescription
+        updateWithInvalidVersion(collectionSpecimenDescriptionToJson(specimenDescription),
+                                 urlUpdateSpecimenDescription(specimenDescription))
+      }
+
+      it("not add an specimen description on an enabled study") {
+        val specimenDescription = factory.createCollectionSpecimenDescription
+        updateOnNonDisabledStudy(factory.createEnabledStudy,
+                                 collectionSpecimenDescriptionToJson(specimenDescription),
+                                 urlUpdateSpecimenDescription(specimenDescription))
+      }
+
+      it("not add an specimen description on an retired study") {
+        val specimenDescription = factory.createCollectionSpecimenDescription
+        updateOnNonDisabledStudy(factory.createRetiredStudy,
+                                 collectionSpecimenDescriptionToJson(specimenDescription),
+                                 urlUpdateSpecimenDescription(specimenDescription))
+      }
+
+      it("fail when adding specimen description and collection event type ID is invalid") {
+        val specimenDescription = factory.createCollectionSpecimenDescription
+        updateOnInvalidCeventType(collectionSpecimenDescriptionToJsonNoId(factory.createCollectionSpecimenDescription),
+                                 urlUpdateSpecimenDescription(specimenDescription))
+      }
+    }
+
+    describe("DELETE /studies/cetypes/spcdesc/:id/:ver/:uniqueId") {
 
       it("remove an specimen spec") {
         createEntities { (study, cet) =>
@@ -995,6 +1180,8 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
           (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
         }
       }
+
+    }
 
   }
 
