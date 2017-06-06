@@ -6,7 +6,7 @@ import play.api.libs.json._
 import play.api.{Environment, Logger}
 import play.api.mvc._
 import org.biobank.controllers._
-import org.biobank.domain.centre.{CentreId, ShipmentId}
+import org.biobank.domain.centre.{CentreId, ShipmentId, ShipmentSpecimenId}
 import org.biobank.dto.ShipmentDto
 import org.biobank.service.{FilterString, ServiceValidation, SortString}
 import org.biobank.service.centres.ShipmentsService
@@ -87,7 +87,7 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
     action(parse.empty) { implicit request =>
       validationReply(shipmentsService.getShipmentSpecimen(request.authInfo.userId,
                                                            shipmentId,
-                                                           shipmentSpecimenId))
+                                                           ShipmentSpecimenId(shipmentSpecimenId)))
     }
 
   def snapshot: Action[Unit] =
@@ -160,8 +160,7 @@ class ShipmentsController @Inject() (val action:           BbwebAction,
                                           shipmentId         = shipmentId.id,
                                           expectedVersion    = version,
                                           shipmentSpecimenId = shipmentSpecimenId)
-      val future = shipmentsService.removeShipmentSpecimen(cmd)
-      validationReply(future)
+      processSpecimenCommand(cmd)
     }
 
   def specimenContainer(shipmentId: ShipmentId): Action[JsValue] =

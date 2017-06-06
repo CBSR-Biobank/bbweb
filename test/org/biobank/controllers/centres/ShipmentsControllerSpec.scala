@@ -1,4 +1,4 @@
- package org.biobank.controllers.centres
+package org.biobank.controllers.centres
 
 import com.github.nscala_time.time.Imports._
 import org.biobank.controllers.PagedResultsSpec

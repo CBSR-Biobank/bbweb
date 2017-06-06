@@ -64,7 +64,7 @@ trait ShipmentsService extends BbwebService {
 
   def getShipmentSpecimen(requestUserId:      UserId,
                           shipmentId:         ShipmentId,
-                          shipmentSpecimenId: String): ServiceValidation[ShipmentSpecimenDto]
+                          shipmentSpecimenId: ShipmentSpecimenId): ServiceValidation[ShipmentSpecimenDto]
 
   def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[ShipmentDto]]
 
@@ -72,8 +72,6 @@ trait ShipmentsService extends BbwebService {
 
   def processShipmentSpecimenCommand(cmd: ShipmentSpecimenCommand):
       Future[ServiceValidation[ShipmentDto]]
-
-  def removeShipmentSpecimen(cmd: ShipmentSpecimenRemoveCmd): Future[ServiceValidation[Boolean]]
 
   def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
 
@@ -118,7 +116,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
    */
   def getShipments(requestUserId: UserId, filter: FilterString, sort: SortString):
       ServiceValidation[List[ShipmentDto]] = {
-    withPermittedCentres(requestUserId) { centres =>
+    withPermittedShippingCentres(requestUserId) { centres =>
       val shipments = centres
         .map { centre => shipmentRepository.withCentre(centre.id) }
         .toList.sequenceU.toSet
@@ -162,6 +160,16 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
     }
   }
 
+  def getShipmentSpecimen(requestUserId: UserId, shipmentId: ShipmentId, shipmentSpecimenId: ShipmentSpecimenId)
+      : ServiceValidation[ShipmentSpecimenDto] = {
+    whenShipmentPermitted(requestUserId, shipmentId) { shipment =>
+      for {
+        ss  <- shipmentSpecimenRepository.getByKey(shipmentSpecimenId)
+        dto <- getShipmentSpecimenDto(requestUserId, ss)
+      } yield dto
+    }
+  }
+
   def getShipmentSpecimens(requestUserId: UserId,
                            shipmentId:    ShipmentId,
                            filter:        FilterString,
@@ -189,16 +197,6 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
         if (sortExpressions(0).order == AscendingOrder) result
         else result.reverse
       }
-    }
-  }
-
-  def getShipmentSpecimen(requestUserId: UserId, shipmentId: ShipmentId, shipmentSpecimenId: String)
-      : ServiceValidation[ShipmentSpecimenDto] = {
-    whenShipmentPermitted(requestUserId, shipmentId) { shipment =>
-      for {
-        ss  <- shipmentSpecimenRepository.getByKey(ShipmentSpecimenId(shipmentSpecimenId))
-        dto <- getShipmentSpecimenDto(requestUserId, ss)
-      } yield dto
     }
   }
 
@@ -233,18 +231,14 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
 
   def processShipmentSpecimenCommand(cmd: ShipmentSpecimenCommand)
       : Future[ServiceValidation[ShipmentDto]] = {
-    ask(processor, cmd).mapTo[ServiceValidation[ShipmentSpecimenEvent]].map { validation =>
-      for {
-        event    <- validation
-        shipment <- shipmentRepository.getByKey(ShipmentId(event.shipmentId))
-        dto      <- getShipmentDto(shipment)
-      } yield dto
-    }
-  }
-
-  def removeShipmentSpecimen(cmd: ShipmentSpecimenRemoveCmd): Future[ServiceValidation[Boolean]] = {
-    ask(processor, cmd).mapTo[ServiceValidation[ShipmentSpecimenEvent]].map { validation =>
-      validation.map(_ => true)
+    whenShipmentPermittedAsync(cmd) { () =>
+      ask(processor, cmd).mapTo[ServiceValidation[ShipmentSpecimenEvent]].map { validation =>
+        for {
+          event    <- validation
+          shipment <- shipmentRepository.getByKey(ShipmentId(event.shipmentId))
+          dto      <- getShipmentDto(shipment)
+        } yield dto
+      }
     }
   }
 
@@ -272,24 +266,43 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
 
   case class ShipmentCentreIds(fromId: CentreId, toId: CentreId)
 
+  private def validCentresIds(shipmentId: ShipmentId): ServiceValidation[ShipmentCentreIds] = {
+    for {
+      shipment   <- shipmentRepository.getByKey(shipmentId)
+      fromCentre <- centreRepository.getByKey(shipment.fromCentreId)
+      toCentre   <- centreRepository.getByKey(shipment.toCentreId)
+    } yield ShipmentCentreIds(fromCentre.id, toCentre.id)
+  }
+
+
+  private def isMemberOfCentres(userId: UserId, validCentreIds: ServiceValidation[ShipmentCentreIds]) = {
+    for {
+      centreIds  <- validCentreIds
+      fromMember <- accessService.isMember(userId, None, Some(centreIds.fromId)).fold(
+        err      => err.failure[Boolean],
+        isMember => if (isMember) true.successNel[String]
+                    else Unauthorized.failureNel[Boolean]
+      )
+      toMember   <- accessService.isMember(userId, None, Some(centreIds.toId)).fold(
+        err      => err.failure[Boolean],
+        isMember => if (isMember) true.successNel[String]
+                    else Unauthorized.failureNel[Boolean]
+      )
+    } yield toMember
+  }
+
   //
   // Invokes function "block" if user that issued the command has the permission and membership
   // to do so.
   //
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   private def whenShipmentPermittedAsync[T](cmd: ShipmentCommand)
                                            (block: () => Future[ServiceValidation[T]])
       : Future[ServiceValidation[T]] = {
 
     val sessionUserId = UserId(cmd.sessionUserId)
     val validCentreIds = cmd match {
-        case c: ShipmentModifyCommand => {
-          for {
-            shipment   <- shipmentRepository.getByKey(ShipmentId(c.id))
-            fromCentre <- centreRepository.getByKey(shipment.fromCentreId)
-            toCentre   <- centreRepository.getByKey(shipment.toCentreId)
-          } yield ShipmentCentreIds(fromCentre.id, toCentre.id)
-        }
-
+        case c: ShipmentModifyCommand => validCentresIds(ShipmentId(c.id))
         case c: AddShipmentCmd =>
           for {
             fromCentre <- centreRepository.getByLocationId(LocationId(c.fromLocationId))
@@ -297,29 +310,31 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
           } yield ShipmentCentreIds(fromCentre.id, toCentre.id)
       }
 
-    val isMemberOfCentres = for {
-        centreIds  <- validCentreIds
-        fromMember <- accessService.isMember(sessionUserId, None, Some(centreIds.fromId)).fold(
-          err      => err.failure[Boolean],
-          isMember => if (isMember) true.successNel[String]
-                      else Unauthorized.failureNel[Boolean]
-        )
-        toMember   <- accessService.isMember(sessionUserId, None, Some(centreIds.toId)).fold(
-          err      => err.failure[Boolean],
-          isMember => if (isMember) true.successNel[String]
-                      else Unauthorized.failureNel[Boolean]
-        )
-      } yield toMember
-
     val permission = cmd match {
         case c: AddShipmentCmd    => PermissionId.ShipmentCreate
         case c: ShipmentRemoveCmd => PermissionId.ShipmentDelete
         case c                    => PermissionId.ShipmentUpdate
       }
 
-    isMemberOfCentres.fold(
+    isMemberOfCentres(sessionUserId, validCentreIds).fold(
       err    => Future.successful(err.failure[T]),
       member => whenPermittedAsync(sessionUserId, permission)(block)
+    )
+  }
+
+  //
+  // Invokes function "block" if user that issued the command has the permission and membership
+  // to do so.
+  //
+  private def whenShipmentPermittedAsync[T](cmd: ShipmentSpecimenCommand)
+                                           (block: () => Future[ServiceValidation[T]])
+      : Future[ServiceValidation[T]] = {
+
+    val sessionUserId = UserId(cmd.sessionUserId)
+    val shipmentId = ShipmentId(cmd.shipmentId)
+    isMemberOfCentres(sessionUserId, validCentresIds(shipmentId)).fold(
+      err    => Future.successful(err.failure[T]),
+      member => whenPermittedAsync(sessionUserId, PermissionId.ShipmentUpdate)(block)
     )
   }
 

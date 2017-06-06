@@ -3,12 +3,10 @@ package org.biobank.service.centres
 import org.biobank.fixture._
 import org.biobank.domain._
 import org.biobank.domain.access._
-import org.biobank.domain.ConcurrencySafeEntity
 import org.biobank.domain.centre._
 import org.biobank.domain.study._
 import org.biobank.domain.user._
 import org.biobank.service.{FilterString, SortString}
-import org.biobank.service.users._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
@@ -16,64 +14,11 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
  * Primarily these are tests that exercise the User Access aspect of CentresService.
  */
 class CentresServiceSpec
-    extends ProcessorTestFixture
-    with UserServiceFixtures
+    extends CentresServiceFixtures
     with ScalaFutures {
 
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.command.CentreCommands._
-
-  class UsersWithCentreAccessFixture {
-    val location             = factory.createLocation
-    val centre               = factory.createDisabledCentre.copy(locations = Set(location))
-
-    val allCentresAdminUser    = factory.createActiveUser
-    val centreOnlyAdminUser    = factory.createActiveUser
-    val centreUser             = factory.createActiveUser
-    val noMembershipUser       = factory.createActiveUser
-    val noCentrePermissionUser = factory.createActiveUser
-
-    val allCentresMembership = factory.createMembership.copy(
-        userIds = Set(allCentresAdminUser.id),
-        centreInfo = MembershipCentreInfo(true, Set.empty[CentreId]))
-
-    val centreOnlyMembership = factory.createMembership.copy(
-        userIds = Set(centreOnlyAdminUser.id, centreUser.id),
-        centreInfo = MembershipCentreInfo(false, Set(centre.id)))
-
-    val noCentresMembership = factory.createMembership.copy(
-        userIds = Set(noMembershipUser.id, noCentrePermissionUser.id),
-        centreInfo = MembershipCentreInfo(false, Set.empty[CentreId]))
-
-    def usersCanReadTable() = Table(("users with read access", "label"),
-                                    (allCentresAdminUser, "all centres admin user"),
-                                    (centreOnlyAdminUser,  "centre only admin user"),
-                                    (centreUser,           "non-admin centre user"))
-
-    def usersCanAddOrUpdateTable() = Table(("users with update access", "label"),
-                                      (allCentresAdminUser, "all centres admin user"),
-                                      (centreOnlyAdminUser,  "centre only admin user"))
-
-    def usersCannotAddOrUpdateTable() = Table(("users with update access", "label"),
-                                         (centreUser,             "non-admin centre user"),
-                                         (noMembershipUser,       "all centres admin user"),
-                                         (noCentrePermissionUser, "centre only admin user"))
-    Set(centre,
-        allCentresAdminUser,
-        centreOnlyAdminUser,
-        centreUser,
-        noMembershipUser,
-        noCentrePermissionUser,
-        allCentresMembership,
-        centreOnlyMembership,
-        noCentresMembership
-    ).foreach(addToRepository)
-
-    addUserToCentreAdminRole(allCentresAdminUser)
-    addUserToCentreAdminRole(centreOnlyAdminUser)
-    addUserToRole(centreUser, RoleId.CentreUser)
-    addUserToRole(noMembershipUser, RoleId.CentreUser)
-  }
 
   class CentresOfAllStatesFixure extends UsersWithCentreAccessFixture {
     val disabledCentre = centre
@@ -94,26 +39,11 @@ class CentresServiceSpec
 
   protected val userRepository = app.injector.instanceOf[UserRepository]
 
-  private val centreRepository = app.injector.instanceOf[CentreRepository]
+  protected val centreRepository = app.injector.instanceOf[CentreRepository]
 
-  private val studyRepository = app.injector.instanceOf[StudyRepository]
+  protected val studyRepository = app.injector.instanceOf[StudyRepository]
 
-  private val centresService = app.injector.instanceOf[CentresService]
-
-  private def addUserToCentreAdminRole(user: User): Unit = {
-    addUserToRole(user, RoleId.CentreAdministrator)
-  }
-
-  override protected def addToRepository[T <: ConcurrencySafeEntity[_]](entity: T): Unit = {
-    entity match {
-      case u: User       => userRepository.put(u)
-      case i: AccessItem => accessItemRepository.put(i)
-      case s: Study      => studyRepository.put(s)
-      case c: Centre     => centreRepository.put(c)
-      case m: Membership => membershipRepository.put(m)
-      case _             => fail("invalid entity")
-    }
-  }
+  protected val centresService = app.injector.instanceOf[CentresService]
 
   private def updateCommandsTable(sessionUserId: UserId,
                                   centre:        Centre,

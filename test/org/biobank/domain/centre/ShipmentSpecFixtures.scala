@@ -16,9 +16,9 @@ trait ShipmentSpecFixtures {
                                        val shipment: T)
       extends ToFromCentres(fromCentre, toCentre)
 
-  class ShipmentsFixture[T <: Shipment](fromCentre:      Centre,
-                                        toCentre:        Centre,
-                                        val shipmentMap: Map[ShipmentId, Shipment])
+  class ShipmentsFixture(fromCentre:      Centre,
+                         toCentre:        Centre,
+                         val shipmentMap: Map[ShipmentId, Shipment])
       extends ToFromCentres(fromCentre, toCentre)
 
   class ShipmentsByStateFixture[T <: Shipment](fromCentre:    Centre,
@@ -32,6 +32,16 @@ trait ShipmentSpecFixtures {
       extends ToFromCentres(fromCentre, toCentre)
 
   class SpecimenShipmentSpecimen(val specimen: UsableSpecimen, val shipmentSpecimen: ShipmentSpecimen)
+
+  class CollectionEventFixture {
+    val study = factory.createEnabledStudy
+    val specimenDescription = factory.createCollectionSpecimenDescription
+    val ceventType = factory.createCollectionEventType.copy(studyId = study.id,
+                                                            specimenDescriptions = Set(specimenDescription),
+                                                            annotationTypes = Set.empty)
+    val participant = factory.createParticipant.copy(studyId = study.id)
+    val cevent = factory.createCollectionEvent
+  }
 
   class SpecimensFixture(fromCentre:              Centre,
                          toCentre:                Centre,
@@ -185,13 +195,8 @@ trait ShipmentSpecFixtures {
 
   def specimensFixture(numSpecimens: Int) = {
     val f = createdShipmentFixture
-    val study = factory.createEnabledStudy
-    val specimenDescription = factory.createCollectionSpecimenDescription
-    val ceventType = factory.createCollectionEventType.copy(studyId = study.id,
-                                                            specimenDescriptions = Set(specimenDescription),
-                                                            annotationTypes = Set.empty)
-    val participant = factory.createParticipant.copy(studyId = study.id)
-    val cevent = factory.createCollectionEvent
+    val ceventFixture = new CollectionEventFixture
+
     val specimens = (1 to numSpecimens).map { _ =>
         factory.createUsableSpecimen.copy(originLocationId = f.fromCentre.locations.head.id,
                                           locationId = f.fromCentre.locations.head.id)
@@ -199,11 +204,11 @@ trait ShipmentSpecFixtures {
 
     new SpecimensFixture(fromCentre          = f.fromCentre,
                          toCentre            = f.toCentre,
-                         study               = study,
-                         specimenDescription = specimenDescription,
-                         ceventType          = ceventType,
-                         participant         = participant,
-                         cevent              = cevent,
+                         study               = ceventFixture.study,
+                         specimenDescription = ceventFixture.specimenDescription,
+                         ceventType          = ceventFixture.ceventType,
+                         participant         = ceventFixture.participant,
+                         cevent              = ceventFixture.cevent,
                          specimens           = specimens,
                          shipment            = f.shipment)
   }

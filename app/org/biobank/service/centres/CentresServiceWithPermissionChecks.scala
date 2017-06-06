@@ -10,16 +10,30 @@ import scalaz.Validation.FlatMap._
 
 trait CentreServicePermissionChecks extends ServicePermissionChecks {
 
+  import org.biobank.domain.access.PermissionId._
+
   protected val centreRepository: CentreRepository
 
-  protected def withPermittedCentres[T](requestUserId: UserId)(block: Set[Centre] => ServiceValidation[T])
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
+  private def withPermittedCentres[T](requestUserId: UserId, permissionId: PermissionId)
+                                    (block: Set[Centre] => ServiceValidation[T])
       : ServiceValidation[T] = {
-    whenPermitted(requestUserId, PermissionId.CentreRead) { () =>
+    whenPermitted(requestUserId, permissionId) { () =>
       for {
         centres <- getMembershipCentres(requestUserId)
         result  <- block(centres)
       } yield result
     }
+  }
+
+  protected def withPermittedCentres[T](requestUserId: UserId)(block: Set[Centre] => ServiceValidation[T])
+      : ServiceValidation[T] = {
+    withPermittedCentres(requestUserId, PermissionId.CentreRead)(block)
+  }
+
+  protected def withPermittedShippingCentres[T](requestUserId: UserId)(block: Set[Centre] => ServiceValidation[T])
+      : ServiceValidation[T] = {
+    withPermittedCentres(requestUserId, PermissionId.ShipmentRead)(block)
   }
 
   protected def getMembershipCentres(userId: UserId): ServiceValidation[Set[Centre]] = {
