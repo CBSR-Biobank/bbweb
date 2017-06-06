@@ -63,6 +63,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
         case et: EventType.AnnotationTypeUpdated      => applyAnnotationTypeUpdatedEvent(event)
         case et: EventType.AnnotationTypeRemoved      => applyAnnotationTypeRemovedEvent(event)
         case et: EventType.SpecimenDescriptionAdded   => applySpecimenDescriptionAddedEvent(event)
+        case et: EventType.SpecimenDescriptionUpdated => applySpecimenDescriptionUpdatedEvent(event)
         case et: EventType.SpecimenDescriptionRemoved => applySpecimenDescriptionRemovedEvent(event)
 
         case event => log.error(s"event not handled: $event")
@@ -168,7 +169,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                                               Set.empty)
     } yield CollectionEventTypeEvent(cetId.id).update(
       _.studyId                   := studyId.id,
-      _.optionalSessionUserId     := cmd.userId,
+      _.sessionUserId             := cmd.sessionUserId,
       _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.added.name                := newItem.name,
       _.added.optionalDescription := newItem.description,
@@ -182,7 +183,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     } else {
       CollectionEventTypeEvent(ceventType.id.id).update(
         _.studyId               := ceventType.studyId.id,
-        _.optionalSessionUserId := cmd.userId,
+        _.sessionUserId         := cmd.sessionUserId,
         _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.removed.version       := cmd.expectedVersion).successNel[String]
     }
@@ -195,7 +196,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       newItem       <- cet.withName(cmd.name)
     } yield CollectionEventTypeEvent(newItem.id.id).update(
       _.studyId               := newItem.studyId.id,
-      _.optionalSessionUserId := cmd.userId,
+      _.sessionUserId         := cmd.sessionUserId,
       _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.nameUpdated.version   := cmd.expectedVersion,
       _.nameUpdated.name      := newItem.name)
@@ -207,7 +208,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     cet.withDescription(cmd.description).map { _ =>
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                                := cet.studyId.id,
-        _.optionalSessionUserId                  := cmd.userId,
+        _.sessionUserId                          := cmd.sessionUserId,
         _.time                                   := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.descriptionUpdated.version             := cmd.expectedVersion,
         _.descriptionUpdated.optionalDescription := cmd.description)
@@ -220,7 +221,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     cet.withRecurring(cmd.recurring).map { _ =>
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                    := cet.studyId.id,
-        _.optionalSessionUserId      := cmd.userId,
+        _.sessionUserId              := cmd.sessionUserId,
         _.time                       := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.recurringUpdated.version   := cmd.expectedVersion,
         _.recurringUpdated.recurring := cmd.recurring)
@@ -243,7 +244,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       updatedCet <- cet.withAnnotationType(annotationType)
     } yield CollectionEventTypeEvent(cet.id.id).update(
       _.studyId                            := cet.studyId.id,
-      _.optionalSessionUserId              := cmd.userId,
+      _.sessionUserId                      := cmd.sessionUserId,
       _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.annotationTypeAdded.version        := cmd.expectedVersion,
       _.annotationTypeAdded.annotationType := EventUtils.annotationTypeToEvent(annotationType))
@@ -264,7 +265,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     } yield {
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                              := cet.studyId.id,
-        _.optionalSessionUserId                := cmd.userId,
+        _.sessionUserId                        := cmd.sessionUserId,
         _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.annotationTypeUpdated.version        := cmd.expectedVersion,
         _.annotationTypeUpdated.annotationType := EventUtils.annotationTypeToEvent(annotationType))
@@ -277,7 +278,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     cet.removeAnnotationType(AnnotationTypeId(cmd.annotationTypeId)) map { c =>
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                        := cet.studyId.id,
-        _.optionalSessionUserId          := cmd.userId,
+        _.sessionUserId                  := cmd.sessionUserId,
         _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.annotationTypeRemoved.version  := cmd.expectedVersion,
         _.annotationTypeRemoved.id       := cmd.annotationTypeId)
@@ -300,7 +301,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       updatedCet <- cet.withSpecimenDescription(specimenDesc)
     } yield CollectionEventTypeEvent(cet.id.id).update(
       _.studyId                                      := cet.studyId.id,
-      _.optionalSessionUserId                        := cmd.userId,
+      _.sessionUserId                                := cmd.sessionUserId,
       _.time                                         := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.specimenDescriptionAdded.version             := cmd.expectedVersion,
       _.specimenDescriptionAdded.specimenDescription := EventUtils.specimenDescriptionToEvent(specimenDesc))
@@ -325,7 +326,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       updatedCet <- cet.withSpecimenDescription(specimenDesc)
     } yield CollectionEventTypeEvent(cet.id.id).update(
       _.studyId                                        := cet.studyId.id,
-      _.optionalSessionUserId                          := cmd.userId,
+      _.sessionUserId                                  := cmd.sessionUserId,
       _.time                                           := ISODateTimeFormat.dateTime.print(DateTime.now),
       _.specimenDescriptionUpdated.version             := cmd.expectedVersion,
       _.specimenDescriptionUpdated.specimenDescription := EventUtils.specimenDescriptionToEvent(specimenDesc))
@@ -337,7 +338,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     cet.removeSpecimenDescription(SpecimenDescriptionId(cmd.specimenDescriptionId)) map { c =>
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                             := cet.studyId.id,
-        _.optionalSessionUserId               := cmd.userId,
+        _.sessionUserId                       := cmd.sessionUserId,
         _.time                                := ISODateTimeFormat.dateTime.print(DateTime.now),
         _.specimenDescriptionRemoved.version  := cmd.expectedVersion,
         _.specimenDescriptionRemoved.id       := cmd.specimenDescriptionId)
@@ -494,6 +495,16 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                            event.getSpecimenDescriptionAdded.getVersion) { (cet, eventTime) =>
       storeIfValid(
         cet.withSpecimenDescription(EventUtils.specimenDescriptionFromEvent(event.getSpecimenDescriptionAdded.getSpecimenDescription)),
+        eventTime)
+    }
+  }
+
+  private def applySpecimenDescriptionUpdatedEvent(event: CollectionEventTypeEvent): Unit = {
+    onValidEventAndVersion(event,
+                           event.eventType.isSpecimenDescriptionUpdated,
+                           event.getSpecimenDescriptionUpdated.getVersion) { (cet, eventTime) =>
+      storeIfValid(
+        cet.withSpecimenDescription(EventUtils.specimenDescriptionFromEvent(event.getSpecimenDescriptionUpdated.getSpecimenDescription)),
         eventTime)
     }
   }

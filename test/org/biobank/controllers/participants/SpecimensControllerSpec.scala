@@ -95,7 +95,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include regex("IdNotFound.*specimen")
+        (json \ "message").as[String] must include regex("specimen id not found")
       }
 
     }

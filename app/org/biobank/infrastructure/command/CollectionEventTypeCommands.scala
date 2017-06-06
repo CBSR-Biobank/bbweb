@@ -64,7 +64,20 @@ object CollectionEventTypeCommands {
                                                            required:        Boolean)
       extends CollectionEventTypeModifyCommand
 
-  final case class RemoveCollectionEventTypeAnnotationTypeCmd(sessionUserId:    String,
+  final case class CollectionEventTypeUpdateAnnotationTypeCmd(sessionUserId:   String,
+                                                              studyId:          String,
+                                                              id:               String,
+                                                              expectedVersion:  Long,
+                                                              annotationTypeId: String,
+                                                              name:             String,
+                                                              description:      Option[String],
+                                                              valueType:        AnnotationValueType,
+                                                              maxValueCount:    Option[Int],
+                                                              options:          Seq[String],
+                                                              required:         Boolean)
+      extends CollectionEventTypeModifyCommand
+
+  final case class RemoveCollectionEventTypeAnnotationTypeCmd(sessionUserId:   String,
                                                               studyId:          String,
                                                               id:               String,
                                                               expectedVersion:  Long,
@@ -84,6 +97,22 @@ object CollectionEventTypeCommands {
                                                        specimenType:                SpecimenType,
                                                        maxCount:                    Int,
                                                        amount:                      BigDecimal)
+      extends CollectionEventTypeModifyCommand
+
+  final case class UpdateCollectionSpecimenDescriptionCmd(sessionUserId:               String,
+                                                          studyId:                     String,
+                                                          id:                          String,
+                                                          expectedVersion:             Long,
+                                                          specimenDescriptionId:       String,
+                                                          name:                        String,
+                                                          description:                 Option[String],
+                                                          units:                       String,
+                                                          anatomicalSourceType:        AnatomicalSourceType,
+                                                          preservationType:            PreservationType,
+                                                          preservationTemperatureType: PreservationTemperatureType,
+                                                          specimenType:                SpecimenType,
+                                                          maxCount:                    Int,
+                                                          amount:                      BigDecimal)
       extends CollectionEventTypeModifyCommand
 
   final case class RemoveCollectionSpecimenDescriptionCmd(sessionUserId:         String,
@@ -114,11 +143,17 @@ object CollectionEventTypeCommands {
   implicit val collectionEventTypeAddAnnotationTypeCmdReads: Reads[CollectionEventTypeAddAnnotationTypeCmd] =
     Json.reads[CollectionEventTypeAddAnnotationTypeCmd]
 
+  implicit val collectionEventTypeUpdateAnnotationTypeCmdReads: Reads[CollectionEventTypeUpdateAnnotationTypeCmd] =
+    Json.reads[CollectionEventTypeUpdateAnnotationTypeCmd]
+
   implicit val removeCollectionEventAnnotationTypeCmdReads: Reads[RemoveCollectionEventTypeAnnotationTypeCmd] =
     Json.reads[RemoveCollectionEventTypeAnnotationTypeCmd]
 
   implicit val addCollectionSpecimenDescriptionCmdReads: Reads[AddCollectionSpecimenDescriptionCmd] =
     Json.reads[AddCollectionSpecimenDescriptionCmd]
+
+  implicit val updateCollectionSpecimenDescriptionCmdReads: Reads[UpdateCollectionSpecimenDescriptionCmd] =
+    Json.reads[UpdateCollectionSpecimenDescriptionCmd]
 
   implicit val removeCollectionSpecimenDescriptionCmdReads: Reads[RemoveCollectionSpecimenDescriptionCmd] =
     Json.reads[RemoveCollectionSpecimenDescriptionCmd]

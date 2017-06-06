@@ -142,6 +142,7 @@ class ShipmentSpecimensControllerSpec
       it("fail for an invalid item state for a shipment specimen") {
         val f = createdShipmentFixture
         val invalidStateName = "state::" + nameGenerator.next[ShipmentSpecimen]
+        shipmentRepository.put(f.shipment)
 
         val reply = makeRequest(GET,
                                 uri(f.shipment) + s"?filter=$invalidStateName",

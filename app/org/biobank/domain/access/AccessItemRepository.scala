@@ -184,7 +184,24 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
                                Set(RoleId.SpecimenCollector)),
         createPermissionSimple(PermissionId.SpecimenChangeState,
                                "User can change states on specimens",
-                               Set(RoleId.StudyUser))
+                               Set(RoleId.StudyUser)),
+
+        // SHIPMENT PERMISSIONS
+        createPermissionSimple(PermissionId.ShipmentRead,
+                               "User can view shipments",
+                               Set(RoleId.ShippingUser)),
+        createPermissionSimple(PermissionId.ShipmentCreate,
+                               "User can create shipments",
+                               Set(RoleId.ShippingUser)),
+        createPermissionSimple(PermissionId.ShipmentUpdate,
+                               "User can update shipments",
+                               Set(RoleId.ShippingUser)),
+        createPermissionSimple(PermissionId.ShipmentChangeState,
+                               "User can change states on shipments",
+                               Set(RoleId.StudyUser)),
+        createPermissionSimple(PermissionId.ShipmentDelete,
+                               "User can update shipments",
+                               Set(RoleId.ShippingAdministrator))
       )
     permissions.foreach(put)
   }

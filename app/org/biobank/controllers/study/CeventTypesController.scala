@@ -61,6 +61,10 @@ class CeventTypesController @Inject() (val action:  BbwebAction,
   def addAnnotationType(id: CollectionEventTypeId): Action[JsValue] =
     commandAction[CollectionEventTypeAddAnnotationTypeCmd](Json.obj("id" -> id))(processCommand)
 
+  def updateAnnotationType(id: CollectionEventTypeId, annotationTypeId: String): Action[JsValue] =
+    commandAction[CollectionEventTypeUpdateAnnotationTypeCmd](
+      Json.obj("id" -> id, "annotationTypeId" -> annotationTypeId))(processCommand)
+
   def removeAnnotationType(studyId: StudyId, id: CollectionEventTypeId, ver: Long, annotationTypeId: String)
       : Action[Unit]=
     action.async(parse.empty) { implicit request =>
@@ -75,6 +79,10 @@ class CeventTypesController @Inject() (val action:  BbwebAction,
 
   def addSpecimenDescription(id: CollectionEventTypeId): Action[JsValue] =
     commandAction[AddCollectionSpecimenDescriptionCmd](Json.obj("id" -> id))(processCommand)
+
+  def updateSpecimenDescription(id: CollectionEventTypeId, sdId: String): Action[JsValue] =
+    commandAction[UpdateCollectionSpecimenDescriptionCmd](
+      Json.obj("id" -> id,"specimenDescriptionId" -> sdId))(processCommand)
 
   def removeSpecimenDescription(studyId: StudyId, id: CollectionEventTypeId, ver: Long, sdId: String)
       : Action[Unit]=
