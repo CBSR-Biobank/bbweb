@@ -37,6 +37,7 @@ object ShipmentSpecimenFilter extends PredicateHelper with ShipmentSpecimenPredi
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   def comparisonToPredicates(expression: Expression): ServiceValidation[ShipmentSpecimenFilter] = {
     expression match {
       case Comparison(selector, comparator, args) =>

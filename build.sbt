@@ -1,5 +1,5 @@
-val akkaVer = "2.4.14"
-val angularVer = "1.5.9"
+val akkaVer = "2.4.18"
+val angularVer = "1.5.11"
 
 name := "bbweb"
 
@@ -21,7 +21,7 @@ packageSummary in Linux := "Biorepository application for tracking biospecimens.
 
 packageDescription := "Biorepository application for tracking biospecimens."
 
-scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.8")
+scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.11")
 
 scalacOptions in Compile ++= Seq(
   "-target:jvm-1.8",
@@ -85,11 +85,11 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   cache,
   filters,
-  ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.4.17"   % "compile"  ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
-  "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.17"   % "compile",
+  ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.4.18"   % "compile"  ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
+  "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.18"   % "compile",
   "com.typesafe.akka"           %% "akka-remote"                         % akkaVer   % "compile",
   ( "com.okumin"                %% "akka-persistence-sql-async"          % "0.4.0"   % "compile"  ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
-  "org.scalaz"                  %% "scalaz-core"                         % "7.2.10"  % "compile",
+  "org.scalaz"                  %% "scalaz-core"                         % "7.2.13"  % "compile",
   "com.github.mauricio"         %% "mysql-async"                         % "0.2.21",
   "com.github.t3hnar"           %% "scala-bcrypt"                        % "3.0",
   "com.github.ancane"           %% "hashids-scala"                       % "1.3",
@@ -101,7 +101,7 @@ libraryDependencies ++= Seq(
   // WebJars dependencies
   "org.webjars"                 %  "requirejs"                           % "2.3.3",
   "org.webjars.npm"             %  "angular"                             % angularVer,
-  "org.webjars.npm"             %  "angular-animate"                     % angularVer,
+  "org.webjars.npm"             %  "angular-animate"                     % "1.5.9",
   "org.webjars.npm"             %  "angular-cookies"                     % angularVer,
   ( "org.webjars.bower"         %  "angular-gettext"                     % "2.2.1" ).exclude("org.webjars.bower", "angular"),
   "org.webjars.npm"             %  "angular-messages"                    % angularVer,
@@ -112,19 +112,19 @@ libraryDependencies ++= Seq(
   ( "org.webjars.npm"           %  "angular-ui-router"                   % "0.4.2" ).exclude("org.webjars.npm", "angular"),
   "org.webjars.bower"           %  "angular-utils-ui-breadcrumbs"        % "0.2.2",
   "org.webjars.npm"             %  "bootstrap"                           % "3.3.7",
-  ( "org.webjars.bower"         %  "bootstrap-ui-datetime-picker"        % "2.4.3" ).exclude("org.webjars.bower", "angular"),
+  ( "org.webjars.bower"         %  "bootstrap-ui-datetime-picker"        % "2.6.0" ).exclude("org.webjars.bower", "angular"),
   "org.webjars.npm"             %  "jquery"                              % "3.2.1",
   "org.webjars.npm"             %  "lodash"                              % "4.17.4",
   "org.webjars.npm"             %  "moment"                              % "2.18.1",
   "org.webjars.npm"             %  "sprintf-js"                          % "1.0.3",
   "org.webjars.npm"             %  "tv4"                                 % "1.2.7",
   // Testing
-  ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "2.4.17.3"  % "test" ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
+  ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "2.4.18.1"  % "test" ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
   "com.typesafe.akka"           %% "akka-testkit"                        % akkaVer   % "test",
   "org.scalatestplus.play"      %% "scalatestplus-play"                  % "2.0.0"   % "test",
   "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
   "org.codehaus.janino"         %  "janino"                              % "3.0.7"   % "test",
-  "org.mockito"                 %  "mockito-core"                        % "2.7.22"  % "test"
+  "org.mockito"                 %  "mockito-core"                        % "2.8.9"  % "test"
   )
 
 incOptions := incOptions.value.withNameHashing(true)
@@ -158,17 +158,19 @@ com.jamesward.play.BrowserNotifierKeys.shouldOpenBrowser := false
 
 coverageExcludedPackages := "<empty>;router.*;views.html.*;Reverse.*;org.biobank.infrastructure.event.*;org.biobank.TestData"
 
-wartremoverErrors in (Compile, compile) ++= Warts.allBut(Wart.Equals, Wart.ToString)
+// project would not compile if Wart.ArrayEquals is not removed: wart remover version 2.1.0
+wartremoverErrors in (Compile, compile) ++= Warts.allBut(Wart.ArrayEquals, Wart.Equals, Wart.ToString)
 
-wartremoverExcluded += crossTarget.value / "routes" / "main" / "router" / "Routes.scala"
-wartremoverExcluded += crossTarget.value / "routes" / "main" / "router" / "RoutesPrefix.scala"
-wartremoverExcluded += crossTarget.value / "routes" / "main" / "controllers" / "ReverseRoutes.scala"
-wartremoverExcluded += crossTarget.value / "routes" / "main" / "controllers" / "javascript" / "JavaScriptReverseRoutes.scala"
 
 // see following for explanation: https://github.com/puffnfresh/wartremover/issues/219
 //wartremoverExcluded ++= ((crossTarget.value / "src_managed" / "main" / "compiled_protobuf" ) ** "*.scala").get
 
 wartremoverExcluded ++= Seq(
+    crossTarget.value / "routes" / "main" / "router" / "Routes.scala",
+    crossTarget.value / "routes" / "main" / "router" / "RoutesPrefix.scala",
+    crossTarget.value / "routes" / "main" / "controllers" / "ReverseRoutes.scala",
+    crossTarget.value / "routes" / "main" / "controllers" / "javascript" / "JavaScriptReverseRoutes.scala",
+
     crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "AccessEvents" / "AccessEvent.scala",
     crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "AccessEvents" / "AccessEventsProto.scala",
     crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreAddedEvent.scala",

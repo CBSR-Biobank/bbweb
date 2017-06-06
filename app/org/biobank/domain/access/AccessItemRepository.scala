@@ -59,6 +59,7 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
 
   def rolesForUser(userId: UserId): Set[Role] = {
 
+    @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
     def roleChildren(role: Role): Set[Role] = {
       role.childrenIds.map(getByKey).toList.sequenceU.fold(
         err => Set.empty[Role],

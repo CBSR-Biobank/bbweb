@@ -33,6 +33,7 @@ object CollectionEventFilter extends PredicateHelper with CollectionEventPredica
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   private def comparisonToPredicates(expression: Expression): ServiceValidation[CollectionEventFilter] = {
     expression match {
       case Comparison(selector, comparator, args) =>

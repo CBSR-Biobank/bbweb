@@ -34,6 +34,7 @@ object StudyFilter
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   private def comparisonToPredicates(expression: Expression): ServiceValidation[StudyFilter] = {
     expression match {
       case Comparison(selector, comparator, args) =>

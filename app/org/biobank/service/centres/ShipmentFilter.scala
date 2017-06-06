@@ -46,6 +46,7 @@ class ShipmentFilterImpl @Inject() (val shipmentRepository: ShipmentRepository,
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
   private def comparisonToPredicates(expression: Expression): ServiceValidation[ShipmentFilter] = {
     expression match {
       case Comparison(selector, comparator, args) =>

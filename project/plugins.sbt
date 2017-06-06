@@ -24,7 +24,7 @@ addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.4.0")
 
 addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.1.0")
 
-addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.0.3")
+addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.1.0")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.1.1")
 
